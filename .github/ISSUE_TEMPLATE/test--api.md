@@ -36,6 +36,7 @@ Required tests:
 - Agents.
 - Decoders.
 - Manager.
+- Cluster.
 - Rootcheck.
 - Rules.
 - Syscheck.
@@ -44,8 +45,6 @@ Required tests:
 Checks:
 
 - [ ] Master node:
-    - [ ] Ubuntu 18 / Python 2.
-    - [ ] Ubuntu 18 / Python 3.
-    - [ ] CentOS 7 / Python 2.
-    - [ ] CentOS 7 / Python 3.
-    - [ ] CentOS 6 / Python27.
+    - [ ] Ubuntu 18.
+    - [ ] CentOS 7.
+    - [ ] CentOS 6.
