@@ -17,14 +17,12 @@ assignees: ''
 
 - [ ] Install new version.
 - [ ] Check_files.
-- [ ] Check that the databases are purged.
 - [ ] Check that the service are restarted.
 
 ## DEB (Linux)
 
 - [ ] Install new version.
 - [ ] Check_files.
-- [ ] Check that the databases are purged.
 - [ ] Check that the service are restarted.
 
 ## macOS
@@ -40,12 +38,6 @@ assignees: ''
 - [ ] Check that the service are restarted.
 
 ## Solaris (SPARC)
-
-- [ ] Install new version.
-- [ ] Check_files.
-- [ ] Check that the service are restarted.
-
-## HP-UX
 
 - [ ] Install new version.
 - [ ] Check_files.
