@@ -24,6 +24,7 @@ assignees: ''
 ## Ruleset
 
 - [ ] Trigger alerts which depend on `frequency`, `timeframe`, `ignore`.
+- [ ] Trigger alerts which depend on `same_fields` and `not_same_fields`.
 - [ ] Trigger alerts which depend on `if_matched_sid`, `if_matched_group`, `same_source_ip`, etc.
 - [ ] Trigger a custom decoder and rule set at `etc/decoders`/`etc/rules`.
 - [ ] Overwrite a rule.
