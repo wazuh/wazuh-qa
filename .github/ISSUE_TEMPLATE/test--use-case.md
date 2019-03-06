@@ -19,7 +19,7 @@ assignees: ''
 
 ## Bruteforce Attack - Windows agent
 
-- [ ] Trigger an alert of bruteforce attack (18152) for a Windows agent.
+- [ ] Trigger an alert of bruteforce attack (18152/20086) for a Windows agent.
 
 # Audit user actions - Linux agent
 
@@ -119,6 +119,6 @@ https://documentation.wazuh.com/current/user-manual/agents/remote-upgrading/crea
 
 # Analysisd performance - Manager
 
-- [ ] Use the script `queue.py` to test the Analisys daemon performance.
+- [ ] Use the script `queue.py` to test the Analysis daemon performance.
 
 https://github.com/wazuh/wazuh-tools/blob/master/utils/queue.py
