@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-# Configuration Assessment test
+# SCA test
 
 | Version | Revision | Branch |
 | --- | --- | --- |
