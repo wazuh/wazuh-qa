@@ -1,0 +1,98 @@
+# ID of the test template
+# Values allowed: An unique integer
+id: 1
+
+# Name of the test
+# Values allowed: A descriptive name for the test
+description: "Add file in realtime."
+
+# Version of the specification template
+# Values allowed: ?????
+version: "0.1"
+
+# Date of creation of the first file version
+# Values allowed: Date
+creation_date: 11/02/2019
+
+# Date of the last modification
+# Values allowed: Date
+modification_date: 11/02/2019
+
+# Name of the provisioner
+# Values allowed: vm or docker
+provisioner: docker
+
+# Tier of the test. The lower the number, the higher the priority.
+# Values allowed: An integer between 0 and 5.
+tier: 0
+
+# Category of the tests specified.
+# Values allowed: ?????
+category: file-integrity-monitoring
+
+# Tags to classify the test
+# Values allowed: Any tag
+tags: fim, file integrity monitoring, who data, file modification, changes, hash
+
+# Subcategory of the tests specified
+# Values allowed: ?????
+subcategory: file-integrity-monitoring
+
+# Targets where the tests will be executed
+# Values allowed: agent, manager or all
+target: manager
+
+# Specifies whether the cluster should be active.
+# Values allowed: enabled or disabled
+cluster_mode: enabled
+
+# Targets where the tests will be executed if the cluster is enabled.
+# Values allowed: master, worker or both of them
+cluster_target: master, worker
+
+# ?????
+# Values allowed: ?????
+os_groups: nix
+
+# Target operating systems
+# Values allowed: ?????
+os_target: all
+
+# Number of agents needed for the tests
+# Values allowed: An integer between 0 and ?????
+total_agents: 1
+
+# Number of managers needed for the tests
+# Values allowed: An integer between 0 and ?????
+total_managers: 1
+
+# Wazuh's maximum version of the manager
+# Values allowed: Any Wazuh's manager version
+wazuh_max_version_manager: "3.7.1"
+
+# Wazuh's minimum version of the manager
+# Values allowed: Any Wazuh's manager version
+wazuh_min_version_manager: "3.9.2"
+
+# Specifies whether the manager needs to have installed the API
+# Values allowed: yes or no
+need_api: no
+
+##########################################################
+#                      TEST SECTION                      #
+##########################################################
+
+managers:
+  - id: 0
+    configuration_template : "configuration_template/ossec.conf.manager0"
+    arrangements : "arrangements/arrangements.py"
+    trigger: "trigger/trigger.py"
+    output: "results_checker.py"
+
+agents:
+  - id: 0
+    configuration_template : "configuration_template/ossec.conf.agent0"
+    arrangements : "arrangements/arrangements.py"
+    trigger: "trigger/trigger.py"
+    output: "results_checker.py"
+
