@@ -32,8 +32,8 @@ assignees: ''
 - [ ] Change path to opt in master and var in clients.
 - [ ] Synchronization process when one of the clients is down.
 - [ ] Stop master and start it after some time.
-- [ ] Disconnect worker node internet connection and check it disconnects after 2 minutes. Check the master node removes that node. Connect the node to the internet again and check itreconnects to the master node without restarting (https://github.com/wazuh/wazuh/pull/1482).
-- [ ] Disconnect worker and reconnect it again to the internet in less than 2 minutes. Check it keeps working as usual (https://github.com/wazuh/wazuh/pull/1482).
+- [ ] Disconnect worker node internet connection and check it disconnects after 2 minutes. Check the master node removes that node. Connect the node to the internet again and check itreconnects to the master node without restarting.
+- [ ] Disconnect worker and reconnect it again to the internet in less than 2 minutes. Check it keeps working as usual.
 - [ ] File level tests: Run automatic tests and review KO files.
 
 ## Cluster control
