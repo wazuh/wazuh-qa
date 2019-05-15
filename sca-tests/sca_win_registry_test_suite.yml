@@ -38,28 +38,6 @@ checks:
    rules:
      - r:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion -> SoftwareType -> System
 
-###########################
-# FAIL for positive rules #
-###########################
-
- - id: 99100
-   title: FAIL -- Test to test if key exists
-   condition: any
-   rules:
-     - r:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion_FAIL
-
- - id: 99101
-   title: FAIL -- Test to check if key has value
-   condition: any
-   rules:
-     - r:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion -> ProductName_FAIL
-
- - id: 99102
-   title: FAIL -- Test to check for value data
-   condition: any
-   rules:
-     - r:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion -> SoftwareType -> System_FAIL
-
 ##########################
 # PASS for negated rules #
 ##########################
@@ -87,6 +65,28 @@ checks:
    condition: any
    rules:
      - r:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion -> SoftwareType -> !System_FAIL
+
+###########################
+# FAIL for positive rules #
+###########################
+
+ - id: 99100
+   title: FAIL -- Test to test if key exists
+   condition: any
+   rules:
+     - r:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion_FAIL
+
+ - id: 99101
+   title: FAIL -- Test to check if key has value
+   condition: any
+   rules:
+     - r:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion -> ProductName_FAIL
+
+ - id: 99102
+   title: FAIL -- Test to check for value data
+   condition: any
+   rules:
+     - r:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion -> SoftwareType -> System_FAIL
 
 ##########################
 # FAIL for negated rules #
