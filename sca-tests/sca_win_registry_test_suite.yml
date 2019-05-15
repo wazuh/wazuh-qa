@@ -34,10 +34,9 @@ checks:
 
  - id: 99002
    title: PASS -- Test to check for value data
-   condition: all
+   condition: any
    rules:
-     - r:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion -> SoftwareType -> System && !System2
-     - r:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion -> SoftwareType -> System && !System
+     - r:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion -> SoftwareType -> System
 
 ###########################
 # FAIL for positive rules #
