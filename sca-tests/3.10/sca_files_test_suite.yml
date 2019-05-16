@@ -1,0 +1,104 @@
+# Security Configuration assessment
+# Testing suite for directory checks (v3.9.0)
+# Copyright (C) 2015-2019, Wazuh Inc.
+#
+# This program is a free software; you can redistribute it
+# and/or modify it under the terms of the GNU General Public
+# License (version 2) as published by the FSF - Free Software
+# Foundation
+policy:
+  id: sca_files_test_suite
+  file: sca_files_test_suite.yml
+  name: Test suite for file rules
+  description: This document includes file rules for testing purposes with the syntax rule of Wazuh v3.10.0
+############### Expected results
+# Passed = 8
+# Failed = 8
+# Invalid = 2
+# Total checks = 18
+# Directory checks
+checks:
+###############################
+# Single file existence checks #
+###############################
+ - id: 100100
+   title: PASS -- existing file exists
+   condition: any
+   rules:
+     - f:/var/ossec/etc/ossec.conf
+ - id: 100101
+   title: FAIL -- a non-existing file file should exist
+   condition: any
+   rules:
+     - f:/var/ossec/etc/ossec.conf_FAIL
+ - id: 100102
+   title: PASS -- a non-existing file does not exist
+   condition: any
+   rules:
+     - not f:/var/ossec/etc/ossec.conf_FAIL
+ - id: 100103
+   title: FAIL -- existing file file should not exist
+   condition: any
+   rules:
+     - not f:/var/ossec/etc/ossec.conf
+###############################
+# File lists existence checks #
+###############################
+# When listing more than one directory, the existence of one of them stops the searching (OR operation)
+ - id: 100200
+   title: FAIL -- files do not exis
+   condition: any
+   rules:
+     - f:/var/ossec/etc/ossec.conf_FAIL0,/var/ossec/etc/ossec.conf_FAIL1,/var/ossec/etc/ossec.conf_FAIL2
+  #revisar
+ - id: 100201
+   title: PASS -- The last file exists
+   condition: any
+   rules:
+     - f:/var/ossec/etc/ossec.conf_FAIL0,/var/ossec/etc/ossec.conf_FAIL1,/var/ossec/etc/ossec.conf
+    #revisar
+ - id: 100202
+   title: PASS -- The last file is negated (it does not exist)
+   condition: any
+   rules:
+     - f:/var/ossec/etc/ossec.conf,!/var/ossec/etc/ossec.conf_FAIL
+ - id: 100203
+   title: FAIL -- Existing files negated should not exist
+   condition: any
+   rules:
+     - f:!/var/ossec/etc/ossec.conf,!/var/ossec/etc/sslmanager.cert,!/var/ossec/etc/sslmanager.key
+###########################
+# Content wise file rules #
+###########################
+ - id: 100300
+   title: PASS -- Full rule regex match
+   condition: any
+   rules:
+     - f:/var/ossec/etc/ossec.conf -> r:^<ossec_config>
+ - id: 100301
+   title: FAIL -- negated full rule regex match
+   condition: any
+   rules:
+     - not f:/var/ossec/etc/ossec.conf -> r:^<ossec_config>
+ - id: 100302
+   title: FAIL -- Full rule regex does not match
+   condition: any
+   rules:
+     - f:/var/ossec/etc/ossec.conf -> r:^FAIL;
+ - id: 100303
+   title: PASS -- negated full rule regex does not match
+   condition: any
+   rules:
+     - not f:/var/ossec/etc/ossec.conf -> r:^FAIL;
+ - id: 100304
+   title: INVALID -- File does not exist
+   condition: any
+   rules:
+     - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE;
+# This check is pass instead of invalid because the existence of the file is optional (not mandatory)
+# - id: 100303
+#   title: FAIL -- File does not exist
+#   condition: any
+#   rules:
+#     - d:/var/ossec -> fakefile -> r:^Wazuh;
+
