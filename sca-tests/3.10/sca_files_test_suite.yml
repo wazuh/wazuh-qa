@@ -12,10 +12,10 @@ policy:
   name: Test suite for file rules
   description: This document includes file rules for testing purposes with the syntax rule of Wazuh v3.10.0
 ############### Expected results
-# Passed = 8
-# Failed = 8
-# Invalid = 2
-# Total checks = 18
+# Passed = 6
+# Failed = 6
+# Invalid = 1
+# Total checks = 13
 # Directory checks
 checks:
 ###############################
