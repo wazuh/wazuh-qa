@@ -21,22 +21,22 @@ checks:
 ###############################
 # Single file existence checks #
 ###############################
- - id: 100100
+ - id: 200100
    title: PASS -- existing file exists
    condition: any
    rules:
      - f:/var/ossec/etc/ossec.conf
- - id: 100101
+ - id: 200101
    title: FAIL -- a non-existing file file should exist
    condition: any
    rules:
      - f:/var/ossec/etc/ossec.conf_FAIL
- - id: 100102
+ - id: 200102
    title: PASS -- a non-existing file does not exist
    condition: any
    rules:
      - not f:/var/ossec/etc/ossec.conf_FAIL
- - id: 100103
+ - id: 200103
    title: FAIL -- existing file file should not exist
    condition: any
    rules:
@@ -45,25 +45,25 @@ checks:
 # File lists existence checks #
 ###############################
 # When listing more than one directory, the existence of one of them stops the searching (OR operation)
- - id: 100200
+ - id: 200200
    title: PASS -- Last file exists
    condition: any
    rules:
      - f:/var/ossec/etc/ossec.conf_FAIL0,/var/ossec/etc/ossec.conf_FAIL1,/var/ossec/etc/ossec.conf
 
- - id: 100201
+ - id: 200201
    title: FAIL -- Files do not exist
    condition: any
    rules:
      - f:/var/ossec/etc/ossec.conf_FAIL0,/var/ossec/etc/ossec.conf_FAIL1,/var/ossec/etc/ossec.conf_FAIL2
 
- - id: 100202
+ - id: 200202
    title: FAIL -- Negated last file exists
    condition: any
    rules:
      - not f:/var/ossec/etc/ossec.conf_FAIL0,/var/ossec/etc/ossec.conf_FAIL1,/var/ossec/etc/ossec.conf
 
- - id: 100203
+ - id: 200203
    title: PASS -- Negated non-existing list
    condition: any
    rules:
@@ -72,43 +72,43 @@ checks:
 ###########################
 # Content wise file rules #
 ###########################
- - id: 100300
+ - id: 200300
    title: PASS -- Full rule regex match
    condition: any
    rules:
      - f:/var/ossec/etc/ossec.conf -> r:^<ossec_config>
- - id: 100301
+ - id: 200301
    title: FAIL -- negated full rule regex match
    condition: any
    rules:
      - not f:/var/ossec/etc/ossec.conf -> r:^<ossec_config>
- - id: 100302
+ - id: 200302
    title: FAIL -- Full rule regex does not match
    condition: any
    rules:
      - f:/var/ossec/etc/ossec.conf -> r:^FAIL;
- - id: 100303
+ - id: 200303
    title: PASS -- negated full rule regex does not match
    condition: any
    rules:
      - not f:/var/ossec/etc/ossec.conf -> r:^FAIL;
- - id: 100304
+ - id: 200304
    title: PASS -- negated regex matches (because !r:^FAIL matches everything but ^FAIL)
    condition: any
    rules:
      - f:/var/ossec/etc/ossec.conf -> !r:^FAIL;
- - id: 100305
+ - id: 200305
    title: INVALID -- File does not exist
    condition: any
    rules:
      - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE;
- - id: 100306
+ - id: 200306
    title: FAIL -- Contradictory match
    condition: any
    rules:
      - f:/var/ossec/etc/ossec.conf -> r:^FAIL && !r:^FAIL
 
- - id: 100307
+ - id: 200307
    title: PASS -- Negated contradictory match -> Tautology
    condition: any
    rules:
