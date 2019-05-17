@@ -12,10 +12,10 @@ policy:
   name: Test suite for file rules
   description: This document includes file rules for testing purposes with the syntax rule of Wazuh v3.10.0
 ############### Expected results
-# Passed = 6
-# Failed = 6
+# Passed = 8
+# Failed = 7
 # Invalid = 1
-# Total checks = 13
+# Total checks = 16
 # Directory checks
 checks:
 ###############################
@@ -93,14 +93,23 @@ checks:
    rules:
      - not f:/var/ossec/etc/ossec.conf -> r:^FAIL;
  - id: 100304
+   title: PASS -- negated regex matches (because !r:^FAIL matches everything but ^FAIL)
+   condition: any
+   rules:
+     - f:/var/ossec/etc/ossec.conf -> !r:^FAIL;
+ - id: 100305
    title: INVALID -- File does not exist
    condition: any
    rules:
      - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE;
-# This check is pass instead of invalid because the existence of the file is optional (not mandatory)
-# - id: 100303
-#   title: FAIL -- File does not exist
-#   condition: any
-#   rules:
-#     - d:/var/ossec -> fakefile -> r:^Wazuh;
+ - id: 100306
+   title: FAIL -- Contradictory match
+   condition: any
+   rules:
+     - f:/var/ossec/etc/ossec.conf -> r:^FAIL && !r:^FAIL
 
+ - id: 100307
+   title: PASS -- Negated contradictory match -> Tautology
+   condition: any
+   rules:
+     - not f:/var/ossec/etc/ossec.conf -> r:^FAIL && !r:^FAIL
