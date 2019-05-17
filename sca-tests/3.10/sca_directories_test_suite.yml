@@ -35,36 +35,40 @@ checks:
    title: PASS  -- Directory does not exist
    condition: any
    rules:
-     - d:!/var/ossec/fakedir
+     - not d:/var/ossec/fakedir
  - id: 100103
    title: FAIL  -- Directory exists
    condition: any
    rules:
-     - d:!/var/ossec/ruleset
+     - not d:/var/ossec/ruleset
 ########################################
 # Multiple directories existence check #
 ########################################
 # When listing more than one directory, the existence of one of them stops the searching (OR operation)
  - id: 100200
-   title: FAIL  -- Directories dont exist
+   title: FAIL  -- Directories do not exist
    condition: any
    rules:
-     - d:/var/ossec/ruleset/fakedir,/etc/fakedir,/var/ossec/etc/fakedir;
+     - d:/var/ossec/ruleset/fakedir,/etc/fakedir,/var/ossec/etc/fakedir
+
  - id: 100201
    title: PASS  -- The last directory exists
    condition: any
    rules:
-     - d:/var/ossec/ruleset/fakedir,/var/ossec/etc/fakedir,/var/ossec/etc;
+     - d:/var/ossec/ruleset/fakedir,/var/ossec/etc/fakedir,/var/ossec/etc
+
  - id: 100202
-   title: PASS  -- The last directory is negated (it doesnt exist)
+   title: PASS  -- Negated directories that do not exist
    condition: any
    rules:
-     - d:/var/ossec,/etc,!/fakedir;
+     - not d:/var/ossec/ruleset/fakedir,/etc/fakedir,/var/ossec/etc/fakedir
+
  - id: 100203
-   title: FAIL  -- Valid directories negated
+   title: FAIL  -- Negated existing directories
    condition: any
    rules:
-     - d:!/var/ossec,!/etc;
+     - not d:/var/ossec,/etc
+
 ###########################
 # Complex directory rules #
 ###########################
