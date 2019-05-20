@@ -24,7 +24,7 @@ checks:
    title: PASS -- Test to test if key exists
    condition: any
    rules:
-     - r:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion;
+     - r:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion
 
  - id: 99001
    title: PASS -- Test to check if key has value
@@ -46,7 +46,7 @@ checks:
    title: PASS -- Test to test if key exists
    condition: any
    rules:
-     - not r:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion_FAKE;
+     - not r:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion_FAKE
 
  - id: 99201
    title: PASS -- Test to check if key has entry
@@ -96,7 +96,7 @@ checks:
    title: FAIL -- Test to test if key does not exist
    condition: any
    rules:
-     - not r:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion;
+     - not r:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion
 
  - id: 99301
    title: FAIL -- Test to check if key does not have certain value
