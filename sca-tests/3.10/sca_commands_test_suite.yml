@@ -14,7 +14,7 @@ policy:
 ############### Expected results
 # Passed = 2
 # Failed = 2
-# Invalid = 2
+# Invalid = 3
 # Total checks = 6
 
 checks:
@@ -46,9 +46,15 @@ checks:
    title: INVALID -- Command does not exist (will trigger leak reports due to execvp failing)
    condition: any
    rules:
-     - not c:_IM_NO_COMMAND_ -n ABC -> r:CBA
+     - c:_IM_NO_COMMAND_ -n ABC -> r:CBA
 
  - id: 300105
+   title: INVALID -- negated Command does not exist (will trigger leak reports due to execvp failing)
+   condition: any
+   rules:
+     - not c:_IM_NO_COMMAND_ -n ABC -> r:CBA
+
+ - id: 300106
    title: INVALID -- Not executable file (will trigger leak reports due to execvp failing)
    condition: any
    rules:
