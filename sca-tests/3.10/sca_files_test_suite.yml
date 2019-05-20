@@ -86,17 +86,17 @@ checks:
    title: FAIL -- Full rule regex does not match
    condition: any
    rules:
-     - f:/var/ossec/etc/ossec.conf -> r:^FAIL;
+     - f:/var/ossec/etc/ossec.conf -> r:^FAKE;
  - id: 200303
    title: PASS -- negated full rule regex does not match
    condition: any
    rules:
-     - not f:/var/ossec/etc/ossec.conf -> r:^FAIL;
+     - not f:/var/ossec/etc/ossec.conf -> r:^FAKE;
  - id: 200304
-   title: PASS -- negated regex matches (because !r:^FAIL matches everything but ^FAIL)
+   title: PASS -- negated regex matches (because !r:^FAKE matches everything but ^FAKE)
    condition: any
    rules:
-     - f:/var/ossec/etc/ossec.conf -> !r:^FAIL;
+     - f:/var/ossec/etc/ossec.conf -> !r:^FAKE;
  - id: 200305
    title: INVALID -- File does not exist
    condition: any
@@ -106,10 +106,10 @@ checks:
    title: FAIL -- Contradictory match
    condition: any
    rules:
-     - f:/var/ossec/etc/ossec.conf -> r:^FAIL && !r:^FAIL
+     - f:/var/ossec/etc/ossec.conf -> r:^FAKE && !r:^FAKE
 
  - id: 200307
    title: PASS -- Negated contradictory match -> Tautology
    condition: any
    rules:
-     - not f:/var/ossec/etc/ossec.conf -> r:^FAIL && !r:^FAIL
+     - not f:/var/ossec/etc/ossec.conf -> r:^FAKE && !r:^FAKE
