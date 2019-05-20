@@ -30,12 +30,12 @@ checks:
    title: FAIL -- a non-existing file file should exist
    condition: any
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE
  - id: 200102
    title: PASS -- a non-existing file does not exist
    condition: any
    rules:
-     - not f:/var/ossec/etc/ossec.conf_FAIL
+     - not f:/var/ossec/etc/ossec.conf_FAKE
  - id: 200103
    title: FAIL -- existing file file should not exist
    condition: any
@@ -49,25 +49,25 @@ checks:
    title: PASS -- Last file exists
    condition: any
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL0,/var/ossec/etc/ossec.conf_FAIL1,/var/ossec/etc/ossec.conf
+     - f:/var/ossec/etc/ossec.conf_FAKE0,/var/ossec/etc/ossec.conf_FAKE1,/var/ossec/etc/ossec.conf
 
  - id: 200201
    title: FAIL -- Files do not exist
    condition: any
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL0,/var/ossec/etc/ossec.conf_FAIL1,/var/ossec/etc/ossec.conf_FAIL2
+     - f:/var/ossec/etc/ossec.conf_FAKE0,/var/ossec/etc/ossec.conf_FAKE1,/var/ossec/etc/ossec.conf_FAKE2
 
  - id: 200202
    title: FAIL -- Negated last file exists
    condition: any
    rules:
-     - not f:/var/ossec/etc/ossec.conf_FAIL0,/var/ossec/etc/ossec.conf_FAIL1,/var/ossec/etc/ossec.conf
+     - not f:/var/ossec/etc/ossec.conf_FAKE0,/var/ossec/etc/ossec.conf_FAKE1,/var/ossec/etc/ossec.conf
 
  - id: 200203
    title: PASS -- Negated non-existing list
    condition: any
    rules:
-     - not f:/var/ossec/etc/ossec.conf_FAIL0,/var/ossec/etc/ossec.conf_FAIL1,/var/ossec/etc/ossec.conf_FAIL2
+     - not f:/var/ossec/etc/ossec.conf_FAKE0,/var/ossec/etc/ossec.conf_FAKE1,/var/ossec/etc/ossec.conf_FAKE2
 
 ###########################
 # Content wise file rules #
@@ -101,7 +101,7 @@ checks:
    title: INVALID -- File does not exist
    condition: any
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE;
+     - f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE;
  - id: 200306
    title: FAIL -- Contradictory match
    condition: any

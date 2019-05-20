@@ -18,8 +18,8 @@ policy:
 # Total checks = 6
 
 # - f:/var/ossec/etc/ossec.conf -> TRUE
-# - f:/var/ossec/etc/ossec.conf_FAIL -> FALSE
-# - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE -> INVALID
+# - f:/var/ossec/etc/ossec.conf_FAKE -> FALSE
+# - f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE -> INVALID
 
 checks:
 #########
@@ -35,13 +35,13 @@ checks:
    title: FAIL -- FALSE
    condition: any
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE
 
  - id: 700102
    title: INVALID -- INVALID
    condition: any
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE -> INVALID
+     - f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE -> INVALID
 
  - id: 700103
    title: FAIL -- not TRUE
@@ -53,10 +53,10 @@ checks:
    title: PASS -- not FALSE
    condition: any
    rules:
-     - not f:/var/ossec/etc/ossec.conf_FAIL
+     - not f:/var/ossec/etc/ossec.conf_FAKE
 
  - id: 700105
    title: INVALID -- not INVALID
    condition: any
    rules:
-     - not f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE -> INVALID
+     - not f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE -> INVALID

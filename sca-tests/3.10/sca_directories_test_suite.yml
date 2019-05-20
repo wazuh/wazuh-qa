@@ -22,22 +22,22 @@ checks:
 # One directory existence check #
 #################################
  - id: 100100
-   title: PASS  -- Directory exists
+   title: PASS -- Directory exists
    condition: any
    rules:
      - d:/var/ossec;
  - id: 100101
-   title: FAIL  -- Directory does not exist
+   title: FAIL -- Directory does not exist
    condition: any
    rules:
      - d:/var/ossec/fakedir
  - id: 100102
-   title: PASS  -- Directory does not exist
+   title: PASS -- Directory does not exist
    condition: any
    rules:
      - not d:/var/ossec/fakedir
  - id: 100103
-   title: FAIL  -- Directory exists
+   title: FAIL -- Directory exists
    condition: any
    rules:
      - not d:/var/ossec/ruleset
@@ -46,25 +46,25 @@ checks:
 ########################################
 # When listing more than one directory, the existence of one of them stops the searching (OR operation)
  - id: 100200
-   title: FAIL  -- Directories do not exist
+   title: FAIL -- Directories do not exist
    condition: any
    rules:
      - d:/var/ossec/ruleset/fakedir,/etc/fakedir,/var/ossec/etc/fakedir
 
  - id: 100201
-   title: PASS  -- The last directory exists
+   title: PASS -- The last directory exists
    condition: any
    rules:
      - d:/var/ossec/ruleset/fakedir,/var/ossec/etc/fakedir,/var/ossec/etc
 
  - id: 100202
-   title: PASS  -- Negated directories that do not exist
+   title: PASS -- Negated directories that do not exist
    condition: any
    rules:
      - not d:/var/ossec/ruleset/fakedir,/etc/fakedir,/var/ossec/etc/fakedir
 
  - id: 100203
-   title: FAIL  -- Negated existing directories
+   title: FAIL -- Negated existing directories
    condition: any
    rules:
      - not d:/var/ossec,/etc
@@ -73,12 +73,12 @@ checks:
 # Complex directory rules #
 ###########################
  - id: 100300
-   title: PASS  -- Full rule regex match
+   title: PASS -- Full rule regex match
    condition: any
    rules:
      - d:/etc -> ossec-init.conf -> r:^DIRECTORY;
  - id: 100301
-   title: FAIL  -- Full rule regex does not match
+   title: FAIL -- Full rule regex does not match
    condition: any
    rules:
      - d:/etc -> ossec-init.conf -> r:^FAKE;
@@ -89,7 +89,7 @@ checks:
      - d:/var/ossec/fakedir -> ossec-init.conf -> r:^FAKE;
 # This check is pass instead of invalid because the existence of the file is optional (not mandatory)
  - id: 100303
-   title: FAIL  -- File does not exist
+   title: FAIL -- File does not exist
    condition: any
    rules:
      - d:/var/ossec -> fakefile -> r:^Wazuh;
@@ -97,27 +97,27 @@ checks:
 # Looking for files in directory rules #
 ########################################
  - id: 100400
-   title: PASS  -- The file exists
+   title: PASS -- The file exists
    condition: any
    rules:
      - d:/var/ossec -> ossec.conf;
  - id: 100401
-   title: PASS  -- There exist other files in /var/ossec which !ossec.conf -> TRUE
+   title: PASS -- There exist other files in /var/ossec which !ossec.conf -> TRUE
    condition: any
    rules:
      - d:/var/ossec -> !ossec.conf;
  - id: 100402
-   title: FAIL  -- There not exists the file ossec.conf
+   title: FAIL -- There not exists the file ossec.conf
    condition: none
    rules:
      - d:/var/ossec -> ossec.conf;
  - id: 100403
-   title: PASS  -- There exist other files in /var/ossec which !fakefile -> TRUE
+   title: PASS -- There exist other files in /var/ossec which !fakefile -> TRUE
    condition: any
    rules:
      - d:/var/ossec -> !fakefile;
  - id: 100404
-   title: FAIL  -- The file does not exist
+   title: FAIL -- The file does not exist
    condition: any
    rules:
      - d:/var/ossec -> fakefile;

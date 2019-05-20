@@ -18,8 +18,8 @@ policy:
 # Total checks = 24
 
 # - f:/var/ossec/etc/ossec.conf -> TRUE
-# - f:/var/ossec/etc/ossec.conf_FAIL -> FALSE
-# - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE -> INVALID
+# - f:/var/ossec/etc/ossec.conf_FAKE -> FALSE
+# - f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE -> INVALID
 
 checks:
 #########
@@ -37,49 +37,49 @@ checks:
    condition: any
    rules:
      - f:/var/ossec/etc/ossec.conf
-     - f:/var/ossec/etc/ossec.conf_FAIL
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE
  - id: 800102
    title: PASS -- ANY on a list [FALSE, TRUE, FALSE]
    condition: any
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE
      - f:/var/ossec/etc/ossec.conf
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE
  - id: 800103
    title: PASS -- ANY on a list [FALSE, FALSE, TRUE]
    condition: any
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE
      - f:/var/ossec/etc/ossec.conf
  - id: 800104
    title: FAIL -- ANY on a list [FALSE, FALSE, FALSE]
    condition: any
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL
-     - f:/var/ossec/etc/ossec.conf_FAIL
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE
  - id: 800105
    title: INVALID -- ANY on a list [INVALID, INVALID, INVALID]
    condition: any
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE
-     - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE
-     - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE
  - id: 800106
    title: INVALID -- ANY on a list [FALSE, INVALID, FALSE]
    condition: any
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL
-     - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE
  - id: 800107
    title: PASS -- ANY on a list [FALSE, INVALID, TRUE]
    condition: any
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL
-     - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE
      - f:/var/ossec/etc/ossec.conf
 
 #########
@@ -98,50 +98,50 @@ checks:
    rules:
      - f:/var/ossec/etc/ossec.conf
      - f:/var/ossec/etc/ossec.conf
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE
  - id: 800202
    title: FAIL -- ALL on a list [TRUE, FALSE, TRUE]
    condition: all
    rules:
      - f:/var/ossec/etc/ossec.conf
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE
      - f:/var/ossec/etc/ossec.conf
  - id: 800203
    title: FAIL -- ALL on a list [FALSE, TRUE, TRUE]
    condition: all
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE
      - f:/var/ossec/etc/ossec.conf
      - f:/var/ossec/etc/ossec.conf
  - id: 800204
    title: FAIL -- ALL on a list [FALSE, FALSE, FALSE]
    condition: all
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL
-     - f:/var/ossec/etc/ossec.conf_FAIL
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE
  - id: 800205
    title: INVALID -- ALL on a list [INVALID, INVALID, INVALID]
    condition: all
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE
-     - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE
-     - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE
  - id: 800206
    title: INVALID -- ALL on a list [TRUE, INVALID, TRUE]
    condition: all
    rules:
      - f:/var/ossec/etc/ossec.conf
-     - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE
      - f:/var/ossec/etc/ossec.conf
 
  - id: 800207
    title: FAIL -- ALL on a list [INVALID, TRUE, FALSE]
    condition: all
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE
      - f:/var/ossec/etc/ossec.conf
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE
 
 
 ##########
@@ -159,47 +159,47 @@ checks:
    condition: none
    rules:
      - f:/var/ossec/etc/ossec.conf
-     - f:/var/ossec/etc/ossec.conf_FAIL
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE
  - id: 800302
    title: FAIL -- NONE on a list [FALSE, TRUE, FALSE]
    condition: none
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE
      - f:/var/ossec/etc/ossec.conf
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE
  - id: 800303
    title: FAIL -- NONE on a list [FALSE, FALSE, TRUE]
    condition: none
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE
      - f:/var/ossec/etc/ossec.conf
  - id: 800304
    title: PASS -- NONE on a list [FALSE, FALSE, FALSE]
    condition: none
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL
-     - f:/var/ossec/etc/ossec.conf_FAIL
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE
  - id: 800305
    title: INVALID -- NONE on a list [INVALID, INVALID, INVALID]
    condition: none
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE
-     - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE
-     - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE
  - id: 800306
    title: INVALID -- NONE on a list [INVALID, FALSE, FALSE]
    condition: none
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE
-     - f:/var/ossec/etc/ossec.conf_FAIL
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE
  - id: 800307
    title: FAIL -- NONE on a list [INVALID, FALSE, TRUE]
    condition: none
    rules:
-     - f:/var/ossec/etc/ossec.conf_FAIL -> r:^FAKE
-     - f:/var/ossec/etc/ossec.conf_FAIL
+     - f:/var/ossec/etc/ossec.conf_FAKE -> r:^FAKE
+     - f:/var/ossec/etc/ossec.conf_FAKE
      - f:/var/ossec/etc/ossec.conf
