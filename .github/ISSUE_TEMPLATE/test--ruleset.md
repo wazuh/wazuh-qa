@@ -28,6 +28,8 @@ assignees: ''
 - [ ] Trigger alerts which depend on `if_matched_sid`, `if_matched_group`, `same_source_ip`, etc.
 - [ ] Trigger a custom decoder and rule set at `etc/decoders`/`etc/rules`.
 - [ ] Overwrite a rule.
+- [ ] On an overwriting rule, trigger alerts which depend on `same_fields` and `not_same_fields`.
+- [ ] On an overwriting rule, trigger alerts to check `list` label and others.
 - [ ] Make the manager fails when starting by setting a duplicated rule ID, as well as other invalid fields.
 - [ ] Decode static and dynamic fields and use them into a rule.
 - [ ] Trigger a rule depending on a CDB list.
