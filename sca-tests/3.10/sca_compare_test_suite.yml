@@ -67,54 +67,48 @@ checks:
      - 'not c:echo -n SomeValue 100 -> n:^SomeValue (\d+) compare > 100'
 
  - id: 900105
-   title: PASS -- compare < 0
-   condition: any
-   rules:
-     - 'c:echo -n SomeValue 1000 -> n:^SomeValue (\d+)|^SomeValue (-\d+) compare < 0'
-
- - id: 900106
    title: "INVALID -- Incomplete rules 1"
    condition: any
    rules:
      - 'c:echo -n 123 -> n:(\d+) compare <='
 
- - id: 900107
+ - id: 900106
    title: "INVALID -- Incomplete rule 2"
    condition: any
    rules:
      - 'c:echo -n 123 -> n:(\d+) compare 123'
 
- - id: 900108
+ - id: 900107
    title: "INVALID -- Incomplete rule 3"
    condition: any
    rules:
      - 'c:echo -n 123 -> n:(\d+) <= 123'
 
- - id: 900109
+ - id: 900108
    title: "INVALID -- Incomplete rules 4"
    condition: any
    rules:
      - 'c:echo -n 123 -> n:(\d+) compare'
 
- - id: 900110
+ - id: 900109
    title: "INVALID -- Incomplete rule 5"
    condition: any
    rules:
      - 'c:echo -n 123 -> n:(\d+) <='
 
- - id: 900111
+ - id: 900110
    title: "INVALID -- Incomplete rule 6"
    condition: any
    rules:
      - 'c:echo -n 123 -> n:(\d+) 123'
 
- - id: 900112
+ - id: 900111
    title: "INVALID -- Incomplete rule 7"
    condition: any
    rules:
      - 'c:echo -n 123 -> n:(\d+)'
 
- - id: 900113
+ - id: 900112
    title: "FAIL -- Malformed rule: <= is part of the regex"
    condition: all
    rules:
