@@ -55,7 +55,7 @@ checks:
      - not c:_IM_NO_COMMAND_ -n ABC -> r:CBA
 
  - id: 300106
-   title: INVALID -- Not executable file (will trigger leak reports due to execvp failing)
+   title: INVALID -- Non executable file (will trigger leak reports due to execvp failing)
    condition: any
    rules:
      - not c:/var/ossec/etc/ossec.conf -n ABC -> r:CBA
