@@ -19,6 +19,8 @@ assignees: ''
 - [ ] Delete all localfile entries and start Logcollector.
 - [ ] Test Logcollector internal options.
 - [ ] Increase both `logcollector.max_files` and `logcollector.rlimit_nofile` and check if everything works with the maximum number of files allowed.
+- [ ] Check that the agent bookmarks Eventchannel logs.
+- [ ] Set `<only-future-events>` to `yes` and check that the agent is not bookmarking Eventchannel logs.
 
 ## Logs
 
