@@ -30,6 +30,7 @@ assignees: ''
 - [ ] Check that labels are added to JSON files.
 - [ ] Check that the multi-line logs are taken correctly.
 - [ ] Check that no duplicate files are scanned (entered multiple times).
+- [ ] Check that the agent sends the Windows Eventchannel events generated when it was stopped. (https://github.com/wazuh/wazuh/issues/3475)
 
 ## Performance
 
