@@ -24,3 +24,4 @@ assignees: ''
     - [ ] Export a filesystem.
     - [ ] Create/delete a network.
     - [ ] Create/delete a service.
+- [ ] Check that the integration is not inheriting file descriptors from modulesd: ``ls -la  /proc/`pidof python /var/ossec/wodles/docker/DockerListener`/fd``
