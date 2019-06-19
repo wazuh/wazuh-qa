@@ -27,6 +27,7 @@ assignees: ''
 - [ ] Use legacy configuration (server-ip, server-hostname, protocol, port).
 - [ ] Check statistics files for analysisd, remoted and agentd.
 - [ ] Check if the agent-info file contains the agent IP. 
+- [ ] Stop Modulesd and check that the agent-info file does not contain the agent IP.
 
 (1) https://documentation.wazuh.com/3.x/user-manual/reference/ossec-conf/client.html
 (3) You have to write the alert in a monitorized log, for example: **active-response.log**
