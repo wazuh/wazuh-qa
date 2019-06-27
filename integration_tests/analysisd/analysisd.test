@@ -17,14 +17,16 @@ def getOssecConfig(initconf,path):
         sys.exit(1)
 
 def rootcheckTest(basedir):
+    title = "Analysisd Rootcheck decoder can handle spurious data"
+
     try:
         feeding(basedir,'9:/var/:')
         time.sleep(1)
         feeding(basedir,'9:/var/:')
     except BaseException as e:
-        print("not ok - Analysisd Rootcheck decoder")
+        print("not ok - {0}".format(title))
         sys.exit(1)
-    print("ok - Analysisd Rootcheck decoder")
+    print("ok - {0}".format(title))
 
 if __name__ == "__main__":
     ossec_init = {}
