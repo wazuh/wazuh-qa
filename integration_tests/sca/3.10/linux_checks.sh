@@ -1,3 +1,5 @@
+#!/bin/bash
+
 sysctl fs.suid_dumpable=0
 sysctl kernel.randomize_va_space=2
 sysctl net.ipv4.conf.all.accept_redirects=0
