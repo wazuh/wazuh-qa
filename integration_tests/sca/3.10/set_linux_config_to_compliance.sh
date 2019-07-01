@@ -17,8 +17,8 @@ sysctl net.ipv4.conf.default.send_redirects=0
 sysctl net.ipv4.icmp_echo_ignore_broadcasts=1
 sysctl net.ipv4.icmp_ignore_bogus_error_responses=1
 sysctl net.ipv4.tcp_syncookies=1
-systemctl net.ipv4.ip_forward = 0
-systemctl net.ipv4.tcp_syncookies = 1
+sysctl net.ipv4.ip_forward = 0
+sysctl net.ipv4.tcp_syncookies = 1
 
 echo "fs.suid_dumpable=0" >> /etc/sysctl.conf
 echo "kernel.randomize_va_space=2" >> /etc/sysctl.conf
