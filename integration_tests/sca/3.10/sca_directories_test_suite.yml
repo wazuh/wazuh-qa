@@ -26,21 +26,25 @@ checks:
    condition: any
    rules:
      - d:/var/ossec
+
  - id: 100101
    title: FAIL -- Directory does not exist
    condition: any
    rules:
      - d:/var/ossec/fakedir
+
  - id: 100102
    title: PASS -- Directory does not exist
    condition: any
    rules:
      - not d:/var/ossec/fakedir
+
  - id: 100103
    title: FAIL -- Directory exists
    condition: any
    rules:
      - not d:/var/ossec/ruleset
+
 ########################################
 # Multiple directories existence check #
 ########################################
@@ -77,11 +81,13 @@ checks:
    condition: any
    rules:
      - d:/etc -> ossec-init.conf -> r:^DIRECTORY
+
  - id: 100301
    title: FAIL -- Full rule regex does not match
    condition: any
    rules:
      - d:/etc -> ossec-init.conf -> r:^FAKE
+
  - id: 100302
    title: INVALID -- Directory does not exist
    condition: any
@@ -93,6 +99,7 @@ checks:
    condition: any
    rules:
      - d:/var/ossec -> fakefile -> r:^Wazuh
+
 ########################################
 # Looking for files in directory rules #
 ########################################
@@ -101,26 +108,31 @@ checks:
    condition: any
    rules:
      - d:/var/ossec -> ossec.conf
+
  - id: 100401
    title: PASS -- There exist other files in /var/ossec which !ossec.conf
    condition: any
    rules:
      - d:/var/ossec -> !ossec.conf
+
  - id: 100402
    title: FAIL -- There not exists the file ossec.conf
    condition: none
    rules:
      - d:/var/ossec -> ossec.conf
+
  - id: 100403
    title: PASS -- There exist other files in /var/ossec which !fakefile
    condition: any
    rules:
      - d:/var/ossec -> !fakefile
+
  - id: 100404
    title: FAIL -- The file does not exist
    condition: any
    rules:
      - d:/var/ossec -> fakefile
+
  - id: 100405
    title: INVALID -- The directory does not exist
    condition: any

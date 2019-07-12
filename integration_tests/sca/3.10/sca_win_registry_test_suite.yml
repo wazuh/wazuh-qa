@@ -131,4 +131,3 @@ checks:
    condition: any
    rules:
      - r:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion -> SoftwareType_FAKEED -> System
-
