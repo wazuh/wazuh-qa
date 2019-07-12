@@ -173,13 +173,13 @@ checks:
    rules:
      - d:/var/ossec/ruleset,/var/ossec/logs,/var/ossec/etc -> r:ossec.conf
 
- - id: 100504
+ - id: 100505
    title: FAIL -- Directories exist and no one contains the file
    condition: any
    rules:
      - d:/var/ossec/ruleset,/var/ossec/logs,/var/ossec/etc -> r:fake.conf
 
- - id: 100505
+ - id: 100506
    title: INVALID -- Directories exist except one and no one contains the file
    condition: any
    rules:
