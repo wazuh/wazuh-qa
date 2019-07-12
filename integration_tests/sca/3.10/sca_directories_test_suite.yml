@@ -138,3 +138,49 @@ checks:
    condition: any
    rules:
      - d:/var/ossec/fakedir -> !ossec.conf
+
+########################################
+# Multiple directories content check   #
+########################################
+# When listing more than one directory, the existence of one of them stops the searching (OR operation)
+ - id: 100500
+   title: INVALID -- Directories do not exist
+   condition: any
+   rules:
+     - d:/var/ossec/ruleset/fakedir,/etc/fakedir,/var/ossec/etc/fakedir -> r:FAKE
+
+ - id: 100501
+   title: PASS -- The last directory exists
+   condition: any
+   rules:
+     - d:/var/ossec/ruleset/fakedir,/var/ossec/etc/fakedir,/var/ossec/etc -> r:ossec
+
+ - id: 100502
+   title: PASS -- The mid directory exists
+   condition: any
+   rules:
+     - d:/var/ossec/ruleset/fakedir,/var/ossec/etc,/var/ossec/etc/fakedir -> r:ossec
+
+ - id: 100503
+   title: PASS -- The first directory exists
+   condition: any
+   rules:
+     - d:/var/ossec/etc,/var/ossec/ruleset/fakedir,/var/ossec/etc/fakedir -> r:ossec
+
+ - id: 100504
+   title: PASS -- Directories exist and one contains the file
+   condition: any
+   rules:
+     - d:/var/ossec/ruleset,/var/ossec/logs,/var/ossec/etc -> r:ossec.conf
+
+ - id: 100504
+   title: FAIL -- Directories exist and no one contains the file
+   condition: any
+   rules:
+     - d:/var/ossec/ruleset,/var/ossec/logs,/var/ossec/etc -> r:fake.conf
+
+ - id: 100505
+   title: INVALID -- Directories exist except one and no one contains the file
+   condition: any
+   rules:
+     - d:/var/ossec/ruleset,/var/ossec/fakedir,/var/ossec/etc -> r:fake.conf
