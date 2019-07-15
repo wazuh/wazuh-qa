@@ -33,7 +33,6 @@ Spend at least 5-10 minutes checking logs of vulnerable and non-vulnerable packa
 - [ ] Check that there are no false positives in Amazon Linux.
 - [ ] Check that there are no false positives in Debian.
 - [ ] Test that all vulnerabilities are reported according to the period indicated in ignore_time.
-- [ ] Verify that no vulnerabilities of wrong architectures are triggered in RedHat/CentOS agents.
 - [ ] Verify that the vulnerability databases are deleted when updating.
 - [ ] Verify that a 3.2.X configuration is accepted.
 - [ ] Verify that OVAL files can be downloaded from alternate addresses.

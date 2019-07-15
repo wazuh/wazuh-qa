@@ -96,4 +96,23 @@ To check in every test:
 - [ ] Windows 10
 - [ ] Windows Server 2019
 
+## Post-installation
+
+- [ ] Administrator user has full control on the folder.
+- [ ] Any administrator user must confirm UAC to access the folder.
+- [ ] Non administrator user can not access the folder unless he introduces an administrator password.
+
+### Versions
+
+- [ ] Windows XP
+- [ ] Windows Server 2003
+- [ ] Windows Vista
+- [ ] Windows Server 2008
+- [ ] Windows 7
+- [ ] Windows Server 2012
+- [ ] Windows 8/8.1
+- [ ] Windows Server 2016
+- [ ] Windows 10
+- [ ] Windows Server 2019
+
 (1) Use MS-DOS scaping form for paths with spaces. ( "C:\Program Files\sslagent.cert" would be "C:\Progra\~1\sslagent.cert" and "C:\Program Files x86\sslagent.cert" would be "C:\Progra\~2\sslagent.cert")

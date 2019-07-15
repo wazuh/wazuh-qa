@@ -18,7 +18,7 @@ assignees: ''
 - [ ] Check if ignore files and folders using tag <ignore> and restrict option (string or sregex) in both options.
 - [ ] Check if delete content in _/var/ossec/queue/diff_ when deleting any tag <directories report_changes="yes">
 - [ ] Check if delete content in _/var/ossec/queue/diff_ when report_changes option passed yes to no.
-
+- [ ] Check that duplicate entries are ignored. Include entries with a trailing slash in a single comma-separated stanza.
 
 ## Frequency
 
@@ -26,7 +26,6 @@ assignees: ''
 
 - [ ] Check syscheck alert for adding a file
 - [ ] Check syscheck alert for adding text to a file
-- [ ] Check syscheck alert for deleting text from a file
 - [ ] Check syscheck alert with report_changes option
 - [ ] Check syscheck alert for changing owner of file
 - [ ] Check syscheck alert for changing group of file

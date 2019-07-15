@@ -19,6 +19,8 @@ assignees: ''
 - [ ] Delete all localfile entries and start Logcollector.
 - [ ] Test Logcollector internal options.
 - [ ] Increase both `logcollector.max_files` and `logcollector.rlimit_nofile` and check if everything works with the maximum number of files allowed.
+- [ ] Check that the agent bookmarks Eventchannel logs.
+- [ ] Set `<only-future-events>` to `yes` and check that the agent is not bookmarking Eventchannel logs.
 
 ## Logs
 
@@ -30,6 +32,7 @@ assignees: ''
 - [ ] Check that labels are added to JSON files.
 - [ ] Check that the multi-line logs are taken correctly.
 - [ ] Check that no duplicate files are scanned (entered multiple times).
+- [ ] Check that the agent sends the Windows Eventchannel events generated when it was stopped. (https://github.com/wazuh/wazuh/issues/3475)
 
 ## Performance
 
