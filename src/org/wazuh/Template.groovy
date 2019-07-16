@@ -5,9 +5,6 @@ package org.wazuh;
 import org.yaml.snakeyaml.Yaml
 
 class Template{
-  // Manage variables
-  private String template_path;
-
   // Common variables
   private String id;
   private String description;
@@ -37,13 +34,11 @@ class Template{
   Map data;
 
 
-  Template(template_path = ''){
-    this.template_path = template_path
-  }
+  Template(){ }
 
 
 
-  void loadTemplate(path = ''){
+  void loadYaml(path = ''){
     Yaml parser = new Yaml()
     Map data = parser.load((path as File).text)
     this.data = data
