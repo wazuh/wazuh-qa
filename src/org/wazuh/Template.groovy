@@ -53,7 +53,7 @@ class Template{
 
 
 
-  void toString(){
+  String toString(){
     String result;
 
     result += 'ID: ' + id + '\n';
