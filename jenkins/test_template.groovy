@@ -14,7 +14,7 @@ String verbosity = '-vvv'
 String hosts_deploy_path
 String hosts_config_path
 
-Map template
+Map info, module, test
 
 node(master_node){
   try{
@@ -27,8 +27,9 @@ node(master_node){
       }
 
       stage('STAGE 1: Parse template'){
-        template = readYaml(file: 'tests/specification.yml')
-        if(template.provisioner != 'docker'){ error 'Only docker provisioner supported' }
+        info = readYaml(file: 'tests/info.yml')
+        module = readYaml(file: "tests/${info.available_modules[0]}/module.yml")
+        test = readYaml(file: "tests/${info.available_modules[0]}/${module.available_tests[4]}/test.yml")
 
 
 
