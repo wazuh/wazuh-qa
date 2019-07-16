@@ -68,11 +68,11 @@ total_managers: 1
 
 # Wazuh's maximum version of the manager
 # Values allowed: Any Wazuh's manager version
-wazuh_max_version_manager: "3.7.1"
+wazuh_max_version_manager: "3.9.2"
 
 # Wazuh's minimum version of the manager
 # Values allowed: Any Wazuh's manager version
-wazuh_min_version_manager: "3.9.2"
+wazuh_min_version_manager: "3.7.1"
 
 # Specifies whether the manager needs to have installed the API
 # Values allowed: yes or no
