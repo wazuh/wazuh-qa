@@ -1,0 +1,22 @@
+description: "File integrity monitoring module test suite"
+category: File integrity monitoring
+tags:
+  - fim
+available_tests:
+  - auto_ignore_test
+  - change_file_group
+  - change_file_owner
+  - change_file_perm
+  - files
+  - group
+  - inode
+  - md5_sum
+  - nodiff
+  - owner
+  - perm
+  - recursion_level
+  - sha1_sum
+  - sha256_sum
+  - size
+  - tags
+
