@@ -40,6 +40,7 @@ class Template{
 
   void loadYaml(path = ''){
     Yaml parser = new Yaml()
+    println "ls".execute().text
     Map data = parser.load((path as File).text)
     this.data = data
   }
