@@ -1,5 +1,6 @@
 
 package org.wazuh;
+
 @Grab('org.yaml:snakeyaml:1.17')
 import org.yaml.snakeyaml.Yaml
 
@@ -47,7 +48,7 @@ class Template{
 
   void loadTemplate(path = ''){
     Yaml parser = new Yaml()
-    Map data = parser.load((path as File).text)
+    //Map data = parser.load((path as File).text)
     //this.data = data
   }
 
