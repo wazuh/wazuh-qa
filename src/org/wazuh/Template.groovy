@@ -45,8 +45,8 @@ class Template{
 
   void loadTemplate(path = ''){
     Yaml parser = new Yaml()
-    //Map data = parser.load((path as File).text)
-    //this.data = data
+    Map data = parser.load((path as File).text)
+    this.data = data
   }
 
 
