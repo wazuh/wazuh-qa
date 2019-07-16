@@ -40,7 +40,7 @@ class Template{
   Template(template_path = ''){
     this.template_path = template_path
     if(this.template_path != ''){
-      loadTemplate(this.template_path)
+      this.loadTemplate(this.template_path)
     }
   }
 
