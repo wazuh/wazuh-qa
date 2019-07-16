@@ -39,15 +39,12 @@ class Template{
 
   Template(template_path = ''){
     this.template_path = template_path
-    if(this.template_path != ''){
-      this.loadTemplate(this.template_path)
-    }
   }
 
 
 
   void loadTemplate(path = ''){
-    //Yaml parser = new Yaml()
+    Yaml parser = new Yaml()
     //Map data = parser.load((path as File).text)
     //this.data = data
   }
