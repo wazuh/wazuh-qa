@@ -2,19 +2,22 @@
 
 String master_node = null
 String jenkins_branch = '641-add-qa-templates'
-String agent_image = 'centos-7'
-String manager_image = 'centos-7'
-String num_agents = '1'
-String num_managers = '1'
+//String agent_image = 'centos-7'
+//String manager_image = 'centos-7'
+String [] images
+String num_agents
+String num_managers
 String deploy_node = 'Node0'
-String deploy_prefix = 'test'
-String  max_manager_version = '3.9.2'
+String deploy_prefix
 String verbosity = '-vvv'
 
-String hosts_deploy_path
-String hosts_config_path
+String module = params.MODULE
+String test = params.TEST
 
-Map info, module, test
+List hosts_deploy_path = []
+List hosts_config_path = []
+
+Map info_data, module_data, test_data
 
 node(master_node){
   try{
@@ -27,37 +30,57 @@ node(master_node){
       }
 
       stage('STAGE 1: Parse template'){
-        info = readYaml(file: 'tests/info.yml')
-        module = readYaml(file: "tests/${info.available_modules[0]}/module.yml")
-        test = readYaml(file: "tests/${info.available_modules[0]}/${module.available_tests[4]}/test.yml")
+        info_data = readYaml(file: 'tests/info.yml')
+        module_data = readYaml(file: "tests/${module}/module.yml")
+        test_data = readYaml(file: "tests/${module}/${test}/test.yml")
 
+        num_agents = test_data.number_of_agents
+        num_managers = test_data.number_of_managers
 
+        images = test_data.system_target
 
+        deploy_prefix = 'Test_' + module + '_'  + test
       }
 
 
-      stage('STAGE 2: Launch instances'){
+      stage('STAGE 2: Generate deploy data'){
         instance.init(branch: jenkins_branch)
 
-        hosts_deploy_path = instance.createDeployData(
-          agent_image: agent_image,
-          manager_image: manager_image,
-          number_of_agents: template.total_agents,
-          number_of_managers: template.total_managers,
-          deploy_node: deploy_node,
-          deploy_prefix: deploy_prefix,
-          use_ecr: true,
-          ecr_repository: instance.ECR_BASE_REPOSITORY,
-          ecr_source_version: max_manager_version
-        )
+        images.each{ img ->
+          hosts_deploy_path << instance.createDeployData(
+            hosts_deploy_path: instance.TMP_PATH + '/' + img + '_' + 'deploy',
+            agent_image: img,
+            manager_image: img,
+            number_of_agents: num_agents,
+            number_of_managers: num_managers,
+            deploy_node: deploy_node,
+            deploy_prefix: deploy_prefix,
+            use_ecr: true,
+            ecr_repository: instance.ECR_BASE_REPOSITORY,
+            ecr_source_version: '3.9.2'
+            //ecr_source_version: test_data.maximum_supported_version
+          )
+          hosts_config_path << instance.createConfigurationData(
+            hosts_config_path: instance.TMP_PATH + '/' + img + '_' + 'config',
+            deploy_prefix: deploy_prefix,
+            is_centos5: false
+          )
 
-        hosts_config_path = instance.createConfigurationData(
-          deploy_prefix: deploy_prefix,
-          is_centos5: false
-        )
-
-        instance.deploy(verbosity: verbosity)
+        }
       }
+
+
+
+      stage('STAGE 3: Launch instances'){
+        hosts_deploy_path.each{ deploy_data ->
+          instance.deploy(
+            hosts_deploy_path: deploy_data,
+            verbosity: verbosity
+          )
+        }
+      }
+
+
     }
 
   }catch(exception){
