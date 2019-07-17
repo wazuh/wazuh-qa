@@ -19,8 +19,8 @@ available_tests:
 
 number_of_agents: 1
 number_of_managers: 1
-minimum_supported_version: "3.5.0"
-maximum_supported_version: "3.9.3"
+minimum_supported_version: '3.5.0'
+maximum_supported_version: '3.9.3'
 
 ##########################################################
 #                      TEST SECTION                      #
