@@ -27,48 +27,48 @@ maximum_supported_version: "3.9.3"
 ##########################################################
 
 tests:
-  - add:
-    - managers:
-      - 0:
-        - configuration_template : "---"
-        - arrangements : "manager/arrangements.py"
-        - trigger: "manager/trigger.py"
-        - output: "manager/results_checker.py"
+  add:
+    managers:
+      0:
+        configuration_template : "---"
+        arrangements : "manager/arrangements.py"
+        trigger: "manager/trigger.py"
+        output: "manager/results_checker.py"
 
-    - agents:
-      - 0:
-        - configuration_template : "---"
-        - arrangements : "agent/arrangements.py"
-        - trigger: "agent/trigger.py"
-        - output: "agent/results_checker.py"
+    agents:
+      0:
+        configuration_template : "---"
+        arrangements : "agent/arrangements.py"
+        trigger: "agent/trigger.py"
+        output: "agent/results_checker.py"
 
-  - delete:
-    - managers:
-      - 0:
-        - configuration_template : "---"
-        - arrangements : "manager/arrangements.py"
-        - trigger: "manager/trigger.py"
-        - output: "manager/results_checker.py"
+  delete:
+    managers:
+      0:
+        configuration_template : "---"
+        arrangements : "manager/arrangements.py"
+        trigger: "manager/trigger.py"
+        output: "manager/results_checker.py"
 
-    - agents:
-      - 0:
-        - configuration_template : "---"
-        - arrangements : "agent/arrangements.py"
-        - trigger: "agent/trigger.py"
-        - output: "agent/results_checker.py"
+    agents:
+      0:
+        configuration_template : "---"
+        arrangements : "agent/arrangements.py"
+        trigger: "agent/trigger.py"
+        output: "agent/results_checker.py"
 
-  - modify:
-    - managers:
-      - 0:
-        - configuration_template : "---"
-        - arrangements : "manager/arrangements.py"
-        - trigger: "manager/trigger.py"
-        - output: "manager/results_checker.py"
+  modify:
+    managers:
+      0:
+        configuration_template : "---"
+        arrangements : "manager/arrangements.py"
+        trigger: "manager/trigger.py"
+        output: "manager/results_checker.py"
 
-    - agents:
-      - 0:
-        - configuration_template : "---"
-        - arrangements : "agent/arrangements.py"
-        - trigger: "agent/trigger.py"
-        - output: "agent/results_checker.py"
+    agents:
+      0:
+        configuration_template : "---"
+        arrangements : "agent/arrangements.py"
+        trigger: "agent/trigger.py"
+        output: "agent/results_checker.py"
 
