@@ -1,0 +1,7 @@
+---
+- hosts: all
+  tasks:
+  - name: Synchronize test folder on instance
+    synchronize:
+      src: "{{ src_folder }}"
+      dest: "/{{ dest_folder }}"
