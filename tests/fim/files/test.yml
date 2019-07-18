@@ -30,45 +30,45 @@ tests:
   add:
     managers:
       0:
-        configuration_template : "---"
-        arrangements : "manager/arrangements.py"
+        configuration_template: "---"
+        arrangement: "manager/arrangement.py"
 #        trigger: "manager/trigger.py"
         output: "manager/checker.py"
 
     agents:
       0:
         configuration_template : "---"
-        arrangements : "agent/arrangements.py"
+        arrangement: "agent/arrangement.py"
         trigger: "agent/trigger.py"
         output: "agent/checker.py"
 
   delete:
     managers:
       0:
-        configuration_template : "---"
-        arrangements : "manager/arrangements.py"
+        configuration_template: "---"
+        arrangement: "manager/arrangement.py"
 #        trigger: "manager/trigger.py"
         output: "manager/checker.py"
 
     agents:
       0:
-        configuration_template : "---"
-        arrangements : "agent/arrangements.py"
+        configuration_template: "---"
+        arrangement: "agent/arrangement.py"
         trigger: "agent/trigger.py"
         output: "agent/checker.py"
 
   modify:
     managers:
       0:
-        configuration_template : "---"
-        arrangements : "manager/arrangements.py"
+        configuration_template: "---"
+        arrangement: "manager/arrangement.py"
 #        trigger: "manager/trigger.py"
         output: "manager/checker.py"
 
     agents:
       0:
-        configuration_template : "---"
-        arrangements : "agent/arrangements.py"
+        configuration_template: "---"
+        arrangement: "agent/arrangement.py"
         trigger: "agent/trigger.py"
         output: "agent/checker.py"
 
