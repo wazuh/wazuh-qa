@@ -4,7 +4,7 @@
   - name: Check if dest_folder exists
     file: path="/{{ dest_folder }}" state=directory
 
-  - name: Synchronize test folder on instance
-    synchronize:
-      src: "{{ src_folder }}"
-      dest: "/{{ dest_folder }}"
+  - name: copy test folder on instance
+    copy:
+      src: "{{ src_folder }}/"
+      dest: "/{{ dest_folder }}/"
