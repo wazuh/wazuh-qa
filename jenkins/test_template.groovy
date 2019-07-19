@@ -109,34 +109,49 @@ node(master_node){
 
           test_data.tests.each{ test_object ->
 
-            ansiblePlaybook(
-              credentialsId: vars.DEFAULT_ANSIBLE_CREDENTIALS_ID,
-              disableHostKeyChecking: vars.DISABLE_HOST_KEY_CHECKING,
-              extraVars: [
-                binary: 'python',
-                script: "wazuh-qa/tests/${module}/${test}/${test_object.key}/${test_object.value.managers[0].arrangement}"
-              ],
-              limit: 'Managers'
-              inventory: config_data,
-              playbook: "wazuh-qa/ansible/launch_script.yml",
-              extras: verbosity,
-              colorized: vars.COLORIZED_ANSIBLE
-            )
+            echo 'Test: ' + test_object.toString()
+            test_object.value.agents.each{ agent ->
+              echo 'Agent: ' + agent.toString()
+              agent.value.each{ item ->
+                  ansiblePlaybook(
+                    credentialsId: vars.DEFAULT_ANSIBLE_CREDENTIALS_ID,
+                    disableHostKeyChecking: vars.DISABLE_HOST_KEY_CHECKING,
+                    extraVars: [
+                      binary: 'python',
+                      script: "/tests/${test_object.key}/${item.value}"
+                    ],
+                    limit: 'Agents',
+                    inventory: config_data,
+                    playbook: "wazuh-qa/ansible/launch_script.yml",
+                    extras: verbosity,
+                    colorized: vars.COLORIZED_ANSIBLE
+                  )
+                  echo 'Item.key: ' + item.key.toString()
+                  echo 'Item.value: ' + item.value.toString()
+              }
+            }
 
-            ansiblePlaybook(
-              credentialsId: vars.DEFAULT_ANSIBLE_CREDENTIALS_ID,
-              disableHostKeyChecking: vars.DISABLE_HOST_KEY_CHECKING,
-              extraVars: [
-                binary: 'python',
-                script: "wazuh-qa/tests/${module}/${test}/${test_object.key}/${test_object.value.agents[0].arrangement}"
-              ],
-              limit: 'Managers'
-              inventory: config_data,
-              playbook: "wazuh-qa/ansible/launch_script.yml",
-              extras: verbosity,
-              colorized: vars.COLORIZED_ANSIBLE
-            )
-
+            echo 'Test: ' + test_object.toString()
+            test_object.value.managers.each{ manager ->
+              echo 'Manager: ' + manager.toString()
+              manager.value.each{ item ->
+                  ansiblePlaybook(
+                    credentialsId: vars.DEFAULT_ANSIBLE_CREDENTIALS_ID,
+                    disableHostKeyChecking: vars.DISABLE_HOST_KEY_CHECKING,
+                    extraVars: [
+                      binary: 'python',
+                      script: "/tests/${test_object.key}/${item.value}"
+                    ],
+                    limit: 'Managers',
+                    inventory: config_data,
+                    playbook: "wazuh-qa/ansible/launch_script.yml",
+                    extras: verbosity,
+                    colorized: vars.COLORIZED_ANSIBLE
+                  )
+                  echo 'Item.key: ' + item.key.toString()
+                  echo 'Item.value: ' + item.value.toString()
+              }
+            }
           }
         }
       }
