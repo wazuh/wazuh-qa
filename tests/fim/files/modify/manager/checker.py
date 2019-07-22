@@ -3,7 +3,7 @@ import json, pytest, sys, os
 with open('/var/ossec/logs/alerts/alerts.json') as f:
     alerts_json = [json.loads(line) for line in f]
 
-with open(os.path.dirname(sys.argv[0]) + '/' + 'check_alert_new_files_modify.json') as f:
+with open(os.path.dirname(sys.argv[1]) + '/' + 'check_alert_new_files_modify.json') as f:
     test_alert = json.load(f)
 
 # delete the keys that we don't want to check in our FIM testing
