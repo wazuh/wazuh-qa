@@ -31,44 +31,68 @@ tests:
     managers:
       0:
 #        configuration_template: "---"
-        arrangement: "manager/arrangement.py"
+        arrangement:
+          binary: "python"
+          file: "manager/arrangement.py"
 #        trigger: "manager/trigger.py"
-        output: "manager/checker.py"
+        output:
+          binary: "pytest"
+          file: "manager/checker.py"
 
     agents:
       0:
 #        configuration_template : "---"
-        arrangement: "agent/arrangement.py"
-        trigger: "agent/trigger.py"
+        arrangement:
+          binary: "python"
+          file: "agent/arrangement.py"
+        trigger:
+          binary: "python"
+          file: "agent/trigger.py"
 #        output: "agent/checker.py"
 
   delete:
     managers:
       0:
 #        configuration_template: "---"
-        arrangement: "manager/arrangement.py"
+        arrangement:
+          binary: "python"
+          file: "manager/arrangement.py"
 #        trigger: "manager/trigger.py"
-        output: "manager/checker.py"
+        output:
+          binary: "pytest"
+          file: "manager/checker.py"
 
     agents:
       0:
 #        configuration_template: "---"
-        arrangement: "agent/arrangement.py"
-        trigger: "agent/trigger.py"
+        arrangement:
+          binary: "python"
+          file: "agent/arrangement.py"
+        trigger:
+          binary: "python"
+          file: "agent/trigger.py"
 #        output: "agent/checker.py"
 
   modify:
     managers:
       0:
 #        configuration_template: "---"
-        arrangement: "manager/arrangement.py"
+        arrangement:
+          binary: "python"
+          file: "manager/arrangement.py"
 #        trigger: "manager/trigger.py"
-        output: "manager/checker.py"
+        output:
+          binary: "pytest"
+          file: "manager/checker.py"
 
     agents:
       0:
 #        configuration_template: "---"
-        arrangement: "agent/arrangement.py"
-        trigger: "agent/trigger.py"
+        arrangement:
+          binary: "python"
+          file: "agent/arrangement.py"
+        trigger:
+          binary: "python"
+          file: "agent/trigger.py"
 #        output: "agent/checker.py"
 
