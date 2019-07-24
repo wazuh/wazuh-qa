@@ -20,7 +20,8 @@ opt_check = ['check_all', 'check_sum', 'check_sha1sum', 'check_md5sum', 'check_s
 def generate_name():
     result = ""
     for i in range(0,5):
-        result += random.choice(string.letters)
+        result += random.choice(string.ascii_letters)
+    return result
 
 
 # Waiting time
@@ -125,20 +126,20 @@ if __name__ == '__main__':
     print(' ----- ----- ----- ----- Wait for syscheck to generate its database: it take a few minutes')
 
     #waiting_time('ossec-syscheckd: INFO: (6011): Initializing real time file monitoring engine.')
-    time.sleep(60)
+    #time.sleep(60)
     file_name = generate_name()
     print(' ----- ----- ----- ----- Creating files ---')
     write_files('File created', file_name)
-    time.sleep(time_to_sleep)
+    #time.sleep(time_to_sleep)
     print(' ----- ----- ----- ----- Modifying inode ---')
     modify_inode(file_name)
-    time.sleep(time_to_sleep)
+    #time.sleep(time_to_sleep)
     print(' ----- ----- ----- ----- Modifying files ---')
     write_files('File modified', file_name)
-    time.sleep(time_to_sleep)
+    #time.sleep(time_to_sleep)
     print(' ----- ----- ----- ----- Modifying owner ---')
     call_chown('ossec', None, file_name)
-    time.sleep(time_to_sleep)
+    #time.sleep(time_to_sleep)
     print(' ----- ----- ----- ----- Modifying group ---')
     call_chown(None, 'ossec', file_name)
     time.sleep(time_to_sleep)
