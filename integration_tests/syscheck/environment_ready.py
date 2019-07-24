@@ -20,7 +20,8 @@ opt_check = ['check_all', 'check_sum', 'check_sha1sum', 'check_md5sum', 'check_s
 def generate_name():
     result = ""
     for i in range(0,5):
-        result += random.choice(string.letters)
+        result += random.choice(string.ascii_letters)
+    return result
 
 
 # Waiting time
