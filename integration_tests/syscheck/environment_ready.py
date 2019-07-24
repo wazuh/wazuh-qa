@@ -13,7 +13,7 @@ log_file = '/var/ossec/logs/ossec.log'
 testing_dir = '/home/lopezziur/testing_fim_options'
 opt = ['t_frequency', 't_whodata', 't_realtime']
 opt_check = ['check_all', 'check_sum', 'check_sha1sum', 'check_md5sum', 'check_sha256sum', 'check_size', 'check_owner', 'check_group', 'check_perm', \
-    'check_mtime', 'check_inode', 'report_changes']
+    'check_mtime', 'check_inode', 'report_changes', 'tags']
 
 
 # Generate random name to files
@@ -62,9 +62,14 @@ def add_configuration():
         f.write('<syscheck>\n')
         f.write('<frequency>120</frequency>\n')
         for i in opt_check:
-            f.write('<directories {2}="yes">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[0], i))
-            f.write('<directories whodata="yes" {2}="yes">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[1], i))
-            f.write('<directories realtime="yes" {2}="yes">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[2], i))
+            if i == 'tags' or i == 'report_changes':
+                f.write('<directories check_size="yes" {2}="yes">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[0], i))
+                f.write('<directories check_size="yes" whodata="yes" {2}="yes">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[1], i))
+                f.write('<directories check_size="yes" realtime="yes" {2}="yes">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[2], i))
+            else:
+                f.write('<directories {2}="yes">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[0], i))
+                f.write('<directories whodata="yes" {2}="yes">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[1], i))
+                f.write('<directories realtime="yes" {2}="yes">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[2], i))
         f.write('</syscheck>\n')
         f.write('</ossec_config>\n')
         f.close()
@@ -83,7 +88,7 @@ def write_files(msg, archive):
 def modify_inode(archive):
     delete_files(archive)
     write_files('File created', 'testing.txt')
-    write_files('File created', 'testing.txt')
+    write_files('File created', archive)
 
 
 # Modify owner and/or group of files
@@ -153,4 +158,3 @@ if __name__ == '__main__':
     delete_files(file_name)
     time.sleep(time_to_sleep)
     print(' ----- ----- ----- ----- DONE ----- ----- ----- -----')
-
