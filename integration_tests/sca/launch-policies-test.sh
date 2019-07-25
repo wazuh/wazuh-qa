@@ -3,9 +3,10 @@ red=`tput setaf 1`
 green=`tput setaf 2`
 reset=`tput sgr0`
 
-if [ "$1" = "" ]; then
-    echo ${red}ERROR: Agent database required
-    echo Usage: ./test-sca-policies.sh \<agent-database.db\>${reset}
+
+if [ $# -ne 2 ]; then
+    echo ${red}ERROR: Agent database and policy test required. Type 1 in case you want to check policy tests or 0 otherwise.
+    echo Usage: ./test-sca-policies.sh \<agent-database.db\> \<test-policies\>
     exit 1
 fi
 
@@ -45,12 +46,43 @@ do
         obtained_result=$(echo $line | rev | cut -d'|' -f 2 | rev)
     fi
 
-    if [ "$obtained_result" != "passed" ]; then
-        echo ${red}Check $check_id result: NOT OK${reset} expected result: passed, ${red}obtained result: $obtained_result ${reset}
-        failed_checks=$((failed_checks+1))
+    if [ $2 -eq 0 ]; then
+        if [ "$obtained_result" != "passed" ]; then
+            echo ${red}Check $check_id result: NOT OK${reset} expected result: passed, ${red}obtained result: $obtained_result ${reset}
+            failed_checks=$((failed_checks+1))
+        else
+            echo ${green}Check $check_id result: OK${reset} expected result: passed, obtained result: $obtained_result
+            passed_checks=$((passed_checks+1))
+        fi
     else
-        echo ${green}Check $check_id result: OK${reset} expected result: passed, obtained result: $obtained_result
-        passed_checks=$((passed_checks+1))
+        expected_result=$(echo $line | cut -d'|' -f 4 | cut -d' ' -f 1)
+        if [ "$expected_result" = "INVALID" ]; then
+            if [ "$obtained_result" = "Not applicable" ]; then
+                echo ${green}Check $check_id result: OK ${reset}expected result: $expected_result, obtained result: $obtained_result
+                passed_checks=$((passed_checks+1))
+            else
+                echo ${red}Check $check_id result: NOT OK ${reset}expected result: $expected_result, ${red}obtained result: $obtained_result${reset}
+                failed_checks=$((failed_checks+1))
+            fi
+        elif [ "$expected_result" = "PASS" ]; then
+            if [ "$obtained_result" = "passed" ]; then
+                echo ${green}Check $check_id result: OK ${reset}expected result: $expected_result, obtained result: $obtained_result
+                passed_checks=$((passed_checks+1))
+            else
+                echo ${red}Check $check_id result: NOT OK ${reset}expected result: $expected_result, ${red}obtained result: $obtained_result${reset}
+                failed_checks=$((failed_checks+1))
+            fi
+        elif [ "$expected_result" = "FAIL" ]; then
+            if [ "$obtained_result" = "failed" ]; then
+                echo ${green}Check $check_id result: OK ${reset}expected result: $expected_result, obtained result: $obtained_result
+                passed_checks=$((passed_checks+1))
+            else
+                echo ${red}Check $check_id result: NOT OK ${reset}expected result: $expected_result, ${red}obtained result: $obtained_result${reset}
+                failed_checks=$((failed_checks+1))
+            fi
+        else
+            echo ${red}Check $check_id. Couldn\'t get expected result ${reset}
+        fi
     fi
 
 done < sca_database.txt
