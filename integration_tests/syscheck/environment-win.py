@@ -1,20 +1,21 @@
 #!/usr/bin/python
 # Testing FIM options work. Part I
 # Add testing configuration to the end of ossec.conf
-# And create, modify and delete files to generate alerts
+# And create files, modify files, modify inodes, change owner and group, change permision, and delete files to generate alerts.
+# Run in Windows
 
-import os, shutil
+
+import os, shutil, subprocess
 from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR
-import time
-import random, string
-import subprocess
+import time, random, string
+
 
 # Directories and options
 #log_file = '/var/ossec/logs/ossec.log'
 testing_dir = 'C:\\Users\\Administrator\\Documents\\testing_fim_options'
 opt = ['t_frequency', 't_whodata', 't_realtime']
 opt_check = ['check_all', 'check_sum', 'check_sha1sum', 'check_md5sum', 'check_sha256sum', 'check_size', 'check_owner', 'check_perm', \
-    'check_mtime', 'check_attr', 'report_changes', 'tags', 'restrict', 'recursion_level']
+    'check_mtime', 'check_attrs', 'report_changes', 'tags', 'restrict', 'recursion_level']
 
 
 # Generate random name to files
@@ -48,13 +49,13 @@ def add_configuration():
                 f.write('<directories check_size="yes" whodata="yes" {2}="yes">{0}\{1}\{2}</directories>\n'.format(testing_dir, opt[1], i))
                 f.write('<directories check_size="yes" realtime="yes" {2}="yes">{0}\{1}\{2}</directories>\n'.format(testing_dir, opt[2], i))
             elif i == 'recursion_level':
-                f.write('<directories check_size="yes" {2}="1">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[0], i))
-                f.write('<directories check_size="yes" whodata="yes" {2}="1">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[1], i))
-                f.write('<directories check_size="yes" realtime="yes" {2}="1">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[2], i))
+                f.write('<directories check_size="yes" {2}="1">{0}\{1}\{2}</directories>\n'.format(testing_dir, opt[0], i))
+                f.write('<directories check_size="yes" whodata="yes" {2}="1">{0}\{1}\{2}</directories>\n'.format(testing_dir, opt[1], i))
+                f.write('<directories check_size="yes" realtime="yes" {2}="1">{0}\{1}\{2}</directories>\n'.format(testing_dir, opt[2], i))
             elif i == 'restrict':
-                f.write('<directories check_size="yes" {2}="test$">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[0], i))
-                f.write('<directories check_size="yes" whodata="yes" {2}="test$">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[1], i))
-                f.write('<directories check_size="yes" realtime="yes" {2}="test$">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[2], i))
+                f.write('<directories check_size="yes" {2}="test$">{0}\{1}\{2}</directories>\n'.format(testing_dir, opt[0], i))
+                f.write('<directories check_size="yes" whodata="yes" {2}="test$">{0}\{1}\{2}</directories>\n'.format(testing_dir, opt[1], i))
+                f.write('<directories check_size="yes" realtime="yes" {2}="test$">{0}\{1}\{2}</directories>\n'.format(testing_dir, opt[2], i))
             else:
                 f.write('<directories {2}="yes">{0}\{1}\{2}</directories>\n'.format(testing_dir, opt[0], i))
                 f.write('<directories whodata="yes" {2}="yes">{0}\{1}\{2}</directories>\n'.format(testing_dir, opt[1], i))
@@ -63,7 +64,7 @@ def add_configuration():
         f.write('</ossec_config>\n')
         f.close()
 
-# Create and modify files to generate alerts
+# Generate events:
 def write_files(msg, archive):
     for i in opt:
         for j in opt_check:
@@ -71,20 +72,15 @@ def write_files(msg, archive):
             ff.write(msg)
             ff.close()
 
-
-# Modify owner and/or group of files
 def call_chown(owner, group, archive):
     for i in opt:
         for j in opt_check:
             shutil.chown('{0}\\{1}\\{2}\\{3}'.format(testing_dir, i, j, archive), owner, group)
 
-
-# Modify permission
 def change_perm(archive, perm):
     for i in opt:
         for j in opt_check:
             os.chmod('{0}\\{1}\\{2}\\{3}'.format(testing_dir, i, j, archive), perm)
-
 
 def test_recursion_level():
     name = generate_name()
@@ -96,15 +92,13 @@ def test_recursion_level():
         ff = open(testing_dir + '\\' + i + '\\recursion_level\\level1\\level2\\{0}'.format(name), 'w')
         ff.close()
 
-
-# Delete files
 def delete_files(archive):
     for i in opt:
         for j in opt_check:
             os.remove('{0}\\{1}\\{2}\\{3}'.format(testing_dir, i, j, archive))
 
 
-# Main
+####
 if __name__ == '__main__':
 
     time_to_sleep = 180
@@ -116,29 +110,26 @@ if __name__ == '__main__':
     print(' ----- ----- ----- ----- Add configuration --- DONE')
     os.system('taskkill.exe /f /im ossec-agent.exe')
     print(' ----- ----- ----- ----- Stop Wazuh --- DONE')
-    #os.spawnv(os.P_DETACH, 'C:\\Program Files (x86)\\ossec-agent\\ossec-agent.exe', ['start'])
     subprocess.Popen(['C:\\Program Files (x86)\\ossec-agent\\ossec-agent.exe', 'start'], creationflags = subprocess.CREATE_NEW_CONSOLE)
     print(' ----- ----- ----- ----- Start Wazuh --- DONE')
     print(' ----- ----- ----- ----- Wait for syscheck to generate its database: it take a few minutes')
     time.sleep(60)
-    #waiting_time('ossec-syscheckd: INFO: (6011): Initializing real time file monitoring engine.')
     file_name = generate_name()
     print(' ----- ----- ----- ----- Creating files ---')
     write_files('File created', file_name)
-    time.sleep(30)
+    time.sleep(180)
     print(' ----- ----- ----- ----- Modifying files ---')
     write_files('File modified', file_name)
-    time.sleep(30)
+    time.sleep(180)
     #print(' ----- ----- ----- ----- Modifying owner ---')
     #call_chown('Administrators', None, file_name)
-    #time.sleep(time_to_sleep)
-    time.sleep(30)
-    print(' ----- ----- ----- ----- Modifying permission ---')
+    #time.sleep(180)
+    print(' ----- ----- ----- ----- Modifying attributes ---')
     change_perm(file_name, S_IREAD|S_IRGRP|S_IROTH)
-    time.sleep(30)
-    print(' ----- ----- ----- ----- Modifying permission ---')
+    time.sleep(180)
+    print(' ----- ----- ----- ----- Modifying attributes ---')
     change_perm(file_name, S_IWUSR|S_IREAD)
     print(' ----- ----- ----- ----- Removing files ---')
     delete_files(file_name)
-    time.sleep(30)
+    time.sleep(180)
     print(' ----- ----- ----- ----- DONE ----- ----- ----- -----')

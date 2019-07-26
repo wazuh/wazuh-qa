@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # Testing FIM options work. Part I
 # Add testing configuration to the end of ossec.conf
-# And create, modify and delete files to generate alerts
+# And create files, modify files, modify inodes, change owner and group, change permision, and delete files to generate alerts.
+# Run in Linux
 
 import os, shutil
-import time
-import random, string
+import time, random, string
 
 
 # Directories and options
@@ -83,7 +83,7 @@ def add_configuration():
         f.close()
 
 
-# Create and modify files to generate alerts
+# Generate events:
 def write_files(msg, archive):
     for i in opt:
         for j in opt_check:
@@ -91,27 +91,20 @@ def write_files(msg, archive):
             ff.write(msg)
             ff.close()
 
-
-# Modify inode to generate alerts
 def modify_inode(archive):
     delete_files(archive)
     write_files('File created', 'testing.txt')
     write_files('File created', archive)
 
-
-# Modify owner and/or group of files
 def call_chown(owner, group, archive):
     for i in opt:
         for j in opt_check:
             shutil.chown('{0}/{1}/{2}/{3}'.format(testing_dir, i, j, archive), owner, group)
 
-
-# Modify permission
 def change_perm(perm, archive):
     for i in opt:
         for j in opt_check:
             os.chmod('{0}/{1}/{2}/{3}'.format(testing_dir, i, j, archive), perm)
-
 
 def test_recursion_level():
     name = generate_name()
@@ -123,15 +116,13 @@ def test_recursion_level():
         ff = open(testing_dir + '/' + i + '/recursion_level/level1/level2/{0}'.format(name), 'w')
         ff.close()
 
-
-# Delete files
 def delete_files(archive):
     for i in opt:
         for j in opt_check:
             os.remove('{0}/{1}/{2}/{3}'.format(testing_dir, i, j, archive))
 
 
-# Main
+####
 if __name__ == '__main__':
 
     time_to_sleep = 180
