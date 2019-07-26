@@ -13,7 +13,7 @@ log_file = '/var/ossec/logs/ossec.log'
 testing_dir = '/home/lopezziur/testing_fim_options'
 opt = ['t_frequency', 't_whodata', 't_realtime']
 opt_check = ['check_all', 'check_sum', 'check_sha1sum', 'check_md5sum', 'check_sha256sum', 'check_size', 'check_owner', 'check_group', 'check_perm', \
-    'check_mtime', 'check_inode', 'report_changes', 'tags']
+    'check_mtime', 'check_inode', 'report_changes', 'tags', 'restrict', 'recursion_level']
 
 
 # Generate random name to files
@@ -66,6 +66,14 @@ def add_configuration():
                 f.write('<directories check_size="yes" {2}="yes">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[0], i))
                 f.write('<directories check_size="yes" whodata="yes" {2}="yes">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[1], i))
                 f.write('<directories check_size="yes" realtime="yes" {2}="yes">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[2], i))
+            elif i == 'recursion_level':
+                f.write('<directories check_size="yes" {2}="1">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[0], i))
+                f.write('<directories check_size="yes" whodata="yes" {2}="1">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[1], i))
+                f.write('<directories check_size="yes" realtime="yes" {2}="1">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[2], i))
+            elif i == 'restrict':
+                f.write('<directories check_size="yes" {2}="test$">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[0], i))
+                f.write('<directories check_size="yes" whodata="yes" {2}="test$">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[1], i))
+                f.write('<directories check_size="yes" realtime="yes" {2}="test$">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[2], i))
             else:
                 f.write('<directories {2}="yes">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[0], i))
                 f.write('<directories whodata="yes" {2}="yes">{0}/{1}/{2}</directories>\n'.format(testing_dir, opt[1], i))
@@ -105,6 +113,17 @@ def change_perm(perm, archive):
             os.chmod('{0}/{1}/{2}/{3}'.format(testing_dir, i, j, archive), perm)
 
 
+def test_recursion_level():
+    name = generate_name()
+    for i in opt:
+        os.mkdir(testing_dir + '/' + i + '/recursion_level/level1')
+        ff = open(testing_dir + '/' + i + '/recursion_level/level1/{0}'.format(name), 'w')
+        ff.close()
+        os.mkdir(testing_dir + '/' + i + '/recursion_level/level1/level2')
+        ff = open(testing_dir + '/' + i + '/recursion_level/level1/level2/{0}'.format(name), 'w')
+        ff.close()
+
+
 # Delete files
 def delete_files(archive):
     for i in opt:
@@ -123,13 +142,8 @@ if __name__ == '__main__':
     add_configuration()
     print(' ----- ----- ----- ----- Add configuration --- DONE')
     print(' ----- ----- ----- ----- Restarting Wazuh')
-    try:
-        os.system('/var/ossec/bin/ossec-control restart')
-        print(' ----- ----- ----- ----- Restart Wazuh --- DONE')
-    except:
-        print(' ----- ----- ----- ----- ERROR --- Can not restart Wazuh')
+    os.system('/var/ossec/bin/ossec-control restart')
     print(' ----- ----- ----- ----- Wait for syscheck to generate its database: it take a few minutes')
-
     #waiting_time('ossec-syscheckd: INFO: (6011): Initializing real time file monitoring engine.')
     time.sleep(60)
     file_name = generate_name()
@@ -153,6 +167,9 @@ if __name__ == '__main__':
     time.sleep(time_to_sleep)
     print(' ----- ----- ----- ----- Modifying permission ---')
     change_perm(777, file_name)
+    time.sleep(time_to_sleep)
+    print(' ----- ----- ----- ----- Test recursion-level ---')
+    test_recursion_level()
     time.sleep(time_to_sleep)
     print(' ----- ----- ----- ----- Removing files ---')
     delete_files(file_name)
