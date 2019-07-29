@@ -9,9 +9,8 @@ import os, sys
 
 # Directories and options
 alerts_directory = '/var/ossec/logs/alerts/alerts.json'
-testing_dir_linux = '/home/lopezziur/testing_fim_options'
-testing_dir_windows = 'c:\\users\\administrator\\documents\\testing_fim_options'
-opt = ['t_frequency', 't_whodata', 't_realtime']
+testing_dir_linux = '/home/lopezziur/testing_fim_options/'
+testing_dir_windows = 'c:\\users\\administrator\\documents\\testing_fim_options\\'
 
 
 # Check alerts:
@@ -54,15 +53,11 @@ def check_no_alert(path):
 
 # Test
 def test_alerts(dic, event, so, opt_check):
-    for i in opt:
-        for j in opt_check:
-            if so == 'linux':
-                path = '{0}/{1}/{2}/'.format(testing_dir_linux, i, j)
-            else:
-                path = '{0}\\{1}\\{2}\\'.format(testing_dir_windows, i, j)
-            if dic.get(j) != None:
-                if check_alert(path, dic.get(j), event) == False:
-                    print('\nNo exist {0} alert for: \nOption: '.format(event) + j + '\nPath: ' + path)
+    for j in opt_check:
+        path = '{0}{1}'.format(testing_dir_windows, j)
+        if dic.get(j) != None:
+            if check_alert(path, dic.get(j), event) == False:
+                print('\nNo exist {0} alert for: \nOption: '.format(event) + j + '\nPath: ' + path)
 
 
 
@@ -77,12 +72,15 @@ if __name__ == "__main__":
         so = sys.argv[1]
         if so == 'linux':
             directory = testing_dir_linux
+            p = '/level1/level2'
             opt_check = ['check_all', 'check_sum', 'check_sha1sum', 'check_md5sum', 'check_sha256sum', 'check_size', 'check_owner', \
-                'check_group', 'check_perm', 'check_mtime', 'check_inode','report_changes', 'tags']
+                'check_group', 'check_perm', 'check_mtime', 'check_inode']
         else:
             directory = testing_dir_windows
+            p = '\\level1\\level2'
             opt_check = ['check_all', 'check_sum', 'check_sha1sum', 'check_md5sum', 'check_sha256sum', 'check_size', 'check_owner', \
-                'check_perm', 'check_attrs', 'check_mtime','report_changes', 'tags']
+                'check_perm', 'check_attrs', 'check_mtime']
+
 
         with open('syscheck.yml') as syscheck:
             data = yaml.safe_load(syscheck)
@@ -110,16 +108,15 @@ if __name__ == "__main__":
                 print('  ----- ----- ----- ----- ----- -----')
         syscheck.close()
 
-        
-        for i in opt:
-            check_no_alert('{0}/{1}/restrict'.format(directory, i))
-            check_no_alert('{0}/{1}/recursion_level/level1/level2'.format(directory, i))
+
+        check_no_alert('{0}restrict.txt'.format(directory))
+        for i in opt_check:
+            check_no_alert('{0}{1}{2}'.format(directory, i, p))
+
 
         print('\n  ----- CHECK --- Delete alerts')
-        for i in opt:
-            for j in opt_check:
-                path = '{0}\\{1}\\{2}\\'.format(directory, i, j)
-                if check_delete(path) == False:
-                    print('\nNo exist removed alert for: \nOption: ' + j + '\nPath: ' + path)
-
+        for j in opt_check:
+            path = '{0}{1}'.format(directory, j)
+            if check_delete(path) == False:
+                print('\nNo exist removed alert for: \nOption: ' + j + '\nPath: ' + path)
         print('  ----- ----- ----- ----- ----- ----- ')
