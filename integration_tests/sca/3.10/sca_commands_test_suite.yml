@@ -11,11 +11,6 @@ policy:
   file: sca_commands_test_suite.yml
   name: Test suite for command rules
   description: This document includes file rules for testing purposes with the syntax rule of Wazuh v3.10.0
-############### Expected results
-# Passed = 2
-# Failed = 2
-# Invalid = 3
-# Total checks = 6
 
 checks:
  - id: 300100
@@ -35,13 +30,13 @@ checks:
    condition: any
    rules:
      - c:echo -n ABC -> r:CBA
-  
+
  - id: 300103
    title: PASS -- Negate yield ABC and try to find CBA
    condition: any
    rules:
      - not c:echo -n ABC -> r:CBA
- 
+
  - id: 300104
    title: INVALID -- Command does not exist (will trigger leak reports due to execvp failing)
    condition: any

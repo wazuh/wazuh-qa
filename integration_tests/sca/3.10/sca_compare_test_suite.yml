@@ -11,12 +11,6 @@ policy:
   file: sca_compare_test_suite.yml
   name: Test suite for compare.
   description: This document includes file rules for testing purposes with the syntax rule of Wazuh v3.10.0
-############### Expected results
-# Pass = 6
-# Fail = 1
-# Invalid = 7
-# Total checks = 13
-
 
 checks:
 #########

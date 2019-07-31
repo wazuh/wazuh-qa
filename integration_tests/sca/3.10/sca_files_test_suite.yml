@@ -11,12 +11,7 @@ policy:
   file: sca_files_test_suite.yml
   name: Test suite for file rules
   description: This document includes file rules for testing purposes with the syntax rule of Wazuh v3.10.0
-############### Expected results
-# Passed = 9
-# Failed = 8
-# Invalid = 3
-# Total checks = 20
-# Directory checks
+
 checks:
 ################################
 # Single file existence checks #
@@ -147,7 +142,7 @@ checks:
      - f:/var/ossec/etc/ossec.conf,/var/ossec/etc/internal_options.conf -> r:^FAKE
 
  - id: 200403
-   title: INVALID -- Content not exist. One file does not exists 
+   title: INVALID -- Content not exist. One file does not exists
    condition: any
    rules:
      - f:/var/ossec/etc/ossec.conf,/var/ossec/etc/internal_options.conf,/var/ossec/etc/ossec.conf_FAKE1 -> r:^FAKE

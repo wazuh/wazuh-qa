@@ -11,12 +11,6 @@ policy:
   file: sca_condition_test_suite.yml
   name: Test suite for conditions.
   description: This document includes file rules for testing purposes with the syntax rule of Wazuh v3.10.0
-############### Expected results
-# Pass = 7
-# Fail = 11
-# Invalid = 6
-# Total checks = 24
-
 # - f:/var/ossec/etc/ossec.conf -> TRUE
 # - f:/var/ossec/etc/ossec.conf_FAKEn -> FALSE
 # - f:/var/ossec/etc/ossec.conf_FAKEn -> r:^FAKE -> INVALID
@@ -100,7 +94,7 @@ checks:
    rules:
      - f:/var/ossec/etc/ossec.conf
      - f:/var/ossec/etc/client.keys
-     - f:/var/ossec/logs/ossec.log 
+     - f:/var/ossec/logs/ossec.log
 
  - id: 800201
    title: FAIL -- ALL on a list [TRUE, TRUE, FALSE]
