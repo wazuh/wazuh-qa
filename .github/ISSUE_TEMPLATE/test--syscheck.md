@@ -106,10 +106,10 @@ assignees: ''
 - [ ] Check whodata in Amazon Linux.
 - [ ] Check the option `follow_symbolic_link` only for directories, not files. (Since v3.8.0)
 
-
 ### Windows
 
 - [ ] Check syscheck alert for adding a file
 - [ ] Check syscheck alert for moving a file
 - [ ] Check syscheck alert for modifying a file
 - [ ] Check syscheck alert for deleting a file
+- [ ] Verify that whodata does not block files. https://github.com/wazuh/wazuh/pull/3872
