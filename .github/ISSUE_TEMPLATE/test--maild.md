@@ -16,6 +16,9 @@ assignees: ''
 ## Send reports
 
 - [ ] Configure the mail alerts and receive an alert in your email.
+- [ ] Receive FIM alerts (using the alerts.json as source file).
+- [ ] Receive alerts from the alerts.json including the field full_log.
+- [ ] Receive alerts from the alerts.json without the field full_log.
 
 ## Configuration
 
