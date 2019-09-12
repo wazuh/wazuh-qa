@@ -7,33 +7,29 @@ import pytest
 import time
 
 from datetime import timedelta
-from wazuh_testing.fim import WAZUH_CONF_PATH, LOG_FILE_PATH, ALERTS_FILE_PATH,\
-    is_fim_scan_ended, load_fim_alerts
-from wazuh_testing.tools import truncate_file, wait_for_condition, TimeMachine
+from wazuh_testing.fim import WAZUH_CONF_PATH, LOG_FILE_PATH, \
+    ALERTS_FILE_PATH, is_fim_scan_ended, load_fim_alerts
+from wazuh_testing.tools import truncate_file, wait_for_condition, \
+    get_ossec_conf, set_ossec_conf, TimeMachine, TestEnvironment
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 testdir1 = os.path.join('/', 'testdir1')
 testdir2 = os.path.join('/', 'testdir2')
 
+environments = [{'section': 'syscheck',
+                 'new_values': [{'disabled': 'no'},
+                                {'directories': '/testdir1,/testdir2,/noexists'}],
+                 'new_attributes': [{'directories': [{'check_all': 'yes'}]}],
+                 'checks': []},
+                {'section': 'syscheck',
+                 'new_values': [{'disabled': 'no'},
+                                {'frequency': '21600'},
+                                {'directories': '/testdir1,/testdir2,/noexists'}],
+                 'new_attributes': [{'directories': [{'check_all': 'yes'}]}],
+                 'checks': []}
+                ]
+# functions
 
-@pytest.fixture(scope='module')
-def configure_environment():
-    # Place configuration in path
-    shutil.copy(os.path.join(test_data_path, 'ossec.conf'), WAZUH_CONF_PATH)
-    shutil.chown(WAZUH_CONF_PATH, 'root', 'ossec')
-    os.chmod(WAZUH_CONF_PATH, mode=0o660)
-
-    # Create test folders
-    os.mkdir(testdir1)
-    os.mkdir(testdir2)
-
-    yield
-    # Remove created folders
-    shutil.rmtree(testdir1)
-    shutil.rmtree(testdir2)
-
-
-@pytest.fixture(scope='module')
 def restart_wazuh():
     truncate_file(LOG_FILE_PATH)
     p = subprocess.Popen(["service", "wazuh-manager", "restart"])
@@ -42,15 +38,46 @@ def restart_wazuh():
     time.sleep(11)
 
 
+# fixtures
+
+@pytest.fixture(scope='module', params=environments)
+def configure_environment(request):
+    """Configure a custom environment for testing.
+
+    :param params: List with values to customize Wazuh configuration
+    """
+    print(f"Setting a custom environment: {str(request.param)}")
+
+    # save current configuration
+    backup_conf = get_ossec_conf()
+    test_environment = TestEnvironment(request.param.get('section'),
+                                       request.param.get('new_values'),
+                                       request.param.get('new_attributes'),
+                                       request.param.get('checks')
+                                       )
+    # set new configuration
+    test_environment.set_new_wazuh_conf()
+    # Create test folders
+    os.mkdir(testdir1)
+    os.mkdir(testdir2)
+    yield
+    # Remove created folders
+    shutil.rmtree(testdir1)
+    shutil.rmtree(testdir2)
+    # restore previous configuration
+    set_ossec_conf(backup_conf)
+    restart_wazuh()
+
+# tests
+
 @pytest.mark.parametrize('folder, filename, mode, content', [
     (testdir1, 'testfile', 'w', "Sample content"),
     (testdir1, 'btestfile', 'wb', b"Sample content"),
     (testdir2, 'testfile', 'w', ""),
     (testdir2, "btestfile", "wb", b"")
 ])
-def test_regular_file(folder, filename, mode, content, configure_environment, restart_wazuh):
+def test_regular_file(folder, filename, mode, content, configure_environment):
     """Checks if a regular file creation is detected by syscheck"""
-
     # Create text files
     with open(os.path.join(folder, filename), mode) as f:
         f.write(content)

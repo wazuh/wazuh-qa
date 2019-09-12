@@ -8,7 +8,13 @@ import time
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from subprocess import DEVNULL, check_call, check_output
-from typing import Dict, List
+from typing import List
+
+
+WAZUH_PATH = os.path.join('/', 'var', 'ossec')
+WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
+WAZUH_SOURCES = os.path.join('/', 'wazuh')
+GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
 
 
 class TimeMachine:
@@ -78,26 +84,25 @@ class TestEnvironment:
     """Class to prepare a custom configuration for a test."""
 
     def __init__(self, section: str, new_values: List, new_attributes: List,
-                 checks: Dict = None) -> TestEnvironment:
-        """Constructor for TestEnvironment class.
+                 checks: List = None) -> None:
+        """Initialize TestEnvironment class.
 
         :param section: Section of 'ossec.conf' to edit
         :param new_values: List with dictionaries for replacing element values in a section
         :param new_attributes: Dictionary with the values of new attributes in a section
         :param checks: Dictionary with different checks for testing the environment
-
-        :return: TestEnvironment object for setting a custom test environment
         """
         self.section = section
         self.new_values = new_values
         self.new_attributes = new_attributes
         self.checks = checks
-        self.new_conf = edit_configuration(generate_ossec_conf(), self.section,
-                                           self.new_values, self.new_attributes)
+        self.new_conf = set_section_configuration(self.section,
+                                                  self.new_values,
+                                                  self.new_attributes)
 
     def set_new_wazuh_conf(self):
         """Set the new Wazuh configuration. Wazuh will be restarted for applying it."""
-        self.new_conf.write(WAZUH_CONF)
+        set_ossec_conf(self.new_conf)
         print("Restarting Wazuh...")
         command = os.path.join(WAZUH_PATH, 'bin/ossec-control')
         arguments = ['restart']
@@ -127,7 +132,7 @@ def generate_ossec_conf(args: List = None) -> ET.ElementTree:
     """Generate a configuration file for Wazuh.
 
     :param args: Arguments for generating ossec.conf (install_type, distribution, version)
-    :return: ElementTree with a Wazuh configuration
+    :return: ElementTree with a new Wazuh configuration generated from 'gen_ossec.sh'
     """
     gen_ossec_args = args if args else ['conf', 'manager', 'rhel', '7']
     wazuh_config = check_output([GEN_OSSEC] + gen_ossec_args).decode(encoding='utf-8', errors='ignore')
@@ -135,46 +140,45 @@ def generate_ossec_conf(args: List = None) -> ET.ElementTree:
     return ET.ElementTree(ET.fromstring(wazuh_config))
 
 
-def edit_configuration(wazuh_conf: ET.ElementTree, section: str = 'syscheck',
-                       new_values: List = None, new_attributes: List = None) \
-                       -> ET.ElementTree:
-    """Edit a Wazuh configuration file.
+def get_ossec_conf() -> ET.ElementTree:
+    """Get current 'ossec.conf' file.
+
+    :return: ElemenTree with current Wazuh configuration
+    """
+    return ET.parse(WAZUH_CONF)
+
+
+def set_ossec_conf(wazuh_conf: ET.ElementTree):
+    """Set a new configuration in 'ossec.conf' file."""
+    return wazuh_conf.write(WAZUH_CONF, encoding='utf-8')
+
+
+def set_section_configuration(section: str = 'syscheck',
+                              new_values: List = None,
+                              new_attributes: List = None) -> ET.ElementTree:
+    """Set a configuration in a section of Wazuh.
 
     :param wazuh_conf: XML with the Wazuh configuration (ossec.conf)
-    :param new_values: List with dictionaries for replacing element values
-    :param new_attributes: Dictionary with the values of new attributes
-    :return: Customized Wazuh configuration
+    :param new_values: List with dictionaries for settings elements
+    :param new_attributes: dictionaries for setting attributes of elements
+    :return: ElementTree with the custom Wazuh configuration
     """
-    # edit element values
-    if new_values:
-        for elem in new_values:
-            for tag_name, new_value in elem.items():
-                tag = wazuh_conf.find('/'.join([section, tag_name]))
-                tag.text = new_value
-
-    # edit attributes values
-    if new_attributes:
-        for elem in new_attributes:
-            for tag_name, attr_list in elem.items():
-                tag = wazuh_conf.find('/'.join([section, tag_name]))
-                for attr in attr_list:
-                    attr_name, new_attr_value = list(attr.items())[0]
-                    tag.attrib[attr_name] = new_attr_value
+    wazuh_conf = get_ossec_conf()
+    section_conf = wazuh_conf.find('/'.join([section]))
+    # clear section
+    section_conf.clear()
+    # insert elements
+    for elem in new_values:
+        for tag_name, new_value in elem.items():
+            tag = ET.SubElement(section_conf, tag_name)
+            tag.text = new_value
+    # set attributes
+    for elem in new_attributes:
+        for tag_name, attr_list in elem.items():
+            tag = wazuh_conf.find('/'.join([section, tag_name]))
+            #tag = ET.SubElement(section_conf, tag_name)
+            for attr in attr_list:
+                attr_name, new_attr_value = list(attr.items())[0]
+                tag.attrib[attr_name] = new_attr_value
 
     return wazuh_conf
-
-
-if __name__ == '__main__':
-    # generate Wazuh configuration
-    wazuh_conf = generate_ossec_conf()
-    # section to edit
-    section = 'syscheck'
-    # values to change. The format is a list of pair of key/values. Example: [{'frequency': '1200'}, {'scan_on_start': 'no'}]
-    new_values = [{'frequency': '1200'}, {'scan_on_start': 'yes'}]
-    # attributes to change. List with a pair of key/values with new attribute values. Example: [{'auto_ignore': [{'frequency': '5'}]}]
-    new_attributes = [{'auto_ignore': [{'frequency': '5'}, {'timeframe': '5'}]}]
-    #new_wazuh_conf = edit_configuration(wazuh_conf, section, new_values, new_attributes)
-
-
-    test_syscheck_1 = TestEnvironment(section, new_values, new_attributes)
-    test_syscheck_1.set_new_wazuh_conf()
