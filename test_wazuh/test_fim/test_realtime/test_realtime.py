@@ -8,7 +8,7 @@ from datetime import timedelta
 import pytest
 
 from wazuh_testing.fim import ALERTS_FILE_PATH, is_fim_scan_ended, load_fim_alerts
-from wazuh_testing.tools import truncate_file, wait_for_condition, TimeMachine
+from wazuh_testing.tools import truncate_file, wait_for_condition
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2')]
@@ -21,15 +21,12 @@ testdir1, testdir2 = test_directories
     (testdir2, 'testfile', 'w', ""),
     (testdir2, "btestfile", "wb", b"")
 ])
-def test_regular_file(folder, filename, mode, content, configure_environment, restart_wazuh):
+def _test_regular_file(folder, filename, mode, content, configure_environment, restart_wazuh):
     """Checks if a regular file creation is detected by syscheck"""
 
     # Create text files
     with open(os.path.join(folder, filename), mode) as f:
         f.write(content)
-
-    # Go ahead in time to let syscheck perform a new scan
-    TimeMachine.travel_to_future(timedelta(hours=13))
 
     # Wait for FIM scan to finish
     wait_for_condition(lambda: is_fim_scan_ended() > -1, timeout=60)
