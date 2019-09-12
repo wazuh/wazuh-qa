@@ -3,6 +3,8 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import socket
+import sys
 import re
 from jq import jq
 
@@ -10,6 +12,11 @@ WAZUH_PATH = os.path.join('/', 'var', 'ossec')
 ALERTS_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'alerts', 'alerts.json')
 WAZUH_CONF_PATH = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
 LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+
+FIFO = 'fifo'
+SYSLINK = 'sys_link'
+SOCKET = 'socket'
+REGULAR = 'regular'
 
 _last_log_line = 0
 
@@ -92,3 +99,40 @@ def is_fim_scan_ended():
                     globals()['_last_log_line'] = line_number
                     return line_number
     return -1
+
+
+def create_file(type, path):
+    getattr(sys.modules[__name__], f'_create_{type}')(path)
+
+
+def _create_fifo(path):
+    fifo_path = os.path.join(path, 'fifo_file')
+    try:
+        os.mkfifo(fifo_path)
+    except OSError:
+        raise
+
+
+def _create_sys_link(path):
+    syslink_path = os.path.join(path, 'syslink_file')
+    try:
+        os.symlink(syslink_path, syslink_path)
+    except OSError:
+        raise
+
+
+def _create_socket(path):
+    socket_path = os.path.join(path, 'socket_file')
+    try:
+        os.unlink(socket_path)
+    except OSError:
+        if os.path.exists(socket_path):
+            raise
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sock.bind(socket_path)
+
+
+def _create_regular(path):
+    regular_path = os.path.join(path, 'regular_file')
+    with open(regular_path, 'w') as f:
+        f.write('')
