@@ -21,20 +21,17 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2')]
 testdir1, testdir2 = test_directories
 
+
 # configurations
 
 configurations = [{'section': 'syscheck',
                    'new_values': [{'disabled': 'no'},
                                   {'directories': '/testdir1,/testdir2,/noexists'}],
-                   'new_attributes': [{'directories': [{'check_all': 'yes'}]}],
-                   'checks': []},
-                  {'section': 'syscheck',
-                   'new_values': [{'disabled': 'no'},
-                                  {'frequency': '21600'},
-                                  {'directories': '/testdir1,/testdir2,/noexists'}],
-                   'new_attributes': [{'directories': [{'check_all': 'yes'}]}],
+                   'new_attributes': [{'directories': [{'check_all': 'yes'},
+                                                       {'realtime': 'yes'}]}],
                    'checks': []}
                   ]
+
 
 # functions
 
@@ -87,14 +84,12 @@ def configure_environment(request):
     (testdir2, 'testfile', 'w', ""),
     (testdir2, "btestfile", "wb", b"")
 ])
-def test_regular_file(folder, filename, mode, content):
+def _test_regular_file(folder, filename, mode, content):
     """Checks if a regular file creation is detected by syscheck"""
+
     # Create text files
     with open(os.path.join(folder, filename), mode) as f:
         f.write(content)
-
-    # Go ahead in time to let syscheck perform a new scan
-    TimeMachine.travel_to_future(timedelta(hours=13))
 
     # Wait for FIM scan to finish
     wait_for_condition(lambda: is_fim_scan_ended() > -1, timeout=60)
