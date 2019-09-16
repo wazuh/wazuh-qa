@@ -4,9 +4,9 @@
 
 import json
 import os
+import re
 import socket
 import sys
-import re
 
 from jq import jq
 
@@ -103,16 +103,27 @@ def is_fim_scan_ended():
     return -1
 
 
-def create_file(type, path):
+def create_file(type, path, *content):
     """ Creates a file in a given path.
 
     :param type: Defined constant that specifies the type. It can be: FIFO, SYSLINK, SOCKET or REGULAR
+    :type type: Constant string
     :param path: Path where the file will be created
+    :type path: String
+    :param content: Content of the file. Used for regular files.
+    :type content: String
+    :return: None
     """
-    getattr(sys.modules[__name__], f'_create_{type}')(path)
+    getattr(sys.modules[__name__], f'_create_{type}')(path, *content)
 
 
 def _create_fifo(path):
+    """ Creates a FIFO file.
+
+    :param path: Path where the file will be created
+    :type path: String
+    :return: None
+    """
     fifo_path = os.path.join(path, 'fifo_file')
     try:
         os.mkfifo(fifo_path)
@@ -121,6 +132,12 @@ def _create_fifo(path):
 
 
 def _create_sys_link(path):
+    """ Creates a SysLink file.
+
+    :param path: Path where the file will be created
+    :type path: String
+    :return: None
+    """
     syslink_path = os.path.join(path, 'syslink_file')
     try:
         os.symlink(syslink_path, syslink_path)
@@ -129,6 +146,12 @@ def _create_sys_link(path):
 
 
 def _create_socket(path):
+    """ Creates a Socket file.
+
+    :param path: Path where the file will be created
+    :type path: String
+    :return: None
+    """
     socket_path = os.path.join(path, 'socket_file')
     try:
         os.unlink(socket_path)
@@ -139,24 +162,43 @@ def _create_socket(path):
     sock.bind(socket_path)
 
 
-def _create_regular(path):
+def _create_regular(path, content=''):
+    """ Creates a Regular file.
+
+    :param path: Path where the file will be created
+    :type path: String
+    :param content: Content of the file. Its default value is an empty string.
+    :type content: String
+    :return: None
+    """
     regular_path = os.path.join(path, 'regular_file')
     with open(regular_path, 'w') as f:
-        f.write('')
+        f.write(content)
 
 
-def change_internal_options(int_opt_path, pattern, value):
+def change_internal_options(opt_path, pattern, value):
     """ Changes the value of a given parameter
 
-    :param int_opt_path: internal_options.conf path
+    :param opt_path: File path
+    :type opt_path: String
     :param pattern: Parameter to change
+    :type pattern: String
     :param value: New value
+    :type value: String
     """
-    with open(int_opt_path, "r") as sources:
+    add_pattern = True
+    with open(opt_path, "r") as sources:
         lines = sources.readlines()
-    with open(int_opt_path, "w") as sources:
+
+    with open(opt_path, "w") as sources:
         for line in lines:
             sources.write(re.sub(f'{pattern}=[0-9]*', f'{pattern}={value}', line))
+            if pattern in line:
+                add_pattern = False
+
+    if add_pattern:
+        with open(opt_path, "a") as sources:
+            sources.write(f'\n\n{pattern}={value}')
 
 
 def callback_detect_end_scan(line):
