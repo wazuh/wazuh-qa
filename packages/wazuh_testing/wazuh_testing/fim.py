@@ -102,6 +102,11 @@ def is_fim_scan_ended():
 
 
 def create_file(type, path):
+    """ Creates a file in a given path.
+
+    :param type: Defined constant that specifies the type. It can be: FIFO, SYSLINK, SOCKET or REGULAR
+    :param path: Path where the file will be created
+    """
     getattr(sys.modules[__name__], f'_create_{type}')(path)
 
 
@@ -136,3 +141,16 @@ def _create_regular(path):
     regular_path = os.path.join(path, 'regular_file')
     with open(regular_path, 'w') as f:
         f.write('')
+
+def change_internal_options(int_opt_path, pattern, value):
+    """ Changes the value of a given parameter
+
+    :param int_opt_path: internal_options.conf path
+    :param pattern: Parameter to change
+    :param value: New value
+    """
+    with open(int_opt_path, "r") as sources:
+        lines = sources.readlines()
+    with open(int_opt_path, "w") as sources:
+        for line in lines:
+            sources.write(re.sub(f'{pattern}\=[0-9]*', f'{pattern}={value}', line))
