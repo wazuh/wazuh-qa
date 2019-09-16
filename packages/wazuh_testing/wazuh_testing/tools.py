@@ -5,6 +5,7 @@
 from _datetime import datetime
 import sys
 import time
+import threading
 
 
 class TimeMachine:
@@ -78,13 +79,105 @@ def truncate_file(file_path):
 def wait_for_condition(condition_checker, args=None, kwargs=None, timeout=-1):
     args = [] if args is None else args
     kwargs = {} if kwargs is None else kwargs
-    timestep = 0.5
-    max_iterations = timeout / timestep
+    time_step = 0.5
+    max_iterations = timeout / time_step
     begin = time.time()
     iterations = 0
     while not condition_checker(*args, **kwargs):
         if timeout != -1 and iterations > max_iterations:
             raise TimeoutError()
         iterations += 1
-        time.sleep(timestep)
+        time.sleep(time_step)
 
+
+def _callback_default(line):
+    print(line)
+    return None
+
+
+class Timer(threading.Thread):
+
+    def __init__(self, timeout=10, function=None, time_step=0.5):
+        threading.Thread.__init__(self)
+        self.timeout = timeout
+        self.function = function
+        self.time_step = time_step
+        self._cancel = threading.Event()
+
+    def run(self):
+        max_iterations = int(self.timeout / self.time_step)
+        for i in range(max_iterations):
+            time.sleep(self.time_step)
+            if self.is_canceled():
+                return
+        self.function()
+        return
+
+    def cancel(self):
+        self._cancel.set()
+
+    def is_canceled(self):
+        return self._cancel.is_set()
+
+
+class FileMonitor:
+
+    def __init__(self, file_path, time_step=0.5):
+        self.file_path = file_path
+        self._position = 0
+        self.time_step = time_step
+        self._continue = False
+        self._abort = False
+        self._result = None
+        self.timer = None
+
+    def _monitor(self, callback=_callback_default):
+        """Wait for new lines to be appended to the file.
+
+        A callback function will be called every time a new line is detected. This function must receive two
+        positional parameters: a references to the FileMonitor object and the line detected.
+        """
+        with open(self.file_path) as f:
+            print(f"Seeking to: {self._position}")
+            f.seek(self._position)
+            while self._continue:
+                if self._abort:
+                    self.stop()
+                    raise TimeoutError()
+                self._position = f.tell()
+                line = f.readline()
+                if not line:
+                    f.seek(self._position)
+                    time.sleep(self.time_step)
+                else:
+                    self._result = callback(line)
+                    if self._result:
+                        self.stop()
+
+            self._position = f.tell()
+
+    def start(self, timeout=-1, callback=_callback_default):
+        """Start the file monitoring until the stop method is called"""
+        if not self._continue:
+            self._continue = True
+            self._abort = False
+            if timeout > 0:
+                print(f"Pongo el temporizador a {timeout} segundos")
+                self.timer = Timer(timeout, self.abort)
+                self.timer.start()
+            self._monitor(callback=callback)
+
+    def stop(self):
+        """Stop the file monitoring. It can be restart calling the start method"""
+        self._continue = False
+        if self.timer:
+            self.timer.cancel()
+            self.timer.join()
+
+    def abort(self):
+        """Abort because of timeout"""
+        print("Aborto por timeout!!!!!!!!!!!")
+        self._abort = True
+
+    def result(self):
+        return self._result
