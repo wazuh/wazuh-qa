@@ -6,7 +6,7 @@ ARG source_branch=master
 RUN apt-get update
 
 # Clone the corresponding branch of wazuh-puppet
-RUN git clone -b $source_branch https://github.com/wazuh/wazuh-puppet.git
+RUN git clone -b 3.10.0_7.3.2_bump_version https://github.com/wazuh/wazuh-puppet.git
 
 RUN cd wazuh-puppet/kitchen && chmod +x ./run.sh && bundle install
 
