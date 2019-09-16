@@ -2,10 +2,12 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import json
 import os
 import socket
 import sys
 import re
+
 from jq import jq
 
 WAZUH_PATH = os.path.join('/', 'var', 'ossec')
@@ -142,6 +144,7 @@ def _create_regular(path):
     with open(regular_path, 'w') as f:
         f.write('')
 
+
 def change_internal_options(int_opt_path, pattern, value):
     """ Changes the value of a given parameter
 
@@ -153,4 +156,20 @@ def change_internal_options(int_opt_path, pattern, value):
         lines = sources.readlines()
     with open(int_opt_path, "w") as sources:
         for line in lines:
-            sources.write(re.sub(f'{pattern}\=[0-9]*', f'{pattern}={value}', line))
+            sources.write(re.sub(f'{pattern}=[0-9]*', f'{pattern}={value}', line))
+
+
+def callback_detect_end_scan(line):
+    if 'File integrity monitoring scan ended.' in line:
+        print(f"Detecto fin de scan en línea: {line}")
+        return line
+    return None
+
+
+def callback_detect_event(line):
+    match = re.match(r'.*Sending event: (.+)$', line)
+    if match:
+        print(f"Detecto evento en línea: {line}")
+        print(f"Evento detectado: {json.loads(match.group(1))}")
+        return json.loads(match.group(1))
+    return None

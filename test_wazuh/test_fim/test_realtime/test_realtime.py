@@ -7,14 +7,12 @@ from datetime import timedelta
 
 import pytest
 
-from wazuh_testing.fim import callback_detect_end_scan, callback_detect_event, LOG_FILE_PATH
-from wazuh_testing.tools import TimeMachine, FileMonitor
+from wazuh_testing.fim import ALERTS_FILE_PATH, is_fim_scan_ended, load_fim_alerts
+from wazuh_testing.tools import truncate_file, wait_for_condition
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2')]
 testdir1, testdir2 = test_directories
-
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
 @pytest.mark.parametrize('folder, filename, mode, content', [
@@ -23,23 +21,17 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     (testdir2, 'testfile', 'w', ""),
     (testdir2, "btestfile", "wb", b"")
 ])
-def test_regular_file(folder, filename, mode, content, configure_environment, restart_wazuh):
+def _test_regular_file(folder, filename, mode, content, configure_environment, restart_wazuh):
     """Checks if a regular file creation is detected by syscheck"""
 
     # Create text files
     with open(os.path.join(folder, filename), mode) as f:
         f.write(content)
 
-    # Go ahead in time to let syscheck perform a new scan
-    print("Muevo el reloj 13 horas al futuro")
-    TimeMachine.travel_to_future(timedelta(hours=13))
-
-    # Wait until event is detected
-    print("Espero a que salte el evento")
-    wazuh_log_monitor.start(timeout=10, callback=callback_detect_event)
-
     # Wait for FIM scan to finish
-    print("Espero a que termine el scan")
-    wazuh_log_monitor.start(timeout=10, callback=callback_detect_end_scan)
-    print("Espero 11 segundos")
+    wait_for_condition(lambda: is_fim_scan_ended() > -1, timeout=60)
     time.sleep(11)
+    # Wait until alerts are generated
+    wait_for_condition(lambda: len(load_fim_alerts(n_last=1)) == 1, timeout=5)
+
+    truncate_file(ALERTS_FILE_PATH)
