@@ -2,8 +2,10 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import json
 import os
 import re
+
 from jq import jq
 
 WAZUH_PATH = os.path.join('/', 'var', 'ossec')
@@ -92,3 +94,19 @@ def is_fim_scan_ended():
                     globals()['_last_log_line'] = line_number
                     return line_number
     return -1
+
+
+def callback_detect_end_scan(line):
+    if 'File integrity monitoring scan ended.' in line:
+        print(f"Detecto fin de scan en línea: {line}")
+        return line
+    return None
+
+
+def callback_detect_event(line):
+    match = re.match(r'.*Sending event: (.+)$', line)
+    if match:
+        print(f"Detecto evento en línea: {line}")
+        print(f"Evento detectado: {json.loads(match.group(1))}")
+        return json.loads(match.group(1))
+    return None
