@@ -1,0 +1,58 @@
+---
+driver:
+  name: docker
+  privileged: true
+  use_sudo: false
+
+provisioner:
+  name: chef_zero
+
+platforms:
+  - name: ubuntu-kitchen
+    driver_config:
+      image: ubuntu:14.04
+      platform: ubuntu
+
+  - name: centos-kitchen
+    driver_config:
+      image: centos:7
+      platform: centos
+      run_command: /usr/sbin/init
+      dockerfile: test/Dockerfile
+      build_options:
+        rm: true
+
+suites:
+  - name: manager
+    environments_path: <%= ENV['COOKBOOKS_HOME'] %>/wazuh_manager/test/environments
+    data_bags_path: <%= ENV['COOKBOOKS_HOME'] %>/wazuh_manager/test/data_bags
+    encrypted_data_bag_secret_key_path: <%= ENV['COOKBOOKS_HOME'] %>/wazuh_manager/test/data_bags/wazuh_secrets/test_data_bag_key
+    driver:
+    run_list:
+      - recipe[wazuh_manager::repository]
+      - recipe[wazuh_manager::manager]
+      - recipe[wazuh_filebeat::default]
+    attributes:
+    provisioner:
+      client_rb:
+        environment: development-master
+    verifier:
+      name: shell
+      command: py.test -v test/base
+
+  - name: agent
+    environments_path: <%= ENV['COOKBOOKS_HOME'] %>/wazuh_agent/test/environments
+    data_bags_path: <%= ENV['COOKBOOKS_HOME'] %>/wazuh_agent/test/data_bags
+    encrypted_data_bag_secret_key_path: <%= ENV['COOKBOOKS_HOME'] %>/wazuh_agent/test/data_bags/wazuh_secrets/test_data_bag_key
+    driver:
+    run_list:
+      - recipe[wazuh_agent::repository]
+      - recipe[wazuh_agent::agent]
+    attributes:
+         vagrant:
+    provisioner:
+      client_rb:
+        environment: development
+    verifier:
+      name: shell
+      command: py.test -v test/base
