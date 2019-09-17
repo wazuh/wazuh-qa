@@ -5,6 +5,8 @@
 import json
 import os
 import re
+import socket
+import sys
 
 from jq import jq
 
@@ -12,6 +14,11 @@ WAZUH_PATH = os.path.join('/', 'var', 'ossec')
 ALERTS_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'alerts', 'alerts.json')
 WAZUH_CONF_PATH = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
 LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+
+FIFO = 'fifo'
+SYSLINK = 'sys_link'
+SOCKET = 'socket'
+REGULAR = 'regular'
 
 _last_log_line = 0
 
@@ -94,6 +101,104 @@ def is_fim_scan_ended():
                     globals()['_last_log_line'] = line_number
                     return line_number
     return -1
+
+
+def create_file(type, path, *content):
+    """ Creates a file in a given path.
+
+    :param type: Defined constant that specifies the type. It can be: FIFO, SYSLINK, SOCKET or REGULAR
+    :type type: Constant string
+    :param path: Path where the file will be created
+    :type path: String
+    :param content: Content of the file. Used for regular files.
+    :type content: String
+    :return: None
+    """
+    getattr(sys.modules[__name__], f'_create_{type}')(path, *content)
+
+
+def _create_fifo(path):
+    """ Creates a FIFO file.
+
+    :param path: Path where the file will be created
+    :type path: String
+    :return: None
+    """
+    fifo_path = os.path.join(path, 'fifo_file')
+    try:
+        os.mkfifo(fifo_path)
+    except OSError:
+        raise
+
+
+def _create_sys_link(path):
+    """ Creates a SysLink file.
+
+    :param path: Path where the file will be created
+    :type path: String
+    :return: None
+    """
+    syslink_path = os.path.join(path, 'syslink_file')
+    try:
+        os.symlink(syslink_path, syslink_path)
+    except OSError:
+        raise
+
+
+def _create_socket(path):
+    """ Creates a Socket file.
+
+    :param path: Path where the file will be created
+    :type path: String
+    :return: None
+    """
+    socket_path = os.path.join(path, 'socket_file')
+    try:
+        os.unlink(socket_path)
+    except OSError:
+        if os.path.exists(socket_path):
+            raise
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sock.bind(socket_path)
+
+
+def _create_regular(path, content=''):
+    """ Creates a Regular file.
+
+    :param path: Path where the file will be created
+    :type path: String
+    :param content: Content of the file. Its default value is an empty string.
+    :type content: String
+    :return: None
+    """
+    regular_path = os.path.join(path, 'regular_file')
+    with open(regular_path, 'w') as f:
+        f.write(content)
+
+
+def change_internal_options(opt_path, pattern, value):
+    """ Changes the value of a given parameter
+
+    :param opt_path: File path
+    :type opt_path: String
+    :param pattern: Parameter to change
+    :type pattern: String
+    :param value: New value
+    :type value: String
+    """
+    add_pattern = True
+    with open(opt_path, "r") as sources:
+        lines = sources.readlines()
+
+    with open(opt_path, "w") as sources:
+        for line in lines:
+            sources.write(re.sub(f'{pattern}=[0-9]*', f'{pattern}={value}', line))
+            if pattern in line:
+                add_pattern = False
+
+    if add_pattern:
+        with open(opt_path, "a") as sources:
+            sources.write(f'\n\n{pattern}={value}')
 
 
 def callback_detect_end_scan(line):
