@@ -19,9 +19,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 @pytest.mark.parametrize('n_regular, folder', [
     (10, testdir1),
-    (100, testdir1),
-    (1000, testdir1),
-    (10000, testdir1)
+    (100, testdir1)
 ])
 def test_detect_regular_files(n_regular, folder, configure_environment, restart_wazuh):
     """Checks if a regular file creation is detected by syscheck"""

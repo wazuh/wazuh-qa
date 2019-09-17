@@ -10,6 +10,7 @@ import pytest
 from wazuh_testing.fim import callback_detect_end_scan, callback_detect_event, LOG_FILE_PATH
 from wazuh_testing.tools import TimeMachine, FileMonitor
 
+
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2')]
 testdir1, testdir2 = test_directories
@@ -23,7 +24,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     (testdir2, 'testfile', 'w', ""),
     (testdir2, "btestfile", "wb", b"")
 ])
-def test_regular_file(folder, filename, mode, content, configure_environment, restart_wazuh):
+def _test_regular_file(folder, filename, mode, content, configure_environment, restart_wazuh):
     """Checks if a regular file creation is detected by syscheck"""
 
     # Create text files
