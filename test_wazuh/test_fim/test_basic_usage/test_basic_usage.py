@@ -19,6 +19,7 @@ from wazuh_testing.tools import (FileMonitor, TestEnvironment, TimeMachine,
 
 # variables
 
+
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2')]

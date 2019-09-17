@@ -228,12 +228,13 @@ class FileMonitor:
         self._result = None
         self.timer = None
 
-    def _monitor(self, callback=_callback_default):
+    def _monitor(self, callback=_callback_default, accum_results=1):
         """Wait for new lines to be appended to the file.
 
         A callback function will be called every time a new line is detected. This function must receive two
         positional parameters: a references to the FileMonitor object and the line detected.
         """
+        self._result = [] if accum_results > 1 else None
         with open(self.file_path) as f:
             print(f"Seeking to: {self._position}")
             f.seek(self._position)
@@ -247,13 +248,20 @@ class FileMonitor:
                     f.seek(self._position)
                     time.sleep(self.time_step)
                 else:
-                    self._result = callback(line)
-                    if self._result:
-                        self.stop()
+                    result = callback(line)
+                    if result:
+                        if accum_results > 1:
+                            self._result.append(result)
+                            if accum_results == len(self._result):
+                                self.stop()
+                        else:
+                            self._result = result
+                            if self._result:
+                                self.stop()
 
             self._position = f.tell()
 
-    def start(self, timeout=-1, callback=_callback_default):
+    def start(self, timeout=-1, callback=_callback_default, accum_results=1):
         """Start the file monitoring until the stop method is called"""
         if not self._continue:
             self._continue = True
@@ -262,7 +270,9 @@ class FileMonitor:
                 print(f"Pongo el temporizador a {timeout} segundos")
                 self.timer = Timer(timeout, self.abort)
                 self.timer.start()
-            self._monitor(callback=callback)
+            self._monitor(callback=callback, accum_results=accum_results)
+
+        return self
 
     def stop(self):
         """Stop the file monitoring. It can be restart calling the start method"""
@@ -270,11 +280,13 @@ class FileMonitor:
         if self.timer:
             self.timer.cancel()
             self.timer.join()
+        return self
 
     def abort(self):
         """Abort because of timeout"""
         print("Aborto por timeout!!!!!!!!!!!")
         self._abort = True
+        return self
 
     def result(self):
         return self._result

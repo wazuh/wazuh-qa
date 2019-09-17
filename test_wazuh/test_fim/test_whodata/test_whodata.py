@@ -1,17 +1,12 @@
 # Copyright (C) 2015-2019, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
 import os
-import shutil
-import subprocess
-import time
 from collections import Counter
-from datetime import timedelta
 
 import pytest
-
 from jq import jq
+
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event
 from wazuh_testing.tools import FileMonitor
 
@@ -21,34 +16,12 @@ testdir1, testdir2 = test_directories
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-# configurations
-
-configurations = [{'section': 'syscheck',
-                   'new_values': [{'disabled': 'no'},
-                                  {'directories': '/testdir1,/testdir2,/noexists'}],
-                   'new_attributes': [{'directories': [{'check_all': 'yes'},
-                                                       {'realtime': 'yes'}]}],
-                   'checks': []}
-                  ]
-
-
-# fixtures
-
-@pytest.fixture(scope='module', params=configurations)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
-
-
-# tests
 
 @pytest.mark.parametrize('n_regular, folder', [
     (10, testdir1),
-    (100, testdir1),
-    (1000, testdir1),
-    (10000, testdir1)
+    (100, testdir1)
 ])
-def test_detect_regular_files(n_regular, folder, configure_environment):
+def test_detect_regular_files(n_regular, folder, configure_environment, restart_wazuh):
     """Checks if a regular file creation is detected by syscheck"""
 
     min_timeout = 30
