@@ -7,7 +7,7 @@ from datetime import timedelta
 
 import pytest
 
-from wazuh_testing.fim import callback_detect_end_scan, callback_detect_event, LOG_FILE_PATH
+from wazuh_testing.fim import callback_detect_end_scan, callback_detect_event, LOG_FILE_PATH, FIFO, SYSLINK, SOCKET, REGULAR, create_file
 from wazuh_testing.tools import TimeMachine, FileMonitor
 
 
@@ -30,6 +30,38 @@ def _test_regular_file(folder, filename, mode, content, configure_environment, r
     # Create text files
     with open(os.path.join(folder, filename), mode) as f:
         f.write(content)
+
+    # Go ahead in time to let syscheck perform a new scan
+    print("Muevo el reloj 13 horas al futuro")
+    TimeMachine.travel_to_future(timedelta(hours=13))
+
+    # Wait until event is detected
+    print("Espero a que salte el evento")
+    wazuh_log_monitor.start(timeout=10, callback=callback_detect_event)
+
+    # Wait for FIM scan to finish
+    print("Espero a que termine el scan")
+    wazuh_log_monitor.start(timeout=10, callback=callback_detect_end_scan)
+    print("Espero 11 segundos")
+    time.sleep(11)
+
+
+@pytest.mark.parametrize('folder, filetype, content', [
+    (testdir1, REGULAR, 'Sample content'),
+    (testdir1, REGULAR, b'Sample content'),
+    (testdir2, REGULAR, ''),
+    (testdir2, REGULAR, b''),
+    (testdir1, SYSLINK, ''),
+    (testdir2, SYSLINK, ''),
+    (testdir1, FIFO, ''),
+    (testdir2, FIFO, ''),
+    (testdir1, SOCKET, ''),
+    (testdir2, SOCKET, ''),
+])
+def test_file(folder, filetype, content, configure_environment, restart_wazuh):
+    """Checks if a special file creation is detected by syscheck"""
+    # Create files
+    create_file(filetype, folder, content)
 
     # Go ahead in time to let syscheck perform a new scan
     print("Muevo el reloj 13 horas al futuro")

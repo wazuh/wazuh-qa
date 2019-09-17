@@ -111,17 +111,19 @@ def create_file(type, path, content=''):
     :param path: Path where the file will be created
     :type path: String
     :param content: Content of the file. Used for regular files.
-    :type content: String
+    :type content: String or binary
     :return: None
     """
     getattr(sys.modules[__name__], f'_create_{type}')(path, content)
 
 
-def _create_fifo(path):
+def _create_fifo(path, content):
     """ Creates a FIFO file.
 
     :param path: Path where the file will be created
     :type path: String
+    :param content: Content of the created file
+    :type content: String or binary
     :return: None
     """
     fifo_path = os.path.join(path, 'fifo_file')
@@ -131,11 +133,13 @@ def _create_fifo(path):
         raise
 
 
-def _create_sys_link(path):
+def _create_sys_link(path, content):
     """ Creates a SysLink file.
 
     :param path: Path where the file will be created
     :type path: String
+    :param content: Content of the created file
+    :type content: String or binary
     :return: None
     """
     syslink_path = os.path.join(path, 'syslink_file')
@@ -145,11 +149,13 @@ def _create_sys_link(path):
         raise
 
 
-def _create_socket(path):
+def _create_socket(path, content):
     """ Creates a Socket file.
 
     :param path: Path where the file will be created
     :type path: String
+    :param content: Content of the created file
+    :type content: String or binary
     :return: None
     """
     socket_path = os.path.join(path, 'socket_file')
@@ -162,17 +168,23 @@ def _create_socket(path):
     sock.bind(socket_path)
 
 
-def _create_regular(path, content=''):
+def _create_regular(path, content):
     """ Creates a Regular file.
 
     :param path: Path where the file will be created
     :type path: String
-    :param content: Content of the file. Its default value is an empty string.
-    :type content: String
+    :param content: Content of the created file
+    :type content: String or binary
     :return: None
     """
     regular_path = os.path.join(path, 'regular_file')
-    with open(regular_path, 'w') as f:
+    # Check if content is binary so it changes the mode
+    isBinary = re.compile('^b\'.*\'$')
+    if isBinary.match(str(content)):
+        mode = 'wb'
+    else:
+        mode = 'w'
+    with open(regular_path, mode) as f:
         f.write(content)
 
 

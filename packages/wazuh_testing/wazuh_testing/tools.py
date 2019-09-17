@@ -44,6 +44,7 @@ class TimeMachine:
 
         subprocess.call(shlex.split("timedatectl set-ntp false"))
         subprocess.call(shlex.split("sudo date -s '%s'" % time_))
+        subprocess.call(shlex.split("sudo hwclock -w"))
 
     @staticmethod
     def _win_set_time(time_):
