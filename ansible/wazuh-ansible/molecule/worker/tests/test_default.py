@@ -45,8 +45,8 @@ def test_wazuh_services_are_running(host):
     if distribution == 'centos':
         # assert manager.is_running
         assert manager.is_enabled
-        # assert not api.is_running
-        assert not api.is_enabled
+        # assert api.is_running
+        assert api.is_enabled
     elif distribution == 'ubuntu':
         # assert manager.is_running
         assert manager.is_enabled
