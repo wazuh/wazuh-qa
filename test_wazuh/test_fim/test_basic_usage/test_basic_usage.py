@@ -12,10 +12,7 @@ import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_end_scan,
                                callback_detect_event)
-from wazuh_testing.tools import (FileMonitor, TestEnvironment, TimeMachine,
-                                 set_wazuh_conf, wait_for_condition,
-                                 write_wazuh_conf)
-
+from wazuh_testing.tools import FileMonitor, TimeMachine
 
 # variables
 

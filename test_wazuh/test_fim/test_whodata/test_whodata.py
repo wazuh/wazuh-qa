@@ -17,11 +17,32 @@ testdir1, testdir2 = test_directories
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
+# configurations
+
+configurations = [{'section': 'syscheck',
+                   'new_values': [{'disabled': 'no'},
+                                  {'directories': '/testdir1,/testdir2,/noexists'}],
+                   'new_attributes': [{'directories': [{'check_all': 'yes'},
+                                                       {'whodata': 'yes'}]}],
+                   'checks': []}
+                  ]
+
+
+# fixtures
+
+@pytest.fixture(scope='module', params=configurations)
+def get_configuration(request):
+    """Get configurations from the module."""
+    return request.param
+
+
+# tests
+
 @pytest.mark.parametrize('n_regular, folder', [
     (10, testdir1),
     (100, testdir1)
 ])
-def test_detect_regular_files(n_regular, folder, configure_environment, restart_wazuh):
+def test_detect_regular_files(n_regular, folder, configure_environment):
     """Checks if a regular file creation is detected by syscheck"""
 
     min_timeout = 30
