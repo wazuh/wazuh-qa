@@ -103,7 +103,7 @@ def is_fim_scan_ended():
     return -1
 
 
-def create_file(type, path, *content):
+def create_file(type, path, content=''):
     """ Creates a file in a given path.
 
     :param type: Defined constant that specifies the type. It can be: FIFO, SYSLINK, SOCKET or REGULAR
@@ -114,7 +114,7 @@ def create_file(type, path, *content):
     :type content: String
     :return: None
     """
-    getattr(sys.modules[__name__], f'_create_{type}')(path, *content)
+    getattr(sys.modules[__name__], f'_create_{type}')(path, content)
 
 
 def _create_fifo(path):
