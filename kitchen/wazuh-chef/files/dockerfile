@@ -13,6 +13,8 @@ RUN cd wazuh-chef && git checkout $source_branch && git branch && git pull
 
 RUN cd wazuh-chef && git merge ${target_branch}
 
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3.5 get-pip.py
+
 RUN pip install pytest && pip install testinfra && pip install paramiko
 
 RUN git clone -branch master https://github.com/wazuh/wazuh-qa.git
