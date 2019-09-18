@@ -19,6 +19,6 @@ RUN pip install pytest && pip install testinfra && pip install paramiko
 
 RUN git clone --branch master https://github.com/wazuh/wazuh-qa.git
 
-RUN cp -rf /wazuh_qa/kitchen/wazuh_chef/test/* /wazuh_chef/cookbook/wazuh_manager/test && cp -rf /wazuh_qa/kitchen/wazuh_chef/files/* /wazuh_chef/cookbook/wazuh_manager/
+RUN cp -rf wazuh_qa/kitchen/wazuh_chef/test/* wazuh_chef/cookbook/wazuh_manager/test && cp -rf wazuh_qa/kitchen/wazuh_chef/files/* wazuh_chef/cookbook/wazuh_manager/
 
 RUN echo "$(sed -n '/ip6/!p' /etc/hosts)" > /etc/hosts
