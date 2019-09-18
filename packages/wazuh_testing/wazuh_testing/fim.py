@@ -212,3 +212,19 @@ def callback_detect_event(line):
     if match:
         return json.loads(match.group(1))
     return None
+
+
+def callback_whodata_hc_success(line):
+    print(line)
+    if 'Whodata health-check: Success.' in line:
+        return 1
+    return 0
+
+
+def callback_whodata_added_rule(line):
+    print(line)
+    match = re.match(r'.*Added audit rule for monitoring directory: \'(.+)\'', line)
+    if match:
+        print("MATCHED")
+        return match.group(1)
+    return None
