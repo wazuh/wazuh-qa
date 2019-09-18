@@ -1,6 +1,7 @@
 # Copyright (C) 2015-2019, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+import glob
 import os
 from collections import Counter
 
@@ -11,18 +12,26 @@ from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event
 from wazuh_testing.tools import FileMonitor
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2')]
-testdir1, testdir2 = test_directories
+test_directories = [os.path.join('/', 'testdir1')]
+testdir1 = test_directories[0]
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
+@pytest.fixture(scope='module', params=glob.glob(os.path.join(test_data_path, 'ossec*.conf')))
+def get_ossec_configuration(request):
+    return request.param
+
+
+@pytest.mark.benchmark
 @pytest.mark.parametrize('n_regular, folder', [
     (10, testdir1),
-    (100, testdir1)
+    (100, testdir1),
+    (1000, testdir1),
+    (10000, testdir1)
 ])
-def test_detect_regular_files(n_regular, folder, configure_environment, restart_wazuh):
-    """Checks if a regular file creation is detected by syscheck"""
+def test_benchmark_regular_files(n_regular, folder, configure_environment, restart_wazuh):
+    """Checks syscheckd detects a minimum volume of file changes (add, modify, delete)"""
 
     min_timeout = 30
     # Create text files

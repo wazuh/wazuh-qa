@@ -1,6 +1,7 @@
 # Copyright (C) 2015-2019, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+import glob
 import os
 import shutil
 import subprocess
@@ -13,9 +14,9 @@ from wazuh_testing.tools import truncate_file, wait_for_condition, FileMonitor
 
 
 @pytest.fixture(scope='module')
-def configure_environment(request):
+def configure_environment(get_ossec_configuration, request):
     # Place configuration in path
-    shutil.copy(os.path.join(getattr(request.module, 'test_data_path'), 'ossec.conf'), WAZUH_CONF_PATH)
+    shutil.copy(get_ossec_configuration, WAZUH_CONF_PATH)
     shutil.chown(WAZUH_CONF_PATH, 'root', 'ossec')
     os.chmod(WAZUH_CONF_PATH, mode=0o660)
 
@@ -31,7 +32,7 @@ def configure_environment(request):
 
 
 @pytest.fixture(scope='module')
-def restart_wazuh(request):
+def restart_wazuh(get_ossec_configuration, request):
     # Reset ossec.log and start a new monitor
     truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)

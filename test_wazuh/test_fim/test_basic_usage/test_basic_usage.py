@@ -4,7 +4,7 @@
 import os
 import time
 from datetime import timedelta
-
+import glob
 import pytest
 
 from wazuh_testing.fim import callback_detect_end_scan, callback_detect_event, LOG_FILE_PATH
@@ -18,13 +18,18 @@ testdir1, testdir2 = test_directories
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
+@pytest.fixture(scope='module', params=glob.glob(os.path.join(test_data_path, 'ossec*.conf')))
+def get_ossec_configuration(request):
+    return request.param
+
+
 @pytest.mark.parametrize('folder, filename, mode, content', [
     (testdir1, 'testfile', 'w', "Sample content"),
     (testdir1, 'btestfile', 'wb', b"Sample content"),
     (testdir2, 'testfile', 'w', ""),
     (testdir2, "btestfile", "wb", b"")
 ])
-def _test_regular_file(folder, filename, mode, content, configure_environment, restart_wazuh):
+def test_regular_file(folder, filename, mode, content, configure_environment, restart_wazuh):
     """Checks if a regular file creation is detected by syscheck"""
 
     # Create text files
