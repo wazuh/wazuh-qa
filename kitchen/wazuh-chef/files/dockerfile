@@ -1,0 +1,22 @@
+FROM vpgrp/kitchen:latest
+
+ARG source_branch=master
+ARG target_branch=master
+
+# Update aptitude with new repo
+RUN apt-get update
+
+# Clone the corresponding branch of wazuh-chef
+RUN git clone https://github.com/wazuh/wazuh-chef.git
+
+RUN cd wazuh-chef && git checkout $source_branch && git branch && git pull
+
+RUN cd wazuh-chef && git merge ${target_branch}
+
+RUN pip install pytest && pip install testinfra && pip install paramiko
+
+RUN git clone -branch master https://github.com/wazuh/wazuh-qa.git
+
+RUN cp -rf /wazuh_qa/kitchen/wazuh_chef/test/* /wazuh_chef/cookbook/wazuh_manager/test && cp -rf /wazuh_qa/kitchen/wazuh_chef/files/* /wazuh_chef/cookbook/wazuh_manager/
+
+RUN echo "$(sed -n '/ip6/!p' /etc/hosts)" > /etc/hosts

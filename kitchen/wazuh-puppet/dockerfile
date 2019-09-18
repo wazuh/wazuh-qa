@@ -1,7 +1,7 @@
 FROM vpgrp/kitchen:latest
 
 ARG source_branch=master
-
+ARG target_branch=master
 # Update aptitude with new repo
 RUN apt-get update
 
