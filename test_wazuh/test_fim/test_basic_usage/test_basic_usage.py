@@ -7,7 +7,7 @@ import shutil
 import subprocess
 import time
 from datetime import timedelta
-
+import glob
 import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_end_scan,
@@ -47,6 +47,11 @@ def get_configuration(request):
     return request.param
 
 # tests
+
+@pytest.fixture(scope='module', params=glob.glob(os.path.join(test_data_path, 'ossec*.conf')))
+def get_ossec_configuration(request):
+    return request.param
+
 
 @pytest.mark.parametrize('folder, filename, mode, content', [
     (testdir1, 'testfile', 'w', "Sample content"),
