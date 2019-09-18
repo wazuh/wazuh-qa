@@ -39,7 +39,6 @@ class TimeMachine:
         """
         import subprocess
         import shlex
-
         subprocess.call(shlex.split("timedatectl set-ntp false"))
         subprocess.call(shlex.split("sudo date -s '%s'" % time_))
 
@@ -139,7 +138,6 @@ class FileMonitor:
         """
         self._result = [] if accum_results > 1 else None
         with open(self.file_path) as f:
-            print(f"Seeking to: {self._position}")
             f.seek(self._position)
             while self._continue:
                 if self._abort:
@@ -170,7 +168,6 @@ class FileMonitor:
             self._continue = True
             self._abort = False
             if timeout > 0:
-                print(f"Pongo el temporizador a {timeout} segundos")
                 self.timer = Timer(timeout, self.abort)
                 self.timer.start()
             self._monitor(callback=callback, accum_results=accum_results)
@@ -187,7 +184,6 @@ class FileMonitor:
 
     def abort(self):
         """Abort because of timeout"""
-        print("Aborto por timeout!!!!!!!!!!!")
         self._abort = True
         return self
 

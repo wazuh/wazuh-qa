@@ -98,7 +98,6 @@ def is_fim_scan_ended():
 
 def callback_detect_end_scan(line):
     if 'File integrity monitoring scan ended.' in line:
-        print(f"Detecto fin de scan en línea: {line}")
         return line
     return None
 
@@ -106,7 +105,5 @@ def callback_detect_end_scan(line):
 def callback_detect_event(line):
     match = re.match(r'.*Sending event: (.+)$', line)
     if match:
-        print(f"Detecto evento en línea: {line}")
-        print(f"Evento detectado: {json.loads(match.group(1))}")
         return json.loads(match.group(1))
     return None
