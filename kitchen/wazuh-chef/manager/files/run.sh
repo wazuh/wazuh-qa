@@ -2,6 +2,9 @@
 
 development_agent_path="../wazuh_agent/test/environments/development.json"
 development_manager_path="../wazuh_manager/test/environments/development.json"
+development_manager_path_master="../wazuh_manager/test/environments/development-master.json"
+development_manager_path_client="../wazuh_manager/test/environments/development-client.json"
+
 template=".template"
 
 if [ -z "$1" ]
@@ -31,6 +34,15 @@ do
 	cp "$development_manager_path$template" "$development_manager_path"
 	sed -i 's/MANAGER_IP/'${manager_ip}'/g' $development_manager_path
 	cat $development_manager_path
+
+	cp "$development_manager_path_master$template" "$development_manager_path_master"
+	sed -i 's/MANAGER_IP/'${manager_ip}'/g' $development_manager_path_master
+	cat $development_manager_path_master
+
+	cp "$development_manager_path_client$template" "$development_manager_path_client"
+	sed -i 's/MANAGER_IP/'${manager_ip}'/g' $development_manager_path_client
+	cat $development_manager_path_client
+
 	echo "Kitchen is converging ..."
 	kitchen converge $dist
 
@@ -38,7 +50,9 @@ do
 	echo "Getting default things back"
 	cp "$development_agent_path$template" "$development_agent_path"
 	cp "$development_manager_path$template" "$development_manager_path"
-
+	cp "$development_manager_path_master$template" "$development_manager_path_master"
+	cp "$development_manager_path_client$template" "$development_manager_path_client"
+	
 done
 
 echo "Kitchen is testing ..."
