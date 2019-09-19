@@ -29,7 +29,7 @@ def get_ossec_configuration(request):
     (testdir2, 'testfile', 'w', ""),
     (testdir2, "btestfile", "wb", b"")
 ])
-def test_regular_file(folder, filename, mode, content, configure_environment, restart_wazuh):
+def test_regular_file(folder, filename, mode, content, configure_environment, restart_wazuh, wait_for_initial_scan):
     """Checks if a regular file creation is detected by syscheck"""
 
     # Create text files

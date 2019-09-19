@@ -42,8 +42,12 @@ def restart_wazuh(get_ossec_configuration, request):
     p = subprocess.Popen(["service", "wazuh-manager", "restart"])
     p.wait()
 
+
+@pytest.fixture(scope='module')
+def wait_for_initial_scan(get_ossec_configuration, request):
     # Wait for initial FIM scan to end
-    #file_monitor.start(timeout=60, callback=callback_detect_end_scan)
+    file_monitor = getattr(request.module, 'wazuh_log_monitor')
+    file_monitor.start(timeout=60, callback=callback_detect_end_scan)
 
     # Add additional sleep to avoid changing system clock issues (TO BE REMOVED when syscheck has not sleeps anymore)
-    #time.sleep(11)
+    time.sleep(11)

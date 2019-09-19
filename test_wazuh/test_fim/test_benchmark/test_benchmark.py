@@ -30,7 +30,7 @@ def get_ossec_configuration(request):
     (1000, testdir1),
     (10000, testdir1)
 ])
-def test_benchmark_regular_files(n_regular, folder, configure_environment, restart_wazuh):
+def test_benchmark_regular_files(n_regular, folder, configure_environment, restart_wazuh, wait_for_initial_scan):
     """Checks syscheckd detects a minimum volume of file changes (add, modify, delete)"""
 
     min_timeout = 30

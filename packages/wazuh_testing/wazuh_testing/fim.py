@@ -216,8 +216,8 @@ def callback_detect_event(line):
 
 def callback_whodata_hc_success(line):
     if 'Whodata health-check: Success.' in line:
-        return 1
-    return 0
+        return True
+    return None
 
 
 def callback_whodata_added_rule(line):
@@ -229,14 +229,14 @@ def callback_whodata_added_rule(line):
 
 def callback_whodata_audit_manipulation(line):
     if 'Detected Audit rules manipulation' in line:
-        return 1
-    return 0
+        return True
+    return None
 
 
 def callback_whodata_audit_connection(line):
     if '(6030): Audit: connected' in line:
-        return 1
-    return 0
+        return True
+    return None
 
 
 def callback_whodata_loaded_rule(line):
