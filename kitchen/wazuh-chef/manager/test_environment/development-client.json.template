@@ -10,8 +10,8 @@
   },
   "override_attributes": {
     "ossec": {
-      "master": "manager-master.wazuh-test.com",
-      "address": ["manager-master.wazuh-test.com", "manager-client.wazuh-test.com"],
+      "master": "MANAGER_IP",
+      "address": ["MANAGER_IP", "MANAGER_IP"],
       "cluster_disabled": "no",
       "conf": {
         "server": {
