@@ -214,32 +214,32 @@ def callback_detect_event(line):
     return None
 
 
-def callback_whodata_hc_success(line):
+def callback_audit_health_check(line):
     if 'Whodata health-check: Success.' in line:
         return True
     return None
 
 
-def callback_whodata_added_rule(line):
+def callback_audit_added_rule(line):
     match = re.match(r'.*Added audit rule for monitoring directory: \'(.+)\'', line)
     if match:
         return match.group(1)
     return None
 
 
-def callback_whodata_audit_manipulation(line):
+def callback_audit_rules_manipulation(line):
     if 'Detected Audit rules manipulation' in line:
         return True
     return None
 
 
-def callback_whodata_audit_connection(line):
+def callback_audit_connection(line):
     if '(6030): Audit: connected' in line:
         return True
     return None
 
 
-def callback_whodata_loaded_rule(line):
+def callback_audit_loaded_rule(line):
     match = re.match(r'.*Audit rule loaded: -w (.+) -p', line)
     if match:
         return match.group(1)

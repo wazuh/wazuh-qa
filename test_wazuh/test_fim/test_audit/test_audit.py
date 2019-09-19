@@ -6,9 +6,10 @@ import glob
 import pytest
 import subprocess
 
-from wazuh_testing.fim import callback_whodata_hc_success, callback_whodata_added_rule, callback_whodata_audit_manipulation, \
-    callback_whodata_loaded_rule, callback_whodata_audit_connection, callback_realtime_added_directory, LOG_FILE_PATH
-from wazuh_testing.tools import TimeMachine, FileMonitor
+from wazuh_testing.fim import callback_audit_health_check, callback_audit_added_rule, \
+    callback_audit_rules_manipulation, callback_audit_loaded_rule, callback_audit_connection, \
+    callback_realtime_added_directory, LOG_FILE_PATH
+from wazuh_testing.tools import FileMonitor
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
@@ -25,13 +26,13 @@ def get_ossec_configuration(request):
 
 def test_audit_health_check(configure_environment, restart_wazuh):
     """Checks if the health check is passed."""
-    wazuh_log_monitor.start(timeout=20, callback=callback_whodata_hc_success)
+    wazuh_log_monitor.start(timeout=20, callback=callback_audit_health_check)
 
 
 def test_added_rules(configure_environment, restart_wazuh):
     """Checks if the specified folders are added to Audit rules list."""
 
-    events = wazuh_log_monitor.start(timeout=20, callback=callback_whodata_added_rule, accum_results=3).result()
+    events = wazuh_log_monitor.start(timeout=20, callback=callback_audit_added_rule, accum_results=3).result()
 
     assert (testdir1 in events)
     assert (testdir2 in events)
@@ -46,9 +47,9 @@ def test_readded_rules(configure_environment, restart_wazuh):
     os.system("auditctl -W {0} -p wa -k wazuh_fim".format(testdir2))
     os.system("auditctl -W {0} -p wa -k wazuh_fim".format(testdir3))
 
-    wazuh_log_monitor.start(timeout=20, callback=callback_whodata_audit_manipulation)
+    wazuh_log_monitor.start(timeout=20, callback=callback_audit_rules_manipulation)
 
-    events = wazuh_log_monitor.start(timeout=10, callback=callback_whodata_loaded_rule, accum_results=3).result()
+    events = wazuh_log_monitor.start(timeout=10, callback=callback_audit_loaded_rule, accum_results=3).result()
 
     assert (testdir1 in events)
     assert (testdir2 in events)
@@ -62,9 +63,9 @@ def test_readded_rules_on_restart(configure_environment, restart_wazuh):
     p = subprocess.Popen(["service", "auditd", "restart"])
     p.wait()
 
-    wazuh_log_monitor.start(timeout=10, callback=callback_whodata_audit_connection)
+    wazuh_log_monitor.start(timeout=10, callback=callback_audit_connection)
 
-    events = wazuh_log_monitor.start(timeout=30, callback=callback_whodata_loaded_rule, accum_results=3).result()
+    events = wazuh_log_monitor.start(timeout=30, callback=callback_audit_loaded_rule, accum_results=3).result()
 
     assert (testdir1 in events)
     assert (testdir2 in events)
