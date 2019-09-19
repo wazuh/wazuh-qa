@@ -1,0 +1,32 @@
+FROM ruby
+
+RUN cd $HOME && git clone https://github.com/wazuh/wazuh-qa.git && cd $HOME/wazuh-qa && git fetch && git checkout x
+
+RUN cd $HOME && git clone https://github.com/wazuh/wazuh-chef.git && git pull && git checkout x1 && git merge x2
+#ARG chef_source_branch=master
+#ARG chef_target_branch=master
+#ARG qa_branch=master
+#
+## Update aptitude with new repo
+#RUN apt-get update
+#
+## Clone the corresponding branch of wazuh-chef
+#RUN git clone https://github.com/wazuh/wazuh-chef.git
+#
+#RUN cd wazuh-chef && git checkout $source_branch && git branch && git pull
+#
+#RUN cd wazuh-chef && git fetch && git merge ${target_branch}
+#
+#RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py
+#
+#RUN pip install pytest && pip install testinfra && pip install paramiko
+#
+#RUN git clone --branch $qa_branch https://github.com/wazuh/wazuh-qa.git && cd /wazuh-qa && git pull
+#
+#RUN cp -rf wazuh-qa/kitchen/wazuh-chef/test/* wazuh-chef/cookbooks/wazuh_manager/test/ && cp -rf wazuh-qa/kitchen/wazuh-chef/files/* wazuh-chef/cookbooks/wazuh_manager/
+#
+#RUN echo "$(sed -n '/ip6/!p' /etc/hosts)" > /etc/hosts
+#
+#RUN cd $HOME/wazuh-puppet/kitchen/.kitchen && ssh-keygen -t rsa -N "" -f docker_id_rsa
+#RUN cd $HOME && chmod +x $HOME/wazuh-puppet/kitchen/run.sh
+#RUN sed -i "s|\YOUR_PUBLIC_KEY|$(cat $HOME/wazuh-puppet/kitchen/.kitchen/docker_id_rsa.pub)|g" /home/vagrant/wazuh-puppet/kitchen/test/Dockerfile
