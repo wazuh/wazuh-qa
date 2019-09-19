@@ -1,0 +1,35 @@
+{
+  "name": "development-client",
+  "description": "The development environment",
+  "cookbook_versions": {
+  },
+  "json_class": "Chef::Environment",
+  "chef_type": "environment",
+  "default_attributes": {
+
+  },
+  "override_attributes": {
+    "ossec": {
+      "master": "manager-master.wazuh-test.com",
+      "address": ["manager-master.wazuh-test.com", "manager-client.wazuh-test.com"],
+      "cluster_disabled": "no",
+      "conf": {
+        "server": {
+          "cluster": {
+            "node_name": "node02",
+            "node_type": "client",
+            "disabled": "no",
+            "nodes": {
+              "node": ["MANAGER_IP", ""]
+            },
+            "key": "596f6b328c8ca831a03f7c7ca8203e8b"
+          }
+        }
+      }
+    },
+    "filebeat": {
+      "ossec_type": "ossec-alerts-development",
+      "logstash_servers": "elk.wazuh-test.com:5000"
+    }
+  }
+}

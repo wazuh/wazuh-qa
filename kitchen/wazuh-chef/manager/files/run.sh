@@ -18,7 +18,7 @@ do
 
 	echo "Getting Wazuh managers IPs to the agents"
 	manager_ip="$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' `docker ps | awk '{print $NF}' | grep  $dist | grep manager`)"
-
+	echo $manager_ip
 
 	cp "$development_agent_path$template" "$development_agent_path"
 
@@ -30,7 +30,7 @@ do
 
 	cp "$development_manager_path$template" "$development_manager_path"
 	sed -i 's/MANAGER_IP/'${manager_ip}'/g' $development_manager_path
-
+	cat $development_manager_path
 	echo "Kitchen is converging ..."
 	kitchen converge $dist
 
@@ -38,6 +38,7 @@ do
 	echo "Getting default things back"
 	cp "$development_agent_path$template" "$development_agent_path"
 	cp "$development_manager_path$template" "$development_manager_path"
+
 done
 
 echo "Kitchen is testing ..."
