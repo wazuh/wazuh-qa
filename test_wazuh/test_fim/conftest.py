@@ -16,20 +16,13 @@ from wazuh_testing.tools import (FileMonitor, TestEnvironment, set_wazuh_conf,
                                  write_wazuh_conf)
 
 
-# variables
-
-test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2')]
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-testdir1, testdir2 = test_directories
-
-
 # functions
 
-def restart_wazuh():
+def restart_wazuh(request):
     # Reset ossec.log and start a new monitor
     truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)
-    # setattr(request.module, 'wazuh_log_monitor', file_monitor)
+    setattr(request.module, 'wazuh_log_monitor', file_monitor)
 
     # Restart Wazuh and wait for the command to end
     p = subprocess.Popen(["service", "wazuh-manager", "restart"])
@@ -61,14 +54,17 @@ def configure_environment(get_configuration, request):
     set_wazuh_conf(test_environment.new_conf)
 
     # create test directories
+    test_directories = getattr(request.module, 'test_directories')
     for test_dir in test_directories:
         os.mkdir(test_dir)
 
     yield
 
-    # remove created folders
-    for test_dir in test_directories:
-        shutil.rmtree(test_dir)
+    # remove created folders (parents)
+    parent_directories = set([os.path.join('/', test_dir.split('/')[1]) for
+                              test_dir in test_directories])
+    for parent_directory in parent_directories:
+        shutil.rmtree(parent_directory)
     # restore previous configuration
     write_wazuh_conf(test_environment.backup_conf)
-    restart_wazuh()
+    restart_wazuh(request)

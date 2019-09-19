@@ -54,68 +54,68 @@ def get_ossec_configuration(request):
 
 
 @pytest.mark.benchmark
-@pytest.mark.parametrize('n_regular, folder, check', [
+@pytest.mark.parametrize('n_regular, folder, checks', [
     (10, testdir1, ['whodata', 'realtime']),
     (100, testdir1, ['realtime']),
     (1000, testdir1, ['whodata']),
     (10000, testdir1, ['realtime'])
 ])
-def test_detect_regular_files(n_regular, folder, check, get_configuration,
+def test_detect_regular_files(n_regular, folder, checks, get_configuration,
                               configure_environment):
     """Checks if a regular file creation is detected by syscheck"""
-    if set(check).intersection(set(get_configuration['checks'])):
-        min_timeout = 30
-        # Create text files
-        for name in range(n_regular):
-            with open(os.path.join(folder, f'regular_{name}'), 'w') as f:
-                f.write('')
+    if not set(checks).intersection(set(get_configuration['checks'])):
+        pytest.skip("Does not apply to this config file")
 
-        # Fetch the n_regular expected events
-        events = wazuh_log_monitor.start(timeout=max(n_regular*0.01, min_timeout), callback=callback_detect_event,
-                                        accum_results=n_regular).result()
-        # Are the n_regular events of type 'added'?
-        types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
+    min_timeout = 30
+    # Create text files
+    for name in range(n_regular):
+        with open(os.path.join(folder, f'regular_{name}'), 'w') as f:
+            f.write('')
 
-        assert(types['added'] == n_regular)
+    # Fetch the n_regular expected events
+    events = wazuh_log_monitor.start(timeout=max(n_regular*0.01, min_timeout), callback=callback_detect_event,
+                                    accum_results=n_regular).result()
+    # Are the n_regular events of type 'added'?
+    types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
 
-        # Are the n_regular events the files added?
-        file_paths = jq(".[].data.path").transform(events, multiple_output=True)
-        for name in range(n_regular):
-            assert(os.path.join(folder, f'regular_{name}') in file_paths)
+    assert(types['added'] == n_regular)
 
-        # Modify previous text files
-        for name in range(n_regular):
-            with open(os.path.join(folder, f'regular_{name}'), 'a') as f:
-                f.write('new content')
+    # Are the n_regular events the files added?
+    file_paths = jq(".[].data.path").transform(events, multiple_output=True)
+    for name in range(n_regular):
+        assert(os.path.join(folder, f'regular_{name}') in file_paths)
 
-        # Fetch the n_regular expected events
-        events = wazuh_log_monitor.start(timeout=max(n_regular * 0.01, min_timeout), callback=callback_detect_event,
-                                        accum_results=n_regular).result()
+    # Modify previous text files
+    for name in range(n_regular):
+        with open(os.path.join(folder, f'regular_{name}'), 'a') as f:
+            f.write('new content')
 
-        # Are the n_regular events of type 'modified'?
-        types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
-        assert (types['modified'] == n_regular)
+    # Fetch the n_regular expected events
+    events = wazuh_log_monitor.start(timeout=max(n_regular * 0.01, min_timeout), callback=callback_detect_event,
+                                    accum_results=n_regular).result()
 
-        # Are the n_regular events the files modified?
-        file_paths = jq(".[].data.path").transform(events, multiple_output=True)
-        for name in range(n_regular):
-            assert (os.path.join(folder, f'regular_{name}') in file_paths)
+    # Are the n_regular events of type 'modified'?
+    types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
+    assert (types['modified'] == n_regular)
 
-        # Delete previous text files
-        for name in range(n_regular):
-            os.remove(os.path.join(folder, f'regular_{name}'))
+    # Are the n_regular events the files modified?
+    file_paths = jq(".[].data.path").transform(events, multiple_output=True)
+    for name in range(n_regular):
+        assert (os.path.join(folder, f'regular_{name}') in file_paths)
 
-        # Fetch the n_regular expected events
-        events = wazuh_log_monitor.start(timeout=max(n_regular * 0.01, min_timeout), callback=callback_detect_event,
-                                        accum_results=n_regular).result()
+    # Delete previous text files
+    for name in range(n_regular):
+        os.remove(os.path.join(folder, f'regular_{name}'))
 
-        # Are the n_regular events of type 'deleted'?
-        types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
-        assert (types['deleted'] == n_regular)
+    # Fetch the n_regular expected events
+    events = wazuh_log_monitor.start(timeout=max(n_regular * 0.01, min_timeout), callback=callback_detect_event,
+                                    accum_results=n_regular).result()
 
-        # Are the n_regular events the files modified?
-        file_paths = jq(".[].data.path").transform(events, multiple_output=True)
-        for name in range(n_regular):
-            assert (os.path.join(folder, f'regular_{name}') in file_paths)
-    else:
-        pytest.skip()
+    # Are the n_regular events of type 'deleted'?
+    types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
+    assert (types['deleted'] == n_regular)
+
+    # Are the n_regular events the files modified?
+    file_paths = jq(".[].data.path").transform(events, multiple_output=True)
+    for name in range(n_regular):
+        assert (os.path.join(folder, f'regular_{name}') in file_paths)
