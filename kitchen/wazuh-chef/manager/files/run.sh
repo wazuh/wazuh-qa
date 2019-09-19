@@ -1,8 +1,8 @@
 #!/bin/bash
 
-development_agent_path="$COOKBOOKS_HOME/wazuh_agent/test/environments/development.json"
+development_agent_path="../wazuh_agent/test/environments/development.json"
+development_manager_path="../wazuh_manager/test/environments/development.json"
 template=".template"
-echo $COOKBOOKS_HOME
 
 if [ -z "$1" ]
 then
@@ -26,6 +26,10 @@ do
 	sed -i 's/manager-client.wazuh-test.com//g' $development_agent_path
 	sed -i 's/manager-master.wazuh-test.com/'${manager_ip}'/g' $development_agent_path
 
+	echo "setting the manager registration and report IPs"
+
+	cp "$development_manager_path$template" "$development_manager_path"
+	sed -i 's/MANAGER_IP/'${manager_ip}'/g' $development_manager_path
 
 	echo "Kitchen is converging ..."
 	kitchen converge $dist
@@ -33,6 +37,7 @@ do
 
 	echo "Getting default things back"
 	cp "$development_agent_path$template" "$development_agent_path"
+	cp "$development_manager_path$template" "$development_manager_path"
 done
 
 echo "Kitchen is testing ..."

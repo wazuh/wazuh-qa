@@ -27,6 +27,10 @@ RUN cd $HOME && git clone https://github.com/wazuh/wazuh-chef.git && git pull &&
 #
 #RUN echo "$(sed -n '/ip6/!p' /etc/hosts)" > /etc/hosts
 #
-#RUN cd $HOME/wazuh-puppet/kitchen/.kitchen && ssh-keygen -t rsa -N "" -f docker_id_rsa
-#RUN cd $HOME && chmod +x $HOME/wazuh-puppet/kitchen/run.sh
-#RUN sed -i "s|\YOUR_PUBLIC_KEY|$(cat $HOME/wazuh-puppet/kitchen/.kitchen/docker_id_rsa.pub)|g" /home/vagrant/wazuh-puppet/kitchen/test/Dockerfile
+#RUN cd $HOME/wazuh-chef/kitchen/.kitchen && ssh-keygen -t rsa -N "" -f docker_id_rsa
+#RUN cd $HOME && chmod +x $HOME/wazuh-chef/cookbooks/wazuh_manager/run.sh
+#RUN sed -i "s|\YOUR_PUBLIC_KEY|$(cat $HOME/wazuh-chef/cookbooks/wazuh_manager/.kitchen/docker_id_rsa.pub)|g" $HOME/wazuh-chef/cookbooks/wazuh_manager/test/Dockerfile
+
+ rbnacl (>= 3.2, < 5.0)
+ rbnacl-libsodium, if your system doesn't have libsodium installed.
+ bcrypt_pbkdf (>= 1.0, < 2.0)

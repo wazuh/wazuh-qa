@@ -25,9 +25,9 @@ platforms:
 
 suites:
   - name: manager
-    environments_path: <%= ENV['COOKBOOKS_HOME'] %>/wazuh_manager/test/environments
-    data_bags_path: <%= ENV['COOKBOOKS_HOME'] %>/wazuh_manager/test/data_bags
-    encrypted_data_bag_secret_key_path: <%= ENV['COOKBOOKS_HOME'] %>/wazuh_manager/test/data_bags/wazuh_secrets/test_data_bag_key
+    environments_path: ../wazuh_manager/test/environments
+    data_bags_path: ../wazuh_manager/test/data_bags
+    encrypted_data_bag_secret_key_path: ../wazuh_manager/test/data_bags/wazuh_secrets/test_data_bag_key
     driver:
     run_list:
       - recipe[wazuh_manager::repository]
@@ -42,9 +42,9 @@ suites:
       command: py.test -v test/base
 
   - name: agent
-    environments_path: <%= ENV['COOKBOOKS_HOME'] %>/wazuh_agent/test/environments
-    data_bags_path: <%= ENV['COOKBOOKS_HOME'] %>/wazuh_agent/test/data_bags
-    encrypted_data_bag_secret_key_path: <%= ENV['COOKBOOKS_HOME'] %>/wazuh_agent/test/data_bags/wazuh_secrets/test_data_bag_key
+    environments_path: ../wazuh_agent/test/environments
+    data_bags_path: ../wazuh_agent/test/data_bags
+    encrypted_data_bag_secret_key_path: ../wazuh_agent/test/data_bags/wazuh_secrets/test_data_bag_key
     driver:
     run_list:
       - recipe[wazuh_agent::repository]
