@@ -34,6 +34,10 @@ do
 	sed -i 's/MANAGER_IP/'${manager_ip}'/g' $development_manager_path
 	cat $development_manager_path
 
+	cp "$development_manager_path_master$template" "$development_manager_path_master"
+	sed -i 's/MANAGER_IP/'${manager_ip}'/g' $development_manager_path_master
+	cat $development_manager_path_master
+
 
 	echo "Kitchen is converging ..."
 	kitchen converge $dist
@@ -42,7 +46,7 @@ do
 	echo "Getting default things back"
 	cp "$development_agent_path$template" "$development_agent_path"
 	cp "$development_manager_path$template" "$development_manager_path"
-
+	cp "$development_manager_path_master$template" "$development_manager_path_master"
 
 done
 
