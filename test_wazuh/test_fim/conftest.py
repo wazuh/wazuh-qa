@@ -11,9 +11,8 @@ import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH, WAZUH_CONF_PATH,
                                callback_detect_end_scan, is_fim_scan_ended)
-from wazuh_testing.tools import (FileMonitor, TestEnvironment, set_wazuh_conf,
-                                 truncate_file, wait_for_condition,
-                                 write_wazuh_conf)
+from wazuh_testing.tools import (FileMonitor, TestEnvironment, truncate_file,
+                                 wait_for_condition, write_wazuh_conf)
 
 
 # functions
@@ -35,6 +34,12 @@ def restart_wazuh(request):
     time.sleep(11)
 
 
+def set_wazuh_conf(new_conf, request):
+    """Set a new Wazuh configuration. It restarts Wazuh."""
+    write_wazuh_conf(new_conf)
+    restart_wazuh(request)
+
+
 # fixtures
 
 @pytest.fixture(scope='module')
@@ -46,17 +51,17 @@ def configure_environment(get_configuration, request):
     print(f"Setting a custom environment: {str(get_configuration)}")
 
     test_environment = TestEnvironment(get_configuration.get('section'),
-                                       get_configuration.get('new_values'),
-                                       get_configuration.get('new_attributes'),
+                                       get_configuration.get('elements'),
                                        get_configuration.get('checks')
                                        )
-    # set new configuration
-    set_wazuh_conf(test_environment.new_conf)
 
     # create test directories
     test_directories = getattr(request.module, 'test_directories')
     for test_dir in test_directories:
         os.mkdir(test_dir)
+
+    # set new configuration
+    set_wazuh_conf(test_environment.new_conf, request)
 
     yield
 
@@ -65,6 +70,6 @@ def configure_environment(get_configuration, request):
                               test_dir in test_directories])
     for parent_directory in parent_directories:
         shutil.rmtree(parent_directory)
+
     # restore previous configuration
-    write_wazuh_conf(test_environment.backup_conf)
-    restart_wazuh(request)
+    set_wazuh_conf(test_environment.backup_conf, request)

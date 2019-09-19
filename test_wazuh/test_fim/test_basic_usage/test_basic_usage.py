@@ -14,8 +14,8 @@ from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_end_scan,
                                callback_detect_event)
 from wazuh_testing.tools import FileMonitor, TimeMachine
 
-# variables
 
+# variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -26,16 +26,18 @@ testdir1, testdir2 = test_directories
 # configurations
 
 configurations = [{'section': 'syscheck',
-                   'new_values': [{'disabled': 'no'},
-                                  {'directories': '/testdir1,/testdir2,/noexists'}],
-                   'new_attributes': [{'directories': [{'check_all': 'yes'}]}],
+                   'elements': [{'disabled': {'value': 'no'}},
+                                {'directories': {'value': '/testdir1,/testdir2,/noexists',
+                                                 'attributes': {'check_all': 'yes'}}}
+                                ],
                    'checks': []},
                   {'section': 'syscheck',
-                   'new_values': [{'disabled': 'no'},
-                                  {'frequency': '21600'},
-                                  {'directories': '/testdir1,/testdir2,/noexists'}],
-                   'new_attributes': [{'directories': [{'check_all': 'yes'}]}],
-                   'checks': []}
+                   'elements': [{'disabled': {'value': 'no'}},
+                                {'frequency': {'value': '21600'}},
+                                {'directories': {'value': '/testdir1,/testdir2,/noexists',
+                                                 'attributes': {'check_all': 'yes'}}}
+                                ],
+                   'checks': []},
                   ]
 
 

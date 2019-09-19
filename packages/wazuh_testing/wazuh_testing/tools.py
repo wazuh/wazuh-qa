@@ -83,23 +83,20 @@ class TimeMachine:
 class TestEnvironment:
     """Class to prepare a custom configuration for a test."""
 
-    def __init__(self, section: str, new_values: List, new_attributes: List,
+    def __init__(self, section: str, new_elements: List,
                  checks: List = None) -> None:
         """Initialize TestEnvironment class.
 
         :param section: Section of 'ossec.conf' to edit
-        :param new_values: List with dictionaries for replacing element values in a section
-        :param new_attributes: Dictionary with the values of new attributes in a section
-        :param checks: Dictionary with different checks for testing the environment
+        :param new_elements: List with dictionaries for replacing element values in a section
+        :param checks: List with different checks for testing the environment
         """
         self.backup_conf = get_wazuh_conf()
         self.section = section
-        self.new_values = new_values
-        self.new_attributes = new_attributes
+        self.new_elements = new_elements
         self.checks = checks
         self.new_conf = set_section_configuration(self.section,
-                                                  self.new_values,
-                                                  self.new_attributes)
+                                                  self.new_elements)
 
 
 def set_wazuh_conf(wazuh_conf: ET.ElementTree):
@@ -156,36 +153,34 @@ def write_wazuh_conf(wazuh_conf: ET.ElementTree):
 
 
 def set_section_configuration(section: str = 'syscheck',
-                              new_values: List = None,
-                              new_attributes: List = None) -> ET.ElementTree:
-    """Set a configuration in a section of Wazuh.
+                              new_elements: List = None) -> ET.ElementTree:
+    """Set a configuration in a section of Wazuh. It replaces the content if it exists.
 
     :param wazuh_conf: XML with the Wazuh configuration (ossec.conf)
-    :param new_values: List with dictionaries for settings elements
-    :param new_attributes: dictionaries for setting attributes of elements
+    :param new_elements: List with dictionaries for settings elements
     :return: ElementTree with the custom Wazuh configuration
     """
     wazuh_conf = get_wazuh_conf()
     section_conf = wazuh_conf.find('/'.join([section]))
-    # clear section
-    section_conf.clear()
+    # create section if it does not exist, clean otherwise
+    if not section_conf:
+        section_conf = ET.SubElement(wazuh_conf.getroot(), section)
+    else:
+        section_conf.clear()
     # insert elements
-    if new_values:
-        for elem in new_values:
-            for tag_name, new_value in elem.items():
+    if new_elements:
+        for elem in new_elements:
+            for tag_name, properties in elem.items():
                 tag = ET.SubElement(section_conf, tag_name)
-                tag.text = new_value
-    # set attributes
-    if new_attributes:
-        for elem in new_attributes:
-            for tag_name, attr_list in elem.items():
-                tag = wazuh_conf.find('/'.join([section, tag_name]))
-                #tag = ET.SubElement(section_conf, tag_name)
-                for attr in attr_list:
-                    attr_name, new_attr_value = list(attr.items())[0]
-                    tag.attrib[attr_name] = new_attr_value
+                tag.text = properties.get('value')
+                attributes = properties.get('attributes')
+                if attributes:
+                    for attr_name, attr_value in attributes.items():
+                        tag.attrib[attr_name] = attr_value
 
     return wazuh_conf
+
+
 def _callback_default(line):
     print(line)
     return None

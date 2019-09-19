@@ -15,6 +15,9 @@ from jq import jq
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event
 from wazuh_testing.tools import FileMonitor
 
+
+# variables
+
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_directories = [os.path.join('/', 'testdir1')]
 testdir1 = test_directories[0]
@@ -24,17 +27,19 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 # configurations
 
 configurations = [{'section': 'syscheck',
-                   'new_values': [{'disabled': 'no'},
-                                  {'directories': '/testdir1,/testdir2,/noexists'}],
-                   'new_attributes': [{'directories': [{'check_all': 'yes'},
-                                                       {'realtime': 'yes'}]}],
-                   'checks': ['realtime']},
+                   'elements': [{'disabled': {'value': 'no'}},
+                                {'directories': {'value': '/testdir1,/testdir2,/noexists',
+                                                 'attributes': {'check_all': 'yes',
+                                                                'realtime': 'yes'}}}
+                                ],
+                   'checks': []},
                   {'section': 'syscheck',
-                   'new_values': [{'disabled': 'no'},
-                                  {'directories': '/testdir1,/testdir2,/noexists'}],
-                   'new_attributes': [{'directories': [{'check_all': 'yes'},
-                                                       {'whodata': 'yes'}]}],
-                   'checks': ['whodata']}
+                   'elements': [{'disabled': {'value': 'no'}},
+                                {'directories': {'value': '/testdir1,/testdir2,/noexists',
+                                                 'attributes': {'check_all': 'yes',
+                                                                'whodata': 'yes'}}}
+                                ],
+                   'checks': []}
                   ]
 
 
@@ -54,18 +59,15 @@ def get_ossec_configuration(request):
 
 
 @pytest.mark.benchmark
-@pytest.mark.parametrize('n_regular, folder, checks', [
-    (10, testdir1, ['whodata', 'realtime']),
-    (100, testdir1, ['realtime']),
-    (1000, testdir1, ['whodata']),
-    (10000, testdir1, ['realtime'])
+@pytest.mark.parametrize('n_regular, folder', [
+    (10, testdir1),
+    (100, testdir1),
+    (1000, testdir1),
+    (10000, testdir1)
 ])
-def test_detect_regular_files(n_regular, folder, checks, get_configuration,
+def test_detect_regular_files(n_regular, folder, get_configuration,
                               configure_environment):
     """Checks if a regular file creation is detected by syscheck"""
-    if not set(checks).intersection(set(get_configuration['checks'])):
-        pytest.skip("Does not apply to this config file")
-
     min_timeout = 30
     # Create text files
     for name in range(n_regular):

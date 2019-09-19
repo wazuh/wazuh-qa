@@ -9,6 +9,9 @@ import pytest
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event
 from wazuh_testing.tools import FileMonitor
 
+
+# variables
+
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_directories = [os.path.join('/', 'testdir1'),
                     os.path.join('/', 'testdir1', 'subdir'),
@@ -26,55 +29,63 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 configurations = [
                   # ossec_realtime_1
                   {'section': 'syscheck',
-                   'new_values': [{'disabled': 'no'},
-                                  {'directories': '/testdir1'},
-                                  {'ignore': '/testdir1/ignore_this'}
-                                  ],
-                   'new_attributes': [{'directories': [{'check_all': 'yes'},
-                                                       {'realtime': 'yes'}]}],
+                   'elements': [{'disabled': {'value': 'no'}},
+                                {'directories': {'value': '/testdir1',
+                                                 'attributes': {'check_all': 'yes',
+                                                                'realtime': 'yes'}}}
+                                ],
                    'checks': ['realtime']},
                   # ossec_realtime_2
                   {'section': 'syscheck',
-                   'new_values': [{'disabled': 'no'},
-                                  {'ignore': '/testdir1/ignore_this'},
-                                  {'directories': '/testdir1'},
-                                  ],
-                   'new_attributes': [{'directories': [{'check_all': 'yes'},
-                                                       {'realtime': 'yes'}]}],
+                   'elements': [{'disabled': {'value': 'no'}},
+                                {'directories': {'value': '/testdir1',
+                                                 'attributes': {'check_all': 'yes',
+                                                                'realtime': 'yes'}}},
+                                {'ignore': {'value': '/testdir1/ignore_this'}}
+                                ],
                    'checks': ['realtime']},
                   # ossec_realtime_3
                   {'section': 'syscheck',
-                   'new_values': [{'disabled': 'no'},
-                                  {'ignore': '/testdir1/ignore_this'},
-                                  {'ignore': '/testdir1/not_exists'},
-                                  {'directories': '/testdir1'},
-                                  ],
-                   'new_attributes': [{'directories': [{'check_all': 'yes'},
-                                                       {'realtime': 'yes'}]}],
+                   'elements': [{'disabled': {'value': 'no'}},
+                                {'directories': {'value': '/testdir1',
+                                                 'attributes': {'check_all': 'yes',
+                                                                'realtime': 'yes'}}},
+                                {'ignore': {'value': '/testdir1/ignore_this'}},
+                                {'ignore': {'value': '/testdir1/not_exists'}}
+                                ],
                    'checks': ['realtime']},
                   # ossec_sregex_1
                   {'section': 'syscheck',
-                   'new_values': [{'disabled': 'no'},
-                                  {'ignore': '.ignore$'},
-                                  {'directories': 'testdir1,/testdir2'},
-                                  ],
-                   'new_attributes': [{'directories': [{'check_all': 'yes'},
-                                                       {'realtime': 'yes'}]},
-                                      {'ignore': [{'type': 'sregex'}]}
-                                      ],
+                   'elements': [{'disabled': {'value': 'no'}},
+                                {'ignore': {'value': '.ignore$',
+                                            'attributes': {'type': 'sregex'}}},
+                                {'directories': {'value': 'testdir1,/testdir2',
+                                                 'attributes': {'check_all': 'yes',
+                                                                'realtime': 'yes'}}}
+                                ],
                    'checks': ['regex', 'regex1']},
                   # ossec_sregex_2
                   {'section': 'syscheck',
-                   'new_values': [{'disabled': 'no'},
-                                  {'ignore': '.ignore$|.ignore2$'},
-                                  {'directories': 'testdir1,/testdir2'},
-                                  ],
-                   'new_attributes': [{'directories': [{'check_all': 'yes'},
-                                                       {'realtime': 'yes'}]},
-                                      {'ignore': [{'type': 'sregex'}]}
-                                      ],
-                   'checks': ['regex', 'regex2']}
-                  # ossec_srgex_3 TO DO, multiple tags
+                   'elements': [{'disabled': {'value': 'no'}},
+                                {'ignore': {'value': '.ignore$|.ignore2$',
+                                            'attributes': {'type': 'sregex'}}},
+                                {'directories': {'value': 'testdir1,/testdir2',
+                                                 'attributes': {'check_all': 'yes',
+                                                                'realtime': 'yes'}}}
+                                ],
+                   'checks': ['regex', 'regex1']},
+                  # ossec_srgex_3
+                  {'section': 'syscheck',
+                   'elements': [{'disabled': {'value': 'no'}},
+                                {'ignore': {'value': '.ignore$',
+                                            'attributes': {'type': 'sregex'}}},
+                                {'ignore': {'value': '.ignore2$',
+                                            'attributes': {'type': 'sregex'}}},
+                                {'directories': {'value': 'testdir1,/testdir2',
+                                                 'attributes': {'check_all': 'yes',
+                                                                'realtime': 'yes'}}},
+                                ],
+                   'checks': ['regex', 'regex1']},
                   ]
 
 
@@ -107,8 +118,8 @@ def get_configuration(request):
     (testdir2, "another.ignored2", "w", "", True, ['regex1']),
     (testdir2, "another.ignored2", "w", "", False, ['regex2', 'regex3'])
 ])
-def test_ignore_subdirectory(folder, filename, mode, content, triggers_event, checks,
-                             get_configuration, configure_environment):
+def test_ignore_subdirectory(folder, filename, mode, content, triggers_event,
+                             checks, get_configuration, configure_environment):
     """Checks files are ignored in subdirectory according to configuration
 
        This test is intended to be used with valid ignore configurations
