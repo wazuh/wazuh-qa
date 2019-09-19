@@ -82,12 +82,35 @@ def check_fim_alert(alert, exclude_fields=None):
         if field not in exclude_fields:
             assert(field in alert)
             assert(checker(alert[field]))
+        else:
+            assert(field not in alert)
 
 
 def load_fim_alerts(n_last=0):
     with open(ALERTS_FILE_PATH, 'r') as f:
         alerts = f.read()
     return list(filter(lambda x: x is not None, jq('.syscheck').transform(text=alerts, multiple_output=True)))[-n_last:]
+
+
+def check_checkers(checkers, event):
+    """ Checks if every checker is behaving correctly.
+        If a checker value is "yes", it must appear in the log.
+        Else, it must not appear in the log.
+
+        Checkers keys must be the exact name of the attribute.
+        Example: For check_sum="yes" you put "checksum":"yes" in checkers.
+
+    :param checkers: Dict of checkers
+    :type checkers: Dict
+    :param event: Parsed JSON log.
+    :type event: JSON
+    :return: None
+    """
+    for check in checkers.items():
+        if check[1] == "yes":
+            assert(check[0] in event['data']['attributes'].keys())
+        else:
+            assert(check[0] not in event['data']['attributes'].keys())
 
 
 def is_fim_scan_ended():
@@ -103,62 +126,70 @@ def is_fim_scan_ended():
     return -1
 
 
-def create_file(type, path, content=''):
+def create_file(type, name, path, content=''):
     """ Creates a file in a given path.
 
     :param type: Defined constant that specifies the type. It can be: FIFO, SYSLINK, SOCKET or REGULAR
     :type type: Constant string
+    :param name: File name
+    :type name: String
     :param path: Path where the file will be created
     :type path: String
     :param content: Content of the file. Used for regular files.
     :type content: String or binary
     :return: None
     """
-    getattr(sys.modules[__name__], f'_create_{type}')(path, content)
+    getattr(sys.modules[__name__], f'_create_{type}')(path, name, content)
 
 
-def _create_fifo(path, content):
+def _create_fifo(path, name, content):
     """ Creates a FIFO file.
 
     :param path: Path where the file will be created
     :type path: String
+    :param name: File name
+    :type name: String
     :param content: Content of the created file
     :type content: String or binary
     :return: None
     """
-    fifo_path = os.path.join(path, 'fifo_file')
+    fifo_path = os.path.join(path, name)
     try:
         os.mkfifo(fifo_path)
     except OSError:
         raise
 
 
-def _create_sys_link(path, content):
+def _create_sys_link(path, name, content):
     """ Creates a SysLink file.
 
     :param path: Path where the file will be created
     :type path: String
+    :param name: File name
+    :type name: String
     :param content: Content of the created file
     :type content: String or binary
     :return: None
     """
-    syslink_path = os.path.join(path, 'syslink_file')
+    syslink_path = os.path.join(path, name)
     try:
         os.symlink(syslink_path, syslink_path)
     except OSError:
         raise
 
 
-def _create_socket(path, content):
+def _create_socket(path, name, content):
     """ Creates a Socket file.
 
     :param path: Path where the file will be created
     :type path: String
+    :param name: File name
+    :type name: String
     :param content: Content of the created file
     :type content: String or binary
     :return: None
     """
-    socket_path = os.path.join(path, 'socket_file')
+    socket_path = os.path.join(path, name)
     try:
         os.unlink(socket_path)
     except OSError:
@@ -168,16 +199,18 @@ def _create_socket(path, content):
     sock.bind(socket_path)
 
 
-def _create_regular(path, content):
+def _create_regular(path, name, content):
     """ Creates a Regular file.
 
     :param path: Path where the file will be created
     :type path: String
+    :param name: File name
+    :type name: String
     :param content: Content of the created file
     :type content: String or binary
     :return: None
     """
-    regular_path = os.path.join(path, 'regular_file')
+    regular_path = os.path.join(path, name)
     # Check if content is binary so it changes the mode
     isBinary = re.compile('^b\'.*\'$')
     if isBinary.match(str(content)):
