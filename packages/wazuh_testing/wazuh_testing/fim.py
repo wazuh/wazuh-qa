@@ -106,11 +106,30 @@ def check_checkers(checkers, event):
     :type event: JSON
     :return: None
     """
+    default_attributes = {
+        "type",
+        "size",
+        "perm",
+        "uid",
+        "gid",
+        "user_name",
+        "group_name",
+        "inode",
+        "mtime",
+        "hash_md5",
+        "hash_sha1",
+        "hash_sha256",
+        "checksum"
+    }
+    event_keys = set(event['data']['attributes'].keys())
     for check in checkers.items():
         if check[1] == "yes":
-            assert(check[0] in event['data']['attributes'].keys())
+            assert(check[0] in event_keys)
+        elif check[1] == "except":
+            default_attributes.remove(check[0])
+            assert(event_keys <= default_attributes)
         else:
-            assert(check[0] not in event['data']['attributes'].keys())
+            assert(check[0] not in event_keys)
 
 
 def is_fim_scan_ended():
@@ -221,6 +240,35 @@ def _create_regular(path, name, content):
         f.write(content)
 
 
+def delete_file(path, name):
+    """ Deletes regular file """
+    regular_path = os.path.join(path, name)
+    if os.path.exists(regular_path):
+        os.remove(regular_path)
+
+
+def modify_file(path, name, content):
+    """ Modify a Regular file.
+
+    :param path: Path where the file will be created
+    :type path: String
+    :param name: File name
+    :type name: String
+    :param content: Content of the created file
+    :type content: String or binary
+    :return: None
+    """
+    regular_path = os.path.join(path, name)
+    # Check if content is binary so it changes the mode
+    isBinary = re.compile('^b\'.*\'$')
+    if isBinary.match(str(content)):
+        mode = 'ab'
+    else:
+        mode = 'a'
+    with open(regular_path, mode) as f:
+        f.write(content)
+
+
 def change_internal_options(opt_path, pattern, value):
     """ Changes the value of a given parameter
 
@@ -289,6 +337,7 @@ def callback_audit_loaded_rule(line):
     if match:
         return match.group(1)
     return None
+
 
 def callback_realtime_added_directory(line):
     match = re.match(r'.*Directory added for real time monitoring: \'(.+)\'', line)
