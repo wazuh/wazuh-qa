@@ -4,6 +4,7 @@
 import glob
 import os
 import pytest
+import re
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event
 from wazuh_testing.tools import FileMonitor
