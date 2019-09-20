@@ -9,6 +9,9 @@ import socket
 import sys
 
 from jq import jq
+from jsonschema import validate
+
+_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 WAZUH_PATH = os.path.join('/', 'var', 'ossec')
 ALERTS_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'alerts', 'alerts.json')
@@ -20,58 +23,51 @@ SYSLINK = 'sys_link'
 SOCKET = 'socket'
 REGULAR = 'regular'
 
+CHECK_ALL = 'check_all'
+CHECK_SUM = 'check_sum'
+CHECK_SHA1SUM = 'check_sha1sum'
+CHECK_MD5SUM = 'check_md5sum'
+CHECK_SHA256SUM = 'check_sha256sum'
+CHECK_SIZE = 'check_size'
+CHECK_OWNER = 'check_owner'
+CHECK_GROUP = 'check_group'
+CHECK_PERM = 'check_perm'
+CHECK_ATTRS = 'check_attrs'
+CHECK_MTIME = 'check_mtime'
+CHECK_INODE = 'check_inode'
+
+_REQUIRED_ATTRIBUTES = {
+    CHECK_SHA1SUM: 'hash_sha1',
+    CHECK_MD5SUM: 'hash_md5',
+    CHECK_SHA256SUM: 'hash_sha256',
+    CHECK_SIZE: 'size',
+    CHECK_OWNER: 'uid',
+    CHECK_GROUP: 'gid',
+    CHECK_PERM: 'perm',
+    CHECK_ATTRS: 'win_attributes',
+    CHECK_MTIME: 'mtime',
+    CHECK_INODE: 'inode',
+    CHECK_ALL: {CHECK_SHA256SUM, CHECK_SHA1SUM, CHECK_MD5SUM, CHECK_SIZE, CHECK_OWNER,
+                CHECK_GROUP, CHECK_PERM, CHECK_ATTRS, CHECK_MTIME, CHECK_INODE},
+    CHECK_SUM: {CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_MD5SUM}
+}
+
+_REQUIRED_AUDIT = {
+    'user_id',
+    'user_name',
+    'group_id',
+    'group_name',
+    'process_name',
+    'path',
+    'audit_uid',
+    'audit_name',
+    'effective_uid'
+    'effective_name',
+    'ppid',
+    'process_id'  # Only in windows, TODO parametrization
+}
+
 _last_log_line = 0
-
-
-def check_path(value):
-    return re.match(r'^(?:\/[^\/]+)*$', value)
-
-
-def check_integer_formatted_string(value):
-    return re.match(r'^\d+$', value)
-
-
-def check_md5(value):
-    return re.match(r'^[a-f0-9]{32}$', value)
-
-
-def check_sha1(value):
-    return re.match(r'^[0-9a-f]{5,40}$', value)
-
-
-def check_sha256(value):
-    return re.match(r'^[a-f0-9]{64}$', value)
-
-
-def check_datetime(value):
-    return re.match(r'^\d{4}-\d{2}-\d{2}T\d{2}\:\d{2}\:\d{2}$', value)
-
-
-def check_string(value):
-    return isinstance(value, str)
-
-
-def check_integer(value):
-    return isinstance(value, int)
-
-
-def check_event(value):
-    return value in ('added', 'modified', 'deleted')
-
-
-FIELDS = {'path': check_path,
-          'size_after': check_integer_formatted_string,
-          'perm_after': check_integer_formatted_string,
-          'uid_after': check_integer_formatted_string,
-          'gid_after': check_integer_formatted_string,
-          'md5_after': check_md5,
-          'sha1_after': check_sha1,
-          'sha256_after': check_sha256,
-          'uname_after': check_string,
-          'gname_after': check_string,
-          'mtime_after': check_datetime,
-          'inode_after': check_integer,
-          'event': check_event}
 
 
 def load_fim_alerts(n_last=0):
@@ -80,8 +76,8 @@ def load_fim_alerts(n_last=0):
     return list(filter(lambda x: x is not None, jq('.syscheck').transform(text=alerts, multiple_output=True)))[-n_last:]
 
 
-def check_checkers(checkers, event):
-    """ Checks if every checker is behaving correctly.
+def validate_event(event, checks=None):
+    """ Checks if event is properly formatted according to some checkers.
         If a checker value is "yes", it must appear in the log.
         Else, it must not appear in the log.
 
@@ -94,11 +90,30 @@ def check_checkers(checkers, event):
     :type event: JSON
     :return: None
     """
-    for check in checkers.items():
-        if check[1] == "yes":
-            assert(check[0] in event['data']['attributes'].keys())
-        else:
-            assert(check[0] not in event['data']['attributes'].keys())
+    def get_required_attributes(check_attributes, result=None):
+        result = set() if result is None else result
+        for check in check_attributes:
+            mapped = _REQUIRED_ATTRIBUTES[check]
+            if isinstance(mapped, str):
+                result |= {mapped}
+            elif isinstance(mapped, set):
+                result |= get_required_attributes(mapped, result=result)
+        return result
+
+    checks = {CHECK_ALL} if checks is None else checks
+    with open(os.path.join(_data_path, 'syscheck_event.json'), 'r') as f:
+        schema = json.load(f)
+    validate(schema=schema, instance=event)
+
+    # Check attributes
+    attributes = event['data']['attributes']
+    required_attributes = get_required_attributes(checks)
+    assert(attributes.keys() ^ required_attributes == set())
+
+    # Check audit
+    if event['data']['mode'] == 'whodata':
+        assert('audit' in event['data'])
+        assert(event['data']['audit'] ^ _REQUIRED_AUDIT == set())
 
 
 def is_fim_scan_ended():

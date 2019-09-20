@@ -9,8 +9,8 @@ import time
 
 import pytest
 
-from wazuh_testing.fim import WAZUH_CONF_PATH, LOG_FILE_PATH, is_fim_scan_ended, callback_detect_end_scan
-from wazuh_testing.tools import truncate_file, wait_for_condition, FileMonitor
+from wazuh_testing.fim import WAZUH_CONF_PATH, LOG_FILE_PATH, callback_detect_end_scan
+from wazuh_testing.tools import truncate_file, FileMonitor
 
 
 @pytest.fixture(scope='module')
