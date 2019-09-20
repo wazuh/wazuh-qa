@@ -74,18 +74,6 @@ FIELDS = {'path': check_path,
           'event': check_event}
 
 
-def check_fim_alert(alert, exclude_fields=None):
-    """Checks a FIM alert is properly formatted"""
-    exclude_fields = [] if exclude_fields is None else exclude_fields
-
-    for field, checker in FIELDS.items():
-        if field not in exclude_fields:
-            assert(field in alert)
-            assert(checker(alert[field]))
-        else:
-            assert(field not in alert)
-
-
 def load_fim_alerts(n_last=0):
     with open(ALERTS_FILE_PATH, 'r') as f:
         alerts = f.read()
@@ -289,6 +277,7 @@ def callback_audit_loaded_rule(line):
     if match:
         return match.group(1)
     return None
+
 
 def callback_realtime_added_directory(line):
     match = re.match(r'.*Directory added for real time monitoring: \'(.+)\'', line)
