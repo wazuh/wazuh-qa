@@ -1,36 +1,31 @@
 FROM ruby
 
-RUN cd $HOME && git clone https://github.com/wazuh/wazuh-qa.git && cd $HOME/wazuh-qa && git fetch && git checkout x
+RUN groupadd -r postgres && useradd --no-log-init -r -g postgres postgre
 
-RUN cd $HOME && git clone https://github.com/wazuh/wazuh-chef.git && git pull && git checkout x1 && git merge x2
 #ARG chef_source_branch=master
 #ARG chef_target_branch=master
 #ARG qa_branch=master
-#
-## Update aptitude with new repo
-#RUN apt-get update
-#
-## Clone the corresponding branch of wazuh-chef
-#RUN git clone https://github.com/wazuh/wazuh-chef.git
-#
-#RUN cd wazuh-chef && git checkout $source_branch && git branch && git pull
-#
-#RUN cd wazuh-chef && git fetch && git merge ${target_branch}
-#
-#RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py
-#
-#RUN pip install pytest && pip install testinfra && pip install paramiko
-#
-#RUN git clone --branch $qa_branch https://github.com/wazuh/wazuh-qa.git && cd /wazuh-qa && git pull
-#
-#RUN cp -rf wazuh-qa/kitchen/wazuh-chef/test/* wazuh-chef/cookbooks/wazuh_manager/test/ && cp -rf wazuh-qa/kitchen/wazuh-chef/files/* wazuh-chef/cookbooks/wazuh_manager/
-#
-#RUN echo "$(sed -n '/ip6/!p' /etc/hosts)" > /etc/hosts
-#
-#RUN cd $HOME/wazuh-chef/kitchen/.kitchen && ssh-keygen -t rsa -N "" -f docker_id_rsa
-#RUN cd $HOME && chmod +x $HOME/wazuh-chef/cookbooks/wazuh_manager/run.sh
-#RUN sed -i "s|\YOUR_PUBLIC_KEY|$(cat $HOME/wazuh-chef/cookbooks/wazuh_manager/.kitchen/docker_id_rsa.pub)|g" $HOME/wazuh-chef/cookbooks/wazuh_manager/test/Dockerfile
 
- rbnacl (>= 3.2, < 5.0)
- rbnacl-libsodium, if your system doesn't have libsodium installed.
- bcrypt_pbkdf (>= 1.0, < 2.0)
+RUN cd $HOME && git clone https://github.com/wazuh/wazuh-qa.git
+RUN cd $HOME/wazuh-qa/ && git checkout add-chef-tests && git pull
+RUN cd $HOME && git clone https://github.com/wazuh/wazuh-chef.git
+RUN cd $HOME/wazuh-chef/ && git checkout 3.10.0_7.3.2-bump && git pull
+
+
+RUN cp -rf $HOME/wazuh-qa/kitchen/wazuh-chef/manager/files/* $HOME/wazuh-chef/cookbooks/wazuh_manager/
+RUN cp -rf $HOME/wazuh-qa/kitchen/wazuh-chef/manager/test/* $HOME/wazuh-chef/cookbooks/wazuh_manager/test/
+RUN cp -rf $HOME/wazuh-qa/kitchen/wazuh-chef/agent/* $HOME/wazuh-chef/cookbooks/wazuh_agent/test/environments/
+
+RUN cd $HOME/wazuh-chef/cookbooks/wazuh_manager/ && mkdir .kitchen
+RUN cd $HOME/wazuh-chef/cookbooks/wazuh_manager/.kitchen && ssh-keygen -t rsa -N "" -f docker_id_rsa
+
+RUN sed -i "s|\YOUR_PUBLIC_KEY|$(cat $HOME/wazuh-chef/cookbooks/wazuh_manager/.kitchen/docker_id_rsa.pub)|g" $HOME/wazuh-chef/cookbooks/wazuh_manager/test/Dockerfile
+RUN cd $HOME/wazuh-chef/cookbooks/wazuh_manager/ && chmod +x run.sh
+
+RUN apt-get update && sudo apt install docker.io git curl wget -y
+
+RUN apt-get update
+
+RUN gem install kitchen-docker && gem install rbnacl && gem install rbnacl-libsodium && gem install bcrypt_pbkdf
+
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py
