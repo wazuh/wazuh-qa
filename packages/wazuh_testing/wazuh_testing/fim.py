@@ -333,3 +333,10 @@ def callback_realtime_added_directory(line):
     if match:
         return match.group(1)
     return None
+
+
+def callback_configuration_error(line):
+    match = re.match(r'.*CRITICAL: \(\d+\): Configuration error at', line)
+    if match:
+        return True
+    return None
