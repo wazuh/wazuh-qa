@@ -50,7 +50,7 @@
         "mode": {
           "$id": "#/properties/data/properties/mode",
           "type": "string",
-          "enum": ["realtime", "whodata", "scheduled"],
+          "enum": ["real-time", "whodata", "scheduled"],
           "examples": [
             "whodata"
           ],

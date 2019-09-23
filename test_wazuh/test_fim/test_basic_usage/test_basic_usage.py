@@ -131,7 +131,8 @@ def test_regular_file_realtime(folder, name, filetype, content, checkers,
     (testdir2, 'file', SOCKET, '', {'no_realtime'})
 ])
 def _test_special_file_realtime(folder, name, filetype, content, checks,
-                                configure_environment, restart_wazuh):
+                                get_configuration, configure_environment,
+                                restart_wazuh):
     """Check if a regular file creation is detected by syscheck."""
     if not (checks.intersection(get_configuration['checks']) or
        'all' in checks):

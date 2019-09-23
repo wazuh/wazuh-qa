@@ -11,8 +11,9 @@ import time
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from subprocess import DEVNULL, check_call, check_output
-from typing import List
+from typing import List, Any
 
+import yaml
 
 WAZUH_PATH = os.path.join('/', 'var', 'ossec')
 WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
@@ -331,3 +332,13 @@ def random_string(length, encode=None):
         st = st.encode(encode)
 
     return st
+
+
+def load_yaml(yaml_file: str) -> Any:
+    """Load a YAML file.
+
+    :param yaml_file: Full path of the YAML file to be loaded
+    :return: Python object with the YAML file content
+    """
+    with open(yaml_file) as stream:
+        return yaml.safe_load(stream)
