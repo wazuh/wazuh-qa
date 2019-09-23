@@ -36,19 +36,19 @@ CHECK_ATTRS = 'check_attrs'
 CHECK_MTIME = 'check_mtime'
 CHECK_INODE = 'check_inode'
 
-_REQUIRED_ATTRIBUTES = {
+REQUIRED_ATTRIBUTES = {
     CHECK_SHA1SUM: 'hash_sha1',
     CHECK_MD5SUM: 'hash_md5',
     CHECK_SHA256SUM: 'hash_sha256',
     CHECK_SIZE: 'size',
-    CHECK_OWNER: 'uid',
-    CHECK_GROUP: 'gid',
+    CHECK_OWNER: ['uid', 'user_name'],
+    CHECK_GROUP: ['gid', 'group_name'],
     CHECK_PERM: 'perm',
     CHECK_ATTRS: 'win_attributes',
     CHECK_MTIME: 'mtime',
     CHECK_INODE: 'inode',
     CHECK_ALL: {CHECK_SHA256SUM, CHECK_SHA1SUM, CHECK_MD5SUM, CHECK_SIZE, CHECK_OWNER,
-                CHECK_GROUP, CHECK_PERM, CHECK_ATTRS, CHECK_MTIME, CHECK_INODE},
+                CHECK_GROUP, CHECK_PERM, CHECK_MTIME, CHECK_INODE},
     CHECK_SUM: {CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_MD5SUM}
 }
 
@@ -61,7 +61,7 @@ _REQUIRED_AUDIT = {
     'path',
     'audit_uid',
     'audit_name',
-    'effective_uid'
+    'effective_uid',
     'effective_name',
     'ppid',
     'process_id'  # Only in windows, TODO parametrization
@@ -93,9 +93,11 @@ def validate_event(event, checks=None):
     def get_required_attributes(check_attributes, result=None):
         result = set() if result is None else result
         for check in check_attributes:
-            mapped = _REQUIRED_ATTRIBUTES[check]
+            mapped = REQUIRED_ATTRIBUTES[check]
             if isinstance(mapped, str):
                 result |= {mapped}
+            elif isinstance(mapped, list):
+                result |= set(mapped)
             elif isinstance(mapped, set):
                 result |= get_required_attributes(mapped, result=result)
         return result
@@ -106,14 +108,17 @@ def validate_event(event, checks=None):
     validate(schema=schema, instance=event)
 
     # Check attributes
-    attributes = event['data']['attributes']
+    attributes = event['data']['attributes'].keys() - {'type', 'checksum'}
     required_attributes = get_required_attributes(checks)
-    assert(attributes.keys() ^ required_attributes == set())
+    print(f'attributes: {attributes}')
+    print(f'required_attributes: {required_attributes}')
+    assert(attributes ^ required_attributes == set())
 
     # Check audit
+    print(f"audit: {event['data']['audit'].keys()}")
     if event['data']['mode'] == 'whodata':
         assert('audit' in event['data'])
-        assert(event['data']['audit'] ^ _REQUIRED_AUDIT == set())
+        assert(event['data']['audit'].keys() ^ _REQUIRED_AUDIT == set())
 
 
 def is_fim_scan_ended():
