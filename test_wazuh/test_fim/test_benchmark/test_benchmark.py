@@ -26,20 +26,23 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-configurations = [{'section': 'syscheck',
+configurations = [
+                  # realtime
+                  {'section': 'syscheck',
                    'elements': [{'disabled': {'value': 'no'}},
                                 {'directories': {'value': '/testdir1,/testdir2,/noexists',
                                                  'attributes': {'check_all': 'yes',
                                                                 'realtime': 'yes'}}}
                                 ],
-                   'checks': []},
+                   'checks': {'realtime'}},
+                  # whodata
                   {'section': 'syscheck',
                    'elements': [{'disabled': {'value': 'no'}},
                                 {'directories': {'value': '/testdir1,/testdir2,/noexists',
                                                  'attributes': {'check_all': 'yes',
                                                                 'whodata': 'yes'}}}
                                 ],
-                   'checks': []}
+                   'checks': {'whodata'}}
                   ]
 
 
@@ -59,15 +62,19 @@ def get_ossec_configuration(request):
 
 
 @pytest.mark.benchmark
-@pytest.mark.parametrize('n_regular, folder', [
-    (10, testdir1),
-    (100, testdir1),
-    (1000, testdir1),
-    (10000, testdir1)
+@pytest.mark.parametrize('n_regular, folder, checks', [
+    (10, testdir1, {'realtime', 'whodata'}),
+    (100, testdir1, {'realtime', 'whodata'}),
+    (1000, testdir1, {'realtime', 'whodata'}),
+    (10000, testdir1, {'realtime', 'whodata'})
 ])
-def test_detect_regular_files(n_regular, folder, get_configuration,
-                              configure_environment):
-    """Checks if a regular file creation is detected by syscheck"""
+def test_benchmark_regular_files(n_regular, folder, checks, get_configuration,
+                                 configure_environment, restart_wazuh,
+                                 wait_for_initial_scan):
+    """Check if syscheckd detects a minimum volume of file changes (add, modify, delete)."""
+    if not checks.intersection(get_configuration['checks']):
+        pytest.skip("Does not apply to this config file")
+
     min_timeout = 30
     # Create text files
     for name in range(n_regular):
@@ -75,8 +82,9 @@ def test_detect_regular_files(n_regular, folder, get_configuration,
             f.write('')
 
     # Fetch the n_regular expected events
-    events = wazuh_log_monitor.start(timeout=max(n_regular*0.01, min_timeout), callback=callback_detect_event,
-                                    accum_results=n_regular).result()
+    events = wazuh_log_monitor.start(timeout=max(n_regular*0.01, min_timeout),
+                                     callback=callback_detect_event,
+                                     accum_results=n_regular).result()
     # Are the n_regular events of type 'added'?
     types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
 
@@ -93,8 +101,9 @@ def test_detect_regular_files(n_regular, folder, get_configuration,
             f.write('new content')
 
     # Fetch the n_regular expected events
-    events = wazuh_log_monitor.start(timeout=max(n_regular * 0.01, min_timeout), callback=callback_detect_event,
-                                    accum_results=n_regular).result()
+    events = wazuh_log_monitor.start(timeout=max(n_regular * 0.01, min_timeout),
+                                     callback=callback_detect_event,
+                                     accum_results=n_regular).result()
 
     # Are the n_regular events of type 'modified'?
     types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
@@ -110,8 +119,9 @@ def test_detect_regular_files(n_regular, folder, get_configuration,
         os.remove(os.path.join(folder, f'regular_{name}'))
 
     # Fetch the n_regular expected events
-    events = wazuh_log_monitor.start(timeout=max(n_regular * 0.01, min_timeout), callback=callback_detect_event,
-                                    accum_results=n_regular).result()
+    events = wazuh_log_monitor.start(timeout=max(n_regular * 0.01, min_timeout),
+                                     callback=callback_detect_event,
+                                     accum_results=n_regular).result()
 
     # Are the n_regular events of type 'deleted'?
     types = Counter(jq(".[].data.type").transform(events, multiple_output=True))

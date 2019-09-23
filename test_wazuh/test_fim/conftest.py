@@ -10,29 +10,11 @@ import time
 import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH, WAZUH_CONF_PATH,
-                               callback_detect_end_scan, is_fim_scan_ended)
+                               callback_detect_end_scan)
 from wazuh_testing.tools import (FileMonitor, TestEnvironment, truncate_file,
                                  wait_for_condition, write_wazuh_conf)
 
-
 # functions
-
-def restart_wazuh(request):
-    # Reset ossec.log and start a new monitor
-    truncate_file(LOG_FILE_PATH)
-    file_monitor = FileMonitor(LOG_FILE_PATH)
-    setattr(request.module, 'wazuh_log_monitor', file_monitor)
-
-    # Restart Wazuh and wait for the command to end
-    p = subprocess.Popen(["service", "wazuh-manager", "restart"])
-    p.wait()
-
-    # Wait for initial FIM scan to end
-    file_monitor.start(timeout=60, callback=callback_detect_end_scan)
-
-    # Add additional sleep to avoid changing system clock issues (TO BE REMOVED when syscheck has not sleeps anymore)
-    time.sleep(11)
-
 
 def set_wazuh_conf(new_conf, request):
     """Set a new Wazuh configuration. It restarts Wazuh."""
@@ -43,11 +25,30 @@ def set_wazuh_conf(new_conf, request):
 # fixtures
 
 @pytest.fixture(scope='module')
-def configure_environment(get_configuration, request):
-    """Configure a custom environment for testing.
+def restart_wazuh(get_configuration, request):
+    # Reset ossec.log and start a new monitor
+    truncate_file(LOG_FILE_PATH)
+    file_monitor = FileMonitor(LOG_FILE_PATH)
+    setattr(request.module, 'wazuh_log_monitor', file_monitor)
 
-    :param params: List with values to customize Wazuh configuration
-    """
+    # Restart Wazuh and wait for the command to end
+    p = subprocess.Popen(["service", "wazuh-manager", "restart"])
+    p.wait()
+
+
+@pytest.fixture(scope='module')
+def wait_for_initial_scan(get_configuration, request):
+    # Wait for initial FIM scan to end
+    file_monitor = getattr(request.module, 'wazuh_log_monitor')
+    file_monitor.start(timeout=60, callback=callback_detect_end_scan)
+
+    # Add additional sleep to avoid changing system clock issues (TO BE REMOVED when syscheck has not sleeps anymore)
+    time.sleep(11)
+
+
+@pytest.fixture(scope='module')
+def configure_environment(get_configuration, request):
+    """Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration."""
     print(f"Setting a custom environment: {str(get_configuration)}")
 
     test_environment = TestEnvironment(get_configuration.get('section'),
@@ -61,7 +62,7 @@ def configure_environment(get_configuration, request):
         os.mkdir(test_dir)
 
     # set new configuration
-    set_wazuh_conf(test_environment.new_conf, request)
+    write_wazuh_conf(test_environment.new_conf)
 
     yield
 
@@ -72,4 +73,4 @@ def configure_environment(get_configuration, request):
         shutil.rmtree(parent_directory)
 
     # restore previous configuration
-    set_wazuh_conf(test_environment.backup_conf, request)
+    write_wazuh_conf(test_environment.backup_conf)
