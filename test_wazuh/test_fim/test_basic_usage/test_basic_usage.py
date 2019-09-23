@@ -2,9 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import glob
 import os
-import re
 import time
 from datetime import timedelta
 
@@ -15,9 +13,8 @@ from wazuh_testing.fim import (CHECK_ALL, FIFO, LOG_FILE_PATH, REGULAR, SOCKET,
                                create_file, validate_event)
 from wazuh_testing.tools import FileMonitor, TimeMachine
 
+
 # variables
-
-
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -28,19 +25,30 @@ options = {CHECK_ALL}
 
 # configurations
 
-configurations = [{'section': 'syscheck',
-                   'elements': [{'disabled': {'value': 'no'}},
-                                {'directories': {'value': '/testdir1,/testdir2,/noexists',
-                                                 'attributes': {'check_all': 'yes'}}}
-                                ],
-                   'checks': []},
+configurations = [
+                  # no_realtime
                   {'section': 'syscheck',
                    'elements': [{'disabled': {'value': 'no'}},
-                                {'frequency': {'value': '21600'}},
-                                {'directories': {'value': '/testdir1,/testdir2,/noexists',
+                                {'directories': {'value': '/testdir1,/testdir2',
                                                  'attributes': {'check_all': 'yes'}}}
                                 ],
-                   'checks': []},
+                   'checks': {'no_realtime'}},
+                  # realtime
+                  {'section': 'syscheck',
+                   'elements': [{'disabled': {'value': 'no'}},
+                                {'directories': {'value': '/testdir1,/testdir2',
+                                                 'attributes': {'check_all': 'yes',
+                                                                'realtime': 'yes'}}}
+                                ],
+                   'checks': {'realtime'}},
+                  # realtime_noexists
+                  {'section': 'syscheck',
+                   'elements': [{'disabled': {'value': 'no'}},
+                                {'directories': {'value': '/testdir1,/testdir2,/noexists',
+                                                 'attributes': {'check_all': 'yes',
+                                                                'realtime': 'yes'}}}
+                                ],
+                   'checks': {'realtime', 'realtime_noexists'}}
                   ]
 
 
@@ -54,22 +62,22 @@ def get_configuration(request):
 
 # tests
 
-@pytest.mark.parametrize('folder, name, filetype, content, applies_to_config', [
-    (testdir1, 'file', REGULAR, 'Sample content', 'ossec.conf'),
-    (testdir1, 'file', REGULAR, b'Sample content', 'ossec.conf'),
-    (testdir1, 'file', REGULAR, '', 'ossec.conf'),
-    (testdir1, 'file', REGULAR, b'', 'ossec.conf'),
-    (testdir2, 'file', REGULAR, 'Sample content', 'ossec.conf'),
-    (testdir2, 'file', REGULAR, b'Sample content', 'ossec.conf'),
-    (testdir2, 'file', REGULAR, '', 'ossec.conf'),
-    (testdir2, 'file', REGULAR, b'', 'ossec.conf')
+@pytest.mark.parametrize('folder, name, filetype, content, checks', [
+    (testdir1, 'file', REGULAR, 'Sample content', {'no_realtime'}),
+    (testdir1, 'file', REGULAR, b'Sample content', {'no_realtime'}),
+    (testdir1, 'file', REGULAR, '', {'no_realtime'}),
+    (testdir1, 'file', REGULAR, b'', {'no_realtime'}),
+    (testdir2, 'file', REGULAR, 'Sample content', {'no_realtime'}),
+    (testdir2, 'file', REGULAR, b'Sample content', {'no_realtime'}),
+    (testdir2, 'file', REGULAR, '', {'no_realtime'}),
+    (testdir2, 'file', REGULAR, b'', {'no_realtime'})
 ])
-def test_regular_file(folder, name, filetype, content, applies_to_config,
+def test_regular_file(folder, name, filetype, content, checks,
                       get_configuration, configure_environment, restart_wazuh,
                       wait_for_initial_scan):
-    """Checks if a special file creation is detected by syscheck"""
-
-    if not re.search(applies_to_config, get_ossec_configuration):
+    """Check if a special file creation is detected by syscheck."""
+    if not (checks.intersection(get_configuration['checks']) or
+       'all' in checks):
         pytest.skip("Does not apply to this config file")
 
     # Create files
@@ -90,20 +98,21 @@ def test_regular_file(folder, name, filetype, content, applies_to_config,
     time.sleep(11)
 
 
-@pytest.mark.parametrize('folder, name, filetype, content, checkers, applies_to_config', [
-    (testdir1, 'file', REGULAR, 'Sample content', options, 'ossec_realtime.*conf'),
-    (testdir1, 'file', REGULAR, b'Sample content', options, 'ossec_realtime.*conf'),
-    (testdir1, 'file', REGULAR, '', options, 'ossec_realtime.*conf'),
-    (testdir1, 'file', REGULAR, b'', options, 'ossec_realtime.*conf'),
-    (testdir2, 'file', REGULAR, 'Sample content', options, 'ossec_realtime.*conf'),
-    (testdir2, 'file', REGULAR, b'Sample content', options, 'ossec_realtime.*conf'),
-    (testdir2, 'file', REGULAR, '', options, 'ossec_realtime.*conf'),
-    (testdir2, 'file', REGULAR, b'', options, 'ossec_realtime.*conf')
+@pytest.mark.parametrize('folder, name, filetype, content, checkers, checks', [
+    (testdir1, 'file', REGULAR, 'Sample content', options, {'realtime'}),
+    (testdir1, 'file', REGULAR, b'Sample content', options, {'realtime'}),
+    (testdir1, 'file', REGULAR, '', options, {'realtime'}),
+    (testdir1, 'file', REGULAR, b'', options, {'realtime'}),
+    (testdir2, 'file', REGULAR, 'Sample content', options, {'realtime'}),
+    (testdir2, 'file', REGULAR, '', options, {'realtime'}),
+    (testdir2, 'file', REGULAR, b'', options, {'realtime'})
 ])
-def test_regular_file_realtime(folder, name, filetype, content, checkers, applies_to_config,
-                               get_ossec_configuration, configure_environment, restart_wazuh):
-    """Checks if a regular file creation is detected by syscheck"""
-    if not re.search(applies_to_config, get_ossec_configuration):
+def test_regular_file_realtime(folder, name, filetype, content, checkers,
+                               checks, get_configuration,
+                               configure_environment, restart_wazuh):
+    """Check if a regular file creation is detected by syscheck."""
+    if not (checks.intersection(get_configuration['checks']) or
+       'all' in checks):
         pytest.skip("Does not apply to this config file")
 
     # Create files
@@ -115,18 +124,24 @@ def test_regular_file_realtime(folder, name, filetype, content, checkers, applie
     validate_event(event, checks=options)
 
 
-@pytest.mark.parametrize('folder, name, filetype, content', [
-    (testdir1, 'file', FIFO, ''),
-    (testdir2, 'file', FIFO, ''),
-    (testdir1, 'file', SOCKET, ''),
-    (testdir2, 'file', SOCKET, '')
+@pytest.mark.parametrize('folder, name, filetype, content, checks', [
+    (testdir1, 'file', FIFO, '', {'no_realtime'}),
+    (testdir2, 'file', FIFO, '', {'no_realtime'}),
+    (testdir1, 'file', SOCKET, '', {'no_realtime'}),
+    (testdir2, 'file', SOCKET, '', {'no_realtime'})
 ])
-def _test_special_file_realtime(folder, name, filetype, content, configure_environment, restart_wazuh):
-    """Checks if a regular file creation is detected by syscheck"""
+def _test_special_file_realtime(folder, name, filetype, content, checks,
+                                configure_environment, restart_wazuh):
+    """Check if a regular file creation is detected by syscheck."""
+    if not (checks.intersection(get_configuration['checks']) or
+       'all' in checks):
+        pytest.skip("Does not apply to this config file")
+
     # Create files
     create_file(filetype, folder, content)
 
     # Wait until event is detected
     print("Espero a que salte el evento")
     with pytest.raises(TimeoutError):
-        assert wazuh_log_monitor.start(timeout=10, callback=callback_detect_event)
+        assert wazuh_log_monitor.start(timeout=10,
+                                       callback=callback_detect_event)

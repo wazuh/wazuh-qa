@@ -1,20 +1,15 @@
 # Copyright (C) 2015-2019, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-import glob
+
 import os
-import shutil
-import subprocess
-import time
 from collections import Counter
-from datetime import timedelta
 
 import pytest
 
 from jq import jq
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event
 from wazuh_testing.tools import FileMonitor
-
 
 # variables
 
@@ -56,23 +51,19 @@ def get_configuration(request):
 
 # tests
 
-@pytest.fixture(scope='module', params=glob.glob(os.path.join(test_data_path, 'ossec*.conf')))
-def get_ossec_configuration(request):
-    return request.param
-
-
 @pytest.mark.benchmark
 @pytest.mark.parametrize('n_regular, folder, checks', [
-    (10, testdir1, {'realtime', 'whodata'}),
-    (100, testdir1, {'realtime', 'whodata'}),
-    (1000, testdir1, {'realtime', 'whodata'}),
-    (10000, testdir1, {'realtime', 'whodata'})
+    (10, testdir1, {'all'}),
+    (100, testdir1, {'all'}),
+    (1000, testdir1, {'all'}),
+    (10000, testdir1, {'all'})
 ])
 def test_benchmark_regular_files(n_regular, folder, checks, get_configuration,
                                  configure_environment, restart_wazuh,
                                  wait_for_initial_scan):
     """Check if syscheckd detects a minimum volume of file changes (add, modify, delete)."""
-    if not checks.intersection(get_configuration['checks']):
+    if not (checks.intersection(get_configuration['checks']) or
+       'all' in checks):
         pytest.skip("Does not apply to this config file")
 
     min_timeout = 30
