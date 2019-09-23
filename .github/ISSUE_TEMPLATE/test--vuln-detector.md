@@ -1,17 +1,43 @@
----
-name: 'Test: Vulnerability Detector'
-about: Test suite for Vulnerability Detector.
-title: ''
-labels: ''
-assignees: ''
+# Vulnerability detector
 
----
+| Version | Revision | 
+| --- | --- | 
+| x.y.z | rev |
 
-# Vulnerability Detector test
+## Summary
+- [ ] VUL001
 
-| Version | Revision | Branch |
-| --- | --- | --- |
-| x.y.z | rev | branch |
+## VUL001
+
+**Short description**
+
+Vulnerability-detector must updated the local DBs with the latest feeds.
+
+**Category**
+
+Vulnerability-detector
+
+**Subcategory**
+
+Database updates
+
+**Description**
+
+Vulnerability-detector needs to updated the DB each `frequency` time, it is required to check in the logs, if the downloads are working properly.
+
+**Configuration sample**
+
+<vulnerability-detector>
+
+
+
+**Min/Max compatible versions**
+3.8 - 3.10
+
+**Expected logs**
+
+
+
 
 ## Database update
 
