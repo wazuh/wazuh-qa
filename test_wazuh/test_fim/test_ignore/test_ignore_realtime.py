@@ -27,25 +27,27 @@ def get_ossec_configuration(request):
 
 
 @pytest.mark.parametrize('folder, filename, mode, content, triggers_event, applies_to_config', [
-    (testdir1, 'testfile', 'w', "Sample content", True, 'wazuh_valid.*conf'),
-    (testdir1, 'btestfile', 'wb', b"Sample content", True, 'wazuh_valid.*conf'),
-    (testdir1, 'testfile2', 'w', "", True, 'wazuh_valid.*conf'),
-    (testdir1, "btestfile2", "wb", b"", True, 'wazuh_valid.*conf'),
+    (testdir1, 'testfile', 'w', "Sample content", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
+    (testdir1, 'btestfile', 'wb', b"Sample content", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
+    (testdir1, 'testfile2', 'w', "", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
+    (testdir1, "btestfile2", "wb", b"", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
     (testdir1, "btestfile2.ignore", "wb", b"", False, 'wazuh_valid_sregex_(1|2|3).*conf'),
-    (testdir1, "btestfile2.ignored", "wb", b"", True, 'wazuh_valid.*conf'),
-    (testdir1_sub, 'testfile', 'w', "Sample content", True, 'wazuh_valid.*conf'),
-    (testdir1_sub, 'btestfile', 'wb', b"Sample content", True, 'wazuh_valid.*conf'),
-    (testdir1_sub, 'testfile2', 'w', "", True, 'wazuh_valid.*conf'),
-    (testdir1_sub, "btestfile2", "wb", b"", True, 'wazuh_valid.*conf'),
-    (testdir1_sub, ".ignore.btestfile", "wb", b"", True, 'wazuh_valid.*conf'),
+    (testdir1, "btestfile2.ignored", "wb", b"", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
+    (testdir1_sub, 'testfile', 'w', "Sample content", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
+    (testdir1_sub, 'btestfile', 'wb', b"Sample content", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
+    (testdir1_sub, 'testfile2', 'w', "", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
+    (testdir1_sub, "btestfile2", "wb", b"", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
+    (testdir1_sub, ".ignore.btestfile", "wb", b"", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
     (testdir2, "another.ignore", "wb", b"other content", False, 'wazuh_valid_sregex_(1|2|3).*conf'),
     (testdir2, "another.ignored", "wb", b"other content", True, 'wazuh_valid_sregex.*conf'),
     (testdir2_sub, "another.ignore", "wb", b"other content", False, 'wazuh_valid_sregex_(1|2|3).*conf'),
     (testdir2_sub, "another.ignored", "wb", b"other content", True, 'wazuh_valid_sregex.*conf'),
-    (testdir2, "another.ignored2", "w", "", True, r'wazuh_valid.*conf'),
+    (testdir2, "another.ignored2", "w", "", True, r'wazuh_valid_(sregex_|realtime_).*conf'),
     (testdir2, "another.ignore2", "w", "", False, r'wazuh_valid_sregex_(2|3)\.conf'),
     (testdir1, 'ignore_prefix_test.txt', "w", "test", True, 'wazuh_valid_sregex_(1|2|3|4).*conf'),
-    (testdir1, 'ignore_prefix_test.txt', "w", "test", False, 'wazuh_valid_sregex_5.conf')
+    (testdir1, 'ignore_prefix_test.txt', "w", "test", False, 'wazuh_valid_sregex_5.conf'),
+    (testdir1, 'whatever.txt', "w", "test", False, 'wazuh_valid_empty.*conf'),
+    (testdir2, 'whatever2.txt', "w", "test", False, 'wazuh_valid_empty.*conf')
 ])
 def test_ignore(folder, filename, mode, content, triggers_event, applies_to_config,
                 get_ossec_configuration, configure_environment, restart_wazuh, wait_for_initial_scan):
