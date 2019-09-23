@@ -54,7 +54,7 @@ def assert_event(expected_type, path, should_be_triggered):
     """
     try:
         event = wazuh_log_monitor.start(
-            timeout=10, callback=callback_detect_event).result()
+            timeout=5, callback=callback_detect_event).result()
 
         event_triggered = event['data']['type'] == expected_type and event['data']['path'] == path
         assert(event_triggered == should_be_triggered)
