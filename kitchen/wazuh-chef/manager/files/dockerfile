@@ -49,3 +49,7 @@ RUN gem install kitchen-docker && \
     gem install berkshelf && \
     gem install httpclient && \
     cd $HOME/wazuh-chef/cookbooks/wazuh_manager/ && bundle install
+
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py
+
+RUN pip install pytest && pip install testinfra && pip install paramiko
