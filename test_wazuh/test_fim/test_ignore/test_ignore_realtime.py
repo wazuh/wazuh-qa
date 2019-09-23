@@ -48,7 +48,7 @@ def get_ossec_configuration(request):
     (testdir1, 'ignore_prefix_test.txt', "w", "test", False, 'ossec_sregex_5.conf')
 ])
 def test_ignore_subdirectory(folder, filename, mode, content, triggers_event, applies_to_config,
-                             get_ossec_configuration, configure_environment, restart_wazuh):
+                             get_ossec_configuration, configure_environment, restart_wazuh, wait_for_initial_scan):
     """Checks files are ignored in subdirectory according to configuration
 
        This test is intended to be used with valid ignore configurations
