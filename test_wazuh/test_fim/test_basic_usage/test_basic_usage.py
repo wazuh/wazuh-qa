@@ -11,37 +11,39 @@ from datetime import timedelta
 import pytest
 
 from wazuh_testing.fim import callback_detect_end_scan, callback_detect_event, LOG_FILE_PATH, FIFO, SOCKET, REGULAR, \
-    create_file, check_checkers
+    create_file, validate_event, CHECK_ALL
 from wazuh_testing.tools import TimeMachine, FileMonitor
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2')]
 testdir1, testdir2 = test_directories
-checkers = {
-    "size": "yes",
-    "group_name": "yes"
-}
+options = {CHECK_ALL}
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
-@pytest.fixture(scope='module', params=glob.glob(os.path.join(test_data_path, 'ossec*.conf')))
+@pytest.fixture(scope='module', params=glob.glob(os.path.join(test_data_path, 'ossec.conf')))
 def get_ossec_configuration(request):
     return request.param
 
 
-@pytest.mark.parametrize('folder, name, filetype, content', [
-    (testdir1, 'file', REGULAR, 'Sample content'),
-    (testdir1, 'file', REGULAR, b'Sample content'),
-    (testdir1, 'file', REGULAR, ''),
-    (testdir1, 'file', REGULAR, b''),
-    (testdir2, 'file', REGULAR, 'Sample content'),
-    (testdir2, 'file', REGULAR, b'Sample content'),
-    (testdir2, 'file', REGULAR, ''),
-    (testdir2, 'file', REGULAR, b'')
+@pytest.mark.parametrize('folder, name, filetype, content, applies_to_config', [
+    (testdir1, 'file', REGULAR, 'Sample content', 'ossec.conf'),
+    (testdir1, 'file', REGULAR, b'Sample content', 'ossec.conf'),
+    (testdir1, 'file', REGULAR, '', 'ossec.conf'),
+    (testdir1, 'file', REGULAR, b'', 'ossec.conf'),
+    (testdir2, 'file', REGULAR, 'Sample content', 'ossec.conf'),
+    (testdir2, 'file', REGULAR, b'Sample content', 'ossec.conf'),
+    (testdir2, 'file', REGULAR, '', 'ossec.conf'),
+    (testdir2, 'file', REGULAR, b'', 'ossec.conf')
 ])
-def test_regular_file(folder, name, filetype, content, configure_environment, restart_wazuh, wait_for_initial_scan):
+def test_regular_file(folder, name, filetype, content, applies_to_config,
+                      get_ossec_configuration, configure_environment, restart_wazuh, wait_for_initial_scan):
     """Checks if a special file creation is detected by syscheck"""
+
+    if not re.search(applies_to_config, get_ossec_configuration):
+        pytest.skip("Does not apply to this config file")
+
     # Create files
     create_file(filetype, name, folder, content)
 
@@ -61,16 +63,17 @@ def test_regular_file(folder, name, filetype, content, configure_environment, re
 
 
 @pytest.mark.parametrize('folder, name, filetype, content, checkers, applies_to_config', [
-    (testdir1, 'file', REGULAR, 'Sample content', checkers, 'ossec.conf'),
-    (testdir1, 'file', REGULAR, b'Sample content', checkers, 'ossec.conf'),
-    (testdir1, 'file', REGULAR, '', checkers, 'ossec.conf'),
-    (testdir1, 'file', REGULAR, b'', checkers, 'ossec.conf'),
-    (testdir2, 'file', REGULAR, 'Sample content', checkers, 'ossec_noexists.*conf'),
-    (testdir2, 'file', REGULAR, b'Sample content', checkers, 'ossec_noexists.*conf'),
-    (testdir2, 'file', REGULAR, '', checkers, 'ossec_noexists.*conf'),
-    (testdir2, 'file', REGULAR, b'', checkers, 'ossec_noexists.*conf')
+    (testdir1, 'file', REGULAR, 'Sample content', options, 'ossec_realtime.*conf'),
+    (testdir1, 'file', REGULAR, b'Sample content', options, 'ossec_realtime.*conf'),
+    (testdir1, 'file', REGULAR, '', options, 'ossec_realtime.*conf'),
+    (testdir1, 'file', REGULAR, b'', options, 'ossec_realtime.*conf'),
+    (testdir2, 'file', REGULAR, 'Sample content', options, 'ossec_realtime.*conf'),
+    (testdir2, 'file', REGULAR, b'Sample content', options, 'ossec_realtime.*conf'),
+    (testdir2, 'file', REGULAR, '', options, 'ossec_realtime.*conf'),
+    (testdir2, 'file', REGULAR, b'', options, 'ossec_realtime.*conf')
 ])
-def test_regular_file_realtime(folder, name, filetype, content, checkers, applies_to_config, get_ossec_configuration, configure_environment, restart_wazuh):
+def test_regular_file_realtime(folder, name, filetype, content, checkers, applies_to_config,
+                               get_ossec_configuration, configure_environment, restart_wazuh):
     """Checks if a regular file creation is detected by syscheck"""
     if not re.search(applies_to_config, get_ossec_configuration):
         pytest.skip("Does not apply to this config file")
@@ -81,10 +84,10 @@ def test_regular_file_realtime(folder, name, filetype, content, checkers, applie
     # Wait until event is detected
     print("Espero a que salte el evento")
     event = wazuh_log_monitor.start(timeout=10, callback=callback_detect_event).result()
-    check_checkers(checkers, event)
+    validate_event(event, checks=options)
 
 
-@pytest.mark.parametrize('folder, name, filetype, content',[
+@pytest.mark.parametrize('folder, name, filetype, content', [
     (testdir1, 'file', FIFO, ''),
     (testdir2, 'file', FIFO, ''),
     (testdir1, 'file', SOCKET, ''),
