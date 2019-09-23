@@ -11,12 +11,13 @@ import pytest
 from wazuh_testing.fim import (CHECK_ALL, FIFO, LOG_FILE_PATH, REGULAR, SOCKET,
                                callback_detect_end_scan, callback_detect_event,
                                create_file, validate_event)
-from wazuh_testing.tools import FileMonitor, TimeMachine
+from wazuh_testing.tools import FileMonitor, TimeMachine, load_yaml
 
 
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+section_configuration_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2')]
 testdir1, testdir2 = test_directories
@@ -25,31 +26,7 @@ options = {CHECK_ALL}
 
 # configurations
 
-configurations = [
-                  # no_realtime
-                  {'section': 'syscheck',
-                   'elements': [{'disabled': {'value': 'no'}},
-                                {'directories': {'value': '/testdir1,/testdir2',
-                                                 'attributes': {'check_all': 'yes'}}}
-                                ],
-                   'checks': {'no_realtime'}},
-                  # realtime
-                  {'section': 'syscheck',
-                   'elements': [{'disabled': {'value': 'no'}},
-                                {'directories': {'value': '/testdir1,/testdir2',
-                                                 'attributes': {'check_all': 'yes',
-                                                                'realtime': 'yes'}}}
-                                ],
-                   'checks': {'realtime'}},
-                  # realtime_noexists
-                  {'section': 'syscheck',
-                   'elements': [{'disabled': {'value': 'no'}},
-                                {'directories': {'value': '/testdir1,/testdir2,/noexists',
-                                                 'attributes': {'check_all': 'yes',
-                                                                'realtime': 'yes'}}}
-                                ],
-                   'checks': {'realtime', 'realtime_noexists'}}
-                  ]
+configurations = load_yaml(section_configuration_path)
 
 
 # fixtures

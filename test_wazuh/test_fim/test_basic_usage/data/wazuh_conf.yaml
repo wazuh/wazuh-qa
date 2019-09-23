@@ -1,0 +1,34 @@
+---
+- section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "/testdir1,/testdir2"
+      attributes:
+        check_all: 'yes'
+  checks:
+  - no_realtime
+- section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "/testdir1,/testdir2"
+      attributes:
+        check_all: 'yes'
+        realtime: 'yes'
+  checks:
+  - realtime
+- section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "/testdir1,/testdir2,/noexists"
+      attributes:
+        check_all: 'yes'
+        realtime: 'yes'
+  checks:
+  - realtime
+  - realtime_no_exists

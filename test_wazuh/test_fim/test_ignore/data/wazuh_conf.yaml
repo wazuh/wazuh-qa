@@ -1,0 +1,137 @@
+---
+# conf 1
+- section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "/testdir1,/testdir2"
+      attributes:
+        check_all: 'yes'
+        realtime: 'yes'
+  - ignore:
+      value: "/testdir1/ignore_this"
+  checks:
+  - no_regex
+  - no_regex1
+# conf 2
+- section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - ignore:
+      value: "/testdir1/ignore_this"
+  - directories:
+      value: "/testdir1,/testdir2"
+      attributes:
+        check_all: 'yes'
+        realtime: 'yes'
+  checks:
+  - no_regex
+  - no_regex2
+# conf 3
+- section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - ignore:
+      value: "/testdir1/ignore_this"
+  - ignore:
+      value: "/testdir1/not_exists"
+  - directories:
+      value: "/testdir1,/testdir2"
+      attributes:
+        check_all: 'yes'
+        realtime: 'yes'
+  checks:
+  - no_regex
+  - no_regex3
+# conf 4
+- section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - ignore:
+      value: ".ignore$"
+      attributes:
+        type: sregex
+  - directories:
+      value: testdir1,/testdir2
+      attributes:
+        check_all: 'yes'
+        realtime: 'yes'
+  checks:
+  - regex
+  - regex1
+# conf 5
+- section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - ignore:
+      value: ".ignore$|.ignore2$"
+      attributes:
+        type: sregex
+  - directories:
+      value: testdir1,/testdir2
+      attributes:
+        check_all: 'yes'
+        realtime: 'yes'
+  checks:
+  - regex
+  - regex2
+# conf 6
+- section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - ignore:
+      value: ".ignore$"
+      attributes:
+        type: sregex
+  - ignore:
+      value: ".ignore2$"
+      attributes:
+        type: sregex
+  - directories:
+      value: testdir1,/testdir2
+      attributes:
+        check_all: 'yes'
+        realtime: 'yes'
+  checks:
+  - regex
+  - regex3
+# conf 7
+- section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - ignore:
+      value: "^ignore_prefix"
+      attributes:
+        type: sregex
+  - directories:
+      value: testdir1,/testdir2
+      attributes:
+        check_all: 'yes'
+        realtime: 'yes'
+  checks:
+  - regex
+  - regex4
+# conf 8
+- section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - ignore:
+      value: "^/testdir1/ignore_prefix"
+      attributes:
+        type: sregex
+  - directories:
+      value: testdir1,/testdir2
+      attributes:
+        check_all: 'yes'
+        realtime: 'yes'
+  checks:
+  - regex
+  - regex5
