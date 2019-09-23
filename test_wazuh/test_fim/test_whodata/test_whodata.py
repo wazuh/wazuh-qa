@@ -16,7 +16,7 @@ from wazuh_testing.tools import FileMonitor, load_yaml
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
-section_configuration_path = os.path.join(test_data_path, 'wazuh_config')
+section_configuration_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 
 test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2'), os.path.join('/', 'testdir3'),
                     os.path.join('/', 'testdir4'), os.path.join('/', 'testdir5'), os.path.join('/', 'testdir6'),
@@ -71,7 +71,7 @@ def get_configuration(request):
     (testdir0, {"inode": "except"}, {'conf1'})
 ])
 def test_fim_whodata(folder, name, filetype, content, checkers, checks,
-                     configure_environment, restart_wazuh,
+                     get_configuration, configure_environment, restart_wazuh,
                      wait_for_initial_scan):
     if not (checks.intersection(get_configuration['checks']) or
        'all' in checks):

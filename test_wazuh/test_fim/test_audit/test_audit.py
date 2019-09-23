@@ -13,12 +13,14 @@ from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_added_rule,
                                callback_audit_loaded_rule,
                                callback_audit_rules_manipulation,
                                callback_realtime_added_directory)
-from wazuh_testing.tools import FileMonitor
+from wazuh_testing.tools import FileMonitor, load_yaml
 
 
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+
+section_configuration_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 
 test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2'), os.path.join('/', 'testdir3')]
 testdir1, testdir2, testdir3 = test_directories
@@ -28,16 +30,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-configurations = [
-                  # config1
-                  {'section': 'syscheck',
-                   'elements': [{'disabled': {'value': 'no'}},
-                                {'directories': {'value': '/testdir1,/testdir2,/testdir3',
-                                                 'attributes': {'check_all': 'yes',
-                                                                'whodata': 'yes'}}}
-                                ],
-                   'checks': {'config1'}}
-                  ]
+configurations = load_yaml(section_configuration_path)
 
 
 # fixtures

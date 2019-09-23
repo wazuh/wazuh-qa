@@ -1,0 +1,12 @@
+---
+- section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "/testdir1,/testdir2,/testdir3"
+      attributes:
+        check_all: 'yes'
+        whodata: 'yes'
+  checks:
+  - config1
