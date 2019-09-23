@@ -1,8 +1,8 @@
 #!/bin/bash
 
 development_agent_path="../wazuh_agent/test/environments/development.json"
-development_manager_path="../wazuh_manager/test/environments/development.json"
-
+development_manager_path="./wazuh_manager/test/environments/development.json"
+development_manager_path_master="./wazuh_manager/test/environments/development-master.json"
 
 template=".template"
 
@@ -47,7 +47,7 @@ do
 	cp "$development_agent_path$template" "$development_agent_path"
 	cp "$development_manager_path$template" "$development_manager_path"
 	cp "$development_manager_path_master$template" "$development_manager_path_master"
-
+	
 done
 
 echo "Kitchen is testing ..."
