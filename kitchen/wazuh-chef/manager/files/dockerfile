@@ -17,6 +17,9 @@ RUN cd $HOME && \
     cd $HOME/wazuh-chef/ && \
     git checkout $chef_source_branch && \
     git pull && \
+    git checkout $chef_target_branch && \
+    git pull && \
+    git checkout $chef_source_branch && \
     git merge $chef_target_branch
 
 
@@ -44,6 +47,5 @@ RUN gem install kitchen-docker && \
     gem install rbnacl-libsodium && \
     gem install bcrypt_pbkdf && \
     gem install berkshelf && \
-    gem uninstall httpclient -x && \
     gem install httpclient && \
     cd $HOME/wazuh-chef/cookbooks/wazuh_manager/ && bundle install
