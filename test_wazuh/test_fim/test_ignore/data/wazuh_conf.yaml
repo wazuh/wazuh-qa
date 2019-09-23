@@ -10,11 +10,28 @@
       - check_all: 'yes'
       - realtime: 'yes'
   - ignore:
+      value: "aaaa"
+      attributes:
+      - type: "sregexxxx"
+  checks:
+  - invalid_noregex
+  - invalid_noregex1
+# conf 2
+- section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "/testdir1,/testdir2"
+      attributes:
+      - check_all: 'yes'
+      - realtime: 'yes'
+  - ignore:
       value: "/testdir1/ignore_this"
   checks:
   - no_regex
   - no_regex1
-# conf 2
+# conf 3
 - section: syscheck
   elements:
   - disabled:
@@ -29,7 +46,7 @@
   checks:
   - no_regex
   - no_regex2
-# conf 3
+# conf 4
 - section: syscheck
   elements:
   - disabled:
@@ -46,7 +63,7 @@
   checks:
   - no_regex
   - no_regex3
-# conf 4
+# conf 5
 - section: syscheck
   elements:
   - disabled:
@@ -56,14 +73,14 @@
       attributes:
       - type: sregex
   - directories:
-      value: testdir1,/testdir2
+      value: "/testdir1,/testdir2"
       attributes:
       - check_all: 'yes'
       - realtime: 'yes'
   checks:
   - regex
   - regex1
-# conf 5
+# conf 6
 - section: syscheck
   elements:
   - disabled:
@@ -73,14 +90,14 @@
       attributes:
       - type: sregex
   - directories:
-      value: /testdir1,/testdir2
+      value: "/testdir1,/testdir2"
       attributes:
       - check_all: 'yes'
       - realtime: 'yes'
   checks:
   - regex
   - regex2
-# conf 6
+# conf 7
 - section: syscheck
   elements:
   - disabled:
@@ -94,14 +111,14 @@
       attributes:
       - type: sregex
   - directories:
-      value: /testdir1,/testdir2
+      value: "/testdir1,/testdir2"
       attributes:
       - check_all: 'yes'
       - realtime: 'yes'
   checks:
   - regex
   - regex3
-# conf 7
+# conf 8
 - section: syscheck
   elements:
   - disabled:
@@ -111,7 +128,7 @@
       attributes:
       - type: sregex
   - directories:
-      value: /testdir1,/testdir2
+      value: "/testdir1,/testdir2"
       attributes:
       - check_all: 'yes'
       - realtime: 'yes'
@@ -128,7 +145,7 @@
       attributes:
       - type: sregex
   - directories:
-      value: /testdir1,/testdir2
+      value: "/testdir1,/testdir2"
       attributes:
       - check_all: 'yes'
       - realtime: 'yes'
