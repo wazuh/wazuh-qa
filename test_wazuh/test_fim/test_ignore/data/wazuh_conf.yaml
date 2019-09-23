@@ -14,13 +14,30 @@
       attributes:
       - type: "sregexxxx"
   checks:
-  - invalid_noregex
-  - invalid_noregex1
+  - invalid_no_regex
+  - invalid_no_regex1
 # conf 2
 - section: syscheck
   elements:
   - disabled:
       value: 'no'
+  - ignore:
+      value: ""
+      attributes:
+      - type: "sregex"
+  - directories:
+      value: "/testdir1,/testdir2"
+      attributes:
+      - check_all: 'yes'
+      - realtime: 'yes'
+  checks:
+  - valid_empty
+  - valid_empty1
+# conf 3
+- section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
   - directories:
       value: "/testdir1,/testdir2"
       attributes:
@@ -29,9 +46,9 @@
   - ignore:
       value: "/testdir1/ignore_this"
   checks:
-  - no_regex
-  - no_regex1
-# conf 3
+  - valid_no_regex
+  - valid_no_regex1
+# conf 4
 - section: syscheck
   elements:
   - disabled:
@@ -44,9 +61,9 @@
       - check_all: 'yes'
       - realtime: 'yes'
   checks:
-  - no_regex
-  - no_regex2
-# conf 4
+  - valid_no_regex
+  - valid_no_regex2
+# conf 5
 - section: syscheck
   elements:
   - disabled:
@@ -61,9 +78,9 @@
       - check_all: 'yes'
       - realtime: 'yes'
   checks:
-  - no_regex
-  - no_regex3
-# conf 5
+  - valid_no_regex
+  - valid_no_regex3
+# conf 6
 - section: syscheck
   elements:
   - disabled:
@@ -78,9 +95,9 @@
       - check_all: 'yes'
       - realtime: 'yes'
   checks:
-  - regex
-  - regex1
-# conf 6
+  - valid_regex
+  - valid_regex1
+# conf 7
 - section: syscheck
   elements:
   - disabled:
@@ -95,9 +112,9 @@
       - check_all: 'yes'
       - realtime: 'yes'
   checks:
-  - regex
-  - regex2
-# conf 7
+  - valid_regex
+  - valid_regex2
+# conf 8
 - section: syscheck
   elements:
   - disabled:
@@ -116,9 +133,9 @@
       - check_all: 'yes'
       - realtime: 'yes'
   checks:
-  - regex
-  - regex3
-# conf 8
+  - valid_regex
+  - valid_regex3
+# conf 9
 - section: syscheck
   elements:
   - disabled:
@@ -133,9 +150,9 @@
       - check_all: 'yes'
       - realtime: 'yes'
   checks:
-  - regex
-  - regex4
-# conf 8
+  - valid_regex
+  - valid_regex4
+# conf 10
 - section: syscheck
   elements:
   - disabled:
@@ -150,5 +167,5 @@
       - check_all: 'yes'
       - realtime: 'yes'
   checks:
-  - regex
-  - regex5
+  - valid_regex
+  - valid_regex5

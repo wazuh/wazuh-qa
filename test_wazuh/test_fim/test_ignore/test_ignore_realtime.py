@@ -9,6 +9,7 @@ import pytest
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event
 from wazuh_testing.tools import FileMonitor, load_yaml
 
+
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -26,7 +27,9 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-configurations = load_yaml(section_configuration_path)
+configurations = [configuration for configuration in
+                  load_yaml(section_configuration_path)
+                  if 'invalid_noregex' not in configuration['checks']]
 
 
 # fixtures
@@ -37,28 +40,28 @@ def get_configuration(request):
     return request.param
 
 
-# tests
-
 @pytest.mark.parametrize('folder, filename, mode, content, triggers_event, checks', [
-    (testdir1, 'testfile', 'w', "Sample content", True, {'no_regex'}),
-    (testdir1, 'btestfile', 'wb', b"Sample content", True, {'no_regex'}),
-    (testdir1, 'testfile2', 'w', "", True, {'no_regex'}),
-    (testdir1, "btestfile2", "wb", b"", True, {'no_regex'}),
-    (testdir1, "btestfile2.ignore", "wb", b"", False, {'regex1', 'regex2', 'regex3'}),
-    (testdir1, "btestfile2.ignored", "wb", b"", True, {'no_regex'}),
-    (testdir1_sub, 'testfile', 'w', "Sample content", True, {'no_regex'}),
-    (testdir1_sub, 'btestfile', 'wb', b"Sample content", True, {'no_regex'}),
-    (testdir1_sub, 'testfile2', 'w', "", True, {'no_regex'}),
-    (testdir1_sub, "btestfile2", "wb", b"", True, {'no_regex'}),
-    (testdir1_sub, ".ignore.btestfile", "wb", b"", True, {'no_regex'}),
-    (testdir2, "another.ignore", "wb", b"other content", False, {'regex1', 'regex2', 'regex3'}),
-    (testdir2, "another.ignored", "wb", b"other content", True, {'regex'}),
-    (testdir2_sub, "another.ignore", "wb", b"other content", False, {'regex1', 'regex2', 'regex3'}),
-    (testdir2_sub, "another.ignored", "wb", b"other content", True, {'regex'}),
-    (testdir2, "another.ignored2", "w", "", True, {'no_regex'}),
-    (testdir2, "another.ignore2", "w", "", False, {'regex2', 'regex3'}),
-    (testdir1, 'ignore_prefix_test.txt', "w", "test", True, {'regex1', 'regex2', 'regex3', 'regex4'}),
-    (testdir1, 'ignore_prefix_test.txt', "w", "test", False, {'regex5'})
+    (testdir1, 'testfile', 'w', "Sample content", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1, 'btestfile', 'wb', b"Sample content", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1, 'testfile2', 'w', "", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1, "btestfile2", "wb", b"", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1, "btestfile2.ignore", "wb", b"", False, {'valid_regex1', 'valid_regex2', 'valid_regex3'}),
+    (testdir1, "btestfile2.ignored", "wb", b"", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1_sub, 'testfile', 'w', "Sample content", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1_sub, 'btestfile', 'wb', b"Sample content", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1_sub, 'testfile2', 'w', "", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1_sub, "btestfile2", "wb", b"", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1_sub, ".ignore.btestfile", "wb", b"", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir2, "another.ignore", "wb", b"other content", False, {'valid_regex1', 'valid_regex2', 'valid_regex3'}),
+    (testdir2, "another.ignored", "wb", b"other content", True, {'valid_regex'}),
+    (testdir2_sub, "another.ignore", "wb", b"other content", False, {'valid_regex1', 'valid_regex2', 'valid_regex3'}),
+    (testdir2_sub, "another.ignored", "wb", b"other content", True, {'valid_regex'}),
+    (testdir2, "another.ignored2", "w", "", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir2, "another.ignore2", "w", "", False, {'valid_regex2', 'valid_regex3'}),
+    (testdir1, 'ignore_prefix_test.txt', "w", "test", True, {'valid_regex1', 'valid_regex2', 'valid_regex3', 'valid_regex4'}),
+    (testdir1, 'ignore_prefix_test.txt', "w", "test", False, {'valid_regex5'}),
+    (testdir1, 'whatever.txt', "w", "test", False, {'valid_empty'}),
+    (testdir2, 'whatever2.txt', "w", "test", False, {'valid_empty'})
 ])
 def test_ignore_subdirectory(folder, filename, mode, content, triggers_event,
                              checks, get_configuration, configure_environment,
