@@ -7,8 +7,8 @@
   - directories:
       value: "/testdir1,/testdir2"
       attributes:
-        check_all: 'yes'
-        realtime: 'yes'
+      - check_all: 'yes'
+      - realtime: 'yes'
   - ignore:
       value: "/testdir1/ignore_this"
   checks:
@@ -24,8 +24,8 @@
   - directories:
       value: "/testdir1,/testdir2"
       attributes:
-        check_all: 'yes'
-        realtime: 'yes'
+      - check_all: 'yes'
+      - realtime: 'yes'
   checks:
   - no_regex
   - no_regex2
@@ -41,8 +41,8 @@
   - directories:
       value: "/testdir1,/testdir2"
       attributes:
-        check_all: 'yes'
-        realtime: 'yes'
+      - check_all: 'yes'
+      - realtime: 'yes'
   checks:
   - no_regex
   - no_regex3
@@ -54,12 +54,12 @@
   - ignore:
       value: ".ignore$"
       attributes:
-        type: sregex
+      - type: sregex
   - directories:
       value: testdir1,/testdir2
       attributes:
-        check_all: 'yes'
-        realtime: 'yes'
+      - check_all: 'yes'
+      - realtime: 'yes'
   checks:
   - regex
   - regex1
@@ -71,12 +71,12 @@
   - ignore:
       value: ".ignore$|.ignore2$"
       attributes:
-        type: sregex
+      - type: sregex
   - directories:
-      value: testdir1,/testdir2
+      value: /testdir1,/testdir2
       attributes:
-        check_all: 'yes'
-        realtime: 'yes'
+      - check_all: 'yes'
+      - realtime: 'yes'
   checks:
   - regex
   - regex2
@@ -88,16 +88,16 @@
   - ignore:
       value: ".ignore$"
       attributes:
-        type: sregex
+      - type: sregex
   - ignore:
       value: ".ignore2$"
       attributes:
-        type: sregex
+      - type: sregex
   - directories:
-      value: testdir1,/testdir2
+      value: /testdir1,/testdir2
       attributes:
-        check_all: 'yes'
-        realtime: 'yes'
+      - check_all: 'yes'
+      - realtime: 'yes'
   checks:
   - regex
   - regex3
@@ -109,12 +109,12 @@
   - ignore:
       value: "^ignore_prefix"
       attributes:
-        type: sregex
+      - type: sregex
   - directories:
-      value: testdir1,/testdir2
+      value: /testdir1,/testdir2
       attributes:
-        check_all: 'yes'
-        realtime: 'yes'
+      - check_all: 'yes'
+      - realtime: 'yes'
   checks:
   - regex
   - regex4
@@ -126,12 +126,12 @@
   - ignore:
       value: "^/testdir1/ignore_prefix"
       attributes:
-        type: sregex
+      - type: sregex
   - directories:
-      value: testdir1,/testdir2
+      value: /testdir1,/testdir2
       attributes:
-        check_all: 'yes'
-        realtime: 'yes'
+      - check_all: 'yes'
+      - realtime: 'yes'
   checks:
   - regex
   - regex5

@@ -7,62 +7,62 @@
   - directories:
       value: "/testdir1"
       attributes:
-        check_all: 'yes'
-        whodata: 'yes'
-        check_sum: 'no'
+      - check_all: 'yes'
+      - whodata: 'yes'
+      - check_sum: 'no'
   - directories:
       value: "/testdir1"
       attributes:
-        check_all: 'yes'
-        whodata: 'yes'
-        check_md5sum: 'no'
+      - check_all: 'yes'
+      - whodata: 'yes'
+      - check_md5sum: 'no'
   - directories:
       value: "/testdir1"
       attributes:
-        check_all: 'yes'
-        whodata: 'yes'
-        check_sha1sum: 'no'
+      - check_all: 'yes'
+      - whodata: 'yes'
+      - check_sha1sum: 'no'
   - directories:
       value: "/testdir1"
       attributes:
-        check_all: 'yes'
-        whodata: 'yes'
-        check_sha256sum: 'no'
+      - check_all: 'yes'
+      - whodata: 'yes'
+      - check_sha256sum: 'no'
   - directories:
       value: "/testdir1"
       attributes:
-        check_all: 'yes'
-        whodata: 'yes'
-        check_size: 'no'
+      - check_all: 'yes'
+      - whodata: 'yes'
+      - check_size: 'no'
   - directories:
       value: "/testdir1"
       attributes:
-        check_all: 'yes'
-        whodata: 'yes'
-        check_owner: 'no'
+      - check_all: 'yes'
+      - whodata: 'yes'
+      - check_owner: 'no'
   - directories:
       value: "/testdir1"
       attributes:
-        check_all: 'yes'
-        whodata: 'yes'
-        check_group: 'no'
+      - check_all: 'yes'
+      - whodata: 'yes'
+      - check_group: 'no'
   - directories:
       value: "/testdir1"
       attributes:
-        check_all: 'yes'
-        whodata: 'yes'
-        check_perm: 'no'
+      - check_all: 'yes'
+      - whodata: 'yes'
+      - check_perm: 'no'
   - directories:
       value: "/testdir1"
       attributes:
-        check_all: 'yes'
-        whodata: 'yes'
-        check_mtime: 'no'
+      - check_all: 'yes'
+      - whodata: 'yes'
+      - check_mtime: 'no'
   - directories:
       value: "/testdir1"
       attributes:
-        check_all: 'yes'
-        whodata: 'yes'
-        check_inode: 'no'
+      - check_all: 'yes'
+      - whodata: 'yes'
+      - check_inode: 'no'
   checks:
-    - conf1
+  - conf1

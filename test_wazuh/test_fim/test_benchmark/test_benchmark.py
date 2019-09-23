@@ -9,11 +9,12 @@ import pytest
 
 from jq import jq
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event
-from wazuh_testing.tools import FileMonitor
+from wazuh_testing.tools import FileMonitor, load_yaml
 
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+section_configuration_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [os.path.join('/', 'testdir1')]
 testdir1 = test_directories[0]
 
@@ -21,24 +22,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-configurations = [
-                  # realtime
-                  {'section': 'syscheck',
-                   'elements': [{'disabled': {'value': 'no'}},
-                                {'directories': {'value': '/testdir1,/testdir2,/noexists',
-                                                 'attributes': {'check_all': 'yes',
-                                                                'realtime': 'yes'}}}
-                                ],
-                   'checks': {'realtime'}},
-                  # whodata
-                  {'section': 'syscheck',
-                   'elements': [{'disabled': {'value': 'no'}},
-                                {'directories': {'value': '/testdir1,/testdir2,/noexists',
-                                                 'attributes': {'check_all': 'yes',
-                                                                'whodata': 'yes'}}}
-                                ],
-                   'checks': {'whodata'}}
-                  ]
+configurations = load_yaml(section_configuration_path)
 
 
 # fixtures

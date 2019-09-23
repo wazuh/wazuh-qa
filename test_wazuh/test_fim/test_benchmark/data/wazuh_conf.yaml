@@ -5,24 +5,13 @@
   - disabled:
       value: 'no'
   - directories:
-      value: "/testdir1,/testdir2"
-      attributes:
-      - check_all: 'yes'
-  checks:
-  - no_realtime
-# conf 2
-- section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/testdir1,/testdir2"
+      value: "/testdir1,/testdir2,/noexists"
       attributes:
       - check_all: 'yes'
       - realtime: 'yes'
   checks:
   - realtime
-# conf 3
+# conf 2
 - section: syscheck
   elements:
   - disabled:
@@ -31,7 +20,6 @@
       value: "/testdir1,/testdir2,/noexists"
       attributes:
       - check_all: 'yes'
-      - realtime: 'yes'
+      - whodata: 'yes'
   checks:
-  - realtime
-  - realtime_no_exists
+  - whodata

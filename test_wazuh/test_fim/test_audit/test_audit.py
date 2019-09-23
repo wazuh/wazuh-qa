@@ -19,9 +19,7 @@ from wazuh_testing.tools import FileMonitor, load_yaml
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-
 section_configuration_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-
 test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2'), os.path.join('/', 'testdir3')]
 testdir1, testdir2, testdir3 = test_directories
 

@@ -179,8 +179,9 @@ def set_section_configuration(section: str = 'syscheck',
                 tag.text = properties.get('value')
                 attributes = properties.get('attributes')
                 if attributes:
-                    for attr_name, attr_value in attributes.items():
-                        tag.attrib[attr_name] = attr_value
+                    for attribute in attributes:
+                        for attr_name, attr_value in attribute.items():
+                            tag.attrib[attr_name] = attr_value
 
     return wazuh_conf
 
