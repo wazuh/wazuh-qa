@@ -50,7 +50,6 @@ def test_regular_file(folder, name, filetype, content, applies_to_config,
     # Go ahead in time to let syscheck perform a new scan
     print("Muevo el reloj 13 horas al futuro")
     TimeMachine.travel_to_future(timedelta(hours=13))
-
     # Wait until event is detected
     print("Espero a que salte el evento")
     wazuh_log_monitor.start(timeout=10, callback=callback_detect_event)
@@ -73,7 +72,7 @@ def test_regular_file(folder, name, filetype, content, applies_to_config,
     (testdir2, 'file', REGULAR, b'', options, 'ossec_realtime.*conf')
 ])
 def test_regular_file_realtime(folder, name, filetype, content, checkers, applies_to_config,
-                               get_ossec_configuration, configure_environment, restart_wazuh):
+                               get_ossec_configuration, configure_environment, restart_wazuh, wait_for_initial_scan):
     """Checks if a regular file creation is detected by syscheck"""
     if not re.search(applies_to_config, get_ossec_configuration):
         pytest.skip("Does not apply to this config file")
@@ -86,17 +85,53 @@ def test_regular_file_realtime(folder, name, filetype, content, checkers, applie
     event = wazuh_log_monitor.start(timeout=10, callback=callback_detect_event).result()
     validate_event(event, checks=options)
 
-
-@pytest.mark.parametrize('folder, name, filetype, content', [
-    (testdir1, 'file', FIFO, ''),
-    (testdir2, 'file', FIFO, ''),
-    (testdir1, 'file', SOCKET, ''),
-    (testdir2, 'file', SOCKET, '')
+    # This test is not finished yet. There is a bug with special and regular files in the same directory
+@pytest.mark.parametrize('folder, name, filetype, content, applies_to_config', [
+    (testdir1, 'fifofile', FIFO, '', 'ossec.conf')
+    (testdir2, 'fifofile', FIFO, '', 'ossec.conf'),
+    (testdir1, 'regularfile', REGULAR, '', 'ossec.conf')
+    (testdir1, 'socketfile', SOCKET, '', 'ossec.conf'),
+    (testdir2, 'socketfile', SOCKET, '', 'ossec.conf')
 ])
-def _test_special_file_realtime(folder, name, filetype, content, configure_environment, restart_wazuh):
-    """Checks if a regular file creation is detected by syscheck"""
+def _test_special_file(folder, name, filetype, content, applies_to_config,
+                      get_ossec_configuration, configure_environment, restart_wazuh, wait_for_initial_scan):
+    """Checks if a special file creation is detected by syscheck"""
+
+    if not re.search(applies_to_config, get_ossec_configuration):
+        pytest.skip("Does not apply to this config file")
+
     # Create files
-    create_file(filetype, folder, content)
+    create_file(filetype, name, folder, content)
+    print(f'\n\n{filetype}\n\n')
+    # Go ahead in time to let syscheck perform a new scan
+    print("Muevo el reloj 13 horas al futuro")
+    TimeMachine.travel_to_future(timedelta(hours=13))
+    # Wait until event is detected
+    print("Espero a que salte el evento")
+    with pytest.raises(TimeoutError):
+        assert wazuh_log_monitor.start(timeout=10, callback=callback_detect_event)
+
+    # Wait for FIM scan to finish
+    print("Espero a que termine el scan")
+    #wazuh_log_monitor.start(timeout=10, callback=callback_detect_end_scan)
+    #print("Espero 11 segundos")
+    #time.sleep(11)
+
+
+@pytest.mark.parametrize('folder, name, filetype, content, applies_to_config', [
+    (testdir1, 'fifofile', FIFO, '', 'ossec_realtime.*conf'),
+    (testdir2, 'fifofile', FIFO, '', 'ossec_realtime.*conf'),
+    (testdir1, 'socketfile', SOCKET, '', 'ossec_realtime.*conf'),
+    (testdir2, 'socketfile', SOCKET, '', 'ossec_realtime.*conf')
+])
+def test_special_file_realtime(folder, name, filetype, content, applies_to_config,
+                                get_ossec_configuration, configure_environment, restart_wazuh):
+    """Checks if a regular file creation is detected by syscheck"""
+    if not re.search(applies_to_config, get_ossec_configuration):
+        pytest.skip("Does not apply to this config file")
+
+    # Create files
+    create_file(filetype, name, folder, content)
 
     # Wait until event is detected
     print("Espero a que salte el evento")
