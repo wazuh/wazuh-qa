@@ -23,12 +23,12 @@ def configure_environment(get_ossec_configuration, request):
     # Create test directories
     test_directories = getattr(request.module, 'test_directories')
     for test_dir in test_directories:
-        os.mkdir(test_dir)
+        os.makedirs(test_dir)
 
     yield
     # Remove created folders
     for test_dir in test_directories:
-        shutil.rmtree(test_dir)
+        shutil.rmtree(test_dir, ignore_errors=True)
 
 
 @pytest.fixture(scope='module')

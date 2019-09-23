@@ -11,11 +11,22 @@ from wazuh_testing.tools import FileMonitor
 
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+
+def create_folder_hierarchy(num_subdirectories):
+    path = "/testdir1"
+    for n in range(1, num_subdirectories):
+        path = os.path.join(path, "subdir" + str(n))
+    return path
+
+
 test_directories = [os.path.join('/', 'testdir1'),
+                    os.path.join('/', 'testdir2'),
                     os.path.join('/', 'testdir1', 'subdir1'),
-                    os.path.join('/', 'testdir1', 'subdir1', 'subdir2', 'subdir3', 'subdir4', 'subdir5')
+                    os.path.join('/', 'testdir2', 'subdir1'),
+                    create_folder_hierarchy(5),
+                    create_folder_hierarchy(319)
                     ]
-testdir1, testdir_sub1, testdir_sub5 = test_directories
+testdir1, testdir2, testdir1_sub1, testdir2_sub1, testdir1_sub5, testdir1_sub320 = test_directories
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
@@ -23,29 +34,27 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 def get_ossec_configuration(request):
     return request.param
 
-@pytest.mark.parametrize('folder, filename, mode, content, triggers_event, applies_to_config', [
+@pytest.mark.parametrize('folder, filename, mode, content, should_be_triggered, applies_to_config', [
     (testdir1, 'testfile', 'w', "Sample content", True, 'ossec.*conf'),
     (testdir1, 'btestfile', 'wb', b"Sample content", True, 'ossec.*conf'),
-
-    (testdir_sub1, 'testfile', 'w', "", False, 'ossec_no_recursion.conf'),
-    (testdir_sub1, "btestfile", "wb", b"", False, 'ossec_no_recursion.conf'),
-
-    (testdir_sub1, 'testfile', 'w', "", False, 'ossec_valid_recursion_1.conf'),
-    (testdir_sub1, "btestfile", "wb", b"", False, 'ossec_valid_recursion_1.conf'),
-
-    (testdir_sub1, 'testfile', 'w', "", True, 'ossec_valid_recursion_2.conf'),
-    (testdir_sub1, "btestfile", "wb", b"", True, 'ossec_valid_recursion_2.conf'),
-    (testdir_sub5, 'testfile', 'w', "", False, 'ossec_valid_recursion_2.conf'),
-    (testdir_sub5, "btestfile", "wb", b"", False, 'ossec_valid_recursion_2.conf'),
-
-    (testdir_sub1, 'testfile', 'w', "", True, 'ossec_valid_recursion_3.conf'),
-    (testdir_sub1, "btestfile", "wb", b"", True, 'ossec_valid_recursion_3.conf'),
-    (testdir_sub5, 'testfile', 'w', "", True, 'ossec_valid_recursion_3.conf'),
-    (testdir_sub5, "btestfile", "wb", b"", True, 'ossec_valid_recursion_3.conf'),
+    (testdir2, 'testfile', 'w', "Sample content", True, 'ossec_no_recursion.conf'),
+    (testdir2, 'btestfile', 'wb', b"Sample content", True, 'ossec_no_recursion.conf'),
+    (testdir1_sub1, 'testfile', 'w', "", False, 'ossec_no_recursion.conf'),
+    (testdir1_sub1, 'testfile', 'wb', b"", False, 'ossec_no_recursion.conf'),
+    (testdir2_sub1, 'testfile', 'w', "", True, 'ossec_no_recursion.conf'),
+    (testdir2_sub1, 'testfile', 'wb', b"", True, 'ossec_no_recursion.conf'),
+    (testdir1_sub5, 'testfile', 'w', "", False, 'ossec_recursion_1.conf'),
+    (testdir1_sub5, "btestfile", "wb", b"", False, 'ossec_recursion_1.conf'),
+    (testdir1_sub1, 'testfile', 'w', "", True, 'ossec_recursion_(1|5).*.conf'),
+    (testdir1_sub1, 'btestfile', 'wb', b"", True, 'ossec_valid_recursion_(1|5).*.conf'),
+    (testdir1_sub5, 'testfile', 'w', "", True, 'ossec_recursion_5.conf'),
+    (testdir1_sub5, "btestfile", "wb", b"", True, 'ossec_recursion_5.conf'),
+    (testdir1_sub320, 'testfile', 'w', "Sample content", True, 'ossec_recursion_320.conf'),
+    (testdir1_sub320, 'btestfile', 'wb', b"Sample content", True, 'ossec_recursion_320.conf')
 ])
 
-def test_maximum_recursion_level(folder, filename, mode, content, triggers_event, applies_to_config,
-                             get_ossec_configuration, configure_environment, restart_wazuh):
+def test_maximum_recursion_level(folder, filename, mode, content, should_be_triggered, applies_to_config,
+                                 get_ossec_configuration, configure_environment, restart_wazuh):
     """Checks files inside directories recursively according to maximum_recursion_level
 
         This test is intended to be used with valid recursion configurations.
@@ -54,7 +63,7 @@ def test_maximum_recursion_level(folder, filename, mode, content, triggers_event
         :param filename string Name of the file to be created
         :param mode string same as mode in open built-in function
         :param content string, bytes Content to fill the new file
-        :param triggers_event bool True if an event must be generated, False otherwise
+        :param should_be_triggered bool True if an event must be generated, False otherwise
         :param applies_to_config string RegEx to match the name of the configuration file where the test applies. If
                 the configuration file does not match the test is skipped
     """
@@ -68,9 +77,11 @@ def test_maximum_recursion_level(folder, filename, mode, content, triggers_event
 
     # Fetch the n_regular expected events
     try:
-        event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
-        assert(event['data']['type'] == 'added')
-        assert(event['data']['path'] == os.path.join(folder, filename))
+        event = wazuh_log_monitor.start(timeout=10, callback=callback_detect_event).result()
+
+        event_triggered = event['data']['type'] in ["added", "modified"] and event['data']['path'] == os.path.join(folder, filename)
+        assert(event_triggered == should_be_triggered)
+
     except TimeoutError:
-        if triggers_event:
+        if should_be_triggered:
             raise
