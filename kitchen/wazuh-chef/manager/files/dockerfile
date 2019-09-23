@@ -2,14 +2,22 @@ FROM ruby
 
 RUN groupadd -r postgres && useradd --no-log-init -r -g postgres postgre
 
-#ARG chef_source_branch=master
-#ARG chef_target_branch=master
-#ARG qa_branch=master
+ARG chef_source_branch=master
+ARG chef_target_branch=master
+ARG qa_branch=master
 
-RUN cd $HOME && git clone https://github.com/wazuh/wazuh-qa.git
-RUN cd $HOME/wazuh-qa/ && git checkout add-chef-tests && git pull
-RUN cd $HOME && git clone https://github.com/wazuh/wazuh-chef.git
-RUN cd $HOME/wazuh-chef/ && git checkout 3.10.0_7.3.2-bump && git pull
+RUN cd $HOME && \ 
+    git clone https://github.com/wazuh/wazuh-qa.git && \
+    cd $HOME/wazuh-qa/ && \
+    git checkout $qa_branch && \
+    git pull
+ 
+RUN cd $HOME && \
+    git clone https://github.com/wazuh/wazuh-chef.git && \
+    cd $HOME/wazuh-chef/ && \
+    git checkout $chef_source_branch && \
+    git pull && \
+    git merge $chef_target_branch
 
 
 RUN cp -rf $HOME/wazuh-qa/kitchen/wazuh-chef/manager/files/* $HOME/wazuh-chef/cookbooks/wazuh_manager/
@@ -22,7 +30,10 @@ RUN cd $HOME/wazuh-chef/cookbooks/wazuh_manager/ && \
     cp $HOME/wazuh-qa/kitchen/wazuh-chef/manager/keys/* $HOME/wazuh-chef/cookbooks/wazuh_manager/.kitchen
 
 RUN sed -i "s|\YOUR_PUBLIC_KEY|$(ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCzvRTvt+V6UcjVa1Ad7oYs1hoQOU+c2nA4bTS9YvLNGxrKFoLnfML7HMWbwrtstXc0MI7NiEDpFjg3qXsUEkpu8Rd6u0AGh60iPHNIG1R4UviwBVvBHb5EFoVAtzyiW3v9Yj4DA/OqBEko4HBTslH4eM/1AoFUDWZUnIG/hRUE9cwyH4n6iZPJ846lzw/S4JnATAvfKHqrJ7QXXOsJG4m8F0+LC3JSI5AjjrjiVgejlHFGJdd9uqhQtnvyMFTm+pCz7jj2jZ1+CrWjs+1c2G42jacuvakDX3RZY3H+EKMToyec0XzmufvRi/49VJSvVqVxXulzWe3aVIdYm3GcAKGZ kitchen_docker_key)|g" $HOME/wazuh-chef/cookbooks/wazuh_manager/test/Dockerfile
-RUN cd $HOME/wazuh-chef/cookbooks/wazuh_manager/ && chmod +x run.sh && chmod +x clean.sh
+RUN cd $HOME/wazuh-chef/cookbooks/wazuh_manager/ && \
+    chmod +x run.sh && \
+    chmod +x clean.sh && \
+    rm .kitchen.yml
 
 RUN apt-get update && apt install docker.io git curl wget -y
 
@@ -34,7 +45,5 @@ RUN gem install kitchen-docker && \
     gem install bcrypt_pbkdf && \
     gem install berkshelf && \
     gem uninstall httpclient -x && \
-    gem install httpclient && && \
+    gem install httpclient && \
     cd $HOME/wazuh-chef/cookbooks/wazuh_manager/ && bundle install
-
-RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py

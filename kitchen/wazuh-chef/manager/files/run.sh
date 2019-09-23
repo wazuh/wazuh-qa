@@ -1,8 +1,8 @@
 #!/bin/bash
 
 development_agent_path="../wazuh_agent/test/environments/development.json"
-development_manager_path="./wazuh_manager/test/environments/development.json"
-development_manager_path_master="./wazuh_manager/test/environments/development-master.json"
+development_manager_path="../wazuh_manager/test/environments/development.json"
+development_manager_path_master="../wazuh_manager/test/environments/development-master.json"
 
 template=".template"
 
