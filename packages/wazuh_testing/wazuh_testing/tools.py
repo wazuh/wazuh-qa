@@ -8,7 +8,68 @@ import string
 import sys
 import threading
 import time
+
+
+import sys
 import xml.etree.ElementTree as ET
+module = sys.modules['xml.etree.ElementTree']
+
+def _serialize_xml(write, elem, qnames, namespaces,
+                   short_empty_elements, **kwargs):
+    tag = elem.tag
+    text = elem.text
+    if tag is ET.Comment:
+        write("<!--%s-->" % text)
+    elif tag is ET.ProcessingInstruction:
+        write("<?%s?>" % text)
+    else:
+        tag = qnames[tag]
+        if tag is None:
+            if text:
+                write(ET._escape_cdata(text))
+            for e in elem:
+                _serialize_xml(write, e, qnames, None,
+                               short_empty_elements=short_empty_elements)
+        else:
+            write("<" + tag)
+            items = list(elem.items())
+            if items or namespaces:
+                if namespaces:
+                    for v, k in sorted(namespaces.items(),
+                                       key=lambda x: x[1]):  # sort on prefix
+                        if k:
+                            k = ":" + k
+                        write(" xmlns%s=\"%s\"" % (
+                            k,
+                            ET._escape_attrib(v)
+                            ))
+                for k, v in items:  ### order!!!!
+                    if isinstance(k, ET.QName):
+                        k = k.text
+                    if isinstance(v, ET.QName):
+                        v = qnames[v.text]
+                    else:
+                        v = ET._escape_attrib(v)
+                    write(" %s=\"%s\"" % (qnames[k], v))
+            if text or len(elem) or not short_empty_elements:
+                write(">")
+                if text:
+                    write(ET._escape_cdata(text))
+                for e in elem:
+                    _serialize_xml(write, e, qnames, None,
+                                   short_empty_elements=short_empty_elements)
+                write("</" + tag + ">")
+            else:
+                write(" />")
+    if elem.tail:
+        write(ET._escape_cdata(elem.tail))
+
+
+module = sys.modules['xml.etree.ElementTree']
+module._serialize_xml = _serialize_xml
+sys.modules['xml.etree.ElementTree'] = module
+
+
 from datetime import datetime
 from subprocess import DEVNULL, check_call, check_output
 from typing import List, Any

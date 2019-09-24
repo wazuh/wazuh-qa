@@ -29,7 +29,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 configurations = [configuration for configuration in
                   load_yaml(section_configuration_path)
-                  if 'invalid_noregex' not in configuration['checks']]
+                  if 'invalid_no_regex' not in configuration['checks']]
 
 
 # fixtures

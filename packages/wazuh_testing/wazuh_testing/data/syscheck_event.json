@@ -65,6 +65,21 @@
           ],
           "pattern": "^(.*)$"
         },
+        "tags": {
+          "$id": "#/properties/data/properties/tags",
+          "type": "string",
+          "examples": [
+            "tag1,tag2"
+          ],
+          "pattern": "^(.*)$"
+        },
+        "content_changes": {
+          "$id": "#/properties/data/properties/content_changes",
+          "type": "string",
+          "examples": [
+            "1c1\n< Sample content\n---\n> Sample contentSample content\n"
+          ]
+        },
         "timestamp": {
           "$id": "#/properties/data/properties/timestamp",
           "type": "integer",
@@ -78,8 +93,6 @@
           "type": "object",
           "required": [
             "type",
-            "user_name",
-            "group_name",
             "checksum"
           ],
           "properties": {
