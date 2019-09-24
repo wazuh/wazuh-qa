@@ -10,12 +10,12 @@ provisioner:
   chef_license: accept-no-persist
 
 platforms:
-  - name: ubuntu-kitchen
+  - name: ubuntu-kitchen-chef
     driver_config:
       image: ubuntu:14.04
       platform: ubuntu
 
-  - name: centos-kitchen
+  - name: centos-kitchen-chef
     driver_config:
       image: centos:7
       platform: centos
