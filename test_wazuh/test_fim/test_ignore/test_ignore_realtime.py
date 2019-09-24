@@ -7,7 +7,7 @@ import os
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event
-from wazuh_testing.tools import FileMonitor, load_yaml
+from wazuh_testing.tools import FileMonitor, check_apply_test, load_yaml
 
 
 # variables
@@ -29,7 +29,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 configurations = [configuration for configuration in
                   load_yaml(section_configuration_path)
-                  if 'invalid_no_regex' not in configuration['checks']]
+                  if 'invalid_no_regex' not in configuration['identifiers']]
 
 
 # fixtures
@@ -40,7 +40,7 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.parametrize('folder, filename, mode, content, triggers_event, checks', [
+@pytest.mark.parametrize('folder, filename, mode, content, triggers_event, ids_to_apply', [
     (testdir1, 'testfile', 'w', "Sample content", True, {'valid_regex', 'valid_no_regex'}),
     (testdir1, 'btestfile', 'wb', b"Sample content", True, {'valid_regex', 'valid_no_regex'}),
     (testdir1, 'testfile2', 'w', "", True, {'valid_regex', 'valid_no_regex'}),
@@ -64,8 +64,9 @@ def get_configuration(request):
     (testdir2, 'whatever2.txt', "w", "test", False, {'valid_empty'})
 ])
 def test_ignore_subdirectory(folder, filename, mode, content, triggers_event,
-                             checks, get_configuration, configure_environment,
-                             restart_wazuh, wait_for_initial_scan):
+                             ids_to_apply, get_configuration,
+                             configure_environment, restart_wazuh,
+                             wait_for_initial_scan):
     """Checks files are ignored in subdirectory according to configuration
 
        This test is intended to be used with valid ignore configurations
@@ -75,12 +76,9 @@ def test_ignore_subdirectory(folder, filename, mode, content, triggers_event,
        :param mode string same as mode in open built-in function
        :param content string, bytes Content to fill the new file
        :param triggers_event bool True if an event must be generated, False otherwise
-       :param checks List to match if the configuration is applied. If the
-              configuration does not match the test is skipped
+       :param ids_to_apply set Run test if matchs with a configuration identifier, skip otherwise
     """
-    if not (checks.intersection(get_configuration['checks']) or
-       'all' in checks):
-        pytest.skip("Does not apply to this config file")
+    check_apply_test(ids_to_apply, get_configuration['identifiers'])
 
     # Create text files
     with open(os.path.join(folder, filename), mode) as f:

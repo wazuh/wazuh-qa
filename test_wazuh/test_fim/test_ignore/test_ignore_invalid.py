@@ -7,7 +7,7 @@ import os
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_configuration_error
-from wazuh_testing.tools import FileMonitor, load_yaml
+from wazuh_testing.tools import FileMonitor, check_apply_test, load_yaml
 
 
 # variables
@@ -26,7 +26,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 configurations = [configuration for configuration in
                   load_yaml(section_configuration_path)
-                  if 'invalid_no_regex' in configuration['checks']]
+                  if 'invalid_no_regex' in configuration['identifiers']]
 
 
 # fixtures
@@ -39,13 +39,12 @@ def get_configuration(request):
 
 # tests
 
-@pytest.mark.parametrize('checks', [
+@pytest.mark.parametrize('ids_to_apply', [
     ({'invalid_no_regex'})
 ])
-def test_ignore(checks, get_configuration, configure_environment, restart_wazuh):
+def test_ignore(ids_to_apply, get_configuration, configure_environment,
+                restart_wazuh):
     """Checks if an invalid ignore configuration is detected."""
-    if not (checks.intersection(get_configuration['checks']) or
-       'all' in checks):
-        pytest.skip("Does not apply to this config file")
+    check_apply_test(ids_to_apply, get_configuration['identifiers'])
 
     wazuh_log_monitor.start(timeout=3, callback=callback_configuration_error)

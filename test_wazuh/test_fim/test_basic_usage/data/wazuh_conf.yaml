@@ -1,6 +1,8 @@
 ---
 # conf 1
-- section: syscheck
+- identifiers:
+  - no_realtime
+  section: syscheck
   elements:
   - disabled:
       value: 'no'
@@ -8,10 +10,10 @@
       value: "/testdir1,/testdir2"
       attributes:
       - check_all: 'yes'
-  checks:
-  - no_realtime
 # conf 2
-- section: syscheck
+- identifiers:
+  - realtime
+  section: syscheck
   elements:
   - disabled:
       value: 'no'
@@ -20,10 +22,11 @@
       attributes:
       - check_all: 'yes'
       - realtime: 'yes'
-  checks:
-  - realtime
 # conf 3
-- section: syscheck
+- identifiers:
+  - realtime
+  - realtime_no_exists
+  section: syscheck
   elements:
   - disabled:
       value: 'no'
@@ -32,6 +35,3 @@
       attributes:
       - check_all: 'yes'
       - realtime: 'yes'
-  checks:
-  - realtime
-  - realtime_no_exists

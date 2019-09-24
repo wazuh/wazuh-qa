@@ -8,11 +8,21 @@ import string
 import sys
 import threading
 import time
-
-
-import sys
 import xml.etree.ElementTree as ET
-module = sys.modules['xml.etree.ElementTree']
+from datetime import datetime
+from pytest import skip
+from subprocess import DEVNULL, check_call, check_output
+from typing import Any, List, Set
+
+import yaml
+
+WAZUH_PATH = os.path.join('/', 'var', 'ossec')
+WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
+WAZUH_SOURCES = os.path.join('/', 'wazuh')
+GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
+
+
+# customize _serialize_xml to avoid lexicographical order in XML attributes
 
 def _serialize_xml(write, elem, qnames, namespaces,
                    short_empty_elements, **kwargs):
@@ -43,7 +53,7 @@ def _serialize_xml(write, elem, qnames, namespaces,
                             k,
                             ET._escape_attrib(v)
                             ))
-                for k, v in items:  ### order!!!!
+                for k, v in items:  # avoid lexicographical order for XML attributes
                     if isinstance(k, ET.QName):
                         k = k.text
                     if isinstance(v, ET.QName):
@@ -65,21 +75,7 @@ def _serialize_xml(write, elem, qnames, namespaces,
         write(ET._escape_cdata(elem.tail))
 
 
-module = sys.modules['xml.etree.ElementTree']
-module._serialize_xml = _serialize_xml
-sys.modules['xml.etree.ElementTree'] = module
-
-
-from datetime import datetime
-from subprocess import DEVNULL, check_call, check_output
-from typing import List, Any
-
-import yaml
-
-WAZUH_PATH = os.path.join('/', 'var', 'ossec')
-WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
-WAZUH_SOURCES = os.path.join('/', 'wazuh')
-GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
+ET._serialize_xml = _serialize_xml  # override _serialize_xml to avoid lexicographical order in XML attributes
 
 
 class TimeMachine:
@@ -149,17 +145,17 @@ class TestEnvironment:
     """Class to prepare a custom configuration for a test."""
 
     def __init__(self, section: str, new_elements: List,
-                 checks: List = None) -> None:
+                 identifiers: List = None) -> None:
         """Initialize TestEnvironment class.
 
         :param section: Section of 'ossec.conf' to edit
         :param new_elements: List with dictionaries for replacing element values in a section
-        :param checks: List with different checks for testing the environment
+        :param identifiers: List with the configuration identifiers
         """
         self.backup_conf = get_wazuh_conf()
         self.section = section
         self.new_elements = new_elements
-        self.checks = checks
+        self.identifiers = identifiers
         self.new_conf = set_section_configuration(self.section,
                                                   self.new_elements)
 
@@ -404,3 +400,14 @@ def load_yaml(yaml_file: str) -> Any:
     """
     with open(yaml_file) as stream:
         return yaml.safe_load(stream)
+
+
+def check_apply_test(apply_to_identifiers: Set, identifiers: List):
+    """Skip test if intersection between two parameters is empty.
+
+    :param apply_to_identifiers: Identifiers that run the test
+    :param identifiers: List with the identifiers from a configuration
+    """
+    if not (apply_to_identifiers.intersection(identifiers) or
+       'all' in apply_to_identifiers):
+        skip("Does not apply to this config file")

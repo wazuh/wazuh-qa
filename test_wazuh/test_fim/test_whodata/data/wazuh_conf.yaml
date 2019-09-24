@@ -1,6 +1,8 @@
 ---
 # conf 1
-- section: syscheck
+- identifiers:
+  - conf1
+  section: syscheck
   elements:
   - disabled:
       value: 'no'
@@ -114,5 +116,4 @@
       - type: sregex
   - nodiff:
       value: "/etc/ssl/private.key"
-  checks:
-  - conf1
+

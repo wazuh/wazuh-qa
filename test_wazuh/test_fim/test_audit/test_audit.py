@@ -13,7 +13,7 @@ from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_added_rule,
                                callback_audit_loaded_rule,
                                callback_audit_rules_manipulation,
                                callback_realtime_added_directory)
-from wazuh_testing.tools import FileMonitor, load_yaml
+from wazuh_testing.tools import FileMonitor, check_apply_test, load_yaml
 
 
 # variables
@@ -41,28 +41,24 @@ def get_configuration(request):
 
 # tests
 
-@pytest.mark.parametrize('checks', [
+@pytest.mark.parametrize('ids_to_apply', [
     ({'all'})
 ])
-def test_audit_health_check(checks, get_configuration, configure_environment,
-                            restart_wazuh):
+def test_audit_health_check(ids_to_apply, get_configuration,
+                            configure_environment, restart_wazuh):
     """Checks if the health check is passed."""
-    if not (checks.intersection(get_configuration['checks']) or
-       'all' in checks):
-        pytest.skip("Does not apply to this config file")
+    check_apply_test(ids_to_apply, get_configuration['identifiers'])
 
     wazuh_log_monitor.start(timeout=20, callback=callback_audit_health_check)
 
 
-@pytest.mark.parametrize('checks', [
+@pytest.mark.parametrize('ids_to_apply', [
     ({'all'})
 ])
-def test_added_rules(checks, get_configuration, configure_environment,
-                     restart_wazuh):
+def test_added_rules(ids_to_apply, get_configuration,
+                     configure_environment, restart_wazuh):
     """Checks if the specified folders are added to Audit rules list."""
-    if not (checks.intersection(get_configuration['checks']) or
-       'all' in checks):
-        pytest.skip("Does not apply to this config file")
+    check_apply_test(ids_to_apply, get_configuration['identifiers'])
 
     events = wazuh_log_monitor.start(timeout=20,
                                      callback=callback_audit_added_rule,
@@ -73,15 +69,13 @@ def test_added_rules(checks, get_configuration, configure_environment,
     assert (testdir3 in events)
 
 
-@pytest.mark.parametrize('checks', [
+@pytest.mark.parametrize('ids_to_apply', [
     ({'all'})
 ])
-def test_readded_rules(checks, get_configuration, configure_environment,
-                       restart_wazuh):
+def test_readded_rules(ids_to_apply, get_configuration,
+                       configure_environment, restart_wazuh):
     """Checks if the removed rules are added to Audit rules list."""
-    if not (checks.intersection(get_configuration['checks']) or
-       'all' in checks):
-        pytest.skip("Does not apply to this config file")
+    check_apply_test(ids_to_apply, get_configuration['identifiers'])
 
     # Remove added rules
     os.system("auditctl -W {0} -p wa -k wazuh_fim".format(testdir1))
@@ -100,15 +94,13 @@ def test_readded_rules(checks, get_configuration, configure_environment,
     assert (testdir3 in events)
 
 
-@pytest.mark.parametrize('checks', [
+@pytest.mark.parametrize('ids_to_apply', [
     ({'all'})
 ])
-def test_readded_rules_on_restart(checks, get_configuration,
+def test_readded_rules_on_restart(ids_to_apply, get_configuration,
                                   configure_environment, restart_wazuh):
     """Checks if the rules are added to Audit when it restarts."""
-    if not (checks.intersection(get_configuration['checks']) or
-       'all' in checks):
-        pytest.skip("Does not apply to this config file")
+    check_apply_test(ids_to_apply, get_configuration['identifiers'])
 
     # Restart Audit
     p = subprocess.Popen(["service", "auditd", "restart"])
@@ -126,15 +118,13 @@ def test_readded_rules_on_restart(checks, get_configuration,
     assert (testdir3 in events)
 
 
-@pytest.mark.parametrize('checks', [
+@pytest.mark.parametrize('ids_to_apply', [
     ({'all'})
 ])
-def test_move_rules_realtime(checks, get_configuration, configure_environment,
-                             restart_wazuh):
+def test_move_rules_realtime(ids_to_apply, get_configuration,
+                             configure_environment, restart_wazuh):
     """Checks if the rules are changed to realtime when Audit stops."""
-    if not (checks.intersection(get_configuration['checks']) or
-       'all' in checks):
-        pytest.skip("Does not apply to this config file")
+    check_apply_test(ids_to_apply, get_configuration['identifiers'])
 
     # Stop Audit
     p = subprocess.Popen(["service", "auditd", "stop"])

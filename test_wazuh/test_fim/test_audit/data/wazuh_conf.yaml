@@ -1,6 +1,8 @@
 ---
 # conf 1
-- section: syscheck
+- identifiers:
+  - config1
+  section: syscheck
   elements:
   - disabled:
       value: 'no'
@@ -9,5 +11,3 @@
       attributes:
       - check_all: 'yes'
       - whodata: 'yes'
-  checks:
-  - config1

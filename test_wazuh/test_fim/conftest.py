@@ -53,7 +53,7 @@ def configure_environment(get_configuration, request):
 
     test_environment = TestEnvironment(get_configuration.get('section'),
                                        get_configuration.get('elements'),
-                                       get_configuration.get('checks')
+                                       get_configuration.get('identifiers')
                                        )
 
     # create test directories

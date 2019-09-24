@@ -1,6 +1,8 @@
 ---
 # conf 1
-- section: syscheck
+- identifiers:
+  - whodata
+  section: syscheck
   elements:
   - disabled:
       value: 'no'
@@ -12,7 +14,9 @@
   checks:
   - realtime
 # conf 2
-- section: syscheck
+- identifiers:
+  - whodata
+  section: syscheck
   elements:
   - disabled:
       value: 'no'
@@ -21,5 +25,5 @@
       attributes:
       - check_all: 'yes'
       - whodata: 'yes'
-  checks:
+  identifiers:
   - whodata

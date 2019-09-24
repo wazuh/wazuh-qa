@@ -9,7 +9,8 @@ import pytest
 
 from jq import jq
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event
-from wazuh_testing.tools import FileMonitor, load_yaml
+from wazuh_testing.tools import FileMonitor, check_apply_test, load_yaml
+
 
 # variables
 
@@ -36,19 +37,17 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.benchmark
-@pytest.mark.parametrize('n_regular, folder, checks', [
+@pytest.mark.parametrize('n_regular, folder, ids_to_apply', [
     (10, testdir1, {'all'}),
     (100, testdir1, {'all'}),
     (1000, testdir1, {'all'}),
     (10000, testdir1, {'all'})
 ])
-def test_benchmark_regular_files(n_regular, folder, checks, get_configuration,
-                                 configure_environment, restart_wazuh,
-                                 wait_for_initial_scan):
+def test_benchmark_regular_files(n_regular, folder, ids_to_apply,
+                                 get_configuration, configure_environment,
+                                 restart_wazuh, wait_for_initial_scan):
     """Check if syscheckd detects a minimum volume of file changes (add, modify, delete)."""
-    if not (checks.intersection(get_configuration['checks']) or
-       'all' in checks):
-        pytest.skip("Does not apply to this config file")
+    check_apply_test(ids_to_apply, get_configuration['identifiers'])
 
     min_timeout = 30
     # Create text files

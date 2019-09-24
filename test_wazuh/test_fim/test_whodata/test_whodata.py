@@ -13,7 +13,7 @@ from wazuh_testing.fim import (CHECK_ALL, CHECK_GROUP, CHECK_INODE,
                                REQUIRED_ATTRIBUTES, callback_detect_event,
                                create_file, delete_file, modify_file,
                                validate_event)
-from wazuh_testing.tools import FileMonitor, load_yaml
+from wazuh_testing.tools import FileMonitor, check_apply_test, load_yaml
 
 
 # variables
@@ -53,7 +53,7 @@ def get_configuration(request):
     ('file3', REGULAR, b'Sample content')
     #('file4', REGULAR, b'')
 ])
-@pytest.mark.parametrize('folder, checkers, checks', [
+@pytest.mark.parametrize('folder, checkers, ids_to_apply', [
     (testdir1, REQUIRED_ATTRIBUTES[CHECK_ALL] - REQUIRED_ATTRIBUTES[CHECK_SUM], {'all'}),
     # <directories whodata="yes" check_all="yes" check_md5sum="no">/testdir2</directories>
     (testdir2, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_MD5SUM}, {'all'}),
@@ -74,12 +74,11 @@ def get_configuration(request):
     # <directories whodata="yes" check_all="yes" check_inode="no">/testdir0</directories>
     (testdir0, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_INODE}, {'all'})
 ])
-def test_fim_checks(folder, name, filetype, content, checkers, checks,
-                    get_configuration, configure_environment, restart_wazuh,
+def test_fim_checks(folder, name, filetype, content, checkers,
+                    ids_to_apply, get_configuration,
+                    configure_environment, restart_wazuh,
                     wait_for_initial_scan):
-    if not (checks.intersection(get_configuration['checks']) or
-       'all' in checks):
-        pytest.skip("Does not apply to this config file")
+    check_apply_test(ids_to_apply, get_configuration['identifiers'])
 
     # Create file
     create_file(filetype, name, folder, content)
@@ -111,16 +110,15 @@ def test_fim_checks(folder, name, filetype, content, checkers, checks,
     ('file3', REGULAR, b'Sample content')
     #('file4', REGULAR, b'')
 ])
-@pytest.mark.parametrize('folder, checkers, checks', [
+@pytest.mark.parametrize('folder, checkers, ids_to_apply', [
     # <directories whodata="yes" report_changes="yes">/testdir_report_changes</directories>
     (testdir_report_changes, REQUIRED_ATTRIBUTES[CHECK_ALL], {'all'})
 ])
-def test_fim_reports(folder, name, filetype, content, checkers, checks,
-                     get_configuration, configure_environment,
-                     restart_wazuh, wait_for_initial_scan):
-    if not (checks.intersection(get_configuration['checks']) or
-       'all' in checks):
-        pytest.skip("Does not apply to this config file")
+def test_fim_reports(folder, name, filetype, content, checkers,
+                     ids_to_apply, get_configuration,
+                     configure_environment, restart_wazuh,
+                     wait_for_initial_scan):
+    check_apply_test(ids_to_apply, get_configuration['identifiers'])
 
     # Create file
     create_file(filetype, name, folder, content)
@@ -153,16 +151,14 @@ def test_fim_reports(folder, name, filetype, content, checkers, checks,
     ('file3', REGULAR, b'Sample content')
     #('file4', REGULAR, b'')
 ])
-@pytest.mark.parametrize('folder, checkers, checks', [
+@pytest.mark.parametrize('folder, checkers, ids_to_apply', [
     # <directories whodata="yes" tags="tag0,tag1,tag2,tag3,tag4,tag5,tag6,tag7,tag8,tag9">/testdir_tags</directories>
     (testdir_tags, REQUIRED_ATTRIBUTES[CHECK_ALL], {'all'})
 ])
-def test_fim_tags(folder, name, filetype, content, checkers, checks,
+def test_fim_tags(folder, name, filetype, content, checkers, ids_to_apply,
                   get_configuration, configure_environment, restart_wazuh,
                   wait_for_initial_scan):
-    if not (checks.intersection(get_configuration['checks']) or
-       'all' in checks):
-        pytest.skip("Does not apply to this config file")
+    check_apply_test(ids_to_apply, get_configuration['identifiers'])
 
     defined_tags = 'tag0,tag1,tag2,tag3,tag4,tag5,tag6,tag7,tag8,tag9'
     # Create file
@@ -183,7 +179,6 @@ def test_fim_tags(folder, name, filetype, content, checkers, checks,
     assert (defined_tags == event['data']['tags'])
 
     # Delete file
-    regular_path = os.path.join(folder, name)
     delete_file(folder, name)
 
     # Wait until event is detected

@@ -11,7 +11,8 @@ import pytest
 from wazuh_testing.fim import (CHECK_ALL, FIFO, LOG_FILE_PATH, REGULAR, SOCKET,
                                callback_detect_end_scan, callback_detect_event,
                                create_file, validate_event)
-from wazuh_testing.tools import FileMonitor, TimeMachine, load_yaml
+from wazuh_testing.tools import (FileMonitor, TimeMachine, check_apply_test,
+                                 load_yaml)
 
 
 # variables
@@ -39,7 +40,7 @@ def get_configuration(request):
 
 # tests
 
-@pytest.mark.parametrize('folder, name, filetype, content, checks', [
+@pytest.mark.parametrize('folder, name, filetype, content, ids_to_apply', [
     (testdir1, 'file', REGULAR, 'Sample content', {'no_realtime'}),
     (testdir1, 'file', REGULAR, b'Sample content', {'no_realtime'}),
     (testdir1, 'file', REGULAR, '', {'no_realtime'}),
@@ -49,13 +50,11 @@ def get_configuration(request):
     (testdir2, 'file', REGULAR, '', {'no_realtime'}),
     (testdir2, 'file', REGULAR, b'', {'no_realtime'})
 ])
-def test_regular_file(folder, name, filetype, content, checks,
+def test_regular_file(folder, name, filetype, content, ids_to_apply,
                       get_configuration, configure_environment, restart_wazuh,
                       wait_for_initial_scan):
     """Check if a special file creation is detected by syscheck."""
-    if not (checks.intersection(get_configuration['checks']) or
-       'all' in checks):
-        pytest.skip("Does not apply to this config file")
+    check_apply_test(ids_to_apply, get_configuration['identifiers'])
 
     # Create files
     create_file(filetype, name, folder, content)
@@ -75,7 +74,7 @@ def test_regular_file(folder, name, filetype, content, checks,
     time.sleep(11)
 
 
-@pytest.mark.parametrize('folder, name, filetype, content, checkers, checks', [
+@pytest.mark.parametrize('folder, name, filetype, content, checkers, ids_to_apply', [
     (testdir1, 'file', REGULAR, 'Sample content', options, {'realtime'}),
     (testdir1, 'file', REGULAR, b'Sample content', options, {'realtime'}),
     (testdir1, 'file', REGULAR, '', options, {'realtime'}),
@@ -85,12 +84,10 @@ def test_regular_file(folder, name, filetype, content, checks,
     (testdir2, 'file', REGULAR, b'', options, {'realtime'})
 ])
 def test_regular_file_realtime(folder, name, filetype, content, checkers,
-                               checks, get_configuration,
+                               ids_to_apply, get_configuration,
                                configure_environment, restart_wazuh):
     """Check if a regular file creation is detected by syscheck."""
-    if not (checks.intersection(get_configuration['checks']) or
-       'all' in checks):
-        pytest.skip("Does not apply to this config file")
+    check_apply_test(ids_to_apply, get_configuration['identifiers'])
 
     # Create files
     create_file(filetype, name, folder, content)
@@ -101,19 +98,17 @@ def test_regular_file_realtime(folder, name, filetype, content, checkers,
     validate_event(event, checks=options)
 
 
-@pytest.mark.parametrize('folder, name, filetype, content, checks', [
+@pytest.mark.parametrize('folder, name, filetype, content, ids_to_apply', [
     (testdir1, 'file', FIFO, '', {'no_realtime'}),
     (testdir2, 'file', FIFO, '', {'no_realtime'}),
     (testdir1, 'file', SOCKET, '', {'no_realtime'}),
     (testdir2, 'file', SOCKET, '', {'no_realtime'})
 ])
-def _test_special_file_realtime(folder, name, filetype, content, checks,
-                                get_configuration, configure_environment,
-                                restart_wazuh):
+def _test_special_file_realtime(folder, name, filetype, content,
+                                ids_to_apply, get_configuration,
+                                configure_environment, restart_wazuh):
     """Check if a regular file creation is detected by syscheck."""
-    if not (checks.intersection(get_configuration['checks']) or
-       'all' in checks):
-        pytest.skip("Does not apply to this config file")
+    check_apply_test(ids_to_apply, get_configuration['identifiers'])
 
     # Create files
     create_file(filetype, folder, content)
