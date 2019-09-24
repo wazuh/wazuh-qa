@@ -54,3 +54,6 @@ done
 
 echo "Kitchen is testing ..."
 kitchen verify
+
+echo "Kitchen is destroying"
+kitchen destroy

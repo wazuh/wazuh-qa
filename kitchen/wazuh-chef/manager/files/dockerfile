@@ -1,7 +1,5 @@
 FROM ruby
 
-RUN groupadd -r postgres && useradd --no-log-init -r -g postgres postgre
-
 ARG chef_source_branch=master
 ARG chef_target_branch=master
 ARG qa_branch=master
