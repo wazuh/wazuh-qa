@@ -27,10 +27,13 @@ RUN cp -rf $HOME/wazuh-qa/kitchen/wazuh-chef/manager/test_environment/* $HOME/wa
 RUN cp -rf $HOME/wazuh-qa/kitchen/wazuh-chef/agent/* $HOME/wazuh-chef/cookbooks/wazuh_agent/test/environments/
 
 RUN cd $HOME/wazuh-chef/cookbooks/wazuh_manager/ && \
-    mkdir .kitchen && \
-    cp $HOME/wazuh-qa/kitchen/wazuh-chef/manager/keys/* $HOME/wazuh-chef/cookbooks/wazuh_manager/.kitchen
+    mkdir .kitchen
 
-RUN sed -i "s|\YOUR_PUBLIC_KEY|AAAAB3NzaC1yc2EAAAADAQABAAABAQCzvRTvt+V6UcjVa1Ad7oYs1hoQOU+c2nA4bTS9YvLNGxrKFoLnfML7HMWbwrtstXc0MI7NiEDpFjg3qXsUEkpu8Rd6u0AGh60iPHNIG1R4UviwBVvBHb5EFoVAtzyiW3v9Yj4DA/OqBEko4HBTslH4eM/1AoFUDWZUnIG/hRUE9cwyH4n6iZPJ846lzw/S4JnATAvfKHqrJ7QXXOsJG4m8F0+LC3JSI5AjjrjiVgejlHFGJdd9uqhQtnvyMFTm+pCz7jj2jZ1+CrWjs+1c2G42jacuvakDX3RZY3H+EKMToyec0XzmufvRi/49VJSvVqVxXulzWe3aVIdYm3GcAKGZ kitchen_docker_key|g" $HOME/wazuh-chef/cookbooks/wazuh_manager/test/Dockerfile
+RUN cd wazuh-puppet/kitchen/.kitchen && ssh-keygen -t rsa -N "" -f docker_id_rsa
+
+RUN cd wazuh-puppet/kitchen/.kitchen &&  sed -i "s|$(awk 'END {print $NF}' docker_id_rsa.pub)|kitchen_docker_key|g" docker_id_rsa.pub
+
+RUN sed -i "s|\YOUR_PUBLIC_KEY|$(cat .kitchen/docker_id_rsa.pub)|g" $HOME/wazuh-chef/cookbooks/wazuh_manager/test/Dockerfile
 RUN cd $HOME/wazuh-chef/cookbooks/wazuh_manager/ && \
     chmod +x run.sh && \
     chmod +x clean.sh && \
