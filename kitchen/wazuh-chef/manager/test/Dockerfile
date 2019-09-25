@@ -14,7 +14,7 @@ RUN touch /home/kitchen/.ssh/authorized_keys
 RUN chown kitchen /home/kitchen/.ssh/authorized_keys
 RUN chmod 0600 /home/kitchen/.ssh/authorized_keys
 RUN mkdir -p /run/sshd
-RUN echo ssh-rsa YOUR_PUBLIC_KEY >> /home/kitchen/.ssh/authorized_keys
+RUN echo YOUR_PUBLIC_KEY >> /home/kitchen/.ssh/authorized_keys
 EXPOSE 1515/tcp
 EXPOSE 1515/udp
 RUN yum install -y openssl

@@ -33,7 +33,7 @@ RUN cd $HOME/wazuh-chef/cookbooks/wazuh_manager/.kitchen && ssh-keygen -t rsa -N
 
 RUN cd $HOME/wazuh-chef/cookbooks/wazuh_manager/.kitchen &&  sed -i "s|$(awk 'END {print $NF}' docker_id_rsa.pub)|kitchen_docker_key|g" docker_id_rsa.pub
 
-RUN cd $HOME/wazuh-chef/cookbooks/wazuh_manager/.kitchen && sed -i "s|\YOUR_PUBLIC_KEY|$(cat .kitchen/docker_id_rsa.pub)|g" $HOME/wazuh-chef/cookbooks/wazuh_manager/test/Dockerfile
+RUN cd $HOME/wazuh-chef/cookbooks/wazuh_manager/ && sed -i "s|\YOUR_PUBLIC_KEY|$(cat .kitchen/docker_id_rsa.pub)|g" $HOME/wazuh-chef/cookbooks/wazuh_manager/test/Dockerfile
 RUN cd $HOME/wazuh-chef/cookbooks/wazuh_manager/ && \
     chmod +x run.sh && \
     chmod +x clean.sh && \
