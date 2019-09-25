@@ -286,7 +286,8 @@ def callback_detect_end_scan(line):
 def callback_detect_event(line):
     match = re.match(r'.*Sending event: (.+)$', line)
     if match:
-        return json.loads(match.group(1))
+        if json.loads(match.group(1))['type'] == 'event':
+            return json.loads(match.group(1))
     return None
 
 
