@@ -10,7 +10,7 @@ policy:
   id: sca_negation_test_suite
   file: sca_negation_test_suite.yml
   name: Test suite for negation.
-  description: This document includes file rules for testing purposes with the syntax rule of Wazuh v3.10.0
+  description: This document includes file rules for testing purposes with the syntax rule of Wazuh v3.10.2
 ############### Expected results
 # Pass = 2
 # Failed = 2

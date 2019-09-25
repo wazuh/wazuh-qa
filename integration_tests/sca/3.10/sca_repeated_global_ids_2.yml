@@ -10,7 +10,7 @@ policy:
   id: repeated_global_ids_2
   file: sca_repeated_global_ids_2.yml
   name: Test suite for repeated rules
-  description: This document includes rules with repeated ids for testing purposes with the syntax rule of Wazuh v3.10.0
+  description: This document includes rules with repeated ids for testing purposes with the syntax rule of Wazuh v3.10.2
 
 checks:
 

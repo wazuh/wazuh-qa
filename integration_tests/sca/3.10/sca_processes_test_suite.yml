@@ -10,7 +10,7 @@ policy:
   id: sca_processes_test_suite
   file: sca_processes_test_suite.yml
   name: Test suite for process rules
-  description: This document includes file rules for testing purposes with the syntax rule of Wazuh v3.10.0
+  description: This document includes file rules for testing purposes with the syntax rule of Wazuh v3.10.2
 ############### Expected results
 # Passed = 3
 # Failed = 2

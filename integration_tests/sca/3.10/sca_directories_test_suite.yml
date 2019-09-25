@@ -10,7 +10,7 @@ policy:
   id: directories_test_suite
   file: sca_directories_test_suite.yml
   name: Test suite for directories rules
-  description: This document includes directories rules for testing purposes with the syntax rule of Wazuh v3.10.0
+  description: This document includes directories rules for testing purposes with the syntax rule of Wazuh v3.10.2
 ############### Expected results
 # Passed = 8
 # Failed = 8
