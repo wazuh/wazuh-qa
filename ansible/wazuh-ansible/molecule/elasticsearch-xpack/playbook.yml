@@ -1,0 +1,53 @@
+---
+- name: Converge
+  hosts: node-1
+  roles:
+    - role: ../roles/elastic-stack/ansible-elasticsearch
+      elasticsearch_network_host: node-1
+      node_name: node-1
+      single_node: false
+      elasticsearch_master_candidate: true
+      elasticsearch_bootstrap_node: true
+      elasticsearch_cluster_nodes:
+        - node-1
+        - node-2
+      elasticsearch_discovery_nodes:
+        - node-1
+        - node-2
+      elasticsearch_xpack_security: true
+      node_certs_generator: true
+      node_certs_generator_ip: node-1
+      master_certs_path: ~/certs
+      generate_CA: true
+      ca_key_name: "wazuh-test"
+      ca_cert_name: "wazuh1"
+      ca_password: "test-password"
+
+  vars:
+    instances:
+      node-1:
+        name: node-1
+        dns: node-1
+      node-2:
+        name: node-2
+        dns: node-2
+
+- hosts: node-2
+  roles:
+    - role: ../roles/elastic-stack/ansible-elasticsearch
+      elasticsearch_network_host: node-2
+      elasticsearch_node_name: node-2
+      elasticsearch_xpack_security: true
+      elasticsearch_master_candidate: true
+      node_certs_generator_ip: node-1
+      elasticsearch_cluster_nodes:
+        - node-1
+        - node-2
+      elasticsearch_discovery_nodes:
+        - node-1
+        - node-2
+      master_certs_path: ~/certs
+      generate_CA: true
+      ca_key_name: "wazuh-test"
+      ca_cert_name: "wazuh1"
+      ca_password: "test-password"
