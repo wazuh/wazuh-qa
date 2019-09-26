@@ -3,12 +3,10 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-from collections import Counter
 
 import pytest
 
-from jq import jq
-from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event
+from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations)
 
@@ -38,71 +36,19 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.benchmark
-@pytest.mark.parametrize('n_regular, folder, tags_to_apply', [
-    (10, testdir1, {'all'}),
-    (100, testdir1, {'all'}),
-    (1000, testdir1, {'all'}),
-    (10000, testdir1, {'all'})
+@pytest.mark.parametrize('n_regular, folder, is_scheduled, tags_to_apply', [
+    (10, testdir1, False, {'realtime', 'whodata'}),
+    (100, testdir1, False, {'realtime', 'whodata'}),
+    (1000, testdir1, False, {'realtime', 'whodata'}),
+    (10000, testdir1, False, {'realtime', 'whodata'})
 ])
-def test_benchmark_regular_files(n_regular, folder, tags_to_apply,
-                                 get_configuration, configure_environment,
-                                 restart_wazuh, wait_for_initial_scan):
-    """Check if syscheckd detects a minimum volume of file changes (add, modify, delete)."""
+def test_benchmark_regular_files(n_regular, folder, is_scheduled,
+                                 tags_to_apply, get_configuration,
+                                 configure_environment, restart_wazuh,
+                                 wait_for_initial_scan):
+    """Checks syscheckd detects a minimum volume of file changes (add, modify, delete)"""
     check_apply_test(tags_to_apply, get_configuration['tags'])
-
     min_timeout = 30
-    # Create text files
-    for name in range(n_regular):
-        with open(os.path.join(folder, f'regular_{name}'), 'w') as f:
-            f.write('')
 
-    # Fetch the n_regular expected events
-    events = wazuh_log_monitor.start(timeout=max(n_regular*0.01, min_timeout),
-                                     callback=callback_detect_event,
-                                     accum_results=n_regular).result()
-    # Are the n_regular events of type 'added'?
-    types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
-
-    assert(types['added'] == n_regular)
-
-    # Are the n_regular events the files added?
-    file_paths = jq(".[].data.path").transform(events, multiple_output=True)
-    for name in range(n_regular):
-        assert(os.path.join(folder, f'regular_{name}') in file_paths)
-
-    # Modify previous text files
-    for name in range(n_regular):
-        with open(os.path.join(folder, f'regular_{name}'), 'a') as f:
-            f.write('new content')
-
-    # Fetch the n_regular expected events
-    events = wazuh_log_monitor.start(timeout=max(n_regular * 0.01, min_timeout),
-                                     callback=callback_detect_event,
-                                     accum_results=n_regular).result()
-
-    # Are the n_regular events of type 'modified'?
-    types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
-    assert (types['modified'] == n_regular)
-
-    # Are the n_regular events the files modified?
-    file_paths = jq(".[].data.path").transform(events, multiple_output=True)
-    for name in range(n_regular):
-        assert (os.path.join(folder, f'regular_{name}') in file_paths)
-
-    # Delete previous text files
-    for name in range(n_regular):
-        os.remove(os.path.join(folder, f'regular_{name}'))
-
-    # Fetch the n_regular expected events
-    events = wazuh_log_monitor.start(timeout=max(n_regular * 0.01, min_timeout),
-                                     callback=callback_detect_event,
-                                     accum_results=n_regular).result()
-
-    # Are the n_regular events of type 'deleted'?
-    types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
-    assert (types['deleted'] == n_regular)
-
-    # Are the n_regular events the files modified?
-    file_paths = jq(".[].data.path").transform(events, multiple_output=True)
-    for name in range(n_regular):
-        assert (os.path.join(folder, f'regular_{name}') in file_paths)
+    regular_file_cud(folder, is_scheduled, n_regular, min_timeout,
+                     wazuh_log_monitor)

@@ -7,9 +7,12 @@ import os
 import re
 import socket
 import sys
+from collections import Counter
+from datetime import timedelta
 
 from jq import jq
 from jsonschema import validate
+from wazuh_testing.tools import TimeMachine
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
@@ -104,8 +107,6 @@ def validate_event(event, checks=None):
     # Check attributes
     attributes = event['data']['attributes'].keys() - {'type', 'checksum'}
     required_attributes = get_required_attributes(checks)
-    print(f'attributes: {attributes}')
-    print(f'required_attributes: {required_attributes}')
     assert(attributes ^ required_attributes == set())
 
     # Check audit
@@ -214,8 +215,8 @@ def _create_regular(path, name, content):
     """
     regular_path = os.path.join(path, name)
     # Check if content is binary so it changes the mode
-    isBinary = re.compile('^b\'.*\'$')
-    if isBinary.match(str(content)):
+    is_binary = re.compile('^b\'.*\'$')
+    if is_binary.match(str(content)):
         mode = 'wb'
     else:
         mode = 'w'
@@ -243,8 +244,8 @@ def modify_file(path, name, content):
     """
     regular_path = os.path.join(path, name)
     # Check if content is binary so it changes the mode
-    isBinary = re.compile('^b\'.*\'$')
-    if isBinary.match(str(content)):
+    is_binary = re.compile('^b\'.*\'$')
+    if is_binary.match(str(content)):
         mode = 'ab'
     else:
         mode = 'a'
@@ -286,7 +287,8 @@ def callback_detect_end_scan(line):
 def callback_detect_event(line):
     match = re.match(r'.*Sending event: (.+)$', line)
     if match:
-        return json.loads(match.group(1))
+        if json.loads(match.group(1))['type'] == 'event':
+            return json.loads(match.group(1))
     return None
 
 
@@ -334,3 +336,89 @@ def callback_configuration_error(line):
     if match:
         return True
     return None
+
+
+def regular_file_cud(folder, time_travel, n_regular, min_timeout, log_monitor, options=None):
+    """ Checks if creation, update and delete events are detected by syscheck
+
+    :param folder: Path where the files will be created
+    :type folder: String
+    :param time_travel: Boolean to determine if there will be time travels or not
+    :type time_travel: Boolean
+    :param n_regular: Number of regular files that will be created
+    :type n_regular: Integer
+    :param min_timeout: Minimum timeout
+    :type min_timeout: Float
+    :param log_monitor: File event monitor
+    :type log_monitor: FileMonitor
+    :param options: Dict with all the checkers
+    :type options: Dict. Default value is None.
+    :return: None
+    """
+    def type_assert(ev_type):
+        event_types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
+        assert (event_types[ev_type] == n_regular)
+
+    def check_files_in_event():
+        # Are the n_regular events the files modified?
+        file_paths = jq(".[].data.path").transform(events, multiple_output=True)
+        for file_name in range(n_regular):
+            assert (os.path.join(folder, f'regular_{file_name}') in file_paths)
+
+    # Create text files
+    for name in range(n_regular):
+        create_file(REGULAR, f'regular_{name}', folder, '')
+
+    # Check if scheduled for time traveling
+    if time_travel:
+        TimeMachine.travel_to_future(timedelta(hours=13))
+
+    # Fetch the n_regular expected events
+    events = log_monitor.start(timeout=max(n_regular * 0.01, min_timeout), callback=callback_detect_event,
+                               accum_results=n_regular).result()
+
+    # Validate checkers for every event
+    if options is not None:
+        for ev in events:
+            validate_event(ev, options)
+
+    # Are the n_regular events of type 'added'?
+    type_assert('added')
+    check_files_in_event()
+
+    # Modify previous text files
+    for name in range(n_regular):
+        modify_file(folder, f'regular_{name}', 'Sample content added')
+
+    # Check if scheduled for time traveling
+    if time_travel:
+        TimeMachine.travel_to_future(timedelta(hours=13))
+
+    # Fetch the n_regular expected events
+    events = log_monitor.start(timeout=max(n_regular * 0.01, min_timeout), callback=callback_detect_event,
+                               accum_results=n_regular).result()
+
+    # Validate checkers for every event
+    if options is not None:
+        for ev in events:
+            validate_event(ev, options)
+
+    # Are the n_regular events of type 'modified'?
+    type_assert('modified')
+    check_files_in_event()
+
+    # Delete previous text files
+    for name in range(n_regular):
+        delete_file(folder, f'regular_{name}')
+
+    # Check if scheduled for time traveling
+    if time_travel:
+        TimeMachine.travel_to_future(timedelta(hours=13))
+
+    # Fetch the n_regular expected events
+    events = log_monitor.start(timeout=max(n_regular * 0.01, min_timeout), callback=callback_detect_event,
+                               accum_results=n_regular).result()
+
+    # Are the n_regular events of type 'deleted'?
+    type_assert('deleted')
+    check_files_in_event()

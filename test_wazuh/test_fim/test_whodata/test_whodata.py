@@ -20,7 +20,7 @@ from wazuh_testing.tools import (FileMonitor, check_apply_test,
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-section_configuration_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2'), os.path.join('/', 'testdir3'),
                     os.path.join('/', 'testdir4'), os.path.join('/', 'testdir5'), os.path.join('/', 'testdir6'),
                     os.path.join('/', 'testdir7'), os.path.join('/', 'testdir8'), os.path.join('/', 'testdir9'),
@@ -146,7 +146,7 @@ def test_fim_reports(folder, name, filetype, content, checkers,
     validate_event(event, checks=checkers)
 
 
-@pytest.mark.parametrize('tags_to_apply, filetype, content', [
+@pytest.mark.parametrize('name, filetype, content', [
     ('file1', REGULAR, 'Sample content'),
     #('file2', REGULAR, ''),
     ('file3', REGULAR, b'Sample content')
