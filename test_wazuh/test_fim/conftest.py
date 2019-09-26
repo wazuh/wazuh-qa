@@ -1,7 +1,7 @@
 # Copyright (C) 2015-2019, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-import glob
+
 import os
 import shutil
 import subprocess
@@ -11,8 +11,10 @@ import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH, WAZUH_CONF_PATH,
                                callback_detect_end_scan)
-from wazuh_testing.tools import (FileMonitor, TestEnvironment, truncate_file,
+from wazuh_testing.tools import (FileMonitor, get_wazuh_conf,
+                                 set_section_wazuh_conf, truncate_file,
                                  wait_for_condition, write_wazuh_conf)
+
 
 # functions
 
@@ -51,10 +53,11 @@ def configure_environment(get_configuration, request):
     """Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration."""
     print(f"Setting a custom environment: {str(get_configuration)}")
 
-    test_environment = TestEnvironment(get_configuration.get('section'),
-                                       get_configuration.get('elements'),
-                                       get_configuration.get('identifiers')
-                                       )
+    # save current configuration
+    backup_config = get_wazuh_conf()
+    # configuration for testing
+    test_config = set_section_wazuh_conf(get_configuration.get('section'),
+                                         get_configuration.get('elements'))
 
     # create test directories
     test_directories = getattr(request.module, 'test_directories')
@@ -62,15 +65,13 @@ def configure_environment(get_configuration, request):
         os.mkdir(test_dir)
 
     # set new configuration
-    write_wazuh_conf(test_environment.new_conf)
+    write_wazuh_conf(test_config)
 
     yield
 
     # remove created folders (parents)
-    parent_directories = set([os.path.join('/', test_dir.split('/')[1]) for
-                              test_dir in test_directories])
-    for parent_directory in parent_directories:
-        shutil.rmtree(parent_directory)
+    for test_dir in test_directories:
+        shutil.rmtree(test_dir, ignore_errors=True)
 
     # restore previous configuration
-    write_wazuh_conf(test_environment.backup_conf)
+    write_wazuh_conf(backup_config)

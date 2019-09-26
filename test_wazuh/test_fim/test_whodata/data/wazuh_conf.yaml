@@ -1,7 +1,9 @@
 ---
 # conf 1
-- identifiers:
+- tags:
   - conf1
+  apply_to_modules:
+  - test_whodata
   section: syscheck
   elements:
   - disabled:

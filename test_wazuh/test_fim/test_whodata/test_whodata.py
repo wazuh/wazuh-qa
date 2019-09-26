@@ -13,7 +13,8 @@ from wazuh_testing.fim import (CHECK_ALL, CHECK_GROUP, CHECK_INODE,
                                REQUIRED_ATTRIBUTES, callback_detect_event,
                                create_file, delete_file, modify_file,
                                validate_event)
-from wazuh_testing.tools import FileMonitor, check_apply_test, load_yaml
+from wazuh_testing.tools import (FileMonitor, check_apply_test,
+                                 load_wazuh_configurations)
 
 
 # variables
@@ -34,7 +35,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-configurations = load_yaml(section_configuration_path)
+configurations = load_wazuh_configurations(configurations_path, __name__)
 
 
 # fixtures
@@ -53,7 +54,7 @@ def get_configuration(request):
     ('file3', REGULAR, b'Sample content')
     #('file4', REGULAR, b'')
 ])
-@pytest.mark.parametrize('folder, checkers, ids_to_apply', [
+@pytest.mark.parametrize('folder, checkers, tags_to_apply', [
     (testdir1, REQUIRED_ATTRIBUTES[CHECK_ALL] - REQUIRED_ATTRIBUTES[CHECK_SUM], {'all'}),
     # <directories whodata="yes" check_all="yes" check_md5sum="no">/testdir2</directories>
     (testdir2, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_MD5SUM}, {'all'}),
@@ -75,10 +76,10 @@ def get_configuration(request):
     (testdir0, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_INODE}, {'all'})
 ])
 def test_fim_checks(folder, name, filetype, content, checkers,
-                    ids_to_apply, get_configuration,
+                    tags_to_apply, get_configuration,
                     configure_environment, restart_wazuh,
                     wait_for_initial_scan):
-    check_apply_test(ids_to_apply, get_configuration['identifiers'])
+    check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Create file
     create_file(filetype, name, folder, content)
@@ -110,15 +111,15 @@ def test_fim_checks(folder, name, filetype, content, checkers,
     ('file3', REGULAR, b'Sample content')
     #('file4', REGULAR, b'')
 ])
-@pytest.mark.parametrize('folder, checkers, ids_to_apply', [
+@pytest.mark.parametrize('folder, checkers, tags_to_apply', [
     # <directories whodata="yes" report_changes="yes">/testdir_report_changes</directories>
     (testdir_report_changes, REQUIRED_ATTRIBUTES[CHECK_ALL], {'all'})
 ])
 def test_fim_reports(folder, name, filetype, content, checkers,
-                     ids_to_apply, get_configuration,
+                     tags_to_apply, get_configuration,
                      configure_environment, restart_wazuh,
                      wait_for_initial_scan):
-    check_apply_test(ids_to_apply, get_configuration['identifiers'])
+    check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Create file
     create_file(filetype, name, folder, content)
@@ -145,20 +146,20 @@ def test_fim_reports(folder, name, filetype, content, checkers,
     validate_event(event, checks=checkers)
 
 
-@pytest.mark.parametrize('name, filetype, content', [
+@pytest.mark.parametrize('tags_to_apply, filetype, content', [
     ('file1', REGULAR, 'Sample content'),
     #('file2', REGULAR, ''),
     ('file3', REGULAR, b'Sample content')
     #('file4', REGULAR, b'')
 ])
-@pytest.mark.parametrize('folder, checkers, ids_to_apply', [
+@pytest.mark.parametrize('folder, checkers, tags_to_apply', [
     # <directories whodata="yes" tags="tag0,tag1,tag2,tag3,tag4,tag5,tag6,tag7,tag8,tag9">/testdir_tags</directories>
     (testdir_tags, REQUIRED_ATTRIBUTES[CHECK_ALL], {'all'})
 ])
-def test_fim_tags(folder, name, filetype, content, checkers, ids_to_apply,
+def test_fim_tags(folder, name, filetype, content, checkers, tags_to_apply,
                   get_configuration, configure_environment, restart_wazuh,
                   wait_for_initial_scan):
-    check_apply_test(ids_to_apply, get_configuration['identifiers'])
+    check_apply_test(tags_to_apply, get_configuration['tags'])
 
     defined_tags = 'tag0,tag1,tag2,tag3,tag4,tag5,tag6,tag7,tag8,tag9'
     # Create file

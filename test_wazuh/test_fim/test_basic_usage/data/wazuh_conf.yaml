@@ -1,7 +1,9 @@
 ---
 # conf 1
-- identifiers:
+- tags:
   - no_realtime
+  apply_to_modules:
+  - test_basic_usage
   section: syscheck
   elements:
   - disabled:
@@ -11,8 +13,10 @@
       attributes:
       - check_all: 'yes'
 # conf 2
-- identifiers:
+- tags:
   - realtime
+  apply_to_modules:
+  - test_basic_usage
   section: syscheck
   elements:
   - disabled:
@@ -23,9 +27,11 @@
       - check_all: 'yes'
       - realtime: 'yes'
 # conf 3
-- identifiers:
+- tags:
   - realtime
   - realtime_no_exists
+  apply_to_modules:
+  - test_basic_usage
   section: syscheck
   elements:
   - disabled:

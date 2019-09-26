@@ -1,7 +1,9 @@
 ---
 # conf 1
-- identifiers:
-  - whodata
+- tags:
+  - realtime
+  apply_to_modules:
+  - test_benchmark
   section: syscheck
   elements:
   - disabled:
@@ -11,11 +13,11 @@
       attributes:
       - check_all: 'yes'
       - realtime: 'yes'
-  checks:
-  - realtime
 # conf 2
-- identifiers:
+- tags:
   - whodata
+  apply_to_modules:
+  - test_benchmark
   section: syscheck
   elements:
   - disabled:
@@ -25,5 +27,3 @@
       attributes:
       - check_all: 'yes'
       - whodata: 'yes'
-  identifiers:
-  - whodata

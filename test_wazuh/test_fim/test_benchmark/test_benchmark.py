@@ -9,13 +9,14 @@ import pytest
 
 from jq import jq
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event
-from wazuh_testing.tools import FileMonitor, check_apply_test, load_yaml
+from wazuh_testing.tools import (FileMonitor, check_apply_test,
+                                 load_wazuh_configurations)
 
 
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-section_configuration_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [os.path.join('/', 'testdir1')]
 testdir1 = test_directories[0]
 
@@ -23,7 +24,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-configurations = load_yaml(section_configuration_path)
+configurations = load_wazuh_configurations(configurations_path, __name__)
 
 
 # fixtures
@@ -37,17 +38,17 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.benchmark
-@pytest.mark.parametrize('n_regular, folder, ids_to_apply', [
+@pytest.mark.parametrize('n_regular, folder, tags_to_apply', [
     (10, testdir1, {'all'}),
     (100, testdir1, {'all'}),
     (1000, testdir1, {'all'}),
     (10000, testdir1, {'all'})
 ])
-def test_benchmark_regular_files(n_regular, folder, ids_to_apply,
+def test_benchmark_regular_files(n_regular, folder, tags_to_apply,
                                  get_configuration, configure_environment,
                                  restart_wazuh, wait_for_initial_scan):
     """Check if syscheckd detects a minimum volume of file changes (add, modify, delete)."""
-    check_apply_test(ids_to_apply, get_configuration['identifiers'])
+    check_apply_test(tags_to_apply, get_configuration['tags'])
 
     min_timeout = 30
     # Create text files

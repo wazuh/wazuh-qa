@@ -1,8 +1,10 @@
 ---
 # conf 1
-- identifiers:
+- tags:
   - invalid_no_regex
   - invalid_no_regex1
+  apply_to_modules:
+  - test_ignore_invalid
   section: syscheck
   elements:
   - disabled:
@@ -17,9 +19,11 @@
       attributes:
       - type: "sregexxxx"
 # conf 2
-- identifiers:
+- tags:
   - valid_empty
   - valid_empty1
+  apply_to_modules:
+  - test_ignore_realtime
   section: syscheck
   elements:
   - disabled:
@@ -34,9 +38,11 @@
       - check_all: 'yes'
       - realtime: 'yes'
 # conf 3
-- identifiers:
+- tags:
   - valid_no_regex
   - valid_no_regex1
+  apply_to_modules:
+  - test_ignore_realtime
   section: syscheck
   elements:
   - disabled:
@@ -49,9 +55,11 @@
   - ignore:
       value: "/testdir1/ignore_this"
 # conf 4
-- identifiers:
+- tags:
   - valid_no_regex
   - valid_no_regex2
+  apply_to_modules:
+  - test_ignore_realtime
   section: syscheck
   elements:
   - disabled:
@@ -64,9 +72,11 @@
       - check_all: 'yes'
       - realtime: 'yes'
 # conf 5
-- identifiers:
+- tags:
   - valid_no_regex
   - valid_no_regex3
+  apply_to_modules:
+  - test_ignore_realtime
   section: syscheck
   elements:
   - disabled:
@@ -81,9 +91,11 @@
       - check_all: 'yes'
       - realtime: 'yes'
 # conf 6
-- identifiers:
+- tags:
   - valid_regex
   - valid_regex1
+  apply_to_modules:
+  - test_ignore_realtime
   section: syscheck
   elements:
   - disabled:
@@ -98,9 +110,11 @@
       - check_all: 'yes'
       - realtime: 'yes'
 # conf 7
-- identifiers:
+- tags:
   - valid_regex
   - valid_regex2
+  apply_to_modules:
+  - test_ignore_realtime
   section: syscheck
   elements:
   - disabled:
@@ -115,9 +129,11 @@
       - check_all: 'yes'
       - realtime: 'yes'
 # conf 8
-- identifiers:
+- tags:
   - valid_regex
   - valid_regex3
+  apply_to_modules:
+  - test_ignore_realtime
   section: syscheck
   elements:
   - disabled:
@@ -136,9 +152,11 @@
       - check_all: 'yes'
       - realtime: 'yes'
 # conf 9
-- identifiers:
+- tags:
   - valid_regex
   - valid_regex4
+  apply_to_modules:
+  - test_ignore_realtime
   section: syscheck
   elements:
   - disabled:
@@ -153,9 +171,11 @@
       - check_all: 'yes'
       - realtime: 'yes'
 # conf 10
-- identifiers:
+- tags:
   - valid_regex
   - valid_regex5
+  apply_to_modules:
+  - test_ignore_realtime
   section: syscheck
   elements:
   - disabled:

@@ -141,25 +141,6 @@ class TimeMachine:
             TimeMachine._win_set_time(future)
 
 
-class TestEnvironment:
-    """Class to prepare a custom configuration for a test."""
-
-    def __init__(self, section: str, new_elements: List,
-                 identifiers: List = None) -> None:
-        """Initialize TestEnvironment class.
-
-        :param section: Section of 'ossec.conf' to edit
-        :param new_elements: List with dictionaries for replacing element values in a section
-        :param identifiers: List with the configuration identifiers
-        """
-        self.backup_conf = get_wazuh_conf()
-        self.section = section
-        self.new_elements = new_elements
-        self.identifiers = identifiers
-        self.new_conf = set_section_configuration(self.section,
-                                                  self.new_elements)
-
-
 def set_wazuh_conf(wazuh_conf: ET.ElementTree):
     """Set up Wazuh configuration. Wazuh will be restarted for applying it."""
     write_wazuh_conf(wazuh_conf)
@@ -213,12 +194,12 @@ def write_wazuh_conf(wazuh_conf: ET.ElementTree):
     return wazuh_conf.write(WAZUH_CONF, encoding='utf-8')
 
 
-def set_section_configuration(section: str = 'syscheck',
-                              new_elements: List = None) -> ET.ElementTree:
+def set_section_wazuh_conf(section: str = 'syscheck',
+                           new_elements: List = None) -> ET.ElementTree:
     """Set a configuration in a section of Wazuh. It replaces the content if it exists.
 
-    :param wazuh_conf: XML with the Wazuh configuration (ossec.conf)
-    :param new_elements: List with dictionaries for settings elements
+    :param section: Section of Wazuh configuration to replace
+    :param new_elements: List with dictionaries for settings elements in the section
     :return: ElementTree with the custom Wazuh configuration
     """
     wazuh_conf = get_wazuh_conf()
@@ -392,22 +373,26 @@ def random_string(length, encode=None):
     return st
 
 
-def load_yaml(yaml_file: str) -> Any:
-    """Load a YAML file.
+def load_wazuh_configurations(yaml_file_path: str, test_name: str) -> Any:
+    """Load different configurations of Wazuh from a YAML file.
 
     :param yaml_file: Full path of the YAML file to be loaded
+    :param test_name: Name of the file which contains the test that will be executed
     :return: Python object with the YAML file content
     """
-    with open(yaml_file) as stream:
-        return yaml.safe_load(stream)
+    with open(yaml_file_path) as stream:
+        configurations = yaml.safe_load(stream)
+
+    return [configuration for configuration in configurations if
+            test_name in configuration.get('apply_to_modules')]
 
 
-def check_apply_test(apply_to_identifiers: Set, identifiers: List):
-    """Skip test if intersection between two parameters is empty.
+def check_apply_test(apply_to_tags: Set, tags: List):
+    """Skip test if intersection between the two parameters is empty.
 
-    :param apply_to_identifiers: Identifiers that run the test
-    :param identifiers: List with the identifiers from a configuration
+    :param apply_to_tags: Tags which the tests will run
+    :param tags: List with the tags which identifies a configuration
     """
-    if not (apply_to_identifiers.intersection(identifiers) or
-       'all' in apply_to_identifiers):
+    if not (apply_to_tags.intersection(tags) or
+       'all' in apply_to_tags):
         skip("Does not apply to this config file")

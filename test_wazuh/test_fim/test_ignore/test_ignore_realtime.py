@@ -7,13 +7,14 @@ import os
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event
-from wazuh_testing.tools import FileMonitor, check_apply_test, load_yaml
+from wazuh_testing.tools import (FileMonitor, check_apply_test,
+                                 load_wazuh_configurations)
 
 
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-section_configuration_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [os.path.join('/', 'testdir1'),
                     os.path.join('/', 'testdir1', 'subdir'),
                     os.path.join('/', 'testdir1', 'ignore_this'),
@@ -27,9 +28,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-configurations = [configuration for configuration in
-                  load_yaml(section_configuration_path)
-                  if 'invalid_no_regex' not in configuration['identifiers']]
+configurations = load_wazuh_configurations(configurations_path, __name__)
 
 
 # fixtures
@@ -40,7 +39,7 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.parametrize('folder, filename, mode, content, triggers_event, ids_to_apply', [
+@pytest.mark.parametrize('folder, filename, mode, content, triggers_event, tags_to_apply', [
     (testdir1, 'testfile', 'w', "Sample content", True, {'valid_regex', 'valid_no_regex'}),
     (testdir1, 'btestfile', 'wb', b"Sample content", True, {'valid_regex', 'valid_no_regex'}),
     (testdir1, 'testfile2', 'w', "", True, {'valid_regex', 'valid_no_regex'}),
@@ -64,7 +63,7 @@ def get_configuration(request):
     (testdir2, 'whatever2.txt', "w", "test", False, {'valid_empty'})
 ])
 def test_ignore_subdirectory(folder, filename, mode, content, triggers_event,
-                             ids_to_apply, get_configuration,
+                             tags_to_apply, get_configuration,
                              configure_environment, restart_wazuh,
                              wait_for_initial_scan):
     """Checks files are ignored in subdirectory according to configuration
@@ -76,9 +75,9 @@ def test_ignore_subdirectory(folder, filename, mode, content, triggers_event,
        :param mode string same as mode in open built-in function
        :param content string, bytes Content to fill the new file
        :param triggers_event bool True if an event must be generated, False otherwise
-       :param ids_to_apply set Run test if matchs with a configuration identifier, skip otherwise
+       :param tags_to_apply set Run test if matchs with a configuration identifier, skip otherwise
     """
-    check_apply_test(ids_to_apply, get_configuration['identifiers'])
+    check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Create text files
     with open(os.path.join(folder, filename), mode) as f:

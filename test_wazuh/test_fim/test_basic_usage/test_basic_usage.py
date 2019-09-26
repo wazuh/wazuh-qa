@@ -12,13 +12,13 @@ from wazuh_testing.fim import (CHECK_ALL, FIFO, LOG_FILE_PATH, REGULAR, SOCKET,
                                callback_detect_end_scan, callback_detect_event,
                                create_file, validate_event)
 from wazuh_testing.tools import (FileMonitor, TimeMachine, check_apply_test,
-                                 load_yaml)
+                                 load_wazuh_configurations)
 
 
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-section_configuration_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2')]
 testdir1, testdir2 = test_directories
@@ -27,7 +27,7 @@ options = {CHECK_ALL}
 
 # configurations
 
-configurations = load_yaml(section_configuration_path)
+configurations = load_wazuh_configurations(configurations_path, __name__)
 
 
 # fixtures
@@ -40,7 +40,7 @@ def get_configuration(request):
 
 # tests
 
-@pytest.mark.parametrize('folder, name, filetype, content, ids_to_apply', [
+@pytest.mark.parametrize('folder, name, filetype, content, tags_to_apply', [
     (testdir1, 'file', REGULAR, 'Sample content', {'no_realtime'}),
     (testdir1, 'file', REGULAR, b'Sample content', {'no_realtime'}),
     (testdir1, 'file', REGULAR, '', {'no_realtime'}),
@@ -50,11 +50,11 @@ def get_configuration(request):
     (testdir2, 'file', REGULAR, '', {'no_realtime'}),
     (testdir2, 'file', REGULAR, b'', {'no_realtime'})
 ])
-def test_regular_file(folder, name, filetype, content, ids_to_apply,
+def test_regular_file(folder, name, filetype, content, tags_to_apply,
                       get_configuration, configure_environment, restart_wazuh,
                       wait_for_initial_scan):
     """Check if a special file creation is detected by syscheck."""
-    check_apply_test(ids_to_apply, get_configuration['identifiers'])
+    check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Create files
     create_file(filetype, name, folder, content)
@@ -74,7 +74,7 @@ def test_regular_file(folder, name, filetype, content, ids_to_apply,
     time.sleep(11)
 
 
-@pytest.mark.parametrize('folder, name, filetype, content, checkers, ids_to_apply', [
+@pytest.mark.parametrize('folder, name, filetype, content, checkers, tags_to_apply', [
     (testdir1, 'file', REGULAR, 'Sample content', options, {'realtime'}),
     (testdir1, 'file', REGULAR, b'Sample content', options, {'realtime'}),
     (testdir1, 'file', REGULAR, '', options, {'realtime'}),
@@ -84,10 +84,10 @@ def test_regular_file(folder, name, filetype, content, ids_to_apply,
     (testdir2, 'file', REGULAR, b'', options, {'realtime'})
 ])
 def test_regular_file_realtime(folder, name, filetype, content, checkers,
-                               ids_to_apply, get_configuration,
+                               tags_to_apply, get_configuration,
                                configure_environment, restart_wazuh):
     """Check if a regular file creation is detected by syscheck."""
-    check_apply_test(ids_to_apply, get_configuration['identifiers'])
+    check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Create files
     create_file(filetype, name, folder, content)
@@ -98,17 +98,17 @@ def test_regular_file_realtime(folder, name, filetype, content, checkers,
     validate_event(event, checks=options)
 
 
-@pytest.mark.parametrize('folder, name, filetype, content, ids_to_apply', [
+@pytest.mark.parametrize('folder, name, filetype, content, tags_to_apply', [
     (testdir1, 'file', FIFO, '', {'no_realtime'}),
     (testdir2, 'file', FIFO, '', {'no_realtime'}),
     (testdir1, 'file', SOCKET, '', {'no_realtime'}),
     (testdir2, 'file', SOCKET, '', {'no_realtime'})
 ])
 def _test_special_file_realtime(folder, name, filetype, content,
-                                ids_to_apply, get_configuration,
+                                tags_to_apply, get_configuration,
                                 configure_environment, restart_wazuh):
     """Check if a regular file creation is detected by syscheck."""
-    check_apply_test(ids_to_apply, get_configuration['identifiers'])
+    check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Create files
     create_file(filetype, folder, content)

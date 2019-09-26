@@ -1,7 +1,9 @@
 ---
 # conf 1
-- identifiers:
+- tags:
   - config1
+  apply_to_modules:
+  - test_audit
   section: syscheck
   elements:
   - disabled:
