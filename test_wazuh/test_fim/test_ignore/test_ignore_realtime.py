@@ -1,15 +1,20 @@
 # Copyright (C) 2015-2019, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-import glob
+
 import os
-import re
+
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event
-from wazuh_testing.tools import FileMonitor
+from wazuh_testing.tools import (FileMonitor, check_apply_test,
+                                 load_wazuh_configurations)
+
+
+# variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [os.path.join('/', 'testdir1'),
                     os.path.join('/', 'testdir1', 'subdir'),
                     os.path.join('/', 'testdir1', 'ignore_this'),
@@ -21,37 +26,47 @@ testdir1, testdir1_sub, testdir1_ignore, testdir2, testdir2_sub = test_directori
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
-@pytest.fixture(scope='module', params=glob.glob(os.path.join(test_data_path, 'wazuh_valid*.conf')))
-def get_ossec_configuration(request):
+# configurations
+
+configurations = load_wazuh_configurations(configurations_path, __name__)
+
+
+# fixtures
+
+@pytest.fixture(scope='module', params=configurations)
+def get_configuration(request):
+    """Get configurations from the module."""
     return request.param
 
 
-@pytest.mark.parametrize('folder, filename, mode, content, triggers_event, applies_to_config', [
-    (testdir1, 'testfile', 'w', "Sample content", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
-    (testdir1, 'btestfile', 'wb', b"Sample content", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
-    (testdir1, 'testfile2', 'w', "", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
-    (testdir1, "btestfile2", "wb", b"", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
-    (testdir1, "btestfile2.ignore", "wb", b"", False, 'wazuh_valid_sregex_(1|2|3).*conf'),
-    (testdir1, "btestfile2.ignored", "wb", b"", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
-    (testdir1_sub, 'testfile', 'w', "Sample content", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
-    (testdir1_sub, 'btestfile', 'wb', b"Sample content", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
-    (testdir1_sub, 'testfile2', 'w', "", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
-    (testdir1_sub, "btestfile2", "wb", b"", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
-    (testdir1_sub, ".ignore.btestfile", "wb", b"", True, 'wazuh_valid_(sregex_|realtime_).*conf'),
-    (testdir2, "another.ignore", "wb", b"other content", False, 'wazuh_valid_sregex_(1|2|3).*conf'),
-    (testdir2, "another.ignored", "wb", b"other content", True, 'wazuh_valid_sregex.*conf'),
-    (testdir2_sub, "another.ignore", "wb", b"other content", False, 'wazuh_valid_sregex_(1|2|3).*conf'),
-    (testdir2_sub, "another.ignored", "wb", b"other content", True, 'wazuh_valid_sregex.*conf'),
-    (testdir2, "another.ignored2", "w", "", True, r'wazuh_valid_(sregex_|realtime_).*conf'),
-    (testdir2, "another.ignore2", "w", "", False, r'wazuh_valid_sregex_(2|3)\.conf'),
-    (testdir1, 'ignore_prefix_test.txt', "w", "test", True, 'wazuh_valid_sregex_(1|2|3|4).*conf'),
-    (testdir1, 'ignore_prefix_test.txt', "w", "test", False, 'wazuh_valid_sregex_5.conf'),
-    (testdir1, 'whatever.txt', "w", "test", False, 'wazuh_valid_empty.*conf'),
-    (testdir2, 'whatever2.txt', "w", "test", False, 'wazuh_valid_empty.*conf')
+@pytest.mark.parametrize('folder, filename, mode, content, triggers_event, tags_to_apply', [
+    (testdir1, 'testfile', 'w', "Sample content", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1, 'btestfile', 'wb', b"Sample content", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1, 'testfile2', 'w', "", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1, "btestfile2", "wb", b"", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1, "btestfile2.ignore", "wb", b"", False, {'valid_regex1', 'valid_regex2', 'valid_regex3'}),
+    (testdir1, "btestfile2.ignored", "wb", b"", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1_sub, 'testfile', 'w', "Sample content", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1_sub, 'btestfile', 'wb', b"Sample content", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1_sub, 'testfile2', 'w', "", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1_sub, "btestfile2", "wb", b"", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1_sub, ".ignore.btestfile", "wb", b"", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir2, "another.ignore", "wb", b"other content", False, {'valid_regex1', 'valid_regex2', 'valid_regex3'}),
+    (testdir2, "another.ignored", "wb", b"other content", True, {'valid_regex'}),
+    (testdir2_sub, "another.ignore", "wb", b"other content", False, {'valid_regex1', 'valid_regex2', 'valid_regex3'}),
+    (testdir2_sub, "another.ignored", "wb", b"other content", True, {'valid_regex'}),
+    (testdir2, "another.ignored2", "w", "", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir2, "another.ignore2", "w", "", False, {'valid_regex2', 'valid_regex3'}),
+    (testdir1, 'ignore_prefix_test.txt', "w", "test", True, {'valid_regex1', 'valid_regex2', 'valid_regex3', 'valid_regex4'}),
+    (testdir1, 'ignore_prefix_test.txt', "w", "test", False, {'valid_regex5'}),
+    (testdir1, 'whatever.txt', "w", "test", False, {'valid_empty'}),
+    (testdir2, 'whatever2.txt', "w", "test", False, {'valid_empty'})
 ])
-def test_ignore(folder, filename, mode, content, triggers_event, applies_to_config,
-                get_ossec_configuration, configure_environment, restart_wazuh, wait_for_initial_scan):
-    """Checks files are ignored accordingly
+def test_ignore_subdirectory(folder, filename, mode, content, triggers_event,
+                             tags_to_apply, get_configuration,
+                             configure_environment, restart_wazuh,
+                             wait_for_initial_scan):
+    """Checks files are ignored in subdirectory according to configuration
 
        This test is intended to be used with valid ignore configurations
 
@@ -60,19 +75,18 @@ def test_ignore(folder, filename, mode, content, triggers_event, applies_to_conf
        :param mode string same as mode in open built-in function
        :param content string, bytes Content to fill the new file
        :param triggers_event bool True if an event must be generated, False otherwise
-       :param applies_to_config string RegEx to match the name of the configuration file where the test applies. If
-              the configuration file does not match the test is skipped
+       :param tags_to_apply set Run test if matchs with a configuration identifier, skip otherwise
     """
+    check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    if not re.search(applies_to_config, get_ossec_configuration):
-        pytest.skip("Does not apply to this config file")
     # Create text files
     with open(os.path.join(folder, filename), mode) as f:
         f.write(content)
 
     # Fetch the n_regular expected events
     try:
-        event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
+        event = wazuh_log_monitor.start(timeout=3,
+                                        callback=callback_detect_event).result()
         assert triggers_event
         assert (event['data']['type'] == 'added')
         assert (event['data']['path'] == os.path.join(folder, filename))
