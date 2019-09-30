@@ -99,6 +99,7 @@ def validate_event(event, checks=None):
                 result |= get_required_attributes(mapped, result=result)
         return result
 
+
     checks = {CHECK_ALL} if checks is None else checks
     with open(os.path.join(_data_path, 'syscheck_event.json'), 'r') as f:
         schema = json.load(f)
@@ -257,6 +258,7 @@ def change_internal_options(opt_path, pattern, value):
 
     :param opt_path: File path
     :type opt_path: String
+    :type opt_path: String
     :param pattern: Parameter to change
     :type pattern: String
     :param value: New value
@@ -337,7 +339,7 @@ def callback_configuration_error(line):
     return None
 
 
-def regular_file_cud(folder, time_travel, n_regular, min_timeout, log_monitor, options=None):
+def regular_file_cud(folder, time_travel, n_regular, min_timeout, log_monitor, options=None, content_changes=False, no_diff=False):
     """ Checks if creation, update and delete events are detected by syscheck
 
     :param folder: Path where the files will be created
@@ -355,14 +357,28 @@ def regular_file_cud(folder, time_travel, n_regular, min_timeout, log_monitor, o
     :return: None
     """
     def type_assert(ev_type):
-        event_types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
-        assert (event_types[ev_type] == n_regular)
+        if n_regular > 1:
+            event_types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
+            assert (event_types[ev_type] == n_regular)
+        else:
+            assert((jq(".data.type").transform(events, multiple_output=False)) in ev_type)
+
 
     def check_files_in_event():
         # Are the n_regular events the files modified?
-        file_paths = jq(".[].data.path").transform(events, multiple_output=True)
+        if n_regular > 1:
+            file_paths = jq(".[].data.path").transform(events, multiple_output=True)
+        else:
+            file_paths = jq(".data.path").transform(events, multiple_output=False)
         for file_name in range(n_regular):
             assert (os.path.join(folder, f'regular_{file_name}') in file_paths)
+
+    def validate_all_events():
+        if n_regular > 1:
+            for ev in events:
+                validate_event(ev, options)
+        else:
+            validate_event(events, options)
 
     # Create text files
     for name in range(n_regular):
@@ -378,8 +394,7 @@ def regular_file_cud(folder, time_travel, n_regular, min_timeout, log_monitor, o
 
     # Validate checkers for every event
     if options is not None:
-        for ev in events:
-            validate_event(ev, options)
+        validate_all_events()
 
     # Are the n_regular events of type 'added'?
     type_assert('added')
@@ -399,12 +414,22 @@ def regular_file_cud(folder, time_travel, n_regular, min_timeout, log_monitor, o
 
     # Validate checkers for every event
     if options is not None:
-        for ev in events:
-            validate_event(ev, options)
+        validate_all_events()
 
     # Are the n_regular events of type 'modified'?
     type_assert('modified')
     check_files_in_event()
+    # Content changes
+    if content_changes:
+        for name in range(n_regular):
+            diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
+                                     folder.strip('/'), f'regular_{name}')
+            assert (os.path.isfile(diff_file))
+    # Nodiff
+    if no_diff:
+        assert ('<Diff truncated because nodiff option>' in events['data'].get('content_changes'))
+    else:
+        assert (events['data'].get('content_changes') is not None)
 
     # Delete previous text files
     for name in range(n_regular):
