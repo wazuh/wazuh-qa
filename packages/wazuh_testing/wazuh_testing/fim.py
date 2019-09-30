@@ -111,7 +111,6 @@ def validate_event(event, checks=None):
 
     # Check audit
     if event['data']['mode'] == 'whodata':
-        print(f"audit: {event['data']['audit'].keys()}")
         assert('audit' in event['data'])
         assert(event['data']['audit'].keys() ^ _REQUIRED_AUDIT == set())
 
