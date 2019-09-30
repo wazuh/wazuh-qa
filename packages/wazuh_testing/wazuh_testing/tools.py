@@ -2,10 +2,12 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-from _datetime import datetime
+import random
+import string
 import sys
-import time
 import threading
+import time
+from _datetime import datetime
 
 
 class TimeMachine:
@@ -40,7 +42,8 @@ class TimeMachine:
         import subprocess
         import shlex
         subprocess.call(shlex.split("timedatectl set-ntp false"))
-        subprocess.call(shlex.split("sudo date -s '%s'" % time_))
+        subprocess.call(shlex.split("date -s '%s'" % time_))
+        subprocess.call(shlex.split("hwclock -w"))
 
     @staticmethod
     def _win_set_time(time_):
@@ -189,3 +192,50 @@ class FileMonitor:
 
     def result(self):
         return self._result
+
+
+def random_unicode_char():
+    """ Generates a random unicode char from 0x0000 to 0xD7FF
+
+    :return: Random unicode char
+    :rtype: String
+    """
+    return chr(random.randrange(0xD7FF))
+
+
+def random_string_unicode(length, encode=None):
+    """ Generates a random unicode string with variable size and optionally encoded
+
+    :param length: String length
+    :type length: Integer
+    :param encode: Encoding type. Its value is None by default
+    :type encode: String
+    :return: Random unicode string
+    :rtype: It can be a string or a binary
+    """
+    st = str(''.join(format(random_unicode_char()) for i in range(length)))
+    st = u"".join(st)
+
+    if encode is not None:
+        st = st.encode(encode)
+
+    return st
+
+
+def random_string(length, encode=None):
+    """ Generates a random alphanumeric string with variable size and optionally encoded
+
+        :param length: String length
+        :type length: Integer
+        :param encode: Encoding type. Its value is None by default
+        :type encode: String
+        :return: Random string
+        :rtype: It can be a string or a binary
+        """
+    letters = string.ascii_letters + string.digits
+    st = str(''.join(random.choice(letters) for i in range(length)))
+
+    if encode is not None:
+        st = st.encode(encode)
+
+    return st
