@@ -3,7 +3,8 @@
   hosts: node-1
   roles:
     - role: ../roles/elastic-stack/ansible-elasticsearch
-      elasticsearch_network_host: node-1
+      elasticsearch_network_host: 0.0.0.0
+      elasticsearch_reachable_host: 127.0.0.1
       node_name: node-1
       single_node: false
       elasticsearch_master_candidate: true
@@ -17,10 +18,10 @@
       elasticsearch_xpack_security: true
       node_certs_generator: true
       node_certs_generator_ip: node-1
-      master_certs_path: ~/certs
+      master_certs_path: /tmp/xpack-certs
       generate_CA: true
       ca_key_name: "wazuh-test"
-      ca_cert_name: "wazuh1"
+      ca_cert_name: "wazuh-cert"
       ca_password: "test-password"
 
   vars:
@@ -35,7 +36,8 @@
 - hosts: node-2
   roles:
     - role: ../roles/elastic-stack/ansible-elasticsearch
-      elasticsearch_network_host: node-2
+      elasticsearch_network_host: 0.0.0.0
+      elasticsearch_reachable_host: 127.0.0.1
       elasticsearch_node_name: node-2
       elasticsearch_xpack_security: true
       elasticsearch_master_candidate: true
@@ -46,8 +48,8 @@
       elasticsearch_discovery_nodes:
         - node-1
         - node-2
-      master_certs_path: ~/certs
+      master_certs_path: /tmp/xpack-certs
       generate_CA: true
       ca_key_name: "wazuh-test"
-      ca_cert_name: "wazuh1"
+      ca_cert_name: "wazuh-cert"
       ca_password: "test-password"
