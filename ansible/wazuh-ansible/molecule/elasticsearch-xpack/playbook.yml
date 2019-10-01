@@ -5,7 +5,7 @@
     - role: ../roles/elastic-stack/ansible-elasticsearch
       elasticsearch_network_host: 0.0.0.0
       elasticsearch_reachable_host: 127.0.0.1
-      node_name: node-1
+      elasticsearch_node_name: node-1
       single_node: false
       elasticsearch_master_candidate: true
       elasticsearch_bootstrap_node: true
@@ -39,6 +39,7 @@
       elasticsearch_network_host: 0.0.0.0
       elasticsearch_reachable_host: 127.0.0.1
       elasticsearch_node_name: node-2
+      single_node: false
       elasticsearch_xpack_security: true
       elasticsearch_master_candidate: true
       node_certs_generator_ip: node-1
