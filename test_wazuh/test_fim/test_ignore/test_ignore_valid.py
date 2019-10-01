@@ -3,13 +3,13 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+from datetime import timedelta
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event
+from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, create_file, REGULAR
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
-                                 load_wazuh_configurations)
-
+                                 load_wazuh_configurations, TimeMachine)
 
 # variables
 
@@ -28,7 +28,16 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-configurations = load_wazuh_configurations(configurations_path, __name__)
+configurations = load_wazuh_configurations(configurations_path, __name__,
+                                           params=[{'FIM_MODE': ''},
+                                                   {'FIM_MODE': {'realtime': 'yes'}},
+                                                   {'FIM_MODE': {'whodata': 'yes'}}
+                                                   ],
+                                           metadata=[{'fim_mode': 'scheduled'},
+                                                     {'fim_mode': 'realtime'},
+                                                     {'fim_mode': 'whodata'}
+                                                     ]
+                                           )
 
 
 # fixtures
@@ -80,10 +89,12 @@ def test_ignore_subdirectory(folder, filename, mode, content, triggers_event,
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Create text files
-    with open(os.path.join(folder, filename), mode) as f:
-        f.write(content)
+    create_file(REGULAR, filename, folder, content)
 
-    # Fetch the n_regular expected events
+    if get_configuration['metadata']['fim_mode'] == 'scheduled':
+        # Go ahead in time to let syscheck perform a new scan
+        TimeMachine.travel_to_future(timedelta(hours=13))
+
     try:
         event = wazuh_log_monitor.start(timeout=3,
                                         callback=callback_detect_event).result()

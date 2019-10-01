@@ -13,6 +13,7 @@ from datetime import datetime
 from pytest import skip
 from subprocess import DEVNULL, check_call, check_output
 from typing import Any, List, Set
+from copy import deepcopy
 
 import yaml
 
@@ -218,8 +219,9 @@ def set_section_wazuh_conf(section: str = 'syscheck',
                 attributes = properties.get('attributes')
                 if attributes:
                     for attribute in attributes:
-                        for attr_name, attr_value in attribute.items():
-                            tag.attrib[attr_name] = attr_value
+                        if attribute is not None and isinstance(attribute, dict):
+                            for attr_name, attr_value in attribute.items():
+                                tag.attrib[attr_name] = attr_value
 
     return wazuh_conf
 
@@ -373,18 +375,80 @@ def random_string(length, encode=None):
     return st
 
 
-def load_wazuh_configurations(yaml_file_path: str, test_name: str) -> Any:
+def expand_placeholders(mutable_obj, placeholders=None):
+    """Search for placeholders and replace them by a value inside mutable_obj
+
+    :param mutable_obj: target object where the replacement are performed
+    :param placeholders: dict where each key is a placeholder and the value is the replacement
+    :return: reference to mutable_obj
+    """
+    placeholders = {} if placeholders is None else placeholders
+    if isinstance(mutable_obj, list):
+        for criterion, placeholder in placeholders.items():
+            for index, value in enumerate(mutable_obj):
+                if value == criterion:
+                    mutable_obj[index] = placeholder
+                elif isinstance(value, (dict, list)):
+                    expand_placeholders(mutable_obj[index], placeholders=placeholders)
+    elif isinstance(mutable_obj, dict):
+        for criterion, placeholder in placeholders.items():
+            for key, value in mutable_obj.items():
+                if criterion == key:
+                    mutable_obj[key] = placeholder
+                elif isinstance(value, (dict, list)):
+                    expand_placeholders(mutable_obj[key], placeholders=placeholders)
+
+    return mutable_obj
+
+
+def add_metadata(dikt, metadata=None):
+    """Create a new key 'metadata' in dikt if not already exists and updates it with metadata content
+
+    :param dikt: target dict to update metadata in
+    :param metadata: dict including the new properties to be saved in the metadata key
+    :return: None
+    """
+    if metadata is not None:
+        new_metadata = dikt['metadata'] if 'metadata' in dikt else {}
+        new_metadata.update(metadata)
+        dikt['metadata'] = new_metadata
+
+
+def process_configuration(config, placeholders=None, metadata=None):
+    """Get a new configuration replacing placeholders and adding metadata.
+    Both placeholders and metadata should have equal length
+
+    :param config: dict config to be enriched
+    :param placeholders: list of dicts with the replacements
+    :param metadata: list of dicts with the metadata keys to include in config
+    :return: dict with config enriched
+    """
+    new_config = expand_placeholders(deepcopy(config), placeholders=placeholders)
+    add_metadata(new_config, metadata=metadata)
+
+    return new_config
+
+
+def load_wazuh_configurations(yaml_file_path: str, test_name: str, params: list = None, metadata: list = None) -> Any:
     """Load different configurations of Wazuh from a YAML file.
 
-    :param yaml_file: Full path of the YAML file to be loaded
+    :param yaml_file_path: Full path of the YAML file to be loaded
     :param test_name: Name of the file which contains the test that will be executed
+    :param params: List of dicts where each dict represents a replacement MATCH -> REPLACEMENT
+    :param metadata: List of dicts. Custom metadata to be inserted in the configuration
     :return: Python object with the YAML file content
     """
+    params = [{}] if params is None else params
+    metadata = [{}] if metadata is None else metadata
+    if len(params) != len(metadata):
+        raise ValueError(f"params and metadata should have the same length {len(params)} != {len(metadata)}")
+
     with open(yaml_file_path) as stream:
         configurations = yaml.safe_load(stream)
 
-    return [configuration for configuration in configurations if
-            test_name in configuration.get('apply_to_modules')]
+    return [process_configuration(configuration, placeholders=replacement, metadata=meta)
+            for replacement, meta in zip(params, metadata)
+            for configuration in configurations if test_name in configuration.get('apply_to_modules')]
 
 
 def check_apply_test(apply_to_tags: Set, tags: List):
