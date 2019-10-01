@@ -23,7 +23,7 @@
   - valid_empty
   - valid_empty1
   apply_to_modules:
-  - test_ignore_realtime
+  - test_ignore_valid
   section: syscheck
   elements:
   - disabled:
@@ -36,13 +36,13 @@
       value: "/testdir1,/testdir2"
       attributes:
       - check_all: 'yes'
-      - realtime: 'yes'
+      - FIM_MODE
 # conf 3
 - tags:
   - valid_no_regex
   - valid_no_regex1
   apply_to_modules:
-  - test_ignore_realtime
+  - test_ignore_valid
   section: syscheck
   elements:
   - disabled:
@@ -51,7 +51,7 @@
       value: "/testdir1,/testdir2"
       attributes:
       - check_all: 'yes'
-      - realtime: 'yes'
+      - FIM_MODE
   - ignore:
       value: "/testdir1/ignore_this"
 # conf 4
@@ -59,7 +59,7 @@
   - valid_no_regex
   - valid_no_regex2
   apply_to_modules:
-  - test_ignore_realtime
+  - test_ignore_valid
   section: syscheck
   elements:
   - disabled:
@@ -70,13 +70,13 @@
       value: "/testdir1,/testdir2"
       attributes:
       - check_all: 'yes'
-      - realtime: 'yes'
+      - FIM_MODE
 # conf 5
 - tags:
   - valid_no_regex
   - valid_no_regex3
   apply_to_modules:
-  - test_ignore_realtime
+  - test_ignore_valid
   section: syscheck
   elements:
   - disabled:
@@ -89,13 +89,13 @@
       value: "/testdir1,/testdir2"
       attributes:
       - check_all: 'yes'
-      - realtime: 'yes'
+      - FIM_MODE
 # conf 6
 - tags:
   - valid_regex
   - valid_regex1
   apply_to_modules:
-  - test_ignore_realtime
+  - test_ignore_valid
   section: syscheck
   elements:
   - disabled:
@@ -108,13 +108,13 @@
       value: "/testdir1,/testdir2"
       attributes:
       - check_all: 'yes'
-      - realtime: 'yes'
+      - FIM_MODE
 # conf 7
 - tags:
   - valid_regex
   - valid_regex2
   apply_to_modules:
-  - test_ignore_realtime
+  - test_ignore_valid
   section: syscheck
   elements:
   - disabled:
@@ -127,13 +127,13 @@
       value: "/testdir1,/testdir2"
       attributes:
       - check_all: 'yes'
-      - realtime: 'yes'
+      - FIM_MODE
 # conf 8
 - tags:
   - valid_regex
   - valid_regex3
   apply_to_modules:
-  - test_ignore_realtime
+  - test_ignore_valid
   section: syscheck
   elements:
   - disabled:
@@ -150,13 +150,13 @@
       value: "/testdir1,/testdir2"
       attributes:
       - check_all: 'yes'
-      - realtime: 'yes'
+      - FIM_MODE
 # conf 9
 - tags:
   - valid_regex
   - valid_regex4
   apply_to_modules:
-  - test_ignore_realtime
+  - test_ignore_valid
   section: syscheck
   elements:
   - disabled:
@@ -169,13 +169,13 @@
       value: "/testdir1,/testdir2"
       attributes:
       - check_all: 'yes'
-      - realtime: 'yes'
+      - FIM_MODE
 # conf 10
 - tags:
   - valid_regex
   - valid_regex5
   apply_to_modules:
-  - test_ignore_realtime
+  - test_ignore_valid
   section: syscheck
   elements:
   - disabled:
@@ -188,4 +188,4 @@
       value: "/testdir1,/testdir2"
       attributes:
       - check_all: 'yes'
-      - realtime: 'yes'
+      - FIM_MODE
