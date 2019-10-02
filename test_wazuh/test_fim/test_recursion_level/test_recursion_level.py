@@ -7,8 +7,10 @@ import pytest
 import re
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, regular_file_cud
-from wazuh_testing.tools import FileMonitor
+from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations
 
+
+# Variables
 
 dir_no_recursion = "/test_no_recursion"
 dir_recursion_1 = "/test_recursion_1"
@@ -24,6 +26,7 @@ subdir_space = "sub dir "
 
 test_data_path = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), 'data')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [
     dir_no_recursion,
     dir_recursion_1,
@@ -37,18 +40,25 @@ test_directories = [
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
-def check_config_applies(applies_to_config, get_ossec_configuration):
+# Configurations
+
+configurations = load_wazuh_configurations(configurations_path, __name__)
+
+
+# Functions
+
+def check_config_applies(applies_to_config, get_configuration):
     """Checks if the processed conf file matches with the one specified by parameter.
     If not, the test is skipped.
 
     :param applies_to_config string The .conf file name to apply.
     """
-    if not re.search(applies_to_config, get_ossec_configuration):
+    if not re.search(applies_to_config, get_configuration):
         pytest.skip("Does not apply to this config file")
 
 
-def recursion_test(dirname, subdirname, recursion_level, num_files=2,
-                   timeout=1, threshold_true=2, threshold_false=2, is_scheduled = False):
+def recursion_test(dirname, subdirname, recursion_level, num_files=1,
+                   timeout=1, threshold_true=2, threshold_false=2, is_scheduled=False):
     """Checks recursion_level functionality over the first and last n-directories of the dirname hierarchy 
     by creating, modifying and deleting some files in them. It will create all directories and 
     subdirectories needed using the info provided by parameter.
@@ -70,18 +80,20 @@ def recursion_test(dirname, subdirname, recursion_level, num_files=2,
         if ((recursion_level < threshold_true * 2) or
             (recursion_level >= threshold_true * 2 and n < threshold_true) or
             (recursion_level >= threshold_true * 2 and n > recursion_level - threshold_true)):
-            regular_file_cud(path, is_scheduled, num_files, timeout,
-                             wazuh_log_monitor, should_be_triggered=True)
+            regular_file_cud(path, wazuh_log_monitor, time_travel=is_scheduled,
+                             n_regular=num_files, min_timeout=timeout)
 
     # Check False (exceding the specified recursion_level)
     for n in range(recursion_level, recursion_level + threshold_false):
         path = os.path.join(path, subdirname + str(n+1))
-        regular_file_cud(path, is_scheduled, num_files, timeout,
-                         wazuh_log_monitor, should_be_triggered=False)
+        regular_file_cud(path, wazuh_log_monitor, time_travel=is_scheduled,
+                         n_regular=num_files, min_timeout=timeout, triggers_event=False)
 
 
-@pytest.fixture(scope='module', params=glob.glob(os.path.join(test_data_path, 'wazuh*.conf')))
-def get_ossec_configuration(request):
+# Fixtures
+
+@pytest.fixture(scope='module', params=configurations)
+def get_configuration(request):
     return request.param
 
 
@@ -97,9 +109,11 @@ parametrized_list = [
 ]
 
 
+# Tests
+
 @pytest.mark.parametrize('dirname, subdirname, recursion_level', parametrized_list)
 def test_recursion_realtime(dirname, subdirname, recursion_level,
-                            get_ossec_configuration, configure_environment, 
+                            get_configuration, configure_environment,
                             restart_wazuh, wait_for_initial_scan):
     """Checks if files are correctly detected by syscheck with recursion level using realtime monitoring.
 
@@ -111,14 +125,13 @@ def test_recursion_realtime(dirname, subdirname, recursion_level,
     :param subdirname string The name of the subdirectories that will be created during the execution for testing purpouses.
     :param recursion_level int Recursion level. Also used as the number of subdirectories to be created and checked for the current test.
     """
-    check_config_applies("wazuh_recursion_realtime.conf",
-                         get_ossec_configuration)
+    check_apply_test({'realtime'}, get_configuration['tags'])
     recursion_test(dirname, subdirname, recursion_level)
 
 
 @pytest.mark.parametrize('dirname, subdirname, recursion_level', parametrized_list)
 def test_recursion_scheduled(dirname, subdirname, recursion_level,
-                             get_ossec_configuration, configure_environment, 
+                             get_configuration, configure_environment,
                              restart_wazuh, wait_for_initial_scan):
     """Checks if files are correctly detected by syscheck with recursion level using scheduled monitoring.
 
@@ -130,14 +143,13 @@ def test_recursion_scheduled(dirname, subdirname, recursion_level,
     :param subdirname string The name of the subdirectories that will be created during the execution for testing purpouses.
     :param recursion_level int Recursion level. Also used as the number of subdirectories to be created and checked for the current test.
     """
-    check_config_applies("wazuh_recursion_scheduled.conf",
-                         get_ossec_configuration)
+    check_apply_test({'scheduled'}, get_configuration['tags'])
     recursion_test(dirname, subdirname, recursion_level, is_scheduled=True)
 
 
 @pytest.mark.parametrize('dirname, subdirname, recursion_level', parametrized_list)
 def test_recursion_whodata(dirname, subdirname, recursion_level,
-                           get_ossec_configuration, configure_environment, 
+                           get_configuration, configure_environment,
                            restart_wazuh, wait_for_initial_scan):
     """Checks if files are correctly detected by syscheck with recursion level using whodata monitoring.
 
@@ -149,6 +161,5 @@ def test_recursion_whodata(dirname, subdirname, recursion_level,
     :param subdirname string The name of the subdirectories that will be created during the execution for testing purpouses.
     :param recursion_level int Recursion level. Also used as the number of subdirectories to be created and checked for the current test.
     """
-    check_config_applies("wazuh_recursion_whodata.conf",
-                         get_ossec_configuration)
+    check_apply_test({'whodata'}, get_configuration['tags'])
     recursion_test(dirname, subdirname, recursion_level, timeout=2)
