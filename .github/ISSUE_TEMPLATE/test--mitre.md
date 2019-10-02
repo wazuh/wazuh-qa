@@ -16,6 +16,7 @@
 - [ ] MIT008
 - [ ] MIT009
 - [ ] MIT010
+- [ ] MIT011
 
 ## MIT001
 
@@ -56,13 +57,13 @@ Then, install manager again
 **Expected outputs**
 ```
 # ls var/ossec/var/db
-output: agents  global.db  global.db-shm  global.db-wal  mitre.db
-``` 
+```
+> agents  global.db  global.db-shm  global.db-wal  mitre.db
 ```
 # sqlite3 var/ossec/var/db/mitre.db
 sqlite> .tables
-output: attack has_phase has_platform
 ```
+> attack has_phase has_platform
 ```
 sqlite> SELECT * FROM attack;
 sqlite> SELECT * FROM has_phase;
@@ -98,13 +99,14 @@ Then, install Manager
 3.11.0
 
 **Expected logs**
-```
-# cat ossec.log | grep Mitre
-output: 
-ossec-analysisd[19213] mitre.c:71 at mitre_load(): DEBUG: Mitre info loading failed. Mitre's database response has 0 elements.
-ossec-analysisd[4729] mitre.c:50 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
 
 ```
+# cat ossec.log | grep Mitre
+```
+> ossec-analysisd[19213] mitre.c:71 at mitre_load(): DEBUG: Mitre info loading failed. Mitre's database response has 0 elements.
+
+> ossec-analysisd[4729] mitre.c:50 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
+
 ## MIT003
 
 **Short description**
@@ -133,13 +135,13 @@ Then, install Manager
 3.11.0
 
 **Expected logs**
-```
-# cat ossec.log | grep Mitre
-output: 
-ossec-analysisd[19213] mitre.c:71 at mitre_load(): DEBUG: Mitre info loading failed. Mitre's database response has 0 elements.
-ossec-analysisd[4729] mitre.c:50 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
 
 ```
+# cat ossec.log | grep Mitre
+```
+> ossec-analysisd[19213] mitre.c:71 at mitre_load(): DEBUG: Mitre info loading failed. Mitre's database response has 0 elements.
+
+> ossec-analysisd[4729] mitre.c:50 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
 
 ## MIT004
 
@@ -170,13 +172,13 @@ Install Manager and choose /opt/ossec as path installation
 **Expected outputs**
 ```
 # ls opt/ossec/var/db
-output: agents  global.db  global.db-shm  global.db-wal  mitre.db
-``` 
+```
+> agents  global.db  global.db-shm  global.db-wal  mitre.db
 ```
 # sqlite3 opt/ossec/var/db/mitre.db
 sqlite> .tables
-output: attack has_phase has_platform
 ```
+> attack has_phase has_platform
 ```
 sqlite> SELECT * FROM attack;
 sqlite> SELECT * FROM has_phase;
@@ -215,10 +217,10 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
  ```
  ```
  ossec-control restart
- sudo su
  CTRL + D
  sudo su
  CRTL + D
+ sudo su
  ```
 **Compatible versions**
 
@@ -279,10 +281,10 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
  ```
  ```
  ossec-control restart
- sudo su
  CTRL + D
  sudo su
  CRTL + D
+ sudo su
  ```
 **Compatible versions**
 
@@ -316,7 +318,7 @@ In this case, these techniques have in common the "Privilege Escalation" tactic 
 
 **Short description**
 
-When a rule has an ID technique that is not in Mitre database, the ID will appear in the alert.
+When a rule has an ID technique that is not in Mitre database, the ID will appear in the alert but a warning message will be generated. 
 
 **Category**
 
@@ -324,7 +326,7 @@ Mitre
 
 **Description**
 
-When a rule has an ID technique that is not in Mitre database, the ID will appear in the alert but its tactics wont because there are no tactics associated with that ID. Wazuh doesn't have to stop. 
+When a rule has an ID technique that is not in Mitre database, the ID will appear in the alert but its tactics wont because there are no tactics associated with that ID. Wazuh doesn't have to stop. In addition, a warning message will be generated. 
 
 **Configuration sample**
 
@@ -344,10 +346,10 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
  ```
  ```
  ossec-control restart
- sudo su
  CTRL + D
  sudo su
  CRTL + D
+ sudo su
  ```
 **Compatible versions**
 
@@ -375,6 +377,7 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
 }
 
 ```
+> to_json.c:110 at Eventinfo_to_jsonstr(): WARNING: Mitre Technique ID 6000 is not in mitre database.
 
 ## MIT008
 
@@ -409,10 +412,10 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
  ```
  ```
  ossec-control restart
- sudo su
  CTRL + D
  sudo su
  CRTL + D
+ sudo su
  ```
 **Compatible versions**
 
@@ -439,8 +442,77 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
        ...
 }
 ```
-
 ## MIT009
+
+**Short description**
+
+When has_phase table is not in mitre.db, tactics won't be shown in alerts and Wazuh will show error messages.
+
+**Category**
+
+Mitre
+
+**Description**
+
+When has_phase table is not in mitre.db, tactics won't be shown in alerts and Wazuh will show error messages. It does not have to stop.
+
+**Configuration sample**
+
+Remove techniques:
+
+```
+sudo nano wazuh/etc/rules/0020-syslog_rules.xml
+
+<rule id="5402" level="3">
+    <if_sid>5400</if_sid>
+    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+    <description>Successful sudo to ROOT executed</description>
+    <mitre>
+      <id>T1169</id>
+      <id>T1078</id>
+    </mitre>
+    <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
+</rule>
+ ```
+ ```
+ ossec-control restart
+ CTRL + D
+ sudo su
+ CRTL + D
+ sudo su
+ ```
+**Compatible versions**
+
+3.11.0
+
+**Expected alerts**
+```
+# tail -f /var/ossec/logs/alerts/alerts.json
+
+{
+"timestamp":"2019-09-30T13:12:29.416+0200",
+"rule":{
+      "level":3,
+      "description":"Successful sudo to ROOT executed",
+      "id":"5402",
+      "mitre":{"id":["T1169","T1078"],
+               "tactics":[]
+               },
+      "firedtimes":1,
+      "mail":false,
+      "groups":["syslog","sudo"],"pci_dss":["10.2.5","10.2.2"],"gpg13":["7.6","7.8","7.13"],"gdpr":["IV_32.2"],"hipaa":["164.312.b"],"nist_800_53":["AU.3.1","IA.10"]
+       },
+       
+       ...
+}
+```
+> wazuh-db[7314] wdb_parser.c:348 at wdb_parse(): DEBUG: Mitre DB Cannot execute SQL query; err database var/db/mitre.db: no such table: has_phase
+
+> ossec-analysisd[7339] mitre.c:119 at mitre_load(): DEBUG: Mitre info loading failed. Query gave an error response: err Cannot execute SQL query; no such table: has_phase
+
+> ossec-analysisd[7339] mitre.c:120 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
+
+## MIT010
 
 **Short description**
 
@@ -473,6 +545,7 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
 </rule>
  ```
  Or remove <id>:
+ 
  ```
  <rule id="5402" level="3">
     <if_sid>5400</if_sid>
@@ -487,22 +560,20 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
  ``` 
  ```
  ossec-control restart
- sudo su
  CTRL + D
  sudo su
  CRTL + D
+ sudo su
  ```
 **Compatible versions**
 
 3.11.0
 
 **Expected logs**
-```
-ossec-analysisd[22563] analysisd.c:572 at main(): CRITICAL: (1220): Error loading the rules: 'ruleset/rules/0020-syslog_rules.xml'.
 
-```
+> ossec-analysisd[22563] analysisd.c:572 at main(): CRITICAL: (1220): Error loading the rules: 'ruleset/rules/0020-syslog_rules.xml'.
 
-## MIT010
+## MIT011
 
 **Short description**
 
