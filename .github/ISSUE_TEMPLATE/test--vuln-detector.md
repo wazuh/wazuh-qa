@@ -1,7 +1,16 @@
+---
+name: 'Test: Vulnerability detector'
+about: Test suite for Vulnerability detector.
+title: ''
+labels: ''
+assignees: ''
+
+---
+
 # Vulnerability detector
 
-| Version | Revision | 
-| --- | --- | 
+| Version | Revision |
+| --- | --- |
 | x.y.z | rev |
 
 ## Summary
@@ -164,7 +173,7 @@ Database updates
 Vulnerability-detector is able to check if a vulnerability feed is outdated or not, to update it if it is necessary. The tests consist on to verify that the feeds are not being updated if the remote database has not changed. We will observe different behaviour depending on what feed is updating.
 
 - For **Canonical** and **Debian** feeds, Vulnerability Detector will download the entire OVAL file, but it won't try to index it if that version has already been updated.
-- For the **National Vulnerability Database** feed, Vulnerability Detector will download lightweight metadata files that will be used to evaluate if the database (heavier file) must be fetched too. This is checked for each file, as this feed divides the vulnerabilities into annual files which can be updated at different times. 
+- For the **National Vulnerability Database** feed, Vulnerability Detector will download lightweight metadata files that will be used to evaluate if the database (heavier file) must be fetched too. This is checked for each file, as this feed divides the vulnerabilities into annual files which can be updated at different times.
 - The **Red Hat** feed doest not follow this rule because we have not a way to verify if that feed has been updated since last time we indexed it.
 
 **Configuration sample**
@@ -230,7 +239,7 @@ Database updates
 
 **Description**
 
-This option is only valid for the Red Hat and National Vulnerability feeds. To verify that all is working as expected, you can filter 
+This option is only valid for the Red Hat and National Vulnerability feeds. To verify that all is working as expected, you can filter
 
 **Configuration sample**
 
@@ -325,7 +334,7 @@ File integrity
 
 **Description**
 
-The information stored in `<installation_path>/queue/vulnerability/cve.db` is not currently persistent, so the database must be removed between updates. 
+The information stored in `<installation_path>/queue/vulnerability/cve.db` is not currently persistent, so the database must be removed between updates.
 
 To verify it, perform a vulnerability scan or update, check that the database exists, modify the `ossec.conf` file to disable the module, and update Wazuh. After this, the database should not exist.
 
@@ -402,7 +411,7 @@ Database updates
 
 **Description**
 
-We understand offline update as the one in which we indicate an alternative repository where getting the vulnerability database. 
+We understand offline update as the one in which we indicate an alternative repository where getting the vulnerability database.
 
 This type of update is performed through the `path` and `url` options, and the way to configure it depends on the provider type (multi-provider o single-provider). You can find this process explained in the Vulnerability Detector documentation.
 
@@ -548,7 +557,7 @@ Vulnerability detection
 
 **Description**
 
-This test is the reverse of `VUL009`. It consists on to verify that all continue working if an unsupported agent is connected to de manager. 
+This test is the reverse of `VUL009`. It consists on to verify that all continue working if an unsupported agent is connected to de manager.
 
 An agent may be unsupported because the module does not accept its distribution, such as Fedora, or because of its version (Debian Sid).
 
@@ -584,7 +593,7 @@ The `allow` option of Vulnerability Detector is used to configure the vulnerabil
 
 **Configuration sample**
 
-To test it, connect several agents of similar or derivated distributions to the manager and configure its monitoring using this tag. 
+To test it, connect several agents of similar or derivated distributions to the manager and configure its monitoring using this tag.
 
 The following configuration example is adding support for `Pop! OS 16` and `Ubuntu 15` as if they were `Ubuntu 16`, `Linux Mint 19` as `Ubuntu 18`, `Oracle Linux 7` as `Red Hat 7`, and `Oracle Linux 6` as `Red Hat 6`.
 
@@ -677,7 +686,7 @@ Vulnerability detection
 
 The `<ignore_time>` option is used to configure the interval time during the agent will not be fully scanned. This means during that time only the new packages of the agent, or those that have been updated will be analyzed.
 
-Note that this option defines an interval for each agent, and the time must start to count when the first scan of the agent is performed. 
+Note that this option defines an interval for each agent, and the time must start to count when the first scan of the agent is performed.
 
 The test must also verify that the ignore interval is respected, and not restarted, between manager restarts.
 
@@ -729,4 +738,3 @@ You should see the following debug messages with the ignore time has not been re
 
 > 2019/09/26 09:46:57 wazuh-modulesd:vulnerability-detector[6099] wm_vuln_detector.c:2815 at wm_vuldet_get_software_info(): DEBUG: (5574): A partial scan will be run on agent 47.
 > 2019/09/26 09:46:57 wazuh-modulesd:vulnerability-detector[6099] wm_vuln_detector.c:2950 at wm_vuldet_get_software_info(): DEBUG: (5475): No changes have been found with respect to the last package inventory for agent 47.
-
