@@ -15,6 +15,7 @@
 - [ ] MIT007
 - [ ] MIT008
 - [ ] MIT009
+- [ ] MIT010
 
 ## MIT001
 
@@ -37,7 +38,6 @@ It is important to check the mitre database is created in /var/db/mitre.db after
 
 ```
 $ cd wazuh/
-$ git checkout 3.10-mitre
 # ./install (install Manager)
  ```
 
@@ -500,4 +500,39 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
 ```
 ossec-analysisd[22563] analysisd.c:572 at main(): CRITICAL: (1220): Error loading the rules: 'ruleset/rules/0020-syslog_rules.xml'.
 
+```
+
+## MIT010
+
+**Short description**
+
+Check there are not memory leaks using Valgrind
+
+**Category**
+
+Mitre
+
+**Description**
+
+Check there are not memory leaks in analysisd using Valgrind. Analysisd is responsible for filling in Mitre database and generating alerts.
+
+**Configuration sample**
+
+```
+valgrind --leak-check=full --trace-children=yes --read-var-info=yes --track-origins=yes --show-leak-kinds=all --read-var-info=yes /var/ossec/bin/ossec-analysisd -f
+```
+**Compatible versions**
+
+3.11.0
+
+**Expected outputs**
+
+100 bytes of memory leak are expected:
+```
+LEAK SUMMARY:
+==2268==    definitely lost: 100 bytes in 9 blocks
+==2268==    indirectly lost: 0 bytes in 0 blocks
+==2268==      possibly lost: 20,128 bytes in 74 blocks
+==2268==    still reachable: 12,118,135 bytes in 58,600 blocks
+==2268==         suppressed: 0 bytes in 0 blocks
 ```
