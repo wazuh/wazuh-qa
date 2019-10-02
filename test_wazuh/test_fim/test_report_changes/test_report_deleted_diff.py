@@ -2,15 +2,13 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
-import glob
+from datetime import timedelta
+
 import pytest
-import time
-import subprocess
-import shutil
+
 from wazuh_testing.fim import *
-from wazuh_testing.tools import (FileMonitor, check_apply_test,
-                                 load_wazuh_configurations, truncate_file, set_section_wazuh_conf,
-                                 write_wazuh_conf, WAZUH_PATH)
+from wazuh_testing.tools import (FileMonitor, TimeMachine, check_apply_test,
+                                 load_wazuh_configurations, set_section_wazuh_conf)
 
 
 # variables
@@ -43,39 +41,39 @@ def get_configuration(request):
 
 
 # tests
-@pytest.mark.parametrize('tags_to_apply', [
-    {'realtime_report'}
+@pytest.mark.parametrize('tags_to_apply, new_ossec_conf', [
+    ({'schedule_report'}, set_section_wazuh_conf(configurations[3].get('section'),
+                                                 configurations[3].get('elements'))),
+    ({'realtime_report'}, set_section_wazuh_conf(configurations[4].get('section'),
+                                                 configurations[4].get('elements'))),
+    ({'whodata_report'}, set_section_wazuh_conf(configurations[5].get('section'),
+                                                configurations[5].get('elements'))),
 ])
 @pytest.mark.parametrize('folder, checkers, no_diff', [
     (testdir_reports, options, False),
 ])
-def test_reports_file_and_nodiff(folder, checkers, no_diff, tags_to_apply,
-                    get_configuration, configure_environment,
-                      restart_wazuh, wait_for_initial_scan):
+def test_reports_file_and_nodiff(folder, checkers, no_diff, tags_to_apply, new_ossec_conf,
+                                 get_configuration, configure_environment,
+                                 restart_wazuh, wait_for_initial_scan):
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     filename = 'regularfile'
 
-    no_report_config = set_section_wazuh_conf(configurations[3].get('section'),
-                                              configurations[3].get('elements'))
     # Check if a diff file is created
     create_file(REGULAR, filename, folder, 'Sample content')
-    stripped_folder = folder.strip('/')
-    print(stripped_folder)
-    diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local', folder, filename)
-    print(diff_file)
-    assert(os.path.isfile(diff_file))
+    if tags_to_apply == {'schedule_report'}:
+        TimeMachine.travel_to_future(timedelta(hours=13))
+    # Check if file is duplicated
+    diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
+                             folder.strip('/'), filename)
+    # Wait until event is detected
+    wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
 
-    # Restart Wazuh with a new conf without report_changes and check if the directory is empty
-    write_wazuh_conf(no_report_config)
-    p = subprocess.Popen(["service", "wazuh-manager", "restart"])
-    p.wait()
-    # Wait for FIM scan to finish
-    wazuh_log_monitor.start(timeout=60, callback=callback_detect_end_scan)
-    #time.sleep(11)
-    print(diff_file)
-    assert(os.path.isfile(diff_file) is False)
+    assert (os.path.exists(diff_file))
+    # Restart Wazuh without report_changes
+    restart_wazuh_with_new_conf(new_ossec_conf, wazuh_log_monitor)
+    assert(os.path.exists(diff_file) is False)
 
 #
 # @pytest.fixture(scope='function', params=glob.glob(os.path.join(test_data_path, 'ossec_delete.conf')))

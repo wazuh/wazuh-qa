@@ -9,10 +9,12 @@ import socket
 import sys
 from collections import Counter
 from datetime import timedelta
+import subprocess
+import time
 
 from jq import jq
 from jsonschema import validate
-from wazuh_testing.tools import TimeMachine
+from wazuh_testing.tools import TimeMachine, write_wazuh_conf
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
@@ -339,7 +341,7 @@ def callback_configuration_error(line):
     return None
 
 
-def regular_file_cud(folder, time_travel, n_regular, min_timeout, log_monitor, options=None, content_changes=False, no_diff=False):
+def regular_file_cud(folder, time_travel, n_regular, min_timeout, log_monitor, options=None, report_changes=False, no_diff=False):
     """ Checks if creation, update and delete events are detected by syscheck
 
     :param folder: Path where the files will be created
@@ -362,7 +364,6 @@ def regular_file_cud(folder, time_travel, n_regular, min_timeout, log_monitor, o
             assert (event_types[ev_type] == n_regular)
         else:
             assert((jq(".data.type").transform(events, multiple_output=False)) in ev_type)
-
 
     def check_files_in_event():
         # Are the n_regular events the files modified?
@@ -400,6 +401,13 @@ def regular_file_cud(folder, time_travel, n_regular, min_timeout, log_monitor, o
     type_assert('added')
     check_files_in_event()
 
+    # Check if files are duplicated
+    if report_changes:
+        for name in range(n_regular):
+            diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
+                                     folder.strip('/'), f'regular_{name}')
+            assert (os.path.exists(diff_file))
+
     # Modify previous text files
     for name in range(n_regular):
         modify_file(folder, f'regular_{name}', 'Sample content added')
@@ -419,12 +427,7 @@ def regular_file_cud(folder, time_travel, n_regular, min_timeout, log_monitor, o
     # Are the n_regular events of type 'modified'?
     type_assert('modified')
     check_files_in_event()
-    # Content changes
-    if content_changes:
-        for name in range(n_regular):
-            diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
-                                     folder.strip('/'), f'regular_{name}')
-            assert (os.path.isfile(diff_file))
+
     # Nodiff
     if no_diff:
         assert ('<Diff truncated because nodiff option>' in events['data'].get('content_changes'))
@@ -446,3 +449,20 @@ def regular_file_cud(folder, time_travel, n_regular, min_timeout, log_monitor, o
     # Are the n_regular events of type 'deleted'?
     type_assert('deleted')
     check_files_in_event()
+
+
+def restart_wazuh_with_new_conf(new_conf, log_monitor):
+    """ Restart Wazuh service applying a new ossec.conf
+
+    :param new_conf: New config file
+    :type new_conf: ElementTree
+    :param log_monitor: Wazuh log monitor
+    :type log_monitor: FileMonitor
+    :return: None
+    """
+    write_wazuh_conf(new_conf)
+    p = subprocess.Popen(["service", "wazuh-manager", "restart"])
+    p.wait()
+    # Wait for FIM scan to finish
+    log_monitor.start(timeout=60, callback=callback_detect_end_scan)
+    time.sleep(11)

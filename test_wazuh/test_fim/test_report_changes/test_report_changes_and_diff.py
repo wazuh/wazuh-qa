@@ -56,11 +56,11 @@ def test_reports_file_and_nodiff(folder, checkers, no_diff, tags_to_apply,
                       restart_wazuh, wait_for_initial_scan):
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
+    # More than one regular file will make the test fail
     n_regular_files = 1
     min_timeout = 3
     time_travel = False
-    if tags_to_apply == {'schedule'}:
-        print("timetravel true")
+    if tags_to_apply == {'schedule_report'}:
         time_travel = True
     regular_file_cud(folder, time_travel, n_regular_files, min_timeout, wazuh_log_monitor, options=checkers,
-                     content_changes=True, no_diff=no_diff)
+                     report_changes=True, no_diff=no_diff)

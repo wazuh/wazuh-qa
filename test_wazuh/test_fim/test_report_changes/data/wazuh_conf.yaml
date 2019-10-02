@@ -65,37 +65,32 @@
         value: "/testdir_reports, /testdir_nodiff"
         attributes:
           - check_all: 'yes'
+          - report_changes: 'no'
 # config 5
 - tags:
-  - realtime
+    - realtime
   apply_to_modules:
-  - test_report_changes
+    - test_report_deleted_diff
   section: syscheck
   elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/testdir_reports, /testdir_nodiff"
-      attributes:
-      - check_all: 'yes'
-      - whodata: 'yes'
-      - report_changes: 'yes'
-  - nodiff:
-      value: "/testdir_nodiff/regular_0"
+    - disabled:
+        value: 'no'
+    - directories:
+        value: "/testdir_reports, /testdir_nodiff"
+        attributes:
+          - check_all: 'yes'
+          - report_changes: 'no'
 # config 6
 - tags:
-  - whodata
+    - whodata
   apply_to_modules:
-  - test_report_changes
+    - test_report_deleted_diff
   section: syscheck
   elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/testdir_reports, /testdir_nodiff"
-      attributes:
-      - check_all: 'yes'
-      - whodata: 'yes'
-      - report_changes: 'yes'
-  - nodiff:
-      value: "/testdir_nodiff/regular_0"
+    - disabled:
+        value: 'no'
+    - directories:
+        value: "/testdir_reports, /testdir_nodiff"
+        attributes:
+          - check_all: 'yes'
+          - report_changes: 'no'
