@@ -89,7 +89,6 @@ def recursion_test(dirname, subdirname, recursion_level, num_files=1,
         regular_file_cud(path, wazuh_log_monitor, time_travel=is_scheduled,
                          n_regular=num_files, min_timeout=timeout, triggers_event=False)
 
-
 # Fixtures
 
 @pytest.fixture(scope='module', params=configurations)
