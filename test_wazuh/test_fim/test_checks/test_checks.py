@@ -1,79 +1,87 @@
 # Copyright (C) 2015-2019, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-import os
-import glob
-import pytest
-import time
 
-from wazuh_testing.fim import *
-from wazuh_testing.tools import FileMonitor
+import os
+
+import pytest
+
+from wazuh_testing.fim import (CHECK_ALL, CHECK_GROUP, CHECK_INODE,
+                               CHECK_MD5SUM, CHECK_MTIME, CHECK_OWNER,
+                               CHECK_PERM, CHECK_SHA1SUM, CHECK_SHA256SUM,
+                               CHECK_SIZE, CHECK_SUM, LOG_FILE_PATH, REGULAR,
+                               REQUIRED_ATTRIBUTES, callback_detect_event,
+                               regular_file_cud,create_file, modify_file, delete_file, validate_event)
+from wazuh_testing.tools import (FileMonitor, check_apply_test,
+                                 load_wazuh_configurations)
+
+
+# variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-
-test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2'), os.path.join('/', 'testdir3'),
-                    os.path.join('/', 'testdir4'), os.path.join('/', 'testdir5'), os.path.join('/', 'testdir6'),
-                    os.path.join('/', 'testdir7'), os.path.join('/', 'testdir8'), os.path.join('/', 'testdir9'),
-                    os.path.join('/', 'testdir0'),
-                    ]
+configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2'), 
+                    os.path.join('/', 'testdir3'), os.path.join('/', 'testdir4'), 
+                    os.path.join('/', 'testdir5'), os.path.join('/', 'testdir6'), 
+                    os.path.join('/', 'testdir7'), os.path.join('/', 'testdir8'), 
+                    os.path.join('/', 'testdir9'), os.path.join('/', 'testdir0')]
 testdir1, testdir2, testdir3, testdir4, testdir5, testdir6, testdir7, testdir8, testdir9, testdir0 = test_directories
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
-@pytest.fixture(scope='module', params=glob.glob(os.path.join(test_data_path, 'ossec.conf')))
-def get_ossec_configuration(request):
+# configurations
+
+configurations = load_wazuh_configurations(configurations_path, __name__)
+
+
+# fixtures
+
+@pytest.fixture(scope='module', params=configurations)
+def get_configuration(request):
+    """Get configurations from the module."""
     return request.param
 
 
-@pytest.mark.parametrize('name, filetype, content', [
-    ('file1', REGULAR, 'Sample content'),
-    #('file2', REGULAR, ''),
-    ('file3', REGULAR, b'Sample content')
-    #('file4', REGULAR, b'')
-])
-@pytest.mark.parametrize('folder, checkers', [
-    # <directories whodata="yes" check_all="yes" check_sum="no">/testdir1</directories>
+# tests
+
+parametrized_headers = 'path, checkers'
+parametrized_list = [
     (testdir1, REQUIRED_ATTRIBUTES[CHECK_ALL] - REQUIRED_ATTRIBUTES[CHECK_SUM]),
-    # <directories whodata="yes" check_all="yes" check_md5sum="no">/testdir2</directories>
     (testdir2, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_MD5SUM}),
-    # <directories whodata="yes" check_all="yes" check_sha1sum="no">/testdir3</directories>
     (testdir3, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_SHA1SUM}),
-    # <directories whodata="yes" check_all="yes" check_sha256sum="no">/testdir4</directories>
     (testdir4, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_SHA256SUM}),
-    # <directories whodata="yes" check_all="yes" check_size="no">/testdir5</directories>
     (testdir5, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_SIZE}),
-    # <directories whodata="yes" check_all="yes" check_owner="no">/testdir6</directories>
     (testdir6, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_OWNER}),
-    # <directories whodata="yes" check_all="yes" check_group="no">/testdir7</directories>
     (testdir7, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_GROUP}),
-    # <directories whodata="yes" check_all="yes" check_perm="no">/testdir8</directories>
     (testdir8, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_PERM}),
-    # <directories whodata="yes" check_all="yes" check_mtime="no">/testdir9</directories>
     (testdir9, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_MTIME}),
-    # <directories whodata="yes" check_all="yes" check_inode="no">/testdir0</directories>
-    (testdir0, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_INODE})
-])
-def test_fim_checks(folder, name, filetype, content, checkers, configure_environment, restart_wazuh, wait_for_initial_scan):
-    # Create file
-    create_file(filetype, name, folder, content)
+    (testdir0, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_INODE}),
+]
+reduced_list = [
+    (testdir1, REQUIRED_ATTRIBUTES[CHECK_ALL] -
+     REQUIRED_ATTRIBUTES[CHECK_SUM])
+]
 
-    # Wait until event is detected
-    event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
-    validate_event(event, checks=checkers)
+@pytest.mark.parametrize(parametrized_headers, parametrized_list)
+def test_checks_realtime(path, checkers, get_configuration,
+                         configure_environment, restart_wazuh,
+                         wait_for_initial_scan):
+    check_apply_test({'realtime'}, get_configuration['tags'])
+    regular_file_cud(path, wazuh_log_monitor, min_timeout=3, options=checkers)
 
-    # Modify file
-    regular_path = os.path.join(folder, name)
-    modify_file(folder, name, content)
 
-    # Wait until event is detected
-    event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
-    validate_event(event, checks=checkers)
+@pytest.mark.parametrize(parametrized_headers, parametrized_list)
+def test_checks_whodata(path, checkers, get_configuration,
+                        configure_environment, restart_wazuh,
+                        wait_for_initial_scan):
+    check_apply_test({'whodata'}, get_configuration['tags'])
+    regular_file_cud(path, wazuh_log_monitor, min_timeout=3, options=checkers)
 
-    # Delete file
-    regular_path = os.path.join(folder, name)
-    delete_file(folder, name)
 
-    # Wait until event is detected
-    event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
-    validate_event(event, checks=checkers)
+@pytest.mark.parametrize(parametrized_headers, parametrized_list)
+def test_checks_scheduled(path, checkers, get_configuration,
+                          configure_environment, restart_wazuh,
+                          wait_for_initial_scan):
+    check_apply_test({'scheduled'}, get_configuration['tags'])
+    regular_file_cud(path, wazuh_log_monitor, min_timeout=3, options=checkers, time_travel=True)

@@ -1,0 +1,15 @@
+---
+# conf 1
+- tags:
+  - config1
+  apply_to_modules:
+  - test_audit
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "/testdir1,/testdir2,/testdir3"
+      attributes:
+      - check_all: 'yes'
+      - whodata: 'yes'
