@@ -269,8 +269,7 @@ def change_internal_options(opt_path, pattern, value):
 
     with open(opt_path, "w") as sources:
         for line in lines:
-            sources.write(
-                re.sub(f'{pattern}=[0-9]*', f'{pattern}={value}', line))
+            sources.write(re.sub(f'{pattern}=[0-9]*', f'{pattern}={value}', line))
             if pattern in line:
                 add_pattern = False
 

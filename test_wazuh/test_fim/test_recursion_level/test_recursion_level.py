@@ -24,8 +24,7 @@ dir_recursion_5_space = "/test recursion 5"
 dir_recursion_320_space = "/test recursion 320"
 subdir_space = "sub dir "
 
-test_data_path = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), 'data')
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [
     dir_no_recursion,
@@ -42,7 +41,16 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # Configurations
 
-configurations = load_wazuh_configurations(configurations_path, __name__)
+configurations = load_wazuh_configurations(configurations_path, __name__,
+                                           params=[{'FIM_MODE': ''},
+                                                   {'FIM_MODE': {'realtime': 'yes'}},
+                                                   {'FIM_MODE': {'whodata': 'yes'}}
+                                                   ],
+                                           metadata=[{'fim_mode': 'scheduled'},
+                                                     {'fim_mode': 'realtime'},
+                                                     {'fim_mode': 'whodata'}
+                                                     ]
+                                           )
 
 
 # Functions
@@ -89,13 +97,17 @@ def recursion_test(dirname, subdirname, recursion_level, num_files=1,
         regular_file_cud(path, wazuh_log_monitor, time_travel=is_scheduled,
                          n_regular=num_files, min_timeout=timeout, triggers_event=False)
 
+
 # Fixtures
 
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     return request.param
 
-parametrized_list = [
+
+# Tests
+
+@pytest.mark.parametrize('dirname, subdirname, recursion_level', [
     (dir_no_recursion, subdir, 0),
     (dir_no_recursion_space, subdir_space, 0),
     (dir_recursion_1, subdir, 1),
@@ -104,16 +116,11 @@ parametrized_list = [
     (dir_recursion_5_space, subdir_space, 5),
     (dir_recursion_320, subdir, 318),
     (dir_recursion_320_space, subdir_space, 318)
-]
-
-
-# Tests
-
-@pytest.mark.parametrize('dirname, subdirname, recursion_level', parametrized_list)
-def test_recursion_realtime(dirname, subdirname, recursion_level,
-                            get_configuration, configure_environment,
-                            restart_wazuh, wait_for_initial_scan):
-    """Checks if files are correctly detected by syscheck with recursion level using realtime monitoring.
+])
+def test_recursion_level(dirname, subdirname, recursion_level,
+                         get_configuration, configure_environment,
+                         restart_wazuh, wait_for_initial_scan):
+    """Checks if files are correctly detected by syscheck with recursion level using scheduled, realtime and whodata monitoring
 
     This test is intended to be used with valid ignore configurations. It applies RegEx to match the name 
     of the configuration file where the test applies. If the configuration file does not match the test 
@@ -123,41 +130,7 @@ def test_recursion_realtime(dirname, subdirname, recursion_level,
     :param subdirname string The name of the subdirectories that will be created during the execution for testing purpouses.
     :param recursion_level int Recursion level. Also used as the number of subdirectories to be created and checked for the current test.
     """
-    check_apply_test({'realtime'}, get_configuration['tags'])
-    recursion_test(dirname, subdirname, recursion_level)
-
-
-@pytest.mark.parametrize('dirname, subdirname, recursion_level', parametrized_list)
-def test_recursion_scheduled(dirname, subdirname, recursion_level,
-                             get_configuration, configure_environment,
-                             restart_wazuh, wait_for_initial_scan):
-    """Checks if files are correctly detected by syscheck with recursion level using scheduled monitoring.
-
-    This test is intended to be used with valid ignore configurations. It applies RegEx to match the name 
-    of the configuration file where the test applies. If the configuration file does not match the test 
-    is skipped.
-
-    :param dirname string The path being monitored by syscheck (indicated in the .conf file)
-    :param subdirname string The name of the subdirectories that will be created during the execution for testing purpouses.
-    :param recursion_level int Recursion level. Also used as the number of subdirectories to be created and checked for the current test.
-    """
-    check_apply_test({'scheduled'}, get_configuration['tags'])
-    recursion_test(dirname, subdirname, recursion_level, is_scheduled=True)
-
-
-@pytest.mark.parametrize('dirname, subdirname, recursion_level', parametrized_list)
-def test_recursion_whodata(dirname, subdirname, recursion_level,
-                           get_configuration, configure_environment,
-                           restart_wazuh, wait_for_initial_scan):
-    """Checks if files are correctly detected by syscheck with recursion level using whodata monitoring.
-
-    This test is intended to be used with valid ignore configurations. It applies RegEx to match the name 
-    of the configuration file where the test applies. If the configuration file does not match the test 
-    is skipped.
-
-    :param dirname string The path being monitored by syscheck (indicated in the .conf file)
-    :param subdirname string The name of the subdirectories that will be created during the execution for testing purpouses.
-    :param recursion_level int Recursion level. Also used as the number of subdirectories to be created and checked for the current test.
-    """
-    check_apply_test({'whodata'}, get_configuration['tags'])
-    recursion_test(dirname, subdirname, recursion_level, timeout=2)
+    if get_configuration['metadata']['fim_mode'] == 'scheduled':
+        recursion_test(dirname, subdirname, recursion_level, is_scheduled=True)
+    else:
+        recursion_test(dirname, subdirname, recursion_level, timeout=2)
