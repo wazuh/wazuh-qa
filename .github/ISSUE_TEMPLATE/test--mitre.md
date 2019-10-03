@@ -17,6 +17,9 @@
 - [ ] MIT009
 - [ ] MIT010
 - [ ] MIT011
+- [ ] MIT012
+- [ ] MIT013
+- [ ] MIT014
 
 ## MIT001
 
@@ -52,7 +55,7 @@ Then, install manager again
 ```
 **Compatible versions**
 
-3.11.0
+3.11.0 - Current
 
 **Expected outputs**
 ```
@@ -96,7 +99,7 @@ Then, install Manager
  ```
 **Compatible versions**
 
-3.11.0
+3.11.0 - Current
 
 **Expected logs**
 
@@ -132,7 +135,7 @@ Then, install Manager
  ```
 **Compatible versions**
 
-3.11.0
+3.11.0 - Current
 
 **Expected logs**
 
@@ -167,7 +170,7 @@ Install Manager and choose /opt/ossec as path installation
  ```
 **Compatible versions**
 
-3.11.0
+3.11.0 - Current
 
 **Expected outputs**
 ```
@@ -198,7 +201,7 @@ Mitre
 
 **Description**
 
-When Mitre extension is added to a rule and an event matchs the rule, an alert should show Mitre information. 
+If Mitre extension is added to a rule and an event matchs the rule, an alert should show Mitre information. 
 
 **Configuration sample**
 
@@ -224,7 +227,7 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
  ```
 **Compatible versions**
 
-3.11.0
+3.11.0 - Current
 
 **Expected alerts**
 ```
@@ -253,7 +256,7 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
 
 **Short description**
 
-When a rule has two o more different Mitre techniques, repeated tactics are not shown in the alert.
+If a rule has two o more different Mitre techniques IDs, repeated tactics should not be shown in the alert.
 
 **Category**
 
@@ -261,7 +264,7 @@ Mitre
 
 **Description**
 
-When a rule has two o more different Mitre's techniques, repeated tactics are not shown in the alert. Techniques and tactics are shown in different arrays. 
+If a rule has two o more different Mitre's techniques, repeated tactics should not be shown in the alert. Technique IDs and tactics are shown in different arrays. 
 
 **Configuration sample**
 
@@ -288,7 +291,7 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
  ```
 **Compatible versions**
 
-3.11.0
+3.11.0 - Current
 
 **Expected alerts**
 ```
@@ -318,7 +321,7 @@ In this case, these techniques have in common the "Privilege Escalation" tactic 
 
 **Short description**
 
-When a rule has an ID technique that is not in Mitre database, the ID will appear in the alert but a warning message will be generated. 
+If a rule has repeated Mitre Technique IDs, repeated IDs should not be shown in the alert.
 
 **Category**
 
@@ -326,7 +329,74 @@ Mitre
 
 **Description**
 
-When a rule has an ID technique that is not in Mitre database, the ID will appear in the alert but its tactics wont because there are no tactics associated with that ID. Wazuh doesn't have to stop. In addition, a warning message will be generated. 
+If a rule has repeated Mitre Technique IDs, repeated IDs should not be shown in the alert. In that way, the alert will be clearer for the user.
+
+**Configuration sample**
+
+```
+sudo nano wazuh/etc/rules/0020-syslog_rules.xml
+
+<rule id="5402" level="3">
+    <if_sid>5400</if_sid>
+    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+    <description>Successful sudo to ROOT executed</description>
+    <mitre>
+      <id>T1169</id>
+      <id>T1078</id>
+      <id>T1169</id>
+      <id>T1078</id>
+    </mitre>
+    <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
+</rule>
+ ```
+ ```
+ ossec-control restart
+ CTRL + D
+ sudo su
+ CRTL + D
+ sudo su
+ ```
+**Compatible versions**
+
+3.11.0 - Current
+
+**Expected alerts**
+```
+# tail -f /var/ossec/logs/alerts/alerts.json
+
+{
+"timestamp":"2019-09-30T13:12:29.416+0200",
+"rule":{
+      "level":3,
+      "description":"Successful sudo to ROOT executed",
+      "id":"5402",
+      "mitre":{"id":["T1169","T1078"]
+               "tactics":["Privilege Escalation","Defense Evasion","Initial Access","Persistence"]
+               },
+      "firedtimes":1,
+      "mail":false,
+      "groups":["syslog","sudo"],"pci_dss":["10.2.5","10.2.2"],"gpg13":["7.6","7.8","7.13"],"gdpr":["IV_32.2"],"hipaa":["164.312.b"],"nist_800_53":["AU.3.1","IA.10"]
+       },
+       
+       ...
+}
+
+```
+Techniques appear only once.
+
+## MIT008
+
+**Short description**
+
+If a rule has an ID technique that is not in Mitre database, the ID should appear in the alert and a warning message should be generated. 
+
+**Category**
+
+Mitre
+
+**Description**
+
+If a rule has an ID technique that is not in Mitre database, the ID should appear in the alert but its tactics should because there are no tactics associated with that ID. Wazuh doesn't have to stop. In addition, a warning message will be generated. 
 
 **Configuration sample**
 
@@ -353,7 +423,7 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
  ```
 **Compatible versions**
 
-3.11.0
+3.11.0 - Current
 
 **Expected alerts**
 ```
@@ -377,13 +447,13 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
 }
 
 ```
-> to_json.c:110 at Eventinfo_to_jsonstr(): WARNING: Mitre Technique ID 6000 is not in mitre database.
+> to_json.c:110 at Eventinfo_to_jsonstr(): WARNING: Mitre Technique ID T6000 is not in mitre database.
 
-## MIT008
+## MIT009
 
 **Short description**
 
-When a rule has 0 Techniques, an alert is generated with two empty arrays.
+If a rule has 0 Techniques, an alert should be generated without Mitre info.
 
 **Category**
 
@@ -391,7 +461,7 @@ Mitre
 
 **Description**
 
-When a rule has 0 ID Techniques, an alert is generated with two empty arrays. The rule has to have Mitre and ID XML tags. 
+If a rule has 0 ID Techniques, an alert should be generated without Mitre info. The rule has to have Mitre and ID XML tags. 
 
 **Configuration sample**
 
@@ -419,7 +489,7 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
  ```
 **Compatible versions**
 
-3.11.0
+3.11.0 - Current
 
 **Expected alerts**
 ```
@@ -442,11 +512,11 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
        ...
 }
 ```
-## MIT009
+## MIT010
 
 **Short description**
 
-When has_phase table is not in mitre.db, tactics won't be shown in alerts and Wazuh will show error messages.
+If has_phase table is not in mitre.db, tactics should not be shown in alerts and Wazuh should show error messages.
 
 **Category**
 
@@ -454,38 +524,21 @@ Mitre
 
 **Description**
 
-When has_phase table is not in mitre.db, tactics won't be shown in alerts and Wazuh will show error messages. It does not have to stop.
+If has_phase table is not in mitre.db, tactics should not be shown in alerts and Wazuh should show error messages. It does not have to stop.
 
 **Configuration sample**
 
-Remove techniques:
-
 ```
-sudo nano wazuh/etc/rules/0020-syslog_rules.xml
-
-<rule id="5402" level="3">
-    <if_sid>5400</if_sid>
-    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
-    <description>Successful sudo to ROOT executed</description>
-    <mitre>
-      <id>T1169</id>
-      <id>T1078</id>
-    </mitre>
-    <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
-</rule>
- ```
- ```
- ossec-control restart
- CTRL + D
- sudo su
- CRTL + D
- sudo su
+sqlite3 /var/ossec/var/db/mitre.db
+sqlite> DROP TABLE has_phase;
+CTRL + D
+ossec-control restart
  ```
 **Compatible versions**
 
-3.11.0
+3.11.0 - Current
 
-**Expected alerts**
+**Expected logs and alerts**
 ```
 # tail -f /var/ossec/logs/alerts/alerts.json
 
@@ -506,17 +559,20 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
        ...
 }
 ```
+```
+# cat ossec.log | grep Mitre
+```
 > wazuh-db[7314] wdb_parser.c:348 at wdb_parse(): DEBUG: Mitre DB Cannot execute SQL query; err database var/db/mitre.db: no such table: has_phase
 
 > ossec-analysisd[7339] mitre.c:119 at mitre_load(): DEBUG: Mitre info loading failed. Query gave an error response: err Cannot execute SQL query; no such table: has_phase
 
 > ossec-analysisd[7339] mitre.c:120 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
 
-## MIT010
+## MIT011
 
 **Short description**
 
-When a rule has an incorrect Mitre XML tag or it does not have one, Wazuh stops.
+If attack table is not in mitre.db, tactics should not be shown in alerts and Wazuh should show error messages.
 
 **Category**
 
@@ -524,11 +580,125 @@ Mitre
 
 **Description**
 
-When a rule has an incorrect Mitre XML tag name or it does not have any, an critical error is generated and Wazuh stops.
+If attack table is not in mitre.db, tactics should not be shown in alerts and Wazuh should show error messages. It does not have to stop.
 
 **Configuration sample**
 
-Change <id> to <ids> in rule:
+```
+sqlite3 /var/ossec/var/db/mitre.db
+sqlite> DROP TABLE attack;
+CTRL + D
+ossec-control restart
+ ```
+**Compatible versions**
+
+3.11.0 - Current
+
+**Expected logs and alerts**
+```
+# tail -f /var/ossec/logs/alerts/alerts.json
+
+{
+"timestamp":"2019-09-30T13:12:29.416+0200",
+"rule":{
+      "level":3,
+      "description":"Successful sudo to ROOT executed",
+      "id":"5402",
+      "mitre":{"id":["T1169","T1078"],
+               "tactics":[]
+               },
+      "firedtimes":1,
+      "mail":false,
+      "groups":["syslog","sudo"],"pci_dss":["10.2.5","10.2.2"],"gpg13":["7.6","7.8","7.13"],"gdpr":["IV_32.2"],"hipaa":["164.312.b"],"nist_800_53":["AU.3.1","IA.10"]
+       },
+       
+       ...
+}
+```
+```
+# cat ossec.log | grep Mitre
+```
+> wazuh-db[27581] wdb_parser.c:348 at wdb_parse(): DEBUG: Mitre DB Cannot execute SQL query; err database var/db/mitre.db: no such table: attack
+
+> ossec-analysisd[27609] mitre.c:49 at mitre_load(): DEBUG: Mitre info loading failed. Query gave an error response: err Cannot execute SQL query; no such table: attack
+
+> ossec-analysisd[27609] mitre.c:50 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
+
+## MIT012
+
+**Short description**
+
+If Mitre database does not exist, tactics should not be shown in alerts and Wazuh should show error messages.
+
+**Category**
+
+Mitre
+
+**Description**
+
+If Mitre database does not exist, tactics should not be shown in alerts and Wazuh should show error messages. It does not have to stop.
+
+**Configuration sample**
+
+```
+rm /var/ossec/var/db/mitre*
+ossec-control restart
+ ```
+**Compatible versions**
+
+3.11.0 - Current
+
+**Expected logs and alerts**
+```
+# tail -f /var/ossec/logs/alerts/alerts.json
+
+{
+"timestamp":"2019-09-30T13:12:29.416+0200",
+"rule":{
+      "level":3,
+      "description":"Successful sudo to ROOT executed",
+      "id":"5402",
+      "mitre":{"id":["T1169","T1078"],
+               "tactics":[]
+               },
+      "firedtimes":1,
+      "mail":false,
+      "groups":["syslog","sudo"],"pci_dss":["10.2.5","10.2.2"],"gpg13":["7.6","7.8","7.13"],"gdpr":["IV_32.2"],"hipaa":["164.312.b"],"nist_800_53":["AU.3.1","IA.10"]
+       },
+       
+       ...
+}
+```
+```
+# cat ossec.log | grep Mitre
+```
+> wazuh-db[14586] wdb.c:212 at wdb_open_mitre(): ERROR: Can't open SQLite database 'var/db/mitre.db': unable to open database file
+
+> wazuh-db[14586] wdb_parser.c:320 at wdb_parse(): ERROR: Couldn't open DB mitre
+
+> ossec-remoted[14614] wazuhdb_op.c:94 at wdb_send_query(): ERROR: Bad response 'err Couldn't open DB mitre'.
+
+> ossec-analysisd[14614] mitre.c:49 at mitre_load(): DEBUG: Mitre info loading failed. Query gave an error response: err Couldn't open DB mitre
+
+> ossec-analysisd[14614] mitre.c:50 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
+
+## MIT013
+
+**Short description**
+
+If a rule has an incorrect Mitre XML tag or it does not have one, Wazuh should stop.
+
+**Category**
+
+Mitre
+
+**Description**
+
+If a rule has an incorrect Mitre XML tag name or it does not have any, a critical error should be generated and Wazuh will stop.
+
+**Configuration sample**
+
+Swap 'id' for 'ids' in rule:
 
 ```
 sudo nano wazuh/etc/rules/0020-syslog_rules.xml
@@ -544,7 +714,7 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
     <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
 </rule>
  ```
- Or remove <id>:
+ Or remove 'id':
  
  ```
  <rule id="5402" level="3">
@@ -558,22 +728,15 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
     <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
   </rule>
  ``` 
- ```
- ossec-control restart
- CTRL + D
- sudo su
- CRTL + D
- sudo su
- ```
 **Compatible versions**
 
-3.11.0
+3.11.0 - Current
 
 **Expected logs**
 
 > ossec-analysisd[22563] analysisd.c:572 at main(): CRITICAL: (1220): Error loading the rules: 'ruleset/rules/0020-syslog_rules.xml'.
 
-## MIT011
+## MIT014
 
 **Short description**
 
@@ -594,7 +757,7 @@ valgrind --leak-check=full --trace-children=yes --read-var-info=yes --track-orig
 ```
 **Compatible versions**
 
-3.11.0
+3.11.0 - Current
 
 **Expected outputs**
 
