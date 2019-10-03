@@ -129,7 +129,7 @@ def is_fim_scan_ended():
 
 
 def create_file(type, name, path, content=''):
-    """ Creates a file in a given path.
+    """ Creates a file in a given path. The path will be created in case it does not exists.
 
     :param type: Defined constant that specifies the type. It can be: FIFO, SYSLINK, SOCKET or REGULAR
     :type type: Constant string
@@ -141,6 +141,7 @@ def create_file(type, name, path, content=''):
     :type content: String or binary
     :return: None
     """
+    os.makedirs(path, exist_ok=True)
     getattr(sys.modules[__name__], f'_create_{type}')(path, name, content)
 
 
@@ -337,87 +338,88 @@ def callback_configuration_error(line):
     return None
 
 
-def regular_file_cud(folder, time_travel, n_regular, min_timeout, log_monitor, options=None):
+def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_timeout=1, options=None, triggers_event=True):
     """ Checks if creation, update and delete events are detected by syscheck
 
     :param folder: Path where the files will be created
     :type folder: String
+    :param log_monitor: File event monitor
+    :type log_monitor: FileMonitor
     :param time_travel: Boolean to determine if there will be time travels or not
     :type time_travel: Boolean
     :param n_regular: Number of regular files that will be created
     :type n_regular: Integer
     :param min_timeout: Minimum timeout
     :type min_timeout: Float
-    :param log_monitor: File event monitor
-    :type log_monitor: FileMonitor
     :param options: Dict with all the checkers
     :type options: Dict. Default value is None.
+    :param triggers_event: Boolean to determinate if the event should be raised or not.
+    :type triggers_event: Boolean
     :return: None
     """
-    def type_assert(ev_type):
-        event_types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
-        assert (event_types[ev_type] == n_regular)
+    def check_time_travel():
+        if time_travel:
+            TimeMachine.travel_to_future(timedelta(hours=13))
+
+    def fetch_events():
+        try:
+            return log_monitor.start(timeout=max(n_regular * 0.01, min_timeout), 
+                                     callback=callback_detect_event,
+                                     accum_results=n_regular
+                                    ).result()
+        except TimeoutError:
+            if triggers_event:
+                raise
+
+    def validate_checkers_per_event():
+        if options is not None:
+            for ev in events:
+                validate_event(ev, options)
+
+    def check_events_type(ev_type):
+        if n_regular > 1:
+            event_types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
+            assert (event_types[ev_type] == n_regular)
+        else:
+            assert((jq(".data.type").transform(events, multiple_output=False)) in ev_type)
 
     def check_files_in_event():
-        # Are the n_regular events the files modified?
-        file_paths = jq(".[].data.path").transform(events, multiple_output=True)
+        if n_regular > 1:
+            file_paths = jq(".[].data.path").transform(events, multiple_output=True)
+        else:
+            file_paths = jq(".data.path").transform(events, multiple_output=False)
         for file_name in range(n_regular):
             assert (os.path.join(folder, f'regular_{file_name}') in file_paths)
+
 
     # Create text files
     for name in range(n_regular):
         create_file(REGULAR, f'regular_{name}', folder, '')
 
-    # Check if scheduled for time traveling
-    if time_travel:
-        TimeMachine.travel_to_future(timedelta(hours=13))
-
-    # Fetch the n_regular expected events
-    events = log_monitor.start(timeout=max(n_regular * 0.01, min_timeout), callback=callback_detect_event,
-                               accum_results=n_regular).result()
-
-    # Validate checkers for every event
-    if options is not None:
-        for ev in events:
-            validate_event(ev, options)
-
-    # Are the n_regular events of type 'added'?
-    type_assert('added')
-    check_files_in_event()
+    check_time_travel()
+    events = fetch_events()
+    if events is not None:
+        validate_checkers_per_event()
+        check_events_type('added')
+        check_files_in_event()
 
     # Modify previous text files
     for name in range(n_regular):
         modify_file(folder, f'regular_{name}', 'Sample content added')
 
-    # Check if scheduled for time traveling
-    if time_travel:
-        TimeMachine.travel_to_future(timedelta(hours=13))
-
-    # Fetch the n_regular expected events
-    events = log_monitor.start(timeout=max(n_regular * 0.01, min_timeout), callback=callback_detect_event,
-                               accum_results=n_regular).result()
-
-    # Validate checkers for every event
-    if options is not None:
-        for ev in events:
-            validate_event(ev, options)
-
-    # Are the n_regular events of type 'modified'?
-    type_assert('modified')
-    check_files_in_event()
+    check_time_travel()
+    events = fetch_events()
+    if events is not None:
+        validate_checkers_per_event()
+        check_events_type('modified')
+        check_files_in_event()
 
     # Delete previous text files
     for name in range(n_regular):
         delete_file(folder, f'regular_{name}')
 
-    # Check if scheduled for time traveling
-    if time_travel:
-        TimeMachine.travel_to_future(timedelta(hours=13))
-
-    # Fetch the n_regular expected events
-    events = log_monitor.start(timeout=max(n_regular * 0.01, min_timeout), callback=callback_detect_event,
-                               accum_results=n_regular).result()
-
-    # Are the n_regular events of type 'deleted'?
-    type_assert('deleted')
-    check_files_in_event()
+    check_time_travel()
+    events = fetch_events()
+    if events is not None:
+        check_events_type('deleted')
+        check_files_in_event()

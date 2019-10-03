@@ -50,5 +50,5 @@ def test_benchmark_regular_files(n_regular, folder, is_scheduled,
     check_apply_test(tags_to_apply, get_configuration['tags'])
     min_timeout = 30
 
-    regular_file_cud(folder, is_scheduled, n_regular, min_timeout,
-                     wazuh_log_monitor)
+    regular_file_cud(folder, wazuh_log_monitor, time_travel=is_scheduled, 
+                     n_regular=n_regular, min_timeout=min_timeout)
