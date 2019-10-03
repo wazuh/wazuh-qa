@@ -1,10 +1,9 @@
 ---
 # conf 1
 - tags:
-  - schedule_report
+  - ossec_conf_report
   apply_to_modules:
-  - test_report_changes_and_diff
-  - test_report_deleted_diff
+  - MODULE_NAME
   section: syscheck
   elements:
   - disabled:
@@ -13,84 +12,7 @@
       value: "/testdir_reports, /testdir_nodiff"
       attributes:
       - check_all: 'yes'
-      - report_changes: 'yes'
+      - FIM_MODE
+      - REPORT_CHANGES
   - nodiff:
       value: "/testdir_nodiff/regular_0"
-# conf 2
-- tags:
-  - realtime_report
-  apply_to_modules:
-  - test_report_changes_and_diff
-  - test_report_deleted_diff
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/testdir_reports, /testdir_nodiff"
-      attributes:
-      - check_all: 'yes'
-      - realtime: 'yes'
-      - report_changes: 'yes'
-  - nodiff:
-      value: "/testdir_nodiff/regular_0"
-# conf 3
-- tags:
-  - whodata_report
-  apply_to_modules:
-  - test_report_changes_and_diff
-  - test_report_deleted_diff
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/testdir_reports, /testdir_nodiff"
-      attributes:
-      - check_all: 'yes'
-      - whodata: 'yes'
-      - report_changes: 'yes'
-  - nodiff:
-      value: "/testdir_nodiff/regular_0"
-  # conf 4
-- tags:
-    - schedule
-  apply_to_modules:
-    - test_report_deleted_diff
-  section: syscheck
-  elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: "/testdir_reports, /testdir_nodiff"
-        attributes:
-          - check_all: 'yes'
-          - report_changes: 'no'
-# config 5
-- tags:
-    - realtime
-  apply_to_modules:
-    - test_report_deleted_diff
-  section: syscheck
-  elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: "/testdir_reports, /testdir_nodiff"
-        attributes:
-          - check_all: 'yes'
-          - report_changes: 'no'
-# config 6
-- tags:
-    - whodata
-  apply_to_modules:
-    - test_report_deleted_diff
-  section: syscheck
-  elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: "/testdir_reports, /testdir_nodiff"
-        attributes:
-          - check_all: 'yes'
-          - report_changes: 'no'

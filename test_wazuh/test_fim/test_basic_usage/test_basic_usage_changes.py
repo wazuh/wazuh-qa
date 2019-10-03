@@ -9,7 +9,6 @@ import time
 from datetime import timedelta
 
 import pytest
-
 from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH,
                                callback_detect_end_scan, callback_detect_event,
                                create_file, regular_file_cud, validate_event)
@@ -30,7 +29,16 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-configurations = load_wazuh_configurations(configurations_path, __name__)
+configurations = load_wazuh_configurations(configurations_path, __name__,
+                                           params=[{'FIM_MODE': '', 'MODULE_NAME': __name__},
+                                                   {'FIM_MODE': {'realtime': 'yes'}, 'MODULE_NAME': __name__},
+                                                   {'FIM_MODE': {'whodata': 'yes'}, 'MODULE_NAME': __name__}
+                                                   ],
+                                           metadata=[{'fim_mode': 'scheduled', 'module_name': __name__},
+                                                     {'fim_mode': 'realtime', 'module_name': __name__},
+                                                     {'fim_mode': 'whodata', 'module_name': __name__}
+                                                     ]
+                                           )
 
 
 # fixtures
@@ -47,12 +55,10 @@ def get_configuration(request):
     testdir1,
     testdir2
 ])
-@pytest.mark.parametrize('checkers, is_scheduled,  tags_to_apply', [
-    (options, True, {'schedule'}),
-    (options, False, {'realtime'}),
-    (options, False, {'whodata'})
+@pytest.mark.parametrize('checkers,  tags_to_apply', [
+    (options, {'ossec_conf'}),
 ])
-def test_regular_file_changes(folder, checkers, is_scheduled, tags_to_apply,
+def test_regular_file_changes(folder, checkers, tags_to_apply,
                               get_configuration, configure_environment,
                               restart_wazuh, wait_for_initial_scan):
     """ Checks if syscheckd detects regular file changes (add, modify, delete)"""
@@ -60,5 +66,8 @@ def test_regular_file_changes(folder, checkers, is_scheduled, tags_to_apply,
 
     n_regular = 3
     min_timeout = 3
+    is_scheduled = False
 
+    if get_configuration['metadata']['fim_mode'] == 'scheduled':
+        is_scheduled = True
     regular_file_cud(folder, is_scheduled, n_regular, min_timeout, wazuh_log_monitor, checkers)

@@ -448,7 +448,8 @@ def load_wazuh_configurations(yaml_file_path: str, test_name: str, params: list 
 
     return [process_configuration(configuration, placeholders=replacement, metadata=meta)
             for replacement, meta in zip(params, metadata)
-            for configuration in configurations if test_name in configuration.get('apply_to_modules')]
+            for configuration in configurations
+            if test_name in expand_placeholders(configuration.get('apply_to_modules'), placeholders=replacement)]
 
 
 def check_apply_test(apply_to_tags: Set, tags: List):

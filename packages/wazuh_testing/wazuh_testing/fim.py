@@ -341,7 +341,8 @@ def callback_configuration_error(line):
     return None
 
 
-def regular_file_cud(folder, time_travel, n_regular, min_timeout, log_monitor, options=None, report_changes=False, no_diff=False):
+def regular_file_cud(folder, time_travel, n_regular, min_timeout, log_monitor, options=None,
+                     report_changes=False, no_diff=False):
     """ Checks if creation, update and delete events are detected by syscheck
 
     :param folder: Path where the files will be created
@@ -401,13 +402,6 @@ def regular_file_cud(folder, time_travel, n_regular, min_timeout, log_monitor, o
     type_assert('added')
     check_files_in_event()
 
-    # Check if files are duplicated
-    if report_changes:
-        for name in range(n_regular):
-            diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
-                                     folder.strip('/'), f'regular_{name}')
-            assert (os.path.exists(diff_file))
-
     # Modify previous text files
     for name in range(n_regular):
         modify_file(folder, f'regular_{name}', 'Sample content added')
@@ -428,11 +422,16 @@ def regular_file_cud(folder, time_travel, n_regular, min_timeout, log_monitor, o
     type_assert('modified')
     check_files_in_event()
 
-    # Nodiff
-    if no_diff:
-        assert ('<Diff truncated because nodiff option>' in events['data'].get('content_changes'))
-    else:
-        assert (events['data'].get('content_changes') is not None)
+    # Check if files are duplicated
+    if report_changes:
+        for name in range(n_regular):
+            diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
+                                     folder.strip('/'), f'regular_{name}')
+            assert (os.path.exists(diff_file))
+            assert (events['data'].get('content_changes') is not None)
+        # Nodiff
+        if no_diff:
+            assert ('<Diff truncated because nodiff option>' in events['data'].get('content_changes'))
 
     # Delete previous text files
     for name in range(n_regular):
