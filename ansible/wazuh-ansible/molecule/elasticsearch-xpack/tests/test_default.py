@@ -31,7 +31,30 @@ def test_elasticsearch_has_xpack_config(host):
 
 def test_elasticsearch_has_ssl(host):
     """Test if elasticsearch has SSL enabled."""
-    cmd = host.run("curl -u elastic:elastic_pass -k https://127.0.0.1:9200")
+    cmd = host.run("curl -s -u elastic:elastic_pass -k https://127.0.0.1:9200")
     assert cmd.rc == 0
+    assert len(cmd.stdout) > 0
+
+
+def test_elasticsearch_response(host):
+    """Test elasticsearch response contains no errors."""
+    cmd = host.run("curl -s -u elastic:elastic_pass -k https://127.0.0.1:9200")
+    assert "error" not in cmd.stdout
+
+
+def test_elasticsearch_version_is_correct(host):
+    """Test elasticsearch response contains no errors."""
+    cmd = host.run("curl -s -u elastic:elastic_pass -k https://127.0.0.1:9200")
     result = json.loads(cmd.stdout)
     assert result["version"]["number"] == "7.3.2"
+
+
+def test_elasticsearch_cluster_health(host):
+    """Test elasticsearch cluster health."""
+    cmd = host.run(
+        "curl -s -u elastic:elastic_pass -k https://127.0.0.1:9200/_nodes/"
+        )
+    result = json.loads(cmd.stdout)
+    assert result["_nodes"]["total"] == 2
+    assert result["_nodes"]["successful"] == 2
+    assert result["_nodes"]["failed"] == 0
