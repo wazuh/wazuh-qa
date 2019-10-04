@@ -6,6 +6,9 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
+API_USER = 'molecule_user'
+API_PASSWORD = 'MoleculePassword'
+
 
 def test_elasticsearch_is_installed(host):
     """Test if the elasticsearch package is installed."""
@@ -31,30 +34,42 @@ def test_elasticsearch_has_xpack_config(host):
 
 def test_elasticsearch_has_ssl(host):
     """Test if elasticsearch has SSL enabled."""
-    cmd = host.run("curl -s -u elastic:elastic_pass -k https://127.0.0.1:9200")
+    cmd = host.run("curl -s -u %s:%s -k https://127.0.0.1:9200"
+                   % (API_USER, API_PASSWORD))
     assert cmd.rc == 0
     assert len(cmd.stdout) > 0
 
 
 def test_elasticsearch_response(host):
     """Test elasticsearch response contains no errors."""
-    cmd = host.run("curl -s -u elastic:elastic_pass -k https://127.0.0.1:9200")
+    cmd = host.run("curl -s -u %s:%s -k https://127.0.0.1:9200"
+                   % (API_USER, API_PASSWORD))
     assert "error" not in cmd.stdout
 
 
 def test_elasticsearch_version_is_correct(host):
     """Test elasticsearch response contains no errors."""
-    cmd = host.run("curl -s -u elastic:elastic_pass -k https://127.0.0.1:9200")
+    cmd = host.run("curl -s -u %s:%s -k https://127.0.0.1:9200"
+                   % (API_USER, API_PASSWORD))
     result = json.loads(cmd.stdout)
     assert result["version"]["number"] == "7.3.2"
 
 
-def test_elasticsearch_cluster_health(host):
-    """Test elasticsearch cluster health."""
-    cmd = host.run(
-        "curl -s -u elastic:elastic_pass -k https://127.0.0.1:9200/_nodes/"
-        )
+def test_elasticsearch_number_of_nodes(host):
+    """Test number of elasticsearch nodes."""
+    cmd = host.run("curl -s -u %s:%s -k https://127.0.0.1:9200/_nodes/"
+                   % (API_USER, API_PASSWORD))
     result = json.loads(cmd.stdout)
     assert result["_nodes"]["total"] == 2
     assert result["_nodes"]["successful"] == 2
     assert result["_nodes"]["failed"] == 0
+
+
+def test_elasticsearch_cluster_health(host):
+    """Test elasticsearch cluster health."""
+    cmd = host.run("curl -s -u %s:%s"
+                   " -k https://127.0.0.1:9200/_cluster/health/"
+                   % (API_USER, API_PASSWORD))
+    result = json.loads(cmd.stdout)
+    assert result["status"] == "green"
+    assert result["number_of_nodes"] == 2

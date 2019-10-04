@@ -27,6 +27,10 @@
       ca_password: "test-password"
 
   vars:
+    elasticsearch_xpack_users:
+      molecule_user:
+        password: 'MoleculePassword'
+        roles: '["superuser"]'
     instances:
       node-1:
         name: node-1
