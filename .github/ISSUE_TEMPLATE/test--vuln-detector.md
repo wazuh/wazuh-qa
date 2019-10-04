@@ -250,7 +250,7 @@ This option is only valid for the Red Hat and National Vulnerability feeds. To v
     <run_on_start>yes</run_on_start>
     <provider name="redhat">
       <enabled>yes</enabled>
-      <update_from_year>2015</update_from_year>
+      <update_from_year>2013</update_from_year>
       <update_interval>1m</update_interval>
     </provider>
     <provider name="nvd">
@@ -334,7 +334,7 @@ File integrity
 
 **Description**
 
-The information stored in `<installation_path>/queue/vulnerability/cve.db` is not currently persistent, so the database must be removed between updates.
+The information stored in `<installation_path>/queue/vulnerabilities/cve.db` is not currently persistent, so the database must be removed between updates.
 
 To verify it, perform a vulnerability scan or update, check that the database exists, modify the `ossec.conf` file to disable the module, and update Wazuh. After this, the database should not exist.
 
