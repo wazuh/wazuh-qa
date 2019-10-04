@@ -1,0 +1,45 @@
+---
+# conf 1
+- tags:
+  - schedule
+  apply_to_modules:
+  - test_basic_usage_create
+  - test_basic_usage_changes
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "/testdir1,/testdir2,/noexists"
+      attributes:
+      - check_all: 'yes'
+# conf 2
+- tags:
+  - realtime
+  apply_to_modules:
+  - test_basic_usage_create
+  - test_basic_usage_changes
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "/testdir1,/testdir2,/noexists"
+      attributes:
+      - check_all: 'yes'
+      - realtime: 'yes'
+# conf 3
+- tags:
+  - whodata
+  apply_to_modules:
+  - test_basic_usage_create
+  - test_basic_usage_changes
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "/testdir1,/testdir2,/noexists"
+      attributes:
+      - check_all: 'yes'
+      - whodata: 'yes'

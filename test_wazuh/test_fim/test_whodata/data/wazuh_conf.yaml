@@ -1,0 +1,121 @@
+---
+# conf 1
+- tags:
+  - conf1
+  apply_to_modules:
+  - test_whodata
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "/testdir1"
+      attributes:
+      - whodata: 'yes'
+      - check_all: 'yes'
+      - check_sum: 'no'
+  - directories:
+      value: "/testdir2"
+      attributes:
+      - whodata: 'yes'
+      - check_all: 'yes'
+      - check_md5sum: 'no'
+  - directories:
+      value: "/testdir3"
+      attributes:
+      - whodata: 'yes'
+      - check_all: 'yes'
+      - check_sha1sum: 'no'
+  - directories:
+      value: "/testdir4"
+      attributes:
+      - whodata: 'yes'
+      - check_all: 'yes'
+      - check_sha256sum: 'no'
+  - directories:
+      value: "/testdir5"
+      attributes:
+      - whodata: 'yes'
+      - check_all: 'yes'
+      - check_size: 'no'
+  - directories:
+      value: "/testdir6"
+      attributes:
+      - whodata: 'yes'
+      - check_all: 'yes'
+      - check_owner: 'no'
+  - directories:
+      value: "/testdir7"
+      attributes:
+      - whodata: 'yes'
+      - check_all: 'yes'
+      - check_group: 'no'
+  - directories:
+      value: "/testdir8"
+      attributes:
+      - whodata: 'yes'
+      - check_all: 'yes'
+      - check_perm: 'no'
+  - directories:
+      value: "/testdir9"
+      attributes:
+      - whodata: 'yes'
+      - check_all: 'yes'
+      - check_mtime: 'no'
+  - directories:
+      value: "/testdir0"
+      attributes:
+      - whodata: 'yes'
+      - check_all: 'yes'
+      - check_inode: 'no'
+  - directories:
+      value: "/testdir_tags"
+      attributes:
+      - whodata: 'yes'
+      - check_all: 'yes'
+      - tags: tag0,tag1,tag2,tag3,tag4,tag5,tag6,tag7,tag8,tag9
+  - directories:
+      value: "/testdir_report_changes"
+      attributes:
+      - whodata: 'yes'
+      - check_all: 'yes'
+      - report_changes: 'yes'
+  - ignore:
+      value: "/etc/mtab"
+  - ignore:
+      value: "/etc/hosts.deny"
+  - ignore:
+      value: "/etc/mail/statistics"
+  - ignore:
+      value: "/etc/random-seed"
+  - ignore:
+      value: "/etc/random.seed"
+  - ignore:
+      value: "/etc/adjtime"
+  - ignore:
+      value: "/etc/httpd/logs"
+  - ignore:
+      value: "/etc/utmpx"
+  - ignore:
+      value: "/etc/cups/certs"
+  - ignore:
+      value: "/etc/dumpdates"
+  - ignore:
+      value: "/etc/svc/volatile"
+  - ignore:
+      value: "/sys/kernel/security"
+  - ignore:
+      value: "/sys/kernel/debug"
+  - ignore:
+      value: "/dev/core"
+  - ignore:
+      value: "^/proc"
+      attributes:
+      - type: sregex
+  - ignore:
+      value: ".log$|.swp$"
+      attributes:
+      - type: sregex
+  - nodiff:
+      value: "/etc/ssl/private.key"
+
