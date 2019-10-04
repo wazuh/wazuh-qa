@@ -20,6 +20,7 @@
 - [ ] MIT012
 - [ ] MIT013
 - [ ] MIT014
+- [ ] MIT015
 
 ## MIT001
 
@@ -447,9 +448,73 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
 }
 
 ```
-> to_json.c:110 at Eventinfo_to_jsonstr(): WARNING: Mitre Technique ID T6000 is not in mitre database.
+> ossec-analysisd[27311] to_json.c:110 at Eventinfo_to_jsonstr(): WARNING: Mitre Technique ID T6000 is not in mitre database.
 
 ## MIT009
+
+**Short description**
+
+If a rule has two or more technique IDs separated by commas,the IDs should appear in the alert and a warning message should be generated. 
+
+**Category**
+
+Mitre
+
+**Description**
+
+If a rule has two or more technique IDs separated by commas, they will not be splittered so it will not be possible to get their tactics. IDs should appear in the alert and a warning message should be generated.
+
+**Configuration sample**
+
+```
+sudo nano wazuh/etc/rules/0020-syslog_rules.xml
+
+<rule id="5402" level="3">
+    <if_sid>5400</if_sid>
+    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+    <description>Successful sudo to ROOT executed</description>
+    <mitre>
+      <id>T1169, T1078</id>
+    </mitre>
+    <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
+</rule>
+ ```
+ ```
+ ossec-control restart
+ CTRL + D
+ sudo su
+ CRTL + D
+ sudo su
+ ```
+**Compatible versions**
+
+3.11.0 - Current
+
+**Expected alerts**
+```
+# tail -f /var/ossec/logs/alerts/alerts.json
+
+{
+"timestamp":"2019-09-30T13:12:29.416+0200",
+"rule":{
+      "level":3,
+      "description":"Successful sudo to ROOT executed",
+      "id":"5402",
+      "mitre":{"id":["T1169, T1078"]
+               "tactics":[]
+               },
+      "firedtimes":1,
+      "mail":false,
+      "groups":["syslog","sudo"],"pci_dss":["10.2.5","10.2.2"],"gpg13":["7.6","7.8","7.13"],"gdpr":["IV_32.2"],"hipaa":["164.312.b"],"nist_800_53":["AU.3.1","IA.10"]
+       },
+       
+       ...
+}
+
+```
+> ossec-analysisd[27311] to_json.c:109 at Eventinfo_to_jsonstr(): WARNING: Mitre Technique ID T1169, T1078 is not in mitre database.
+
+## MIT010
 
 **Short description**
 
@@ -512,7 +577,7 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
        ...
 }
 ```
-## MIT010
+## MIT011
 
 **Short description**
 
@@ -568,7 +633,7 @@ ossec-control restart
 
 > ossec-analysisd[7339] mitre.c:120 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
 
-## MIT011
+## MIT012
 
 **Short description**
 
@@ -624,7 +689,7 @@ ossec-control restart
 
 > ossec-analysisd[27609] mitre.c:50 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
 
-## MIT012
+## MIT013
 
 **Short description**
 
@@ -682,7 +747,7 @@ ossec-control restart
 
 > ossec-analysisd[14614] mitre.c:50 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
 
-## MIT013
+## MIT014
 
 **Short description**
 
@@ -736,7 +801,7 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
 
 > ossec-analysisd[22563] analysisd.c:572 at main(): CRITICAL: (1220): Error loading the rules: 'ruleset/rules/0020-syslog_rules.xml'.
 
-## MIT014
+## MIT015
 
 **Short description**
 
