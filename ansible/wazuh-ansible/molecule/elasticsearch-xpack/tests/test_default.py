@@ -55,11 +55,21 @@ def test_elasticsearch_version_is_correct(host):
     assert result["version"]["number"] == "7.3.2"
 
 
-def test_elasticsearch_cluster_health(host):
-    """Test elasticsearch cluster health."""
+def test_elasticsearch_number_of_nodes(host):
+    """Test number of elasticsearch nodes."""
     cmd = host.run("curl -s -u %s:%s -k https://127.0.0.1:9200/_nodes/"
                    % (API_USER, API_PASSWORD))
     result = json.loads(cmd.stdout)
     assert result["_nodes"]["total"] == 2
     assert result["_nodes"]["successful"] == 2
     assert result["_nodes"]["failed"] == 0
+
+
+def test_elasticsearch_cluster_health(host):
+    """Test elasticsearch cluster health."""
+    cmd = host.run("curl -s -u %s:%s"
+                   " -k https://127.0.0.1:9200/_cluster/health/"
+                   % (API_USER, API_PASSWORD))
+    result = json.loads(cmd.stdout)
+    assert result["status"] == "green"
+    assert result["number_of_nodes"] == 2
