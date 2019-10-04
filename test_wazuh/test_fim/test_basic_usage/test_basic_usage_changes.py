@@ -2,16 +2,10 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import glob
 import os
-import re
-import time
-from datetime import timedelta
 
 import pytest
-from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH,
-                               callback_detect_end_scan, callback_detect_event,
-                               create_file, regular_file_cud, validate_event)
+from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH, regular_file_cud)
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations)
 
@@ -70,4 +64,5 @@ def test_regular_file_changes(folder, checkers, tags_to_apply,
 
     if get_configuration['metadata']['fim_mode'] == 'scheduled':
         is_scheduled = True
-    regular_file_cud(folder, is_scheduled, n_regular, min_timeout, wazuh_log_monitor, checkers)
+    regular_file_cud(folder, wazuh_log_monitor, time_travel=is_scheduled,
+                     n_regular=n_regular, min_timeout=min_timeout, options=checkers)

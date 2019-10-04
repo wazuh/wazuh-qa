@@ -1,11 +1,14 @@
 # Copyright (C) 2015-2019, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+import os
 import shutil
+from datetime import timedelta
 
 import pytest
 
-from wazuh_testing.fim import *
+from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH, WAZUH_PATH, callback_detect_event,
+                               REGULAR, create_file, restart_wazuh_with_new_conf)
 from wazuh_testing.tools import (FileMonitor, TimeMachine, check_apply_test,
                                  load_wazuh_configurations, set_section_wazuh_conf)
 

@@ -2,15 +2,11 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
-import glob
-import pytest
-import time
-import subprocess
-import shutil
 
-from wazuh_testing.fim import *
-from wazuh_testing.tools import (FileMonitor, check_apply_test,
-                                 load_wazuh_configurations, truncate_file)
+import pytest
+
+from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH, regular_file_cud)
+from wazuh_testing.tools import (FileMonitor, check_apply_test, load_wazuh_configurations)
 
 # variables
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -77,5 +73,5 @@ def test_reports_file_and_nodiff(folder, checkers, tags_to_apply,
     nd = folder == testdir_nodiff
     if get_configuration['metadata']['fim_mode'] == 'scheduled':
         time_travel = True
-    regular_file_cud(folder, time_travel, 1, min_timeout, wazuh_log_monitor, options=checkers,
+    regular_file_cud(folder, wazuh_log_monitor, time_travel, 1, min_timeout, options=checkers,
                      report_changes=rc, no_diff=nd)

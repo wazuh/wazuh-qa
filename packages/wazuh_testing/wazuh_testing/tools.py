@@ -9,13 +9,13 @@ import sys
 import threading
 import time
 import xml.etree.ElementTree as ET
+import yaml
+
 from datetime import datetime
 from pytest import skip
 from subprocess import DEVNULL, check_call, check_output
 from typing import Any, List, Set
 from copy import deepcopy
-
-import yaml
 
 WAZUH_PATH = os.path.join('/', 'var', 'ossec')
 WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')

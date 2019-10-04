@@ -62,7 +62,7 @@ def configure_environment(get_configuration, request):
     # create test directories
     test_directories = getattr(request.module, 'test_directories')
     for test_dir in test_directories:
-        os.mkdir(test_dir)
+        os.makedirs(test_dir, exist_ok=True)
 
     # set new configuration
     write_wazuh_conf(test_config)
