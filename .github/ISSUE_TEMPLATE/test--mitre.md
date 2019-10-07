@@ -397,7 +397,7 @@ Mitre
 
 **Description**
 
-If a rule has an ID technique that is not in Mitre database, the ID should appear in the alert but its tactics should because there are no tactics associated with that ID. Wazuh doesn't have to stop. In addition, a warning message will be generated. 
+If a rule has an ID technique that is not in Mitre database, the ID should appear in the alert but its tactics should not because there are no tactics associated with that ID. Wazuh doesn't have to stop. In addition, a warning message will be generated. 
 
 **Configuration sample**
 
@@ -592,7 +592,18 @@ Mitre
 If has_phase table is not in mitre.db, tactics should not be shown in alerts and Wazuh should show error messages. It does not have to stop.
 
 **Configuration sample**
-
+```
+<rule id="5402" level="3">
+    <if_sid>5400</if_sid>
+    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+    <description>Successful sudo to ROOT executed</description>
+    <mitre>
+      <id>T1169</id>
+      <id>T1078</id>
+    </mitre>
+    <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
+</rule>
+```
 ```
 sqlite3 /var/ossec/var/db/mitre.db
 sqlite> DROP TABLE has_phase;
@@ -648,6 +659,18 @@ Mitre
 If attack table is not in mitre.db, tactics should not be shown in alerts and Wazuh should show error messages. It does not have to stop.
 
 **Configuration sample**
+```
+<rule id="5402" level="3">
+    <if_sid>5400</if_sid>
+    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+    <description>Successful sudo to ROOT executed</description>
+    <mitre>
+      <id>T1169</id>
+      <id>T1078</id>
+    </mitre>
+    <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
+</rule>
+```
 
 ```
 sqlite3 /var/ossec/var/db/mitre.db
@@ -704,6 +727,18 @@ Mitre
 If Mitre database does not exist, tactics should not be shown in alerts and Wazuh should show error messages. It does not have to stop.
 
 **Configuration sample**
+```
+<rule id="5402" level="3">
+    <if_sid>5400</if_sid>
+    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+    <description>Successful sudo to ROOT executed</description>
+    <mitre>
+      <id>T1169</id>
+      <id>T1078</id>
+    </mitre>
+    <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
+</rule>
+```
 
 ```
 rm /var/ossec/var/db/mitre*
