@@ -393,7 +393,7 @@ def expand_placeholders(mutable_obj, placeholders=None):
     elif isinstance(mutable_obj, dict):
         for criterion, placeholder in placeholders.items():
             for key, value in mutable_obj.items():
-                if criterion == key:
+                if criterion == value:
                     mutable_obj[key] = placeholder
                 elif isinstance(value, (dict, list)):
                     expand_placeholders(mutable_obj[key], placeholders=placeholders)

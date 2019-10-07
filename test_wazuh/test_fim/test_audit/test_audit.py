@@ -79,20 +79,16 @@ def test_readded_rules(tags_to_apply, get_configuration,
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Remove added rules
-    os.system("auditctl -W {0} -p wa -k wazuh_fim".format(testdir1))
-    os.system("auditctl -W {0} -p wa -k wazuh_fim".format(testdir2))
-    os.system("auditctl -W {0} -p wa -k wazuh_fim".format(testdir3))
+    for dir in (testdir1, testdir2, testdir3):
+        os.system("auditctl -W {0} -p wa -k wazuh_fim".format(dir))
 
-    wazuh_log_monitor.start(timeout=20,
-                            callback=callback_audit_rules_manipulation)
+        wazuh_log_monitor.start(timeout=20,
+                                callback=callback_audit_rules_manipulation)
 
-    events = wazuh_log_monitor.start(timeout=10,
-                                     callback=callback_audit_loaded_rule,
-                                     accum_results=3).result()
+        events = wazuh_log_monitor.start(timeout=10,
+                                         callback=callback_audit_loaded_rule).result()
 
-    assert (testdir1 in events)
-    assert (testdir2 in events)
-    assert (testdir3 in events)
+        assert (dir in events)
 
 
 @pytest.mark.parametrize('tags_to_apply', [

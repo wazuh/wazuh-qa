@@ -1,62 +1,67 @@
 # Copyright (C) 2015-2019, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+import itertools
 import os
-import glob
-import pytest
-import time
 
-from wazuh_testing.fim import *
-from wazuh_testing.tools import FileMonitor
+import pytest
+
+from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, regular_file_cud
+from wazuh_testing.tools import FileMonitor, load_wazuh_configurations
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
-test_directories = [ os.path.join('/', 'testdir_tags') ]
-
-testdir_tags = test_directories[0]
+test_directories = [os.path.join('/', 'testdir_tags'),
+                    os.path.join('/', 'testdir_tags', 'subdir'),
+                    os.path.join('/', 'test dir'),
+                    os.path.join('/', 'test dir', 'subdir')
+                    ]
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
+# configurations
 
-@pytest.fixture(scope='module', params=glob.glob(os.path.join(test_data_path, 'ossec.conf')))
-def get_ossec_configuration(request):
+configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+tags = ['tag1', 'tág', '0tag', '000', 'a' * 1000]
+# Create an incresing tag set. I.e.: ['tag1', 'tag1,tag2', 'tag1,tag2,tag3']
+test_tags = [tags[0], ','.join(tags)]
+fim_modes = ['', {'realtime': 'yes'}, {'whodata': 'yes'}]
+fim_modes_metadata = ['scheduled', 'realtime', 'whodata']
+params = [{'FIM_MODE': fim_mode,
+           'FIM_TAGS': test_tag}
+          for fim_mode, test_tag in itertools.product(fim_modes, test_tags)]
+metadata = [{'fim_mode': fim_mode,
+             'fim_tags': test_tag}
+            for fim_mode, test_tag in itertools.product(fim_modes_metadata, test_tags)]
+configurations = load_wazuh_configurations(configurations_path, __name__,
+                                           params=params,
+                                           metadata=metadata
+                                           )
+
+
+# fixtures
+
+@pytest.fixture(scope='module', params=configurations)
+def get_configuration(request):
+    """Get configurations from the module."""
     return request.param
 
 
+@pytest.mark.parametrize('folder', test_directories)
 @pytest.mark.parametrize('name, filetype, content', [
     ('file1', REGULAR, 'Sample content'),
-    #('file2', REGULAR, ''),
-    ('file3', REGULAR, b'Sample content')
-    #('file4', REGULAR, b'')
+    ('file2', REGULAR, b'Sample content')
 ])
-@pytest.mark.parametrize('folder, checkers', [
-    # <directories whodata="yes" tags="tag0,tag1,tag2,tag3,tag4,tag5,tag6,tag7,tag8,tag9">/testdir_tags</directories>
-    (testdir_tags, REQUIRED_ATTRIBUTES[CHECK_ALL])
-])
-def test_tags(folder, name, filetype, content, checkers, configure_environment, restart_wazuh, wait_for_initial_scan):
-    defined_tags = 'tag0,tag1,tag2,tag3,tag4,tag5,tag6,tag7,tag8,tag9'
-    # Create file
-    create_file(filetype, name, folder, content)
+def test_tags(folder, name, filetype, content,
+              get_configuration, configure_environment, restart_wazuh, wait_for_initial_scan):
 
-    # Wait until event is detected
-    event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
-    validate_event(event, checks=checkers)
-    assert (defined_tags == event['data']['tags'])
+    defined_tags = get_configuration['metadata']['fim_tags']
 
-    # Modify file
-    regular_path = os.path.join(folder, name)
-    modify_file(folder, name, content)
+    def tag_validator(event):
+        assert(defined_tags == event['data']['tags'])
 
-    # Wait until event is detected
-    event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
-    validate_event(event, checks=checkers)
-    assert (defined_tags == event['data']['tags'])
-
-    # Delete file
-    regular_path = os.path.join(folder, name)
-    delete_file(folder, name)
-
-    # Wait until event is detected
-    event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
-    validate_event(event, checks=checkers)
-    assert (defined_tags == event['data']['tags'])
+    regular_file_cud(folder, wazuh_log_monitor,
+                     min_timeout=3,
+                     time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
+                     validators_after_cud=[tag_validator]
+                     )
