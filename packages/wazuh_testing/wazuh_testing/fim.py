@@ -343,7 +343,7 @@ def callback_configuration_error(line):
 
 
 def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_timeout=1, options=None,
-                     triggers_event=True, report_changes=False, no_diff=False):
+                     triggers_event=True, report_changes=False, no_diff=False, f_name='', content=''):
     """ Checks if creation, update and delete events are detected by syscheck
 
     :param folder: Path where the files will be created
@@ -395,8 +395,11 @@ def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_ti
 
     def check_files_in_event():
         file_paths = jq(".[].data.path").transform(events, multiple_output=True)
-        for file_name in range(n_regular):
-            assert (os.path.join(folder, f'regular_{file_name}') in file_paths)
+        if n_regular > 1:
+            for file_name in range(n_regular):
+                assert (os.path.join(folder, f'regular_{file_name}') in file_paths)
+        else:
+            assert (os.path.join(folder, f_name) in file_paths)
 
     def check_events(event_type, validate=True):
         if events is not None:
@@ -406,16 +409,22 @@ def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_ti
             check_files_in_event()
 
     # Create text files
-    for name in range(n_regular):
-        create_file(REGULAR, f'regular_{name}', folder, '')
+    if n_regular > 1:
+        for name in range(n_regular):
+            create_file(REGULAR, f'regular_{name}', folder, '')
+    else:
+        create_file(REGULAR, f_name, folder, content)
 
     check_time_travel()
     events = fetch_events()
     check_events(event_type='added')
 
     # Modify previous text files
-    for name in range(n_regular):
-        modify_file(folder, f'regular_{name}', 'Sample content added')
+    if n_regular > 1:
+        for name in range(n_regular):
+            modify_file(folder, f'regular_{name}', 'Sample content added')
+    else:
+        modify_file(folder, f_name, 'Sample content added')
 
     check_time_travel()
     events = fetch_events()
@@ -423,21 +432,36 @@ def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_ti
 
     # Check if files are duplicated
     if report_changes:
-        for name in range(n_regular):
+        if n_regular > 1:
+            for name in range(n_regular):
+                diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
+                                         folder.strip('/'), f'regular_{name}')
+                assert (os.path.exists(diff_file))
+                for ev in events:
+                    assert (ev['data'].get('content_changes') is not None)
+                    # Nodiff
+                    print('*********************')
+                    print(ev['data'].get('content_changes'))
+                    if no_diff:
+                        assert ('<Diff truncated because nodiff option>' in ev['data'].get('content_changes'))
+                    else:
+                        assert ('<Diff truncated because nodiff option>' not in ev['data'].get('content_changes'))
+        else:
             diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
-                                     folder.strip('/'), f'regular_{name}')
+                                     folder.strip('/'), f_name)
             assert (os.path.exists(diff_file))
             for ev in events:
-                assert (ev['data'].get('content_changes') is not None)
-
-        # Nodiff
-        if no_diff:
-            for ev in events:
-                assert ('<Diff truncated because nodiff option>' in ev['data'].get('content_changes'))
+                if no_diff:
+                    assert ('<Diff truncated because nodiff option>' in ev['data'].get('content_changes'))
+                else:
+                    assert ('<Diff truncated because nodiff option>' not in ev['data'].get('content_changes'))
 
     # Delete previous text files
-    for name in range(n_regular):
-        delete_file(folder, f'regular_{name}')
+    if n_regular > 1:
+        for name in range(n_regular):
+            delete_file(folder, f'regular_{name}')
+    else:
+        delete_file(folder, f_name)
 
     check_time_travel()
     events = fetch_events()
