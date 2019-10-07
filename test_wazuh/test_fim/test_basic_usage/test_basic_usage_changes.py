@@ -2,20 +2,14 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import glob
 import os
-import re
-import time
-from datetime import timedelta
 
 import pytest
 
 from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH,
-                               callback_detect_end_scan, callback_detect_event,
-                               create_file, regular_file_cud, validate_event)
+                               regular_file_cud)
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations)
-
 
 # variables
 

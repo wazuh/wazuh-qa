@@ -338,7 +338,10 @@ def callback_configuration_error(line):
     return None
 
 
-def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_timeout=1, options=None, triggers_event=True):
+def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_timeout=1, options=None,
+                     triggers_event=True,
+                     validators_after_create=None, validators_after_update=None, validators_after_delete=None,
+                     validators_after_cud=None):
     """ Checks if creation, update and delete events are detected by syscheck
 
     :param folder: Path where the files will be created
@@ -355,6 +358,18 @@ def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_ti
     :type options: Dict. Default value is None.
     :param triggers_event: Boolean to determinate if the event should be raised or not.
     :type triggers_event: Boolean
+    :param validators_after_create: list of functions that validate an event triggered when a new file is created. Each
+    function must accept a param to receive the event to be validated.
+    :type validators_after_create: list
+    :param validators_after_update: list of functions that validate an event triggered when a new file is modified. Each
+    function must accept a param to receive the event to be validated.
+    :type validators_after_update: list
+    :param validators_after_delete: list of functions that validate an event triggered when a new file is deleted. Each
+    function must accept a param to receive the event to be validated.
+    :type validators_after_delete: list
+    :param validators_after_cud: list of functions that validate an event triggered when a new file is created, modified
+    or deleted. Each function must accept a param to receive the event to be validated.
+    :type validators_after_cud: list
     :return: None
     """
     def check_time_travel():
@@ -363,10 +378,11 @@ def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_ti
 
     def fetch_events():
         try:
-            return log_monitor.start(timeout=max(n_regular * 0.01, min_timeout), 
-                                     callback=callback_detect_event,
-                                     accum_results=n_regular
-                                    ).result()
+            result = log_monitor.start(timeout=max(n_regular * 0.01, min_timeout),
+                                       callback=callback_detect_event,
+                                       accum_results=n_regular
+                                       ).result()
+            return result if isinstance(result, list) else [result]
         except TimeoutError:
             if triggers_event:
                 raise
@@ -377,20 +393,19 @@ def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_ti
                 validate_event(ev, options)
 
     def check_events_type(ev_type):
-        if n_regular > 1:
-            event_types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
-            assert (event_types[ev_type] == n_regular)
-        else:
-            assert((jq(".data.type").transform(events, multiple_output=False)) in ev_type)
+        event_types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
+        assert (event_types[ev_type] == n_regular)
 
     def check_files_in_event():
-        if n_regular > 1:
-            file_paths = jq(".[].data.path").transform(events, multiple_output=True)
-        else:
-            file_paths = jq(".data.path").transform(events, multiple_output=False)
+        file_paths = jq(".[].data.path").transform(events, multiple_output=True)
         for file_name in range(n_regular):
             assert (os.path.join(folder, f'regular_{file_name}') in file_paths)
 
+    def run_custom_validators(validators):
+        if validators is not None:
+            for validator in validators:
+                for event in events:
+                    validator(event)
 
     # Create text files
     for name in range(n_regular):
@@ -402,6 +417,8 @@ def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_ti
         validate_checkers_per_event()
         check_events_type('added')
         check_files_in_event()
+        run_custom_validators(validators_after_cud)
+        run_custom_validators(validators_after_create)
 
     # Modify previous text files
     for name in range(n_regular):
@@ -413,6 +430,8 @@ def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_ti
         validate_checkers_per_event()
         check_events_type('modified')
         check_files_in_event()
+        run_custom_validators(validators_after_cud)
+        run_custom_validators(validators_after_update)
 
     # Delete previous text files
     for name in range(n_regular):
@@ -423,3 +442,5 @@ def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_ti
     if events is not None:
         check_events_type('deleted')
         check_files_in_event()
+        run_custom_validators(validators_after_cud)
+        run_custom_validators(validators_after_delete)
