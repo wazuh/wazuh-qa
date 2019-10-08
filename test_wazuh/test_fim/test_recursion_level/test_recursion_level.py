@@ -131,6 +131,6 @@ def test_recursion_level(dirname, subdirname, recursion_level,
     :param recursion_level int Recursion level. Also used as the number of subdirectories to be created and checked for the current test.
     """
     if get_configuration['metadata']['fim_mode'] == 'scheduled':
-        recursion_test(dirname, subdirname, recursion_level, is_scheduled=True)
+        recursion_test(dirname, subdirname, recursion_level, is_scheduled=True, timeout=3)
     else:
-        recursion_test(dirname, subdirname, recursion_level, timeout=2)
+        recursion_test(dirname, subdirname, recursion_level, timeout=3)
