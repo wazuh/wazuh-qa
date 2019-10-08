@@ -1,18 +1,17 @@
 ---
 # conf 1
 - tags:
-  - ossec_conf_report
+  - invalid_no_regex
+  - invalid_no_regex1
   apply_to_modules:
-  - MODULE_NAME
+  - test_tags
   section: syscheck
   elements:
   - disabled:
       value: 'no'
   - directories:
-      value: "/testdir_reports, /testdir_nodiff"
+      value: "/testdir_tags,/test dir"
       attributes:
       - check_all: 'yes'
       - FIM_MODE
-      - REPORT_CHANGES
-  - nodiff:
-      value: "/testdir_nodiff/regular_file"
+      - tags: FIM_TAGS

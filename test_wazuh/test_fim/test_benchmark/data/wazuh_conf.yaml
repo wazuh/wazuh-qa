@@ -1,7 +1,7 @@
 ---
 # conf 1
 - tags:
-  - realtime
+  - ossec_benchmark
   apply_to_modules:
   - test_benchmark
   section: syscheck
@@ -12,18 +12,4 @@
       value: "/testdir1,/testdir2,/noexists"
       attributes:
       - check_all: 'yes'
-      - realtime: 'yes'
-# conf 2
-- tags:
-  - whodata
-  apply_to_modules:
-  - test_benchmark
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/testdir1,/testdir2,/noexists"
-      attributes:
-      - check_all: 'yes'
-      - whodata: 'yes'
+      - FIM_MODE
