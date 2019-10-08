@@ -33,6 +33,9 @@ This format must match in every test.
 - [ ] ROT003
 - [ ] ROT004
 - [ ] ROT005
+- [ ] ROT006
+- [ ] ROT007
+- [ ] ROT008
 
 ## ROT001
 
@@ -92,6 +95,7 @@ If a specific day of the week is specified the log will be rotated at `00:00` of
 3.12.0 - Current
 
 **Expected files**
+
 Wazuh will rotate the specific log every scheduled (as if the first rotation is at `00:00`) interval.
 
 **Use cases**
@@ -158,6 +162,7 @@ It'll accept bytes (`B`), kilobytes (`K`), megabytes (`M`) and gigabytes (`G`) a
 3.12.0 - Current
 
 **Expected files**
+
 Wazuh will rotate the specific log every time it grows bigger than `max_size`.
 
 **Use cases**
@@ -227,6 +232,7 @@ Wazuh must be capable of combine size or interval rotation.
 3.12.0 - Current
 
 **Expected files**
+
 Wazuh will rotate the specific log every scheduled (as if the first rotation is at `00:00`) interval. Also, it'll rotate the specific log if it grows bigger than `max_size`.
 
 **Use cases**
@@ -295,6 +301,7 @@ Wazuh must be capable of rotate logs combining size (`min_size`) and interval ro
 3.12.0 - Current
 
 **Expected files**
+
 Wazuh will rotate the specific log every scheduled (as if the first rotation is at `00:00`) interval only if the log has grown bigger than `min_size`.
 It will also rotate if the log grows bigger than `min_size` after the scheduled interval has passed.
 
@@ -362,6 +369,196 @@ Wazuh must rotate logs even if they're empty. This only has to be tested with `s
 3.12.0 - Current
 
 **Expected files**
+
 In order to test this we must ensure that the specific log is empty (and empty it if not, before the rotation happens).
 The rotated file must be empty.
+
+## ROT006
+
+**Short description**
+
+Wazuh must be able to compress the rotated logs.
+
+**Category**
+
+Log rotation
+
+**Subcategory**
+
+Log compression
+
+**Description**
+
+Wazuh must compress the rotated logs if indicated in the configuration. `gunzip` is used to compress the rotated logs (the format will be `.gz`. Command `gz -t -v` can be used to check the integrity of the compressed files.
+
+**Configuration sample**
+
+``` XML
+  <logging>
+    <log>
+      <enabled>yes</enabled>
+      <format>json,plain</format>
+      <rotation>
+        <enabled>yes</enabled>
+        <schedule>1m</schedule>
+        <compress>yes</compress>
+      </rotation>
+    </log>
+    <alerts>
+      <enabled>yes</enabled>
+      <format>json,plain</format>
+      <rotation>
+        <enabled>yes</enabled>
+        <schedule>1m</schedule>
+        <compress>yes</compress>
+      </rotation>
+    </alerts>
+    <archives>
+      <enabled>yes</enabled>
+      <format>json,plain</format>
+      <rotation>
+        <enabled>yes</enabled>
+        <schedule>1m</schedule>
+        <compress>yes</compress>
+      </rotation>
+    </archives>
+  </logging>
+```
+
+**Min/Max compatible versions**
+3.12.0 - Current
+
+**Expected files**
+
+The expected files will be as usual but the log rotation files will be compressed. With this configuration a new file should appear every minute.
+
+## ROT007
+
+**Short description**
+
+Wazuh must be able to keep a maximum number of rotated logs if indicated.
+
+**Category**
+
+Log rotation
+
+**Subcategory**
+
+Maximum rotated logs
+
+**Description**
+
+Wazuh will keep `rotate` rotated logs under the log rotation folder. If a new rotated file appears, the oldest one will be deleted.
+
+**Configuration sample**
+
+``` XML
+  <logging>
+    <log>
+      <enabled>yes</enabled>
+      <format>json,plain</format>
+      <rotation>
+        <enabled>yes</enabled>
+        <schedule>1m</schedule>
+        <compress>yes</compress>
+        <rotate>3</rotate>
+      </rotation>
+    </log>
+    <alerts>
+      <enabled>yes</enabled>
+      <format>json,plain</format>
+      <rotation>
+        <enabled>yes</enabled>
+        <schedule>1m</schedule>
+        <compress>yes</compress>
+        <rotate>5</rotate>
+      </rotation>
+    </alerts>
+    <archives>
+      <enabled>yes</enabled>
+      <format>json,plain</format>
+      <rotation>
+        <enabled>yes</enabled>
+        <schedule>1m</schedule>
+        <compress>no</compress>
+        <rotate>4</rotate>
+      </rotation>
+    </archives>
+  </logging>
+```
+
+**Min/Max compatible versions**
+3.12.0 - Current
+
+**Expected files**
+
+As described, a maximum of `rotate` log rotations must be kept under the specific log folder. Check that when a new log is rotated the older one is deleted (in order to keep the maximum log rotations specified). Keep in mind that the `rotate` option refers to each format. This means that if `<rotate>3</rotate>`, three maximum logs will be kept for each format (6 in total).
+
+## ROT008
+
+**Short description**
+
+Wazuh must be able to delete old logs.
+
+**Category**
+
+Log rotation
+
+**Subcategory**
+
+Delete old logs
+
+**Description**
+
+Wazuh will delete rotated logs older than `maxage` days.
+
+**Configuration sample**
+
+``` XML
+  <logging>
+    <log>
+      <enabled>yes</enabled>
+      <format>json,plain</format>
+      <rotation>
+        <enabled>yes</enabled>
+        <schedule>8h</schedule>
+        <compress>yes</compress>
+        <maxage>2</maxage>
+      </rotation>
+    </log>
+    <alerts>
+      <enabled>yes</enabled>
+      <format>json,plain</format>
+      <rotation>
+        <enabled>yes</enabled>
+        <schedule>8h</schedule>
+        <compress>yes</compress>
+        <maxage>2</maxage>
+      </rotation>
+    </alerts>
+    <archives>
+      <enabled>yes</enabled>
+      <format>json,plain</format>
+      <rotation>
+        <enabled>yes</enabled>
+        <schedule>8h</schedule>
+        <compress>no</compress>
+        <maxage>2</maxage>
+      </rotation>
+    </archives>
+  </logging>
+```
+
+**Min/Max compatible versions**
+3.12.0 - Current
+
+**Expected files**
+
+The rotated logs will be deleted after two days (in the example above). This means that, for instance, the logs created October 8, will be deleted October 11 (00:00) no matter the hour they were created.
+
+**Use cases**
+- [ ] Trigger several log rotations during several days. Don't trigger a new log rotation at least until the `maxage` period has passed for every old rotated log. Then trigger a new rotation. All rotated logs should be deleted and a new one should be created.
+
+
+
 
