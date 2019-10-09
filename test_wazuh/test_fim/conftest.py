@@ -5,26 +5,13 @@
 import os
 import shutil
 import subprocess
-import time
 
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH, WAZUH_CONF_PATH,
-                               callback_detect_end_scan)
-from wazuh_testing.tools import (FileMonitor, get_wazuh_conf,
-                                 set_section_wazuh_conf, truncate_file,
-                                 wait_for_condition, write_wazuh_conf)
+from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan
+from wazuh_testing.tools import FileMonitor, get_wazuh_conf, set_section_wazuh_conf, truncate_file, write_wazuh_conf, \
+    restart_wazuh_daemon
 
-
-# functions
-
-def set_wazuh_conf(new_conf, request):
-    """Set a new Wazuh configuration. It restarts Wazuh."""
-    write_wazuh_conf(new_conf)
-    restart_wazuh(request)
-
-
-# fixtures
 
 @pytest.fixture(scope='module')
 def restart_wazuh(get_configuration, request):
@@ -39,13 +26,20 @@ def restart_wazuh(get_configuration, request):
 
 
 @pytest.fixture(scope='module')
+def restart_syscheckd(get_configuration, request):
+    # Reset ossec.log and start a new monitor
+    truncate_file(LOG_FILE_PATH)
+    file_monitor = FileMonitor(LOG_FILE_PATH)
+    setattr(request.module, 'wazuh_log_monitor', file_monitor)
+
+    restart_wazuh_daemon('ossec-syscheckd')
+
+
+@pytest.fixture(scope='module')
 def wait_for_initial_scan(get_configuration, request):
     # Wait for initial FIM scan to end
     file_monitor = getattr(request.module, 'wazuh_log_monitor')
     file_monitor.start(timeout=60, callback=callback_detect_end_scan)
-
-    # Add additional sleep to avoid changing system clock issues (TO BE REMOVED when syscheck has not sleeps anymore)
-    time.sleep(11)
 
 
 @pytest.fixture(scope='module')

@@ -7,7 +7,7 @@ from datetime import timedelta
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, create_file, REGULAR
+from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, callback_restricted, create_file, REGULAR
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations, TimeMachine)
 
@@ -60,7 +60,7 @@ def get_configuration(request):
     ("myother_restricted", "wb", b"", True, {'valid_regex_3'})
 ])
 def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply,
-                  get_configuration, configure_environment, restart_wazuh,
+                  get_configuration, configure_environment, restart_syscheckd,
                   wait_for_initial_scan):
     """Checks the only files detected are those matching the restrict regex
 
@@ -82,12 +82,14 @@ def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply
         # Go ahead in time to let syscheck perform a new scan
         TimeMachine.travel_to_future(timedelta(hours=13))
 
-    try:
+    if triggers_event:
         event = wazuh_log_monitor.start(timeout=3,
                                         callback=callback_detect_event).result()
-        assert triggers_event
         assert (event['data']['type'] == 'added')
         assert (event['data']['path'] == os.path.join(folder, filename))
-    except TimeoutError:
-        if triggers_event:
-            raise
+    else:
+        while True:
+            ignored_file = wazuh_log_monitor.start(timeout=3,
+                                                   callback=callback_restricted).result()
+            if ignored_file == os.path.join(folder, filename):
+                break

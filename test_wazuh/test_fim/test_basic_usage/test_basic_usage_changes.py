@@ -48,7 +48,7 @@ def get_configuration(request):
 ])
 def test_regular_file_changes(folder, checkers, is_scheduled, tags_to_apply,
                               get_configuration, configure_environment,
-                              restart_wazuh, wait_for_initial_scan):
+                              restart_syscheckd, wait_for_initial_scan):
     """ Checks if syscheckd detects regular file changes (add, modify, delete)"""
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

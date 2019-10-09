@@ -77,7 +77,7 @@ def get_configuration(request):
 ])
 def test_fim_checks(folder, name, filetype, content, checkers,
                     tags_to_apply, get_configuration,
-                    configure_environment, restart_wazuh,
+                    configure_environment, restart_syscheckd,
                     wait_for_initial_scan):
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -117,7 +117,7 @@ def test_fim_checks(folder, name, filetype, content, checkers,
 ])
 def test_fim_reports(folder, name, filetype, content, checkers,
                      tags_to_apply, get_configuration,
-                     configure_environment, restart_wazuh,
+                     configure_environment, restart_syscheckd,
                      wait_for_initial_scan):
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -157,7 +157,7 @@ def test_fim_reports(folder, name, filetype, content, checkers,
     (testdir_tags, REQUIRED_ATTRIBUTES[CHECK_ALL], {'all'})
 ])
 def test_fim_tags(folder, name, filetype, content, checkers, tags_to_apply,
-                  get_configuration, configure_environment, restart_wazuh,
+                  get_configuration, configure_environment, restart_syscheckd,
                   wait_for_initial_scan):
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

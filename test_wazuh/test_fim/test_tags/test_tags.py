@@ -53,7 +53,7 @@ def get_configuration(request):
     ('file2', REGULAR, b'Sample content')
 ])
 def test_tags(folder, name, filetype, content,
-              get_configuration, configure_environment, restart_wazuh, wait_for_initial_scan):
+              get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
 
     defined_tags = get_configuration['metadata']['fim_tags']
 

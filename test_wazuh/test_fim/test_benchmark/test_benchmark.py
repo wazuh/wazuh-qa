@@ -44,7 +44,7 @@ def get_configuration(request):
 ])
 def test_benchmark_regular_files(n_regular, folder, is_scheduled,
                                  tags_to_apply, get_configuration,
-                                 configure_environment, restart_wazuh,
+                                 configure_environment, restart_syscheckd,
                                  wait_for_initial_scan):
     """Checks syscheckd detects a minimum volume of file changes (add, modify, delete)"""
     check_apply_test(tags_to_apply, get_configuration['tags'])

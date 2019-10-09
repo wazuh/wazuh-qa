@@ -292,6 +292,20 @@ def callback_detect_event(line):
     return None
 
 
+def callback_ignore(line):
+    match = re.match(r".*Ignoring '.*?' '(.*?)' due to sregex '.*?'", line)
+    if match:
+        return match.group(1)
+    return None
+
+
+def callback_restricted(line):
+    match = re.match(r".*Ignoring file '(.*?)' due to restriction '.*?'", line)
+    if match:
+        return match.group(1)
+    return None
+
+
 def callback_audit_health_check(line):
     if 'Whodata health-check: Success.' in line:
         return True
@@ -393,7 +407,11 @@ def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_ti
                 validate_event(ev, options)
 
     def check_events_type(ev_type):
+        print(f"Events: {events}")
+        print(f"n_regular: {n_regular}")
         event_types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
+        print(f"event_types: {event_types}")
+        print(f"ev_type: {ev_type}")
         assert (event_types[ev_type] == n_regular)
 
     def check_files_in_event():

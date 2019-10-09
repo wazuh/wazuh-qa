@@ -7,9 +7,8 @@ from datetime import timedelta
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, create_file, REGULAR
-from wazuh_testing.tools import (FileMonitor, check_apply_test,
-                                 load_wazuh_configurations, TimeMachine)
+from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, callback_ignore, create_file, REGULAR
+from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, TimeMachine
 
 # variables
 
@@ -69,11 +68,13 @@ def get_configuration(request):
     (testdir1, 'ignore_prefix_test.txt', "w", "test", True, {'valid_regex1', 'valid_regex2', 'valid_regex3', 'valid_regex4'}),
     (testdir1, 'ignore_prefix_test.txt', "w", "test", False, {'valid_regex5'}),
     (testdir1, 'whatever.txt', "w", "test", False, {'valid_empty'}),
-    (testdir2, 'whatever2.txt', "w", "test", False, {'valid_empty'})
+    (testdir2, 'whatever2.txt', "w", "test", False, {'valid_empty'}),
+    (testdir1, 'mytest', "w", "test", True, {'negation_regex'}),
+    (testdir1, 'othername', "w", "test", False, {'negation_regex'})
 ])
 def test_ignore_subdirectory(folder, filename, mode, content, triggers_event,
                              tags_to_apply, get_configuration,
-                             configure_environment, restart_wazuh,
+                             configure_environment, restart_syscheckd,
                              wait_for_initial_scan):
     """Checks files are ignored in subdirectory according to configuration
 
@@ -95,12 +96,14 @@ def test_ignore_subdirectory(folder, filename, mode, content, triggers_event,
         # Go ahead in time to let syscheck perform a new scan
         TimeMachine.travel_to_future(timedelta(hours=13))
 
-    try:
+    if triggers_event:
         event = wazuh_log_monitor.start(timeout=3,
                                         callback=callback_detect_event).result()
-        assert triggers_event
         assert (event['data']['type'] == 'added')
         assert (event['data']['path'] == os.path.join(folder, filename))
-    except TimeoutError:
-        if triggers_event:
-            raise
+    else:
+        while True:
+            ignored_file = wazuh_log_monitor.start(timeout=3,
+                                                   callback=callback_ignore).result()
+            if ignored_file == os.path.join(folder, filename):
+                break

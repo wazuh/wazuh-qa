@@ -119,7 +119,7 @@ def get_configuration(request):
 ])
 def test_recursion_level(dirname, subdirname, recursion_level,
                          get_configuration, configure_environment,
-                         restart_wazuh, wait_for_initial_scan):
+                         restart_syscheckd, wait_for_initial_scan):
     """Checks if files are correctly detected by syscheck with recursion level using scheduled, realtime and whodata monitoring
 
     This test is intended to be used with valid ignore configurations. It applies RegEx to match the name 

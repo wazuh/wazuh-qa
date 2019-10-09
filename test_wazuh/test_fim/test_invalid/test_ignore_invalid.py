@@ -42,7 +42,7 @@ def get_configuration(request):
     ({'invalid_no_regex'})
 ])
 def test_ignore(tags_to_apply, get_configuration, configure_environment,
-                restart_wazuh):
+                restart_syscheckd):
     """Checks if an invalid ignore configuration is detected."""
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
