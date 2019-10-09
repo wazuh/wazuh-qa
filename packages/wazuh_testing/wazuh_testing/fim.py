@@ -7,14 +7,14 @@ import os
 import re
 import socket
 import sys
+import time
 from collections import Counter
 from datetime import timedelta
-import subprocess
-import time
 
 from jq import jq
 from jsonschema import validate
-from wazuh_testing.tools import TimeMachine, write_wazuh_conf
+
+from wazuh_testing.tools import TimeMachine
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
@@ -354,6 +354,7 @@ def regular_file_cud(folder, log_monitor, file_list, time_travel=False, min_time
     :type log_monitor: FileMonitor
     :param file_list: List/Dict with the file names and content.
     List -> ['name0', 'name1'] -- Dict -> {'name0': 'content0', 'name1': 'content1'}
+    If it is a list, it will be transformed to a dict with empty strings in each value.
     :type file_list: Either List or Dict
     :param time_travel: Boolean to determine if there will be time travels or not
     :type time_travel: Boolean
@@ -422,13 +423,10 @@ def regular_file_cud(folder, log_monitor, file_list, time_travel=False, min_time
                     validator(event)
 
     # Transform file list
+    if not isinstance(file_list, list) and not isinstance(file_list, dict):
+        raise ValueError('Value error. It can only be list or dict')
     if isinstance(file_list, list):
-        aux_dict = {i: '' for i in file_list}
-        file_list = aux_dict
-    elif isinstance(file_list, dict):
-        pass
-    else:
-        raise Exception('Type error. It can only be list or dict')
+        file_list = {i: '' for i in file_list}
 
     # Create text files
     for name, content in file_list.items():
@@ -455,18 +453,13 @@ def regular_file_cud(folder, log_monitor, file_list, time_travel=False, min_time
     check_events('deleted', validators_after_delete)
 
 
-def restart_wazuh_with_new_conf(new_conf, log_monitor):
-    """ Restart Wazuh service applying a new ossec.conf
+def detect_initial_scan(file_monitor):
+    """ Detect initial scan when restarting Wazuh
 
-    :param new_conf: New config file
-    :type new_conf: ElementTree
-    :param log_monitor: Wazuh log monitor
-    :type log_monitor: FileMonitor
+    :param file_monitor: Wazuh log monitor to detect syscheck events
+    :type file_monitor: FileMonitor
     :return: None
     """
-    write_wazuh_conf(new_conf)
-    p = subprocess.Popen(["service", "wazuh-manager", "restart"])
-    p.wait()
-    # Wait for FIM scan to finish
-    log_monitor.start(timeout=60, callback=callback_detect_end_scan)
+    file_monitor.start(timeout=60, callback=callback_detect_end_scan)
+    # Add additional sleep to avoid changing system clock issues (TO BE REMOVED when syscheck has not sleeps anymore)
     time.sleep(11)

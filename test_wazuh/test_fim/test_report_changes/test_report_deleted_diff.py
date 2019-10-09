@@ -8,9 +8,9 @@ from datetime import timedelta
 import pytest
 
 from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH, WAZUH_PATH, callback_detect_event,
-                               REGULAR, create_file, restart_wazuh_with_new_conf)
+                               REGULAR, create_file, detect_initial_scan)
 from wazuh_testing.tools import (FileMonitor, TimeMachine, check_apply_test,
-                                 load_wazuh_configurations, set_section_wazuh_conf)
+                                 load_wazuh_configurations, set_section_wazuh_conf, restart_wazuh_with_new_conf)
 
 # variables
 
@@ -65,7 +65,11 @@ def get_configuration(request):
 
 # functions
 def wait_for_event(fim_mode):
-    """ Wait for the event to be scanned"""
+    """ Wait for the event to be scanned
+
+    :param fim_mode: FIM mode (scheduled, realtime, whodata)
+    :return: None
+    """
     if fim_mode == 'scheduled':
         TimeMachine.travel_to_future(timedelta(hours=13))
     # Wait until event is detected
@@ -73,7 +77,13 @@ def wait_for_event(fim_mode):
 
 
 def create_and_check_diff(name, directory, fim_mode):
-    """ Create a file and check if it is duplicated in diff directory"""
+    """ Create a file and check if it is duplicated in diff directory
+
+    :param name: File name
+    :param directory: File directory
+    :param fim_mode: FIM mode (scheduled, realtime, whodata)
+    :return: String with with the duplicated file path (diff)
+    """
     create_file(REGULAR, name, directory, 'Sample content')
     wait_for_event(fim_mode)
     diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
@@ -83,14 +93,29 @@ def create_and_check_diff(name, directory, fim_mode):
 
 
 def check_when_no_report_changes(name, directory, fim_mode, new_conf):
-    # Restart Wazuh without report_changes
+    """ Restart Wazuh without report_changes
+
+    :param name: File name
+    :param directory: File directory
+    :param fim_mode: FIM mode (scheduled, realtime, whodata)
+    :param new_conf: New configuration to apply to syscheck
+    :return:
+    """
     diff_file = create_and_check_diff(name, directory, fim_mode)
-    restart_wazuh_with_new_conf(new_conf, wazuh_log_monitor)
+    restart_wazuh_with_new_conf(new_conf)
+    # Wait for FIM scan to finish
+    detect_initial_scan(wazuh_log_monitor)
     assert (os.path.exists(diff_file) is False)
 
 
 def check_when_deleted_directories(name, directory, fim_mode):
-    # Check if the diff directory is empty when the monitored directory is deleted
+    """ Check if the diff directory is empty when the monitored directory is deleted
+
+    :param name: File name
+    :param directory: File directory
+    :param fim_mode: FIM mode (scheduled, realtime, whodata)
+    :return: None
+    """
     diff_dir = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local', directory.strip('/'))
     create_and_check_diff(name, directory, fim_mode)
     shutil.rmtree(directory, ignore_errors=True)
@@ -112,7 +137,7 @@ def test_no_report_changes(folder, checkers, delete_dir, tags_to_apply,
                            get_configuration, configure_environment,
                            restart_wazuh, wait_for_initial_scan):
     """ Check if duplicated directories in diff are deleted when changing
-        report_changes to 'no' or deleting the monitored directories"""
+        report_changes to 'no' or deleting the monitored directories """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     filename = 'regularfile'
