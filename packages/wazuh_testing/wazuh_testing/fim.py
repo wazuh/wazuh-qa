@@ -7,14 +7,14 @@ import os
 import re
 import socket
 import sys
+import time
 from collections import Counter
 from datetime import timedelta
-import subprocess
-import time
 
 from jq import jq
 from jsonschema import validate
-from wazuh_testing.tools import TimeMachine, write_wazuh_conf
+
+from wazuh_testing.tools import TimeMachine
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
@@ -342,28 +342,40 @@ def callback_configuration_error(line):
     return None
 
 
-def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_timeout=1, options=None,
-                     triggers_event=True, report_changes=False, no_diff=False, f_name='', content=''):
+def regular_file_cud(folder, log_monitor, file_list, time_travel=False, min_timeout=1, options=None,
+                     triggers_event=True,
+                     validators_after_create=None, validators_after_update=None, validators_after_delete=None,
+                     validators_after_cud=None):
     """ Checks if creation, update and delete events are detected by syscheck
 
     :param folder: Path where the files will be created
     :type folder: String
     :param log_monitor: File event monitor
     :type log_monitor: FileMonitor
+    :param file_list: List/Dict with the file names and content.
+    List -> ['name0', 'name1'] -- Dict -> {'name0': 'content0', 'name1': 'content1'}
+    If it is a list, it will be transformed to a dict with empty strings in each value.
+    :type file_list: Either List or Dict
     :param time_travel: Boolean to determine if there will be time travels or not
     :type time_travel: Boolean
-    :param n_regular: Number of regular files that will be created
-    :type n_regular: Integer
     :param min_timeout: Minimum timeout
     :type min_timeout: Float
     :param options: Dict with all the checkers
     :type options: Dict. Default value is None.
     :param triggers_event: Boolean to determine if the event should be raised or not.
     :type triggers_event: Boolean
-    :param report_changes: Boolean to determine if there should be a report_changes field in the event
-    :type report_changes: Boolean
-    :param no_diff: Boolean to determine if the current file should have its content protected
-    :type no_diff: Boolean
+    :param validators_after_create: list of functions that validate an event triggered when a new file is created. Each
+    function must accept a param to receive the event to be validated.
+    :type validators_after_create: list
+    :param validators_after_update: list of functions that validate an event triggered when a new file is modified. Each
+    function must accept a param to receive the event to be validated.
+    :type validators_after_update: list
+    :param validators_after_delete: list of functions that validate an event triggered when a new file is deleted. Each
+    function must accept a param to receive the event to be validated.
+    :type validators_after_delete: list
+    :param validators_after_cud: list of functions that validate an event triggered when a new file is created, modified
+    or deleted. Each function must accept a param to receive the event to be validated.
+    :type validators_after_cud: list
     :return: None
     """
 
@@ -373,13 +385,11 @@ def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_ti
 
     def fetch_events():
         try:
-            event_list = log_monitor.start(timeout=max(n_regular * 0.01, min_timeout),
-                                           callback=callback_detect_event,
-                                           accum_results=n_regular
-                                           ).result()
-            if n_regular == 1:
-                event_list = [event_list]
-            return event_list
+            result = log_monitor.start(timeout=max(len(file_list) * 0.01, min_timeout),
+                                       callback=callback_detect_event,
+                                       accum_results=len(file_list)
+                                       ).result()
+            return result if isinstance(result, list) else [result]
         except TimeoutError:
             if triggers_event:
                 raise
@@ -391,95 +401,65 @@ def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_ti
 
     def check_events_type(ev_type):
         event_types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
-        assert (event_types[ev_type] == n_regular)
+        assert (event_types[ev_type] == len(file_list))
 
     def check_files_in_event():
         file_paths = jq(".[].data.path").transform(events, multiple_output=True)
-        if n_regular > 1:
-            for file_name in range(n_regular):
-                assert (os.path.join(folder, f'regular_{file_name}') in file_paths)
-        else:
-            assert (os.path.join(folder, f_name) in file_paths)
+        for file_name, file_content in file_list.items():
+            assert (os.path.join(folder, file_name) in file_paths)
 
-    def check_events(event_type, validate=True):
+    def check_events(event_type, validate_after):
         if events is not None:
-            if validate:
-                validate_checkers_per_event()
+            validate_checkers_per_event()
             check_events_type(event_type)
             check_files_in_event()
+            run_custom_validators(validators_after_cud)
+            run_custom_validators(validate_after)
+
+    def run_custom_validators(validators):
+        if validators is not None:
+            for validator in validators:
+                for event in events:
+                    validator(event)
+
+    # Transform file list
+    if not isinstance(file_list, list) and not isinstance(file_list, dict):
+        raise ValueError('Value error. It can only be list or dict')
+    if isinstance(file_list, list):
+        file_list = {i: '' for i in file_list}
 
     # Create text files
-    if n_regular > 1:
-        for name in range(n_regular):
-            create_file(REGULAR, f'regular_{name}', folder, '')
-    else:
-        create_file(REGULAR, f_name, folder, content)
+    for name, content in file_list.items():
+        create_file(REGULAR, name, folder, content)
 
     check_time_travel()
     events = fetch_events()
-    check_events(event_type='added')
+    check_events('added', validators_after_create)
 
     # Modify previous text files
-    if n_regular > 1:
-        for name in range(n_regular):
-            modify_file(folder, f'regular_{name}', 'Sample content added')
-    else:
-        modify_file(folder, f_name, 'Sample content added')
+    for name in file_list:
+        modify_file(folder, name, 'Sample content added')
 
     check_time_travel()
     events = fetch_events()
-    check_events(event_type='modified')
-
-    # Check if files are duplicated
-    if report_changes:
-        if n_regular > 1:
-            for name in range(n_regular):
-                diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
-                                         folder.strip('/'), f'regular_{name}')
-                assert (os.path.exists(diff_file))
-                for ev in events:
-                    assert (ev['data'].get('content_changes') is not None)
-                    # Nodiff
-                    print('*********************')
-                    print(ev['data'].get('content_changes'))
-                    if no_diff:
-                        assert ('<Diff truncated because nodiff option>' in ev['data'].get('content_changes'))
-                    else:
-                        assert ('<Diff truncated because nodiff option>' not in ev['data'].get('content_changes'))
-        else:
-            diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
-                                     folder.strip('/'), f_name)
-            assert (os.path.exists(diff_file))
-            for ev in events:
-                if no_diff:
-                    assert ('<Diff truncated because nodiff option>' in ev['data'].get('content_changes'))
-                else:
-                    assert ('<Diff truncated because nodiff option>' not in ev['data'].get('content_changes'))
+    check_events('modified', validators_after_update)
 
     # Delete previous text files
-    if n_regular > 1:
-        for name in range(n_regular):
-            delete_file(folder, f'regular_{name}')
-    else:
-        delete_file(folder, f_name)
+    for name in file_list:
+        delete_file(folder, name)
 
     check_time_travel()
     events = fetch_events()
-    check_events('deleted', validate=False)
+    check_events('deleted', validators_after_delete)
 
 
-def restart_wazuh_with_new_conf(new_conf, log_monitor):
-    """ Restart Wazuh service applying a new ossec.conf
+def detect_initial_scan(file_monitor):
+    """ Detect initial scan when restarting Wazuh
 
-    :param new_conf: New config file
-    :type new_conf: ElementTree
-    :param log_monitor: Wazuh log monitor
-    :type log_monitor: FileMonitor
+    :param file_monitor: Wazuh log monitor to detect syscheck events
+    :type file_monitor: FileMonitor
     :return: None
     """
-    write_wazuh_conf(new_conf)
-    p = subprocess.Popen(["service", "wazuh-manager", "restart"])
-    p.wait()
-    # Wait for FIM scan to finish
-    log_monitor.start(timeout=60, callback=callback_detect_end_scan)
+    file_monitor.start(timeout=60, callback=callback_detect_end_scan)
+    # Add additional sleep to avoid changing system clock issues (TO BE REMOVED when syscheck has not sleeps anymore)
     time.sleep(11)

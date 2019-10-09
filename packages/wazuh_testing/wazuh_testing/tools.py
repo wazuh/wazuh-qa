@@ -5,17 +5,18 @@
 import os
 import random
 import string
+import subprocess
 import sys
 import threading
 import time
 import xml.etree.ElementTree as ET
-import yaml
-
+from copy import deepcopy
 from datetime import datetime
-from pytest import skip
 from subprocess import DEVNULL, check_call, check_output
 from typing import Any, List, Set
-from copy import deepcopy
+
+import yaml
+from pytest import skip
 
 WAZUH_PATH = os.path.join('/', 'var', 'ossec')
 WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
@@ -393,7 +394,7 @@ def expand_placeholders(mutable_obj, placeholders=None):
     elif isinstance(mutable_obj, dict):
         for criterion, placeholder in placeholders.items():
             for key, value in mutable_obj.items():
-                if criterion == key:
+                if criterion == value:
                     mutable_obj[key] = placeholder
                 elif isinstance(value, (dict, list)):
                     expand_placeholders(mutable_obj[key], placeholders=placeholders)
@@ -461,3 +462,22 @@ def check_apply_test(apply_to_tags: Set, tags: List):
     if not (apply_to_tags.intersection(tags) or
        'all' in apply_to_tags):
         skip("Does not apply to this config file")
+
+
+def restart_wazuh_with_new_conf(new_conf):
+    """ Restart Wazuh service applying a new ossec.conf
+
+    :param new_conf: New config file
+    :type new_conf: ElementTree
+    :return: None
+    """
+    write_wazuh_conf(new_conf)
+    restart_wazuh_service()
+
+
+def restart_wazuh_service():
+    """ Restart Wazuh service completely
+    :return: None
+    """
+    p = subprocess.Popen(["service", "wazuh-manager", "restart"])
+    p.wait()
