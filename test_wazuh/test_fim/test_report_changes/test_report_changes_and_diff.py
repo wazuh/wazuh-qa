@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH, regular_file_cud)
+from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH, regular_file_cud, WAZUH_PATH)
 from wazuh_testing.tools import (FileMonitor, check_apply_test, load_wazuh_configurations)
 
 # variables
@@ -64,14 +64,32 @@ def get_configuration(request):
 def test_reports_file_and_nodiff(folder, checkers, tags_to_apply,
                                  get_configuration, configure_environment,
                                  restart_wazuh, wait_for_initial_scan):
-    """ Check if report_changes events and diff truncated files are correct  """
+    """ Check if report_changes events and diff truncated files are correct
+    :param folder: Directory where the files will be created
+    :param checkers: Dict of syscheck checkers (check_all)
+    """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    # More than one regular file will make the test fail
+
     min_timeout = 3
-    time_travel = False
-    rc = get_configuration['metadata']['report_changes']
-    nd = folder == testdir_nodiff
-    if get_configuration['metadata']['fim_mode'] == 'scheduled':
-        time_travel = True
-    regular_file_cud(folder, wazuh_log_monitor, time_travel, 1, min_timeout, options=checkers,
-                     report_changes=rc, no_diff=nd)
+    file_list = ['regular_file']
+    is_truncated = folder == testdir_nodiff
+
+    def report_changes_validator(event):
+        """ Validate content_changes attribute exists in the event """
+        for file in file_list:
+            diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
+                                     folder.strip('/'), file)
+            assert(os.path.exists(diff_file))
+            assert(event['data'].get('content_changes') is not None)
+
+    def no_diff_validator(event):
+        """ Validate content_changes value is truncated if the file is set to no_diff """
+        if is_truncated:
+            assert ('<Diff truncated because nodiff option>' in event['data'].get('content_changes'))
+        else:
+            assert ('<Diff truncated because nodiff option>' not in event['data'].get('content_changes'))
+
+    regular_file_cud(folder, wazuh_log_monitor, file_list=file_list,
+                     time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
+                     min_timeout=min_timeout, triggers_event=True,
+                     validators_after_update=[report_changes_validator, no_diff_validator])

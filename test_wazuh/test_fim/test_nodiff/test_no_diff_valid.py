@@ -6,7 +6,7 @@ import os
 
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud)
+from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, WAZUH_PATH)
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations)
 
@@ -36,6 +36,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
                                                      {'fim_mode': 'whodata'}
                                                      ]
                                            )
+
 
 # fixtures
 
@@ -79,18 +80,30 @@ def test_no_diff_subdirectory(folder, filename, content, hidden_content,
 
        :param folder string Directory where the file is being created
        :param filename string Name of the file to be created
-       :param mode string same as mode in open built-in function
        :param content string, bytes Content to fill the new file
-       :param hidden_content bool True if an event must be generated, False otherwise
+       :param hidden_content bool True if content must be truncated,, False otherwise
        :param tags_to_apply set Run test if matches with a configuration identifier, skip otherwise
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    time_travel = False
-    if get_configuration['metadata']['fim_mode'] == 'scheduled':
-        # Go ahead in time to let syscheck perform a new scan
-        time_travel = True
+    files = {filename: content}
 
-    print(f'+++ Diff: {get_configuration["elements"]}')
-    regular_file_cud(folder=folder, log_monitor=wazuh_log_monitor, time_travel=time_travel, n_regular=1, min_timeout=3,
-                     report_changes=True, no_diff=hidden_content, f_name=filename, content=content)
+    def report_changes_validator(event):
+        """ Validate content_changes attribute exists in the event """
+        for file in files:
+            diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
+                                     folder.strip('/'), file)
+            assert (os.path.exists(diff_file))
+            assert (event['data'].get('content_changes') is not None)
+
+    def no_diff_validator(event):
+        """ Validate content_changes value is truncated if the file is set to no_diff """
+        if hidden_content:
+            assert ('<Diff truncated because nodiff option>' in event['data'].get('content_changes'))
+        else:
+            assert ('<Diff truncated because nodiff option>' not in event['data'].get('content_changes'))
+
+    regular_file_cud(folder, wazuh_log_monitor, file_list=files,
+                     time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
+                     min_timeout=10, triggers_event=True,
+                     validators_after_update=[report_changes_validator, no_diff_validator])

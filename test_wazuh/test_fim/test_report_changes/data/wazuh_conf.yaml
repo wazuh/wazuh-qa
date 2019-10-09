@@ -15,4 +15,5 @@
       - FIM_MODE
       - REPORT_CHANGES
   - nodiff:
-      value: "/testdir_nodiff/regular_0"
+      value: "/testdir_nodiff/regular_file"
+

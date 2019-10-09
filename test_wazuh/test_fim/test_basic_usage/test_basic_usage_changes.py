@@ -5,10 +5,11 @@
 import os
 
 import pytest
-from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH, regular_file_cud)
+
+from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH,
+                               regular_file_cud)
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations)
-
 
 # variables
 
@@ -55,14 +56,16 @@ def get_configuration(request):
 def test_regular_file_changes(folder, checkers, tags_to_apply,
                               get_configuration, configure_environment,
                               restart_wazuh, wait_for_initial_scan):
-    """ Checks if syscheckd detects regular file changes (add, modify, delete)"""
+    """ Checks if syscheckd detects regular file changes (add, modify, delete)
+
+    :param folder: Directory where the files will be created
+    :param checkers: Dict of syscheck checkers (check_all)
+    """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    n_regular = 3
+    file_list = ['regular0', 'regular1', 'regular2']
     min_timeout = 3
-    is_scheduled = False
 
-    if get_configuration['metadata']['fim_mode'] == 'scheduled':
-        is_scheduled = True
-    regular_file_cud(folder, wazuh_log_monitor, time_travel=is_scheduled,
-                     n_regular=n_regular, min_timeout=min_timeout, options=checkers)
+    regular_file_cud(folder, wazuh_log_monitor, file_list=file_list,
+                     time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
+                     min_timeout=min_timeout, options=checkers, triggers_event=True)
