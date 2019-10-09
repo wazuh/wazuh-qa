@@ -4,16 +4,13 @@
 
 import os
 import shutil
-import subprocess
-import time
 
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH, WAZUH_CONF_PATH,
-                               callback_detect_end_scan)
+from wazuh_testing.fim import (LOG_FILE_PATH, detect_initial_scan)
 from wazuh_testing.tools import (FileMonitor, get_wazuh_conf,
                                  set_section_wazuh_conf, truncate_file,
-                                 wait_for_condition, write_wazuh_conf)
+                                 restart_wazuh_service, write_wazuh_conf)
 
 
 # functions
@@ -34,18 +31,14 @@ def restart_wazuh(get_configuration, request):
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
 
     # Restart Wazuh and wait for the command to end
-    p = subprocess.Popen(["service", "wazuh-manager", "restart"])
-    p.wait()
+    restart_wazuh_service()
 
 
 @pytest.fixture(scope='module')
 def wait_for_initial_scan(get_configuration, request):
     # Wait for initial FIM scan to end
     file_monitor = getattr(request.module, 'wazuh_log_monitor')
-    file_monitor.start(timeout=60, callback=callback_detect_end_scan)
-
-    # Add additional sleep to avoid changing system clock issues (TO BE REMOVED when syscheck has not sleeps anymore)
-    time.sleep(11)
+    detect_initial_scan(file_monitor)
 
 
 @pytest.fixture(scope='module')

@@ -65,7 +65,7 @@ def check_config_applies(applies_to_config, get_configuration):
         pytest.skip("Does not apply to this config file")
 
 
-def recursion_test(dirname, subdirname, recursion_level, num_files=1,
+def recursion_test(dirname, subdirname, recursion_level, file_list,
                    timeout=1, threshold_true=2, threshold_false=2, is_scheduled=False):
     """Checks recursion_level functionality over the first and last n-directories of the dirname hierarchy 
     by creating, modifying and deleting some files in them. It will create all directories and 
@@ -74,11 +74,11 @@ def recursion_test(dirname, subdirname, recursion_level, num_files=1,
     :param dirname string The path being monitored by syscheck (indicated in the .conf file)
     :param subdirname string The name of the subdirectories that will be created during the execution for testing purpouses.
     :param recursion_level int Recursion level. Also used as the number of subdirectories to be created and checked for the current test.
-    :param num_files The number of regular files that the test will use for each directory
+    :param file_list: List with the file names to create
     :param timeout int Max time to wait until an event is raised.
     :param threshold_true Number of directories where the test will monitor events 
     :param threshold_false Number of directories exceding the specified recursion_level to verify events are not raised
-    :para is_scheduled bool If True the internal date will be modified to trigger scheduled checks by syschecks. False if realtime or Whodata.
+    :param is_scheduled bool If True the internal date will be modified to trigger scheduled checks by syschecks. False if realtime or Whodata.
     """
     path = dirname
 
@@ -88,14 +88,14 @@ def recursion_test(dirname, subdirname, recursion_level, num_files=1,
         if ((recursion_level < threshold_true * 2) or
             (recursion_level >= threshold_true * 2 and n < threshold_true) or
             (recursion_level >= threshold_true * 2 and n > recursion_level - threshold_true)):
-            regular_file_cud(path, wazuh_log_monitor, time_travel=is_scheduled,
-                             n_regular=num_files, min_timeout=timeout)
+            regular_file_cud(path, wazuh_log_monitor, file_list=file_list, time_travel=is_scheduled,
+                             min_timeout=timeout)
 
     # Check False (exceding the specified recursion_level)
     for n in range(recursion_level, recursion_level + threshold_false):
         path = os.path.join(path, subdirname + str(n+1))
-        regular_file_cud(path, wazuh_log_monitor, time_travel=is_scheduled,
-                         n_regular=num_files, min_timeout=timeout, triggers_event=False)
+        regular_file_cud(path, wazuh_log_monitor, file_list=file_list, time_travel=is_scheduled,
+                         min_timeout=timeout, triggers_event=False)
 
 
 # Fixtures
@@ -130,7 +130,6 @@ def test_recursion_level(dirname, subdirname, recursion_level,
     :param subdirname string The name of the subdirectories that will be created during the execution for testing purpouses.
     :param recursion_level int Recursion level. Also used as the number of subdirectories to be created and checked for the current test.
     """
-    if get_configuration['metadata']['fim_mode'] == 'scheduled':
-        recursion_test(dirname, subdirname, recursion_level, is_scheduled=True)
-    else:
-        recursion_test(dirname, subdirname, recursion_level, timeout=2)
+    recursion_test(dirname, subdirname, recursion_level, ['regular_file'], timeout=2,
+                   is_scheduled=get_configuration['metadata']['fim_mode'] == 'scheduled')
+
