@@ -61,4 +61,5 @@ def test_regular_file_changes(folder, checkers, is_scheduled, tags_to_apply,
     n_regular = 3
     min_timeout = 3
 
-    regular_file_cud(folder, wazuh_log_monitor, is_scheduled, n_regular, min_timeout, checkers)
+    regular_file_cud(folder, wazuh_log_monitor, time_travel=is_scheduled, 
+                     n_regular=n_regular, min_timeout=min_timeout, options=checkers)

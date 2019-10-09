@@ -4,9 +4,13 @@
 
 import json
 import os
+import random
 import re
+import shutil
 import socket
+import string
 import sys
+import time
 from collections import Counter
 from datetime import timedelta
 
@@ -231,26 +235,85 @@ def delete_file(path, name):
         os.remove(regular_path)
 
 
-def modify_file(path, name, content):
+def modify_file(path, name, options=None):
     """ Modify a Regular file.
 
     :param path: Path where the file will be created
     :type path: String
     :param name: File name
     :type name: String
-    :param content: Content of the created file
-    :type content: String or binary
+    :param options: Dict with all the checkers 
+    :type options: Dict
     :return: None
     """
+    def modify_file_content():
+        # Check if content is binary so it changes the mode
+        #content = 'Sample content added'
+        letters = string.ascii_lowercase
+        content = ''.join(random.choice(letters) for i in range(10))
+        is_binary = re.compile('^b\'.*\'$')
+        mode = 'ab' if is_binary.match(str(content)) else 'a'
+
+        with open(regular_path, mode) as f:
+            f.write(content)
+
+    def modify_file_owner():
+        os.chown(regular_path, 1, -1)
+
+    def modify_file_group():
+        os.chown(regular_path, -1, 1)
+
+    def modify_file_permission():
+        os.chmod(regular_path, 0o666)
+
+    def modify_file_inode():
+        shutil.copyfile(regular_path, os.path.join(path, "shutiltmp"))
+        os.replace(os.path.join(path, "shutiltmp"), regular_path)
+
+
     regular_path = os.path.join(path, name)
-    # Check if content is binary so it changes the mode
-    is_binary = re.compile('^b\'.*\'$')
-    if is_binary.match(str(content)):
-        mode = 'ab'
+
+    if options is None:
+        modify_file_content()
     else:
-        mode = 'a'
-    with open(regular_path, mode) as f:
-        f.write(content)
+        for modification_type in options:
+            check = REQUIRED_ATTRIBUTES[modification_type]
+            if isinstance(check, set):
+                modify_file(path, name, check)
+
+            elif isinstance(check, list):
+                #check = check.upper()
+                if check == REQUIRED_ATTRIBUTES[CHECK_OWNER]:
+                    modify_file_owner()
+                elif check == REQUIRED_ATTRIBUTES[CHECK_GROUP]:
+                    modify_file_group()
+
+            else:
+                if check == REQUIRED_ATTRIBUTES[CHECK_ALL] or check == CHECK_ALL:
+                    modify_file_content()
+                    modify_file_owner()
+                    modify_file_group()
+                    modify_file_permission()
+
+                elif (check == REQUIRED_ATTRIBUTES[CHECK_SUM] or check == CHECK_SUM or
+                      check == REQUIRED_ATTRIBUTES[CHECK_SHA1SUM] or check == CHECK_SHA1SUM or
+                      check == REQUIRED_ATTRIBUTES[CHECK_MD5SUM] or check == CHECK_MD5SUM or
+                      check == REQUIRED_ATTRIBUTES[CHECK_SHA256SUM] or check == CHECK_SHA256SUM or
+                      check == REQUIRED_ATTRIBUTES[CHECK_SIZE] or check == CHECK_SIZE or 
+                      check == REQUIRED_ATTRIBUTES[CHECK_MTIME] or check == CHECK_MTIME):
+                    modify_file_content()
+
+                elif check == REQUIRED_ATTRIBUTES[CHECK_OWNER] or check == CHECK_OWNER:
+                    modify_file_owner()
+
+                elif check == REQUIRED_ATTRIBUTES[CHECK_GROUP] or check == CHECK_GROUP:
+                    modify_file_group()
+
+                elif check == REQUIRED_ATTRIBUTES[CHECK_PERM] or check == CHECK_PERM:
+                    modify_file_permission()
+
+                elif check == REQUIRED_ATTRIBUTES[CHECK_INODE] or check == CHECK_INODE:
+                    modify_file_inode() 
 
 
 def change_internal_options(opt_path, pattern, value):
@@ -364,13 +427,13 @@ def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_ti
 
     def fetch_events():
         try:
-            events = log_monitor.start(timeout=max(n_regular * 0.01, min_timeout), 
+            event_list = log_monitor.start(timeout=max(n_regular * 0.01, min_timeout), 
                                        callback=callback_detect_event,
                                        accum_results=n_regular
                                        ).result()
             if n_regular == 1:
-                events = [events]
-            return events
+                event_list = [event_list]
+            return event_list
 
         except TimeoutError:
             if triggers_event:
@@ -405,7 +468,7 @@ def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_ti
 
     # Modify previous text files
     for name in range(n_regular):
-        modify_file(folder, f'regular_{name}', 'Sample content added')
+        modify_file(folder, f'regular_{name}', options=options)
 
     check_time_travel()
     events = fetch_events()
