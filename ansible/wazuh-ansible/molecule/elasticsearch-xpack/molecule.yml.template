@@ -9,7 +9,14 @@ lint:
     config-data:
       ignore: .virtualenv
 platforms:
-  - name: elasticsearch_platform_
+  - name: elasticsearch_platform_-1
+    image: imagename
+    command: /sbin/init
+    ulimits:
+      - nofile:262144:262144
+    privileged: true
+    memory_reservation: 2048m
+  - name: elasticsearch_platform_-2
     image: imagename
     command: /sbin/init
     ulimits:
@@ -36,7 +43,7 @@ provisioner:
       all:
         elasticsearch_jvm_xms: 512
 scenario:
-  name: elasticsearch
+  name: elasticsearch-xpack
   test_sequence:
     - lint
     - dependency

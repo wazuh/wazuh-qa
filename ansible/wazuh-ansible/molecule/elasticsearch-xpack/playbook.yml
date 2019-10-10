@@ -27,10 +27,6 @@
       ca_password: "test-password"
 
   vars:
-    elasticsearch_xpack_users:
-      molecule_user:
-        password: 'MoleculePassword'
-        roles: '["superuser"]'
     instances:
       node-1:
         name: node-1
@@ -47,7 +43,6 @@
       elasticsearch_node_name: node-2
       single_node: false
       elasticsearch_master_candidate: true
-      elasticsearch_bootstrap_node: true
       elasticsearch_cluster_nodes:
         - node-1
         - node-2
@@ -63,3 +58,8 @@
       ca_key_name: "wazuh-test"
       ca_cert_name: "wazuh-cert"
       ca_password: "test-password"
+  vars:
+    elasticsearch_xpack_users:
+      molecule_user:
+        password: 'MoleculePassword'
+        roles: '["superuser"]'

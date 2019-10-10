@@ -14,8 +14,8 @@
                 port: '1516'
                 bind_addr: '0.0.0.0'
                 nodes:
-                - 'manager_platform'
+                - 'manager_%PLATFORM%'
                 hidden: 'no'
-    - { role: wazuh/ansible-filebeat, filebeat_output_elasticsearch_hosts: 'elasticsearch_platform:9200' }
+    - { role: wazuh/ansible-filebeat, filebeat_output_elasticsearch_hosts: 'elasticsearch_%PLATFORM%:9200' }
 
 
