@@ -59,7 +59,7 @@ def get_configuration(request):
 ])
 def test_create_file_scheduled(folder, name, filetype, content, checkers,
                                tags_to_apply, get_configuration,
-                               configure_environment, restart_wazuh,
+                               configure_environment, restart_syscheckd,
                                wait_for_initial_scan):
     """ Checks if a special or regular file creation is detected by syscheck using scheduled monitoring"""
     check_apply_test(tags_to_apply, get_configuration['tags'])

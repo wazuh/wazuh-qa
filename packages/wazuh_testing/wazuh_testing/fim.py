@@ -296,6 +296,20 @@ def callback_detect_event(line):
     return None
 
 
+def callback_ignore(line):
+    match = re.match(r".*Ignoring '.*?' '(.*?)' due to sregex '.*?'", line)
+    if match:
+        return match.group(1)
+    return None
+
+
+def callback_restricted(line):
+    match = re.match(r".*Ignoring file '(.*?)' due to restriction '.*?'", line)
+    if match:
+        return match.group(1)
+    return None
+
+
 def callback_audit_health_check(line):
     if 'Whodata health-check: Success.' in line:
         return True
