@@ -4,6 +4,7 @@
 
 import os
 import random
+import re
 import string
 import subprocess
 import sys
@@ -481,3 +482,21 @@ def restart_wazuh_service():
     """
     p = subprocess.Popen(["service", "wazuh-manager", "restart"])
     p.wait()
+
+
+def reformat_time(scan_time):
+    """ Transform scan_time to readable time
+
+    :param scan_time: Time string
+    :type scan_time: String
+    :return: Datetime object
+    """
+    hour_format = '%H'
+    colon = ''
+    locale = ''
+    if ':' in scan_time:
+        colon = ':%M'
+    if re.search('[a-zA-Z]', scan_time):
+        locale = '%p'
+        hour_format = '%I'
+    return datetime.strptime(scan_time, hour_format + colon + locale)

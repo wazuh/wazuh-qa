@@ -1,0 +1,64 @@
+---
+# conf 1
+- tags:
+  - scan_time_scheduled
+  apply_to_modules:
+  - test_scan_time
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - scan_time:
+      value: SCAN_TIME
+  - directories:
+      value: "/testdir1"
+      attributes:
+      - check_all: 'yes'
+# conf 2
+- tags:
+  - scan_time_realtime
+  apply_to_modules:
+  - test_scan_time
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - scan_time:
+      value: SCAN_TIME
+  - directories:
+      value: "/testdir1"
+      attributes:
+      - check_all: 'yes'
+      - realtime: 'yes'
+# conf 3
+- tags:
+  - scan_time_whodata
+  apply_to_modules:
+  - test_scan_time
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - scan_time:
+      value: SCAN_TIME
+  - directories:
+      value: "/testdir1"
+      attributes:
+      - check_all: 'yes'
+      - whodata: 'yes'
+# conf 4
+- tags:
+  - scan_on_start
+  apply_to_modules:
+  - test_scan_on_start
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - scan_on_start:
+      value: SCAN_START
+  - directories:
+      value: "/testdir1"
+      attributes:
+      - check_all: 'yes'
+      - FIM_MODE
