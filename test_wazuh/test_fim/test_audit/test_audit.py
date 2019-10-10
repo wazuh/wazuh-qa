@@ -11,6 +11,7 @@ from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_added_rule,
                                callback_audit_connection,
                                callback_audit_health_check,
                                callback_audit_loaded_rule,
+                               callback_audit_reloaded_rule,
                                callback_audit_rules_manipulation,
                                callback_realtime_added_directory)
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
@@ -86,7 +87,7 @@ def test_readded_rules(tags_to_apply, get_configuration,
                                 callback=callback_audit_rules_manipulation)
 
         events = wazuh_log_monitor.start(timeout=10,
-                                         callback=callback_audit_loaded_rule).result()
+                                         callback=callback_audit_reloaded_rule).result()
 
         assert (dir in events)
 

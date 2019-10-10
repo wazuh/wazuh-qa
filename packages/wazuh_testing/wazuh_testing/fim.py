@@ -342,6 +342,13 @@ def callback_audit_loaded_rule(line):
     return None
 
 
+def callback_audit_reloaded_rule(line):
+    match = re.match(r'.*Reloaded audit rule for monitoring directory: \'(.+)\'', line)
+    if match:
+        return match.group(1)
+    return None
+
+
 def callback_realtime_added_directory(line):
     match = re.match(r'.*Directory added for real time monitoring: \'(.+)\'', line)
     if match:
