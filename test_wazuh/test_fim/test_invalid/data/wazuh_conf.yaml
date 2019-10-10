@@ -4,7 +4,7 @@
   - invalid_no_regex
   - invalid_no_regex1
   apply_to_modules:
-  - test_ignore_invalid
+  - test_invalid
   section: syscheck
   elements:
   - disabled:
@@ -15,6 +15,26 @@
       - check_all: 'yes'
       - realtime: 'yes'
   - ignore:
+      value: "aaaa"
+      attributes:
+      - type: "sregexxxx"
+# conf 2
+- tags:
+  - invalid_no_regex
+  - invalid_no_regex2
+  apply_to_modules:
+  - test_invalid
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "/testdir1,/testdir2"
+      attributes:
+      - check_all: 'yes'
+      - realtime: 'yes'
+      - report_changes: 'yes'
+  - nodiff:
       value: "aaaa"
       attributes:
       - type: "sregexxxx"
