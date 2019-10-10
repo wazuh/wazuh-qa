@@ -6,17 +6,18 @@ import os
 import psutil
 import random
 import string
+import subprocess
 import sys
 import threading
 import time
 import xml.etree.ElementTree as ET
-import yaml
-
+from copy import deepcopy
 from datetime import datetime
-from pytest import skip
 from subprocess import DEVNULL, check_call, check_output
 from typing import Any, List, Set
-from copy import deepcopy
+
+import yaml
+from pytest import skip
 
 WAZUH_PATH = os.path.join('/', 'var', 'ossec')
 WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
@@ -461,7 +462,8 @@ def load_wazuh_configurations(yaml_file_path: str, test_name: str, params: list 
 
     return [process_configuration(configuration, placeholders=replacement, metadata=meta)
             for replacement, meta in zip(params, metadata)
-            for configuration in configurations if test_name in configuration.get('apply_to_modules')]
+            for configuration in configurations
+            if test_name in expand_placeholders(configuration.get('apply_to_modules'), placeholders=replacement)]
 
 
 def check_apply_test(apply_to_tags: Set, tags: List):
@@ -473,3 +475,22 @@ def check_apply_test(apply_to_tags: Set, tags: List):
     if not (apply_to_tags.intersection(tags) or
        'all' in apply_to_tags):
         skip("Does not apply to this config file")
+
+
+def restart_wazuh_with_new_conf(new_conf):
+    """ Restart Wazuh service applying a new ossec.conf
+
+    :param new_conf: New config file
+    :type new_conf: ElementTree
+    :return: None
+    """
+    write_wazuh_conf(new_conf)
+    restart_wazuh_service()
+
+
+def restart_wazuh_service():
+    """ Restart Wazuh service completely
+    :return: None
+    """
+    p = subprocess.Popen(["service", "wazuh-manager", "restart"])
+    p.wait()

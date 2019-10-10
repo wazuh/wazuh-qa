@@ -48,11 +48,11 @@ def get_configuration(request):
 
 
 @pytest.mark.parametrize('folder', test_directories)
-@pytest.mark.parametrize('name, filetype, content', [
-    ('file1', REGULAR, 'Sample content'),
-    ('file2', REGULAR, b'Sample content')
+@pytest.mark.parametrize('name, content', [
+    ('file1', 'Sample content'),
+    ('file2', b'Sample content')
 ])
-def test_tags(folder, name, filetype, content,
+def test_tags(folder, name, content,
               get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
 
     defined_tags = get_configuration['metadata']['fim_tags']
@@ -60,8 +60,9 @@ def test_tags(folder, name, filetype, content,
     def tag_validator(event):
         assert(defined_tags == event['data']['tags'])
 
-    regular_file_cud(folder, wazuh_log_monitor,
-                     min_timeout=3,
+    files = {name: content}
+
+    regular_file_cud(folder, wazuh_log_monitor, file_list=files,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                     validators_after_cud=[tag_validator]
+                     min_timeout=3, validators_after_cud=[tag_validator]
                      )

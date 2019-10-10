@@ -24,7 +24,16 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-configurations = load_wazuh_configurations(configurations_path, __name__)
+configurations = load_wazuh_configurations(configurations_path, __name__,
+                                           params=[{'FIM_MODE': '', 'MODULE_NAME': __name__},
+                                                   {'FIM_MODE': {'realtime': 'yes'}, 'MODULE_NAME': __name__},
+                                                   {'FIM_MODE': {'whodata': 'yes'}, 'MODULE_NAME': __name__}
+                                                   ],
+                                           metadata=[{'fim_mode': 'scheduled', 'module_name': __name__},
+                                                     {'fim_mode': 'realtime', 'module_name': __name__},
+                                                     {'fim_mode': 'whodata', 'module_name': __name__}
+                                                     ]
+                                           )
 
 
 # fixtures
@@ -41,19 +50,22 @@ def get_configuration(request):
     testdir1,
     testdir2
 ])
-@pytest.mark.parametrize('checkers, is_scheduled,  tags_to_apply', [
-    (options, True, {'schedule'}),
-    (options, False, {'realtime'}),
-    (options, False, {'whodata'})
+@pytest.mark.parametrize('checkers,  tags_to_apply', [
+    (options, {'ossec_conf'}),
 ])
-def test_regular_file_changes(folder, checkers, is_scheduled, tags_to_apply,
+def test_regular_file_changes(folder, checkers, tags_to_apply,
                               get_configuration, configure_environment,
                               restart_syscheckd, wait_for_initial_scan):
-    """ Checks if syscheckd detects regular file changes (add, modify, delete)"""
+    """ Checks if syscheckd detects regular file changes (add, modify, delete)
+
+    :param folder: Directory where the files will be created
+    :param checkers: Dict of syscheck checkers (check_all)
+    """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    n_regular = 3
+    file_list = ['regular0', 'regular1', 'regular2']
     min_timeout = 3
 
-    regular_file_cud(folder, wazuh_log_monitor, time_travel=is_scheduled, 
-                     n_regular=n_regular, min_timeout=min_timeout, options=checkers)
+    regular_file_cud(folder, wazuh_log_monitor, file_list=file_list,
+                     time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
+                     min_timeout=min_timeout, options=checkers, triggers_event=True)

@@ -7,11 +7,13 @@ import os
 import re
 import socket
 import sys
+import time
 from collections import Counter
 from datetime import timedelta
 
 from jq import jq
 from jsonschema import validate
+
 from wazuh_testing.tools import TimeMachine
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -87,6 +89,7 @@ def validate_event(event, checks=None):
 
     :return: None
     """
+
     def get_required_attributes(check_attributes, result=None):
         result = set() if result is None else result
         for check in check_attributes:
@@ -107,12 +110,12 @@ def validate_event(event, checks=None):
     # Check attributes
     attributes = event['data']['attributes'].keys() - {'type', 'checksum'}
     required_attributes = get_required_attributes(checks)
-    assert(attributes ^ required_attributes == set())
+    assert (attributes ^ required_attributes == set())
 
     # Check audit
     if event['data']['mode'] == 'whodata':
-        assert('audit' in event['data'])
-        assert(event['data']['audit'].keys() ^ _REQUIRED_AUDIT == set())
+        assert ('audit' in event['data'])
+        assert (event['data']['audit'].keys() ^ _REQUIRED_AUDIT == set())
 
 
 def is_fim_scan_ended():
@@ -258,6 +261,7 @@ def change_internal_options(opt_path, pattern, value):
 
     :param opt_path: File path
     :type opt_path: String
+    :type opt_path: String
     :param pattern: Parameter to change
     :type pattern: String
     :param value: New value
@@ -352,7 +356,7 @@ def callback_configuration_error(line):
     return None
 
 
-def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_timeout=1, options=None,
+def regular_file_cud(folder, log_monitor, file_list, time_travel=False, min_timeout=1, options=None,
                      triggers_event=True,
                      validators_after_create=None, validators_after_update=None, validators_after_delete=None,
                      validators_after_cud=None):
@@ -362,15 +366,17 @@ def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_ti
     :type folder: String
     :param log_monitor: File event monitor
     :type log_monitor: FileMonitor
+    :param file_list: List/Dict with the file names and content.
+    List -> ['name0', 'name1'] -- Dict -> {'name0': 'content0', 'name1': 'content1'}
+    If it is a list, it will be transformed to a dict with empty strings in each value.
+    :type file_list: Either List or Dict
     :param time_travel: Boolean to determine if there will be time travels or not
     :type time_travel: Boolean
-    :param n_regular: Number of regular files that will be created
-    :type n_regular: Integer
     :param min_timeout: Minimum timeout
     :type min_timeout: Float
     :param options: Dict with all the checkers
     :type options: Dict. Default value is None.
-    :param triggers_event: Boolean to determinate if the event should be raised or not.
+    :param triggers_event: Boolean to determine if the event should be raised or not.
     :type triggers_event: Boolean
     :param validators_after_create: list of functions that validate an event triggered when a new file is created. Each
     function must accept a param to receive the event to be validated.
@@ -386,15 +392,16 @@ def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_ti
     :type validators_after_cud: list
     :return: None
     """
+
     def check_time_travel():
         if time_travel:
             TimeMachine.travel_to_future(timedelta(hours=13))
 
     def fetch_events():
         try:
-            result = log_monitor.start(timeout=max(n_regular * 0.01, min_timeout),
+            result = log_monitor.start(timeout=max(len(file_list) * 0.01, min_timeout),
                                        callback=callback_detect_event,
-                                       accum_results=n_regular
+                                       accum_results=len(file_list)
                                        ).result()
             return result if isinstance(result, list) else [result]
         except TimeoutError:
@@ -407,17 +414,21 @@ def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_ti
                 validate_event(ev, options)
 
     def check_events_type(ev_type):
-        print(f"Events: {events}")
-        print(f"n_regular: {n_regular}")
         event_types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
-        print(f"event_types: {event_types}")
-        print(f"ev_type: {ev_type}")
-        assert (event_types[ev_type] == n_regular)
+        assert (event_types[ev_type] == len(file_list))
 
     def check_files_in_event():
         file_paths = jq(".[].data.path").transform(events, multiple_output=True)
-        for file_name in range(n_regular):
-            assert (os.path.join(folder, f'regular_{file_name}') in file_paths)
+        for file_name, file_content in file_list.items():
+            assert (os.path.join(folder, file_name) in file_paths)
+
+    def check_events(event_type, validate_after):
+        if events is not None:
+            validate_checkers_per_event()
+            check_events_type(event_type)
+            check_files_in_event()
+            run_custom_validators(validators_after_cud)
+            run_custom_validators(validate_after)
 
     def run_custom_validators(validators):
         if validators is not None:
@@ -425,40 +436,44 @@ def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_ti
                 for event in events:
                     validator(event)
 
+    # Transform file list
+    if not isinstance(file_list, list) and not isinstance(file_list, dict):
+        raise ValueError('Value error. It can only be list or dict')
+    if isinstance(file_list, list):
+        file_list = {i: '' for i in file_list}
+
     # Create text files
-    for name in range(n_regular):
-        create_file(REGULAR, f'regular_{name}', folder, '')
+    for name, content in file_list.items():
+        create_file(REGULAR, name, folder, content)
 
     check_time_travel()
     events = fetch_events()
-    if events is not None:
-        validate_checkers_per_event()
-        check_events_type('added')
-        check_files_in_event()
-        run_custom_validators(validators_after_cud)
-        run_custom_validators(validators_after_create)
+    check_events('added', validators_after_create)
 
     # Modify previous text files
-    for name in range(n_regular):
-        modify_file(folder, f'regular_{name}', 'Sample content added')
+    for name in file_list:
+        modify_file(folder, name, 'Sample content added')
 
     check_time_travel()
     events = fetch_events()
-    if events is not None:
-        validate_checkers_per_event()
-        check_events_type('modified')
-        check_files_in_event()
-        run_custom_validators(validators_after_cud)
-        run_custom_validators(validators_after_update)
+    check_events('modified', validators_after_update)
 
     # Delete previous text files
-    for name in range(n_regular):
-        delete_file(folder, f'regular_{name}')
+    for name in file_list:
+        delete_file(folder, name)
 
     check_time_travel()
     events = fetch_events()
-    if events is not None:
-        check_events_type('deleted')
-        check_files_in_event()
-        run_custom_validators(validators_after_cud)
-        run_custom_validators(validators_after_delete)
+    check_events('deleted', validators_after_delete)
+
+
+def detect_initial_scan(file_monitor):
+    """ Detect initial scan when restarting Wazuh
+
+    :param file_monitor: Wazuh log monitor to detect syscheck events
+    :type file_monitor: FileMonitor
+    :return: None
+    """
+    file_monitor.start(timeout=60, callback=callback_detect_end_scan)
+    # Add additional sleep to avoid changing system clock issues (TO BE REMOVED when syscheck has not sleeps anymore)
+    time.sleep(11)

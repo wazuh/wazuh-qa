@@ -1,15 +1,18 @@
 ---
 # conf 1
 - tags:
-  - ossec_benchmark
+  - ossec_conf_report
   apply_to_modules:
-  - test_benchmark
+  - MODULE_NAME
   section: syscheck
   elements:
   - disabled:
       value: 'no'
   - directories:
-      value: "/testdir1,/testdir2,/noexists"
+      value: "/testdir_reports, /testdir_nodiff"
       attributes:
       - check_all: 'yes'
       - FIM_MODE
+      - REPORT_CHANGES
+  - nodiff:
+      value: "/testdir_nodiff/regular_file"

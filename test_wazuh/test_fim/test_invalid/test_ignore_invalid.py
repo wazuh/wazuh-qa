@@ -19,6 +19,7 @@ test_directories = [os.path.join('/', 'testdir1'),
                     os.path.join('/', 'testdir2'),
                     os.path.join('/', 'testdir2', 'subdir')
                     ]
+force_restart_after_restoring = True
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
@@ -42,7 +43,7 @@ def get_configuration(request):
     ({'invalid_no_regex'})
 ])
 def test_ignore(tags_to_apply, get_configuration, configure_environment,
-                restart_syscheckd):
+                restart_wazuh):
     """Checks if an invalid ignore configuration is detected."""
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
