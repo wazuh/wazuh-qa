@@ -76,7 +76,7 @@ def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Create text files
-    create_file(REGULAR, filename, folder, content)
+    create_file(REGULAR, folder, filename, content)
 
     if get_configuration['metadata']['fim_mode'] == 'scheduled':
         # Go ahead in time to let syscheck perform a new scan

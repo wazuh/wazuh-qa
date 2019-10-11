@@ -85,7 +85,7 @@ def create_and_check_diff(name, directory, fim_mode):
     :param fim_mode: FIM mode (scheduled, realtime, whodata)
     :return: String with with the duplicated file path (diff)
     """
-    create_file(REGULAR, name, directory, 'Sample content')
+    create_file(REGULAR, directory, name, 'Sample content')
     wait_for_event(fim_mode)
     diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
                              directory.strip('/'), name)

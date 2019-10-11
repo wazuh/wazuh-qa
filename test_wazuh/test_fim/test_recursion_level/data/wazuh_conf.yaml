@@ -1,5 +1,4 @@
 ---
-# conf 1
 - apply_to_modules:
   - test_recursion_level
   section: syscheck
@@ -10,37 +9,37 @@
       value: "/test_no_recursion"
       attributes:
       - check_all: 'yes'
-      - recursion_level: "2"
+      - recursion_level: "0"
       - FIM_MODE
   - directories:
       value: "/test no recursion"
       attributes:
       - check_all: 'yes'
-      - recursion_level: "2"
+      - recursion_level: "0"
       - FIM_MODE
   - directories:
       value: "/test_recursion_1"
       attributes:
       - check_all: 'yes'
-      - recursion_level: "3"
+      - recursion_level: "1"
       - FIM_MODE
   - directories:
       value: "/test recursion 1"
       attributes:
       - check_all: 'yes'
-      - recursion_level: "3"
+      - recursion_level: "1"
       - FIM_MODE
   - directories:
       value: "/test_recursion_5"
       attributes:
       - check_all: 'yes'
-      - recursion_level: "7"
+      - recursion_level: "5"
       - FIM_MODE
   - directories:
       value: "/test recursion 5"
       attributes:
       - check_all: 'yes'
-      - recursion_level: "7"
+      - recursion_level: "5"
       - FIM_MODE
   - directories:
       value: "/test_recursion_320"
