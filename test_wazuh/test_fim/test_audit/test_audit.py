@@ -46,7 +46,7 @@ def get_configuration(request):
     ({'all'})
 ])
 def test_audit_health_check(tags_to_apply, get_configuration,
-                            configure_environment, restart_wazuh):
+                            configure_environment, restart_syscheckd):
     """Checks if the health check is passed."""
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -57,7 +57,7 @@ def test_audit_health_check(tags_to_apply, get_configuration,
     ({'all'})
 ])
 def test_added_rules(tags_to_apply, get_configuration,
-                     configure_environment, restart_wazuh):
+                     configure_environment, restart_syscheckd):
     """Checks if the specified folders are added to Audit rules list."""
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -74,7 +74,7 @@ def test_added_rules(tags_to_apply, get_configuration,
     ({'all'})
 ])
 def test_readded_rules(tags_to_apply, get_configuration,
-                       configure_environment, restart_wazuh):
+                       configure_environment, restart_syscheckd):
     """Checks if the removed rules are added to Audit rules list."""
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -95,7 +95,7 @@ def test_readded_rules(tags_to_apply, get_configuration,
     ({'all'})
 ])
 def test_readded_rules_on_restart(tags_to_apply, get_configuration,
-                                  configure_environment, restart_wazuh):
+                                  configure_environment, restart_syscheckd):
     """Checks if the rules are added to Audit when it restarts."""
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -119,7 +119,7 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
     ({'all'})
 ])
 def test_move_rules_realtime(tags_to_apply, get_configuration,
-                             configure_environment, restart_wazuh):
+                             configure_environment, restart_syscheckd):
     """Checks if the rules are changed to realtime when Audit stops."""
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
