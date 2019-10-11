@@ -13,9 +13,11 @@ import sys
 import time
 from collections import Counter
 from datetime import timedelta
+from stat import ST_ATIME, ST_MTIME, ST_MODE
 
 from jq import jq
 from jsonschema import validate
+
 from wazuh_testing.tools import TimeMachine
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -91,6 +93,7 @@ def validate_event(event, checks=None):
 
     :return: None
     """
+
     def get_required_attributes(check_attributes, result=None):
         result = set() if result is None else result
         for check in check_attributes:
@@ -111,12 +114,12 @@ def validate_event(event, checks=None):
     # Check attributes
     attributes = event['data']['attributes'].keys() - {'type', 'checksum'}
     required_attributes = get_required_attributes(checks)
-    assert(attributes ^ required_attributes == set())
+    assert (attributes ^ required_attributes == set())
 
     # Check audit
     if event['data']['mode'] == 'whodata':
-        assert('audit' in event['data'])
-        assert(event['data']['audit'].keys() ^ _REQUIRED_AUDIT == set())
+        assert ('audit' in event['data'])
+        assert (event['data']['audit'].keys() ^ _REQUIRED_AUDIT == set())
 
 
 def is_fim_scan_ended():
@@ -132,15 +135,20 @@ def is_fim_scan_ended():
     return -1
 
 
-def create_file(type, name, path, content=''):
+def _is_binary(content):
+    is_binary = re.compile('^b\'.*\'$')
+    return is_binary.match(str(content))
+
+
+def create_file(type, path, name, content=''):
     """ Creates a file in a given path. The path will be created in case it does not exists.
 
     :param type: Defined constant that specifies the type. It can be: FIFO, SYSLINK, SOCKET or REGULAR
     :type type: Constant string
-    :param name: File name
-    :type name: String
     :param path: Path where the file will be created
     :type path: String
+    :param name: File name
+    :type name: String
     :param content: Content of the file. Used for regular files.
     :type content: String or binary
     :return: None
@@ -218,12 +226,8 @@ def _create_regular(path, name, content):
     :return: None
     """
     regular_path = os.path.join(path, name)
-    # Check if content is binary so it changes the mode
-    is_binary = re.compile('^b\'.*\'$')
-    if is_binary.match(str(content)):
-        mode = 'wb'
-    else:
-        mode = 'w'
+    mode = 'wb' if _is_binary(content) else 'w'
+
     with open(regular_path, mode) as f:
         f.write(content)
 
@@ -235,27 +239,36 @@ def delete_file(path, name):
         os.remove(regular_path)
 
 
-def modify_file(path, name, options=None):
+def modify_file(path, name, is_binary=False, options=None):
     """ Modify a Regular file.
 
     :param path: Path where the file will be created
     :type path: String
     :param name: File name
     :type name: String
+    :param is_binary: True if the file is binary. False otherwise.
+    :type is_binary: boolean
     :param options: Dict with all the checkers 
     :type options: Dict
     :return: None
     """
     def modify_file_content():
-        # Check if content is binary so it changes the mode
-        #content = 'Sample content added'
-        letters = string.ascii_lowercase
-        content = ''.join(random.choice(letters) for i in range(10))
-        is_binary = re.compile('^b\'.*\'$')
-        mode = 'ab' if is_binary.match(str(content)) else 'a'
+        if is_binary:
+            content = b"1234567890qwertyuiopasdfghjklzxcvbnm"
+            mode = 'ab'
+        else:
+            content = "1234567890qwertyuiopasdfghjklzxcvbnm"
+            mode = 'a'
 
         with open(regular_path, mode) as f:
             f.write(content)
+
+    def modify_file_mtime():
+        stat = os.stat(regular_path)
+        access_time = stat[ST_ATIME]
+        modification_time = stat[ST_MTIME]
+        modification_time = modification_time + (120)
+        os.utime(regular_path, (access_time, modification_time))
 
     def modify_file_owner():
         os.chown(regular_path, 1, -1)
@@ -267,8 +280,8 @@ def modify_file(path, name, options=None):
         os.chmod(regular_path, 0o666)
 
     def modify_file_inode():
-        shutil.copyfile(regular_path, os.path.join(path, "shutiltmp"))
-        os.replace(os.path.join(path, "shutiltmp"), regular_path)
+        shutil.copyfile(regular_path, os.path.join(path, "inodetmp"))
+        os.replace(os.path.join(path, "inodetmp"), regular_path)
 
 
     regular_path = os.path.join(path, name)
@@ -282,7 +295,6 @@ def modify_file(path, name, options=None):
                 modify_file(path, name, check)
 
             elif isinstance(check, list):
-                #check = check.upper()
                 if check == REQUIRED_ATTRIBUTES[CHECK_OWNER]:
                     modify_file_owner()
                 elif check == REQUIRED_ATTRIBUTES[CHECK_GROUP]:
@@ -291,17 +303,21 @@ def modify_file(path, name, options=None):
             else:
                 if check == REQUIRED_ATTRIBUTES[CHECK_ALL] or check == CHECK_ALL:
                     modify_file_content()
+                    modify_file_mtime()
                     modify_file_owner()
                     modify_file_group()
                     modify_file_permission()
+                    modify_file_inode()
 
                 elif (check == REQUIRED_ATTRIBUTES[CHECK_SUM] or check == CHECK_SUM or
                       check == REQUIRED_ATTRIBUTES[CHECK_SHA1SUM] or check == CHECK_SHA1SUM or
                       check == REQUIRED_ATTRIBUTES[CHECK_MD5SUM] or check == CHECK_MD5SUM or
                       check == REQUIRED_ATTRIBUTES[CHECK_SHA256SUM] or check == CHECK_SHA256SUM or
-                      check == REQUIRED_ATTRIBUTES[CHECK_SIZE] or check == CHECK_SIZE or 
-                      check == REQUIRED_ATTRIBUTES[CHECK_MTIME] or check == CHECK_MTIME):
+                      check == REQUIRED_ATTRIBUTES[CHECK_SIZE] or check == CHECK_SIZE):
                     modify_file_content()
+
+                elif check == REQUIRED_ATTRIBUTES[CHECK_MTIME] or check == CHECK_MTIME:
+                    modify_file_mtime()
 
                 elif check == REQUIRED_ATTRIBUTES[CHECK_OWNER] or check == CHECK_OWNER:
                     modify_file_owner()
@@ -320,6 +336,7 @@ def change_internal_options(opt_path, pattern, value):
     """ Changes the value of a given parameter
 
     :param opt_path: File path
+    :type opt_path: String
     :type opt_path: String
     :param pattern: Parameter to change
     :type pattern: String
@@ -388,6 +405,12 @@ def callback_audit_loaded_rule(line):
     return None
 
 
+def callback_audit_event_too_long(line):
+    if '(6643): Caching Audit message: event too long' in line:
+        return True
+    return None
+
+
 def callback_realtime_added_directory(line):
     match = re.match(r'.*Directory added for real time monitoring: \'(.+)\'', line)
     if match:
@@ -402,39 +425,53 @@ def callback_configuration_error(line):
     return None
 
 
-def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_timeout=1, options=None, triggers_event=True):
+def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=False, min_timeout=1, options=None,
+                     triggers_event=True, validators_after_create=None, validators_after_update=None, 
+                     validators_after_delete=None, validators_after_cud=None):
     """ Checks if creation, update and delete events are detected by syscheck
 
     :param folder: Path where the files will be created
     :type folder: String
     :param log_monitor: File event monitor
     :type log_monitor: FileMonitor
+    :param file_list: List/Dict with the file names and content.
+    List -> ['name0', 'name1'] -- Dict -> {'name0': 'content0', 'name1': 'content1'}
+    If it is a list, it will be transformed to a dict with empty strings in each value.
+    :type file_list: Either List or Dict
     :param time_travel: Boolean to determine if there will be time travels or not
     :type time_travel: Boolean
-    :param n_regular: Number of regular files that will be created
-    :type n_regular: Integer
     :param min_timeout: Minimum timeout
     :type min_timeout: Float
     :param options: Dict with all the checkers
     :type options: Dict. Default value is None.
-    :param triggers_event: Boolean to determinate if the event should be raised or not.
+    :param triggers_event: Boolean to determine if the event should be raised or not.
     :type triggers_event: Boolean
+    :param validators_after_create: list of functions that validate an event triggered when a new file is created. Each
+    function must accept a param to receive the event to be validated.
+    :type validators_after_create: list
+    :param validators_after_update: list of functions that validate an event triggered when a new file is modified. Each
+    function must accept a param to receive the event to be validated.
+    :type validators_after_update: list
+    :param validators_after_delete: list of functions that validate an event triggered when a new file is deleted. Each
+    function must accept a param to receive the event to be validated.
+    :type validators_after_delete: list
+    :param validators_after_cud: list of functions that validate an event triggered when a new file is created, modified
+    or deleted. Each function must accept a param to receive the event to be validated.
+    :type validators_after_cud: list
     :return: None
     """
+
     def check_time_travel():
         if time_travel:
             TimeMachine.travel_to_future(timedelta(hours=13))
 
     def fetch_events():
         try:
-            event_list = log_monitor.start(timeout=max(n_regular * 0.01, min_timeout), 
+            result = log_monitor.start(timeout=max(len(file_list) * 0.01, min_timeout),
                                        callback=callback_detect_event,
-                                       accum_results=n_regular
+                                       accum_results=len(file_list)
                                        ).result()
-            if n_regular == 1:
-                event_list = [event_list]
-            return event_list
-
+            return result if isinstance(result, list) else [result]
         except TimeoutError:
             if triggers_event:
                 raise
@@ -446,43 +483,65 @@ def regular_file_cud(folder, log_monitor, time_travel=False, n_regular=1, min_ti
 
     def check_events_type(ev_type):
         event_types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
-        assert (event_types[ev_type] == n_regular)
+        assert (event_types[ev_type] == len(file_list))
 
     def check_files_in_event():
         file_paths = jq(".[].data.path").transform(events, multiple_output=True)
+        for file_name in file_list:
+            assert (os.path.join(folder, file_name) in file_paths)
 
-        for file_name in range(n_regular):
-            assert (os.path.join(folder, f'regular_{file_name}') in file_paths)
+    def check_events(event_type, validate_after):
+        if events is not None:
+            validate_checkers_per_event()
+            check_events_type(event_type)
+            check_files_in_event()
+            run_custom_validators(validators_after_cud)
+            run_custom_validators(validate_after)
 
+    def run_custom_validators(validators):
+        if validators is not None:
+            for validator in validators:
+                for event in events:
+                    validator(event)
+
+    # Transform file list
+    if not isinstance(file_list, list) and not isinstance(file_list, dict):
+        raise ValueError('Value error. It can only be list or dict')
+    elif isinstance(file_list, list):
+        file_list = {i: '' for i in file_list}
 
     # Create text files
-    for name in range(n_regular):
-        create_file(REGULAR, f'regular_{name}', folder, '')
+    for name, content in file_list.items():
+        create_file(REGULAR, folder, name, content)
 
     check_time_travel()
     events = fetch_events()
-    if events is not None:
-        validate_checkers_per_event()
-        check_events_type('added')
-        check_files_in_event()
+    check_events('added', validators_after_create)
 
     # Modify previous text files
-    for name in range(n_regular):
-        modify_file(folder, f'regular_{name}', options=options)
+    for name, content in file_list.items():
+        modify_file(folder, name, is_binary=_is_binary(content), options=options)
 
     check_time_travel()
     events = fetch_events()
-    if events is not None:
-        validate_checkers_per_event()
-        check_events_type('modified')
-        check_files_in_event()
+    check_events('modified', validators_after_update)
 
     # Delete previous text files
-    for name in range(n_regular):
-        delete_file(folder, f'regular_{name}')
+    for name in file_list:
+        delete_file(folder, name)
 
     check_time_travel()
     events = fetch_events()
-    if events is not None:
-        check_events_type('deleted')
-        check_files_in_event()
+    check_events('deleted', validators_after_delete)
+
+
+def detect_initial_scan(file_monitor):
+    """ Detect initial scan when restarting Wazuh
+
+    :param file_monitor: Wazuh log monitor to detect syscheck events
+    :type file_monitor: FileMonitor
+    :return: None
+    """
+    file_monitor.start(timeout=60, callback=callback_detect_end_scan)
+    # Add additional sleep to avoid changing system clock issues (TO BE REMOVED when syscheck has not sleeps anymore)
+    time.sleep(11)

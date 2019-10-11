@@ -75,7 +75,7 @@ def test_check_all_single(path, checkers, get_configuration, configure_environme
     """
     check_apply_test({'test_check_all_single'}, get_configuration['tags'])
 
-    regular_file_cud(path, wazuh_log_monitor, min_timeout=3, options=checkers,
+    regular_file_cud(path, wazuh_log_monitor, min_timeout=10, options=checkers,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled')
 
 
@@ -99,5 +99,5 @@ def test_check_all(path, checkers, get_configuration, configure_environment, res
     """
     check_apply_test({'test_check_all'}, get_configuration['tags'])
 
-    regular_file_cud(path, wazuh_log_monitor, min_timeout=3, options=checkers,
+    regular_file_cud(path, wazuh_log_monitor, min_timeout=10, options=checkers,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled')

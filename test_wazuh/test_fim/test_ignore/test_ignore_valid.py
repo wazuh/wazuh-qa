@@ -48,30 +48,30 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.parametrize('folder, filename, mode, content, triggers_event, tags_to_apply', [
-    (testdir1, 'testfile', 'w', "Sample content", True, {'valid_regex', 'valid_no_regex'}),
-    (testdir1, 'btestfile', 'wb', b"Sample content", True, {'valid_regex', 'valid_no_regex'}),
-    (testdir1, 'testfile2', 'w', "", True, {'valid_regex', 'valid_no_regex'}),
-    (testdir1, "btestfile2", "wb", b"", True, {'valid_regex', 'valid_no_regex'}),
-    (testdir1, "btestfile2.ignore", "wb", b"", False, {'valid_regex1', 'valid_regex2', 'valid_regex3'}),
-    (testdir1, "btestfile2.ignored", "wb", b"", True, {'valid_regex', 'valid_no_regex'}),
-    (testdir1_sub, 'testfile', 'w', "Sample content", True, {'valid_regex', 'valid_no_regex'}),
-    (testdir1_sub, 'btestfile', 'wb', b"Sample content", True, {'valid_regex', 'valid_no_regex'}),
-    (testdir1_sub, 'testfile2', 'w', "", True, {'valid_regex', 'valid_no_regex'}),
-    (testdir1_sub, "btestfile2", "wb", b"", True, {'valid_regex', 'valid_no_regex'}),
-    (testdir1_sub, ".ignore.btestfile", "wb", b"", True, {'valid_regex', 'valid_no_regex'}),
-    (testdir2, "another.ignore", "wb", b"other content", False, {'valid_regex1', 'valid_regex2', 'valid_regex3'}),
-    (testdir2, "another.ignored", "wb", b"other content", True, {'valid_regex'}),
-    (testdir2_sub, "another.ignore", "wb", b"other content", False, {'valid_regex1', 'valid_regex2', 'valid_regex3'}),
-    (testdir2_sub, "another.ignored", "wb", b"other content", True, {'valid_regex'}),
-    (testdir2, "another.ignored2", "w", "", True, {'valid_regex', 'valid_no_regex'}),
-    (testdir2, "another.ignore2", "w", "", False, {'valid_regex2', 'valid_regex3'}),
-    (testdir1, 'ignore_prefix_test.txt', "w", "test", True, {'valid_regex1', 'valid_regex2', 'valid_regex3', 'valid_regex4'}),
-    (testdir1, 'ignore_prefix_test.txt', "w", "test", False, {'valid_regex5'}),
-    (testdir1, 'whatever.txt', "w", "test", False, {'valid_empty'}),
-    (testdir2, 'whatever2.txt', "w", "test", False, {'valid_empty'})
+@pytest.mark.parametrize('folder, filename, content, triggers_event, tags_to_apply', [
+    (testdir1, 'testfile', "Sample content", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1, 'btestfile', b"Sample content", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1, 'testfile2', "", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1, "btestfile2", b"", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1, "btestfile2.ignore", b"", False, {'valid_regex1', 'valid_regex2', 'valid_regex3'}),
+    (testdir1, "btestfile2.ignored", b"", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1_sub, 'testfile', "Sample content", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1_sub, 'btestfile', b"Sample content", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1_sub, 'testfile2', "", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1_sub, "btestfile2", b"", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir1_sub, ".ignore.btestfile", b"", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir2, "another.ignore", b"other content", False, {'valid_regex1', 'valid_regex2', 'valid_regex3'}),
+    (testdir2, "another.ignored", b"other content", True, {'valid_regex'}),
+    (testdir2_sub, "another.ignore", b"other content", False, {'valid_regex1', 'valid_regex2', 'valid_regex3'}),
+    (testdir2_sub, "another.ignored", b"other content", True, {'valid_regex'}),
+    (testdir2, "another.ignored2", "", True, {'valid_regex', 'valid_no_regex'}),
+    (testdir2, "another.ignore2", "", False, {'valid_regex2', 'valid_regex3'}),
+    (testdir1, 'ignore_prefix_test.txt', "test", True, {'valid_regex1', 'valid_regex2', 'valid_regex3', 'valid_regex4'}),
+    (testdir1, 'ignore_prefix_test.txt', "test", False, {'valid_regex5'}),
+    (testdir1, 'whatever.txt', "test", False, {'valid_empty'}),
+    (testdir2, 'whatever2.txt', "test", False, {'valid_empty'})
 ])
-def test_ignore_subdirectory(folder, filename, mode, content, triggers_event,
+def test_ignore_subdirectory(folder, filename, content, triggers_event,
                              tags_to_apply, get_configuration,
                              configure_environment, restart_wazuh,
                              wait_for_initial_scan):
@@ -81,15 +81,14 @@ def test_ignore_subdirectory(folder, filename, mode, content, triggers_event,
 
        :param folder string Directory where the file is being created
        :param filename string Name of the file to be created
-       :param mode string same as mode in open built-in function
        :param content string, bytes Content to fill the new file
        :param triggers_event bool True if an event must be generated, False otherwise
-       :param tags_to_apply set Run test if matchs with a configuration identifier, skip otherwise
+       :param tags_to_apply set Run test if matches with a configuration identifier, skip otherwise
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Create text files
-    create_file(REGULAR, filename, folder, content)
+    create_file(REGULAR, folder, filename, content)
 
     if get_configuration['metadata']['fim_mode'] == 'scheduled':
         # Go ahead in time to let syscheck perform a new scan

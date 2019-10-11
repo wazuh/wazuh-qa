@@ -78,8 +78,8 @@ def test_checksums_checkall(path, checkers, get_configuration, configure_environ
     :param checkers dict Dict with all the check options to be used
     """
     check_apply_test({'test_checksums_checkall'}, get_configuration['tags'])
-    
-    regular_file_cud(path, wazuh_log_monitor, min_timeout=3, options=checkers,
+
+    regular_file_cud(path, wazuh_log_monitor, min_timeout=10, options=checkers,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled')
 
 
@@ -110,6 +110,6 @@ def test_checksums(path, checkers, triggers_event, get_configuration, configure_
     """
     check_apply_test({'test_checksums'}, get_configuration['tags'])
 
-    regular_file_cud(path, wazuh_log_monitor, min_timeout=2, options=checkers,
+    regular_file_cud(path, wazuh_log_monitor, min_timeout=10, options=checkers,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
                      triggers_event=triggers_event)
