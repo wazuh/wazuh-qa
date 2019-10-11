@@ -16,3 +16,4 @@
       - REPORT_CHANGES
   - nodiff:
       value: "/testdir_nodiff/regular_file"
+
