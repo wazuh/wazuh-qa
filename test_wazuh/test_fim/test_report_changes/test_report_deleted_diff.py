@@ -136,7 +136,7 @@ def check_when_deleted_directories(name, directory, fim_mode):
 ])
 def test_no_report_changes(folder, checkers, delete_dir, tags_to_apply,
                            get_configuration, configure_environment,
-                           restart_wazuh, wait_for_initial_scan):
+                           restart_syscheckd, wait_for_initial_scan):
     """ Check if duplicated directories in diff are deleted when changing
         report_changes to 'no' or deleting the monitored directories """
     check_apply_test(tags_to_apply, get_configuration['tags'])
