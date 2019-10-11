@@ -4,16 +4,14 @@
 
 import json
 import os
-import random
 import re
 import shutil
 import socket
-import string
 import sys
 import time
 from collections import Counter
 from datetime import timedelta
-from stat import ST_ATIME, ST_MTIME, ST_MODE
+from stat import ST_ATIME, ST_MTIME
 
 from jq import jq
 from jsonschema import validate
@@ -135,16 +133,11 @@ def is_fim_scan_ended():
     return -1
 
 
-def _is_binary(content):
-    is_binary = re.compile('^b\'.*\'$')
-    return is_binary.match(str(content))
-
-
-def create_file(type, path, name, content=''):
+def create_file(type_, path, name, content=''):
     """ Creates a file in a given path. The path will be created in case it does not exists.
 
-    :param type: Defined constant that specifies the type. It can be: FIFO, SYSLINK, SOCKET or REGULAR
-    :type type: Constant string
+    :param type_: Defined constant that specifies the type. It can be: FIFO, SYSLINK, SOCKET or REGULAR
+    :type type_: Constant string
     :param path: Path where the file will be created
     :type path: String
     :param name: File name
@@ -154,7 +147,7 @@ def create_file(type, path, name, content=''):
     :return: None
     """
     os.makedirs(path, exist_ok=True)
-    getattr(sys.modules[__name__], f'_create_{type}')(path, name, content)
+    getattr(sys.modules[__name__], f'_create_{type_}')(path, name, content)
 
 
 def _create_fifo(path, name, content):
@@ -222,11 +215,11 @@ def _create_regular(path, name, content):
     :param name: File name
     :type name: String
     :param content: Content of the created file
-    :type content: String or binary
+    :type content: String or bytes
     :return: None
     """
     regular_path = os.path.join(path, name)
-    mode = 'wb' if _is_binary(content) else 'w'
+    mode = 'wb' if isinstance(content, bytes) else 'w'
 
     with open(regular_path, mode) as f:
         f.write(content)
@@ -253,21 +246,15 @@ def modify_file(path, name, is_binary=False, options=None):
     :return: None
     """
     def modify_file_content():
-        if is_binary:
-            content = b"1234567890qwertyuiopasdfghjklzxcvbnm"
-            mode = 'ab'
-        else:
-            content = "1234567890qwertyuiopasdfghjklzxcvbnm"
-            mode = 'a'
-
-        with open(regular_path, mode) as f:
-            f.write(content)
+        content = "1234567890qwertyuiopasdfghjklzxcvbnm"
+        with open(regular_path, 'ab' if is_binary else 'a') as f:
+            f.write(content.encode() if is_binary else content)
 
     def modify_file_mtime():
         stat = os.stat(regular_path)
         access_time = stat[ST_ATIME]
         modification_time = stat[ST_MTIME]
-        modification_time = modification_time + (120)
+        modification_time = modification_time + 120
         os.utime(regular_path, (access_time, modification_time))
 
     def modify_file_owner():
@@ -283,7 +270,6 @@ def modify_file(path, name, is_binary=False, options=None):
         shutil.copyfile(regular_path, os.path.join(path, "inodetmp"))
         os.replace(os.path.join(path, "inodetmp"), regular_path)
 
-
     regular_path = os.path.join(path, name)
 
     if options is None:
@@ -292,7 +278,7 @@ def modify_file(path, name, is_binary=False, options=None):
         for modification_type in options:
             check = REQUIRED_ATTRIBUTES[modification_type]
             if isinstance(check, set):
-                modify_file(path, name, check)
+                modify_file(path, name, options=check)
 
             elif isinstance(check, list):
                 if check == REQUIRED_ATTRIBUTES[CHECK_OWNER]:
@@ -420,8 +406,15 @@ def callback_audit_loaded_rule(line):
 
 
 def callback_audit_event_too_long(line):
-    if '(6643): Caching Audit message: event too long' in line:
+    if '.*Caching Audit message: event too long' in line:
         return True
+    return None
+
+
+def callback_audit_reloaded_rule(line):
+    match = re.match(r'.*Reloaded audit rule for monitoring directory: \'(.+)\'', line)
+    if match:
+        return match.group(1)
     return None
 
 
@@ -534,7 +527,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     # Modify previous text files
     for name, content in file_list.items():
-        modify_file(folder, name, is_binary=_is_binary(content), options=options)
+        modify_file(folder, name, is_binary=isinstance(content, bytes), options=options)
 
     check_time_travel()
     events = fetch_events()

@@ -64,7 +64,7 @@ def get_configuration(request):
     (testdir9, {CHECK_MTIME}),
     (testdir0, {CHECK_INODE})
 ])
-def test_check_others_individually(path, checkers, get_configuration, configure_environment, restart_wazuh, 
+def test_check_others_individually(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                                    wait_for_initial_scan):
     """Test the behaviour of every Check option individually without using the Check_all option.
 

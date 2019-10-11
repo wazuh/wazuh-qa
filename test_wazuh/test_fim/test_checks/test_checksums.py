@@ -17,7 +17,7 @@ from wazuh_testing.tools import (FileMonitor, check_apply_test,
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_cheksums.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_checksums.yaml')
 test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2'),
                     os.path.join('/', 'testdir3'), os.path.join('/', 'testdir4'),
                     os.path.join('/', 'testdir5'), os.path.join('/', 'testdir6'),
@@ -67,7 +67,7 @@ def get_configuration(request):
     (testdir9, REQUIRED_ATTRIBUTES[CHECK_ALL] - REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_MD5SUM} - {CHECK_SHA256SUM}),
     (testdir9, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_MD5SUM} - {CHECK_SHA256SUM} - REQUIRED_ATTRIBUTES[CHECK_SUM]),
 ])
-def test_checksums_checkall(path, checkers, get_configuration, configure_environment, restart_wazuh,
+def test_checksums_checkall(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                             wait_for_initial_scan):
     """Test the checksum options (checksum, sha1sum, sha256sum and md5sum) behaviour when is used alone or in conjuntion
     along with the Check_all option.
@@ -97,7 +97,7 @@ def test_checksums_checkall(path, checkers, get_configuration, configure_environ
     (testdir9, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_MD5SUM} - {CHECK_SHA256SUM}, True),
     (testdir9, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_SHA256SUM} - {CHECK_MD5SUM}, True),
 ])
-def test_checksums(path, checkers, triggers_event, get_configuration, configure_environment, restart_wazuh,
+def test_checksums(path, checkers, triggers_event, get_configuration, configure_environment, restart_syscheckd,
                    wait_for_initial_scan):
     """Test the checksum options (checksum, sha1sum, sha256sum and md5sum) behaviour when is used alone or in conjuntion
     but without Check_all option.

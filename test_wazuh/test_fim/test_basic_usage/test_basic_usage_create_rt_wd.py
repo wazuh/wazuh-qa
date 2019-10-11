@@ -10,9 +10,9 @@ from datetime import timedelta
 import pytest
 
 from wazuh_testing.fim import (CHECK_ALL, FIFO, LOG_FILE_PATH, REGULAR, SOCKET,
-                               callback_detect_end_scan, callback_detect_event,
+                               callback_detect_event,
                                create_file, validate_event)
-from wazuh_testing.tools import (FileMonitor, TimeMachine, check_apply_test,
+from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations)
 
 

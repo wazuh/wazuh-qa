@@ -64,7 +64,7 @@ def get_configuration(request):
     (testdir9, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_MTIME}),
     (testdir0, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_INODE})
 ])
-def test_check_all_single(path, checkers, get_configuration, configure_environment, restart_wazuh,
+def test_check_all_single(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                           wait_for_initial_scan):
     """Test the Check_all option behaviour when is used in conjuntion with one more check option
 
@@ -89,7 +89,7 @@ def test_check_all_single(path, checkers, get_configuration, configure_environme
     (testdir7, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_INODE}),
     (testdir0, REQUIRED_ATTRIBUTES[CHECK_ALL])
 ])
-def test_check_all(path, checkers, get_configuration, configure_environment, restart_wazuh, wait_for_initial_scan):
+def test_check_all(path, checkers, get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
     """Test the Check_all option behaviour when is used in conjuntion with more than one check options
 
     This test is intended to be used with valid configurations files.

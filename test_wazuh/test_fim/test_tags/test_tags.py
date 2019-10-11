@@ -6,7 +6,7 @@ import os
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, regular_file_cud
+from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud
 from wazuh_testing.tools import FileMonitor, load_wazuh_configurations
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
