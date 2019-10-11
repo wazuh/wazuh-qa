@@ -2,13 +2,12 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
-import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH)
-from wazuh_testing.tools import (FileMonitor, check_apply_test, load_wazuh_configurations, reformat_time)
+from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_start_scan)
+from wazuh_testing.tools import (FileMonitor, check_apply_test, load_wazuh_configurations, reformat_time, TimeMachine)
 
 # variables
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -42,16 +41,21 @@ def get_configuration(request):
 
 # tests
 @pytest.mark.parametrize('tags_to_apply', [
-    {'scan_time_scheduled', 'scan_time_realtime', 'scan_time_whodata'}
+    {'scan_time'}
 ])
 def test_scan_time(tags_to_apply,
                    get_configuration, configure_environment,
-                   restart_wazuh, wait_for_initial_scan):
+                   restart_syscheckd, wait_for_initial_scan):
     """ Check if there is a scan at a certain time """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     scan_time = reformat_time(get_configuration['metadata']['scan_time'])
+    current_time = datetime.now()
 
-
-
-
+    time_difference = (scan_time - current_time) if (scan_time - current_time).days == 0 else \
+        ((scan_time - current_time) + timedelta(days=2))
+    TimeMachine.travel_to_future(time_difference + timedelta(minutes=-30))
+    with pytest.raises(TimeoutError):
+        wazuh_log_monitor.start(timeout=3, callback=callback_detect_start_scan)
+    TimeMachine.travel_to_future(timedelta(minutes=31))
+    wazuh_log_monitor.start(timeout=3, callback=callback_detect_start_scan)

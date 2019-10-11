@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import psutil
 import random
 import re
 import string
@@ -226,6 +227,18 @@ def set_section_wazuh_conf(section: str = 'syscheck',
                                 tag.attrib[attr_name] = attr_value
 
     return wazuh_conf
+
+
+def restart_wazuh_daemon(daemon):
+    """Restarts a Wazuh daemon.
+
+    Use this function to avoid restarting the whole service and all of its daemons.
+    :param daemon string Name of the executable file of the daemon in /var/ossec/bin
+    """
+    for proc in psutil.process_iter(attrs=['name']):
+        if proc.name() == daemon:
+            proc.kill()
+    check_call([f'/var/ossec/bin/{daemon}'])
 
 
 def _callback_default(line):
@@ -499,4 +512,6 @@ def reformat_time(scan_time):
     if re.search('[a-zA-Z]', scan_time):
         locale = '%p'
         hour_format = '%I'
-    return datetime.strptime(scan_time, hour_format + colon + locale)
+    cd = datetime.now()
+    return datetime.replace(datetime.strptime(scan_time, hour_format + colon + locale),
+                            year=cd.year, month=cd.month, day=cd.day)

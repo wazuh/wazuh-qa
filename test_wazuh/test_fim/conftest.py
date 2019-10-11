@@ -11,17 +11,8 @@ from wazuh_testing.fim import (LOG_FILE_PATH, detect_initial_scan)
 from wazuh_testing.tools import (FileMonitor, get_wazuh_conf,
                                  set_section_wazuh_conf, truncate_file,
                                  restart_wazuh_service, write_wazuh_conf)
+from wazuh_testing.tools import restart_wazuh_daemon
 
-
-# functions
-
-def set_wazuh_conf(new_conf, request):
-    """Set a new Wazuh configuration. It restarts Wazuh."""
-    write_wazuh_conf(new_conf)
-    restart_wazuh(request)
-
-
-# fixtures
 
 @pytest.fixture(scope='module')
 def restart_wazuh(get_configuration, request):
@@ -32,6 +23,16 @@ def restart_wazuh(get_configuration, request):
 
     # Restart Wazuh and wait for the command to end
     restart_wazuh_service()
+
+
+@pytest.fixture(scope='module')
+def restart_syscheckd(get_configuration, request):
+    # Reset ossec.log and start a new monitor
+    truncate_file(LOG_FILE_PATH)
+    file_monitor = FileMonitor(LOG_FILE_PATH)
+    setattr(request.module, 'wazuh_log_monitor', file_monitor)
+
+    restart_wazuh_daemon('ossec-syscheckd')
 
 
 @pytest.fixture(scope='module')
@@ -68,3 +69,7 @@ def configure_environment(get_configuration, request):
 
     # restore previous configuration
     write_wazuh_conf(backup_config)
+
+    if hasattr(request.module, 'force_restart_after_restoring'):
+        if getattr(request.module, 'force_restart_after_restoring'):
+            restart_wazuh_service()
