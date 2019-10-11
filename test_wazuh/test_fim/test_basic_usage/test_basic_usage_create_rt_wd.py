@@ -62,7 +62,7 @@ def get_configuration(request):
     ('file4', REGULAR, b'', options, {'ossec_conf'}),
 ])
 def test_create_file_realtime_whodata(folder, name, filetype, content, checkers, tags_to_apply,
-                                      get_configuration, configure_environment, restart_wazuh,
+                                      get_configuration, configure_environment, restart_syscheckd,
                                       wait_for_initial_scan):
     """ Checks if a special or regular file creation is detected by syscheck using realtime and whodata monitoring"""
     check_apply_test(tags_to_apply, get_configuration['tags'])

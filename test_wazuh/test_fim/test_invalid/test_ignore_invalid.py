@@ -19,6 +19,7 @@ test_directories = [os.path.join('/', 'testdir1'),
                     os.path.join('/', 'testdir2'),
                     os.path.join('/', 'testdir2', 'subdir')
                     ]
+force_restart_after_restoring = True
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 

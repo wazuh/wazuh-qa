@@ -125,7 +125,7 @@ def get_configuration(request):
 ])
 def test_recursion_level(dirname, subdirname, recursion_level,
                          get_configuration, configure_environment,
-                         restart_wazuh, wait_for_initial_scan):
+                         restart_syscheckd, wait_for_initial_scan):
     """Checks if files are correctly detected by syscheck with recursion level using scheduled, realtime and whodata monitoring
 
     This test is intended to be used with valid ignore configurations. It applies RegEx to match the name 
@@ -136,7 +136,6 @@ def test_recursion_level(dirname, subdirname, recursion_level,
     :param subdirname string The name of the subdirectories that will be created during the execution for testing purpouses.
     :param recursion_level int Recursion level. Also used as the number of subdirectories to be created and checked for the current test.
     """
-
     check_event_too_long(get_configuration, recursion_level)
     recursion_test(dirname, subdirname, recursion_level, timeout=3,
                    is_scheduled=get_configuration['metadata']['fim_mode'] == 'scheduled')

@@ -1,25 +1,6 @@
 ---
 # conf 1
 - tags:
-  - invalid_no_regex
-  - invalid_no_regex1
-  apply_to_modules:
-  - test_ignore_invalid
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/testdir1,/testdir2"
-      attributes:
-      - check_all: 'yes'
-      - realtime: 'yes'
-  - ignore:
-      value: "aaaa"
-      attributes:
-      - type: "sregexxxx"
-# conf 2
-- tags:
   - valid_empty
   - valid_empty1
   apply_to_modules:
@@ -37,7 +18,7 @@
       attributes:
       - check_all: 'yes'
       - FIM_MODE
-# conf 3
+# conf 2
 - tags:
   - valid_no_regex
   - valid_no_regex1
@@ -54,7 +35,7 @@
       - FIM_MODE
   - ignore:
       value: "/testdir1/ignore_this"
-# conf 4
+# conf 3
 - tags:
   - valid_no_regex
   - valid_no_regex2
@@ -71,7 +52,7 @@
       attributes:
       - check_all: 'yes'
       - FIM_MODE
-# conf 5
+# conf 4
 - tags:
   - valid_no_regex
   - valid_no_regex3
@@ -90,7 +71,7 @@
       attributes:
       - check_all: 'yes'
       - FIM_MODE
-# conf 6
+# conf 5
 - tags:
   - valid_regex
   - valid_regex1
@@ -109,7 +90,7 @@
       attributes:
       - check_all: 'yes'
       - FIM_MODE
-# conf 7
+# conf 6
 - tags:
   - valid_regex
   - valid_regex2
@@ -128,7 +109,7 @@
       attributes:
       - check_all: 'yes'
       - FIM_MODE
-# conf 8
+# conf 7
 - tags:
   - valid_regex
   - valid_regex3
@@ -151,7 +132,7 @@
       attributes:
       - check_all: 'yes'
       - FIM_MODE
-# conf 9
+# conf 8
 - tags:
   - valid_regex
   - valid_regex4
@@ -170,7 +151,7 @@
       attributes:
       - check_all: 'yes'
       - FIM_MODE
-# conf 10
+# conf 9
 - tags:
   - valid_regex
   - valid_regex5
@@ -182,6 +163,24 @@
       value: 'no'
   - ignore:
       value: "^/testdir1/ignore_prefix"
+      attributes:
+      - type: sregex
+  - directories:
+      value: "/testdir1,/testdir2"
+      attributes:
+      - check_all: 'yes'
+      - FIM_MODE
+# conf 11
+- tags:
+  - negation_regex
+  apply_to_modules:
+  - test_ignore_valid
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - ignore:
+      value: "!mytest"
       attributes:
       - type: sregex
   - directories:
