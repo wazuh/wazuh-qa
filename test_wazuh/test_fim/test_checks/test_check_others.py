@@ -89,7 +89,7 @@ def test_check_others_individually(path, checkers, get_configuration, configure_
     (testdir7, {CHECK_GROUP} | {CHECK_MTIME}),
     (testdir8, {CHECK_SHA256SUM})
 ])
-def test_check_others(path, checkers, get_configuration, configure_environment, restart_wazuh, wait_for_initial_scan):
+def test_check_others(path, checkers, get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
     """Test the behaviour of combinations of Check options over the same directory without using the Check_all option.
 
     This test is intended to be used with valid configurations files.

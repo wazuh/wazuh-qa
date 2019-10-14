@@ -16,8 +16,8 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [os.path.join('/', 'testdir1')]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 scan_times = ['9PM', '20:00', '3:07PM']
-# configurations
 
+# configurations
 
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=[{'SCAN_TIME': scan_times[0]},
@@ -44,8 +44,8 @@ def get_configuration(request):
     {'scan_time'}
 ])
 def test_scan_time(tags_to_apply,
-                   get_configuration, configure_environment, wait_for_initial_scan,
-                   restart_syscheckd):
+                   get_configuration, configure_environment,
+                   restart_syscheckd, wait_for_initial_scan):
     """ Check if there is a scan at a certain time """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

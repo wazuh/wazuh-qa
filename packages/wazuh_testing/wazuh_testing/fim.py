@@ -351,12 +351,6 @@ def callback_detect_end_scan(line):
     return None
 
 
-def callback_detect_start_scan(line):
-    if 'File integrity monitoring scan started.' in line:
-        return line
-    return None
-
-
 def callback_detect_event(line):
     match = re.match(r'.*Sending event: (.+)$', line)
     if match:

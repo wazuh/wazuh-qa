@@ -45,8 +45,8 @@ def get_configuration(request):
     {'scan_day'}
 ])
 def test_scan_day(tags_to_apply,
-                  get_configuration, configure_environment, wait_for_initial_scan,
-                  restart_syscheckd):
+                  get_configuration, configure_environment,
+                  restart_syscheckd, wait_for_initial_scan):
     """ Check if there is a scan at a certain day """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -61,14 +61,13 @@ def test_scan_day(tags_to_apply,
     current_day = datetime.now().weekday()
     scan_day = day_of_week[get_configuration['metadata']['scan_day']]
     day_diff = scan_day - current_day
-    print(f'Current: {current_day}')
-    # Check if difference is negative
+
     if day_diff < 0:
         day_diff %= 7
     elif day_diff == 0:
         with pytest.raises(TimeoutError):
             wazuh_log_monitor.start(timeout=5, callback=callback_detect_end_scan)
-        pass
+        return
 
     if day_diff > 1:
         TimeMachine.travel_to_future(timedelta(days=day_diff - 1))

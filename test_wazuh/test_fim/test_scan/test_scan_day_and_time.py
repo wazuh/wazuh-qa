@@ -66,8 +66,8 @@ def get_configuration(request):
     {'scan_both'}
 ])
 def test_scan_day_and_time(tags_to_apply,
-                           get_configuration, configure_environment, wait_for_initial_scan,
-                           restart_syscheckd):
+                           get_configuration, configure_environment,
+                           restart_syscheckd, wait_for_initial_scan):
     """ Check if there is a scan in a certain day and time
     TODO Check this test once this configuration is fixed"""
     check_apply_test(tags_to_apply, get_configuration['tags'])
@@ -85,7 +85,7 @@ def test_scan_day_and_time(tags_to_apply,
     scan_time = reformat_time(get_configuration['metadata']['scan_time'])
     day_diff = scan_day - current_day.weekday()
     scan_today = False
-    # Check if difference is negative
+
     if day_diff < 0:
         day_diff %= 7
     elif day_diff == 0:
@@ -97,7 +97,7 @@ def test_scan_day_and_time(tags_to_apply,
         if (scan_time - current_day).days == 0:
             TimeMachine.travel_to_future(scan_time - current_day + timedelta(minutes=1))
             wazuh_log_monitor.start(timeout=5, callback=callback_detect_end_scan)
-            pass
+            return
         else:
             day_diff = 7
 
