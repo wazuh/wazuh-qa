@@ -68,7 +68,7 @@ def test_create_file_realtime_whodata(folder, name, filetype, content, checkers,
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Create files
-    create_file(filetype, name, folder, content)
+    create_file(filetype, folder, name, content)
 
     if filetype == REGULAR:
         # Wait until event is detected
@@ -76,4 +76,4 @@ def test_create_file_realtime_whodata(folder, name, filetype, content, checkers,
         validate_event(event, checkers)
     else:
         with pytest.raises(TimeoutError):
-            assert wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+            wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)

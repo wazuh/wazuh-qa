@@ -19,6 +19,7 @@ test_directories = [os.path.join('/', 'testdir1'),
                     os.path.join('/', 'testdir2'),
                     os.path.join('/', 'testdir2', 'subdir')
                     ]
+force_restart_after_restoring = True
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
@@ -39,7 +40,7 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.parametrize('tags_to_apply', [
-    ({'invalid_no_regex'})
+    ({'invalid_no_regex', 'invalid_scan'})
 ])
 def test_ignore(tags_to_apply, get_configuration, configure_environment,
                 restart_wazuh):

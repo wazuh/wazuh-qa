@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_start_scan)
+from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_end_scan)
 from wazuh_testing.tools import (FileMonitor, check_apply_test, load_wazuh_configurations, reformat_time, TimeMachine)
 
 # variables
@@ -44,7 +44,7 @@ def get_configuration(request):
     {'scan_time'}
 ])
 def test_scan_time(tags_to_apply,
-                   get_configuration, configure_environment,
+                   get_configuration, configure_environment, wait_for_initial_scan,
                    restart_syscheckd):
     """ Check if there is a scan at a certain time """
     check_apply_test(tags_to_apply, get_configuration['tags'])
@@ -56,6 +56,6 @@ def test_scan_time(tags_to_apply,
         ((scan_time - current_time) + timedelta(days=2))
     TimeMachine.travel_to_future(time_difference + timedelta(minutes=-30))
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=3, callback=callback_detect_start_scan)
+        wazuh_log_monitor.start(timeout=5, callback=callback_detect_end_scan)
     TimeMachine.travel_to_future(timedelta(minutes=31))
-    wazuh_log_monitor.start(timeout=3, callback=callback_detect_start_scan)
+    wazuh_log_monitor.start(timeout=5, callback=callback_detect_end_scan)

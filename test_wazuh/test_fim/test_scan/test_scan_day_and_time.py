@@ -7,7 +7,7 @@ from calendar import monthrange
 
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_start_scan)
+from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_end_scan)
 from wazuh_testing.tools import (FileMonitor, check_apply_test, load_wazuh_configurations, TimeMachine, reformat_time)
 
 # variables
@@ -66,7 +66,7 @@ def get_configuration(request):
     {'scan_both'}
 ])
 def test_scan_day_and_time(tags_to_apply,
-                           get_configuration, configure_environment,
+                           get_configuration, configure_environment, wait_for_initial_scan,
                            restart_syscheckd):
     """ Check if there is a scan in a certain day and time
     TODO Check this test once this configuration is fixed"""
@@ -96,7 +96,7 @@ def test_scan_day_and_time(tags_to_apply,
     if scan_today:
         if (scan_time - current_day).days == 0:
             TimeMachine.travel_to_future(scan_time - current_day + timedelta(minutes=1))
-            wazuh_log_monitor.start(timeout=3, callback=callback_detect_start_scan)
+            wazuh_log_monitor.start(timeout=5, callback=callback_detect_end_scan)
             pass
         else:
             day_diff = 7
@@ -105,10 +105,10 @@ def test_scan_day_and_time(tags_to_apply,
         TimeMachine.travel_to_future(timedelta(days=day_diff - 1))
         current_day = datetime.now()
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=3, callback=callback_detect_start_scan)
+            wazuh_log_monitor.start(timeout=5, callback=callback_detect_end_scan)
 
     TimeMachine.travel_to_future(scan_time - current_day - timedelta(minutes=5))
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=3, callback=callback_detect_start_scan)
+        wazuh_log_monitor.start(timeout=5, callback=callback_detect_end_scan)
     TimeMachine.travel_to_future(timedelta(minutes=6))
-    wazuh_log_monitor.start(timeout=3, callback=callback_detect_start_scan)
+    wazuh_log_monitor.start(timeout=5, callback=callback_detect_end_scan)

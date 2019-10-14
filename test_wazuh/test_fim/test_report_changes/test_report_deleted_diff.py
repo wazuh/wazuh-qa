@@ -85,7 +85,7 @@ def create_and_check_diff(name, directory, fim_mode):
     :param fim_mode: FIM mode (scheduled, realtime, whodata)
     :return: String with with the duplicated file path (diff)
     """
-    create_file(REGULAR, name, directory, 'Sample content')
+    create_file(REGULAR, directory, name, 'Sample content')
     wait_for_event(fim_mode)
     diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
                              directory.strip('/'), name)
@@ -106,7 +106,7 @@ def check_when_no_report_changes(name, directory, fim_mode, new_conf):
     restart_wazuh_with_new_conf(new_conf)
     # Wait for FIM scan to finish
     detect_initial_scan(wazuh_log_monitor)
-    assert (os.path.exists(diff_file) is False)
+    assert (not os.path.exists(diff_file))
 
 
 def check_when_deleted_directories(name, directory, fim_mode):
@@ -121,7 +121,7 @@ def check_when_deleted_directories(name, directory, fim_mode):
     create_and_check_diff(name, directory, fim_mode)
     shutil.rmtree(directory, ignore_errors=True)
     wait_for_event(fim_mode)
-    assert (os.path.exists(diff_dir) is False)
+    assert (not os.path.exists(diff_dir))
 
 
 # tests
@@ -136,7 +136,7 @@ def check_when_deleted_directories(name, directory, fim_mode):
 ])
 def test_no_report_changes(folder, checkers, delete_dir, tags_to_apply,
                            get_configuration, configure_environment,
-                           restart_wazuh, wait_for_initial_scan):
+                           restart_syscheckd, wait_for_initial_scan):
     """ Check if duplicated directories in diff are deleted when changing
         report_changes to 'no' or deleting the monitored directories """
     check_apply_test(tags_to_apply, get_configuration['tags'])

@@ -31,23 +31,6 @@
       - check_all: 'yes'
 # conf 3
 - tags:
-  - scan_invalid
-  apply_to_modules:
-  - test_scan_invalid
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - scan_time:
-      value: SCAN_TIME
-  - scan_day:
-      value: SCAN_DAY
-  - directories:
-      value: "/testdir1"
-      attributes:
-      - check_all: 'yes'
-# conf 4
-- tags:
     - scan_both
   apply_to_modules:
     - test_scan_day_and_time

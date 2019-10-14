@@ -65,7 +65,7 @@ def test_create_file_scheduled(folder, name, filetype, content, checkers,
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Create files
-    create_file(filetype, name, folder, content)
+    create_file(filetype, folder, name, content)
 
     # Go ahead in time to let syscheck perform a new scan
     TimeMachine.travel_to_future(timedelta(hours=13))
@@ -80,4 +80,4 @@ def test_create_file_scheduled(folder, name, filetype, content, checkers,
         time.sleep(3)
     else:
         with pytest.raises(TimeoutError):
-            assert wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+            wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)

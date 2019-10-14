@@ -5,11 +5,13 @@
 import json
 import os
 import re
+import shutil
 import socket
 import sys
 import time
 from collections import Counter
 from datetime import timedelta
+from stat import ST_ATIME, ST_MTIME
 
 from jq import jq
 from jsonschema import validate
@@ -131,21 +133,21 @@ def is_fim_scan_ended():
     return -1
 
 
-def create_file(type, name, path, content=''):
+def create_file(type_, path, name, content=''):
     """ Creates a file in a given path. The path will be created in case it does not exists.
 
-    :param type: Defined constant that specifies the type. It can be: FIFO, SYSLINK, SOCKET or REGULAR
-    :type type: Constant string
-    :param name: File name
-    :type name: String
+    :param type_: Defined constant that specifies the type. It can be: FIFO, SYSLINK, SOCKET or REGULAR
+    :type type_: Constant string
     :param path: Path where the file will be created
     :type path: String
+    :param name: File name
+    :type name: String
     :param content: Content of the file. Used for regular files.
     :type content: String or binary
     :return: None
     """
     os.makedirs(path, exist_ok=True)
-    getattr(sys.modules[__name__], f'_create_{type}')(path, name, content)
+    getattr(sys.modules[__name__], f'_create_{type_}')(path, name, content)
 
 
 def _create_fifo(path, name, content):
@@ -213,16 +215,12 @@ def _create_regular(path, name, content):
     :param name: File name
     :type name: String
     :param content: Content of the created file
-    :type content: String or binary
+    :type content: String or bytes
     :return: None
     """
     regular_path = os.path.join(path, name)
-    # Check if content is binary so it changes the mode
-    is_binary = re.compile('^b\'.*\'$')
-    if is_binary.match(str(content)):
-        mode = 'wb'
-    else:
-        mode = 'w'
+    mode = 'wb' if isinstance(content, bytes) else 'w'
+
     with open(regular_path, mode) as f:
         f.write(content)
 
@@ -234,26 +232,90 @@ def delete_file(path, name):
         os.remove(regular_path)
 
 
-def modify_file(path, name, content):
+def modify_file(path, name, is_binary=False, options=None):
     """ Modify a Regular file.
 
     :param path: Path where the file will be created
     :type path: String
     :param name: File name
     :type name: String
-    :param content: Content of the created file
-    :type content: String or binary
+    :param is_binary: True if the file is binary. False otherwise.
+    :type is_binary: boolean
+    :param options: Dict with all the checkers 
+    :type options: Dict
     :return: None
     """
+    def modify_file_content():
+        content = "1234567890qwertyuiopasdfghjklzxcvbnm"
+        with open(regular_path, 'ab' if is_binary else 'a') as f:
+            f.write(content.encode() if is_binary else content)
+
+    def modify_file_mtime():
+        stat = os.stat(regular_path)
+        access_time = stat[ST_ATIME]
+        modification_time = stat[ST_MTIME]
+        modification_time = modification_time + 120
+        os.utime(regular_path, (access_time, modification_time))
+
+    def modify_file_owner():
+        os.chown(regular_path, 1, -1)
+
+    def modify_file_group():
+        os.chown(regular_path, -1, 1)
+
+    def modify_file_permission():
+        os.chmod(regular_path, 0o666)
+
+    def modify_file_inode():
+        shutil.copyfile(regular_path, os.path.join(path, "inodetmp"))
+        os.replace(os.path.join(path, "inodetmp"), regular_path)
+
     regular_path = os.path.join(path, name)
-    # Check if content is binary so it changes the mode
-    is_binary = re.compile('^b\'.*\'$')
-    if is_binary.match(str(content)):
-        mode = 'ab'
+
+    if options is None:
+        modify_file_content()
     else:
-        mode = 'a'
-    with open(regular_path, mode) as f:
-        f.write(content)
+        for modification_type in options:
+            check = REQUIRED_ATTRIBUTES[modification_type]
+            if isinstance(check, set):
+                modify_file(path, name, options=check)
+
+            elif isinstance(check, list):
+                if check == REQUIRED_ATTRIBUTES[CHECK_OWNER]:
+                    modify_file_owner()
+                elif check == REQUIRED_ATTRIBUTES[CHECK_GROUP]:
+                    modify_file_group()
+
+            else:
+                if check == REQUIRED_ATTRIBUTES[CHECK_ALL] or check == CHECK_ALL:
+                    modify_file_content()
+                    modify_file_mtime()
+                    modify_file_owner()
+                    modify_file_group()
+                    modify_file_permission()
+                    modify_file_inode()
+
+                elif (check == REQUIRED_ATTRIBUTES[CHECK_SUM] or check == CHECK_SUM or
+                      check == REQUIRED_ATTRIBUTES[CHECK_SHA1SUM] or check == CHECK_SHA1SUM or
+                      check == REQUIRED_ATTRIBUTES[CHECK_MD5SUM] or check == CHECK_MD5SUM or
+                      check == REQUIRED_ATTRIBUTES[CHECK_SHA256SUM] or check == CHECK_SHA256SUM or
+                      check == REQUIRED_ATTRIBUTES[CHECK_SIZE] or check == CHECK_SIZE):
+                    modify_file_content()
+
+                elif check == REQUIRED_ATTRIBUTES[CHECK_MTIME] or check == CHECK_MTIME:
+                    modify_file_mtime()
+
+                elif check == REQUIRED_ATTRIBUTES[CHECK_OWNER] or check == CHECK_OWNER:
+                    modify_file_owner()
+
+                elif check == REQUIRED_ATTRIBUTES[CHECK_GROUP] or check == CHECK_GROUP:
+                    modify_file_group()
+
+                elif check == REQUIRED_ATTRIBUTES[CHECK_PERM] or check == CHECK_PERM:
+                    modify_file_permission()
+
+                elif check == REQUIRED_ATTRIBUTES[CHECK_INODE] or check == CHECK_INODE:
+                    modify_file_inode() 
 
 
 def change_internal_options(opt_path, pattern, value):
@@ -273,7 +335,8 @@ def change_internal_options(opt_path, pattern, value):
 
     with open(opt_path, "w") as sources:
         for line in lines:
-            sources.write(re.sub(f'{pattern}=[0-9]*', f'{pattern}={value}', line))
+            sources.write(
+                re.sub(f'{pattern}=[0-9]*', f'{pattern}={value}', line))
             if pattern in line:
                 add_pattern = False
 
@@ -348,6 +411,19 @@ def callback_audit_loaded_rule(line):
     return None
 
 
+def callback_audit_event_too_long(line):
+    if '.*Caching Audit message: event too long' in line:
+        return True
+    return None
+
+
+def callback_audit_reloaded_rule(line):
+    match = re.match(r'.*Reloaded audit rule for monitoring directory: \'(.+)\'', line)
+    if match:
+        return match.group(1)
+    return None
+
+
 def callback_realtime_added_directory(line):
     match = re.match(r'.*Directory added for real time monitoring: \'(.+)\'', line)
     if match:
@@ -362,10 +438,9 @@ def callback_configuration_error(line):
     return None
 
 
-def regular_file_cud(folder, log_monitor, file_list, time_travel=False, min_timeout=1, options=None,
-                     triggers_event=True,
-                     validators_after_create=None, validators_after_update=None, validators_after_delete=None,
-                     validators_after_cud=None):
+def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=False, min_timeout=1, options=None,
+                     triggers_event=True, validators_after_create=None, validators_after_update=None, 
+                     validators_after_delete=None, validators_after_cud=None):
     """ Checks if creation, update and delete events are detected by syscheck
 
     :param folder: Path where the files will be created
@@ -425,7 +500,7 @@ def regular_file_cud(folder, log_monitor, file_list, time_travel=False, min_time
 
     def check_files_in_event():
         file_paths = jq(".[].data.path").transform(events, multiple_output=True)
-        for file_name, file_content in file_list.items():
+        for file_name in file_list:
             assert (os.path.join(folder, file_name) in file_paths)
 
     def check_events(event_type, validate_after):
@@ -445,20 +520,20 @@ def regular_file_cud(folder, log_monitor, file_list, time_travel=False, min_time
     # Transform file list
     if not isinstance(file_list, list) and not isinstance(file_list, dict):
         raise ValueError('Value error. It can only be list or dict')
-    if isinstance(file_list, list):
+    elif isinstance(file_list, list):
         file_list = {i: '' for i in file_list}
 
     # Create text files
     for name, content in file_list.items():
-        create_file(REGULAR, name, folder, content)
+        create_file(REGULAR, folder, name, content)
 
     check_time_travel()
     events = fetch_events()
     check_events('added', validators_after_create)
 
     # Modify previous text files
-    for name in file_list:
-        modify_file(folder, name, 'Sample content added')
+    for name, content in file_list.items():
+        modify_file(folder, name, is_binary=isinstance(content, bytes), options=options)
 
     check_time_travel()
     events = fetch_events()

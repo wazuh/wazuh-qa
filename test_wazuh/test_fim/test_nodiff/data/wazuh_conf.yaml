@@ -1,26 +1,6 @@
 ---
 # conf 1
 - tags:
-  - invalid_no_regex
-  - invalid_no_regex1
-  apply_to_modules:
-  - test_no_diff_invalid
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/testdir1,/testdir2"
-      attributes:
-      - check_all: 'yes'
-      - realtime: 'yes'
-      - report_changes: 'yes'
-  - nodiff:
-      value: "aaaa"
-      attributes:
-      - type: "sregexxxx"
-# conf 2
-- tags:
   - valid_empty
   - valid_empty1
   apply_to_modules:
@@ -39,7 +19,7 @@
       - check_all: 'yes'
       - FIM_MODE
       - report_changes: 'yes'
-# conf 3
+# conf 2
 - tags:
   - valid_no_regex
   - valid_no_regex1
@@ -57,7 +37,7 @@
       - report_changes: 'yes'
   - nodiff:
       value: "/testdir1/nodiff_this"
-# conf 4
+# conf 3
 - tags:
   - valid_no_regex
   - valid_no_regex2
@@ -75,7 +55,7 @@
       - check_all: 'yes'
       - FIM_MODE
       - report_changes: 'yes'
-# conf 5
+# conf 4
 - tags:
   - valid_no_regex
   - valid_no_regex3
@@ -95,7 +75,7 @@
       - check_all: 'yes'
       - FIM_MODE
       - report_changes: 'yes'
-# conf 6
+# conf 5
 - tags:
   - valid_regex
   - valid_regex1
@@ -115,7 +95,7 @@
       - check_all: 'yes'
       - FIM_MODE
       - report_changes: 'yes'
-# conf 7
+# conf 6
 - tags:
   - valid_regex
   - valid_regex2
@@ -135,7 +115,7 @@
       - check_all: 'yes'
       - FIM_MODE
       - report_changes: 'yes'
-# conf 8
+# conf 7
 - tags:
   - valid_regex
   - valid_regex3
@@ -159,7 +139,7 @@
       - check_all: 'yes'
       - FIM_MODE
       - report_changes: 'yes'
-# conf 9
+# conf 8
 - tags:
   - valid_regex
   - valid_regex4
@@ -179,7 +159,7 @@
       - check_all: 'yes'
       - FIM_MODE
       - report_changes: 'yes'
-# conf 10
+# conf 9
 - tags:
   - valid_regex
   - valid_regex5
