@@ -27,6 +27,8 @@ assignees: ''
 - [ ] VUL011
 - [ ] VUL012
 - [ ] VUL013
+- [ ] VUL014
+- [ ] VUL015
 
 
 ## VUL001
@@ -738,3 +740,285 @@ You should see the following debug messages with the ignore time has not been re
 
 > 2019/09/26 09:46:57 wazuh-modulesd:vulnerability-detector[6099] wm_vuln_detector.c:2815 at wm_vuldet_get_software_info(): DEBUG: (5574): A partial scan will be run on agent 47.
 > 2019/09/26 09:46:57 wazuh-modulesd:vulnerability-detector[6099] wm_vuln_detector.c:2950 at wm_vuldet_get_software_info(): DEBUG: (5475): No changes have been found with respect to the last package inventory for agent 47.
+
+
+## VUL014
+
+**Short description**
+
+Vulnerability-detector must scan an agent if it has hotfix or package inventory.
+
+**Category**
+
+Vulnerability-detector
+
+**Subcategory**
+
+Vulnerability detection
+
+**Description**
+
+Vulnerability Detector checks if there is a package inventory available for each Linux agent to decide if the agent has to be scanned or not. However, this check is not the same for Windows agents since they can also be scanned if a hotfixes inventory is available.
+
+The purpose of this test is to verify if Vulnerability Detector takes into account the supported agents with a package/hotfixes inventory, or discards them otherwise.
+
+To see the related messages modulesd must be launched with level 1 debug. The message code which confirms that an agent is going to be reported is `5454`.
+
+**Configuration sample**
+
+The following configuration will help us to cover all use cases combining it with agents of different type and configuration.
+
+``` XML
+  <vulnerability-detector>
+    <enabled>yes</enabled>
+    <interval>5m</interval>
+    <ignore_time>6h</ignore_time>
+    <run_on_start>yes</run_on_start>
+    <provider name="canonical">
+      <enabled>yes</enabled>
+      <os>xenial</os>
+      <update_interval>1h</update_interval>
+    </provider>
+    <provider name="redhat">
+      <enabled>yes</enabled>
+      <update_from_year>2010</update_from_year>
+      <update_interval>1h</update_interval>
+    </provider>
+    <provider name="nvd">
+      <enabled>yes</enabled>
+      <update_from_year>2010</update_from_year>
+      <update_interval>1h</update_interval>
+    </provider>
+  </vulnerability-detector>
+```
+
+Using this configuration, the test should replicate an environment such as the following or similar.
+
+An Ubuntu Xenial manager with the following configuration for Syscollector:
+
+``` XML
+  <wodle name="syscollector">
+    <disabled>no</disabled>
+    <interval>1h</interval>
+    <scan_on_start>yes</scan_on_start>
+    <packages>yes</packages>
+  </wodle>
+```
+
+A Windows agent with the packages scan disabled, but which will be able to scan hotfixes.
+
+``` XML
+  <wodle name="syscollector">
+    <disabled>no</disabled>
+    <interval>1h</interval>
+    <scan_on_start>yes</scan_on_start>
+    <os>yes</os> 
+    <packages>no</packages>
+  </wodle>
+```
+
+A Centos 7 agent with the package scan disabled:
+
+``` XML
+  <wodle name="syscollector">
+    <disabled>no</disabled>
+    <interval>1h</interval>
+    <scan_on_start>yes</scan_on_start>
+    <packages>no</packages>
+  </wodle>
+```
+
+Another Windows agent with Syscollector disabled:
+
+``` XML
+  <wodle name="syscollector">
+    <disabled>yes</disabled>
+    <interval>1h</interval>
+    <scan_on_start>yes</scan_on_start>
+  </wodle>
+```
+
+**Min/Max compatible versions**
+3.11.0 - current
+
+**Expected logs**
+
+Using the previous configuration, and taking into account that the agents with deactivated scans have not sent any before, these are the expected logs:
+
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:4975 at wm_vuldet_run_scan(): INFO: (5452): Starting vulnerability scanning.
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:1028 at wm_vuldet_check_agent_vulnerabilities(): DEBUG: (5486): Starting vulnerability assessment for agent 0.
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:2752 at wm_vuldet_get_software_info(): DEBUG: (5462): Getting agent 0 software.
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:2763 at wm_vuldet_get_software_info(): DEBUG: (5573): A full scan will be run on agent 0.
+
+The module notifies that the agent 0 (the manager) can bee fully analyzed because it is its first scan, or the ignore time has been reached.
+
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:1028 at wm_vuldet_check_agent_vulnerabilities(): DEBUG: (5486): Starting vulnerability assessment for agent 1.
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:2752 at wm_vuldet_get_software_info(): DEBUG: (5462): Getting agent 1 software.
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:2763 at wm_vuldet_get_software_info(): DEBUG: (5573): A full scan will be run on agent 1.
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:2784 at wm_vuldet_get_software_info(): DEBUG: (5576): The package inventory of the agent 1 is not available, but an hotfix analysis will be launched.
+
+The first Windows agent does not have the package inventory available but will try to analyze its hotfixes.
+
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:1028 at wm_vuldet_check_agent_vulnerabilities(): DEBUG: (5486): Starting vulnerability assessment for agent 3.
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:2752 at wm_vuldet_get_software_info(): DEBUG: (5462): Getting agent 3 software.
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:2763 at wm_vuldet_get_software_info(): DEBUG: (5573): A full scan will be run on agent 3.
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:2779 at wm_vuldet_get_software_info(): DEBUG: (5434): No package inventory found for agent 3, so their vulnerabilities will not be checked.
+
+Agent 3 (Centos 7) is directly discarded due to it does not have the necessary package scan.
+
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:1028 at wm_vuldet_check_agent_vulnerabilities(): DEBUG: (5486): Starting vulnerability assessment for agent 4.
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:2752 at wm_vuldet_get_software_info(): DEBUG: (5462): Getting agent 4 software.
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:2763 at wm_vuldet_get_software_info(): DEBUG: (5573): A full scan will be run on agent 4.
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:2784 at wm_vuldet_get_software_info(): DEBUG: (5576): The package inventory of the agent 4 is not available, but an hotfix analysis will be launched.
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:2860 at wm_vuldet_get_software_info(): DEBUG: (5577): It is not possible to perform a hotfix scan on agent 4.
+
+On the other hand, agent 4 (Windows) has no inventory of hotfixes or packages available, so it will also be discarded.
+
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:856 at wm_vuldet_report_agent_vulnerabilities(): DEBUG: (5454): Analyzing agent 1 vulnerabilities.
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:992 at wm_vuldet_report_agent_vulnerabilities(): DEBUG: (5487): Finished vulnerability assessment for agent 1.
+> 2019/10/09 16:21:35 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:856 at wm_vuldet_report_agent_vulnerabilities(): DEBUG: (5454): Analyzing agent 0 vulnerabilities.
+> 2019/10/09 16:21:36 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:992 at wm_vuldet_report_agent_vulnerabilities(): DEBUG: (5487): Finished vulnerability assessment for agent 0.
+> 2019/10/09 16:21:36 wazuh-modulesd:vulnerability-detector[30183] wm_vuln_detector.c:4983 at wm_vuldet_run_scan(): INFO: (5453): Vulnerability scanning finished.
+
+Finally, we can see that only the agents 1 and 0 has been scanned.
+
+
+## VUL015
+
+**Short description**
+
+Vulnerability-detector must not report as vulnerable the software that has been updated if Syscollector has notified it.
+
+**Category**
+
+Vulnerability-detector
+
+**Subcategory**
+
+Vulnerability detection
+
+**Description**
+
+The purpose of this test is to verify that the module is useful for locating packages that need to be updated and correcting their vulnerabilities.
+
+To verify it for Windows and Linux programs, we can install a vulnerable version, check how it is reported, and fix it.
+
+The test is different for those vulnerabilities which can only be fixed by installing a hotfix.
+
+**Configuration sample**
+
+The use case of this test will be a vulnerable Ubuntu Bionic manager and a Windows Server 2008 R2 agent. We can use this configuration:
+
+``` XML
+  <vulnerability-detector>
+    <enabled>yes</enabled>
+    <interval>5m</interval>
+    <ignore_time>6h</ignore_time>
+    <run_on_start>yes</run_on_start>
+    <provider name="canonical">
+      <enabled>yes</enabled>
+      <os>bionic</os>
+      <update_interval>1h</update_interval>
+    </provider>
+    <provider name="nvd">
+      <enabled>yes</enabled>
+      <update_from_year>2010</update_from_year>
+      <update_interval>1h</update_interval>
+    </provider>
+  </vulnerability-detector>
+```
+
+For Syscollector:
+
+``` XML
+  <wodle name="syscollector">
+    <disabled>no</disabled>
+    <interval>1h</interval>
+    <scan_on_start>yes</scan_on_start>
+    <packages>yes</packages>
+    <packages>os</packages>
+  </wodle>
+```
+
+**Min/Max compatible versions**
+3.11.0 - current
+
+**Expected logs**
+
+We can start the test by installing the `libkrb5support0` package to a vulnerable version (`1.16-2ubuntu0.1`) as follows:
+
+
+``` BASH
+apt install libkrb5support0=1.16-2ubuntu0.1
+```
+
+After this, the next scan should trigger the next alert:
+
+```
+** Alert 1571046780.345938: - vulnerability-detector,gdpr_IV_35.7.d,
+2019 Oct 14 09:53:00 8d31315b480e->vulnerability-detector
+Rule: 23503 (level 5) -> 'CVE-2018-5710 on Ubuntu 18.04 LTS (bionic) - low.'
+{"vulnerability":{"cve":"CVE-2018-5710","title":"CVE-2018-5710 on Ubuntu 18.04 LTS (bionic) - low.","severity":"Low","published":"2018-01-16T09:29:00Z","state":"Fixed","software":{"name":"libkrb5support0","version":"1.16-2ubuntu0.1","architecture":"amd64"},"condition":"Package less than 1.16.1-1","reference":"https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-5710"}}
+vulnerability.cve: CVE-2018-5710
+vulnerability.title: CVE-2018-5710 on Ubuntu 18.04 LTS (bionic) - low.
+vulnerability.severity: Low
+vulnerability.published: 2018-01-16T09:29:00Z
+vulnerability.state: Fixed
+vulnerability.software.name: libkrb5support0
+vulnerability.software.version: 1.16-2ubuntu0.1
+vulnerability.software.architecture: amd64
+vulnerability.condition: Package less than 1.16.1-1
+vulnerability.reference: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-5710
+```
+
+It is not necessary to wait for the ignore time to expire because new or updated packages are always analyzed.
+
+If we set the debug level to 2 and filter by the package we should see a message indicating that the package is vulnerable and the condition to confirm the vulnerability.
+
+> 2019/10/14 09:57:54 wazuh-modulesd:vulnerability-detector[3641] wm_vuln_detector.c:946 at wm_vuldet_report_agent_vulnerabilities(): DEBUG: (5467): The 'libkrb5support0' package from agent 0 is vulnerable to CVE-2018-5710. Condition: package version (1.16-2ubuntu0.1) less than 1.16.1-1.
+
+Finally, if we update the package and Syscollector index that change:
+
+> 2019/10/14 10:18:45 wazuh-modulesd:vulnerability-detector[4122] wm_vuln_detector.c:939 at wm_vuldet_report_agent_vulnerabilities(): DEBUG: (5456): The 'libkrb5support0' package from agent 0 is not vulnerable to CVE-2018-5710. Condition: package version (1.16.3-3.1) less than 1.16.1-1.
+
+For the Windows vulnerability, we will use a Windows Server 2008 R2 which is vulnerable to `CVE-2017-0055` for not having the `KB4012212` hotfix installed. We should see the following alert.
+
+```
+** Alert 1571048511.2019462: - vulnerability-detector,gdpr_IV_35.7.d,
+2019 Oct 14 10:21:51 (agwin) 172.16.210.128->vulnerability-detector
+Rule: 23504 (level 7) -> 'Microsoft Internet Information Server (IIS) in Windows Vista SP2; Windows Server 2008 SP2 and R2; Windows 7 SP1; Windows 8.1; Windows Server 2012 Gold and R2; Windows RT 8.1; Windows 10 Gold, 1511, and 1607; and Windows Server 2016 allows remote attackers to perform cross-site scripting and run script with local user privileges via a crafted request, aka "Microsoft IIS Server XSS Elevation of Privilege Vulnerability."'
+{"vulnerability":{"cve":"CVE-2017-0055","title":"Microsoft Internet Information Server (IIS) in Windows Vista SP2; Windows Server 2008 SP2 and R2; Windows 7 SP1; Windows 8.1; Windows Server 2012 Gold and R2; Windows RT 8.1; Windows 10 Gold, 1511, and 1607; and Windows Server 2016 allows remote attackers to perform cross-site scripting and run script with local user privileges via a crafted request, aka \"Microsoft IIS Server XSS Elevation of Privilege Vulnerability.\"","severity":"Medium","published":"2017-03-17","updated":"2017-07-12","state":"Fixed","cvss":{"cvss2":{"vector":{"attack_vector":"network","access_complexity":"medium ","authentication":"none","integrity_impact":"partial ","availability":"none"},"base_score":4.3},"cvss3":{"vector":{"attack_vector":"network","access_complexity":"low","confidentiality_impact":"low","availability":"none","privileges_required":"none","user_interaction":"required ","scope":"changed "},"base_score":6.1}},"software":{"name":"Windows Server 2008 R2","generated_cpe":"o:microsoft:windows_server_2008:r2:sp1::::::"},"condition":"4012212 patch is not installed.","cwe_reference":"CWE-79","reference":"http://www.securityfocus.com/bid/96622"}}
+vulnerability.cve: CVE-2017-0055
+vulnerability.title: Microsoft Internet Information Server (IIS) in Windows Vista SP2; Windows Server 2008 SP2 and R2; Windows 7 SP1; Windows 8.1; Windows Server 2012 Gold and R2; Windows RT 8.1; Windows 10 Gold, 1511, and 1607; and Windows Server 2016 allows remote attackers to perform cross-site scripting and run script with local user privileges via a crafted request, aka "Microsoft IIS Server XSS Elevation of Privilege Vulnerability."
+vulnerability.severity: Medium
+vulnerability.published: 2017-03-17
+vulnerability.updated: 2017-07-12
+vulnerability.state: Fixed
+vulnerability.cvss.cvss2.vector.attack_vector: network
+vulnerability.cvss.cvss2.vector.access_complexity: medium 
+vulnerability.cvss.cvss2.vector.authentication: none
+vulnerability.cvss.cvss2.vector.integrity_impact: partial 
+vulnerability.cvss.cvss2.vector.availability: none
+vulnerability.cvss.cvss2.base_score: 4.300000
+vulnerability.cvss.cvss3.vector.attack_vector: network
+vulnerability.cvss.cvss3.vector.access_complexity: low
+vulnerability.cvss.cvss3.vector.confidentiality_impact: low
+vulnerability.cvss.cvss3.vector.availability: none
+vulnerability.cvss.cvss3.vector.privileges_required: none
+vulnerability.cvss.cvss3.vector.user_interaction: required 
+vulnerability.cvss.cvss3.vector.scope: changed 
+vulnerability.cvss.cvss3.base_score: 6.100000
+vulnerability.software.name: Windows Server 2008 R2
+vulnerability.software.generated_cpe: o:microsoft:windows_server_2008:r2:sp1::::::
+vulnerability.condition: 4012212 patch is not installed.
+vulnerability.cwe_reference: CWE-79
+vulnerability.reference: http://www.securityfocus.com/bid/96622
+```
+
+We can download the patch suggested by the alert from https://www.catalog.update.microsoft.com/search.aspx?q=kb4012212.
+
+After applying the hotfix, and once the agent has updated its hotfix inventory through Syscollector, we will see the following debug message in Vulnerability Detector when running a full-scan.
+
+> 2019/10/14 10:29:42 wazuh-modulesd:vulnerability-detector[4463] wm_vuln_detector_nvd.c:2611 at wm_vuldet_check_hotfix(): DEBUG: (5534): Agent 1 has installed KB4012212 that corrects the vulnerability CVE-2017-0055.
+
+Note that the hotfixes scan is only performed each time a full-scan is launched, or in other words, each time the value set by `<ignore_time>` is reached. Only packages can be scanned with a partial scan.
