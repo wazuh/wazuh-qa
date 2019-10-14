@@ -43,7 +43,7 @@ def get_configuration(request):
 ])
 def test_scan_invalid(tags_to_apply,
                       get_configuration, configure_environment,
-                      restart_wazuh):
+                      restart_syscheckd):
     """ Check if there is a scan at a certain time """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

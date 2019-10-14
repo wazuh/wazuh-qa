@@ -10,8 +10,6 @@
       value: 'no'
   - scan_time:
       value: SCAN_TIME
-  - scan_time:
-      value: SCAN_TIME
   - directories:
       value: "/testdir1"
       attributes:
@@ -25,8 +23,6 @@
   elements:
   - disabled:
       value: 'no'
-  - scan_day:
-      value: SCAN_DAY
   - scan_day:
       value: SCAN_DAY
   - directories:
