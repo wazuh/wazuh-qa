@@ -21,6 +21,7 @@
 - [ ] MIT013
 - [ ] MIT014
 - [ ] MIT015
+- [ ] MIT016
 
 ## MIT001
 
@@ -129,7 +130,7 @@ Script mitredb.py will search enterprise-attack.json in order to fill the three 
 
 ```
 $ cd wazuh/etc/mitre
-$ sudo nano enterprise-attack.json attack.json
+$ sudo nano enterprise-attack.json
 Change line 5: "objects" to "object".
 
 Then, install Manager
@@ -143,7 +144,7 @@ Then, install Manager
 ```
 # cat ossec.log | grep Mitre
 ```
-> ossec-analysisd[19213] mitre.c:71 at mitre_load(): DEBUG: Mitre info loading failed. Mitre's database response has 0 elements.
+> ossec-analysisd[19213] mitre.c:71 at mitre_load(): DEBUG: Mitre info loading failed. Query's response has 0 elements.
 
 > ossec-analysisd[4729] mitre.c:50 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
 
@@ -589,7 +590,7 @@ Mitre
 
 **Description**
 
-If has_phase table is not in mitre.db, tactics should not be shown in alerts and Wazuh should show error messages. It does not have to stop.
+If has_phase table is not in mitre.db, tactics should not be shown in alerts and Wazuh should show error messages. It does not have to stop Wazuh.
 
 **Configuration sample**
 ```
@@ -656,7 +657,7 @@ Mitre
 
 **Description**
 
-If attack table is not in mitre.db, tactics should not be shown in alerts and Wazuh should show error messages. It does not have to stop.
+If attack table is not in mitre.db, tactics should not be shown in alerts and Wazuh should show error messages. It does not have to stop Wazuh.
 
 **Configuration sample**
 ```
@@ -713,6 +714,144 @@ ossec-control restart
 > ossec-analysisd[27609] mitre.c:50 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
 
 ## MIT013
+
+**Short description**
+
+If the attack table's colum called 'id' has other different names, tactics should not be shown in alerts and Wazuh should show error messages.
+
+**Category**
+
+Mitre
+
+**Description**
+
+If the attack table's column called 'id' has other different names, tactics should not be shown in alerts and Wazuh should show error messages. It does not have to stop Wazuh.
+
+**Configuration sample**
+```
+<rule id="5402" level="3">
+    <if_sid>5400</if_sid>
+    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+    <description>Successful sudo to ROOT executed</description>
+    <mitre>
+      <id>T1169</id>
+      <id>T1078</id>
+    </mitre>
+    <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
+</rule>
+```
+
+```
+# nano /wazuh/tools/mitre/mitredb.py
+Change  id for ids in sql_create_attack = """CREATE TABLE IF NOT EXISTS attack (id TEXT PRIMARY KEY, json TEXT);"""
+ ```
+**Compatible versions**
+
+3.11.0 - Current
+
+**Expected logs and alerts**
+```
+# tail -f /var/ossec/logs/alerts/alerts.json
+
+{
+"timestamp":"2019-09-30T13:12:29.416+0200",
+"rule":{
+      "level":3,
+      "description":"Successful sudo to ROOT executed",
+      "id":"5402",
+      "mitre":{"id":["T1169","T1078"],
+               "tactics":[]
+               },
+      "firedtimes":1,
+      "mail":false,
+      "groups":["syslog","sudo"],"pci_dss":["10.2.5","10.2.2"],"gpg13":["7.6","7.8","7.13"],"gdpr":["IV_32.2"],"hipaa":["164.312.b"],"nist_800_53":["AU.3.1","IA.10"]
+       },
+       
+       ...
+}
+```
+```
+# cat ossec.log | grep Mitre
+```
+> wazuh-db[28187] wdb_parser.c:358 at wdb_parse(): DEBUG: Mitre DB Cannot execute SQL query; err database var/db/mitre.db: no such column: id
+
+> ossec-analysisd[28215] mitre.c:48 at mitre_load(): DEBUG: Mitre info loading failed. No response or bad response from wazuh-db: err Cannot execute SQL query; no such column: id
+
+> ossec-analysisd[28215] mitre.c:49 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
+
+## MIT014
+
+**Short description**
+
+If the attack table's colum called 'id' has other different names, tactics should not be shown in alerts and Wazuh should show error messages.
+
+**Category**
+
+Mitre
+
+**Description**
+
+If the has_phase table's column called 'phase_name' has other different names, tactics should not be shown in alerts and Wazuh should show error messages. It does not have to stop Wazuh.
+
+**Configuration sample**
+```
+<rule id="5402" level="3">
+    <if_sid>5400</if_sid>
+    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+    <description>Successful sudo to ROOT executed</description>
+    <mitre>
+      <id>T1169</id>
+      <id>T1078</id>
+    </mitre>
+    <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
+</rule>
+```
+
+```
+# nano /wazuh/tools/mitre/mitredb.py
+Change phase_name for phase in sql_create_has_phase = """CREATE TABLE IF NOT EXISTS has_phase (
+                                    attack_id TEXT, 
+                                    phase_name TEXT,
+                                    FOREIGN KEY(attack_id) REFERENCES attack(id),
+                                    PRIMARY KEY (attack_id, phase_name)
+                                );"""
+ ```
+**Compatible versions**
+
+3.11.0 - Current
+
+**Expected logs and alerts**
+```
+# tail -f /var/ossec/logs/alerts/alerts.json
+
+{
+"timestamp":"2019-09-30T13:12:29.416+0200",
+"rule":{
+      "level":3,
+      "description":"Successful sudo to ROOT executed",
+      "id":"5402",
+      "mitre":{"id":["T1169","T1078"],
+               "tactics":[]
+               },
+      "firedtimes":1,
+      "mail":false,
+      "groups":["syslog","sudo"],"pci_dss":["10.2.5","10.2.2"],"gpg13":["7.6","7.8","7.13"],"gdpr":["IV_32.2"],"hipaa":["164.312.b"],"nist_800_53":["AU.3.1","IA.10"]
+       },
+       
+       ...
+}
+```
+```
+# cat ossec.log | grep Mitre
+```
+> wazuh-db[3303] wdb_parser.c:358 at wdb_parse(): DEBUG: Mitre DB Cannot execute SQL query; err database var/db/mitre.db: no such table: has_phase
+
+> ossec-analysisd[3331] mitre.c:98 at mitre_load(): DEBUG: Mitre info loading failed. No response or bad response from wazuh-db: err Cannot execute SQL query; no such table: has_phase
+
+> ossec-analysisd[3331] mitre.c:99 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
+root@equipo:/var/ossec
+
+## MIT015
 
 **Short description**
 
@@ -782,7 +921,7 @@ ossec-control restart
 
 > ossec-analysisd[14614] mitre.c:50 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
 
-## MIT014
+## MIT016
 
 **Short description**
 
@@ -835,38 +974,3 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
 **Expected logs**
 
 > ossec-analysisd[22563] analysisd.c:572 at main(): CRITICAL: (1220): Error loading the rules: 'ruleset/rules/0020-syslog_rules.xml'.
-
-## MIT015
-
-**Short description**
-
-Check there are not memory leaks using Valgrind
-
-**Category**
-
-Mitre
-
-**Description**
-
-Check there are not memory leaks in analysisd using Valgrind. Analysisd is responsible for filling in Mitre database and generating alerts.
-
-**Configuration sample**
-
-```
-valgrind --leak-check=full --trace-children=yes --read-var-info=yes --track-origins=yes --show-leak-kinds=all --read-var-info=yes /var/ossec/bin/ossec-analysisd -f
-```
-**Compatible versions**
-
-3.11.0 - Current
-
-**Expected outputs**
-
-100 bytes of memory leak are expected:
-```
-LEAK SUMMARY:
-==2268==    definitely lost: 100 bytes in 9 blocks
-==2268==    indirectly lost: 0 bytes in 0 blocks
-==2268==      possibly lost: 20,128 bytes in 74 blocks
-==2268==    still reachable: 12,118,135 bytes in 58,600 blocks
-==2268==         suppressed: 0 bytes in 0 blocks
-```
