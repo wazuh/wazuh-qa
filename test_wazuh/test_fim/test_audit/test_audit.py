@@ -4,7 +4,7 @@
 
 import os
 import subprocess
-
+import time
 import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_added_rule,
@@ -13,9 +13,15 @@ from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_added_rule,
                                callback_audit_loaded_rule,
                                callback_audit_reloaded_rule,
                                callback_audit_rules_manipulation,
-                               callback_realtime_added_directory)
+                               callback_realtime_added_directory,
+                               callback_audit_key, 
+                               create_file,
+                               delete_file,
+                               REGULAR,
+                               detect_initial_scan)
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
-                                 load_wazuh_configurations)
+                                 load_wazuh_configurations,
+                                 restart_wazuh_service)
 
 
 # variables
@@ -139,3 +145,26 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
     # Start Audit
     p = subprocess.Popen(["service", "auditd", "start"])
     p.wait()
+
+
+def test_audit_key(get_configuration, configure_environment, restart_wazuh, wait_for_initial_scan):
+    check_apply_test({"audit_key"}, get_configuration['tags'])
+    
+    audit_key = "custom_audit_key"
+    audit_dir = "/testdir1"
+    
+    # Insert watch rule
+    os.system("auditctl -w " + audit_dir + " -p wa -k " + audit_key)
+
+
+    create_file(REGULAR, "testfile", audit_dir)
+
+    events = wazuh_log_monitor.start(timeout=30,
+                                     callback=callback_audit_key,
+                                     accum_results=1).result()
+
+    assert (audit_key in events)
+
+
+    # Remove watch rule
+    os.system("auditctl -W " + audit_dir + " -p wa -k " + audit_key)

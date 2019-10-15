@@ -1,7 +1,7 @@
 ---
 # conf 1
 - tags:
-  - config1
+  - audit_key
   apply_to_modules:
   - test_audit
   section: syscheck
@@ -9,7 +9,15 @@
   - disabled:
       value: 'no'
   - directories:
-      value: "/testdir1,/testdir2,/testdir3"
+      value: "/testdir1,/testdirdir"
       attributes:
       - check_all: 'yes'
       - whodata: 'yes'
+  - whodata:
+      elements:
+      - restart_audit:
+          value: 'yes'
+      - audit_key:
+          value: "custom_audit_key"
+      - startup_healthcheck:
+          value: 'yes'

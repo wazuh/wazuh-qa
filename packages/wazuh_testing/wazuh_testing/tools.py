@@ -200,13 +200,12 @@ def write_wazuh_conf(wazuh_conf: ET.ElementTree):
 def set_section_wazuh_conf(section: str = 'syscheck',
                            new_elements: List = None) -> ET.ElementTree:
     """Set a configuration in a section of Wazuh. It replaces the content if it exists.
-
     :param section: Section of Wazuh configuration to replace
     :param new_elements: List with dictionaries for settings elements in the section
     :return: ElementTree with the custom Wazuh configuration
     """
     wazuh_conf = get_wazuh_conf()
-    section_conf = wazuh_conf.find('/'.join([section]))
+    section_conf = wazuh_conf.find(section)
     # create section if it does not exist, clean otherwise
     if not section_conf:
         section_conf = ET.SubElement(wazuh_conf.getroot(), section)
@@ -216,15 +215,29 @@ def set_section_wazuh_conf(section: str = 'syscheck',
     if new_elements:
         for elem in new_elements:
             for tag_name, properties in elem.items():
-                tag = ET.SubElement(section_conf, tag_name)
-                tag.text = properties.get('value')
-                attributes = properties.get('attributes')
-                if attributes:
-                    for attribute in attributes:
-                        if attribute is not None and isinstance(attribute, dict):
-                            for attr_name, attr_value in attribute.items():
-                                tag.attrib[attr_name] = attr_value
-
+                if properties.get('elements'):
+                    #tag = set_section_wazuh_conf(section=f'{section}/{tag_name}',
+                    #                             new_elements=properties.get('elements')).find(f'{section}/{tag_name}')
+                    sub = ET.SubElement(section_conf, tag_name)
+                    for e in properties.get('elements'):
+                        for name, prop in e.items():
+                            tag = ET.SubElement(sub, name)
+                            tag.text = prop.get('value')
+                            attributes = properties.get('attributes')
+                            if attributes:
+                                for attribute in attributes:
+                                    if attribute is not None and isinstance(attribute, dict):
+                                        for attr_name, attr_value in attribute.items():
+                                            tag.attrib[attr_name] = attr_value
+                else:
+                    tag = ET.SubElement(section_conf, tag_name)
+                    tag.text = properties.get('value')
+                    attributes = properties.get('attributes')
+                    if attributes:
+                        for attribute in attributes:
+                            if attribute is not None and isinstance(attribute, dict):
+                                for attr_name, attr_value in attribute.items():
+                                    tag.attrib[attr_name] = attr_value
     return wazuh_conf
 
 
