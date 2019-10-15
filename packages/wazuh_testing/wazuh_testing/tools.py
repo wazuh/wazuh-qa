@@ -205,6 +205,27 @@ def set_section_wazuh_conf(section: str = 'syscheck',
     :param new_elements: List with dictionaries for settings elements in the section
     :return: ElementTree with the custom Wazuh configuration
     """
+    def create_elements(section: ET.Element, elements: List):
+        """Insert new elements in a Wazuh configuration section.
+
+        :param section: Section where the element will be inserted
+        :param elements: List with the new elements to be inserted
+        """
+        for element in elements:
+            for tag_name, properties in element.items():
+                tag = ET.SubElement(section, tag_name)
+                new_elements = properties.get('elements')
+                if new_elements:
+                    create_elements(tag, new_elements)
+                else:
+                    tag.text = properties.get('value')
+                    attributes = properties.get('attributes')
+                    if attributes:
+                        for attribute in attributes:
+                            if attribute is not None and isinstance(attribute, dict):  # noqa: E501
+                                for attr_name, attr_value in attribute.items():
+                                    tag.attrib[attr_name] = attr_value
+    # get Wazuh configuration
     wazuh_conf = get_wazuh_conf()
     section_conf = wazuh_conf.find('/'.join([section]))
     # create section if it does not exist, clean otherwise
@@ -214,16 +235,7 @@ def set_section_wazuh_conf(section: str = 'syscheck',
         section_conf.clear()
     # insert elements
     if new_elements:
-        for elem in new_elements:
-            for tag_name, properties in elem.items():
-                tag = ET.SubElement(section_conf, tag_name)
-                tag.text = properties.get('value')
-                attributes = properties.get('attributes')
-                if attributes:
-                    for attribute in attributes:
-                        if attribute is not None and isinstance(attribute, dict):
-                            for attr_name, attr_value in attribute.items():
-                                tag.attrib[attr_name] = attr_value
+        create_elements(section_conf, new_elements)
 
     return wazuh_conf
 
