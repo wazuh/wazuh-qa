@@ -68,7 +68,7 @@ def test_create_file_realtime_whodata(folder, name, filetype, content, checkers,
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Create files
-    create_file(filetype, name, folder, content)
+    create_file(filetype, folder, name, content)
 
     if filetype == REGULAR:
         # Wait until event is detected
