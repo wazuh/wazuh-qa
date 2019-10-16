@@ -1,6 +1,18 @@
 ---
 # conf 1
 - tags:
+  - config1
+  apply_to_modules:
+  - test_audit
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "/testdir1,/testdir2,/testdir3"
+      attributes:
+      - whodata: 'yes'
+- tags:
   - audit_key
   apply_to_modules:
   - test_audit
@@ -9,9 +21,8 @@
   - disabled:
       value: 'no'
   - directories:
-      value: "/testdir1,/testdirdir"
+      value: "/testdir1"
       attributes:
-      - check_all: 'yes'
       - whodata: 'yes'
   - whodata:
       elements:
