@@ -21,7 +21,8 @@ from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_added_rule,
                                detect_initial_scan)
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations,
-                                 restart_wazuh_service)
+                                 restart_wazuh_service,
+                                 truncate_file)
 
 
 # variables
@@ -50,7 +51,7 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.parametrize('tags_to_apply', [
-    ({'all'})
+    ({'config1'})
 ])
 def test_audit_health_check(tags_to_apply, get_configuration,
                             configure_environment, restart_syscheckd):
@@ -61,7 +62,7 @@ def test_audit_health_check(tags_to_apply, get_configuration,
 
 
 @pytest.mark.parametrize('tags_to_apply', [
-    ({'all'})
+    ({'config1'})
 ])
 def test_added_rules(tags_to_apply, get_configuration,
                      configure_environment, restart_syscheckd):
@@ -78,7 +79,7 @@ def test_added_rules(tags_to_apply, get_configuration,
 
 
 @pytest.mark.parametrize('tags_to_apply', [
-    ({'all'})
+    ({'config1'})
 ])
 def test_readded_rules(tags_to_apply, get_configuration,
                        configure_environment, restart_syscheckd):
@@ -99,7 +100,7 @@ def test_readded_rules(tags_to_apply, get_configuration,
 
 
 @pytest.mark.parametrize('tags_to_apply', [
-    ({'all'})
+    ({'config1'})
 ])
 def test_readded_rules_on_restart(tags_to_apply, get_configuration,
                                   configure_environment, restart_syscheckd):
@@ -123,7 +124,7 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
 
 
 @pytest.mark.parametrize('tags_to_apply', [
-    ({'all'})
+    ({'config1'})
 ])
 def test_move_rules_realtime(tags_to_apply, get_configuration,
                              configure_environment, restart_syscheckd):
@@ -147,24 +148,28 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
     p.wait()
 
 
-def test_audit_key(get_configuration, configure_environment, restart_wazuh, wait_for_initial_scan):
+def test_audit_key(get_configuration, configure_environment, restart_syscheckd):
     check_apply_test({"audit_key"}, get_configuration['tags'])
     
     audit_key = "custom_audit_key"
     audit_dir = "/testdir1"
-    
-    # Insert watch rule
+
+    # Add watch rule
     os.system("auditctl -w " + audit_dir + " -p wa -k " + audit_key)
 
+    truncate_file(LOG_FILE_PATH)
 
-    create_file(REGULAR, "testfile", audit_dir)
+    restart_wazuh_service()
+
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    detect_initial_scan(wazuh_log_monitor)
+
+    create_file(REGULAR, audit_dir, "testfile")
 
     events = wazuh_log_monitor.start(timeout=30,
                                      callback=callback_audit_key,
                                      accum_results=1).result()
-
     assert (audit_key in events)
-
 
     # Remove watch rule
     os.system("auditctl -W " + audit_dir + " -p wa -k " + audit_key)
