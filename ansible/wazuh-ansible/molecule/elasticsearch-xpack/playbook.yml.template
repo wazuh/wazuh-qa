@@ -11,7 +11,6 @@
       elasticsearch_bootstrap_node: true
       elasticsearch_cluster_nodes:
         - elasticsearch_%PLATFORM%-1
-        - elasticsearch_%PLATFORM%-2
       elasticsearch_discovery_nodes:
         - elasticsearch_%PLATFORM%-1
         - elasticsearch_%PLATFORM%-2
@@ -43,9 +42,6 @@
       elasticsearch_node_name: elasticsearch_%PLATFORM%-2
       single_node: false
       elasticsearch_master_candidate: true
-      elasticsearch_cluster_nodes:
-        - elasticsearch_%PLATFORM%-1
-        - elasticsearch_%PLATFORM%-2
       elasticsearch_discovery_nodes:
         - elasticsearch_%PLATFORM%-1
         - elasticsearch_%PLATFORM%-2
