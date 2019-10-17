@@ -377,10 +377,10 @@ This test consists in check that there are no duplicated alerts. We consider a r
 ``` JSON
 agents.id
 data.vulnerability.cve
-data.vulnerability.software.name
-data.vulnerability.software.version
-data.vulnerability.software.architecture
-data.vulnerability.software.generated_cpe
+data.vulnerability.package.name
+data.vulnerability.package.version
+data.vulnerability.package.architecture
+data.vulnerability.package.generated_cpe
 ```
 
 Please note that some of the fields mentioned above may not appear.
@@ -812,7 +812,7 @@ A Windows agent with the packages scan disabled, but which will be able to scan 
     <disabled>no</disabled>
     <interval>1h</interval>
     <scan_on_start>yes</scan_on_start>
-    <os>yes</os> 
+    <os>yes</os>
     <packages>no</packages>
   </wodle>
 ```
@@ -964,9 +964,9 @@ vulnerability.title: CVE-2018-5710 on Ubuntu 18.04 LTS (bionic) - low.
 vulnerability.severity: Low
 vulnerability.published: 2018-01-16T09:29:00Z
 vulnerability.state: Fixed
-vulnerability.software.name: libkrb5support0
-vulnerability.software.version: 1.16-2ubuntu0.1
-vulnerability.software.architecture: amd64
+vulnerability.package.name: libkrb5support0
+vulnerability.package.version: 1.16-2ubuntu0.1
+vulnerability.package.architecture: amd64
 vulnerability.condition: Package less than 1.16.1-1
 vulnerability.reference: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-5710
 ```
@@ -995,9 +995,9 @@ vulnerability.published: 2017-03-17
 vulnerability.updated: 2017-07-12
 vulnerability.state: Fixed
 vulnerability.cvss.cvss2.vector.attack_vector: network
-vulnerability.cvss.cvss2.vector.access_complexity: medium 
+vulnerability.cvss.cvss2.vector.access_complexity: medium
 vulnerability.cvss.cvss2.vector.authentication: none
-vulnerability.cvss.cvss2.vector.integrity_impact: partial 
+vulnerability.cvss.cvss2.vector.integrity_impact: partial
 vulnerability.cvss.cvss2.vector.availability: none
 vulnerability.cvss.cvss2.base_score: 4.300000
 vulnerability.cvss.cvss3.vector.attack_vector: network
@@ -1005,11 +1005,11 @@ vulnerability.cvss.cvss3.vector.access_complexity: low
 vulnerability.cvss.cvss3.vector.confidentiality_impact: low
 vulnerability.cvss.cvss3.vector.availability: none
 vulnerability.cvss.cvss3.vector.privileges_required: none
-vulnerability.cvss.cvss3.vector.user_interaction: required 
-vulnerability.cvss.cvss3.vector.scope: changed 
+vulnerability.cvss.cvss3.vector.user_interaction: required
+vulnerability.cvss.cvss3.vector.scope: changed
 vulnerability.cvss.cvss3.base_score: 6.100000
-vulnerability.software.name: Windows Server 2008 R2
-vulnerability.software.generated_cpe: o:microsoft:windows_server_2008:r2:sp1::::::
+vulnerability.package.name: Windows Server 2008 R2
+vulnerability.package.generated_cpe: o:microsoft:windows_server_2008:r2:sp1::::::
 vulnerability.condition: 4012212 patch is not installed.
 vulnerability.cwe_reference: CWE-79
 vulnerability.reference: http://www.securityfocus.com/bid/96622
