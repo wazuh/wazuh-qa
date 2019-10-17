@@ -11,5 +11,40 @@
   - directories:
       value: "/testdir1,/testdir2,/testdir3"
       attributes:
-      - check_all: 'yes'
+      - whodata: 'yes'
+- tags:
+  - audit_key
+  apply_to_modules:
+  - test_audit
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - whodata:
+      elements:
+      - restart_audit:
+          value: 'yes'
+      - audit_key:
+          value: "custom_audit_key"
+      - startup_healthcheck:
+          value: 'yes'
+  - directories:
+      value: "/testdir1"
+      attributes:
+      - whodata: 'yes'
+- tags:
+  - restart_audit_false
+  apply_to_modules:
+  - test_audit
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - whodata:
+      elements:
+      - restart_audit:
+          value: 'no'
+  - directories:
+      value: "/testdir1"
+      attributes:
       - whodata: 'yes'

@@ -201,7 +201,6 @@ def write_wazuh_conf(wazuh_conf: ET.ElementTree):
 def set_section_wazuh_conf(section: str = 'syscheck',
                            new_elements: List = None) -> ET.ElementTree:
     """Set a configuration in a section of Wazuh. It replaces the content if it exists.
-
     :param section: Section of Wazuh configuration to replace
     :param new_elements: List with dictionaries for settings elements in the section
     :return: ElementTree with the custom Wazuh configuration
@@ -228,7 +227,7 @@ def set_section_wazuh_conf(section: str = 'syscheck',
                                     tag.attrib[attr_name] = attr_value
     # get Wazuh configuration
     wazuh_conf = get_wazuh_conf()
-    section_conf = wazuh_conf.find('/'.join([section]))
+    section_conf = wazuh_conf.find(section)
     # create section if it does not exist, clean otherwise
     if not section_conf:
         section_conf = ET.SubElement(wazuh_conf.getroot(), section)
@@ -237,7 +236,6 @@ def set_section_wazuh_conf(section: str = 'syscheck',
     # insert elements
     if new_elements:
         create_elements(section_conf, new_elements)
-
     return wazuh_conf
 
 

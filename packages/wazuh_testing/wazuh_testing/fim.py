@@ -418,6 +418,12 @@ def callback_audit_reloaded_rule(line):
     return None
 
 
+def callback_audit_key(line):
+    if 'Match audit_key' in line and 'key="wazuh_hc"' not in line and 'key="wazuh_fim"' not in line:
+        return line
+    return None
+
+
 def callback_realtime_added_directory(line):
     match = re.match(r'.*Directory added for real time monitoring: \'(.+)\'', line)
     if match:
