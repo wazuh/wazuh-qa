@@ -8,8 +8,9 @@ import subprocess
 
 import pytest
 
-from wazuh_testing.tools import (FileMonitor, truncate_file,
-                                restart_wazuh_service)
+from wazuh_testing.tools import (FileMonitor, get_wazuh_conf,
+                                 set_section_wazuh_conf, truncate_file,
+                                 restart_wazuh_service, write_wazuh_conf)
 from wazuh_testing.tools import restart_wazuh_daemon
 
 def find(name, path):
@@ -86,17 +87,17 @@ def configure_local_rules():
     shutil.copy('/var/ossec/etc/rules/local_rules.xml', '/var/ossec/etc/rules/local_rules.xml.cpy')
 
     # configuration for testing
-    path_test = find('test1.xml', '../..') 
-    shutil.copy('path_test', '/var/ossec/etc/rules/local_rules.xml')
+    path_test = find('test1.xml', '/') 
+    shutil.copy(path_test, '/var/ossec/etc/rules/local_rules.xml')
 
     # restart wazuh service    
     restart_wazuh_service()
+    restart_wazuh_daemon('ossec-analysisd')
 
     yield
 
     # restore previous configuration
     shutil.move('/var/ossec/etc/rules/local_rules.xml.cpy', '/var/ossec/etc/rules/local_rules.xml')
-    
+
     # restart wazuh service
     restart_wazuh_service()
-
