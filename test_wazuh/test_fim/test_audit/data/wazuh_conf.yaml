@@ -32,3 +32,19 @@
       value: "/testdir1"
       attributes:
       - whodata: 'yes'
+- tags:
+  - restart_audit_false
+  apply_to_modules:
+  - test_audit
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - whodata:
+      elements:
+      - restart_audit:
+          value: 'no'
+  - directories:
+      value: "/testdir1"
+      attributes:
+      - whodata: 'yes'
