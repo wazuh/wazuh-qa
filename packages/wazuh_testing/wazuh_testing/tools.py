@@ -5,6 +5,7 @@
 import os
 import psutil
 import random
+import re
 import string
 import subprocess
 import sys
@@ -207,7 +208,6 @@ def set_section_wazuh_conf(section: str = 'syscheck',
     def create_elements(section: ET.Element, elements: List):
         """Insert new elements in a Wazuh configuration section.
 
-
         :param section: Section where the element will be inserted
         :param elements: List with the new elements to be inserted
         """
@@ -236,7 +236,6 @@ def set_section_wazuh_conf(section: str = 'syscheck',
     # insert elements
     if new_elements:
         create_elements(section_conf, new_elements)
-    
     return wazuh_conf
 
 
@@ -506,3 +505,23 @@ def restart_wazuh_service():
     """
     p = subprocess.Popen(["service", "wazuh-manager", "restart"])
     p.wait()
+
+
+def reformat_time(scan_time):
+    """ Transform scan_time to readable time
+
+    :param scan_time: Time string
+    :type scan_time: String
+    :return: Datetime object
+    """
+    hour_format = '%H'
+    colon = ''
+    locale = ''
+    if ':' in scan_time:
+        colon = ':%M'
+    if re.search('[a-zA-Z]', scan_time):
+        locale = '%p'
+        hour_format = '%I'
+    cd = datetime.now()
+    return datetime.replace(datetime.strptime(scan_time, hour_format + colon + locale),
+                            year=cd.year, month=cd.month, day=cd.day)

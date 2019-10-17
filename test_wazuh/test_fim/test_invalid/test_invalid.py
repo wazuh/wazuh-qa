@@ -40,7 +40,7 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.parametrize('tags_to_apply', [
-    ({'invalid_no_regex'})
+    ({'invalid_no_regex', 'invalid_scan'})
 ])
 def test_ignore(tags_to_apply, get_configuration, configure_environment,
                 restart_wazuh):

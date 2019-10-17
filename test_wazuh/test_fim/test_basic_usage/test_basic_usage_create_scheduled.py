@@ -80,4 +80,4 @@ def test_create_file_scheduled(folder, name, filetype, content, checkers,
         time.sleep(3)
     else:
         with pytest.raises(TimeoutError):
-            assert wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+            wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
