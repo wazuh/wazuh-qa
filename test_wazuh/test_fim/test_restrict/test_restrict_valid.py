@@ -85,8 +85,8 @@ def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply
     if triggers_event:
         event = wazuh_log_monitor.start(timeout=3,
                                         callback=callback_detect_event).result()
-        assert (event['data']['type'] == 'added')
-        assert (event['data']['path'] == os.path.join(folder, filename))
+        assert (event['data']['type'] == 'added'), f'Event type not equal'
+        assert (event['data']['path'] == os.path.join(folder, filename)), f'Event path not equal'
     else:
         while True:
             ignored_file = wazuh_log_monitor.start(timeout=3,

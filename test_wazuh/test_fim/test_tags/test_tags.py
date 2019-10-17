@@ -58,7 +58,7 @@ def test_tags(folder, name, content,
     defined_tags = get_configuration['metadata']['fim_tags']
 
     def tag_validator(event):
-        assert(defined_tags == event['data']['tags'])
+        assert(defined_tags == event['data']['tags']), f'defined_tags are not equal'
 
     files = {name: content}
 

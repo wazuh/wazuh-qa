@@ -66,9 +66,9 @@ def test_added_rules(tags_to_apply, get_configuration,
                                      callback=callback_audit_added_rule,
                                      accum_results=3).result()
 
-    assert (testdir1 in events)
-    assert (testdir2 in events)
-    assert (testdir3 in events)
+    assert (testdir1 in events), f'{testdir1} not detected in scan'
+    assert (testdir2 in events), f'{testdir2} not detected in scan'
+    assert (testdir3 in events), f'{testdir3} not detected in scan'
 
 
 @pytest.mark.parametrize('tags_to_apply', [
@@ -89,7 +89,7 @@ def test_readded_rules(tags_to_apply, get_configuration,
         events = wazuh_log_monitor.start(timeout=10,
                                          callback=callback_audit_reloaded_rule).result()
 
-        assert (dir in events)
+        assert (dir in events), f'{dir} not in {events}'
 
 
 @pytest.mark.parametrize('tags_to_apply', [
@@ -111,9 +111,9 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
                                      callback=callback_audit_loaded_rule,
                                      accum_results=3).result()
 
-    assert (testdir1 in events)
-    assert (testdir2 in events)
-    assert (testdir3 in events)
+    assert (testdir1 in events), f'{testdir1} not in {events}'
+    assert (testdir2 in events), f'{testdir2} not in {events}'
+    assert (testdir3 in events), f'{testdir3} not in {events}'
 
 
 @pytest.mark.parametrize('tags_to_apply', [
@@ -132,9 +132,9 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
                                      callback=callback_realtime_added_directory,
                                      accum_results=3).result()
 
-    assert (testdir1 in events)
-    assert (testdir2 in events)
-    assert (testdir3 in events)
+    assert (testdir1 in events), f'{testdir1} not detected in scan'
+    assert (testdir2 in events), f'{testdir2} not detected in scan'
+    assert (testdir3 in events), f'{testdir3} not detected in scan'
 
     # Start Audit
     p = subprocess.Popen(["service", "auditd", "start"])
