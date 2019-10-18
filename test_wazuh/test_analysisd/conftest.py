@@ -5,6 +5,7 @@
 import os
 import shutil
 import subprocess
+import time
 
 import pytest
 
@@ -12,12 +13,6 @@ from wazuh_testing.tools import (FileMonitor, get_wazuh_conf,
                                  set_section_wazuh_conf, truncate_file,
                                  restart_wazuh_service, write_wazuh_conf)
 from wazuh_testing.tools import restart_wazuh_daemon
-
-def find(name, path):
-    for root, dirs, files in os.walk(path):
-        if name in files:
-            return os.path.join(root, name)
-
 
 @pytest.fixture(scope='module')
 def restart_wazuh(get_configuration, request):
@@ -50,7 +45,7 @@ def wait_for_initial_scan(get_configuration, request):
 @pytest.fixture(scope='module')
 def configure_environment(get_configuration, request):
     """Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration."""
-    #print(f"Setting a custom environment: {str(get_configuration)}")
+    print(f"Setting a custom environment: {str(get_configuration)}")
 
     # save current configuration
     backup_config = get_wazuh_conf()
@@ -80,19 +75,22 @@ def configure_environment(get_configuration, request):
             restart_wazuh_service()
 
 @pytest.fixture(scope='module')
-def configure_local_rules():
+def configure_local_rules(get_configuration, request):
     """Configure a custom rule in local_rules.xml for testing. Restart Wazuh is needed for applying the configuration."""
+    print(f"Test's path: {str(get_configuration)}")
+    
 
     # save current configuration
     shutil.copy('/var/ossec/etc/rules/local_rules.xml', '/var/ossec/etc/rules/local_rules.xml.cpy')
 
     # configuration for testing
-    path_test = find('test1.xml', '/') 
-    shutil.copy(path_test, '/var/ossec/etc/rules/local_rules.xml')
+    file_test = str(get_configuration)
+    shutil.copy(file_test, '/var/ossec/etc/rules/local_rules.xml')
 
     # restart wazuh service    
     restart_wazuh_service()
     restart_wazuh_daemon('ossec-analysisd')
+    time.sleep(10)
 
     yield
 
