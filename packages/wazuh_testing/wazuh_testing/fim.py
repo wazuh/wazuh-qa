@@ -246,7 +246,6 @@ def modify_file(path, name, is_binary=False, options=None):
     :type options: Dict
     :return: None
     """
-
     def modify_file_content():
         content = "1234567890qwertyuiopasdfghjklzxcvbnm"
         with open(regular_path, 'ab' if is_binary else 'a') as f:
@@ -417,6 +416,12 @@ def callback_audit_reloaded_rule(line):
     match = re.match(r'.*Reloaded audit rule for monitoring directory: \'(.+)\'', line)
     if match:
         return match.group(1)
+    return None
+
+
+def callback_audit_key(line):
+    if 'Match audit_key' in line and 'key="wazuh_hc"' not in line and 'key="wazuh_fim"' not in line:
+        return line
     return None
 
 
