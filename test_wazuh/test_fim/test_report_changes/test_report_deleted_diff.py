@@ -89,7 +89,7 @@ def create_and_check_diff(name, directory, fim_mode):
     wait_for_event(fim_mode)
     diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
                              directory.strip('/'), name)
-    assert (os.path.exists(diff_file))
+    assert (os.path.exists(diff_file)), f'{diff_file} does not exist'
     return diff_file
 
 
@@ -106,7 +106,7 @@ def check_when_no_report_changes(name, directory, fim_mode, new_conf):
     restart_wazuh_with_new_conf(new_conf)
     # Wait for FIM scan to finish
     detect_initial_scan(wazuh_log_monitor)
-    assert (not os.path.exists(diff_file))
+    assert (not os.path.exists(diff_file)), f'{diff_file} exists'
 
 
 def check_when_deleted_directories(name, directory, fim_mode):
@@ -121,7 +121,7 @@ def check_when_deleted_directories(name, directory, fim_mode):
     create_and_check_diff(name, directory, fim_mode)
     shutil.rmtree(directory, ignore_errors=True)
     wait_for_event(fim_mode)
-    assert (not os.path.exists(diff_dir))
+    assert (not os.path.exists(diff_dir)), f'{diff_dir} exists'
 
 
 # tests
