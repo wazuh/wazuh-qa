@@ -1,0 +1,14 @@
+---
+# conf 1
+- tags:
+  - follow_symbolic_link
+  apply_to_modules:
+  - test_follow_symbolic_link
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "/testdir1,/testdir2,/noexists"
+      attributes:
+      - FIM_MODE
