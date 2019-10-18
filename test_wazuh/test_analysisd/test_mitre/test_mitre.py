@@ -6,8 +6,8 @@ import os
 import pytest
 import time
 
-from wazuh_testing.mitre import (CHECK_ALL, LOG_FILE_PATH, callback_detect_mitre_event,
-                                 load_mitre_alerts, validate_mitre_event)
+from wazuh_testing.mitre import (CHECK_ALL, LOG_FILE_PATH, 
+                                callback_detect_mitre_event, validate_mitre_event)
 from wazuh_testing.tools import (FileMonitor)
 
 # variables
@@ -21,7 +21,6 @@ def test_mitre_alert(configure_local_rules):
     """Checks files are ignored in subdirectory according to configuration"""
     # Wait until event is detected
     event = wazuh_log_monitor.start(timeout=60, callback=callback_detect_mitre_event).result()
-    print(event)
     validate_mitre_event(event, checkers)
     time.sleep(2)
     
