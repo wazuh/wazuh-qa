@@ -1,19 +1,19 @@
 ---
-## conf 1
-#- tags:
-#  - skip_nfs
-#  apply_to_modules:
-#  - test_skip
-#  section: syscheck
-#  elements:
-#  - disabled:
-#      value: 'no'
-#  - directories:
-#      value: "/testdir1"
-#      attributes:
-#      - FIM_MODE
-#  - skip_nfs:
-#      SKIP
+# conf 1
+- tags:
+  - skip_nfs
+  apply_to_modules:
+  - test_skip
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "/nfs-mount-point"
+      attributes:
+      - FIM_MODE
+  - skip_nfs:
+      value: SKIP
 # conf 2
 - tags:
   - skip_dev
@@ -29,34 +29,34 @@
       - FIM_MODE
   - skip_dev:
       value: SKIP
-# conf 3
-- tags:
-  - skip_proc
-  apply_to_modules:
-  - test_skip
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/proc"
-      attributes:
-      - FIM_MODE
-  - skip_proc:
-      value: SKIP
-# conf 4
-- tags:
-  - skip_sys
-  apply_to_modules:
-  - test_skip
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/sys"
-      attributes:
-      - FIM_MODE
-  - skip_sys:
-      value: SKIP
+## conf 3
+#- tags:
+#  - skip_proc
+#  apply_to_modules:
+#  - test_skip
+#  section: syscheck
+#  elements:
+#  - disabled:
+#      value: 'no'
+#  - directories:
+#      value: "/proc"
+#      attributes:
+#      - FIM_MODE
+#  - skip_proc:
+#      value: SKIP
+## conf 4
+#- tags:
+#  - skip_sys
+#  apply_to_modules:
+#  - test_skip
+#  section: syscheck
+#  elements:
+#  - disabled:
+#      value: 'no'
+#  - directories:
+#      value: "/sys"
+#      attributes:
+#      - FIM_MODE
+#  - skip_sys:
+#      value: SKIP
 
