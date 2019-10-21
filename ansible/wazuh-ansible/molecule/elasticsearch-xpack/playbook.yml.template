@@ -24,7 +24,6 @@
       ca_key_name: "wazuh-test"
       ca_cert_name: "wazuh-cert"
       ca_password: "test-password"
-      elasticsearch_jvm_xms: 512
 
   vars:
     instances:
@@ -55,7 +54,6 @@
       ca_key_name: "wazuh-test"
       ca_cert_name: "wazuh-cert"
       ca_password: "test-password"
-      elasticsearch_jvm_xms: 512
   vars:
     elasticsearch_xpack_users:
       molecule_user:
