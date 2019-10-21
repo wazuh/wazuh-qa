@@ -14,6 +14,7 @@
       elasticsearch_discovery_nodes:
         - elasticsearch_%PLATFORM%-1
         - elasticsearch_%PLATFORM%-2
+      elasticsearch_lower_disk_requirements: true
       elasticsearch_xpack_security: true
       elasticsearch_xpack_security_user: elastic
       elasticsearch_xpack_security_password: elastic_pass
@@ -45,6 +46,7 @@
       elasticsearch_discovery_nodes:
         - elasticsearch_%PLATFORM%-1
         - elasticsearch_%PLATFORM%-2
+      elasticsearch_lower_disk_requirements: true
       elasticsearch_xpack_security: true
       elasticsearch_xpack_security_user: elastic
       elasticsearch_xpack_security_password: elastic_pass

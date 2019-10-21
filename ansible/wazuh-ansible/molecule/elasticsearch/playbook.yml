@@ -4,3 +4,4 @@
   roles:
     - role: elastic-stack/ansible-elasticsearch
       elasticsearch_network_host: '127.0.0.1'
+      elasticsearch_lower_disk_requirements: true
