@@ -36,6 +36,7 @@ This format must match in every test.
 - [ ] ROT006
 - [ ] ROT007
 - [ ] ROT008
+- [ ] ROT009
 
 ## ROT001
 
@@ -559,6 +560,30 @@ The rotated logs will be deleted after two days (in the example above). This mea
 **Use cases**
 - [ ] Trigger several log rotations during several days. Don't trigger a new log rotation at least until the `maxage` period has passed for every old rotated log. Then trigger a new rotation. All rotated logs should be deleted and a new one should be created.
 
+## ROT009
+
+**Short description**
+
+The log rotation must work for the different supported OS
+
+**Category**
+
+Log rotation
+
+**Subcategory**
+
+Different OS rotation
 
 
+**Use cases**
+The following use cases should be tested:
+- [ ] CentOS Manager
+- [ ] Ubuntu Manager.
+- [ ] CentOS Agent.
+- [ ] Ubuntu Agent.
+- [ ] Windows Agent.
+- [ ] MacOS Agent.
+- [ ] Solaris Agent.
+- [ ] HP-UX Agent.
+- [ ] AIX Agent
 
