@@ -73,10 +73,9 @@ def validate_mitre_event(event, checks=None):
         schema = json.load(f)
     validate(schema=schema, instance=event)
 
-    # Check mitre
-    if event['rule']['mitre']:
-        assert ('mitre' in event['rule'])
-        assert (event['rule']['mitre'].keys() ^ _REQUIRED_MITRE == set())
+    # Check Mitre
+    assert ('mitre' in event['rule'])
+    assert (event['rule']['mitre'].keys() ^ _REQUIRED_MITRE == set())
 
 def callback_detect_mitre_event(line):
     match = re.match(r'.*Sending mitre event: (.+)$', line)

@@ -35,4 +35,5 @@ def test_mitre_check_alert(get_configuration, configure_local_rules):
 
     # Wait until event is detected
     event = wazuh_log_monitor.start(timeout=20, callback=callback_detect_mitre_event).result()
+    print(event)
     validate_mitre_event(event, checkers)

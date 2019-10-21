@@ -89,8 +89,6 @@ def configure_local_rules(get_configuration, request):
 
     # restart wazuh service    
     restart_wazuh_service()
-    restart_wazuh_daemon('ossec-analysisd')
-    time.sleep(10)
 
     yield
 
