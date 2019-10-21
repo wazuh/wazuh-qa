@@ -359,6 +359,14 @@ def callback_detect_event(line):
     return None
 
 
+def callback_detect_integrity_event(line):
+    match = re.match(r'.*Sending integrity control message: (.+)$', line)
+    if match:
+        if json.loads(match.group(1))['type'] == 'state':
+            return json.loads(match.group(1))
+    return None
+
+
 def callback_ignore(line):
     match = re.match(r".*Ignoring '.*?' '(.*?)' due to sregex '.*?'", line)
     if match:
