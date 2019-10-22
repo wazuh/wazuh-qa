@@ -6,18 +6,17 @@ import os
 import pytest
 import time
 
-from wazuh_testing.mitre import (CHECK_ALL, LOG_FILE_PATH, callback_detect_mitre_event,
+from wazuh_testing.mitre import (callback_detect_mitre_event,
                                  validate_mitre_event, detect_initial_sca_scan)
-from wazuh_testing.tools import (FileMonitor)
+from wazuh_testing.tools import (FileMonitor, LOG_FILE_PATH)
 
 # variables
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-checkers = {CHECK_ALL}
 
 configurations = []
 path_tests = os.path.join(os.getcwd()+"/"+"data"+"/")
-for i in range(1,9):
+for i in range(8, 13):
     file_test = os.path.join(path_tests +"test" + str(i) + ".xml")
     configurations.append(file_test)
 
@@ -38,5 +37,4 @@ def test_mitre_check_alert(get_configuration, restart_wazuh, configure_local_rul
 
     # Wait until event is detected
     event = wazuh_log_monitor.start(timeout=6, callback=callback_detect_mitre_event).result()
-    print(event)
-    validate_mitre_event(event, checkers)
+    validate_mitre_event(event)

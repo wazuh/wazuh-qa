@@ -10,9 +10,6 @@ import time
 import pytest
 
 from wazuh_testing.tools import restart_wazuh_service
-from wazuh_testing.tools import (FileMonitor, truncate_file,
-                                 restart_wazuh_service)
-from wazuh_testing.tools import restart_wazuh_daemon
 
 
 @pytest.fixture(scope='module')
