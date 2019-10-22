@@ -359,6 +359,12 @@ def callback_detect_event(line):
     return None
 
 
+def callback_detect_synchronization(line):
+    if 'Performing synchronization check' in line:
+        return line
+    return None
+
+
 def callback_ignore(line):
     match = re.match(r".*Ignoring '.*?' '(.*?)' due to sregex '.*?'", line)
     if match:
