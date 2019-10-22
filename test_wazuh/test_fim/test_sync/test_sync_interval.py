@@ -5,7 +5,7 @@ import os
 from datetime import datetime, timedelta
 import pytest
 import time
-from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_synchronization, detect_initial_scan)
+from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_synchronization, detect_initial_scan, callback_configuration_warning)
 from wazuh_testing.tools import (FileMonitor, truncate_file, check_apply_test, load_wazuh_configurations, reformat_time, TimeMachine)
 
 

@@ -444,6 +444,13 @@ def callback_configuration_error(line):
     return None
 
 
+def callback_configuration_warning(line):
+    match = re.match(r'.*WARNING: \(\d+\): Invalid value for element', line)
+    if match:
+        return True
+    return None
+
+
 def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=False, min_timeout=1, options=None,
                      triggers_event=True, validators_after_create=None, validators_after_update=None, 
                      validators_after_delete=None, validators_after_cud=None):
