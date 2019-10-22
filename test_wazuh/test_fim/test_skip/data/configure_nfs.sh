@@ -5,3 +5,4 @@ mkdir /media/nfs-folder
 mkdir /nfs-mount-point
 echo "/media/nfs-folder     172.19.0.100*(rw,sync,no_root_squash)" > /etc/exports
 exportfs -a
+mount -o hard,nolock 172.19.0.100:/media/nfs-folder /nfs-mount-point/
