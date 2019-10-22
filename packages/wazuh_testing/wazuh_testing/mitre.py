@@ -23,7 +23,6 @@ _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 WAZUH_PATH = os.path.join('/', 'var', 'ossec')
 ALERTS_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'alerts', 'alerts.json')
 WAZUH_CONF_PATH = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
-LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
 
 FIFO = 'fifo'
 SYSLINK = 'sys_link'
