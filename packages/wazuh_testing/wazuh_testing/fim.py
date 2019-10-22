@@ -112,12 +112,13 @@ def validate_event(event, checks=None):
     # Check attributes
     attributes = event['data']['attributes'].keys() - {'type', 'checksum'}
     required_attributes = get_required_attributes(checks)
-    assert (attributes ^ required_attributes == set())
+    assert (attributes ^ required_attributes == set()), f'attributes and required_attributes are not the same'
 
     # Check audit
     if event['data']['mode'] == 'whodata':
-        assert ('audit' in event['data'])
-        assert (event['data']['audit'].keys() ^ _REQUIRED_AUDIT == set())
+        assert ('audit' in event['data']), f'audit no detected in event'
+        assert (event['data']['audit'].keys() ^ _REQUIRED_AUDIT == set()), \
+            f'audit keys and required_audit are no the same'
 
 
 def is_fim_scan_ended():
@@ -315,7 +316,7 @@ def modify_file(path, name, is_binary=False, options=None):
                     modify_file_permission()
 
                 elif check == REQUIRED_ATTRIBUTES[CHECK_INODE] or check == CHECK_INODE:
-                    modify_file_inode() 
+                    modify_file_inode()
 
 
 def change_internal_options(opt_path, pattern, value):
@@ -418,6 +419,12 @@ def callback_audit_reloaded_rule(line):
     return None
 
 
+def callback_audit_key(line):
+    if 'Match audit_key' in line and 'key="wazuh_hc"' not in line and 'key="wazuh_fim"' not in line:
+        return line
+    return None
+
+
 def callback_realtime_added_directory(line):
     match = re.match(r'.*Directory added for real time monitoring: \'(.+)\'', line)
     if match:
@@ -433,7 +440,7 @@ def callback_configuration_error(line):
 
 
 def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=False, min_timeout=1, options=None,
-                     triggers_event=True, validators_after_create=None, validators_after_update=None, 
+                     triggers_event=True, validators_after_create=None, validators_after_update=None,
                      validators_after_delete=None, validators_after_cud=None):
     """ Checks if creation, update and delete events are detected by syscheck
 
@@ -490,12 +497,12 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     def check_events_type(ev_type):
         event_types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
-        assert (event_types[ev_type] == len(file_list))
+        assert (event_types[ev_type] == len(file_list)), f'Non expected number of events'
 
     def check_files_in_event():
         file_paths = jq(".[].data.path").transform(events, multiple_output=True)
         for file_name in file_list:
-            assert (os.path.join(folder, file_name) in file_paths)
+            assert (os.path.join(folder, file_name) in file_paths), f'{file_name} does not exist in {file_paths}'
 
     def check_events(event_type, validate_after):
         if events is not None:

@@ -9,7 +9,6 @@ import re
 from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, callback_audit_event_too_long
 from wazuh_testing.tools import FileMonitor, load_wazuh_configurations
 
-
 # Variables
 
 dir_no_recursion = "/test_no_recursion"
@@ -38,7 +37,6 @@ test_directories = [
 ]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-
 # Configurations
 
 configurations = load_wazuh_configurations(configurations_path, __name__,
@@ -65,7 +63,7 @@ def check_config_applies(applies_to_config, get_configuration):
         pytest.skip("Does not apply to this config file")
 
 
-def recursion_test(dirname, subdirname, recursion_level, timeout=1, threshold_true=2, threshold_false=2, 
+def recursion_test(dirname, subdirname, recursion_level, timeout=1, threshold_true=2, threshold_false=2,
                    is_scheduled=False):
     """Checks recursion_level functionality over the first and last n-directories of the dirname hierarchy 
     by creating, modifying and deleting some files in them. It will create all directories and 
@@ -83,25 +81,25 @@ def recursion_test(dirname, subdirname, recursion_level, timeout=1, threshold_tr
 
     # Check True (Within the specified recursion level)
     for n in range(recursion_level):
-        path = os.path.join(path, subdirname + str(n+1))
+        path = os.path.join(path, subdirname + str(n + 1))
         if ((recursion_level < threshold_true * 2) or
-            (recursion_level >= threshold_true * 2 and n < threshold_true) or
-            (recursion_level >= threshold_true * 2 and n > recursion_level - threshold_true)):
+                (recursion_level >= threshold_true * 2 and n < threshold_true) or
+                (recursion_level >= threshold_true * 2 and n > recursion_level - threshold_true)):
             regular_file_cud(path, wazuh_log_monitor, time_travel=is_scheduled, min_timeout=timeout)
 
     # Check False (exceding the specified recursion_level)
     for n in range(recursion_level, recursion_level + threshold_false):
-        path = os.path.join(path, subdirname + str(n+1))
+        path = os.path.join(path, subdirname + str(n + 1))
         regular_file_cud(path, wazuh_log_monitor, time_travel=is_scheduled, min_timeout=timeout, triggers_event=False)
 
 
-def check_event_too_long (get_configuration, recursion_level):
+def check_event_too_long(get_configuration, recursion_level):
     """Checks if the `Event to long` message was raised due to Whodata path length limitation."""
     if (get_configuration['metadata']['fim_mode'] == 'whodata' and recursion_level > 250):
         event = wazuh_log_monitor.start(timeout=30,
                                         callback=callback_audit_event_too_long,
                                         accum_results=1).result()
-        assert (event)
+        assert event, f'event not detected'
 
 
 # Fixtures

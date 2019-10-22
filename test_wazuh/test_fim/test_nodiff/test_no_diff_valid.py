@@ -93,15 +93,17 @@ def test_no_diff_subdirectory(folder, filename, content, hidden_content,
         for file in files:
             diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
                                      folder.strip('/'), file)
-            assert (os.path.exists(diff_file))
-            assert (event['data'].get('content_changes') is not None)
+            assert (os.path.exists(diff_file)), f'{diff_file} does not exist'
+            assert (event['data'].get('content_changes') is not None), f'content_changes is empty'
 
     def no_diff_validator(event):
         """ Validate content_changes value is truncated if the file is set to no_diff """
         if hidden_content:
-            assert ('<Diff truncated because nodiff option>' in event['data'].get('content_changes'))
+            assert ('<Diff truncated because nodiff option>' in event['data'].get('content_changes')), \
+                    f'content_changes is not truncated'
         else:
-            assert ('<Diff truncated because nodiff option>' not in event['data'].get('content_changes'))
+            assert ('<Diff truncated because nodiff option>' not in event['data'].get('content_changes')), \
+                    f'content_changes is truncated'
 
     regular_file_cud(folder, wazuh_log_monitor, file_list=files,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
