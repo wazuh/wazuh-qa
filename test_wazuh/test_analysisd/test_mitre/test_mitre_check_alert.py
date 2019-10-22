@@ -7,7 +7,7 @@ import pytest
 import time
 
 from wazuh_testing.mitre import (CHECK_ALL, LOG_FILE_PATH, callback_detect_mitre_event,
-                                 validate_mitre_event)
+                                 validate_mitre_event, detect_initial_sca_scan)
 from wazuh_testing.tools import (FileMonitor)
 
 # variables
@@ -30,10 +30,13 @@ def get_configuration(request):
 
 # tests
 
-def test_mitre_check_alert(get_configuration, configure_local_rules):
+def test_mitre_check_alert(get_configuration, restart_wazuh, configure_local_rules):
     """Checks Mitre alerts have correct format in accordance with configuration"""
 
+    # Wait until SCA scan end
+    detect_initial_sca_scan(wazuh_log_monitor)
+
     # Wait until event is detected
-    event = wazuh_log_monitor.start(timeout=20, callback=callback_detect_mitre_event).result()
+    event = wazuh_log_monitor.start(timeout=6, callback=callback_detect_mitre_event).result()
     print(event)
     validate_mitre_event(event, checkers)
