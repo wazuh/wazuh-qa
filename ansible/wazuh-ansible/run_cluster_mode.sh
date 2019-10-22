@@ -36,6 +36,7 @@ fi
 pipenv run destroy_all
 
 pipenv run elasticsearch
+pipenv run elasticsearch-xpack
 pipenv run test
 pipenv run worker
 pipenv run kibana
