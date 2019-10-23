@@ -9,15 +9,15 @@ lint:
     config-data:
       ignore: .virtualenv
 platforms:
-  - name: node-1
-    image: solita/ubuntu-systemd:bionic
+  - name: elasticsearch_${MOL_PLATFORM:-centos7}-1
+    image: ${MOL_IMAGE:-milcom/centos7-systemd}
     command: /sbin/init
     ulimits:
       - nofile:262144:262144
     privileged: true
     memory_reservation: 2048m
-  - name: node-2
-    image: solita/ubuntu-systemd:bionic
+  - name: elasticsearch_${MOL_PLATFORM:-centos7}-2
+    image: ${MOL_IMAGE:-milcom/centos7-systemd}
     command: /sbin/init
     ulimits:
       - nofile:262144:262144

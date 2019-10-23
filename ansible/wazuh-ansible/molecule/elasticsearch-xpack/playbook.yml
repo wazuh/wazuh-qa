@@ -1,25 +1,25 @@
 ---
 - name: Converge
-  hosts: node-1
+  hosts: elasticsearch_${MOL_PLATFORM:-centos7}-1
   roles:
     - role: ../roles/elastic-stack/ansible-elasticsearch
       elasticsearch_network_host: 0.0.0.0
       elasticsearch_reachable_host: 127.0.0.1
-      elasticsearch_node_name: node-1
+      elasticsearch_node_name: elasticsearch_${MOL_PLATFORM:-centos7}-1
       single_node: false
       elasticsearch_master_candidate: true
       elasticsearch_bootstrap_node: true
       elasticsearch_cluster_nodes:
-        - node-1
+        - elasticsearch_${MOL_PLATFORM:-centos7}-1
       elasticsearch_discovery_nodes:
-        - node-1
-        - node-2
+        - elasticsearch_${MOL_PLATFORM:-centos7}-1
+        - elasticsearch_${MOL_PLATFORM:-centos7}-2
       elasticsearch_lower_disk_requirements: true
       elasticsearch_xpack_security: true
       elasticsearch_xpack_security_user: elastic
       elasticsearch_xpack_security_password: elastic_pass
       node_certs_generator: true
-      node_certs_generator_ip: node-1
+      node_certs_generator_ip: elasticsearch_${MOL_PLATFORM:-centos7}-1
       master_certs_path: /tmp/xpack-certs
       generate_CA: true
       ca_key_name: "wazuh-test"
@@ -28,29 +28,29 @@
 
   vars:
     instances:
-      node-1:
-        name: node-1
-        dns: node-1
-      node-2:
-        name: node-2
-        dns: node-2
+      elasticsearch_${MOL_PLATFORM:-centos7}-1:
+        name: elasticsearch_${MOL_PLATFORM:-centos7}-1
+        dns: elasticsearch_${MOL_PLATFORM:-centos7}-1
+      elasticsearch_${MOL_PLATFORM:-centos7}-2:
+        name: elasticsearch_${MOL_PLATFORM:-centos7}-2
+        dns: elasticsearch_${MOL_PLATFORM:-centos7}-2
 
-- hosts: node-2
+- hosts: elasticsearch_${MOL_PLATFORM:-centos7}-2
   roles:
     - role: ../roles/elastic-stack/ansible-elasticsearch
       elasticsearch_network_host: 0.0.0.0
       elasticsearch_reachable_host: 127.0.0.1
-      elasticsearch_node_name: node-2
+      elasticsearch_node_name: elasticsearch_${MOL_PLATFORM:-centos7}-2
       single_node: false
       elasticsearch_master_candidate: true
       elasticsearch_discovery_nodes:
-        - node-1
-        - node-2
+        - elasticsearch_${MOL_PLATFORM:-centos7}-1
+        - elasticsearch_${MOL_PLATFORM:-centos7}-2
       elasticsearch_lower_disk_requirements: true
       elasticsearch_xpack_security: true
       elasticsearch_xpack_security_user: elastic
       elasticsearch_xpack_security_password: elastic_pass
-      node_certs_generator_ip: node-1
+      node_certs_generator_ip: elasticsearch_${MOL_PLATFORM:-centos7}-1
       master_certs_path: /tmp/xpack-certs
       generate_CA: true
       ca_key_name: "wazuh-test"
