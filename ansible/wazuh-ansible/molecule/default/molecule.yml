@@ -7,8 +7,8 @@ lint:
   name: yamllint
   enabled: false
 platforms:
-  - name: manager_bionic
-    image: solita/ubuntu-systemd:bionic
+  - name: ${MOL_PLATFORM:-centos7}
+    image: ${MOL_IMAGE:-milcom/centos7-systemd}
     command: /sbin/init
     ulimits:
       - nofile:262144:262144
