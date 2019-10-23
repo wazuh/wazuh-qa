@@ -3,7 +3,7 @@
 - tags:
   - ambiguous_restrict
   apply_to_modules:
-  - test_ambiguous_dirs_subdirs
+  - test_ambiguous_simple
   section: syscheck
   elements:
   - disabled:
@@ -21,7 +21,7 @@
 - tags:
   - ambiguous_ignore
   apply_to_modules:
-  - test_ambiguous_dirs_subdirs
+  - test_ambiguous_simple
   section: syscheck
   elements:
   - disabled:
@@ -39,7 +39,7 @@
 - tags:
   - ambiguous_report_changes
   apply_to_modules:
-  - test_ambiguous_dirs_subdirs
+  - test_ambiguous_simple
   section: syscheck
   elements:
   - disabled:
@@ -58,7 +58,7 @@
 - tags:
   - ambiguous_tags
   apply_to_modules:
-  - test_ambiguous_dirs_subdirs
+  - test_ambiguous_simple
   section: syscheck
   elements:
   - disabled:
@@ -76,7 +76,7 @@
 - tags:
   - ambiguous_recursion_over
   apply_to_modules:
-  - test_ambiguous_dirs_subdirs
+  - test_ambiguous_simple
   section: syscheck
   elements:
   - disabled:
@@ -94,7 +94,7 @@
 - tags:
   - ambiguous_recursion
   apply_to_modules:
-  - test_ambiguous_dirs_subdirs
+  - test_ambiguous_simple
   section: syscheck
   elements:
   - disabled:
@@ -112,7 +112,7 @@
 - tags:
   - ambiguous_check
   apply_to_modules:
-  - test_ambiguous_dirs_subdirs
+  - test_ambiguous_simple
   section: syscheck
   elements:
   - disabled:

@@ -8,8 +8,8 @@ import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, WAZUH_PATH,
                                CHECK_ALL, CHECK_GROUP, CHECK_INODE,
-                               CHECK_MD5SUM, CHECK_MTIME, CHECK_OWNER,
-                               CHECK_PERM, CHECK_SHA1SUM, CHECK_SHA256SUM,
+                               CHECK_MTIME, CHECK_OWNER,
+                               CHECK_PERM, CHECK_SHA256SUM,
                                CHECK_SIZE, CHECK_SUM, REQUIRED_ATTRIBUTES)
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations)
@@ -17,10 +17,10 @@ from wazuh_testing.tools import (FileMonitor, check_apply_test,
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf_simple.yaml')
 checkdir_default = os.path.join('/', 'checkdir_default')
 checkdir_checkall = os.path.join(checkdir_default, 'checkdir_checkall')
-checkdir_no_inode = os.path.join(checkdir_checkall, 'checkdir_checkdir_no_inode')
+checkdir_no_inode = os.path.join(checkdir_checkall, 'checkdir_no_inode')
 checkdir_no_checksum = os.path.join(checkdir_no_inode, 'checkdir_no_checksum')
 test_directories = [os.path.join('/', 'testdir'), os.path.join('/', 'testdir', 'subdir'),
                     os.path.join('/', 'recursiondir'), checkdir_default, checkdir_checkall,
@@ -30,7 +30,6 @@ testdir_recursion = test_directories[2]
 
 tag = 'Sample_tag'
 
-
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
@@ -39,7 +38,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=[{'TAGS': tag}],
                                            metadata=[{'tags': tag}]
                                            )
-configurations = [configurations[6]]
+
 
 # fixtures
 
@@ -62,9 +61,9 @@ def get_configuration(request):
     ({'ambiguous_ignore'}),
 
 ])
-def _test_ambiguous_restrict_ignore(folders, tags_to_apply,
-                                   get_configuration, configure_environment,
-                                   restart_syscheckd, wait_for_initial_scan):
+def test_ambiguous_restrict_ignore(folders, tags_to_apply,
+                                    get_configuration, configure_environment,
+                                    restart_syscheckd, wait_for_initial_scan):
     """ Checks if syscheckd detects regular file changes (add, modify, delete)
 
     """
@@ -85,9 +84,9 @@ def _test_ambiguous_restrict_ignore(folders, tags_to_apply,
 @pytest.mark.parametrize('folders, tags_to_apply', [
     ([testdir, subdir], {'ambiguous_report_changes'})
 ])
-def _test_ambiguous_report(folders, tags_to_apply,
-                          get_configuration, configure_environment,
-                          restart_syscheckd, wait_for_initial_scan):
+def test_ambiguous_report(folders, tags_to_apply,
+                           get_configuration, configure_environment,
+                           restart_syscheckd, wait_for_initial_scan):
     """ Checks if syscheckd detects regular file changes (add, modify, delete)
 
     """
@@ -128,9 +127,9 @@ def _test_ambiguous_report(folders, tags_to_apply,
 @pytest.mark.parametrize('folders, tags_to_apply', [
     ([testdir, subdir], {'ambiguous_tags'})
 ])
-def _test_ambiguous_tags(folders, tags_to_apply,
-                        get_configuration, configure_environment,
-                        restart_syscheckd, wait_for_initial_scan):
+def test_ambiguous_tags(folders, tags_to_apply,
+                         get_configuration, configure_environment,
+                         restart_syscheckd, wait_for_initial_scan):
     """ Checks if syscheckd detects regular file changes (add, modify, delete)
 
     """
@@ -158,12 +157,12 @@ def _test_ambiguous_tags(folders, tags_to_apply,
 
 
 @pytest.mark.parametrize('dirname, recursion_level, tags_to_apply', [
-    (testdir_recursion,  1, {'ambiguous_recursion_over'}),
+    (testdir_recursion, 1, {'ambiguous_recursion_over'}),
     (testdir_recursion, 4, {'ambiguous_recursion'})
 ])
-def _test_ambiguous_recursion(dirname, recursion_level, tags_to_apply,
-                             get_configuration, configure_environment,
-                             restart_syscheckd, wait_for_initial_scan):
+def test_ambiguous_recursion(dirname, recursion_level, tags_to_apply,
+                              get_configuration, configure_environment,
+                              restart_syscheckd, wait_for_initial_scan):
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     min_timeout = 3
@@ -188,10 +187,11 @@ def _test_ambiguous_recursion(dirname, recursion_level, tags_to_apply,
 ])
 @pytest.mark.parametrize('dirname, checkers', [
     (checkdir_default, {CHECK_SIZE} | {CHECK_PERM} | {CHECK_OWNER} | {CHECK_GROUP} | {CHECK_SHA256SUM} |
-            {CHECK_MTIME} | {CHECK_INODE}),
+     {CHECK_MTIME} | {CHECK_INODE}),
     (checkdir_checkall, REQUIRED_ATTRIBUTES[CHECK_ALL]),
-    (checkdir_no_checksum, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_SUM}),
-    (checkdir_no_inode, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_INODE})
+    (checkdir_no_inode, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_INODE}),
+    (checkdir_no_checksum, REQUIRED_ATTRIBUTES[CHECK_ALL] - REQUIRED_ATTRIBUTES[CHECK_SUM])
+
 ])
 def test_ambiguous_check(dirname, checkers, tags_to_apply,
                          get_configuration, configure_environment,
@@ -199,9 +199,5 @@ def test_ambiguous_check(dirname, checkers, tags_to_apply,
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     min_timeout = 3
-
     regular_file_cud(dirname, wazuh_log_monitor, min_timeout=min_timeout, options=checkers,
                      time_travel=False)
-
-
-
