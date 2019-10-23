@@ -5,31 +5,12 @@
 import json
 import os
 import re
-import shutil
-import socket
-import sys
-import time
-from collections import Counter
-from datetime import timedelta
-from stat import ST_ATIME, ST_MTIME
 
 from jq import jq
 from jsonschema import validate
 
-from wazuh_testing.tools import TimeMachine
-
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
-WAZUH_PATH = os.path.join('/', 'var', 'ossec')
-ALERTS_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'alerts', 'alerts.json')
-WAZUH_CONF_PATH = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
-
-FIFO = 'fifo'
-SYSLINK = 'sys_link'
-SOCKET = 'socket'
-REGULAR = 'regular'
-
-_last_log_line = 0
 
 def validate_mitre_event(event):
     """ Checks if a Mitre event is properly formatted.
