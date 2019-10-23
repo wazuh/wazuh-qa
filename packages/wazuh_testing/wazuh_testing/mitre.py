@@ -24,7 +24,7 @@ def validate_mitre_event(event):
     validate(schema=schema, instance=event)
 
 def callback_detect_mitre_event(line):
-    """ Callback to detect Mitre event when restarting Wazuh
+    """ Callback to detect Mitre event
 
     :param line: string to be compared with alerts in ossec.log
     :return: JSON object on success or None on fail
@@ -34,16 +34,16 @@ def callback_detect_mitre_event(line):
         return json.loads(match.group(1))
     return None
 
-def callback_detect_end_sca_scan(line):
-    if 'Security Configuration Assessment scan finished.' in line:
+def callback_detect_analysisd_started(line):
+    if 'ossec-analysisd' and 'at main(): INFO: Started' in line:
         return line
     return None
 
-def detect_initial_sca_scan(file_monitor):
-    """ Detect end SCA scan when restarting Wazuh
+def detect_initial_analysisd(file_monitor):
+    """ Detect analysisd start when restarting Wazuh
 
     :param file_monitor: Wazuh log monitor to detect syscheck events
     :type file_monitor: FileMonitor
     :return: None
     """
-    file_monitor.start(timeout=20, callback=callback_detect_end_sca_scan)
+    file_monitor.start(timeout=5, callback=callback_detect_analysisd_started, accum_results=2)
