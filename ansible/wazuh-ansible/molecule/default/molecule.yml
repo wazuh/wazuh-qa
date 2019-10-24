@@ -7,7 +7,7 @@ lint:
   name: yamllint
   enabled: false
 platforms:
-  - name: ${MOL_PLATFORM:-centos7}
+  - name: manager_${MOL_PLATFORM:-centos7}
     image: ${MOL_IMAGE:-milcom/centos7-systemd}
     command: /sbin/init
     ulimits:
