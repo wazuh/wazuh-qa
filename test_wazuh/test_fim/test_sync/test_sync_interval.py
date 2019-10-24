@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import pytest
 import time
 from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_synchronization, detect_initial_scan, callback_configuration_warning)
-from wazuh_testing.tools import (FileMonitor, truncate_file, check_apply_test, load_wazuh_configurations, reformat_time, TimeMachine)
+from wazuh_testing.tools import (FileMonitor, truncate_file, check_apply_test, load_wazuh_configurations, reformat_time, TimeMachine, time_to_timedelta)
 
 
 # variables
@@ -39,31 +39,15 @@ def get_configuration(request):
 # Tests
 
 def test_sync_interval(get_configuration, configure_environment, restart_syscheckd):
-    """ Check if there is a scan at a certain time """
+    """Verify that synchronization checks take place at the expected time given SYNC_INTERVAL variable.
+    
+    This test is intended to be used with valid ignore configurations.
+    """
     def truncate_log():
         truncate_file(LOG_FILE_PATH)
         return FileMonitor(LOG_FILE_PATH)
     
-    def time_delta(time):
-        time_unit = time[len(time)-1:]
-
-        if time_unit.isnumeric():
-            return timedelta(seconds=int(time))
-
-        time_value = int(time[:len(time)-1])
-
-        if time_unit == "s":
-            return timedelta(seconds=time_value)
-        elif time_unit == "m":
-            return timedelta(minutes=time_value)
-        elif time_unit == "h":
-            return timedelta(hours=time_value)
-        elif time_unit == "d":
-            return timedelta(days=time_value)
-        elif time_unit == "w":
-            return timedelta(weeks=time_value)
-    
-    
+    # Check if the test should be skipped
     check_apply_test({'sync_interval'}, get_configuration['tags'])
     
     wazuh_log_monitor = truncate_log()
@@ -71,12 +55,12 @@ def test_sync_interval(get_configuration, configure_environment, restart_syschec
     wazuh_log_monitor.start(timeout=5, callback=callback_detect_synchronization)
 
     wazuh_log_monitor = truncate_log()
-    TimeMachine.travel_to_future(time_delta(get_configuration['metadata']['sync_interval']))
+    TimeMachine.travel_to_future(time_to_timedelta(get_configuration['metadata']['sync_interval']))
     wazuh_log_monitor.start(timeout=5, callback=callback_detect_synchronization)
 
     # This should fail as we are only advancing half the time needed for synchronization to occur
     wazuh_log_monitor = truncate_log()
-    TimeMachine.travel_to_future(time_delta(get_configuration['metadata']['sync_interval'])/2)
+    TimeMachine.travel_to_future(time_to_timedelta(get_configuration['metadata']['sync_interval'])/2)
     try:
         result = wazuh_log_monitor.start(timeout=1,
                                         callback=callback_detect_synchronization,
