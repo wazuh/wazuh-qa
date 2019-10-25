@@ -233,7 +233,7 @@ def delete_file(path, name):
         os.remove(regular_path)
 
 
-def modify_file(path, name, is_binary=False, options=None):
+def modify_file(path, name, is_binary=False):
     """ Modify a Regular file.
 
     :param path: Path where the file will be created
@@ -248,75 +248,37 @@ def modify_file(path, name, is_binary=False, options=None):
     """
     def modify_file_content():
         content = "1234567890qwertyuiopasdfghjklzxcvbnm"
-        with open(regular_path, 'ab' if is_binary else 'a') as f:
+        with open(path_to_file, 'ab' if is_binary else 'a') as f:
             f.write(content.encode() if is_binary else content)
 
     def modify_file_mtime():
-        stat = os.stat(regular_path)
+        stat = os.stat(path_to_file)
         access_time = stat[ST_ATIME]
         modification_time = stat[ST_MTIME]
         modification_time = modification_time + 120
-        os.utime(regular_path, (access_time, modification_time))
+        os.utime(path_to_file, (access_time, modification_time))
 
     def modify_file_owner():
-        os.chown(regular_path, 1, -1)
+        os.chown(path_to_file, 1, -1)
 
     def modify_file_group():
-        os.chown(regular_path, -1, 1)
+        os.chown(path_to_file, -1, 1)
 
     def modify_file_permission():
-        os.chmod(regular_path, 0o666)
+        os.chmod(path_to_file, 0o666)
 
     def modify_file_inode():
-        shutil.copyfile(regular_path, os.path.join(path, "inodetmp"))
-        os.replace(os.path.join(path, "inodetmp"), regular_path)
+        shutil.copy2(path_to_file, os.path.join(path, "inodetmp"))
+        os.replace(os.path.join(path, "inodetmp"), path_to_file)
 
-    regular_path = os.path.join(path, name)
+    path_to_file = os.path.join(path, name)
 
-    if options is None:
-        modify_file_content()
-    else:
-        for modification_type in options:
-            check = REQUIRED_ATTRIBUTES[modification_type]
-            if isinstance(check, set):
-                modify_file(path, name, options=check)
-
-            elif isinstance(check, list):
-                if check == REQUIRED_ATTRIBUTES[CHECK_OWNER]:
-                    modify_file_owner()
-                elif check == REQUIRED_ATTRIBUTES[CHECK_GROUP]:
-                    modify_file_group()
-
-            else:
-                if check == REQUIRED_ATTRIBUTES[CHECK_ALL] or check == CHECK_ALL:
-                    modify_file_content()
-                    modify_file_mtime()
-                    modify_file_owner()
-                    modify_file_group()
-                    modify_file_permission()
-                    modify_file_inode()
-
-                elif (check == REQUIRED_ATTRIBUTES[CHECK_SUM] or check == CHECK_SUM or
-                      check == REQUIRED_ATTRIBUTES[CHECK_SHA1SUM] or check == CHECK_SHA1SUM or
-                      check == REQUIRED_ATTRIBUTES[CHECK_MD5SUM] or check == CHECK_MD5SUM or
-                      check == REQUIRED_ATTRIBUTES[CHECK_SHA256SUM] or check == CHECK_SHA256SUM or
-                      check == REQUIRED_ATTRIBUTES[CHECK_SIZE] or check == CHECK_SIZE):
-                    modify_file_content()
-
-                elif check == REQUIRED_ATTRIBUTES[CHECK_MTIME] or check == CHECK_MTIME:
-                    modify_file_mtime()
-
-                elif check == REQUIRED_ATTRIBUTES[CHECK_OWNER] or check == CHECK_OWNER:
-                    modify_file_owner()
-
-                elif check == REQUIRED_ATTRIBUTES[CHECK_GROUP] or check == CHECK_GROUP:
-                    modify_file_group()
-
-                elif check == REQUIRED_ATTRIBUTES[CHECK_PERM] or check == CHECK_PERM:
-                    modify_file_permission()
-
-                elif check == REQUIRED_ATTRIBUTES[CHECK_INODE] or check == CHECK_INODE:
-                    modify_file_inode()
+    modify_file_content()
+    modify_file_mtime()
+    modify_file_owner()
+    modify_file_group()
+    modify_file_permission()
+    modify_file_inode()
 
 
 def change_internal_options(opt_path, pattern, value):
@@ -534,7 +496,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     # Modify previous text files
     for name, content in file_list.items():
-        modify_file(folder, name, is_binary=isinstance(content, bytes), options=options)
+        modify_file(folder, name, is_binary=isinstance(content, bytes))
 
     check_time_travel()
     events = fetch_events()
