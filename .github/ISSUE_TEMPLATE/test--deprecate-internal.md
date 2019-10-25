@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-# Log rotation
+# Internal options deprecation
 
 | Version | Revision |
 | --- | --- |
