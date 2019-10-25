@@ -22,6 +22,8 @@
 - [ ] MIT014
 - [ ] MIT015
 - [ ] MIT016
+- [ ] MIT017
+- [ ] MIT018
 
 ## MIT001
 
@@ -207,18 +209,20 @@ If Mitre extension is added to a rule and an event matchs the rule, an alert sho
 
 **Configuration sample**
 
+Add the following lines in /var/ossec/etc/rules/local_rules.xml
 ```
-sudo nano wazuh/etc/rules/0020-syslog_rules.xml
+<group name="syslog,errors,">
 
-<rule id="5402" level="3">
-    <if_sid>5400</if_sid>
-    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+  <rule id="100002" level="5">
+    <if_sid>5402</if_sid>
     <description>Successful sudo to ROOT executed</description>
     <mitre>
       <id>T1169</id>
     </mitre>
     <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
-</rule>
+  </rule>
+
+</group>
  ```
  ```
  ossec-control restart
@@ -233,12 +237,12 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
 
 **Expected alerts**
 ```
-# tail -f /var/ossec/logs/alerts/alerts.json
+# tail -f /var/ossec/logs/alerts/alerts.json | grep Mitre
 
 {
 "timestamp":"2019-09-30T13:12:29.416+0200",
 "rule":{
-      "level":3,
+      "level":5,
       "description":"Successful sudo to ROOT executed",
       "id":"5402",
       "mitre":{"id":["T1169"],
@@ -270,19 +274,21 @@ If a rule has two o more different Mitre's techniques, repeated tactics should n
 
 **Configuration sample**
 
+Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_rules.xml
 ```
-sudo nano wazuh/etc/rules/0020-syslog_rules.xml
+<group name="syslog,errors,">
 
-<rule id="5402" level="3">
-    <if_sid>5400</if_sid>
-    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+  <rule id="100002" level="5">
+    <if_sid>5402</if_sid>
     <description>Successful sudo to ROOT executed</description>
     <mitre>
       <id>T1169</id>
       <id>T1078</id>
     </mitre>
     <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
-</rule>
+  </rule>
+
+</group>
  ```
  ```
  ossec-control restart
@@ -297,12 +303,12 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
 
 **Expected alerts**
 ```
-# tail -f /var/ossec/logs/alerts/alerts.json
+# tail -f /var/ossec/logs/alerts/alerts.json | grep Mitre
 
 {
 "timestamp":"2019-09-30T13:12:29.416+0200",
 "rule":{
-      "level":3,
+      "level":5,
       "description":"Successful sudo to ROOT executed",
       "id":"5402",
       "mitre":{"id":["T1169","T1078"]
@@ -335,12 +341,12 @@ If a rule has repeated Mitre Technique IDs, repeated IDs should not be shown in 
 
 **Configuration sample**
 
+Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_rules.xml
 ```
-sudo nano wazuh/etc/rules/0020-syslog_rules.xml
+<group name="syslog,errors,">
 
-<rule id="5402" level="3">
-    <if_sid>5400</if_sid>
-    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+  <rule id="100002" level="5">
+    <if_sid>5402</if_sid>
     <description>Successful sudo to ROOT executed</description>
     <mitre>
       <id>T1169</id>
@@ -349,7 +355,9 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
       <id>T1078</id>
     </mitre>
     <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
-</rule>
+  </rule>
+
+</group>
  ```
  ```
  ossec-control restart
@@ -364,12 +372,12 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
 
 **Expected alerts**
 ```
-# tail -f /var/ossec/logs/alerts/alerts.json
+# tail -f /var/ossec/logs/alerts/alerts.json | grep Mitre
 
 {
 "timestamp":"2019-09-30T13:12:29.416+0200",
 "rule":{
-      "level":3,
+      "level":5,
       "description":"Successful sudo to ROOT executed",
       "id":"5402",
       "mitre":{"id":["T1169","T1078"]
@@ -402,19 +410,21 @@ If a rule has an ID technique that is not in Mitre database, the ID should appea
 
 **Configuration sample**
 
+Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_rules.xml
 ```
-sudo nano wazuh/etc/rules/0020-syslog_rules.xml
+<group name="syslog,errors,">
 
-<rule id="5402" level="3">
-    <if_sid>5400</if_sid>
-    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+  <rule id="100002" level="5">
+    <if_sid>5402</if_sid>
     <description>Successful sudo to ROOT executed</description>
     <mitre>
       <id>T1169</id>
       <id>T6000</id>
     </mitre>
     <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
-</rule>
+  </rule>
+
+</group>
  ```
  ```
  ossec-control restart
@@ -429,12 +439,12 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
 
 **Expected alerts**
 ```
-# tail -f /var/ossec/logs/alerts/alerts.json
+# tail -f /var/ossec/logs/alerts/alerts.json | grep Mitre
 
 {
 "timestamp":"2019-09-30T13:12:29.416+0200",
 "rule":{
-      "level":3,
+      "level":5,
       "description":"Successful sudo to ROOT executed",
       "id":"5402",
       "mitre":{"id":["T1169","T6000"]
@@ -467,18 +477,20 @@ If a rule has two or more technique IDs separated by commas, they will not be sp
 
 **Configuration sample**
 
+Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_rules.xml
 ```
-sudo nano wazuh/etc/rules/0020-syslog_rules.xml
+<group name="syslog,errors,">
 
-<rule id="5402" level="3">
-    <if_sid>5400</if_sid>
-    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+  <rule id="100002" level="5">
+    <if_sid>5402</if_sid>
     <description>Successful sudo to ROOT executed</description>
     <mitre>
       <id>T1169, T1078</id>
     </mitre>
     <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
-</rule>
+  </rule>
+
+</group>
  ```
  ```
  ossec-control restart
@@ -493,12 +505,12 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
 
 **Expected alerts**
 ```
-# tail -f /var/ossec/logs/alerts/alerts.json
+# tail -f /var/ossec/logs/alerts/alerts.json | grep Mitre
 
 {
 "timestamp":"2019-09-30T13:12:29.416+0200",
 "rule":{
-      "level":3,
+      "level":5,
       "description":"Successful sudo to ROOT executed",
       "id":"5402",
       "mitre":{"id":["T1169, T1078"]
@@ -533,18 +545,20 @@ If a rule has 0 ID Techniques, an alert should be generated without Mitre info. 
 
 Remove techniques:
 
+Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_rules.xml
 ```
-sudo nano wazuh/etc/rules/0020-syslog_rules.xml
+<group name="syslog,errors,">
 
-<rule id="5402" level="3">
-    <if_sid>5400</if_sid>
-    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+  <rule id="100002" level="5">
+    <if_sid>5402</if_sid>
     <description>Successful sudo to ROOT executed</description>
     <mitre>
       <ids></ids>
     </mitre>
     <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
-</rule>
+  </rule>
+
+</group>
  ```
  ```
  ossec-control restart
@@ -559,12 +573,12 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
 
 **Expected alerts**
 ```
-# tail -f /var/ossec/logs/alerts/alerts.json
+# tail -f /var/ossec/logs/alerts/alerts.json | grep Mitre
 
 {
 "timestamp":"2019-09-30T13:12:29.416+0200",
 "rule":{
-      "level":3,
+      "level":5,
       "description":"Successful sudo to ROOT executed",
       "id":"5402",
       "mitre":{"id":[""],
@@ -578,7 +592,146 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
        ...
 }
 ```
+
 ## MIT011
+
+**Short description**
+
+A rule has two o more different Mitre techniques IDs but they are not together inside 'mitre' tags.
+
+**Category**
+
+Mitre
+
+**Description**
+
+If a rule has two o more different Mitre techniques IDs but they are not together inside 'mitre' tags, there will be no errors.
+
+**Configuration sample**
+
+Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_rules.xml
+```
+<group name="syslog,errors,">
+
+  <rule id="100002" level="5">
+    <if_sid>5402</if_sid>
+    <description>Successful sudo to ROOT executed</description>
+    <mitre>
+      <id>T1169</id>
+    </mitre>
+    <mitre>
+      <id>T1078</id>
+    </mitre>
+    <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
+  </rule>
+
+</group>
+ ```
+ ```
+ ossec-control restart
+ CTRL + D
+ sudo su
+ CRTL + D
+ sudo su
+ ```
+**Compatible versions**
+
+3.11.0 - Current
+
+**Expected alerts**
+```
+# tail -f /var/ossec/logs/alerts/alerts.json | grep Mitre
+
+{
+"timestamp":"2019-09-30T13:12:29.416+0200",
+"rule":{
+      "level":5,
+      "description":"Successful sudo to ROOT executed",
+      "id":"5402",
+      "mitre":{"id":["T1169","T1078"],
+               "tactics":["Privilege Escalation","Defense Evasion","Initial Access","Persistence"]
+               },
+      "firedtimes":1,
+      "mail":false,
+      "groups":["syslog","sudo"],"pci_dss":["10.2.5","10.2.2"],"gpg13":["7.6","7.8","7.13"],"gdpr":["IV_32.2"],"hipaa":["164.312.b"],"nist_800_53":["AU.3.1","IA.10"]
+       },
+       
+       ...
+}
+
+```
+
+## MIT012
+
+**Short description**
+
+A rule has two o more different Mitre techniques IDs but they are not together inside 'mitre' tags and there are duplicated technique IDs.
+
+**Category**
+
+Mitre
+
+**Description**
+
+If a rule has two o more different Mitre techniques IDs but they are not together inside 'mitre' tags and there are duplicated technique IDs, there will be no errors.
+
+**Configuration sample**
+
+Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_rules.xml
+```
+<group name="syslog,errors,">
+
+  <rule id="100002" level="5">
+    <if_sid>5402</if_sid>
+    <description>Successful sudo to ROOT executed</description>
+    <mitre>
+      <id>T1169</id>
+      <id>T1110</id>
+    </mitre>
+    <mitre>
+      <id>T1169</id>
+      <id>T1154</id>
+    </mitre>
+    <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
+  </rule>
+
+</group>
+ ```
+ ```
+ ossec-control restart
+ CTRL + D
+ sudo su
+ CRTL + D
+ sudo su
+ ```
+**Compatible versions**
+
+3.11.0 - Current
+
+**Expected alerts**
+```
+# tail -f /var/ossec/logs/alerts/alerts.json | grep Mitre
+
+{
+"timestamp":"2019-09-30T13:12:29.416+0200",
+"rule":{
+      "level":5,
+      "description":"Successful sudo to ROOT executed",
+      "id":"5402",
+      "mitre":{"id":["T1169","T1110","T1154"],
+               "tactics":["Privilege Escalation","Credential Access","Execution","Persistence"]
+               },
+      "firedtimes":1,
+      "mail":false,
+      "groups":["syslog","sudo"],"pci_dss":["10.2.5","10.2.2"],"gpg13":["7.6","7.8","7.13"],"gdpr":["IV_32.2"],"hipaa":["164.312.b"],"nist_800_53":["AU.3.1","IA.10"]
+       },
+       
+       ...
+}
+
+```
+
+## MIT013
 
 **Short description**
 
@@ -593,17 +746,22 @@ Mitre
 If has_phase table is not in mitre.db, tactics should not be shown in alerts and Wazuh should show error messages. It does not have to stop Wazuh.
 
 **Configuration sample**
+
+Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_rules.xml
 ```
-<rule id="5402" level="3">
-    <if_sid>5400</if_sid>
-    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+<group name="syslog,errors,">
+
+  <rule id="100002" level="5">
+    <if_sid>5402</if_sid>
     <description>Successful sudo to ROOT executed</description>
     <mitre>
       <id>T1169</id>
       <id>T1078</id>
     </mitre>
     <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
-</rule>
+  </rule>
+
+</group>
 ```
 ```
 sqlite3 /var/ossec/var/db/mitre.db
@@ -617,12 +775,12 @@ ossec-control restart
 
 **Expected logs and alerts**
 ```
-# tail -f /var/ossec/logs/alerts/alerts.json
+# tail -f /var/ossec/logs/alerts/alerts.json | grep Mitre
 
 {
 "timestamp":"2019-09-30T13:12:29.416+0200",
 "rule":{
-      "level":3,
+      "level":5,
       "description":"Successful sudo to ROOT executed",
       "id":"5402",
       "mitre":{"id":["T1169","T1078"],
@@ -641,11 +799,13 @@ ossec-control restart
 ```
 > wazuh-db[7314] wdb_parser.c:348 at wdb_parse(): DEBUG: Mitre DB Cannot execute SQL query; err database var/db/mitre.db: no such table: has_phase
 
-> ossec-analysisd[7339] mitre.c:119 at mitre_load(): DEBUG: Mitre info loading failed. Query gave an error response: err Cannot execute SQL query; no such table: has_phase
+> ossec-remoted[7354] wazuhdb_op.c:94 at wdb_send_query(): ERROR: Bad response 'err Cannot execute Mitre database query; no such table: has_phase'
 
-> ossec-analysisd[7339] mitre.c:120 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
+> ossec-analysisd[7339] mitre.c:98 at mitre_load(): DEBUG: Mitre info loading failed. No response or bad response from wazuh-db: err Cannot execute Mitre database query; no such table: has_phase
 
-## MIT012
+> ossec-analysisd[7339] mitre.c:99 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
+
+## MIT014
 
 **Short description**
 
@@ -660,17 +820,22 @@ Mitre
 If attack table is not in mitre.db, tactics should not be shown in alerts and Wazuh should show error messages. It does not have to stop Wazuh.
 
 **Configuration sample**
+
+Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_rules.xml
 ```
-<rule id="5402" level="3">
-    <if_sid>5400</if_sid>
-    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+<group name="syslog,errors,">
+
+  <rule id="100002" level="5">
+    <if_sid>5402</if_sid>
     <description>Successful sudo to ROOT executed</description>
     <mitre>
       <id>T1169</id>
       <id>T1078</id>
     </mitre>
     <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
-</rule>
+  </rule>
+
+</group>
 ```
 
 ```
@@ -685,12 +850,12 @@ ossec-control restart
 
 **Expected logs and alerts**
 ```
-# tail -f /var/ossec/logs/alerts/alerts.json
+# tail -f /var/ossec/logs/alerts/alerts.json | grep Mitre
 
 {
 "timestamp":"2019-09-30T13:12:29.416+0200",
 "rule":{
-      "level":3,
+      "level":5,
       "description":"Successful sudo to ROOT executed",
       "id":"5402",
       "mitre":{"id":["T1169","T1078"],
@@ -709,11 +874,13 @@ ossec-control restart
 ```
 > wazuh-db[27581] wdb_parser.c:348 at wdb_parse(): DEBUG: Mitre DB Cannot execute SQL query; err database var/db/mitre.db: no such table: attack
 
-> ossec-analysisd[27609] mitre.c:49 at mitre_load(): DEBUG: Mitre info loading failed. Query gave an error response: err Cannot execute SQL query; no such table: attack
+> ossec-remoted[27593] wazuhdb_op.c:94 at wdb_send_query(): ERROR: Bad response 'err Cannot execute Mitre database query; no such table: attack'
 
-> ossec-analysisd[27609] mitre.c:50 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
+> ossec-analysisd[27609] mitre.c:48 at mitre_load(): DEBUG: Mitre info loading failed. Query gave an error response: err Cannot execute Mitre database query; no such table: attack
 
-## MIT013
+> ossec-analysisd[27609] mitre.c:49 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
+
+## MIT015
 
 **Short description**
 
@@ -728,17 +895,22 @@ Mitre
 If the attack table's column called 'id' has other different names, tactics should not be shown in alerts and Wazuh should show error messages. It does not have to stop Wazuh.
 
 **Configuration sample**
+
+Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_rules.xml
 ```
-<rule id="5402" level="3">
-    <if_sid>5400</if_sid>
-    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+<group name="syslog,errors,">
+
+  <rule id="100002" level="5">
+    <if_sid>5402</if_sid>
     <description>Successful sudo to ROOT executed</description>
     <mitre>
       <id>T1169</id>
       <id>T1078</id>
     </mitre>
     <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
-</rule>
+  </rule>
+
+</group>
 ```
 
 ```
@@ -751,12 +923,12 @@ Change  id for ids in sql_create_attack = """CREATE TABLE IF NOT EXISTS attack (
 
 **Expected logs and alerts**
 ```
-# tail -f /var/ossec/logs/alerts/alerts.json
+# tail -f /var/ossec/logs/alerts/alerts.json | grep Mitre
 
 {
 "timestamp":"2019-09-30T13:12:29.416+0200",
 "rule":{
-      "level":3,
+      "level":5,
       "description":"Successful sudo to ROOT executed",
       "id":"5402",
       "mitre":{"id":["T1169","T1078"],
@@ -775,15 +947,17 @@ Change  id for ids in sql_create_attack = """CREATE TABLE IF NOT EXISTS attack (
 ```
 > wazuh-db[28187] wdb_parser.c:358 at wdb_parse(): DEBUG: Mitre DB Cannot execute SQL query; err database var/db/mitre.db: no such column: id
 
-> ossec-analysisd[28215] mitre.c:48 at mitre_load(): DEBUG: Mitre info loading failed. No response or bad response from wazuh-db: err Cannot execute SQL query; no such column: id
+> ossec-remoted[28195] wazuhdb_op.c:94 at wdb_send_query(): ERROR: Bad response 'err Cannot execute Mitre database query; no such column: id'
+
+> ossec-analysisd[28215] mitre.c:48 at mitre_load(): DEBUG: Mitre info loading failed. No response or bad response from wazuh-db: err Cannot execute Mitre database query; no such column: id
 
 > ossec-analysisd[28215] mitre.c:49 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
 
-## MIT014
+## MIT016
 
 **Short description**
 
-If the attack table's colum called 'id' has other different names, tactics should not be shown in alerts and Wazuh should show error messages.
+If the has_phase table's column called 'phase_name' has other different names, tactics should not be shown in alerts and Wazuh should show error messages.
 
 **Category**
 
@@ -794,17 +968,22 @@ Mitre
 If the has_phase table's column called 'phase_name' has other different names, tactics should not be shown in alerts and Wazuh should show error messages. It does not have to stop Wazuh.
 
 **Configuration sample**
+
+Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_rules.xml
 ```
-<rule id="5402" level="3">
-    <if_sid>5400</if_sid>
-    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+<group name="syslog,errors,">
+
+  <rule id="100002" level="5">
+    <if_sid>5402</if_sid>
     <description>Successful sudo to ROOT executed</description>
     <mitre>
       <id>T1169</id>
       <id>T1078</id>
     </mitre>
     <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
-</rule>
+  </rule>
+
+</group>
 ```
 
 ```
@@ -822,12 +1001,12 @@ Change phase_name for phase in sql_create_has_phase = """CREATE TABLE IF NOT EXI
 
 **Expected logs and alerts**
 ```
-# tail -f /var/ossec/logs/alerts/alerts.json
+# tail -f /var/ossec/logs/alerts/alerts.json | grep Mitre
 
 {
 "timestamp":"2019-09-30T13:12:29.416+0200",
 "rule":{
-      "level":3,
+      "level":5,
       "description":"Successful sudo to ROOT executed",
       "id":"5402",
       "mitre":{"id":["T1169","T1078"],
@@ -846,12 +1025,13 @@ Change phase_name for phase in sql_create_has_phase = """CREATE TABLE IF NOT EXI
 ```
 > wazuh-db[3303] wdb_parser.c:358 at wdb_parse(): DEBUG: Mitre DB Cannot execute SQL query; err database var/db/mitre.db: no such table: has_phase
 
-> ossec-analysisd[3331] mitre.c:98 at mitre_load(): DEBUG: Mitre info loading failed. No response or bad response from wazuh-db: err Cannot execute SQL query; no such table: has_phase
+> ossec-remoted[3319] wazuhdb_op.c:94 at wdb_send_query(): ERROR: Bad response 'err Cannot execute Mitre database query; no such table: has_phase'
+
+> ossec-analysisd[3331] mitre.c:98 at mitre_load(): DEBUG: Mitre info loading failed. No response or bad response from wazuh-db: err Cannot execute Mitre database query; no such table: has_phase
 
 > ossec-analysisd[3331] mitre.c:99 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
-root@equipo:/var/ossec
 
-## MIT015
+## MIT017
 
 **Short description**
 
@@ -866,17 +1046,22 @@ Mitre
 If Mitre database does not exist, tactics should not be shown in alerts and Wazuh should show error messages. It does not have to stop.
 
 **Configuration sample**
+
+Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_rules.xml
 ```
-<rule id="5402" level="3">
-    <if_sid>5400</if_sid>
-    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+<group name="syslog,errors,">
+
+  <rule id="100002" level="5">
+    <if_sid>5402</if_sid>
     <description>Successful sudo to ROOT executed</description>
     <mitre>
       <id>T1169</id>
       <id>T1078</id>
     </mitre>
     <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
-</rule>
+  </rule>
+
+</group>
 ```
 
 ```
@@ -889,12 +1074,12 @@ ossec-control restart
 
 **Expected logs and alerts**
 ```
-# tail -f /var/ossec/logs/alerts/alerts.json
+# tail -f /var/ossec/logs/alerts/alerts.json | grep Mitre
 
 {
 "timestamp":"2019-09-30T13:12:29.416+0200",
 "rule":{
-      "level":3,
+      "level":5,
       "description":"Successful sudo to ROOT executed",
       "id":"5402",
       "mitre":{"id":["T1169","T1078"],
@@ -917,11 +1102,11 @@ ossec-control restart
 
 > ossec-remoted[14614] wazuhdb_op.c:94 at wdb_send_query(): ERROR: Bad response 'err Couldn't open DB mitre'.
 
-> ossec-analysisd[14614] mitre.c:49 at mitre_load(): DEBUG: Mitre info loading failed. Query gave an error response: err Couldn't open DB mitre
+> ossec-analysisd[14614] mitre.c:48 at mitre_load(): DEBUG: Mitre info loading failed. Query gave an error response: err Couldn't open DB mitre
 
-> ossec-analysisd[14614] mitre.c:50 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
+> ossec-analysisd[14614] mitre.c:49 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
 
-## MIT016
+## MIT018
 
 **Short description**
 
@@ -937,14 +1122,12 @@ If a rule has an incorrect Mitre XML tag name or it does not have any, a critica
 
 **Configuration sample**
 
-Swap 'id' for 'ids' in rule:
-
+Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_rules.xml (we change 'id' label for 'ids').
 ```
-sudo nano wazuh/etc/rules/0020-syslog_rules.xml
+<group name="syslog,errors,">
 
-<rule id="5402" level="3">
-    <if_sid>5400</if_sid>
-    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+  <rule id="100002" level="5">
+    <if_sid>5402</if_sid>
     <description>Successful sudo to ROOT executed</description>
     <mitre>
       <ids>T1169</ids>
@@ -954,11 +1137,11 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
 </rule>
  ```
  Or remove 'id':
- 
  ```
- <rule id="5402" level="3">
-    <if_sid>5400</if_sid>
-    <regex> ; USER=root ; COMMAND=| ; USER=root ; TSID=\S+ ; COMMAND=</regex>
+ <group name="syslog,errors,">
+
+  <rule id="100002" level="5">
+    <if_sid>5402</if_sid>
     <description>Successful sudo to ROOT executed</description>
     <mitre>
       T1169
@@ -966,6 +1149,8 @@ sudo nano wazuh/etc/rules/0020-syslog_rules.xml
     </mitre>
     <group>pci_dss_10.2.5,pci_dss_10.2.2,gpg13_7.6,gpg13_7.8,gpg13_7.13,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.3.1,nist_800_53_IA.10,</group>
   </rule>
+
+</group>
  ``` 
 **Compatible versions**
 
