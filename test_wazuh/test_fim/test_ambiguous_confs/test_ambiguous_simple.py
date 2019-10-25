@@ -53,17 +53,12 @@ def get_configuration(request):
 
 # tests
 
-@pytest.mark.parametrize('folders', [
-    ([testdir, subdir])
+@pytest.mark.parametrize('folders, tags_to_apply', [
+    ([testdir, subdir], {'ambiguous_restrict'})
 ])
-@pytest.mark.parametrize('tags_to_apply', [
-    ({'ambiguous_restrict'}),
-    ({'ambiguous_ignore'}),
-
-])
-def test_ambiguous_restrict_ignore(folders, tags_to_apply,
-                                    get_configuration, configure_environment,
-                                    restart_syscheckd, wait_for_initial_scan):
+def test_ambiguous_restrict(folders, tags_to_apply,
+                            get_configuration, configure_environment,
+                            restart_syscheckd, wait_for_initial_scan):
     """ Checks if syscheckd detects regular file changes (add, modify, delete)
 
     """
@@ -85,8 +80,8 @@ def test_ambiguous_restrict_ignore(folders, tags_to_apply,
     ([testdir, subdir], {'ambiguous_report_changes'})
 ])
 def test_ambiguous_report(folders, tags_to_apply,
-                           get_configuration, configure_environment,
-                           restart_syscheckd, wait_for_initial_scan):
+                          get_configuration, configure_environment,
+                          restart_syscheckd, wait_for_initial_scan):
     """ Checks if syscheckd detects regular file changes (add, modify, delete)
 
     """
@@ -128,8 +123,8 @@ def test_ambiguous_report(folders, tags_to_apply,
     ([testdir, subdir], {'ambiguous_tags'})
 ])
 def test_ambiguous_tags(folders, tags_to_apply,
-                         get_configuration, configure_environment,
-                         restart_syscheckd, wait_for_initial_scan):
+                        get_configuration, configure_environment,
+                        restart_syscheckd, wait_for_initial_scan):
     """ Checks if syscheckd detects regular file changes (add, modify, delete)
 
     """
@@ -161,8 +156,8 @@ def test_ambiguous_tags(folders, tags_to_apply,
     (testdir_recursion, 4, {'ambiguous_recursion'})
 ])
 def test_ambiguous_recursion(dirname, recursion_level, tags_to_apply,
-                              get_configuration, configure_environment,
-                              restart_syscheckd, wait_for_initial_scan):
+                             get_configuration, configure_environment,
+                             restart_syscheckd, wait_for_initial_scan):
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     min_timeout = 3
