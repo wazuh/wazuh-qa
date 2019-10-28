@@ -27,6 +27,7 @@ LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
 
 FIFO = 'fifo'
 SYSLINK = 'sys_link'
+HARDLINK = 'hard_link'
 SOCKET = 'socket'
 REGULAR = 'regular'
 
@@ -169,7 +170,7 @@ def _create_fifo(path, name, content):
         raise
 
 
-def _create_sys_link(path, name, content):
+def _create_sys_link(path, name, target):
     """ Creates a SysLink file.
 
     :param path: Path where the file will be created
@@ -182,7 +183,25 @@ def _create_sys_link(path, name, content):
     """
     syslink_path = os.path.join(path, name)
     try:
-        os.symlink(syslink_path, syslink_path)
+        os.symlink(syslink_path, target)
+    except OSError:
+        raise
+
+
+def _create_hard_link(path, name, target):
+    """ Creates a SysLink file.
+
+    :param path: Path where the file will be created
+    :type path: String
+    :param name: File name
+    :type name: String
+    :param content: Content of the created file
+    :type content: String or binary
+    :return: None
+    """
+    link_path = os.path.join(path, name)
+    try:
+        os.link(link_path, target)
     except OSError:
         raise
 
@@ -233,7 +252,44 @@ def delete_file(path, name):
         os.remove(regular_path)
 
 
-def modify_file(path, name, is_binary=False):
+def modify_file_content(path, name, new_content=None, is_binary=False):
+    path_to_file = os.path.join(path, name)
+    content = "1234567890qwertyu" if new_content is None else new_content
+    with open(path_to_file, 'ab' if is_binary else 'a') as f:
+        f.write(content.encode() if is_binary else content)
+
+
+def modify_file_mtime(path, name):
+    path_to_file = os.path.join(path, name)
+    stat = os.stat(path_to_file)
+    access_time = stat[ST_ATIME]
+    modification_time = stat[ST_MTIME]
+    modification_time = modification_time + 120
+    os.utime(path_to_file, (access_time, modification_time))
+
+
+def modify_file_owner(path, name):
+    path_to_file = os.path.join(path, name)
+    os.chown(path_to_file, 1, -1)
+
+
+def modify_file_group(path, name):
+    path_to_file = os.path.join(path, name)
+    os.chown(path_to_file, -1, 1)
+
+
+def modify_file_permission(path, name):
+    path_to_file = os.path.join(path, name)
+    os.chmod(path_to_file, 0o666)
+
+
+def modify_file_inode(path, name):
+    path_to_file = os.path.join(path, name)
+    shutil.copy2(path_to_file, os.path.join(path, "inodetmp"))
+    os.replace(os.path.join(path, "inodetmp"), path_to_file)
+
+
+def modify_file(path, name, new_content=None, is_binary=False):
     """ Modify a Regular file.
 
     :param path: Path where the file will be created
@@ -246,39 +302,12 @@ def modify_file(path, name, is_binary=False):
     :type options: Dict
     :return: None
     """
-    def modify_file_content():
-        content = "1234567890qwertyuiopasdfghjklzxcvbnm"
-        with open(path_to_file, 'ab' if is_binary else 'a') as f:
-            f.write(content.encode() if is_binary else content)
-
-    def modify_file_mtime():
-        stat = os.stat(path_to_file)
-        access_time = stat[ST_ATIME]
-        modification_time = stat[ST_MTIME]
-        modification_time = modification_time + 120
-        os.utime(path_to_file, (access_time, modification_time))
-
-    def modify_file_owner():
-        os.chown(path_to_file, 1, -1)
-
-    def modify_file_group():
-        os.chown(path_to_file, -1, 1)
-
-    def modify_file_permission():
-        os.chmod(path_to_file, 0o666)
-
-    def modify_file_inode():
-        shutil.copy2(path_to_file, os.path.join(path, "inodetmp"))
-        os.replace(os.path.join(path, "inodetmp"), path_to_file)
-
-    path_to_file = os.path.join(path, name)
-
-    modify_file_content()
-    modify_file_mtime()
-    modify_file_owner()
-    modify_file_group()
-    modify_file_permission()
-    modify_file_inode()
+    modify_file_content(path, name, new_content, is_binary)
+    modify_file_mtime(path, name)
+    modify_file_owner(path, name)
+    modify_file_group(path, name)
+    modify_file_permission(path, name)
+    modify_file_inode(path, name)
 
 
 def change_internal_options(opt_path, pattern, value):
@@ -401,6 +430,136 @@ def callback_configuration_error(line):
     return None
 
 
+def check_time_travel(time_travel):
+    if time_travel:
+        TimeMachine.travel_to_future(timedelta(hours=13))
+
+
+class EventChecker:
+    def __init__(self, log_monitor, folder, file_list=['testfile0'], options=None, custom_validator=None):
+        self.log_monitor = log_monitor
+        self.folder = folder
+        self.file_list = file_list
+        self.custom_validator = custom_validator
+        self.options = options
+        self.events = None
+        
+
+    def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True):
+        self.fetch_events(min_timeout, triggers_event)
+        self.check_events(event_type)
+
+
+    def fetch_events(self, min_timeout=1, triggers_event=True):
+        try:
+            result = self.log_monitor.start(timeout=max(len(self.file_list) * 0.01, min_timeout),
+                                       callback=callback_detect_event,
+                                       accum_results=len(self.file_list)
+                                       ).result()
+            return result if isinstance(result, list) else [result]
+        except TimeoutError:
+            if triggers_event:
+                raise
+
+
+    def check_events(self, event_type):
+
+        def validate_checkers_per_event(events, options):
+            if options is not None:
+                for ev in events:
+                    validate_event(ev, options)
+
+        def validate_event(event, checks=None):
+            """ Checks if event is properly formatted according to some checks.
+
+            :param event: dict representing an event generated by syscheckd
+            :param checks: set of xml CHECK_* options. Default {CHECK_ALL}.
+
+            :return: None
+            """
+            checks = {CHECK_ALL} if checks is None else checks
+            with open(os.path.join(_data_path, 'syscheck_event.json'), 'r') as f:
+                schema = json.load(f)
+            validate(schema=schema, instance=event)
+
+            # Check attributes
+            attributes = event['data']['attributes'].keys() - {'type', 'checksum'}
+            required_attributes = get_required_attributes(checks)
+            assert (attributes ^ required_attributes == set()), f'attributes and required_attributes are not the same'
+
+            # Check audit
+            if event['data']['mode'] == 'whodata':
+                assert ('audit' in event['data']), f'audit no detected in event'
+                assert (event['data']['audit'].keys() ^ _REQUIRED_AUDIT == set()), \
+                    f'audit keys and required_audit are no the same'
+        
+        def get_required_attributes(check_attributes, result=None):
+            result = set() if result is None else result
+            for check in check_attributes:
+                mapped = REQUIRED_ATTRIBUTES[check]
+                if isinstance(mapped, str):
+                    result |= {mapped}
+                elif isinstance(mapped, list):
+                    result |= set(mapped)
+                elif isinstance(mapped, set):
+                    result |= get_required_attributes(mapped, result=result)
+            return result
+            
+        def check_events_type(events, ev_type, file_list=['testfile0']):
+            event_types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
+            assert (event_types[ev_type] == len(file_list)), f'Non expected number of events'
+
+        def check_files_in_event(events, folder, file_list=['testfile0']):
+            file_paths = jq(".[].data.path").transform(events, multiple_output=True)
+            for file_name in file_list:
+                assert (os.path.join(folder, file_name) in file_paths), f'{file_name} does not exist in {file_paths}'
+
+        if self.events is not None:
+            validate_checkers_per_event(self.events, self.options)
+            check_events_type(self.events, event_type, self.file_list)
+            check_files_in_event(self.events, self.folder, self.file_list)
+
+            if self.custom_validator is not None:
+                self.custom_validator.validate_after_cud(self.events)
+                if event_type == "added":
+                    self.custom_validator.validate_after_create(self.events)
+                elif event_type == "modified":
+                    self.custom_validator.validate_after_update(self.events)
+                elif event_type == "deleted":
+                    self.custom_validator.validate_after_delete(self.events)
+
+
+class CustomValidator:
+    """
+    """
+
+    def __init__(self, validators_after_create=None, validators_after_update=None, 
+                 validators_after_delete=None, validators_after_cud=None):
+        self.validators_after_create = validators_after_create
+        self.validators_after_update = validators_after_update
+        self.validators_after_delete = validators_after_delete
+        self.validators_after_cud = validators_after_cud
+
+
+    def validate_after_create(self, events):
+        for event in events:
+            self.validators_after_create(event)
+
+    def validate_after_update(self, events):
+        for event in events:
+            self.validators_after_update(event)
+
+    def validate_after_delete(self, events):
+        for event in events:
+            self.validators_after_delete(event)
+
+    def validate_after_cud(self, events):
+        for event in events:
+            self.validators_after_cud(event)
+
+
+
+
 def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=False, min_timeout=1, options=None,
                      triggers_event=True, validators_after_create=None, validators_after_update=None,
                      validators_after_delete=None, validators_after_cud=None):
@@ -436,79 +595,40 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
     :type validators_after_cud: list
     :return: None
     """
-
-    def check_time_travel():
-        if time_travel:
-            TimeMachine.travel_to_future(timedelta(hours=13))
-
-    def fetch_events():
-        try:
-            result = log_monitor.start(timeout=max(len(file_list) * 0.01, min_timeout),
-                                       callback=callback_detect_event,
-                                       accum_results=len(file_list)
-                                       ).result()
-            return result if isinstance(result, list) else [result]
-        except TimeoutError:
-            if triggers_event:
-                raise
-
-    def validate_checkers_per_event():
-        if options is not None:
-            for ev in events:
-                validate_event(ev, options)
-
-    def check_events_type(ev_type):
-        event_types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
-        assert (event_types[ev_type] == len(file_list)), f'Non expected number of events'
-
-    def check_files_in_event():
-        file_paths = jq(".[].data.path").transform(events, multiple_output=True)
-        for file_name in file_list:
-            assert (os.path.join(folder, file_name) in file_paths), f'{file_name} does not exist in {file_paths}'
-
-    def check_events(event_type, validate_after):
-        if events is not None:
-            validate_checkers_per_event()
-            check_events_type(event_type)
-            check_files_in_event()
-            run_custom_validators(validators_after_cud)
-            run_custom_validators(validate_after)
-
-    def run_custom_validators(validators):
-        if validators is not None:
-            for validator in validators:
-                for event in events:
-                    validator(event)
-
     # Transform file list
     if not isinstance(file_list, list) and not isinstance(file_list, dict):
         raise ValueError('Value error. It can only be list or dict')
     elif isinstance(file_list, list):
         file_list = {i: '' for i in file_list}
 
+
+    custom_validator = CustomValidator(validators_after_create, validators_after_update, 
+                                       validators_after_delete, validators_after_cud)
+    event_checker = EventChecker(log_monitor, folder, file_list, options, custom_validator)
+
+
     # Create text files
     for name, content in file_list.items():
         create_file(REGULAR, folder, name, content)
 
-    check_time_travel()
-    events = fetch_events()
-    check_events('added', validators_after_create)
+    check_time_travel(time_travel)
+    event_checker.fetch_and_check('added', min_timeout, triggers_event)
+    
 
     # Modify previous text files
     for name, content in file_list.items():
         modify_file(folder, name, is_binary=isinstance(content, bytes))
 
-    check_time_travel()
-    events = fetch_events()
-    check_events('modified', validators_after_update)
+    check_time_travel(time_travel)
+    event_checker.fetch_and_check('modified', min_timeout, triggers_event)
+
 
     # Delete previous text files
     for name in file_list:
         delete_file(folder, name)
 
-    check_time_travel()
-    events = fetch_events()
-    check_events('deleted', validators_after_delete)
+    check_time_travel(time_travel)
+    event_checker.fetch_and_check('deleted', min_timeout, triggers_event)
 
 
 def detect_initial_scan(file_monitor):
