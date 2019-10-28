@@ -1,6 +1,7 @@
 FROM vpgrp/kitchen:latest
 
 ARG source_branch=master
+ARG target_branch=master
 
 # Update aptitude with new repo
 RUN apt-get update
@@ -8,7 +9,11 @@ RUN apt-get update
 # Clone the corresponding branch of wazuh-puppet
 RUN git clone https://github.com/wazuh/wazuh-puppet.git
 
-RUN cd wazuh-puppet && git checkout $source_branch && git branch && git pull
+RUN cd wazuh-puppet && \
+    git pull --all && \
+    git checkout $source_branch && \
+    git branch && \
+    git merge origin/${target_branch}
 
 RUN cd wazuh-puppet/kitchen && chmod +x ./run.sh && bundle install
 
