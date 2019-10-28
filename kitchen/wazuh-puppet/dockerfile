@@ -10,10 +10,10 @@ RUN apt-get update
 RUN git clone https://github.com/wazuh/wazuh-puppet.git
 
 RUN cd wazuh-puppet && \
-    git checkout $target_branch && \
-    git branch && \
     git pull --all && \
-    git merge ${source_branch}
+    git checkout origin/$source_branch && \
+    git branch && \
+    git merge origin/${target_branch}
 
 RUN cd wazuh-puppet/kitchen && chmod +x ./run.sh && bundle install
 
