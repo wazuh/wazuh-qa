@@ -13,7 +13,7 @@ import threading
 import time
 import xml.etree.ElementTree as ET
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timedelta
 from subprocess import DEVNULL, check_call, check_output
 from typing import Any, List, Set
 
@@ -525,3 +525,25 @@ def reformat_time(scan_time):
     cd = datetime.now()
     return datetime.replace(datetime.strptime(scan_time, hour_format + colon + locale),
                             year=cd.year, month=cd.month, day=cd.day)
+
+
+def time_to_timedelta(time):
+    """Converts a string with time in seconds with `smhdw` suffixes allowed to `datetime.timedelta`.
+    """
+    time_unit = time[len(time)-1:]
+
+    if time_unit.isnumeric():
+        return timedelta(seconds=int(time))
+
+    time_value = int(time[:len(time)-1])
+
+    if time_unit == "s":
+        return timedelta(seconds=time_value)
+    elif time_unit == "m":
+        return timedelta(minutes=time_value)
+    elif time_unit == "h":
+        return timedelta(hours=time_value)
+    elif time_unit == "d":
+        return timedelta(days=time_value)
+    elif time_unit == "w":
+        return timedelta(weeks=time_value)
