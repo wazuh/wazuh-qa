@@ -351,6 +351,12 @@ def callback_detect_event(line):
     return None
 
 
+def callback_detect_synchronization(line):
+    if 'Performing synchronization check' in line:
+        return line
+    return None
+
+
 def callback_ignore(line):
     match = re.match(r".*Ignoring '.*?' '(.*?)' due to sregex '.*?'", line)
     if match:
@@ -433,6 +439,13 @@ def callback_configuration_error(line):
 def check_time_travel(time_travel):
     if time_travel:
         TimeMachine.travel_to_future(timedelta(hours=13))
+
+
+def callback_configuration_warning(line):
+    match = re.match(r'.*WARNING: \(\d+\): Invalid value for element', line)
+    if match:
+        return True
+    return None
 
 
 class EventChecker:
@@ -556,8 +569,6 @@ class CustomValidator:
     def validate_after_cud(self, events):
         for event in events:
             self.validators_after_cud(event)
-
-
 
 
 def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=False, min_timeout=1, options=None,
