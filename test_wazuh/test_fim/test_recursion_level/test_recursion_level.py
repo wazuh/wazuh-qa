@@ -3,11 +3,12 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import glob
 import os
-import pytest
 import re
+import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, callback_audit_event_too_long
+from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_event_too_long, regular_file_cud)
 from wazuh_testing.tools import FileMonitor, load_wazuh_configurations
+
 
 # Variables
 
@@ -37,16 +38,23 @@ test_directories = [
 ]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
+
 # Configurations
 
 configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=[{'FIM_MODE': ''},
-                                                   {'FIM_MODE': {'realtime': 'yes'}},
-                                                   {'FIM_MODE': {'whodata': 'yes'}}
+                                           params=[{'FIM_MODE': '', 'CHECK': {'check_all': 'yes'}},
+                                                   {'FIM_MODE': '', 'CHECK': {'check_inode': 'no'}},
+                                                   {'FIM_MODE': {'realtime': 'yes'}, 'CHECK': {'check_all': 'yes'}},
+                                                   {'FIM_MODE': {'realtime': 'yes'}, 'CHECK': {'check_inode': 'no'}},
+                                                   {'FIM_MODE': {'whodata': 'yes'}, 'CHECK': {'check_all': 'yes'}},
+                                                   {'FIM_MODE': {'whodata': 'yes'}, 'CHECK': {'check_inode': 'no'}}
                                                    ],
-                                           metadata=[{'fim_mode': 'scheduled'},
-                                                     {'fim_mode': 'realtime'},
-                                                     {'fim_mode': 'whodata'}
+                                           metadata=[{'fim_mode': 'scheduled', 'check': 'all'},
+                                                     {'fim_mode': 'scheduled', 'check': 'inode'},
+                                                     {'fim_mode': 'realtime', 'check': 'all'},
+                                                     {'fim_mode': 'realtime', 'check': 'inode'},
+                                                     {'fim_mode': 'whodata', 'check': 'all'},
+                                                     {'fim_mode': 'whodata', 'check': 'inode'}
                                                      ]
                                            )
 
@@ -56,7 +64,6 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
 def check_config_applies(applies_to_config, get_configuration):
     """Checks if the processed conf file matches with the one specified by parameter.
     If not, the test is skipped.
-
     :param applies_to_config string The .conf file name to apply.
     """
     if not re.search(applies_to_config, get_configuration):
@@ -68,7 +75,6 @@ def recursion_test(dirname, subdirname, recursion_level, timeout=1, threshold_tr
     """Checks recursion_level functionality over the first and last n-directories of the dirname hierarchy 
     by creating, modifying and deleting some files in them. It will create all directories and 
     subdirectories needed using the info provided by parameter.
-
     :param dirname string The path being monitored by syscheck (indicated in the .conf file)
     :param subdirname string The name of the subdirectories that will be created during the execution for testing purpouses.
     :param recursion_level int Recursion level. Also used as the number of subdirectories to be created and checked for the current test.
@@ -78,28 +84,37 @@ def recursion_test(dirname, subdirname, recursion_level, timeout=1, threshold_tr
     :param is_scheduled bool If True the internal date will be modified to trigger scheduled checks by syschecks. False if realtime or Whodata.
     """
     path = dirname
-
-    # Check True (Within the specified recursion level)
-    for n in range(recursion_level):
-        path = os.path.join(path, subdirname + str(n + 1))
-        if ((recursion_level < threshold_true * 2) or
+    try:
+        # Check True (Within the specified recursion level)
+        for n in range(recursion_level):
+            path = os.path.join(path, subdirname + str(n + 1))
+            if ((recursion_level < threshold_true * 2) or
                 (recursion_level >= threshold_true * 2 and n < threshold_true) or
                 (recursion_level >= threshold_true * 2 and n > recursion_level - threshold_true)):
-            regular_file_cud(path, wazuh_log_monitor, time_travel=is_scheduled, min_timeout=timeout)
+                check_event_too_long()
+                regular_file_cud(path, wazuh_log_monitor, time_travel=is_scheduled, min_timeout=timeout)
 
-    # Check False (exceding the specified recursion_level)
-    for n in range(recursion_level, recursion_level + threshold_false):
-        path = os.path.join(path, subdirname + str(n + 1))
-        regular_file_cud(path, wazuh_log_monitor, time_travel=is_scheduled, min_timeout=timeout, triggers_event=False)
+        # Check False (exceding the specified recursion_level)
+        for n in range(recursion_level, recursion_level + threshold_false):
+            check_event_too_long()
+            path = os.path.join(path, subdirname + str(n + 1))
+            regular_file_cud(path, wazuh_log_monitor, time_travel=is_scheduled, min_timeout=timeout, triggers_event=False)
+
+    except (TimeoutError, AssertionError):
+        check_event_too_long()
 
 
-def check_event_too_long(get_configuration, recursion_level):
+def check_event_too_long():
     """Checks if the `Event to long` message was raised due to Whodata path length limitation."""
-    if (get_configuration['metadata']['fim_mode'] == 'whodata' and recursion_level > 250):
-        event = wazuh_log_monitor.start(timeout=30,
+    try:
+        event = wazuh_log_monitor.start(timeout=1,
                                         callback=callback_audit_event_too_long,
-                                        accum_results=1).result()
-        assert event, f'event not detected'
+                                        update_position=False).result()
+        if event:
+            pytest.exit(returncode=pytest.ExitCode.OK)
+        pytest.fail("No Event Too Long message was raised.")
+    except TimeoutError:
+        pass
 
 
 # Fixtures
@@ -125,15 +140,12 @@ def test_recursion_level(dirname, subdirname, recursion_level,
                          get_configuration, configure_environment,
                          restart_syscheckd, wait_for_initial_scan):
     """Checks if files are correctly detected by syscheck with recursion level using scheduled, realtime and whodata monitoring
-
     This test is intended to be used with valid ignore configurations. It applies RegEx to match the name 
     of the configuration file where the test applies. If the configuration file does not match the test 
     is skipped.
-
     :param dirname string The path being monitored by syscheck (indicated in the .conf file)
     :param subdirname string The name of the subdirectories that will be created during the execution for testing purpouses.
     :param recursion_level int Recursion level. Also used as the number of subdirectories to be created and checked for the current test.
     """
-    check_event_too_long(get_configuration, recursion_level)
-    recursion_test(dirname, subdirname, recursion_level, timeout=3,
+    recursion_test(dirname, subdirname, recursion_level, timeout=1,
                    is_scheduled=get_configuration['metadata']['fim_mode'] == 'scheduled')

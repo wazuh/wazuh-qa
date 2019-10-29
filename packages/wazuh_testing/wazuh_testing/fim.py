@@ -18,6 +18,7 @@ from jsonschema import validate
 
 from wazuh_testing.tools import TimeMachine
 
+
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 WAZUH_PATH = os.path.join('/', 'var', 'ossec')
@@ -413,7 +414,7 @@ def callback_audit_loaded_rule(line):
 
 
 def callback_audit_event_too_long(line):
-    if '.*Caching Audit message: event too long' in line:
+    if 'Caching Audit message: event too long' in line:
         return True
     return None
 
