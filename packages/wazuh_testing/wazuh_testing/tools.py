@@ -292,12 +292,13 @@ class FileMonitor:
         self._result = None
         self.timer = None
 
-    def _monitor(self, callback=_callback_default, accum_results=1):
+    def _monitor(self, callback=_callback_default, accum_results=1, update_position=True):
         """Wait for new lines to be appended to the file.
 
         A callback function will be called every time a new line is detected. This function must receive two
         positional parameters: a references to the FileMonitor object and the line detected.
         """
+        previous_position = self._position
         self._result = [] if accum_results > 1 else None
         with open(self.file_path) as f:
             f.seek(self._position)
@@ -322,9 +323,9 @@ class FileMonitor:
                             if self._result:
                                 self.stop()
 
-            self._position = f.tell()
+            self._position = f.tell() if update_position else previous_position
 
-    def start(self, timeout=-1, callback=_callback_default, accum_results=1):
+    def start(self, timeout=-1, callback=_callback_default, accum_results=1, update_position=True):
         """Start the file monitoring until the stop method is called"""
         if not self._continue:
             self._continue = True
@@ -332,7 +333,7 @@ class FileMonitor:
             if timeout > 0:
                 self.timer = Timer(timeout, self.abort)
                 self.timer.start()
-            self._monitor(callback=callback, accum_results=accum_results)
+            self._monitor(callback=callback, accum_results=accum_results, update_position=update_position)
 
         return self
 
