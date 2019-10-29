@@ -246,13 +246,24 @@ def _create_regular(path, name, content):
 
 
 def delete_file(path, name):
-    """ Deletes regular file """
+    """ Deletes regular file 
+    
+    :param path String Path to the file to be deleted
+    :param name String Name of the file to be deleted
+    """
     regular_path = os.path.join(path, name)
     if os.path.exists(regular_path):
         os.remove(regular_path)
 
 
 def modify_file_content(path, name, new_content=None, is_binary=False):
+    """Modifies the content of a file 
+    
+    :param path String Path to the file to be modified
+    :param name String Name of the file to be modified
+    :param new_content String New content to append to the file. Previous content will remain
+    :param is_binary boolean True if the file's content is in binary format, False otherwise
+    """
     path_to_file = os.path.join(path, name)
     content = "1234567890qwertyu" if new_content is None else new_content
     with open(path_to_file, 'ab' if is_binary else 'a') as f:
@@ -260,6 +271,11 @@ def modify_file_content(path, name, new_content=None, is_binary=False):
 
 
 def modify_file_mtime(path, name):
+    """Change the modification time of a file
+    
+    :param path String Path to the file to be modified
+    :param name String Name of the file to be modified
+    """
     path_to_file = os.path.join(path, name)
     stat = os.stat(path_to_file)
     access_time = stat[ST_ATIME]
@@ -269,21 +285,41 @@ def modify_file_mtime(path, name):
 
 
 def modify_file_owner(path, name):
+    """Change the owner of a file. The new owner will be '1'
+    
+    :param path String Path to the file to be modified
+    :param name String Name of the file to be modified
+    """
     path_to_file = os.path.join(path, name)
     os.chown(path_to_file, 1, -1)
 
 
 def modify_file_group(path, name):
+    """Change the group of a file. The new group will be '1'
+    
+    :param path String Path to the file to be modified
+    :param name String Name of the file to be modified
+    """
     path_to_file = os.path.join(path, name)
     os.chown(path_to_file, -1, 1)
 
 
 def modify_file_permission(path, name):
+    """Change the permision of a file. The new one will be '666'
+    
+    :param path String Path to the file to be modified
+    :param name String Name of the file to be modified
+    """
     path_to_file = os.path.join(path, name)
     os.chmod(path_to_file, 0o666)
 
 
 def modify_file_inode(path, name):
+    """Change the inode of a file.
+    
+    :param path String Path to the file to be modified
+    :param name String Name of the file to be modified
+    """
     path_to_file = os.path.join(path, name)
     shutil.copy2(path_to_file, os.path.join(path, "inodetmp"))
     os.replace(os.path.join(path, "inodetmp"), path_to_file)
@@ -298,8 +334,6 @@ def modify_file(path, name, new_content=None, is_binary=False):
     :type name: String
     :param is_binary: True if the file is binary. False otherwise.
     :type is_binary: boolean
-    :param options: Dict with all the checkers 
-    :type options: Dict
     :return: None
     """
     modify_file_content(path, name, new_content, is_binary)
@@ -437,6 +471,10 @@ def callback_configuration_error(line):
 
 
 def check_time_travel(time_travel):
+    """ Changes date and time of the system
+
+    :param time_travel boolean True if we need to update time, False otherwise
+    """
     if time_travel:
         TimeMachine.travel_to_future(timedelta(hours=13))
 
@@ -449,6 +487,8 @@ def callback_configuration_warning(line):
 
 
 class EventChecker:
+    """ Utility to allow fetch events and validate them
+    """
     def __init__(self, log_monitor, folder, file_list=['testfile0'], options=None, custom_validator=None):
         self.log_monitor = log_monitor
         self.folder = folder
@@ -459,11 +499,22 @@ class EventChecker:
         
 
     def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True):
+        """Calls both 'fetch_events' and 'check_events'
+
+        :param event_type String Expected type of the raised event. It can be 'added', 'modified' or 'deleted'.
+        :param min_timeout int Seconds to wait until an event is raised when trying to fetch.
+        :param triggers_event boolean True if the event should be raised, False otherwise.
+        """
         self.fetch_events(min_timeout, triggers_event)
         self.check_events(event_type)
 
 
     def fetch_events(self, min_timeout=1, triggers_event=True):
+        """Try to fetch events on a given log monitor. Will return a list with the events detected.
+
+        :param min_timeout int Seconds to wait until an event is raised when trying to fetch.
+        :param triggers_event boolean True if the event should be raised, False otherwise.
+        """
         try:
             result = self.log_monitor.start(timeout=max(len(self.file_list) * 0.01, min_timeout),
                                        callback=callback_detect_event,
@@ -476,8 +527,16 @@ class EventChecker:
 
 
     def check_events(self, event_type):
+        """Check and validate all events in the 'events' list
 
+        :param event_type String Expected type of the raised event. It can be 'added', 'modified' or 'deleted'.
+        """
         def validate_checkers_per_event(events, options):
+            """ Checks if each event is properly formatted according to some checks
+
+            :param events List The event list to be checked
+            :param options Set A Set of xml CHECK_* options. Default {CHECK_ALL}.
+            """
             if options is not None:
                 for ev in events:
                     validate_event(ev, options)
@@ -543,7 +602,7 @@ class EventChecker:
 
 
 class CustomValidator:
-    """
+    """ Enables using user-defined validators over the events when validating them with EventChecker
     """
 
     def __init__(self, validators_after_create=None, validators_after_update=None, 
@@ -555,18 +614,34 @@ class CustomValidator:
 
 
     def validate_after_create(self, events):
+        """Custom validators to be applied by default when the event_type is 'added'
+
+        :param events List List of event to be validated.
+        """
         for event in events:
             self.validators_after_create(event)
 
     def validate_after_update(self, events):
+        """Custom validators to be applied by default when the event_type is 'modified'
+
+        :param events List List of event to be validated.
+        """
         for event in events:
             self.validators_after_update(event)
 
     def validate_after_delete(self, events):
+        """Custom validators to be applied by default when the event_type is 'deleted'
+
+        :param events List List of event to be validated.
+        """
         for event in events:
             self.validators_after_delete(event)
 
     def validate_after_cud(self, events):
+        """Custom validators to be applied always by default
+
+        :param events List List of event to be validated.
+        """
         for event in events:
             self.validators_after_cud(event)
 
