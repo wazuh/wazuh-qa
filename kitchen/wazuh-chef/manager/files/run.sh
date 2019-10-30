@@ -10,18 +10,18 @@ template=".template"
 
 if [ -z "$1" ]
 then
-	distributions=( "ubuntu" "centos" )
+	suites_platforms=( "ubuntu" "centos" )
 else
-	distributions=$1
+	suites_platforms=$1
 fi
 
-for dist in "${distributions[@]}"
+for suite in "${suites_platforms[@]}"
 do
-	echo "Kitchen is creating the new instances with dist=$dist"
-	kitchen create $dist
+	echo "Kitchen is creating the new instances with dist=$suite"
+	kitchen create $suite
 
 	echo "Getting Wazuh managers IPs to the agents"
-	manager_ip="$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' `docker ps | awk '{print $NF}' | grep  $dist | grep manager`)"
+	manager_ip="$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' `docker ps | awk '{print $NF}' | grep  $suite | grep manager`)"
 	echo $manager_ip
 
 	cp "$development_agent_path$template" "$development_agent_path"
@@ -42,7 +42,7 @@ do
 
 
 	echo "Kitchen is converging ..."
-	kitchen converge $dist
+	kitchen converge $suite
 
 
 	echo "Getting default things back"
