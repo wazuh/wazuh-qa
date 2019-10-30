@@ -9,9 +9,8 @@
   - disabled:
       value: 'no'
   - directories:
-      value: "/proc"
+      value: DIRECTORY
       attributes:
-      - FIM_MODE
   - skip_proc:
       value: SKIP
 # conf 2
@@ -24,9 +23,8 @@
   - disabled:
       value: 'no'
   - directories:
-      value: "/sys"
+      value: "/sys/module/video"
       attributes:
-      - FIM_MODE
   - skip_sys:
       value: SKIP
 # conf 3
@@ -41,7 +39,6 @@
   - directories:
       value: "/dev"
       attributes:
-        - FIM_MODE
   - skip_dev:
       value: SKIP
 # conf 4
@@ -56,6 +53,5 @@
   - directories:
       value: "/nfs-mount-point"
       attributes:
-        - FIM_MODE
   - skip_nfs:
       value: SKIP
