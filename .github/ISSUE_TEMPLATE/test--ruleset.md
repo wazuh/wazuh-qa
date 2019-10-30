@@ -26,6 +26,7 @@ assignees: ''
 - [ ] Trigger alerts which depend on `frequency`, `timeframe`, `ignore`.
 - [ ] Trigger alerts which depend on `same_fields` and `not_same_fields`.
 - [ ] Trigger alerts which depend on `if_matched_sid`, `if_matched_group`, `same_source_ip`, etc.
+- [ ] For frequency rules, check that `previous_output` shows all previous events which matched the rule.
 - [ ] Trigger a custom decoder and rule set at `etc/decoders`/`etc/rules`.
 - [ ] Overwrite a rule.
 - [ ] On an overwriting rule, trigger alerts which depend on `same_fields` and `not_same_fields`.

@@ -9,8 +9,15 @@ lint:
     config-data:
       ignore: .virtualenv
 platforms:
-  - name: elasticsearch_platform_
-    image: imagename
+  - name: elasticsearch_${MOL_PLATFORM:-centos7}-1
+    image: ${MOL_IMAGE:-milcom/centos7-systemd}
+    command: /sbin/init
+    ulimits:
+      - nofile:262144:262144
+    privileged: true
+    memory_reservation: 2048m
+  - name: elasticsearch_${MOL_PLATFORM:-centos7}-2
+    image: ${MOL_IMAGE:-milcom/centos7-systemd}
     command: /sbin/init
     ulimits:
       - nofile:262144:262144
@@ -36,7 +43,7 @@ provisioner:
       all:
         elasticsearch_jvm_xms: 512
 scenario:
-  name: elasticsearch
+  name: elasticsearch-xpack
   test_sequence:
     - lint
     - dependency

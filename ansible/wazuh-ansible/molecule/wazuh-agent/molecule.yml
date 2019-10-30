@@ -18,8 +18,8 @@ platforms:
   #  privileged: true
   #  groups:
   #    - manager
-  - name: wazuh_agent_bionic
-    image: ubuntu:bionic
+  - name: wazuh_agent_${MOL_PLATFORM:-centos7}
+    image: ${MOL_IMAGE:-milcom/centos7-systemd}
     networks:
       - name: wazuh
     groups:

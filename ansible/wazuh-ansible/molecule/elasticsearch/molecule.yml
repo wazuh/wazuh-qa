@@ -9,8 +9,8 @@ lint:
     config-data:
       ignore: .virtualenv
 platforms:
-  - name: elasticsearch_bionic
-    image: solita/ubuntu-systemd:bionic
+  - name: elasticsearch_${MOL_PLATFORM:-centos7}
+    image: ${MOL_IMAGE:-milcom/centos7-systemd}
     command: /sbin/init
     ulimits:
       - nofile:262144:262144
