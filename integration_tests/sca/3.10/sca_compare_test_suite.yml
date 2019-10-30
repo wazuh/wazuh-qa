@@ -10,7 +10,7 @@ policy:
   id: sca_compare_test_suite
   file: sca_compare_test_suite.yml
   name: Test suite for compare.
-  description: This document includes file rules for testing purposes with the syntax rule of Wazuh v3.10.0
+  description: This document includes file rules for testing purposes with the syntax rule of Wazuh v3.10.2
 ############### Expected results
 # Pass = 6
 # Fail = 1

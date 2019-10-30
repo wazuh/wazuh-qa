@@ -1,0 +1,12 @@
+source 'https://supermarket.chef.io'
+
+metadata
+
+cookbook 'chef-sugar'
+cookbook 'hostsfile'
+cookbook 'apt'
+cookbook 'yum'
+cookbook 'poise-python'
+cookbook 'wazuh_filebeat', path: '../wazuh_filebeat/'
+cookbook 'wazuh_agent', path: '../wazuh_agent/'
+cookbook 'wazuh_elastic', path: '../wazuh_elastic/'

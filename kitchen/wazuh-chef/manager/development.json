@@ -1,0 +1,21 @@
+{
+  "name": "development",
+  "description": "The development environment",
+  "cookbook_versions": {
+  },
+  "json_class": "Chef::Environment",
+  "chef_type": "environment",
+  "default_attributes": {
+
+  },
+  "override_attributes": {
+    "ossec": {
+      "registration_address": "manager-master.wazuh-test.com",
+      "address": ["manager-master.wazuh-test.com", "manager-client.wazuh-test.com"]
+    },
+    "filebeat": {
+      "ossec_type": "ossec-alerts-development",
+      "logstash_servers": "elk.wazuh-test.com:5000"
+    }
+  }
+}

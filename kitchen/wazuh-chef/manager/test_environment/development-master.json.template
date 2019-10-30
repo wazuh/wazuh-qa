@@ -1,0 +1,17 @@
+{
+  "name": "development-master",
+  "description": "The development environment",
+  "cookbook_versions": {
+  },
+  "json_class": "Chef::Environment",
+  "chef_type": "environment",
+  "default_attributes": {
+
+  },
+  "override_attributes": {
+    "filebeat": {
+      "ossec_type": "ossec-alerts-development",
+      "logstash_servers": "elk.wazuh-test.com:5000"
+    }
+  }
+}
