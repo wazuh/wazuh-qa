@@ -13,7 +13,7 @@ import threading
 import time
 import xml.etree.ElementTree as ET
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timedelta
 from subprocess import DEVNULL, check_call, check_output
 from typing import Any, List, Set
 
@@ -292,12 +292,13 @@ class FileMonitor:
         self._result = None
         self.timer = None
 
-    def _monitor(self, callback=_callback_default, accum_results=1):
+    def _monitor(self, callback=_callback_default, accum_results=1, update_position=True):
         """Wait for new lines to be appended to the file.
 
         A callback function will be called every time a new line is detected. This function must receive two
         positional parameters: a references to the FileMonitor object and the line detected.
         """
+        previous_position = self._position
         self._result = [] if accum_results > 1 else None
         with open(self.file_path) as f:
             f.seek(self._position)
@@ -322,9 +323,9 @@ class FileMonitor:
                             if self._result:
                                 self.stop()
 
-            self._position = f.tell()
+            self._position = f.tell() if update_position else previous_position
 
-    def start(self, timeout=-1, callback=_callback_default, accum_results=1):
+    def start(self, timeout=-1, callback=_callback_default, accum_results=1, update_position=True):
         """Start the file monitoring until the stop method is called"""
         if not self._continue:
             self._continue = True
@@ -332,7 +333,7 @@ class FileMonitor:
             if timeout > 0:
                 self.timer = Timer(timeout, self.abort)
                 self.timer.start()
-            self._monitor(callback=callback, accum_results=accum_results)
+            self._monitor(callback=callback, accum_results=accum_results, update_position=update_position)
 
         return self
 
@@ -525,3 +526,25 @@ def reformat_time(scan_time):
     cd = datetime.now()
     return datetime.replace(datetime.strptime(scan_time, hour_format + colon + locale),
                             year=cd.year, month=cd.month, day=cd.day)
+
+
+def time_to_timedelta(time):
+    """Converts a string with time in seconds with `smhdw` suffixes allowed to `datetime.timedelta`.
+    """
+    time_unit = time[len(time)-1:]
+
+    if time_unit.isnumeric():
+        return timedelta(seconds=int(time))
+
+    time_value = int(time[:len(time)-1])
+
+    if time_unit == "s":
+        return timedelta(seconds=time_value)
+    elif time_unit == "m":
+        return timedelta(minutes=time_value)
+    elif time_unit == "h":
+        return timedelta(hours=time_value)
+    elif time_unit == "d":
+        return timedelta(days=time_value)
+    elif time_unit == "w":
+        return timedelta(weeks=time_value)

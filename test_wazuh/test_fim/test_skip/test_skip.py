@@ -27,13 +27,13 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-def change_conf(directory):
+def change_conf(dir_value):
     return load_wazuh_configurations(configurations_path, __name__,
-                                     params=[{'SKIP': 'yes', 'DIRECTORY': directory},
-                                             {'SKIP': 'no', 'DIRECTORY': directory},
+                                     params=[{'SKIP': 'yes', 'DIRECTORY': dir_value},
+                                             {'SKIP': 'no', 'DIRECTORY': dir_value},
                                              ],
-                                     metadata=[{'skip': 'yes', 'directory': directory},
-                                               {'skip': 'no', 'directory': directory},
+                                     metadata=[{'skip': 'yes', 'directory': dir_value},
+                                               {'skip': 'no', 'directory': dir_value},
                                                ]
                                      )
 
@@ -87,21 +87,25 @@ def test_skip(directory, tags_to_apply,
             proc = subprocess.Popen(["python3", f"{os.path.dirname(os.path.abspath(__file__))}/data/proc.py"])
             # Change configuration, monitoring the PID path in /proc
             new_conf = change_conf(f'/proc/{proc.pid}')
-            # new_conf[1] -> 'skip': 'no'
-            new_ossec_conf = set_section_wazuh_conf(new_conf[1].get('section'),
-                                                    new_conf[1].get('elements'))
+            new_ossec_conf = []
+            # Get new skip_proc configuration
+            for conf in new_conf:
+                if conf['metadata']['skip'] == 'no' and conf['tags'] == ['skip_proc']:
+                    new_ossec_conf = set_section_wazuh_conf(conf.get('section'),
+                                                            conf.get('elements'))
             restart_wazuh_with_new_conf(new_ossec_conf)
-            detect_initial_scan(wazuh_log_monitor)
+            proc_monitor = FileMonitor(LOG_FILE_PATH)
+            detect_initial_scan(proc_monitor)
 
             # Do not expect any 'Sending event'
             with pytest.raises(TimeoutError):
-                wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+                proc_monitor.start(timeout=3, callback=callback_detect_event)
 
             TimeMachine.travel_to_future(timedelta(hours=13))
 
             found_event = False
             while not found_event:
-                event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event).result()
+                event = proc_monitor.start(timeout=5, callback=callback_detect_event).result()
                 if f'/proc/{proc.pid}/' in event['data'].get('path'):
                     found_event = True
 
