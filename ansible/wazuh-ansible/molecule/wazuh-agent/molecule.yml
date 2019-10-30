@@ -24,6 +24,11 @@ platforms:
       - name: wazuh
     groups:
       - agent
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
   #- name: wazuh_agent_xenial
   #  image: solita/ubuntu-systemd:xenial
   #  privileged: true
