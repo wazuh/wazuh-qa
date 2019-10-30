@@ -53,7 +53,7 @@ do
 done
 
 echo "Kitchen is testing ..."
-kitchen verify
+kitchen verify $suite
 
 echo "Kitchen is destroying"
-kitchen destroy
+kitchen destroy $suite
