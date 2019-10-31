@@ -20,7 +20,6 @@ platforms:
       image: centos:7
       platform: centos
       run_command: /usr/sbin/init
-      dockerfile: test/Dockerfile
       build_options:
         rm: true
 
