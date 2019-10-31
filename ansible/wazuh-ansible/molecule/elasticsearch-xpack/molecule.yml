@@ -16,6 +16,11 @@ platforms:
       - nofile:262144:262144
     privileged: true
     memory_reservation: 2048m
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
   - name: elasticsearch_${MOL_PLATFORM:-centos7}-2
     image: ${MOL_IMAGE:-milcom/centos7-systemd}
     command: /sbin/init
@@ -23,6 +28,11 @@ platforms:
       - nofile:262144:262144
     privileged: true
     memory_reservation: 2048m
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
 provisioner:
   name: ansible
   config_options:
