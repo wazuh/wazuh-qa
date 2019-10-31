@@ -18,7 +18,7 @@ RUN gem install kitchen-docker && \
     gem install rbnacl-libsodium && \
     gem install bcrypt_pbkdf && \
     gem install berkshelf && \
-    gem install httpclient && \
+    gem install httpclient
 
 RUN cd $HOME && \
     git clone https://github.com/wazuh/wazuh-qa.git && \
