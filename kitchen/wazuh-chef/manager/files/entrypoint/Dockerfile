@@ -22,6 +22,8 @@ RUN gem install kitchen-docker && \
 
 RUN cd $HOME && \
     git clone https://github.com/wazuh/wazuh-qa.git && \
+    cd $HOME/wazuh-qa && \
+    git checkout devel && \
     cd $HOME/wazuh-qa/kitchen/wazuh-chef/manager/files/ && \
     bundle install
 
