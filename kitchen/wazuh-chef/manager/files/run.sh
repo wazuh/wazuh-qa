@@ -42,6 +42,12 @@ do
 
 
 	echo "Kitchen is converging ..."
+
+	if [[ $suite == *"centos"* ]]; then
+		echo "suite is a centos and require OpenSSL to be installed. .. Installing .."
+		kitchen exec $suite -c "sudo yum install -y openssl"
+	fi
+
 	kitchen converge $suite
 
 

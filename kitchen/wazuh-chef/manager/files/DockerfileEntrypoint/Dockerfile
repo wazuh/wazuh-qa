@@ -1,0 +1,51 @@
+FROM ruby
+
+ARG chef_source_branch=master
+ARG chef_target_branch=master
+ARG qa_branch=master
+
+RUN cd $HOME && \ 
+    git clone https://github.com/wazuh/wazuh-qa.git && \
+    cd $HOME/wazuh-qa/ && \
+    git checkout $qa_branch && \
+    git pull
+ 
+RUN cd $HOME && \
+    git clone https://github.com/wazuh/wazuh-chef.git && \
+    cd $HOME/wazuh-chef/ && \
+    git checkout $chef_source_branch && \
+    git pull && \
+    git checkout $chef_target_branch && \
+    git pull && \
+    git checkout $chef_source_branch && \
+    git merge $chef_target_branch
+
+
+RUN cp -rf $HOME/wazuh-qa/kitchen/wazuh-chef/manager/files/* $HOME/wazuh-chef/cookbooks/wazuh_manager/
+RUN cp -rf $HOME/wazuh-qa/kitchen/wazuh-chef/manager/test/* $HOME/wazuh-chef/cookbooks/wazuh_manager/test/
+RUN cp -rf $HOME/wazuh-qa/kitchen/wazuh-chef/manager/test_environment/* $HOME/wazuh-chef/cookbooks/wazuh_manager/test/environments/
+RUN cp -rf $HOME/wazuh-qa/kitchen/wazuh-chef/agent/* $HOME/wazuh-chef/cookbooks/wazuh_agent/test/environments/
+
+RUN cd $HOME/wazuh-chef/cookbooks/wazuh_manager/ && \
+    mkdir .kitchen
+
+RUN cd $HOME/wazuh-chef/cookbooks/wazuh_manager/ && \
+    chmod +x run.sh && \
+    chmod +x clean.sh && \
+    rm .kitchen.yml
+
+RUN apt-get update && apt install docker.io git curl wget -y
+
+RUN apt-get update
+
+RUN gem install kitchen-docker && \
+    gem install rbnacl && \
+    gem install rbnacl-libsodium && \
+    gem install bcrypt_pbkdf && \
+    gem install berkshelf && \
+    gem install httpclient && \
+    cd $HOME/wazuh-chef/cookbooks/wazuh_manager/ && bundle install
+
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py
+
+RUN pip install pytest && pip install testinfra && pip install paramiko
