@@ -7,6 +7,7 @@ import shutil
 import subprocess
 from datetime import timedelta
 
+import distro
 import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_integrity_event,
@@ -53,7 +54,15 @@ def get_configuration(request):
 def configure_nfs():
     """ Call NFS scripts to create and configure a NFS mount point """
     path = os.path.dirname(os.path.abspath(__file__))
-    subprocess.call([f'{path}/data/configure_nfs.sh'])
+    dist_list = ['centos', 'fedora', 'rhel']
+    if distro.id() in dist_list:
+        dist = 'rpm -qa'
+        installer = 'yum -y install'
+    else:
+        dist = 'dpkg -l'
+        installer = 'apt-get install'
+    freebsd = 'true' if distro.id() == 'freebsd' else 'false'
+    subprocess.call([f'{path}/data/configure_nfs.sh', dist, installer, freebsd])
     yield
     # remove nfs
     subprocess.call([f'{path}/data/remove_nfs.sh'])
@@ -86,6 +95,8 @@ def test_skip(directory, tags_to_apply,
         if trigger:
             proc = subprocess.Popen(["python3", f"{os.path.dirname(os.path.abspath(__file__))}/data/proc.py"])
             # Change configuration, monitoring the PID path in /proc
+            # Monitor only /proc/PID to expect only these events. Otherwise, it will fail due to Timeouts since
+            # integrity scans will take too long
             new_conf = change_conf(f'/proc/{proc.pid}')
             new_ossec_conf = []
             # Get new skip_proc configuration
