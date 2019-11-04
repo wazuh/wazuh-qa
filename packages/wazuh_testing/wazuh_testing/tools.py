@@ -497,7 +497,7 @@ def restart_wazuh_with_new_conf(new_conf):
     :return: None
     """
     write_wazuh_conf(new_conf)
-    restart_wazuh_service()
+    restart_wazuh_daemon('ossec-syscheckd')
 
 
 def restart_wazuh_service():
