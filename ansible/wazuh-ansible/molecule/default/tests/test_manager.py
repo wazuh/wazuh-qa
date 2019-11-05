@@ -1,10 +1,17 @@
 import os
 import pytest
-
 import testinfra.utils.ansible_runner
 
+MOL_PLATFORM = os.getenv('MOL_PLATFORM', 'centos7')
+
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
-    os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
+    os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('manager_{}'
+                                                     .format(MOL_PLATFORM))
+
+
+def test_agents_registered_on_manager(host):
+    cmd = host.run("/var/ossec/bin/manage_agents -l")
+    assert 'agent_{}'.format(MOL_PLATFORM) in cmd.stdout
 
 
 def get_wazuh_version():
