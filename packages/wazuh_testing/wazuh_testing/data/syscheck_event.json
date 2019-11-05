@@ -43,9 +43,10 @@
           "type": "string",
           "default": "",
           "examples": [
-            "/testdir1/example"
+            "/testdir1/example",
+            "c:/testdir1/example"
           ],
-          "pattern": "^(?:\\/[^\\/]+)*$"
+          "pattern": "^(?:([a-zA-Z]\\:|\\/)[^\\/]+)*$"
         },
         "mode": {
           "$id": "#/properties/data/properties/mode",
@@ -129,7 +130,7 @@
               "examples": [
                 "0"
               ],
-              "pattern": "^[0-9a-fA-F]+$"
+              "pattern": "^([0-9a-fA-F]|S-1-.*)+$"
             },
             "gid": {
               "$id": "#/properties/data/properties/attributes/properties/gid",
@@ -138,7 +139,7 @@
               "examples": [
                 "0"
               ],
-              "pattern": "^[0-9a-fA-F]+$"
+              "pattern": "^([0-9a-fA-F]|S-1-.*)+$"
             },
             "user_name": {
               "$id": "#/properties/data/properties/attributes/properties/user_name",
@@ -236,7 +237,7 @@
               "examples": [
                 "0"
               ],
-              "pattern": "^[0-9a-fA-F]+$"
+              "pattern": "^([0-9a-fA-F]|S-1-.*)+$"
             },
             "user_name": {
               "$id": "#/properties/data/properties/audit/properties/user_name",
@@ -254,7 +255,7 @@
               "examples": [
                 "0"
               ],
-              "pattern": "^[0-9a-fA-F]+$"
+              "pattern": "^([0-9a-fA-F]|S-1-.*)+$"
             },
             "group_name": {
               "$id": "#/properties/data/properties/audit/properties/group_name",
@@ -279,18 +280,20 @@
               "type": "string",
               "default": "",
               "examples": [
-                "/testdir1/example"
+                "/testdir1/example",
+                "c:/testdir1/example"
               ],
-              "pattern": "^(?:\\/[^\\/]+)*$"
+              "pattern": "^(?:([a-zA-Z]\\:|\\/)[^\\/]+)*$"
             },
             "audit_uid": {
               "$id": "#/properties/data/properties/audit/properties/audit_uid",
               "type": "string",
               "default": "",
               "examples": [
-                "1000"
+                "1000",
+                "S-1-5-32-544"
               ],
-              "pattern": "^[0-9a-fA-F]+$"
+              "pattern": "^([0-9a-fA-F]|S-1-.*)+$"
             },
             "audit_name": {
               "$id": "#/properties/data/properties/audit/properties/audit_name",
@@ -308,7 +311,7 @@
               "examples": [
                 "0"
               ],
-              "pattern": "^[0-9a-fA-F]+$"
+              "pattern": "^([0-9a-fA-F]|S-1-.*)+$"
             },
             "effective_name": {
               "$id": "#/properties/data/properties/audit/properties/effective_name",

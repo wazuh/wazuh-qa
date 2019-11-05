@@ -12,18 +12,25 @@ import sys
 import threading
 import time
 import xml.etree.ElementTree as ET
+import yaml
 from copy import deepcopy
 from datetime import datetime, timedelta
-from subprocess import DEVNULL, check_call, check_output
+from pytest import skip
+from subprocess import DEVNULL, check_call
 from typing import Any, List, Set
 
-import yaml
-from pytest import skip
 
-WAZUH_PATH = os.path.join('/', 'var', 'ossec')
-WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
-WAZUH_SOURCES = os.path.join('/', 'wazuh')
-GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
+_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+
+if sys.platform == 'linux2' or sys.platform == 'linux':
+    WAZUH_PATH = os.path.join('/', 'var', 'ossec')
+    WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
+    WAZUH_SOURCES = os.path.join('/', 'wazuh')
+
+elif sys.platform == 'win32':
+    WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
+    WAZUH_CONF = os.path.join(WAZUH_PATH, 'ossec.conf')
+    WAZUH_SOURCES = os.path.join('/', 'wazuh')
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
@@ -125,7 +132,7 @@ class TimeMachine:
         :type time_: time
         """
         import os
-        date_ = str(time_.date())
+        date_ = str(time_.date().day) + "-" + str(time_.date().month) + "-" + str(time_.date().year)
         time_ = str(time_.time()).split('.')
         time_ = time_[0]
         os.system('date ' + date_)
@@ -164,25 +171,12 @@ def wait_for_condition(condition_checker, args=None, kwargs=None, timeout=-1):
     kwargs = {} if kwargs is None else kwargs
     time_step = 0.5
     max_iterations = timeout / time_step
-    begin = time.time()
     iterations = 0
     while not condition_checker(*args, **kwargs):
         if timeout != -1 and iterations > max_iterations:
             raise TimeoutError()
         iterations += 1
         time.sleep(time_step)
-
-
-def generate_wazuh_conf(args: List = None) -> ET.ElementTree:
-    """Generate a configuration file for Wazuh.
-
-    :param args: Arguments for generating ossec.conf (install_type, distribution, version)
-    :return: ElementTree with a new Wazuh configuration generated from 'gen_ossec.sh'
-    """
-    gen_ossec_args = args if args else ['conf', 'manager', 'rhel', '7']
-    wazuh_config = check_output([GEN_OSSEC] + gen_ossec_args).decode(encoding='utf-8', errors='ignore')
-
-    return ET.ElementTree(ET.fromstring(wazuh_config))
 
 
 def get_wazuh_conf() -> ET.ElementTree:
@@ -497,7 +491,11 @@ def restart_wazuh_with_new_conf(new_conf):
     :return: None
     """
     write_wazuh_conf(new_conf)
-    restart_wazuh_service()
+    if sys.platform == 'win32':
+        restart_wazuh_service_windows()
+
+    elif sys.platform == 'linux2' or sys.platform == 'linux':
+        restart_wazuh_service()
 
 
 def restart_wazuh_service():
@@ -506,6 +504,27 @@ def restart_wazuh_service():
     """
     p = subprocess.Popen(["service", "wazuh-manager", "restart"])
     p.wait()
+
+
+def stop_wazuh_service_windows():
+    """ Stop Wazuh service completely
+    :return: None
+    """
+    p = subprocess.Popen(["net", "stop", "OssecSvc"])
+    p.wait()
+
+
+def start_wazuh_service_windows():
+    p = subprocess.Popen(["net", "start", "OssecSvc"])
+    p.wait()
+
+
+def restart_wazuh_service_windows():
+    """ Restart Wazuh service completely
+    :return: None
+    """
+    stop_wazuh_service_windows()
+    start_wazuh_service_windows()
 
 
 def reformat_time(scan_time):

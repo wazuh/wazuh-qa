@@ -2,16 +2,18 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
+import time
 from datetime import datetime, timedelta
+
 import paramiko
 import psutil
 import pytest
-import time
-from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_end_scan, callback_detect_synchronization, detect_initial_scan, callback_configuration_warning)
-from wazuh_testing.tools import (FileMonitor, truncate_file, check_apply_test, load_wazuh_configurations, reformat_time, TimeMachine, time_to_timedelta)
+from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, callback_detect_synchronization
+from wazuh_testing.tools import FileMonitor, TimeMachine, check_apply_test, load_wazuh_configurations, time_to_timedelta
 
 
 # variables
+
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 configurations_path = os.path.join(test_data_path, 'wazuh_response_conf.yaml')
@@ -22,8 +24,8 @@ response_timeouts = ['10', '10m', '10h', '10d', '10w']
 
 # configurations
 
-params=[]
-metadata=[]
+params = []
+metadata = []
 for rtime in response_timeouts:
     params.append({'RESPONSE_TIMEOUT': rtime})
     metadata.append({'response_timeout': rtime})
@@ -44,7 +46,7 @@ def get_configuration(request):
 @pytest.mark.parametrize('sync_interval', ['10', '10h'])
 def test_response_timeout(num_files, sync_interval, get_configuration, configure_environment, restart_syscheckd):
     """Verify that synchronization checks take place at the expected time given SYNC_INTERVAL and RESPONSE_TIMEOUT variables.
-    
+
     This test is intended to be used with valid ignore configurations.
 
     :param num_files String Number of files to create within the test
