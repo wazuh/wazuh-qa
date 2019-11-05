@@ -12,8 +12,22 @@ platforms:
     command: /sbin/init
     ulimits:
       - nofile:262144:262144
-    privileged: true
     memory_reservation: 2048m
+    privileged: true
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+  - name: agent_${MOL_PLATFORM:-centos7}
+    image: ${MOL_IMAGE:-milcom/centos7-systemd}
+    groups:
+      - agent
+    command: /sbin/init
+    ulimits:
+      - nofile:262144:262144
+    memory_reservation: 1024m
+    privileged: true
     tmpfs:
       - /run
       - /tmp
