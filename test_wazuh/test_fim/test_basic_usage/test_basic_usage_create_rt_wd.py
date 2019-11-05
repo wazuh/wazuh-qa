@@ -33,10 +33,7 @@ monitoring_modes = ['realtime', 'whodata']
 conf_params = []
 conf_metadata = []
 for mode in monitoring_modes:
-    if mode == "whodata" and sys.platform == 'win32':
-        continue
-    fim_mode = '' if mode == "scheduled" else {mode: 'yes'}
-    conf_params.append({'FIM_MODE': fim_mode, 'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__})
+    conf_params.append({'FIM_MODE': {mode: 'yes'}, 'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__})
     conf_metadata.append({'fim_mode': mode, 'test_directories': directory_str, 'module_name': __name__})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
@@ -74,7 +71,7 @@ def test_create_file_realtime_whodata(folder, name, filetype, content, checkers,
 
     if filetype == REGULAR:
         # Wait until event is detected
-        event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
+        event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event).result()
         validate_event(event, checkers)
     else:
         with pytest.raises(TimeoutError):

@@ -32,8 +32,6 @@ monitoring_modes = ['scheduled', 'realtime', 'whodata']
 conf_params = []
 conf_metadata = []
 for mode in monitoring_modes:
-    if mode == "whodata" and sys.platform == 'win32':
-        continue
     fim_mode = '' if mode == "scheduled" else {mode: 'yes'}
     conf_params.append({'FIM_MODE': fim_mode, 'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__})
     conf_metadata.append({'fim_mode': mode, 'test_directories': directory_str, 'module_name': __name__})

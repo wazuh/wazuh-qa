@@ -28,7 +28,7 @@ testdir1, testdir2 = test_directories
 
 # configurations
 
-conf_params = [{'FIM_MODE': 'realtime', 'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}]
+conf_params = [{'FIM_MODE': '{realtime: yes}', 'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}]
 conf_metadata = [{'fim_mode': 'realtime', 'test_directories': directory_str, 'module_name': __name__}]
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 

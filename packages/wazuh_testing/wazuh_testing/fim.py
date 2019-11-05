@@ -107,8 +107,12 @@ def validate_event(event, checks=None):
 
     checks = {CHECK_ALL} if checks is None else checks
 
-    with open(os.path.join(_data_path, 'syscheck_event.json'), 'r') as f:
-        schema = json.load(f)
+    if sys.platform == 'win32':
+        with open(os.path.join(_data_path, 'syscheck_event_windows.json'), 'r') as f:
+            schema = json.load(f)
+    else:
+        with open(os.path.join(_data_path, 'syscheck_event.json'), 'r') as f:
+            schema = json.load(f)
     validate(schema=schema, instance=event)
 
     # Check attributes
@@ -349,11 +353,12 @@ def modify_file(path, name, new_content=None, is_binary=False):
     :type is_binary: boolean
     :return: None
     """
-    modify_file_content(path, name, new_content, is_binary)
-    modify_file_mtime(path, name)
     if sys.platform == 'linux2' or sys.platform == 'linux':
         modify_file_owner(path, name)
         modify_file_group(path, name)
+
+    modify_file_content(path, name, new_content, is_binary)
+    modify_file_mtime(path, name)
     modify_file_permission(path, name)
     modify_file_inode(path, name)
 
