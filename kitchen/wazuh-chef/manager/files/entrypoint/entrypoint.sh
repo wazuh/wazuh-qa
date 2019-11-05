@@ -6,8 +6,7 @@ CHEF_TARGET_BRANCH=$2
 QA_BRANCH=$3
 
 
-cd $HOME && git clone https://github.com/wazuh/wazuh-qa.git && \
-        cd $HOME/wazuh-qa/ && \
+cd $HOME/wazuh-qa/ && \
         git pull --all && \
         git checkout $QA_BRANCH && \
         git pull
