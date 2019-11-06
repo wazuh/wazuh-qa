@@ -16,6 +16,11 @@ platforms:
       - nofile:262144:262144
     privileged: true
     memory_reservation: 2048m
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
 provisioner:
   name: ansible
   config_options:
