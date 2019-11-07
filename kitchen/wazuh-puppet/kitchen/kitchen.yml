@@ -30,7 +30,6 @@ platforms:
       platform: centos
       hostname: manager00_centos
       run_command: /usr/sbin/init
-      dockerfile: test/Dockerfile
       build_options:
         rm: true
 
@@ -41,7 +40,6 @@ platforms:
       hostname: agent00_centos
       run_command: /usr/sbin/init
       run_command: /usr/lib/systemd/systemd
-      dockerfile: test/Dockerfile
       build_options:
         rm: true
 
