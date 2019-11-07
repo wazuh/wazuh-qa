@@ -29,6 +29,11 @@ do
     echo "Assigning Wazuh managers IPs to the corresponding agents."
     sed -i 's/manager_ip/'${manager_ip}'/g' ./manifests/site.pp
 
+	if [[ $suite == *"centos"* ]]; then
+		echo "suite is a Centos one and requires OpenSSL to be installed. .. Installing .."
+		kitchen exec $suite -c "sudo yum install -y openssl"
+	fi
+
     echo "Kitchen is converging ..."
     kitchen converge $suite
 done
