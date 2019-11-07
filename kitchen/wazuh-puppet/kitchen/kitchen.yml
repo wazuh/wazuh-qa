@@ -1,0 +1,51 @@
+---
+driver:
+  name: docker
+  privileged: true
+  use_sudo: false
+  use_internal_docker_network: true
+
+provisioner:
+  name: puppet_apply
+  manifests_path: manifests
+  modules_path: modules
+  hiera_data_path: hieradata
+
+platforms:
+  - name: ubuntu-manager_00_kitchen
+    driver_config:
+      image: ubuntu:14.04
+      platform: ubuntu
+      hostname: manager00_ubuntu
+
+  - name: ubuntu-agent-kitchen
+    driver_config:
+      image: ubuntu:14.04
+      platform: ubuntu
+      hostname: agent00_ubuntu
+
+  - name: centos-manager_00_kitchen
+    driver_config:
+      image: centos:7
+      platform: centos
+      hostname: manager00_centos
+      run_command: /usr/sbin/init
+      build_options:
+        rm: true
+
+  - name: centos-agent_kitchen
+    driver_config:
+      image: centos:7
+      platform: centos
+      hostname: agent00_centos
+      run_command: /usr/sbin/init
+      run_command: /usr/lib/systemd/systemd
+      build_options:
+        rm: true
+
+suites:
+  - name: default
+    manifest: site.pp
+    verifier:
+      name: shell
+      command: py.test -v test/base
