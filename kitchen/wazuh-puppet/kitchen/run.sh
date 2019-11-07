@@ -20,8 +20,7 @@ do
 
     if [[ $suite == *"ubuntu"* ]]; then
         platform = "ubuntu"
-
-    elif [[ $suite == *"centos"* ]]; then
+    else [[ $suite == *"centos"* ]]; then
         platform = "centos"
 	fi
 
@@ -42,7 +41,7 @@ do
 
     echo "Setting the platform in the components names."
     sed -i 's/platform/'${platform}'/g' ./manifests/site.pp
-    
+
 	if [[ $suite == *"centos"* ]]; then
 		echo "suite is a Centos one and requires OpenSSL to be installed. .. Installing .."
 		kitchen exec $suite -c "sudo yum install -y openssl"
