@@ -5,7 +5,7 @@ RUN apt-get update
 
 RUN apt-get -y install ssh && apt-get -y update
 
-RUN echo "source 'https://rubgems.org'\n\
+RUN echo "source 'https://rubygems.org'\n\
 gem 'test-kitchen'\n\
 gem 'kitchen-puppet'\n\
 gem 'kitchen-vagrant'\n\
