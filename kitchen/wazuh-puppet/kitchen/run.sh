@@ -19,9 +19,10 @@ for suite in "${suites_platforms[@]}"
 do
 
     if [[ $suite == *"ubuntu"* ]]; then
-        platform = "ubuntu"
-    else [[ $suite == *"centos"* ]]; then
-        platform = "centos"
+        platform="ubuntu"
+
+    else [[ $suite == *"centos"* ]];
+        platform="centos"
 	fi
 
 
