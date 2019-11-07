@@ -9,7 +9,7 @@ lint:
     config-data:
       ignore: .virtualenv
 platforms:
-  - name: kibana_${MOL_PLATFORM:-centos7}
+  - name: kibana-${MOL_PLATFORM:-centos7}
     image: ${MOL_IMAGE:-milcom/centos7-systemd}
     command: /sbin/init
     ulimits:
