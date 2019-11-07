@@ -23,7 +23,7 @@ do
 
     else [[ $suite == *"centos"* ]];
         platform="centos"
-	  fi
+	fi
 
 
     echo "$suite is selected"
