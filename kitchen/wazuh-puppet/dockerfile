@@ -5,13 +5,13 @@ RUN apt-get update
 
 RUN apt-get -y install ssh && apt-get -y update
 
-RUN gem install rails && \
-    gem install test-kitchen && \
-    gem install kitchen-puppet && \
-    gem install kitchen-vagrant && \
-    gem install kitchen-docker -v 2.3 && \
-    gem install puppet && \
-    gem install librarian-puppet
+RUN echo -e "source 'https://rubgems.org'\n\
+gem 'test-kitchen'\n\
+gem 'kitchen-puppet'\n\
+gem 'kitchen-vagrant'\n\
+gem 'kitchen-docker', '~> 2.3'\n\
+gem 'puppet'\n\
+gem 'librarian-puppet'" > Gemfile
 
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3.5 get-pip.py
 
