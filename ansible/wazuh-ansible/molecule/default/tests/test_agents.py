@@ -6,7 +6,7 @@ import testinfra.utils.ansible_runner
 MOL_PLATFORM = os.getenv('MOL_PLATFORM', 'centos7')
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
-    os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('agent_{}'
+    os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('agent-{}'
                                                      .format(MOL_PLATFORM))
 
 

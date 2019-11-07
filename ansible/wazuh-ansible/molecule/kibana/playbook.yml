@@ -3,4 +3,4 @@
   hosts: all
   roles:
     - role: elastic-stack/ansible-kibana
-      elasticsearch_network_host: "elasticsearch_{{ lookup('env', 'MOL_PLATFORM') or 'centos7' }}"
+      elasticsearch_network_host: "elasticsearch-{{ lookup('env', 'MOL_PLATFORM') or 'centos7' }}"

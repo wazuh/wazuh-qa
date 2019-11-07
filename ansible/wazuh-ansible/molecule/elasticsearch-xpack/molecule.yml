@@ -9,7 +9,7 @@ lint:
     config-data:
       ignore: .virtualenv
 platforms:
-  - name: elasticsearch_${MOL_PLATFORM:-centos7}-1
+  - name: elasticsearch-${MOL_PLATFORM:-centos7}-1
     image: ${MOL_IMAGE:-milcom/centos7-systemd}
     command: /sbin/init
     ulimits:
@@ -21,7 +21,7 @@ platforms:
       - /tmp
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
-  - name: elasticsearch_${MOL_PLATFORM:-centos7}-2
+  - name: elasticsearch-${MOL_PLATFORM:-centos7}-2
     image: ${MOL_IMAGE:-milcom/centos7-systemd}
     command: /sbin/init
     ulimits:

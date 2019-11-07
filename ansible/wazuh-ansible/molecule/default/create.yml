@@ -46,7 +46,7 @@
       docker_network:
         name: "main"
         state: present
-      
+
     - name: Sleep 5 seconds till the network gets created if it's not
         # Pause for 5 minutes to build app cache.
       pause:
@@ -68,7 +68,7 @@
         exposed_ports: "{{ item.exposed_ports | default(omit) }}"
         published_ports: "{{ item.published_ports | default(omit) }}"
         ulimits: "{{ item.ulimits | default(omit) }}"
-        networks: 
+        networks:
           - name: "main"
         dns_servers: "{{ item.dns_servers | default(omit) }}"
       register: server
