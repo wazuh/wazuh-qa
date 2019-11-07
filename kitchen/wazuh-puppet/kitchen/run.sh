@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 mkdir -p modules/wazuh
 
 cp -r ../files ./modules/wazuh/
