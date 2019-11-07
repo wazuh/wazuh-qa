@@ -10,7 +10,8 @@ lint:
       ignore: .virtualenv
 platforms:
   - name: worker_${MOL_PLATFORM:-centos7}
-    image: ${MOL_IMAGE:-milcom/centos7-systemd}
+    image: ${MOL_IMAGE:-paulfantom/centos-molecule:7}
+    pre_build_image: true
     command: /sbin/init
     ulimits:
       - nofile:262144:262144
