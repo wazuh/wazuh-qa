@@ -9,6 +9,7 @@ import shutil
 import socket
 import sys
 import time
+import subprocess
 from collections import Counter
 from datetime import timedelta
 from stat import ST_ATIME, ST_MTIME
@@ -247,11 +248,19 @@ def _create_regular(path, name, content):
     :type content: String or bytes
     :return: None
     """
+    #if sys.platform == "win32":
+    #    return _create_regular_windows(path, name, content)
+
     regular_path = os.path.join(path, name)
     mode = 'wb' if isinstance(content, bytes) else 'w'
 
     with open(regular_path, mode) as f:
         f.write(content)
+
+
+def _create_regular_windows(path, name, content):
+    regular_path = os.path.join(path, name)
+    os.popen("echo " + content + " > " + regular_path + " runas /user:jmv74211")
 
 
 def delete_file(path, name):
@@ -301,8 +310,19 @@ def modify_file_owner(path, name):
     :param path String Path to the file to be modified
     :param name String Name of the file to be modified
     """
+    def modify_file_owner_windows():
+        cmd = "takeown /S 127.0.0.1 /U jmv74211 /F " + path_to_file
+        subprocess.call(cmd)
+
+    def modify_file_owner_unix():
+        os.chown(path_to_file, 1, -1)
+
     path_to_file = os.path.join(path, name)
-    os.chown(path_to_file, 1, -1)
+
+    if sys.platform == 'win32':
+        modify_file_owner_windows()
+    else:
+        modify_file_owner_unix()
 
 
 def modify_file_group(path, name):
@@ -313,6 +333,9 @@ def modify_file_group(path, name):
     :param path String Path to the file to be modified
     :param name String Name of the file to be modified
     """
+    if sys.platform == 'win32':
+        return
+
     path_to_file = os.path.join(path, name)
     os.chown(path_to_file, -1, 1)
 
@@ -327,8 +350,26 @@ def modify_file_permission(path, name):
     :param path String Path to the file to be modified
     :param name String Name of the file to be modified
     """
+    def modify_file_permission_windows():
+        import win32security
+        import ntsecuritycon
+
+        user, domain, account_type = win32security.LookupAccountName(None, "jmv74211-PC\\jmv74211")
+        sd = win32security.GetFileSecurity(path_to_file, win32security.DACL_SECURITY_INFORMATION)
+        dacl = sd.GetSecurityDescriptorDacl()
+        dacl.AddAccessAllowedAce(win32security.ACL_REVISION, ntsecuritycon.FILE_ALL_ACCESS, user)
+        sd.SetSecurityDescriptorDacl(1, dacl, 0)
+        win32security.SetFileSecurity(path_to_file, win32security.DACL_SECURITY_INFORMATION, sd)
+
+    def modify_file_permission_unix():
+        os.chmod(path_to_file, 0o666)
+
     path_to_file = os.path.join(path, name)
-    os.chmod(path_to_file, 0o666)
+
+    if sys.platform == 'win32':
+        modify_file_permission_windows()
+    else:
+        modify_file_permission_unix()
 
 
 def modify_file_inode(path, name):
@@ -337,6 +378,9 @@ def modify_file_inode(path, name):
     :param path String Path to the file to be modified
     :param name String Name of the file to be modified
     """
+    if sys.platform == 'win32':
+        return
+
     path_to_file = os.path.join(path, name)
     shutil.copy2(path_to_file, os.path.join(path, "inodetmp"))
     os.replace(os.path.join(path, "inodetmp"), path_to_file)
@@ -353,12 +397,10 @@ def modify_file(path, name, new_content=None, is_binary=False):
     :type is_binary: boolean
     :return: None
     """
-    if sys.platform == 'linux2' or sys.platform == 'linux':
-        modify_file_owner(path, name)
-        modify_file_group(path, name)
-
     modify_file_content(path, name, new_content, is_binary)
     modify_file_mtime(path, name)
+    modify_file_owner(path, name)
+    modify_file_group(path, name)
     modify_file_permission(path, name)
     modify_file_inode(path, name)
 

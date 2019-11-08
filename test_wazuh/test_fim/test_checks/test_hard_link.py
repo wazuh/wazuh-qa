@@ -3,14 +3,14 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import pytest
+import sys
 
+import pytest
 from wazuh_testing.fim import (HARDLINK, LOG_FILE_PATH, REGULAR, EventChecker,
-                               check_time_travel, create_file, delete_file,
-                               detect_initial_scan, modify_file_content)
-from wazuh_testing.tools import (FileMonitor, check_apply_test,
-                                 load_wazuh_configurations,
-                                 restart_wazuh_service, truncate_file)
+                               check_time_travel, create_file, delete_file, modify_file_content)
+from wazuh_testing.tools import (FileMonitor,
+                                 load_wazuh_configurations, truncate_file)
+
 
 # variables
 
@@ -50,11 +50,12 @@ def get_configuration(request):
 
 # tests
 
+@pytest.mark.skipif(sys.platform == "win32")
 @pytest.mark.parametrize('path_file, path_link, num_links', [
     (testdir1, "/", 1),
     (testdir1, testdir1, 2),
 ])
-def test_hard_link(path_file, path_link, num_links, get_configuration, 
+def test_hard_link(path_file, path_link, num_links, get_configuration,
                    configure_environment, restart_syscheckd, wait_for_initial_scan):
     """Test the check_inode option when used with Hard links.
 
@@ -69,7 +70,7 @@ def test_hard_link(path_file, path_link, num_links, get_configuration,
     regular_file_name = "testregularfile"
     file_list = [regular_file_name]
     hardlinks_list = []
-    
+
     try:
         event_checker = EventChecker(wazuh_log_monitor, path_file, file_list)
 
@@ -81,7 +82,7 @@ def test_hard_link(path_file, path_link, num_links, get_configuration,
         # Create as many links pointing to the regular file as num_links
         for link in range(0, num_links):
             hardlinks_list.append("HardLink"+str(link))
-            create_file(HARDLINK, path_file, regular_file_name, content=os.path.join(path_link, "HardLink"+str(link)))
+            create_file(HARDLINK, path_file, regular_file_name, target=os.path.join(path_link, "HardLink"+str(link)))
 
         # Try to detect the creation events for all the created links
         if path_file == path_link:
@@ -100,7 +101,7 @@ def test_hard_link(path_file, path_link, num_links, get_configuration,
         # Delete log file to avoid false positives
         truncate_file(LOG_FILE_PATH)
         wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-        
+
         # Modify one of the hard links and check the modification events for the entire file_list
         modify_file_content(path_link, "HardLink0", new_content="modified HardLink0")
         check_time_travel(get_configuration['metadata']['fim_mode'] == 'scheduled')
