@@ -13,11 +13,11 @@ from wazuh_testing.tools import (FileMonitor, LOG_FILE_PATH)
 # variables
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 configurations = []
-path_tests = os.path.join(os.getcwd()+"/"+"data"+"/")
-for i in range(1, 14):
-    file_test = os.path.join(path_tests +"test" + str(i) + ".xml")
+for i in range(1, 15):
+    file_test = os.path.join(_data_path, f"test{i}.xml")
     configurations.append(file_test)
 
 # fixtures

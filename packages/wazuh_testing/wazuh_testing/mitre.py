@@ -35,7 +35,8 @@ def callback_detect_mitre_event(line):
     return None
 
 def callback_detect_analysisd_started(line):
-    if 'ossec-analysisd' and 'at main(): INFO: Started' in line:
+    match = re.match(r'.*ossec-analysisd\[\d+\].*Started', line)
+    if match:
         return line
     return None
 
@@ -46,4 +47,4 @@ def detect_initial_analysisd(file_monitor):
     :type file_monitor: FileMonitor
     :return: None
     """
-    file_monitor.start(timeout=5, callback=callback_detect_analysisd_started, accum_results=2)
+    file_monitor.start(timeout=6, callback=callback_detect_analysisd_started)
