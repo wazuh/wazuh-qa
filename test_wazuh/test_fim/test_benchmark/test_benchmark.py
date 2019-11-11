@@ -35,7 +35,8 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 # configurations
 
 monitoring_modes = ['realtime', 'whodata']
-conf_params, conf_metadata = set_configuration({'TEST_DIRECTORIES': directory_str}, {'test_directories': directory_str},
+conf_params, conf_metadata = set_configuration(extra_params={'TEST_DIRECTORIES': directory_str},
+                                               extra_metadata={'test_directories': directory_str},
                                                modes=monitoring_modes)
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
