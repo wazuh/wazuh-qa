@@ -15,17 +15,6 @@ from wazuh_testing.tools import restart_wazuh_daemon
 
 
 @pytest.fixture(scope='module')
-def restart_wazuh(get_configuration, request):
-    # Reset ossec.log and start a new monitor
-    truncate_file(LOG_FILE_PATH)
-    file_monitor = FileMonitor(LOG_FILE_PATH)
-    setattr(request.module, 'wazuh_log_monitor', file_monitor)
-
-    # Restart Wazuh and wait for the command to end
-    restart_wazuh_service()
-
-
-@pytest.fixture(scope='module')
 def restart_syscheckd(get_configuration, request):
     # Reset ossec.log and start a new monitor
     truncate_file(LOG_FILE_PATH)

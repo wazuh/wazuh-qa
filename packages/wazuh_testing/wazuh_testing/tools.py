@@ -24,6 +24,7 @@ WAZUH_PATH = os.path.join('/', 'var', 'ossec')
 WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
 WAZUH_SOURCES = os.path.join('/', 'wazuh')
 GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
+LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
