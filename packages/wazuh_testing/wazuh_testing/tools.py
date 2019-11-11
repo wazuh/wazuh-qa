@@ -567,3 +567,80 @@ def time_to_timedelta(time):
         return timedelta(days=time_value)
     elif time_unit == "w":
         return timedelta(weeks=time_value)
+
+
+def set_configuration(extra_params: dict = None, extra_metadata: dict = None, *, modes: list = None):
+    """ Returns param and metadata for load_configurations function with fim_mode and some extra fields.
+
+        extra_params = {'TAG': {'attribute': ['list', 'of', 'values']}} - Max. 3 elements in the list of values
+                            or
+                       {'TAG': {'attribute': 'value'}} - It will have the same value for scheduled, realtime and whodata
+                            or
+                       {'TAG': 'value'} - Valid when param is not an attribute. (ex: 'MODULE_NAME': __name__)
+
+        extra_metadata = {'tag': ['list', 'of', 'values']} - Same as params
+                            or
+                         {'tag': 'value'} - Same as params
+
+        The length of extra_params and extra_metadata must be the same
+
+    :param extra_params: params to add
+    :param extra_metadata: metadata to add
+    :param modes: monitoring modes to add. All by default
+    :return: Tuple(params, metadata)
+    """
+    def transform_param(mutable_object):
+        for k, v in mutable_object.items():
+            if isinstance(v, dict):
+                for v_key, v_value in v.items():
+                    mutable_object[k][v_key] = v_value if isinstance(v_value, list) else [v_value, v_value, v_value]
+
+    def transform_metadata(mutable_object):
+        for k, v in mutable_object.items():
+            mutable_object[k] = v if isinstance(v, list) else [v,v,v]
+
+    add = False
+    if extra_params is not None and extra_metadata is not None:
+        assert len(extra_params) == len(extra_metadata), f'params and metadata length not equal'
+        transform_param(extra_params)
+        transform_metadata(extra_metadata)
+        add = True
+
+    fim_param = []
+    fim_metadata = []
+
+    modes = modes if modes is not None else ['scheduled', 'realtime', 'whodata']
+    for mode in modes:
+        if mode == 'scheduled':
+            fim_param.append({'FIM_MODE': ''})
+            fim_metadata.append({'fim_mode': 'scheduled'})
+        elif mode == 'realtime' and sys.platform != 'darwin':
+            fim_param.append({'FIM_MODE': {'realtime': 'yes'}})
+            fim_metadata.append({'fim_mode': 'realtime'})
+        elif mode == 'whodata' and sys.platform != 'darwin':
+            fim_param.append({'FIM_MODE': {'whodata': 'yes'}})
+            fim_metadata.append({'fim_mode': 'whodata'})
+
+    params = []
+    metadata = []
+
+    for i in range(len(fim_param)):
+        fim_aux = fim_param[i]
+        p_aux = {list(fim_aux)[0]: list(fim_aux.values())[0]}
+        if add:
+            for key, value in extra_params.items():
+                if isinstance(value, dict):
+                    p_aux[key] = list(value.values())[0][i]
+                else:
+                    p_aux[key] = value
+        params.append(p_aux)
+
+    for i in range(len(fim_metadata)):
+        fim_aux = fim_metadata[i]
+        m_aux = {list(fim_aux)[0]: list(fim_aux.values())[0]}
+        if add:
+            for key, value in extra_metadata.items():
+                m_aux[key] = value[i]
+        metadata.append(m_aux)
+
+    return params, metadata

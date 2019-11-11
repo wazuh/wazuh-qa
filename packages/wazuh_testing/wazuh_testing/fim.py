@@ -4,6 +4,7 @@
 
 import json
 import os
+import platform
 import re
 import shutil
 import socket
@@ -260,7 +261,7 @@ def _create_regular(path, name, content):
 
 def _create_regular_windows(path, name, content):
     regular_path = os.path.join(path, name)
-    os.popen("echo " + content + " > " + regular_path + " runas /user:jmv74211")
+    os.popen("echo " + content + " > " + regular_path + f" runas /user:{os.getlogin()}")
 
 
 def delete_file(path, name):
@@ -311,7 +312,7 @@ def modify_file_owner(path, name):
     :param name String Name of the file to be modified
     """
     def modify_file_owner_windows():
-        cmd = "takeown /S 127.0.0.1 /U jmv74211 /F " + path_to_file
+        cmd = f"takeown /S 127.0.0.1 /U {os.getlogin()} /F " + path_to_file
         subprocess.call(cmd)
 
     def modify_file_owner_unix():
@@ -354,7 +355,7 @@ def modify_file_permission(path, name):
         import win32security
         import ntsecuritycon
 
-        user, domain, account_type = win32security.LookupAccountName(None, "jmv74211-PC\\jmv74211")
+        user, domain, account_type = win32security.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")
         sd = win32security.GetFileSecurity(path_to_file, win32security.DACL_SECURITY_INFORMATION)
         dacl = sd.GetSecurityDescriptorDacl()
         dacl.AddAccessAllowedAce(win32security.ACL_REVISION, ntsecuritycon.FILE_ALL_ACCESS, user)
