@@ -4,6 +4,7 @@
 
 import json
 import os
+import platform
 import re
 import shutil
 import socket
@@ -63,7 +64,7 @@ REQUIRED_ATTRIBUTES = {
     CHECK_MTIME: 'mtime',
     CHECK_INODE: 'inode',
     CHECK_ALL: {CHECK_SHA256SUM, CHECK_SHA1SUM, CHECK_MD5SUM, CHECK_SIZE, CHECK_OWNER,
-                CHECK_GROUP, CHECK_PERM, CHECK_MTIME, CHECK_INODE},
+                CHECK_GROUP, CHECK_PERM, CHECK_ATTRS, CHECK_MTIME, CHECK_INODE},
     CHECK_SUM: {CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_MD5SUM}
 }
 
@@ -117,10 +118,14 @@ def validate_event(event, checks=None):
     validate(schema=schema, instance=event)
 
     # Check attributes
-    attributes = event['data']['attributes'].keys() - {'type', 'checksum', 'win_attributes'}
+    attributes = event['data']['attributes'].keys() - {'type', 'checksum'}
     required_attributes = get_required_attributes(checks)
-    if sys.platform == 'win32':
+
+    if sys.platform == "win32":
         required_attributes = required_attributes - get_required_attributes({CHECK_GROUP})
+    else:
+        attributes = attributes - {'win_attributes'}
+
     intersection = attributes ^ required_attributes
     intersection_debug = "Event attributes are: " + str(attributes)
     intersection_debug += "\nRequired Attributes are: " + str(required_attributes)
@@ -248,19 +253,11 @@ def _create_regular(path, name, content):
     :type content: String or bytes
     :return: None
     """
-    #if sys.platform == "win32":
-    #    return _create_regular_windows(path, name, content)
-
     regular_path = os.path.join(path, name)
     mode = 'wb' if isinstance(content, bytes) else 'w'
 
     with open(regular_path, mode) as f:
         f.write(content)
-
-
-def _create_regular_windows(path, name, content):
-    regular_path = os.path.join(path, name)
-    os.popen("echo " + content + " > " + regular_path + " runas /user:jmv74211")
 
 
 def delete_file(path, name):
@@ -298,7 +295,7 @@ def modify_file_mtime(path, name):
     stat = os.stat(path_to_file)
     access_time = stat[ST_ATIME]
     modification_time = stat[ST_MTIME]
-    modification_time = modification_time + 120
+    modification_time = modification_time + 1000
     os.utime(path_to_file, (access_time, modification_time))
 
 
@@ -311,7 +308,7 @@ def modify_file_owner(path, name):
     :param name String Name of the file to be modified
     """
     def modify_file_owner_windows():
-        cmd = "takeown /S 127.0.0.1 /U jmv74211 /F " + path_to_file
+        cmd = f"takeown /S 127.0.0.1 /U {os.getlogin()} /F " + path_to_file
         subprocess.call(cmd)
 
     def modify_file_owner_unix():
@@ -354,7 +351,7 @@ def modify_file_permission(path, name):
         import win32security
         import ntsecuritycon
 
-        user, domain, account_type = win32security.LookupAccountName(None, "jmv74211-PC\\jmv74211")
+        user, domain, account_type = win32security.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")
         sd = win32security.GetFileSecurity(path_to_file, win32security.DACL_SECURITY_INFORMATION)
         dacl = sd.GetSecurityDescriptorDacl()
         dacl.AddAccessAllowedAce(win32security.ACL_REVISION, ntsecuritycon.FILE_ALL_ACCESS, user)
@@ -386,6 +383,17 @@ def modify_file_inode(path, name):
     os.replace(os.path.join(path, "inodetmp"), path_to_file)
 
 
+def modify_file_win_attributes(path, name):
+    if sys.platform != 'win32':
+        return
+
+    import win32con
+    import win32api
+
+    path_to_file = os.path.join(path, name)
+    win32api.SetFileAttributes(path_to_file, win32con.FILE_ATTRIBUTE_HIDDEN)
+
+
 def modify_file(path, name, new_content=None, is_binary=False):
     """Modify a Regular file.
 
@@ -403,6 +411,7 @@ def modify_file(path, name, new_content=None, is_binary=False):
     modify_file_group(path, name)
     modify_file_permission(path, name)
     modify_file_inode(path, name)
+    modify_file_win_attributes(path, name)
 
 
 def change_internal_options(opt_path, pattern, value):
