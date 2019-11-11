@@ -9,6 +9,9 @@ provisioner:
   name: chef_zero
   chef_license: accept-no-persist
 
+driver_config:
+  provision_command: apt-get install -y --force-yes apt-transport-https ca-certificates && apt-get update
+
 platforms:
   - name: ubuntu-kitchen-chef
     driver_config:
@@ -70,7 +73,7 @@ suites:
         cpus: 2
     run_list:
       - recipe[wazuh_elastic::default]
-    attributes:
+    attributes: 
     provisioner:
       client_rb:
         environment: development
