@@ -630,7 +630,7 @@ def set_configuration(extra_params: dict = None, extra_metadata: dict = None, *,
         if add:
             for key, value in extra_params.items():
                 if isinstance(value, dict):
-                    p_aux[key] = list(value.values())[0][i]
+                    p_aux[key] = {list(value.keys())[0]: list(value.values())[0][i]}
                 else:
                     p_aux[key] = value
         params.append(p_aux)

@@ -260,6 +260,11 @@ def _create_regular(path, name, content):
         f.write(content)
 
 
+def _create_regular_windows(path, name, content):
+    regular_path = os.path.join(path, name)
+    os.popen("echo " + content + " > " + regular_path + f" runas /user:{os.getlogin()}")
+
+
 def delete_file(path, name):
     """Deletes regular file.
 
