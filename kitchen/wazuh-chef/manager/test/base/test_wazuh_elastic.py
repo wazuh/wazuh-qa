@@ -17,4 +17,3 @@ def test_elasticsearch_is_running(host):
     """Test if the services are enabled and running."""
     elasticsearch = host.service("elasticsearch")
     assert elasticsearch.is_enabled
-    assert elasticsearch.is_running
