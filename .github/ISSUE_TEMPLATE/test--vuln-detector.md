@@ -447,7 +447,7 @@ This type of update is performed through the `path` and `url` options, and the w
     </provider>
     <provider name="nvd">
       <enabled>yes</enabled>
-      <url start="2002" end="2019">http://local_repo/rh-feed/redhat-feed[-].json</url>
+      <url start="2002" end="2019">http://local_repo/nvd-feed/nvd-feed[-].json</url>
       <update_interval>1h</update_interval>
     </provider>
   </vulnerability-detector>
