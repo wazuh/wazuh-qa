@@ -57,3 +57,23 @@ suites:
     verifier:
       name: shell
       command: py.test -v test/base
+
+  - name: elastic
+    environments_path: "../wazuh_elastic/environments"
+    data_bags_path: "../wazuh_elastic/test/data_bags"
+    encrypted_data_bag_secret_key_path: "test/data_bags/wazuh_secrets/test_data_bag_key"
+    driver:
+      network:
+      - ["private_network", {ip: "172.16.10.12"}]
+      customize:
+        memory: 2048
+        cpus: 2
+    run_list:
+      - recipe[wazuh_elastic::default]
+    attributes:
+    provisioner:
+      client_rb:
+        environment: development
+    verifier:
+      name: shell
+      command: py.test -v test/base
