@@ -9,6 +9,7 @@ provisioner:
   name: chef_zero
   chef_license: accept-no-persist
 
+
 driver_config:
   provision_command: apt-get install -y --force-yes apt-transport-https ca-certificates && apt-get update
 
@@ -62,21 +63,24 @@ suites:
       command: py.test -v test/base
 
   - name: elastic
-    environments_path: "../wazuh_elastic/environments"
+    environments_path: "../wazuh_elastic/test/environments"
     data_bags_path: "../wazuh_elastic/test/data_bags"
     encrypted_data_bag_secret_key_path: "test/data_bags/wazuh_secrets/test_data_bag_key"
     driver:
       network:
-      - ["private_network", {ip: "172.16.10.12"}]
+      - ["private_network", {ip: "127.0.0.1"}]
       customize:
         memory: 2048
         cpus: 2
     run_list:
-      - recipe[wazuh_elastic::default]
-    attributes: {wazuh-elastic: {elasticsearch_ip: '127.0.0.1'} }
+      - recipe[wazuh_elastic::repository]
+      - recipe[wazuh_elastic::elasticsearch]
+      - recipe[wazuh_elastic::nginx]
+      - recipe[wazuh_elastic::kibana] 
+    attributes: { wazuh-elastic: {elasticsearch_ip: '127.0.0.1'} } 
     provisioner:
       client_rb:
         environment: development
     verifier:
       name: shell
-      command: py.test -v test/base
+      command: py.test -v test/base/test_wazuh_elastic.py
