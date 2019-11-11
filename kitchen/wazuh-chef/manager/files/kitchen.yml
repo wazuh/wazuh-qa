@@ -73,7 +73,7 @@ suites:
         cpus: 2
     run_list:
       - recipe[wazuh_elastic::default]
-    attributes: 
+    attributes: {wazuh-elastic: {elasticsearch_ip: '127.0.0.1'} }
     provisioner:
       client_rb:
         environment: development
