@@ -7,8 +7,8 @@ from datetime import timedelta
 
 import pytest
 import sys
-from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, callback_ignore, create_file, REGULAR
-from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, TimeMachine, set_configuration
+from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, callback_ignore, create_file, REGULAR, generate_params
+from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, TimeMachine, PREFIX
 
 # variables
 
@@ -16,14 +16,11 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path,
                                    'wazuh_conf_win32.yaml' if sys.platform == 'win32' else 'wazuh_conf.yaml')
 
-
-prefix = os.path.join('c:', os.sep) if sys.platform == 'win32' else os.sep
-
-test_directories = [os.path.join(prefix, 'testdir1'),
-                    os.path.join(prefix, 'testdir1', 'subdir'),
-                    os.path.join(prefix, 'testdir1', 'ignore_this'),
-                    os.path.join(prefix, 'testdir2'),
-                    os.path.join(prefix, 'testdir2', 'subdir')
+test_directories = [os.path.join(PREFIX, 'testdir1'),
+                    os.path.join(PREFIX, 'testdir1', 'subdir'),
+                    os.path.join(PREFIX, 'testdir1', 'ignore_this'),
+                    os.path.join(PREFIX, 'testdir2'),
+                    os.path.join(PREFIX, 'testdir2', 'subdir')
                     ]
 testdir1, testdir1_sub, testdir1_ignore, testdir2, testdir2_sub = test_directories
 
@@ -32,7 +29,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-conf_params, conf_metadata = set_configuration()
+conf_params, conf_metadata = generate_params()
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
