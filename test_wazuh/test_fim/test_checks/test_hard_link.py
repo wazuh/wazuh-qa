@@ -50,7 +50,7 @@ def get_configuration(request):
 
 # tests
 
-@pytest.mark.skipif(sys.platform == "win32")
+@pytest.mark.skipif(sys.platform == "win32", reason="Windows does not support Hard links hence no tests are needed.")
 @pytest.mark.parametrize('path_file, path_link, num_links', [
     (testdir1, "/", 1),
     (testdir1, testdir1, 2),

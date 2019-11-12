@@ -7,7 +7,7 @@ import sys
 import pytest
 
 from wazuh_testing.fim import CHECK_ALL, LOG_FILE_PATH, regular_file_cud
-from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations
+from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, set_configuration_with_fim
 
 
 # variables
@@ -28,15 +28,10 @@ testdir1, testdir2 = test_directories
 
 # configurations
 
-monitoring_modes = ['scheduled', 'realtime', 'whodata']
-conf_params = []
-conf_metadata = []
-for mode in monitoring_modes:
-    fim_mode = '' if mode == "scheduled" else {mode: 'yes'}
-    conf_params.append({'FIM_MODE': fim_mode, 'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__})
-    conf_metadata.append({'fim_mode': mode, 'test_directories': directory_str, 'module_name': __name__})
-
-configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
+conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
+conf_metadata = {'test_directories': directory_str, 'module_name': __name__}
+p, m = set_configuration_with_fim(conf_params, conf_metadata)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
 # fixtures

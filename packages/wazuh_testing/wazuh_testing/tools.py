@@ -597,7 +597,7 @@ def set_configuration(extra_params: dict = None, extra_metadata: dict = None, *,
 
     def transform_metadata(mutable_object):
         for k, v in mutable_object.items():
-            mutable_object[k] = v if isinstance(v, list) else [v,v,v]
+            mutable_object[k] = v if isinstance(v, list) else [v, v, v]
 
     add = False
     if extra_params is not None and extra_metadata is not None:

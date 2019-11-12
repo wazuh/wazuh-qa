@@ -48,7 +48,7 @@
       attributes:
       - FIM_MODE
       - check_all: "no"
-      - check_group: "yes"
+      - check_attrs: "yes"
   - directories:
       value: "c:\\testdir8"
       attributes:
@@ -67,6 +67,12 @@
       - FIM_MODE
       - check_all: "no"
       - check_inode: "yes"
+  - directories:
+      value: "c:\\testdirWin"
+      attributes:
+      - FIM_MODE
+      - check_all: "no"
+      - check_attrs: "yes"
 - tags:
   - test_check_others
   apply_to_modules:
@@ -89,7 +95,7 @@
       - check_all: "no"
       - check_md5sum: "yes"
       - check_mtime: "yes"
-      - check_group: "yes"
+      - check_owner: "yes"
   - directories:
       value: "c:\\testdir3"
       attributes:
@@ -104,14 +110,14 @@
       - check_all: "no"
       - check_perm: "yes"
       - check_size: "yes"
-      - check_inode: "yes"
+      - check_attrs: "yes"
   - directories:
       value: "c:\\testdir5"
       attributes:
       - FIM_MODE
-      - check_all: "no"
-      - check_owner: "yes"
-      - check_group: "yes"
+      - check_all: "yes"
+      - check_attrs: "no"
+      - check_owner: "no"
   - directories:
       value: "c:\\testdir6"
       attributes:
@@ -126,7 +132,7 @@
       - check_md5sum: "yes"
       - check_all: "no"
       - check_mtime: "yes"
-      - check_group: "yes"
+      - check_attrs: "yes"
   - directories:
       value: "c:\\testdir8"
       attributes:
