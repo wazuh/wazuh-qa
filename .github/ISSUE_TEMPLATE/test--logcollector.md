@@ -45,6 +45,7 @@ assignees: ''
 
 - [ ] Configure one and multiple sockets output as target. (https://github.com/wazuh/wazuh/pull/395)
 - [ ] Test the `out_format` option for different socket targets. (https://github.com/wazuh/wazuh/pull/863)
+- [ ] Stop the manager and rotate the input log. Check that socket still receives logs. (https://github.com/wazuh/wazuh/pull/4222) 
 
 ## Commands
 
