@@ -9,15 +9,12 @@ provisioner:
   name: chef_zero
   chef_license: accept-no-persist
 
-
-driver_config:
-  provision_command: apt-get install -y --force-yes apt-transport-https ca-certificates && apt-get update
-
 platforms:
   - name: ubuntu-kitchen-chef
     driver_config:
       image: ubuntu:14.04
       platform: ubuntu
+      provision_command: apt-get install -y --force-yes apt-transport-https ca-certificates && apt-get update
 
   - name: centos-kitchen-chef
     driver_config:
