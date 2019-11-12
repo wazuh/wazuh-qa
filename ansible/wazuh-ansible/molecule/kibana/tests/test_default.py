@@ -1,4 +1,5 @@
 import os
+import json
 
 import testinfra.utils.ansible_runner
 import pytest
@@ -26,8 +27,9 @@ def test_port_kibana_is_open(host):
 def test_find_correct_elasticsearch_version(host, KibanaRoleDefaults):
     """Test if we find the kibana/elasticsearch version in package.json"""
     elastic_stack_version = KibanaRoleDefaults["elastic_stack_version"]
-    kibana = host.file("/usr/share/kibana/plugins/wazuh/package.json")
-    assert kibana.contains(elastic_stack_version)
+    kibana = host.file("/usr/share/kibana/plugins/wazuh/package.json").content
+    kibana_dict = json.loads(kibana)
+    assert kibana_dict['kibana']['version'] == elastic_stack_version
 
 
 def test_wazuh_plugin_installed(host):
