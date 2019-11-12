@@ -119,12 +119,9 @@ def validate_event(event, checks=None):
 
     # Check attributes
     attributes = event['data']['attributes'].keys() - {'type', 'checksum'}
-    required_attributes = get_required_attributes(checks)
 
-    if sys.platform == "win32":
-        required_attributes = required_attributes - get_required_attributes({CHECK_GROUP})
-    else:
-        attributes = attributes - {'win_attributes'}
+    required_attributes = get_required_attributes(checks)
+    required_attributes -= get_required_attributes({CHECK_GROUP}) if sys.platform == "win32" else {'win_attributes'}
 
     intersection = attributes ^ required_attributes
     intersection_debug = "Event attributes are: " + str(attributes)

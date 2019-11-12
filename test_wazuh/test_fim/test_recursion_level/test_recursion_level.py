@@ -1,45 +1,41 @@
 # Copyright (C) 2015-2019, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-import glob
 import os
 import re
 import pytest
+import sys
 
 from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_event_too_long, regular_file_cud)
-from wazuh_testing.tools import FileMonitor, load_wazuh_configurations
+from wazuh_testing.tools import FileMonitor, load_wazuh_configurations, set_configuration
 
 
 # Variables
 
-dir_no_recursion = "/test_no_recursion"
-dir_recursion_1 = "/test_recursion_1"
-dir_recursion_5 = "/test_recursion_5"
-dir_recursion_320 = "/test_recursion_320"
+prefix = os.path.join('C:', os.sep) if sys.platform == 'win32' else os.sep
+
+dir_no_recursion = os.path.join(prefix, 'test_no_recursion')
+dir_recursion_1 = os.path.join(prefix, os.sep, 'test_recursion_1')
+dir_recursion_5 = os.path.join(prefix, os.sep, 'test_recursion_5')
+dir_recursion_320 = os.path.join(prefix, os.sep, 'test_recursion_320')
 subdir = "subdir"
 
-dir_no_recursion_space = "/test no recursion"
-dir_recursion_1_space = "/test recursion 1"
-dir_recursion_5_space = "/test recursion 5"
-dir_recursion_320_space = "/test recursion 320"
+dir_no_recursion_space = os.path.join(prefix, 'test no recursion')
+dir_recursion_1_space = os.path.join(prefix, 'test recursion 1')
+dir_recursion_5_space = os.path.join(prefix, 'test recursion 5')
+dir_recursion_320_space = os.path.join(prefix, 'test recursion 320')
 subdir_space = "sub dir "
 
+test_directories = [dir_no_recursion, dir_recursion_1, dir_recursion_5, dir_recursion_320, dir_no_recursion_space,
+                    dir_recursion_1_space, dir_recursion_5_space, dir_recursion_320_space]
+
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-test_directories = [
-    dir_no_recursion,
-    dir_recursion_1,
-    dir_recursion_5,
-    dir_recursion_320,
-    dir_no_recursion_space,
-    dir_recursion_1_space,
-    dir_recursion_5_space,
-    dir_recursion_320_space
-]
+conf_name = "wazuh_recursion_windows.yaml" if sys.platform == "win32" else "wazuh_recursion.yaml"
+configurations_path = os.path.join(test_data_path, conf_name)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
-# Configurations
+# configurations
 
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=[{'FIM_MODE': '', 'CHECK': {'check_all': 'yes'}},
@@ -72,14 +68,14 @@ def check_config_applies(applies_to_config, get_configuration):
 
 def recursion_test(dirname, subdirname, recursion_level, timeout=1, threshold_true=2, threshold_false=2,
                    is_scheduled=False):
-    """Checks recursion_level functionality over the first and last n-directories of the dirname hierarchy 
-    by creating, modifying and deleting some files in them. It will create all directories and 
+    """Checks recursion_level functionality over the first and last n-directories of the dirname hierarchy
+    by creating, modifying and deleting some files in them. It will create all directories and
     subdirectories needed using the info provided by parameter.
     :param dirname string The path being monitored by syscheck (indicated in the .conf file)
     :param subdirname string The name of the subdirectories that will be created during the execution for testing purpouses.
     :param recursion_level int Recursion level. Also used as the number of subdirectories to be created and checked for the current test.
     :param timeout int Max time to wait until an event is raised.
-    :param threshold_true Number of directories where the test will monitor events 
+    :param threshold_true Number of directories where the test will monitor events
     :param threshold_false Number of directories exceding the specified recursion_level to verify events are not raised
     :param is_scheduled bool If True the internal date will be modified to trigger scheduled checks by syschecks. False if realtime or Whodata.
     """
@@ -102,6 +98,9 @@ def recursion_test(dirname, subdirname, recursion_level, timeout=1, threshold_tr
 
     except (TimeoutError, AssertionError):
         check_event_too_long()
+    except OSError as ex:
+        if ex.winerror == 206:
+            pytest.exit(msg="Reached Windows maximum path length.", returncode=pytest.ExitCode.OK)
 
 
 def check_event_too_long():
@@ -111,8 +110,8 @@ def check_event_too_long():
                                         callback=callback_audit_event_too_long,
                                         update_position=False).result()
         if event:
-            pytest.exit(returncode=pytest.ExitCode.OK)
-        pytest.fail("No Event Too Long message was raised.")
+            pytest.exit(msg="Reached Whodata maximum path length.", returncode=pytest.ExitCode.OK)
+        pytest.fail("No 'Event Too Long' message was raised.")
     except TimeoutError:
         pass
 
