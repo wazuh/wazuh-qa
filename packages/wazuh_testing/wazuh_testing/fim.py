@@ -12,6 +12,7 @@ import sys
 import time
 import subprocess
 from collections import Counter
+from copy import deepcopy
 from datetime import timedelta
 from stat import ST_ATIME, ST_MTIME
 
@@ -121,10 +122,7 @@ def validate_event(event, checks=None):
     attributes = event['data']['attributes'].keys() - {'type', 'checksum'}
     required_attributes = get_required_attributes(checks)
 
-    if sys.platform == "win32":
-        required_attributes = required_attributes - get_required_attributes({CHECK_GROUP})
-    else:
-        attributes = attributes - {'win_attributes'}
+    required_attributes -= get_required_attributes({CHECK_GROUP}) if sys.platform == "win32" else {'win_attributes'}
 
     intersection = attributes ^ required_attributes
     intersection_debug = "Event attributes are: " + str(attributes)
@@ -760,3 +758,88 @@ def detect_initial_scan(file_monitor):
     file_monitor.start(timeout=60, callback=callback_detect_end_scan)
     # Add additional sleep to avoid changing system clock issues (TO BE REMOVED when syscheck has not sleeps anymore)
     time.sleep(11)
+
+
+def generate_params(extra_params: dict = None, extra_metadata: dict = None, *, modes: list = None):
+    """ Swings between FIM_MODE values to expand params and metadata with optional extra values.
+
+        extra_params = {'WILDCARD': {'attribute': ['list', 'of', 'values']}} - Max. 3 elements in the list of values
+                            or
+                       {'WILDCARD': {'attribute': 'value'}} - It will have the same value for scheduled, realtime and whodata
+                            or
+                       {'WILDCARD': 'value'} - Valid when param is not an attribute. (ex: 'MODULE_NAME': __name__)
+
+        extra_metadata = {'metadata': ['list', 'of', 'values']} - Same as params
+                            or
+                         {'metadata': 'value'} - Same as params
+
+        The length of extra_params and extra_metadata must be the same
+
+        Examples:
+        p, m = set_configuration( extra_params={'REPORT_CHANGES': {'report_changes': 'value'},
+                                               'MODULE_NAME': 'name''},
+                                  extra_metadata={'report_changes': ['one', 'two'],
+                                                 'module_name': 'name'},
+                                  modes=['realtime', 'whodata'] )
+        Returns:
+        p = [{'FIM_MODE': {'realtime': 'yes'}, 'REPORT_CHANGES': {'report_changes': 'value'},
+                'MODULE_NAME': 'name''},
+             {'FIM_MODE': {'whodata': 'yes'}, 'REPORT_CHANGES': {'report_changes': 'value'},
+                'MODULE_NAME': 'name''}
+            ]
+
+        m = [{'fim_mode': 'realtime', 'report_changes': 'one', 'module_name': 'name'},
+             {'fim_mode': 'whodata', 'report_changes': 'two', 'module_name': 'name'}
+            ]
+
+    :param extra_params: params to add
+    :param extra_metadata: metadata to add
+    :param modes: monitoring modes to add. All by default
+    :return: Tuple(params, metadata)
+    """
+    def transform_param(mutable_object: dict):
+        for k, v in mutable_object.items():
+            if isinstance(v, dict):
+                for v_key, v_value in v.items():
+                    mutable_object[k][v_key] = v_value if isinstance(v_value, list) else [v_value, v_value, v_value]
+
+    def transform_metadata(mutable_object: dict):
+        for k, v in mutable_object.items():
+            mutable_object[k] = v if isinstance(v, list) else [v, v, v]
+
+    add = False
+    if extra_params is not None and extra_metadata is not None:
+        assert len(extra_params) == len(extra_metadata), f'params and metadata length not equal'
+        transform_param(extra_params)
+        transform_metadata(extra_metadata)
+        add = True
+
+    fim_param = []
+    fim_metadata = []
+
+    modes = modes if modes is not None else ['scheduled', 'realtime', 'whodata']
+    for mode in modes:
+        if mode == 'scheduled':
+            fim_param.append({'FIM_MODE': ''})
+            fim_metadata.append({'fim_mode': 'scheduled'})
+        elif mode == 'realtime' and sys.platform != 'darwin':
+            fim_param.append({'FIM_MODE': {'realtime': 'yes'}})
+            fim_metadata.append({'fim_mode': 'realtime'})
+        elif mode == 'whodata' and sys.platform != 'darwin':
+            fim_param.append({'FIM_MODE': {'whodata': 'yes'}})
+            fim_metadata.append({'fim_mode': 'whodata'})
+
+    params = []
+    metadata = []
+
+    for i, (fim_mode_param, fim_mode_meta) in enumerate(zip(fim_param, fim_metadata)):
+        p_aux: dict = deepcopy(fim_mode_param)
+        m_aux: dict = deepcopy(fim_mode_meta)
+        if add:
+            for key, value in extra_params.items():
+                p_aux[key] = {k: v[i] for k, v in value.items()} if isinstance(value, dict) else value
+            m_aux.update({key: value[i] for key, value in extra_metadata.items()})
+        params.append(p_aux)
+        metadata.append(m_aux)
+
+    return params, metadata
