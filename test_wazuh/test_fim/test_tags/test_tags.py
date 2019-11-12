@@ -7,16 +7,17 @@ import os
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud
-from wazuh_testing.tools import FileMonitor, load_wazuh_configurations
+from wazuh_testing.tools import FileMonitor, load_wazuh_configurations, PREFIX
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
-test_directories = [os.path.join('/', 'testdir_tags'),
-                    os.path.join('/', 'testdir_tags', 'subdir'),
-                    os.path.join('/', 'test dir'),
-                    os.path.join('/', 'test dir', 'subdir')
+test_directories = [os.path.join(PREFIX, 'testdir_tags'),
+                    os.path.join(PREFIX, 'testdir_tags', 'subdir'),
+                    os.path.join(PREFIX, 'test dir'),
+                    os.path.join(PREFIX, 'test dir', 'subdir')
                     ]
 
+directory_str = ','.join([test_directories[0], test_directories[2]])
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
@@ -28,16 +29,18 @@ test_tags = [tags[0], ','.join(tags)]
 fim_modes = ['', {'realtime': 'yes'}, {'whodata': 'yes'}]
 fim_modes_metadata = ['scheduled', 'realtime', 'whodata']
 params = [{'FIM_MODE': fim_mode,
-           'FIM_TAGS': test_tag}
+           'FIM_TAGS': test_tag,
+           'TEST_DIRECTORIES': directory_str}
           for fim_mode, test_tag in itertools.product(fim_modes, test_tags)]
 metadata = [{'fim_mode': fim_mode,
-             'fim_tags': test_tag}
+             'fim_tags': test_tag,
+             'test_directories': directory_str}
             for fim_mode, test_tag in itertools.product(fim_modes_metadata, test_tags)]
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=params,
                                            metadata=metadata
                                            )
-
+# configurations = [configurations[0], configurations[1],configurations[2]]
 
 # fixtures
 
@@ -64,5 +67,5 @@ def test_tags(folder, name, content,
 
     regular_file_cud(folder, wazuh_log_monitor, file_list=files,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                     min_timeout=3, validators_after_cud=[tag_validator]
+                     min_timeout=5, validators_after_cud=[tag_validator]
                      )

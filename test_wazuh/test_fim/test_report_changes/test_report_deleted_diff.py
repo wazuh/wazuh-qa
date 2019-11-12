@@ -4,6 +4,7 @@
 import os
 import shutil
 import sys
+import time
 from datetime import timedelta
 
 import pytest
@@ -66,7 +67,7 @@ def wait_for_event(fim_mode):
     if fim_mode == 'scheduled':
         TimeMachine.travel_to_future(timedelta(hours=13))
     # Wait until event is detected
-    wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+    wazuh_log_monitor.start(timeout=10, callback=callback_detect_event)
 
 
 def create_and_check_diff(name, directory, fim_mode):

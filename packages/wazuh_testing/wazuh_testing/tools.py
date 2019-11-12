@@ -296,7 +296,8 @@ class FileMonitor:
         """
         previous_position = self._position
         self._result = [] if accum_results > 1 else None
-        with open(self.file_path) as f:
+        encode = None if sys.platform == 'win32' else 'utf-8'
+        with open(self.file_path, encoding=encode) as f:
             f.seek(self._position)
             while self._continue:
                 if self._abort:

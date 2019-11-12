@@ -10,7 +10,7 @@
   - disabled:
       value: 'no'
   - directories:
-      value: "/testdir_tags,/test dir"
+      value: TEST_DIRECTORIES
       attributes:
       - check_all: 'yes'
       - FIM_MODE

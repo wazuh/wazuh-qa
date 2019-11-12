@@ -61,7 +61,7 @@ def test_reports_file_and_nodiff(folder, checkers, tags_to_apply,
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    min_timeout = 3
+    min_timeout = 10
     file_list = ['regular_file']
     is_truncated = folder == testdir_nodiff
 
