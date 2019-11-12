@@ -2,9 +2,10 @@ import functools
 import os
 import pytest
 import testinfra
+import json
 
 test_host = testinfra.get_host('paramiko://{KITCHEN_USERNAME}@{KITCHEN_HOSTNAME}:{KITCHEN_PORT}'.format(**os.environ), ssh_identity_file=os.environ.get('KITCHEN_SSH_KEY'))
-distribution = host.system_info.distribution.lower()
+node = json("/tmp/kitchen_chef_node.json").params
 
 @pytest.mark.filterwarnings('ignore')
 def test_elasticsearch_is_installed(host):
@@ -18,6 +19,8 @@ def test_elasticsearch_is_running(host):
     """Test if the services are enabled and running."""
     elasticsearch = host.service("elasticsearch")
     assert elasticsearch.is_enabled
+
+    distribution = host.system_info.distribution.lower()
     if distribution == 'centos':
         assert elasticsearch.is_running
 
