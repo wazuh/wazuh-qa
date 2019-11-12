@@ -69,6 +69,7 @@ Vulnerability-detector needs to update the DB each `frequency` time, it is requi
       <os>wheezy</os>
       <os>stretch</os>
       <os>jessie</os>
+      <os>buster</os>
       <update_interval>30m</update_interval>
     </provider>
     <provider name="redhat">
@@ -98,6 +99,7 @@ We should see a `5461` message approximately every individual interval is reache
 - **Debian Wheezy** every 30 minutes.
 - **Debian Stretch** every 30 minutes.
 - **Debian Jessie** every 30 minutes.
+- **Debian Buster** every 30 minutes.
 - **Red Hat** every 10 minutes.
 - **National Vulnerability Database** every 15 minutes.
 
@@ -108,7 +110,9 @@ We should see a `5461` message approximately every individual interval is reache
 > 2019/09/25 11:32:14 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Ubuntu Trusty database update.
 > 2019/09/25 11:32:26 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Ubuntu Trusty feed finished successfully.
 > 2019/09/25 11:32:26 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Ubuntu Precise database update.
-> 2019/09/25 11:32:42 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Ubuntu Precise feed finished successfully.
+> 2019/09/25 11:32:34 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Ubuntu Precise feed finished successfully.
+> 2019/09/25 11:32:34 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Debian Buster database update.
+> 2019/09/25 11:32:42 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Debian Buster feed finished successfully.
 > 2019/09/25 11:32:42 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Debian Stretch database update.
 > 2019/09/25 11:32:51 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Debian Stretch feed finished successfully.
 > 2019/09/25 11:32:51 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Debian Jessie database update.
@@ -198,6 +202,7 @@ Vulnerability-detector is able to check if a vulnerability feed is outdated or n
       <os>wheezy</os>
       <os>stretch</os>
       <os>jessie</os>
+      <os>buster</os>
       <update_interval>1m</update_interval>
     </provider>
     <provider name="nvd">
@@ -219,6 +224,7 @@ To view those logs you need to enable the level 2 debug in modulesd.
 > 2019/09/25 13:43:15 wazuh-modulesd:vulnerability-detector[4618] wm_vuln_detector.c:2256 at wm_vuldet_fetch_oval(): DEBUG: (5457): Ubuntu Xenial OVAL is in its latest version. Update date: 2019-09-25T12:43:19
 > 2019/09/25 13:43:27 wazuh-modulesd:vulnerability-detector[4618] wm_vuln_detector.c:2256 at wm_vuldet_fetch_oval(): DEBUG: (5457): Ubuntu Trusty OVAL is in its latest version. Update date: 2019-04-26T13:07:52
 > 2019/09/25 13:43:50 wazuh-modulesd:vulnerability-detector[4618] wm_vuln_detector.c:2256 at wm_vuldet_fetch_oval(): DEBUG: (5457): Ubuntu Precise OVAL is in its latest version. Update date: 2017-05-10T19:31:06
+> 2019/09/25 13:43:51 wazuh-modulesd:vulnerability-detector[4618] wm_vuln_detector.c:2256 at wm_vuldet_fetch_oval(): DEBUG: (5457): Debian Buster OVAL is in its latest version. Update date: 2019-09-25T11:30:20.188-04:00
 > 2019/09/25 13:43:51 wazuh-modulesd:vulnerability-detector[4618] wm_vuln_detector.c:2256 at wm_vuldet_fetch_oval(): DEBUG: (5457): Debian Stretch OVAL is in its latest version. Update date: 2019-09-25T11:30:20.188-04:00
 > 2019/09/25 13:43:53 wazuh-modulesd:vulnerability-detector[4618] wm_vuln_detector.c:2256 at wm_vuldet_fetch_oval(): DEBUG: (5457): Debian Jessie OVAL is in its latest version. Update date: 2019-09-25T11:30:08.188-04:00
 > 2019/09/25 13:43:54 wazuh-modulesd:vulnerability-detector[4618] wm_vuln_detector.c:2256 at wm_vuldet_fetch_oval(): DEBUG: (5457): Debian Wheezy OVAL is in its latest version. Update date: 2019-09-25T11:30:02.188-04:00
@@ -438,6 +444,7 @@ This type of update is performed through the `path` and `url` options, and the w
       <os url="http://local_repo/oval-definitions-stretch.xml">stretch</os>
       <os url="http://local_repo/oval-definitions-jessie.xml">jessie</os>
       <os path="/local_path/oval-definitions-wheezy.xml">wheezy</os>
+      <os path="/local_path/oval-definitions-buster.xml">buster</os>
       <update_interval>1h</update_interval>
     </provider>
     <provider name="redhat">
@@ -468,7 +475,9 @@ If you perform a vulnerability update with a configuration like the one above, w
 > 2019/09/26 07:26:48 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Ubuntu Trusty database update.
 > 2019/09/26 07:26:59 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Ubuntu Trusty feed finished successfully.
 > 2019/09/26 07:26:59 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Ubuntu Precise database update.
-> 2019/09/26 07:27:09 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Ubuntu Precise feed finished successfully.
+> 2019/09/26 07:27:05 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Ubuntu Precise feed finished successfully.
+> 2019/09/26 07:27:05 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Debian Buster database update.
+> 2019/09/26 07:27:09 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Debian Buster feed finished successfully.
 > 2019/09/26 07:27:09 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Debian Stretch database update.
 > 2019/09/26 07:27:17 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Debian Stretch feed finished successfully.
 > 2019/09/26 07:27:17 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Debian Jessie database update.
@@ -520,6 +529,7 @@ All supported OS must be taken into account when a vulnerability scan is perform
       <os>stretch</os>
       <os>jessie</os>
       <os>wheezy</os>
+      <os>buster</os>
       <update_interval>1h</update_interval>
     </provider>
     <provider name="redhat">
@@ -716,6 +726,7 @@ The following block configures an ignore interval of 6 hours, which is the defau
       <os>wheezy</os>
       <os>stretch</os>
       <os>jessie</os>
+      <os>buster</os>
       <update_interval>1h</update_interval>
     </provider>
     <provider name="redhat">
