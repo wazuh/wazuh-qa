@@ -7,19 +7,14 @@ import sys
 
 import pytest
 from wazuh_testing.fim import (CHECK_ALL, FIFO, LOG_FILE_PATH, REGULAR, SOCKET,
-                               callback_detect_event, create_file, validate_event)
-from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations
-
+                               callback_detect_event, create_file, validate_event, generate_params)
+from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
 # variables
 
-if sys.platform == 'win32':
-    test_directories = [os.path.join('C:', os.sep, 'testdir1'), os.path.join('C:', os.sep, 'testdir2')]
-    directory_str = "c:\\testdir1,c:\\testdir2,c:\\noexists"
+test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')]
 
-else:
-    test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2')]
-    directory_str = "/testdir1,/testdir2,/noexists"
+directory_str = ','.join(test_directories + [os.path.join(PREFIX, 'noexists')])
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -30,13 +25,12 @@ testdir1, testdir2 = test_directories
 # configurations
 
 monitoring_modes = ['realtime', 'whodata']
-conf_params = []
-conf_metadata = []
-for mode in monitoring_modes:
-    conf_params.append({'FIM_MODE': {mode: 'yes'}, 'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__})
-    conf_metadata.append({'fim_mode': mode, 'test_directories': directory_str, 'module_name': __name__})
 
-configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
+conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
+conf_metadata = {'test_directories': directory_str, 'module_name': __name__}
+p, m = generate_params(conf_params, conf_metadata, modes=monitoring_modes)
+
+configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
 # fixtures

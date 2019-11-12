@@ -7,7 +7,7 @@ import sys
 
 import pytest
 from wazuh_testing.fim import (CHECK_ALL, CHECK_ATTRS, CHECK_GROUP, CHECK_INODE, CHECK_MD5SUM, CHECK_MTIME, CHECK_OWNER,
-                               CHECK_PERM, CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_SIZE, CHECK_SUM, CHECK_ATTRS, 
+                               CHECK_PERM, CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_SIZE, CHECK_SUM,
                                LOG_FILE_PATH, REQUIRED_ATTRIBUTES, regular_file_cud)
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations
 
@@ -23,9 +23,7 @@ if sys.platform == 'win32':
                         os.path.join('C:', os.sep, 'testdir3'), os.path.join('C:', os.sep, 'testdir4'),
                         os.path.join('C:', os.sep, 'testdir5'), os.path.join('C:', os.sep, 'testdir6'),
                         os.path.join('C:', os.sep, 'testdir7'), os.path.join('C:', os.sep, 'testdir8'),
-                        os.path.join('C:', os.sep, 'testdir9'), os.path.join('C:', os.sep, 'testdir0'),
-                        os.path.join('C:', os.sep, 'testdirWin')]
-    testdir1, testdir2, testdir3, testdir4, testdir5, testdir6, testdir7, testdir8, testdir9, testdir0, testdirWin = test_directories
+                        os.path.join('C:', os.sep, 'testdir9'), os.path.join('C:', os.sep, 'testdir0')]
     configurations_path = os.path.join(test_data_path, 'wazuh_check_others_windows.yaml')
 
 else:
@@ -34,8 +32,9 @@ else:
                         os.path.join('/', 'testdir5'), os.path.join('/', 'testdir6'),
                         os.path.join('/', 'testdir7'), os.path.join('/', 'testdir8'),
                         os.path.join('/', 'testdir9'), os.path.join('/', 'testdir0')]
-    testdir1, testdir2, testdir3, testdir4, testdir5, testdir6, testdir7, testdir8, testdir9, testdir0 = test_directories
     configurations_path = os.path.join(test_data_path, 'wazuh_check_others.yaml')
+
+testdir1, testdir2, testdir3, testdir4, testdir5, testdir6, testdir7, testdir8, testdir9, testdir0 = test_directories
 
 
 # configurations
@@ -70,8 +69,7 @@ if sys.platform == 'win32':
                         (testdir6, {CHECK_OWNER}),
                         (testdir7, {CHECK_ATTRS}),
                         (testdir8, {CHECK_PERM}),
-                        (testdir9, {CHECK_MTIME}),
-                        (testdirWin, {CHECK_ATTRS}),
+                        (testdir9, {CHECK_MTIME})
                         ]
 else:
     parametrize_list = [(testdir1, REQUIRED_ATTRIBUTES[CHECK_SUM]),
