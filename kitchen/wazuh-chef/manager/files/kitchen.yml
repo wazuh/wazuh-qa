@@ -67,7 +67,7 @@ suites:
       network:
       - ["private_network", {ip: "127.0.0.1"}]
       customize:
-        memory: 2048
+        memory: 4096
         cpus: 2
     run_list:
       - recipe[wazuh_elastic::repository]
