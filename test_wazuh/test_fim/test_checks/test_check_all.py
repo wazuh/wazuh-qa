@@ -22,9 +22,7 @@ if sys.platform == 'win32':
                         os.path.join('C:', os.sep, 'testdir3'), os.path.join('C:', os.sep, 'testdir4'),
                         os.path.join('C:', os.sep, 'testdir5'), os.path.join('C:', os.sep, 'testdir6'),
                         os.path.join('C:', os.sep, 'testdir7'), os.path.join('C:', os.sep, 'testdir8'),
-                        os.path.join('C:', os.sep, 'testdir9'), os.path.join('C:', os.sep, 'testdir0'),
-                        os.path.join('C:', os.sep, 'testdirWin')]
-    testdir1, testdir2, testdir3, testdir4, testdir5, testdir6, testdir7, testdir8, testdir9, testdir0, testdirWin = test_directories
+                        os.path.join('C:', os.sep, 'testdir9'), os.path.join('C:', os.sep, 'testdir0')]
     configurations_path = os.path.join(test_data_path, 'wazuh_check_all_windows.yaml')
 
 else:
@@ -34,7 +32,8 @@ else:
                         os.path.join('/', 'testdir7'), os.path.join('/', 'testdir8'),
                         os.path.join('/', 'testdir9'), os.path.join('/', 'testdir0')]
     configurations_path = os.path.join(test_data_path, 'wazuh_check_all.yaml')
-    testdir1, testdir2, testdir3, testdir4, testdir5, testdir6, testdir7, testdir8, testdir9, testdir0 = test_directories
+
+testdir1, testdir2, testdir3, testdir4, testdir5, testdir6, testdir7, testdir8, testdir9, testdir0 = test_directories
 
 
 # configurations
@@ -68,9 +67,9 @@ if sys.platform == 'win32':
                         (testdir4, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_SHA256SUM}),
                         (testdir5, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_SIZE}),
                         (testdir6, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_OWNER}),
+                        (testdir7, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_ATTRS}),
                         (testdir8, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_PERM}),
-                        (testdir9, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_MTIME}),
-                        (testdirWin, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_ATTRS})
+                        (testdir9, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_MTIME})
                         ]
 else:
     parametrize_list = [(testdir1, REQUIRED_ATTRIBUTES[CHECK_ALL] - REQUIRED_ATTRIBUTES[CHECK_SUM]),

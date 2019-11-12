@@ -410,12 +410,12 @@ def modify_file(path, name, new_content=None, is_binary=False):
     :type is_binary: boolean
     :return: None
     """
+    modify_file_inode(path, name)
     modify_file_content(path, name, new_content, is_binary)
     modify_file_mtime(path, name)
     modify_file_owner(path, name)
     modify_file_group(path, name)
     modify_file_permission(path, name)
-    modify_file_inode(path, name)
     modify_file_win_attributes(path, name)
 
 

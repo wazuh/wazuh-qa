@@ -67,12 +67,6 @@
       - FIM_MODE
       - check_all: "no"
       - check_inode: "yes"
-  - directories:
-      value: "c:\\testdirWin"
-      attributes:
-      - FIM_MODE
-      - check_all: "no"
-      - check_attrs: "yes"
 - tags:
   - test_check_others
   apply_to_modules:

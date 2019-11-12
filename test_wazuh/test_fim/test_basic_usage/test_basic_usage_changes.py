@@ -7,7 +7,7 @@ import sys
 import pytest
 
 from wazuh_testing.fim import CHECK_ALL, LOG_FILE_PATH, regular_file_cud
-from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, set_configuration_with_fim
+from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, set_configuration
 
 
 # variables
@@ -30,7 +30,7 @@ testdir1, testdir2 = test_directories
 
 conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
 conf_metadata = {'test_directories': directory_str, 'module_name': __name__}
-p, m = set_configuration_with_fim(conf_params, conf_metadata)
+p, m = set_configuration(conf_params, conf_metadata)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
