@@ -4,32 +4,24 @@
 import os
 import shutil
 import sys
-import time
 from datetime import timedelta
 
 import pytest
 
 from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH, WAZUH_PATH, callback_detect_event,
-                               REGULAR, create_file, detect_initial_scan)
-from wazuh_testing.tools import (FileMonitor, TimeMachine,
+                               REGULAR, create_file, detect_initial_scan, generate_params)
+from wazuh_testing.tools import (PREFIX, FileMonitor, TimeMachine,
                                  load_wazuh_configurations, restart_wazuh_with_new_conf, set_section_wazuh_conf,
-                                 check_apply_test, set_configuration)
+                                 check_apply_test)
 
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
-if sys.platform == 'win32':
-    test_directories = [os.path.join('C:', os.sep, 'testdir_reports'), os.path.join('C:', os.sep, 'testdir_nodiff')]
-    directory_str = "c:\\testdir_reports,c:\\testdir_nodiff"
-    nodiff_file = os.path.join('C:', os.sep, 'testdir_nodiff', 'regular_file')
+test_directories = [os.path.join(PREFIX, 'testdir_reports'), os.path.join(PREFIX, 'testdir_nodiff')]
+nodiff_file = os.path.join(PREFIX, 'testdir_nodiff', 'regular_file')
 
-
-else:
-    test_directories = [os.path.join('/', 'testdir_reports'), os.path.join('/', 'testdir_nodiff')]
-    directory_str = "/testdir_reports,/testdir_nodiff"
-    nodiff_file = "testdir_nodiff/regular_file"
-
+directory_str = ','.join(test_directories)
 testdir_reports, testdir_nodiff = test_directories
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 options = {CHECK_ALL}
@@ -41,12 +33,12 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 def change_conf(report_value):
     """" Returns a new ossec configuration with a changed report_value"""
-    conf_params, conf_metadata = set_configuration({'REPORT_CHANGES': {'report_changes': report_value},
-                                                    'TEST_DIRECTORIES': directory_str, 'NODIFF_FILE': nodiff_file,
-                                                    'MODULE_NAME': __name__},
-                                                   {'report_changes': report_value,
-                                                    'test_directories': directory_str, 'nodiff_file': nodiff_file,
-                                                    'module_name': __name__})
+    conf_params, conf_metadata = generate_params({'REPORT_CHANGES': {'report_changes': report_value},
+                                                  'TEST_DIRECTORIES': directory_str, 'NODIFF_FILE': nodiff_file,
+                                                  'MODULE_NAME': __name__},
+                                                 {'report_changes': report_value,
+                                                  'test_directories': directory_str, 'nodiff_file': nodiff_file,
+                                                  'module_name': __name__})
     return load_wazuh_configurations(configurations_path, __name__,
                                      params=conf_params,
                                      metadata=conf_metadata

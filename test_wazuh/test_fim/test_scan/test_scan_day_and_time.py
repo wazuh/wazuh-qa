@@ -8,13 +8,17 @@ from calendar import monthrange
 import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_end_scan)
-from wazuh_testing.tools import (FileMonitor, check_apply_test, load_wazuh_configurations, TimeMachine, reformat_time)
+from wazuh_testing.tools import (FileMonitor, check_apply_test, load_wazuh_configurations, TimeMachine, reformat_time,
+                                 PREFIX)
 
 # variables
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-test_directories = [os.path.join('/', 'testdir1')]
+
+test_directories = [os.path.join(PREFIX, 'testdir1')]
+
+directory_str = ','.join(test_directories)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 scan_days = ['thursday', 'wednesday']
 scan_times = ['9PM', '20:00']
@@ -23,11 +27,15 @@ scan_times = ['9PM', '20:00']
 
 
 configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=[{'SCAN_DAY': scan_days[0], 'SCAN_TIME': scan_times[0]},
-                                                   {'SCAN_DAY': scan_days[1], 'SCAN_TIME': scan_times[1]},
+                                           params=[{'SCAN_DAY': scan_days[0], 'SCAN_TIME': scan_times[0],
+                                                    'TEST_DIRECTORIES': directory_str},
+                                                   {'SCAN_DAY': scan_days[1], 'SCAN_TIME': scan_times[1],
+                                                    'TEST_DIRECTORIES': directory_str},
                                                    ],
-                                           metadata=[{'scan_day': scan_days[0], 'scan_time': scan_times[0]},
-                                                     {'scan_day': scan_days[1], 'scan_time': scan_times[1]},
+                                           metadata=[{'scan_day': scan_days[0], 'scan_time': scan_times[0],
+                                                      'test_directories': directory_str},
+                                                     {'scan_day': scan_days[1], 'scan_time': scan_times[1],
+                                                      'test_directories': directory_str},
                                                      ]
                                            )
 
@@ -68,8 +76,7 @@ def get_configuration(request):
 def test_scan_day_and_time(tags_to_apply,
                            get_configuration, configure_environment,
                            restart_syscheckd, wait_for_initial_scan):
-    """ Check if there is a scan in a certain day and time
-    TODO Check this test once this configuration is fixed"""
+    """ Check if there is a scan in a certain day and time """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     day_of_week = {'monday': 0,
