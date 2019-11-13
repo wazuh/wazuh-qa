@@ -6,7 +6,7 @@ import os
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud
+from wazuh_testing.fim import DEFAULT_TIMEOUT, LOG_FILE_PATH, regular_file_cud
 from wazuh_testing.tools import FileMonitor, load_wazuh_configurations, PREFIX
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -67,5 +67,5 @@ def test_tags(folder, name, content,
 
     regular_file_cud(folder, wazuh_log_monitor, file_list=files,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                     min_timeout=5, validators_after_cud=[tag_validator]
+                     min_timeout=DEFAULT_TIMEOUT, validators_after_cud=[tag_validator]
                      )

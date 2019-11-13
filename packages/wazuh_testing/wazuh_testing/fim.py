@@ -28,10 +28,12 @@ _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 if sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'ossec.log')
+    DEFAULT_TIMEOUT = 10
 
 elif sys.platform == 'linux2' or sys.platform == 'linux':
     WAZUH_PATH = os.path.join('/', 'var', 'ossec')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+    DEFAULT_TIMEOUT = 5
 
 
 FIFO = 'fifo'

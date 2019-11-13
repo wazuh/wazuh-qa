@@ -6,7 +6,7 @@ import sys
 
 import pytest
 
-from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH, regular_file_cud, WAZUH_PATH, generate_params)
+from wazuh_testing.fim import (CHECK_ALL, DEFAULT_TIMEOUT, LOG_FILE_PATH, regular_file_cud, WAZUH_PATH, generate_params)
 from wazuh_testing.tools import (PREFIX, FileMonitor, check_apply_test, load_wazuh_configurations)
 
 # variables
@@ -61,7 +61,6 @@ def test_reports_file_and_nodiff(folder, checkers, tags_to_apply,
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    min_timeout = 10
     file_list = ['regular_file']
     is_truncated = folder == testdir_nodiff
 
@@ -88,5 +87,5 @@ def test_reports_file_and_nodiff(folder, checkers, tags_to_apply,
 
     regular_file_cud(folder, wazuh_log_monitor, file_list=file_list,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                     min_timeout=min_timeout, triggers_event=True,
+                     min_timeout=DEFAULT_TIMEOUT, triggers_event=True,
                      validators_after_update=[report_changes_validator, no_diff_validator])

@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_end_scan)
+from wazuh_testing.fim import (LOG_FILE_PATH, DEFAULT_TIMEOUT, callback_detect_end_scan)
 from wazuh_testing.tools import (FileMonitor, check_apply_test, load_wazuh_configurations, TimeMachine, PREFIX)
 
 # variables
@@ -67,12 +67,12 @@ def test_scan_day(tags_to_apply,
         day_diff %= 7
     elif day_diff == 0:
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=5, callback=callback_detect_end_scan)
+            wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_end_scan)
         return
 
     if day_diff > 1:
         TimeMachine.travel_to_future(timedelta(days=day_diff - 1))
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=5, callback=callback_detect_end_scan)
+            wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_end_scan)
     TimeMachine.travel_to_future(timedelta(days=1))
-    wazuh_log_monitor.start(timeout=5, callback=callback_detect_end_scan)
+    wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_end_scan)
