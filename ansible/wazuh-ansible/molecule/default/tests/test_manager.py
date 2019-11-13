@@ -25,7 +25,7 @@ def FilebeatRoleDefaults(host):
     return host.ansible(
         "include_vars",
         (
-            "../../../wazuh-ansible/roles/wazuh/"
+            "../../roles/wazuh/"
             "ansible-filebeat/defaults/main.yml"
         ),
     )["ansible_facts"]
