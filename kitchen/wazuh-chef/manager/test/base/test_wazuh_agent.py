@@ -3,13 +3,18 @@ import os
 import pytest
 import testinfra
 
-test_host = testinfra.get_host('paramiko://{KITCHEN_USERNAME}@{KITCHEN_HOSTNAME}:{KITCHEN_PORT}'.format(**os.environ), ssh_identity_file=os.environ.get('KITCHEN_SSH_KEY'))
+
+wazuh_version = ""
+
+@pytest.mark.filterwarnings('ignore')
+def test_load_variables(host,node):
+    wazuh_version = node['default']['wazuh-agent']['version']
 
 @pytest.mark.filterwarnings('ignore')
 @pytest.mark.skipif('manager' in os.environ.get('KITCHEN_INSTANCE'), reason='Skip on wazuh manager instances')
 def test_wazuh_agent_package(host):
     name = "wazuh-agent"
-    version = "3.10.2"
+    version = wazuh_version
     pkg = host.package(name)
     assert pkg.is_installed
     assert pkg.version.startswith(version)
