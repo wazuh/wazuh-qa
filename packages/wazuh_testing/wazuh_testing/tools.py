@@ -32,7 +32,7 @@ elif sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'ossec.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
-    PREFIX = os.path.join('C:', os.sep)
+    PREFIX = os.path.join('c:', os.sep)
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
@@ -296,7 +296,8 @@ class FileMonitor:
         """
         previous_position = self._position
         self._result = [] if accum_results > 1 else None
-        with open(self.file_path) as f:
+        encode = None if sys.platform == 'win32' else 'utf-8'
+        with open(self.file_path, encoding=encode) as f:
             f.seek(self._position)
             while self._continue:
                 if self._abort:

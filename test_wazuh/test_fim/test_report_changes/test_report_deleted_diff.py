@@ -8,7 +8,7 @@ from datetime import timedelta
 
 import pytest
 
-from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH, WAZUH_PATH, callback_detect_event,
+from wazuh_testing.fim import (CHECK_ALL, DEFAULT_TIMEOUT, LOG_FILE_PATH, WAZUH_PATH, callback_detect_event,
                                REGULAR, create_file, detect_initial_scan, generate_params)
 from wazuh_testing.tools import (PREFIX, FileMonitor, TimeMachine,
                                  load_wazuh_configurations, restart_wazuh_with_new_conf, set_section_wazuh_conf,
@@ -66,7 +66,7 @@ def wait_for_event(fim_mode):
     if fim_mode == 'scheduled':
         TimeMachine.travel_to_future(timedelta(hours=13))
     # Wait until event is detected
-    wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+    wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event)
 
 
 def create_and_check_diff(name, directory, fim_mode):
