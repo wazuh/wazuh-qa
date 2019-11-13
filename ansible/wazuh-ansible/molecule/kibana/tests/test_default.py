@@ -1,8 +1,12 @@
 import os
+import sys
 import json
 
 import testinfra.utils.ansible_runner
 import pytest
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../_utils/'))
+from test_utils import get_full_version
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
