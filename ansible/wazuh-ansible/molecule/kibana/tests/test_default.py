@@ -13,7 +13,7 @@ def KibanaRoleDefaults(host):
     return host.ansible(
         "include_vars",
         (
-            "../../../wazuh-ansible/roles/elastic-stack/"
+            "../../roles/elastic-stack/"
             "ansible-kibana/defaults/main.yml"
         ),
     )["ansible_facts"]

@@ -16,7 +16,7 @@ def ElasticRoleDefaults(host):
     return host.ansible(
         "include_vars",
         (
-            "../../../wazuh-ansible/roles/elastic-stack/"
+            "../../roles/elastic-stack/"
             "ansible-elasticsearch/defaults/main.yml"
         ),
     )["ansible_facts"]

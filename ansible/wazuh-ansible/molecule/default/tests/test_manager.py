@@ -14,7 +14,7 @@ def ManagerRoleDefaults(host):
     return host.ansible(
         "include_vars",
         (
-            "../../../wazuh-ansible/roles/wazuh/"
+            "../../roles/wazuh/"
             "ansible-wazuh-manager/defaults/main.yml"
         ),
     )["ansible_facts"]

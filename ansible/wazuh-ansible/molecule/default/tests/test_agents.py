@@ -14,7 +14,7 @@ def AgentRoleDefaults(host):
     return host.ansible(
         "include_vars",
         (
-            "../../../wazuh-ansible/roles/wazuh/"
+            "../../roles/wazuh/"
             "ansible-wazuh-agent/defaults/main.yml"
         ),
     )["ansible_facts"]
