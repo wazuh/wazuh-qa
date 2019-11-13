@@ -137,7 +137,7 @@ def check_default(directory, trigger, check_list, file_list, timeout, scheduled)
 def check_restrict(directory, trigger, check_list, file_list, timeout, scheduled):
     """ Standard restrict attribute test """
 
-    create_file(REGULAR, directory, file_list[0], '')
+    create_file(REGULAR, directory, file_list[0], content='')
     if scheduled:
         TimeMachine.travel_to_future(timedelta(hours=13))
     while True:

@@ -44,6 +44,12 @@
       - check_all: "yes"
       - check_owner: "no"
   - directories:
+      value: "c:\\testdir7"
+      attributes:
+      - FIM_MODE
+      - check_all: "yes"
+      - check_attrs: "no"
+  - directories:
       value: "c:\\testdir8"
       attributes:
       - FIM_MODE
@@ -91,6 +97,13 @@
       - check_all: "yes"
       - check_sha256sum: "no"
       - check_size: "no"
+  - directories:
+      value: "c:\\testdir5"
+      attributes:
+      - FIM_MODE
+      - check_all: "yes"
+      - check_attrs: "no"
+      - check_perm: "no"
   - directories:
       value: "c:\\testdir6"
       attributes:
