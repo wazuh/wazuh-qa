@@ -1,8 +1,11 @@
 import os
-import pytest
-import testinfra.utils.ansible_runner
+import sys
 
-MOL_PLATFORM = os.getenv("MOL_PLATFORM", "centos7")
+import testinfra.utils.ansible_runner
+import pytest
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../_utils/'))
+from test_utils import get_full_version, MOL_PLATFORM
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ["MOLECULE_INVENTORY_FILE"]
@@ -14,7 +17,7 @@ def ManagerRoleDefaults(host):
     return host.ansible(
         "include_vars",
         (
-            "../../../wazuh-ansible/roles/wazuh/"
+            "../../roles/wazuh/"
             "ansible-wazuh-manager/defaults/main.yml"
         ),
     )["ansible_facts"]
@@ -25,7 +28,7 @@ def FilebeatRoleDefaults(host):
     return host.ansible(
         "include_vars",
         (
-            "../../../wazuh-ansible/roles/wazuh/"
+            "../../roles/wazuh/"
             "ansible-filebeat/defaults/main.yml"
         ),
     )["ansible_facts"]
@@ -42,20 +45,13 @@ def test_wazuh_packages_are_installed(host, ManagerRoleDefaults):
     api = host.package("wazuh-api")
 
     manager_version = ManagerRoleDefaults["wazuh_manager_version"]
-    distribution = host.system_info.distribution.lower()
+    full_manager_version = get_full_version(manager)
+    full_api_version = get_full_version(api)
 
-    if distribution == "centos":
-        if host.system_info.release == "7":
-            assert manager.is_installed
-            assert manager.version.startswith(manager_version)
-            assert api.is_installed
-            assert api.version.startswith(manager_version)
-        elif host.system_info.release.startswith("6"):
-            assert manager.is_installed
-            assert manager.version.startswith(manager_version)
-    elif distribution == "ubuntu":
-        assert manager.is_installed
-        assert manager.version.startswith(manager_version)
+    assert manager.is_installed
+    assert full_manager_version.startswith(manager_version)
+    assert api.is_installed
+    assert full_api_version.startswith(manager_version)
 
 
 def test_wazuh_services_are_running(host):
@@ -115,5 +111,6 @@ def test_filebeat_is_installed(host, FilebeatRoleDefaults):
     """Test if the elasticsearch package is installed."""
     filebeat = host.package("filebeat")
     filebeat_version = FilebeatRoleDefaults["filebeat_version"]
+    full_filebeat_version = get_full_version(filebeat)
     assert filebeat.is_installed
-    assert filebeat.version.startswith(filebeat_version)
+    assert full_filebeat_version.startswith(filebeat_version)

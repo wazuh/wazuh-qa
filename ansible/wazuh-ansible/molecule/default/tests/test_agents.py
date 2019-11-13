@@ -1,8 +1,11 @@
 import os
-import pytest
-import testinfra.utils.ansible_runner
+import sys
 
-MOL_PLATFORM = os.getenv('MOL_PLATFORM', 'centos7')
+import testinfra.utils.ansible_runner
+import pytest
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../_utils/'))
+from test_utils import get_full_version, MOL_PLATFORM
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ["MOLECULE_INVENTORY_FILE"]
@@ -14,7 +17,7 @@ def AgentRoleDefaults(host):
     return host.ansible(
         "include_vars",
         (
-            "../../../wazuh-ansible/roles/wazuh/"
+            "../../roles/wazuh/"
             "ansible-wazuh-agent/defaults/main.yml"
         ),
     )["ansible_facts"]
@@ -25,7 +28,8 @@ def test_wazuh_agent_is_installed(host, AgentRoleDefaults):
     agent = host.package("wazuh-agent")
     agent_version = AgentRoleDefaults["wazuh_agent_version"]
     assert agent.is_installed
-    assert agent.version.startswith(agent_version)
+    full_agent_version = get_full_version(agent)
+    assert full_agent_version.startswith(agent_version)
 
 
 @pytest.mark.parametrize(
