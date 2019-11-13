@@ -28,9 +28,13 @@ def test_elasticsearch_is_running(host):
     if distribution == 'centos':
         assert elasticsearch.is_running
 
-def test_port_nginx_is_open(host):
+def test_port_kibana_is_open(host):
     """Test if the port 5601 is open and listening to connections."""
     host.socket("tcp://0.0.0.0:5601").is_listening
+
+def test_port_nginx_is_open(host):
+    """Test if the port 443 is open and listening to connections."""
+    host.socket("tcp://0.0.0.0:443").is_listening
 
 def test_find_correct_elasticsearch_version(host,node):
     """Test if we find the kibana/elasticsearch version in package.json"""
