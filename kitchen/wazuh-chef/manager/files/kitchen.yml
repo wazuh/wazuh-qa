@@ -43,7 +43,7 @@ suites:
         environment: development-master
     verifier:
       name: shell
-      command: py.test -v test/base
+      command: py.test -v test/base/*manager*
 
   - name: agent-suite1
     environments_path: ../wazuh_agent/test/environments
@@ -61,7 +61,7 @@ suites:
         environment: development
     verifier:
       name: shell
-      command: py.test -v test/base
+      command: py.test -v test/base/*agent*
 
   - name: elastic-suite2
     environments_path: "../wazuh_elastic/test/environments"
