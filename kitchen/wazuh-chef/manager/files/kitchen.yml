@@ -27,7 +27,7 @@ platforms:
       forward: 443
       publish_all: true
 suites:
-  - name: manager
+  - name: manager-suite1
     environments_path: ../wazuh_manager/test/environments
     data_bags_path: ../wazuh_manager/test/data_bags
     encrypted_data_bag_secret_key_path: ../wazuh_manager/test/data_bags/wazuh_secrets/test_data_bag_key
@@ -45,7 +45,7 @@ suites:
       name: shell
       command: py.test -v test/base
 
-  - name: agent
+  - name: agent-suite1
     environments_path: ../wazuh_agent/test/environments
     data_bags_path: ../wazuh_agent/test/data_bags
     encrypted_data_bag_secret_key_path: ../wazuh_agent/test/data_bags/wazuh_secrets/test_data_bag_key
@@ -63,7 +63,7 @@ suites:
       name: shell
       command: py.test -v test/base
 
-  - name: elastic
+  - name: elastic-suite2
     environments_path: "../wazuh_elastic/test/environments"
     data_bags_path: "../wazuh_elastic/test/data_bags"
     encrypted_data_bag_secret_key_path: "test/data_bags/wazuh_secrets/test_data_bag_key"
