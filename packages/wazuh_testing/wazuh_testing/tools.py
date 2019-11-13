@@ -32,7 +32,7 @@ elif sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'ossec.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
-    PREFIX = os.path.join('C:', os.sep)
+    PREFIX = os.path.join('c:', os.sep)
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
