@@ -33,6 +33,7 @@ suites:
     encrypted_data_bag_secret_key_path: ../wazuh_manager/test/data_bags/wazuh_secrets/test_data_bag_key
     driver:
     run_list:
+      - recipe[test::test]
       - recipe[wazuh_manager::repository]
       - recipe[wazuh_manager::manager]
       - recipe[wazuh_filebeat::default]
@@ -50,6 +51,7 @@ suites:
     encrypted_data_bag_secret_key_path: ../wazuh_agent/test/data_bags/wazuh_secrets/test_data_bag_key
     driver:
     run_list:
+      - recipe[test::test]
       - recipe[wazuh_agent::repository]
       - recipe[wazuh_agent::agent]
     attributes:
