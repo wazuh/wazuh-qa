@@ -569,4 +569,3 @@ def time_to_timedelta(time):
         return timedelta(days=time_value)
     elif time_unit == "w":
         return timedelta(weeks=time_value)
-
