@@ -15,7 +15,8 @@ platforms:
       image: ubuntu:14.04
       platform: ubuntu
       provision_command: apt-get install -y --force-yes apt-transport-https ca-certificates && apt-get update
-
+      forward: 443
+      publish_all: true
   - name: centos-kitchen-chef
     driver_config:
       image: centos:7
@@ -23,7 +24,8 @@ platforms:
       run_command: /usr/sbin/init
       build_options:
         rm: true
-
+      forward: 443
+      publish_all: true
 suites:
   - name: manager
     environments_path: ../wazuh_manager/test/environments
@@ -64,12 +66,11 @@ suites:
     data_bags_path: "../wazuh_elastic/test/data_bags"
     encrypted_data_bag_secret_key_path: "test/data_bags/wazuh_secrets/test_data_bag_key"
     driver:
-      network:
-      - ["private_network", {ip: "127.0.0.1"}]
       customize:
         memory: 4096
         cpus: 2
     run_list:
+      - recipe[test::test]
       - recipe[wazuh_elastic::repository]
       - recipe[wazuh_elastic::elasticsearch]
       - recipe[wazuh_elastic::nginx]
