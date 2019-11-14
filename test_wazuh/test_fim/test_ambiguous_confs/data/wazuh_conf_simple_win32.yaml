@@ -9,12 +9,12 @@
   - disabled:
       value: 'no'
   - directories:
-      value: "/testdir"
+      value: "c:\\testdir"
       attributes:
       - restrict: ".txt$"
       - FIM_MODE
   - directories:
-      value: "/testdir/subdir"
+      value: "c:\\testdir\\subdir"
       attributes:
       - FIM_MODE
 # conf 2
@@ -27,12 +27,12 @@
   - disabled:
       value: 'no'
   - directories:
-      value: "/testdir"
+      value: "c:\\testdir"
       attributes:
       - report_changes: 'no'
       - FIM_MODE
   - directories:
-      value: "/testdir/subdir"
+      value: "c:\\testdir\\subdir"
       attributes:
       - report_changes: 'yes'
       - FIM_MODE
@@ -46,11 +46,11 @@
   - disabled:
       value: 'no'
   - directories:
-      value: "/testdir"
+      value: "c:\\testdir"
       attributes:
       - FIM_MODE
   - directories:
-      value: "/testdir/subdir"
+      value: "c:\\testdir\\subdir"
       attributes:
       - tags: TAGS
       - FIM_MODE
@@ -64,11 +64,11 @@
   - disabled:
       value: 'no'
   - directories:
-      value: "/recursiondir"
+      value: "c:\\recursiondir"
       attributes:
       - FIM_MODE
   - directories:
-      value: "/recursiondir"
+      value: "c:\\recursiondir"
       attributes:
         - recursion_level: "1"
         - FIM_MODE
@@ -82,12 +82,12 @@
   - disabled:
       value: 'no'
   - directories:
-      value: "/recursiondir"
+      value: "c:\\recursiondir"
       attributes:
       - recursion_level: "1"
       - FIM_MODE
   - directories:
-      value: "/recursiondir"
+      value: "c:\\recursiondir"
       attributes:
         - FIM_MODE
 # conf 6
@@ -100,22 +100,22 @@
   - disabled:
       value: 'no'
   - directories:
-      value: "/checkdir_default"
+      value: "c:\\checkdir_default"
       attributes:
       - FIM_MODE
   - directories:
-      value: "/checkdir_default/checkdir_checkall"
+      value: "c:\\checkdir_default\\checkdir_checkall"
       attributes:
         - FIM_MODE
         - check_all: 'yes'
   - directories:
-      value: "/checkdir_default/checkdir_checkall/checkdir_no_inode"
+      value: "c:\\checkdir_default\\checkdir_checkall\\checkdir_no_inode"
       attributes:
         - FIM_MODE
         - check_all: 'yes'
         - check_inode: 'no'
   - directories:
-      value: "/checkdir_default/checkdir_checkall/checkdir_no_inode/checkdir_no_checksum"
+      value: "c:\\checkdir_default\\checkdir_checkall\\checkdir_no_inode\\checkdir_no_checksum"
       attributes:
         - FIM_MODE
         - check_all: 'yes'
