@@ -50,7 +50,7 @@ def get_configuration(request):
 
 # tests
 
-@pytest.mark.skipif(sys.platform == "win32", reason="Windows does not support Hard links hence no tests are needed.")
+@pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Hard links.")
 @pytest.mark.parametrize('path_file, path_link, num_links', [
     (testdir1, "/", 1),
     (testdir1, testdir1, 2),
@@ -67,6 +67,7 @@ def test_hard_link(path_file, path_link, num_links, get_configuration,
     :param checkers dict Dict with all the check options to be used
     """
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    is_scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     regular_file_name = "testregularfile"
     file_list = [regular_file_name]
     hardlinks_list = []
@@ -76,7 +77,7 @@ def test_hard_link(path_file, path_link, num_links, get_configuration,
 
         # Create the regular file
         create_file(REGULAR, path_file, regular_file_name, content='test content')
-        check_time_travel(get_configuration['metadata']['fim_mode'] == 'scheduled')
+        check_time_travel(is_scheduled)
         event_checker.fetch_and_check('added', min_timeout=3)
 
         # Create as many links pointing to the regular file as num_links
@@ -86,7 +87,7 @@ def test_hard_link(path_file, path_link, num_links, get_configuration,
 
         # Try to detect the creation events for all the created links
         if path_file == path_link:
-            check_time_travel(get_configuration['metadata']['fim_mode'] == 'scheduled')
+            check_time_travel(is_scheduled)
             event_checker.file_list = hardlinks_list
             event_checker.fetch_and_check('added', min_timeout=3)
 
@@ -95,16 +96,15 @@ def test_hard_link(path_file, path_link, num_links, get_configuration,
 
         # Modify the original file and detect the events for the entire file_list
         modify_file_content(path_file, regular_file_name, new_content="modified testregularfile")
-        check_time_travel(get_configuration['metadata']['fim_mode'] == 'scheduled')
+        check_time_travel(is_scheduled)
         event_checker.fetch_and_check('modified', min_timeout=3)
 
-        # Delete log file to avoid false positives
-        truncate_file(LOG_FILE_PATH)
-        wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
-        # Modify one of the hard links and check the modification events for the entire file_list
+        # Modify one of the hard links
         modify_file_content(path_link, "HardLink0", new_content="modified HardLink0")
-        check_time_travel(get_configuration['metadata']['fim_mode'] == 'scheduled')
+
+        # If the hard link is inside the monitored dir alerts should be triggered for the entire file_list
+        # Scheduled run should ALWAYS detect the modification of the file, even if we are using Real-time or Whodata.
+        check_time_travel(path_file != path_link or is_scheduled)
         event_checker.fetch_and_check('modified', min_timeout=3)
 
     finally:
