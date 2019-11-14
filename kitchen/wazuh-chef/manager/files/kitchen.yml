@@ -14,7 +14,7 @@ platforms:
     driver_config:
       image: ubuntu:14.04
       platform: ubuntu
-      provision_command: apt-get install -y --force-yes apt-transport-https ca-certificates && apt-get update
+      provision_command: apt-get update && apt-get install -y --force-yes apt-transport-https ca-certificates && apt-get update
       forward: 443
       publish_all: true
   - name: centos-kitchen-chef
