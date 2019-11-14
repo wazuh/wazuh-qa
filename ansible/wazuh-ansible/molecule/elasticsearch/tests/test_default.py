@@ -4,7 +4,9 @@ import sys
 import testinfra.utils.ansible_runner
 import pytest
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../_utils/'))
+sys.path.append(
+                os.path.join(os.path.dirname(__file__), '../../_utils/')
+                )  # noqa: E402
 from test_utils import get_full_version
 
 
