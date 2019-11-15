@@ -20,8 +20,6 @@ from subprocess import DEVNULL, check_call
 from typing import Any, List, Set
 
 
-_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-
 if sys.platform == 'linux2' or sys.platform == 'linux':
     WAZUH_PATH = os.path.join('/', 'var', 'ossec')
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
@@ -33,6 +31,9 @@ elif sys.platform == 'win32':
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'ossec.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     PREFIX = os.path.join('c:', os.sep)
+
+_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
@@ -498,7 +499,7 @@ def restart_wazuh_with_new_conf(new_conf):
         restart_wazuh_service_windows()
 
     elif sys.platform == 'linux2' or sys.platform == 'linux':
-        restart_wazuh_service()
+        restart_wazuh_daemon('ossec-syscheckd')
 
 
 def restart_wazuh_service():

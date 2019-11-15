@@ -13,6 +13,7 @@ from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, create_file, WAZ
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations, TimeMachine, PREFIX)
 
+
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -29,11 +30,13 @@ tag = 'Sample_tag'
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
+
 # configurations
 
 conf_params, conf_metadata = generate_params({'TAGS': tag}, {'tags': tag})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
+
 
 # fixtures
 
@@ -57,7 +60,6 @@ def apply_test(directory: str, attributes: list, trigger: bool, check_list: list
     :return:
     """
     for attribute in attributes:
-        print(f'Applying {attribute}')
         getattr(sys.modules[__name__], f'check_{attribute}')(directory, trigger, check_list, *args)
 
 

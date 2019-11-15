@@ -174,8 +174,6 @@ def _create_fifo(path, name, content):
     :type path: String
     :param name: File name
     :type name: String
-    :param content: Content of the created file
-    :type content: String or binary
     :return: None
     """
     fifo_path = os.path.join(path, name)
@@ -192,8 +190,6 @@ def _create_sys_link(path, name, target):
     :type path: String
     :param name: File name
     :type name: String
-    :param content: Content of the created file
-    :type content: String or binary
     :return: None
     """
     syslink_path = os.path.join(path, name)
@@ -210,8 +206,6 @@ def _create_hard_link(path, name, target):
     :type path: String
     :param name: File name
     :type name: String
-    :param content: Content of the created file
-    :type content: String or binary
     :return: None
     """
     link_path = os.path.join(path, name)
@@ -228,8 +222,6 @@ def _create_socket(path, name, content):
     :type path: String
     :param name: File name
     :type name: String
-    :param content: Content of the created file
-    :type content: String or binary
     :return: None
     """
     socket_path = os.path.join(path, name)
@@ -406,6 +398,8 @@ def modify_file(path, name, new_content=None, is_binary=False):
     :type path: String
     :param name: File name
     :type name: String
+    :param new_content: New content to add
+    :type new_content: String
     :param is_binary: True if the file is binary. False otherwise.
     :type is_binary: boolean
     :return: None
@@ -459,6 +453,14 @@ def callback_detect_event(line):
         if '{"type":"event"' not in line:
             return None
         elif json.loads(match.group(1))['type'] == 'event':
+            return json.loads(match.group(1))
+    return None
+
+
+def callback_detect_integrity_event(line):
+    match = re.match(r'.*Sending integrity control message: (.+)$', line)
+    if match:
+        if json.loads(match.group(1))['type'] == 'state':
             return json.loads(match.group(1))
     return None
 
@@ -606,6 +608,7 @@ class EventChecker:
 
         :param event_type String Expected type of the raised event. It can be 'added', 'modified' or 'deleted'.
         """
+
         def validate_checkers_per_event(events, options):
             """Checks if each event is properly formatted according to some checks.
 
