@@ -5,7 +5,7 @@
 import os
 import pytest
 
-from wazuh_testing.fim import CHECK_ALL, LOG_FILE_PATH, regular_file_cud, generate_params
+from wazuh_testing.fim import CHECK_ALL, DEFAULT_TIMEOUT, LOG_FILE_PATH, regular_file_cud, generate_params
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
 # variables
