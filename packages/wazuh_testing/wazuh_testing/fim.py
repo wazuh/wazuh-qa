@@ -548,6 +548,13 @@ def callback_configuration_error(line):
     return None
 
 
+def callback_monitoring_directory(line):
+    match = re.match(r'.*INFO: (.*) Monitoring directory / file: .* ', line)
+    if match:
+        return match.group(1)
+    return None
+
+
 def check_time_travel(time_travel):
     """Changes date and time of the system.
 
