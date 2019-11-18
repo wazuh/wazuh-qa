@@ -16,16 +16,15 @@ import yaml
 from copy import deepcopy
 from datetime import datetime, timedelta
 from pytest import skip
-from subprocess import DEVNULL, check_call
+from subprocess import DEVNULL, check_call, check_output
 from typing import Any, List, Set
 
-
-_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 if sys.platform == 'linux2' or sys.platform == 'linux':
     WAZUH_PATH = os.path.join('/', 'var', 'ossec')
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
+    GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
     PREFIX = os.sep
 
 elif sys.platform == 'win32':
@@ -33,6 +32,9 @@ elif sys.platform == 'win32':
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'ossec.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     PREFIX = os.path.join('c:', os.sep)
+
+_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
@@ -114,31 +116,26 @@ class TimeMachine:
         self.travel_to_future(self.time_delta * -1)
 
     @staticmethod
-    def _linux_set_time(time_):
+    def _linux_set_time(datetime_):
         """ Changes date and time in a Linux system
 
-        :param time_: new date and time to set
-        :type time_: time
+        :param datetime_: new date and time to set
+        :type datetime_: time
         """
-        import subprocess
         import shlex
         subprocess.call(shlex.split("timedatectl set-ntp false"))
-        subprocess.call(shlex.split("sudo date -s '%s'" % time_))
+        subprocess.call(shlex.split("sudo date -s '%s'" % datetime_))
         subprocess.call(shlex.split("sudo hwclock -w"))
 
     @staticmethod
-    def _win_set_time(time_):
+    def _win_set_time(datetime_):
         """ Changes date and time in a Windows system
 
-        :param time_: new date and time to set
-        :type time_: time
+        :param datetime_: new date and time to set
+        :type datetime_: time
         """
-        import os
-        date_ = str(time_.date().day) + "-" + str(time_.date().month) + "-" + str(time_.date().year)
-        time_ = str(time_.time()).split('.')
-        time_ = time_[0]
-        os.system('date ' + date_)
-        os.system('time ' + time_)
+        os.system('date ' + datetime_.strftime("%d-%m-%Y"))
+        os.system('time ' + datetime_.strftime("%H:%M:%S"))
 
     @staticmethod
     def travel_to_future(time_delta):
@@ -179,6 +176,17 @@ def wait_for_condition(condition_checker, args=None, kwargs=None, timeout=-1):
             raise TimeoutError()
         iterations += 1
         time.sleep(time_step)
+
+
+def generate_wazuh_conf(args: List = None) -> ET.ElementTree:
+    """Generate a configuration file for Wazuh.
+    :param args: Arguments for generating ossec.conf (install_type, distribution, version)
+    :return: ElementTree with a new Wazuh configuration generated from 'gen_ossec.sh'
+    """
+    gen_ossec_args = args if args else ['conf', 'manager', 'rhel', '7']
+    wazuh_config = check_output([GEN_OSSEC] + gen_ossec_args).decode(encoding='utf-8', errors='ignore')
+
+    return ET.ElementTree(ET.fromstring(wazuh_config))
 
 
 def get_wazuh_conf() -> ET.ElementTree:
@@ -486,7 +494,7 @@ def check_apply_test(apply_to_tags: Set, tags: List):
         skip("Does not apply to this config file")
 
 
-def restart_wazuh_with_new_conf(new_conf):
+def restart_wazuh_with_new_conf(new_conf, daemon='ossec-syscheckd'):
     """ Restart Wazuh service applying a new ossec.conf
 
     :param new_conf: New config file
@@ -498,7 +506,7 @@ def restart_wazuh_with_new_conf(new_conf):
         restart_wazuh_service_windows()
 
     elif sys.platform == 'linux2' or sys.platform == 'linux':
-        restart_wazuh_service()
+        restart_wazuh_daemon(daemon)
 
 
 def restart_wazuh_service():

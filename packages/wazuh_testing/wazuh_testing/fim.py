@@ -16,11 +16,15 @@ from copy import deepcopy
 from datetime import timedelta
 from stat import ST_ATIME, ST_MTIME
 
+from json import JSONDecodeError
 from jsonschema import validate
 
 from wazuh_testing.tools import TimeMachine
 
-if sys.platform == 'linux2' or sys.platform == 'linux':
+if sys.platform == 'win32':
+    import win32con
+    import win32api
+else:
     from jq import jq
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -29,11 +33,15 @@ if sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'ossec.log')
     DEFAULT_TIMEOUT = 10
+    _REQUIRED_AUDIT = {"path", "process_id", "process_name", "user_id", "user_name"}
 
 elif sys.platform == 'linux2' or sys.platform == 'linux':
     WAZUH_PATH = os.path.join('/', 'var', 'ossec')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     DEFAULT_TIMEOUT = 5
+    _REQUIRED_AUDIT = {'user_id', 'user_name', 'group_id', 'group_name', 'process_name', 'path', 'audit_uid',
+                       'audit_name', 'effective_uid', 'effective_name', 'ppid', 'process_id'
+                       }
 
 
 FIFO = 'fifo'
@@ -71,21 +79,6 @@ REQUIRED_ATTRIBUTES = {
     CHECK_SUM: {CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_MD5SUM}
 }
 
-_REQUIRED_AUDIT = {
-    'user_id',
-    'user_name',
-    'group_id',
-    'group_name',
-    'process_name',
-    'path',
-    'audit_uid',
-    'audit_name',
-    'effective_uid',
-    'effective_name',
-    'ppid',
-    'process_id'  # Only in windows, TODO parametrization
-}
-
 _last_log_line = 0
 
 
@@ -112,12 +105,9 @@ def validate_event(event, checks=None):
 
     checks = {CHECK_ALL} if checks is None else checks
 
-    if sys.platform == 'win32':
-        with open(os.path.join(_data_path, 'syscheck_event_windows.json'), 'r') as f:
-            schema = json.load(f)
-    else:
-        with open(os.path.join(_data_path, 'syscheck_event.json'), 'r') as f:
-            schema = json.load(f)
+    json_file = 'syscheck_event_windows.json' if sys.platform == "win32" else 'syscheck_event.json'
+    with open(os.path.join(_data_path, json_file), 'r') as f:
+        schema = json.load(f)
     validate(schema=schema, instance=event)
 
     # Check attributes
@@ -174,8 +164,6 @@ def _create_fifo(path, name, content):
     :type path: String
     :param name: File name
     :type name: String
-    :param content: Content of the created file
-    :type content: String or binary
     :return: None
     """
     fifo_path = os.path.join(path, name)
@@ -192,8 +180,6 @@ def _create_sys_link(path, name, target):
     :type path: String
     :param name: File name
     :type name: String
-    :param content: Content of the created file
-    :type content: String or binary
     :return: None
     """
     syslink_path = os.path.join(path, name)
@@ -210,8 +196,6 @@ def _create_hard_link(path, name, target):
     :type path: String
     :param name: File name
     :type name: String
-    :param content: Content of the created file
-    :type content: String or binary
     :return: None
     """
     link_path = os.path.join(path, name)
@@ -228,8 +212,6 @@ def _create_socket(path, name, content):
     :type path: String
     :param name: File name
     :type name: String
-    :param content: Content of the created file
-    :type content: String or binary
     :return: None
     """
     socket_path = os.path.join(path, name)
@@ -392,9 +374,6 @@ def modify_file_win_attributes(path, name):
     if sys.platform != 'win32':
         return
 
-    import win32con
-    import win32api
-
     path_to_file = os.path.join(path, name)
     win32api.SetFileAttributes(path_to_file, win32con.FILE_ATTRIBUTE_HIDDEN)
 
@@ -406,6 +385,8 @@ def modify_file(path, name, new_content=None, is_binary=False):
     :type path: String
     :param name: File name
     :type name: String
+    :param new_content: New content to add
+    :type new_content: String
     :param is_binary: True if the file is binary. False otherwise.
     :type is_binary: boolean
     :return: None
@@ -455,10 +436,20 @@ def callback_detect_end_scan(line):
 def callback_detect_event(line):
     msg = r'.*Sending message to server: (.+)' if sys.platform == 'win32' else r'.*Sending event: (.+)$'
     match = re.match(msg, line)
+
+    try:
+        if json.loads(match.group(1))['type'] == 'event':
+            return json.loads(match.group(1))
+    except (AttributeError, JSONDecodeError, KeyError):
+        pass
+
+    return None
+
+
+def callback_detect_integrity_event(line):
+    match = re.match(r'.*Sending integrity control message: (.+)$', line)
     if match:
-        if '{"type":"event"' not in line:
-            return None
-        elif json.loads(match.group(1))['type'] == 'event':
+        if json.loads(match.group(1))['type'] == 'state':
             return json.loads(match.group(1))
     return None
 
@@ -548,13 +539,6 @@ def callback_configuration_error(line):
     return None
 
 
-def callback_monitoring_directory(line):
-    match = re.match(r'.*INFO: (.*) Monitoring directory / file: .* ', line)
-    if match:
-        return match.group(1)
-    return None
-
-
 def check_time_travel(time_travel):
     """Changes date and time of the system.
 
@@ -613,6 +597,7 @@ class EventChecker:
 
         :param event_type String Expected type of the raised event. It can be 'added', 'modified' or 'deleted'.
         """
+
         def validate_checkers_per_event(events, options):
             """Checks if each event is properly formatted according to some checks.
 

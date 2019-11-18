@@ -5,7 +5,7 @@ import os
 import pytest
 import sys
 
-from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_event_too_long, regular_file_cud)
+from wazuh_testing.fim import (DEFAULT_TIMEOUT, LOG_FILE_PATH, callback_audit_event_too_long, regular_file_cud)
 from wazuh_testing.tools import FileMonitor, load_wazuh_configurations
 
 
@@ -33,7 +33,6 @@ conf_name = "wazuh_recursion_windows.yaml" if sys.platform == "win32" else "wazu
 configurations_path = os.path.join(test_data_path, conf_name)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-MIN_TIMEOUT = 10 if sys.platform == "win32" else 3
 
 # configurations
 
@@ -89,7 +88,7 @@ def recursion_test(dirname, subdirname, recursion_level, timeout=1, threshold_tr
             regular_file_cud(path, wazuh_log_monitor, time_travel=is_scheduled, min_timeout=timeout, triggers_event=False)
 
     except TimeoutError:
-        if wazuh_log_monitor.start(timeout=2, callback=callback_audit_event_too_long, update_position=False).result():
+        if wazuh_log_monitor.start(timeout=5, callback=callback_audit_event_too_long, update_position=False).result():
             pytest.skip(msg="Reached Whodata maximum path length.")
         pytest.fail("No 'Event Too Long' message was raised.")
 
@@ -131,5 +130,5 @@ def test_recursion_level(dirname, subdirname, recursion_level,
     :param recursion_level int Recursion level. Also used as the number of subdirectories to be created and checked for the current test.
     """
 
-    recursion_test(dirname, subdirname, recursion_level, timeout=MIN_TIMEOUT,
+    recursion_test(dirname, subdirname, recursion_level, timeout=DEFAULT_TIMEOUT,
                    is_scheduled=get_configuration['metadata']['fim_mode'] == 'scheduled')

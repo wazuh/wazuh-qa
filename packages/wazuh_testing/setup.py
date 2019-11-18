@@ -14,7 +14,10 @@ setup(name='wazuh_testing',
       author_email='hello@wazuh.com',
       license='GPLv2',
       packages=find_packages(),
-      package_data={'wazuh_testing': ['data/syscheck_event.json', 'data/syscheck_event_windows.json']},
+      package_data={'wazuh_testing': ['data/syscheck_event.json',
+                                      'data/syscheck_event_windows.json',
+                                      'data/mitre_event.json']
+                    },
       include_package_data=True,
       install_requires=['jq==0.1.6'],
       zip_safe=False

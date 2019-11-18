@@ -6,7 +6,7 @@ import os
 import sys
 
 import pytest
-from wazuh_testing.fim import (CHECK_ALL, FIFO, LOG_FILE_PATH, REGULAR, SOCKET,
+from wazuh_testing.fim import (CHECK_ALL, DEFAULT_TIMEOUT, FIFO, LOG_FILE_PATH, REGULAR, SOCKET,
                                callback_detect_event, create_file, validate_event, generate_params)
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
@@ -65,8 +65,8 @@ def test_create_file_realtime_whodata(folder, name, filetype, content, checkers,
 
     if filetype == REGULAR:
         # Wait until event is detected
-        event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event).result()
+        event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
         validate_event(event, checkers)
     else:
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+            wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event)

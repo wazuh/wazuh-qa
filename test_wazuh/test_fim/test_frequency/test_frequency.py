@@ -23,7 +23,7 @@ testdir1 = test_directories
 
 # configuration with frequency values
 
-frequencies = [60, 3600, 10000]
+frequencies = [5, 3600, 10000]
 
 configurations1 = load_wazuh_configurations(configurations_path, __name__,
                                             params=[
