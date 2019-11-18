@@ -16,11 +16,15 @@ from copy import deepcopy
 from datetime import timedelta
 from stat import ST_ATIME, ST_MTIME
 
+from json import JSONDecodeError
 from jsonschema import validate
 
 from wazuh_testing.tools import TimeMachine
 
-if sys.platform == 'linux2' or sys.platform == 'linux':
+if sys.platform == 'win32':
+    import win32con
+    import win32api
+else:
     from jq import jq
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -101,12 +105,9 @@ def validate_event(event, checks=None):
 
     checks = {CHECK_ALL} if checks is None else checks
 
-    if sys.platform == 'win32':
-        with open(os.path.join(_data_path, 'syscheck_event_windows.json'), 'r') as f:
-            schema = json.load(f)
-    else:
-        with open(os.path.join(_data_path, 'syscheck_event.json'), 'r') as f:
-            schema = json.load(f)
+    json_file = 'syscheck_event_windows.json' if sys.platform == "win32" else 'syscheck_event.json'
+    with open(os.path.join(_data_path, json_file), 'r') as f:
+        schema = json.load(f)
     validate(schema=schema, instance=event)
 
     # Check attributes
@@ -373,9 +374,6 @@ def modify_file_win_attributes(path, name):
     if sys.platform != 'win32':
         return
 
-    import win32con
-    import win32api
-
     path_to_file = os.path.join(path, name)
     win32api.SetFileAttributes(path_to_file, win32con.FILE_ATTRIBUTE_HIDDEN)
 
@@ -438,11 +436,13 @@ def callback_detect_end_scan(line):
 def callback_detect_event(line):
     msg = r'.*Sending message to server: (.+)' if sys.platform == 'win32' else r'.*Sending event: (.+)$'
     match = re.match(msg, line)
-    if match:
-        if '{"type":"event"' not in line:
-            return None
-        elif json.loads(match.group(1))['type'] == 'event':
+
+    try:
+        if json.loads(match.group(1))['type'] == 'event':
             return json.loads(match.group(1))
+    except (AttributeError, JSONDecodeError, KeyError):
+        pass
+
     return None
 
 
