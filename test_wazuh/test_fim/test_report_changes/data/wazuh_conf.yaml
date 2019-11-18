@@ -9,11 +9,11 @@
   - disabled:
       value: 'no'
   - directories:
-      value: "/testdir_reports, /testdir_nodiff"
+      value: TEST_DIRECTORIES
       attributes:
       - check_all: 'yes'
       - FIM_MODE
       - REPORT_CHANGES
   - nodiff:
-      value: "/testdir_nodiff/regular_file"
+      value: NODIFF_FILE
 

@@ -8,17 +8,16 @@ import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_configuration_error
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
-                                 load_wazuh_configurations)
+                                 load_wazuh_configurations, PREFIX)
 
 
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-test_directories = [os.path.join('/', 'testdir1'),
-                    os.path.join('/', 'testdir2'),
-                    os.path.join('/', 'testdir2', 'subdir')
-                    ]
+test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')]
+
+directory_str = ','.join(test_directories)
 force_restart_after_restoring = True
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -26,7 +25,10 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-configurations = load_wazuh_configurations(configurations_path, __name__)
+configurations = load_wazuh_configurations(configurations_path, __name__,
+                                           params=[{'TEST_DIRECTORIES': directory_str}],
+                                           metadata=[{'test_directories': directory_str}]
+                                           )
 
 
 # fixtures

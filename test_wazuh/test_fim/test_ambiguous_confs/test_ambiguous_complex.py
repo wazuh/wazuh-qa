@@ -9,15 +9,17 @@ from datetime import timedelta
 import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, create_file, WAZUH_PATH,
-                               callback_restricted, REGULAR)
+                               callback_restricted, REGULAR, generate_params, DEFAULT_TIMEOUT)
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
-                                 load_wazuh_configurations, TimeMachine)
+                                 load_wazuh_configurations, TimeMachine, PREFIX)
+
 
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf_complex.yaml')
-testdir = os.path.join('/', 'testdir')
+configurations_path = os.path.join(test_data_path,
+                                   'wazuh_conf_complex_win32.yaml' if sys.platform == 'win32' else 'wazuh_conf_complex.yaml')
+testdir = os.path.join(PREFIX, 'testdir')
 subdir = 'subdir'
 test_directories = [testdir]
 for n in range(5):
@@ -28,18 +30,12 @@ tag = 'Sample_tag'
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
+
 # configurations
 
-configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=[{'FIM_MODE': '', 'TAGS': tag},
-                                                   {'FIM_MODE': {'realtime': 'yes'}, 'TAGS': tag},
-                                                   {'FIM_MODE': {'whodata': 'yes'}, 'TAGS': tag}
-                                                   ],
-                                           metadata=[{'fim_mode': 'scheduled', 'tags': tag},
-                                                     {'fim_mode': 'realtime', 'tags': tag},
-                                                     {'fim_mode': 'whodata', 'tags': tag}
-                                                     ]
-                                           )
+conf_params, conf_metadata = generate_params({'TAGS': tag}, {'tags': tag})
+
+configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
 
 # fixtures
@@ -116,8 +112,12 @@ def check_report_changes(directory, trigger, check_list, file_list, timeout, sch
     def report_changes_validator(event):
         """ Validate content_changes attribute exists in the event """
         for file in file_list:
-            diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
-                                     directory.strip('/'), file)
+            diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
+            if sys.platform == 'win32':
+                diff_file = os.path.join(diff_file, 'c')
+                diff_file = os.path.join(diff_file, directory.strip('C:\\'), file)
+            else:
+                diff_file = os.path.join(diff_file, directory.strip('/'), file)
             assert (os.path.exists(diff_file)), f'{diff_file} does not exist'
             assert (event['data'].get('content_changes') is not None), f'content_changes is empty'
 
@@ -137,7 +137,7 @@ def check_default(directory, trigger, check_list, file_list, timeout, scheduled)
 def check_restrict(directory, trigger, check_list, file_list, timeout, scheduled):
     """ Standard restrict attribute test """
 
-    create_file(REGULAR, directory, file_list[0], '')
+    create_file(REGULAR, directory, file_list[0], content='')
     if scheduled:
         TimeMachine.travel_to_future(timedelta(hours=13))
     while True:
@@ -189,7 +189,7 @@ def test_ambiguous_complex(tags_to_apply,
 
     # Standard params for each test
     file_list = ['example.csv']
-    min_timeout = 3
+    min_timeout = DEFAULT_TIMEOUT
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
     conf_list, check_list = get_dir_and_attributes(get_configuration['elements'])

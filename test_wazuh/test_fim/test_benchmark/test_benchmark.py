@@ -6,16 +6,17 @@ import os
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud
+from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, generate_params
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
-                                 load_wazuh_configurations)
-
+                                 load_wazuh_configurations, PREFIX)
 
 # variables
 
+test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')]
+
+directory_str = ','.join(test_directories)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-test_directories = [os.path.join('/', 'testdir1')]
 testdir1 = test_directories[0]
 
 file_list = []
@@ -26,14 +27,12 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=[{'FIM_MODE': {'realtime': 'yes'}},
-                                                   {'FIM_MODE': {'whodata': 'yes'}}
-                                                   ],
-                                           metadata=[{'fim_mode': 'realtime'},
-                                                     {'fim_mode': 'whodata'}
-                                                     ]
-                                           )
+monitoring_modes = ['realtime', 'whodata']
+conf_params, conf_metadata = generate_params(extra_params={'TEST_DIRECTORIES': directory_str},
+                                             extra_metadata={'test_directories': directory_str},
+                                             modes=monitoring_modes)
+
+configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
 
 # fixtures
