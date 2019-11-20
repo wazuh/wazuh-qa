@@ -14,7 +14,7 @@ platforms:
     driver_config:
       image: ubuntu:14.04
       platform: ubuntu
-      provision_command: apt-get install -y --force-yes apt-transport-https ca-certificates && apt-get update
+      provision_command: apt-get update && apt-get install -y --force-yes apt-transport-https ca-certificates && apt-get update
       forward: 443
       publish_all: true
   - name: centos-kitchen-chef
@@ -43,7 +43,7 @@ suites:
         environment: development-master
     verifier:
       name: shell
-      command: py.test -v test/base
+      command: py.test -v test/base/*manager*
 
   - name: agent-suite1
     environments_path: ../wazuh_agent/test/environments
@@ -61,7 +61,7 @@ suites:
         environment: development
     verifier:
       name: shell
-      command: py.test -v test/base
+      command: py.test -v test/base/*agent*
 
   - name: elastic-suite2
     environments_path: "../wazuh_elastic/test/environments"

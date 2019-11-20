@@ -4,7 +4,9 @@ import sys
 import testinfra.utils.ansible_runner
 import pytest
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../_utils/'))
+sys.path.append(
+                os.path.join(os.path.dirname(__file__), '../../_utils/')
+                )  # noqa: E402
 from test_utils import get_full_version
 
 
@@ -30,7 +32,7 @@ def test_elasticsearch_is_installed(host, ElasticRoleDefaults):
     es_version = ElasticRoleDefaults["elastic_stack_version"]
     es_full_version = get_full_version(elasticsearch)
     assert elasticsearch.is_installed
-    assert elasticsearch.version.startswith(es_version)
+    assert es_full_version.startswith(es_version)
 
 
 def test_elasticsearch_is_running(host):
