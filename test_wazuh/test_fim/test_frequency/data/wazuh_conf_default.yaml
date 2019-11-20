@@ -1,0 +1,14 @@
+# conf 1
+# This conf is used to reduce the amount of tests performed
+- tags:
+  - ossec_conf
+  apply_to_modules:
+  - test_frequency
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: TEST_DIRECTORIES
+      attributes:
+      - FIM_MODE
