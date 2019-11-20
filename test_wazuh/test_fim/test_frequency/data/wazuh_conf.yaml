@@ -1,0 +1,16 @@
+---
+# conf 1
+- tags:
+  - ossec_conf
+  apply_to_modules:
+  - test_frequency
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - frequency:
+      value: FREQUENCY
+  - directories:
+      value: TEST_DIRECTORIES
+      attributes:
+      - FIM_MODE

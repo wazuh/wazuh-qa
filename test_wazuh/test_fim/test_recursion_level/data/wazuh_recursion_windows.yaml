@@ -6,50 +6,50 @@
   - disabled:
       value: 'no'
   - directories:
-      value: "/test_no_recursion"
+      value: "c:\\test_no_recursion"
       attributes:
-      - check_all: 'yes'
+      - CHECK
       - recursion_level: "0"
       - FIM_MODE
   - directories:
-      value: "/test no recursion"
+      value: "c:\\test no recursion"
       attributes:
-      - check_all: 'yes'
+      - CHECK
       - recursion_level: "0"
       - FIM_MODE
   - directories:
-      value: "/test_recursion_1"
+      value: "c:\\test_recursion_1"
       attributes:
-      - check_all: 'yes'
+      - CHECK
       - recursion_level: "1"
       - FIM_MODE
   - directories:
-      value: "/test recursion 1"
+      value: "c:\\test recursion 1"
       attributes:
-      - check_all: 'yes'
+      - CHECK
       - recursion_level: "1"
       - FIM_MODE
   - directories:
-      value: "/test_recursion_5"
+      value: "c:\\test_recursion_5"
       attributes:
-      - check_all: 'yes'
+      - CHECK
       - recursion_level: "5"
       - FIM_MODE
   - directories:
-      value: "/test recursion 5"
+      value: "c:\\test recursion 5"
       attributes:
-      - check_all: 'yes'
+      - CHECK
       - recursion_level: "5"
       - FIM_MODE
   - directories:
-      value: "/test_recursion_320"
+      value: "c:\\test_recursion_320"
       attributes:
-      - check_all: 'yes'
+      - CHECK
       - recursion_level: "320"
       - FIM_MODE
   - directories:
-      value: "/test recursion 320"
+      value: "c:\\test recursion 320"
       attributes:
-      - check_all: 'yes'
+      - CHECK
       - recursion_level: "320"
       - FIM_MODE

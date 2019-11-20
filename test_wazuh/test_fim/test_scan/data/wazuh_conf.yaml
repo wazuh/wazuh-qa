@@ -11,7 +11,7 @@
   - scan_time:
       value: SCAN_TIME
   - directories:
-      value: "/testdir1"
+      value: TEST_DIRECTORIES
       attributes:
       - check_all: 'yes'
 # conf 2
@@ -26,7 +26,7 @@
   - scan_day:
       value: SCAN_DAY
   - directories:
-      value: "/testdir1"
+      value: TEST_DIRECTORIES
       attributes:
       - check_all: 'yes'
 # conf 3
@@ -43,6 +43,6 @@
   - scan_day:
       value: SCAN_DAY
   - directories:
-      value: "/testdir1"
+      value: TEST_DIRECTORIES
       attributes:
       - check_all: 'yes'

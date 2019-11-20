@@ -10,7 +10,7 @@
   - disabled:
       value: 'no'
   - directories:
-      value: "/testdir1,/testdir2"
+      value: TEST_DIRECTORIES
       attributes:
       - check_all: 'yes'
       - realtime: 'yes'
@@ -29,7 +29,7 @@
   - disabled:
       value: 'no'
   - directories:
-      value: "/testdir1,/testdir2"
+      value: TEST_DIRECTORIES
       attributes:
       - check_all: 'yes'
       - realtime: 'yes'
@@ -51,7 +51,7 @@
   - scan_day:
       value: "aaaaaaa"
   - directories:
-      value: "/testdir1"
+      value: TEST_DIRECTORIES
       attributes:
       - check_all: 'yes'
 # conf 4
@@ -67,6 +67,6 @@
   - scan_time:
       value: "aaaaaaa"
   - directories:
-      value: "/testdir1"
+      value: TEST_DIRECTORIES
       attributes:
       - check_all: 'yes'

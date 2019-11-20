@@ -12,18 +12,29 @@ import sys
 import threading
 import time
 import xml.etree.ElementTree as ET
+import yaml
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timedelta
+from pytest import skip
 from subprocess import DEVNULL, check_call, check_output
 from typing import Any, List, Set
 
-import yaml
-from pytest import skip
 
-WAZUH_PATH = os.path.join('/', 'var', 'ossec')
-WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
-WAZUH_SOURCES = os.path.join('/', 'wazuh')
-GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
+if sys.platform == 'linux2' or sys.platform == 'linux':
+    WAZUH_PATH = os.path.join('/', 'var', 'ossec')
+    WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
+    WAZUH_SOURCES = os.path.join('/', 'wazuh')
+    GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
+    PREFIX = os.sep
+
+elif sys.platform == 'win32':
+    WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
+    WAZUH_CONF = os.path.join(WAZUH_PATH, 'ossec.conf')
+    WAZUH_SOURCES = os.path.join('/', 'wazuh')
+    PREFIX = os.path.join('c:', os.sep)
+
+_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
@@ -105,31 +116,26 @@ class TimeMachine:
         self.travel_to_future(self.time_delta * -1)
 
     @staticmethod
-    def _linux_set_time(time_):
+    def _linux_set_time(datetime_):
         """ Changes date and time in a Linux system
 
-        :param time_: new date and time to set
-        :type time_: time
+        :param datetime_: new date and time to set
+        :type datetime_: time
         """
-        import subprocess
         import shlex
         subprocess.call(shlex.split("timedatectl set-ntp false"))
-        subprocess.call(shlex.split("sudo date -s '%s'" % time_))
+        subprocess.call(shlex.split("sudo date -s '%s'" % datetime_))
         subprocess.call(shlex.split("sudo hwclock -w"))
 
     @staticmethod
-    def _win_set_time(time_):
+    def _win_set_time(datetime_):
         """ Changes date and time in a Windows system
 
-        :param time_: new date and time to set
-        :type time_: time
+        :param datetime_: new date and time to set
+        :type datetime_: time
         """
-        import os
-        date_ = str(time_.date())
-        time_ = str(time_.time()).split('.')
-        time_ = time_[0]
-        os.system('date ' + date_)
-        os.system('time ' + time_)
+        os.system('date ' + datetime_.strftime("%d-%m-%Y"))
+        os.system('time ' + datetime_.strftime("%H:%M:%S"))
 
     @staticmethod
     def travel_to_future(time_delta):
@@ -164,7 +170,6 @@ def wait_for_condition(condition_checker, args=None, kwargs=None, timeout=-1):
     kwargs = {} if kwargs is None else kwargs
     time_step = 0.5
     max_iterations = timeout / time_step
-    begin = time.time()
     iterations = 0
     while not condition_checker(*args, **kwargs):
         if timeout != -1 and iterations > max_iterations:
@@ -175,7 +180,6 @@ def wait_for_condition(condition_checker, args=None, kwargs=None, timeout=-1):
 
 def generate_wazuh_conf(args: List = None) -> ET.ElementTree:
     """Generate a configuration file for Wazuh.
-
     :param args: Arguments for generating ossec.conf (install_type, distribution, version)
     :return: ElementTree with a new Wazuh configuration generated from 'gen_ossec.sh'
     """
@@ -292,14 +296,16 @@ class FileMonitor:
         self._result = None
         self.timer = None
 
-    def _monitor(self, callback=_callback_default, accum_results=1):
+    def _monitor(self, callback=_callback_default, accum_results=1, update_position=True):
         """Wait for new lines to be appended to the file.
 
         A callback function will be called every time a new line is detected. This function must receive two
         positional parameters: a references to the FileMonitor object and the line detected.
         """
+        previous_position = self._position
         self._result = [] if accum_results > 1 else None
-        with open(self.file_path) as f:
+        encode = None if sys.platform == 'win32' else 'utf-8'
+        with open(self.file_path, encoding=encode) as f:
             f.seek(self._position)
             while self._continue:
                 if self._abort:
@@ -322,9 +328,9 @@ class FileMonitor:
                             if self._result:
                                 self.stop()
 
-            self._position = f.tell()
+            self._position = f.tell() if update_position else previous_position
 
-    def start(self, timeout=-1, callback=_callback_default, accum_results=1):
+    def start(self, timeout=-1, callback=_callback_default, accum_results=1, update_position=True):
         """Start the file monitoring until the stop method is called"""
         if not self._continue:
             self._continue = True
@@ -332,7 +338,7 @@ class FileMonitor:
             if timeout > 0:
                 self.timer = Timer(timeout, self.abort)
                 self.timer.start()
-            self._monitor(callback=callback, accum_results=accum_results)
+            self._monitor(callback=callback, accum_results=accum_results, update_position=update_position)
 
         return self
 
@@ -488,7 +494,7 @@ def check_apply_test(apply_to_tags: Set, tags: List):
         skip("Does not apply to this config file")
 
 
-def restart_wazuh_with_new_conf(new_conf):
+def restart_wazuh_with_new_conf(new_conf, daemon='ossec-syscheckd'):
     """ Restart Wazuh service applying a new ossec.conf
 
     :param new_conf: New config file
@@ -496,7 +502,11 @@ def restart_wazuh_with_new_conf(new_conf):
     :return: None
     """
     write_wazuh_conf(new_conf)
-    restart_wazuh_service()
+    if sys.platform == 'win32':
+        restart_wazuh_service_windows()
+
+    elif sys.platform == 'linux2' or sys.platform == 'linux':
+        restart_wazuh_daemon(daemon)
 
 
 def restart_wazuh_service():
@@ -505,6 +515,27 @@ def restart_wazuh_service():
     """
     p = subprocess.Popen(["service", "wazuh-manager", "restart"])
     p.wait()
+
+
+def stop_wazuh_service_windows():
+    """ Stop Wazuh service completely
+    :return: None
+    """
+    p = subprocess.Popen(["net", "stop", "OssecSvc"])
+    p.wait()
+
+
+def start_wazuh_service_windows():
+    p = subprocess.Popen(["net", "start", "OssecSvc"])
+    p.wait()
+
+
+def restart_wazuh_service_windows():
+    """ Restart Wazuh service completely
+    :return: None
+    """
+    stop_wazuh_service_windows()
+    start_wazuh_service_windows()
 
 
 def reformat_time(scan_time):
@@ -525,3 +556,25 @@ def reformat_time(scan_time):
     cd = datetime.now()
     return datetime.replace(datetime.strptime(scan_time, hour_format + colon + locale),
                             year=cd.year, month=cd.month, day=cd.day)
+
+
+def time_to_timedelta(time):
+    """Converts a string with time in seconds with `smhdw` suffixes allowed to `datetime.timedelta`.
+    """
+    time_unit = time[len(time)-1:]
+
+    if time_unit.isnumeric():
+        return timedelta(seconds=int(time))
+
+    time_value = int(time[:len(time)-1])
+
+    if time_unit == "s":
+        return timedelta(seconds=time_value)
+    elif time_unit == "m":
+        return timedelta(minutes=time_value)
+    elif time_unit == "h":
+        return timedelta(hours=time_value)
+    elif time_unit == "d":
+        return timedelta(days=time_value)
+    elif time_unit == "w":
+        return timedelta(weeks=time_value)

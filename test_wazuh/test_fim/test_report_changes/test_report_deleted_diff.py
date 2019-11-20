@@ -3,13 +3,14 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
 import shutil
+import sys
 from datetime import timedelta
 
 import pytest
 
-from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH, WAZUH_PATH, callback_detect_event,
-                               REGULAR, create_file, detect_initial_scan)
-from wazuh_testing.tools import (FileMonitor, TimeMachine,
+from wazuh_testing.fim import (CHECK_ALL, DEFAULT_TIMEOUT, LOG_FILE_PATH, WAZUH_PATH, callback_detect_event,
+                               REGULAR, create_file, detect_initial_scan, generate_params)
+from wazuh_testing.tools import (PREFIX, FileMonitor, TimeMachine,
                                  load_wazuh_configurations, restart_wazuh_with_new_conf, set_section_wazuh_conf,
                                  check_apply_test)
 
@@ -17,39 +18,30 @@ from wazuh_testing.tools import (FileMonitor, TimeMachine,
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
-test_directories = [
-    os.path.join('/', 'testdir_reports'),
-    os.path.join('/', 'testdir_nodiff')
-]
+test_directories = [os.path.join(PREFIX, 'testdir_reports'), os.path.join(PREFIX, 'testdir_nodiff')]
+nodiff_file = os.path.join(PREFIX, 'testdir_nodiff', 'regular_file')
+
+directory_str = ','.join(test_directories)
 testdir_reports, testdir_nodiff = test_directories
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 options = {CHECK_ALL}
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-# configurations
 
+# configurations
 
 def change_conf(report_value):
     """" Returns a new ossec configuration with a changed report_value"""
+    conf_params, conf_metadata = generate_params({'REPORT_CHANGES': {'report_changes': report_value},
+                                                  'TEST_DIRECTORIES': directory_str, 'NODIFF_FILE': nodiff_file,
+                                                  'MODULE_NAME': __name__},
+                                                 {'report_changes': report_value,
+                                                  'test_directories': directory_str, 'nodiff_file': nodiff_file,
+                                                  'module_name': __name__})
     return load_wazuh_configurations(configurations_path, __name__,
-                                     params=[{'FIM_MODE': '',
-                                              'REPORT_CHANGES': {'report_changes': report_value},
-                                              'MODULE_NAME': __name__},
-                                             {'FIM_MODE': {'realtime': 'yes'},
-                                              'REPORT_CHANGES': {'report_changes': report_value},
-                                              'MODULE_NAME': __name__},
-                                             {'FIM_MODE': {'whodata': 'yes'},
-                                              'REPORT_CHANGES': {'report_changes': report_value},
-                                              'MODULE_NAME': __name__}
-                                             ],
-                                     metadata=[{'fim_mode': 'scheduled', 'report_changes': report_value,
-                                                'module_name': __name__},
-                                               {'fim_mode': 'realtime', 'report_changes': report_value,
-                                                'module_name': __name__},
-                                               {'fim_mode': 'whodata', 'report_changes': report_value,
-                                                'module_name': __name__}
-                                               ]
+                                     params=conf_params,
+                                     metadata=conf_metadata
                                      )
 
 
@@ -74,7 +66,7 @@ def wait_for_event(fim_mode):
     if fim_mode == 'scheduled':
         TimeMachine.travel_to_future(timedelta(hours=13))
     # Wait until event is detected
-    wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+    wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event)
 
 
 def create_and_check_diff(name, directory, fim_mode):
@@ -85,10 +77,14 @@ def create_and_check_diff(name, directory, fim_mode):
     :param fim_mode: FIM mode (scheduled, realtime, whodata)
     :return: String with with the duplicated file path (diff)
     """
-    create_file(REGULAR, directory, name, 'Sample content')
+    create_file(REGULAR, directory, name, content='Sample content')
     wait_for_event(fim_mode)
-    diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
-                             directory.strip('/'), name)
+    diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
+    if sys.platform == 'win32':
+        diff_file = os.path.join(diff_file, 'c')
+        diff_file = os.path.join(diff_file, directory.strip('C:\\'), name)
+    else:
+        diff_file = os.path.join(diff_file, directory.strip('/'), name)
     assert (os.path.exists(diff_file)), f'{diff_file} does not exist'
     return diff_file
 
@@ -106,6 +102,7 @@ def check_when_no_report_changes(name, directory, fim_mode, new_conf):
     restart_wazuh_with_new_conf(new_conf)
     # Wait for FIM scan to finish
     detect_initial_scan(wazuh_log_monitor)
+
     assert (not os.path.exists(diff_file)), f'{diff_file} exists'
 
 
@@ -117,7 +114,12 @@ def check_when_deleted_directories(name, directory, fim_mode):
     :param fim_mode: FIM mode (scheduled, realtime, whodata)
     :return: None
     """
-    diff_dir = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local', directory.strip('/'))
+    diff_dir = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
+    if sys.platform == 'win32':
+        diff_dir = os.path.join(diff_dir, 'c')
+        diff_dir = os.path.join(diff_dir, directory.strip('C:\\'), name)
+    else:
+        diff_dir = os.path.join(diff_dir, directory.strip('/'), name)
     create_and_check_diff(name, directory, fim_mode)
     shutil.rmtree(directory, ignore_errors=True)
     wait_for_event(fim_mode)

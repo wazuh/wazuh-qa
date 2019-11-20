@@ -1,0 +1,33 @@
+---
+- tags:
+  - sync_invalid
+  apply_to_modules:
+  - test_invalid_sync_response
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - inventory:
+      elements:
+      - sync_interval:
+          value: "invalid_value"
+  - directories:
+      value: "/testdir1"
+      attributes:
+      - check_all: 'yes'
+- tags:
+  - sync_invalid
+  apply_to_modules:
+  - test_invalid_sync_response
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - inventory:
+      elements:
+      - response_timeout:
+          value: "invalid_value"
+  - directories:
+      value: "/testdir1"
+      attributes:
+      - check_all: 'yes'
