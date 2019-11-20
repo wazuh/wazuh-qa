@@ -21,6 +21,7 @@
         name:
           - curl
           - net-tools
+          - sudo          
         state: latest
       register: wazuh_manager_dependencies_packages_installed
       until: wazuh_manager_dependencies_packages_installed is succeeded
