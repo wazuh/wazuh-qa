@@ -1,14 +1,15 @@
 ---
 # conf 1
 - tags:
-  - follow_symbolic_link
+  - non_monitored_dir
   apply_to_modules:
-  - test_follow_symbolic_link
+  - test_not_following_symbolic_link
   section: syscheck
   elements:
   - disabled:
       value: 'no'
   - directories:
-      value: "/testdir1,/testdir2,/noexists"
+      value: '/testdir_link'
       attributes:
       - FIM_MODE
+
