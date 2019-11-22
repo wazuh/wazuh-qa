@@ -5,16 +5,6 @@ RUN apt-get update
 
 RUN apt-get -y install ssh && apt-get -y update
 
-RUN echo "source 'https://rubygems.org'\n\
-gem 'test-kitchen'\n\
-gem 'kitchen-puppet'\n\
-gem 'kitchen-vagrant'\n\
-gem 'kitchen-docker', '~> 2.3'\n\
-gem 'puppet'\n\
-gem 'librarian-puppet'" > Gemfile
-
-RUN bundle install
-
 RUN gem uninstall puppet && gem uninstall puppet-module
 
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3.5 get-pip.py
