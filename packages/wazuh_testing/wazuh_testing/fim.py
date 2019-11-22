@@ -400,8 +400,8 @@ def modify_file(path, name, new_content=None, is_binary=False):
     modify_file_win_attributes(path, name)
 
 
-def change_internal_options(opt_path, pattern, value):
-    """Changes the value of a given parameter.
+def change_internal_options(pattern, value, opt_path=os.path.join('/', 'var', 'ossec', 'etc', 'internal_options.conf')):
+    """Changes the value of a given parameter in linux.
 
     :param opt_path: File path
     :type opt_path: String
