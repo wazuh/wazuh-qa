@@ -1,6 +1,5 @@
 import os
 import sys
-
 import testinfra.utils.ansible_runner
 import pytest
 
@@ -41,41 +40,70 @@ def test_agents_registered_on_manager(host):
     assert "agent-{}".format(MOL_PLATFORM) in cmd.stdout
 
 
-def test_wazuh_packages_are_installed(host, ManagerRoleDefaults):
-    """Test if the main packages are installed."""
+@pytest.mark.parametrize(
+    "wazuh_service, wazuh_owner",
+    (
+        ("ossec-authd", "root"),
+        ("ossec-execd", "root"),
+        ("ossec-analysisd", "ossec"),
+        ("ossec-syscheckd", "root"),
+        ("ossec-remoted", "ossecr"),
+        # Testinfra detects "ossec-logcollector" as "ossec-logcollec"
+        ("ossec-logcollec", "root"),
+        ("ossec-monitord", "ossec"),
+        ("wazuh-db", "ossec"),
+        ("wazuh-modulesd", "root"),
+    ),
+)
+def test_wazuh_manager_is_installed(host, ManagerRoleDefaults,
+                                    wazuh_service, wazuh_owner):
     manager = host.package("wazuh-manager")
-    api = host.package("wazuh-api")
-
     manager_version = ManagerRoleDefaults["wazuh_manager_version"]
-    full_manager_version = get_full_version(manager)
-    full_api_version = get_full_version(api)
 
-    assert manager.is_installed
-    assert full_manager_version.startswith(manager_version)
-    assert api.is_installed
-    assert full_api_version.startswith(manager_version)
+    if (ManagerRoleDefaults["wazuh_manager_sources_installation"]["enabled"]):
+        ossec_init = host.file("/etc/ossec-init.conf")
+        assert ossec_init.exists
+        host.process.get(user=wazuh_owner, comm=wazuh_service)
+    else:
+        full_manager_version = get_full_version(manager)
+        assert manager.is_installed
+        assert full_manager_version.startswith(manager_version)
 
 
-def test_wazuh_services_are_running(host):
-    """Test if the services are enabled and running.
+def test_wazuh_manager_version(host, ManagerRoleDefaults):
+    manager_version = ManagerRoleDefaults["wazuh_manager_version"]
+    ossec_init = host.file("/etc/ossec-init.conf")
+    assert ossec_init.exists
+    assert (manager_version[:-2] in ossec_init.content_string)
 
-    When assert commands are commented, this means that the service command has
-    a wrong exit code: https://github.com/wazuh/wazuh-ansible/issues/107
-    """
-    manager = host.service("wazuh-manager")
-    api = host.service("wazuh-api")
 
-    distribution = host.system_info.distribution.lower()
-    if distribution == "centos":
-        # assert manager.is_running
-        assert manager.is_enabled
-        # assert not api.is_running
-        assert api.is_enabled
-    elif distribution == "ubuntu":
-        # assert manager.is_running
-        assert manager.is_enabled
-        # assert api.is_running
-        assert api.is_enabled
+def test_wazuh_api_is_installed(host, ManagerRoleDefaults):
+    api = host.package("wazuh-api")
+    if (ManagerRoleDefaults["wazuh_api_sources_installation"]["enabled"]):
+        api_package_json = host.file(ManagerRoleDefaults
+                                     ["wazuh_manager_sources_installation"]
+                                     ["user_dir"] +
+                                     "/api/package.json")
+        assert api_package_json.exists
+    else:
+        assert api.is_installed
+
+
+def test_wazuh_api_version(host, ManagerRoleDefaults):
+    if (ManagerRoleDefaults["wazuh_api_sources_installation"]["enabled"]):
+        api = host.package("wazuh-api")
+        manager_version = ManagerRoleDefaults["wazuh_manager_version"]
+        api_package_json = host.file(ManagerRoleDefaults
+                                     ["wazuh_manager_sources_installation"]
+                                     ["user_dir"] +
+                                     "/api/package.json")
+        # formatting "version": "x.xx.x"
+        json_version_search = ("\"version\": " +
+                               "\"" + manager_version[:-2] + "\"")
+        assert (json_version_search in api_package_json.content_string)
+    else:
+        full_api_version = get_full_version(api)
+        assert full_api_version.startswith(manager_version)
 
 
 @pytest.mark.parametrize(
