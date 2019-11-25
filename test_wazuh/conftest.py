@@ -26,3 +26,50 @@ def restart_wazuh(get_configuration, request):
 
     elif sys.platform == 'linux2' or sys.platform == 'linux':
         restart_wazuh_service()
+
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--tier",
+        action="store",
+        metavar="level",
+        default=None,
+        type=int,
+        help="only run tests with a tier level equal to 'level'",
+    )
+    parser.addoption(
+        "--tier-minimum",
+        action="store",
+        metavar="minimum_level",
+        default=-1,
+        type=int,
+        help="only run tests with a tier level less or equal than 'minimum_level'"
+    )
+    parser.addoption(
+        "--tier-maximum",
+        action="store",
+        metavar="maximum_level",
+        default=sys.maxsize,
+        type=int,
+        help="only run tests with a tier level less or equal than 'minimum_level'"
+    )
+
+
+def pytest_configure(config):
+    # register an additional marker
+    config.addinivalue_line(
+        "markers", "tier(level): mark test to run only if match tier level"
+    )
+
+
+def pytest_runtest_setup(item):
+    # Consider only first mark
+    levels = [mark.kwargs['level'] for mark in item.iter_markers(name="tier")]
+    if levels and len(levels) > 0:
+        tier = item.config.getoption("--tier")
+        if tier is not None and tier != levels[0]:
+            pytest.skip(f"test requires tier level {levels[0]}")
+        elif item.config.getoption("--tier-minimum") > levels[0]:
+            pytest.skip(f"test requires a minimum tier level {levels[0]}")
+        elif item.config.getoption("--tier-maximum") < levels[0]:
+            pytest.skip(f"test requires a maximum tier level {levels[0]}")
