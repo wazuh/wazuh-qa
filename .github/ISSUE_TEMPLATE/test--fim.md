@@ -50,6 +50,7 @@ typedef struct fim_entry_data {
 
 Configure in local_internal_options.conf:
 >`syscheck.debug=2`
+
 During the test, check `ossec.log` looking for debug, error or warning messages that may be unnecessarily repetitive or useless.
 
 ### FIM start:
@@ -292,6 +293,7 @@ typedef struct fim_entry_data {
 
 Configure in local_internal_options.conf:
 >`syscheck.debug=2`
+
 During the test, check `ossec.log` looking for debug, error or warning messages that may be unnecessarily repetitive or useless.
 
 ### FIM start:
@@ -515,6 +517,7 @@ typedef struct fim_entry_data {
 
 Configure in local_internal_options.conf:
 >`syscheck.debug=2`
+
 During the test, check `ossec.log` looking for debug, error or warning messages that may be unnecessarily repetitive or useless.
 
 ### FIM start:
