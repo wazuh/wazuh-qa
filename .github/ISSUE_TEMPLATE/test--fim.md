@@ -1,3 +1,12 @@
+---
+name: 'Test: File integrity monitoring'
+about: Test suite for file integrity monitoring.
+title: ''
+labels: ''
+assignees: ''
+
+---
+
 # Test file integrity monitoring
 
 ## Linux
