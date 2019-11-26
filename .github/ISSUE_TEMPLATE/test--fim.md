@@ -211,10 +211,10 @@ Check links:
 - [ ] Configure ignore sregex using '$' `<ignore type="sregex">string$</ignore>`
 - [ ] Configure ignore sregex using '|' `<ignore type="sregex">string1|string2</ignore>`
 - [ ] Configure ignore sregex using '!' `<ignore type="sregex">!string</ignore>`
-- [ ] Configure restrict sregex using '^' `<directories restrict=" type="sregex">^string>/test</directories>`
-- [ ] Configure restrict sregex using '$' `<directories restrict=" type="sregex">string$>/test</directories>`
-- [ ] Configure restrict sregex using '|' `<directories restrict=" type="sregex">string1|string2>/test</directories>`
-- [ ] Configure restrict sregex using '!' `<directories restrict=" type="sregex">!string>/test</directories>`
+- [ ] Configure restrict sregex using '^' <directories restrict="^string">/test</directories>
+- [ ] Configure restrict sregex using '$' <directories restrict="string$">/test</directories>
+- [ ] Configure restrict sregex using '|' <directories restrict="string1|string2">/test</directories>
+- [ ] Configure restrict sregex using '!' <directories restrict="!string">/test</directories>
 
 ### Specifies if syscheck should scan the mounted filesystems, `/dev`, `/sys`, `/proc` directores.
 - [ ] Configure `<skip_nfs>no</skip_nfs>`
@@ -422,10 +422,10 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Configure ignore sregex using '$' `<ignore type="sregex">string$</ignore>`
 - [ ] Configure ignore sregex using '|' `<ignore type="sregex">string1|string2</ignore>`
 - [ ] Configure ignore sregex using '!' `<ignore type="sregex">!string</ignore>`
-- [ ] Configure restrict sregex using '^' `<directories restrict=" type="sregex">^string>/test</directories>`
-- [ ] Configure restrict sregex using '$' `<directories restrict=" type="sregex">string$>/test</directories>`
-- [ ] Configure restrict sregex using '|' `<directories restrict=" type="sregex">string1|string2>/test</directories>`
-- [ ] Configure restrict sregex using '!' `<directories restrict=" type="sregex">!string>/test</directories>`
+- [ ] Configure restrict sregex using '^' <directories restrict="^string">/test</directories>
+- [ ] Configure restrict sregex using '$' <directories restrict="string$">/test</directories>
+- [ ] Configure restrict sregex using '|' <directories restrict="string1|string2">/test</directories>
+- [ ] Configure restrict sregex using '!' <directories restrict="!string">/test</directories>
 
 ### Configure directories with strange characteres
 - [ ] Configure paths with backslashes `<directories>C:\test</directories>`
@@ -600,10 +600,10 @@ Check links:
 - [ ] Configure ignore sregex using '$' `<ignore type="sregex">string$</ignore>`
 - [ ] Configure ignore sregex using '|' `<ignore type="sregex">string1|string2</ignore>`
 - [ ] Configure ignore sregex using '!' `<ignore type="sregex">!string</ignore>`
-- [ ] Configure restrict sregex using '^' `<directories restrict=" type="sregex">^string>/test</directories>`
-- [ ] Configure restrict sregex using '$' `<directories restrict=" type="sregex">string$>/test</directories>`
-- [ ] Configure restrict sregex using '|' `<directories restrict=" type="sregex">string1|string2>/test</directories>`
-- [ ] Configure restrict sregex using '!' `<directories restrict=" type="sregex">!string>/test</directories>`
+- [ ] Configure restrict sregex using '^' <directories restrict="^string">/test</directories>
+- [ ] Configure restrict sregex using '$' <directories restrict="string$">/test</directories>
+- [ ] Configure restrict sregex using '|' <directories restrict="string1|string2">/test</directories>
+- [ ] Configure restrict sregex using '!' <directories restrict="!string">/test</directories>
 
 ### Specifies if syscheck should scan the mounted filesystems, `/dev`, `/sys`, `/proc` directores.
 - [ ] Configure `<skip_nfs>no</skip_nfs>`
