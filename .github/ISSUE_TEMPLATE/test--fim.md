@@ -254,6 +254,11 @@ Check links:
 - [ ] Check recursion level option (recursion_level=0, recursion_level=2 check folder level 0, 1, 2 and 3)
 - [ ] Check syscheck alert for nested monitoring with <tags> option
 
+### Integrity
+- [ ] Add/Modify/Remove a file. Connect the agent to another manager (The agent doesn't need to be restarted). Check the database is updated but there is no alert in the new manager.
+- [ ] Stop the agent. Add a file. Start the agent. The new file must be in the database after the scan but there must not be any alert.
+- [ ] Stop the agent. Remove a file. Start the agent. The removed file must not be in the database after the scan and there must not be any alert.
+- [ ] Set the inventory paramete `sync_interval` to 0 in the agent's ossec.conf. Syscheck must log a Warning message. The value of `sync_interval` must be 300. It can be queried with the API: `curl -u foo:bar -k -X GET "http://127.0.0.1:55000/agents/001/config/syscheck/syscheck?pretty"`
 
 ## Windows
 
