@@ -56,9 +56,9 @@ During the test, check `ossec.log` looking for debug, error or warning messages 
 ### FIM start:
 - [ ] FIM should not report any alerts until the first scan has finished and generated a base line.
 - [ ] After the first scan, FIM should synchronize the database with the manager's. The number of entries in both databases must be the same and with the same elements.
-`wdb 002 "select count(*) from fim_entry" "count(*)": 3372`
-    `DEBUG: (6335):Fim entries: 3372`
 - [ ] Check disable option, set to no, shouldn't show any message about performing scans.
+    `wdb 002 "select count(*) from fim_entry" "count(*)": 3372`
+    `DEBUG: (6335):Fim entries: 3372`
 - [ ] Check that if the number of inodes is different from the number of entries, then, the sum of all paths in the inode table is equal to the number of entries.
     `DEBUG: (6336): Fim inode entries: 3342, path count: 3372`
     `DEBUG: (6335): Fim entries: 3372`
@@ -174,14 +174,17 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check that `realtime` works if `whodata` is used in the configuration without auditd installed.
 - [ ] Check that `realtime` works if `whodata` is used in the configuration with auditd disabled.
 
-### Configure for monitoring a symbolic link in directories stanza.
-Check links:
+### Monitor links through a configured folder (the link itself).
+- [ ] Check that the attributes of a link monitored through a configured folder are the attributes of the link itself (not the attributes of the file/folder that is pointed by the link).
 - [ ] Check syscheck alert for adding a link to a file/folder.
 - [ ] Check syscheck doesn't generate alerts if the pointed file is modified or if content is added to the pointed folder.
 - [ ] Check syscheck generate modify alerts if the link changes the path where it points.
 - [ ] Check syscheck doesn't generate alerts if the pointed file/folder is deleted.
 - [ ] Check syscheck doesn't generate alerts if the pointed file/folder is restored (re-create the previous deleted file/folder.
 - [ ] Check syscheck alert for deleting a link to a file/folder.
+
+### Configure for monitoring a symbolic link in directories stanza.
+Check links:
 - [ ] Check syscheck add alerts in a monitored link that points to a folder.
 - [ ] Check syscheck modify alerts in a monitored link that points to a folder.
 - [ ] Check syscheck delete alerts in a monitored link that points to a folder.
@@ -299,9 +302,9 @@ During the test, check `ossec.log` looking for debug, error or warning messages 
 ### FIM start:
 - [ ] FIM should not report any alerts until the first scan has finished and generated a base line.
 - [ ] After the first scan, FIM should synchronize the database with the manager's. The number of entries in both databases must be the same and with the same elements.
+- [ ] Check disable option, set to no, shouldn't show any message about performing scans.
     `wdb 002 "select count(*) from fim_entry" "count(*)": 3372`
     `DEBUG: (6335):Fim entries: 3372`
-- [ ] Check disable option, set to no, shouldn't show any message about performing scans.
 - [ ] Check that if the number of inodes is different from the number of entries, then, the sum of all paths in the inode table is equal to the number of entries.
     `DEBUG: (6336): Fim inode entries: 3342, path count: 3372`
     `DEBUG: (6335): Fim entries: 3372`
@@ -331,9 +334,9 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_perm for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_owner for file and directory (added, modified and deleted alerts).
-- [ ] Check option check_group for file and directory (added and deleted alerts).
+- [ ] Check option check_group for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_mtime for file and directory (added, modified and deleted alerts).
-- [ ] Check option check_inode for file and directory (added and deleted alerts).
+- [ ] Check option check_inode for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_md5sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha1sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha256sum for file and directory (added, modified and deleted alerts).
@@ -365,9 +368,9 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_perm for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_owner for file and directory (added, modified and deleted alerts).
-- [ ] Check option check_group for file and directory (added and deleted alerts).
+- [ ] Check option check_group for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_mtime for file and directory (added, modified and deleted alerts).
-- [ ] Check option check_inode for file and directory (added and deleted alerts).
+- [ ] Check option check_inode for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_md5sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha1sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha256sum for file and directory (added, modified and deleted alerts).
@@ -399,9 +402,9 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_perm for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_owner for file and directory (added, modified and deleted alerts).
-- [ ] Check option check_group for file and directory (added and deleted alerts).
+- [ ] Check option check_group for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_mtime for file and directory (added, modified and deleted alerts).
-- [ ] Check option check_inode for file and directory (added and deleted alerts).
+- [ ] Check option check_inode for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_md5sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha1sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha256sum for file and directory (added, modified and deleted alerts).
@@ -523,9 +526,9 @@ During the test, check `ossec.log` looking for debug, error or warning messages 
 ### FIM start:
 - [ ] FIM should not report any alerts until the first scan has finished and generated a base line.
 - [ ] After the first scan, FIM should synchronize the database with the manager's. The number of entries in both databases must be the same and with the same elements.
+- [ ] Check disable option, set to no, shouldn't show any message about performing scans.
     `wdb 002 "select count(*) from fim_entry" "count(*)": 3372`
     `DEBUG: (6335):Fim entries: 3372`
-- [ ] Check disable option, set to no, shouldn't show any message about performing scans.
 - [ ] Check that if the number of inodes is different from the number of entries, then, the sum of all paths in the inode table is equal to the number of entries.
     `DEBUG: (6336): Fim inode entries: 3342, path count: 3372`
     `DEBUG: (6335): Fim entries: 3372`
