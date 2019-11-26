@@ -56,9 +56,9 @@ During the test, check `ossec.log` looking for debug, error or warning messages 
 ### FIM start:
 - [ ] FIM should not report any alerts until the first scan has finished and generated a base line.
 - [ ] After the first scan, FIM should synchronize the database with the manager's. The number of entries in both databases must be the same and with the same elements.
-- [ ] Check disable option, set to no, shouldn't show any message about performing scans.
     `wdb 002 "select count(*) from fim_entry" "count(*)": 3372`
     `DEBUG: (6335):Fim entries: 3372`
+- [ ] Check disable option, set to no, shouldn't show any message about performing scans.
 - [ ] Check that if the number of inodes is different from the number of entries, then, the sum of all paths in the inode table is equal to the number of entries.
     `DEBUG: (6336): Fim inode entries: 3342, path count: 3372`
     `DEBUG: (6335): Fim entries: 3372`
@@ -302,9 +302,9 @@ During the test, check `ossec.log` looking for debug, error or warning messages 
 ### FIM start:
 - [ ] FIM should not report any alerts until the first scan has finished and generated a base line.
 - [ ] After the first scan, FIM should synchronize the database with the manager's. The number of entries in both databases must be the same and with the same elements.
-- [ ] Check disable option, set to no, shouldn't show any message about performing scans.
     `wdb 002 "select count(*) from fim_entry" "count(*)": 3372`
     `DEBUG: (6335):Fim entries: 3372`
+- [ ] Check disable option, set to no, shouldn't show any message about performing scans.
 - [ ] Check that if the number of inodes is different from the number of entries, then, the sum of all paths in the inode table is equal to the number of entries.
     `DEBUG: (6336): Fim inode entries: 3342, path count: 3372`
     `DEBUG: (6335): Fim entries: 3372`
@@ -334,9 +334,9 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_perm for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_owner for file and directory (added, modified and deleted alerts).
-- [ ] Check option check_group for file and directory (added, modified and deleted alerts).
+- [ ] Check option check_group for file and directory (added and deleted alerts).
 - [ ] Check option check_mtime for file and directory (added, modified and deleted alerts).
-- [ ] Check option check_inode for file and directory (added, modified and deleted alerts).
+- [ ] Check option check_inode for file and directory (added and deleted alerts).
 - [ ] Check option check_md5sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha1sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha256sum for file and directory (added, modified and deleted alerts).
@@ -368,9 +368,9 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_perm for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_owner for file and directory (added, modified and deleted alerts).
-- [ ] Check option check_group for file and directory (added, modified and deleted alerts).
+- [ ] Check option check_group for file and directory (added and deleted alerts).
 - [ ] Check option check_mtime for file and directory (added, modified and deleted alerts).
-- [ ] Check option check_inode for file and directory (added, modified and deleted alerts).
+- [ ] Check option check_inode for file and directory (added and deleted alerts).
 - [ ] Check option check_md5sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha1sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha256sum for file and directory (added, modified and deleted alerts).
@@ -402,9 +402,9 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_perm for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_owner for file and directory (added, modified and deleted alerts).
-- [ ] Check option check_group for file and directory (added, modified and deleted alerts).
+- [ ] Check option check_group for file and directory (added and deleted alerts).
 - [ ] Check option check_mtime for file and directory (added, modified and deleted alerts).
-- [ ] Check option check_inode for file and directory (added, modified and deleted alerts).
+- [ ] Check option check_inode for file and directory (added and deleted alerts).
 - [ ] Check option check_md5sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha1sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha256sum for file and directory (added, modified and deleted alerts).
