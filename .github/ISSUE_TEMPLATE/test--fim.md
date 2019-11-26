@@ -56,9 +56,9 @@ During the test, check `ossec.log` looking for debug, error or warning messages 
 ### FIM start:
 - [ ] FIM should not report any alerts until the first scan has finished and generated a base line.
 - [ ] After the first scan, FIM should synchronize the database with the manager's. The number of entries in both databases must be the same and with the same elements.
-- [ ] Check disable option, set to no, shouldn't show any message about performing scans.
-    `wdb 002 "select count(*) from fim_entry" "count(*)": 3372`
+`wdb 002 "select count(*) from fim_entry" "count(*)": 3372`
     `DEBUG: (6335):Fim entries: 3372`
+- [ ] Check disable option, set to no, shouldn't show any message about performing scans.
 - [ ] Check that if the number of inodes is different from the number of entries, then, the sum of all paths in the inode table is equal to the number of entries.
     `DEBUG: (6336): Fim inode entries: 3342, path count: 3372`
     `DEBUG: (6335): Fim entries: 3372`
@@ -299,9 +299,9 @@ During the test, check `ossec.log` looking for debug, error or warning messages 
 ### FIM start:
 - [ ] FIM should not report any alerts until the first scan has finished and generated a base line.
 - [ ] After the first scan, FIM should synchronize the database with the manager's. The number of entries in both databases must be the same and with the same elements.
-- [ ] Check disable option, set to no, shouldn't show any message about performing scans.
     `wdb 002 "select count(*) from fim_entry" "count(*)": 3372`
     `DEBUG: (6335):Fim entries: 3372`
+- [ ] Check disable option, set to no, shouldn't show any message about performing scans.
 - [ ] Check that if the number of inodes is different from the number of entries, then, the sum of all paths in the inode table is equal to the number of entries.
     `DEBUG: (6336): Fim inode entries: 3342, path count: 3372`
     `DEBUG: (6335): Fim entries: 3372`
@@ -523,9 +523,9 @@ During the test, check `ossec.log` looking for debug, error or warning messages 
 ### FIM start:
 - [ ] FIM should not report any alerts until the first scan has finished and generated a base line.
 - [ ] After the first scan, FIM should synchronize the database with the manager's. The number of entries in both databases must be the same and with the same elements.
-- [ ] Check disable option, set to no, shouldn't show any message about performing scans.
     `wdb 002 "select count(*) from fim_entry" "count(*)": 3372`
     `DEBUG: (6335):Fim entries: 3372`
+- [ ] Check disable option, set to no, shouldn't show any message about performing scans.
 - [ ] Check that if the number of inodes is different from the number of entries, then, the sum of all paths in the inode table is equal to the number of entries.
     `DEBUG: (6336): Fim inode entries: 3342, path count: 3372`
     `DEBUG: (6335): Fim entries: 3372`
