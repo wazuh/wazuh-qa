@@ -91,8 +91,8 @@ def test_wazuh_api_is_installed(host, ManagerRoleDefaults):
 
 def test_wazuh_api_version(host, ManagerRoleDefaults):
     api = host.package("wazuh-api")
+    manager_version = ManagerRoleDefaults["wazuh_manager_version"]
     if (ManagerRoleDefaults["wazuh_api_sources_installation"]["enabled"]):
-        manager_version = ManagerRoleDefaults["wazuh_manager_version"]
         api_package_json = host.file(ManagerRoleDefaults
                                      ["wazuh_manager_sources_installation"]
                                      ["user_dir"] +
