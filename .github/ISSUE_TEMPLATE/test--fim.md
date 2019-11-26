@@ -82,7 +82,7 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 <directories check_all="no" check_sha1sum="yes">/testsha1sum</directories>
 <directories check_all="no" check_sha256sum="yes">/testsha256sum</directories>
 <directories check_all="no" check_attrs="yes">/testattrs</directories>
-<directories check_all="no" report_changes="yes">/testseechanges</directories>
+<directories check_all="yes" report_changes="yes">/testseechanges</directories>
 ```
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
@@ -115,7 +115,7 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 <directories check_all="no" realtime="yes" check_sha1sum="yes">/testsha1sum</directories>
 <directories check_all="no" realtime="yes" check_sha256sum="yes">/testsha256sum</directories>
 <directories check_all="no" realtime="yes" check_attrs="yes">/testattrs</directories>
-<directories check_all="no" realtime="yes" report_changes="yes">/testseechanges</directories>
+<directories check_all="yes" realtime="yes" report_changes="yes">/testseechanges</directories>
 ```
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts):
@@ -148,7 +148,7 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 <directories check_all="no" whodata="yes" check_sha1sum="yes">/testsha1sum, /testsha1sumfile/file</directories>
 <directories check_all="no" whodata="yes" check_sha256sum="yes">/testsha256sum, /testsha256sumfile/file</directories>
 <directories check_all="no" whodata="yes" check_attrs="yes">/testattrs, /testattrsfile/file</directories>
-<directories check_all="no" whodata="yes" report_changes="yes">/testseechanges, /testseechangesfile/file</directories>
+<directories check_all="yes" whodata="yes" report_changes="yes">/testseechanges, /testseechangesfile/file</directories>
 ```
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
@@ -328,7 +328,7 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 <directories check_all="no" check_sha1sum="yes">/testsha1sum</directories>
 <directories check_all="no" check_sha256sum="yes">/testsha256sum</directories>
 <directories check_all="no" check_attrs="yes">/testattrs</directories>
-<directories check_all="no" report_changes="yes">/testseechanges</directories>
+<directories check_all="yes" report_changes="yes">/testseechanges</directories>
 ```
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
@@ -362,7 +362,7 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 <directories check_all="no" realtime="yes" check_sha1sum="yes">/testsha1sum</directories>
 <directories check_all="no" realtime="yes" check_sha256sum="yes">/testsha256sum</directories>
 <directories check_all="no" realtime="yes" check_attrs="yes">/testattrs</directories>
-<directories check_all="no" realtime="yes" report_changes="yes">/testseechanges</directories>
+<directories check_all="yes" realtime="yes" report_changes="yes">/testseechanges</directories>
 ```
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
@@ -396,7 +396,7 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 <directories check_all="no" whodata="yes" check_sha1sum="yes">/testsha1sum, /testsha1sumfile/file</directories>
 <directories check_all="no" whodata="yes" check_sha256sum="yes">/testsha256sum, /testsha256sumfile/file</directories>
 <directories check_all="no" whodata="yes" check_attrs="yes">/testattrs, /testattrsfile/file</directories>
-<directories check_all="no" whodata="yes" report_changes="yes">/testseechanges, /testseechangesfile/file</directories>
+<directories check_all="yes" whodata="yes" report_changes="yes">/testseechanges, /testseechangesfile/file</directories>
 ```
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
@@ -552,7 +552,7 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 <directories check_all="no" check_sha1sum="yes">/testsha1sum</directories>
 <directories check_all="no" check_sha256sum="yes">/testsha256sum</directories>
 <directories check_all="no" check_attrs="yes">/testattrs</directories>
-<directories check_all="no" report_changes="yes">/testseechanges</directories>
+<directories check_all="yes" report_changes="yes">/testseechanges</directories>
 ```
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
