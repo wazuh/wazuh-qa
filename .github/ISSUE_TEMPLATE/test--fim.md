@@ -331,9 +331,9 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_perm for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_owner for file and directory (added, modified and deleted alerts).
-- [ ] Check option check_group for file and directory (added, modified and deleted alerts).
+- [ ] Check option check_group for file and directory (added and deleted alerts).
 - [ ] Check option check_mtime for file and directory (added, modified and deleted alerts).
-- [ ] Check option check_inode for file and directory (added, modified and deleted alerts).
+- [ ] Check option check_inode for file and directory (added and deleted alerts).
 - [ ] Check option check_md5sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha1sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha256sum for file and directory (added, modified and deleted alerts).
@@ -365,9 +365,9 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_perm for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_owner for file and directory (added, modified and deleted alerts).
-- [ ] Check option check_group for file and directory (added, modified and deleted alerts).
+- [ ] Check option check_group for file and directory (added and deleted alerts).
 - [ ] Check option check_mtime for file and directory (added, modified and deleted alerts).
-- [ ] Check option check_inode for file and directory (added, modified and deleted alerts).
+- [ ] Check option check_inode for file and directory (added and deleted alerts).
 - [ ] Check option check_md5sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha1sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha256sum for file and directory (added, modified and deleted alerts).
@@ -399,9 +399,9 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_perm for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_owner for file and directory (added, modified and deleted alerts).
-- [ ] Check option check_group for file and directory (added, modified and deleted alerts).
+- [ ] Check option check_group for file and directory (added and deleted alerts).
 - [ ] Check option check_mtime for file and directory (added, modified and deleted alerts).
-- [ ] Check option check_inode for file and directory (added, modified and deleted alerts).
+- [ ] Check option check_inode for file and directory (added and deleted alerts).
 - [ ] Check option check_md5sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha1sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha256sum for file and directory (added, modified and deleted alerts).
