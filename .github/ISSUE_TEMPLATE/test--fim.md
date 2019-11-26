@@ -610,7 +610,7 @@ Check links:
 - [ ] Configure restrict sregex using '|' <directories restrict="string1|string2">/test</directories>
 - [ ] Configure restrict sregex using '!' <directories restrict="!string">/test</directories>
 
-### Specifies if syscheck should scan the mounted filesystems, `/dev`, `/sys`, `/proc` directores.
+### Specifies if syscheck should scan the mounted filesystems, `/dev`, `/sys`, `/proc` directores (only in FreeBSD).
 - [ ] Configure `<skip_nfs>no</skip_nfs>`
 - [ ] Configure `<skip_dev>no</skip_dev>`
 - [ ] Configure `<skip_sys>no</skip_sys>`
