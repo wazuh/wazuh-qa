@@ -242,17 +242,14 @@ Check links:
 - [ ] Check if delete content in `/var/ossec/queue/diff` when deleting any tag <directories report_changes="yes">
 - [ ] Check if delete content in `/var/ossec/queue/diff` when report_changes option passed yes to no.
 - [ ] Check that duplicate entries are ignored. Include entries with a trailing slash in a single comma-separated stanza.
-- [ ] Check syscheck alert for moving a file
-- [ ] Check syscheck alert for moving a folder with a file in it
-- [ ] Check syscheck alert for renaming a file
-- [ ] Check that the add file alert does not contain modification information. To do this, create a file with content in the folder being monitored, delete it and add a new file with the name of the deleted file
-- [ ] Check syscheck alert for renaming a folder
-- [ ] Check syscheck alert for deleting a folder
-- [ ] Check syscheck alert for changing owner of file
-- [ ] Check syscheck alert for changing group of file
-- [ ] Check syscheck alert for changing file permissions
-- [ ] Check recursion level option (recursion_level=0, recursion_level=2 check folder level 0, 1, 2 and 3)
-- [ ] Check syscheck alert for nested monitoring with <tags> option
+- [ ] Check syscheck alert for moving a file.
+- [ ] Check syscheck alert for moving a folder with a file in it.
+- [ ] Check that the add file alert does not contain modification information. To do this, create a file with content in the folder being monitored, delete it and add a new file with the name of the deleted file.
+- [ ] Check syscheck alert for renaming a file.
+- [ ] Check syscheck alert for renaming a folder.
+- [ ] Check syscheck alert for deleting a folder.
+- [ ] Check recursion level option (recursion_level=0, recursion_level=2 check folder level 0, 1, 2 and 3).
+- [ ] Check syscheck alert for nested monitoring with <tags> option.
 
 ### Integrity
 - [ ] Add/Modify/Remove a file. Connect the agent to another manager (The agent doesn't need to be restarted). Check the database is updated but there is no alert in the new manager.
@@ -471,17 +468,14 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check if delete content in `C:\Program Files (x86)\ossec-agent\queue\diff\local\c` when deleting any tag <directories report_changes="yes">
 - [ ] Check if delete content in `C:\Program Files (x86)\ossec-agent\queue\diff\local\c` when report_changes option passed yes to no.
 - [ ] Check that duplicate entries are ignored. Include entries with a trailing slash in a single comma-separated stanza.
-- [ ] Check syscheck alert for moving a file
-- [ ] Check syscheck alert for moving a folder with a file in it
-- [ ] Check syscheck alert for renaming a file
-- [ ] Check that the add file alert does not contain modification information. To do this, create a file with content in the folder being monitored, delete it and add a new file with the name of the deleted file
-- [ ] Check syscheck alert for renaming a folder
-- [ ] Check syscheck alert for deleting a folder
-- [ ] Check syscheck alert for changing owner of file
-- [ ] Check syscheck alert for changing group of file
-- [ ] Check syscheck alert for changing file permissions
-- [ ] Check recursion level option (recursion_level=0, recursion_level=2 check folder level 0, 1, 2 and 3)
-- [ ] Check syscheck alert for nested monitoring with <tags> option
+- [ ] Check syscheck alert for moving a file.
+- [ ] Check syscheck alert for moving a folder with a file in it.
+- [ ] Check that the add file alert does not contain modification information. To do this, create a file with content in the folder being monitored, delete it and add a new file with the name of the deleted file.
+- [ ] Check syscheck alert for renaming a file.
+- [ ] Check syscheck alert for renaming a folder.
+- [ ] Check syscheck alert for deleting a folder.
+- [ ] Check recursion level option (recursion_level=0, recursion_level=2 check folder level 0, 1, 2 and 3).
+- [ ] Check syscheck alert for nested monitoring with <tags> option.
 
 
 ## MacOS
@@ -636,17 +630,14 @@ Check links:
 - [ ] Check if delete content in `/var/ossec/queue/diff` when deleting any tag <directories report_changes="yes">
 - [ ] Check if delete content in `/var/ossec/queue/diff` when report_changes option passed yes to no.
 - [ ] Check that duplicate entries are ignored. Include entries with a trailing slash in a single comma-separated stanza.
-- [ ] Check syscheck alert for moving a file
-- [ ] Check syscheck alert for moving a folder with a file in it
-- [ ] Check syscheck alert for renaming a file
-- [ ] Check that the add file alert does not contain modification information. To do this, create a file with content in the folder being monitored, delete it and add a new file with the name of the deleted file
-- [ ] Check syscheck alert for renaming a folder
-- [ ] Check syscheck alert for deleting a folder
-- [ ] Check syscheck alert for changing owner of file
-- [ ] Check syscheck alert for changing group of file
-- [ ] Check syscheck alert for changing file permissions
-- [ ] Check recursion level option (recursion_level=0, recursion_level=2 check folder level 0, 1, 2 and 3)
-- [ ] Check syscheck alert for nested monitoring with <tags> option
+- [ ] Check syscheck alert for moving a file.
+- [ ] Check syscheck alert for moving a folder with a file in it.
+- [ ] Check that the add file alert does not contain modification information. To do this, create a file with content in the folder being monitored, delete it and add a new file with the name of the deleted file.
+- [ ] Check syscheck alert for renaming a file.
+- [ ] Check syscheck alert for renaming a folder.
+- [ ] Check syscheck alert for deleting a folder.
+- [ ] Check recursion level option (recursion_level=0, recursion_level=2 check folder level 0, 1, 2 and 3).
+- [ ] Check syscheck alert for nested monitoring with <tags> option.
 
 
 ## Opened issues:
