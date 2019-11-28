@@ -9,6 +9,10 @@ assignees: ''
 
 # Test file integrity monitoring
 
+## Important
+
+All tests must be run under Valgrind (Linux) or DrMemory (Windows), except for performance analyses.
+
 ## Linux
 
 Compile with flag DEBUGAD=1:
