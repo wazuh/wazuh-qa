@@ -13,6 +13,10 @@ assignees: ''
 | --- | --- | --- |
 | x.y.z | rev | branch |
 
+## Important
+
+All tests must be run under Valgrind (Linux) or DrMemory (Windows), except for performance analyses.
+
 ## Any
 
 - [ ] Check if ignore files and folders using tag <ignore> and restrict option (string or sregex) in both options.
