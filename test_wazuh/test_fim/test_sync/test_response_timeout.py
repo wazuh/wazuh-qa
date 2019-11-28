@@ -57,7 +57,7 @@ def test_response_timeout(num_files, sync_interval, get_configuration, configure
         sync_cmd = "sudo sed -i 's|<sync_interval>.*|<sync_interval>" + str(sync_interval) + "</sync_interval>|g' /var/ossec/etc/ossec.conf"
         ssh.exec_command(sync_cmd)
 
-        response_cmd = "sudo sed -i 's|<response_timeout >.*|<response_timeout>" + response_timeout + "</response_timeout>|g' /var/ossec/etc/ossec.conf"
+        response_cmd = "sudo sed -i 's|<response_timeout>.*|<response_timeout>" + response_timeout + "</response_timeout>|g' /var/ossec/etc/ossec.conf"
         ssh.exec_command(response_cmd)
 
     def wait_agent_initial_scan(time_out=60):
