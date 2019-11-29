@@ -67,14 +67,17 @@ During the test, check `ossec.log` looking for debug, error or warning messages 
     `DEBUG: (6336): Fim inode entries: 3342, path count: 3372`
     `DEBUG: (6335): Fim entries: 3372`
 
-### Configure file and directory in scheduled mode.
+### Configure file and directory in scheduled mode
+
 ```xml
 <directories>/test, /testfile/file</directories>
 ```
+
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] File alerts added.
 - [ ] Modified file alerts.
 - [ ] Deleted file alerts.
+
 ```xml
 <directories check_all="no" check_size="yes">/testsize</directories>
 <directories check_all="no" check_perm="yes">/testperm</directories>
@@ -85,9 +88,12 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 <directories check_all="no" check_md5sum="yes">/testmd5sum</directories>
 <directories check_all="no" check_sha1sum="yes">/testsha1sum</directories>
 <directories check_all="no" check_sha256sum="yes">/testsha256sum</directories>
-<directories check_all="no" check_attrs="yes">/testattrs</directories>
 <directories check_all="yes" report_changes="yes">/testseechanges</directories>
 ```
+
+- [ ] Verify, using API calls and for each of the following tests, that no empty (or disabled) fields are displayed.
+- [ ] Verify, using API calls and for each of the following tests, that the activated fields are displayed.
+
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_perm for file and directory (added, modified and deleted alerts).
@@ -100,14 +106,17 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_sha256sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option report_changes for file and directory (added, modified and deleted alerts).
 
-### Configure file and directory in real-time mode.
+### Configure file and directory in real-time mode
+
 ```xml
 <directories realtime="yes">/testrealtime, /testrealtimefile/file</directories>
 ```
+
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] File alerts added.
 - [ ] Modified file alerts.
 - [ ] Deleted file alerts.
+
 ```xml
 <directories check_all="no" realtime="yes" check_size="yes">/testsize</directories>
 <directories check_all="no" realtime="yes" check_perm="yes">/testperm</directories>
@@ -118,9 +127,12 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 <directories check_all="no" realtime="yes" check_md5sum="yes">/testmd5sum</directories>
 <directories check_all="no" realtime="yes" check_sha1sum="yes">/testsha1sum</directories>
 <directories check_all="no" realtime="yes" check_sha256sum="yes">/testsha256sum</directories>
-<directories check_all="no" realtime="yes" check_attrs="yes">/testattrs</directories>
 <directories check_all="yes" realtime="yes" report_changes="yes">/testseechanges</directories>
 ```
+
+- [ ] Verify, using API calls and for each of the following tests, that no empty (or disabled) fields are displayed.
+- [ ] Verify, using API calls and for each of the following tests, that the activated fields are displayed.
+
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts):
 - [ ] Check option check_perm for file and directory (added, modified and deleted alerts):
@@ -133,14 +145,17 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_sha256sum for file and directory (added, modified and deleted alerts):
 - [ ] Check option report_changes for file and directory (added, modified and deleted alerts):
 
-### Configure file and directory in whodata mode.
+### Configure file and directory in whodata mode
+
 ```xml
 <directories whodata="yes">/testwhodata, /testwhodatafile/file</directories>
 ```
+
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] File alerts added.
 - [ ] Modified file alerts.
 - [ ] Deleted file alerts.
+
 ```xml
 <directories check_all="no" whodata="yes" check_size="yes">/testsize, /testfilesize/file</directories>
 <directories check_all="no" whodata="yes" check_perm="yes">/testperm, /testpermfile/file</directories>
@@ -151,9 +166,12 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 <directories check_all="no" whodata="yes" check_md5sum="yes">/testmd5sum, /testmd5sumfile/file</directories>
 <directories check_all="no" whodata="yes" check_sha1sum="yes">/testsha1sum, /testsha1sumfile/file</directories>
 <directories check_all="no" whodata="yes" check_sha256sum="yes">/testsha256sum, /testsha256sumfile/file</directories>
-<directories check_all="no" whodata="yes" check_attrs="yes">/testattrs, /testattrsfile/file</directories>
 <directories check_all="yes" whodata="yes" report_changes="yes">/testseechanges, /testseechangesfile/file</directories>
 ```
+
+- [ ] Verify, using API calls and for each of the following tests, that no empty (or disabled) fields are displayed.
+- [ ] Verify, using API calls and for each of the following tests, that the activated fields are displayed.
+
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_perm for file and directory (added, modified and deleted alerts).
@@ -178,7 +196,7 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check that `realtime` works if `whodata` is used in the configuration without auditd installed.
 - [ ] Check that `realtime` works if `whodata` is used in the configuration with auditd disabled.
 
-### Monitor links through a configured folder (the link itself).
+### Monitor links through a configured folder (the link itself)
 - [ ] Check that the attributes of a link monitored through a configured folder are the attributes of the link itself (not the attributes of the file/folder that is pointed by the link).
 - [ ] Check syscheck alert for adding a link to a file/folder.
 - [ ] Check syscheck doesn't generate alerts if the pointed file is modified or if content is added to the pointed folder.
@@ -187,7 +205,7 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check syscheck doesn't generate alerts if the pointed file/folder is restored (re-create the previous deleted file/folder.
 - [ ] Check syscheck alert for deleting a link to a file/folder.
 
-### Configure for monitoring a symbolic link in directories stanza.
+### Configure for monitoring a symbolic link in directories stanza
 Check links:
 - [ ] Check syscheck add alerts in a monitored link that points to a folder.
 - [ ] Check syscheck modify alerts in a monitored link that points to a folder.
@@ -220,7 +238,7 @@ Check links:
 - [ ] Configure restrict sregex using '|' <directories restrict="string1|string2">/test</directories>
 - [ ] Configure restrict sregex using '!' <directories restrict="!string">/test</directories>
 
-### Specifies if syscheck should scan the mounted filesystems, `/dev`, `/sys`, `/proc` directores.
+### Specifies if syscheck should scan the mounted filesystems, `/dev`, `/sys`, `/proc` directores
 - [ ] Configure `<skip_nfs>no</skip_nfs>`
 - [ ] Configure `<skip_dev>no</skip_dev>`
 - [ ] Configure `<skip_sys>no</skip_sys>`
@@ -317,61 +335,72 @@ During the test, check `ossec.log` looking for debug, error or warning messages 
     `DEBUG: (6336): Fim inode entries: 3342, path count: 3372`
     `DEBUG: (6335): Fim entries: 3372`
 
-### Configure file and directory in scheduled mode.
+### Configure file and directory in scheduled mode
+
 ```xml
 <directories>/test, /testfile/file</directories>
 ```
+
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] File alerts added.
 - [ ] Modified file alerts.
 - [ ] Deleted file alerts.
+
 ```xml
-<directories check_all="no" check_size="yes">/testsize</directories>
-<directories check_all="no" check_perm="yes">/testperm</directories>
-<directories check_all="no" check_owner="yes">/testowner</directories>
-<directories check_all="no" check_group="yes">/testgroup</directories>
-<directories check_all="no" check_mtime="yes">/testmtime</directories>
-<directories check_all="no" check_inode="yes">/testinode</directories>
-<directories check_all="no" check_md5sum="yes">/testmd5sum</directories>
-<directories check_all="no" check_sha1sum="yes">/testsha1sum</directories>
-<directories check_all="no" check_sha256sum="yes">/testsha256sum</directories>
-<directories check_all="no" check_attrs="yes">/testattrs</directories>
-<directories check_all="yes" report_changes="yes">/testseechanges</directories>
+<directories check_all="no" check_size="yes">C:\test\testsize</directories>
+<directories check_all="no" check_perm="yes">C:\test\testperm</directories>
+<directories check_all="no" check_owner="yes">C:\test\testowner</directories>
+<directories check_all="no" check_group="yes">C:\test\testgroup</directories>
+<directories check_all="no" check_mtime="yes">C:\test\testmtime</directories>
+<directories check_all="no" check_md5sum="yes">C:\test\testmd5sum</directories>
+<directories check_all="no" check_sha1sum="yes">C:\test\testsha1sum</directories>
+<directories check_all="no" check_sha256sum="yes">C:\test\testsha256sum</directories>
+<directories check_all="no" check_attrs="yes">C:\test\testattrs</directories>
+<directories check_all="yes" report_changes="yes">C:\test\testseechanges</directories>
 ```
+
+- [ ] Verify, using API calls and for each of the following tests, that no empty (or disabled) fields are displayed.
+- [ ] Verify, using API calls and for each of the following tests, that the activated fields are displayed.
+
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_perm for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_owner for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_group for file and directory (added and deleted alerts).
 - [ ] Check option check_mtime for file and directory (added, modified and deleted alerts).
-- [ ] Check option check_inode for file and directory (added and deleted alerts).
 - [ ] Check option check_md5sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha1sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_sha256sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_attrs for file and directory (added, modified and deleted alerts).
 - [ ] Check option report_changes for file and directory (added, modified and deleted alerts).
 
-### Configure file and directory in real-time mode.
+### Configure file and directory in real-time mode
+
 ```xml
 <directories realtime="yes">/testrealtime, /testrealtimefile/file</directories>
 ```
+
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] File alerts added.
 - [ ] Modified file alerts.
 - [ ] Deleted file alerts.
+
 ```xml
-<directories check_all="no" realtime="yes" check_size="yes">/testsize</directories>
-<directories check_all="no" realtime="yes" check_perm="yes">/testperm</directories>
-<directories check_all="no" realtime="yes" check_owner="yes">/testowner</directories>
-<directories check_all="no" realtime="yes" check_group="yes">/testgroup</directories>
-<directories check_all="no" realtime="yes" check_mtime="yes">/testmtime</directories>
-<directories check_all="no" realtime="yes" check_inode="yes">/testinode</directories>
-<directories check_all="no" realtime="yes" check_md5sum="yes">/testmd5sum</directories>
-<directories check_all="no" realtime="yes" check_sha1sum="yes">/testsha1sum</directories>
-<directories check_all="no" realtime="yes" check_sha256sum="yes">/testsha256sum</directories>
-<directories check_all="no" realtime="yes" check_attrs="yes">/testattrs</directories>
-<directories check_all="yes" realtime="yes" report_changes="yes">/testseechanges</directories>
+<directories check_all="no" check_size="yes">C:\test\testsize</directories>
+<directories check_all="no" check_perm="yes">C:\test\testperm</directories>
+<directories check_all="no" check_owner="yes">C:\test\testowner</directories>
+<directories check_all="no" check_group="yes">C:\test\testgroup</directories>
+<directories check_all="no" check_mtime="yes">C:\test\testmtime</directories>
+<directories check_all="no" check_md5sum="yes">C:\test\testmd5sum</directories>
+<directories check_all="no" check_sha1sum="yes">C:\test\testsha1sum</directories>
+<directories check_all="no" check_sha256sum="yes">C:\test\testsha256sum</directories>
+<directories check_all="no" check_attrs="yes">C:\test\testattrs</directories>
+<directories check_all="yes" report_changes="yes">C:\test\testseechanges</directories>
 ```
+
+- [ ] Verify, using API calls and for each of the following tests, that no empty (or disabled) fields are displayed.
+- [ ] Verify, using API calls and for each of the following tests, that the activated fields are displayed.
+
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_perm for file and directory (added, modified and deleted alerts).
@@ -385,27 +414,33 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_attrs for file and directory (added, modified and deleted alerts).
 - [ ] Check option report_changes for file and directory (added, modified and deleted alerts).
 
-### Configure file and directory in whodata mode.
+### Configure file and directory in whodata mode
+
 ```xml
 <directories whodata="yes">/testwhodata, /testwhodatafile/file</directories>
 ```
+
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] File alerts added.
 - [ ] Modified file alerts.
 - [ ] Deleted file alerts.
+
 ```xml
-<directories check_all="no" whodata="yes" check_size="yes">/testsize, /testfilesize/file</directories>
-<directories check_all="no" whodata="yes" check_perm="yes">/testperm, /testpermfile/file</directories>
-<directories check_all="no" whodata="yes" check_owner="yes">/testowner, /testownerfile/file</directories>
-<directories check_all="no" whodata="yes" check_group="yes">/testgroup, /testgroupfile/file</directories>
-<directories check_all="no" whodata="yes" check_mtime="yes">/testmtime, /testmtimefile/file</directories>
-<directories check_all="no" whodata="yes" check_inode="yes">/testinode, /testinodefile/file</directories>
-<directories check_all="no" whodata="yes" check_md5sum="yes">/testmd5sum, /testmd5sumfile/file</directories>
-<directories check_all="no" whodata="yes" check_sha1sum="yes">/testsha1sum, /testsha1sumfile/file</directories>
-<directories check_all="no" whodata="yes" check_sha256sum="yes">/testsha256sum, /testsha256sumfile/file</directories>
-<directories check_all="no" whodata="yes" check_attrs="yes">/testattrs, /testattrsfile/file</directories>
-<directories check_all="yes" whodata="yes" report_changes="yes">/testseechanges, /testseechangesfile/file</directories>
+<directories check_all="no" check_size="yes">C:\test\testsize</directories>
+<directories check_all="no" check_perm="yes">C:\test\testperm</directories>
+<directories check_all="no" check_owner="yes">C:\test\testowner</directories>
+<directories check_all="no" check_group="yes">C:\test\testgroup</directories>
+<directories check_all="no" check_mtime="yes">C:\test\testmtime</directories>
+<directories check_all="no" check_md5sum="yes">C:\test\testmd5sum</directories>
+<directories check_all="no" check_sha1sum="yes">C:\test\testsha1sum</directories>
+<directories check_all="no" check_sha256sum="yes">C:\test\testsha256sum</directories>
+<directories check_all="no" check_attrs="yes">C:\test\testattrs</directories>
+<directories check_all="yes" report_changes="yes">C:\test\testseechanges</directories>
 ```
+
+- [ ] Verify, using API calls and for each of the following tests, that no empty (or disabled) fields are displayed.
+- [ ] Verify, using API calls and for each of the following tests, that the activated fields are displayed.
+
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_perm for file and directory (added, modified and deleted alerts).
@@ -550,14 +585,17 @@ During the test, check `ossec.log` looking for debug, error or warning messages 
     `DEBUG: (6336): Fim inode entries: 3342, path count: 3372`
     `DEBUG: (6335): Fim entries: 3372`
 
-### Configure file and directory in scheduled mode.
+### Configure file and directory in scheduled mode
+
 ```xml
 <directories>/test, /testfile/file</directories>
 ```
+
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] File alerts added.
 - [ ] Modified file alerts.
 - [ ] Deleted file alerts.
+
 ```xml
 <directories check_all="no" check_size="yes">/testsize</directories>
 <directories check_all="no" check_perm="yes">/testperm</directories>
@@ -568,9 +606,12 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 <directories check_all="no" check_md5sum="yes">/testmd5sum</directories>
 <directories check_all="no" check_sha1sum="yes">/testsha1sum</directories>
 <directories check_all="no" check_sha256sum="yes">/testsha256sum</directories>
-<directories check_all="no" check_attrs="yes">/testattrs</directories>
 <directories check_all="yes" report_changes="yes">/testseechanges</directories>
 ```
+
+- [ ] Verify, using API calls and for each of the following tests, that no empty (or disabled) fields are displayed.
+- [ ] Verify, using API calls and for each of the following tests, that the activated fields are displayed.
+
 Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_size for file and directory (added, modified and deleted alerts).
 - [ ] Check option check_perm for file and directory (added, modified and deleted alerts).
@@ -583,7 +624,7 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Check option check_sha256sum for file and directory (added, modified and deleted alerts).
 - [ ] Check option report_changes for file and directory (added, modified and deleted alerts).
 
-### Configure for monitoring a symbolic link in directories stanza.
+### Configure for monitoring a symbolic link in directories stanza
 Check links:
 - [ ] Check syscheck alert for adding a link to a file/folder.
 - [ ] Check syscheck doesn't generate alerts if the pointed file is modified or if content is added to the pointed folder.
@@ -622,7 +663,7 @@ Check links:
 - [ ] Configure restrict sregex using '|' <directories restrict="string1|string2">/test</directories>
 - [ ] Configure restrict sregex using '!' <directories restrict="!string">/test</directories>
 
-### Specifies if syscheck should scan the mounted filesystems, `/dev`, `/sys`, `/proc` directores (only in FreeBSD).
+### Specifies if syscheck should scan the mounted filesystems, `/dev`, `/sys`, `/proc` directores (only in FreeBSD)
 - [ ] Configure `<skip_nfs>no</skip_nfs>`
 - [ ] Configure `<skip_dev>no</skip_dev>`
 - [ ] Configure `<skip_sys>no</skip_sys>`
@@ -703,5 +744,5 @@ Check links:
 - [ ] FIM alerts of Windows Registry keys with empty-string MD5: https://github.com/wazuh/wazuh/issues/858
 
 **FIM rework:**
-- https://github.com/wazuh/wazuh/issues/3073 
+- https://github.com/wazuh/wazuh/issues/3073
 - https://github.com/wazuh/wazuh/issues/3319
