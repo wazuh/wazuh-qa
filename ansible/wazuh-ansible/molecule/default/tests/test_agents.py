@@ -26,12 +26,23 @@ def AgentRoleDefaults(host):
 
 
 def test_wazuh_agent_is_installed(host, AgentRoleDefaults):
-    """Test if the main packages are installed."""
+    agent = host.package("wazuh-agent")
+    if (AgentRoleDefaults["wazuh_agent_sources_installation"]["enabled"]):
+        ossec_init = host.file("/etc/ossec-init.conf")
+        assert ossec_init.exists
+    else:
+        assert agent.is_installed
+
+
+def test_agent_version(host, AgentRoleDefaults):
     agent = host.package("wazuh-agent")
     agent_version = AgentRoleDefaults["wazuh_agent_version"]
-    assert agent.is_installed
-    full_agent_version = get_full_version(agent)
-    assert full_agent_version.startswith(agent_version)
+    if (AgentRoleDefaults["wazuh_agent_sources_installation"]["enabled"]):
+        ossec_init = host.file("/etc/ossec-init.conf")
+        assert (agent_version[:-2] in ossec_init.content_string)
+    else:
+        full_agent_version = get_full_version(agent)
+        assert full_agent_version.startswith(agent_version)
 
 
 @pytest.mark.parametrize(
