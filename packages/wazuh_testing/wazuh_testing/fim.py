@@ -539,6 +539,13 @@ def callback_configuration_error(line):
     return None
 
 
+def callback_symlink_scan_ended(line):
+    if 'Links check finalized.' in line:
+        return True
+    else:
+        return None
+
+
 def check_time_travel(time_travel):
     """Changes date and time of the system.
 
