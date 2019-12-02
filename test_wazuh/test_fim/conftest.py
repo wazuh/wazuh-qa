@@ -55,6 +55,10 @@ def configure_environment(get_configuration, request):
     # set new configuration
     write_wazuh_conf(test_config)
 
+    if hasattr(request.module, 'extra_configuration_before_yield'):
+        func = getattr(request.module, 'extra_configuration_before_yield')
+        func()
+
     yield
 
     # remove created folders (parents)
@@ -69,6 +73,10 @@ def configure_environment(get_configuration, request):
 
     # restore previous configuration
     write_wazuh_conf(backup_config)
+
+    if hasattr(request.module, 'extra_configuration_after_yield'):
+        func = getattr(request.module, 'extra_configuration_after_yield')
+        func()
 
     if hasattr(request.module, 'force_restart_after_restoring'):
         if getattr(request.module, 'force_restart_after_restoring'):

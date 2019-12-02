@@ -45,7 +45,7 @@ elif sys.platform == 'linux2' or sys.platform == 'linux':
 
 
 FIFO = 'fifo'
-SYSLINK = 'sys_link'
+SYMLINK = 'sym_link'
 HARDLINK = 'hard_link'
 SOCKET = 'socket'
 REGULAR = 'regular'
@@ -173,8 +173,8 @@ def _create_fifo(path, name, content):
         raise
 
 
-def _create_sys_link(path, name, target):
-    """Creates a SysLink file.
+def _create_sym_link(path, name, target):
+    """Creates a SymLink file.
 
     :param path: Path where the file will be created
     :type path: String
@@ -182,9 +182,9 @@ def _create_sys_link(path, name, target):
     :type name: String
     :return: None
     """
-    syslink_path = os.path.join(path, name)
+    symlink_path = os.path.join(path, name)
     try:
-        os.symlink(syslink_path, target)
+        os.symlink(target, symlink_path)
     except OSError:
         raise
 
@@ -200,7 +200,7 @@ def _create_hard_link(path, name, target):
     """
     link_path = os.path.join(path, name)
     try:
-        os.link(link_path, target)
+        os.link(target, link_path)
     except OSError:
         raise
 
@@ -400,8 +400,8 @@ def modify_file(path, name, new_content=None, is_binary=False):
     modify_file_win_attributes(path, name)
 
 
-def change_internal_options(opt_path, pattern, value):
-    """Changes the value of a given parameter.
+def change_internal_options(pattern, value, opt_path=os.path.join('/', 'var', 'ossec', 'etc', 'internal_options.conf')):
+    """Changes the value of a given parameter in linux.
 
     :param opt_path: File path
     :type opt_path: String
@@ -537,6 +537,13 @@ def callback_configuration_error(line):
     if match:
         return True
     return None
+
+
+def callback_symlink_scan_ended(line):
+    if 'Links check finalized.' in line:
+        return True
+    else:
+        return None
 
 
 def check_time_travel(time_travel):
