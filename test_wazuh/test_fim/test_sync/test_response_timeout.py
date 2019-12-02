@@ -54,12 +54,10 @@ def test_response_timeout(num_files, sync_interval, get_configuration, configure
     units 's', 'm', 'h', 'd' or 'w'. If no unit is specified the default 's' will be used.
     """
     def overwrite_agent_conf_file():
-        line_pos = 109
-        sync_cmd = "sudo sed -i '" + str(line_pos) + "s|.*|<sync_interval>" + str(sync_interval) + "</sync_interval>|' /var/ossec/etc/ossec.conf"
+        sync_cmd = "sudo sed -i 's|<sync_interval>.*|<sync_interval>" + str(sync_interval) + "</sync_interval>|g' /var/ossec/etc/ossec.conf"
         ssh.exec_command(sync_cmd)
 
-        line_pos = 110
-        response_cmd = "sudo sed -i '" + str(line_pos) + "s|.*|<response_timeout>" + response_timeout + "</response_timeout>|' /var/ossec/etc/ossec.conf"
+        response_cmd = "sudo sed -i 's|<response_timeout>.*|<response_timeout>" + response_timeout + "</response_timeout>|g' /var/ossec/etc/ossec.conf"
         ssh.exec_command(response_cmd)
 
     def wait_agent_initial_scan(time_out=60):
@@ -85,7 +83,7 @@ def test_response_timeout(num_files, sync_interval, get_configuration, configure
         for proc in psutil.process_iter(attrs=['name']):
             if proc.name() == "wazuh-db":
                 proc.kill()
-        
+
         os.system("rm -f /var/ossec/queue/db/00{1..9}.db*")
         os.system("/var/ossec/bin/wazuh-db")
         time.sleep(5)
@@ -120,10 +118,9 @@ def test_response_timeout(num_files, sync_interval, get_configuration, configure
                     pytest.fail("No new synchronization process should start until `integrity control message` ends.")
             truncate_agent_log()
 
-
     def truncate_agent_log():
         ssh.exec_command("sudo truncate -s 0 " + LOG_PATH)
-    
+
     def extract_datetime(line):
         return datetime.strptime(line[0:19], '%Y/%m/%d %H:%M:%S')
 
@@ -140,8 +137,8 @@ def test_response_timeout(num_files, sync_interval, get_configuration, configure
 
     # Check if the test should be skipped
     check_apply_test({'response_timeout'}, get_configuration['tags'])
-    
-    # Variables 
+
+    # Variables
     LOG_PATH = "/var/ossec/logs/ossec.log"
     DIR_NAME = "/testdir1"
     AGENT_IP = "172.19.0.201"
@@ -152,7 +149,7 @@ def test_response_timeout(num_files, sync_interval, get_configuration, configure
     # Connect to the agent
     ssh = paramiko.SSHClient()
     ssh.load_system_host_keys()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy()) 
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect(hostname=AGENT_IP, username=USERNAME, password=PASSWORD)
 
     # Setup agent

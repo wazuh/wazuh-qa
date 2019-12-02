@@ -71,7 +71,7 @@ REQUIRED_ATTRIBUTES = {
     CHECK_OWNER: ['uid', 'user_name'],
     CHECK_GROUP: ['gid', 'group_name'],
     CHECK_PERM: 'perm',
-    CHECK_ATTRS: 'win_attributes',
+    CHECK_ATTRS: 'attributes',
     CHECK_MTIME: 'mtime',
     CHECK_INODE: 'inode',
     CHECK_ALL: {CHECK_SHA256SUM, CHECK_SHA1SUM, CHECK_MD5SUM, CHECK_SIZE, CHECK_OWNER,
@@ -114,7 +114,7 @@ def validate_event(event, checks=None):
     attributes = event['data']['attributes'].keys() - {'type', 'checksum'}
 
     required_attributes = get_required_attributes(checks)
-    required_attributes -= get_required_attributes({CHECK_GROUP}) if sys.platform == "win32" else {'win_attributes'}
+    required_attributes -= get_required_attributes({CHECK_GROUP}) if sys.platform == "win32" else {'attributes'}
 
     intersection = attributes ^ required_attributes
     intersection_debug = "Event attributes are: " + str(attributes)
