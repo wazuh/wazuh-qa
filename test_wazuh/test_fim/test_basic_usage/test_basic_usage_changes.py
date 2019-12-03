@@ -51,6 +51,9 @@ def test_regular_file_changes(folder, checkers, tags_to_apply,
 
     :param folder: Directory where the files will be created
     :param checkers: Dict of syscheck checkers (check_all)
+
+    * This test is intended to be used with valid configurations files. Each execution of this test will configure
+          the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

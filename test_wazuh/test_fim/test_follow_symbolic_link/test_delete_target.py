@@ -46,11 +46,20 @@ def test_symbolic_delete_target(tags_to_apply, main_folder, aux_folder, get_conf
     detected.
     Once symlink_checker runs create the same file. No events should be raised. Wait again for symlink_checker run
     and modify the file. Modification event must be detected this time.
+
+    :param main_folder: Directory that is being pointed at or contains the pointed file
+    :param aux_folder: Directory that will be pointed at or will contain the future pointed file
+
+    * This test is intended to be used with valid configurations files. Each execution of this test will configure
+    the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     whodata = get_configuration['metadata']['fim_mode'] == 'whodata'
     file1 = 'regular1'
+
+    # If symlink is pointing to a directory, we need to add files and expect their 'added' event (only if the file
+    # is being created withing the pointed directory. Then, delete the pointed file or directory
     if tags_to_apply == {'monitored_dir'}:
         create_file(REGULAR, main_folder, file1, content='')
         check_time_travel(scheduled)
@@ -62,10 +71,12 @@ def test_symbolic_delete_target(tags_to_apply, main_folder, aux_folder, get_conf
     delete = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
     assert 'deleted' in delete['data']['type'] and file1 in delete['data']['path'], \
         f"'deleted' event not matching for {file1}"
+
     # If syscheck is monitoring with whodata, wait for audit to reload rules
     wait_for_audit(whodata, wazuh_log_monitor)
     wait_for_symlink_check(wazuh_log_monitor)
 
+    # Restore the target and don't expect any event since symlink hasn't updated the link information
     create_file(REGULAR, main_folder, file1, content='')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
@@ -74,6 +85,7 @@ def test_symbolic_delete_target(tags_to_apply, main_folder, aux_folder, get_conf
     wait_for_symlink_check(wazuh_log_monitor)
     wait_for_audit(whodata, wazuh_log_monitor)
 
+    # Modify the files and expect events since symcheck has updated now
     modify_file_content(main_folder, file1, 'Sample modification')
     check_time_travel(scheduled)
     modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()

@@ -49,12 +49,21 @@ def get_configuration(request):
 def test_scan_time(tags_to_apply,
                    get_configuration, configure_environment,
                    restart_syscheckd, wait_for_initial_scan):
-    """ Check if there is a scan at a certain time """
+    """ Check if there is a scan at a certain time
+
+    scan_time option makes sure there is only one scan every 24 hours, at a certain time.
+
+    * This test is intended to be used with valid configurations files. Each execution of this test will configure
+    the environment properly, restart the service and wait for the initial scan.
+    """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
+    # Reformat given time to a readable format since it can be writen in several ways in ossec.conf
     scan_time = reformat_time(get_configuration['metadata']['scan_time'])
     current_time = datetime.now()
 
+    # Calculate how much time we need to travel in time to make sure there hasn't been any scan until it is the given
+    # time
     time_difference = (scan_time - current_time) if (scan_time - current_time).days == 0 else \
         ((scan_time - current_time) + timedelta(days=2))
     TimeMachine.travel_to_future(time_difference + timedelta(minutes=-30))

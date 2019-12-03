@@ -69,15 +69,19 @@ def test_no_diff_subdirectory(folder, filename, content, hidden_content,
                               tags_to_apply, get_configuration,
                               configure_environment, restart_syscheckd,
                               wait_for_initial_scan):
-    """Checks files are ignored in subdirectory according to configuration
+    """ Checks files are ignored in the subdirectory according to configuration
 
-       This test is intended to be used with valid nodiff configurations
+    When using the nodiff option for a file in syscheck configuration, everytime we get an event from this file,
+    we won't be able to see its content. We'll see 'Diff truncated because nodiff option' instead.
 
-       :param folder string Directory where the file is being created
-       :param filename string Name of the file to be created
-       :param content string, bytes Content to fill the new file
-       :param hidden_content bool True if content must be truncated,, False otherwise
-       :param tags_to_apply set Run test if matches with a configuration identifier, skip otherwise
+    :param folder: string Directory where the file is being created
+    :param filename: string Name of the file to be created
+    :param content: string, bytes Content to fill the new file
+    :param hidden_content: bool True if content must be truncated,, False otherwise
+    :param tags_to_apply: set Run test if matches with a configuration identifier, skip otherwise
+
+    * This test is intended to be used with valid nodiff configurations. Each execution of this test will configure
+    the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

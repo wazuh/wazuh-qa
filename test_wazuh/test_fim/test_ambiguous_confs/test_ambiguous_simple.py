@@ -60,7 +60,18 @@ def get_configuration(request):
 def test_ambiguous_restrict(folders, tags_to_apply,
                             get_configuration, configure_environment,
                             restart_syscheckd, wait_for_initial_scan):
-    """ Checks if syscheckd detects regular file changes (add, modify, delete) """
+    """ Checks if syscheck detects regular file changes (add, modify, delete) depending on its restrict configuration
+
+        /testdir -> has a restrict configuration
+        /testdir/subdir -> has no restrict configuration
+
+        Only /testdir/subdir events should appear in ossec.log
+
+        :param folders: List of monitored directories
+
+        * This test is intended to be used with valid configurations files. Each execution of this test will configure
+          the environment properly, restart the service and wait for the initial scan.
+     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     file_list = ['example.csv']
@@ -82,7 +93,16 @@ def test_ambiguous_restrict(folders, tags_to_apply,
 def test_ambiguous_report(folders, tags_to_apply,
                           get_configuration, configure_environment,
                           restart_syscheckd, wait_for_initial_scan):
-    """ Checks if syscheckd detects regular file changes (add, modify, delete)
+    """ Checks if syscheck detects or not the content_changes field for each event depending on its report_changes
+        attribute.
+
+        This test validates both situations, making sure that if report_changes='no', there won't be a
+        content_changes event property.
+
+        :param folders: List of monitored directories
+
+        * This test is intended to be used with valid configurations files. Each execution of this test will configure
+          the environment properly, restart the service and wait for the initial scan.
 
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
@@ -92,7 +112,9 @@ def test_ambiguous_report(folders, tags_to_apply,
     folder = folders[1]
 
     def report_changes_validator(event):
-        """ Validate content_changes attribute exists in the event """
+        """ Validate content_changes event property exists in the event
+            :param event: Matched 'Sending event'.
+        """
         for file in file_list:
             diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
             if sys.platform == 'win32':
@@ -104,7 +126,9 @@ def test_ambiguous_report(folders, tags_to_apply,
             assert (event['data'].get('content_changes') is not None), f'content_changes is empty'
 
     def no_report_changes_validator(event):
-        """ Validate content_changes attribute does not exist in the event """
+        """ Validate content_changes event property does not exist in the event
+            :param event: Matched 'Sending event'.
+        """
         for file in file_list:
             diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
             if sys.platform == 'win32':
@@ -135,8 +159,13 @@ def test_ambiguous_report(folders, tags_to_apply,
 def test_ambiguous_tags(folders, tags_to_apply,
                         get_configuration, configure_environment,
                         restart_syscheckd, wait_for_initial_scan):
-    """ Checks if syscheckd detects regular file changes (add, modify, delete)
+    """ Checks if syscheck detects the event property 'tags' for each event.
 
+        This test validates both situations, making sure that if tags='no', there won't be a
+        tags event property.
+
+        * This test is intended to be used with valid configurations files. Each execution of this test will configure
+          the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -144,11 +173,11 @@ def test_ambiguous_tags(folders, tags_to_apply,
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
     def tag_validator(event):
-        """ Validate tag attribute exists in the event """
+        """ Validate tags event property exists in the event """
         assert defined_tags == event['data']['tags'], f'defined_tags are not equal'
 
     def no_tag_validator(event):
-        """ Validate tag attribute dpes not exist in the event """
+        """ Validate tags event property dpes not exist in the event """
         assert 'tags' not in event['data'].keys(), f"'tags' key found in event"
 
     regular_file_cud(folders[0], wazuh_log_monitor,
@@ -169,6 +198,19 @@ def test_ambiguous_tags(folders, tags_to_apply,
 def test_ambiguous_recursion(dirname, recursion_level, tags_to_apply,
                              get_configuration, configure_environment,
                              restart_syscheckd, wait_for_initial_scan):
+    """ Checks if syscheck detects alerts for each level defined in the recursion_level attribute.
+        This overwrites the default value, restricting it.
+
+        If we set recursion_level=1 and we have this monitored directory /testdir
+        It will only monitor /testdir and /testdir/subdir
+        If we had /testdir/subdir/subdir2, /subdir2 wouldn't be monitored
+
+        :param dirname: Name of the monitored directory
+        :param recursion_level: Value of the recursion_level attribute
+
+        * This test is intended to be used with valid configurations files. Each execution of this test will configure
+          the environment properly, restart the service and wait for the initial scan.
+    """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     min_timeout = DEFAULT_TIMEOUT
@@ -203,6 +245,20 @@ def test_ambiguous_recursion(dirname, recursion_level, tags_to_apply,
 def test_ambiguous_check(dirname, checkers, tags_to_apply,
                          get_configuration, configure_environment,
                          restart_syscheckd, wait_for_initial_scan):
+    """ Checks if syscheck detects every check set in the configuration.
+
+        Checks are read from left to right, overwriting any ambiguous configuration.
+
+        If we set check_all='yes' and then check_inode='no' for the same directory, syscheck must send an event
+        containing every possible check without inode.
+
+        :param dirname: Name of the monitored directory
+        :param checkers: Set of checks to be compared to the actual event check list (the one we get from the event)
+
+        * This test is intended to be used with valid configurations files. Each execution of this test will configure
+          the environment properly, restart the service and wait for the initial scan.
+
+    """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     min_timeout = DEFAULT_TIMEOUT

@@ -46,7 +46,13 @@ def get_configuration(request):
 ])
 def test_ignore(tags_to_apply, get_configuration, configure_environment,
                 restart_wazuh):
-    """Checks if an invalid ignore configuration is detected."""
+    """ Checks if an invalid configuration is detected
+
+    Using invalid configurations with different attributes, expect an error message and syscheck unable to restart.
+
+    * This test is intended to be used with invalid configurations files. Each execution of this test will fail to
+     configure the environment properly.
+    """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     wazuh_log_monitor.start(timeout=3, callback=callback_configuration_error)

@@ -70,11 +70,17 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
                                                  sym_target, tags_to_apply, get_configuration, configure_environment,
                                                  clean_directories, restart_syscheckd, wait_for_initial_scan):
     """ Check what happens with a symlink and its target when syscheck monitors a directory with a symlink
-        and not the symlink itself.
+    and not the symlink itself.
+
+    When this happens, the symbolic link is considered a regular file and it will not follow its target path.
+    It will only generate events if it changes somehow, not its target (file or directory)
 
     :param monitored_dir: Monitored directory
     :param non_monitored_dir1: Non-monitored directory
     :param non_monitored_dir2: Non-monitored directory
+
+    * This test is intended to be used with valid configurations files. Each execution of this test will configure
+    the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     name1 = 'regular1'

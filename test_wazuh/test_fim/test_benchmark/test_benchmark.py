@@ -55,7 +55,14 @@ def get_configuration(request):
 def test_benchmark_regular_files(files, folder, tags_to_apply, get_configuration,
                                  configure_environment, restart_syscheckd,
                                  wait_for_initial_scan):
-    """Checks syscheckd detects a minimum volume of file changes (add, modify, delete)"""
+    """ Checks syscheckd detects a certain volume of file changes (add, modify, delete)
+
+        :param files: List of regular files to be created
+        :param folder: Monitored directory where files will be created
+
+        * This test is intended to be used with valid configurations files. Each execution of this test will configure
+          the environment properly, restart the service and wait for the initial scan.
+    """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     min_timeout = 30
 

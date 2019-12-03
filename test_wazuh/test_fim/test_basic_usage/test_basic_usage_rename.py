@@ -66,7 +66,12 @@ def test_rename(folder, tags_to_apply,
                 restart_syscheckd, wait_for_initial_scan):
     """ Checks if syscheckd detects events when renaming directories or files
 
-    :param folder: Directory where the files will be created
+        If we rename a directory or file, we expect 'deleted' and 'added' events.
+
+        :param folder: Directory where the files will be created
+
+        * This test is intended to be used with valid configurations files. Each execution of this test will configure
+          the environment properly, restart the service and wait for the initial scan.
     """
     def expect_events(path):
         event = wazuh_log_monitor.start(timeout=timeout, callback=callback_detect_event).result()

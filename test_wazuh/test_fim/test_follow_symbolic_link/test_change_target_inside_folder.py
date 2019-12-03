@@ -45,6 +45,12 @@ def test_symbolic_change_target_inside_folder(tags_to_apply, previous_target, ne
     CHECK: Having a symbolic link pointing to a file/folder, change its target to another file/folder inside a monitored
     folder. After symlink_checker runs check that no events for the previous target file are detected while events for
     the new target are still being raised.
+
+    :param previous_target: Previous symlink target (path)
+    :param new_target: New symlink target (path)
+
+    * This test is intended to be used with valid configurations files. Each execution of this test will configure
+    the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
@@ -58,10 +64,12 @@ def test_symbolic_change_target_inside_folder(tags_to_apply, previous_target, ne
         check_time_travel(scheduled)
         wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
 
-    # Change the target to another file
+    # Change the target to another file and wait the symcheck to update the link information
     modify_symlink(new_target, os.path.join(testdir_link, symlink))
     wait_for_symlink_check(wazuh_log_monitor)
     wait_for_audit(whodata, wazuh_log_monitor)
+
+    # Modify the content of the previous target and don't expect events. Modify the new target and expect an event
     modify_file_content(previous_target, file1, new_content='Sample modification')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
