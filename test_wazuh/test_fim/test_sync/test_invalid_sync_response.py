@@ -2,11 +2,10 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
-from datetime import datetime, timedelta
 import pytest
-import time
-from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_synchronization, detect_initial_scan, callback_configuration_warning)
-from wazuh_testing.tools import (FileMonitor, truncate_file, check_apply_test, load_wazuh_configurations, reformat_time, TimeMachine)
+
+from wazuh_testing.fim import LOG_FILE_PATH, callback_configuration_warning
+from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations
 
 
 # variables
@@ -33,7 +32,12 @@ def get_configuration(request):
 # Tests
 
 def test_invalid_sync_response(get_configuration, configure_environment, restart_syscheckd):
-    """Checks if an invalid ignore configuration is detected."""
+    """Checks if an invalid ignore configuration is detected by catching the warning message displayed on the log.
+
+    This test is intended to be used with valid configurations files. Each execution of this test will configure the
+    environment properly and restart the service. No wait for the initial scan in this case as we need to detect the
+    warning message.
+    """
     check_apply_test({'sync_invalid'}, get_configuration['tags'])
 
     wazuh_log_monitor.start(timeout=3, callback=callback_configuration_warning)
