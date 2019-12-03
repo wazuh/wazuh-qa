@@ -28,5 +28,5 @@ assignees: ''
 - [ ] Delete the agent from the manager (You should see the message _Message from 'xxx.yyy.zzz.www' not allowed._).
 - [ ] The agent should be registered again by the module (check the client.keys file).
 
-(1) https://documentation.wazuh.com/3.x/user-manual/reference/ossec-conf/wodle-key-polling.html
-(2) https://documentation.wazuh.com/3.x/user-manual/capabilities/key-polling.html
+(1) https://documentation.wazuh.com/3.10/user-manual/reference/ossec-conf/wodle-agent-key-polling.html
+(2) https://documentation.wazuh.com/3.10/user-manual/capabilities/agent-key-polling.html

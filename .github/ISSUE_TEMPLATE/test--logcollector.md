@@ -21,6 +21,7 @@ assignees: ''
 - [ ] Increase both `logcollector.max_files` and `logcollector.rlimit_nofile` and check if everything works with the maximum number of files allowed.
 - [ ] Check that the agent bookmarks Eventchannel logs.
 - [ ] Set `<only-future-events>` to `yes` and check that the agent is not bookmarking Eventchannel logs.
+- [ ] Add localfile blocks with wildcards or time templates.
 
 ## Logs
 
@@ -32,6 +33,8 @@ assignees: ''
 - [ ] Check that labels are added to JSON files.
 - [ ] Check that the multi-line logs are taken correctly.
 - [ ] Check that no duplicate files are scanned (entered multiple times).
+- [ ] Check that no duplicate inodes are scanned (hard and soft links).
+- [ ] Check logcollector functionality with already created files that match configured wildcards or templates and creating them after logcollector starts (they will be contemplated after reloading).
 - [ ] Check that the agent sends the Windows Eventchannel events generated when it was stopped. (https://github.com/wazuh/wazuh/issues/3475)
 
 ## Performance
@@ -42,6 +45,7 @@ assignees: ''
 
 - [ ] Configure one and multiple sockets output as target. (https://github.com/wazuh/wazuh/pull/395)
 - [ ] Test the `out_format` option for different socket targets. (https://github.com/wazuh/wazuh/pull/863)
+- [ ] Stop the manager and rotate the input log. Check that socket still receives logs. (https://github.com/wazuh/wazuh/pull/4222) 
 
 ## Commands
 

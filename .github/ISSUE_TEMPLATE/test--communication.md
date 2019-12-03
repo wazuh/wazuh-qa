@@ -15,7 +15,7 @@ assignees: ''
 
 ## Manager - agent
 
-- [ ] Connect an agent by UDP successfully  and verify alerts and services work properly. (1)
+- [ ] Connect an agent by UDP successfully and verify alerts and services work properly. (1)
 - [ ] Connect an agent by TCP successfully and verify alerts and services work properly. (1)
 - [ ] Connect an agent with a different port. (1)
 - [ ] Agent re-connects succesfully after a manager recovery.
@@ -28,6 +28,7 @@ assignees: ''
 - [ ] Check statistics files for analysisd, remoted and agentd.
 - [ ] Check if the agent-info file contains the agent IP. 
 - [ ] Stop Modulesd and check that the agent-info file does not contain the agent IP.
+- [ ] Check that the agent keep-alive is sent every notify-time, even if no events are generated. (1)
 
 (1) https://documentation.wazuh.com/3.x/user-manual/reference/ossec-conf/client.html
 (3) You have to write the alert in a monitorized log, for example: **active-response.log**

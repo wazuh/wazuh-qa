@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-# Ruleset test
+# API test
 
 | Version | Revision | Branch |
 | --- | --- | --- |

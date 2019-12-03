@@ -1,0 +1,21 @@
+FROM vpgrp/kitchen:latest
+
+ARG source_branch=3.10_7.3.0_test_jenkins
+
+# Update aptitude
+RUN apt-get update
+
+RUN apt-get install -y git
+
+RUN apt-get install -y curl
+
+RUN apt-get update
+
+RUN wget https://www.python.org/ftp/python/2.7.16/Python-2.7.16.tgz && tar xzf Python-2.7.16.tgz && cd Python-2.7.16 && ./configure --enable-optimizations && sudo make altinstall
+
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py && apt-get install python-dev && pip install pipenv && python -m pip install psutil
+
+# Clone the corresponding branch of wazuh-puppet
+RUN cd ~ && git clone -b $source_branch https://github.com/wazuh/wazuh-ansible.git
+
+RUN apt-get -y install ssh && apt-get -y update
