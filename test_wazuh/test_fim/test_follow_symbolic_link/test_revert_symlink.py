@@ -44,6 +44,9 @@ def test_symbolic_revert_symlink(tags_to_apply, get_configuration, configure_env
     CHECK: Having a symbolic link pointing to a file/folder, change its target to a folder. Check that the old file is not
      being monitored anymore and the new folder is. Revert the target change and ensure the file is being monitored
      and the folder is not.
+
+    * This test is intended to be used with valid configurations files. Each execution of this test will configure
+    the environment properly, restart the service and wait for the initial scan.
     """
     def modify_and_assert(file):
         modify_file_content(testdir1, file, new_content='Sample modification')
@@ -70,6 +73,7 @@ def test_symbolic_revert_symlink(tags_to_apply, get_configuration, configure_env
     wait_for_audit(whodata, wazuh_log_monitor)
     modify_and_assert(file2)
 
+    # Modify symlink target, wait for sym_check to update it 
     modify_symlink(os.path.join(testdir1, file1), os.path.join(testdir_link, 'symlink'))
     wait_for_symlink_check(wazuh_log_monitor)
     modify_file_content(testdir1, file2, new_content='Sample modification2')

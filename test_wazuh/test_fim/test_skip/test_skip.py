@@ -46,7 +46,7 @@ configurations = change_conf(testdir)
 
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
-    """Get configurations from the module."""
+    """ Get configurations from the module """
     return request.param
 
 
@@ -64,6 +64,7 @@ def configure_nfs():
     freebsd = 'true' if distro.id() == 'freebsd' else 'false'
     subprocess.call([f'{path}/data/configure_nfs.sh', dist, installer, freebsd])
     yield
+
     # remove nfs
     subprocess.call([f'{path}/data/remove_nfs.sh'])
     shutil.rmtree(os.path.join('/', 'media', 'nfs-folder'), ignore_errors=True)
@@ -82,7 +83,13 @@ def test_skip(directory, tags_to_apply,
               restart_syscheckd, wait_for_initial_scan):
     """ Check if syscheck is skipping the directory based on its skip configuration
 
+    /proc, /sys, /dev and nfs directories are special directories. Unless it is specified with skip_*='no', syscheck
+    will skip these directories. If not, they will be monitored like a normal directory.
+
     :param directory: Directory that will be monitored. We only use it on skip_dev and skip_nfs
+
+    * This test is intended to be used with valid configurations files. Each execution of this test will configure
+    the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -94,11 +101,13 @@ def test_skip(directory, tags_to_apply,
     if tags_to_apply == {'skip_proc'}:
         if trigger:
             proc = subprocess.Popen(["python3", f"{os.path.dirname(os.path.abspath(__file__))}/data/proc.py"])
+
             # Change configuration, monitoring the PID path in /proc
             # Monitor only /proc/PID to expect only these events. Otherwise, it will fail due to Timeouts since
             # integrity scans will take too long
             new_conf = change_conf(f'/proc/{proc.pid}')
             new_ossec_conf = []
+
             # Get new skip_proc configuration
             for conf in new_conf:
                 if conf['metadata']['skip'] == 'no' and conf['tags'] == ['skip_proc']:
@@ -131,16 +140,20 @@ def test_skip(directory, tags_to_apply,
         if trigger:
             # If /sys/module/video does not exist, use 'modprobe video'
             assert os.path.exists('/sys/module/video'), f'/sys/module/video does not exist'
+
             # Do not expect any 'Sending event'
             with pytest.raises(TimeoutError):
                 wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+
             # Remove module video and travel to future to check alerts
             subprocess.Popen(["modprobe", "-r", "video"])
             TimeMachine.travel_to_future(timedelta(hours=13))
+
             # Detect at least one 'delete' event in /sys/module/video path
             event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event).result()
             assert event['data'].get('type') == 'deleted' and '/sys/module/video' in event['data'].get('path'), \
                 f'Sys event not detected'
+
             # Restore module video
             subprocess.Popen(["modprobe", "video"])
         else:

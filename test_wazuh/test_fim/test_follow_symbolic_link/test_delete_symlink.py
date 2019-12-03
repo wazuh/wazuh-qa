@@ -45,6 +45,12 @@ def test_symbolic_delete_symlink(tags_to_apply, main_folder, aux_folder, get_con
     CHECK: Having a symbolic link pointing to a file/folder, remove that symbolic link file, wait for the symlink
     checker runs and modify the target file. No events should be detected. Restore the symbolic link and modify
     the target file again once symlink checker runs. Events should be detected now.
+
+    :param main_folder: Directory that is being pointed at or contains the pointed file
+    :param aux_folder: Directory that will be pointed at or will contain the future pointed file
+
+    * This test is intended to be used with valid configurations files. Each execution of this test will configure
+    the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
@@ -53,6 +59,7 @@ def test_symbolic_delete_symlink(tags_to_apply, main_folder, aux_folder, get_con
         create_file(REGULAR, main_folder, file1, content='')
         check_time_travel(scheduled)
         wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+
     # Remove symlink and don't expect events
     symlink = 'symlink' if tags_to_apply == {'monitored_file'} else 'symlink2'
     delete_f(testdir_link, symlink)

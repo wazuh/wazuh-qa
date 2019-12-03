@@ -21,7 +21,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories
 
-# configuration with frequency values
+# Configuration with frequency values
 
 frequencies = [5, 3600, 10000]
 
@@ -56,7 +56,7 @@ configurations1 = load_wazuh_configurations(configurations_path, __name__,
                                             ])
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_default.yaml')
 
-# configuration with default frequency
+# Configuration with default frequency
 
 conf_param, conf_metadata = generate_params({'TEST_DIRECTORIES': directory_str},
                                             {'test_directories': directory_str},
@@ -66,6 +66,7 @@ configurations2 = load_wazuh_configurations(configurations_path, __name__,
                                             params=conf_param,
                                             metadata=conf_metadata)
 
+# Merge both list of configurations into the final one to avoid skips and configuration issues
 configurations = configurations1 + configurations2
 
 
@@ -84,7 +85,16 @@ def get_configuration(request):
 ])
 def test_frequency(folder, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                    wait_for_initial_scan):
-    """ Checks if a non existing directory is monitored in realtime after the frequency time has passed """
+    """ Checks if a non existing directory is monitored in realtime after the frequency time has passed
+
+    Even with realtime monitoring, if we monitor a non existing directory and then we create it after restarting
+    the service, syscheck won't detect anything from it until the scan restarts (using its frequency interval).
+
+    :param folder: Directory that is being monitored
+
+    * This test is intended to be used with valid configurations files. Each execution of this test will configure
+    the environment properly, restart the service and wait for the initial scan.
+    """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     try:
         frequency = get_configuration['metadata']['frequency'] if 'frequency' in get_configuration['metadata'] \

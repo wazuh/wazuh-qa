@@ -57,7 +57,19 @@ def get_configuration(request):
 ])
 def test_create_file_scheduled(folder, name, filetype, content, checkers, tags_to_apply, get_configuration,
                                configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """ Checks if a special or regular file creation is detected by syscheck using scheduled monitoring"""
+    """ Checks if a special or regular file creation is detected by syscheck using scheduled monitoring
+
+        Regular files must be monitored. Special files must not.
+
+        :param folder: Name of the monitored folder
+        :param name: Name of the file
+        :param filetype: Type of the file
+        :param content: Content of the file
+        :param checkers: Checks that will compared to the ones from the event
+
+        * This test is intended to be used with valid configurations files. Each execution of this test will configure
+          the environment properly, restart the service and wait for the initial scan.
+    """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Create files

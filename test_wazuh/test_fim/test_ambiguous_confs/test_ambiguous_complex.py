@@ -182,8 +182,16 @@ def get_checkers(check_list):
 def test_ambiguous_complex(tags_to_apply,
                            get_configuration, configure_environment,
                            restart_syscheckd, wait_for_initial_scan):
-    """ Checks if syscheckd detects regular file changes (add, modify, delete)
+    """ Automatic test for each configuration given in the yaml.
 
+    The main purpose of this test is to check that syscheck will apply different configurations between subdirectories
+    properly. Example:
+
+    <directories realtime='yes' report_changes='yes' check_all='yes' check_owner='no'> /testdir </directories>
+    <directories realtime='yes' report_changes='no' check_sum='no' check_owner='yes'> /testdir/subdir </directories>
+
+    * This test is intended to be used with valid configurations files. Each execution of this test will configure
+      the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

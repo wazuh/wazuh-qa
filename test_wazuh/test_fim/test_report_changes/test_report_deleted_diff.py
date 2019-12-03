@@ -61,10 +61,10 @@ def wait_for_event(fim_mode):
     """ Wait for the event to be scanned
 
     :param fim_mode: FIM mode (scheduled, realtime, whodata)
-    :return: None
     """
     if fim_mode == 'scheduled':
         TimeMachine.travel_to_future(timedelta(hours=13))
+
     # Wait until event is detected
     wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event)
 
@@ -140,7 +140,15 @@ def test_no_report_changes(folder, checkers, delete_dir, tags_to_apply,
                            get_configuration, configure_environment,
                            restart_syscheckd, wait_for_initial_scan):
     """ Check if duplicated directories in diff are deleted when changing
-        report_changes to 'no' or deleting the monitored directories """
+    report_changes to 'no' or deleting the monitored directories
+
+    Since report_changes duplicates monitored files, we need to assert that once the original files are deleted,
+    the duplicated ones are deleted too.
+
+    * This test is intended to be used with valid configurations files. Each execution of this test will configure
+    the environment properly, restart the service and wait for the initial scan. This test will restart with a new
+    configuration throughout its execution as well.
+    """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     filename = 'regularfile'

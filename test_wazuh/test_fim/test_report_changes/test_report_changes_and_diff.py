@@ -56,8 +56,16 @@ def test_reports_file_and_nodiff(folder, checkers, tags_to_apply,
                                  get_configuration, configure_environment,
                                  restart_syscheckd, wait_for_initial_scan):
     """ Check if report_changes events and diff truncated files are correct
+
+    The report_changes attribute adds a new event property to the 'modified' sent event: 'content_changes'
+    It has information about what changed from the previous content. To do so, it duplicates the file in the diff
+    directory. We call this duplicated file 'diff_file'.
+
     :param folder: Directory where the files will be created
     :param checkers: Dict of syscheck checkers (check_all)
+
+    * This test is intended to be used with valid configurations files. Each execution of this test will configure
+    the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

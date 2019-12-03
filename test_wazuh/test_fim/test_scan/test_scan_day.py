@@ -48,7 +48,13 @@ def get_configuration(request):
 def test_scan_day(tags_to_apply,
                   get_configuration, configure_environment,
                   restart_syscheckd, wait_for_initial_scan):
-    """ Check if there is a scan at a certain day """
+    """ Check if there is a scan at a certain day of the week
+
+    It will only scan once a week, on the given day.
+
+    * This test is intended to be used with valid configurations files. Each execution of this test will configure
+    the environment properly, restart the service and wait for the initial scan.
+    """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     day_of_week = {'monday': 0,

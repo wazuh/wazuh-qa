@@ -45,9 +45,18 @@ def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_conf
     CHECK: Having a symbolic link pointing to a file/folder, change the target of the link to another file/folder.
     Ensure that the old file is being monitored and the new one is not before symlink_checker runs.
     Wait until symlink_checker runs and ensure that the new file is being monitored and the old one is not.
+
+    :param main_folder: Directory that is being pointed at or contains the pointed file
+    :param aux_folder: Directory that will be pointed at or will contain the future pointed file
+
+    * This test is intended to be used with valid configurations files. Each execution of this test will configure
+    the environment properly, restart the service and wait for the initial scan.
     """
 
     def modify_and_check_events(f1, f2, text):
+        """ Modify the content of 2 given files. We assume the first one is being monitored and the other one is not.
+            We expect a 'modified' event for the first one and a timeout for the second one.
+        """
         modify_file_content(f1, file1, text)
         modify_file_content(f2, file1, text)
         check_time_travel(scheduled)
@@ -62,6 +71,8 @@ def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_conf
     whodata = get_configuration['metadata']['fim_mode'] == 'whodata'
     file1 = 'regular1'
 
+    # If symlink is pointing to a directory, we need to add files and expect their 'added' event (only if the file
+    # is being created withing the pointed directory
     if main_folder == testdir_target:
         create_file(REGULAR, main_folder, file1, content='')
         create_file(REGULAR, aux_folder, file1, content='')
