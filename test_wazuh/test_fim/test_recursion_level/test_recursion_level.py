@@ -59,17 +59,47 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 # Functions
 
-def recursion_test(dirname, subdirname, recursion_level, timeout=1, threshold_true=2, threshold_false=2,
+def recursion_test(dirname, subdirname, recursion_level, timeout=1, edge_limit=2, ignored_levels=2,
                    is_scheduled=False):
-    """Checks recursion_level functionality over the first and last n-directories of the dirname hierarchy
-    by creating, modifying and deleting some files in them. It will create all directories and
-    subdirectories needed using the info provided by parameter.
+    """
+    Checks that events are generated in the first and last `edge_limit` directory levels in the hierarchy
+    dirname/subdirname1/.../subdirname{recursion_level}. It also checks that no events are generated for
+    subdirname{recursion_level+ignored_levels}. All directories and subdirectories needed will be created using the info
+    provided by parameter.
+
+    Example:
+        recursion_level = 10
+        edge_limit = 2
+        ignored_levels = 2
+
+        dirname = "/testdir"
+        subdirname = "subdir"
+
+        With those parameters this function will create files and expect to detect 'added', 'modified' and 'deleted'
+        events for the following directories only, as they are the first and last 2 subdirectories within recursion
+        level 10:
+
+        /testdir/subdir1
+        /testdir/subdir1/subdir2
+        /testdir/subdir1/subdir2/subdir3/subdir4/subdir5/subdir6/subdir7/subdir8/subdir9/
+        /testdir/subdir1/subdir2/subdir3/subdir4/subdir5/subdir6/subdir7/subdir8/subdir9/subdir10
+
+        As ignored_levels value is 2, this function will also create files on the following directories and ensure that
+        no events are raised as they are outside the recursion level specified:
+
+        /testdir/subdir1/subdir2/subdir3/subdir4/subdir5/subdir6/subdir7/subdir8/subdir9/subdir10/subdir11
+        /testdir/subdir1/subdir2/subdir3/subdir4/subdir5/subdir6/subdir7/subdir8/subdir9/subdir10/subdir11/subdir12
+
+    This function also takes into account that a very long path will raise a FileNotFound Exception on Windows because
+    of its path lenght limitations. In a similar way, on Linux environments a `Event Too Long` will be raised if the
+    path name is too long.
+
     :param dirname string The path being monitored by syscheck (indicated in the .conf file)
     :param subdirname string The name of the subdirectories that will be created during the execution for testing purpouses.
     :param recursion_level int Recursion level. Also used as the number of subdirectories to be created and checked for the current test.
     :param timeout int Max time to wait until an event is raised.
-    :param threshold_true Number of directories where the test will monitor events
-    :param threshold_false Number of directories exceding the specified recursion_level to verify events are not raised
+    :param edge_limit Number of directories where the test will monitor events
+    :param ignored_levels Number of directories exceding the specified recursion_level to verify events are not raised
     :param is_scheduled bool If True the internal date will be modified to trigger scheduled checks by syschecks. False if realtime or Whodata.
     """
     path = dirname
@@ -77,13 +107,13 @@ def recursion_test(dirname, subdirname, recursion_level, timeout=1, threshold_tr
         # Check True (Within the specified recursion level)
         for n in range(recursion_level):
             path = os.path.join(path, subdirname + str(n + 1))
-            if ((recursion_level < threshold_true * 2) or
-                (recursion_level >= threshold_true * 2 and n < threshold_true) or
-                (recursion_level >= threshold_true * 2 and n > recursion_level - threshold_true)):
+            if ((recursion_level < edge_limit * 2) or
+                (recursion_level >= edge_limit * 2 and n < edge_limit) or
+                (recursion_level >= edge_limit * 2 and n > recursion_level - edge_limit)):
                 regular_file_cud(path, wazuh_log_monitor, time_travel=is_scheduled, min_timeout=timeout)
 
         # Check False (exceding the specified recursion_level)
-        for n in range(recursion_level, recursion_level + threshold_false):
+        for n in range(recursion_level, recursion_level + ignored_levels):
             path = os.path.join(path, subdirname + str(n + 1))
             regular_file_cud(path, wazuh_log_monitor, time_travel=is_scheduled, min_timeout=timeout, triggers_event=False)
 
@@ -118,17 +148,17 @@ def get_configuration(request):
     (dir_recursion_320, subdir, 320),
     (dir_recursion_320_space, subdir_space, 320)
 ])
-def test_recursion_level(dirname, subdirname, recursion_level,
-                         get_configuration, configure_environment,
+def test_recursion_level(dirname, subdirname, recursion_level, get_configuration, configure_environment,
                          restart_syscheckd, wait_for_initial_scan):
-    """Checks if files are correctly detected by syscheck with recursion level using scheduled, realtime and whodata monitoring
-    This test is intended to be used with valid ignore configurations. It applies RegEx to match the name
-    of the configuration file where the test applies. If the configuration file does not match the test
-    is skipped.
+    """Checks if files are correctly detected by syscheck with recursion level using scheduled, realtime and whodata
+    monitoring.
+
+    This test is intended to be used with valid configurations files. Each execution of this test will configure the
+    environment properly, restart the service and wait for the initial scan.
+
     :param dirname string The path being monitored by syscheck (indicated in the .conf file)
     :param subdirname string The name of the subdirectories that will be created during the execution for testing purpouses.
     :param recursion_level int Recursion level. Also used as the number of subdirectories to be created and checked for the current test.
     """
-
     recursion_test(dirname, subdirname, recursion_level, timeout=DEFAULT_TIMEOUT,
                    is_scheduled=get_configuration['metadata']['fim_mode'] == 'scheduled')
