@@ -63,14 +63,15 @@ def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply
                   wait_for_initial_scan):
     """Checks the only files detected are those matching the restrict regex
 
-       This test is intended to be used with valid configurations
+    This test is intended to be used with valid configurations files. Each execution of this test will configure the
+    environment properly, restart the service and wait for the initial scan.
 
-       :param folder string Directory where the file is being created
-       :param filename string Name of the file to be created
-       :param mode string same as mode in open built-in function
-       :param content string, bytes Content to fill the new file
-       :param triggers_event bool True if an event must be generated, False otherwise
-       :param tags_to_apply set Run test if matchs with a configuration identifier, skip otherwise
+    :param folder string Directory where the file is being created
+    :param filename string Name of the file to be created
+    :param mode string same as mode in open built-in function
+    :param content string, bytes Content to fill the new file
+    :param triggers_event bool True if an event must be generated, False otherwise
+    :param tags_to_apply set Run test if matchs with a configuration identifier, skip otherwise
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

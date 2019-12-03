@@ -71,15 +71,17 @@ def test_ignore_subdirectory(folder, filename, content, triggers_event,
                              tags_to_apply, get_configuration,
                              configure_environment, restart_syscheckd,
                              wait_for_initial_scan):
-    """Checks files are ignored in subdirectory according to configuration
+    """Checks files are ignored in subdirectory according to configuration. It also ensures that events for files that
+    are not being ignored are still detected when using the ignore option.
 
-       This test is intended to be used with valid ignore configurations
+    This test is intended to be used with valid configurations files. Each execution of this test will configure the
+    environment properly, restart the service and wait for the initial scan.
 
-       :param folder string Directory where the file is being created
-       :param filename string Name of the file to be created
-       :param content string, bytes Content to fill the new file
-       :param triggers_event bool True if an event must be generated, False otherwise
-       :param tags_to_apply set Run test if matches with a configuration identifier, skip otherwise
+    :param folder string Directory where the file is being created
+    :param filename string Name of the file to be created
+    :param content string, bytes Content to fill the new file
+    :param triggers_event bool True if an event must be generated, False otherwise
+    :param tags_to_apply set Run test if matches with a configuration identifier, skip otherwise
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
