@@ -77,12 +77,18 @@ def get_configuration(request):
 ])
 def test_checksums_checkall(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                             wait_for_initial_scan):
-    """Test the checksum options (checksum, sha1sum, sha256sum and md5sum) behaviour when is used alone or in conjuntion
-    along with the Check_all option.
+    """Test the behaviour of check_all="yes" when using it with one or more check_sum options (checksum, sha1sum,
+    sha256sum and md5sum) set to "no".
 
-    This test is intended to be used with valid configurations files.
+    Example:
+        check_all="yes" check_sum="no"
+        check_all="yes" check_sum="no" check_md5sum="no"
+        ...
 
-    :param path string Directory where the file is being created
+    This test is intended to be used with valid configurations files. Each execution of this test will configure the
+    environment properly, restart the service and wait for the initial scan.
+
+    :param path string Directory where the file is being created and monitored
     :param checkers dict Dict with all the check options to be used
     """
     check_apply_test({'test_checksums_checkall'}, get_configuration['tags'])
@@ -107,10 +113,16 @@ def test_checksums_checkall(path, checkers, get_configuration, configure_environ
 ])
 def test_checksums(path, checkers, triggers_event, get_configuration, configure_environment, restart_syscheckd,
                    wait_for_initial_scan):
-    """Test the checksum options (checksum, sha1sum, sha256sum and md5sum) behaviour when is used alone or in conjuntion
-    but without Check_all option.
+    """Test the checksum options (checksum, sha1sum, sha256sum and md5sum) behaviour when is used alone or in conjuntion.
+    Check_all option will be set to "no" in order to avoid using the default check_all configuration.
 
-    This test is intended to be used with valid configurations files.
+    Example:
+        check_all: "no" check_sum: "yes"
+        check_all: "no" check_sum: "yes" check_md5sum: "no"
+        ...
+
+    This test is intended to be used with valid configurations files. Each execution of this test will configure the
+    environment properly, restart the service and wait for the initial scan.
 
     :param path string Directory where the file is being created
     :param checkers dict Dict with all the check options to be used
