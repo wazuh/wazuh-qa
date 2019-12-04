@@ -43,6 +43,10 @@ elif sys.platform == 'linux2' or sys.platform == 'linux':
                        'audit_name', 'effective_uid', 'effective_name', 'ppid', 'process_id'
                        }
 
+elif sys.platform == 'darwin':
+    WAZUH_PATH = os.path.join('/', 'Library', 'Ossec')
+    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+    DEFAULT_TIMEOUT = 10
 
 FIFO = 'fifo'
 SYMLINK = 'sym_link'

@@ -26,7 +26,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2 = test_directories[2:]
 new_name = 'this_is_a_new_name'
 old_name = 'old_name'
-timeout = 10 if sys.platform == 'win32' else 3
+timeout = 10 if sys.platform == 'win32' or sys.platform == 'darwin' else 3
 
 # configurations
 

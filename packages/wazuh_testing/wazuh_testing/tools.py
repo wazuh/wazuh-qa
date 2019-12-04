@@ -33,6 +33,12 @@ elif sys.platform == 'win32':
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     PREFIX = os.path.join('c:', os.sep)
 
+elif sys.platform == 'darwin':
+    WAZUH_PATH = os.path.join('/', 'Library', 'Ossec')
+    WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
+    WAZUH_SOURCES = os.path.join('/', 'wazuh')
+    PREFIX = os.sep
+
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
 
@@ -138,17 +144,30 @@ class TimeMachine:
         os.system('time ' + datetime_.strftime("%H:%M:%S"))
 
     @staticmethod
+    def _macos_set_time(datetime_):
+        """ Changes date and time in a MacOS system
+
+        :param datetime_: new date and time to set
+        :type datetime_: time
+        """
+        # {month}{day}{hour}{minute}{year}
+        os.system('date ' + '-u ' + datetime_.strftime("%m%d%H%M%Y"))
+
+    @staticmethod
     def travel_to_future(time_delta):
         """ Checks which system are we running this code in and calls its proper function
 
         :param time_delta: time frame we want to skip. It can have a negative value
         :type time_delta: timedelta
         """
-        future = datetime.now() + time_delta
+        now = datetime.utcnow() if sys.platform == 'darwin' else datetime.now()
+        future = now + time_delta
         if sys.platform == 'linux2' or sys.platform == 'linux':
             TimeMachine._linux_set_time(future.isoformat())
         elif sys.platform == 'win32':
             TimeMachine._win_set_time(future)
+        elif sys.platform == 'darwin':
+            TimeMachine._macos_set_time(future)
 
 
 def set_wazuh_conf(wazuh_conf: ET.ElementTree):
@@ -252,7 +271,9 @@ def restart_wazuh_daemon(daemon):
     for proc in psutil.process_iter(attrs=['name']):
         if proc.name() == daemon:
             proc.kill()
-    check_call([f'/var/ossec/bin/{daemon}'])
+
+    daemon_path = os.path.join(WAZUH_PATH, 'bin')
+    check_call([f'{daemon_path}/{daemon}'])
 
 
 def _callback_default(line):
