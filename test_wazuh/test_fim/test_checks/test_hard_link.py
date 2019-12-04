@@ -39,6 +39,11 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
                                                      ]
                                            )
 
+# Delete real-time and whodata configurations if we are on MacOS
+for conf in list(configurations):
+    if sys.platform == 'darwin' and conf['metadata']['fim_mode'] != 'scheduled':
+        configurations.pop(configurations.index(conf))
+
 
 # fixtures
 
@@ -83,7 +88,7 @@ def test_hard_link(path_file, path_link, num_links, get_configuration,
         # Create as many links pointing to the regular file as num_links
         for link in range(0, num_links):
             hardlinks_list.append("HardLink"+str(link))
-            create_file(HARDLINK, path_file, regular_file_name, target=os.path.join(path_link, "HardLink"+str(link)))
+            create_file(HARDLINK, path_link, "HardLink"+str(link), target=os.path.join(path_file, regular_file_name))
 
         # Try to detect the creation events for all the created links
         if path_file == path_link:

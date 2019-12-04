@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import itertools
 import os
+import sys
 
 import pytest
 
@@ -40,7 +41,12 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=params,
                                            metadata=metadata
                                            )
-# configurations = [configurations[0], configurations[1],configurations[2]]
+
+# Delete real-time and whodata configurations if we are on MacOS
+for conf in list(configurations):
+    if sys.platform == 'darwin' and conf['metadata']['fim_mode'] != 'scheduled':
+        configurations.pop(configurations.index(conf))
+
 
 # fixtures
 
