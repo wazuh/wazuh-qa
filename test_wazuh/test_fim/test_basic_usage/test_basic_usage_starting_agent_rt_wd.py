@@ -20,9 +20,6 @@ test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'test
 
 directory_str = ','.join(test_directories)
 
-for direc in list(test_directories):
-    test_directories.append(os.path.join(direc, 'subdir'))	# Add /testdir1/subdir, /testdir2/subdir ...
-
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
