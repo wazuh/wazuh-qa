@@ -3,27 +3,22 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import shutil
-import sys
-from datetime import timedelta
 
 import pytest
 
-from wazuh_testing.fim import CHECK_ALL, LOG_FILE_PATH, generate_params, create_file,REGULAR, \
-    callback_detect_event, check_time_travel, validate_event, DEFAULT_TIMEOUT, delete_file
-from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX, TimeMachine
-
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
+    callback_detect_event, check_time_travel, DEFAULT_TIMEOUT, delete_file
+from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
 # variables
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')]
+test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2'),
+                    os.path.join(PREFIX, 'testdir1', 'subdir')]
 directory_str = ','.join(test_directories)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-testdir1, testdir2 = test_directories
-timeout = DEFAULT_TIMEOUT
-
+testdir1, testdir2, testdir1_subdir = test_directories
 
 # configurations
 
@@ -44,49 +39,55 @@ def get_configuration(request):
 # tests
 
 
-@pytest.mark.parametrize('file, file_content, filetype', [
-    ('regular1', '',REGULAR)
+@pytest.mark.parametrize('file, file_content, tags_to_apply', [
+    ('regular1', '', {'ossec_conf'})
 ])
-@pytest.mark.parametrize('source_folder, target_folder, triggers_add_event, triggers_delete_event, tags_to_apply', [
-    (testdir1, PREFIX, False, True, {'ossec_conf'}, ),
-    (testdir1, os.path.join(testdir1, 'subdir'), True, True, {'ossec_conf'}, ),
-    (testdir1, testdir2, True, True, {'ossec_conf'}, )
+@pytest.mark.parametrize('source_folder, target_folder, triggers_delete_event, triggers_add_event', [
+    (testdir1, PREFIX, True, False),
+    (testdir1, testdir1_subdir, True, True),
+    (testdir1, testdir2, True, True),
+    (PREFIX, testdir1, False, True),
+    (PREFIX, testdir1_subdir, False, True)
 ])
-def test_move_file_1(file, file_content, filetype, source_folder, target_folder,
-                     triggers_add_event, triggers_delete_event, tags_to_apply,
-                     get_configuration, configure_environment,
-                     restart_syscheckd, wait_for_initial_scan):
-    """ Checks if syscheckd does not detect 'added' event from a file that was 
-        moved to a directory not monitored.
+def test_move_file(file, file_content, tags_to_apply, source_folder, target_folder,
+                   triggers_delete_event, triggers_add_event,
+                   get_configuration, configure_environment,
+                   restart_syscheckd, wait_for_initial_scan):
+    """ Checks if syscheckd detects 'added' or 'deleted' events when moving a file.
 
-        :param folder: Directory where the files will be created
-        :param file: File name
-        :filetype: File type
+        :param file str Name of the file to be created
+        :param file_content str Content of the file to be created
+        :param source_folder str Folder to move the file from
+        :param target_folder str Destination folder to move the file to
+        :param triggers_delete_event boolean Expects a 'deleted' event in the source folder
+        :param triggers_add_event boolean Expects a 'added' event in the target folder
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
     # Create file inside folder
-    create_file(filetype, source_folder, file, content=file_content)
+    create_file(REGULAR, source_folder, file, content=file_content)
 
-    check_time_travel(scheduled)
-    wazuh_log_monitor.start(timeout=timeout, callback=callback_detect_event)
+    if source_folder in test_directories:
+        check_time_travel(scheduled)
+        wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event)
 
     # Move file to target directory
     os.rename(os.path.join(source_folder, file), os.path.join(target_folder, file))
     check_time_travel(scheduled)
-    
+
     # Monitor expected events
-    events = wazuh_log_monitor.start(timeout=timeout,
+    events = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT,
                                      callback=callback_detect_event,
                                      accum_results=(triggers_add_event + triggers_delete_event)).result()
-    
+
     # Expect deleted events
     if isinstance(events, list):
         events_data = [(event['data']['type'],
                         event['data']['path'],
-                        source_folder if event['data']['type'] == 'deleted' else target_folder)
+                        os.path.join(source_folder, file) if event['data']['type'] == 'deleted' else os.path.join(
+                            target_folder, file))
                        for event in events]
         assert set([event[0] for event in events_data]) == {'deleted', 'added'}
         for _, path, expected_path in events_data:
@@ -99,3 +100,6 @@ def test_move_file_1(file, file_content, filetype, source_folder, target_folder,
 
     # Remove file
     delete_file(target_folder, file)
+    if target_folder in test_directories:
+        check_time_travel(scheduled)
+        wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event)
