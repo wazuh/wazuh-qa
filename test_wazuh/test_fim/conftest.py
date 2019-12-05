@@ -25,7 +25,7 @@ def restart_syscheckd(get_configuration, request):
         # As windows doesn't have daemons everything runs on a single process, so we need to restart everything
         restart_wazuh_service_windows()
 
-    elif sys.platform == 'linux2' or sys.platform == 'linux':
+    else:
         restart_wazuh_daemon('ossec-syscheckd')
 
 
@@ -83,5 +83,5 @@ def configure_environment(get_configuration, request):
             if sys.platform == 'win32':
                 restart_wazuh_service_windows()
 
-            elif sys.platform == 'linux2' or sys.platform == 'linux':
+            else:
                 restart_wazuh_service()

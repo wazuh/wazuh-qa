@@ -24,7 +24,7 @@ def restart_wazuh(get_configuration, request):
         # As windows doesn't have daemons everything runs on a single process, so we need to restart everything
         restart_wazuh_service_windows()
 
-    elif sys.platform == 'linux2' or sys.platform == 'linux':
+    else:
         restart_wazuh_service()
 
 

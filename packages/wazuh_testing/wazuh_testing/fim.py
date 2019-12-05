@@ -24,7 +24,7 @@ from wazuh_testing.tools import TimeMachine
 if sys.platform == 'win32':
     import win32con
     import win32api
-else:
+elif sys.platform == 'linux2' or sys.platform == 'linux':
     from jq import jq
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -35,7 +35,7 @@ if sys.platform == 'win32':
     DEFAULT_TIMEOUT = 10
     _REQUIRED_AUDIT = {"path", "process_id", "process_name", "user_id", "user_name"}
 
-elif sys.platform == 'linux2' or sys.platform == 'linux':
+else:
     WAZUH_PATH = os.path.join('/', 'var', 'ossec')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     DEFAULT_TIMEOUT = 5
@@ -823,10 +823,10 @@ def generate_params(extra_params: dict = None, extra_metadata: dict = None, *, m
         if mode == 'scheduled':
             fim_param.append({'FIM_MODE': ''})
             fim_metadata.append({'fim_mode': 'scheduled'})
-        elif mode == 'realtime' and sys.platform != 'darwin':
+        elif mode == 'realtime' and sys.platform != 'darwin' and sys.platform != 'sunos5':
             fim_param.append({'FIM_MODE': {'realtime': 'yes'}})
             fim_metadata.append({'fim_mode': 'realtime'})
-        elif mode == 'whodata' and sys.platform != 'darwin':
+        elif mode == 'whodata' and sys.platform != 'darwin' and sys.platform != 'sunos5':
             fim_param.append({'FIM_MODE': {'whodata': 'yes'}})
             fim_metadata.append({'fim_mode': 'whodata'})
 

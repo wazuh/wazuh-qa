@@ -20,18 +20,18 @@ from subprocess import DEVNULL, check_call, check_output
 from typing import Any, List, Set
 
 
-if sys.platform == 'linux2' or sys.platform == 'linux':
+if sys.platform == 'win32':
+    WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
+    WAZUH_CONF = os.path.join(WAZUH_PATH, 'ossec.conf')
+    WAZUH_SOURCES = os.path.join('/', 'wazuh')
+    PREFIX = os.path.join('c:', os.sep)
+
+else:
     WAZUH_PATH = os.path.join('/', 'var', 'ossec')
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
     PREFIX = os.sep
-
-elif sys.platform == 'win32':
-    WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
-    WAZUH_CONF = os.path.join(WAZUH_PATH, 'ossec.conf')
-    WAZUH_SOURCES = os.path.join('/', 'wazuh')
-    PREFIX = os.path.join('c:', os.sep)
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
@@ -138,6 +138,17 @@ class TimeMachine:
         os.system('time ' + datetime_.strftime("%H:%M:%S"))
 
     @staticmethod
+    def _solaris_set_time(datetime_):
+        """ Changes date and time in a Linux system
+
+        :param datetime_: new date and time to set
+        :type datetime_: time
+        """
+        import shlex
+        solaris_time_format = "%m%d%H%M%Y.%S"
+        subprocess.call(shlex.split("date '%s'" % datetime_.strftime(solaris_time_format)))
+
+    @staticmethod
     def travel_to_future(time_delta):
         """ Checks which system are we running this code in and calls its proper function
 
@@ -147,6 +158,8 @@ class TimeMachine:
         future = datetime.now() + time_delta
         if sys.platform == 'linux2' or sys.platform == 'linux':
             TimeMachine._linux_set_time(future.isoformat())
+        elif sys.platform == 'sunos5':
+            TimeMachine._solaris_set_time(future)
         elif sys.platform == 'win32':
             TimeMachine._win_set_time(future)
 
@@ -505,7 +518,7 @@ def restart_wazuh_with_new_conf(new_conf, daemon='ossec-syscheckd'):
     if sys.platform == 'win32':
         restart_wazuh_service_windows()
 
-    elif sys.platform == 'linux2' or sys.platform == 'linux':
+    else:
         restart_wazuh_daemon(daemon)
 
 
