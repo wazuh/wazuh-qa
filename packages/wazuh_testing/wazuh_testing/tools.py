@@ -509,14 +509,6 @@ def restart_wazuh_with_new_conf(new_conf, daemon='ossec-syscheckd'):
         restart_wazuh_daemon(daemon)
 
 
-def restart_wazuh_service():
-    """ Restart Wazuh service completely
-    :return: None
-    """
-    p = subprocess.Popen(["service", "wazuh-manager", "restart"])
-    p.wait()
-
-
 def stop_wazuh_service_windows():
     """ Stop Wazuh service completely
     :return: None
@@ -536,6 +528,32 @@ def restart_wazuh_service_windows():
     """
     stop_wazuh_service_windows()
     start_wazuh_service_windows()
+
+def start_wazuh_service_linux():
+    """
+        Start Wazuh service on Linux
+        :return: None
+    """
+    p = subprocess.Popen(["service", "wazuh-agent", "start"])
+    p.wait()
+
+def stop_wazuh_service_linux():
+    """
+        Stop Wazuh service on Linux
+        :return: None
+    """
+    p = subprocess.Popen(["service", "wazuh-agent", "stop"])
+    p.wait()
+
+def restart_wazuh_service():
+    """ Restart Wazuh service completely
+    :return: None
+    """
+    if sys.platform == 'linux2' or sys.platform == 'linux':
+        p = subprocess.Popen(["service", "wazuh-manager", "restart"])
+        p.wait()
+    elif sys.platform == 'win32':
+        restart_wazuh_service_windows()
 
 
 def reformat_time(scan_time):
