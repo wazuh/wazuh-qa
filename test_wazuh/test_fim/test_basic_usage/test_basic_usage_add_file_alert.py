@@ -47,9 +47,7 @@ def get_configuration(request):
 ])
 @pytest.mark.parametrize('name, content, checkers, tags_to_apply', [
     ('file', 'Sample content', {CHECK_ALL}, {'ossec_conf'}),
-    ('file2', b'Sample content', {CHECK_ALL}, {'ossec_conf'}),
-    ('file3', '', {CHECK_ALL}, {'ossec_conf'}),
-    ('file4', b'', {CHECK_ALL}, {'ossec_conf'}),
+    ('file2', '', {CHECK_ALL}, {'ossec_conf'}),
 ])
 def test_add_file_alert(folder, name, content, checkers, tags_to_apply, get_configuration,
                                       configure_environment, restart_syscheckd, wait_for_initial_scan):
