@@ -7,7 +7,7 @@ import sys
 
 import pytest
 from wazuh_testing.fim import (CHECK_ALL, DEFAULT_TIMEOUT, FIFO, LOG_FILE_PATH, REGULAR, SOCKET,
-                               callback_detect_event, create_file, validate_event, generate_params)
+                               callback_detect_event, create_file, validate_event, generate_params, check_time_travel)
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
 # variables
@@ -24,14 +24,12 @@ testdir1, testdir2 = test_directories
 
 # configurations
 
-monitoring_modes = ['realtime', 'whodata']
 
 conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
 conf_metadata = {'test_directories': directory_str, 'module_name': __name__}
-p, m = generate_params(conf_params, conf_metadata, modes=monitoring_modes)
+p, m = generate_params(conf_params, conf_metadata)
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
-
 
 # fixtures
 
@@ -69,13 +67,19 @@ def test_add_file_alert(folder, name, content, checkers, tags_to_apply, get_conf
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
+    scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     regular_path = os.path.join(folder, name)
 
     # Create files
     create_file(REGULAR, folder, name, content=content)
+    check_time_travel(scheduled)
+
     if os.path.exists(regular_path):
         os.remove(regular_path)
+        check_time_travel(scheduled)
+
     create_file(REGULAR, folder, name, content='')
+    check_time_travel(scheduled)
 
     # Wait until event is detected
     event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
