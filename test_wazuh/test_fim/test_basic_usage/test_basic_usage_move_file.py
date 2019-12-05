@@ -43,10 +43,10 @@ def get_configuration(request):
 
 # tests
 
-@pytest.mark.parametrize('folder, file, filetype, tags_to_apply', [
-    (testdir1, 'regular1', REGULAR, {'ossec_conf'}, )
+@pytest.mark.parametrize('folder, file, file_content, filetype, tags_to_apply', [
+    (testdir1, 'regular1', '' ,REGULAR, {'ossec_conf'}, )
 ])
-def test_move_file_1(folder, file, filetype, tags_to_apply,
+def test_move_file_1(folder, file, file_content, filetype, tags_to_apply,
                       get_configuration, configure_environment,
                       restart_syscheckd, wait_for_initial_scan):
     """ Checks if syscheckd does not detect 'added' event from a file that was 
@@ -61,7 +61,7 @@ def test_move_file_1(folder, file, filetype, tags_to_apply,
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
  
     # Create file inside folder
-    create_file(filetype, folder, file, content='')
+    create_file(filetype, folder, file, content=file_content)
 
     check_time_travel(scheduled)
     wazuh_log_monitor.start(timeout=timeout, callback=callback_detect_event)
@@ -69,7 +69,7 @@ def test_move_file_1(folder, file, filetype, tags_to_apply,
     # Move file to directory not monitored
     dest = PREFIX
     delete_file(folder, file)
-    create_file(filetype, dest, file, content='')
+    create_file(filetype, dest, file, content=file_content)
     check_time_travel(scheduled)
 
     # Expect deleted events
@@ -79,10 +79,10 @@ def test_move_file_1(folder, file, filetype, tags_to_apply,
     # Remove file
     delete_file(dest, file)
 
-@pytest.mark.parametrize('folder, file, filetype, tags_to_apply', [
-    (testdir1, 'regular2', REGULAR, {'ossec_conf'}, )
+@pytest.mark.parametrize('folder, file, file_content, filetype, tags_to_apply', [
+    (testdir1, 'regular2', '', REGULAR, {'ossec_conf'}, )
 ])
-def test_move_file_2(folder, file, filetype, tags_to_apply,
+def test_move_file_2(folder, file, file_content, filetype, tags_to_apply,
                       get_configuration, configure_environment,
                       restart_syscheckd, wait_for_initial_scan):
     """ Checks if syscheckd detects 'added' and 'deleted' events from a file that was 
@@ -97,7 +97,7 @@ def test_move_file_2(folder, file, filetype, tags_to_apply,
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
  
     # Create file inside folder
-    create_file(filetype, folder, file, content='')
+    create_file(filetype, folder, file, content=file_content)
 
     check_time_travel(scheduled)
     wazuh_log_monitor.start(timeout=timeout, callback=callback_detect_event)
@@ -105,7 +105,7 @@ def test_move_file_2(folder, file, filetype, tags_to_apply,
     # Move file to monitored subdirectory
     dest = os.path.join(folder, "subdir")
     delete_file(folder, file)
-    create_file(filetype, dest, file, content='')
+    create_file(filetype, dest, file, content=file_content)
     check_time_travel(scheduled)
 
     # Expect added and deleted events
@@ -123,16 +123,12 @@ def test_move_file_2(folder, file, filetype, tags_to_apply,
         if 'deleted' not in added['data']['type'] and os.path.join(folder, file) not in added['data']['path']:
             raise AssertionError(f'Wrong event when moving a file')
 
-    # Remove file
-    delete_file(dest, file)
-    check_time_travel(scheduled)
-    wazuh_log_monitor.start(timeout=timeout, callback=callback_detect_event)
 
 
-@pytest.mark.parametrize('folder, file, filetype, tags_to_apply', [
-    (testdir1, 'regular3', REGULAR, {'ossec_conf'}, )
+@pytest.mark.parametrize('folder, file, file_content, filetype, tags_to_apply', [
+    (testdir1, 'regular3', '', REGULAR, {'ossec_conf'}, )
 ])
-def test_move_file_3(folder, file, filetype, tags_to_apply,
+def test_move_file_3(folder, file, file_content, filetype, tags_to_apply,
                       get_configuration, configure_environment,
                       restart_syscheckd, wait_for_initial_scan):
     """ Checks if syscheckd detects 'added' and 'deleted' events from a file that was 
@@ -147,7 +143,7 @@ def test_move_file_3(folder, file, filetype, tags_to_apply,
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
  
     # Create file inside folder
-    create_file(filetype, folder, file, content='')
+    create_file(filetype, folder, file, content=file_content)
 
     check_time_travel(scheduled)
     wazuh_log_monitor.start(timeout=timeout, callback=callback_detect_event)
@@ -155,7 +151,7 @@ def test_move_file_3(folder, file, filetype, tags_to_apply,
     # Move file to monitored directory
     dest = testdir2
     delete_file(folder, file)
-    create_file(filetype, dest, file, content='')
+    create_file(filetype, dest, file, content=file_content)
     check_time_travel(scheduled)
 
     # Expect added and deleted events
@@ -172,8 +168,3 @@ def test_move_file_3(folder, file, filetype, tags_to_apply,
     except AssertionError:
         if 'deleted' not in added['data']['type'] and os.path.join(folder, file) not in added['data']['path']:
             raise AssertionError(f'Wrong event when moving a file')
-
-    # Remove file
-    delete_file(dest, file)
-    check_time_travel(scheduled)
-    wazuh_log_monitor.start(timeout=timeout, callback=callback_detect_event)
