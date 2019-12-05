@@ -11,8 +11,9 @@ from datetime import timedelta
 import pytest
 
 from packages.wazuh_testing.wazuh_testing.fim import CHECK_ALL, DEFAULT_TIMEOUT, FIFO, LOG_FILE_PATH, REGULAR, SOCKET, callback_detect_event, \
-    create_file, validate_event, generate_params, is_fim_scan_ended, modify_file_content, check_time_travel, delete_file
-from packages.wazuh_testing.wazuh_testing.tools import FileMonitor, TimeMachine, check_apply_test, load_wazuh_configurations, PREFIX
+    create_file, validate_event, generate_params, is_fim_scan_ended, modify_file_content, check_time_travel, delete_file, detect_initial_scan
+from packages.wazuh_testing.wazuh_testing.tools import FileMonitor, TimeMachine, check_apply_test, load_wazuh_configurations, PREFIX, \
+    start_wazuh_service_windows, stop_wazuh_service_windows, start_wazuh_service_linux, stop_wazuh_service_linux
 
 # Variables
 
@@ -30,16 +31,22 @@ timeout = DEFAULT_TIMEOUT
 
 def stop_create_file_start(folder, file_list, filetype):
     # Stop agent
-    p = subprocess.Popen(["service", "wazuh-agent", "stop"])
-    p.wait()
+    if sys.platform == 'linux2' or sys.platform == 'linux':
+        start_wazuh_service_linux()
+    elif sys.platform == 'win32':
+        stop_wazuh_service_windows()
 
     # Create empty files
     for file in file_list:
         create_file(filetype, folder, file, content='')
 
     # Start agent
-    p = subprocess.Popen(["service", "wazuh-agent", "start"])
-    p.wait()
+    if sys.platform == 'linux2' or sys.platform == 'linux':
+        stop_wazuh_service_linux()
+    elif sys.platform == 'win32':
+        start_wazuh_service_windows()
+
+    detect_initial_scan(wazuh_log_monitor)
 
 
 # Configurations
@@ -65,7 +72,7 @@ def get_configuration(request):
     (testdir1, ['regular0', 'regular1', 'regular2'], REGULAR, 'Sample content', {CHECK_ALL}, {'ossec_conf'}, )
 ])
 def test_modify_existing_files_starting_agent_rt_wd(folder, file_list, filetype, content, checkers, tags_to_apply,
-                                                 get_configuration, configure_environment):
+                                                    get_configuration, configure_environment):
     """
         Checks if syscheck generates modified alerts for files that exists when starting the agent
         in scheduled mode
@@ -93,7 +100,7 @@ def test_modify_existing_files_starting_agent_rt_wd(folder, file_list, filetype,
     (testdir1, ['regular0', 'regular1', 'regular2'], REGULAR, 'Sample content', {CHECK_ALL}, {'ossec_conf'}, )
 ])
 def test_delete_existing_files_starting_agent_rt_wd(folder, file_list, filetype, content, checkers, tags_to_apply,
-                                                 get_configuration, configure_environment):
+                                                    get_configuration, configure_environment):
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Stop Wazuh, create files and start Wazuh
