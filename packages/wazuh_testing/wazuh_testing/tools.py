@@ -545,8 +545,11 @@ def control_service(action, daemon=None):
             result = subprocess.run(["net", action, "OssecSvc"]).returncode
     else:  # Default Unix
         # Check if running a manager or an agent
-        status = subprocess.run(['service', 'wazuh-agent', 'status'])
-        service = 'wazuh-manager' if status.returncode == 1 else 'wazuh-agent'
+        if sys.platform == 'darwin':
+            service = 'wazuh.agent'
+        else:
+            status = subprocess.run(['service', 'wazuh-agent', 'status'])
+            service = 'wazuh-manager' if status.returncode == 1 else 'wazuh-agent'
         if daemon is None:
             result = subprocess.run(['service', service, action]).returncode
         else:
