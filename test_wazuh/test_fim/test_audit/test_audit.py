@@ -209,7 +209,7 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
 
     time_before_restart = get_audit_creation_time()
     restart_wazuh_service()
-    time.sleep(5)
+    time.sleep(10)
     
     time_after_restart = get_audit_creation_time()
 
