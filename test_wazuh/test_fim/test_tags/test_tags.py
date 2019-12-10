@@ -21,6 +21,7 @@ test_directories = [os.path.join(PREFIX, 'testdir_tags'),
 directory_str = ','.join([test_directories[0], test_directories[2]])
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
+
 # configurations
 
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
@@ -42,11 +43,14 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
                                            metadata=metadata
                                            )
 
+<<<<<<< HEAD
 # Delete real-time and whodata configurations if we are on MacOS
 for conf in list(configurations):
     if sys.platform == 'darwin' and conf['metadata']['fim_mode'] != 'scheduled':
         configurations.pop(configurations.index(conf))
 
+=======
+>>>>>>> master
 
 # fixtures
 
@@ -63,7 +67,16 @@ def get_configuration(request):
 ])
 def test_tags(folder, name, content,
               get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
+    """Checks the tags functionality by applying some tags an ensuring the events raised for the monitored directory has
+    the expected tags.
 
+    This test is intended to be used with valid configurations files. Each execution of this test will configure the
+    environment properly, restart the service and wait for the initial scan.
+
+    :param folder string Directory where the file is being created
+    :param name string Name of the file to be created
+    :param content string, bytes Content to fill the new file
+    """
     defined_tags = get_configuration['metadata']['fim_tags']
 
     def tag_validator(event):

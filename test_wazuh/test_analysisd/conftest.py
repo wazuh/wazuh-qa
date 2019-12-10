@@ -2,13 +2,11 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import os
 import shutil
-import time
 
 import pytest
 
-from wazuh_testing.tools import restart_wazuh_service
+from wazuh_testing.tools import control_service
 
 
 @pytest.fixture(scope='module')
@@ -23,7 +21,7 @@ def configure_local_rules(get_configuration, request):
     shutil.copy(file_test, '/var/ossec/etc/rules/local_rules.xml')
 
     # restart wazuh service
-    restart_wazuh_service()
+    control_service('restart')
 
     yield
 
@@ -31,4 +29,4 @@ def configure_local_rules(get_configuration, request):
     shutil.move('/var/ossec/etc/rules/local_rules.xml.cpy', '/var/ossec/etc/rules/local_rules.xml')
 
     # restart wazuh service
-    restart_wazuh_service()
+    control_service('restart')

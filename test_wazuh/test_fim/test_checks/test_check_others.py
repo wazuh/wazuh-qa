@@ -81,11 +81,18 @@ else:
 @pytest.mark.parametrize('path, checkers', parametrize_list)
 def test_check_others_individually(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                                    wait_for_initial_scan):
-    """Test the behaviour of every Check option individually without using the Check_all option.
+    """Test the behaviour of every Check option individually without using the Check_all option. Check_all option will
+    be set to "no" in order to avoid using the default check_all configuration.
 
-    This test is intended to be used with valid configurations files.
+    Example:
+        check_all="no" check_sum="yes"
+        check_all="no" check_mtime="yes"
+        ...
 
-    :param path string Directory where the file is being created
+    This test is intended to be used with valid configurations files. Each execution of this test will configure the
+    environment properly, restart the service and wait for the initial scan.
+
+    :param path string Directory where the file is being created and monitored
     :param checkers dict Dict with all the check options to be used
     """
     check_apply_test({'test_check_others_individually'}, get_configuration['tags'])
@@ -118,11 +125,20 @@ else:
 
 @pytest.mark.parametrize('path, checkers', parametrize_list)
 def test_check_others(path, checkers, get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Test the behaviour of combinations of Check options over the same directory without using the Check_all option.
+    """Test the behaviour of several combinations of Check options over the same directory with Check_all disabled to
+    avoid using the default check_all configuration. The order of the checks (including check_all="no") will be
+    different on each case to test the behaviour of check_all="no".
 
-    This test is intended to be used with valid configurations files.
+    Example:
+        check_all: "no" check_size: "yes" check_sum: "yes"
+        check_all: "no" check_md5sum: "yes" check_mtime: "yes" check_group: "yes"
+        check_md5sum: "yes" check_all: "no" check_mtime: "yes" check_group: "yes"
+        ...
 
-    :param path string Directory where the file is being created
+    This test is intended to be used with valid configurations files. Each execution of this test will configure the
+    environment properly, restart the service and wait for the initial scan.
+
+    :param path string Directory where the file is being created and monitored
     :param checkers dict Dict with all the check options to be used
     """
     check_apply_test({'test_check_others'}, get_configuration['tags'])

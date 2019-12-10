@@ -80,11 +80,18 @@ else:
 @pytest.mark.parametrize('path, checkers', parametrize_list)
 def test_check_all_single(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                           wait_for_initial_scan):
-    """Test the Check_all option behaviour when is used in conjuntion with one more check option
+    """Test the functionality of `check_all` option when used in conjunction with another check on the same directory,
+    having "check_all" to "yes" and the other check to "no".
 
-    This test is intended to be used with valid configurations files.
+    Example:
+        check_all="yes" check_sum="no"
+        check_all="yes" check_mtime="no"
+        ...
 
-    :param path string Directory where the file is being created
+    This test is intended to be used with valid configurations files. Each execution of this test will configure the
+    environment properly, restart the service and wait for the initial scan.
+
+    :param path string Directory where the file is being created and monitored
     :param checkers dict Dict with all the check options to be used
     """
     check_apply_test({'test_check_all_single'}, get_configuration['tags'])
@@ -115,11 +122,18 @@ else:
 
 @pytest.mark.parametrize('path, checkers', parametrize_list)
 def test_check_all(path, checkers, get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Test the Check_all option behaviour when is used in conjuntion with more than one check options
+    """Test the functionality of `check_all` option when used in conjunction with more than one check on the same directory,
+    having "check_all" to "yes" and the other ones to "no".
 
-    This test is intended to be used with valid configurations files.
+    Example:
+        check_all="yes" check_sum="no" check_md5sum="no"
+        check_all="yes" check_perm="yes" check_mtime="no"
+        ...
 
-    :param path string Directory where the file is being created
+    This test is intended to be used with valid configurations files. Each execution of this test will configure the
+    environment properly, restart the service and wait for the initial scan.
+
+    :param path string Directory where the file is being created and monitored
     :param checkers dict Dict with all the check options to be used
     """
     check_apply_test({'test_check_all'}, get_configuration['tags'])

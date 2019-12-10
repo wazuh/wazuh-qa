@@ -21,7 +21,7 @@ from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_added_rule,
                                detect_initial_scan)
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations,
-                                 restart_wazuh_service,
+                                 control_service,
                                  truncate_file)
 
 
@@ -167,7 +167,7 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
 
     # Restart and for wazuh
     truncate_file(LOG_FILE_PATH)
-    restart_wazuh_service()
+    control_service('restart')
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     detect_initial_scan(wazuh_log_monitor)
 
@@ -208,7 +208,7 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
     os.remove(plugin_path)
 
     time_before_restart = get_audit_creation_time()
-    restart_wazuh_service()
+    control_service('restart')
     time.sleep(5)
     
     time_after_restart = get_audit_creation_time()

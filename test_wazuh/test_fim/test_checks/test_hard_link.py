@@ -8,8 +8,7 @@ import sys
 import pytest
 from wazuh_testing.fim import (HARDLINK, LOG_FILE_PATH, REGULAR, EventChecker,
                                check_time_travel, create_file, delete_file, modify_file_content)
-from wazuh_testing.tools import (FileMonitor,
-                                 load_wazuh_configurations, truncate_file)
+from wazuh_testing.tools import FileMonitor, load_wazuh_configurations
 
 
 # variables
@@ -62,9 +61,11 @@ def get_configuration(request):
 ])
 def test_hard_link(path_file, path_link, num_links, get_configuration,
                    configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Test the check_inode option when used with Hard links.
+    """Test the check_inode option when used with Hard links by creating a hard link file inside and outside the
+    monitored directory.
 
-    This test is intended to be used with valid configurations files.
+    This test is intended to be used with valid configurations files. Each execution of this test will configure the
+    environment properly, restart the service and wait for the initial scan.
 
     :param path_file string The path to the regular file to be created
     :param path_link string The path to the Hard links to be created

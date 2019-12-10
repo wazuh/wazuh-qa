@@ -20,23 +20,21 @@ from subprocess import DEVNULL, check_call, check_output
 from typing import Any, List, Set
 
 
-if sys.platform == 'linux2' or sys.platform == 'linux':
-    WAZUH_PATH = os.path.join('/', 'var', 'ossec')
-    WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
-    WAZUH_SOURCES = os.path.join('/', 'wazuh')
-    GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
-    PREFIX = os.sep
-
-elif sys.platform == 'win32':
+if sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'ossec.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     PREFIX = os.path.join('c:', os.sep)
-
 elif sys.platform == 'darwin':
     WAZUH_PATH = os.path.join('/', 'Library', 'Ossec')
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
+    PREFIX = os.sep
+else:
+    WAZUH_PATH = os.path.join('/', 'var', 'ossec')
+    WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
+    WAZUH_SOURCES = os.path.join('/', 'wazuh')
+    GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
     PREFIX = os.sep
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -523,40 +521,49 @@ def restart_wazuh_with_new_conf(new_conf, daemon='ossec-syscheckd'):
     :return: None
     """
     write_wazuh_conf(new_conf)
+    control_service('restart', daemon=daemon)
+
+
+def control_service(action, daemon=None):
+    """ Performs the stop, start and restart operation with Wazuh.
+    It takes care of the current OS to interact with the service and the type of installation (agent or manager)
+
+    :param action: str Must be one of 'stop', 'start' or 'restart'
+    :param daemon: str Name of the daemon to be controlled. None to control the whole Wazuh service
+    :return: None
+    """
+    valid_actions = ('start', 'stop', 'restart')
+    if action not in valid_actions:
+        raise ValueError(f'action {action} is not one of {valid_actions}')
+
     if sys.platform == 'win32':
-        restart_wazuh_service_windows()
+        if action == 'restart':
+            control_service('stop')
+            control_service('start')
+            result = 0
+        else:
+            result = subprocess.run(["net", action, "OssecSvc"]).returncode
+    else:  # Default Unix
+        # Check if running a manager or an agent
+        status = subprocess.run(['service', 'wazuh-agent', 'status'])
+        service = 'wazuh-manager' if status.returncode == 1 else 'wazuh-agent'
+        if daemon is None:
+            result = subprocess.run(['service', service, action]).returncode
+        else:
+            if action == 'restart':
+                control_service('stop', daemon=daemon)
+                control_service('start', daemon=daemon)
+            elif action == 'stop':
+                for proc in psutil.process_iter(attrs=['name']):
+                    if proc.name() == daemon:
+                        proc.kill()
+            else:
+                daemon_path = os.path.join(WAZUH_PATH, 'bin')
+                check_call([f'{daemon_path}/{daemon}'])
+            result = 0
 
-    elif sys.platform == 'linux2' or sys.platform == 'linux':
-        restart_wazuh_daemon(daemon)
-
-
-def restart_wazuh_service():
-    """ Restart Wazuh service completely
-    :return: None
-    """
-    p = subprocess.Popen(["service", "wazuh-manager", "restart"])
-    p.wait()
-
-
-def stop_wazuh_service_windows():
-    """ Stop Wazuh service completely
-    :return: None
-    """
-    p = subprocess.Popen(["net", "stop", "OssecSvc"])
-    p.wait()
-
-
-def start_wazuh_service_windows():
-    p = subprocess.Popen(["net", "start", "OssecSvc"])
-    p.wait()
-
-
-def restart_wazuh_service_windows():
-    """ Restart Wazuh service completely
-    :return: None
-    """
-    stop_wazuh_service_windows()
-    start_wazuh_service_windows()
+    if result != 0:
+        raise ValueError(f"Error when executing {action} in daemon {daemon}. Exit status: {result}")
 
 
 def reformat_time(scan_time):
