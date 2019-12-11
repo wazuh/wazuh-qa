@@ -109,9 +109,9 @@
       value: "c:\\testdir5"
       attributes:
       - FIM_MODE
-      - check_all: "yes"
-      - check_attrs: "no"
-      - check_owner: "no"
+      - check_all: "no"
+      - check_attrs: "yes"
+      - check_owner: "yes"
   - directories:
       value: "c:\\testdir6"
       attributes:

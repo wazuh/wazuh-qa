@@ -6,8 +6,8 @@ import os
 import sys
 
 import pytest
-from wazuh_testing.fim import (CHECK_ALL, CHECK_MD5SUM, CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_SUM, LOG_FILE_PATH,
-                               REQUIRED_ATTRIBUTES, regular_file_cud)
+from wazuh_testing.fim import (CHECK_ALL, CHECK_MD5SUM, CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_SUM, DEFAULT_TIMEOUT,
+                               LOG_FILE_PATH, REQUIRED_ATTRIBUTES, regular_file_cud)
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations
 
 
@@ -93,25 +93,25 @@ def test_checksums_checkall(path, checkers, get_configuration, configure_environ
     """
     check_apply_test({'test_checksums_checkall'}, get_configuration['tags'])
 
-    regular_file_cud(path, wazuh_log_monitor, min_timeout=10, options=checkers,
+    regular_file_cud(path, wazuh_log_monitor, min_timeout=DEFAULT_TIMEOUT, options=checkers,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled')
 
 
-@pytest.mark.parametrize('path, checkers, triggers_event', [
-    (testdir1, REQUIRED_ATTRIBUTES[CHECK_SUM], True),
-    (testdir2, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_MD5SUM}, True),
-    (testdir3, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_SHA1SUM}, True),
-    (testdir4, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_SHA256SUM}, True),
-    (testdir5, REQUIRED_ATTRIBUTES[CHECK_SUM] - REQUIRED_ATTRIBUTES[CHECK_SUM], False),
-    (testdir6, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_MD5SUM} - {CHECK_SHA1SUM}, True),
-    (testdir6, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_SHA1SUM} - {CHECK_MD5SUM}, True),
-    (testdir7, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_MD5SUM} - {CHECK_SHA1SUM} - {CHECK_SHA256SUM}, False),
-    (testdir7, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_SHA256SUM} - {CHECK_SHA1SUM} - {CHECK_MD5SUM}, False),
-    (testdir8, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_SHA1SUM} - {CHECK_SHA256SUM}, True),
-    (testdir9, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_MD5SUM} - {CHECK_SHA256SUM}, True),
-    (testdir9, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_SHA256SUM} - {CHECK_MD5SUM}, True),
+@pytest.mark.parametrize('path, checkers', [
+    (testdir1, REQUIRED_ATTRIBUTES[CHECK_SUM]),
+    (testdir2, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_MD5SUM}),
+    (testdir3, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_SHA1SUM}),
+    (testdir4, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_SHA256SUM}),
+    (testdir5, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_MD5SUM} - {CHECK_SHA1SUM}),
+    (testdir5, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_SHA1SUM} - {CHECK_MD5SUM}),
+    (testdir6, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_MD5SUM} - {CHECK_SHA256SUM}),
+    (testdir6, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_SHA256SUM} - {CHECK_MD5SUM}),
+    (testdir7, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_SHA1SUM} - {CHECK_SHA256SUM}),
+    (testdir7, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_SHA256SUM} - {CHECK_SHA1SUM}),
+    (testdir8, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_MD5SUM} - {CHECK_SHA256SUM}),
+    (testdir8, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_SHA256SUM} - {CHECK_MD5SUM})
 ])
-def test_checksums(path, checkers, triggers_event, get_configuration, configure_environment, restart_syscheckd,
+def test_checksums(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                    wait_for_initial_scan):
     """Test the checksum options (checksum, sha1sum, sha256sum and md5sum) behaviour when is used alone or in conjuntion.
     Check_all option will be set to "no" in order to avoid using the default check_all configuration.
@@ -130,6 +130,5 @@ def test_checksums(path, checkers, triggers_event, get_configuration, configure_
     """
     check_apply_test({'test_checksums'}, get_configuration['tags'])
 
-    regular_file_cud(path, wazuh_log_monitor, min_timeout=10, options=checkers,
-                     time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                     triggers_event=triggers_event)
+    regular_file_cud(path, wazuh_log_monitor, min_timeout=DEFAULT_TIMEOUT, options=checkers,
+                     time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled')
