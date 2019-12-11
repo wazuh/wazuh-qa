@@ -141,6 +141,18 @@ def is_fim_scan_ended():
                     return line_number
     return -1
 
+def get_log_line(message):
+    message = 'File integrity monitoring scan ended.'
+    line_number = 0
+    with open(LOG_FILE_PATH, 'r') as f:
+        for line in f:
+            line_number += 1
+            if line_number > _last_log_line:
+                if message in line:
+                    globals()['_last_log_line'] = line_number
+                    return line_number
+    return -1
+
 
 def create_file(type_, path, name, **kwargs):
     """ Creates a file in a given path. The path will be created in case it does not exists.
