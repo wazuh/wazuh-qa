@@ -130,10 +130,10 @@ def validate_event(event, checks=None):
 
     # Check add file event
     if event['data']['type'] == 'added':
-        assert old_attributes not in event['data'] and changed_attributes not in event['data']
+        assert 'old_attributes' not in event['data'] and 'changed_attributes' not in event['data']
     # Check modify file event
     if event['data']['type'] == 'modified':
-        assert old_attributes in event['data'] and changed_attributes in event['data']
+        assert 'old_attributes' in event['data'] and 'changed_attributes' in event['data']
 
 
 def is_fim_scan_ended():
