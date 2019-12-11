@@ -73,7 +73,7 @@ def test_prefilter_cmd(tags_to_apply, get_configuration, configure_environment, 
 
     if get_configuration['metadata']['prefilter_cmd'] == '/usr/sbin/prelink -y':
         prelink = get_configuration['metadata']['prefilter_cmd'].split(' ')[0]
-        # assert os.path.exists(prelink), f'Prelink is not installed'
+        assert os.path.exists(prelink), f'Prelink is not installed'
         truncate_file(LOG_FILE_PATH)
         restart_wazuh_daemon('ossec-syscheckd')
         detect_initial_scan(wazuh_log_monitor)

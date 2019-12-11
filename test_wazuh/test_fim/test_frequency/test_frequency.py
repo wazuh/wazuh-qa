@@ -4,6 +4,7 @@
 
 import os
 import shutil
+import sys
 from datetime import timedelta
 
 import pytest
@@ -69,6 +70,10 @@ configurations2 = load_wazuh_configurations(configurations_path, __name__,
 # Merge both list of configurations into the final one to avoid skips and configuration issues
 configurations = configurations1 + configurations2
 
+# Delete real-time and whodata configurations if we are on MacOS
+for conf in list(configurations):
+    if sys.platform == 'darwin' and conf['metadata']['fim_mode'] != 'scheduled':
+        configurations.pop(configurations.index(conf))
 
 # fixtures
 

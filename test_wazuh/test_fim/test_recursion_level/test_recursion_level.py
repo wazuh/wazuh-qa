@@ -61,6 +61,11 @@ for conf in list(configurations):
     if sys.platform == 'darwin' and conf['metadata']['fim_mode'] != 'scheduled':
         configurations.pop(configurations.index(conf))
 
+# Delete real-time and whodata configurations if we are on MacOS
+for conf in list(configurations):
+    if sys.platform == 'darwin' and conf['metadata']['fim_mode'] != 'scheduled':
+        configurations.pop(configurations.index(conf))
+
 
 # Functions
 

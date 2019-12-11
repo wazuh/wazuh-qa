@@ -37,6 +37,12 @@ else:
     GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
     PREFIX = os.sep
 
+if sys.platform == 'darwin' or sys.platform == 'win32':
+    WAZUH_SERVICE = 'wazuh.agent'
+else:
+    status = subprocess.run(['service', 'wazuh-manager', 'status'])
+    WAZUH_SERVICE = 'wazuh-manager' if status.returncode == 0 else 'wazuh-agent'
+
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
 
@@ -544,14 +550,11 @@ def control_service(action, daemon=None):
         else:
             result = subprocess.run(["net", action, "OssecSvc"]).returncode
     else:  # Default Unix
-        # Check if running a manager or an agent
-        if sys.platform == 'darwin':
-            service = 'wazuh.agent'
-        else:
-            status = subprocess.run(['service', 'wazuh-agent', 'status'])
-            service = 'wazuh-manager' if status.returncode == 1 else 'wazuh-agent'
         if daemon is None:
-            result = subprocess.run(['service', service, action]).returncode
+            if sys.platform == 'darwin':
+                result = subprocess.run([f'{WAZUH_PATH}/bin/ossec-control', action]).returncode
+            else:
+                result = subprocess.run(['service', WAZUH_SERVICE, action]).returncode
         else:
             if action == 'restart':
                 control_service('stop', daemon=daemon)
