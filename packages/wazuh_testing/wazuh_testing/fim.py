@@ -10,6 +10,7 @@ import shutil
 import socket
 import sys
 import time
+from datetime import datetime
 import subprocess
 from collections import Counter
 from copy import deepcopy
@@ -544,6 +545,13 @@ def callback_symlink_scan_ended(line):
         return True
     else:
         return None
+
+
+def callback_sending_anything(line):
+    match = re.match(r'(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) .*DEBUG: .*Sending .*({.*?})$', line)
+    if match:
+        return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S'), json.dumps(match.group(2))
+    return None
 
 
 def check_time_travel(time_travel):

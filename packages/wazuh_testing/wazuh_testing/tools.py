@@ -221,13 +221,13 @@ def set_section_wazuh_conf(section: str = 'syscheck',
                 if new_elements:
                     create_elements(tag, new_elements)
                 else:
-                    tag.text = properties.get('value')
+                    tag.text = str(properties.get('value'))
                     attributes = properties.get('attributes')
                     if attributes:
                         for attribute in attributes:
                             if attribute is not None and isinstance(attribute, dict):  # noqa: E501
                                 for attr_name, attr_value in attribute.items():
-                                    tag.attrib[attr_name] = attr_value
+                                    tag.attrib[attr_name] = str(attr_value)
     # get Wazuh configuration
     wazuh_conf = get_wazuh_conf()
     section_conf = wazuh_conf.find(section)
