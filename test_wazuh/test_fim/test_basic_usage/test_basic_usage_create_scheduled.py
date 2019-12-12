@@ -73,7 +73,10 @@ def test_create_file_scheduled(folder, name, filetype, content, checkers, tags_t
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Create files
-    create_file(filetype, folder, name, content=content)
+    if filetype == REGULAR:
+        create_file(filetype, folder, name, content=content)
+    else:
+        create_file(filetype, folder, name)
 
     # Go ahead in time to let syscheck perform a new scan
     TimeMachine.travel_to_future(timedelta(hours=13))
@@ -81,7 +84,7 @@ def test_create_file_scheduled(folder, name, filetype, content, checkers, tags_t
     if filetype == REGULAR:
         # Wait until event is detected
         event = wazuh_log_monitor.start(
-            timeout=30, callback=callback_detect_event).result()
+            timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
         validate_event(event, checkers)
     else:
         with pytest.raises(TimeoutError):

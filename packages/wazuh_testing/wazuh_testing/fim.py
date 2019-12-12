@@ -43,6 +43,10 @@ elif sys.platform == 'linux2' or sys.platform == 'linux':
                        'audit_name', 'effective_uid', 'effective_name', 'ppid', 'process_id'
                        }
 
+elif sys.platform == 'darwin':
+    WAZUH_PATH = os.path.join('/', 'Library', 'Ossec')
+    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+    DEFAULT_TIMEOUT = 10
 
 FIFO = 'fifo'
 SYMLINK = 'sym_link'
@@ -157,7 +161,7 @@ def create_file(type_, path, name, **kwargs):
     getattr(sys.modules[__name__], f'_create_{type_}')(path, name, **kwargs)
 
 
-def _create_fifo(path, name, content):
+def _create_fifo(path, name):
     """Creates a FIFO file.
 
     :param path: Path where the file will be created
@@ -205,7 +209,7 @@ def _create_hard_link(path, name, target):
         raise
 
 
-def _create_socket(path, name, content):
+def _create_socket(path, name):
     """Creates a Socket file.
 
     :param path: Path where the file will be created
@@ -224,7 +228,7 @@ def _create_socket(path, name, content):
     sock.bind(socket_path)
 
 
-def _create_regular(path, name, content):
+def _create_regular(path, name, content=''):
     """Creates a Regular file.
 
     :param path: Path where the file will be created
@@ -242,7 +246,7 @@ def _create_regular(path, name, content):
         f.write(content)
 
 
-def _create_regular_windows(path, name, content):
+def _create_regular_windows(path, name, content=''):
     regular_path = os.path.join(path, name)
     os.popen("echo " + content + " > " + regular_path + f" runas /user:{os.getlogin()}")
 
@@ -400,31 +404,56 @@ def modify_file(path, name, new_content=None, is_binary=False):
     modify_file_win_attributes(path, name)
 
 
-def change_internal_options(pattern, value, opt_path=os.path.join('/', 'var', 'ossec', 'etc', 'internal_options.conf')):
-    """Changes the value of a given parameter in linux.
+def change_internal_options(param, value, opt_path=None):
+    """Changes the value of a given parameter in local_internal_options.
 
-    :param opt_path: File path
-    :type opt_path: String
-    :type opt_path: String
-    :param pattern: Parameter to change
-    :type pattern: String
+    :param param: Parameter to change
+    :type param: String
     :param value: New value
     :type value: String
+    :param opt_path: local_internal_options path
+    :type opt_path: String
     """
+    if opt_path is None:
+        local_conf_path = os.path.join(WAZUH_PATH, 'local_internal_options.conf') if sys.platform == 'win32' else \
+            os.path.join(WAZUH_PATH, 'etc', 'local_internal_options.conf')
+    else:
+        local_conf_path = opt_path
+
     add_pattern = True
-    with open(opt_path, "r") as sources:
+    with open(local_conf_path, "r") as sources:
         lines = sources.readlines()
 
-    with open(opt_path, "w") as sources:
+    with open(local_conf_path, "w") as sources:
         for line in lines:
             sources.write(
-                re.sub(f'{pattern}=[0-9]*', f'{pattern}={value}', line))
-            if pattern in line:
+                re.sub(f'{param}=[0-9]*', f'{param}={value}', line))
+            if param in line:
                 add_pattern = False
 
     if add_pattern:
-        with open(opt_path, "a") as sources:
-            sources.write(f'\n\n{pattern}={value}')
+        with open(local_conf_path, "a") as sources:
+            sources.write(f'\n\n{param}={value}')
+
+
+def change_conf_param(param, value):
+    """Changes the value of a given parameter in ossec.conf.
+
+    :param param: Parameter to change
+    :type param: String
+    :param value: New value
+    :type value: String
+    """
+    conf_path = os.path.join(WAZUH_PATH, 'ossec.conf') if sys.platform == 'win32' else \
+        os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
+
+    with open(conf_path, "r") as sources:
+        lines = sources.readlines()
+
+    with open(conf_path, "w") as sources:
+        for line in lines:
+            sources.write(
+                re.sub(f'<{param}>.*</{param}>', f'<{param}>{value}</{param}>', line))
 
 
 def callback_detect_end_scan(line):
