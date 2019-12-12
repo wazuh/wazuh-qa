@@ -158,6 +158,13 @@ def create_file(type_, path, name, **kwargs):
     :return: None
     """
     os.makedirs(path, exist_ok=True, mode=0o777)
+    if type_ != REGULAR:
+        try:
+            kwargs.pop('content')
+        except KeyError:
+            pass
+    if type_ in (SYMLINK, HARDLINK) and 'target' not in kwargs:
+        raise ValueError(f"'target' param is mandatory for type {type_}")
     getattr(sys.modules[__name__], f'_create_{type_}')(path, name, **kwargs)
 
 
