@@ -1,0 +1,37 @@
+---
+# Conf 1
+- tags:
+  - valid_no_regex
+  apply_to_modules:
+  - test_ignore_works_over_restrict
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "/testdir1"
+      attributes:
+      - check_all: 'yes'
+      - restrict: "testfile$"
+      - FIM_MODE
+  - ignore:
+      value: "/testdir1/testfile"
+# Conf 2
+- tags:
+  - valid_regex
+  apply_to_modules:
+  - test_ignore_works_over_restrict
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "/testdir1"
+      attributes:
+      - check_all: 'yes'
+      - restrict: "testfile2$"
+      - FIM_MODE
+  - ignore:
+      value: "testfile2$"
+      attributes:
+      - type: sregex
