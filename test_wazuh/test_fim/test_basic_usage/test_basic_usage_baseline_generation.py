@@ -3,12 +3,12 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import sys
+from time import time
+
 import pytest
 
-from time import time
-from wazuh_testing.fim import (CHECK_ALL, DEFAULT_TIMEOUT, FIFO, LOG_FILE_PATH, REGULAR, SOCKET,
-                               callback_detect_event, callback_detect_end_scan, create_file, validate_event, generate_params, check_time_travel)
+from wazuh_testing.fim import (LOG_FILE_PATH, REGULAR, callback_detect_event, callback_detect_end_scan, create_file,
+                               generate_params)
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
 # variables
@@ -69,6 +69,7 @@ def test_wait_until_baseline(get_configuration, configure_environment, restart_s
     """
     check_apply_test({'ossec_conf'}, get_configuration['tags'])
 
+    # Create a file during initial scan to check if the event is logged after the 'scan ended' message
     create_file(REGULAR, testdir1, f'test_{int(round(time() * 10**6))}', content='')
 
     wazuh_log_monitor.start(timeout=120, callback=callback_detect_event_before_end_scan)
