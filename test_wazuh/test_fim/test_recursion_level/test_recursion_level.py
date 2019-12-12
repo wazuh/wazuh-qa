@@ -5,9 +5,9 @@ import os
 import pytest
 import sys
 
-from wazuh_testing.fim import (DEFAULT_TIMEOUT, LOG_FILE_PATH, callback_audit_event_too_long, regular_file_cud)
+from wazuh_testing.fim import (DEFAULT_TIMEOUT, LOG_FILE_PATH, callback_audit_event_too_long, regular_file_cud,
+                               generate_params)
 from wazuh_testing.tools import FileMonitor, load_wazuh_configurations
-
 
 # Variables
 
@@ -33,24 +33,13 @@ conf_name = "wazuh_recursion_windows.yaml" if sys.platform == "win32" else "wazu
 configurations_path = os.path.join(test_data_path, conf_name)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-
 # configurations
 
-common_params = [{'FIM_MODE': '', 'CHECK': {'check_all': 'yes'}},
-                 {'FIM_MODE': {'realtime': 'yes'}, 'CHECK': {'check_all': 'yes'}},
-                 {'FIM_MODE': {'whodata': 'yes'}, 'CHECK': {'check_all': 'yes'}}]
+common_params, common_metadata = generate_params({'CHECK': {'check_all': 'yes'}},
+                                                 {'check': 'all'}, )
 
-common_metadata = [{'fim_mode': 'scheduled', 'check': 'all'},
-                   {'fim_mode': 'realtime', 'check': 'all'},
-                   {'fim_mode': 'whodata', 'check': 'all'}]
-
-inode_params = [{'FIM_MODE': '', 'CHECK': {'check_inode': 'no'}},
-                {'FIM_MODE': {'realtime': 'yes'}, 'CHECK': {'check_inode': 'no'}},
-                {'FIM_MODE': {'whodata': 'yes'}, 'CHECK': {'check_inode': 'no'}}]
-
-inode_metadata = [{'fim_mode': 'scheduled', 'check': 'inode'},
-                  {'fim_mode': 'realtime', 'check': 'inode'},
-                  {'fim_mode': 'whodata', 'check': 'inode'}]
+inode_params, inode_metadata = generate_params({'CHECK': {'check_inode': 'no'}},
+                                               {'check': 'inode'}, )
 
 params = common_params if sys.platform == "win32" else common_params + inode_params
 metadata = common_metadata if sys.platform == "win32" else common_metadata + inode_metadata
@@ -108,14 +97,15 @@ def recursion_test(dirname, subdirname, recursion_level, timeout=1, edge_limit=2
         for n in range(recursion_level):
             path = os.path.join(path, subdirname + str(n + 1))
             if ((recursion_level < edge_limit * 2) or
-                (recursion_level >= edge_limit * 2 and n < edge_limit) or
-                (recursion_level >= edge_limit * 2 and n > recursion_level - edge_limit)):
+                    (recursion_level >= edge_limit * 2 and n < edge_limit) or
+                    (recursion_level >= edge_limit * 2 and n > recursion_level - edge_limit)):
                 regular_file_cud(path, wazuh_log_monitor, time_travel=is_scheduled, min_timeout=timeout)
 
         # Check False (exceding the specified recursion_level)
         for n in range(recursion_level, recursion_level + ignored_levels):
             path = os.path.join(path, subdirname + str(n + 1))
-            regular_file_cud(path, wazuh_log_monitor, time_travel=is_scheduled, min_timeout=timeout, triggers_event=False)
+            regular_file_cud(path, wazuh_log_monitor, time_travel=is_scheduled, min_timeout=timeout,
+                             triggers_event=False)
 
     except TimeoutError:
         if wazuh_log_monitor.start(timeout=5, callback=callback_audit_event_too_long, update_position=False).result():
