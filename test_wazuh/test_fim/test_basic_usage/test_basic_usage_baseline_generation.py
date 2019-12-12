@@ -4,12 +4,11 @@
 
 import os
 import sys
-import paramiko
 import pytest
 
-from datetime import datetime, timedelta
+from time import time
 from wazuh_testing.fim import (CHECK_ALL, DEFAULT_TIMEOUT, FIFO, LOG_FILE_PATH, REGULAR, SOCKET,
-                               callback_detect_event, create_file, validate_event, generate_params, get_log_line, check_time_travel)
+                               callback_detect_event, callback_detect_end_scan, create_file, validate_event, generate_params, check_time_travel)
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
 # variables
@@ -27,7 +26,7 @@ testdir1, testdir2 = test_directories
 
 conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
 conf_metadata = {'test_directories': directory_str, 'module_name': __name__}
-p, m = generate_params(conf_params, conf_metadata)
+p, m = generate_params(extra_params=conf_params, extra_metadata=conf_metadata, modes=['scheduled', 'realtime'])
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
@@ -42,34 +41,34 @@ def get_configuration(request):
 
 # tests
 
-@pytest.mark.parametrize('folder, name, tags_to_apply', [
-    (testdir1, 'file', {'ossec_conf'}),
-])
-def test_wait_until_baseline(folder, name, tags_to_apply, get_configuration,
-                                      configure_environment, restart_syscheckd, wait_for_initial_scan):
+def callback_detect_event_before_end_scan(line):
+    ended_scan = callback_detect_end_scan(line)
+    if ended_scan is None:
+        event = callback_detect_event(line)
+        assert event is None, 'Event detected before end scan'
+        return None
+    else:
+        return True
+
+
+def extra_configuration_before_yield():
+    for _ in range(1000):
+        create_file(REGULAR, testdir1, f'test_{int(round(time() * 10**6))}', content='')
+        create_file(REGULAR, testdir2, f'test_{int(round(time() * 10**6))}', content='')
+
+
+def test_wait_until_baseline(get_configuration, configure_environment, restart_syscheckd):
     """ Checks if events are appearing after the baseline
         The message 'File integrity monitoring scan ended' informs about the end of the first scan, which generates the baseline
 
         It creates a file, checks if the baseline has generated before the file addition event, and then if this event has generated.
 
-        :param folder: Name of the monitored folder
-        :param name: Name of the file
 
         * This test is intended to be used with valid configurations files. Each execution of this test will configure
           the environment properly, restart the service and wait for the initial scan.
     """
+    check_apply_test({'ossec_conf'}, get_configuration['tags'])
 
-    scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
+    create_file(REGULAR, testdir1, f'test_{int(round(time() * 10**6))}', content='')
 
-    create_file(REGULAR, folder, name, content='')
-    check_time_travel(scheduled)
-
-    ended_scan = get_log_line('File integrity monitoring scan ended.')
-    first_event = get_log_line(r'Sending message to server' if sys.platform == 'win32' else r'Sending event')
-    check_time_travel(scheduled)
-
-    try:
-        assert ended_scan < first_event
-    except AssertionError as e:
-        e.args += ('First event before baseline', 0)
-        raise
+    wazuh_log_monitor.start(timeout=120, callback=callback_detect_event_before_end_scan)
