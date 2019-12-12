@@ -21,7 +21,6 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2 = test_directories
 
-
 # configurations
 
 monitoring_modes = ['scheduled']

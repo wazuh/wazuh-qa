@@ -21,7 +21,6 @@ test_directories = [os.path.join(PREFIX, 'testdir_link'), os.path.join(PREFIX, '
                     os.path.join(PREFIX, 'testdir2')]
 testdir_link, testdir1, testdir2 = test_directories
 
-
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
@@ -62,6 +61,7 @@ def modify_symlink(target, path):
 
 # tests
 
+@pytest.mark.linux
 @pytest.mark.parametrize('monitored_dir, non_monitored_dir1, non_monitored_dir2, sym_target, tags_to_apply', [
     (testdir_link, testdir1, testdir2, 'file', {'non_monitored_dir'}),
     (testdir_link, testdir1, testdir2, 'folder', {'non_monitored_dir'})

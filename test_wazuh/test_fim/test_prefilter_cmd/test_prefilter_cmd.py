@@ -2,10 +2,10 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import distro
 import os
 import subprocess
 
+import distro
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, detect_initial_scan, generate_params
@@ -54,8 +54,11 @@ def check_prelink():
         installer = 'apt-get install'
     subprocess.call([f'{path}/data/install_prelink.sh', dist, installer])
 
+
 # tests
 
+
+@pytest.mark.linux
 @pytest.mark.parametrize('tags_to_apply', [
     ({'prefilter_cmd'})
 ])
@@ -73,7 +76,7 @@ def test_prefilter_cmd(tags_to_apply, get_configuration, configure_environment, 
 
     if get_configuration['metadata']['prefilter_cmd'] == '/usr/sbin/prelink -y':
         prelink = get_configuration['metadata']['prefilter_cmd'].split(' ')[0]
-        # assert os.path.exists(prelink), f'Prelink is not installed'
+        assert os.path.exists(prelink), f'Prelink is not installed'
         truncate_file(LOG_FILE_PATH)
         restart_wazuh_daemon('ossec-syscheckd')
         detect_initial_scan(wazuh_log_monitor)

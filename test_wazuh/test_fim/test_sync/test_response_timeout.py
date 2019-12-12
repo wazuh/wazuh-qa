@@ -11,7 +11,6 @@ import pytest
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, callback_detect_synchronization
 from wazuh_testing.tools import FileMonitor, TimeMachine, check_apply_test, load_wazuh_configurations, time_to_timedelta
 
-
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -20,7 +19,6 @@ configurations_path = os.path.join(test_data_path, 'wazuh_response_conf.yaml')
 test_directories = [os.path.join('/', 'testdir1')]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 response_timeouts = ['10', '10m', '10h', '10d', '10w']
-
 
 # configurations
 
@@ -42,6 +40,7 @@ def get_configuration(request):
 
 # Tests
 
+@pytest.mark.linux
 @pytest.mark.parametrize('num_files', [1, 100])
 @pytest.mark.parametrize('sync_interval', ['10', '10h'])
 def test_response_timeout(num_files, sync_interval, get_configuration, configure_environment, restart_syscheckd):
@@ -55,17 +54,20 @@ def test_response_timeout(num_files, sync_interval, get_configuration, configure
     :param sync_interval String The value to the SYNC_INTERVAL variable. Must be a number with one of the following 
     units 's', 'm', 'h', 'd' or 'w'. If no unit is specified the default 's' will be used.
     """
+
     def overwrite_agent_conf_file():
-        sync_cmd = "sudo sed -i 's|<sync_interval>.*|<sync_interval>" + str(sync_interval) + "</sync_interval>|g' /var/ossec/etc/ossec.conf"
+        sync_cmd = "sudo sed -i 's|<sync_interval>.*|<sync_interval>" + str(
+            sync_interval) + "</sync_interval>|g' /var/ossec/etc/ossec.conf"
         ssh.exec_command(sync_cmd)
 
-        response_cmd = "sudo sed -i 's|<response_timeout>.*|<response_timeout>" + response_timeout + "</response_timeout>|g' /var/ossec/etc/ossec.conf"
+        response_cmd = "sudo sed -i 's|<response_timeout>.*|<response_timeout>" + response_timeout + \
+                       "</response_timeout>|g' /var/ossec/etc/ossec.conf"
         ssh.exec_command(response_cmd)
 
     def wait_agent_initial_scan(time_out=60):
         truncate_agent_log()
         start_time = datetime.now()
-        while(datetime.now() < start_time + timedelta(seconds=time_out)):
+        while datetime.now() < start_time + timedelta(seconds=time_out):
             ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("sudo cat /var/ossec/logs/ossec.log")
             for line in ssh_stdout.read().decode('ascii').splitlines():
                 if callback_detect_end_scan(line):
@@ -75,7 +77,7 @@ def test_response_timeout(num_files, sync_interval, get_configuration, configure
     def create_files_in_agent():
         ssh.exec_command("sudo systemctl stop wazuh-agent")
         ssh.exec_command("sudo mkdir " + DIR_NAME)
-        ssh.exec_command("sudo touch " + DIR_NAME + "/testfile{0.."+str(num_files)+"}")
+        ssh.exec_command("sudo touch " + DIR_NAME + "/testfile{0.." + str(num_files) + "}")
 
         purge_manager_db()
 
@@ -92,7 +94,7 @@ def test_response_timeout(num_files, sync_interval, get_configuration, configure
 
     def detect_synchronization_start(time_out=1):
         start_time = datetime.now()
-        while(datetime.now() < start_time + timedelta(seconds=time_out)):
+        while datetime.now() < start_time + timedelta(seconds=time_out):
             ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("sudo cat /var/ossec/logs/ossec.log")
             for line in ssh_stdout.read().decode('ascii').splitlines():
                 if callback_detect_synchronization(line):
@@ -134,7 +136,8 @@ def test_response_timeout(num_files, sync_interval, get_configuration, configure
         hour = str(now.hour)
         minute = str(now.minute)
         second = str(now.second)
-        timedatectl_cmd = "sudo timedatectl set-time '"+year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second+"'"
+        timedatectl_cmd = "sudo timedatectl set-time '" + year + "-" + month + "-" + day + " " + hour + ":" + minute + \
+                          ":" + second + "'"
         ssh.exec_command(timedatectl_cmd)
 
     # Check if the test should be skipped

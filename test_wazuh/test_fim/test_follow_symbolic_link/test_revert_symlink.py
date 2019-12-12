@@ -34,6 +34,7 @@ def get_configuration(request):
 
 # tests
 
+@pytest.mark.linux
 @pytest.mark.parametrize('tags_to_apply', [
     {'monitored_file'}
 ])
@@ -48,6 +49,7 @@ def test_symbolic_revert_symlink(tags_to_apply, get_configuration, configure_env
     * This test is intended to be used with valid configurations files. Each execution of this test will configure
     the environment properly, restart the service and wait for the initial scan.
     """
+
     def modify_and_assert(file):
         modify_file_content(testdir1, file, new_content='Sample modification')
         check_time_travel(scheduled)

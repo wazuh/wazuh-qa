@@ -80,6 +80,8 @@ def get_configuration(request):
 
 # tests
 
+@pytest.mark.linux
+@pytest.mark.win32
 @pytest.mark.parametrize('folder, tags_to_apply', [
     (directory_str, {'ossec_conf'})
 ])

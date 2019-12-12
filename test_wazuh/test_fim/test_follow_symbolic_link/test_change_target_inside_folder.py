@@ -34,6 +34,7 @@ def get_configuration(request):
 
 # tests
 
+@pytest.mark.linux
 @pytest.mark.parametrize('tags_to_apply, previous_target, new_target', [
     ({'monitored_file'}, testdir1, os.path.join(testdir2, 'regular1')),
     ({'monitored_dir'}, testdir_target, testdir2)
