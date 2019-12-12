@@ -161,7 +161,7 @@ def create_file(type_, path, name, **kwargs):
     getattr(sys.modules[__name__], f'_create_{type_}')(path, name, **kwargs)
 
 
-def _create_fifo(path, name, content):
+def _create_fifo(path, name):
     """Creates a FIFO file.
 
     :param path: Path where the file will be created
@@ -209,7 +209,7 @@ def _create_hard_link(path, name, target):
         raise
 
 
-def _create_socket(path, name, content):
+def _create_socket(path, name):
     """Creates a Socket file.
 
     :param path: Path where the file will be created
@@ -228,7 +228,7 @@ def _create_socket(path, name, content):
     sock.bind(socket_path)
 
 
-def _create_regular(path, name, content):
+def _create_regular(path, name, content=''):
     """Creates a Regular file.
 
     :param path: Path where the file will be created
@@ -246,7 +246,7 @@ def _create_regular(path, name, content):
         f.write(content)
 
 
-def _create_regular_windows(path, name, content):
+def _create_regular_windows(path, name, content=''):
     regular_path = os.path.join(path, name)
     os.popen("echo " + content + " > " + regular_path + f" runas /user:{os.getlogin()}")
 
@@ -603,7 +603,7 @@ class EventChecker:
         :param min_timeout int Seconds to wait until an event is raised when trying to fetch.
         :param triggers_event boolean True if the event should be raised, False otherwise.
         """
-        self.fetch_events(min_timeout, triggers_event)
+        self.events = self.fetch_events(min_timeout, triggers_event)
         self.check_events(event_type)
 
     def fetch_events(self, min_timeout=1, triggers_event=True):
@@ -617,6 +617,7 @@ class EventChecker:
                                             callback=callback_detect_event,
                                             accum_results=len(self.file_list)
                                             ).result()
+            assert triggers_event, f'No events should be detected.'
             return result if isinstance(result, list) else [result]
         except TimeoutError:
             if triggers_event:
@@ -639,13 +640,24 @@ class EventChecker:
                     validate_event(ev, options)
 
         def check_events_type(events, ev_type, file_list=['testfile0']):
-            event_types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
-            assert (event_types[ev_type] == len(file_list)), f'Non expected number of events'
+            event_types = Counter(filter_events(events, ".[].data.type"))
+            assert (event_types[ev_type] == len(file_list)), f'Non expected number of events. {event_types[ev_type]} != {len(file_list)}'
 
         def check_files_in_event(events, folder, file_list=['testfile0']):
-            file_paths = jq(".[].data.path").transform(events, multiple_output=True)
+            file_paths = filter_events(events, ".[].data.path")
             for file_name in file_list:
-                assert (os.path.join(folder, file_name) in file_paths), f'{file_name} does not exist in {file_paths}'
+                expected_file_path = os.path.join(folder, file_name)
+                expected_file_path = expected_file_path[:1].lower() + expected_file_path[1:]
+                assert (expected_file_path in file_paths), f'{expected_file_path} does not exist in {file_paths}'
+
+        def filter_events(events, mask):
+            """Returns a list of elements matching a specified mask in the events list using jq module."""
+            if sys.platform == "win32":
+                jq_cmd = 'jq -r "' + mask + '"'
+                stdout = subprocess.check_output(jq_cmd, input=json.dumps(events).encode())
+                return stdout.decode("utf8").strip().split("\r\n")
+            else:
+                return jq(mask).transform(events, multiple_output=True)
 
         if self.events is not None:
             validate_checkers_per_event(self.events, self.options)
@@ -664,45 +676,48 @@ class EventChecker:
 
 class CustomValidator:
     """Enables using user-defined validators over the events when validating them with EventChecker"""
-
     def __init__(self, validators_after_create=None, validators_after_update=None,
                  validators_after_delete=None, validators_after_cud=None):
-        self.validators_after_create = validators_after_create
-        self.validators_after_update = validators_after_update
-        self.validators_after_delete = validators_after_delete
-        self.validators_after_cud = validators_after_cud
+        self.validators_create = validators_after_create
+        self.validators_update = validators_after_update
+        self.validators_delete = validators_after_delete
+        self.validators_cud = validators_after_cud
 
     def validate_after_create(self, events):
         """Custom validators to be applied by default when the event_type is 'added'.
-
         :param events List List of event to be validated.
         """
-        for event in events:
-            self.validators_after_create(event)
+        if self.validators_create is not None:
+            for event in events:
+                for validator in self.validators_create:
+                    validator(event)
 
     def validate_after_update(self, events):
         """Custom validators to be applied by default when the event_type is 'modified'.
-
         :param events List List of event to be validated.
         """
-        for event in events:
-            self.validators_after_update(event)
+        if self.validators_update is not None:
+            for event in events:
+                for validator in self.validators_update:
+                    validator(event)
 
     def validate_after_delete(self, events):
         """Custom validators to be applied by default when the event_type is 'deleted'.
-
         :param events List List of event to be validated.
         """
-        for event in events:
-            self.validators_after_delete(event)
+        if self.validators_delete is not None:
+            for event in events:
+                for validator in self.validators_delete:
+                    validator(event)
 
     def validate_after_cud(self, events):
         """Custom validators to be applied always by default.
-
         :param events List List of event to be validated.
         """
-        for event in events:
-            self.validators_after_cud(event)
+        if self.validators_cud is not None:
+            for event in events:
+                for validator in self.validators_cud:
+                    validator(event)
 
 
 def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=False, min_timeout=1, options=None,

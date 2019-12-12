@@ -6,13 +6,14 @@ import os
 import shutil
 import subprocess
 import sys
+from copy import deepcopy
 from datetime import timedelta
 
 import distro
 import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_integrity_event,
-                               regular_file_cud, detect_initial_scan, callback_detect_event)
+                               regular_file_cud, detect_initial_scan, callback_detect_event, generate_params)
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations, TimeMachine,
                                  set_section_wazuh_conf, restart_wazuh_with_new_conf)
@@ -30,22 +31,25 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 # configurations
 
 def change_conf(dir_value):
+    p, m = generate_params({'DIRECTORY': dir_value},
+                           {'directory': dir_value},
+                           modes=['scheduled'])
+
+    params, metadata = list(), list()
+    for skip in ['yes', 'no']:
+        for p_dict, m_dict in zip(p, m):
+            p_dict['SKIP'] = skip
+            m_dict['skip'] = skip
+            params.append(deepcopy(p_dict))
+            metadata.append(deepcopy(m_dict))
+
     return load_wazuh_configurations(configurations_path, __name__,
-                                     params=[{'SKIP': 'yes', 'DIRECTORY': dir_value},
-                                             {'SKIP': 'no', 'DIRECTORY': dir_value},
-                                             ],
-                                     metadata=[{'skip': 'yes', 'directory': dir_value},
-                                               {'skip': 'no', 'directory': dir_value},
-                                               ]
+                                     params=params,
+                                     metadata=metadata
                                      )
 
 
 configurations = change_conf(testdir)
-
-# Delete real-time and whodata configurations if we are on MacOS
-for conf in list(configurations):
-    if sys.platform == 'darwin' and conf['metadata']['fim_mode'] != 'scheduled':
-        configurations.pop(configurations.index(conf))
 
 
 # fixtures

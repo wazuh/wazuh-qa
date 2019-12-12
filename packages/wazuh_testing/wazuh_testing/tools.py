@@ -166,7 +166,7 @@ class TimeMachine:
         """
         now = datetime.utcnow() if sys.platform == 'darwin' else datetime.now()
         future = now + time_delta
-        if sys.platform == 'linux2' or sys.platform == 'linux':
+        if sys.platform == 'linux':
             TimeMachine._linux_set_time(future.isoformat())
         elif sys.platform == 'win32':
             TimeMachine._win_set_time(future)
