@@ -404,21 +404,27 @@ def modify_file(path, name, new_content=None, is_binary=False):
     modify_file_win_attributes(path, name)
 
 
-def change_internal_options(param, value, opt_path=os.path.join('/', 'var', 'ossec', 'etc', 'local_internal_options.conf')):
+def change_internal_options(param, value, opt_path=None):
     """Changes the value of a given parameter in local_internal_options.
 
     :param param: Parameter to change
     :type param: String
     :param value: New value
     :type value: String
-    :param opt_path: local_internal_options path. Linux default
+    :param opt_path: local_internal_options path
     :type opt_path: String
     """
+    if opt_path is None:
+        local_conf_path = os.path.join(WAZUH_PATH, 'local_internal_options.conf') if sys.platform == 'win32' else \
+            os.path.join(WAZUH_PATH, 'etc', 'local_internal_options.conf')
+    else:
+        local_conf_path = opt_path
+
     add_pattern = True
-    with open(opt_path, "r") as sources:
+    with open(local_conf_path, "r") as sources:
         lines = sources.readlines()
 
-    with open(opt_path, "w") as sources:
+    with open(local_conf_path, "w") as sources:
         for line in lines:
             sources.write(
                 re.sub(f'{param}=[0-9]*', f'{param}={value}', line))
@@ -426,7 +432,7 @@ def change_internal_options(param, value, opt_path=os.path.join('/', 'var', 'oss
                 add_pattern = False
 
     if add_pattern:
-        with open(opt_path, "a") as sources:
+        with open(local_conf_path, "a") as sources:
             sources.write(f'\n\n{param}={value}')
 
 
