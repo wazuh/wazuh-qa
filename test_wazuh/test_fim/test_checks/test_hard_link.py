@@ -4,10 +4,11 @@
 
 import os
 import sys
+from copy import deepcopy
 
 import pytest
 from wazuh_testing.fim import (DEFAULT_TIMEOUT, HARDLINK, LOG_FILE_PATH, REGULAR, EventChecker,
-                               check_time_travel, create_file, delete_file, modify_file_content)
+                               check_time_travel, create_file, delete_file, modify_file_content, generate_params)
 from wazuh_testing.tools import FileMonitor, load_wazuh_configurations, truncate_file
 
 # variables
@@ -19,21 +20,19 @@ test_directories = [testdir1]
 
 # configurations
 
+p, m = generate_params()
+
+params, metadata = list(), list()
+for check_inode in [{'check_inode': 'yes'}, {'check_inode': 'no'}]:
+    for p_dict, m_dict in zip(p, m):
+        p_dict['INODE'] = check_inode
+        m_dict['inode'] = check_inode
+        params.append(deepcopy(p_dict))
+        metadata.append(deepcopy(m_dict))
+
 configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=[{'FIM_MODE': '', 'INODE': {'check_inode': 'yes'}},
-                                                   {'FIM_MODE': '', 'INODE': {'check_inode': 'no'}},
-                                                   {'FIM_MODE': {'realtime': 'yes'}, 'INODE': {'check_inode': 'yes'}},
-                                                   {'FIM_MODE': {'realtime': 'yes'}, 'INODE': {'check_inode': 'no'}},
-                                                   {'FIM_MODE': {'whodata': 'yes'}, 'INODE': {'check_inode': 'yes'}},
-                                                   {'FIM_MODE': {'whodata': 'yes'}, 'INODE': {'check_inode': 'no'}}
-                                                   ],
-                                           metadata=[{'fim_mode': 'scheduled', 'inode': 'yes'},
-                                                     {'fim_mode': 'scheduled', 'inode': 'no'},
-                                                     {'fim_mode': 'realtime', 'inode': 'yes'},
-                                                     {'fim_mode': 'realtime', 'inode': 'no'},
-                                                     {'fim_mode': 'whodata', 'inode': 'yes'},
-                                                     {'fim_mode': 'whodata', 'inode': 'no'}
-                                                     ]
+                                           params=params,
+                                           metadata=metadata
                                            )
 
 

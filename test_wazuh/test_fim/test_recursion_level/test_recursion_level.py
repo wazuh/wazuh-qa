@@ -6,7 +6,8 @@ import sys
 
 import pytest
 
-from wazuh_testing.fim import (DEFAULT_TIMEOUT, LOG_FILE_PATH, callback_audit_event_too_long, regular_file_cud)
+from wazuh_testing.fim import (DEFAULT_TIMEOUT, LOG_FILE_PATH, callback_audit_event_too_long, regular_file_cud,
+                               generate_params)
 from wazuh_testing.tools import FileMonitor, load_wazuh_configurations
 
 # Variables
@@ -35,21 +36,11 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-common_params = [{'FIM_MODE': '', 'CHECK': {'check_all': 'yes'}},
-                 {'FIM_MODE': {'realtime': 'yes'}, 'CHECK': {'check_all': 'yes'}},
-                 {'FIM_MODE': {'whodata': 'yes'}, 'CHECK': {'check_all': 'yes'}}]
+common_params, common_metadata = generate_params({'CHECK': {'check_all': 'yes'}},
+                                                 {'check': 'all'}, )
 
-common_metadata = [{'fim_mode': 'scheduled', 'check': 'all'},
-                   {'fim_mode': 'realtime', 'check': 'all'},
-                   {'fim_mode': 'whodata', 'check': 'all'}]
-
-inode_params = [{'FIM_MODE': '', 'CHECK': {'check_inode': 'no'}},
-                {'FIM_MODE': {'realtime': 'yes'}, 'CHECK': {'check_inode': 'no'}},
-                {'FIM_MODE': {'whodata': 'yes'}, 'CHECK': {'check_inode': 'no'}}]
-
-inode_metadata = [{'fim_mode': 'scheduled', 'check': 'inode'},
-                  {'fim_mode': 'realtime', 'check': 'inode'},
-                  {'fim_mode': 'whodata', 'check': 'inode'}]
+inode_params, inode_metadata = generate_params({'CHECK': {'check_inode': 'no'}},
+                                               {'check': 'inode'}, )
 
 params = common_params if sys.platform == "win32" else common_params + inode_params
 metadata = common_metadata if sys.platform == "win32" else common_metadata + inode_metadata

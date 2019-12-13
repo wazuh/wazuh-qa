@@ -9,8 +9,8 @@ import pytest
 
 from wazuh_testing.fim import (CHECK_ATTRS, CHECK_GROUP, CHECK_INODE, CHECK_MD5SUM, CHECK_MTIME, CHECK_OWNER,
                                CHECK_PERM, CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_SIZE, CHECK_SUM,
-                               LOG_FILE_PATH, REQUIRED_ATTRIBUTES, regular_file_cud)
-from wazuh_testing.tools import FileMonitor, PREFIX, check_apply_test, load_wazuh_configurations
+                               LOG_FILE_PATH, REQUIRED_ATTRIBUTES, regular_file_cud, generate_params)
+from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
 # variables
 
@@ -28,16 +28,9 @@ configurations_path = os.path.join(
 testdir1, testdir2, testdir3, testdir4, testdir5, testdir6, testdir7, testdir8, testdir9, testdir0 = test_directories
 
 # configurations
-configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=[{'FIM_MODE': ''},
-                                                   {'FIM_MODE': {'realtime': 'yes'}},
-                                                   {'FIM_MODE': {'whodata': 'yes'}}
-                                                   ],
-                                           metadata=[{'fim_mode': 'scheduled'},
-                                                     {'fim_mode': 'realtime'},
-                                                     {'fim_mode': 'whodata'}
-                                                     ]
-                                           )
+
+p, m = generate_params()
+configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
 # fixtures
