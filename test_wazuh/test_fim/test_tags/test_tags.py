@@ -3,10 +3,12 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import itertools
 import os
+import sys
+from copy import deepcopy
 
 import pytest
 
-from wazuh_testing.fim import DEFAULT_TIMEOUT, LOG_FILE_PATH, regular_file_cud
+from wazuh_testing.fim import DEFAULT_TIMEOUT, LOG_FILE_PATH, regular_file_cud, generate_params
 from wazuh_testing.tools import FileMonitor, load_wazuh_configurations, PREFIX
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -27,16 +29,18 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 tags = ['tag1', 'tág', '0tag', '000', 'a' * 1000]
 # Create an incresing tag set. I.e.: ['tag1', 'tag1,tag2', 'tag1,tag2,tag3']
 test_tags = [tags[0], ','.join(tags)]
-fim_modes = ['', {'realtime': 'yes'}, {'whodata': 'yes'}]
-fim_modes_metadata = ['scheduled', 'realtime', 'whodata']
-params = [{'FIM_MODE': fim_mode,
-           'FIM_TAGS': test_tag,
-           'TEST_DIRECTORIES': directory_str}
-          for fim_mode, test_tag in itertools.product(fim_modes, test_tags)]
-metadata = [{'fim_mode': fim_mode,
-             'fim_tags': test_tag,
-             'test_directories': directory_str}
-            for fim_mode, test_tag in itertools.product(fim_modes_metadata, test_tags)]
+
+p, m = generate_params({'TEST_DIRECTORIES': directory_str},
+                       {'test_directories': directory_str})
+
+params, metadata = list(), list()
+for tag in tags:
+    for p_dict, m_dict in zip(p, m):
+        p_dict['FIM_TAGS'] = tag
+        m_dict['fim_tags'] = tag
+        params.append(deepcopy(p_dict))
+        metadata.append(deepcopy(m_dict))
+
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=params,
                                            metadata=metadata
