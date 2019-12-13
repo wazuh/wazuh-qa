@@ -7,10 +7,9 @@ import shutil
 import sys
 
 import pytest
-from wazuh_testing.fim import LOG_FILE_PATH, detect_initial_scan
-from wazuh_testing.tools import (FileMonitor, get_wazuh_conf, restart_wazuh_daemon, restart_wazuh_service,
-                                 restart_wazuh_service_windows, set_section_wazuh_conf, start_wazuh_service_windows,
-                                 stop_wazuh_service_windows, truncate_file, write_wazuh_conf)
+from wazuh_testing.fim import LOG_FILE_PATH, detect_initial_scan, change_conf_param, change_internal_options
+from wazuh_testing.tools import (FileMonitor, get_wazuh_conf, set_section_wazuh_conf,
+                                 truncate_file, write_wazuh_conf, control_service, WAZUH_SERVICE, WAZUH_PATH)
 
 
 @pytest.fixture(scope='module')
@@ -19,14 +18,7 @@ def restart_syscheckd(get_configuration, request):
     truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
-
-    if sys.platform == 'win32':
-        # Restart Wazuh and wait for the command to end
-        # As windows doesn't have daemons everything runs on a single process, so we need to restart everything
-        restart_wazuh_service_windows()
-
-    elif sys.platform == 'linux2' or sys.platform == 'linux':
-        restart_wazuh_daemon('ossec-syscheckd')
+    control_service('restart', daemon='ossec-syscheckd')
 
 
 @pytest.fixture(scope='module')
@@ -55,6 +47,15 @@ def configure_environment(get_configuration, request):
     # set new configuration
     write_wazuh_conf(test_config)
 
+    # Avoid reconnection if we are on agents and add debug params
+    if 'agent' in WAZUH_SERVICE:
+        change_conf_param('time-reconnect', 99999999999)
+        change_internal_options(param='agent.debug', value=2)
+
+    change_internal_options(param='syscheck.debug', value=2)
+    change_internal_options(param='monitord.rotate_log', value=0)
+
+    # Call extra functions before yield
     if hasattr(request.module, 'extra_configuration_before_yield'):
         func = getattr(request.module, 'extra_configuration_before_yield')
         func()
@@ -63,25 +64,22 @@ def configure_environment(get_configuration, request):
 
     # remove created folders (parents)
     if sys.platform == 'win32':
-        stop_wazuh_service_windows()
+        control_service('stop')
 
     for test_dir in test_directories:
         shutil.rmtree(test_dir, ignore_errors=True)
 
     if sys.platform == 'win32':
-        start_wazuh_service_windows()
+        control_service('start')
 
     # restore previous configuration
     write_wazuh_conf(backup_config)
 
+    # Call extra functions after yield
     if hasattr(request.module, 'extra_configuration_after_yield'):
         func = getattr(request.module, 'extra_configuration_after_yield')
         func()
 
     if hasattr(request.module, 'force_restart_after_restoring'):
         if getattr(request.module, 'force_restart_after_restoring'):
-            if sys.platform == 'win32':
-                restart_wazuh_service_windows()
-
-            elif sys.platform == 'linux2' or sys.platform == 'linux':
-                restart_wazuh_service()
+            control_service('restart')

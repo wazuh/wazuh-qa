@@ -7,8 +7,7 @@ import sys
 
 from wazuh_testing.tools import (LOG_FILE_PATH)
 from wazuh_testing.tools import (FileMonitor, truncate_file,
-                                 restart_wazuh_service,
-                                 restart_wazuh_service_windows)
+                                 control_service)
 
 
 @pytest.fixture(scope='module')
@@ -19,13 +18,7 @@ def restart_wazuh(get_configuration, request):
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
 
     # Restart Wazuh and wait for the command to end
-    if sys.platform == 'win32':
-        # Restart Wazuh and wait for the command to end
-        # As windows doesn't have daemons everything runs on a single process, so we need to restart everything
-        restart_wazuh_service_windows()
-
-    elif sys.platform == 'linux2' or sys.platform == 'linux':
-        restart_wazuh_service()
+    control_service('restart')
 
 
 def pytest_addoption(parser):
