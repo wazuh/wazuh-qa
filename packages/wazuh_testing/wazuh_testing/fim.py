@@ -523,6 +523,13 @@ def callback_audit_health_check(line):
     return None
 
 
+def callback_audit_cannot_start(line):
+    match = re.match(r'.*Who-data engine could not start. Switching who-data to real-time.', line)
+    if match:
+        return True
+    return None
+
+
 def callback_audit_added_rule(line):
     match = re.match(r'.*Added audit rule for monitoring directory: \'(.+)\'', line)
     if match:
@@ -535,9 +542,29 @@ def callback_audit_rules_manipulation(line):
         return True
     return None
 
+def callback_audit_removed_rule(line):
+    match = re.match(r'.* Audit rule removed.', line)
+    if match:
+        return True
+    return None
+
+
+def callback_audit_deleting_rule(line):
+    match = re.match(r'.*Deleting Audit rules...', line)
+    if match:
+        return True
+    return None
+
 
 def callback_audit_connection(line):
     if '(6030): Audit: connected' in line:
+        return True
+    return None
+
+
+def callback_audit_connection_close(line):
+    match = re.match(r'.*Audit: connection closed.', line)
+    if match:
         return True
     return None
 
