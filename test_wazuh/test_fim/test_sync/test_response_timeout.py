@@ -8,15 +8,20 @@ from datetime import datetime, timedelta
 import paramiko
 import psutil
 import pytest
+
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, callback_detect_synchronization
-from wazuh_testing.tools import FileMonitor, TimeMachine, check_apply_test, load_wazuh_configurations, time_to_timedelta
+from wazuh_testing.tools import FileMonitor, TimeMachine, check_apply_test, load_wazuh_configurations, \
+    time_to_timedelta, PREFIX
+
+# All tests in this module apply to linux only
+pytestmark = pytest.mark.linux
 
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 configurations_path = os.path.join(test_data_path, 'wazuh_response_conf.yaml')
-test_directories = [os.path.join('/', 'testdir1')]
+test_directories = [os.path.join(PREFIX, 'testdir1')]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 response_timeouts = ['10', '10m', '10h', '10d', '10w']
 
@@ -40,7 +45,6 @@ def get_configuration(request):
 
 # Tests
 
-@pytest.mark.linux
 @pytest.mark.parametrize('num_files', [1, 100])
 @pytest.mark.parametrize('sync_interval', ['10', '10h'])
 def test_response_timeout(num_files, sync_interval, get_configuration, configure_environment, restart_syscheckd):

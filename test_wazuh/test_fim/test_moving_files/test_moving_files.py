@@ -3,11 +3,14 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import shutil
+
 import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH, REGULAR, DEFAULT_TIMEOUT, callback_detect_event, create_file)
 from wazuh_testing.tools import FileMonitor, PREFIX, load_wazuh_configurations
+
+# All tests in this module apply to linux and windows only
+pytestmark = [pytest.mark.linux, pytest.mark.win32]
 
 # Variables
 
@@ -73,8 +76,6 @@ def get_configuration(request):
 
 # Test
 
-@pytest.mark.linux
-@pytest.mark.win32
 @pytest.mark.parametrize('dirsrc, dirdst, filename, mod_del_event, mod_add_event', [
     (testdir1, testdir2, testfile1, whodata, realtime),
     (testdir2, testdir1, testfile2, realtime, whodata)

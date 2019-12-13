@@ -13,6 +13,9 @@ from wazuh_testing.fim import (LOG_FILE_PATH,
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations, PREFIX)
 
+# All tests in this module apply to linux only
+pytestmark = pytest.mark.linux
+
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -61,7 +64,6 @@ def modify_symlink(target, path):
 
 # tests
 
-@pytest.mark.linux
 @pytest.mark.parametrize('monitored_dir, non_monitored_dir1, non_monitored_dir2, sym_target, tags_to_apply', [
     (testdir_link, testdir1, testdir2, 'file', {'non_monitored_dir'}),
     (testdir_link, testdir1, testdir2, 'folder', {'non_monitored_dir'})

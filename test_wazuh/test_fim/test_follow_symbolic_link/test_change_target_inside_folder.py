@@ -13,6 +13,9 @@ from wazuh_testing.fim import (generate_params, create_file, REGULAR, callback_d
 from wazuh_testing.tools import (check_apply_test,
                                  load_wazuh_configurations, FileMonitor)
 
+# All tests in this module apply to linux only
+pytestmark = pytest.mark.linux
+
 # configurations
 
 conf_params, conf_metadata = generate_params()
@@ -34,7 +37,6 @@ def get_configuration(request):
 
 # tests
 
-@pytest.mark.linux
 @pytest.mark.parametrize('tags_to_apply, previous_target, new_target', [
     ({'monitored_file'}, testdir1, os.path.join(testdir2, 'regular1')),
     ({'monitored_dir'}, testdir_target, testdir2)

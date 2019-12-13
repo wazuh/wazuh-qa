@@ -12,6 +12,9 @@ from wazuh_testing.fim import LOG_FILE_PATH, detect_initial_scan, generate_param
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations, restart_wazuh_daemon, truncate_file)
 
+# All tests in this module apply to linux only
+pytestmark = pytest.mark.linux
+
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -58,7 +61,6 @@ def check_prelink():
 # tests
 
 
-@pytest.mark.linux
 @pytest.mark.parametrize('tags_to_apply', [
     ({'prefilter_cmd'})
 ])
