@@ -1,9 +1,7 @@
 # Copyright (C) 2015-2019, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-import itertools
 import os
-import sys
 from copy import deepcopy
 
 import pytest
@@ -22,12 +20,11 @@ test_directories = [os.path.join(PREFIX, 'testdir_tags'),
 directory_str = ','.join([test_directories[0], test_directories[2]])
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-
 # configurations
 
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 tags = ['tag1', 'tág', '0tag', '000', 'a' * 1000]
-# Create an incresing tag set. I.e.: ['tag1', 'tag1,tag2', 'tag1,tag2,tag3']
+# Create an increasing tag set. I.e.: ['tag1', 'tag1,tag2', 'tag1,tag2,tag3']
 test_tags = [tags[0], ','.join(tags)]
 
 p, m = generate_params({'TEST_DIRECTORIES': directory_str},
@@ -75,7 +72,7 @@ def test_tags(folder, name, content,
     defined_tags = get_configuration['metadata']['fim_tags']
 
     def tag_validator(event):
-        assert(defined_tags == event['data']['tags']), f'defined_tags are not equal'
+        assert defined_tags == event['data']['tags'], f'defined_tags are not equal'
 
     files = {name: content}
 
