@@ -1,0 +1,12 @@
+---
+# conf 1
+- tags:
+  - ossec_conf
+  apply_to_modules:
+  - test_process_priority
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - process_priority:
+      value: PROCESS_PRIORITY

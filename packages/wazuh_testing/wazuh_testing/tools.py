@@ -548,7 +548,8 @@ def control_service(action, daemon=None):
             control_service('start')
             result = 0
         else:
-            result = subprocess.run(["net", action, "OssecSvc"]).returncode
+            result = 0 if subprocess.run(["net", action, "OssecSvc"]).returncode in (0, 2) else \
+                subprocess.run(["net", action, "OssecSvc"]).returncode
     else:  # Default Unix
         if daemon is None:
             if sys.platform == 'darwin':
