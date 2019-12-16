@@ -40,7 +40,6 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 # configurations
 
 conf_params, conf_metadata = generate_params({'TAGS': tag}, {'tags': tag})
-
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
 # fixtures
@@ -55,14 +54,16 @@ def get_configuration(request):
 
 def tag_validator(event):
     """ Validate tags event property exists in the event """
-    assert tag == event['data']['tags'], f'defined_tags are not equal'
+    assert tag == event['data']['tags'], 'defined_tags are not equal'
+
 
 def no_tag_validator(event):
-    """ Validate tags event property dpes not exist in the event """
-    assert 'tags' not in event['data'].keys(), f"'tags' key found in event"
+    """ Validate tags event property does not exist in the event """
+    assert 'tags' not in event['data'].keys(), "'tags' key found in event"
+
 
 def _test_recursion_cud(ini, fin, path, recursion_subdir, scheduled,
-                            min_timeout, triggers_event, validators_after_cud=None):
+                        min_timeout, triggers_event, validators_after_cud=None):
     """ Iterate from ini recursion level to fin recursion level, creating the
     corresponding subdirectory and applying the regular_file_cud function on it.
 
@@ -76,10 +77,11 @@ def _test_recursion_cud(ini, fin, path, recursion_subdir, scheduled,
     for n in range(ini, fin):
         path = os.path.join(path, recursion_subdir + str(n + 1))
         regular_file_cud(path, wazuh_log_monitor,
-                        time_travel=scheduled,
-                        min_timeout=min_timeout, triggers_event=triggers_event,
-                        validators_after_cud=validators_after_cud)
+                         time_travel=scheduled,
+                         min_timeout=min_timeout, triggers_event=triggers_event,
+                         validators_after_cud=validators_after_cud)
     return path
+
 
 # tests
 
@@ -134,11 +136,6 @@ def test_ambiguous_report(folders, tags_to_apply,
           the environment properly, restart the service and wait for the initial scan.
 
     """
-    check_apply_test(tags_to_apply, get_configuration['tags'])
-
-    file_list = ['regular']
-    min_timeout = DEFAULT_TIMEOUT
-    folder = folders[1]
 
     def report_changes_validator(event):
         """ Validate content_changes event property exists in the event
@@ -169,7 +166,11 @@ def test_ambiguous_report(folders, tags_to_apply,
             assert (not os.path.exists(diff_file)), f'{diff_file} exists'
             assert ('content_changes' not in event['data'].keys()), f"'content_changes' in event"
 
+    check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
+    file_list = ['regular']
+    min_timeout = DEFAULT_TIMEOUT
+    folder = folders[1]
 
     # Check if create, update and delete events in folders[1] contain the field 'content_changes'.
     regular_file_cud(folders[1], wazuh_log_monitor, file_list=file_list,
@@ -205,14 +206,12 @@ def test_ambiguous_tags(folders, tags_to_apply,
     # Check that events inside folder[0] do not contain the key 'tags'.
     regular_file_cud(folders[0], wazuh_log_monitor,
                      time_travel=scheduled,
-                     min_timeout=DEFAULT_TIMEOUT, validators_after_cud=[no_tag_validator]
-                     )
+                     min_timeout=DEFAULT_TIMEOUT, validators_after_cud=[no_tag_validator])
 
     # Check that events inside folder[1] do contain the key 'tags'.
     regular_file_cud(folders[1], wazuh_log_monitor,
                      time_travel=scheduled,
-                     min_timeout=DEFAULT_TIMEOUT, validators_after_cud=[tag_validator]
-                     )
+                     min_timeout=DEFAULT_TIMEOUT, validators_after_cud=[tag_validator])
 
 
 @pytest.mark.parametrize('dirname, recursion_level, tags_to_apply', [
@@ -239,58 +238,59 @@ def test_ambiguous_recursion(dirname, recursion_level, tags_to_apply,
 
     min_timeout = DEFAULT_TIMEOUT
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
-    
     recursion_subdir = 'subdir'
     path = dirname
 
     # Iterate from ini to fin and verify that events are generated in the nested directories.
     path = _test_recursion_cud(ini=0, fin=recursion_level, path=path,
-                        recursion_subdir=recursion_subdir,
-                        scheduled=scheduled,
-                        min_timeout=min_timeout, triggers_event=True)
+                               recursion_subdir=recursion_subdir,
+                               scheduled=scheduled,
+                               min_timeout=min_timeout, triggers_event=True)
 
     # Iterate from ini to fin and verify that events are NOT generated in nested directories
     # beyond the established recursion level.
     _test_recursion_cud(ini=recursion_level, fin=4, path=path,
-                    recursion_subdir=recursion_subdir, 
-                    scheduled=scheduled,
-                    min_timeout=min_timeout, triggers_event=False)
+                        recursion_subdir=recursion_subdir,
+                        scheduled=scheduled,
+                        min_timeout=min_timeout, triggers_event=False)
 
 
-@pytest.mark.parametrize('dirnames, recursion_level, tags_to_apply', [
-    ([testdir_recursion_tag, testdir_recursion_no_tag], 2, {'ambiguous_recursion_tag_over'}),
-    ([testdir_recursion_tag, testdir_recursion_no_tag], 4, {'ambiguous_recursion_tag'})
+@pytest.mark.parametrize('dirnames, recursion_level, triggers_event, tags_to_apply', [
+    ([testdir_recursion_tag, testdir_recursion_no_tag], 2, True, {'ambiguous_recursion_tag'}),
+    ([testdir_recursion_tag, testdir_recursion_no_tag], 2, False, {'ambiguous_no_recursion_tag'})
 ])
-def test_ambiguous_recursion_tag(dirnames, recursion_level, tags_to_apply,
-                             get_configuration, configure_environment,
-                             restart_syscheckd, wait_for_initial_scan):
-    """ Checks if syscheck detects alerts for each level defined in the recursion_level attribute and 
-        if it detects the event property 'tags' for each of them.
-        This overwrites the default value, restricting it.
+def test_ambiguous_recursion_tag(dirnames, recursion_level, triggers_event, tags_to_apply,
+                                 get_configuration, configure_environment,
+                                 restart_syscheckd, wait_for_initial_scan):
+    """
+    Checks if syscheck detects alerts for each level defined in the recursion_level attribute and
+    if it detects the event property 'tags' for each of them.
+    This overwrites the default value, restricting it.
 
-        :param dirnames: List of the monitored directories
-        :param recursion_level: Value of the recursion_level attribute
+    :param dirnames: List of the monitored directories
+    :param recursion_level: Value of the recursion_level attribute
+    :param triggers_event: Boolean to determine if the event should be raised or not.
 
-        * This test is intended to be used with valid configurations files. Each execution of this test will configure
-          the environment properly, restart the service and wait for the initial scan.
+    * This test is intended to be used with valid configurations files. Each execution of this test will configure
+      the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    recursion_subdir = 'subdir'
     min_timeout = DEFAULT_TIMEOUT
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
+    recursion_subdir = 'subdir'
 
     # Iterate from ini to fin and verify that events generated in the nested directories contain the key 'tags'.
     _test_recursion_cud(ini=0, fin=recursion_level, path=dirnames[0],
                         recursion_subdir=recursion_subdir,
                         scheduled=scheduled, min_timeout=min_timeout, 
-                        triggers_event=True, validators_after_cud=[tag_validator])
+                        triggers_event=triggers_event, validators_after_cud=[tag_validator])
 
     # Iterate from ini to fin and verify that events generated in the nested directories DO NOT contain the key 'tags'.
     _test_recursion_cud(ini=0, fin=recursion_level, path=dirnames[1],
                         recursion_subdir=recursion_subdir,
                         scheduled=scheduled, min_timeout=min_timeout, 
-                        triggers_event=True, validators_after_cud=[no_tag_validator])
+                        triggers_event=triggers_event, validators_after_cud=[no_tag_validator])
 
 
 @pytest.mark.parametrize('tags_to_apply', [

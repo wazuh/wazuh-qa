@@ -92,7 +92,7 @@
         - FIM_MODE
 # conf 6
 - tags:
-  - ambiguous_recursion_tag_over
+  - ambiguous_recursion_tag
   apply_to_modules:
   - test_ambiguous_simple
   section: syscheck
@@ -112,7 +112,7 @@
         - FIM_MODE
 # conf 7
 - tags:
-  - ambiguous_recursion_tag
+  - ambiguous_no_recursion_tag
   apply_to_modules:
   - test_ambiguous_simple
   section: syscheck
@@ -122,11 +122,13 @@
   - directories:
       value: "/recursiondir_tag"
       attributes:
+        - recursion_level: "0"
         - tags: TAGS
         - FIM_MODE
   - directories:
       value: "/recursiondir_no_tag"
       attributes:
+        - recursion_level: "0"
         - FIM_MODE
 # conf 8
 - tags:
