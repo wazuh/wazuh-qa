@@ -18,8 +18,8 @@ from wazuh_testing.tools import (FileMonitor, check_apply_test,
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path,
-                                   'wazuh_conf_simple_win32.yaml' if sys.platform == 'win32' else 'wazuh_conf_simple.yaml')
+configurations_path = os.path.join(
+    test_data_path, 'wazuh_conf_simple_win32.yaml' if sys.platform == 'win32' else 'wazuh_conf_simple.yaml')
 checkdir_default = os.path.join(PREFIX, 'checkdir_default')
 checkdir_checkall = os.path.join(checkdir_default, 'checkdir_checkall')
 checkdir_no_inode = os.path.join(checkdir_checkall, 'checkdir_no_inode')
@@ -148,8 +148,8 @@ def test_ambiguous_report(folders, tags_to_apply,
                 diff_file = os.path.join(diff_file, folder.strip('c:\\'), file)
             else:
                 diff_file = os.path.join(diff_file, folder.strip('/'), file)
-            assert (os.path.exists(diff_file)), f'{diff_file} does not exist'
-            assert (event['data'].get('content_changes') is not None), f'content_changes is empty'
+            assert os.path.exists(diff_file), f'{diff_file} does not exist'
+            assert event['data'].get('content_changes') is not None, f'content_changes is empty'
 
     def no_report_changes_validator(event):
         """ Validate content_changes event property does not exist in the event
@@ -163,8 +163,8 @@ def test_ambiguous_report(folders, tags_to_apply,
                 diff_file = os.path.join(diff_file, folder.strip('c:\\'), file)
             else:
                 diff_file = os.path.join(diff_file, folder.strip('/'), file)
-            assert (not os.path.exists(diff_file)), f'{diff_file} exists'
-            assert ('content_changes' not in event['data'].keys()), f"'content_changes' in event"
+            assert not os.path.exists(diff_file), f'{diff_file} exists'
+            assert 'content_changes' not in event['data'].keys(), f"'content_changes' in event"
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'

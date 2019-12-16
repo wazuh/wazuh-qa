@@ -13,6 +13,9 @@ from wazuh_testing.fim import (generate_params, callback_detect_event,
 from wazuh_testing.tools import (check_apply_test,
                                  load_wazuh_configurations, FileMonitor)
 
+# All tests in this module apply to linux only
+pytestmark = pytest.mark.linux
+
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
@@ -48,6 +51,7 @@ def test_symbolic_revert_symlink(tags_to_apply, get_configuration, configure_env
     * This test is intended to be used with valid configurations files. Each execution of this test will configure
     the environment properly, restart the service and wait for the initial scan.
     """
+
     def modify_and_assert(file):
         modify_file_content(testdir1, file, new_content='Sample modification')
         check_time_travel(scheduled)

@@ -2,15 +2,18 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import distro
 import os
 import subprocess
 
+import distro
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, detect_initial_scan, generate_params
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations, restart_wazuh_daemon, truncate_file)
+
+# All tests in this module apply to linux only
+pytestmark = pytest.mark.linux
 
 # variables
 
@@ -54,7 +57,9 @@ def check_prelink():
         installer = 'apt-get install'
     subprocess.call([f'{path}/data/install_prelink.sh', dist, installer])
 
+
 # tests
+
 
 @pytest.mark.parametrize('tags_to_apply', [
     ({'prefilter_cmd'})

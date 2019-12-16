@@ -7,8 +7,8 @@ from datetime import timedelta
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, DEFAULT_TIMEOUT, callback_detect_event, callback_restricted, create_file, REGULAR, \
-    generate_params
+from wazuh_testing.fim import LOG_FILE_PATH, DEFAULT_TIMEOUT, callback_detect_event, callback_restricted, create_file, \
+    REGULAR, generate_params
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations, TimeMachine, PREFIX)
 
@@ -71,7 +71,7 @@ def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply
     :param mode string same as mode in open built-in function
     :param content string, bytes Content to fill the new file
     :param triggers_event bool True if an event must be generated, False otherwise
-    :param tags_to_apply set Run test if matchs with a configuration identifier, skip otherwise
+    :param tags_to_apply set Run test if match with a configuration identifier, skip otherwise
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -85,8 +85,8 @@ def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply
     if triggers_event:
         event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT,
                                         callback=callback_detect_event).result()
-        assert (event['data']['type'] == 'added'), f'Event type not equal'
-        assert (event['data']['path'] == os.path.join(folder, filename)), f'Event path not equal'
+        assert event['data']['type'] == 'added', f'Event type not equal'
+        assert event['data']['path'] == os.path.join(folder, filename), f'Event path not equal'
     else:
         while True:
             ignored_file = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT,

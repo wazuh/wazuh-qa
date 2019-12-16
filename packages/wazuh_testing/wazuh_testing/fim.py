@@ -132,6 +132,13 @@ def validate_event(event, checks=None):
         assert (event['data']['audit'].keys() ^ _REQUIRED_AUDIT == set()), \
             f'audit keys and required_audit are no the same'
 
+    # Check add file event
+    if event['data']['type'] == 'added':
+        assert 'old_attributes' not in event['data'] and 'changed_attributes' not in event['data']
+    # Check modify file event
+    if event['data']['type'] == 'modified':
+        assert 'old_attributes' in event['data'] and 'changed_attributes' in event['data']
+
 
 def is_fim_scan_ended():
     message = 'File integrity monitoring scan ended.'
@@ -158,6 +165,13 @@ def create_file(type_, path, name, **kwargs):
     :return: None
     """
     os.makedirs(path, exist_ok=True, mode=0o777)
+    if type_ != REGULAR:
+        try:
+            kwargs.pop('content')
+        except KeyError:
+            pass
+    if type_ in (SYMLINK, HARDLINK) and 'target' not in kwargs:
+        raise ValueError(f"'target' param is mandatory for type {type_}")
     getattr(sys.modules[__name__], f'_create_{type_}')(path, name, **kwargs)
 
 

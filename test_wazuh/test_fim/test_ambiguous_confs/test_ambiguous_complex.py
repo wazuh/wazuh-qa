@@ -13,12 +13,11 @@ from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, create_file, WAZ
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations, TimeMachine, PREFIX)
 
-
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path,
-                                   'wazuh_conf_complex_win32.yaml' if sys.platform == 'win32' else 'wazuh_conf_complex.yaml')
+configurations_path = os.path.join(
+    test_data_path, 'wazuh_conf_complex_win32.yaml' if sys.platform == 'win32' else 'wazuh_conf_complex.yaml')
 testdir = os.path.join(PREFIX, 'testdir')
 subdir = 'subdir'
 test_directories = [testdir]
@@ -29,7 +28,6 @@ for n in range(5):
 tag = 'Sample_tag'
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
 
 # configurations
 
@@ -118,8 +116,8 @@ def check_report_changes(directory, trigger, check_list, file_list, timeout, sch
                 diff_file = os.path.join(diff_file, directory.strip('C:\\'), file)
             else:
                 diff_file = os.path.join(diff_file, directory.strip('/'), file)
-            assert (os.path.exists(diff_file)), f'{diff_file} does not exist'
-            assert (event['data'].get('content_changes') is not None), f'content_changes is empty'
+            assert os.path.exists(diff_file), f'{diff_file} does not exist'
+            assert event['data'].get('content_changes') is not None, f'content_changes is empty'
 
     regular_file_cud(directory, wazuh_log_monitor, file_list=file_list,
                      time_travel=scheduled,
