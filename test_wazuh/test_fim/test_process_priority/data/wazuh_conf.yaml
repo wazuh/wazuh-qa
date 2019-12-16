@@ -1,7 +1,7 @@
 ---
 # conf 1
 - tags:
-  - ossec_conf
+  - ossec_conf_1
   apply_to_modules:
   - test_process_priority
   section: syscheck
@@ -9,4 +9,26 @@
   - disabled:
       value: 'no'
   - process_priority:
-      value: PROCESS_PRIORITY
+      value: "0"
+# conf 2
+- tags:
+  - ossec_conf_2
+  apply_to_modules:
+  - test_process_priority
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - process_priority:
+      value: "4"
+# conf 3
+- tags:
+  - ossec_conf_3
+  apply_to_modules:
+  - test_process_priority
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - process_priority:
+      value: "-5"
