@@ -15,7 +15,9 @@ from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_config
 # Variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf_ignore_restrict.yaml')
+configurations_path = os.path.join(test_data_path,
+                                    'wazuh_conf_ignore_restrict_win32.yaml' if sys.platform == 'win32' else 'wazuh_conf_ignore_restrict.yaml')
+
 
 test_directories = [os.path.join(PREFIX, 'testdir1')]
 
