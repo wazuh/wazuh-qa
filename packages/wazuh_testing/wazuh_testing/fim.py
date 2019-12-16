@@ -605,6 +605,13 @@ def callback_configuration_warning(line):
     return None
 
 
+def callback_entries_path_count(line):
+    match = re.match(r'.*Fim inode entries: (\d+), path count: (\d+)', line)
+
+    if match:
+        return match.group(1), match.group(2)
+
+
 class EventChecker:
     """Utility to allow fetch events and validate them."""
 

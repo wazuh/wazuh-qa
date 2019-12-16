@@ -5,12 +5,13 @@
 import os
 import re
 import pytest
-from decimal import Decimal
 
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, SYMLINK, HARDLINK, callback_detect_event, check_time_travel, DEFAULT_TIMEOUT, delete_file
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, SYMLINK, HARDLINK, \
+                              callback_entries_path_count, check_time_travel, DEFAULT_TIMEOUT, delete_file
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
 # variables
+pytestmark = [pytest.mark.linux, pytest.mark.darwin]
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2'),
@@ -35,10 +36,6 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
-def callback_entries_path_count(line):
-    if 'inode entries: ' in line:
-        return line
-    return None
 
 # tests
 
@@ -49,22 +46,19 @@ def extra_configuration_before_yield():
     create_file(HARDLINK, testdir1, 'hardlink', target=os.path.join(testdir1, 'test_2'))
 
 
-def test_entries_match_path_count(get_configuration, configure_environment, restart_syscheckd):
+def test_entries_match_path_count(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
     """ Checks if FIM entries match the path count
-        It creates two regular files, a symlink and a hard link before the scan begins. After events are logged,  we should have
-        3 inode entries and a path count of 4.
+        It creates two regular files, a symlink and a hard link before the scan begins. After events are logged,
+        we should have 3 inode entries and a path count of 4.
         * This test is intended to be used with valid configurations files. Each execution of this test will configure
           the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test({'ossec_conf'}, get_configuration['tags'])
-    scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
-    fim_data = wazuh_log_monitor.start(timeout=60, callback=callback_entries_path_count).result()
-    check_time_travel(scheduled)
+    entries, path_count = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_entries_path_count).result()
+    check_time_travel(True)
 
-    entries = re.match(r'.*Fim inode entries: (\d+), path count: (\d+)', fim_data)
-
-    if entries:
-        assert (fim_data and entries.group(1) == '3' and entries.group(2) == '4'), f'Wrong number of inodes and path count'
+    if entries and path_count:
+        assert entries == '3' and path_count == '4', 'Wrong number of inodes and path count'
     else:
-        raise AssertionError(f'Wrong number of inodes and path count')
+        raise AssertionError('Wrong number of inodes and path count')
