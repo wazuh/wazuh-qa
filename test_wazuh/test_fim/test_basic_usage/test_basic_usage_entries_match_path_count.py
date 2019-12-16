@@ -3,15 +3,18 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import re
+
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, SYMLINK, HARDLINK, \
-                              callback_entries_path_count, check_time_travel, DEFAULT_TIMEOUT, delete_file
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, SYMLINK, HARDLINK, DEFAULT_TIMEOUT,\
+    callback_entries_path_count, check_time_travel
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
-# variables
+# marks
+
 pytestmark = [pytest.mark.linux, pytest.mark.darwin]
+
+# variables
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2'),
@@ -55,7 +58,8 @@ def test_entries_match_path_count(get_configuration, configure_environment, rest
     """
     check_apply_test({'ossec_conf'}, get_configuration['tags'])
 
-    entries, path_count = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_entries_path_count).result()
+    entries, path_count = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT,
+                                                  callback=callback_entries_path_count).result()
     check_time_travel(True)
 
     if entries and path_count:
