@@ -15,6 +15,9 @@ from wazuh_testing.fim import (DEFAULT_TIMEOUT, LOG_FILE_PATH, regular_file_cud,
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations, PREFIX)
 
+# All tests in this module apply to linux and windows
+pytestmark = [pytest.mark.linux, pytest.mark.win32]
+
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -76,15 +79,12 @@ def _test_recursion_cud(ini, fin, path, recursion_subdir, scheduled,
     """
     for n in range(ini, fin):
         path = os.path.join(path, recursion_subdir + str(n + 1))
-        regular_file_cud(path, wazuh_log_monitor,
-                         time_travel=scheduled,
-                         min_timeout=min_timeout, triggers_event=triggers_event,
-                         validators_after_cud=validators_after_cud)
+        regular_file_cud(path, wazuh_log_monitor, time_travel=scheduled, min_timeout=min_timeout,
+                         triggers_event=triggers_event, validators_after_cud=validators_after_cud)
     return path
 
 
 # tests
-
 @pytest.mark.parametrize('folders, tags_to_apply', [
     ([testdir, subdir], {'ambiguous_restrict'})
 ])
@@ -104,18 +104,16 @@ def test_ambiguous_restrict(folders, tags_to_apply,
           the environment properly, restart the service and wait for the initial scan.
      """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-
     file_list = ['example.csv']
-    min_timeout = DEFAULT_TIMEOUT
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
     regular_file_cud(folders[0], wazuh_log_monitor, file_list=file_list,
                      time_travel=scheduled,
-                     min_timeout=min_timeout, triggers_event=False)
+                     min_timeout=DEFAULT_TIMEOUT, triggers_event=False)
 
     regular_file_cud(folders[1], wazuh_log_monitor, file_list=file_list,
                      time_travel=scheduled,
-                     min_timeout=min_timeout, triggers_event=True)
+                     min_timeout=DEFAULT_TIMEOUT, triggers_event=True)
 
 
 @pytest.mark.parametrize('folders, tags_to_apply', [
@@ -134,9 +132,7 @@ def test_ambiguous_report(folders, tags_to_apply,
 
         * This test is intended to be used with valid configurations files. Each execution of this test will configure
           the environment properly, restart the service and wait for the initial scan.
-
     """
-
     def report_changes_validator(event):
         """ Validate content_changes event property exists in the event
             :param event: Matched 'Sending event'.
@@ -145,9 +141,8 @@ def test_ambiguous_report(folders, tags_to_apply,
             diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
             if sys.platform == 'win32':
                 diff_file = os.path.join(diff_file, 'c')
-                diff_file = os.path.join(diff_file, folder.strip('c:\\'), file)
-            else:
-                diff_file = os.path.join(diff_file, folder.strip('/'), file)
+            diff_file = os.path.join(diff_file, folder.strip(PREFIX), file)
+
             assert os.path.exists(diff_file), f'{diff_file} does not exist'
             assert event['data'].get('content_changes') is not None, f'content_changes is empty'
 
@@ -157,32 +152,27 @@ def test_ambiguous_report(folders, tags_to_apply,
         """
         for file in file_list:
             diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
-            print(f'1{diff_file}')
             if sys.platform == 'win32':
                 diff_file = os.path.join(diff_file, 'c')
-                diff_file = os.path.join(diff_file, folder.strip('c:\\'), file)
-            else:
-                diff_file = os.path.join(diff_file, folder.strip('/'), file)
+            diff_file = os.path.join(diff_file, folder.strip(PREFIX), file)
+
             assert not os.path.exists(diff_file), f'{diff_file} exists'
             assert 'content_changes' not in event['data'].keys(), f"'content_changes' in event"
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     file_list = ['regular']
-    min_timeout = DEFAULT_TIMEOUT
     folder = folders[1]
 
     # Check if create, update and delete events in folders[1] contain the field 'content_changes'.
-    regular_file_cud(folders[1], wazuh_log_monitor, file_list=file_list,
-                     time_travel=scheduled,
-                     min_timeout=min_timeout, triggers_event=True,
+    regular_file_cud(folders[1], wazuh_log_monitor, file_list=file_list, time_travel=scheduled,
+                     min_timeout=DEFAULT_TIMEOUT, triggers_event=True,
                      validators_after_update=[report_changes_validator])
 
     # Check if events in folders[0] do not contain the field 'content_changes'
     folder = folders[0]
-    regular_file_cud(folders[0], wazuh_log_monitor, file_list=file_list,
-                     time_travel=scheduled,
-                     min_timeout=min_timeout, triggers_event=True,
+    regular_file_cud(folders[0], wazuh_log_monitor, file_list=file_list, time_travel=scheduled,
+                     min_timeout=DEFAULT_TIMEOUT, triggers_event=True,
                      validators_after_update=[no_report_changes_validator])
 
 
@@ -235,8 +225,6 @@ def test_ambiguous_recursion(dirname, recursion_level, tags_to_apply,
           the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-
-    min_timeout = DEFAULT_TIMEOUT
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     recursion_subdir = 'subdir'
     path = dirname
@@ -245,14 +233,14 @@ def test_ambiguous_recursion(dirname, recursion_level, tags_to_apply,
     path = _test_recursion_cud(ini=0, fin=recursion_level, path=path,
                                recursion_subdir=recursion_subdir,
                                scheduled=scheduled,
-                               min_timeout=min_timeout, triggers_event=True)
+                               min_timeout=DEFAULT_TIMEOUT, triggers_event=True)
 
     # Iterate from ini to fin and verify that events are NOT generated in nested directories
     # beyond the established recursion level.
     _test_recursion_cud(ini=recursion_level, fin=4, path=path,
                         recursion_subdir=recursion_subdir,
                         scheduled=scheduled,
-                        min_timeout=min_timeout, triggers_event=False)
+                        min_timeout=DEFAULT_TIMEOUT, triggers_event=False)
 
 
 @pytest.mark.parametrize('dirnames, recursion_level, triggers_event, tags_to_apply', [
@@ -262,34 +250,31 @@ def test_ambiguous_recursion(dirname, recursion_level, tags_to_apply,
 def test_ambiguous_recursion_tag(dirnames, recursion_level, triggers_event, tags_to_apply,
                                  get_configuration, configure_environment,
                                  restart_syscheckd, wait_for_initial_scan):
-    """
-    Checks if syscheck detects alerts for each level defined in the recursion_level attribute and
-    if it detects the event property 'tags' for each of them.
-    This overwrites the default value, restricting it.
+    """ Checks if syscheck detects alerts for each level defined in the recursion_level attribute and
+        if it detects the event property 'tags' for each of them.
+        This overwrites the default value, restricting it.
 
-    :param dirnames: List of the monitored directories
-    :param recursion_level: Value of the recursion_level attribute
-    :param triggers_event: Boolean to determine if the event should be raised or not.
+        :param dirnames: List of the monitored directories
+        :param recursion_level: Value of the recursion_level attribute
+        :param triggers_event: Boolean to determine if the event should be raised or not.
 
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-      the environment properly, restart the service and wait for the initial scan.
+        * This test is intended to be used with valid configurations files. Each execution of this test will configure
+          the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-
-    min_timeout = DEFAULT_TIMEOUT
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     recursion_subdir = 'subdir'
 
     # Iterate from ini to fin and verify that events generated in the nested directories contain the key 'tags'.
     _test_recursion_cud(ini=0, fin=recursion_level, path=dirnames[0],
                         recursion_subdir=recursion_subdir,
-                        scheduled=scheduled, min_timeout=min_timeout, 
+                        scheduled=scheduled, min_timeout=DEFAULT_TIMEOUT,
                         triggers_event=triggers_event, validators_after_cud=[tag_validator])
 
     # Iterate from ini to fin and verify that events generated in the nested directories DO NOT contain the key 'tags'.
     _test_recursion_cud(ini=0, fin=recursion_level, path=dirnames[1],
                         recursion_subdir=recursion_subdir,
-                        scheduled=scheduled, min_timeout=min_timeout, 
+                        scheduled=scheduled, min_timeout=DEFAULT_TIMEOUT,
                         triggers_event=triggers_event, validators_after_cud=[no_tag_validator])
 
 
@@ -319,12 +304,9 @@ def test_ambiguous_check(dirname, checkers, tags_to_apply,
 
         * This test is intended to be used with valid configurations files. Each execution of this test will configure
           the environment properly, restart the service and wait for the initial scan.
-
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-
-    min_timeout = DEFAULT_TIMEOUT
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
-    regular_file_cud(dirname, wazuh_log_monitor, min_timeout=min_timeout, options=checkers,
+    regular_file_cud(dirname, wazuh_log_monitor, min_timeout=DEFAULT_TIMEOUT, options=checkers,
                      time_travel=scheduled)
