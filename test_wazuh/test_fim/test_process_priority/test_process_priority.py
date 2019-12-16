@@ -21,8 +21,6 @@ test_directories = []
 
 # configurations
 
-# conf_params, conf_metadata = generate_params({'PROCESS_PRIORITY': str(priority)}, {'process_priority': str(priority)},
-#                                              modes=monitoring_modes)
 conf_params, conf_metadata = generate_params(modes=monitoring_modes)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
