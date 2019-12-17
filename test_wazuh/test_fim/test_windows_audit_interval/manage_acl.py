@@ -85,6 +85,13 @@ FILE_READ_EXEC_ACCESS = FILE_GENERIC_READ | FILE_GENERIC_EXECUTE
 
 FILE_DELETE_ACCESS = WAZUH_RULES['DELETE'] | SYNCHRONIZE
 
+kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+advapi32 = ctypes.WinDLL('advapi32', use_last_error=True)
+
+ERROR_NOT_ALL_ASSIGNED = 0x0514
+SE_PRIVILEGE_ENABLED = 0x00000002
+TOKEN_ALL_ACCESS = 0x000F0000 | 0x01FF
+
 # Classes
 
 # Win32_LogicalFileSecuritySetting
@@ -131,13 +138,16 @@ def get_file_security_descriptor(path):
 
 
 def modify_sacl(lfss, mode, mask='DELETE'):
-    """
+    """Add or delete a SACL rule from a given file security descriptor.
 
     Parameters
     ----------
-    lfss
-    mode
-    mask
+    lfss : list
+        File security descriptor (_wmi_object)
+    mode : str
+        String that decides whether to add or delete a rule from SACL
+    mask : str, optional
+        String used to get the hexadecimal mask. Default value is 'DELETE', which implies using the 'DELETE' mask
 
     Returns
     -------
@@ -157,7 +167,19 @@ def modify_sacl(lfss, mode, mask='DELETE'):
         lfss.SetSecurityDescriptor(sd)
 
 
-def get_sacl(lfss):
+def get_sacl(lfss) -> set:
+    """Retrieve SACL from a given file security descriptor.
+
+    Parameters
+    ----------
+    lfss : list
+        File security descriptor (_wmi_object)
+
+    Returns
+    -------
+    set
+        SACL set
+    """
     sd = lfss.GetSecurityDescriptor()[0]
     sacl_list = set()
     if sd.ControlFlags & SE_SACL_PRESENT:
@@ -169,15 +191,20 @@ def get_sacl(lfss):
         return sacl_list
 
 
-kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
-advapi32 = ctypes.WinDLL('advapi32', use_last_error=True)
-
-ERROR_NOT_ALL_ASSIGNED = 0x0514
-SE_PRIVILEGE_ENABLED = 0x00000002
-TOKEN_ALL_ACCESS = 0x000F0000 | 0x01FF
-
-
 def control_privilege(privilege, status=None):
+    """Enable or disable certain security privilege
+
+    Parameters
+    ----------
+    privilege : str
+        Privilege to get or remove.
+    status : hexadecimal, optional
+        Status of the privilege. It can either be 'SE_PRIVILEGE_ENABLED' to enable it or None (default) to disable it
+
+    Returns
+    -------
+
+    """
     status = 0 if status is None else status
     hToken = wintypes.HANDLE()
     luid = Luid()

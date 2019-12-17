@@ -48,6 +48,12 @@ def get_configuration(request):
 
 # functions
 def extra_configuration_before_yield():
+    """Get list of SACL before Wazuh applies its own rules based on whodata monitoring.
+
+    Returns
+    -------
+
+    """
     with Privilege('SeSecurityPrivilege'):
         lfss = get_file_security_descriptor(testdir_restore)
         setattr(sys.modules[__name__], 'previous_sacl', get_sacl(lfss))
@@ -72,14 +78,26 @@ def callback_sacl_restored(line):
 ])
 def test_windows_audit_modify_sacl(tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                                    wait_for_initial_scan):
+    """Check that Wazuh detects a SACL change every 'windows_audit_interval' and sets monitoring to real-time if so.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     with Privilege('SeSecurityPrivilege'):
+        # Assert that Wazuh rules are added
         lfss = get_file_security_descriptor(testdir_modify)
         dir_rules = get_sacl(lfss)
         for rule in WAZUH_RULES:
             assert rule in dir_rules, f'{rule} not found in {dir_rules}'
 
+        # Delete one of them and assert that after the 'windows_audit_interval' thread, Wazuh is set to real-time
+        # monitoring
         modify_sacl(lfss, 'delete', next(iter(WAZUH_RULES)))
         dir_rules = get_sacl(lfss)
         assert next(iter(WAZUH_RULES)) not in dir_rules
@@ -87,3 +105,34 @@ def test_windows_audit_modify_sacl(tags_to_apply, get_configuration, configure_e
     event = wazuh_log_monitor.start(timeout=windows_audit_interval, callback=callback_sacl_changed).result()
     assert testdir_modify in event, f'{testdir_modify} not detected in SACL modification event'
 
+
+@pytest.mark.parametrize('tags_to_apply', [
+    {'audit_interval'}
+])
+def test_windows_audit_restore_sacl(tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
+                                    wait_for_initial_scan):
+    """Check that Wazuh restores previous SACL rules when the service is stopped.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    """
+    check_apply_test(tags_to_apply, get_configuration['tags'])
+
+    with Privilege('SeSecurityPrivilege'):
+        lfss = get_file_security_descriptor(testdir_restore)
+        dir_rules = set(get_sacl(lfss))
+        assert dir_rules - previous_rules == WAZUH_RULES
+
+        # Stop Wazuh service to force SACL rules to be restored
+        control_service('stop')
+        event = wazuh_log_monitor.start(timeout=5, callback=callback_sacl_restored).result()
+        assert testdir_restore in event, f'{testdir_restore} not detected in SACL restore event'
+        dir_rules = set(get_sacl(lfss))
+        assert dir_rules == previous_rules
+
+    # Start Wazuh service again so the fixture does not crash
+    control_service('start')
