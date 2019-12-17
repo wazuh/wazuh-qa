@@ -5,6 +5,9 @@
 
 import pytest
 import os
+import subprocess
+from distro import id
+import re
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_audit_cannot_start
 from wazuh_testing.tools import FileMonitor, load_wazuh_configurations, check_apply_test
@@ -43,15 +46,35 @@ def uninstall_install_audit():
     Uninstall auditd before test and install after test
     """
 
-    if os.system('yum remove audit --assumeyes') == -1:
-        raise Exception("Can not uninstall auditd")
+    # Check distro
+    linux_distro = id()
+
+    if re.match(linux_distro, "centos"):
+        package_management = "yum"
+        audit = "audit"
+        option = "--assumeyes"
+    elif re.match(linux_distro, "ubuntu") or re.match(linux_distro, "debian"):
+        package_management = "apt-get"
+        audit = "auditd"
+        option = "--yes"
+    else:
+        raise Exception("Can not uninstall/install audit")
+
+    # Uninstall audit
+    process = subprocess.run([package_management, "remove", audit, option])
+    if process.returncode < 0:
+        raise Exception("Can not remove audit")
 
     yield
 
-    if os.system('yum install audit --assumeyes') == -1:
-        raise Exception("Can not install auditd")
+    # Install audit and start the service
+    process = subprocess.run([package_management, "install", audit, option])
+    if process.returncode < 0:
+        raise Exception("Can not install audit")
 
-    os.system('service auditd start')
+    process = subprocess.run(["service", "auditd", "start"])
+    if process.returncode < 0:
+        raise Exception("Can not start audit")
 
 
 # Test
