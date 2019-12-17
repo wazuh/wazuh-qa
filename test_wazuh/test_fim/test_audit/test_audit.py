@@ -211,7 +211,7 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
     time_before_restart = get_audit_creation_time()
     control_service('restart')
     time.sleep(10)
-    
+
     time_after_restart = get_audit_creation_time()
 
     if should_restart:

@@ -14,6 +14,10 @@ from wazuh_testing.tools import (FileMonitor,
                                  check_apply_test)
 
 
+# All tests in this module apply to linux only
+pytestmark = pytest.mark.linux
+
+
 # Variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')

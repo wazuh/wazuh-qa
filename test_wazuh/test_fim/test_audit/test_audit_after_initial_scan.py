@@ -17,6 +17,11 @@ from wazuh_testing.fim import (LOG_FILE_PATH,
 from wazuh_testing.tools import (FileMonitor, load_wazuh_configurations,
                                  check_apply_test, truncate_file)
 
+
+# All tests in this module apply to linux only
+pytestmark = pytest.mark.linux
+
+
 # Variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
