@@ -5,7 +5,6 @@
 import os
 import shutil
 import subprocess
-import sys
 from copy import deepcopy
 from datetime import timedelta
 
@@ -16,13 +15,16 @@ from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_integrity_event,
                                regular_file_cud, detect_initial_scan, callback_detect_event, generate_params)
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations, TimeMachine,
-                                 set_section_wazuh_conf, restart_wazuh_with_new_conf)
+                                 set_section_wazuh_conf, restart_wazuh_with_new_conf, PREFIX)
+
+# All tests in this module apply to linux only
+pytestmark = pytest.mark.linux
 
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-testdir = os.path.join('/', 'testdir1')
+testdir = os.path.join(PREFIX, 'testdir1')
 test_directories = [testdir]
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)

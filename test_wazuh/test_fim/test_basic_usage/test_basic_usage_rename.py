@@ -16,7 +16,7 @@ from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_config
 
 test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')]
 
-directory_str = ','.join(test_directories )
+directory_str = ','.join(test_directories)
 for direc in list(test_directories):
     test_directories.append(os.path.join(direc, 'subdir'))
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -71,6 +71,7 @@ def test_rename(folder, tags_to_apply,
         * This test is intended to be used with valid configurations files. Each execution of this test will configure
           the environment properly, restart the service and wait for the initial scan.
     """
+
     def expect_events(path):
         event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
         try:

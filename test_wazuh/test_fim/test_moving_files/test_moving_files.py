@@ -3,12 +3,14 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import shutil
+
 import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH, REGULAR, DEFAULT_TIMEOUT, callback_detect_event, create_file)
 from wazuh_testing.tools import FileMonitor, PREFIX, load_wazuh_configurations
 
+# All tests in this module apply to linux and windows only
+pytestmark = [pytest.mark.linux, pytest.mark.win32]
 
 # Variables
 
@@ -25,7 +27,6 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
 
 # Configurations
 
@@ -46,16 +47,16 @@ def extra_configuration_before_yield():
 def check_event(dirsrc, dirdst, filename, mod_del_event, mod_add_event):
     """
     Check the event has been generated
-    :param dirsrc: source directory
-    :param dirdst: target directory
-    :param filename: file name
-    :param mod_del_event: mode of deleted event
-    :param mod_add_event: mode of added event
+    :param dirsrc: Source directory
+    :param dirdst: Target directory
+    :param filename: File name
+    :param mod_del_event: Mode of deleted event
+    :param mod_add_event: Mode of added event
     """
     event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
 
     try:
-        assert (event['data']['mode'] == mod_del_event and  event['data']['type'] == deleted and
+        assert (event['data']['mode'] == mod_del_event and event['data']['type'] == deleted and
                 os.path.join(dirsrc, filename) in event['data']['path'])
     except AssertionError:
         if (event['data']['mode'] != mod_add_event and event['data']['type'] != added and
@@ -85,11 +86,11 @@ def test_moving_file_to_whodata(dirsrc, dirdst, filename, mod_del_event, mod_add
     Test Syscheck's behaviors when moving files from a directory monitored by whodata to another
     monitored by realtime and vice versa.
 
-    :param dirsrc Source directory
-    :param dirdst Target directory
-    :param filename File name
-    :param mod_del_event Added event mode
-    :param mod_add_event Deleted event mode
+    :param dirsrc: Source directory
+    :param dirdst: Target directory
+    :param filename: File name
+    :param mod_del_event: Added event mode
+    :param mod_add_event: Deleted event mode
     """
 
     os.rename(os.path.join(dirsrc, filename), os.path.join(dirdst, filename))

@@ -13,6 +13,9 @@ from wazuh_testing.fim import (generate_params, create_file, REGULAR, callback_d
 from wazuh_testing.tools import (check_apply_test,
                                  load_wazuh_configurations, FileMonitor)
 
+# All tests in this module apply to linux only
+pytestmark = pytest.mark.linux
+
 # configurations
 
 conf_params, conf_metadata = generate_params()

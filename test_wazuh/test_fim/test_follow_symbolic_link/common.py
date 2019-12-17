@@ -19,6 +19,7 @@ symlink_interval = 20
 
 def debug_sym_check(func):
     """ Decorator to see how long it's taking wazuh log monitor to detect the sym_check event """
+
     def wrapper(*args, **kwargs):
         now1 = datetime.datetime.now()
         func(*args, **kwargs)
