@@ -122,6 +122,12 @@ def recursion_test(dirname, subdirname, recursion_level, timeout=1, edge_limit=2
             return
         raise
 
+    except OSError as e:
+        MAX_PATH_LENGTH_MACOS_ERROR = 63
+        if e.errno == MAX_PATH_LENGTH_MACOS_ERROR:
+            return
+        raise
+
 
 # Fixtures
 
