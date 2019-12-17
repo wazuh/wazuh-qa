@@ -3,22 +3,23 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import psutil
 import random
 import re
+import socket
 import string
 import subprocess
 import sys
 import threading
 import time
 import xml.etree.ElementTree as ET
-import yaml
 from copy import deepcopy
 from datetime import datetime, timedelta
-from pytest import skip
 from subprocess import DEVNULL, check_call, check_output
 from typing import Any, List, Set
 
+import psutil
+import yaml
+from pytest import skip
 
 if sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
@@ -77,7 +78,7 @@ def _serialize_xml(write, elem, qnames, namespaces,
                         write(" xmlns%s=\"%s\"" % (
                             k,
                             ET._escape_attrib(v)
-                            ))
+                        ))
                 for k, v in items:  # avoid lexicographical order for XML attributes
                     if isinstance(k, ET.QName):
                         k = k.text
@@ -232,6 +233,7 @@ def set_section_wazuh_conf(section: str = 'syscheck',
     :param new_elements: List with dictionaries for settings elements in the section
     :return: ElementTree with the custom Wazuh configuration
     """
+
     def create_elements(section: ET.Element, elements: List):
         """Insert new elements in a Wazuh configuration section.
 
@@ -252,6 +254,7 @@ def set_section_wazuh_conf(section: str = 'syscheck',
                             if attribute is not None and isinstance(attribute, dict):  # noqa: E501
                                 for attr_name, attr_value in attribute.items():
                                     tag.attrib[attr_name] = attr_value
+
     # get Wazuh configuration
     wazuh_conf = get_wazuh_conf()
     section_conf = wazuh_conf.find(section)
@@ -515,7 +518,7 @@ def check_apply_test(apply_to_tags: Set, tags: List):
     :param tags: List with the tags which identifies a configuration
     """
     if not (apply_to_tags.intersection(tags) or
-       'all' in apply_to_tags):
+            'all' in apply_to_tags):
         skip("Does not apply to this config file")
 
 
@@ -595,12 +598,12 @@ def reformat_time(scan_time):
 def time_to_timedelta(time):
     """Converts a string with time in seconds with `smhdw` suffixes allowed to `datetime.timedelta`.
     """
-    time_unit = time[len(time)-1:]
+    time_unit = time[len(time) - 1:]
 
     if time_unit.isnumeric():
         return timedelta(seconds=int(time))
 
-    time_value = int(time[:len(time)-1])
+    time_value = int(time[:len(time) - 1])
 
     if time_unit == "s":
         return timedelta(seconds=time_value)
@@ -612,3 +615,129 @@ def time_to_timedelta(time):
         return timedelta(days=time_value)
     elif time_unit == "w":
         return timedelta(weeks=time_value)
+
+
+class OssecSocket:
+
+    def __init__(self, path, timeout=10, socket_type='writer', connection_protocol=socket.SOCK_STREAM):
+        """
+
+        Parameters
+        ----------
+        path : str
+            Path where the file will be created
+        timeout : int
+            Socket's timeout
+        socket_type : str
+            Reader or writer
+        connection_protocol : int
+            Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM)
+
+        Raises
+        ------
+        Exception
+            If the socket connection failed
+        """
+        self.path = path
+        self.sock = socket.socket(socket.AF_UNIX, connection_protocol)
+        if socket_type == 'reader':
+            try:
+                if os.path.exists(path):
+                    os.unlink(path)
+                self.sock.bind(self.path)
+                os.chmod(self.path, 0o666)
+                self.sock.settimeout(timeout)
+            except OSError as e:
+                raise e
+        else:
+            try:
+                self.sock.connect(self.path)
+                self.sock.settimeout(timeout)
+            except Exception as e:
+                raise e
+
+    def close(self):
+        self.sock.close()
+
+    def send(self, msg, total_messages=1):
+        """
+
+        Parameters
+        ----------
+        msg : bytes
+            Message to be send
+        total_messages : int
+            Total messages to be sent
+
+        Returns
+        -------
+
+        """
+        if not isinstance(msg, bytes):
+            raise TypeError("Type must be bytes")
+
+        output = list()
+        for _ in range(0, total_messages):
+            try:
+                output.append(self.sock.send(msg))
+            except Exception as e:
+                raise e
+
+        return output
+
+    def receive(self, total_messages=1):
+        """
+
+        Parameters
+        ----------
+        total_messages : int
+            Total messages to be received
+
+        Returns
+        -------
+        Socket message
+        """
+        output = list()
+        for _ in range(0, total_messages):
+            try:
+                self.sock.listen()
+                conn, addr = self.sock.accept()
+                output.append(conn.recv(socket.MSG_WAITALL))
+            except Exception as e:
+                raise e
+
+        return output
+
+# if __name__ == '__main__':
+#     parser = argparse.ArgumentParser(description='Socket utilities')
+#     parser.add_argument('--message', '-m', type=str, help='Custom message')
+#     parser.add_argument('--timeout', '-o', type=int, default=30, help='Socket\'s timeout')
+#     parser.add_argument('--total_messages', '-x', type=int, default=10, help='Total messages')
+#     parser.add_argument('--type', '-t', type=str, help='Types: reader or writer')
+#     args = parser.parse_args()
+#
+#     if args.type == 'reader':
+#         # Create wazuh-db socket (wdb)
+#         wdb_path = os.path.join('/var', 'ossec', 'queue', 'db', 'wdb')
+#         wdb_socket = OssecSocket(wdb_path, timeout=args.timeout, socket_type='reader')
+#         print(wdb_socket.receive(total_messages=args.total_messages))
+#         wdb_socket.close()
+#     elif args.type == 'writer':
+#         # Create analysis sockets (queue)
+#         analysis_path = os.path.join('/var', 'ossec', 'queue', 'ossec', 'queue')
+#         analysis_socket = OssecSocket(analysis_path, timeout=args.timeout, socket_type='writer',
+#                                       connection_protocol=socket.SOCK_DGRAM)
+#
+#         if args.message:
+#             message = args.message
+#         else:
+#             message = '8:[001] (9db98108b96e) any->syscheck:{"type":"event","data":{"path":"/home/test/file2",' \
+#                       '"mode":"real-time","type":"added","timestamp":1575421292,"attributes":{"type":"file","size":0,' \
+#                       '"perm":"rw-r--r--","uid":"0","gid":"0","user_name":"root","group_name":"root","inode":16879,' \
+#                       '"mtime":1575421292,"hash_md5":"d41d8cd98f00b204e9800998ecf8427e",' \
+#                       '"hash_sha1":"da39a3ee5e6b4b0d3255bfef95601890afd80709",' \
+#                       '"hash_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",' \
+#                       '"checksum":"f65b9f66c5ef257a7566b98e862732640d502b6f"}}}'
+#
+#         analysis_socket.send(message.encode(), total_messages=args.total_messages)
+#         analysis_socket.close()
