@@ -50,7 +50,6 @@ def configure_environment(get_configuration, request):
     # Avoid reconnection if we are on agents and add debug params
     if 'agent' in WAZUH_SERVICE:
         change_conf_param('time-reconnect', 99999999999)
-        change_internal_options(param='agent.debug', value=2)
 
     change_internal_options(param='syscheck.debug', value=2)
     change_internal_options(param='monitord.rotate_log', value=0)
