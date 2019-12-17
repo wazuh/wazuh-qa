@@ -45,7 +45,7 @@ def get_configuration(request):
 @pytest.mark.parametrize('tags_to_apply, folder', [
     ({'config1'}, '/testdir1')
 ])
-def test_remove_and_readd_folder(tags_to_apply, folder, get_configuration,
+def test_remove_and_read_folder(tags_to_apply, folder, get_configuration,
                                  configure_environment, restart_syscheckd,
                                  wait_for_initial_scan):
     """
