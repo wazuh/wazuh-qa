@@ -118,18 +118,19 @@ class TokenPrivileges(ctypes.Structure):
 
 
 def get_file_security_descriptor(path):
-    """Get file security descriptor from a given file or folder.
+    """
+    Get file security descriptor from a given file or folder.
 
-        Parameters
-        ----------
-        path : str
-            Absolute path to file or folder
+    Parameters
+    ----------
+    path : str
+        Absolute path to file or folder
 
-        Returns
-        -------
-        list
-            File security descriptor (_wmi_object)
-        """
+    Returns
+    -------
+    list
+        File security descriptor (_wmi_object)
+    """
 
     path = os.path.abspath(path)
     os.stat(path)
@@ -138,7 +139,8 @@ def get_file_security_descriptor(path):
 
 
 def modify_sacl(lfss, mode, mask='DELETE'):
-    """Add or delete a SACL rule from a given file security descriptor.
+    """
+    Add or delete a SACL rule from a given file security descriptor.
 
     Parameters
     ----------
@@ -148,10 +150,6 @@ def modify_sacl(lfss, mode, mask='DELETE'):
         String that decides whether to add or delete a rule from SACL
     mask : str, optional
         String used to get the hexadecimal mask. Default value is 'DELETE', which implies using the 'DELETE' mask
-
-    Returns
-    -------
-
     """
     sd = lfss.GetSecurityDescriptor()[0]
     if sd.ControlFlags & SE_SACL_PRESENT:
@@ -168,7 +166,8 @@ def modify_sacl(lfss, mode, mask='DELETE'):
 
 
 def get_sacl(lfss) -> set:
-    """Retrieve SACL from a given file security descriptor.
+    """
+    Retrieve SACL from a given file security descriptor.
 
     Parameters
     ----------
@@ -192,7 +191,8 @@ def get_sacl(lfss) -> set:
 
 
 def control_privilege(privilege, status=None):
-    """Enable or disable certain security privilege
+    """
+    Enable or disable certain security privilege
 
     Parameters
     ----------
@@ -200,10 +200,6 @@ def control_privilege(privilege, status=None):
         Privilege to get or remove.
     status : hexadecimal, optional
         Status of the privilege. It can either be 'SE_PRIVILEGE_ENABLED' to enable it or None (default) to disable it
-
-    Returns
-    -------
-
     """
     status = 0 if status is None else status
     hToken = wintypes.HANDLE()

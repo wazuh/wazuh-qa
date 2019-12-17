@@ -53,15 +53,10 @@ def get_configuration(request):
 
 # functions
 def extra_configuration_before_yield():
-    """Get list of SACL before Wazuh applies its own rules based on whodata monitoring.
-
-    Returns
-    -------
-
-    """
+    """Get list of SACL before Wazuh applies its own rules based on whodata monitoring."""
     with Privilege('SeSecurityPrivilege'):
         lfss = get_file_security_descriptor(testdir_restore)
-        setattr(sys.modules[__name__], 'previous_sacl', get_sacl(lfss))
+        setattr(sys.modules[__name__], 'previous_rules', get_sacl(lfss))
 
 
 def callback_sacl_changed(line):
@@ -83,15 +78,7 @@ def callback_sacl_restored(line):
 ])
 def test_windows_audit_modify_sacl(tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                                    wait_for_initial_scan):
-    """Check that Wazuh detects a SACL change every 'windows_audit_interval' and sets monitoring to real-time if so.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+    """Check that Wazuh detects a SACL change every 'windows_audit_interval' and sets monitoring to real-time if so."""
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     with Privilege('SeSecurityPrivilege'):
@@ -103,7 +90,7 @@ def test_windows_audit_modify_sacl(tags_to_apply, get_configuration, configure_e
 
         # Delete one of them and assert that after the 'windows_audit_interval' thread, Wazuh is set to real-time
         # monitoring
-        modify_sacl(lfss, 'delete', next(iter(WAZUH_RULES)))
+        modify_sacl(lfss, 'delete', mask=next(iter(WAZUH_RULES)))
         dir_rules = get_sacl(lfss)
         assert next(iter(WAZUH_RULES)) not in dir_rules
 
@@ -116,15 +103,7 @@ def test_windows_audit_modify_sacl(tags_to_apply, get_configuration, configure_e
 ])
 def test_windows_audit_restore_sacl(tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                                     wait_for_initial_scan):
-    """Check that Wazuh restores previous SACL rules when the service is stopped.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+    """Check that Wazuh restores previous SACL rules when the service is stopped."""
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     with Privilege('SeSecurityPrivilege'):
