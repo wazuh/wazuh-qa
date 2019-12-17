@@ -13,6 +13,9 @@ from wazuh_testing.fim import (LOG_FILE_PATH,
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations, PREFIX)
 
+# All tests in this module apply to linux only
+pytestmark = pytest.mark.linux
+
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -20,7 +23,6 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [os.path.join(PREFIX, 'testdir_link'), os.path.join(PREFIX, 'testdir1'),
                     os.path.join(PREFIX, 'testdir2')]
 testdir_link, testdir1, testdir2 = test_directories
-
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 

@@ -10,6 +10,26 @@ from wazuh_testing.tools import (FileMonitor, truncate_file,
                                  control_service)
 
 
+ALL = set("darwin linux win32 sunos5".split())
+
+
+def pytest_runtest_setup(item):
+    supported_platforms = ALL.intersection(mark.name for mark in item.iter_markers())
+    plat = sys.platform
+    if supported_platforms and plat not in supported_platforms:
+        pytest.skip("Cannot run on platform {}".format(plat))
+    # Consider only first mark
+    levels = [mark.kwargs['level'] for mark in item.iter_markers(name="tier")]
+    if levels and len(levels) > 0:
+        tier = item.config.getoption("--tier")
+        if tier is not None and tier != levels[0]:
+            pytest.skip(f"test requires tier level {levels[0]}")
+        elif item.config.getoption("--tier-minimum") > levels[0]:
+            pytest.skip(f"test requires a minimum tier level {levels[0]}")
+        elif item.config.getoption("--tier-maximum") < levels[0]:
+            pytest.skip(f"test requires a maximum tier level {levels[0]}")
+
+
 @pytest.fixture(scope='module')
 def restart_wazuh(get_configuration, request):
     # Reset ossec.log and start a new monitor
@@ -53,16 +73,3 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "tier(level): mark test to run only if match tier level"
     )
-
-
-def pytest_runtest_setup(item):
-    # Consider only first mark
-    levels = [mark.kwargs['level'] for mark in item.iter_markers(name="tier")]
-    if levels and len(levels) > 0:
-        tier = item.config.getoption("--tier")
-        if tier is not None and tier != levels[0]:
-            pytest.skip(f"test requires tier level {levels[0]}")
-        elif item.config.getoption("--tier-minimum") > levels[0]:
-            pytest.skip(f"test requires a minimum tier level {levels[0]}")
-        elif item.config.getoption("--tier-maximum") < levels[0]:
-            pytest.skip(f"test requires a maximum tier level {levels[0]}")

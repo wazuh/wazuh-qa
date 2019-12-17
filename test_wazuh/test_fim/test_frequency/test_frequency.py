@@ -12,6 +12,9 @@ import pytest
 from wazuh_testing.fim import LOG_FILE_PATH, DEFAULT_TIMEOUT, regular_file_cud, generate_params
 from wazuh_testing.tools import FileMonitor, TimeMachine, check_apply_test, load_wazuh_configurations, PREFIX
 
+# All tests in this module apply to linux and windows only
+pytestmark = [pytest.mark.linux, pytest.mark.win32]
+
 # variables
 
 test_directories = [os.path.join(PREFIX, 'testdir1')]
@@ -20,7 +23,6 @@ directory_str = os.path.join(PREFIX, 'frequencydir')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-testdir1 = test_directories
 
 # Configuration with frequency values
 

@@ -21,7 +21,6 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2 = test_directories
 
-
 # configurations
 
 monitoring_modes = ['scheduled']
@@ -73,10 +72,7 @@ def test_create_file_scheduled(folder, name, filetype, content, checkers, tags_t
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Create files
-    if filetype == REGULAR:
-        create_file(filetype, folder, name, content=content)
-    else:
-        create_file(filetype, folder, name)
+    create_file(filetype, folder, name, content=content)
 
     # Go ahead in time to let syscheck perform a new scan
     TimeMachine.travel_to_future(timedelta(hours=13))

@@ -222,6 +222,63 @@
             }
           }
         },
+        "changed_attributes": {
+          "$id": "#/properties/data/properties/changed_attributes",
+          "type": "array",
+          "items": {
+            "$id": "#/properties/data/properties/changed_attributes/items",
+            "type": "string",
+            "default": "",
+            "enum": [
+              "size",
+              "mtime",
+              "md5",
+              "sha1",
+              "sha256",
+              "type",
+              "permission",
+              "uid",
+              "gid",
+              "user_name",
+              "group_name",
+              "inode"
+              ],
+            "examples": [
+              "size",
+              "mtime",
+              "md5",
+              "sha1",
+              "sha256",
+              "type",
+              "permission",
+              "uid",
+              "gid",
+              "user_name",
+              "group_name",
+              "inode"
+            ],
+            "pattern": "^(.*)$"
+          }
+        },
+        "old_attributes": {
+          "required": ["type",
+                       "size",
+                       "perm",
+                       "uid",
+                       "gid",
+                       "user_name",
+                       "group_name",
+                       "inode",
+                       "mtime",
+                       "hash_md5",
+                       "hash_sha1",
+                       "hash_sha256",
+                       "checksum"
+                      ],
+          "allOf": [
+              {"$ref": "#/properties/data/properties/attributes"}
+            ]
+        },
         "audit": {
           "$id": "#/properties/data/properties/audit",
           "type": "object",
