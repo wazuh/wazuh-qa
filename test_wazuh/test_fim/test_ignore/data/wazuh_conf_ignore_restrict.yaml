@@ -14,6 +14,11 @@
       - check_all: 'yes'
       - restrict: "testfile$"
       - FIM_MODE
+  - directories:
+      value: "/testdir2"
+      attributes:
+      - check_all: 'yes'
+      - FIM_MODE
   - ignore:
       value: "/testdir1/testfile"
 # Conf 2
@@ -30,6 +35,12 @@
       attributes:
       - check_all: 'yes'
       - restrict: "testfile2$"
+      - FIM_MODE
+  - directories:
+      value: "/testdir2"
+      attributes:
+      - check_all: 'yes'
+      - restrict: "not_ignored_sregex$"
       - FIM_MODE
   - ignore:
       value: "testfile2$"

@@ -6,7 +6,7 @@ import os
 
 import pytest
 import sys
-from wazuh_testing.fim import LOG_FILE_PATH, callback_ignore, create_file, \
+from wazuh_testing.fim import LOG_FILE_PATH, callback_ignore, callback_detect_event, create_file, \
                               REGULAR, generate_params, check_time_travel, DEFAULT_TIMEOUT
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
@@ -17,12 +17,11 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf_ignore_restrict_w
                                    else 'wazuh_conf_ignore_restrict.yaml')
 
 
-test_directories = [os.path.join(PREFIX, 'testdir1')]
+test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')]
 
-testdir1 = test_directories[0]
+testdir1, testdir2 = test_directories
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-timeout = DEFAULT_TIMEOUT
 
 # Configurations
 
@@ -38,12 +37,15 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.parametrize('folder, filename, tags_to_apply', [
-    (testdir1, 'testfile', {'valid_no_regex'}),
-    (testdir1, 'testfile2', {'valid_regex'})
+@pytest.mark.parametrize('folder, filename, triggers_event, tags_to_apply', [
+    (testdir1, 'testfile', False, {'valid_no_regex'}),
+    (testdir2, 'not_ignored_string', True, {'valid_no_regex'}),
+    (testdir1, 'testfile2', False, {'valid_regex'}),
+    (testdir1, 'ignore_testfile2', False, {'valid_regex'}),
+    (testdir2, 'not_ignored_sregex', True, {'valid_regex'})
 ])
-def test_ignore_works_over_restrict(folder, filename, tags_to_apply, get_configuration, configure_environment,
-                                    restart_syscheckd, wait_for_initial_scan):
+def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_apply, get_configuration,
+                                    configure_environment, restart_syscheckd, wait_for_initial_scan):
     """
         Checks if the ignore tag prevails over the restrict one when using both in the same directory.
 
@@ -52,6 +54,7 @@ def test_ignore_works_over_restrict(folder, filename, tags_to_apply, get_configu
 
         :param folder string Directory where the file is being created
         :param filename string Name of the file to be created
+        :param triggers_event bool True if an event must be generated, False otherwise
         :param tags_to_apply set Run test if matches with a configuration identifier, skip otherwise
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
@@ -63,8 +66,14 @@ def test_ignore_works_over_restrict(folder, filename, tags_to_apply, get_configu
     # Check if any event has been sent
     check_time_travel(scheduled)
 
-    while True:
-        ignored_file = wazuh_log_monitor.start(timeout=timeout, callback=callback_ignore).result()
+    if triggers_event:
+        event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
 
-        if ignored_file == os.path.join(folder, filename):
-            break
+        assert (event['data']['type'] == 'added'), f'Event type not equal'
+        assert (event['data']['path'] == os.path.join(folder, filename)), f'Event path not equal'
+    else:
+        while True:
+            ignored_file = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_ignore).result()
+
+            if ignored_file == os.path.join(folder, filename):
+                break
