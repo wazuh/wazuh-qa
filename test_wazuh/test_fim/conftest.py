@@ -9,7 +9,7 @@ import sys
 import pytest
 from wazuh_testing.fim import LOG_FILE_PATH, detect_initial_scan, change_conf_param, change_internal_options
 from wazuh_testing.tools import (FileMonitor, get_wazuh_conf, set_section_wazuh_conf,
-                                 truncate_file, write_wazuh_conf, control_service, WAZUH_SERVICE, WAZUH_PATH)
+                                 truncate_file, write_wazuh_conf, control_service, WAZUH_SERVICE)
 
 
 @pytest.fixture(scope='module')

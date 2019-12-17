@@ -10,8 +10,13 @@ import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import (FileMonitor, load_wazuh_configurations, PREFIX, check_apply_test, control_service)
-from test_fim.test_windows_audit_interval.manage_acl import Privilege, get_file_security_descriptor, modify_sacl, \
-    get_sacl
+
+if sys.platform == 'win32':
+    from test_fim.test_windows_audit_interval.manage_acl import Privilege, get_file_security_descriptor, modify_sacl, \
+        get_sacl
+
+# All tests in this module apply to windows only
+pytestmark = pytest.mark.win32
 
 # variables
 

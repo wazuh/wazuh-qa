@@ -11,14 +11,12 @@ from wazuh_testing.fim import (DEFAULT_TIMEOUT, HARDLINK, LOG_FILE_PATH, REGULAR
                                check_time_travel, create_file, delete_file, modify_file_content, generate_params)
 from wazuh_testing.tools import FileMonitor, load_wazuh_configurations, truncate_file
 
-
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_hard_link.yaml')
 testdir1 = os.path.join('/', 'testdir1')
 test_directories = [testdir1]
-
 
 # configurations
 
@@ -61,10 +59,10 @@ def test_hard_link(path_file, path_link, num_links, get_configuration,
     This test is intended to be used with valid configurations files. Each execution of this test will configure the
     environment properly, restart the service and wait for the initial scan.
 
-    :param path_file string The path to the regular file to be created
-    :param path_link string The path to the Hard links to be created
-    :param num_links int Number of hard links to create. All of them will be pointing to the same regular file.
-    :param checkers dict Dict with all the check options to be used
+    :param path_file: The path to the regular file to be created
+    :param path_link: The path to the Hard links to be created
+    :param num_links: Number of hard links to create. All of them will be pointing to the same regular file.
+    :param checkers: Dict with all the check options to be used
     """
     truncate_file(LOG_FILE_PATH)
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -83,8 +81,8 @@ def test_hard_link(path_file, path_link, num_links, get_configuration,
 
         # Create as many links pointing to the regular file as num_links
         for link in range(0, num_links):
-            hardlinks_list.append("HardLink"+str(link))
-            create_file(HARDLINK, path_link, "HardLink"+str(link), target=os.path.join(path_file, regular_file_name))
+            hardlinks_list.append("HardLink" + str(link))
+            create_file(HARDLINK, path_link, "HardLink" + str(link), target=os.path.join(path_file, regular_file_name))
 
         # Try to detect the creation events for all the created links
         if path_file == path_link:
