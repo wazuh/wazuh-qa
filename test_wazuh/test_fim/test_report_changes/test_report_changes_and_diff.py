@@ -45,6 +45,7 @@ def get_configuration(request):
 
 
 # tests
+
 @pytest.mark.parametrize('tags_to_apply', [
     {'ossec_conf_report'}
 ])

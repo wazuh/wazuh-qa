@@ -35,18 +35,18 @@ if sys.platform == 'win32':
     DEFAULT_TIMEOUT = 10
     _REQUIRED_AUDIT = {"path", "process_id", "process_name", "user_id", "user_name"}
 
-else:
-    WAZUH_PATH = os.path.join('/', 'var', 'ossec')
-    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
-    DEFAULT_TIMEOUT = 5
-    _REQUIRED_AUDIT = {'user_id', 'user_name', 'group_id', 'group_name', 'process_name', 'path', 'audit_uid',
-                       'audit_name', 'effective_uid', 'effective_name', 'ppid', 'process_id'
-                       }
-
 elif sys.platform == 'darwin':
     WAZUH_PATH = os.path.join('/', 'Library', 'Ossec')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     DEFAULT_TIMEOUT = 10
+
+else:
+    WAZUH_PATH = os.path.join('/', 'var', 'ossec')
+    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+    DEFAULT_TIMEOUT = 5 if sys.platform == "linux" else 10
+    _REQUIRED_AUDIT = {'user_id', 'user_name', 'group_id', 'group_name', 'process_name', 'path', 'audit_uid',
+                       'audit_name', 'effective_uid', 'effective_name', 'ppid', 'process_id'
+                       }
 
 FIFO = 'fifo'
 SYMLINK = 'sym_link'
@@ -658,10 +658,9 @@ class EventChecker:
 
         def filter_events(events, mask):
             """Returns a list of elements matching a specified mask in the events list using jq module."""
-            if sys.platform == "win32":
-                jq_cmd = 'jq -r "' + mask + '"'
-                stdout = subprocess.check_output(jq_cmd, input=json.dumps(events).encode())
-                return stdout.decode("utf8").strip().split("\r\n")
+            if sys.platform in ("win32", 'sunos5'):
+                stdout = subprocess.check_output(["jq", "-r", mask], input=json.dumps(events).encode())
+                return stdout.decode("utf8").strip().split(os.linesep)
             else:
                 return jq(mask).transform(events, multiple_output=True)
 

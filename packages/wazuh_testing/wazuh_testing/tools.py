@@ -39,7 +39,7 @@ else:
     GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
     PREFIX = os.sep
 
-if sys.platform == 'darwin' or sys.platform == 'win32':
+if sys.platform == 'darwin' or sys.platform == 'win32' or sys.platform == 'sunos5':
     WAZUH_SERVICE = 'wazuh.agent'
 else:
     status = subprocess.run(['service', 'wazuh-manager', 'status'])
@@ -565,7 +565,7 @@ def control_service(action, daemon=None):
             result = subprocess.run(["net", action, "OssecSvc"]).returncode
     else:  # Default Unix
         if daemon is None:
-            if sys.platform == 'darwin':
+            if sys.platform == 'darwin' or sys.platform == 'sunos5':
                 result = subprocess.run([f'{WAZUH_PATH}/bin/ossec-control', action]).returncode
             else:
                 result = subprocess.run(['service', WAZUH_SERVICE, action]).returncode
