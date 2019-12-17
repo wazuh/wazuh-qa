@@ -65,4 +65,4 @@ def test_move_folders_to_realtime(tags_to_apply, get_configuration, uninstall_in
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    wazuh_log_monitor.start(timeout=20, callback=callback_audit_cannot_start).result()
+    wazuh_log_monitor.start(timeout=20, callback=callback_audit_cannot_start)

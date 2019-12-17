@@ -61,10 +61,10 @@ def test_remove_and_readd_folder(tags_to_apply, folder, get_configuration,
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     shutil.rmtree(folder, ignore_errors=True)
-    wazuh_log_monitor.start(timeout=20, callback=callback_audit_removed_rule).result()
+    wazuh_log_monitor.start(timeout=20, callback=callback_audit_removed_rule)
 
     os.makedirs(folder, mode=0o777)
-    wazuh_log_monitor.start(timeout=20, callback=callback_audit_reloaded_rule).result()
+    wazuh_log_monitor.start(timeout=20, callback=callback_audit_reloaded_rule)
 
 
 @pytest.mark.parametrize('tags_to_apply', [
@@ -85,5 +85,5 @@ def test_reconnect_to_audit(tags_to_apply, get_configuration, configure_environm
 
     os.system("service auditd restart")
 
-    wazuh_log_monitor.start(timeout=20, callback=callback_audit_connection_close).result()
-    wazuh_log_monitor.start(timeout=20, callback=callback_audit_connection).result()
+    wazuh_log_monitor.start(timeout=20, callback=callback_audit_connection_close)
+    wazuh_log_monitor.start(timeout=20, callback=callback_audit_connection)

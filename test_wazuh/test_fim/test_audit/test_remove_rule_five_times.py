@@ -57,6 +57,6 @@ def test_remove_rule_five_times(tags_to_apply, folder, audit_key, get_configurat
 
     for i in range(0, 5):
         os.system("auditctl -W " + folder + " -p wa -k " + audit_key)
-        wazuh_log_monitor.start(timeout=20, callback=callback_audit_rules_manipulation).result()
+        wazuh_log_monitor.start(timeout=20, callback=callback_audit_rules_manipulation)
 
-    wazuh_log_monitor.start(timeout=20, callback=callback_audit_deleting_rule).result()
+    wazuh_log_monitor.start(timeout=20, callback=callback_audit_deleting_rule)
