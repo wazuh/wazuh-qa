@@ -10,6 +10,10 @@ from wazuh_testing.fim import LOG_FILE_PATH, callback_ignore, callback_detect_ev
                               REGULAR, generate_params, check_time_travel, DEFAULT_TIMEOUT
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
+# markers
+
+pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.win32]
+
 # Variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -52,10 +56,10 @@ def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_ap
         This test is intended to be used with valid configurations files. Each execution of this test will configure
         the environment properly, restart the service and wait for the initial scan.
 
-        :param folder string Directory where the file is being created
-        :param filename string Name of the file to be created
-        :param triggers_event bool True if an event must be generated, False otherwise
-        :param tags_to_apply set Run test if matches with a configuration identifier, skip otherwise
+        :param folder: Directory where the file is being created
+        :param filename: Name of the file to be created
+        :param triggers_event: True if an event must be generated, False otherwise
+        :param tags_to_apply: Run test if matches with a configuration identifier, skip otherwise
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
