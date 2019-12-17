@@ -7,7 +7,7 @@ import sys
 import pytest
 
 from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH, check_time_travel, callback_detect_event, 
-    create_file, REGULAR, detect_initial_scan, delete_file, generate_params)
+    create_file, REGULAR, detect_initial_scan, delete_file, generate_params, DEFAULT_TIMEOUT)
 from wazuh_testing.tools import (FileMonitor, check_apply_test, load_wazuh_configurations, 
     restart_wazuh_with_new_conf, set_section_wazuh_conf, PREFIX)
 
