@@ -11,10 +11,6 @@ from wazuh_testing.fim import LOG_FILE_PATH, callback_ignore, callback_detect_ev
     generate_params, check_time_travel, DEFAULT_TIMEOUT
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
-# Markers
-
-pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.win32]
-
 # Variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
