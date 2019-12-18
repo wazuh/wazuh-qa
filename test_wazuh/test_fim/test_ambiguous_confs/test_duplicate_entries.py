@@ -5,7 +5,7 @@
 import os
 import pytest
 
-from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH, check_time_travel, callback_detect_event,
+from wazuh_testing.fim import (LOG_FILE_PATH, check_time_travel, callback_detect_event, get_fim_mode_param, deepcopy,
                                create_file, REGULAR, detect_initial_scan, delete_file, generate_params, DEFAULT_TIMEOUT)
 from wazuh_testing.tools import (FileMonitor, check_apply_test, load_wazuh_configurations,
                                  restart_wazuh_with_new_conf, set_section_wazuh_conf, PREFIX)
@@ -13,45 +13,30 @@ from wazuh_testing.tools import (FileMonitor, check_apply_test, load_wazuh_confi
 pytestmark = [pytest.mark.linux, pytest.mark.win32]
 
 # variables
-test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir1')]
-directory_str = ','.join([os.path.join(PREFIX, 'testdir1')] + [os.path.join(PREFIX, 'testdir1')])
+test_directories = [os.path.join(PREFIX, 'testdir1')]*2
+directory_str = ','.join(test_directories)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_dup_entries.yaml')
 testdir1, _ = test_directories
 file = 'hello'
 
-# Convert the mode string into an ossec.conf valid format value
-
-
-def mode_format(mode):
-    if mode != 'scheduled':
-        return {mode: 'yes'}
-    else:
-        return ''
-
 
 # Configuration
-conf_params = [
-            {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__, 'FIM_MODE': mode_format('whodata'),
-                'TEST_DIRECTORIES2': directory_str, 'FIM_MODE2': mode_format('realtime')},
-            {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__, 'FIM_MODE': mode_format('realtime'),
-                'TEST_DIRECTORIES2': directory_str, 'FIM_MODE2': mode_format('scheduled')},
-            {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__, 'FIM_MODE': mode_format('whodata'),
-                'TEST_DIRECTORIES2': directory_str, 'FIM_MODE2': mode_format('whodata')},
-            {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__, 'FIM_MODE': mode_format('scheduled'),
-                'TEST_DIRECTORIES2': directory_str, 'FIM_MODE2': mode_format('whodata')}
-            ]
-conf_metadata = [
-            {'module_name': __name__, 'fim_mode': 'whodata', 'fim_mode2': 'realtime'},
-            {'module_name': __name__, 'fim_mode': 'realtime', 'fim_mode2': 'scheduled'},
-            {'module_name': __name__, 'fim_mode': 'whodata', 'fim_mode2': 'whodata'},
-            {'module_name': __name__, 'fim_mode': 'scheduled', 'fim_mode2': 'whodata'}
-            ]
 
-configurations = load_wazuh_configurations(configurations_path,
-                                           __name__, params=conf_params, metadata=conf_metadata)
+p, m = generate_params(extra_params={'MODULE_NAME': __name__, 'TEST_DIRECTORIES': directory_str},
+                       extra_metadata={'module_name': __name__, 'test_directories': directory_str})
 
+params, metadata = list(), list()
+for mode in ['scheduled', 'realtime', 'whodata']:
+    p_fim, m_fim = get_fim_mode_param(mode, key='FIM_MODE2')
+    for p_dict, m_dict in zip(p, m):
+        p_dict.update(p_fim.items())
+        m_dict.update(m_fim.items())
+        params.append(deepcopy(p_dict))
+        metadata.append(deepcopy(m_dict))
+
+configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
 # Fixtures
 
@@ -65,10 +50,10 @@ def get_configuration(request):
 # tests
 
 
-@pytest.mark.parametrize('checkers, tags_to_apply', [
-   ({CHECK_ALL}, {'ossec_conf'}),
+@pytest.mark.parametrize('tags_to_apply', [
+   ({'ossec_conf'}),
 ])
-def test_duplicate_entries(checkers, tags_to_apply,
+def test_duplicate_entries(tags_to_apply,
                            get_configuration, configure_environment,
                            restart_syscheckd, wait_for_initial_scan):
     """ Checks if syscheckd ignores duplicate entries.
