@@ -16,6 +16,7 @@ from copy import deepcopy
 from datetime import datetime, timedelta
 from subprocess import DEVNULL, check_call, check_output
 from typing import Any, List, Set
+from struct import pack, unpack
 
 import psutil
 import yaml
@@ -617,9 +618,9 @@ def time_to_timedelta(time):
         return timedelta(weeks=time_value)
 
 
-class OssecSocket:
+class SocketController:
 
-    def __init__(self, path, timeout=10, socket_type='writer', connection_protocol=socket.SOCK_STREAM):
+    def __init__(self, path, timeout=None, socket_type='writer', connection_protocol=socket.SOCK_STREAM):
         """
 
         Parameters
@@ -627,7 +628,7 @@ class OssecSocket:
         path : str
             Path where the file will be created
         timeout : int
-            Socket's timeout
+            Socket's timeout, 0 for non-blocking mode
         socket_type : str
             Reader or writer
         connection_protocol : int
@@ -657,6 +658,7 @@ class OssecSocket:
                 raise e
 
     def close(self):
+        self.sock.shutdown(socket.SHUT_RDWR)
         self.sock.close()
 
     def send(self, msg, total_messages=1):
@@ -671,7 +673,8 @@ class OssecSocket:
 
         Returns
         -------
-
+        list
+            List of sent messages
         """
         if not isinstance(msg, bytes):
             raise TypeError("Type must be bytes")
@@ -700,44 +703,96 @@ class OssecSocket:
         output = list()
         for _ in range(0, total_messages):
             try:
-                self.sock.listen()
+                self.sock.listen(1)
                 conn, addr = self.sock.accept()
-                output.append(conn.recv(socket.MSG_WAITALL))
+                size = unpack("<I", conn.recv(4, socket.MSG_WAITALL))[0]
+                output.append(conn.recv(size, socket.MSG_WAITALL))
             except Exception as e:
                 raise e
 
         return output
 
-# if __name__ == '__main__':
-#     parser = argparse.ArgumentParser(description='Socket utilities')
-#     parser.add_argument('--message', '-m', type=str, help='Custom message')
-#     parser.add_argument('--timeout', '-o', type=int, default=30, help='Socket\'s timeout')
-#     parser.add_argument('--total_messages', '-x', type=int, default=10, help='Total messages')
-#     parser.add_argument('--type', '-t', type=str, help='Types: reader or writer')
-#     args = parser.parse_args()
-#
-#     if args.type == 'reader':
-#         # Create wazuh-db socket (wdb)
-#         wdb_path = os.path.join('/var', 'ossec', 'queue', 'db', 'wdb')
-#         wdb_socket = OssecSocket(wdb_path, timeout=args.timeout, socket_type='reader')
-#         print(wdb_socket.receive(total_messages=args.total_messages))
-#         wdb_socket.close()
-#     elif args.type == 'writer':
-#         # Create analysis sockets (queue)
-#         analysis_path = os.path.join('/var', 'ossec', 'queue', 'ossec', 'queue')
-#         analysis_socket = OssecSocket(analysis_path, timeout=args.timeout, socket_type='writer',
-#                                       connection_protocol=socket.SOCK_DGRAM)
-#
-#         if args.message:
-#             message = args.message
-#         else:
-#             message = '8:[001] (9db98108b96e) any->syscheck:{"type":"event","data":{"path":"/home/test/file2",' \
-#                       '"mode":"real-time","type":"added","timestamp":1575421292,"attributes":{"type":"file","size":0,' \
-#                       '"perm":"rw-r--r--","uid":"0","gid":"0","user_name":"root","group_name":"root","inode":16879,' \
-#                       '"mtime":1575421292,"hash_md5":"d41d8cd98f00b204e9800998ecf8427e",' \
-#                       '"hash_sha1":"da39a3ee5e6b4b0d3255bfef95601890afd80709",' \
-#                       '"hash_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",' \
-#                       '"checksum":"f65b9f66c5ef257a7566b98e862732640d502b6f"}}}'
-#
-#         analysis_socket.send(message.encode(), total_messages=args.total_messages)
-#         analysis_socket.close()
+
+class SocketMonitor:
+
+    def __init__(self, path, timeout=10, socket_type='writer'):
+        """
+
+        Parameters
+        ----------
+        path : str
+            Path where the file will be created
+        timeout : int
+            Socket's timeout
+        socket_type : str
+            Reader or writer
+
+        Raises
+        ------
+        Exception
+            If the socket connection failed
+        """
+        self.timeout = timeout
+        self.socket_type = socket_type
+        self.controller = SocketController(path=path, socket_type=socket_type,
+                                           connection_protocol=socket.SOCK_STREAM if socket_type == 'reader'
+                                           else socket.SOCK_DGRAM)
+
+    def close(self):
+        self.controller.close()
+
+    def _start_timeout(self):
+        self.timer = Timer(self.timeout, self._abort)
+        self.timer.start()
+
+    def _stop_timeout(self):
+        self.timer.cancel()
+
+    def _abort(self):
+        self.close()
+        raise TimeoutError()
+
+    def send(self, message_list):
+        """
+
+        Parameters
+        ----------
+        message_list : list
+            List of messages to be send
+
+        Returns
+        -------
+        list
+            List of sent messages
+        """
+        output = list()
+        self._start_timeout()
+        for message in message_list:
+            output.extend(self.controller.send(message.encode(), 1))
+        self._stop_timeout()
+
+        return output
+
+    def receive(self, total_messages):
+        """
+
+        Parameters
+        ----------
+        total_messages : int
+            Total messages to be received
+
+        Returns
+        -------
+        Socket message
+        """
+        self._start_timeout()
+        response = self.controller.receive(total_messages)
+        self._stop_timeout()
+
+        return response
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
