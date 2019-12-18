@@ -504,7 +504,7 @@ def callback_detect_synchronization(line):
 
 
 def callback_ignore(line):
-    match = re.match(r".*Ignoring '.*?' '(.*?)' due to( sregex)* '.*?'", line)
+    match = re.match(r".*Ignoring '.*?' '(.*?)' due to( sregex)? '.*?'", line)
     if match:
         return match.group(1)
     return None
