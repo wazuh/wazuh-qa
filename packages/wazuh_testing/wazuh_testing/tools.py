@@ -573,6 +573,27 @@ def control_service(action, daemon=None):
         raise ValueError(f"Error when executing {action} in daemon {daemon}. Exit status: {result}")
 
 
+def get_process(search_name):
+    """
+    Search process by its name.
+
+    Parameters
+    ----------
+    search_name : str
+        Name of the process to be fetched
+
+    Returns
+    -------
+    `psutil.Process` or None
+        first occurrence of the process object matching the `search_name` or None if no process has been found
+    """
+    for proc in psutil.process_iter(attrs=['name']):
+        if proc.name() == search_name:
+            return proc
+
+    return None
+
+
 def reformat_time(scan_time):
     """ Transform scan_time to readable time
 
