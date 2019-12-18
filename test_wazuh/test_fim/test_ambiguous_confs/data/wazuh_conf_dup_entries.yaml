@@ -14,7 +14,7 @@
       - check_all: 'yes'
       - FIM_MODE
   - directories:
-      value: TEST_DIRECTORIES2
+      value: TEST_DIRECTORIES
       attributes:
       - check_all: 'yes'
       - FIM_MODE2
