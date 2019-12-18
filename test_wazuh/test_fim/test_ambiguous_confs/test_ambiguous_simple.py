@@ -6,6 +6,7 @@ import os
 import sys
 
 import pytest
+
 from wazuh_testing.fim import (DEFAULT_TIMEOUT, LOG_FILE_PATH, regular_file_cud, WAZUH_PATH,
                                CHECK_ALL, CHECK_GROUP, CHECK_INODE,
                                CHECK_MTIME, CHECK_OWNER,
@@ -94,7 +95,7 @@ def _test_recursion_cud(ini, fin, path, recursion_subdir, scheduled,
         Minimum timeout
     triggers_event : bool
         determine if the event should be raised or not.
-    validators_after_cud : list
+    validators_after_cud : list, optional
         functions that validate an event triggered when a new file is created, modified
     or deleted. Each function must accept a param to receive the event to be validated.
 

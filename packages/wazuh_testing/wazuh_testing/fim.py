@@ -504,7 +504,7 @@ def callback_detect_synchronization(line):
 
 
 def callback_ignore(line):
-    match = re.match(r".*Ignoring '.*?' '(.*?)' due to sregex '.*?'", line)
+    match = re.match(r".*Ignoring '.*?' '(.*?)' due to( sregex)? '.*?'", line)
     if match:
         return match.group(1)
     return None
@@ -603,6 +603,13 @@ def callback_configuration_warning(line):
     if match:
         return True
     return None
+
+
+def callback_entries_path_count(line):
+    match = re.match(r'.*Fim inode entries: (\d+), path count: (\d+)', line)
+
+    if match:
+        return match.group(1), match.group(2)
 
 
 class EventChecker:
