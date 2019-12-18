@@ -8,7 +8,7 @@ from copy import deepcopy
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, create_file, generate_params, callback_sending_anything
+from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, create_file, generate_params, callback_syscheck_message
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
 # variables
@@ -21,7 +21,6 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories[0]
 
-
 # configurations
 conf_params = {'TEST_DIRECTORIES': directory_str,
                'MODULE_NAME': __name__
@@ -31,7 +30,8 @@ conf_metadata = {'test_directories': directory_str,
                  }
 p, m = generate_params(extra_params=conf_params, extra_metadata=conf_metadata)
 params, metadata = list(), list()
-for max_eps in ['10', '50', '100', '200', '500']:
+eps_values = ['10', '50', '100', '200', '500']
+for max_eps in eps_values:
     for p_dict, m_dict in zip(p, m):
         p_dict['MAX_EPS'] = max_eps
         m_dict['max_eps'] = max_eps
@@ -55,7 +55,8 @@ def extra_configuration_before_yield():
 
 
 def test_max_eps_on_start(get_configuration, configure_environment, restart_syscheckd):
-    """Checks that max_eps is respected when a big quatity of events are generated
+    """
+    Checks that max_eps is respected when a big quatity of events are generated
 
     Before starting the service, a great number of files is created thanks to function `extra_configuration_before_yield`.
     After that, syscheck is launched and starts generating as much events as files created.
@@ -65,12 +66,14 @@ def test_max_eps_on_start(get_configuration, configure_environment, restart_sysc
     """
     check_apply_test({'max_eps'}, get_configuration['tags'])
 
-    result = wazuh_log_monitor.start(timeout=120,
+    result = wazuh_log_monitor.start(timeout=150,
                                      accum_results=1000,
-                                     callback=callback_sending_anything,
+                                     callback=callback_syscheck_message,
                                      update_position=False).result()
 
-    max_eps = get_configuration['metadata']['max_eps']
+    max_eps = int(get_configuration['metadata']['max_eps'])
     counter = Counter([date_time for date_time, _ in result])
+    error_margin = (max_eps * 0.1)
+
     for date_time, n_occurrences in counter.items():
-        assert n_occurrences <= int(max_eps), f'Sent {n_occurrences} but a maximum of {max_eps} was set'
+        assert n_occurrences <= round(max_eps + error_margin), f'Sent {n_occurrences} but a maximum of {max_eps} was set'
