@@ -47,7 +47,7 @@ def get_configuration(request):
 ])
 def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_apply, get_configuration,
                                     configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """ Checks if the ignore tag prevails over the restrict one when using both in the same directory.
+    """Checks if the ignore tag prevails over the restrict one when using both in the same directory.
 
     This test is intended to be used with valid configurations files. Each execution of this test will configure
     the environment properly, restart the service and wait for the initial scan.
