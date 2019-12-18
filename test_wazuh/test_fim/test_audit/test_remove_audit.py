@@ -42,9 +42,7 @@ def get_configuration(request):
 
 @pytest.fixture(scope='module')
 def uninstall_install_audit():
-    """
-    Uninstall auditd before test and install after test
-    """
+    """Uninstall auditd before test and install after test"""
 
     # Check distro
     linux_distro = id()
@@ -58,23 +56,16 @@ def uninstall_install_audit():
         audit = "auditd"
         option = "--yes"
     else:
-        raise Exception("Can not uninstall/install audit")
+        raise ValueError(f"Linux distro ({linux_distro}) not supported for uninstall/install audit")
 
     # Uninstall audit
-    process = subprocess.run([package_management, "remove", audit, option])
-    if process.returncode < 0:
-        raise Exception("Can not remove audit")
+    process = subprocess.run([package_management, "remove", audit, option], check=True)
 
     yield
 
     # Install audit and start the service
-    process = subprocess.run([package_management, "install", audit, option])
-    if process.returncode < 0:
-        raise Exception("Can not install audit")
-
-    process = subprocess.run(["service", "auditd", "start"])
-    if process.returncode < 0:
-        raise Exception("Can not start audit")
+    process = subprocess.run([package_management, "install", audit, option], check=True)
+    process = subprocess.run(["service", "auditd", "start"], check=True)
 
 
 # Test
@@ -84,10 +75,12 @@ def uninstall_install_audit():
 ])
 def test_move_folders_to_realtime(tags_to_apply, get_configuration, uninstall_install_audit,
                                   configure_environment, restart_syscheckd):
-    """
-    Check folders monitored with Whodata change to Real-time if auditd is not installed
+    """Check folders monitored with Whodata change to Real-time if auditd is not installed
 
-    :param tags_to_apply Configuration tag to apply
+    Parameters
+    ----------
+    tags_to_apply : set
+        Configuration tag to apply
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])

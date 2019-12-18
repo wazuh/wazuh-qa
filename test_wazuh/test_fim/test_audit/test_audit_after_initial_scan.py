@@ -6,6 +6,7 @@
 import pytest
 import os
 import shutil
+import subprocess
 
 from wazuh_testing.fim import (LOG_FILE_PATH,
                                callback_audit_rules_manipulation,
@@ -48,28 +49,30 @@ def get_configuration(request):
 # Test
 
 @pytest.mark.parametrize('tags_to_apply, folder', [
-    ({'config1'}, '/testdir1')
+    ({'config1'}, testdir1),
+    ({'config1'}, testdir2),
+    ({'config1'}, testdir3)
 ])
 def test_remove_and_read_folder(tags_to_apply, folder, get_configuration,
                                  configure_environment, restart_syscheckd,
                                  wait_for_initial_scan):
-    """
-    Remove folder which is monitored with auditd and then create it again.
+    """Remove folder which is monitored with auditd and then create it again.
 
-    :param tags_to_apply Configuration tag to apply in the test
-    :param folder The folder to remove and readd
+    Parameters
+    ----------
+    tags_to_apply : set
+        Configuration tag to apply in the test
+    folder : str
+        The folder to remove and readd
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
-
-    truncate_file(LOG_FILE_PATH)
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     shutil.rmtree(folder, ignore_errors=True)
     wazuh_log_monitor.start(timeout=20, callback=callback_audit_removed_rule)
 
     os.makedirs(folder, mode=0o777)
-    wazuh_log_monitor.start(timeout=20, callback=callback_audit_reloaded_rule)
+    wazuh_log_monitor.start(timeout=30, callback=callback_audit_reloaded_rule)
 
 
 @pytest.mark.parametrize('tags_to_apply', [
@@ -77,18 +80,17 @@ def test_remove_and_read_folder(tags_to_apply, folder, get_configuration,
 ])
 def test_reconnect_to_audit(tags_to_apply, get_configuration, configure_environment,
                             restart_syscheckd, wait_for_initial_scan):
-    """
-    Restart auditd and check Wazuh reconnect to auditd
+    """Restart auditd and check Wazuh reconnect to auditd
 
-    :param tags_to_apply Configuration tag to apply in the test
+    Parameters
+    ----------
+    tags_to_apply : set
+        Configuration tag to apply in the test
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    truncate_file(LOG_FILE_PATH)
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
-    os.system("service auditd restart")
+    subprocess.run(["service", "auditd", "restart"], check=True)
 
     wazuh_log_monitor.start(timeout=20, callback=callback_audit_connection_close)
     wazuh_log_monitor.start(timeout=20, callback=callback_audit_connection)

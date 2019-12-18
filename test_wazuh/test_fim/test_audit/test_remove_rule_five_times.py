@@ -5,6 +5,7 @@
 
 import pytest
 import os
+import subprocess
 
 from wazuh_testing.fim import (LOG_FILE_PATH,
                                callback_audit_rules_manipulation,
@@ -46,21 +47,24 @@ def get_configuration(request):
 @pytest.mark.parametrize('tags_to_apply, folder, audit_key', [
     ({'config1'}, '/testdir2', 'wazuh_fim')
 ])
-def test_remove_rule_five_times(tags_to_apply, folder, audit_key, get_configuration,
-                                 configure_environment, restart_syscheckd,
-                                 wait_for_initial_scan):
-    """
-    Remove auditd rule using auditctl five times and check Wazuh ignores folder.
+def test_remove_rule_five_times(tags_to_apply, folder, audit_key,
+                                get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
+    """Remove auditd rule using auditctl five times and check Wazuh ignores folder.
 
-    :param tags_to_apply Configuration tag to apply in the test
-    :param folder The folder to remove and readd
-    :param audit_key The key which Wazuh put.
+    Parameters
+    ----------
+    tags_to_apply : set
+        Configuration tag to apply in the test
+    folder : str
+        The folder to remove and readd
+    audit_key : str
+        The key which Wazuh put.
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     for i in range(0, 5):
-        os.system("auditctl -W " + folder + " -p wa -k " + audit_key)
+        subprocess.run(["auditctl", "-W", folder, "-p", "wa", "-k", audit_key], check=True)
         wazuh_log_monitor.start(timeout=20, callback=callback_audit_rules_manipulation)
 
     wazuh_log_monitor.start(timeout=20, callback=callback_audit_deleting_rule)
