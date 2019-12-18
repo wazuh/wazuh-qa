@@ -3,14 +3,15 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import sys
 
 import pytest
-import sys
-from wazuh_testing.fim import LOG_FILE_PATH, callback_ignore, callback_detect_event, create_file, \
-                              REGULAR, generate_params, check_time_travel, DEFAULT_TIMEOUT
+
+from wazuh_testing.fim import LOG_FILE_PATH, callback_ignore, callback_detect_event, create_file, REGULAR, \
+    generate_params, check_time_travel, DEFAULT_TIMEOUT
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
-# markers
+# Markers
 
 pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.win32]
 
@@ -20,9 +21,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_ignore_restrict_win32.yaml' if sys.platform == 'win32'
                                    else 'wazuh_conf_ignore_restrict.yaml')
 
-
 test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')]
-
 testdir1, testdir2 = test_directories
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -32,14 +31,16 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 conf_params, conf_metadata = generate_params()
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
-# Fixtures
 
+# Fixtures
 
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
+
+# Tests
 
 @pytest.mark.parametrize('folder, filename, triggers_event, tags_to_apply', [
     (testdir1, 'testfile', False, {'valid_no_regex'}),
@@ -50,16 +51,22 @@ def get_configuration(request):
 ])
 def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_apply, get_configuration,
                                     configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """
-        Checks if the ignore tag prevails over the restrict one when using both in the same directory.
+    """ Checks if the ignore tag prevails over the restrict one when using both in the same directory.
 
-        This test is intended to be used with valid configurations files. Each execution of this test will configure
-        the environment properly, restart the service and wait for the initial scan.
+    This test is intended to be used with valid configurations files. Each execution of this test will configure
+    the environment properly, restart the service and wait for the initial scan.
 
-        :param folder: Directory where the file is being created
-        :param filename: Name of the file to be created
-        :param triggers_event: True if an event must be generated, False otherwise
-        :param tags_to_apply: Run test if matches with a configuration identifier, skip otherwise
+    Parameters
+    ----------
+    folder : str
+        Directory where the file is being created
+    filename : str
+        Name of the file to be created
+    triggers_event : bool
+        True if an event must be generated, False otherwise
+    tags_to_apply : set
+        Run test if it matches with a configuration identifier, skip otherwise
+
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
@@ -67,14 +74,14 @@ def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_ap
     # Create file that must be ignored
     create_file(REGULAR, folder, filename, content='')
 
-    # Check if any event has been sent
+    # Go ahead in time to let syscheck perform a new scan if mode is scheduled
     check_time_travel(scheduled)
 
     if triggers_event:
         event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
 
-        assert (event['data']['type'] == 'added'), f'Event type not equal'
-        assert (event['data']['path'] == os.path.join(folder, filename)), f'Event path not equal'
+        assert event['data']['type'] == 'added', 'Event type not equal'
+        assert event['data']['path'] == os.path.join(folder, filename), 'Event path not equal'
     else:
         while True:
             ignored_file = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_ignore).result()
