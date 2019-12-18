@@ -878,15 +878,10 @@ def generate_params(extra_params: dict = None, extra_metadata: dict = None, *, m
 
     modes = modes if modes is not None else ['scheduled', 'realtime', 'whodata']
     for mode in modes:
-        if mode == 'scheduled':
-            fim_param.append({'FIM_MODE': ''})
-            fim_metadata.append({'fim_mode': 'scheduled'})
-        elif mode == 'realtime' and sys.platform != 'darwin':
-            fim_param.append({'FIM_MODE': {'realtime': 'yes'}})
-            fim_metadata.append({'fim_mode': 'realtime'})
-        elif mode == 'whodata' and sys.platform != 'darwin':
-            fim_param.append({'FIM_MODE': {'whodata': 'yes'}})
-            fim_metadata.append({'fim_mode': 'whodata'})
+        param, metadata = get_fim_mode_param(mode)
+        if param:
+            fim_param.append(param)
+            fim_metadata.append(metadata)
 
     params = []
     metadata = []
@@ -902,3 +897,33 @@ def generate_params(extra_params: dict = None, extra_metadata: dict = None, *, m
         metadata.append(m_aux)
 
     return params, metadata
+
+
+def get_fim_mode_param(mode, key='FIM_MODE'):
+    """Gets the parameters for the FIM mode.
+
+    This is useful to generate the directories tag with several fim modes. It also
+    takes into account the current platform so realtime and whodata does not apply
+    to darwin.
+
+    Parameters
+    ----------
+    mode : string
+        Must be one of the following 'scheduled', 'realtime' or 'whodata'
+    key : string, optional
+        Name of the placeholder expected in the target configuration. Default 'FIM_MODE'
+
+    Returns
+    -------
+    params : dict
+        The key is `key` and the value is the string to be replaced in the target configuration
+    metadata : dict
+        The key is `key` in lowercase and the value is always `mode`
+    """
+    metadata = {key.lower(): mode}
+    if mode == 'scheduled':
+        return {key: ''}, metadata
+    elif mode == 'realtime' and sys.platform != 'darwin':
+        return {key: {'realtime': 'yes'}}, metadata
+    elif mode == 'whodata' and sys.platform != 'darwin':
+        return {key: {'whodata': 'yes'}}, metadata
