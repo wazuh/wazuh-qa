@@ -157,8 +157,12 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
 
     This test is intended to be used with valid configurations
 
-    :param taudit_key string Name of the audit_key to monitor
-    :param path string Path of the folder to be monitored
+    Parameters
+    ----------
+    audit_key : str
+        Name of the audit_key to monitor
+    path : str
+        Path of the folder to be monitored
     """
     check_apply_test({audit_key}, get_configuration['tags'])
 
@@ -192,8 +196,12 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
 
     This test is intended to be used with valid configurations
 
-    :param tags_to_apply set Run test if matches with a configuration identifier, skip otherwise
-    :param should_restart boolean True if Auditd should restart, False otherwise
+    Parameters
+    ----------
+    tags_to_apply : set
+        Run test if matches with a configuration identifier, skip otherwise
+    should_restart : boolean
+        True if Auditd should restart, False otherwise
     """
 
     def get_audit_creation_time():
@@ -210,7 +218,7 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
 
     time_before_restart = get_audit_creation_time()
     control_service('restart')
-    time.sleep(5)
+    time.sleep(10)
 
     time_after_restart = get_audit_creation_time()
 
