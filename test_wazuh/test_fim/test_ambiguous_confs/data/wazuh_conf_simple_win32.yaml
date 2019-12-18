@@ -149,7 +149,6 @@
       - check_group: 'yes'
       - check_sha256sum: 'yes'
       - check_mtime: 'yes'
-      - check_inode: 'yes'
       - FIM_MODE
   - directories:
       value: "c:\\checkdir_default\\checkdir_checkall"

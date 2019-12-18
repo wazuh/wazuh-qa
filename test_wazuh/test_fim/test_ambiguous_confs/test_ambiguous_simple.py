@@ -36,6 +36,15 @@ testdir_recursion = test_directories[2]
 testdir_recursion_tag = test_directories[3]
 testdir_recursion_no_tag = test_directories[4]
 
+if sys.platform == 'win32':
+    check_list = [(checkdir_default, {CHECK_SIZE} | {CHECK_PERM} | {CHECK_OWNER} | {CHECK_GROUP} |
+                  {CHECK_SHA256SUM} | {CHECK_MTIME})]
+else:
+    check_list = [(checkdir_default, {CHECK_SIZE} | {CHECK_PERM} | {CHECK_OWNER} | {CHECK_GROUP} |
+                  {CHECK_SHA256SUM} | {CHECK_MTIME} | {CHECK_INODE})]
+check_list.extend([(checkdir_checkall, REQUIRED_ATTRIBUTES[CHECK_ALL]),
+                   (checkdir_no_inode, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_INODE}),
+                   (checkdir_no_checksum, REQUIRED_ATTRIBUTES[CHECK_ALL] - REQUIRED_ATTRIBUTES[CHECK_SUM])])
 tag = 'Sample_tag'
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -89,9 +98,8 @@ def _test_recursion_cud(ini, fin, path, recursion_subdir, scheduled,
 @pytest.mark.parametrize('folders, tags_to_apply', [
     ([testdir, subdir], {'ambiguous_restrict'})
 ])
-def test_ambiguous_restrict(folders, tags_to_apply,
-                            get_configuration, configure_environment,
-                            restart_syscheckd, wait_for_initial_scan):
+def test_ambiguous_restrict(folders, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
+                            wait_for_initial_scan):
     """ Checks if syscheck detects regular file changes (add, modify, delete) depending on its restrict configuration.
 
         /testdir -> has a restrict configuration
@@ -280,14 +288,7 @@ def test_ambiguous_recursion_tag(dirnames, recursion_level, triggers_event, tags
 @pytest.mark.parametrize('tags_to_apply', [
     {'ambiguous_check'}
 ])
-@pytest.mark.parametrize('dirname, checkers', [
-    (checkdir_default, {CHECK_SIZE} | {CHECK_PERM} | {CHECK_OWNER} | {CHECK_GROUP} | {CHECK_SHA256SUM} |
-     {CHECK_MTIME} | {CHECK_INODE}),
-    (checkdir_checkall, REQUIRED_ATTRIBUTES[CHECK_ALL]),
-    (checkdir_no_inode, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_INODE}),
-    (checkdir_no_checksum, REQUIRED_ATTRIBUTES[CHECK_ALL] - REQUIRED_ATTRIBUTES[CHECK_SUM])
-
-])
+@pytest.mark.parametrize('dirname, checkers', check_list)
 def test_ambiguous_check(dirname, checkers, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                          wait_for_initial_scan):
     """ Checks if syscheck detects every check set in the configuration.
