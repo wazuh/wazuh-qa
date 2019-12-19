@@ -435,7 +435,7 @@ def callback_detect_end_scan(line):
 
 
 def callback_detect_event(line):
-    msg = r'.*Sending message to server: (.+)' if sys.platform == 'win32' else r'.*Sending event: (.+)$'
+    msg = r'.*Sending FIM event: (.+)$'
     match = re.match(msg, line)
 
     try:
@@ -450,8 +450,15 @@ def callback_detect_event(line):
 def callback_detect_integrity_event(line):
     match = re.match(r'.*Sending integrity control message: (.+)$', line)
     if match:
-        if json.loads(match.group(1))['type'] == 'state':
-            return json.loads(match.group(1))
+        return json.loads(match.group(1))
+    return None
+
+
+def callback_detect_integrity_state(line):
+    event = callback_detect_integrity_event(line)
+    if event:
+        if event['type'] == 'state':
+            return json.loads(event)
     return None
 
 
@@ -548,8 +555,8 @@ def callback_symlink_scan_ended(line):
 
 
 def callback_syscheck_message(line):
-    if callback_detect_event(line) or callback_detect_integrity_event(line):
-        match = re.match(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*'({.*?})'$", line)
+    if callback_detect_integrity_event(line) or callback_detect_event(line):
+        match = re.match(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*({.*?})$", line)
         if match:
             return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S'), json.dumps(match.group(2))
         return None
