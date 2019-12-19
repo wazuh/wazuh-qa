@@ -24,6 +24,7 @@ from wazuh_testing.tools import TimeMachine
 if sys.platform == 'win32':
     import win32con
     import win32api
+    import winreg
 else:
     from jq import jq
 
@@ -175,6 +176,21 @@ def create_file(type_, path, name, **kwargs):
     getattr(sys.modules[__name__], f'_create_{type_}')(path, name, **kwargs)
 
 
+def create_registry(key, subkey, arch)
+    """ Creates a registry given the key and the subkey. The registry is opened if it already exists
+
+    :param key: The key of the registry
+    :type key: HKEY_* constants
+    :param subkey: The subkey (name) of the registry
+    :type subkey: String
+    :return: None
+    """
+    if sys.platform != 'win32':
+        return
+    access_ = arch | winreg.KEY_WRITE
+    key = winreg.CreateKeyEx(key, subkey, access=access_)
+
+
 def _create_fifo(path, name):
     """Creates a FIFO file.
 
@@ -274,6 +290,36 @@ def delete_file(path, name):
     regular_path = os.path.join(path, name)
     if os.path.exists(regular_path):
         os.remove(regular_path)
+
+
+def delete_registry(key, subkey)
+    """ Deletes a registry
+
+    :param key: The key of the registry
+    :type key: HKEY_* constants
+    :param subkey: The subkey (name) of the registry
+    :type subkey: String
+    :return: None
+    """
+    if sys.platform != 'win32':
+        return
+    key = winreg.CreatDeleteKeyEx(key, subkey)
+
+
+def modify_registry(key, subkey, value)
+    """ Modifies the content of REG_SZ in a registry
+
+    :param key: The key of the registry
+    :type key: HKEY_* constants
+    :param subkey: The subkey (name) of the registry
+    :type subkey: String
+    :param value: The value to be set
+    :type value: String
+    :return: None
+    """
+    if sys.platform != 'win32':
+        return
+    key = winreg.SetValue(key, subkey, value)
 
 
 def modify_file_content(path, name, new_content=None, is_binary=False):
