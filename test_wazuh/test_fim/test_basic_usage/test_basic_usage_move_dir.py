@@ -3,14 +3,12 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import shutil
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
     callback_detect_event, check_time_travel, DEFAULT_TIMEOUT, delete_file
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
-pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.darwin]
 
 # variables
 
@@ -45,7 +43,8 @@ def extra_configuration_before_yield():
     create_file(REGULAR, os.path.join(testdir3, 'subdir2'), 'regular2', content='')
 
 
-@pytest.mark.parametrize('source_folder, target_folder, subdir, tags_to_apply, triggers_delete_event, triggers_add_event', [
+@pytest.mark.parametrize('source_folder, target_folder, subdir, tags_to_apply, \
+                triggers_delete_event, triggers_add_event', [
     (PREFIX, testdir2, 'subdir', {'ossec_conf'}, False, True),
     (testdir1, PREFIX, 'subdir', {'ossec_conf'}, True, False),
     (testdir3, testdir2, 'subdir2', {'ossec_conf'}, True, True),
@@ -72,7 +71,7 @@ def test_move_file(source_folder, target_folder, subdir, tags_to_apply,
     check_time_travel(scheduled)
 
     # Monitor expected events
-    events = wazuh_log_monitor.start(timeout=30,
+    events = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT,
                                      callback=callback_detect_event,
                                      accum_results=(triggers_add_event + triggers_delete_event)).result()
 
