@@ -641,8 +641,8 @@ def time_to_timedelta(time):
 
 class SocketController:
 
-    def __init__(self, path, timeout=None, socket_type='writer', connection_protocol=socket.SOCK_STREAM):
-        """
+    def __init__(self, path, timeout=None, connection_protocol='TCP'):
+        """Create a new unix socket or connect to a existing one.
 
         Parameters
         ----------
@@ -650,9 +650,7 @@ class SocketController:
             Path where the file will be created
         timeout : int
             Socket's timeout, 0 for non-blocking mode
-        socket_type : str
-            Reader or writer
-        connection_protocol : int
+        connection_protocol : str
             Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM)
 
         Raises
@@ -661,56 +659,58 @@ class SocketController:
             If the socket connection failed
         """
         self.path = path
-        self.sock = socket.socket(socket.AF_UNIX, connection_protocol)
-        if socket_type == 'reader':
-            try:
-                if os.path.exists(path):
-                    os.unlink(path)
-                self.sock.bind(self.path)
-                os.chmod(self.path, 0o666)
-                self.sock.settimeout(timeout)
-            except OSError as e:
-                raise e
+        if connection_protocol.lower() == 'tcp':
+            self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        elif connection_protocol.lower() == 'udp':
+            self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
         else:
-            try:
-                self.sock.connect(self.path)
-                self.sock.settimeout(timeout)
-            except Exception as e:
-                raise e
+            raise TypeError('Invalid connection protocol detected. Valid ones are TCP or UDP')
+
+        try:
+            self.sock.connect(self.path)
+        except OSError:
+            if os.path.exists(path):
+                os.unlink(path)
+            self.sock.bind(self.path)
+            os.chmod(self.path, 0o666)
+        self.sock.settimeout(timeout)
 
     def close(self):
+        """Close the socket gracefully"""
         self.sock.shutdown(socket.SHUT_RDWR)
         self.sock.close()
 
-    def send(self, msg, total_messages=1):
-        """
+    def send(self, messages, size=False):
+        """Send a list of messages to the socket.
 
         Parameters
         ----------
-        msg : bytes
-            Message to be send
-        total_messages : int
-            Total messages to be sent
+        messages : list
+            List of messages to be sent
+        size : bool
+            Flag that indicates if the header of the message includes the size of the message
+            (Analysis doesn't need the size, wazuh-db does)
 
         Returns
         -------
         list
-            List of sent messages
+            List of sizes of the sent messages
         """
-        if not isinstance(msg, bytes):
-            raise TypeError("Type must be bytes")
-
         output = list()
-        for _ in range(0, total_messages):
+        for message_ in messages:
+            msg_bytes = message_.encode()
             try:
-                output.append(self.sock.send(msg))
-            except Exception as e:
+                if size:
+                    output.append(self.sock.send(pack("<I", len(msg_bytes)) + msg_bytes))
+                else:
+                    output.append(self.sock.send(msg_bytes))
+            except OSError as e:
                 raise e
 
         return output
 
     def receive(self, total_messages=1):
-        """
+        """Receive a specified number of messages from the socket.
 
         Parameters
         ----------
@@ -719,98 +719,113 @@ class SocketController:
 
         Returns
         -------
-        Socket message
+        list
+            Socket messages
         """
         output = list()
         for _ in range(0, total_messages):
             try:
-                self.sock.listen(1)
-                conn, addr = self.sock.accept()
-                size = unpack("<I", conn.recv(4, socket.MSG_WAITALL))[0]
-                output.append(conn.recv(size, socket.MSG_WAITALL))
-            except Exception as e:
-                raise e
+                size = unpack("<I", self.sock.recv(4, socket.MSG_WAITALL))[0]
+                output.append(self.sock.recv(size, socket.MSG_WAITALL).decode().rstrip('\x00'))
+            except OSError:
+                try:
+                    self.sock.listen(1)
+                    conn, addr = self.sock.accept()
+                    size = unpack("<I", conn.recv(4, socket.MSG_WAITALL))[0]
+                    output.append(conn.recv(size, socket.MSG_WAITALL).decode().rstrip('\x00'))
+                except OSError as e:
+                    raise e
 
         return output
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
 
 class SocketMonitor:
 
-    def __init__(self, path, timeout=10, socket_type='writer'):
-        """
+    def __init__(self, path, connection_protocol='TCP'):
+        """Create a new unix socket or connect to a existing one.
 
         Parameters
         ----------
         path : str
             Path where the file will be created
-        timeout : int
-            Socket's timeout
-        socket_type : str
-            Reader or writer
+        connection_protocol : str
+            Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM)
 
         Raises
         ------
         Exception
             If the socket connection failed
         """
-        self.timeout = timeout
-        self.socket_type = socket_type
-        self.controller = SocketController(path=path, socket_type=socket_type,
-                                           connection_protocol=socket.SOCK_STREAM if socket_type == 'reader'
-                                           else socket.SOCK_DGRAM)
+        self._continue = False
+        self._abort = False
+        self._result = None
+        self.timer = None
+        self.path = path
+        self.controller = SocketController(path=path, connection_protocol=connection_protocol)
 
-    def close(self):
-        self.controller.close()
-
-    def _start_timeout(self):
-        self.timer = Timer(self.timeout, self._abort)
-        self.timer.start()
-
-    def _stop_timeout(self):
-        self.timer.cancel()
-
-    def _abort(self):
-        self.close()
-        raise TimeoutError()
-
-    def send(self, message_list):
-        """
+    def start(self, timeout=-1, callback=_callback_default, accum_results=1):
+        """Start the socket monitoring with specified callback.
 
         Parameters
         ----------
-        message_list : list
-            List of messages to be send
+        timeout : int
+            Timeout of the operation
+        callback : callable
+            Callable function that accepts a specified param
+        accum_results : int
+            Expected number of messages
 
         Returns
         -------
         list
-            List of sent messages
+            Socket messages
         """
-        output = list()
-        self._start_timeout()
-        for message in message_list:
-            output.extend(self.controller.send(message.encode(), 1))
-        self._stop_timeout()
+        if not self._continue:
+            self._continue = True
+            self._abort = False
+            if timeout > 0:
+                self.timer = Timer(timeout, self.abort)
+                self.timer.start()
+            while self._continue:
+                for message in self.controller.receive(accum_results):
+                    result = callback(message)
+                    if result:
+                        self._add_results(result, accum_results)
+        return self
 
-        return output
+    def _add_results(self, result, accum_results):
+        if accum_results > 1:
+            self._result.append(result)
+            accum_results == len(self._result) and self.stop()
+        else:
+            self._result = result
+            self._result and self.stop()
 
-    def receive(self, total_messages):
-        """
+    def result(self):
+        """Return the monitored socket messages."""
+        return self._result
 
-        Parameters
-        ----------
-        total_messages : int
-            Total messages to be received
+    def close(self):
+        """Close the socket gracefully."""
+        self.controller.close()
 
-        Returns
-        -------
-        Socket message
-        """
-        self._start_timeout()
-        response = self.controller.receive(total_messages)
-        self._stop_timeout()
+    def stop(self):
+        """Stop the socket monitoring. It can be restarted calling the start method."""
+        self._continue = False
+        if self.timer:
+            self.timer.cancel()
+            self.timer.join()
+        return self
 
-        return response
+    def abort(self):
+        """Raise a timeout exception if the operation takes more time that the specified timeout."""
+        raise TimeoutError()
 
     def __enter__(self):
         return self
