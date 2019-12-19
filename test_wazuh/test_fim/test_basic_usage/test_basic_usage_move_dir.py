@@ -4,7 +4,6 @@
 
 import os
 import shutil
-import time
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
@@ -45,6 +44,7 @@ def extra_configuration_before_yield():
     create_file(REGULAR, os.path.join(PREFIX, 'subdir'), 'regular1', content='')
     create_file(REGULAR, os.path.join(testdir3, 'subdir2'), 'regular2', content='')
 
+
 @pytest.mark.parametrize('source_folder, target_folder, subdir, tags_to_apply, triggers_delete_event, triggers_add_event', [
     (PREFIX, testdir2, 'subdir', {'ossec_conf'}, False, True),
     (testdir1, PREFIX, 'subdir', {'ossec_conf'}, True, False),
@@ -56,8 +56,7 @@ def test_move_file(source_folder, target_folder, subdir, tags_to_apply,
                    restart_syscheckd, wait_for_initial_scan):
     """ Checks if syscheckd detects 'added' or 'deleted' events when moving a folder.
 
-        :param file str Name of the file to be created
-        :param file_content str Content of the file to be created
+        :param subdir str Name of the subdir to be moved
         :param source_folder str Folder to move the file from
         :param target_folder str Destination folder to move the file to
         :param triggers_delete_event boolean Expects a 'deleted' event in the source folder
@@ -68,7 +67,7 @@ def test_move_file(source_folder, target_folder, subdir, tags_to_apply,
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     check_time_travel(scheduled)
 
-    # Move file to target directory
+    # Move folder to target directory
     os.rename(os.path.join(source_folder, subdir), os.path.join(target_folder, subdir))
     check_time_travel(scheduled)
 
