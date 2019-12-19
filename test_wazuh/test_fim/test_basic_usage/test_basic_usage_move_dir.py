@@ -13,7 +13,8 @@ from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_config
 # variables
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2'), os.path.join(PREFIX, 'testdir3')]
+test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2'),
+                    os.path.join(PREFIX, 'testdir3')]
 directory_str = ','.join(test_directories)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
