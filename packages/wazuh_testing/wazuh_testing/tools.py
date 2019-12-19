@@ -248,14 +248,13 @@ def set_section_wazuh_conf(section: str = 'syscheck',
                 if new_elements:
                     create_elements(tag, new_elements)
                 else:
-                    tag.text = properties.get('value')
+                    tag.text = str(properties.get('value'))
                     attributes = properties.get('attributes')
                     if attributes:
                         for attribute in attributes:
                             if attribute is not None and isinstance(attribute, dict):  # noqa: E501
                                 for attr_name, attr_value in attribute.items():
-                                    tag.attrib[attr_name] = attr_value
-
+                                    tag.attrib[attr_name] = str(attr_value)
     # get Wazuh configuration
     wazuh_conf = get_wazuh_conf()
     section_conf = wazuh_conf.find(section)
@@ -552,7 +551,8 @@ def control_service(action, daemon=None):
             control_service('start')
             result = 0
         else:
-            result = subprocess.run(["net", action, "OssecSvc"]).returncode
+            result = 0 if subprocess.run(["net", action, "OssecSvc"]).returncode in (0, 2) else \
+                subprocess.run(["net", action, "OssecSvc"]).returncode
     else:  # Default Unix
         if daemon is None:
             if sys.platform == 'darwin':
@@ -574,6 +574,27 @@ def control_service(action, daemon=None):
 
     if result != 0:
         raise ValueError(f"Error when executing {action} in daemon {daemon}. Exit status: {result}")
+
+
+def get_process(search_name):
+    """
+    Search process by its name.
+
+    Parameters
+    ----------
+    search_name : str
+        Name of the process to be fetched
+
+    Returns
+    -------
+    `psutil.Process` or None
+        first occurrence of the process object matching the `search_name` or None if no process has been found
+    """
+    for proc in psutil.process_iter(attrs=['name']):
+        if proc.name() == search_name:
+            return proc
+
+    return None
 
 
 def reformat_time(scan_time):
