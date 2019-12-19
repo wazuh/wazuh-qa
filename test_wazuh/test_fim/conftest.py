@@ -7,9 +7,9 @@ import shutil
 import sys
 
 import pytest
-from wazuh_testing.fim import LOG_FILE_PATH, detect_initial_scan, change_conf_param, change_internal_options
+from wazuh_testing.fim import LOG_FILE_PATH, detect_initial_scan
 from wazuh_testing.tools import (FileMonitor, get_wazuh_conf, set_section_wazuh_conf,
-                                 truncate_file, write_wazuh_conf, control_service, WAZUH_SERVICE, WAZUH_PATH)
+                                 truncate_file, write_wazuh_conf, control_service)
 
 
 @pytest.fixture(scope='module')
@@ -46,14 +46,6 @@ def configure_environment(get_configuration, request):
 
     # set new configuration
     write_wazuh_conf(test_config)
-
-    # Avoid reconnection if we are on agents and add debug params
-    if 'agent' in WAZUH_SERVICE:
-        change_conf_param('time-reconnect', 99999999999)
-        change_internal_options(param='agent.debug', value=2)
-
-    change_internal_options(param='syscheck.debug', value=2)
-    change_internal_options(param='monitord.rotate_log', value=0)
 
     # Call extra functions before yield
     if hasattr(request.module, 'extra_configuration_before_yield'):

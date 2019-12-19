@@ -122,8 +122,9 @@ def recursion_test(dirname, subdirname, recursion_level, timeout=1, edge_limit=2
         raise
 
     except OSError as ex:
+        MAX_PATH_LENGTH_MACOS_ERROR = 63
         MAX_PATH_LENGTH_SOLARIS_ERROR = 78
-        if ex.errno == MAX_PATH_LENGTH_SOLARIS_ERROR:
+        if ex.errno in (MAX_PATH_LENGTH_SOLARIS_ERROR, MAX_PATH_LENGTH_MACOS_ERROR):
             return
         raise
 
