@@ -2,6 +2,7 @@ import datetime
 import os
 import shutil
 import subprocess
+import sys
 
 from wazuh_testing.fim import callback_audit_loaded_rule, create_file, REGULAR, SYMLINK, callback_symlink_scan_ended, \
     change_internal_options
@@ -34,7 +35,12 @@ def modify_symlink(target, path, file=None):
     """ Modify an existing symbolic link to point to another file or directory """
     if file is not None:
         target = os.path.join(target, file)
-    subprocess.call(['ln', '-sfn', target, path])
+    if sys.platform == "sunos5":
+        if os.path.exists(path):
+            os.remove(path)
+        os.symlink(target, path)
+    else:
+        subprocess.call(['ln', '-sfn', target, path])
 
 
 def wait_for_audit(whodata, monitor):
