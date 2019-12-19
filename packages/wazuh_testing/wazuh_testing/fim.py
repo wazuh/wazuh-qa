@@ -140,6 +140,13 @@ def validate_event(event, checks=None):
     if event['data']['type'] == 'modified':
         assert 'old_attributes' in event['data'] and 'changed_attributes' in event['data']
 
+        old_attributes = event['data']['old_attributes'].keys() - {'type', 'checksum'}
+        old_intersection = old_attributes ^ required_attributes
+        old_intersection_debug = "Event attributes are: " + str(old_attributes)
+        old_intersection_debug += "\nRequired Attributes are: " + str(required_attributes)
+        old_intersection_debug += "\nIntersection is: " + str(old_intersection)
+        assert (old_intersection == set()), f'Old_attributes and required_attributes are not the same. ' + old_intersection_debug
+
 
 def is_fim_scan_ended():
     message = 'File integrity monitoring scan ended.'
