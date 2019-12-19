@@ -4,12 +4,16 @@
 
 import os
 import shutil
+from copy import deepcopy
 from datetime import timedelta
 
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, DEFAULT_TIMEOUT, regular_file_cud, generate_params
 from wazuh_testing.tools import FileMonitor, TimeMachine, check_apply_test, load_wazuh_configurations, PREFIX
+
+# All tests in this module apply to linux and windows only
+pytestmark = [pytest.mark.linux, pytest.mark.win32]
 
 # variables
 
@@ -19,41 +23,27 @@ directory_str = os.path.join(PREFIX, 'frequencydir')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-testdir1 = test_directories
 
 # Configuration with frequency values
 
-frequencies = [5, 3600, 10000]
+frequencies = ['5', '3600', '10000']
+
+p, m = generate_params({'TEST_DIRECTORIES': directory_str},
+                       {'test_directories': directory_str},
+                       modes=['realtime', 'whodata'])
+
+params, metadata = list(), list()
+for freq in frequencies:
+    for p_dict, m_dict in zip(p, m):
+        p_dict['FREQUENCY'] = freq
+        m_dict['frequency'] = freq
+        params.append(deepcopy(p_dict))
+        metadata.append(deepcopy(m_dict))
 
 configurations1 = load_wazuh_configurations(configurations_path, __name__,
-                                            params=[
-                                                {'FIM_MODE': {'realtime': 'yes'}, 'FREQUENCY': str(frequencies[0]),
-                                                 'TEST_DIRECTORIES': directory_str},
-                                                {'FIM_MODE': {'realtime': 'yes'}, 'FREQUENCY': str(frequencies[1]),
-                                                 'TEST_DIRECTORIES': directory_str},
-                                                {'FIM_MODE': {'realtime': 'yes'}, 'FREQUENCY': str(frequencies[2]),
-                                                 'TEST_DIRECTORIES': directory_str},
-                                                {'FIM_MODE': {'whodata': 'yes'}, 'FREQUENCY': str(frequencies[0]),
-                                                 'TEST_DIRECTORIES': directory_str},
-                                                {'FIM_MODE': {'whodata': 'yes'}, 'FREQUENCY': str(frequencies[1]),
-                                                 'TEST_DIRECTORIES': directory_str},
-                                                {'FIM_MODE': {'whodata': 'yes'}, 'FREQUENCY': str(frequencies[2]),
-                                                 'TEST_DIRECTORIES': directory_str},
-                                            ],
-                                            metadata=[
-                                                {'fim_mode': 'realtime', 'frequency': str(frequencies[0]),
-                                                 'test_directories': directory_str},
-                                                {'fim_mode': 'realtime', 'frequency': str(frequencies[1]),
-                                                 'test_directories': directory_str},
-                                                {'fim_mode': 'realtime', 'frequency': str(frequencies[2]),
-                                                 'test_directories': directory_str},
-                                                {'fim_mode': 'whodata', 'frequency': str(frequencies[0]),
-                                                 'test_directories': directory_str},
-                                                {'fim_mode': 'whodata', 'frequency': str(frequencies[1]),
-                                                 'test_directories': directory_str},
-                                                {'fim_mode': 'whodata', 'frequency': str(frequencies[2]),
-                                                 'test_directories': directory_str},
-                                            ])
+                                            params=params,
+                                            metadata=metadata)
+
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_default.yaml')
 
 # Configuration with default frequency

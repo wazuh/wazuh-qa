@@ -8,8 +8,7 @@ import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_configuration_error
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
-                                 load_wazuh_configurations, PREFIX)
-
+                                 load_wazuh_configurations, PREFIX, control_service)
 
 # variables
 
@@ -21,7 +20,6 @@ directory_str = ','.join(test_directories)
 force_restart_after_restoring = True
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
 
 # configurations
 
@@ -44,8 +42,7 @@ def get_configuration(request):
 @pytest.mark.parametrize('tags_to_apply', [
     ({'invalid_no_regex', 'invalid_scan'})
 ])
-def test_ignore(tags_to_apply, get_configuration, configure_environment,
-                restart_wazuh):
+def test_invalid(tags_to_apply, get_configuration, configure_environment):
     """ Checks if an invalid configuration is detected
 
     Using invalid configurations with different attributes, expect an error message and syscheck unable to restart.
@@ -54,5 +51,7 @@ def test_ignore(tags_to_apply, get_configuration, configure_environment,
      configure the environment properly.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-
+    # Configuration error -> ValueError raised
+    with pytest.raises(ValueError):
+        control_service('restart')
     wazuh_log_monitor.start(timeout=3, callback=callback_configuration_error)

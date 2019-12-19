@@ -21,7 +21,6 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2 = test_directories
 
-
 # configurations
 
 monitoring_modes = ['scheduled']
@@ -81,7 +80,7 @@ def test_create_file_scheduled(folder, name, filetype, content, checkers, tags_t
     if filetype == REGULAR:
         # Wait until event is detected
         event = wazuh_log_monitor.start(
-            timeout=30, callback=callback_detect_event).result()
+            timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
         validate_event(event, checkers)
     else:
         with pytest.raises(TimeoutError):

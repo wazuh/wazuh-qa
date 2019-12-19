@@ -21,7 +21,6 @@ for direc in list(test_directories):
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2 = test_directories[2:]
-timeout = DEFAULT_TIMEOUT
 
 # configurations
 
@@ -70,14 +69,14 @@ def test_delete_folder(folder, file_list, filetype, tags_to_apply,
         create_file(filetype, folder, file, content='')
 
     check_time_travel(scheduled)
-    wazuh_log_monitor.start(timeout=timeout, callback=callback_detect_event, accum_results=len(file_list))
+    wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event, accum_results=len(file_list))
 
     # Remove folder
     shutil.rmtree(folder, ignore_errors=True)
     check_time_travel(scheduled)
 
     # Expect deleted events
-    event = wazuh_log_monitor.start(timeout=timeout, callback=callback_detect_event,
+    event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event,
                                     accum_results=len(file_list)).result()
     for i, file in enumerate(file_list):
         assert 'deleted' in event[i]['data']['type'] and os.path.join(folder, file) in event[i]['data']['path']

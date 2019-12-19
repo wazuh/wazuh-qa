@@ -71,14 +71,14 @@ def test_no_diff_subdirectory(folder, filename, content, hidden_content,
                               wait_for_initial_scan):
     """ Checks files are ignored in the subdirectory according to configuration
 
-    When using the nodiff option for a file in syscheck configuration, everytime we get an event from this file,
+    When using the nodiff option for a file in syscheck configuration, every time we get an event from this file,
     we won't be able to see its content. We'll see 'Diff truncated because nodiff option' instead.
 
-    :param folder: string Directory where the file is being created
-    :param filename: string Name of the file to be created
-    :param content: string, bytes Content to fill the new file
-    :param hidden_content: bool True if content must be truncated,, False otherwise
-    :param tags_to_apply: set Run test if matches with a configuration identifier, skip otherwise
+    :param folder: Directory where the file is being created
+    :param filename: Name of the file to be created
+    :param content: Content to fill the new file
+    :param hidden_content: True if content must be truncated,, False otherwise
+    :param tags_to_apply: Run test if matches with a configuration identifier, skip otherwise
 
     * This test is intended to be used with valid nodiff configurations. Each execution of this test will configure
     the environment properly, restart the service and wait for the initial scan.
@@ -92,17 +92,17 @@ def test_no_diff_subdirectory(folder, filename, content, hidden_content,
         for file in files:
             diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local',
                                      folder.strip(PREFIX), file)
-            assert (os.path.exists(diff_file)), f'{diff_file} does not exist'
-            assert (event['data'].get('content_changes') is not None), f'content_changes is empty'
+            assert os.path.exists(diff_file), f'{diff_file} does not exist'
+            assert event['data'].get('content_changes') is not None, f'content_changes is empty'
 
     def no_diff_validator(event):
         """ Validate content_changes value is truncated if the file is set to no_diff """
         if hidden_content:
-            assert ('<Diff truncated because nodiff option>' in event['data'].get('content_changes')), \
-                    f'content_changes is not truncated'
+            assert '<Diff truncated because nodiff option>' in event['data'].get('content_changes'), \
+                f'content_changes is not truncated'
         else:
-            assert ('<Diff truncated because nodiff option>' not in event['data'].get('content_changes')), \
-                    f'content_changes is truncated'
+            assert '<Diff truncated because nodiff option>' not in event['data'].get('content_changes'), \
+                f'content_changes is truncated'
 
     regular_file_cud(folder, wazuh_log_monitor, file_list=files,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',

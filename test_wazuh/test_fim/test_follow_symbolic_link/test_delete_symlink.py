@@ -13,6 +13,9 @@ from wazuh_testing.fim import (generate_params, create_file, REGULAR, SYMLINK, c
 from wazuh_testing.tools import (check_apply_test,
                                  load_wazuh_configurations, FileMonitor)
 
+# All tests in this module apply to linux and macos only
+pytestmark = [pytest.mark.linux, pytest.mark.darwin]
+
 # configurations
 
 conf_params, conf_metadata = generate_params()

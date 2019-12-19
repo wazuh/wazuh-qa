@@ -92,6 +92,46 @@
         - FIM_MODE
 # conf 6
 - tags:
+  - ambiguous_recursion_tag
+  apply_to_modules:
+  - test_ambiguous_simple
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "c:\\recursiondir_tag"
+      attributes:
+        - recursion_level: "2"
+        - tags: TAGS
+        - FIM_MODE
+  - directories:
+      value: "c:\\recursiondir_no_tag"
+      attributes:
+      - recursion_level: "2"
+      - FIM_MODE
+# conf 7
+- tags:
+  - ambiguous_no_recursion_tag
+  apply_to_modules:
+  - test_ambiguous_simple
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "c:\\recursiondir_tag"
+      attributes:
+        - recursion_level: "0"
+        - tags: TAGS
+        - FIM_MODE
+  - directories:
+      value: "c:\\recursiondir_no_tag"
+      attributes:
+        - recursion_level: "0"
+        - FIM_MODE
+# conf 8
+- tags:
   - ambiguous_check
   apply_to_modules:
   - test_ambiguous_simple
@@ -102,6 +142,13 @@
   - directories:
       value: "c:\\checkdir_default"
       attributes:
+      - check_all: 'no'
+      - check_size: 'yes'
+      - check_perm: 'yes'
+      - check_owner: 'yes'
+      - check_group: 'yes'
+      - check_sha256sum: 'yes'
+      - check_mtime: 'yes'
       - FIM_MODE
   - directories:
       value: "c:\\checkdir_default\\checkdir_checkall"

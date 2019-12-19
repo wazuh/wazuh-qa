@@ -5,7 +5,7 @@
 import os
 import pytest
 
-from wazuh_testing.fim import CHECK_ALL, DEFAULT_TIMEOUT, LOG_FILE_PATH, regular_file_cud, generate_params
+from wazuh_testing.fim import CHECK_ALL, LOG_FILE_PATH, regular_file_cud, generate_params, DEFAULT_TIMEOUT
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
 # variables
@@ -17,7 +17,6 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2 = test_directories
-
 
 # configurations
 
@@ -58,8 +57,7 @@ def test_regular_file_changes(folder, checkers, tags_to_apply,
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     file_list = ['regular0', 'regular1', 'regular2']
-    min_timeout = 10
 
     regular_file_cud(folder, wazuh_log_monitor, file_list=file_list,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                     min_timeout=min_timeout, options=checkers, triggers_event=True)
+                     min_timeout=DEFAULT_TIMEOUT, options=checkers, triggers_event=True)

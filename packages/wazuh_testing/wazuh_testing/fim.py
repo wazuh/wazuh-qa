@@ -44,6 +44,10 @@ elif sys.platform == 'linux2' or sys.platform == 'linux':
                        'audit_name', 'effective_uid', 'effective_name', 'ppid', 'process_id'
                        }
 
+elif sys.platform == 'darwin':
+    WAZUH_PATH = os.path.join('/', 'Library', 'Ossec')
+    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+    DEFAULT_TIMEOUT = 5
 
 FIFO = 'fifo'
 SYMLINK = 'sym_link'
@@ -129,6 +133,13 @@ def validate_event(event, checks=None):
         assert (event['data']['audit'].keys() ^ _REQUIRED_AUDIT == set()), \
             f'audit keys and required_audit are no the same'
 
+    # Check add file event
+    if event['data']['type'] == 'added':
+        assert 'old_attributes' not in event['data'] and 'changed_attributes' not in event['data']
+    # Check modify file event
+    if event['data']['type'] == 'modified':
+        assert 'old_attributes' in event['data'] and 'changed_attributes' in event['data']
+
 
 def is_fim_scan_ended():
     message = 'File integrity monitoring scan ended.'
@@ -155,10 +166,17 @@ def create_file(type_, path, name, **kwargs):
     :return: None
     """
     os.makedirs(path, exist_ok=True, mode=0o777)
+    if type_ != REGULAR:
+        try:
+            kwargs.pop('content')
+        except KeyError:
+            pass
+    if type_ in (SYMLINK, HARDLINK) and 'target' not in kwargs:
+        raise ValueError(f"'target' param is mandatory for type {type_}")
     getattr(sys.modules[__name__], f'_create_{type_}')(path, name, **kwargs)
 
 
-def _create_fifo(path, name, content):
+def _create_fifo(path, name):
     """Creates a FIFO file.
 
     :param path: Path where the file will be created
@@ -206,7 +224,7 @@ def _create_hard_link(path, name, target):
         raise
 
 
-def _create_socket(path, name, content):
+def _create_socket(path, name):
     """Creates a Socket file.
 
     :param path: Path where the file will be created
@@ -225,7 +243,7 @@ def _create_socket(path, name, content):
     sock.bind(socket_path)
 
 
-def _create_regular(path, name, content):
+def _create_regular(path, name, content=''):
     """Creates a Regular file.
 
     :param path: Path where the file will be created
@@ -243,7 +261,7 @@ def _create_regular(path, name, content):
         f.write(content)
 
 
-def _create_regular_windows(path, name, content):
+def _create_regular_windows(path, name, content=''):
     regular_path = os.path.join(path, name)
     os.popen("echo " + content + " > " + regular_path + f" runas /user:{os.getlogin()}")
 
@@ -401,31 +419,56 @@ def modify_file(path, name, new_content=None, is_binary=False):
     modify_file_win_attributes(path, name)
 
 
-def change_internal_options(pattern, value, opt_path=os.path.join('/', 'var', 'ossec', 'etc', 'internal_options.conf')):
-    """Changes the value of a given parameter in linux.
+def change_internal_options(param, value, opt_path=None):
+    """Changes the value of a given parameter in local_internal_options.
 
-    :param opt_path: File path
-    :type opt_path: String
-    :type opt_path: String
-    :param pattern: Parameter to change
-    :type pattern: String
+    :param param: Parameter to change
+    :type param: String
     :param value: New value
     :type value: String
+    :param opt_path: local_internal_options path
+    :type opt_path: String
     """
+    if opt_path is None:
+        local_conf_path = os.path.join(WAZUH_PATH, 'local_internal_options.conf') if sys.platform == 'win32' else \
+            os.path.join(WAZUH_PATH, 'etc', 'local_internal_options.conf')
+    else:
+        local_conf_path = opt_path
+
     add_pattern = True
-    with open(opt_path, "r") as sources:
+    with open(local_conf_path, "r") as sources:
         lines = sources.readlines()
 
-    with open(opt_path, "w") as sources:
+    with open(local_conf_path, "w") as sources:
         for line in lines:
             sources.write(
-                re.sub(f'{pattern}=[0-9]*', f'{pattern}={value}', line))
-            if pattern in line:
+                re.sub(f'{param}=[0-9]*', f'{param}={value}', line))
+            if param in line:
                 add_pattern = False
 
     if add_pattern:
-        with open(opt_path, "a") as sources:
-            sources.write(f'\n\n{pattern}={value}')
+        with open(local_conf_path, "a") as sources:
+            sources.write(f'\n\n{param}={value}')
+
+
+def change_conf_param(param, value):
+    """Changes the value of a given parameter in ossec.conf.
+
+    :param param: Parameter to change
+    :type param: String
+    :param value: New value
+    :type value: String
+    """
+    conf_path = os.path.join(WAZUH_PATH, 'ossec.conf') if sys.platform == 'win32' else \
+        os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
+
+    with open(conf_path, "r") as sources:
+        lines = sources.readlines()
+
+    with open(conf_path, "w") as sources:
+        for line in lines:
+            sources.write(
+                re.sub(f'<{param}>.*</{param}>', f'<{param}>{value}</{param}>', line))
 
 
 def callback_detect_end_scan(line):
@@ -469,7 +512,7 @@ def callback_detect_synchronization(line):
 
 
 def callback_ignore(line):
-    match = re.match(r".*Ignoring '.*?' '(.*?)' due to sregex '.*?'", line)
+    match = re.match(r".*Ignoring '.*?' '(.*?)' due to( sregex)? '.*?'", line)
     if match:
         return match.group(1)
     return None
@@ -488,6 +531,13 @@ def callback_audit_health_check(line):
     return None
 
 
+def callback_audit_cannot_start(line):
+    match = re.match(r'.*Who-data engine could not start. Switching who-data to real-time.', line)
+    if match:
+        return True
+    return None
+
+
 def callback_audit_added_rule(line):
     match = re.match(r'.*Added audit rule for monitoring directory: \'(.+)\'', line)
     if match:
@@ -500,9 +550,29 @@ def callback_audit_rules_manipulation(line):
         return True
     return None
 
+def callback_audit_removed_rule(line):
+    match = re.match(r'.* Audit rule removed.', line)
+    if match:
+        return True
+    return None
+
+
+def callback_audit_deleting_rule(line):
+    match = re.match(r'.*Deleting Audit rules...', line)
+    if match:
+        return True
+    return None
+
 
 def callback_audit_connection(line):
     if '(6030): Audit: connected' in line:
+        return True
+    return None
+
+
+def callback_audit_connection_close(line):
+    match = re.match(r'.*Audit: connection closed.', line)
+    if match:
         return True
     return None
 
@@ -578,6 +648,13 @@ def callback_configuration_warning(line):
     return None
 
 
+def callback_entries_path_count(line):
+    match = re.match(r'.*Fim inode entries: (\d+), path count: (\d+)', line)
+
+    if match:
+        return match.group(1), match.group(2)
+
+
 class EventChecker:
     """Utility to allow fetch events and validate them."""
 
@@ -596,7 +673,7 @@ class EventChecker:
         :param min_timeout int Seconds to wait until an event is raised when trying to fetch.
         :param triggers_event boolean True if the event should be raised, False otherwise.
         """
-        self.fetch_events(min_timeout, triggers_event)
+        self.events = self.fetch_events(min_timeout, triggers_event)
         self.check_events(event_type)
 
     def fetch_events(self, min_timeout=1, triggers_event=True):
@@ -610,6 +687,7 @@ class EventChecker:
                                             callback=callback_detect_event,
                                             accum_results=len(self.file_list)
                                             ).result()
+            assert triggers_event, f'No events should be detected.'
             return result if isinstance(result, list) else [result]
         except TimeoutError:
             if triggers_event:
@@ -632,13 +710,24 @@ class EventChecker:
                     validate_event(ev, options)
 
         def check_events_type(events, ev_type, file_list=['testfile0']):
-            event_types = Counter(jq(".[].data.type").transform(events, multiple_output=True))
-            assert (event_types[ev_type] == len(file_list)), f'Non expected number of events'
+            event_types = Counter(filter_events(events, ".[].data.type"))
+            assert (event_types[ev_type] == len(file_list)), f'Non expected number of events. {event_types[ev_type]} != {len(file_list)}'
 
         def check_files_in_event(events, folder, file_list=['testfile0']):
-            file_paths = jq(".[].data.path").transform(events, multiple_output=True)
+            file_paths = filter_events(events, ".[].data.path")
             for file_name in file_list:
-                assert (os.path.join(folder, file_name) in file_paths), f'{file_name} does not exist in {file_paths}'
+                expected_file_path = os.path.join(folder, file_name)
+                expected_file_path = expected_file_path[:1].lower() + expected_file_path[1:]
+                assert (expected_file_path in file_paths), f'{expected_file_path} does not exist in {file_paths}'
+
+        def filter_events(events, mask):
+            """Returns a list of elements matching a specified mask in the events list using jq module."""
+            if sys.platform == "win32":
+                jq_cmd = 'jq -r "' + mask + '"'
+                stdout = subprocess.check_output(jq_cmd, input=json.dumps(events).encode())
+                return stdout.decode("utf8").strip().split("\r\n")
+            else:
+                return jq(mask).transform(events, multiple_output=True)
 
         if self.events is not None:
             validate_checkers_per_event(self.events, self.options)
@@ -657,45 +746,48 @@ class EventChecker:
 
 class CustomValidator:
     """Enables using user-defined validators over the events when validating them with EventChecker"""
-
     def __init__(self, validators_after_create=None, validators_after_update=None,
                  validators_after_delete=None, validators_after_cud=None):
-        self.validators_after_create = validators_after_create
-        self.validators_after_update = validators_after_update
-        self.validators_after_delete = validators_after_delete
-        self.validators_after_cud = validators_after_cud
+        self.validators_create = validators_after_create
+        self.validators_update = validators_after_update
+        self.validators_delete = validators_after_delete
+        self.validators_cud = validators_after_cud
 
     def validate_after_create(self, events):
         """Custom validators to be applied by default when the event_type is 'added'.
-
         :param events List List of event to be validated.
         """
-        for event in events:
-            self.validators_after_create(event)
+        if self.validators_create is not None:
+            for event in events:
+                for validator in self.validators_create:
+                    validator(event)
 
     def validate_after_update(self, events):
         """Custom validators to be applied by default when the event_type is 'modified'.
-
         :param events List List of event to be validated.
         """
-        for event in events:
-            self.validators_after_update(event)
+        if self.validators_update is not None:
+            for event in events:
+                for validator in self.validators_update:
+                    validator(event)
 
     def validate_after_delete(self, events):
         """Custom validators to be applied by default when the event_type is 'deleted'.
-
         :param events List List of event to be validated.
         """
-        for event in events:
-            self.validators_after_delete(event)
+        if self.validators_delete is not None:
+            for event in events:
+                for validator in self.validators_delete:
+                    validator(event)
 
     def validate_after_cud(self, events):
         """Custom validators to be applied always by default.
-
         :param events List List of event to be validated.
         """
-        for event in events:
-            self.validators_after_cud(event)
+        if self.validators_cud is not None:
+            for event in events:
+                for validator in self.validators_cud:
+                    validator(event)
 
 
 def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=False, min_timeout=1, options=None,

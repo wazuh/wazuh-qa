@@ -8,7 +8,6 @@ import time
 import psutil
 import pytest
 
-
 from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_added_rule,
                                callback_audit_connection,
                                callback_audit_health_check,
@@ -16,7 +15,7 @@ from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_added_rule,
                                callback_audit_reloaded_rule,
                                callback_audit_rules_manipulation,
                                callback_realtime_added_directory,
-                               callback_audit_key, 
+                               callback_audit_key,
                                create_file, REGULAR,
                                detect_initial_scan)
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
@@ -24,6 +23,8 @@ from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  control_service,
                                  truncate_file)
 
+# All tests in this module apply to linux only
+pytestmark = pytest.mark.linux
 
 # variables
 
@@ -33,7 +34,6 @@ test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2')
 testdir1, testdir2, testdir3 = test_directories
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
 
 # configurations
 
@@ -73,9 +73,9 @@ def test_added_rules(tags_to_apply, get_configuration,
                                      callback=callback_audit_added_rule,
                                      accum_results=3).result()
 
-    assert (testdir1 in events), f'{testdir1} not detected in scan'
-    assert (testdir2 in events), f'{testdir2} not detected in scan'
-    assert (testdir3 in events), f'{testdir3} not detected in scan'
+    assert testdir1 in events, f'{testdir1} not detected in scan'
+    assert testdir2 in events, f'{testdir2} not detected in scan'
+    assert testdir3 in events, f'{testdir3} not detected in scan'
 
 
 @pytest.mark.parametrize('tags_to_apply', [
@@ -96,7 +96,7 @@ def test_readded_rules(tags_to_apply, get_configuration,
         events = wazuh_log_monitor.start(timeout=10,
                                          callback=callback_audit_reloaded_rule).result()
 
-        assert (dir in events), f'{dir} not in {events}'
+        assert dir in events, f'{dir} not in {events}'
 
 
 @pytest.mark.parametrize('tags_to_apply', [
@@ -118,9 +118,9 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
                                      callback=callback_audit_loaded_rule,
                                      accum_results=3).result()
 
-    assert (testdir1 in events), f'{testdir1} not in {events}'
-    assert (testdir2 in events), f'{testdir2} not in {events}'
-    assert (testdir3 in events), f'{testdir3} not in {events}'
+    assert testdir1 in events, f'{testdir1} not in {events}'
+    assert testdir2 in events, f'{testdir2} not in {events}'
+    assert testdir3 in events, f'{testdir3} not in {events}'
 
 
 @pytest.mark.parametrize('tags_to_apply', [
@@ -139,9 +139,9 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
                                      callback=callback_realtime_added_directory,
                                      accum_results=3).result()
 
-    assert (testdir1 in events), f'{testdir1} not detected in scan'
-    assert (testdir2 in events), f'{testdir2} not detected in scan'
-    assert (testdir3 in events), f'{testdir3} not detected in scan'
+    assert testdir1 in events, f'{testdir1} not detected in scan'
+    assert testdir2 in events, f'{testdir2} not detected in scan'
+    assert testdir3 in events, f'{testdir3} not detected in scan'
 
     # Start Audit
     p = subprocess.Popen(["service", "auditd", "start"])
@@ -157,8 +157,12 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
 
     This test is intended to be used with valid configurations
 
-    :param taudit_key string Name of the audit_key to monitor
-    :param path string Path of the folder to be monitored
+    Parameters
+    ----------
+    audit_key : str
+        Name of the audit_key to monitor
+    path : str
+        Path of the folder to be monitored
     """
     check_apply_test({audit_key}, get_configuration['tags'])
 
@@ -176,7 +180,7 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
     events = wazuh_log_monitor.start(timeout=30,
                                      callback=callback_audit_key,
                                      accum_results=1).result()
-    assert (audit_key in events)
+    assert audit_key in events
 
     # Remove watch rule
     os.system("auditctl -W " + path + " -p wa -k " + audit_key)
@@ -192,15 +196,20 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
 
     This test is intended to be used with valid configurations
 
-    :param tags_to_apply set Run test if matches with a configuration identifier, skip otherwise
-    :param should_restart boolean True if Auditd should restart, False otherwise
+    Parameters
+    ----------
+    tags_to_apply : set
+        Run test if matches with a configuration identifier, skip otherwise
+    should_restart : boolean
+        True if Auditd should restart, False otherwise
     """
+
     def get_audit_creation_time():
         for proc in psutil.process_iter(attrs=['name']):
             if proc.name() == "auditd":
                 return proc.create_time()
         pytest.fail("Auditd is not running")
-    
+
     plugin_path = "/etc/audisp/plugins.d/af_wazuh.conf"
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
@@ -209,13 +218,13 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
 
     time_before_restart = get_audit_creation_time()
     control_service('restart')
-    time.sleep(5)
-    
+    time.sleep(10)
+
     time_after_restart = get_audit_creation_time()
 
     if should_restart:
-        assert(time_before_restart != time_after_restart)
+        assert time_before_restart != time_after_restart
     else:
-        assert(time_before_restart == time_after_restart)
+        assert time_before_restart == time_after_restart
 
-    assert(os.path.isfile(plugin_path))
+    assert os.path.isfile(plugin_path)

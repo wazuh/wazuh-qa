@@ -7,7 +7,8 @@ from datetime import timedelta
 
 import pytest
 import sys
-from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, callback_ignore, create_file, REGULAR, generate_params
+from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, callback_ignore, create_file, REGULAR, \
+    generate_params
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, TimeMachine, PREFIX
 
 # variables
@@ -26,12 +27,12 @@ testdir1, testdir1_sub, testdir1_ignore, testdir2, testdir2_sub = test_directori
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-
 # configurations
 
 conf_params, conf_metadata = generate_params()
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
+
 
 # fixtures
 
@@ -60,7 +61,8 @@ def get_configuration(request):
     (testdir2_sub, "another.ignored", b"other content", True, {'valid_regex'}),
     (testdir2, "another.ignored2", "", True, {'valid_regex', 'valid_no_regex'}),
     (testdir2, "another.ignore2", "", False, {'valid_regex2', 'valid_regex3'}),
-    (testdir1, 'ignore_prefix_test.txt', "test", True, {'valid_regex1', 'valid_regex2', 'valid_regex3', 'valid_regex4'}),
+    (testdir1, 'ignore_prefix_test.txt', "test", True,
+     {'valid_regex1', 'valid_regex2', 'valid_regex3', 'valid_regex4'}),
     (testdir1, 'ignore_prefix_test.txt', "test", False, {'valid_regex5'}),
     (testdir1, 'whatever.txt', "test", False, {'valid_empty'}),
     (testdir2, 'whatever2.txt', "test", False, {'valid_empty'}),
@@ -77,11 +79,11 @@ def test_ignore_subdirectory(folder, filename, content, triggers_event,
     This test is intended to be used with valid configurations files. Each execution of this test will configure the
     environment properly, restart the service and wait for the initial scan.
 
-    :param folder string Directory where the file is being created
-    :param filename string Name of the file to be created
-    :param content string, bytes Content to fill the new file
-    :param triggers_event bool True if an event must be generated, False otherwise
-    :param tags_to_apply set Run test if matches with a configuration identifier, skip otherwise
+    :param folder: Directory where the file is being created
+    :param filename: Name of the file to be created
+    :param content: Content to fill the new file
+    :param triggers_event: True if an event must be generated, False otherwise
+    :param tags_to_apply: Run test if matches with a configuration identifier, skip otherwise
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -95,8 +97,8 @@ def test_ignore_subdirectory(folder, filename, content, triggers_event,
     if triggers_event:
         event = wazuh_log_monitor.start(timeout=10,
                                         callback=callback_detect_event).result()
-        assert (event['data']['type'] == 'added'), f'Event type not equal'
-        assert (event['data']['path'] == os.path.join(folder, filename)), f'Event path not equal'
+        assert event['data']['type'] == 'added', f'Event type not equal'
+        assert event['data']['path'] == os.path.join(folder, filename), f'Event path not equal'
     else:
         while True:
             ignored_file = wazuh_log_monitor.start(timeout=10,

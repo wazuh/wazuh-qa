@@ -47,6 +47,7 @@ def configure_environment(get_configuration, request):
     # set new configuration
     write_wazuh_conf(test_config)
 
+    # Call extra functions before yield
     if hasattr(request.module, 'extra_configuration_before_yield'):
         func = getattr(request.module, 'extra_configuration_before_yield')
         func()
@@ -66,6 +67,7 @@ def configure_environment(get_configuration, request):
     # restore previous configuration
     write_wazuh_conf(backup_config)
 
+    # Call extra functions after yield
     if hasattr(request.module, 'extra_configuration_after_yield'):
         func = getattr(request.module, 'extra_configuration_after_yield')
         func()
