@@ -501,7 +501,7 @@ def callback_detect_integrity_state(line):
     event = callback_detect_integrity_event(line)
     if event:
         if event['type'] == 'state':
-            return json.loads(event)
+            return event
     return None
 
 
