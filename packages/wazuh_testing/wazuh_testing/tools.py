@@ -858,8 +858,9 @@ def delete_sockets(path=None):
     """
     try:
         if path is None:
-            for file in os.listdir(os.path.join(WAZUH_PATH, 'queue', 'ossec')):
-                os.remove(file)
+            path = os.path.join(WAZUH_PATH, 'queue', 'ossec')
+            for file in os.listdir(path):
+                os.remove(os.path.join(path, file))
             os.remove(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
         else:
             os.remove(os.path.join(WAZUH_PATH, path))
@@ -879,6 +880,7 @@ def control_wazuh_daemon(action, daemon=None, wait_for_complete=True):
     wait_for_complete : bool
         Wait until daemon is running/not running if True
     """
+    global WAZUH_SERVICE
     WAZUH_SERVICE = 'wazuh-manager'
     valid_actions = {'start': 'not', 'stop': 'is'}
     if action not in valid_actions:
