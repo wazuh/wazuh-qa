@@ -25,11 +25,13 @@ if sys.platform == 'win32':
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'ossec.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     PREFIX = os.path.join('c:', os.sep)
+
 elif sys.platform == 'darwin':
     WAZUH_PATH = os.path.join('/', 'Library', 'Ossec')
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     PREFIX = os.sep
+
 else:
     WAZUH_PATH = os.path.join('/', 'var', 'ossec')
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
@@ -37,7 +39,7 @@ else:
     GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
     PREFIX = os.sep
 
-if sys.platform == 'darwin' or sys.platform == 'win32':
+if sys.platform == 'darwin' or sys.platform == 'win32' or sys.platform == 'sunos5':
     WAZUH_SERVICE = 'wazuh.agent'
 else:
     status = subprocess.run(['service', 'wazuh-manager', 'status'])
@@ -148,6 +150,16 @@ class TimeMachine:
         os.system('time ' + datetime_.strftime("%H:%M:%S"))
 
     @staticmethod
+    def _solaris_set_time(datetime_):
+        """ Changes date and time in a Linux system
+
+        :param datetime_: new date and time to set
+        :type datetime_: time
+        """
+        solaris_time_format = "%m%d%H%M%Y.%S"
+        os.system("date '%s'" % datetime_.strftime(solaris_time_format))
+
+    @staticmethod
     def _macos_set_time(datetime_):
         """ Changes date and time in a MacOS system
 
@@ -168,6 +180,8 @@ class TimeMachine:
         future = now + time_delta
         if sys.platform == 'linux':
             TimeMachine._linux_set_time(future.isoformat())
+        elif sys.platform == 'sunos5':
+            TimeMachine._solaris_set_time(future)
         elif sys.platform == 'win32':
             TimeMachine._win_set_time(future)
         elif sys.platform == 'darwin':
@@ -552,7 +566,7 @@ def control_service(action, daemon=None):
                 subprocess.run(["net", action, "OssecSvc"]).returncode
     else:  # Default Unix
         if daemon is None:
-            if sys.platform == 'darwin':
+            if sys.platform == 'darwin' or sys.platform == 'sunos5':
                 result = subprocess.run([f'{WAZUH_PATH}/bin/ossec-control', action]).returncode
             else:
                 result = subprocess.run(['service', WAZUH_SERVICE, action]).returncode

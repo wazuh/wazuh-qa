@@ -25,7 +25,7 @@ from wazuh_testing.tools import TimeMachine
 if sys.platform == 'win32':
     import win32con
     import win32api
-else:
+elif sys.platform == 'linux2' or sys.platform == 'linux':
     from jq import jq
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -36,18 +36,18 @@ if sys.platform == 'win32':
     DEFAULT_TIMEOUT = 10
     _REQUIRED_AUDIT = {"path", "process_id", "process_name", "user_id", "user_name"}
 
-elif sys.platform == 'linux2' or sys.platform == 'linux':
-    WAZUH_PATH = os.path.join('/', 'var', 'ossec')
-    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
-    DEFAULT_TIMEOUT = 5
-    _REQUIRED_AUDIT = {'user_id', 'user_name', 'group_id', 'group_name', 'process_name', 'path', 'audit_uid',
-                       'audit_name', 'effective_uid', 'effective_name', 'ppid', 'process_id'
-                       }
-
 elif sys.platform == 'darwin':
     WAZUH_PATH = os.path.join('/', 'Library', 'Ossec')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     DEFAULT_TIMEOUT = 5
+
+else:
+    WAZUH_PATH = os.path.join('/', 'var', 'ossec')
+    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+    DEFAULT_TIMEOUT = 5 if sys.platform == "linux" else 10
+    _REQUIRED_AUDIT = {'user_id', 'user_name', 'group_id', 'group_name', 'process_name', 'path', 'audit_uid',
+                       'audit_name', 'effective_uid', 'effective_name', 'ppid', 'process_id'
+                       }
 
 FIFO = 'fifo'
 SYMLINK = 'sym_link'
@@ -139,6 +139,13 @@ def validate_event(event, checks=None):
     # Check modify file event
     if event['data']['type'] == 'modified':
         assert 'old_attributes' in event['data'] and 'changed_attributes' in event['data']
+
+        old_attributes = event['data']['old_attributes'].keys() - {'type', 'checksum'}
+        old_intersection = old_attributes ^ required_attributes
+        old_intersection_debug = "Event attributes are: " + str(old_attributes)
+        old_intersection_debug += "\nRequired Attributes are: " + str(required_attributes)
+        old_intersection_debug += "\nIntersection is: " + str(old_intersection)
+        assert (old_intersection == set()), f'Old_attributes and required_attributes are not the same. ' + old_intersection_debug
 
 
 def is_fim_scan_ended():
@@ -550,6 +557,7 @@ def callback_audit_rules_manipulation(line):
         return True
     return None
 
+
 def callback_audit_removed_rule(line):
     match = re.match(r'.* Audit rule removed.', line)
     if match:
@@ -722,10 +730,9 @@ class EventChecker:
 
         def filter_events(events, mask):
             """Returns a list of elements matching a specified mask in the events list using jq module."""
-            if sys.platform == "win32":
-                jq_cmd = 'jq -r "' + mask + '"'
-                stdout = subprocess.check_output(jq_cmd, input=json.dumps(events).encode())
-                return stdout.decode("utf8").strip().split("\r\n")
+            if sys.platform in ("win32", 'sunos5'):
+                stdout = subprocess.check_output(["jq", "-r", mask], input=json.dumps(events).encode())
+                return stdout.decode("utf8").strip().split(os.linesep)
             else:
                 return jq(mask).transform(events, multiple_output=True)
 
@@ -931,10 +938,10 @@ def generate_params(extra_params: dict = None, extra_metadata: dict = None, *, m
         if mode == 'scheduled':
             fim_param.append({'FIM_MODE': ''})
             fim_metadata.append({'fim_mode': 'scheduled'})
-        elif mode == 'realtime' and sys.platform != 'darwin':
+        elif mode == 'realtime' and sys.platform != 'darwin' and sys.platform != 'sunos5':
             fim_param.append({'FIM_MODE': {'realtime': 'yes'}})
             fim_metadata.append({'fim_mode': 'realtime'})
-        elif mode == 'whodata' and sys.platform != 'darwin':
+        elif mode == 'whodata' and sys.platform != 'darwin' and sys.platform != 'sunos5':
             fim_param.append({'FIM_MODE': {'whodata': 'yes'}})
             fim_metadata.append({'fim_mode': 'whodata'})
 
