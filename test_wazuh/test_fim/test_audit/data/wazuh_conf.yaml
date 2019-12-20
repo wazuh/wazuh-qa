@@ -4,6 +4,9 @@
   - config1
   apply_to_modules:
   - test_audit
+  - test_audit_after_initial_scan
+  - test_remove_rule_five_times
+  - test_remove_audit
   section: syscheck
   elements:
   - disabled:

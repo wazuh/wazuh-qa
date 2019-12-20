@@ -11,8 +11,10 @@ from wazuh_testing.fim import (generate_params, create_file, REGULAR, callback_d
 from wazuh_testing.tools import (check_apply_test,
                                  load_wazuh_configurations, FileMonitor)
 
+
 # All tests in this module apply to linux only
-pytestmark = pytest.mark.linux
+pytestmark = [pytest.mark.linux, pytest.mark.sunos5, pytest.mark.darwin]
+
 
 # configurations
 

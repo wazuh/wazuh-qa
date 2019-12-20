@@ -10,6 +10,7 @@ import shutil
 import socket
 import sys
 import time
+from datetime import datetime
 import subprocess
 from collections import Counter
 from copy import deepcopy
@@ -24,7 +25,7 @@ from wazuh_testing.tools import TimeMachine
 if sys.platform == 'win32':
     import win32con
     import win32api
-else:
+elif sys.platform == 'linux2' or sys.platform == 'linux':
     from jq import jq
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -35,18 +36,18 @@ if sys.platform == 'win32':
     DEFAULT_TIMEOUT = 10
     _REQUIRED_AUDIT = {"path", "process_id", "process_name", "user_id", "user_name"}
 
-elif sys.platform == 'linux2' or sys.platform == 'linux':
-    WAZUH_PATH = os.path.join('/', 'var', 'ossec')
-    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
-    DEFAULT_TIMEOUT = 5
-    _REQUIRED_AUDIT = {'user_id', 'user_name', 'group_id', 'group_name', 'process_name', 'path', 'audit_uid',
-                       'audit_name', 'effective_uid', 'effective_name', 'ppid', 'process_id'
-                       }
-
 elif sys.platform == 'darwin':
     WAZUH_PATH = os.path.join('/', 'Library', 'Ossec')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
-    DEFAULT_TIMEOUT = 10
+    DEFAULT_TIMEOUT = 5
+
+else:
+    WAZUH_PATH = os.path.join('/', 'var', 'ossec')
+    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+    DEFAULT_TIMEOUT = 5 if sys.platform == "linux" else 10
+    _REQUIRED_AUDIT = {'user_id', 'user_name', 'group_id', 'group_name', 'process_name', 'path', 'audit_uid',
+                       'audit_name', 'effective_uid', 'effective_name', 'ppid', 'process_id'
+                       }
 
 FIFO = 'fifo'
 SYMLINK = 'sym_link'
@@ -138,6 +139,13 @@ def validate_event(event, checks=None):
     # Check modify file event
     if event['data']['type'] == 'modified':
         assert 'old_attributes' in event['data'] and 'changed_attributes' in event['data']
+
+        old_attributes = event['data']['old_attributes'].keys() - {'type', 'checksum'}
+        old_intersection = old_attributes ^ required_attributes
+        old_intersection_debug = "Event attributes are: " + str(old_attributes)
+        old_intersection_debug += "\nRequired Attributes are: " + str(required_attributes)
+        old_intersection_debug += "\nIntersection is: " + str(old_intersection)
+        assert (old_intersection == set()), f'Old_attributes and required_attributes are not the same. ' + old_intersection_debug
 
 
 def is_fim_scan_ended():
@@ -477,7 +485,7 @@ def callback_detect_end_scan(line):
 
 
 def callback_detect_event(line):
-    msg = r'.*Sending message to server: (.+)' if sys.platform == 'win32' else r'.*Sending event: (.+)$'
+    msg = r'.*Sending FIM event: (.+)$'
     match = re.match(msg, line)
 
     try:
@@ -492,8 +500,15 @@ def callback_detect_event(line):
 def callback_detect_integrity_event(line):
     match = re.match(r'.*Sending integrity control message: (.+)$', line)
     if match:
-        if json.loads(match.group(1))['type'] == 'state':
-            return json.loads(match.group(1))
+        return json.loads(match.group(1))
+    return None
+
+
+def callback_detect_integrity_state(line):
+    event = callback_detect_integrity_event(line)
+    if event:
+        if event['type'] == 'state':
+            return event
     return None
 
 
@@ -504,7 +519,7 @@ def callback_detect_synchronization(line):
 
 
 def callback_ignore(line):
-    match = re.match(r".*Ignoring '.*?' '(.*?)' due to sregex '.*?'", line)
+    match = re.match(r".*Ignoring '.*?' '(.*?)' due to( sregex)? '.*?'", line)
     if match:
         return match.group(1)
     return None
@@ -523,6 +538,13 @@ def callback_audit_health_check(line):
     return None
 
 
+def callback_audit_cannot_start(line):
+    match = re.match(r'.*Who-data engine could not start. Switching who-data to real-time.', line)
+    if match:
+        return True
+    return None
+
+
 def callback_audit_added_rule(line):
     match = re.match(r'.*Added audit rule for monitoring directory: \'(.+)\'', line)
     if match:
@@ -536,8 +558,29 @@ def callback_audit_rules_manipulation(line):
     return None
 
 
+def callback_audit_removed_rule(line):
+    match = re.match(r'.* Audit rule removed.', line)
+    if match:
+        return True
+    return None
+
+
+def callback_audit_deleting_rule(line):
+    match = re.match(r'.*Deleting Audit rules...', line)
+    if match:
+        return True
+    return None
+
+
 def callback_audit_connection(line):
     if '(6030): Audit: connected' in line:
+        return True
+    return None
+
+
+def callback_audit_connection_close(line):
+    match = re.match(r'.*Audit: connection closed.', line)
+    if match:
         return True
     return None
 
@@ -589,6 +632,14 @@ def callback_symlink_scan_ended(line):
         return None
 
 
+def callback_syscheck_message(line):
+    if callback_detect_integrity_event(line) or callback_detect_event(line):
+        match = re.match(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*({.*?})$", line)
+        if match:
+            return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S'), json.dumps(match.group(2))
+        return None
+
+
 def check_time_travel(time_travel):
     """Changes date and time of the system.
 
@@ -602,6 +653,24 @@ def callback_configuration_warning(line):
     match = re.match(r'.*WARNING: \(\d+\): Invalid value for element', line)
     if match:
         return True
+    return None
+
+
+def callback_entries_path_count(line):
+    match = re.match(r'.*Fim inode entries: (\d+), path count: (\d+)', line)
+
+    if match:
+        return match.group(1), match.group(2)
+
+
+def callback_fim_event_message(line):
+    match = re.match(r'^agent (\d{3,}) syscheck (\w+) (.+)$', line)
+    if match:
+        try:
+            body = json.loads(match.group(3))
+        except json.decoder.JSONDecodeError:
+            body = match.group(3)
+        return match.group(1), match.group(2), body
     return None
 
 
@@ -672,10 +741,9 @@ class EventChecker:
 
         def filter_events(events, mask):
             """Returns a list of elements matching a specified mask in the events list using jq module."""
-            if sys.platform == "win32":
-                jq_cmd = 'jq -r "' + mask + '"'
-                stdout = subprocess.check_output(jq_cmd, input=json.dumps(events).encode())
-                return stdout.decode("utf8").strip().split("\r\n")
+            if sys.platform in ("win32", 'sunos5'):
+                stdout = subprocess.check_output(["jq", "-r", mask], input=json.dumps(events).encode())
+                return stdout.decode("utf8").strip().split(os.linesep)
             else:
                 return jq(mask).transform(events, multiple_output=True)
 

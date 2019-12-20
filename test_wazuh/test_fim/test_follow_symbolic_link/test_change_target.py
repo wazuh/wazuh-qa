@@ -14,8 +14,7 @@ from wazuh_testing.tools import (check_apply_test,
                                  load_wazuh_configurations, FileMonitor)
 
 # All tests in this module apply to linux only
-pytestmark = pytest.mark.linux
-
+pytestmark = [pytest.mark.linux, pytest.mark.sunos5, pytest.mark.darwin]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
