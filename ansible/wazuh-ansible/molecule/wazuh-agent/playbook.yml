@@ -7,7 +7,7 @@
     wazuh_managers:
       - address: "manager-{{ lookup('env', 'MOL_PLATFORM') or 'centos7' }}"
         port: 1514
-        protocol: tcp
+        protocol: udp
         api_port: 55000
         api_proto: 'http'
         api_user: ansible
