@@ -11,12 +11,15 @@ from wazuh_testing.fim import (DEFAULT_TIMEOUT, HARDLINK, LOG_FILE_PATH, REGULAR
                                check_time_travel, create_file, delete_file, modify_file_content, generate_params)
 from wazuh_testing.tools import FileMonitor, load_wazuh_configurations, truncate_file
 
+
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_hard_link.yaml')
 testdir1 = os.path.join('/', 'testdir1')
-test_directories = [testdir1]
+unmonitored_dir = os.path.join('/', 'test_unmonitorized')
+test_directories = [testdir1, unmonitored_dir]
+
 
 # configurations
 
@@ -48,8 +51,8 @@ def get_configuration(request):
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Hard links.")
 @pytest.mark.parametrize('path_file, path_link, num_links', [
-    (testdir1, "/", 1),
-    (testdir1, testdir1, 2),
+    (testdir1, unmonitored_dir, 1),
+    (testdir1, testdir1, 2)
 ])
 def test_hard_link(path_file, path_link, num_links, get_configuration,
                    configure_environment, restart_syscheckd, wait_for_initial_scan):
@@ -71,44 +74,43 @@ def test_hard_link(path_file, path_link, num_links, get_configuration,
     file_list = [regular_file_name]
     hardlinks_list = []
 
-    try:
-        event_checker = EventChecker(wazuh_log_monitor, path_file, file_list)
+    event_checker = EventChecker(wazuh_log_monitor, path_file, file_list)
 
-        # Create the regular file
-        create_file(REGULAR, path_file, regular_file_name, content='test content')
+    # Create the regular file
+    create_file(REGULAR, path_file, regular_file_name, content='test content')
+    check_time_travel(is_scheduled)
+    event_checker.fetch_and_check('added', min_timeout=DEFAULT_TIMEOUT)
+
+    # Create as many links pointing to the regular file as num_links
+    for link in range(0, num_links):
+        hardlinks_list.append("HardLink" + str(link))
+        create_file(HARDLINK, path_link, "HardLink" + str(link), target=os.path.join(path_file, regular_file_name))
+
+    # Try to detect the creation events for all the created links
+    if path_file == path_link:
         check_time_travel(is_scheduled)
+        event_checker.file_list = hardlinks_list
         event_checker.fetch_and_check('added', min_timeout=DEFAULT_TIMEOUT)
 
-        # Create as many links pointing to the regular file as num_links
-        for link in range(0, num_links):
-            hardlinks_list.append("HardLink" + str(link))
-            create_file(HARDLINK, path_link, "HardLink" + str(link), target=os.path.join(path_file, regular_file_name))
+    # Update file_list with the links if these were created in the monitored folder
+    event_checker.file_list = file_list + hardlinks_list if path_file == path_link else file_list
 
-        # Try to detect the creation events for all the created links
-        if path_file == path_link:
-            check_time_travel(is_scheduled)
-            event_checker.file_list = hardlinks_list
-            event_checker.fetch_and_check('added', min_timeout=DEFAULT_TIMEOUT)
+    # Modify the original file and detect the events for the entire file_list
+    modify_file_content(path_file, regular_file_name, new_content="modified testregularfile")
+    check_time_travel(is_scheduled)
+    event_checker.fetch_and_check('modified', min_timeout=DEFAULT_TIMEOUT)
 
-        # Update file_list with the links if these were created in the monitored folder
-        event_checker.file_list = file_list + hardlinks_list if path_file == path_link else file_list
+    # Modify one of the hard links
+    modify_file_content(path_link, "HardLink0", new_content="modified HardLink0")
 
-        # Modify the original file and detect the events for the entire file_list
-        modify_file_content(path_file, regular_file_name, new_content="modified testregularfile")
-        check_time_travel(is_scheduled)
-        event_checker.fetch_and_check('modified', min_timeout=DEFAULT_TIMEOUT)
+    # If the hard link is inside the monitored dir alerts should be triggered for the entire file_list
+    # Scheduled run should ALWAYS detect the modification of the file, even if we are using Real-time or Whodata.
+    check_time_travel(path_file != path_link or is_scheduled)
+    event_checker.fetch_and_check('modified', min_timeout=DEFAULT_TIMEOUT)
 
-        # Modify one of the hard links
-        modify_file_content(path_link, "HardLink0", new_content="modified HardLink0")
-
-        # If the hard link is inside the monitored dir alerts should be triggered for the entire file_list
-        # Scheduled run should ALWAYS detect the modification of the file, even if we are using Real-time or Whodata.
-        check_time_travel(path_file != path_link or is_scheduled)
-        event_checker.fetch_and_check('modified', min_timeout=DEFAULT_TIMEOUT)
-
-    finally:
-        # Clean up
-        delete_file(path_file, regular_file_name)
-        for link in hardlinks_list:
-            delete_file(path_link, link)
-        check_time_travel(True)
+    # Clean up
+    delete_file(path_file, regular_file_name)
+    for link in hardlinks_list:
+        delete_file(path_link, link)
+    check_time_travel(True)
+    event_checker.fetch_and_check('deleted', min_timeout=DEFAULT_TIMEOUT)

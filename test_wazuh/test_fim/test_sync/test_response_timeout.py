@@ -5,13 +5,17 @@ import os
 import time
 from datetime import datetime, timedelta
 
-import paramiko
 import psutil
 import pytest
+import sys
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, callback_detect_synchronization
 from wazuh_testing.tools import FileMonitor, TimeMachine, check_apply_test, load_wazuh_configurations, \
     time_to_timedelta, PREFIX
+
+if sys.platform == "linux":
+    import paramiko
+
 
 # All tests in this module apply to linux only
 pytestmark = pytest.mark.linux
