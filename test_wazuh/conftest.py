@@ -2,13 +2,12 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import pytest
 import sys
 
-from wazuh_testing.tools import (LOG_FILE_PATH)
-from wazuh_testing.tools import (FileMonitor, truncate_file,
-                                 control_service)
+import pytest
 
+from wazuh_testing.tools import LOG_FILE_PATH, control_wazuh_daemon, delete_sockets, FileMonitor, truncate_file, \
+    control_service
 
 ALL = set("darwin linux win32 sunos5".split())
 
@@ -73,3 +72,35 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "tier(level): mark test to run only if match tier level"
     )
+
+
+@pytest.fixture(scope='module')
+def configure_environment_standalone_daemons(request):
+    """Configure a custom environment for testing with specific Wazuh daemons only. Stopping wazuh-service is needed."""
+    # Stop wazuh-service
+    control_wazuh_daemon('stop')
+
+    # Remove all remaining Wazuh sockets
+    delete_sockets()
+
+    # Start selected daemons and ensure they are running
+    for daemon in getattr(request.module, 'used_daemons'):
+        control_wazuh_daemon('start', daemon=daemon)
+
+    # Call extra functions before yield
+    if hasattr(request.module, 'extra_configuration_before_yield'):
+        func = getattr(request.module, 'extra_configuration_before_yield')
+        func()
+
+    yield
+
+    # Call extra functions after yield
+    if hasattr(request.module, 'extra_configuration_after_yield'):
+        func = getattr(request.module, 'extra_configuration_after_yield')
+        func()
+
+    # Stop wazuh-service
+    control_wazuh_daemon('stop')
+
+    # Remove all remaining Wazuh sockets
+    delete_sockets()

@@ -14,9 +14,9 @@ import time
 import xml.etree.ElementTree as ET
 from copy import deepcopy
 from datetime import datetime, timedelta
+from struct import pack, unpack
 from subprocess import DEVNULL, check_call, check_output
 from typing import Any, List, Set
-from struct import pack, unpack
 
 import psutil
 import yaml
@@ -846,3 +846,51 @@ class SocketMonitor:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
+
+
+def delete_sockets(path=None):
+    """Delete a Wazuh socket file or all of them if None is specified
+
+    Parameters
+    ----------
+    path : str
+        Socket path relative to WAZUH_PATH
+    """
+    try:
+        if path is None:
+            for file in os.listdir(os.path.join(WAZUH_PATH, 'queue', 'ossec')):
+                os.remove(file)
+            os.remove(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
+        else:
+            os.remove(os.path.join(WAZUH_PATH, path))
+    except FileNotFoundError:
+        pass
+
+
+def control_wazuh_daemon(action, daemon=None, wait_for_complete=True):
+    """Control Wazuh daemon (start or stop)
+
+    Parameters
+    ----------
+    action : str
+        Action to be performed on the daemon (start or stop)
+    daemon : str
+        Wazuh daemon to apply action on
+    wait_for_complete : bool
+        Wait until daemon is running/not running if True
+    """
+    WAZUH_SERVICE = 'wazuh-manager'
+    valid_actions = {'start': 'not', 'stop': 'is'}
+    if action not in valid_actions:
+        raise ValueError(
+            f"{action} is not a valid control daemon action. Valid actions are: {', '.join(valid_actions.keys())}.")
+    control_service(action, daemon=daemon)
+    if wait_for_complete:
+        for _ in range(3):
+            daemon_status = subprocess.run(['service', 'wazuh-manager', 'status'],
+                                           stdout=subprocess.PIPE).stdout.decode()
+            if f"{daemon if daemon is not None else ''} {valid_actions[action]} running" not in daemon_status:
+                break
+            time.sleep(3)
+        else:
+            raise TimeoutError(f"Timed out executing {action} in {'wazuh-service' if daemon is None else daemon}")
