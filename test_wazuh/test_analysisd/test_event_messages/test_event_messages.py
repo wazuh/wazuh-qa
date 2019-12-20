@@ -23,16 +23,19 @@ analysis_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'queue')
 monitored_sockets, receiver_sockets = None, None  # These variables will be set in the fixture create_unix_sockets
 monitored_sockets_params = [(wdb_path, 'TCP')]
 receiver_sockets_params = [(analysis_path, 'UDP')]
+used_daemons = ['ossec-analysisd']
 
 
 # tests
 
-def test_event_messages(create_unix_sockets):
+@pytest.mark.parametrize('key, message_', [
+    message_ for message_ in messages.items()
+])
+def test_event_messages(configure_environment_standalone_daemons, create_unix_sockets, key, message_):
     """
 
     """
-    for key, message_ in messages.items():
-        expected = callback_fim_event_message(message_['output'])
-        receiver_sockets[0].send([message_['input']])
-        response = monitored_sockets[0].start(timeout=5, callback=callback_fim_event_message).result()
-        assert response == expected
+    expected = callback_fim_event_message(message_['output'])
+    receiver_sockets[0].send([message_['input']])
+    response = monitored_sockets[0].start(timeout=5, callback=callback_fim_event_message).result()
+    assert response == expected, 'Failed test case: {}'.format(key)

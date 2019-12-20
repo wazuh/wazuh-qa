@@ -7,7 +7,7 @@ import sys
 import pytest
 
 from wazuh_testing.tools import LOG_FILE_PATH, control_wazuh_daemon, delete_sockets, FileMonitor, truncate_file, \
-    control_service
+    control_service, SocketController, SocketMonitor
 
 ALL = set("darwin linux win32 sunos5".split())
 
@@ -104,3 +104,27 @@ def configure_environment_standalone_daemons(request):
 
     # Remove all remaining Wazuh sockets
     delete_sockets()
+
+
+@pytest.fixture(scope='module')
+def create_unix_sockets(request):
+    """Create the specified unix sockets for the tests."""
+    monitored_sockets_params = getattr(request.module, 'monitored_sockets_params')
+    receiver_sockets_params = getattr(request.module, 'receiver_sockets_params')
+
+    # Create the unix sockets
+    monitored_sockets, receiver_sockets = list(), list()
+    for path_, protocol in monitored_sockets_params:
+        monitored_sockets.append(SocketMonitor(path=path_, connection_protocol=protocol))
+    for path_, protocol in receiver_sockets_params:
+        receiver_sockets.append(SocketController(path=path_, connection_protocol=protocol))
+
+    setattr(request.module, 'monitored_sockets', monitored_sockets)
+    setattr(request.module, 'receiver_sockets', receiver_sockets)
+
+    yield
+
+    # Close the sockets gracefully
+    for monitored_socket, receiver_socket in zip(monitored_sockets, receiver_sockets):
+        monitored_socket.close()
+        receiver_socket.close()
