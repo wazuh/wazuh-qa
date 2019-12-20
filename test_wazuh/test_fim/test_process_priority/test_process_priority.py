@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import sys
 from copy import deepcopy
 
 import pytest
@@ -11,7 +12,7 @@ from wazuh_testing.fim import generate_params
 from wazuh_testing.tools import check_apply_test, load_wazuh_configurations, get_process
 
 # All tests in this module apply to linux only
-pytestmark = [pytest.mark.linux, pytest.mark.darwin]
+pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5]
 
 # variables
 
@@ -58,4 +59,5 @@ def test_process_priority(get_configuration, configure_environment, restart_sysc
     syscheckd_process = get_process(process_name)
 
     assert syscheckd_process is not None, f'Process {process_name} not found'
+    print("nice: " + str(syscheckd_process.nice()) + ", priority: " + str(priority))
     assert syscheckd_process.nice() == priority, f'Process {process_name} has not updated its priority.'
