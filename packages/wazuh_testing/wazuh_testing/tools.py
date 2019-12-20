@@ -44,8 +44,12 @@ else:
 if sys.platform == 'darwin' or sys.platform == 'win32' or sys.platform == 'sunos5':
     WAZUH_SERVICE = 'wazuh.agent'
 else:
-    status = subprocess.run(['service', 'wazuh-manager', 'status'])
-    WAZUH_SERVICE = 'wazuh-manager' if status.returncode == 0 else 'wazuh-agent'
+    with open(os.path.join(WAZUH_PATH, 'etc/ossec-init.conf'), 'r') as f:
+        type_ = None
+        for line in f.readlines():
+            if 'TYPE' in line:
+                type_ = line.split('"')[1]
+        WAZUH_SERVICE = 'wazuh-manager' if type_ == 'server' else 'wazuh-agent'
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
