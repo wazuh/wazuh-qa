@@ -23,8 +23,9 @@ from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  control_service,
                                  truncate_file)
 
-# All tests in this module apply to linux only
-pytestmark = pytest.mark.linux
+# Marks
+
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
 # variables
 

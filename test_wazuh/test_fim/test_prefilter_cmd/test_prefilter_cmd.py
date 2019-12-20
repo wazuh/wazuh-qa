@@ -12,8 +12,9 @@ from wazuh_testing.fim import LOG_FILE_PATH, detect_initial_scan, generate_param
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations, restart_wazuh_daemon, truncate_file)
 
-# All tests in this module apply to linux only
-pytestmark = pytest.mark.linux
+# Marks
+
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
 # variables
 
