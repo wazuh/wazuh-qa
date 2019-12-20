@@ -3,12 +3,12 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+
 import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH, check_time_travel, callback_detect_event, get_fim_mode_param, deepcopy,
-                               create_file, REGULAR, detect_initial_scan, delete_file, generate_params, DEFAULT_TIMEOUT)
-from wazuh_testing.tools import (FileMonitor, check_apply_test, load_wazuh_configurations,
-                                 restart_wazuh_with_new_conf, set_section_wazuh_conf, PREFIX)
+                               create_file, REGULAR, generate_params, DEFAULT_TIMEOUT)
+from wazuh_testing.tools import (FileMonitor, load_wazuh_configurations, PREFIX, check_apply_test)
 
 pytestmark = [pytest.mark.linux, pytest.mark.win32]
 
@@ -19,7 +19,6 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_dup_entries.yaml')
 testdir1, _ = test_directories
-file = 'hello'
 
 
 # Configuration
@@ -51,22 +50,22 @@ def get_configuration(request):
 
 
 @pytest.mark.parametrize('tags_to_apply', [
-   ({'ossec_conf'}),
+   {'ossec_conf'}
 ])
 def test_duplicate_entries(tags_to_apply,
                            get_configuration, configure_environment,
                            restart_syscheckd, wait_for_initial_scan):
-    """ Checks if syscheckd ignores duplicate entries.
-            For instance:
-            - The second entry should prevail over the first one.
+    """Checks if syscheckd ignores duplicate entries.
+       For instance:
+           - The second entry should prevail over the first one.
             <directories realtime="yes">/home/user</directories> (IGNORED)
             <directories whodata="yes">/home/user</directories>
         OR
-            - Just generate one event.
+           - Just generate one event.
             <directories realtime="yes">/home/user,/home/user</directories>
-
-    :param mode2: Second entry's mode and the one which syscheck should choose.
     """
+    check_apply_test(tags_to_apply, get_configuration['tags'])
+    file = 'hello'
     mode2 = get_configuration['metadata']['fim_mode2']
 
     scheduled = mode2 == 'scheduled'
