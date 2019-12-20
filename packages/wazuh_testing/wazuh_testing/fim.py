@@ -663,6 +663,17 @@ def callback_entries_path_count(line):
         return match.group(1), match.group(2)
 
 
+def callback_fim_event_message(line):
+    match = re.match(r'^agent (\d{3,}) syscheck (\w+) (.+)$', line)
+    if match:
+        try:
+            body = json.loads(match.group(3))
+        except json.decoder.JSONDecodeError:
+            body = match.group(3)
+        return match.group(1), match.group(2), body
+    return None
+
+
 class EventChecker:
     """Utility to allow fetch events and validate them."""
 

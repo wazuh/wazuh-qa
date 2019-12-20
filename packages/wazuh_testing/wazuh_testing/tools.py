@@ -3,22 +3,24 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import psutil
 import random
 import re
+import socket
 import string
 import subprocess
 import sys
 import threading
 import time
 import xml.etree.ElementTree as ET
-import yaml
 from copy import deepcopy
 from datetime import datetime, timedelta
-from pytest import skip
 from subprocess import DEVNULL, check_call, check_output
 from typing import Any, List, Set
+from struct import pack, unpack
 
+import psutil
+import yaml
+from pytest import skip
 
 if sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
@@ -79,7 +81,7 @@ def _serialize_xml(write, elem, qnames, namespaces,
                         write(" xmlns%s=\"%s\"" % (
                             k,
                             ET._escape_attrib(v)
-                            ))
+                        ))
                 for k, v in items:  # avoid lexicographical order for XML attributes
                     if isinstance(k, ET.QName):
                         k = k.text
@@ -246,6 +248,7 @@ def set_section_wazuh_conf(section: str = 'syscheck',
     :param new_elements: List with dictionaries for settings elements in the section
     :return: ElementTree with the custom Wazuh configuration
     """
+
     def create_elements(section: ET.Element, elements: List):
         """Insert new elements in a Wazuh configuration section.
 
@@ -529,7 +532,7 @@ def check_apply_test(apply_to_tags: Set, tags: List):
     :param tags: List with the tags which identifies a configuration
     """
     if not (apply_to_tags.intersection(tags) or
-       'all' in apply_to_tags):
+            'all' in apply_to_tags):
         skip("Does not apply to this config file")
 
 
@@ -631,12 +634,12 @@ def reformat_time(scan_time):
 def time_to_timedelta(time):
     """Converts a string with time in seconds with `smhdw` suffixes allowed to `datetime.timedelta`.
     """
-    time_unit = time[len(time)-1:]
+    time_unit = time[len(time) - 1:]
 
     if time_unit.isnumeric():
         return timedelta(seconds=int(time))
 
-    time_value = int(time[:len(time)-1])
+    time_value = int(time[:len(time) - 1])
 
     if time_unit == "s":
         return timedelta(seconds=time_value)
@@ -648,3 +651,198 @@ def time_to_timedelta(time):
         return timedelta(days=time_value)
     elif time_unit == "w":
         return timedelta(weeks=time_value)
+
+
+class SocketController:
+
+    def __init__(self, path, timeout=None, connection_protocol='TCP'):
+        """Create a new unix socket or connect to a existing one.
+
+        Parameters
+        ----------
+        path : str
+            Path where the file will be created
+        timeout : int
+            Socket's timeout, 0 for non-blocking mode
+        connection_protocol : str
+            Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM)
+
+        Raises
+        ------
+        Exception
+            If the socket connection failed
+        """
+        self.path = path
+        if connection_protocol.lower() == 'tcp':
+            self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        elif connection_protocol.lower() == 'udp':
+            self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+        else:
+            raise TypeError('Invalid connection protocol detected. Valid ones are TCP or UDP')
+
+        try:
+            self.sock.connect(self.path)
+        except OSError:
+            if os.path.exists(path):
+                os.unlink(path)
+            self.sock.bind(self.path)
+            os.chmod(self.path, 0o666)
+        self.sock.settimeout(timeout)
+
+    def close(self):
+        """Close the socket gracefully"""
+        self.sock.shutdown(socket.SHUT_RDWR)
+        self.sock.close()
+
+    def send(self, messages, size=False):
+        """Send a list of messages to the socket.
+
+        Parameters
+        ----------
+        messages : list
+            List of messages to be sent
+        size : bool
+            Flag that indicates if the header of the message includes the size of the message
+            (Analysis doesn't need the size, wazuh-db does)
+
+        Returns
+        -------
+        list
+            List of sizes of the sent messages
+        """
+        output = list()
+        for message_ in messages:
+            msg_bytes = message_.encode()
+            try:
+                if size:
+                    output.append(self.sock.send(pack("<I", len(msg_bytes)) + msg_bytes))
+                else:
+                    output.append(self.sock.send(msg_bytes))
+            except OSError as e:
+                raise e
+
+        return output
+
+    def receive(self, total_messages=1):
+        """Receive a specified number of messages from the socket.
+
+        Parameters
+        ----------
+        total_messages : int
+            Total messages to be received
+
+        Returns
+        -------
+        list
+            Socket messages
+        """
+        output = list()
+        for _ in range(0, total_messages):
+            try:
+                size = unpack("<I", self.sock.recv(4, socket.MSG_WAITALL))[0]
+                output.append(self.sock.recv(size, socket.MSG_WAITALL).decode().rstrip('\x00'))
+            except OSError:
+                try:
+                    self.sock.listen(1)
+                    conn, addr = self.sock.accept()
+                    size = unpack("<I", conn.recv(4, socket.MSG_WAITALL))[0]
+                    output.append(conn.recv(size, socket.MSG_WAITALL).decode().rstrip('\x00'))
+                except OSError as e:
+                    raise e
+
+        return output
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
+
+class SocketMonitor:
+
+    def __init__(self, path, connection_protocol='TCP'):
+        """Create a new unix socket or connect to a existing one.
+
+        Parameters
+        ----------
+        path : str
+            Path where the file will be created
+        connection_protocol : str
+            Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM)
+
+        Raises
+        ------
+        Exception
+            If the socket connection failed
+        """
+        self._continue = False
+        self._abort = False
+        self._result = None
+        self.timer = None
+        self.path = path
+        self.controller = SocketController(path=path, connection_protocol=connection_protocol)
+
+    def start(self, timeout=-1, callback=_callback_default, accum_results=1):
+        """Start the socket monitoring with specified callback.
+
+        Parameters
+        ----------
+        timeout : int
+            Timeout of the operation
+        callback : callable
+            Callable function that accepts a specified param
+        accum_results : int
+            Expected number of messages
+
+        Returns
+        -------
+        list
+            Socket messages
+        """
+        if not self._continue:
+            self._continue = True
+            self._abort = False
+            if timeout > 0:
+                self.timer = Timer(timeout, self.abort)
+                self.timer.start()
+            while self._continue:
+                for message in self.controller.receive(accum_results):
+                    result = callback(message)
+                    if result:
+                        self._add_results(result, accum_results)
+        return self
+
+    def _add_results(self, result, accum_results):
+        if accum_results > 1:
+            self._result.append(result)
+            accum_results == len(self._result) and self.stop()
+        else:
+            self._result = result
+            self._result and self.stop()
+
+    def result(self):
+        """Return the monitored socket messages."""
+        return self._result
+
+    def close(self):
+        """Close the socket gracefully."""
+        self.controller.close()
+
+    def stop(self):
+        """Stop the socket monitoring. It can be restarted calling the start method."""
+        self._continue = False
+        if self.timer:
+            self.timer.cancel()
+            self.timer.join()
+        return self
+
+    def abort(self):
+        """Raise a timeout exception if the operation takes more time that the specified timeout."""
+        raise TimeoutError()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
