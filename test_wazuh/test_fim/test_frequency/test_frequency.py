@@ -12,8 +12,9 @@ import pytest
 from wazuh_testing.fim import LOG_FILE_PATH, DEFAULT_TIMEOUT, regular_file_cud, generate_params
 from wazuh_testing.tools import FileMonitor, TimeMachine, check_apply_test, load_wazuh_configurations, PREFIX
 
-# All tests in this module apply to linux and windows only
-pytestmark = [pytest.mark.linux, pytest.mark.win32]
+# Marks
+
+pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # variables
 

@@ -9,6 +9,12 @@ import pytest
 from wazuh_testing.fim import DEFAULT_TIMEOUT, LOG_FILE_PATH, regular_file_cud, generate_params
 from wazuh_testing.tools import FileMonitor, load_wazuh_configurations, PREFIX
 
+# Marks
+
+pytestmark = pytest.mark.tier(level=1)
+
+# Variables
+
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 test_directories = [os.path.join(PREFIX, 'testdir_tags'),

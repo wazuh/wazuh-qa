@@ -11,8 +11,9 @@ import pytest
 from wazuh_testing.fim import generate_params
 from wazuh_testing.tools import check_apply_test, load_wazuh_configurations, get_process
 
-# All tests in this module apply to linux only
-pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5]
+# Marks
+
+pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=1)]
 
 # variables
 

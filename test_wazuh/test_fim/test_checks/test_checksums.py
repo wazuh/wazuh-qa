@@ -11,6 +11,10 @@ from wazuh_testing.fim import (CHECK_ALL, CHECK_MD5SUM, CHECK_SHA1SUM, CHECK_SHA
                                LOG_FILE_PATH, REQUIRED_ATTRIBUTES, regular_file_cud, generate_params)
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
+# Marks
+
+pytestmark = pytest.mark.tier(level=1)
+
 # variables
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)

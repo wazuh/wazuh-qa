@@ -11,6 +11,10 @@ from wazuh_testing.fim import CHECK_ALL, DEFAULT_TIMEOUT, FIFO, LOG_FILE_PATH, R
     create_file, validate_event, generate_params
 from wazuh_testing.tools import FileMonitor, TimeMachine, check_apply_test, load_wazuh_configurations, PREFIX
 
+# Marks
+
+pytestmark = pytest.mark.tier(level=0)
+
 # variables
 test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')]
 

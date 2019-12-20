@@ -10,6 +10,10 @@ from wazuh_testing.fim import (DEFAULT_TIMEOUT, LOG_FILE_PATH, callback_audit_ev
                                generate_params)
 from wazuh_testing.tools import FileMonitor, load_wazuh_configurations
 
+# Marks
+
+pytestmark = pytest.mark.tier(level=2)
+
 # Variables
 
 prefix = os.path.join('C:', os.sep) if sys.platform == 'win32' else os.sep
