@@ -10,7 +10,9 @@ from wazuh_testing.fim import (LOG_FILE_PATH, check_time_travel, callback_detect
                                create_file, REGULAR, generate_params, DEFAULT_TIMEOUT)
 from wazuh_testing.tools import (FileMonitor, load_wazuh_configurations, PREFIX, check_apply_test)
 
-pytestmark = [pytest.mark.linux, pytest.mark.win32]
+# Marks
+
+pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=2)]
 
 # variables
 test_directories = [os.path.join(PREFIX, 'testdir1')]*2
