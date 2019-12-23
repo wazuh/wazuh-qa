@@ -16,7 +16,8 @@ setup(name='wazuh_testing',
       packages=find_packages(),
       package_data={'wazuh_testing': ['data/syscheck_event.json',
                                       'data/syscheck_event_windows.json',
-                                      'data/mitre_event.json']
+                                      'data/mitre_event.json',
+                                      'data/alert_schema.json']
                     },
       include_package_data=True,
       zip_safe=False
