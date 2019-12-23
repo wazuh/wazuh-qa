@@ -2,6 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import os
 import sys
 
 import pytest
@@ -40,7 +41,7 @@ def restart_wazuh(get_configuration, request):
     control_service('restart')
 
 
-def pytest_addoption(parser):
+def pytest_adoption(parser):
     parser.addoption(
         "--tier",
         action="store",
@@ -76,6 +77,13 @@ def pytest_configure(config):
 
 @pytest.fixture(scope='module')
 def configure_environment_standalone_daemons(request):
+    def clear_logs():
+        """Remove all Wazuh logs"""
+        logs_path = '/var/ossec/logs'
+        for root, dirs, files in os.walk(logs_path):
+            for file in files:
+                os.remove(os.path.join(root, file))
+
     """Configure a custom environment for testing with specific Wazuh daemons only. Stopping wazuh-service is needed."""
     # Stop wazuh-service and ensure all daemons are stopped
     control_service('stop')
@@ -83,6 +91,9 @@ def configure_environment_standalone_daemons(request):
 
     # Remove all remaining Wazuh sockets
     delete_sockets()
+
+    # Clear all Wazuh logs
+    clear_logs()
 
     # Start selected daemons and ensure they are running
     for daemon in getattr(request.module, 'used_daemons'):
@@ -106,6 +117,9 @@ def configure_environment_standalone_daemons(request):
 
     # Remove all remaining Wazuh sockets
     delete_sockets()
+
+    # Clear all Wazuh logs
+    clear_logs()
 
 
 @pytest.fixture(scope='module')
