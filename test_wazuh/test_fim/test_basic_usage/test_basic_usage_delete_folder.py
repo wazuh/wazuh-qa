@@ -11,6 +11,10 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGUL
     callback_detect_event, check_time_travel, DEFAULT_TIMEOUT
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
+# Marks
+
+pytestmark = pytest.mark.tier(level=0)
+
 # variables
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)

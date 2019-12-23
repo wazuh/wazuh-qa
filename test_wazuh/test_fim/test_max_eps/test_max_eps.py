@@ -11,6 +11,10 @@ import pytest
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, create_file, generate_params, callback_syscheck_message
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
+# Marks
+
+pytestmark = pytest.mark.tier(level=1)
+
 # variables
 test_directories = [os.path.join(PREFIX, 'testdir1')]
 

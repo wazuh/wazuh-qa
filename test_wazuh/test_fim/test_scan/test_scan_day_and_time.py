@@ -11,6 +11,10 @@ from wazuh_testing.fim import (LOG_FILE_PATH, DEFAULT_TIMEOUT, callback_detect_e
 from wazuh_testing.tools import (FileMonitor, check_apply_test, load_wazuh_configurations, TimeMachine, reformat_time,
                                  PREFIX)
 
+# Marks
+
+pytestmark = [pytest.mark.tier(level=1)]
+
 # variables
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 

@@ -10,6 +10,10 @@ from wazuh_testing.fim import LOG_FILE_PATH, callback_configuration_error
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations, PREFIX, control_service)
 
+# Marks
+
+pytestmark = pytest.mark.tier(level=1)
+
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')

@@ -10,9 +10,9 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGUL
     DEFAULT_TIMEOUT, callback_entries_path_count, check_time_travel
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
-# marks
+# Marks
 
-pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5]
+pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]
 
 # variables
 
