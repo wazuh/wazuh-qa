@@ -6,8 +6,8 @@ import sys
 
 import pytest
 
-from wazuh_testing.tools import LOG_FILE_PATH, control_wazuh_daemon, delete_sockets, FileMonitor, truncate_file, \
-    control_service, SocketController, SocketMonitor
+from wazuh_testing.tools import LOG_FILE_PATH, delete_sockets, FileMonitor, truncate_file, control_service, \
+    SocketController, SocketMonitor, check_daemon_status
 
 ALL = set("darwin linux win32 sunos5".split())
 
@@ -77,15 +77,17 @@ def pytest_configure(config):
 @pytest.fixture(scope='module')
 def configure_environment_standalone_daemons(request):
     """Configure a custom environment for testing with specific Wazuh daemons only. Stopping wazuh-service is needed."""
-    # Stop wazuh-service
-    control_wazuh_daemon('stop')
+    # Stop wazuh-service and ensure all daemons are stopped
+    control_service('stop')
+    check_daemon_status(running=False)
 
     # Remove all remaining Wazuh sockets
     delete_sockets()
 
     # Start selected daemons and ensure they are running
     for daemon in getattr(request.module, 'used_daemons'):
-        control_wazuh_daemon('start', daemon=daemon)
+        control_service('start', daemon=daemon)
+        check_daemon_status(running=True, daemon=daemon)
 
     # Call extra functions before yield
     if hasattr(request.module, 'extra_configuration_before_yield'):
@@ -100,7 +102,7 @@ def configure_environment_standalone_daemons(request):
         func()
 
     # Stop wazuh-service
-    control_wazuh_daemon('stop')
+    control_service('stop')
 
     # Remove all remaining Wazuh sockets
     delete_sockets()

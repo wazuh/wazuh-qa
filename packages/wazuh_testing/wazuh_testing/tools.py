@@ -872,31 +872,29 @@ def delete_sockets(path=None):
         pass
 
 
-def control_wazuh_daemon(action, daemon=None, wait_for_complete=True):
-    """Control Wazuh daemon (start or stop)
+def check_daemon_status(daemon=None, running=True, timeout=10):
+    """Check Wazuh daemon status.
 
     Parameters
     ----------
-    action : str
-        Action to be performed on the daemon (start or stop)
     daemon : str
-        Wazuh daemon to apply action on
-    wait_for_complete : bool
-        Wait until daemon is running/not running if True
+        Wazuh daemon to check
+    running : bool
+        True if the daemon is expected to be running False if it is expected to be stopped
+    timeout : int
+        Timeout value for the check
+
+    Raises
+    ------
+    TimeoutError
+        If the daemon status is wrong after timeout seconds
     """
-    global WAZUH_SERVICE
-    WAZUH_SERVICE = 'wazuh-manager'
-    valid_actions = {'start': 'not', 'stop': 'is'}
-    if action not in valid_actions:
-        raise ValueError(
-            f"{action} is not a valid control daemon action. Valid actions are: {', '.join(valid_actions.keys())}.")
-    control_service(action, daemon=daemon)
-    if wait_for_complete:
-        for _ in range(3):
-            daemon_status = subprocess.run(['service', 'wazuh-manager', 'status'],
-                                           stdout=subprocess.PIPE).stdout.decode()
-            if f"{daemon if daemon is not None else ''} {valid_actions[action]} running" not in daemon_status:
-                break
-            time.sleep(3)
-        else:
-            raise TimeoutError(f"Timed out executing {action} in {'wazuh-service' if daemon is None else daemon}")
+    for _ in range(3):
+        daemon_status = subprocess.run(['service', 'wazuh-manager', 'status'],
+                                       stdout=subprocess.PIPE).stdout.decode()
+        if f"{daemon if daemon is not None else ''} {'not' if running is True else 'is'} running" not in daemon_status:
+            break
+        time.sleep(timeout/3)
+    else:
+        raise TimeoutError(f"{'wazuh-service' if daemon is None else daemon} "
+                           f"{'is not' if running is True else 'is'} running")
