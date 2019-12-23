@@ -13,9 +13,9 @@ from wazuh_testing.fim import LOG_FILE_PATH, callback_audit_cannot_start
 from wazuh_testing.tools import FileMonitor, load_wazuh_configurations, check_apply_test
 
 
-# All tests in this module apply to linux only
-pytestmark = pytest.mark.linux
+# Marks
 
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
 # Variables
 

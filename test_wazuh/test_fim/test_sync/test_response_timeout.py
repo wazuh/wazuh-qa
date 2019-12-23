@@ -17,8 +17,9 @@ if sys.platform == "linux":
     import paramiko
 
 
-# All tests in this module apply to linux only
-pytestmark = pytest.mark.linux
+# Marks
+
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2)]
 
 # variables
 

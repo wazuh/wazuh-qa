@@ -14,6 +14,10 @@ from wazuh_testing.tools import (PREFIX, FileMonitor, TimeMachine,
                                  load_wazuh_configurations, restart_wazuh_with_new_conf, set_section_wazuh_conf,
                                  check_apply_test)
 
+# Marks
+
+pytestmark = pytest.mark.tier(level=1)
+
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')

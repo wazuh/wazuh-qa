@@ -15,8 +15,9 @@ if sys.platform == 'win32':
     from test_fim.test_windows_audit_interval.manage_acl import Privilege, get_file_security_descriptor, modify_sacl, \
         get_sacl
 
-# All tests in this module apply to windows only
-pytestmark = pytest.mark.win32
+# Marks
+
+pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # variables
 
