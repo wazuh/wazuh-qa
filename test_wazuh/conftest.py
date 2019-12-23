@@ -41,7 +41,7 @@ def restart_wazuh(get_configuration, request):
     control_service('restart')
 
 
-def pytest_adoption(parser):
+def pytest_addoption(parser):
     parser.addoption(
         "--tier",
         action="store",
