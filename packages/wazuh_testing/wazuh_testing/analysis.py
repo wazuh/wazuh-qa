@@ -23,13 +23,10 @@ def callback_fim_event_message(line):
 
 
 def callback_fim_event_alert(line):
-    match = re.match(r'(.+)$', line)
-    if match:
-        try:
-            return json.loads(match.group(1))
-        except json.decoder.JSONDecodeError as e:
-            raise e
-    return None
+    try:
+        return json.loads(line)
+    except json.decoder.JSONDecodeError as e:
+        raise e
 
 
 def validate_analysis_event(event):
