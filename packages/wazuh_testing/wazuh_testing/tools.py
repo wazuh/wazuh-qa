@@ -551,13 +551,19 @@ def restart_wazuh_with_new_conf(new_conf, daemon='ossec-syscheckd'):
     control_service('restart', daemon=daemon)
 
 
-def control_service(action, daemon=None):
-    """ Performs the stop, start and restart operation with Wazuh.
+def control_service(action, daemon=None, debug_mode=False):
+    """Performs the stop, start and restart operation with Wazuh.
     It takes care of the current OS to interact with the service and the type of installation (agent or manager)
 
-    :param action: str Must be one of 'stop', 'start' or 'restart'
-    :param daemon: str Name of the daemon to be controlled. None to control the whole Wazuh service
-    :return: None
+    Parameters
+    ----------
+    action : str
+        Must be one of 'stop', 'start' or 'restart'
+    daemon : str
+        Name of the daemon to be controlled. None to control the whole Wazuh service
+    debug_mode : bool
+        Run the specified daemon in debug mode
+
     """
     valid_actions = ('start', 'stop', 'restart')
     if action not in valid_actions:
@@ -583,11 +589,10 @@ def control_service(action, daemon=None):
                 control_service('start', daemon=daemon)
             elif action == 'stop':
                 for proc in psutil.process_iter(attrs=['name']):
-                    if proc.name() == daemon:
-                        proc.kill()
+                    proc.name() == daemon and proc.kill()
             else:
                 daemon_path = os.path.join(WAZUH_PATH, 'bin')
-                check_call([f'{daemon_path}/{daemon}'])
+                check_call([f'{daemon_path}/{daemon}', '' if not debug_mode else '-d'])
             result = 0
 
     if result != 0:
