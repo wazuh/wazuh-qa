@@ -53,6 +53,7 @@ else:
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes

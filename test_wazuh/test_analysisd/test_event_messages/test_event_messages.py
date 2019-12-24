@@ -7,7 +7,7 @@ import os
 import pytest
 import yaml
 from wazuh_testing.analysis import callback_fim_event_alert, callback_fim_event_message, validate_analysis_event
-from wazuh_testing.tools import WAZUH_PATH, FileMonitor
+from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH, FileMonitor
 
 # All tests in this module apply to linux only
 pytestmark = pytest.mark.linux
@@ -15,7 +15,7 @@ pytestmark = pytest.mark.linux
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-alerts_json = '/var/ossec/logs/alerts/alerts.json'
+alerts_json = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.json')
 wazuh_log_monitor = FileMonitor(alerts_json)
 messages_path = os.path.join(test_data_path, 'messages.yaml')
 with open(messages_path) as f:

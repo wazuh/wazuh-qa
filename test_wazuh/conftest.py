@@ -7,8 +7,8 @@ import sys
 
 import pytest
 
-from wazuh_testing.tools import LOG_FILE_PATH, delete_sockets, FileMonitor, truncate_file, control_service, \
-    SocketController, SocketMonitor, check_daemon_status
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_LOGS_PATH, delete_sockets, FileMonitor, truncate_file,\
+    control_service, SocketController, SocketMonitor, check_daemon_status
 
 ALL = set("darwin linux win32 sunos5".split())
 
@@ -79,20 +79,9 @@ def pytest_configure(config):
 def configure_environment_standalone_daemons(request):
     """Configure a custom environment for testing with specific Wazuh daemons only. Stopping wazuh-service is needed."""
 
-    def clear_logs():
-        """Clear all Wazuh logs"""
-        logs_path = '/var/ossec/logs'
-        for root, dirs, files in os.walk(logs_path):
-            for file in files:
-                try:
-                    open(os.path.join(root, file), 'w').close()
-                except FileNotFoundError:
-                    pass
-
     def remove_logs():
         """Remove all Wazuh logs"""
-        logs_path = '/var/ossec/logs'
-        for root, dirs, files in os.walk(logs_path):
+        for root, dirs, files in os.walk(WAZUH_LOGS_PATH):
             for file in files:
                 os.remove(os.path.join(root, file))
 
@@ -109,7 +98,7 @@ def configure_environment_standalone_daemons(request):
         check_daemon_status(running=True, daemon=daemon)
 
     # Clear all Wazuh logs
-    clear_logs()
+    truncate_file(LOG_FILE_PATH)
 
     # Call extra functions before yield
     if hasattr(request.module, 'extra_configuration_before_yield'):
