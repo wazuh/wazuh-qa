@@ -7,6 +7,7 @@ import shutil
 import pytest
 
 from wazuh_testing.tools import control_service
+from wazuh_testing.tools import SocketMonitor, SocketController
 
 
 @pytest.fixture(scope='module')

@@ -14,9 +14,9 @@ import time
 import xml.etree.ElementTree as ET
 from copy import deepcopy
 from datetime import datetime, timedelta
+from struct import pack, unpack
 from subprocess import DEVNULL, check_call, check_output
 from typing import Any, List, Set
-from struct import pack, unpack
 
 import psutil
 import yaml
@@ -44,11 +44,16 @@ else:
 if sys.platform == 'darwin' or sys.platform == 'win32' or sys.platform == 'sunos5':
     WAZUH_SERVICE = 'wazuh.agent'
 else:
-    status = subprocess.run(['service', 'wazuh-manager', 'status'])
-    WAZUH_SERVICE = 'wazuh-manager' if status.returncode == 0 else 'wazuh-agent'
+    with open(os.path.join(WAZUH_PATH, 'etc/ossec-init.conf'), 'r') as f:
+        type_ = None
+        for line in f.readlines():
+            if 'TYPE' in line:
+                type_ = line.split('"')[1]
+        WAZUH_SERVICE = 'wazuh-manager' if type_ == 'server' else 'wazuh-agent'
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
@@ -547,13 +552,19 @@ def restart_wazuh_with_new_conf(new_conf, daemon='ossec-syscheckd'):
     control_service('restart', daemon=daemon)
 
 
-def control_service(action, daemon=None):
-    """ Performs the stop, start and restart operation with Wazuh.
+def control_service(action, daemon=None, debug_mode=False):
+    """Performs the stop, start and restart operation with Wazuh.
     It takes care of the current OS to interact with the service and the type of installation (agent or manager)
 
-    :param action: str Must be one of 'stop', 'start' or 'restart'
-    :param daemon: str Name of the daemon to be controlled. None to control the whole Wazuh service
-    :return: None
+    Parameters
+    ----------
+    action : str
+        Must be one of 'stop', 'start' or 'restart'
+    daemon : str
+        Name of the daemon to be controlled. None to control the whole Wazuh service
+    debug_mode : bool
+        Run the specified daemon in debug mode
+
     """
     valid_actions = ('start', 'stop', 'restart')
     if action not in valid_actions:
@@ -579,11 +590,10 @@ def control_service(action, daemon=None):
                 control_service('start', daemon=daemon)
             elif action == 'stop':
                 for proc in psutil.process_iter(attrs=['name']):
-                    if proc.name() == daemon:
-                        proc.kill()
+                    proc.name() == daemon and proc.kill()
             else:
                 daemon_path = os.path.join(WAZUH_PATH, 'bin')
-                check_call([f'{daemon_path}/{daemon}'])
+                check_call([f'{daemon_path}/{daemon}', '' if not debug_mode else '-d'])
             result = 0
 
     if result != 0:
@@ -846,3 +856,51 @@ class SocketMonitor:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
+
+
+def delete_sockets(path=None):
+    """Delete a Wazuh socket file or all of them if None is specified
+
+    Parameters
+    ----------
+    path : str
+        Socket path relative to WAZUH_PATH
+    """
+    try:
+        if path is None:
+            path = os.path.join(WAZUH_PATH, 'queue', 'ossec')
+            for file in os.listdir(path):
+                os.remove(os.path.join(path, file))
+            os.remove(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
+        else:
+            os.remove(os.path.join(WAZUH_PATH, path))
+    except FileNotFoundError:
+        pass
+
+
+def check_daemon_status(daemon=None, running=True, timeout=10):
+    """Check Wazuh daemon status.
+
+    Parameters
+    ----------
+    daemon : str
+        Wazuh daemon to check
+    running : bool
+        True if the daemon is expected to be running False if it is expected to be stopped
+    timeout : int
+        Timeout value for the check
+
+    Raises
+    ------
+    TimeoutError
+        If the daemon status is wrong after timeout seconds
+    """
+    for _ in range(3):
+        daemon_status = subprocess.run(['service', 'wazuh-manager', 'status'],
+                                       stdout=subprocess.PIPE).stdout.decode()
+        if f"{daemon if daemon is not None else ''} {'not' if running is True else 'is'} running" not in daemon_status:
+            break
+        time.sleep(timeout/3)
+    else:
+        raise TimeoutError(f"{'wazuh-service' if daemon is None else daemon} "
+                           f"{'is not' if running is True else 'is'} running")
