@@ -17,7 +17,7 @@
   type: "Incorrect event type in an event message"
 -
   input: "5:[001] (vm-test-agent) 192.168.57.2->syscheck:{{\"component\":\"syscheck\",\"type\":\"integrity_check_global\",\"data\":{\"id\": 1575421330,\"begin\":\"/home/test/file\",\"end\":\"/home/test/file2\",\"checksum\":\"6bdaf5656029544cf0d08e7c4f4feceb0c45853c\"}}"
-  output: "dbsync: Cannot parse JSON: %s\", lf->log"
+  output: "dbsync: Cannot parse JSON: {{\"component\":\"syscheck\",\"type\":\"integrity_check_global\",\"data\":{\"id\": 1575421330,\"begin\":\"/home/test/file\",\"end\":\"/home/test/file2\",\"checksum\":\"6bdaf5656029544cf0d08e7c4f4feceb0c45853c\"}}"
   type: "The JSON in a DB sync message cannot be parsed"
 -
   input: "5:[001] (vm-test-agent) 192.168.57.2->syscheck:{\"type\":\"integrity_check_global\",\"data\":{\"id\": 1575421330,\"begin\":\"/home/test/file\",\"end\":\"/home/test/file2\",\"checksum\":\"6bdaf5656029544cf0d08e7c4f4feceb0c45853c\"}}"

@@ -78,6 +78,16 @@ def pytest_configure(config):
 @pytest.fixture(scope='module')
 def configure_environment_standalone_daemons(request):
     def clear_logs():
+        """Clear all Wazuh logs"""
+        logs_path = '/var/ossec/logs'
+        for root, dirs, files in os.walk(logs_path):
+            for file in files:
+                try:
+                    open(os.path.join(root, file), 'w').close()
+                except FileNotFoundError:
+                    pass
+
+    def remove_logs():
         """Remove all Wazuh logs"""
         logs_path = '/var/ossec/logs'
         for root, dirs, files in os.walk(logs_path):
@@ -92,13 +102,13 @@ def configure_environment_standalone_daemons(request):
     # Remove all remaining Wazuh sockets
     delete_sockets()
 
-    # Clear all Wazuh logs
-    clear_logs()
-
     # Start selected daemons and ensure they are running
     for daemon in getattr(request.module, 'used_daemons'):
         control_service('start', daemon=daemon)
         check_daemon_status(running=True, daemon=daemon)
+
+    # Clear all Wazuh logs
+    clear_logs()
 
     # Call extra functions before yield
     if hasattr(request.module, 'extra_configuration_before_yield'):
@@ -118,8 +128,8 @@ def configure_environment_standalone_daemons(request):
     # Remove all remaining Wazuh sockets
     delete_sockets()
 
-    # Clear all Wazuh logs
-    clear_logs()
+    # Remove all Wazuh logs
+    remove_logs()
 
 
 @pytest.fixture(scope='module')

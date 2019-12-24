@@ -29,12 +29,8 @@ def callback_fim_event_alert(line):
         raise e
 
 
-def callback_wdb(line):
-    return line
-
-
 def callback_fim_error(line):
-    match = re.match(r'(dbsync:|No|Invalid) (.*)', line)
+    match = re.match(r'.* ossec-analysisd: ERROR: ((?:dbsync:|No|Invalid) .*)', line)
     if match:
         return match.group(1)
     return None
