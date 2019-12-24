@@ -19,6 +19,5 @@ setup(name='wazuh_testing',
                                       'data/mitre_event.json']
                     },
       include_package_data=True,
-      install_requires=['jq==0.1.6'],
       zip_safe=False
       )

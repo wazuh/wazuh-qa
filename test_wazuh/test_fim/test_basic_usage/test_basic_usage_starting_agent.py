@@ -10,6 +10,10 @@ from wazuh_testing.fim import DEFAULT_TIMEOUT, LOG_FILE_PATH, REGULAR, callback_
     create_file, generate_params, modify_file_content, check_time_travel, delete_file
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
+# Marks
+
+pytestmark = pytest.mark.tier(level=0)
+
 # Variables
 
 test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')]

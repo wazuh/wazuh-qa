@@ -11,14 +11,16 @@ from datetime import timedelta
 import distro
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_integrity_event,
-                               regular_file_cud, detect_initial_scan, callback_detect_event, generate_params)
+from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, detect_initial_scan, callback_detect_event,
+                               generate_params, callback_detect_integrity_state)
+
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations, TimeMachine,
                                  set_section_wazuh_conf, restart_wazuh_with_new_conf, PREFIX)
 
-# All tests in this module apply to linux only
-pytestmark = pytest.mark.linux
+# Marks
+
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
 # variables
 
@@ -146,7 +148,7 @@ def test_skip(directory, tags_to_apply,
 
         else:
             with pytest.raises(TimeoutError):
-                wazuh_log_monitor.start(timeout=3, callback=callback_detect_integrity_event)
+                wazuh_log_monitor.start(timeout=3, callback=callback_detect_integrity_state)
 
     elif tags_to_apply == {'skip_sys'}:
         if trigger:
@@ -170,7 +172,7 @@ def test_skip(directory, tags_to_apply,
             subprocess.Popen(["modprobe", "video"])
         else:
             with pytest.raises(TimeoutError):
-                wazuh_log_monitor.start(timeout=3, callback=callback_detect_integrity_event)
+                wazuh_log_monitor.start(timeout=3, callback=callback_detect_integrity_state)
     else:
         regular_file_cud(directory, wazuh_log_monitor,
                          time_travel=True,

@@ -3,18 +3,21 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import subprocess
 
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH,
+
+from test_fim.test_follow_symbolic_link.common import modify_symlink
+from wazuh_testing.fim import (DEFAULT_TIMEOUT, LOG_FILE_PATH,
                                generate_params, create_file, REGULAR, SYMLINK, callback_detect_event,
                                modify_file, delete_file, check_time_travel)
 from wazuh_testing.tools import (FileMonitor, check_apply_test,
                                  load_wazuh_configurations, PREFIX)
 
-# All tests in this module apply to linux and macos only
-pytestmark = [pytest.mark.linux, pytest.mark.darwin]
+
+# Marks
+
+pytestmark = [pytest.mark.linux, pytest.mark.sunos5, pytest.mark.darwin, pytest.mark.tier(level=1)]
 
 # variables
 
@@ -56,12 +59,6 @@ def clean_directories(request):
                 print(e)
 
 
-# functions
-
-def modify_symlink(target, path):
-    subprocess.call(['ln', '-sfn', target, path])
-
-
 # tests
 
 @pytest.mark.parametrize('monitored_dir, non_monitored_dir1, non_monitored_dir2, sym_target, tags_to_apply', [
@@ -101,18 +98,18 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
 
     # Create the syslink and expect its event, since it's withing the monitored directory
     check_time_travel(scheduled)
-    wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+    wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event)
 
     # Modify the target file and don't expect any event
     modify_file(non_monitored_dir1, name1, new_content='Modify sample')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+        wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
 
     # Modify the target of the symlink and expect the modify event
     modify_symlink(target=b_path, path=sl_path)
     check_time_travel(scheduled)
-    result = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
+    result = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
     assert 'modified' in result['data']['type'], f"No 'modified' event when modifying symlink"
 
     # Remove and restore the target file. Don't expect any events

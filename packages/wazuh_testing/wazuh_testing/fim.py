@@ -10,6 +10,7 @@ import shutil
 import socket
 import sys
 import time
+from datetime import datetime
 import subprocess
 from collections import Counter
 from copy import deepcopy
@@ -25,7 +26,7 @@ if sys.platform == 'win32':
     import win32con
     import win32api
     import winreg
-else:
+elif sys.platform == 'linux2' or sys.platform == 'linux':
     from jq import jq
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -36,18 +37,18 @@ if sys.platform == 'win32':
     DEFAULT_TIMEOUT = 10
     _REQUIRED_AUDIT = {"path", "process_id", "process_name", "user_id", "user_name"}
 
-elif sys.platform == 'linux2' or sys.platform == 'linux':
-    WAZUH_PATH = os.path.join('/', 'var', 'ossec')
-    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
-    DEFAULT_TIMEOUT = 5
-    _REQUIRED_AUDIT = {'user_id', 'user_name', 'group_id', 'group_name', 'process_name', 'path', 'audit_uid',
-                       'audit_name', 'effective_uid', 'effective_name', 'ppid', 'process_id'
-                       }
-
 elif sys.platform == 'darwin':
     WAZUH_PATH = os.path.join('/', 'Library', 'Ossec')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     DEFAULT_TIMEOUT = 5
+
+else:
+    WAZUH_PATH = os.path.join('/', 'var', 'ossec')
+    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+    DEFAULT_TIMEOUT = 5 if sys.platform == "linux" else 10
+    _REQUIRED_AUDIT = {'user_id', 'user_name', 'group_id', 'group_name', 'process_name', 'path', 'audit_uid',
+                       'audit_name', 'effective_uid', 'effective_name', 'ppid', 'process_id'
+                       }
 
 FIFO = 'fifo'
 SYMLINK = 'sym_link'
@@ -140,6 +141,13 @@ def validate_event(event, checks=None):
     if event['data']['type'] == 'modified':
         assert 'old_attributes' in event['data'] and 'changed_attributes' in event['data']
 
+        old_attributes = event['data']['old_attributes'].keys() - {'type', 'checksum'}
+        old_intersection = old_attributes ^ required_attributes
+        old_intersection_debug = "Event attributes are: " + str(old_attributes)
+        old_intersection_debug += "\nRequired Attributes are: " + str(required_attributes)
+        old_intersection_debug += "\nIntersection is: " + str(old_intersection)
+        assert (old_intersection == set()), f'Old_attributes and required_attributes are not the same. ' + old_intersection_debug
+
 
 def is_fim_scan_ended():
     message = 'File integrity monitoring scan ended.'
@@ -176,7 +184,7 @@ def create_file(type_, path, name, **kwargs):
     getattr(sys.modules[__name__], f'_create_{type_}')(path, name, **kwargs)
 
 
-def create_registry(key, subkey, arch)
+def create_registry(key, subkey, arch):
     """ Creates a registry given the key and the subkey. The registry is opened if it already exists
 
     :param key: The key of the registry
@@ -292,7 +300,7 @@ def delete_file(path, name):
         os.remove(regular_path)
 
 
-def delete_registry(key, subkey)
+def delete_registry(key, subkey):
     """ Deletes a registry
 
     :param key: The key of the registry
@@ -306,7 +314,7 @@ def delete_registry(key, subkey)
     key = winreg.CreatDeleteKeyEx(key, subkey)
 
 
-def modify_registry(key, subkey, value)
+def modify_registry(key, subkey, value):
     """ Modifies the content of REG_SZ in a registry
 
     :param key: The key of the registry
@@ -523,7 +531,7 @@ def callback_detect_end_scan(line):
 
 
 def callback_detect_event(line):
-    msg = r'.*Sending message to server: (.+)' if sys.platform == 'win32' else r'.*Sending event: (.+)$'
+    msg = r'.*Sending FIM event: (.+)$'
     match = re.match(msg, line)
 
     try:
@@ -538,8 +546,15 @@ def callback_detect_event(line):
 def callback_detect_integrity_event(line):
     match = re.match(r'.*Sending integrity control message: (.+)$', line)
     if match:
-        if json.loads(match.group(1))['type'] == 'state':
-            return json.loads(match.group(1))
+        return json.loads(match.group(1))
+    return None
+
+
+def callback_detect_integrity_state(line):
+    event = callback_detect_integrity_event(line)
+    if event:
+        if event['type'] == 'state':
+            return event
     return None
 
 
@@ -550,7 +565,7 @@ def callback_detect_synchronization(line):
 
 
 def callback_ignore(line):
-    match = re.match(r".*Ignoring '.*?' '(.*?)' due to sregex '.*?'", line)
+    match = re.match(r".*Ignoring '.*?' '(.*?)' due to( sregex)? '.*?'", line)
     if match:
         return match.group(1)
     return None
@@ -569,6 +584,13 @@ def callback_audit_health_check(line):
     return None
 
 
+def callback_audit_cannot_start(line):
+    match = re.match(r'.*Who-data engine could not start. Switching who-data to real-time.', line)
+    if match:
+        return True
+    return None
+
+
 def callback_audit_added_rule(line):
     match = re.match(r'.*Added audit rule for monitoring directory: \'(.+)\'', line)
     if match:
@@ -582,8 +604,29 @@ def callback_audit_rules_manipulation(line):
     return None
 
 
+def callback_audit_removed_rule(line):
+    match = re.match(r'.* Audit rule removed.', line)
+    if match:
+        return True
+    return None
+
+
+def callback_audit_deleting_rule(line):
+    match = re.match(r'.*Deleting Audit rules...', line)
+    if match:
+        return True
+    return None
+
+
 def callback_audit_connection(line):
     if '(6030): Audit: connected' in line:
+        return True
+    return None
+
+
+def callback_audit_connection_close(line):
+    match = re.match(r'.*Audit: connection closed.', line)
+    if match:
         return True
     return None
 
@@ -635,6 +678,14 @@ def callback_symlink_scan_ended(line):
         return None
 
 
+def callback_syscheck_message(line):
+    if callback_detect_integrity_event(line) or callback_detect_event(line):
+        match = re.match(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*({.*?})$", line)
+        if match:
+            return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S'), json.dumps(match.group(2))
+        return None
+
+
 def check_time_travel(time_travel):
     """Changes date and time of the system.
 
@@ -648,6 +699,24 @@ def callback_configuration_warning(line):
     match = re.match(r'.*WARNING: \(\d+\): Invalid value for element', line)
     if match:
         return True
+    return None
+
+
+def callback_entries_path_count(line):
+    match = re.match(r'.*Fim inode entries: (\d+), path count: (\d+)', line)
+
+    if match:
+        return match.group(1), match.group(2)
+
+
+def callback_fim_event_message(line):
+    match = re.match(r'^agent (\d{3,}) syscheck (\w+) (.+)$', line)
+    if match:
+        try:
+            body = json.loads(match.group(3))
+        except json.decoder.JSONDecodeError:
+            body = match.group(3)
+        return match.group(1), match.group(2), body
     return None
 
 
@@ -718,10 +787,9 @@ class EventChecker:
 
         def filter_events(events, mask):
             """Returns a list of elements matching a specified mask in the events list using jq module."""
-            if sys.platform == "win32":
-                jq_cmd = 'jq -r "' + mask + '"'
-                stdout = subprocess.check_output(jq_cmd, input=json.dumps(events).encode())
-                return stdout.decode("utf8").strip().split("\r\n")
+            if sys.platform in ("win32", 'sunos5'):
+                stdout = subprocess.check_output(["jq", "-r", mask], input=json.dumps(events).encode())
+                return stdout.decode("utf8").strip().split(os.linesep)
             else:
                 return jq(mask).transform(events, multiple_output=True)
 
@@ -924,15 +992,10 @@ def generate_params(extra_params: dict = None, extra_metadata: dict = None, *, m
 
     modes = modes if modes is not None else ['scheduled', 'realtime', 'whodata']
     for mode in modes:
-        if mode == 'scheduled':
-            fim_param.append({'FIM_MODE': ''})
-            fim_metadata.append({'fim_mode': 'scheduled'})
-        elif mode == 'realtime' and sys.platform != 'darwin':
-            fim_param.append({'FIM_MODE': {'realtime': 'yes'}})
-            fim_metadata.append({'fim_mode': 'realtime'})
-        elif mode == 'whodata' and sys.platform != 'darwin':
-            fim_param.append({'FIM_MODE': {'whodata': 'yes'}})
-            fim_metadata.append({'fim_mode': 'whodata'})
+        param, metadata = get_fim_mode_param(mode)
+        if param:
+            fim_param.append(param)
+            fim_metadata.append(metadata)
 
     params = []
     metadata = []
@@ -948,3 +1011,35 @@ def generate_params(extra_params: dict = None, extra_metadata: dict = None, *, m
         metadata.append(m_aux)
 
     return params, metadata
+
+
+def get_fim_mode_param(mode, key='FIM_MODE'):
+    """Gets the parameters for the FIM mode.
+
+    This is useful to generate the directories tag with several fim modes. It also
+    takes into account the current platform so realtime and whodata does not apply
+    to darwin.
+
+    Parameters
+    ----------
+    mode : string
+        Must be one of the following 'scheduled', 'realtime' or 'whodata'
+    key : string, optional
+        Name of the placeholder expected in the target configuration. Default 'FIM_MODE'
+
+    Returns
+    -------
+    params : dict
+        The key is `key` and the value is the string to be replaced in the target configuration
+    metadata : dict
+        The key is `key` in lowercase and the value is always `mode`
+    """
+    metadata = {key.lower(): mode}
+    if mode == 'scheduled':
+        return {key: ''}, metadata
+    elif mode == 'realtime' and sys.platform != 'darwin':
+        return {key: {'realtime': 'yes'}}, metadata
+    elif mode == 'whodata' and sys.platform != 'darwin':
+        return {key: {'whodata': 'yes'}}, metadata
+    else:
+        return None, None

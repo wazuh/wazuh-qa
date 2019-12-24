@@ -9,6 +9,10 @@ import pytest
 from wazuh_testing.fim import (CHECK_ALL, DEFAULT_TIMEOUT, LOG_FILE_PATH, regular_file_cud, WAZUH_PATH, generate_params)
 from wazuh_testing.tools import (PREFIX, FileMonitor, check_apply_test, load_wazuh_configurations)
 
+# Marks
+
+pytestmark = pytest.mark.tier(level=1)
+
 # variables
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
@@ -45,6 +49,7 @@ def get_configuration(request):
 
 
 # tests
+
 @pytest.mark.parametrize('tags_to_apply', [
     {'ossec_conf_report'}
 ])

@@ -10,6 +10,10 @@ from wazuh_testing.fim import (DEFAULT_TIMEOUT, LOG_FILE_PATH, callback_audit_ev
                                generate_params)
 from wazuh_testing.tools import FileMonitor, load_wazuh_configurations
 
+# Marks
+
+pytestmark = pytest.mark.tier(level=2)
+
 # Variables
 
 prefix = os.path.join('C:', os.sep) if sys.platform == 'win32' else os.sep
@@ -49,8 +53,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 # Functions
 
-def recursion_test(dirname, subdirname, recursion_level, timeout=1, edge_limit=2, ignored_levels=2,
-                   is_scheduled=False):
+def recursion_test(dirname, subdirname, recursion_level, timeout=1, edge_limit=2, ignored_levels=1, is_scheduled=False):
     """
     Checks that events are generated in the first and last `edge_limit` directory levels in the hierarchy
     dirname/subdirname1/.../subdirname{recursion_level}. It also checks that no events are generated for
@@ -122,9 +125,10 @@ def recursion_test(dirname, subdirname, recursion_level, timeout=1, edge_limit=2
             return
         raise
 
-    except OSError as e:
+    except OSError as ex:
         MAX_PATH_LENGTH_MACOS_ERROR = 63
-        if e.errno == MAX_PATH_LENGTH_MACOS_ERROR:
+        MAX_PATH_LENGTH_SOLARIS_ERROR = 78
+        if ex.errno in (MAX_PATH_LENGTH_SOLARIS_ERROR, MAX_PATH_LENGTH_MACOS_ERROR):
             return
         raise
 

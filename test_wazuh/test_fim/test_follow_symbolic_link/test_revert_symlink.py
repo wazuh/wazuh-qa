@@ -13,8 +13,11 @@ from wazuh_testing.fim import (generate_params, callback_detect_event,
 from wazuh_testing.tools import (check_apply_test,
                                  load_wazuh_configurations, FileMonitor)
 
-# All tests in this module apply to linux and macos only
-pytestmark = [pytest.mark.linux, pytest.mark.darwin]
+
+# Marks
+
+pytestmark = [pytest.mark.linux, pytest.mark.sunos5, pytest.mark.darwin, pytest.mark.tier(level=1)]
+
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
