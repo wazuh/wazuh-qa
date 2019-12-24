@@ -984,3 +984,5 @@ def get_fim_mode_param(mode, key='FIM_MODE'):
         return {key: {'realtime': 'yes'}}, metadata
     elif mode == 'whodata' and sys.platform != 'darwin':
         return {key: {'whodata': 'yes'}}, metadata
+    else:
+        return None, None
