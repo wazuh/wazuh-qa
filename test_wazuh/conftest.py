@@ -77,13 +77,14 @@ def pytest_configure(config):
 
 @pytest.fixture(scope='module')
 def configure_environment_standalone_daemons(request):
-    def clear_logs():
+    """Configure a custom environment for testing with specific Wazuh daemons only. Stopping wazuh-service is needed."""
+
+    def remove_logs():
         """Remove all Wazuh logs"""
         for root, dirs, files in os.walk(WAZUH_LOGS_PATH):
             for file in files:
                 os.remove(os.path.join(root, file))
 
-    """Configure a custom environment for testing with specific Wazuh daemons only. Stopping wazuh-service is needed."""
     # Stop wazuh-service and ensure all daemons are stopped
     control_service('stop')
     check_daemon_status(running=False)
@@ -91,13 +92,13 @@ def configure_environment_standalone_daemons(request):
     # Remove all remaining Wazuh sockets
     delete_sockets()
 
-    # Clear all Wazuh logs
-    clear_logs()
-
-    # Start selected daemons and ensure they are running
+    # Start selected daemons in debug mode and ensure they are running
     for daemon in getattr(request.module, 'used_daemons'):
-        control_service('start', daemon=daemon)
+        control_service('start', daemon=daemon, debug_mode=True)
         check_daemon_status(running=True, daemon=daemon)
+
+    # Clear all Wazuh logs
+    truncate_file(LOG_FILE_PATH)
 
     # Call extra functions before yield
     if hasattr(request.module, 'extra_configuration_before_yield'):
@@ -117,8 +118,8 @@ def configure_environment_standalone_daemons(request):
     # Remove all remaining Wazuh sockets
     delete_sockets()
 
-    # Clear all Wazuh logs
-    clear_logs()
+    # Remove all Wazuh logs
+    remove_logs()
 
 
 @pytest.fixture(scope='module')
