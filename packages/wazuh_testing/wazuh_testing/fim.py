@@ -876,69 +876,94 @@ def detect_initial_scan(file_monitor):
     time.sleep(11)
 
 
-def generate_params(extra_params: dict = None, extra_metadata: dict = None, *, modes: list = None):
-    """ Swings between FIM_MODE values to expand params and metadata with optional extra values.
+def generate_params(extra_params: dict = None, *, apply_to_all: dict = None, modes: list = None):
+    """
+    Expand params and metadata with optional FIM modes.
 
-        extra_params = {'WILDCARD': {'attribute': ['list', 'of', 'values']}} - Max. 3 elements in the list of values
-                            or
-                       {'WILDCARD': {'attribute': 'value'}} - It will have the same value for scheduled, realtime and whodata
-                            or
-                       {'WILDCARD': 'value'} - Valid when param is not an attribute. (ex: 'MODULE_NAME': __name__)
+    extra_params = {'WILDCARD': {'attribute': ['list', 'of', 'values']}} - Max. 3 elements in the list of values
+                        or
+                   {'WILDCARD': {'attribute': 'value'}} - It will have the same value for scheduled, realtime and whodata
+                        or
+                   {'WILDCARD': 'value'} - Valid when param is not an attribute. (ex: 'MODULE_NAME': __name__)
+                        or
+                   {'WILDCARD': ['list', 'of', 'values']} - Same as above with multiple values. The length of the list
+                                                            must be the same as the length of the mode list.
 
-        extra_metadata = {'metadata': ['list', 'of', 'values']} - Same as params
-                            or
-                         {'metadata': 'value'} - Same as params
+    apply_to_all = Same structure as above. The difference is, these params will be applied for every existing
+                    configuration. They are applied after the `extra_params`.
 
-        The length of extra_params and extra_metadata must be the same
+    Examples:
 
-        Examples:
-        p, m = set_configuration( extra_params={'REPORT_CHANGES': {'report_changes': 'value'},
-                                               'MODULE_NAME': 'name''},
-                                  extra_metadata={'report_changes': ['one', 'two'],
-                                                 'module_name': 'name'},
-                                  modes=['realtime', 'whodata'] )
-        Returns:
-        p = [{'FIM_MODE': {'realtime': 'yes'}, 'REPORT_CHANGES': {'report_changes': 'value'},
-                'MODULE_NAME': 'name''},
-             {'FIM_MODE': {'whodata': 'yes'}, 'REPORT_CHANGES': {'report_changes': 'value'},
-                'MODULE_NAME': 'name''}
-            ]
+    1/
 
-        m = [{'fim_mode': 'realtime', 'report_changes': 'one', 'module_name': 'name'},
-             {'fim_mode': 'whodata', 'report_changes': 'two', 'module_name': 'name'}
-            ]
+    p, m = generate_params( extra_params={'REPORT_CHANGES': {'report_changes': 'value'},
+                                           'MODULE_NAME': 'name''},
+                              modes=['realtime', 'whodata'] )
 
-    :param extra_params: params to add
-    :param extra_metadata: metadata to add
-    :param modes: monitoring modes to add. All by default
-    :return: Tuple(params, metadata)
+    p = [{'FIM_MODE': {'realtime': 'yes'}, 'REPORT_CHANGES': {'report_changes': 'value'},
+            'MODULE_NAME': 'name''},
+         {'FIM_MODE': {'whodata': 'yes'}, 'REPORT_CHANGES': {'report_changes': 'value'},
+            'MODULE_NAME': 'name''}
+        ]
+
+    m = [{'fim_mode': 'realtime', 'report_changes': 'one', 'module_name': 'name'},
+         {'fim_mode': 'whodata', 'report_changes': 'two', 'module_name': 'name'}
+        ]
+
+    2/
+
+    p, m = generate_params( extra_params={'MODULE_NAME': 'name'}, apply_to_all={'FREQUENCY': {'frequency': [1, 2]}},
+                            modes=['scheduled', 'realtime']}
+
+    p = [{'FIM_MODE': '', 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 1}},
+        {'FIM_MODE': {'realtime': 'yes'}, 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 1}},
+        {'FIM_MODE': '', 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 2}},
+        {'FIM_MODE': {'realtime': 'yes'}, 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 2}}]
+
+    m = [{'fim_mode': 'scheduled', 'module_name': 'name', 'frequency': {'frequency': 1}},
+        {'fim_mode': 'realtime', 'module_name': 'name', 'frequency': {'frequency': 1}},
+        {'fim_mode': 'scheduled', 'module_name': 'name', 'frequency': {'frequency': 2}},
+        {'fim_mode': 'realtime', 'module_name': 'name', 'frequency': {'frequency': 2}}]
+
+    Parameters
+    ----------
+    extra_params : dict, optional
+    apply_to_all : dict, optional
+    modes : list, optional
+
+    Returns
+    -------
+    tuple (list, list)
+        Tuple with the list of parameters and the list of metadata
     """
     def transform_param(mutable_object: dict):
         for k, v in mutable_object.items():
             if isinstance(v, dict):
                 for v_key, v_value in v.items():
-                    mutable_object[k][v_key] = v_value if isinstance(v_value, list) else [v_value, v_value, v_value]
-
-    def transform_metadata(mutable_object: dict):
-        for k, v in mutable_object.items():
-            mutable_object[k] = v if isinstance(v, list) else [v, v, v]
-
-    add = False
-    if extra_params is not None and extra_metadata is not None:
-        assert len(extra_params) == len(extra_metadata), f'params and metadata length not equal'
-        transform_param(extra_params)
-        transform_metadata(extra_metadata)
-        add = True
+                    mutable_object[k][v_key] = v_value if isinstance(v_value, list) else [v_value]*len(modes)
+            elif not isinstance(v, list):
+                mutable_object[k] = [v]*len(modes)
 
     fim_param = []
     fim_metadata = []
 
-    modes = modes if modes is not None else ['scheduled', 'realtime', 'whodata']
-    for mode in modes:
+    modes = None if modes == [] else ['scheduled', 'realtime', 'whodata'] if modes is None else modes
+    for mode in modes or []:
         param, metadata = get_fim_mode_param(mode)
         if param:
             fim_param.append(param)
             fim_metadata.append(metadata)
+
+    add = False
+    if extra_params is not None:
+        transform_param(extra_params)
+        for _, value in extra_params.items():
+            if isinstance(value, dict):
+                assert len(next(iter(value.values()))) == len(modes), 'Length not equal between extra_params values ' \
+                                                                      'and modes'
+            else:
+                assert len(value) == len(modes), 'Length not equal between extra_params values and modes'
+        add = True
 
     params = []
     metadata = []
@@ -948,10 +973,40 @@ def generate_params(extra_params: dict = None, extra_metadata: dict = None, *, m
         m_aux: dict = deepcopy(fim_mode_meta)
         if add:
             for key, value in extra_params.items():
-                p_aux[key] = {k: v[i] for k, v in value.items()} if isinstance(value, dict) else value
-            m_aux.update({key: value[i] for key, value in extra_metadata.items()})
+                p_aux[key] = {k: v[i] for k, v in value.items()} if isinstance(value, dict) else \
+                    value[i] if isinstance(value, list) else value
+                m_aux[key.lower()] = next(iter(value.values()))[i] if isinstance(value, dict) else \
+                    value[i] if isinstance(value, list) else value
         params.append(p_aux)
         metadata.append(m_aux)
+
+    if apply_to_all:
+        expanded_params = list()
+        expanded_metadata = list()
+        for wildcard, values in apply_to_all.items():
+            if isinstance(values, dict):
+                if isinstance(next(iter(values.values())), list):
+                    list_of_values = list()
+                    for v in next(iter(values.values())):
+                        list_of_values.append({next(iter(values)): v})
+                    values = list_of_values
+                else:
+                    values = [values]
+            elif not isinstance(values, list):
+                values = [values]
+            else:
+                pass
+
+            values = next(iter(values.values())) if isinstance(values, dict) else values
+            values = values if isinstance(values, list) else [values]
+            for value in values:
+                for p_dict, m_dict in zip(params, metadata):
+                    value = values if isinstance(values, dict) else value
+                    p_dict[wildcard] = value
+                    m_dict[wildcard.lower()] = value
+                    expanded_params.append(deepcopy(p_dict))
+                    expanded_metadata.append(deepcopy(m_dict))
+        return expanded_params, expanded_metadata
 
     return params, metadata
 
