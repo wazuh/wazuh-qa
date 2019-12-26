@@ -184,19 +184,20 @@ def create_file(type_, path, name, **kwargs):
     getattr(sys.modules[__name__], f'_create_{type_}')(path, name, **kwargs)
 
 
-def create_registry(key, subkey, arch):
-    """ Creates a registry given the key and the subkey. The registry is opened if it already exists
+def create_registry(key, subkey):
+    """Creates a registry
 
-    :param key: The key of the registry
-    :type key: HKEY_* constants
-    :param subkey: The subkey (name) of the registry
-    :type subkey: String
-    :return: None
+    Creates a registry given the key and the subkey. The registry is opened if it already exists
+
+    Parameters
+    ----------
+    key : HKEY_* constant
+        The key of the registry
+    subkey : string
+        The subkey (name) of the registry
+
     """
-    if sys.platform != 'win32':
-        return
-    access_ = arch | winreg.KEY_WRITE
-    key = winreg.CreateKeyEx(key, subkey, access=access_)
+    sys.platform == 'win32' and winreg.CreateKey(key, subkey)
 
 
 def _create_fifo(path, name):
@@ -301,33 +302,31 @@ def delete_file(path, name):
 
 
 def delete_registry(key, subkey):
-    """ Deletes a registry
+    """Deletes a regitry
 
-    :param key: The key of the registry
-    :type key: HKEY_* constants
-    :param subkey: The subkey (name) of the registry
-    :type subkey: String
-    :return: None
+    Parameters
+    ----------
+    key : HKEY_* constant
+        The key of the registry
+    subkey : string
+        The subkey (name) of the registry
     """
-    if sys.platform != 'win32':
-        return
-    key = winreg.CreatDeleteKeyEx(key, subkey)
+    sys.platform == 'win32' and winreg.DeleteKey(key, subkey)
 
 
 def modify_registry(key, subkey, value):
-    """ Modifies the content of REG_SZ in a registry
+    """Modifies the content of REG_SZ in a registry
 
-    :param key: The key of the registry
-    :type key: HKEY_* constants
-    :param subkey: The subkey (name) of the registry
-    :type subkey: String
-    :param value: The value to be set
-    :type value: String
-    :return: None
+    Parameters
+    ----------
+    key : HKEY_* constant
+        The key of the registry
+    subkey : string
+        The subkey (name) of the registry
+    value : string
+        The value to be set
     """
-    if sys.platform != 'win32':
-        return
-    key = winreg.SetValue(key, subkey, value)
+    sys.platform == 'win32' and winreg.SetValue(key, subkey, winreg.REG_SZ, value)
 
 
 def modify_file_content(path, name, new_content=None, is_binary=False):

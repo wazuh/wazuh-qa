@@ -1,0 +1,44 @@
+---
+# conf 1
+- tags:
+  - ossec_conf
+  apply_to_modules:
+  - test_windows_registry
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - frequency:
+      value: '2'
+  - windows_registry:
+      value: 'HKEY_LOCAL_MACHINE\SOFTWARE\\Classes\\testkey'
+# conf 2
+- tags:
+  - ossec_conf_arch64
+  apply_to_modules:
+  - test_windows_registry
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - frequency:
+      value: '2'
+  - windows_registry:
+      value: 'HKEY_LOCAL_MACHINE\SOFTWARE\\Classes\\testkey'
+      attributes:
+        - arch: '64bit'
+# conf 3
+- tags:
+  - ossec_conf_tag
+  apply_to_modules:
+  - test_windows_registry
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - frequency:
+      value: '2'
+  - windows_registry:
+      value: 'HKEY_LOCAL_MACHINE\SOFTWARE\\Classes\\testkey'
+      attributes:
+        - tags: 'test_tag'
