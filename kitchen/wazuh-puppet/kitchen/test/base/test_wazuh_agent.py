@@ -9,7 +9,7 @@ test_host = testinfra.get_host('paramiko://{KITCHEN_USERNAME}@{KITCHEN_HOSTNAME}
 @pytest.mark.skipif('manager' in os.environ.get('KITCHEN_INSTANCE'), reason='Skip on wazuh manager instances')
 def test_wazuh_agent_package(host):
     name = "wazuh-agent"
-    version = "3.10.2"
+    version = "3.11.0"
     pkg = host.package(name)
     assert pkg.is_installed
     assert pkg.version.startswith(version)
