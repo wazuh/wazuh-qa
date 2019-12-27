@@ -26,19 +26,11 @@ test_directories = [testdir1, unmonitored_dir]
 
 # configurations
 
-p, m = generate_params()
-
-params, metadata = list(), list()
-for check_inode in [{'check_inode': 'yes'}, {'check_inode': 'no'}]:
-    for p_dict, m_dict in zip(p, m):
-        p_dict['INODE'] = check_inode
-        m_dict['inode'] = check_inode
-        params.append(deepcopy(p_dict))
-        metadata.append(deepcopy(m_dict))
+p, m = generate_params(apply_to_all=({'INODE': {'check_inode': inode}} for inode in ['yes', 'no']))
 
 configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=params,
-                                           metadata=metadata
+                                           params=p,
+                                           metadata=m
                                            )
 
 
