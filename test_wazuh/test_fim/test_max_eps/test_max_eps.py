@@ -4,7 +4,6 @@
 
 import os
 from collections import Counter
-from copy import deepcopy
 
 import pytest
 
@@ -27,21 +26,12 @@ testdir1 = test_directories[0]
 
 # configurations
 conf_params = {'TEST_DIRECTORIES': directory_str,
-               'MODULE_NAME': __name__
-               }
-conf_metadata = {'test_directories': directory_str,
-                 'module_name': __name__
-                 }
-p, m = generate_params(extra_params=conf_params, extra_metadata=conf_metadata)
-params, metadata = list(), list()
+               'MODULE_NAME': __name__}
+
 eps_values = ['10', '50', '100', '200', '500']
-for max_eps in eps_values:
-    for p_dict, m_dict in zip(p, m):
-        p_dict['MAX_EPS'] = max_eps
-        m_dict['max_eps'] = max_eps
-        params.append(deepcopy(p_dict))
-        metadata.append(deepcopy(m_dict))
-configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
+
+p, m = generate_params(extra_params=conf_params, apply_to_all=({'MAX_EPS': eps_value} for eps_value in eps_values))
+configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
 # fixtures
