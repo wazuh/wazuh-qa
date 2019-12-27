@@ -37,8 +37,6 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 windows_audit_interval = 20
 conf_params, conf_metadata = generate_params(extra_params={'TEST_DIRECTORIES': directory_str,
                                                            'WINDOWS_AUDIT_INTERVAL': str(windows_audit_interval)},
-                                             extra_metadata={'test_directories': directory_str,
-                                                             'windows_audit_interval': str(windows_audit_interval)},
                                              modes=['whodata'])
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
