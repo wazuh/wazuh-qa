@@ -3,8 +3,6 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import sys
-from copy import deepcopy
 
 import pytest
 
@@ -27,17 +25,9 @@ test_directories = []
 
 priority_list = ['0', '4', '-5']
 
-p, m = generate_params(modes=monitoring_modes)
+p, m = generate_params(apply_to_all=({'PROCESS_PRIORITY': priority_value} for priority_value in priority_list), modes=monitoring_modes)
 
-params, metadata = list(), list()
-for pr in priority_list:
-    for p_dict, m_dict in zip(p, m):
-        p_dict['PROCESS_PRIORITY'] = pr
-        m_dict['process_priority'] = pr
-        params.append(deepcopy(p_dict))
-        metadata.append(deepcopy(m_dict))
-
-configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
 # fixtures
