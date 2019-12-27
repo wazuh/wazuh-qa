@@ -28,8 +28,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 # configurations
 
 prefilter = '/usr/sbin/prelink -y'
-conf_params, conf_metadata = generate_params(extra_params={'PREFILTER_CMD': prefilter},
-                                             extra_metadata={'prefilter_cmd': prefilter})
+conf_params, conf_metadata = generate_params(extra_params={'PREFILTER_CMD': prefilter})
 
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=conf_params,
