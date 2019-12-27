@@ -195,7 +195,6 @@ def create_registry(key, subkey):
         The key of the registry
     subkey : string
         The subkey (name) of the registry
-
     """
     sys.platform == 'win32' and winreg.CreateKey(key, subkey)
 

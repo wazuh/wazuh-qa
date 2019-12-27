@@ -8,12 +8,11 @@ import sys
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_registry, modify_registry, delete_registry, \
-    check_time_travel, EventChecker, DEFAULT_TIMEOUT
+    TimeMachine, timedelta, DEFAULT_TIMEOUT, callback_detect_event
 from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations
 
 if sys.platform == 'win32':
     import winreg
-
 
 # Marks
 
@@ -23,16 +22,32 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 test_directories = []
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 monitoring_modes = ['scheduled']
 
-sub_key = r'SOFTWARE\\Classes\\testkey'
+sub_key = os.path.join('SOFTWARE', 'Classes', 'testkey')
+registry = os.path.join('HKEY_LOCAL_MACHINE', sub_key)
+frequency = 4
 
 # Configurations
 
-conf_params, conf_metadata = generate_params(modes=monitoring_modes)
-configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
+conf_params = {'WINDOWS_REGISTRY': registry,
+               'FREQUENCY': frequency}
+conf_metadata = {'WINDOWS_REGISTRY'.lower(): registry,
+                 'FREQUENCY'.lower(): frequency}
+configurations_path = os.path.join(test_data_path, 'wazuh_conf_no_attr.yaml')
+p, m = generate_params(extra_params=conf_params, extra_metadata=conf_metadata, modes=monitoring_modes)
+configurations1 = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+
+conf_params.update({'ARCH_ATTRIBUTE': {'arch': '64bit'},
+                    'TAG_ATTRIBUTE': {'tags': 'test_tag'}})
+conf_metadata.update({'ARCH_ATTRIBUTE'.lower(): {'arch': '64bit'},
+                     'TAG_ATTRIBUTE'.lower(): {'tags': 'test_tag'}})
+configurations_path = os.path.join(test_data_path, 'wazuh_conf_attr.yaml')
+p, m = generate_params(extra_params=conf_params, extra_metadata=conf_metadata, modes=monitoring_modes)
+configurations2 = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+
+configurations = configurations1 + configurations2
 
 
 # Fixtures
@@ -71,34 +86,32 @@ def test_windows_registry(arch, tag, tags_to_apply,
 
     Parameters
     ----------
-    arch : string
-        Selected architecture
-    tag : string
-        Name of the tag to look for in the event
+    arch : str
+        Selected architecture.
+    tag : str
+        Name of the tag to look for in the event.
     tags_to_apply : set
-         Run test if matches with a configuration identifier, skip otherwise
+         Run test if matches with a configuration identifier, skip otherwise.
     """
-
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    is_scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
-    event_checker = EventChecker(wazuh_log_monitor, folder=None)
 
     # Check that windows_registry does not trigger alerts for new entries and empty keys
     create_registry(winreg.HKEY_LOCAL_MACHINE, sub_key)
-    check_time_travel(is_scheduled)
-    event_checker.fetch_events(min_timeout=DEFAULT_TIMEOUT, triggers_event=False)
+    TimeMachine.travel_to_future(timedelta(seconds=frequency))
+    with pytest.raises(TimeoutError):
+        wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event)
 
     # Check that windows_registry trigger alerts when adding an entry
     modify_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 'test_add')
-    check_time_travel(is_scheduled)
-    event = event_checker.fetch_events(min_timeout=DEFAULT_TIMEOUT, triggers_event=True)[0]
+    TimeMachine.travel_to_future(timedelta(seconds=frequency))
+    event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
     assert event['data']['type'] == 'added', f'Event type not equal'
 
     # Check that windows_registry trigger alerts when modifying existing keys
     # and check arch and tag values match with the ones in event
     modify_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 'test_modify')
-    check_time_travel(is_scheduled)
-    event = event_checker.fetch_events(min_timeout=DEFAULT_TIMEOUT, triggers_event=True)[0]
+    TimeMachine.travel_to_future(timedelta(seconds=frequency))
+    event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event).result()
     assert event['data']['type'] == 'modified', f'Event type not equal'
     if arch:
         assert arch in event['data']['path'], f'Architecture is not correct'
@@ -107,6 +120,6 @@ def test_windows_registry(arch, tag, tags_to_apply,
 
     # Check that windows_registry trigger alerts when deleting a key
     delete_registry(winreg.HKEY_LOCAL_MACHINE, sub_key)
-    check_time_travel(is_scheduled)
-    event = event_checker.fetch_events(min_timeout=DEFAULT_TIMEOUT, triggers_event=True)[0]
+    TimeMachine.travel_to_future(timedelta(seconds=frequency))
+    event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event).result()
     assert event['data']['type'] == 'deleted', f'Event type not equal'
