@@ -39,10 +39,8 @@ def change_conf(report_value):
     """" Returns a new ossec configuration with a changed report_value"""
     conf_params, conf_metadata = generate_params({'REPORT_CHANGES': {'report_changes': report_value},
                                                   'TEST_DIRECTORIES': directory_str, 'NODIFF_FILE': nodiff_file,
-                                                  'MODULE_NAME': __name__},
-                                                 {'report_changes': report_value,
-                                                  'test_directories': directory_str, 'nodiff_file': nodiff_file,
-                                                  'module_name': __name__})
+                                                  'MODULE_NAME': __name__})
+
     return load_wazuh_configurations(configurations_path, __name__,
                                      params=conf_params,
                                      metadata=conf_metadata
