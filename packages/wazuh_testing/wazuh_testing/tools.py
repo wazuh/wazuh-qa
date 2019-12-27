@@ -113,33 +113,36 @@ ET._serialize_xml = _serialize_xml  # override _serialize_xml to avoid lexicogra
 
 
 class TimeMachine:
-    """ Context manager that goes forward/back in time and comes back to real time once it finishes its instance
-    """
+    """Context manager that goes forward/back in time and comes back to real time once it finishes its instance."""
 
     def __init__(self, timedelta):
-        """ Saves time frame given by user
+        """
+        Save time frame given by user.
 
-        :param timedelta: time frame
-        :type timedelta: timedelta
+        Parameters
+        ----------
+        timedelta : timedelta
+            Time frame.
         """
         self.time_delta = timedelta
 
     def __enter__(self):
-        """ Calls travel_to_future function with saved timedelta as argument
-        """
+        """Call travel_to_future function with saved timedelta as argument."""
         self.travel_to_future(self.time_delta)
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
-        """ Calls travel_to_future again before exiting with a negative timedelta
-        """
+        """Call travel_to_future again before exiting with a negative timedelta."""
         self.travel_to_future(self.time_delta * -1)
 
     @staticmethod
     def _linux_set_time(datetime_):
-        """ Changes date and time in a Linux system
+        """
+        Change date and time in a Linux system.
 
-        :param datetime_: new date and time to set
-        :type datetime_: time
+        Parameters
+        ----------
+        datetime_ : time
+            New date and time to set.
         """
         import shlex
         subprocess.call(shlex.split("timedatectl set-ntp false"))
@@ -148,40 +151,52 @@ class TimeMachine:
 
     @staticmethod
     def _win_set_time(datetime_):
-        """ Changes date and time in a Windows system
+        """
+        Change date and time in a Windows system.
 
-        :param datetime_: new date and time to set
-        :type datetime_: time
+        Parameters
+        ----------
+        datetime_ : time
+            New date and time to set.
         """
         os.system('date ' + datetime_.strftime("%d-%m-%Y"))
         os.system('time ' + datetime_.strftime("%H:%M:%S"))
 
     @staticmethod
     def _solaris_set_time(datetime_):
-        """ Changes date and time in a Linux system
+        """
+        Change date and time in a Linux system.
 
-        :param datetime_: new date and time to set
-        :type datetime_: time
+        Parameters
+        ----------
+        datetime_ : time
+            New date and time to set.
         """
         solaris_time_format = "%m%d%H%M%Y.%S"
         os.system("date '%s'" % datetime_.strftime(solaris_time_format))
 
     @staticmethod
     def _macos_set_time(datetime_):
-        """ Changes date and time in a MacOS system
+        """
+        Change date and time in a MacOS system.
 
-        :param datetime_: new date and time to set
-        :type datetime_: time
+        Parameters
+        ----------
+        datetime_ : time
+            New date and time to set.
         """
         # {month}{day}{hour}{minute}{year}
         os.system('date ' + '-u ' + datetime_.strftime("%m%d%H%M%Y"))
 
     @staticmethod
     def travel_to_future(time_delta):
-        """ Checks which system are we running this code in and calls its proper function
+        """
+        Check which system are we running this code in and calls its proper function.
 
-        :param time_delta: time frame we want to skip. It can have a negative value
-        :type time_delta: timedelta
+        Parameters
+        ----------
+        time_delta : timedelta
+            Time frame we want to skip. It can have a negative value.
         """
         now = datetime.utcnow() if sys.platform == 'darwin' else datetime.now()
         future = now + time_delta
@@ -196,7 +211,14 @@ class TimeMachine:
 
 
 def set_wazuh_conf(wazuh_conf: ET.ElementTree):
-    """Set up Wazuh configuration. Wazuh will be restarted for applying it."""
+    """
+    Set up Wazuh configuration. Wazuh will be restarted for applying it.
+
+    Parameters
+    ----------
+    wazuh_conf : ET.ElementTree
+        ElementTree with a custom Wazuh configuration.
+    """
     write_wazuh_conf(wazuh_conf)
     print("Restarting Wazuh...")
     command = os.path.join(WAZUH_PATH, 'bin/ossec-control')
@@ -205,11 +227,38 @@ def set_wazuh_conf(wazuh_conf: ET.ElementTree):
 
 
 def truncate_file(file_path):
+    """
+    Truncate a file to reset its content.
+
+    Parameters
+    ----------
+    file_path : str
+        Path of the file to be truncated.
+    """
     with open(file_path, 'w'):
         pass
 
 
 def wait_for_condition(condition_checker, args=None, kwargs=None, timeout=-1):
+    """
+    Wait for a given condition to check.
+
+    Parameters
+    ----------
+    condition_checker : object
+        Function that checks a condition.
+    args :  list, optional
+        List of positional arguments. Default `None`
+    kwargs : dict, optional
+        Dict of non positional arguments. Default `None`
+    timeout : int, optional
+        Time to wait. Default `-1`
+
+    Raises
+    ------
+    TimeoutError
+        If `timeout` is not -1 and there have been more iterations that the max allowed.
+    """
     args = [] if args is None else args
     kwargs = {} if kwargs is None else kwargs
     time_step = 0.5
@@ -223,9 +272,20 @@ def wait_for_condition(condition_checker, args=None, kwargs=None, timeout=-1):
 
 
 def generate_wazuh_conf(args: List = None) -> ET.ElementTree:
-    """Generate a configuration file for Wazuh.
+    """
+    Generate a configuration file for Wazuh.
     :param args: Arguments for generating ossec.conf (install_type, distribution, version)
     :return: ElementTree with a new Wazuh configuration generated from 'gen_ossec.sh'
+
+    Parameters
+    ----------
+    args : list, optional
+        Arguments to generate ossec.conf (install_type, distribuition, version). Default `None`
+
+    Returns
+    -------
+    ET.ElementTree
+        New Wazuh configuration generated from 'gen_ossec.sh'.
     """
     gen_ossec_args = args if args else ['conf', 'manager', 'rhel', '7']
     wazuh_config = check_output([GEN_OSSEC] + gen_ossec_args).decode(encoding='utf-8', errors='ignore')
@@ -234,31 +294,62 @@ def generate_wazuh_conf(args: List = None) -> ET.ElementTree:
 
 
 def get_wazuh_conf() -> ET.ElementTree:
-    """Get current 'ossec.conf' file.
+    """
+    Get current 'ossec.conf' file.
 
-    :return: ElemenTree with current Wazuh configuration
+    Returns
+    -------
+    ET.ElementTree
+        Current Wazuh configuration.
     """
     return ET.parse(WAZUH_CONF)
 
 
 def write_wazuh_conf(wazuh_conf: ET.ElementTree):
-    """Write a new configuration in 'ossec.conf' file."""
+    """
+    Write a new configuration in 'ossec.conf' file.
+
+    Parameters
+    ----------
+    wazuh_conf : ET.ElementTree
+        Wazuh configuration.
+    """
     return wazuh_conf.write(WAZUH_CONF, encoding='utf-8')
 
 
 def set_section_wazuh_conf(section: str = 'syscheck',
                            new_elements: List = None) -> ET.ElementTree:
-    """Set a configuration in a section of Wazuh. It replaces the content if it exists.
-    :param section: Section of Wazuh configuration to replace
-    :param new_elements: List with dictionaries for settings elements in the section
-    :return: ElementTree with the custom Wazuh configuration
+    """
+    Set a configuration in a section of Wazuh. It replaces the content if it exists.
+
+    Parameters
+    ----------
+    section : str, optional
+        Section of Wazuh configuration to replace. Default `'syscheck'`
+    new_elements : list, optional
+        List with dictionaries for settings elements in the section. Default `None`
+
+    Returns
+    -------
+    ET.ElementTree
+        ElementTree with the custom Wazuh configuration.
     """
 
     def create_elements(section: ET.Element, elements: List):
-        """Insert new elements in a Wazuh configuration section.
+        """
+        Insert new elements in a Wazuh configuration section.
 
-        :param section: Section where the element will be inserted
-        :param elements: List with the new elements to be inserted
+        Parameters
+        ----------
+        section : ET.Element
+            Section where the element will be inserted.
+        elements : list
+            List with the new elements to be inserted.
+
+        Returns
+        -------
+        ET.ElementTree
+            Modified Wazuh configuration.
         """
         for element in elements:
             for tag_name, properties in element.items():
@@ -289,10 +380,15 @@ def set_section_wazuh_conf(section: str = 'syscheck',
 
 
 def restart_wazuh_daemon(daemon):
-    """Restarts a Wazuh daemon.
+    """
+    Restarts a Wazuh daemon.
 
     Use this function to avoid restarting the whole service and all of its daemons.
-    :param daemon string Name of the executable file of the daemon in /var/ossec/bin
+
+    Parameters
+    ----------
+    daemon : str
+        Name of the executable file of the daemon in /var/ossec/bin
     """
     for proc in psutil.process_iter(attrs=['name']):
         if proc.name() == daemon:
@@ -378,7 +474,7 @@ class FileMonitor:
             self._position = f.tell() if update_position else previous_position
 
     def start(self, timeout=-1, callback=_callback_default, accum_results=1, update_position=True):
-        """Start the file monitoring until the stop method is called"""
+        """Start the file monitoring until the stop method is called."""
         if not self._continue:
             self._continue = True
             self._abort = False
@@ -390,7 +486,7 @@ class FileMonitor:
         return self
 
     def stop(self):
-        """Stop the file monitoring. It can be restart calling the start method"""
+        """Stop the file monitoring. It can be restart calling the start method."""
         self._continue = False
         if self.timer:
             self.timer.cancel()
@@ -398,7 +494,7 @@ class FileMonitor:
         return self
 
     def abort(self):
-        """Abort because of timeout"""
+        """Abort because of timeout."""
         self._abort = True
         return self
 
@@ -407,23 +503,32 @@ class FileMonitor:
 
 
 def random_unicode_char():
-    """ Generates a random unicode char from 0x0000 to 0xD7FF
+    """
+    Generate a random unicode char from 0x0000 to 0xD7FF.
 
-    :return: Random unicode char
-    :rtype: String
+    Returns
+    -------
+    str
+        Random unicode char.
     """
     return chr(random.randrange(0xD7FF))
 
 
 def random_string_unicode(length, encode=None):
-    """ Generates a random unicode string with variable size and optionally encoded
+    """
+    Generate a random unicode string with variable size and optionally encoded.
 
-    :param length: String length
-    :type length: Integer
-    :param encode: Encoding type. Its value is None by default
-    :type encode: String
-    :return: Random unicode string
-    :rtype: It can be a string or a binary
+    Parameters
+    ----------
+    length : int
+        String length.
+    encode : str, optional
+        Encoding type. Default `None`
+
+    Returns
+    -------
+    str or binary
+        Random unicode string.
     """
     st = str(''.join(format(random_unicode_char()) for i in range(length)))
     st = u"".join(st)
@@ -435,15 +540,21 @@ def random_string_unicode(length, encode=None):
 
 
 def random_string(length, encode=None):
-    """ Generates a random alphanumeric string with variable size and optionally encoded
+    """
+    Generate a random alphanumeric string with variable size and optionally encoded.
 
-        :param length: String length
-        :type length: Integer
-        :param encode: Encoding type. Its value is None by default
-        :type encode: String
-        :return: Random string
-        :rtype: It can be a string or a binary
-        """
+    Parameters
+    ----------
+    length : int
+        String length.
+    encode : str, optional
+        Encoding type. Default `None`
+
+    Returns
+    -------
+    str or binary
+        Random string.
+    """
     letters = string.ascii_letters + string.digits
     st = str(''.join(random.choice(letters) for i in range(length)))
 
@@ -454,11 +565,20 @@ def random_string(length, encode=None):
 
 
 def expand_placeholders(mutable_obj, placeholders=None):
-    """Search for placeholders and replace them by a value inside mutable_obj
+    """
+    Search for placeholders and replace them by a value inside mutable_obj.
 
-    :param mutable_obj: target object where the replacement are performed
-    :param placeholders: dict where each key is a placeholder and the value is the replacement
-    :return: reference to mutable_obj
+    Parameters
+    ----------
+    mutable_obj : mutable object
+        Target object where the replacements are performed.
+    placeholders : dict
+        Each key is a placeholder and its value is the replacement. Default `None`
+
+    Returns
+    -------
+    Reference
+        Reference to `mutable_obj`
     """
     placeholders = {} if placeholders is None else placeholders
     if isinstance(mutable_obj, list):
@@ -480,11 +600,15 @@ def expand_placeholders(mutable_obj, placeholders=None):
 
 
 def add_metadata(dikt, metadata=None):
-    """Create a new key 'metadata' in dikt if not already exists and updates it with metadata content
+    """
+    Create a new key 'metadata' in dikt if not already exists and updates it with metadata content.
 
-    :param dikt: target dict to update metadata in
-    :param metadata: dict including the new properties to be saved in the metadata key
-    :return: None
+    Parameters
+    ----------
+    dikt : dict
+        Target dict to update metadata in.
+    metadata : dict, optional
+        Dict including the new properties to be saved in the metadata key.
     """
     if metadata is not None:
         new_metadata = dikt['metadata'] if 'metadata' in dikt else {}
@@ -493,13 +617,24 @@ def add_metadata(dikt, metadata=None):
 
 
 def process_configuration(config, placeholders=None, metadata=None):
-    """Get a new configuration replacing placeholders and adding metadata.
-    Both placeholders and metadata should have equal length
+    """
+    Get a new configuration replacing placeholders and adding metadata.
 
-    :param config: dict config to be enriched
-    :param placeholders: list of dicts with the replacements
-    :param metadata: list of dicts with the metadata keys to include in config
-    :return: dict with config enriched
+    Both placeholders and metadata should have equal length.
+
+    Parameters
+    ----------
+    config : dict
+        Config to be enriched.
+    placeholders : list of dict, optional
+        List of dicts with the replacements.
+    metadata : list of dict, optional
+        List of dicts with the metadata keys to include in config.
+
+    Returns
+    -------
+    dict
+        Dict with enriched configuration.
     """
     new_config = expand_placeholders(deepcopy(config), placeholders=placeholders)
     add_metadata(new_config, metadata=metadata)
@@ -508,13 +643,28 @@ def process_configuration(config, placeholders=None, metadata=None):
 
 
 def load_wazuh_configurations(yaml_file_path: str, test_name: str, params: list = None, metadata: list = None) -> Any:
-    """Load different configurations of Wazuh from a YAML file.
+    """
+    Load different configurations of Wazuh from a YAML file.
 
-    :param yaml_file_path: Full path of the YAML file to be loaded
-    :param test_name: Name of the file which contains the test that will be executed
-    :param params: List of dicts where each dict represents a replacement MATCH -> REPLACEMENT
-    :param metadata: List of dicts. Custom metadata to be inserted in the configuration
-    :return: Python object with the YAML file content
+    Parameters
+    ----------
+    yaml_file_path : str
+        Full path of the YAML file to be loaded.
+    test_name : str
+        Name of the file which contains the test that will be executed.
+    params : list, optional
+        List of dicts where each dict represents a replacement MATCH -> REPLACEMENT. Default `None`
+    metadata : list, optional
+        Custom metadata to be inserted in the configuration. Default `None`
+
+    Returns
+    -------
+    Python object with the YAML file content
+
+    Raises
+    ------
+    ValueError
+        If the length of `params` and `metadata` are not equal.
     """
     params = [{}] if params is None else params
     metadata = [{}] if metadata is None else metadata
@@ -531,10 +681,15 @@ def load_wazuh_configurations(yaml_file_path: str, test_name: str, params: list 
 
 
 def check_apply_test(apply_to_tags: Set, tags: List):
-    """Skip test if intersection between the two parameters is empty.
+    """
+    Skip test if intersection between the two parameters is empty.
 
-    :param apply_to_tags: Tags which the tests will run
-    :param tags: List with the tags which identifies a configuration
+    Parameters
+    ----------
+    apply_to_tags : set
+        Tags that the tests will run.
+    tags : list
+        List with the tags that identifies a configuration.
     """
     if not (apply_to_tags.intersection(tags) or
             'all' in apply_to_tags):
@@ -542,29 +697,40 @@ def check_apply_test(apply_to_tags: Set, tags: List):
 
 
 def restart_wazuh_with_new_conf(new_conf, daemon='ossec-syscheckd'):
-    """ Restart Wazuh service applying a new ossec.conf
+    """
+    Restart Wazuh service applying a new ossec.conf
 
-    :param new_conf: New config file
-    :type new_conf: ElementTree
-    :return: None
+    Parameters
+    ----------
+    new_conf : ET.ElementTree
+        New config file.
+    daemon : str, optional
+        Daemon to restart when applying the configuration.
     """
     write_wazuh_conf(new_conf)
     control_service('restart', daemon=daemon)
 
 
 def control_service(action, daemon=None, debug_mode=False):
-    """Performs the stop, start and restart operation with Wazuh.
-    It takes care of the current OS to interact with the service and the type of installation (agent or manager)
+    """Perform the stop, start and restart operation with Wazuh.
+
+    It takes care of the current OS to interact with the service and the type of installation (agent or manager).
 
     Parameters
     ----------
-    action : str
-        Must be one of 'stop', 'start' or 'restart'
-    daemon : str
-        Name of the daemon to be controlled. None to control the whole Wazuh service
-    debug_mode : bool
-        Run the specified daemon in debug mode
+    action : {'stop', 'start', 'restart'}
+        Action to be done with the service/daemon.
+    daemon : str, optional
+        Name of the daemon to be controlled. None to control the whole Wazuh service. Default `None`
+    debug_mode : bool, optional
+        Run the specified daemon in debug mode. Default `False`
 
+    Raises
+    ------
+    ValueError
+        If `action` is not contained in {'start', 'stop', 'restart'}.
+    ValueError
+        If the result is not equal to 0.
     """
     valid_actions = ('start', 'stop', 'restart')
     if action not in valid_actions:
@@ -612,7 +778,7 @@ def get_process(search_name):
     Returns
     -------
     `psutil.Process` or None
-        first occurrence of the process object matching the `search_name` or None if no process has been found
+        First occurrence of the process object matching the `search_name` or None if no process has been found.
     """
     for proc in psutil.process_iter(attrs=['name']):
         if proc.name() == search_name:
@@ -622,11 +788,18 @@ def get_process(search_name):
 
 
 def reformat_time(scan_time):
-    """ Transform scan_time to readable time
+    """
+    Transform scan_time to readable time
 
-    :param scan_time: Time string
-    :type scan_time: String
-    :return: Datetime object
+    Parameters
+    ----------
+    scan_time : str
+        Time string.
+
+    Returns
+    -------
+    datetime
+        Datetime object with the string translated.
     """
     hour_format = '%H'
     colon = ''
@@ -642,7 +815,18 @@ def reformat_time(scan_time):
 
 
 def time_to_timedelta(time):
-    """Converts a string with time in seconds with `smhdw` suffixes allowed to `datetime.timedelta`.
+    """
+    Convert a string with time in seconds with `smhdw` suffixes allowed to `datetime.timedelta`.
+
+    Parameters
+    ----------
+    time : str
+        String with time in seconds.
+
+    Returns
+    -------
+    timedelta
+        Timedelta object.
     """
     time_unit = time[len(time) - 1:]
 
@@ -671,16 +855,16 @@ class SocketController:
         Parameters
         ----------
         path : str
-            Path where the file will be created
+            Path where the file will be created.
         timeout : int
-            Socket's timeout, 0 for non-blocking mode
+            Socket's timeout, 0 for non-blocking mode.
         connection_protocol : str
-            Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM)
+            Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM).
 
         Raises
         ------
         Exception
-            If the socket connection failed
+            If the socket connection failed.
         """
         self.path = path
         if connection_protocol.lower() == 'tcp':
@@ -700,7 +884,7 @@ class SocketController:
         self.sock.settimeout(timeout)
 
     def close(self):
-        """Close the socket gracefully"""
+        """Close the socket gracefully."""
         self.sock.shutdown(socket.SHUT_RDWR)
         self.sock.close()
 
@@ -710,15 +894,15 @@ class SocketController:
         Parameters
         ----------
         messages : list
-            List of messages to be sent
-        size : bool
-            Flag that indicates if the header of the message includes the size of the message
-            (Analysis doesn't need the size, wazuh-db does)
+            List of messages to be sent.
+        size : bool, optional
+            Flag that indicates if the header of the message includes the size of the message.
+            (Analysis doesn't need the size, wazuh-db does). Default `False`
 
         Returns
         -------
         list
-            List of sizes of the sent messages
+            List of sizes of the sent messages.
         """
         output = list()
         for message_ in messages:
@@ -738,13 +922,13 @@ class SocketController:
 
         Parameters
         ----------
-        total_messages : int
-            Total messages to be received
+        total_messages : int, optional
+            Total messages to be received. Default `1`
 
         Returns
         -------
         list
-            Socket messages
+            Socket messages.
         """
         output = list()
         for _ in range(0, total_messages):
@@ -778,13 +962,13 @@ class SocketMonitor:
         ----------
         path : str
             Path where the file will be created
-        connection_protocol : str
-            Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM)
+        connection_protocol : str, optional
+            Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM). Default `'TCP'`
 
         Raises
         ------
         Exception
-            If the socket connection failed
+            If the socket connection failed.
         """
         self._continue = False
         self._abort = False
@@ -798,17 +982,17 @@ class SocketMonitor:
 
         Parameters
         ----------
-        timeout : int
-            Timeout of the operation
-        callback : callable
-            Callable function that accepts a specified param
-        accum_results : int
-            Expected number of messages
+        timeout : int, optional
+            Timeout of the operation. Default `-1`
+        callback : callable, optional
+            Callable function that accepts a specified param. Default ``_callback_default``
+        accum_results : int, optional
+            Expected number of messages. Default `1`
 
         Returns
         -------
         list
-            Socket messages
+            Socket messages.
         """
         if not self._continue:
             self._continue = True
@@ -859,12 +1043,12 @@ class SocketMonitor:
 
 
 def delete_sockets(path=None):
-    """Delete a Wazuh socket file or all of them if None is specified
+    """Delete a Wazuh socket file or all of them if None is specified.
 
     Parameters
     ----------
-    path : str
-        Socket path relative to WAZUH_PATH
+    path : str, optional
+        Socket path relative to WAZUH_PATH. Default `None`
     """
     try:
         if path is None:
@@ -883,17 +1067,17 @@ def check_daemon_status(daemon=None, running=True, timeout=10):
 
     Parameters
     ----------
-    daemon : str
-        Wazuh daemon to check
-    running : bool
-        True if the daemon is expected to be running False if it is expected to be stopped
-    timeout : int
-        Timeout value for the check
+    daemon : str, optional
+        Wazuh daemon to check. Default `None`
+    running : bool, optional
+        True if the daemon is expected to be running False if it is expected to be stopped. Default `True`
+    timeout : int, optional
+        Timeout value for the check. Default `10`
 
     Raises
     ------
     TimeoutError
-        If the daemon status is wrong after timeout seconds
+        If the daemon status is wrong after timeout seconds.
     """
     for _ in range(3):
         daemon_status = subprocess.run(['service', 'wazuh-manager', 'status'],
