@@ -749,6 +749,9 @@ class SocketController:
         output = list()
         for _ in range(0, total_messages):
             try:
+                # data = self.sock.recv(4)
+                # size = unpack('<I', data[0:4])[0]
+
                 size = unpack("<I", self.sock.recv(4, socket.MSG_WAITALL))[0]
                 output.append(self.sock.recv(size, socket.MSG_WAITALL).decode().rstrip('\x00'))
             except OSError:
@@ -771,7 +774,7 @@ class SocketController:
 
 class SocketMonitor:
 
-    def __init__(self, path, connection_protocol='TCP'):
+    def __init__(self, path, connection_protocol='TCP', controller=None):
         """Create a new unix socket or connect to a existing one.
 
         Parameters
@@ -791,7 +794,10 @@ class SocketMonitor:
         self._result = None
         self.timer = None
         self.path = path
-        self.controller = SocketController(path=path, connection_protocol=connection_protocol)
+        if not controller:
+            self.controller = SocketController(path=path, connection_protocol=connection_protocol)
+        else:
+            self.controller = controller
 
     def start(self, timeout=-1, callback=_callback_default, accum_results=1):
         """Start the socket monitoring with specified callback.

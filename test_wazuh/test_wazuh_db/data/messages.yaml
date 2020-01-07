@@ -1,0 +1,13 @@
+---
+-
+  input: "agent 001 syscheck save2 {\"path\":\"/home/test/file2\",\"timestamp\":1575421292,\"attributes\":{\"type\":\"file\",\"size\":0,\"perm\":\"rw-r--r--\",\"uid\":\"0\",\"gid\":\"0\",\"user_name\":\"root\",\"group_name\":\"root\",\"inode\":16879,\"mtime\":1575421292,\"hash_md5\":\"d41d8cd98f00b204e9800998ecf8427e\",\"hash_sha1\":\"da39a3ee5e6b4b0d3255bfef95601890afd80709\",\"hash_sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"checksum\":\"f65b9f66c5ef257a7566b98e862732640d502b6f\"}}"
+  output: "ok"
+  type: "Syscheck save2 success"
+-
+  input: "agent 001 syscheck load /home/test/file2"
+  output: "ok 0:rw-r--r--:0:0:d41d8cd98f00b204e9800998ecf8427e:da39a3ee5e6b4b0d3255bfef95601890afd80709:root:root:1575421292:16879:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855:!1:1575421292"
+  type: "Syscheck save2 load success"
+-
+  input: "agent 001 syscheck load /home/test/file"
+  output: "ok "
+  type: "Syscheck save2 load success"
