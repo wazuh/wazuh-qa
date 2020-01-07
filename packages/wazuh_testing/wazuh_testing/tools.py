@@ -773,7 +773,7 @@ def get_process(search_name):
     Parameters
     ----------
     search_name : str
-        Name of the process to be fetched
+        Name of the process to be fetched.
 
     Returns
     -------
@@ -789,7 +789,7 @@ def get_process(search_name):
 
 def reformat_time(scan_time):
     """
-    Transform scan_time to readable time
+    Transform scan_time to readable time.
 
     Parameters
     ----------
@@ -961,7 +961,7 @@ class SocketMonitor:
         Parameters
         ----------
         path : str
-            Path where the file will be created
+            Path where the file will be created.
         connection_protocol : str, optional
             Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM). Default `'TCP'`
 

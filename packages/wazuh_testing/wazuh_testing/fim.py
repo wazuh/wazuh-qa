@@ -19,6 +19,7 @@ from stat import ST_ATIME, ST_MTIME
 
 from json import JSONDecodeError
 from jsonschema import validate
+from typing import Sequence, Union, Generator, Any
 
 from wazuh_testing.tools import TimeMachine
 
@@ -992,7 +993,8 @@ def detect_initial_scan(file_monitor):
     time.sleep(11)
 
 
-def generate_params(extra_params: dict = None, *, apply_to_all: dict = None, modes: list = None):
+def generate_params(extra_params: dict = None, apply_to_all: Union[Sequence[Any], Generator[dict, None, None]] = None,
+                    modes: list = None):
     """
     Expand params and metadata with optional FIM modes.
 
@@ -1008,44 +1010,36 @@ def generate_params(extra_params: dict = None, *, apply_to_all: dict = None, mod
     apply_to_all = Same structure as above. The difference is, these params will be applied for every existing
                     configuration. They are applied after the `extra_params`.
 
-    Examples:
+    Examples
+    --------
+    >>> generate_params(extra_params={'REPORT_CHANGES': {'report_changes': ['yes', 'no']}, 'MODULE_NAME': 'name'},
+    ...                 modes=['realtime', 'whodata'])
+    ([{'FIM_MODE': {'realtime': 'yes'}, 'REPORT_CHANGES': {'report_changes': 'yes'}, 'MODULE_NAME': 'name'},
+      {'FIM_MODE': {'whodata': 'yes'}, 'REPORT_CHANGES': {'report_changes': 'no'}, 'MODULE_NAME': 'name'}],
+     [{'fim_mode': 'realtime', 'report_changes': 'yes', 'module_name': 'name'},
+      {'fim_mode': 'whodata', 'report_changes': 'no', 'module_name': 'name'}])
 
-    1/
+    >>> generate_params(extra_params={'MODULE_NAME': 'name'}, apply_to_all={'FREQUENCY': {'frequency': [1, 2]}},
+    ...                 modes=['scheduled', 'realtime'])
+    ([{'FIM_MODE': '', 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 1}},
+      {'FIM_MODE': {'realtime': 'yes'}, 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 1}},
+      {'FIM_MODE': '', 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 2}},
+      {'FIM_MODE': {'realtime': 'yes'}, 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 2}}],
+     [{'fim_mode': 'scheduled', 'module_name': 'name', 'frequency': {'frequency': 1}},
+      {'fim_mode': 'realtime', 'module_name': 'name', 'frequency': {'frequency': 1}},
+      {'fim_mode': 'scheduled', 'module_name': 'name', 'frequency': {'frequency': 2}},
+      {'fim_mode': 'realtime', 'module_name': 'name', 'frequency': {'frequency': 2}}])
 
-    p, m = generate_params( extra_params={'REPORT_CHANGES': {'report_changes': 'value'},
-                                           'MODULE_NAME': 'name''},
-                              modes=['realtime', 'whodata'] )
-
-    p = [{'FIM_MODE': {'realtime': 'yes'}, 'REPORT_CHANGES': {'report_changes': 'value'},
-            'MODULE_NAME': 'name''},
-         {'FIM_MODE': {'whodata': 'yes'}, 'REPORT_CHANGES': {'report_changes': 'value'},
-            'MODULE_NAME': 'name''}
-        ]
-
-    m = [{'fim_mode': 'realtime', 'report_changes': 'one', 'module_name': 'name'},
-         {'fim_mode': 'whodata', 'report_changes': 'two', 'module_name': 'name'}
-        ]
-
-    2/
-
-    p, m = generate_params( extra_params={'MODULE_NAME': 'name'}, apply_to_all={'FREQUENCY': {'frequency': [1, 2]}},
-                            modes=['scheduled', 'realtime']}
-
-    p = [{'FIM_MODE': '', 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 1}},
-        {'FIM_MODE': {'realtime': 'yes'}, 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 1}},
-        {'FIM_MODE': '', 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 2}},
-        {'FIM_MODE': {'realtime': 'yes'}, 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 2}}]
-
-    m = [{'fim_mode': 'scheduled', 'module_name': 'name', 'frequency': {'frequency': 1}},
-        {'fim_mode': 'realtime', 'module_name': 'name', 'frequency': {'frequency': 1}},
-        {'fim_mode': 'scheduled', 'module_name': 'name', 'frequency': {'frequency': 2}},
-        {'fim_mode': 'realtime', 'module_name': 'name', 'frequency': {'frequency': 2}}]
+    >>> generate_params(extra_params={'LIST_OF_VALUES': {'list': [[1,2,3]]}, 'MODULE_NAME': 'name'},
+    ...                 modes=['scheduled'])
+    ([{'FIM_MODE': '', 'LIST_OF_VALUES': {'list': [1, 2, 3]}, 'MODULE_NAME': 'name'}],
+     [{'fim_mode': 'scheduled', 'list_of_values': [1, 2, 3], 'module_name': 'name'}])
 
     Parameters
     ----------
     extra_params : dict, optional
         Dictionary with all the extra parameters to add for every mode. Default `None`
-    apply_to_all : dict, optional
+    apply_to_all : iterable object or generator object
         Dictionary with all the extra parameters to add to every configuration. Default `None`
     modes : list, optional
         FIM modes to be applied. Default `None` (scheduled, realtime and whodata)
@@ -1053,7 +1047,7 @@ def generate_params(extra_params: dict = None, *, apply_to_all: dict = None, mod
     Returns
     -------
     tuple (list, list)
-        Tuple with the list of parameters and the list of metadata
+        Tuple with the list of parameters and the list of metadata.
     """
     def transform_param(mutable_object: dict):
         for k, v in mutable_object.items():
@@ -1100,32 +1094,14 @@ def generate_params(extra_params: dict = None, *, apply_to_all: dict = None, mod
         metadata.append(m_aux)
 
     if apply_to_all:
-        expanded_params = list()
-        expanded_metadata = list()
-        for wildcard, values in apply_to_all.items():
-            if isinstance(values, dict):
-                if isinstance(next(iter(values.values())), list):
-                    list_of_values = list()
-                    for v in next(iter(values.values())):
-                        list_of_values.append({next(iter(values)): v})
-                    values = list_of_values
-                else:
-                    values = [values]
-            elif not isinstance(values, list):
-                values = [values]
-            else:
-                pass
-
-            values = next(iter(values.values())) if isinstance(values, dict) else values
-            values = values if isinstance(values, list) else [values]
-            for value in values:
-                for p_dict, m_dict in zip(params, metadata):
-                    value = values if isinstance(values, dict) else value
-                    p_dict[wildcard] = value
-                    m_dict[wildcard.lower()] = value
-                    expanded_params.append(deepcopy(p_dict))
-                    expanded_metadata.append(deepcopy(m_dict))
-        return expanded_params, expanded_metadata
+        aux_params = deepcopy(params)
+        aux_metadata = deepcopy(metadata)
+        params.clear()
+        metadata.clear()
+        for element in apply_to_all:
+            for p_dict, m_dict in zip(aux_params, aux_metadata):
+                params.append({**p_dict, **element})
+                metadata.append({**m_dict, **{wildcard.lower(): value for wildcard, value in element.items()}})
 
     return params, metadata
 
