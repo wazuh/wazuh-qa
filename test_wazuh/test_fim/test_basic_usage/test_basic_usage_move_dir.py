@@ -18,6 +18,9 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2, testdir3 = test_directories
 
+# marks
+pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0)]
+
 # This directory won't be monitored
 testdir4 = os.path.join(PREFIX, 'testdir4')
 
