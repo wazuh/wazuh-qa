@@ -33,9 +33,10 @@ used_daemons = ['ossec-analysisd']
     message_ for message_ in messages
 ])
 def test_error_messages(configure_environment_standalone_daemons, create_unix_sockets, message_):
-    """
+    """ Check analysisd error messages
 
+    * This test checks that an input message in analysisd socket is properly formatted and outputted to wazuh-db socket
     """
     receiver_sockets[0].send([message_['input']])
     result = wazuh_log_monitor.start(timeout=10, callback=callback_fim_error).result()
-    assert result == message_['output'], message_['type']
+    assert result == message_['output'], 'Failed test case type: {}'.format(message_['type'])
