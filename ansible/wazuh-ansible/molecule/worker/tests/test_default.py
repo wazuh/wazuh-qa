@@ -73,9 +73,9 @@ def test_open_ports(host):
     """Test if the main port is open and the agent-auth is not open."""
     distribution = host.system_info.distribution.lower()
     if distribution == 'ubuntu':
-        assert host.socket("tcp://0.0.0.0:1514").is_listening
+        assert host.socket("udp://0.0.0.0:1514").is_listening
     elif distribution == 'centos':
-        assert host.socket("tcp://127.0.0.1:1514").is_listening
+        assert host.socket("udp://127.0.0.1:1514").is_listening
 
 
 def test_filebeat_is_installed(host):
