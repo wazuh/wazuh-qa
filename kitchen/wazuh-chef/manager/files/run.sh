@@ -29,7 +29,6 @@ do
                 cp "$development_agent_path$template" "$development_agent_path"
 
                 echo "Assigning Wazuh managers IPs to the corresponding agents."
-                sed -i 's/manager-client.wazuh-test.com//g' $development_agent_path
                 sed -i 's/manager-master.wazuh-test.com/'${manager_ip}'/g' $development_agent_path
 
                 echo "setting the manager registration and report IPs"
