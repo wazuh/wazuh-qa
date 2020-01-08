@@ -300,7 +300,7 @@ def delete_file(path, name):
         os.remove(regular_path)
 
 
-def delete_registry(key, subkey):
+def delete_registry(key, subkey, arch):
     """ Deletes a registry
 
     :param key: The key of the registry
@@ -309,9 +309,7 @@ def delete_registry(key, subkey):
     :type subkey: String
     :return: None
     """
-    if sys.platform != 'win32':
-        return
-    key = winreg.CreatDeleteKeyEx(key, subkey)
+    sys.platform == 'win32' and winreg.DeleteKeyEx(key, subkey, access=arch)
 
 
 def modify_registry(key, subkey, value):
@@ -325,9 +323,7 @@ def modify_registry(key, subkey, value):
     :type value: String
     :return: None
     """
-    if sys.platform != 'win32':
-        return
-    key = winreg.SetValue(key, subkey, value)
+    sys.platform == 'win32' and winreg.SetValue(key, subkey, winreg.REG_SZ, value)
 
 
 def modify_file_content(path, name, new_content=None, is_binary=False):
