@@ -55,7 +55,7 @@ provisioner:
       all:
         elasticsearch_jvm_xms: 512
 scenario:
-  name: elasticsearch
+  name: elasticsearch-kibana
   test_sequence:
     - lint
     - dependency
