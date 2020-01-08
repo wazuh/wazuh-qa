@@ -10,7 +10,7 @@ from wazuh_testing.analysis import callback_fim_event_alert, callback_analysisd_
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH, FileMonitor
 
 # All tests in this module apply to linux only
-pytestmark = pytest.mark.linux
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
 
 # variables
 
