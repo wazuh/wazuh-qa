@@ -44,7 +44,6 @@ provisioner:
     docker:
       create: ../default/create.yml
       destroy: ../default/destroy.yml
-      prepare: ../default/prepare.yml
   env:
     ANSIBLE_ROLES_PATH: ../../roles
   lint:
