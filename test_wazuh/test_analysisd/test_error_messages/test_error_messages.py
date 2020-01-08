@@ -38,5 +38,5 @@ def test_error_messages(configure_environment_standalone_daemons, create_unix_so
     * This test checks that an input message in analysisd socket is properly formatted and outputted to wazuh-db socket
     """
     receiver_sockets[0].send([message_['input']])
-    result = wazuh_log_monitor.start(timeout=10, callback=callback_fim_error).result()
+    result = wazuh_log_monitor.start(timeout=20, callback=callback_fim_error).result()
     assert result == message_['output'], 'Failed test case type: {}'.format(message_['type'])
