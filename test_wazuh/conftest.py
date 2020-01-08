@@ -112,8 +112,9 @@ def configure_environment_standalone_daemons(request):
         func = getattr(request.module, 'extra_configuration_after_yield')
         func()
 
-    # Stop wazuh-service
-    control_service('stop')
+    # Stop selected daemons
+    for daemon in getattr(request.module, 'used_daemons'):
+        control_service('stop', daemon=daemon)
 
     # Remove all remaining Wazuh sockets
     delete_sockets()

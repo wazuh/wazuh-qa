@@ -11,7 +11,7 @@ from jsonschema import validate
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 
-def callback_fim_event_message(line):
+def callback_analysisd_message(line):
     match = re.match(r'^agent (\d{3,}) syscheck (\w+) (.+)$', line)
     if match:
         try:
