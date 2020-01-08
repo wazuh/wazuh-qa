@@ -1,12 +1,18 @@
 import os
 import json
+import sys
 
 import testinfra.utils.ansible_runner
 import pytest
 
+sys.path.append(
+                os.path.join(os.path.dirname(__file__), '../../_utils/')
+                )  # noqa: E402
+from test_utils import MOL_PLATFORM
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
-    os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
+    os.environ['MOLECULE_INVENTORY_FILE']
+).get_hosts("kibana-{}".format(MOL_PLATFORM))
 
 
 @pytest.fixture(scope="module")

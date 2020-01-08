@@ -1,0 +1,11 @@
+---
+- name: Converge
+  hosts: elasticsearch-{{ lookup('env', 'MOL_PLATFORM') or 'centos7' }}
+  roles:
+    - role: elastic-stack/ansible-elasticsearch
+      elasticsearch_network_host: '0.0.0.0'
+      elasticsearch_lower_disk_requirements: true
+- hosts: kibana-{{ lookup('env', 'MOL_PLATFORM') or 'centos7' }}
+  roles:
+    - role: elastic-stack/ansible-kibana
+      elasticsearch_network_host: "elasticsearch-{{ lookup('env', 'MOL_PLATFORM') or 'centos7' }}"

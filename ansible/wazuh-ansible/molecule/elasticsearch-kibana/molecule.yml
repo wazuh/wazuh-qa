@@ -22,6 +22,19 @@ platforms:
       - /tmp
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
+  - name: kibana-${MOL_PLATFORM:-centos7}
+    image: ${MOL_IMAGE:-paulfantom/centos-molecule:7}
+    pre_build_image: true
+    command: /sbin/init
+    ulimits:
+      - nofile:262144:262144
+    privileged: true
+    memory_reservation: 1024m
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
 provisioner:
   name: ansible
   config_options:
@@ -31,7 +44,6 @@ provisioner:
     docker:
       create: ../default/create.yml
       destroy: ../default/destroy.yml
-      prepare: ../default/prepare.yml
   env:
     ANSIBLE_ROLES_PATH: ../../roles
   lint:
@@ -42,7 +54,7 @@ provisioner:
       all:
         elasticsearch_jvm_xms: 512
 scenario:
-  name: elasticsearch
+  name: elasticsearch-kibana
   test_sequence:
     - lint
     - dependency
