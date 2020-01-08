@@ -6,8 +6,8 @@ import os
 
 import pytest
 import yaml
-from wazuh_testing.analysis import callback_fim_error
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, FileMonitor
+from wazuh_testing.analysis import callback_analysisd_message, validate_analysis_integrity_state
+from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH, FileMonitor
 
 # All tests in this module apply to linux only
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
@@ -15,8 +15,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-messages_path = os.path.join(test_data_path, 'error_messages.yaml')
+messages_path = os.path.join(test_data_path, 'integrity_messages.yaml')
 with open(messages_path) as f:
     messages = yaml.safe_load(f)
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
@@ -32,11 +31,16 @@ used_daemons = ['ossec-analysisd']
 @pytest.mark.parametrize('message_', [
     message_ for message_ in messages
 ])
-def test_error_messages(configure_environment_standalone_daemons, create_unix_sockets, message_):
-    """ Checks the error messages handling by analysisd.
+def test_integrity_messages(configure_environment_standalone_daemons, create_unix_sockets, message_):
+    """ Checks the integration test for the integrity handling by analysisd.
+
     The variable messages is a yaml file that contains the input and the expected output for every test case.
+    The function validate_analysis_integrity_state is a function responsible for checking that the output follows a
+    certain jsonschema.
 
     """
+    expected = callback_analysisd_message(message_['output'])
     receiver_sockets[0].send([message_['input']])
-    result = wazuh_log_monitor.start(timeout=20, callback=callback_fim_error).result()
-    assert result == message_['output'], 'Failed test case type: {}'.format(message_['type'])
+    response = monitored_sockets[0].start(timeout=5, callback=callback_analysisd_message).result()
+    assert response == expected, 'Failed test case type: {}'.format(message_['type'])
+    message_['validate'] and validate_analysis_integrity_state(response[2])
