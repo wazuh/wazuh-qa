@@ -10,7 +10,7 @@ from wazuh_testing.analysis import callback_analysisd_message, validate_analysis
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH, FileMonitor
 
 # All tests in this module apply to linux only
-pytestmark = pytest.mark.linux
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
 
 # variables
 
@@ -32,7 +32,11 @@ used_daemons = ['ossec-analysisd']
     message_ for message_ in messages
 ])
 def test_integrity_messages(configure_environment_standalone_daemons, create_unix_sockets, message_):
-    """
+    """ Checks the integration test for the integrity handling by analysisd.
+
+    The variable messages is a yaml file that contains the input and the expected output for every test case.
+    The function validate_analysis_integrity_state is a function responsible for checking that the output follows a
+    certain jsonschema.
 
     """
     expected = callback_analysisd_message(message_['output'])

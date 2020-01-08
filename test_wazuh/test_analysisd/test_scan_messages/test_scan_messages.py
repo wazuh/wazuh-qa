@@ -32,9 +32,9 @@ used_daemons = ['ossec-analysisd']
     message_ for message_ in messages
 ])
 def test_scan_messages(configure_environment_standalone_daemons, create_unix_sockets, message_):
-    """ Check analysisd scan messages
+    """ Checks the scan messages handling by analysisd.
+    The variable messages is a yaml file that contains the input and the expected output for every test case.
 
-    * This test checks that an input message in analysisd socket is properly formatted and outputted to wazuh-db socket
     """
     expected = callback_analysisd_message(message_['output'])
     receiver_sockets[0].send([message_['input']])
