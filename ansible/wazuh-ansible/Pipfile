@@ -19,7 +19,6 @@ worker ="molecule test -s worker"
 agent ="molecule test -s wazuh-agent"
 elasticsearch-kibana ="molecule test -s elasticsearch-kibana"
 elasticsearch-xpack ="molecule test -s elasticsearch-xpack"
-kibana ="molecule test -s kibana"
 
 # Verify ..
 verify ="molecule verify"
@@ -27,7 +26,6 @@ verify_worker ="molecule verify -s worker"
 verify_agent ="molecule verify -s agent"
 verify_elasticsearch-kibana ="molecule verify -s elasticsearch-kibana"
 verify_elasticsearch_xpack ="molecule verify -s elasticsearch-xpack"
-verify_kibana ="molecule verify -s kibana"
 
 # Destroy ..
 destroy ="molecule destroy"
@@ -35,5 +33,4 @@ destroy_worker ="molecule destroy -s worker"
 destroy_agent ="molecule destroy -s agent"
 destroy_elasticsearch-kibana ="molecule destroy -s elasticsearch-kibana"
 destroy_elasticsearch_xpack ="molecule destroy -s elasticsearch-xpack"
-destroy_kibana ="molecule destroy -s kibana"
 destroy_all ="molecule destroy --all"
