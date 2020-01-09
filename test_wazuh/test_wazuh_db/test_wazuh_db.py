@@ -7,7 +7,7 @@ import os
 import pytest
 import yaml
 
-from wazuh_testing.analysis import callback_fim_event_message
+from wazuh_testing.wazuh_db import callback_fim_query
 from wazuh_testing.tools import WAZUH_PATH
 
 # marks
@@ -38,7 +38,7 @@ def test_wazuh_db_messages(configure_environment_standalone_daemons, create_unix
 
     * This test checks that an input message in wazuh-db socket generates the adequate output to wazuh-db socket
     """
-    expected = callback_fim_event_message(message_['output'])
+    expected = message_['output']
     receiver_sockets[0].send([message_['input']], size=True)
-    response = monitored_sockets[0].start(timeout=5, callback=callback_fim_event_message).result()
+    response = monitored_sockets[0].start(timeout=5, callback=callback_fim_query).result()
     assert response == expected, 'Failed test case type: {}'.format(message_['type'])
