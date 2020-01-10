@@ -185,3 +185,4 @@
   input: "agent 001 syscheck integrity_clear {}"
   output: "err Cannot perform range checksum"
   type: "Syscheck integrity_clear fail - no id"
+  
