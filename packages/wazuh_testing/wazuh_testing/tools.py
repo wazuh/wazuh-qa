@@ -772,17 +772,20 @@ class SocketController:
 
 class SocketMonitor:
 
-    def __init__(self, path, connection_protocol='TCP', socket_timeout=30):
+    def __init__(self, path, connection_protocol='TCP', controller=None, socket_timeout=30):
         """Create a new unix socket or connect to a existing one.
 
         Parameters
         ----------
         path : str
-            Path where the file will be created
+            Path where the file will be created.
         connection_protocol : str, optional
-            Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM)
+            Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM).
+        controller : SocketController, optional
+            Already initialized SocketController to avoid creating a new one. Useful in case of monitoring
+            the same socket where messages are being sent.
         socket_timeout : int, optional
-            Timeout in seconds to abort a recv operation from the socket
+            Timeout in seconds to abort a recv operation from the socket.
 
         Raises
         ------
@@ -794,7 +797,11 @@ class SocketMonitor:
         self._result = None
         self.timer = None
         self.path = path
-        self.controller = SocketController(path=path, connection_protocol=connection_protocol, timeout=socket_timeout)
+        if not controller:
+            self.controller = SocketController(path=path, connection_protocol=connection_protocol,
+                                               timeout=socket_timeout)
+        else:
+            self.controller = controller
 
     def start(self, timeout=-1, callback=_callback_default, accum_results=1):
         """Start the socket monitoring with specified callback.

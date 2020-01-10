@@ -131,10 +131,15 @@ def create_unix_sockets(request):
 
     # Create the unix sockets
     monitored_sockets, receiver_sockets = list(), list()
-    for path_, protocol in monitored_sockets_params:
-        monitored_sockets.append(SocketMonitor(path=path_, connection_protocol=protocol))
     for path_, protocol in receiver_sockets_params:
         receiver_sockets.append(SocketController(path=path_, connection_protocol=protocol))
+    for path_, protocol in monitored_sockets_params:
+        if (path_, protocol) in receiver_sockets_params:
+            monitored_sockets.append(
+                SocketMonitor(path=path_, connection_protocol=protocol,
+                              controller=receiver_sockets[receiver_sockets_params.index((path_, protocol))]))
+        else:
+            monitored_sockets.append(SocketMonitor(path=path_, connection_protocol=protocol))
 
     setattr(request.module, 'monitored_sockets', monitored_sockets)
     setattr(request.module, 'receiver_sockets', receiver_sockets)
@@ -143,5 +148,10 @@ def create_unix_sockets(request):
 
     # Close the sockets gracefully
     for monitored_socket, receiver_socket in zip(monitored_sockets, receiver_sockets):
-        monitored_socket.close()
-        receiver_socket.close()
+        try:
+            monitored_socket.close()
+            receiver_socket.close()
+        except OSError as e:
+            if e.errno == 9:
+                # Do not try to close the socket again if it was reused
+                pass
