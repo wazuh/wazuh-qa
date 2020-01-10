@@ -665,7 +665,7 @@ def time_to_timedelta(time):
 
 class SocketController:
 
-    def __init__(self, path, timeout=None, connection_protocol='TCP'):
+    def __init__(self, path, timeout=30, connection_protocol='TCP'):
         """Create a new unix socket or connect to a existing one.
 
         Parameters
@@ -687,17 +687,18 @@ class SocketController:
             self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         elif connection_protocol.lower() == 'udp':
             self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+            wait_for_condition(os.path.exists, args=[self.path], timeout=3)
         else:
             raise TypeError('Invalid connection protocol detected. Valid ones are TCP or UDP')
 
         try:
+            self.sock.settimeout(timeout)
             self.sock.connect(self.path)
-        except OSError:
+        except OSError as e:
             if os.path.exists(path):
                 os.unlink(path)
             self.sock.bind(self.path)
             os.chmod(self.path, 0o666)
-        self.sock.settimeout(timeout)
 
     def close(self):
         """Close the socket gracefully"""
@@ -774,15 +775,17 @@ class SocketController:
 
 class SocketMonitor:
 
-    def __init__(self, path, connection_protocol='TCP', controller=None):
+    def __init__(self, path, connection_protocol='TCP', controller=None, socket_timeout=30):
         """Create a new unix socket or connect to a existing one.
 
         Parameters
         ----------
         path : str
             Path where the file will be created
-        connection_protocol : str
+        connection_protocol : str, optional
             Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM)
+        socket_timeout : int, optional
+            Timeout in seconds to abort a recv operation from the socket
 
         Raises
         ------
@@ -823,6 +826,9 @@ class SocketMonitor:
                 self.timer = Timer(timeout, self.abort)
                 self.timer.start()
             while self._continue:
+                if self._abort:
+                    self.stop()
+                    raise TimeoutError()
                 for message in self.controller.receive(accum_results):
                     result = callback(message)
                     if result:
@@ -855,7 +861,8 @@ class SocketMonitor:
 
     def abort(self):
         """Raise a timeout exception if the operation takes more time that the specified timeout."""
-        raise TimeoutError()
+        self._abort = True
+        return self
 
     def __enter__(self):
         return self

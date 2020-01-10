@@ -10,7 +10,7 @@ from wazuh_testing.analysis import callback_fim_error
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, FileMonitor
 
 # All tests in this module apply to linux only
-pytestmark = pytest.mark.linux
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
 
 # variables
 
@@ -33,9 +33,10 @@ used_daemons = ['ossec-analysisd']
     message_ for message_ in messages
 ])
 def test_error_messages(configure_environment_standalone_daemons, create_unix_sockets, message_):
-    """
+    """ Checks the error messages handling by analysisd.
+    The variable messages is a yaml file that contains the input and the expected output for every test case.
 
     """
     receiver_sockets[0].send([message_['input']])
-    result = wazuh_log_monitor.start(timeout=10, callback=callback_fim_error).result()
-    assert result == message_['output'], message_['type']
+    result = wazuh_log_monitor.start(timeout=20, callback=callback_fim_error).result()
+    assert result == message_['output'], 'Failed test case type: {}'.format(message_['type'])
