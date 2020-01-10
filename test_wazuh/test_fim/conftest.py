@@ -40,9 +40,10 @@ def configure_environment(get_configuration, request):
                                          get_configuration.get('elements'))
 
     # create test directories
-    test_directories = getattr(request.module, 'test_directories')
-    for test_dir in test_directories:
-        os.makedirs(test_dir, exist_ok=True, mode=0o777)
+    if hasattr(request.module, 'test_directories'):
+        test_directories = getattr(request.module, 'test_directories')
+        for test_dir in test_directories:
+            os.makedirs(test_dir, exist_ok=True, mode=0o777)
 
     # set new configuration
     write_wazuh_conf(test_config)
@@ -58,8 +59,9 @@ def configure_environment(get_configuration, request):
     if sys.platform == 'win32':
         control_service('stop')
 
-    for test_dir in test_directories:
-        shutil.rmtree(test_dir, ignore_errors=True)
+    if hasattr(request.module, 'test_directories'):
+        for test_dir in test_directories:
+            shutil.rmtree(test_dir, ignore_errors=True)
 
     if sys.platform == 'win32':
         control_service('start')
