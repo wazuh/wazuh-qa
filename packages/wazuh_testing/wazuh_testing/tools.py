@@ -749,9 +749,6 @@ class SocketController:
         output = list()
         for _ in range(0, total_messages):
             try:
-                # data = self.sock.recv(4)
-                # size = unpack('<I', data[0:4])[0]
-
                 size = unpack("<I", self.sock.recv(4, socket.MSG_WAITALL))[0]
                 output.append(self.sock.recv(size, socket.MSG_WAITALL).decode().rstrip('\x00'))
             except OSError:
