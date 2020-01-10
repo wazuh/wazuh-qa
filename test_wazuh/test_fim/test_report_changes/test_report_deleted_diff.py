@@ -37,9 +37,10 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 def change_conf(report_value):
     """" Returns a new ossec configuration with a changed report_value"""
-    conf_params, conf_metadata = generate_params({'REPORT_CHANGES': {'report_changes': report_value},
-                                                  'TEST_DIRECTORIES': directory_str, 'NODIFF_FILE': nodiff_file,
-                                                  'MODULE_NAME': __name__})
+    conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': report_value},
+                                                               'TEST_DIRECTORIES': directory_str,
+                                                               'NODIFF_FILE': nodiff_file,
+                                                               'MODULE_NAME': __name__})
 
     return load_wazuh_configurations(configurations_path, __name__,
                                      params=conf_params,

@@ -274,8 +274,6 @@ def wait_for_condition(condition_checker, args=None, kwargs=None, timeout=-1):
 def generate_wazuh_conf(args: List = None) -> ET.ElementTree:
     """
     Generate a configuration file for Wazuh.
-    :param args: Arguments for generating ossec.conf (install_type, distribution, version)
-    :return: ElementTree with a new Wazuh configuration generated from 'gen_ossec.sh'
 
     Parameters
     ----------

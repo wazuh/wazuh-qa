@@ -1050,6 +1050,7 @@ def generate_params(extra_params: dict = None, apply_to_all: Union[Sequence[Any]
         Tuple with the list of parameters and the list of metadata.
     """
     def transform_param(mutable_object: dict):
+        """Transform `mutable_object` into a valid data structure."""
         for k, v in mutable_object.items():
             if isinstance(v, dict):
                 for v_key, v_value in v.items():
@@ -1060,15 +1061,18 @@ def generate_params(extra_params: dict = None, apply_to_all: Union[Sequence[Any]
     fim_param = []
     fim_metadata = []
 
-    modes = None if modes == [] else ['scheduled', 'realtime', 'whodata'] if modes is None else modes
-    for mode in modes or []:
+    # Get FIM params and metadata
+    modes = modes if modes else ['scheduled', 'realtime', 'whodata']
+    for mode in modes:
         param, metadata = get_fim_mode_param(mode)
         if param:
             fim_param.append(param)
             fim_metadata.append(metadata)
 
+    # If we have extra_params to add, assert they have the exact number of elements as modes
+    # Also, if there aren't extra_params, let `add` to False to at least put `FIM_MODES`
     add = False
-    if extra_params is not None:
+    if extra_params:
         transform_param(extra_params)
         for _, value in extra_params.items():
             if isinstance(value, dict):
@@ -1081,6 +1085,7 @@ def generate_params(extra_params: dict = None, apply_to_all: Union[Sequence[Any]
     params = []
     metadata = []
 
+    # Iterate over fim_mode params and metadata and add one configuration for every existing fim_mode
     for i, (fim_mode_param, fim_mode_meta) in enumerate(zip(fim_param, fim_metadata)):
         p_aux: dict = deepcopy(fim_mode_param)
         m_aux: dict = deepcopy(fim_mode_meta)
@@ -1093,6 +1098,7 @@ def generate_params(extra_params: dict = None, apply_to_all: Union[Sequence[Any]
         params.append(p_aux)
         metadata.append(m_aux)
 
+    # Append new parameters and metadata for every existing configuration
     if apply_to_all:
         aux_params = deepcopy(params)
         aux_metadata = deepcopy(metadata)

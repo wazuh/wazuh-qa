@@ -38,7 +38,7 @@ def extra_configuration_before_yield():
 # Configurations
 
 conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
-p, m = generate_params(conf_params)
+p, m = generate_params(extra_params=conf_params)
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
