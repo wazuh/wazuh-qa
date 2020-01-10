@@ -80,14 +80,20 @@ def get_configuration(request):
 ])
 def test_ignore_registry(key_string, key_object, tags_to_apply, get_configuration,
                          configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Checks registries are ignored according to configuration.
+    """
+    Checks registries are ignored according to configuration.
 
     This test is intended to be used with valid configurations files. Each execution of this test will configure the
     environment properly, restart the service and wait for the initial scan.
 
-    :param key_string: String name of the key
-    :param key_object: Object winreg of the key
-    :param tags_to_apply: Run test if matches with a configuration identifier, skip otherwise
+    Parameters
+    ----------
+    key_string : str
+        String name of the key.
+    key_object : object
+        Object winreg of the key.
+    tags_to_apply : set
+        Run test if matches with a configuration identifier, skip otherwise.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
