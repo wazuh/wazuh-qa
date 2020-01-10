@@ -778,11 +778,14 @@ class SocketMonitor:
         Parameters
         ----------
         path : str
-            Path where the file will be created
+            Path where the file will be created.
         connection_protocol : str, optional
-            Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM)
+            Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM).
+        controller : SocketController, optional
+            Already initialized SocketController to avoid creating a new one. Useful in case of monitoring
+            the same socket where messages are being sent.
         socket_timeout : int, optional
-            Timeout in seconds to abort a recv operation from the socket
+            Timeout in seconds to abort a recv operation from the socket.
 
         Raises
         ------
@@ -795,7 +798,8 @@ class SocketMonitor:
         self.timer = None
         self.path = path
         if not controller:
-            self.controller = SocketController(path=path, connection_protocol=connection_protocol)
+            self.controller = SocketController(path=path, connection_protocol=connection_protocol,
+                                               timeout=socket_timeout)
         else:
             self.controller = controller
 
