@@ -1,7 +1,7 @@
 ---
 # conf 2
 - tags:
-  - ossec_conf_arch64
+  - ossec_conf_2
   apply_to_modules:
   - test_windows_registry
   section: syscheck
@@ -13,19 +13,4 @@
   - windows_registry:
       value: WINDOWS_REGISTRY
       attributes:
-        - ARCH_ATTRIBUTE
-# conf 3
-- tags:
-  - ossec_conf_tag
-  apply_to_modules:
-  - test_windows_registry
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - frequency:
-      value: FREQUENCY
-  - windows_registry:
-      value: WINDOWS_REGISTRY
-      attributes:
-        - TAG_ATTRIBUTE
+        - ATTRIBUTE
