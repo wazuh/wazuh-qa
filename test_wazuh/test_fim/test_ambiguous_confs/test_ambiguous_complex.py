@@ -35,7 +35,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-conf_params, conf_metadata = generate_params({'TAGS': tag}, {'tags': tag})
+conf_params, conf_metadata = generate_params(extra_params={'TAGS': tag})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 

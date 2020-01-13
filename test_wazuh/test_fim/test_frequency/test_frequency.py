@@ -4,7 +4,6 @@
 
 import os
 import shutil
-from copy import deepcopy
 from datetime import timedelta
 
 import pytest
@@ -29,28 +28,20 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 
 frequencies = ['5', '3600', '10000']
 
-p, m = generate_params({'TEST_DIRECTORIES': directory_str},
-                       {'test_directories': directory_str},
+p, m = generate_params(extra_params={'TEST_DIRECTORIES': directory_str},
+                       apply_to_all=({'FREQUENCY': frequency} for frequency in frequencies),
                        modes=['realtime', 'whodata'])
 
-params, metadata = list(), list()
-for freq in frequencies:
-    for p_dict, m_dict in zip(p, m):
-        p_dict['FREQUENCY'] = freq
-        m_dict['frequency'] = freq
-        params.append(deepcopy(p_dict))
-        metadata.append(deepcopy(m_dict))
 
 configurations1 = load_wazuh_configurations(configurations_path, __name__,
-                                            params=params,
-                                            metadata=metadata)
+                                            params=p,
+                                            metadata=m)
 
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_default.yaml')
 
 # Configuration with default frequency
 
-conf_param, conf_metadata = generate_params({'TEST_DIRECTORIES': directory_str},
-                                            {'test_directories': directory_str},
+conf_param, conf_metadata = generate_params(extra_params={'TEST_DIRECTORIES': directory_str},
                                             modes=['realtime', 'whodata'])
 
 configurations2 = load_wazuh_configurations(configurations_path, __name__,

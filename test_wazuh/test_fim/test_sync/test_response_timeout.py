@@ -9,7 +9,7 @@ import psutil
 import pytest
 import sys
 
-from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, callback_detect_synchronization
+from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, callback_detect_synchronization, generate_params
 from wazuh_testing.tools import FileMonitor, TimeMachine, check_apply_test, load_wazuh_configurations, \
     time_to_timedelta, PREFIX
 
@@ -31,13 +31,10 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 response_timeouts = ['10', '10m', '10h', '10d', '10w']
 
 # configurations
+p, m = generate_params(apply_to_all=({'RESPONSE_TIMEOUT': response_timeout} for response_timeout in response_timeouts),
+                       modes=['scheduled'])
 
-params = []
-metadata = []
-for rtime in response_timeouts:
-    params.append({'RESPONSE_TIMEOUT': rtime})
-    metadata.append({'response_timeout': rtime})
-configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
 # fixtures

@@ -29,8 +29,7 @@ testdir1, testdir2 = test_directories[2:]
 # configurations
 
 conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
-conf_metadata = {'test_directories': directory_str, 'module_name': __name__}
-p, m = generate_params(conf_params, conf_metadata)
+p, m = generate_params(extra_params=conf_params)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 

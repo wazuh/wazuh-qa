@@ -2,7 +2,6 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
-from copy import deepcopy
 
 import pytest
 
@@ -33,20 +32,12 @@ tags = ['tag1', 'tág', '0tag', '000', 'a' * 1000]
 # Create an increasing tag set. I.e.: ['tag1', 'tag1,tag2', 'tag1,tag2,tag3']
 test_tags = [tags[0], ','.join(tags)]
 
-p, m = generate_params({'TEST_DIRECTORIES': directory_str},
-                       {'test_directories': directory_str})
-
-params, metadata = list(), list()
-for tag in tags:
-    for p_dict, m_dict in zip(p, m):
-        p_dict['FIM_TAGS'] = tag
-        m_dict['fim_tags'] = tag
-        params.append(deepcopy(p_dict))
-        metadata.append(deepcopy(m_dict))
+p, m = generate_params(extra_params={'TEST_DIRECTORIES': directory_str},
+                       apply_to_all=({'FIM_TAGS': tag} for tag in tags))
 
 configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=params,
-                                           metadata=metadata
+                                           params=p,
+                                           metadata=m
                                            )
 
 

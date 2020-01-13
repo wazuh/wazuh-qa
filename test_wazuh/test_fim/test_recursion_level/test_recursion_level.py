@@ -40,11 +40,9 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-common_params, common_metadata = generate_params({'CHECK': {'check_all': 'yes'}},
-                                                 {'check': 'all'}, )
+common_params, common_metadata = generate_params(extra_params={'CHECK': {'check_all': 'yes'}})
 
-inode_params, inode_metadata = generate_params({'CHECK': {'check_inode': 'no'}},
-                                               {'check': 'inode'}, )
+inode_params, inode_metadata = generate_params(extra_params={'CHECK': {'check_inode': 'no'}})
 
 params = common_params if sys.platform == "win32" else common_params + inode_params
 metadata = common_metadata if sys.platform == "win32" else common_metadata + inode_metadata

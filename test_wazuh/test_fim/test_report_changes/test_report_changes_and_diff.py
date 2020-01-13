@@ -28,12 +28,11 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-conf_params, conf_metadata = generate_params({'REPORT_CHANGES': {'report_changes': 'yes'},
-                                              'TEST_DIRECTORIES': directory_str, 'NODIFF_FILE': nodiff_file,
-                                              'MODULE_NAME': __name__},
-                                             {'report_changes': 'yes',
-                                              'test_directories': directory_str, 'nodiff_file': nodiff_file,
-                                              'module_name': __name__})
+conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': 'yes'},
+                                                           'TEST_DIRECTORIES': directory_str,
+                                                           'NODIFF_FILE': nodiff_file,
+                                                           'MODULE_NAME': __name__})
+
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=conf_params,
                                            metadata=conf_metadata

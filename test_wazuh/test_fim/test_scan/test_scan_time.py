@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH, DEFAULT_TIMEOUT, callback_detect_end_scan)
+from wazuh_testing.fim import (LOG_FILE_PATH, DEFAULT_TIMEOUT, callback_detect_end_scan, generate_params)
 from wazuh_testing.tools import (FileMonitor, check_apply_test, load_wazuh_configurations, reformat_time, TimeMachine,
                                  PREFIX)
 
@@ -26,16 +26,10 @@ scan_times = ['9PM', '20:00', '3:07PM']
 
 # configurations
 
-configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=[{'SCAN_TIME': scan_times[0], 'TEST_DIRECTORIES': directory_str},
-                                                   {'SCAN_TIME': scan_times[1], 'TEST_DIRECTORIES': directory_str},
-                                                   {'SCAN_TIME': scan_times[2], 'TEST_DIRECTORIES': directory_str}
-                                                   ],
-                                           metadata=[{'scan_time': scan_times[0], 'test_directories': directory_str},
-                                                     {'scan_time': scan_times[1], 'test_directories': directory_str},
-                                                     {'scan_time': scan_times[2], 'test_directories': directory_str}
-                                                     ]
-                                           )
+p, m = generate_params(extra_params={'TEST_DIRECTORIES': directory_str, 'SCAN_TIME': scan_times},
+                       modes=['scheduled']*len(scan_times))
+
+configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
 # fixtures

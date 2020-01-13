@@ -35,21 +35,12 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 # configurations
 
 def change_conf(dir_value):
-    p, m = generate_params({'DIRECTORY': dir_value},
-                           {'directory': dir_value},
+    p, m = generate_params(extra_params={'DIRECTORY': dir_value}, apply_to_all=({'SKIP': skip} for skip in ['yes', 'no']),
                            modes=['scheduled'])
 
-    params, metadata = list(), list()
-    for skip in ['yes', 'no']:
-        for p_dict, m_dict in zip(p, m):
-            p_dict['SKIP'] = skip
-            m_dict['skip'] = skip
-            params.append(deepcopy(p_dict))
-            metadata.append(deepcopy(m_dict))
-
     return load_wazuh_configurations(configurations_path, __name__,
-                                     params=params,
-                                     metadata=metadata
+                                     params=p,
+                                     metadata=m
                                      )
 
 
