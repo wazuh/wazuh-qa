@@ -25,8 +25,7 @@ testdir1, _ = test_directories
 
 # Configuration
 
-p, m = generate_params(extra_params={'MODULE_NAME': __name__, 'TEST_DIRECTORIES': directory_str},
-                       extra_metadata={'module_name': __name__, 'test_directories': directory_str})
+p, m = generate_params(extra_params={'MODULE_NAME': __name__, 'TEST_DIRECTORIES': directory_str})
 
 params, metadata = list(), list()
 for mode in ['scheduled', 'realtime', 'whodata']:

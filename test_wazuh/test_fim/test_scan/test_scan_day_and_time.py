@@ -2,12 +2,12 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
-from datetime import datetime, timedelta
 from calendar import monthrange
+from datetime import datetime, timedelta
 
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH, DEFAULT_TIMEOUT, callback_detect_end_scan)
+from wazuh_testing.fim import (LOG_FILE_PATH, DEFAULT_TIMEOUT, callback_detect_end_scan, generate_params)
 from wazuh_testing.tools import (FileMonitor, check_apply_test, load_wazuh_configurations, TimeMachine, reformat_time,
                                  PREFIX)
 
@@ -29,19 +29,10 @@ scan_times = ['9PM', '20:00']
 
 # configurations
 
+p, m = generate_params(extra_params={'TEST_DIRECTORIES': directory_str, 'SCAN_DAY': scan_days, 'SCAN_TIME': scan_times},
+                       modes=['scheduled']*len(scan_days))
 
-configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=[{'SCAN_DAY': scan_days[0], 'SCAN_TIME': scan_times[0],
-                                                    'TEST_DIRECTORIES': directory_str},
-                                                   {'SCAN_DAY': scan_days[1], 'SCAN_TIME': scan_times[1],
-                                                    'TEST_DIRECTORIES': directory_str},
-                                                   ],
-                                           metadata=[{'scan_day': scan_days[0], 'scan_time': scan_times[0],
-                                                      'test_directories': directory_str},
-                                                     {'scan_day': scan_days[1], 'scan_time': scan_times[1],
-                                                      'test_directories': directory_str},
-                                                     ]
-                                           )
+configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
 # functions

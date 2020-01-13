@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_synchronization, detect_initial_scan)
+from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_synchronization, detect_initial_scan, generate_params)
 from wazuh_testing.tools import (FileMonitor, truncate_file, check_apply_test, load_wazuh_configurations, TimeMachine,
                                  time_to_timedelta, PREFIX)
 
@@ -23,12 +23,10 @@ sync_intervals = ['10', '10s', '10m', '10h', '10d', '10w']
 
 # configurations
 
-params = []
-metadata = []
-for interval in sync_intervals:
-    params.append({'SYNC_INTERVAL': interval})
-    metadata.append({'sync_interval': interval})
-configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
+p, m = generate_params(apply_to_all=({'SYNC_INTERVAL': sync_interval} for sync_interval in [sync_intervals]),
+                       modes=['scheduled'])
+
+configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
 # fixtures
