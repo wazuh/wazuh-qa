@@ -6,10 +6,20 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
+@pytest.fixture(scope="module")
+def ManagerRoleDefaults(host):
+    return host.ansible(
+        "include_vars",
+        (
+            "../../roles/wazuh/"
+            "ansible-wazuh-manager/defaults/main.yml"
+        ),
+    )["ansible_facts"]
 
-def get_wazuh_version():
+def get_wazuh_version(ManagerRoleDefaults):
     """This return the version of Wazuh."""
-    return "3.11.1"
+     
+    return ManagerRoleDefaults["wazuh_manager_version"]
 
 
 def test_wazuh_packages_are_installed(host):
@@ -18,18 +28,16 @@ def test_wazuh_packages_are_installed(host):
     api = host.package("wazuh-api")
 
     distribution = host.system_info.distribution.lower()
+    assert manager.version.startswith(get_wazuh_version(ManagerRoleDefaults))
     if distribution == 'centos':
         if host.system_info.release == "7":
             assert manager.is_installed
-            assert manager.version.startswith(get_wazuh_version())
             assert api.is_installed
-            assert api.version.startswith(get_wazuh_version())
         elif host.system_info.release.startswith("6"):
             assert manager.is_installed
-            assert manager.version.startswith(get_wazuh_version())
     elif distribution == 'ubuntu':
         assert manager.is_installed
-        assert manager.version.startswith(get_wazuh_version())
+        
 
 
 def test_wazuh_services_are_running(host):

@@ -2,15 +2,30 @@ import os
 import pytest
 
 import testinfra.utils.ansible_runner
+from test_utils import get_full_version, MOL_PLATFORM
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('agent')
 
+@pytest.fixture(scope="module")
+def AgentRoleDefaults(host):
+    return host.ansible(
+        "include_vars",
+        (
+            "../../roles/wazuh/"
+            "ansible-wazuh-agent/defaults/main.yml"
+        ),
+    )["ansible_facts"]
 
-def get_wazuh_version():
-    """This return the version of Wazuh."""
-    return "3.11.1"
-
+def test_agent_version(host, AgentRoleDefaults):
+    agent = host.package("wazuh-agent")
+    agent_version = AgentRoleDefaults["wazuh_agent_version"]
+    if (AgentRoleDefaults["wazuh_agent_sources_installation"]["enabled"]):
+        ossec_init = host.file("/etc/ossec-init.conf")
+        assert (agent_version[:-2] in ossec_init.content_string)
+    else:
+        full_agent_version = get_full_version(agent)
+        assert full_agent_version.startswith(agent_version)
 
 def test_ossec_package_installed(Package):
     ossec = Package('wazuh-agent')
