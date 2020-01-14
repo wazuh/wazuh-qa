@@ -1,5 +1,3 @@
-ARG DEBIAN_FRONTEND=noninteractive
-
 FROM ubuntu:18.04
 
 # Global required packages
@@ -66,12 +64,11 @@ RUN gem install rake \
       --no-document \
       --quiet
 
-RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
-    python3 get-pip.py
-
-RUN pip install pytest && \
-    pip install testinfra && \
-    pip install paramiko
+# Python Dependencies and Libraries
+RUN apt install python3-venv python3-pip -y && \
+    python3 -m pip install pytest && \
+    python3 -m pip install testinfra && \
+    python3 -m pip install paramiko
 
 # Adding systemd compatibility.
 VOLUME [ "/sys/fs/cgroup", "/run", "/run/lock" ]
