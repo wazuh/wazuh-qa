@@ -66,6 +66,13 @@ RUN gem install rake \
       --no-document \
       --quiet
 
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+    python3 get-pip.py
+
+RUN pip install pytest && \
+    pip install testinfra && \
+    pip install paramiko
+
 # Adding systemd compatibility.
 VOLUME [ "/sys/fs/cgroup", "/run", "/run/lock" ]
 
