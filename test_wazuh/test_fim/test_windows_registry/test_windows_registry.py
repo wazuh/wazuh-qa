@@ -95,7 +95,7 @@ def test_windows_registry(arch_list, tag, tags_to_apply,
             len(arch_list) > 1 and 'arch' not in get_configuration['metadata']['attribute'].keys()):
         pytest.skip("Does not apply to this config file")
 
-    # Check that windows_registry does not trigger alerts for new entries and empty keys
+    # Check that windows_registry does not trigger alerts for new keys
     create_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 32)
     TimeMachine.travel_to_future(timedelta(seconds=frequency))
     with pytest.raises(TimeoutError):
@@ -111,7 +111,7 @@ def test_windows_registry(arch_list, tag, tags_to_apply,
     for i, arch in enumerate(arch_list):
         assert event[i]['data']['type'] == 'added', f'Event type not equal'
 
-    # Check that windows_registry trigger alerts when modifying existing keys
+    # Check that windows_registry trigger alerts when modifying existing entries
     # and check arch and tag values match with the ones in event
     modify_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 'test_modify')
     TimeMachine.travel_to_future(timedelta(seconds=frequency))
