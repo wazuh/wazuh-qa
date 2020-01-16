@@ -202,8 +202,8 @@
               ],
               "pattern": "^[a-f0-9]{64}$"
             },
-            "win_attributes": {
-              "$id": "#/properties/data/properties/attributes/properties/win_attributes",
+            "attributes": {
+              "$id": "#/properties/data/properties/attributes/properties/attributes",
               "type": "string",
               "default": "",
               "examples": [
@@ -241,7 +241,8 @@
               "gid",
               "user_name",
               "group_name",
-              "inode"
+              "inode",
+              "attributes"
               ],
             "examples": [
               "size",
@@ -255,7 +256,8 @@
               "gid",
               "user_name",
               "group_name",
-              "inode"
+              "inode",
+              "attributes"
             ],
             "pattern": "^(.*)$"
           }
