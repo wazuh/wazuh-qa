@@ -210,9 +210,9 @@ class TimeMachine:
             TimeMachine._macos_set_time(future)
 
 
-def set_wazuh_conf(wazuh_conf: ET.ElementTree):
+def set_wazuh_conf(wazuh_conf: List[str]):
     """
-    Set up Wazuh configuration. Wazuh will be restarted for applying it.
+    Set up Wazuh configuration. Wazuh will be restarted to apply it.
 
     Parameters
     ----------
@@ -291,32 +291,35 @@ def generate_wazuh_conf(args: List = None) -> ET.ElementTree:
     return ET.ElementTree(ET.fromstring(wazuh_config))
 
 
-def get_wazuh_conf() -> ET.ElementTree:
+def get_wazuh_conf():
     """
-    Get current 'ossec.conf' file.
+    Get current `ossec.conf` file content.
 
     Returns
     -------
-    ET.ElementTree
-        Current Wazuh configuration.
+    List of str
+        A list containing all the lines of the `ossec.conf` file.
     """
-    return ET.parse(WAZUH_CONF)
+    lines = []
+    with open(WAZUH_CONF) as f:
+        lines = f.readlines()
+    return lines
 
 
-def write_wazuh_conf(wazuh_conf: ET.ElementTree):
+def write_wazuh_conf(wazuh_conf: List[str]):
     """
     Write a new configuration in 'ossec.conf' file.
 
     Parameters
     ----------
-    wazuh_conf : ET.ElementTree
-        Wazuh configuration.
+    wazuh_conf : List of str
+        Lines to be written in the ossec.conf file.
     """
-    return wazuh_conf.write(WAZUH_CONF, encoding='utf-8')
+    with open(WAZUH_CONF, 'w') as f:
+        f.writelines(wazuh_conf)
 
 
-def set_section_wazuh_conf(section: str = 'syscheck',
-                           new_elements: List = None) -> ET.ElementTree:
+def set_section_wazuh_conf(section: str = 'syscheck', new_elements: List = None):
     """
     Set a configuration in a section of Wazuh. It replaces the content if it exists.
 
@@ -329,8 +332,8 @@ def set_section_wazuh_conf(section: str = 'syscheck',
 
     Returns
     -------
-    ET.ElementTree
-        ElementTree with the custom Wazuh configuration.
+    List of str
+        List of str with the custom Wazuh configuration.
     """
 
     def create_elements(section: ET.Element, elements: List):
@@ -363,8 +366,75 @@ def set_section_wazuh_conf(section: str = 'syscheck',
                             if attribute is not None and isinstance(attribute, dict):  # noqa: E501
                                 for attr_name, attr_value in attribute.items():
                                     tag.attrib[attr_name] = str(attr_value)
-    # get Wazuh configuration
-    wazuh_conf = get_wazuh_conf()
+
+    def purge_multiple_root_elements(str_list, root_delimeter="</ossec_config>"):
+        """
+        Remove from the list all the lines located after the root element ends.
+
+        This operation is needed before attempting to convert the list to ElementTree because if the ossec.conf had more
+        than one `<ossec_config>` element as root the conversion would fail.
+
+        Parameters
+        ----------
+        str_list : list of str
+            The content of the ossec.conf file in a list of str.
+        root_delimeter : str, optional
+            The expected string to identify when the first root element ends, by default "</ossec_config>"
+
+        Returns
+        -------
+        list of str
+            The first N lines of the specified str_list until the root_delimeter is found. The rest of the list will be
+            ignored.
+        """
+        line_counter = 0
+        for line in str_list:
+            line_counter += 1
+            if root_delimeter in line:
+                return str_list[0:line_counter]
+        else:
+            return str_list
+
+    def to_elementTree(str_list):
+        """
+        Turn a list of str into an ElementTree object.
+
+        As ElementTree does not support xml with more than one root element this function will parse the list first with
+        `purge_multiple_root_elements` to ensure there is only one root element.
+
+        Parameters
+        ----------
+        str_list : list of str
+            A list of strings with every line of the ossec conf.
+
+        Returns
+        -------
+        ElementTree
+            A ElementTree object with the data of the `str_list`
+        """
+        str_list = purge_multiple_root_elements(str_list)
+        return ET.fromstringlist(str_list)
+
+    def to_str_list(elementTree):
+        """
+        Turn an ElementTree object into a list of str.
+
+        Parameters
+        ----------
+        elementTree : ElementTree
+            A ElementTree object with all the data of the ossec.conf.
+
+        Returns
+        -------
+        list of str
+            A list of str containing all the lines of the ossec.conf.
+        """
+        return ET.tostringlist(elementTree, encoding="unicode")
+
+    # get Wazuh configuration as a list of str
+    raw_wazuh_conf = get_wazuh_conf()
+    # generate a ElementTree representation of the previous list to work with its sections
+    wazuh_conf = to_elementTree(purge_multiple_root_elements(raw_wazuh_conf))
     section_conf = wazuh_conf.find(section)
     # create section if it does not exist, clean otherwise
     if not section_conf:
@@ -374,7 +444,7 @@ def set_section_wazuh_conf(section: str = 'syscheck',
     # insert elements
     if new_elements:
         create_elements(section_conf, new_elements)
-    return wazuh_conf
+    return to_str_list(wazuh_conf)
 
 
 def restart_wazuh_daemon(daemon):
