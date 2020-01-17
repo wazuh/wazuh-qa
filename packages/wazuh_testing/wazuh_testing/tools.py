@@ -291,7 +291,7 @@ def generate_wazuh_conf(args: List = None) -> ET.ElementTree:
     return ET.ElementTree(ET.fromstring(wazuh_config))
 
 
-def get_wazuh_conf():
+def get_wazuh_conf() -> List[str]:
     """
     Get current `ossec.conf` file content.
 
@@ -300,7 +300,6 @@ def get_wazuh_conf():
     List of str
         A list containing all the lines of the `ossec.conf` file.
     """
-    lines = []
     with open(WAZUH_CONF) as f:
         lines = f.readlines()
     return lines
@@ -367,7 +366,7 @@ def set_section_wazuh_conf(section: str = 'syscheck', new_elements: List = None)
                                 for attr_name, attr_value in attribute.items():
                                     tag.attrib[attr_name] = str(attr_value)
 
-    def purge_multiple_root_elements(str_list, root_delimeter="</ossec_config>"):
+    def purge_multiple_root_elements(str_list: List[str], root_delimeter: str = "</ossec_config>") -> List[str]:
         """
         Remove from the list all the lines located after the root element ends.
 
@@ -395,7 +394,7 @@ def set_section_wazuh_conf(section: str = 'syscheck', new_elements: List = None)
         else:
             return str_list
 
-    def to_elementTree(str_list):
+    def to_elementTree(str_list: List[str]) -> ET.ElementTree:
         """
         Turn a list of str into an ElementTree object.
 
@@ -413,9 +412,9 @@ def set_section_wazuh_conf(section: str = 'syscheck', new_elements: List = None)
             A ElementTree object with the data of the `str_list`
         """
         str_list = purge_multiple_root_elements(str_list)
-        return ET.fromstringlist(str_list)
+        return ET.ElementTree(ET.fromstringlist(str_list))
 
-    def to_str_list(elementTree):
+    def to_str_list(elementTree: ET.ElementTree) -> List[str]:
         """
         Turn an ElementTree object into a list of str.
 
@@ -429,7 +428,7 @@ def set_section_wazuh_conf(section: str = 'syscheck', new_elements: List = None)
         list of str
             A list of str containing all the lines of the ossec.conf.
         """
-        return ET.tostringlist(elementTree, encoding="unicode")
+        return ET.tostringlist(elementTree.getroot(), encoding="unicode")
 
     # get Wazuh configuration as a list of str
     raw_wazuh_conf = get_wazuh_conf()
