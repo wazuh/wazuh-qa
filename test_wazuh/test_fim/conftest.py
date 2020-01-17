@@ -48,6 +48,10 @@ def configure_environment(get_configuration, request):
     # set new configuration
     write_wazuh_conf(test_config)
 
+    # Change Windows Date format to ensure TimeMachine will work properly
+    if sys.platform == 'win32':
+        os.system('reg add "HKCU\\Control Panel\\International" /f /v sShortDate /t REG_SZ /d "dd/MM/yyyy" >nul')
+
     # Call extra functions before yield
     if hasattr(request.module, 'extra_configuration_before_yield'):
         func = getattr(request.module, 'extra_configuration_before_yield')
