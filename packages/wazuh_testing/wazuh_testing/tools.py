@@ -146,7 +146,7 @@ class TimeMachine:
         """
         import shlex
         subprocess.call(shlex.split("timedatectl set-ntp false"))
-        subprocess.call(shlex.split("sudo date -s '%s'" % datetime_))
+        subprocess.call(shlex.split("sudo date -s " + str(datetime_) + "+%Y-%m-%dT%H:%M:%S.%s"))
         subprocess.call(shlex.split("sudo hwclock -w"))
 
     @staticmethod
