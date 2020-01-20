@@ -22,7 +22,7 @@ def test_wazuh_packages_are_installed(host,get_wazuh_version):
 
     distribution = host.system_info.distribution.lower()
     if distribution == 'centos':
-        if host.system_info.release == "7":
+        if host.system_info.release.startswith("7"):
             assert manager.is_installed
             assert manager.version.startswith(get_wazuh_version)
         elif host.system_info.release.startswith("6"):
