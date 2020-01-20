@@ -78,7 +78,7 @@ def test_wazuh_services_are_running(host):
     ("/var/ossec/etc/sslmanager.cert", "root", "root", 0o640),
     ("/var/ossec/etc/sslmanager.key", "root", "root", 0o640),
     ("/var/ossec/etc/rules/local_rules.xml", "root", "ossec", 0o640),
-    ("/var/ossec/etc/lists/audit-keys", "root", "ossec", 0o640),
+    ("/var/ossec/etc/lists/audit-keys", "ossec", "ossec", 0o660),
 ])
 def test_wazuh_files(host, wazuh_file, wazuh_owner, wazuh_group, wazuh_mode):
     """Test if Wazuh related files exist and have proper owners and mode."""
