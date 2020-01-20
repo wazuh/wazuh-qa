@@ -4,6 +4,7 @@
 
 import os
 import shutil
+import subprocess
 import sys
 
 import pytest
@@ -50,7 +51,7 @@ def configure_environment(get_configuration, request):
 
     # Change Windows Date format to ensure TimeMachine will work properly
     if sys.platform == 'win32':
-        os.system('reg add "HKCU\\Control Panel\\International" /f /v sShortDate /t REG_SZ /d "dd/MM/yyyy" >nul')
+        subprocess.call('reg add "HKCU\\Control Panel\\International" /f /v sShortDate /t REG_SZ /d "dd/MM/yyyy" >nul', shell=True)
 
     # Call extra functions before yield
     if hasattr(request.module, 'extra_configuration_before_yield'):
