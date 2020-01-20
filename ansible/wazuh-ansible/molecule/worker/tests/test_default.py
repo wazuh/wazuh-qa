@@ -7,32 +7,9 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
 
-@pytest.fixture(scope="module")
-def ManagerRoleDefaults(host):
-    return host.ansible(
-        "include_vars",
-        (
-            "../../roles/wazuh/"
-            "ansible-wazuh-manager/defaults/main.yml"
-        ),
-    )["ansible_facts"]
-
-
-def get_wazuh_version(ManagerRoleDefaults):
+def get_wazuh_version():
     """This return the version of Wazuh."""
-
-    return ManagerRoleDefaults["wazuh_manager_version"]
-
-
-@pytest.fixture(scope="module")
-def FilebeatRoleDefaults(host):
-    return host.ansible(
-        "include_vars",
-        (
-            "../../roles/wazuh/"
-            "ansible-filebeat/defaults/main.yml"
-        ),
-    )["ansible_facts"]
+    return "3.11.1"
 
 
 def test_wazuh_packages_are_installed(host):
@@ -41,15 +18,18 @@ def test_wazuh_packages_are_installed(host):
     api = host.package("wazuh-api")
 
     distribution = host.system_info.distribution.lower()
-    assert manager.version.startswith(get_wazuh_version(ManagerRoleDefaults))
     if distribution == 'centos':
         if host.system_info.release == "7":
             assert manager.is_installed
+            assert manager.version.startswith(get_wazuh_version())
             assert api.is_installed
+            assert api.version.startswith(get_wazuh_version())
         elif host.system_info.release.startswith("6"):
             assert manager.is_installed
+            assert manager.version.startswith(get_wazuh_version())
     elif distribution == 'ubuntu':
         assert manager.is_installed
+        assert manager.version.startswith(get_wazuh_version())
 
 
 def test_wazuh_services_are_running(host):
@@ -78,7 +58,7 @@ def test_wazuh_services_are_running(host):
     ("/var/ossec/etc/sslmanager.cert", "root", "root", 0o640),
     ("/var/ossec/etc/sslmanager.key", "root", "root", 0o640),
     ("/var/ossec/etc/rules/local_rules.xml", "root", "ossec", 0o640),
-    ("/var/ossec/etc/lists/audit-keys", "ossec", "ossec", 0o660),
+    ("/var/ossec/etc/lists/audit-keys", "root", "ossec", 0o640),
 ])
 def test_wazuh_files(host, wazuh_file, wazuh_owner, wazuh_group, wazuh_mode):
     """Test if Wazuh related files exist and have proper owners and mode."""
@@ -98,9 +78,8 @@ def test_open_ports(host):
         assert host.socket("udp://127.0.0.1:1514").is_listening
 
 
-def test_filebeat_is_installed(host, FilebeatRoleDefaults):
+def test_filebeat_is_installed(host):
     """Test if the elasticsearch package is installed."""
     filebeat = host.package("filebeat")
-    filebeat_version = FilebeatRoleDefaults["filebeat_version"]
     assert filebeat.is_installed
-    assert filebeat.version.startswith(filebeat_version)
+    assert filebeat.version.startswith('7.5.1')
