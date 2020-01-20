@@ -13,9 +13,9 @@ def host():
 @pytest.fixture
 def get_wazuh_version():
     version_file_content = str(test_host.file('/tmp/kitchen/modules/wazuh/VERSION').content_string)
-    aux_text_file = open("VERSION.txt", "w")
-    aux_text_file.write(version_file_content)
-    aux_text_file.close()
-    wazuh_version = subprocess.getoutput("cat VERSION.txt | grep \"WAZUH-PUPPET_VERSION=\" | cut -d '=' -f 2 | tr -d '\"' | tr -d 'v'")
 
-    return str(wazuh_version)
+    wazuh_version = version_file_content.split("\n")[0] # WAZUH-PUPPET_VERSION="vX.XX.X"
+    wazuh_version = wazuh_version.replace('"', '') # Remove double quote.
+    wazuh_version = wazuh_version.split("v",1)[1] # Get string after 'v' : X.XX.X 
+    
+    return wazuh_version
