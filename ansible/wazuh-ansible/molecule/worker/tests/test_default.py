@@ -6,6 +6,7 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
+
 @pytest.fixture(scope="module")
 def ManagerRoleDefaults(host):
     return host.ansible(
@@ -16,10 +17,22 @@ def ManagerRoleDefaults(host):
         ),
     )["ansible_facts"]
 
+
 def get_wazuh_version(ManagerRoleDefaults):
     """This return the version of Wazuh."""
-     
+
     return ManagerRoleDefaults["wazuh_manager_version"]
+
+
+@pytest.fixture(scope="module")
+def FilebeatRoleDefaults(host):
+    return host.ansible(
+        "include_vars",
+        (
+            "../../roles/wazuh/"
+            "ansible-filebeat/defaults/main.yml"
+        ),
+    )["ansible_facts"]
 
 
 def test_wazuh_packages_are_installed(host):
@@ -37,7 +50,6 @@ def test_wazuh_packages_are_installed(host):
             assert manager.is_installed
     elif distribution == 'ubuntu':
         assert manager.is_installed
-        
 
 
 def test_wazuh_services_are_running(host):
@@ -86,8 +98,9 @@ def test_open_ports(host):
         assert host.socket("udp://127.0.0.1:1514").is_listening
 
 
-def test_filebeat_is_installed(host):
+def test_filebeat_is_installed(host, FilebeatRoleDefaults):
     """Test if the elasticsearch package is installed."""
     filebeat = host.package("filebeat")
+    filebeat_version = FilebeatRoleDefaults["filebeat_version"]
     assert filebeat.is_installed
-    assert filebeat.version.startswith('7.5.1')
+    assert filebeat.version.startswith(filebeat_version)
