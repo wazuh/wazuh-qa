@@ -4,10 +4,9 @@ set -e
 
 mkdir -p modules/wazuh
 
-cp -r ../files ./modules/wazuh/
-cp -r ../templates/ ./modules/wazuh/
-cp -r ../manifests/ ./modules/wazuh/
-cp -rf ../VERSION ./modules/wazuh
+cd .. && cp -r `ls -A | grep -v "kitchen"` kitchen/modules/wazuh/
+
+cd kitchen # Access kitchen folder
 
 if [ -z "$1" ]
 then
