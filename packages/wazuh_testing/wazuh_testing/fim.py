@@ -795,7 +795,7 @@ class EventChecker:
         self.options = options
         self.events = None
 
-    def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True):
+    def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0):
         """
         Call both 'fetch_events' and 'check_events'.
 
@@ -808,10 +808,10 @@ class EventChecker:
         triggers_event : boolean, optional
             True if the event should be raised. False otherwise. Default `True`
         """
-        self.events = self.fetch_events(min_timeout, triggers_event)
+        self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout)
         self.check_events(event_type)
 
-    def fetch_events(self, min_timeout=1, triggers_event=True):
+    def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0):
         """
         Try to fetch events on a given log monitor. Will return a list with the events detected.
 
@@ -822,12 +822,38 @@ class EventChecker:
         triggers_event : boolean, optional
             True if the event should be raised. False otherwise. Default `True`
         """
+        def clean_results(event_list):
+            if not isinstance(event_list, list):
+                return event_list
+            result_list = []
+            previous_event = None
+            while(len(event_list) > 0):
+                current_event = event_list.pop(0)
+                if current_event['data']['type'] == "modified":
+                    if not previous_event:
+                        previous_event = current_event
+                    elif (previous_event['data']['path'] == current_event['data']['path'] and
+                          previous_event['data']['timestamp'] == current_event['data']['timestamp']):
+                        previous_event['data']['changed_attributes'] += current_event['data']['changed_attributes']
+                        previous_event['data']['attributes'] = current_event['data']['attributes']
+                    else:
+                        result_list.append(previous_event)
+                        previous_event = current_event
+                else:
+                    result_list.append(current_event)
+            if previous_event:
+                result_list.append(previous_event)
+            return result_list
+
         try:
             result = self.log_monitor.start(timeout=max(len(self.file_list) * 0.01, min_timeout),
                                             callback=callback_detect_event,
-                                            accum_results=len(self.file_list)
+                                            accum_results=len(self.file_list),
+                                            timeout_extra=extra_timeout
                                             ).result()
             assert triggers_event, f'No events should be detected.'
+            if extra_timeout > 0:
+                result = clean_results(result)
             return result if isinstance(result, list) else [result]
         except TimeoutError:
             if triggers_event:
@@ -1007,21 +1033,21 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         create_file(REGULAR, folder, name, content=content)
 
     check_time_travel(time_travel)
-    event_checker.fetch_and_check('added', min_timeout, triggers_event)
+    event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event)
 
     # Modify previous text files
     for name, content in file_list.items():
         modify_file(folder, name, is_binary=isinstance(content, bytes))
 
     check_time_travel(time_travel)
-    event_checker.fetch_and_check('modified', min_timeout, triggers_event)
+    event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
 
     # Delete previous text files
     for name in file_list:
         delete_file(folder, name)
 
     check_time_travel(time_travel)
-    event_checker.fetch_and_check('deleted', min_timeout, triggers_event)
+    event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
 
 
 def detect_initial_scan(file_monitor):

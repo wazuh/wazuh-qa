@@ -146,7 +146,7 @@ class TimeMachine:
         """
         import shlex
         subprocess.call(shlex.split("timedatectl set-ntp false"))
-        subprocess.call(shlex.split("sudo date -s " + str(datetime_) + "+%Y-%m-%dT%H:%M:%S.%s"))
+        subprocess.call(shlex.split("sudo date -s " + str(datetime_) + " +%Y-%m-%dT%H:%M:%S.%s"))
         subprocess.call(shlex.split("sudo hwclock -w"))
 
     @staticmethod
@@ -495,6 +495,8 @@ class Timer(threading.Thread):
         return self._cancel.is_set()
 
 
+
+
 class FileMonitor:
 
     def __init__(self, file_path, time_step=0.5):
@@ -503,24 +505,28 @@ class FileMonitor:
         self.time_step = time_step
         self._continue = False
         self._abort = False
+        self._previous_event = None
         self._result = None
-        self.timer = None
+        self.timeout_timer = None
+        self.extra_timer = None
+        self.extra_timer_is_running = False
 
-    def _monitor(self, callback=_callback_default, accum_results=1, update_position=True):
+    def _monitor(self, callback=_callback_default, accum_results=1, update_position=True, timeout_extra=0):
         """Wait for new lines to be appended to the file.
-
         A callback function will be called every time a new line is detected. This function must receive two
         positional parameters: a references to the FileMonitor object and the line detected.
         """
         previous_position = self._position
-        self._result = [] if accum_results > 1 else None
         encode = None if sys.platform == 'win32' else 'utf-8'
+        self.extra_timer_is_running = False
+        self._result = [] if accum_results > 1 or timeout_extra > 0 else None
         with open(self.file_path, encoding=encode) as f:
             f.seek(self._position)
             while self._continue:
-                if self._abort:
+                if self._abort and not self.extra_timer_is_running:
                     self.stop()
-                    raise TimeoutError()
+                    if type(self._result) != list or accum_results != len(self._result):
+                        raise TimeoutError()
                 self._position = f.tell()
                 line = f.readline()
                 if not line:
@@ -529,35 +535,43 @@ class FileMonitor:
                 else:
                     result = callback(line)
                     if result:
-                        if accum_results > 1:
+                        if type(self._result) == list:
                             self._result.append(result)
                             if accum_results == len(self._result):
-                                self.stop()
+                                if timeout_extra > 0 and not self.extra_timer_is_running:
+                                    self.extra_timer = Timer(timeout_extra, self.stop)
+                                    self.extra_timer.start()
+                                    self.extra_timer_is_running = True
+                                elif timeout_extra == 0:
+                                    self.stop()
                         else:
                             self._result = result
                             if self._result:
                                 self.stop()
-
             self._position = f.tell() if update_position else previous_position
 
-    def start(self, timeout=-1, callback=_callback_default, accum_results=1, update_position=True):
+    def start(self, timeout=-1, callback=_callback_default, accum_results=1, update_position=True, timeout_extra=0):
         """Start the file monitoring until the stop method is called."""
         if not self._continue:
             self._continue = True
             self._abort = False
             if timeout > 0:
-                self.timer = Timer(timeout, self.abort)
-                self.timer.start()
-            self._monitor(callback=callback, accum_results=accum_results, update_position=update_position)
+                self.timeout_timer = Timer(timeout, self.abort)
+                self.timeout_timer.start()
+            self._monitor(callback=callback, accum_results=accum_results, update_position=update_position, timeout_extra=timeout_extra)
 
         return self
 
     def stop(self):
         """Stop the file monitoring. It can be restart calling the start method."""
         self._continue = False
-        if self.timer:
-            self.timer.cancel()
-            self.timer.join()
+        if self.timeout_timer:
+            self.timeout_timer.cancel()
+            self.timeout_timer.join()
+        if self.extra_timer and self.extra_timer_is_running:
+            self.extra_timer.cancel()
+            self.extra_timer.join()
+            self.extra_timer_is_running = False
         return self
 
     def abort(self):
@@ -1046,7 +1060,7 @@ class SocketMonitor:
         self._continue = False
         self._abort = False
         self._result = None
-        self.timer = None
+        self.timeout_timer = None
         self.path = path
         if not controller:
             self.controller = SocketController(path=path, connection_protocol=connection_protocol,
@@ -1075,8 +1089,8 @@ class SocketMonitor:
             self._continue = True
             self._abort = False
             if timeout > 0:
-                self.timer = Timer(timeout, self.abort)
-                self.timer.start()
+                self.timeout_timer = Timer(timeout, self.abort)
+                self.timeout_timer.start()
             while self._continue:
                 if self._abort:
                     self.stop()
@@ -1106,9 +1120,9 @@ class SocketMonitor:
     def stop(self):
         """Stop the socket monitoring. It can be restarted calling the start method."""
         self._continue = False
-        if self.timer:
-            self.timer.cancel()
-            self.timer.join()
+        if self.timeout_timer:
+            self.timeout_timer.cancel()
+            self.timeout_timer.join()
         return self
 
     def abort(self):
