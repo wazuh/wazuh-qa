@@ -1,12 +1,9 @@
 node 'manager00_platform' {
-  class { "wazuh::manager":
-        configure_wodle_openscap => false
-  }
+  class { "wazuh::manager":}
 }
 node 'agent00_platform' {
   class { "wazuh::agent":
         wazuh_register_endpoint => "manager_ip",
         wazuh_reporting_endpoint => "manager_ip",
-        configure_wodle_openscap => false
   }
 }
