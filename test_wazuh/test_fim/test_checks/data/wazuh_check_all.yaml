@@ -128,3 +128,17 @@
       attributes:
       - FIM_MODE
       - check_all: "yes"
+
+- tags:
+  - test_check_all_no
+  apply_to_modules:
+  - test_check_all
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "/testdir1"
+      attributes:
+      - FIM_MODE
+      - check_all: "no"
