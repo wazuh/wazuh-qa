@@ -114,7 +114,7 @@ ET._serialize_xml = _serialize_xml  # override _serialize_xml to avoid lexicogra
 
 class TimeMachine:
     """Context manager that goes forward/back in time and comes back to real time once it finishes its instance."""
-
+    total_time_spent = 0
     def __init__(self, timedelta):
         """
         Save time frame given by user.
@@ -189,7 +189,7 @@ class TimeMachine:
         os.system('date ' + '-u ' + datetime_.strftime("%m%d%H%M%Y"))
 
     @staticmethod
-    def travel_to_future(time_delta):
+    def travel_to_future(time_delta, back_in_time=False):
         """
         Check which system are we running this code in and calls its proper function.
 
@@ -198,8 +198,10 @@ class TimeMachine:
         time_delta : timedelta
             Time frame we want to skip. It can have a negative value.
         """
+        #Save timedelta to be able to  travel back in time after the tests
+        TimeMachine.total_time_spent += time_delta.seconds
         now = datetime.utcnow() if sys.platform == 'darwin' else datetime.now()
-        future = now + time_delta
+        future = now + time_delta if not back_in_time else now - time_delta
         if sys.platform == 'linux':
             TimeMachine._linux_set_time(future.isoformat())
         elif sys.platform == 'sunos5':
@@ -208,6 +210,11 @@ class TimeMachine:
             TimeMachine._win_set_time(future)
         elif sys.platform == 'darwin':
             TimeMachine._macos_set_time(future)
+
+    @staticmethod
+    def time_rollback():
+        TimeMachine.travel_to_future(timedelta(seconds=TimeMachine.total_time_spent), back_in_time=True)
+        TimeMachine.total_time_spent = 0
 
 
 def set_wazuh_conf(wazuh_conf: List[str]):
@@ -570,7 +577,6 @@ class FileMonitor:
             self.timeout_timer.join()
         if self.extra_timer and self.extra_timer_is_running:
             self.extra_timer.cancel()
-            self.extra_timer.join()
             self.extra_timer_is_running = False
         return self
 
