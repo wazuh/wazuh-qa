@@ -16,7 +16,7 @@ def wait_for_condition(condition_checker, args=None, kwargs=None, timeout=-1):
 
     Parameters
     ----------
-    condition_checker : object
+    condition_checker : callable
         Function that checks a condition.
     args :  list, optional
         List of positional arguments. Default `None`
