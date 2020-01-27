@@ -6,9 +6,11 @@ import os
 import sys
 
 import pytest
+
 from wazuh_testing.fim import (CHECK_ALL, DEFAULT_TIMEOUT, FIFO, LOG_FILE_PATH, REGULAR, SOCKET,
                                callback_detect_event, create_file, validate_event, generate_params)
-from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
+from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX, random_string_unicode, \
+    random_string
 
 # Marks
 
@@ -49,15 +51,25 @@ def get_configuration(request):
     testdir1,
     testdir2
 ])
-@pytest.mark.parametrize('name, filetype, content, checkers, tags_to_apply', [
-    ('file', REGULAR, 'Sample content', {CHECK_ALL}, {'ossec_conf'}),
-    ('file2', REGULAR, b'Sample content', {CHECK_ALL}, {'ossec_conf'}),
-    ('socket_file', REGULAR if sys.platform == 'win32' else SOCKET, '', {CHECK_ALL}, {'ossec_conf'}),
-    ('file3', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}),
-    ('fifo_file', REGULAR if sys.platform == 'win32' else FIFO, '', {CHECK_ALL}, {'ossec_conf'}),
-    ('file4', REGULAR, b'', {CHECK_ALL}, {'ossec_conf'}),
+@pytest.mark.parametrize('name, filetype, content, checkers, tags_to_apply, encoding', [
+    ('file', REGULAR, 'Sample content', {CHECK_ALL}, {'ossec_conf'}, None),
+    ('file2', REGULAR, b'Sample content', {CHECK_ALL}, {'ossec_conf'}, None),
+    ('socketfile', REGULAR if sys.platform == 'win32' else SOCKET, '', {CHECK_ALL}, {'ossec_conf'}, None),
+    ('file3', REGULAR, 'Sample content', {CHECK_ALL}, {'ossec_conf'}, None),
+    ('fifofile', REGULAR if sys.platform == 'win32' else FIFO, '', {CHECK_ALL}, {'ossec_conf'}, None),
+    ('file4', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, None),
+    ('file-ñ', REGULAR, b'', {CHECK_ALL}, {'ossec_conf'}, None),
+    pytest.param('檔案', REGULAR, b'', {CHECK_ALL}, {'ossec_conf'}, 'cp950', marks=(pytest.mark.linux,
+                 pytest.mark.darwin, pytest.mark.sunos5)),
+    pytest.param('Образецтекста', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, 'koi8-r', marks=(pytest.mark.linux,
+                 pytest.mark.darwin, pytest.mark.sunos5)),
+    pytest.param('Δείγμακειμένου', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, 'cp737', marks=(pytest.mark.linux,
+                 pytest.mark.darwin, pytest.mark.sunos5)),
+    pytest.param('نصبسيط', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, 'cp720', marks=(pytest.mark.linux,
+                 pytest.mark.darwin, pytest.mark.sunos5)),
+    pytest.param('Ξ³ΞµΞΉΞ±', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, None, marks=pytest.mark.win32)
 ])
-def test_create_file_realtime_whodata(folder, name, filetype, content, checkers, tags_to_apply, get_configuration,
+def test_create_file_realtime_whodata(folder, name, filetype, content, checkers, tags_to_apply, encoding, get_configuration,
                                       configure_environment, restart_syscheckd, wait_for_initial_scan):
     """ Checks if a special or regular file creation is detected by syscheck using realtime and whodata monitoring
 
@@ -75,11 +87,15 @@ def test_create_file_realtime_whodata(folder, name, filetype, content, checkers,
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Create files
+    if encoding is not None:
+        name = name.encode(encoding)
+        folder = folder.encode(encoding)
     create_file(filetype, folder, name, content=content)
 
     if filetype == REGULAR:
         # Wait until event is detected
-        event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+        event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event,
+                                        encoding=encoding).result()
         validate_event(event, checkers)
     else:
         with pytest.raises(TimeoutError):

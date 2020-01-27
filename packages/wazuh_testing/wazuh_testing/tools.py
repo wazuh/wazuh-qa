@@ -617,7 +617,7 @@ def random_string_unicode(length, encode=None):
     str or binary
         Random unicode string.
     """
-    st = str(''.join(format(random_unicode_char()) for i in range(length)))
+    st = str(''.join(format(random_unicode_char()) for _ in range(length)))
     st = u"".join(st)
 
     if encode is not None:
