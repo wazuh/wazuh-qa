@@ -9,7 +9,7 @@ import sys
 
 import pytest
 from wazuh_testing.fim import LOG_FILE_PATH, detect_initial_scan
-from wazuh_testing.tools import (FileMonitor, get_wazuh_conf, set_section_wazuh_conf,
+from wazuh_testing.tools import (FileMonitor, TimeMachine, get_wazuh_conf, set_section_wazuh_conf,
                                  truncate_file, write_wazuh_conf, control_service)
 
 
@@ -59,6 +59,8 @@ def configure_environment(get_configuration, request):
         func()
 
     yield
+
+    TimeMachine.time_rollback()
 
     # remove created folders (parents)
     if sys.platform == 'win32':
