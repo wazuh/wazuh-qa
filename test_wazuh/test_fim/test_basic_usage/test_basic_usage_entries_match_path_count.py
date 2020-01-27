@@ -8,7 +8,9 @@ import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, SYMLINK, HARDLINK, \
     DEFAULT_TIMEOUT, callback_entries_path_count, check_time_travel
-from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 

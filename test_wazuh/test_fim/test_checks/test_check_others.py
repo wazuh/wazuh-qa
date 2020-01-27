@@ -10,7 +10,9 @@ import pytest
 from wazuh_testing.fim import (CHECK_ATTRS, CHECK_GROUP, CHECK_INODE, CHECK_MD5SUM, CHECK_MTIME, CHECK_OWNER,
                                CHECK_PERM, CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_SIZE, CHECK_SUM,
                                LOG_FILE_PATH, REQUIRED_ATTRIBUTES, regular_file_cud, generate_params)
-from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 

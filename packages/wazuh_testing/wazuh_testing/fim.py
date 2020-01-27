@@ -21,7 +21,7 @@ from json import JSONDecodeError
 from jsonschema import validate
 from typing import Sequence, Union, Generator, Any
 
-from wazuh_testing.tools import TimeMachine
+from wazuh_testing.tools.time import TimeMachine
 
 if sys.platform == 'win32':
     import win32con

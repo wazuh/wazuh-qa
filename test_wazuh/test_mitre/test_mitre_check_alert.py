@@ -4,11 +4,11 @@
 
 import os
 import pytest
-import time
 
 from wazuh_testing.mitre import (callback_detect_mitre_event,
                                  validate_mitre_event, detect_initial_analysisd)
-from wazuh_testing.tools import (FileMonitor, LOG_FILE_PATH)
+from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # variables
 

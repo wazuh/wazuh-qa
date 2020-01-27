@@ -12,8 +12,9 @@ from wazuh_testing.fim import (DEFAULT_TIMEOUT, LOG_FILE_PATH, regular_file_cud,
                                CHECK_MTIME, CHECK_OWNER,
                                CHECK_PERM, CHECK_SHA256SUM,
                                CHECK_SIZE, CHECK_SUM, REQUIRED_ATTRIBUTES, generate_params)
-from wazuh_testing.tools import (FileMonitor, check_apply_test,
-                                 load_wazuh_configurations, PREFIX)
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 
@@ -29,7 +30,7 @@ checkdir_checkall = os.path.join(checkdir_default, 'checkdir_checkall')
 checkdir_no_inode = os.path.join(checkdir_checkall, 'checkdir_no_inode')
 checkdir_no_checksum = os.path.join(checkdir_no_inode, 'checkdir_no_checksum')
 test_directories = [os.path.join(PREFIX, 'testdir'), os.path.join(PREFIX, 'testdir', 'subdir'),
-                    os.path.join(PREFIX, 'recursiondir'), os.path.join(PREFIX, 'recursiondir_tag'), 
+                    os.path.join(PREFIX, 'recursiondir'), os.path.join(PREFIX, 'recursiondir_tag'),
                     os.path.join(PREFIX, 'recursiondir_no_tag'), checkdir_default, checkdir_checkall,
                     checkdir_no_inode, checkdir_no_checksum]
 testdir, subdir = test_directories[0:2]

@@ -8,7 +8,8 @@ import pytest
 
 from wazuh_testing.fim import (DEFAULT_TIMEOUT, LOG_FILE_PATH, callback_audit_event_too_long, regular_file_cud,
                                generate_params)
-from wazuh_testing.tools import FileMonitor, load_wazuh_configurations
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 
 # Marks
 

@@ -10,9 +10,11 @@ import pytest
 
 from wazuh_testing.fim import (CHECK_ALL, DEFAULT_TIMEOUT, LOG_FILE_PATH, WAZUH_PATH, callback_detect_event,
                                REGULAR, create_file, detect_initial_scan, generate_params)
-from wazuh_testing.tools import (PREFIX, FileMonitor, TimeMachine,
-                                 load_wazuh_configurations, restart_wazuh_with_new_conf, set_section_wazuh_conf,
-                                 check_apply_test)
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.services import restart_wazuh_with_new_conf
+from wazuh_testing.tools.configuration import set_section_wazuh_conf, load_wazuh_configurations, check_apply_test
 
 # Marks
 

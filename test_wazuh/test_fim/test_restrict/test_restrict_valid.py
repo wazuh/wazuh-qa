@@ -9,8 +9,10 @@ import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, DEFAULT_TIMEOUT, callback_detect_event, callback_restricted, create_file, \
     REGULAR, generate_params
-from wazuh_testing.tools import (FileMonitor, check_apply_test,
-                                 load_wazuh_configurations, TimeMachine, PREFIX)
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 

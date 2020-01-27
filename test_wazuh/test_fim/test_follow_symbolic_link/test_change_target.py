@@ -6,12 +6,11 @@ import os
 import pytest
 
 from test_fim.test_follow_symbolic_link.common import configurations_path, testdir1, \
-    modify_symlink, testdir_link, wait_for_symlink_check, wait_for_audit, test_directories, \
-    extra_configuration_after_yield, extra_configuration_before_yield, testdir_target, testdir_not_target
+    modify_symlink, testdir_link, wait_for_symlink_check, wait_for_audit, testdir_target, testdir_not_target
 from wazuh_testing.fim import (generate_params, create_file, REGULAR, callback_detect_event,
                                check_time_travel, modify_file_content, LOG_FILE_PATH)
-from wazuh_testing.tools import (check_apply_test,
-                                 load_wazuh_configurations, FileMonitor)
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # All tests in this module apply to linux only
 pytestmark = [pytest.mark.linux, pytest.mark.sunos5, pytest.mark.darwin, pytest.mark.tier(level=1)]

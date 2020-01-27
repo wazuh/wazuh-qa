@@ -10,8 +10,8 @@ from distro import id
 import re
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_audit_cannot_start
-from wazuh_testing.tools import FileMonitor, load_wazuh_configurations, check_apply_test
-
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 

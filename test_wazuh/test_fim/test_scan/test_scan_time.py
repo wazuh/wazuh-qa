@@ -6,9 +6,11 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH, DEFAULT_TIMEOUT, callback_detect_end_scan, generate_params)
-from wazuh_testing.tools import (FileMonitor, check_apply_test, load_wazuh_configurations, reformat_time, TimeMachine,
-                                 PREFIX)
+from wazuh_testing.fim import LOG_FILE_PATH, DEFAULT_TIMEOUT, callback_detect_end_scan, generate_params
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.time import TimeMachine, reformat_time
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 

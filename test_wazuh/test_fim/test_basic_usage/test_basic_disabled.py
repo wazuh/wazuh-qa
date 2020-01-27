@@ -8,7 +8,9 @@ import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, regular_file_cud, DEFAULT_TIMEOUT,
                                callback_detect_end_scan)
-from wazuh_testing.tools import FileMonitor, load_wazuh_configurations, PREFIX
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 
 # Marks
 

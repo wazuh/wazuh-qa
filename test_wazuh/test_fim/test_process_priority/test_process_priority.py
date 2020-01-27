@@ -7,7 +7,8 @@ import os
 import pytest
 
 from wazuh_testing.fim import generate_params
-from wazuh_testing.tools import check_apply_test, load_wazuh_configurations, get_process
+from wazuh_testing.tools.services import get_process
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 

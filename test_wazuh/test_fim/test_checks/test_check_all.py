@@ -11,7 +11,9 @@ from wazuh_testing.fim import (CHECK_ALL, CHECK_ATTRS, CHECK_GROUP, CHECK_INODE,
                                CHECK_PERM, CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_SIZE, CHECK_SUM, LOG_FILE_PATH,
                                REQUIRED_ATTRIBUTES, regular_file_cud, generate_params, create_file, REGULAR,
                                check_time_travel, callback_detect_event, delete_file, modify_file)
-from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 

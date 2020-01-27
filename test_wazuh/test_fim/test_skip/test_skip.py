@@ -5,7 +5,6 @@
 import os
 import shutil
 import subprocess
-from copy import deepcopy
 from datetime import timedelta
 
 import distro
@@ -13,10 +12,11 @@ import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, detect_initial_scan, callback_detect_event,
                                generate_params, callback_detect_integrity_state)
-
-from wazuh_testing.tools import (FileMonitor, check_apply_test,
-                                 load_wazuh_configurations, TimeMachine,
-                                 set_section_wazuh_conf, restart_wazuh_with_new_conf, PREFIX)
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.services import restart_wazuh_with_new_conf
+from wazuh_testing.tools.configuration import set_section_wazuh_conf, load_wazuh_configurations, check_apply_test
 
 # Marks
 

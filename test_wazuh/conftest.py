@@ -7,8 +7,10 @@ import sys
 
 import pytest
 
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_LOGS_PATH, delete_sockets, FileMonitor, truncate_file,\
-    control_service, SocketController, SocketMonitor, check_daemon_status
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_LOGS_PATH
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.monitoring import FileMonitor, SocketController, SocketMonitor
+from wazuh_testing.tools.services import control_service, check_daemon_status, delete_sockets
 
 ALL = set("darwin linux win32 sunos5".split())
 

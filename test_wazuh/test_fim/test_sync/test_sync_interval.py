@@ -5,9 +5,12 @@ import os
 
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_synchronization, detect_initial_scan, generate_params)
-from wazuh_testing.tools import (FileMonitor, truncate_file, check_apply_test, load_wazuh_configurations, TimeMachine,
-                                 time_to_timedelta, PREFIX)
+from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_synchronization, detect_initial_scan, generate_params
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.time import TimeMachine, time_to_timedelta
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 

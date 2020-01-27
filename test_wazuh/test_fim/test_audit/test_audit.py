@@ -18,10 +18,10 @@ from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_added_rule,
                                callback_audit_key,
                                create_file, REGULAR,
                                detect_initial_scan)
-from wazuh_testing.tools import (FileMonitor, check_apply_test,
-                                 load_wazuh_configurations,
-                                 control_service,
-                                 truncate_file)
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 

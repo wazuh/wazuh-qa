@@ -9,8 +9,11 @@ import sys
 
 import pytest
 from wazuh_testing.fim import LOG_FILE_PATH, detect_initial_scan
-from wazuh_testing.tools import (FileMonitor, TimeMachine, get_wazuh_conf, set_section_wazuh_conf,
-                                 truncate_file, write_wazuh_conf, control_service)
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.configuration import get_wazuh_conf, write_wazuh_conf, set_section_wazuh_conf
 
 
 @pytest.fixture(scope='module')

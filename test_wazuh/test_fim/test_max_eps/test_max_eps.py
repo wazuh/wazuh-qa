@@ -8,7 +8,9 @@ from collections import Counter
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, create_file, generate_params, callback_syscheck_message
-from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 

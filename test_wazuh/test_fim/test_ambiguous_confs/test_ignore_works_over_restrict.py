@@ -9,7 +9,9 @@ import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_ignore, callback_detect_event, create_file, REGULAR, \
     generate_params, check_time_travel, DEFAULT_TIMEOUT
-from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 

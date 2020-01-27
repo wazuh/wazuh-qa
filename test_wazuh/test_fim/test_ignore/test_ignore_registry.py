@@ -7,8 +7,9 @@ import sys
 import pytest
 from datetime import timedelta
 from wazuh_testing.fim import LOG_FILE_PATH, callback_ignore, create_registry, delete_registry
-from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, TimeMachine
-
+from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 if sys.platform == 'win32':
     import winreg

@@ -10,10 +10,8 @@ import subprocess
 from wazuh_testing.fim import (LOG_FILE_PATH,
                                callback_audit_rules_manipulation,
                                callback_audit_deleting_rule)
-from wazuh_testing.tools import (FileMonitor,
-                                 load_wazuh_configurations,
-                                 check_apply_test)
-
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 

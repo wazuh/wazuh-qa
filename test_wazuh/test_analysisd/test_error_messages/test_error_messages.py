@@ -7,7 +7,8 @@ import os
 import pytest
 import yaml
 from wazuh_testing.analysis import callback_fim_error
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, FileMonitor
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # All tests in this module apply to linux only
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
