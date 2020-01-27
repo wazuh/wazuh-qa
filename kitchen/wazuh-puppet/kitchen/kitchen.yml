@@ -1,7 +1,6 @@
 ---
 driver:
   name: docker
-  privileged: true
   use_sudo: false
   use_internal_docker_network: true
 
@@ -12,36 +11,29 @@ provisioner:
   hiera_data_path: hieradata
 
 platforms:
-  - name: ubuntu-manager_00_kitchen
+  - name: <%= ENV['PLATFORM'] %>-manager_kitchen
     driver_config:
-      image: ubuntu:14.04
-      platform: ubuntu
-      hostname: manager00_ubuntu
+      image: <%= ENV['IMAGE'] %>
+      platform: <%= ENV['PLATFORM'] %>
+      hostname: manager_<%= ENV['PLATFORM'] %>  
+      run_command: /sbin/init
+      privileged: true
+      volume:
+        - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      provision_command:
+        - sed -i 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config
 
-  - name: ubuntu-agent-kitchen
+  - name: <%= ENV['PLATFORM'] %>-agent-kitchen
     driver_config:
-      image: ubuntu:14.04
-      platform: ubuntu
-      hostname: agent00_ubuntu
-
-  - name: centos-manager_00_kitchen
-    driver_config:
-      image: centos:7
-      platform: centos
-      hostname: manager00_centos
-      run_command: /usr/sbin/init
-      build_options:
-        rm: true
-
-  - name: centos-agent_kitchen
-    driver_config:
-      image: centos:7
-      platform: centos
-      hostname: agent00_centos
-      run_command: /usr/sbin/init
-      run_command: /usr/lib/systemd/systemd
-      build_options:
-        rm: true
+      image: <%= ENV['IMAGE'] %>
+      platform: <%= ENV['PLATFORM'] %>
+      hostname: agent_<%= ENV['PLATFORM'] %>
+      run_command: /sbin/init
+      privileged: true
+      volume:
+        - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      provision_command:
+        - sed -i 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config
 
 suites:
   - name: default
