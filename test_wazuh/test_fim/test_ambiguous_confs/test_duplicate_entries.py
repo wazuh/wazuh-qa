@@ -2,13 +2,16 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import codecs
 import os
+from pathlib import Path
 
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH, check_time_travel, callback_detect_event, get_fim_mode_param, deepcopy,
-                               create_file, REGULAR, generate_params, DEFAULT_TIMEOUT)
-from wazuh_testing.tools import (FileMonitor, load_wazuh_configurations, PREFIX, check_apply_test)
+from wazuh_testing.fim import LOG_FILE_PATH, modify_file_group, modify_file_content, modify_file_owner, \
+    modify_file_permission, check_time_travel, callback_detect_event, get_fim_mode_param, deepcopy, create_file, \
+    REGULAR, generate_params, DEFAULT_TIMEOUT
+from wazuh_testing.tools import FileMonitor, load_wazuh_configurations, PREFIX, check_apply_test
 
 # Marks
 
@@ -47,14 +50,22 @@ def get_configuration(request):
     return request.param
 
 
+# Functions
+def check_event2(mode2, event1, file):
+    event2 = None
+    try:
+        event2 = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+    except TimeoutError:
+        assert 'added' in event1['data']['type'] and os.path.join(testdir1, file) in event1['data']['path'] \
+            and mode2 in event1['data']['mode']
+
+    return event2
+
+
 # tests
 
 
-@pytest.mark.parametrize('tags_to_apply', [
-   {'ossec_conf'}
-])
-def test_duplicate_entries(tags_to_apply,
-                           get_configuration, configure_environment,
+def test_duplicate_entries(get_configuration, configure_environment,
                            restart_syscheckd, wait_for_initial_scan):
     """Checks if syscheckd ignores duplicate entries.
        For instance:
@@ -65,7 +76,7 @@ def test_duplicate_entries(tags_to_apply,
            - Just generate one event.
             <directories realtime="yes">/home/user,/home/user</directories>
     """
-    check_apply_test(tags_to_apply, get_configuration['tags'])
+    check_apply_test({'ossec_conf_duplicate_simple'}, get_configuration['tags'])
     file = 'hello'
     mode2 = get_configuration['metadata']['fim_mode2']
 
@@ -76,13 +87,107 @@ def test_duplicate_entries(tags_to_apply,
 
     check_time_travel(scheduled)
     event1 = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
-    event2 = None
 
     # Check for a second event
-    try:
-        event2 = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
-    except TimeoutError:
-        assert 'added' in event1['data']['type'] and os.path.join(testdir1, file) in event1['data']['path'] \
-            and mode2 in event1['data']['mode']
-
+    event2 = check_event2(mode2=mode2, event1=event1, file=file)
     assert event2 is None, "Error: Multiple events created"
+
+
+def test_duplicate_entries_sregex(get_configuration, configure_environment,
+                                  restart_syscheckd, wait_for_initial_scan):
+    """Checks if syscheckd ignores duplicate entries, sregex patterns of restrict.
+       For instance:
+           - The second entry should prevail over the first one.
+            <directories restrict="^good.*$">/home/user</directories> (IGNORED)
+            <directories restrict="^he.*$">/home/user</directories>
+       In this case, only the filenames that match with this regex '^he.*$'
+    """
+    check_apply_test({'ossec_conf_duplicate_sregex'}, get_configuration['tags'])
+    file = 'hello'
+    mode2 = get_configuration['metadata']['fim_mode2']
+    scheduled = mode2 == 'scheduled'
+
+    # Check for an event
+    create_file(REGULAR, testdir1, file, content=' ')
+    check_time_travel(scheduled)
+    try:
+        wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+        assert False
+    except TimeoutError:
+        assert True
+
+    # Check for a second event
+    modify_file_content(testdir1, file)
+    check_time_travel(scheduled)
+    try:
+        wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+    except TimeoutError:
+        assert True
+
+
+def test_duplicate_entries_report(get_configuration, configure_environment,
+                                  restart_syscheckd, wait_for_initial_scan):
+    """Checks if syscheckd ignores duplicate entries, report changes.
+       For instance:
+           - The second entry should prevail over the first one.
+            <directories report_changes="yes">/home/user</directories> (IGNORED)
+            <directories report_changes="no">/home/user</directories>
+    """
+    check_apply_test({'ossec_conf_duplicate_report'}, get_configuration['tags'])
+    file = 'hello'
+    mode2 = get_configuration['metadata']['fim_mode2']
+    scheduled = mode2 == 'scheduled'
+
+    # Check for an event
+    create_file(REGULAR, testdir1, file, content=' ')
+    check_time_travel(scheduled)
+    wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+
+    # Check for a second event
+    modify_file_content(testdir1, file)
+    check_time_travel(scheduled)
+    wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+
+
+def test_duplicate_entries_complex(get_configuration, configure_environment,
+                                   restart_syscheckd, wait_for_initial_scan):
+    """Checks if syscheckd ignores duplicate entries, complex entries.
+       For instance:
+           - The second entry should prevail over the first one.
+            <directories check_all="no" check_owner="yes" check_inode="yes">/home/user</directories> (IGNORED)
+            <directories check_all="no" check_size="yes" check_perm="yes">/home/user</directories>
+       In this case, it only check if the permissions or the size of the file changes
+    """
+    def replace_character(old, new, path):
+        f = codecs.open(path, encoding='utf-8')
+        content = f.read()
+        content.replace(old, new)
+        f.close()
+
+    check_apply_test({'ossec_conf_duplicate_complex'}, get_configuration['tags'])
+    file = 'hello'
+    mode2 = get_configuration['metadata']['fim_mode2']
+
+    scheduled = mode2 == 'scheduled'
+    mode2 = "real-time" if mode2 == "realtime" else mode2
+
+    create_file(REGULAR, testdir1, file, content='testing')
+    file_path = os.path.join(testdir1, file)
+
+    check_time_travel(scheduled)
+    event1 = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+
+    # Replace character, change the group and ownership and touch the file
+    replace_character('i', '1', file_path)
+    modify_file_group(testdir1, file)
+    modify_file_owner(testdir1, file)
+    Path(file_path).touch()
+    check_time_travel(scheduled)
+    event2 = check_event2(mode2=mode2, event1=event1, file=file)
+    assert event2 is None, "Error: Multiple events created"
+
+    # Change the permissions and the size of the file
+    modify_file_permission(testdir1, file)
+    modify_file_content(testdir1, file)
+    check_time_travel(scheduled)
+    wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
