@@ -29,6 +29,7 @@ assignees: ''
 - [ ] VUL013
 - [ ] VUL014
 - [ ] VUL015
+- [ ] VUL016
 
 
 ## VUL001
@@ -69,6 +70,7 @@ Vulnerability-detector needs to update the DB each `frequency` time, it is requi
       <os>wheezy</os>
       <os>stretch</os>
       <os>jessie</os>
+      <os>buster</os>
       <update_interval>30m</update_interval>
     </provider>
     <provider name="redhat">
@@ -98,6 +100,7 @@ We should see a `5461` message approximately every individual interval is reache
 - **Debian Wheezy** every 30 minutes.
 - **Debian Stretch** every 30 minutes.
 - **Debian Jessie** every 30 minutes.
+- **Debian Buster** every 30 minutes.
 - **Red Hat** every 10 minutes.
 - **National Vulnerability Database** every 15 minutes.
 
@@ -108,7 +111,9 @@ We should see a `5461` message approximately every individual interval is reache
 > 2019/09/25 11:32:14 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Ubuntu Trusty database update.
 > 2019/09/25 11:32:26 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Ubuntu Trusty feed finished successfully.
 > 2019/09/25 11:32:26 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Ubuntu Precise database update.
-> 2019/09/25 11:32:42 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Ubuntu Precise feed finished successfully.
+> 2019/09/25 11:32:34 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Ubuntu Precise feed finished successfully.
+> 2019/09/25 11:32:34 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Debian Buster database update.
+> 2019/09/25 11:32:42 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Debian Buster feed finished successfully.
 > 2019/09/25 11:32:42 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Debian Stretch database update.
 > 2019/09/25 11:32:51 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Debian Stretch feed finished successfully.
 > 2019/09/25 11:32:51 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Debian Jessie database update.
@@ -198,6 +203,7 @@ Vulnerability-detector is able to check if a vulnerability feed is outdated or n
       <os>wheezy</os>
       <os>stretch</os>
       <os>jessie</os>
+      <os>buster</os>
       <update_interval>1m</update_interval>
     </provider>
     <provider name="nvd">
@@ -219,6 +225,7 @@ To view those logs you need to enable the level 2 debug in modulesd.
 > 2019/09/25 13:43:15 wazuh-modulesd:vulnerability-detector[4618] wm_vuln_detector.c:2256 at wm_vuldet_fetch_oval(): DEBUG: (5457): Ubuntu Xenial OVAL is in its latest version. Update date: 2019-09-25T12:43:19
 > 2019/09/25 13:43:27 wazuh-modulesd:vulnerability-detector[4618] wm_vuln_detector.c:2256 at wm_vuldet_fetch_oval(): DEBUG: (5457): Ubuntu Trusty OVAL is in its latest version. Update date: 2019-04-26T13:07:52
 > 2019/09/25 13:43:50 wazuh-modulesd:vulnerability-detector[4618] wm_vuln_detector.c:2256 at wm_vuldet_fetch_oval(): DEBUG: (5457): Ubuntu Precise OVAL is in its latest version. Update date: 2017-05-10T19:31:06
+> 2019/09/25 13:43:51 wazuh-modulesd:vulnerability-detector[4618] wm_vuln_detector.c:2256 at wm_vuldet_fetch_oval(): DEBUG: (5457): Debian Buster OVAL is in its latest version. Update date: 2019-09-25T11:30:20.188-04:00
 > 2019/09/25 13:43:51 wazuh-modulesd:vulnerability-detector[4618] wm_vuln_detector.c:2256 at wm_vuldet_fetch_oval(): DEBUG: (5457): Debian Stretch OVAL is in its latest version. Update date: 2019-09-25T11:30:20.188-04:00
 > 2019/09/25 13:43:53 wazuh-modulesd:vulnerability-detector[4618] wm_vuln_detector.c:2256 at wm_vuldet_fetch_oval(): DEBUG: (5457): Debian Jessie OVAL is in its latest version. Update date: 2019-09-25T11:30:08.188-04:00
 > 2019/09/25 13:43:54 wazuh-modulesd:vulnerability-detector[4618] wm_vuln_detector.c:2256 at wm_vuldet_fetch_oval(): DEBUG: (5457): Debian Wheezy OVAL is in its latest version. Update date: 2019-09-25T11:30:02.188-04:00
@@ -438,6 +445,7 @@ This type of update is performed through the `path` and `url` options, and the w
       <os url="http://local_repo/oval-definitions-stretch.xml">stretch</os>
       <os url="http://local_repo/oval-definitions-jessie.xml">jessie</os>
       <os path="/local_path/oval-definitions-wheezy.xml">wheezy</os>
+      <os path="/local_path/oval-definitions-buster.xml">buster</os>
       <update_interval>1h</update_interval>
     </provider>
     <provider name="redhat">
@@ -447,7 +455,7 @@ This type of update is performed through the `path` and `url` options, and the w
     </provider>
     <provider name="nvd">
       <enabled>yes</enabled>
-      <url start="2002" end="2019">http://local_repo/rh-feed/redhat-feed[-].json</url>
+      <url start="2002" end="2019">http://local_repo/nvd-feed/nvd-feed[-].json</url>
       <update_interval>1h</update_interval>
     </provider>
   </vulnerability-detector>
@@ -468,7 +476,9 @@ If you perform a vulnerability update with a configuration like the one above, w
 > 2019/09/26 07:26:48 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Ubuntu Trusty database update.
 > 2019/09/26 07:26:59 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Ubuntu Trusty feed finished successfully.
 > 2019/09/26 07:26:59 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Ubuntu Precise database update.
-> 2019/09/26 07:27:09 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Ubuntu Precise feed finished successfully.
+> 2019/09/26 07:27:05 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Ubuntu Precise feed finished successfully.
+> 2019/09/26 07:27:05 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Debian Buster database update.
+> 2019/09/26 07:27:09 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Debian Buster feed finished successfully.
 > 2019/09/26 07:27:09 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Debian Stretch database update.
 > 2019/09/26 07:27:17 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Debian Stretch feed finished successfully.
 > 2019/09/26 07:27:17 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Debian Jessie database update.
@@ -520,6 +530,7 @@ All supported OS must be taken into account when a vulnerability scan is perform
       <os>stretch</os>
       <os>jessie</os>
       <os>wheezy</os>
+      <os>buster</os>
       <update_interval>1h</update_interval>
     </provider>
     <provider name="redhat">
@@ -716,6 +727,7 @@ The following block configures an ignore interval of 6 hours, which is the defau
       <os>wheezy</os>
       <os>stretch</os>
       <os>jessie</os>
+      <os>buster</os>
       <update_interval>1h</update_interval>
     </provider>
     <provider name="redhat">
@@ -1022,3 +1034,87 @@ After applying the hotfix, and once the agent has updated its hotfix inventory t
 > 2019/10/14 10:29:42 wazuh-modulesd:vulnerability-detector[4463] wm_vuln_detector_nvd.c:2611 at wm_vuldet_check_hotfix(): DEBUG: (5534): Agent 1 has installed KB4012212 that corrects the vulnerability CVE-2017-0055.
 
 Note that the hotfixes scan is only performed each time a full-scan is launched, or in other words, each time the value set by `<ignore_time>` is reached. Only packages can be scanned with a partial scan.
+
+
+## VUL016
+
+**Short description**
+
+Vulnerability-detector must work on resource limited systems
+
+**Category**
+
+Vulnerability-detector
+
+**Subcategory**
+
+Vulnerability detection
+
+**Description**
+
+Vulnerability-detector should be able to run on a system with 1GB of RAM and memory swap disabled.
+
+**Configuration sample**
+
+``` XML
+  <vulnerability-detector>
+    <enabled>yes</enabled>
+    <interval>5m</interval>
+    <ignore_time>6h</ignore_time>
+    <run_on_start>yes</run_on_start>
+    <provider name="canonical">
+      <enabled>yes</enabled>
+      <os>precise</os>
+      <os>trusty</os>
+      <os>xenial</os>
+      <os>bionic</os>
+      <update_interval>1h</update_interval>
+    </provider>
+    <provider name="debian">
+      <enabled>yes</enabled>
+      <os>wheezy</os>
+      <os>stretch</os>
+      <os>jessie</os>
+      <os>buster</os>
+      <update_interval>1h</update_interval>
+    </provider>
+    <provider name="redhat">
+      <enabled>yes</enabled>
+      <update_from_year>2010</update_from_year>
+      <update_interval>1h</update_interval>
+    </provider>
+    <provider name="nvd">
+      <enabled>yes</enabled>
+      <update_from_year>2010</update_from_year>
+      <update_interval>1h</update_interval>
+    </provider>
+  </vulnerability-detector>
+```
+
+**Min/Max compatible versions**
+3.11.2 - Current
+
+**Expected logs**
+
+If you are using the previous configuration on a system with the characteristics described above, you should see the following logs:
+
+> 2020/01/09 19:52:48 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Ubuntu Bionic database update.
+> 2020/01/09 19:53:18 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Ubuntu Bionic feed finished successfully.
+> 2020/01/09 19:53:18 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Ubuntu Xenial database update.
+> 2020/01/09 19:54:16 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Ubuntu Xenial feed finished successfully.
+> 2020/01/09 19:54:16 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Ubuntu Trusty database update.
+> 2020/01/09 19:55:20 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Ubuntu Trusty feed finished successfully.
+> 2020/01/09 19:55:20 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Ubuntu Precise database update.
+> 2020/01/09 19:56:04 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Ubuntu Precise feed finished successfully.
+> 2020/01/09 19:56:04 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Debian Buster database update.
+> 2020/01/09 19:56:52 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Debian Buster feed finished successfully.
+> 2020/01/09 19:56:52 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Debian Stretch database update.
+> 2020/01/09 19:57:38 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Debian Stretch feed finished successfully.
+> 2020/01/09 19:57:38 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Debian Jessie database update.
+> 2020/01/09 19:58:36 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Debian Jessie feed finished successfully.
+> 2020/01/09 19:58:36 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Debian Wheezy database update.
+> 2020/01/09 19:58:41 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Debian Wheezy feed finished successfully.
+> 2020/01/09 19:58:41 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting Red Hat Enterprise Linux database update.
+> 2020/01/09 19:59:57 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the Red Hat Enterprise Linux feed finished successfully.
+> 2020/01/09 20:00:00 wazuh-modulesd:vulnerability-detector: INFO: (5461): Starting National Vulnerability Database database update.
+> 2020/01/09 20:13:25 wazuh-modulesd:vulnerability-detector: INFO: (5494): The update of the National Vulnerability Database feed finished successfully.

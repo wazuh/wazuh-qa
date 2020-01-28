@@ -1,0 +1,170 @@
+---
+# These tests are automated so you only need to change this yaml to add new ones.
+# However, there are some rules to keep in mind to make this work:
+#     - If there's a restrict attribute in a directory, we assume it won't trigger any event (every restrict uses
+#       ".txt$" and we always create a .csv file for these tests)
+#     - If we want to test checks, we need to put check_all="no" as the first check in the directory. This is important
+#       because checks are read from left to right and they can be overwritten.
+#     - 'attribute': 'no' won't work. That is tested on each specific test.
+
+ #conf 1
+- tags:
+  - complex
+  - complex_1
+  apply_to_modules:
+  - test_ambiguous_complex
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "c:\\testdir"
+      attributes:
+      - restrict: ".txt$"
+      - FIM_MODE
+      - report_changes: 'yes'
+  - directories:
+      value: "c:\\testdir\\subdir1"
+      attributes:
+      - report_changes: 'yes'
+      - tags: TAGS
+      - FIM_MODE
+  - directories:
+      value: "c:\\testdir\\subdir1\\subdir2"
+      attributes:
+        - tags: TAGS
+        - FIM_MODE
+        - check_all: 'no'
+        - check_attrs: 'yes'
+  - directories:
+      value: "c:\\testdir\\subdir1\\subdir2\\subdir3"
+      attributes:
+        - FIM_MODE
+        - check_all: 'no'
+        - check_size: 'yes'
+        - check_owner: 'yes'
+        - report_changes: 'yes'
+  - directories:
+      value: "c:\\testdir\\subdir1\\subdir2\\subdir3\\subdir4"
+      attributes:
+        - FIM_MODE
+        - check_all: 'no'
+        - check_size: 'yes'
+        - report_changes: 'yes'
+        - tags: TAGS
+  - directories:
+      value: "c:\\testdir\\subdir1\\subdir2\\subdir3\\subdir4\\subdir5"
+      attributes:
+        - FIM_MODE
+        - check_all: 'no'
+        - restrict: ".txt$"
+        - check_size: 'yes'
+        - check_owner: 'yes'
+        - report_changes: 'yes'
+ #conf 2
+- tags:
+  - complex
+  - complex_2
+  apply_to_modules:
+  - test_ambiguous_complex
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "c:\\testdir"
+      attributes:
+      - FIM_MODE
+      - tags: TAGS
+  - directories:
+      value: "c:\\testdir\\subdir1"
+      attributes:
+      - report_changes: 'yes'
+      - restrict: ".txt$"
+      - FIM_MODE
+  - directories:
+      value: "c:\\testdir\\subdir1\\subdir2"
+      attributes:
+        - report_changes: 'yes'
+        - check_all: 'no'
+        - FIM_MODE
+        - check_size: 'yes'
+  - directories:
+      value: "c:\\testdir\\subdir1\\subdir2\\subdir3"
+      attributes:
+        - FIM_MODE
+        - check_all: 'no'
+        - check_perm: 'yes'
+        - check_owner: 'yes'
+        - check_mtime: 'yes'
+        - tags: TAGS
+  - directories:
+      value: "c:\\testdir\\subdir1\\subdir2\\subdir3\\subdir4"
+      attributes:
+        - FIM_MODE
+        - check_all: 'no'
+        - check_size: 'yes'
+        - restrict: ".txt$"
+        - tags: TAGS
+  - directories:
+      value: "c:\\testdir\\subdir1\\subdir2\\subdir3\\subdir4\\subdir5"
+      attributes:
+        - FIM_MODE
+        - check_all: 'no'
+        - check_group: 'yes'
+        - check_perm: 'yes'
+        - check_sha256sum: 'yes'
+        - report_changes: 'yes'
+#conf 3
+- tags:
+  - complex
+  - complex_3
+  apply_to_modules:
+  - test_ambiguous_complex
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "c:\\testdir\\subdir1"
+      attributes:
+      - report_changes: 'yes'
+      - tags: TAGS
+      - FIM_MODE
+  - directories:
+      value: "c:\\testdir\\subdir1\\subdir2\\subdir3\\subdir4\\subdir5"
+      attributes:
+        - FIM_MODE
+        - check_all: 'no'
+        - restrict: ".txt$"
+        - check_size: 'yes'
+        - check_owner: 'yes'
+        - report_changes: 'yes'
+  - directories:
+      value: "c:\\testdir\\subdir1\\subdir2"
+      attributes:
+        - tags: TAGS
+        - FIM_MODE
+        - check_all: 'no'
+        - check_attrs: 'yes'
+  - directories:
+      value: "c:\\testdir\\subdir1\\subdir2\\subdir3\\subdir4"
+      attributes:
+        - FIM_MODE
+        - check_all: 'no'
+        - check_size: 'yes'
+        - report_changes: 'yes'
+        - tags: TAGS
+  - directories:
+      value: "c:\\testdir\\subdir1\\subdir2\\subdir3"
+      attributes:
+        - FIM_MODE
+        - check_all: 'no'
+        - check_size: 'yes'
+        - check_owner: 'yes'
+  - directories:
+      value: "c:\\testdir"
+      attributes:
+        - restrict: ".txt$"
+        - FIM_MODE
+        - report_changes: 'yes'

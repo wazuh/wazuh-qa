@@ -1,0 +1,139 @@
+---
+- tags:
+  - test_checksums_checkall
+  apply_to_modules:
+  - test_checksums
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "c:\\testdir1"
+      attributes:
+      - FIM_MODE
+      - check_all: "yes"
+      - check_sum: "no"
+  - directories:
+      value: "c:\\testdir2"
+      attributes:
+      - FIM_MODE
+      - check_all: "yes"
+      - check_md5sum: "no"
+  - directories:
+      value: "c:\\testdir3"
+      attributes:
+      - FIM_MODE
+      - check_all: "yes"
+      - check_sha1sum: "no"
+  - directories:
+      value: "c:\\testdir4"
+      attributes:
+      - FIM_MODE
+      - check_all: "yes"
+      - check_sha256sum: "no"
+  - directories:
+      value: "c:\\testdir5"
+      attributes:
+      - FIM_MODE
+      - check_all: "yes"
+      - check_sum: "no"
+      - check_md5sum: "no"
+  - directories:
+      value: "c:\\testdir6"
+      attributes:
+      - FIM_MODE
+      - check_all: "yes"
+      - check_sum: "no"
+      - check_md5sum: "no"
+      - check_sha1sum: "no"
+  - directories:
+      value: "c:\\testdir7"
+      attributes:
+      - FIM_MODE
+      - check_all: "yes"
+      - check_sum: "no"
+      - check_md5sum: "no"
+      - check_sha1sum: "no"
+      - check_sha256sum: "no"
+  - directories:
+      value: "c:\\testdir8"
+      attributes:
+      - FIM_MODE
+      - check_all: "yes"
+      - check_sha1sum: "no"
+      - check_sha256sum: "no"
+  - directories:
+      value: "c:\\testdir9"
+      attributes:
+      - FIM_MODE
+      - check_all: "yes"
+      - check_sum: "no"
+      - check_md5sum: "no"
+      - check_sha256sum: "no"
+- tags:
+  - test_checksums
+  apply_to_modules:
+  - test_checksums
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "c:\\testdir1"
+      attributes:
+      - FIM_MODE
+      - check_all: "no"
+      - check_sum: "yes"
+  - directories:
+      value: "c:\\testdir2"
+      attributes:
+      - FIM_MODE
+      - check_all: "no"
+      - check_sum: "yes"
+      - check_md5sum: "no"
+  - directories:
+      value: "c:\\testdir3"
+      attributes:
+      - FIM_MODE
+      - check_all: "no"
+      - check_sum: "yes"
+      - check_sha1sum: "no"
+  - directories:
+      value: "c:\\testdir4"
+      attributes:
+      - FIM_MODE
+      - check_all: "no"
+      - check_sum: "yes"
+      - check_sha256sum: "no"
+  - directories:
+      value: "c:\\testdir5"
+      attributes:
+      - FIM_MODE
+      - check_all: "no"
+      - check_sum: "yes"
+      - check_md5sum: "no"
+      - check_sha1sum: "no"
+  - directories:
+      value: "c:\\testdir6"
+      attributes:
+      - FIM_MODE
+      - check_all: "no"
+      - check_sum: "yes"
+      - check_md5sum: "no"
+      - check_sha256sum: "no"
+  - directories:
+      value: "c:\\testdir7"
+      attributes:
+      - FIM_MODE
+      - check_all: "no"
+      - check_sum: "yes"
+      - check_sha1sum: "no"
+      - check_sha256sum: "no"
+  - directories:
+      value: "c:\\testdir8"
+      attributes:
+      - FIM_MODE
+      - check_all: "no"
+      - check_sum: "yes"
+      - check_md5sum: "no"
+      - check_sha256sum: "no"
