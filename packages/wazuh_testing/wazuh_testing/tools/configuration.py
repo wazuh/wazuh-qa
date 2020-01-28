@@ -12,12 +12,9 @@ import yaml
 from _pytest.outcomes import skip
 
 from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF
+
+
 # customize _serialize_xml to avoid lexicographical order in XML attributes
-from wazuh_testing.tools.configuration import _serialize_xml
-
-ET._serialize_xml = _serialize_xml  # override _serialize_xml to avoid lexicographical order in XML attributes
-
-
 def _serialize_xml(write, elem, qnames, namespaces,
                    short_empty_elements, **kwargs):
     tag = elem.tag
@@ -67,6 +64,9 @@ def _serialize_xml(write, elem, qnames, namespaces,
                 write(" />")
     if elem.tail:
         write(ET._escape_cdata(elem.tail))
+
+
+ET._serialize_xml = _serialize_xml  # override _serialize_xml to avoid lexicographical order in XML attributes
 
 
 def set_wazuh_conf(wazuh_conf: List[str]):
@@ -322,8 +322,8 @@ def process_configuration(config, placeholders=None, metadata=None):
     ----------
     config : dict
         Config to be enriched.
-    placeholders : list of dict, optional
-        List of dicts with the replacements.
+    placeholders : dict, optional
+        Dict with the replacements.
     metadata : list of dict, optional
         List of dicts with the metadata keys to include in config.
 

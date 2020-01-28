@@ -13,16 +13,17 @@ from datetime import datetime, timedelta
 class TimeMachine:
     """Context manager that goes forward/back in time and comes back to real time once it finishes its instance."""
     total_time_spent = 0
-    def __init__(self, timedelta):
+
+    def __init__(self, timedelta_):
         """
         Save time frame given by user.
 
         Parameters
         ----------
-        timedelta : timedelta
+        timedelta_ : timedelta
             Time frame.
         """
-        self.time_delta = timedelta
+        self.time_delta = timedelta_
 
     def __enter__(self):
         """Call travel_to_future function with saved timedelta as argument."""
@@ -39,12 +40,12 @@ class TimeMachine:
 
         Parameters
         ----------
-        datetime_ : time
+        datetime_ : datetime
             New date and time to set.
         """
         import shlex
         subprocess.call(shlex.split("timedatectl set-ntp false"))
-        subprocess.call(shlex.split("sudo date -s " + str(datetime_) + " +%Y-%m-%dT%H:%M:%S.%s"))
+        subprocess.call(shlex.split("sudo date -s " + datetime_.isoformat() + " +%Y-%m-%dT%H:%M:%S.%s"))
         subprocess.call(shlex.split("sudo hwclock -w"))
 
     @staticmethod
@@ -54,7 +55,7 @@ class TimeMachine:
 
         Parameters
         ----------
-        datetime_ : time
+        datetime_ : datetime
             New date and time to set.
         """
         os.system('date ' + datetime_.strftime("%d-%m-%Y"))
@@ -67,7 +68,7 @@ class TimeMachine:
 
         Parameters
         ----------
-        datetime_ : time
+        datetime_ : datetime
             New date and time to set.
         """
         solaris_time_format = "%m%d%H%M%Y.%S"
@@ -80,7 +81,7 @@ class TimeMachine:
 
         Parameters
         ----------
-        datetime_ : time
+        datetime_ : datetime
             New date and time to set.
         """
         # {month}{day}{hour}{minute}{year}
@@ -95,13 +96,15 @@ class TimeMachine:
         ----------
         time_delta : timedelta
             Time frame we want to skip. It can have a negative value.
+        back_in_time : bool, optional
+            Go back in time the same time_delta interval. Default value is False.
         """
-        #Save timedelta to be able to  travel back in time after the tests
+        # Save timedelta to be able to  travel back in time after the tests
         TimeMachine.total_time_spent += time_delta.seconds
         now = datetime.utcnow() if sys.platform == 'darwin' else datetime.now()
         future = now + time_delta if not back_in_time else now - time_delta
         if sys.platform == 'linux':
-            TimeMachine._linux_set_time(future.isoformat())
+            TimeMachine._linux_set_time(future)
         elif sys.platform == 'sunos5':
             TimeMachine._solaris_set_time(future)
         elif sys.platform == 'win32':
@@ -167,13 +170,13 @@ def reformat_time(scan_time):
                             year=cd.year, month=cd.month, day=cd.day)
 
 
-def time_to_timedelta(time):
+def time_to_timedelta(time_):
     """
     Convert a string with time in seconds with `smhdw` suffixes allowed to `datetime.timedelta`.
 
     Parameters
     ----------
-    time : str
+    time_ : str
         String with time in seconds.
 
     Returns
@@ -181,12 +184,12 @@ def time_to_timedelta(time):
     timedelta
         Timedelta object.
     """
-    time_unit = time[len(time) - 1:]
+    time_unit = time_[len(time_) - 1:]
 
     if time_unit.isnumeric():
-        return timedelta(seconds=int(time))
+        return timedelta(seconds=int(time_))
 
-    time_value = int(time[:len(time) - 1])
+    time_value = int(time_[:len(time_) - 1])
 
     if time_unit == "s":
         return timedelta(seconds=time_value)
