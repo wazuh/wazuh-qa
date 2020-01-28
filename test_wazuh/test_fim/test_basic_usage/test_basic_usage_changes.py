@@ -45,10 +45,20 @@ def get_configuration(request):
     testdir1,
     testdir2
 ])
-@pytest.mark.parametrize('checkers,  tags_to_apply', [
-    ({CHECK_ALL}, {'ossec_conf'}),
+@pytest.mark.parametrize('name, encoding, checkers,  tags_to_apply', [
+    ('regular0', None, {CHECK_ALL}, {'ossec_conf'}),
+    pytest.param('檔案', 'cp950', {CHECK_ALL}, {'ossec_conf'}, marks=(pytest.mark.linux,
+                 pytest.mark.darwin, pytest.mark.sunos5)),
+    pytest.param('Образецтекста', 'koi8-r', {CHECK_ALL}, {'ossec_conf'}, marks=(pytest.mark.linux,
+                 pytest.mark.darwin, pytest.mark.sunos5)),
+    pytest.param('Δείγμακειμένου', 'cp737', {CHECK_ALL}, {'ossec_conf'}, marks=(pytest.mark.linux,
+                 pytest.mark.darwin, pytest.mark.sunos5)),
+    pytest.param('نصبسيط', 'cp720', {CHECK_ALL}, {'ossec_conf'}, marks=(pytest.mark.linux,
+                 pytest.mark.darwin, pytest.mark.sunos5)),
+    pytest.param('Ξ³ΞµΞΉΞ±', None, {CHECK_ALL}, {'ossec_conf'}, marks=pytest.mark.win32)
+
 ])
-def test_regular_file_changes(folder, checkers, tags_to_apply,
+def test_regular_file_changes(folder, name, encoding, checkers, tags_to_apply,
                               get_configuration, configure_environment,
                               restart_syscheckd, wait_for_initial_scan):
     """ Checks if syscheckd detects regular file changes (add, modify, delete)
@@ -61,8 +71,10 @@ def test_regular_file_changes(folder, checkers, tags_to_apply,
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    file_list = ['regular0', 'regular1', 'regular2']
+    if encoding is not None:
+        name = name.encode(encoding)
+        folder = folder.encode(encoding)
 
-    regular_file_cud(folder, wazuh_log_monitor, file_list=file_list,
+    regular_file_cud(folder, wazuh_log_monitor, file_list=[name],
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                     min_timeout=DEFAULT_TIMEOUT, options=checkers, triggers_event=True)
+                     min_timeout=DEFAULT_TIMEOUT, options=checkers, encoding=encoding, triggers_event=True)

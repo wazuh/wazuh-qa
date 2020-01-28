@@ -23,8 +23,8 @@ def pytest_runtest_setup(item):
     # Consider only first mark
     levels = [mark.kwargs['level'] for mark in item.iter_markers(name="tier")]
     if levels and len(levels) > 0:
-        tier = item.config.getoption("--tier")
-        if tier is not None and tier != levels[0]:
+        tiers = item.config.getoption("--tier")
+        if tiers is not None and levels[0] not in tiers:
             pytest.skip(f"test requires tier level {levels[0]}")
         elif item.config.getoption("--tier-minimum") > levels[0]:
             pytest.skip(f"test requires a minimum tier level {levels[0]}")
@@ -46,7 +46,7 @@ def restart_wazuh(get_configuration, request):
 def pytest_addoption(parser):
     parser.addoption(
         "--tier",
-        action="store",
+        action="append",
         metavar="level",
         default=None,
         type=int,

@@ -13,6 +13,9 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations, check_a
 
 if sys.platform == 'win32':
     import winreg
+    keys = [(winreg.HKEY_LOCAL_MACHINE, "HKEY_LOCAL_MACHINE")]
+else:
+    keys = []
 
 # All tests in this module apply to windows only
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
@@ -21,8 +24,6 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_win32.yaml')
-
-keys = [(winreg.HKEY_LOCAL_MACHINE, "HKEY_LOCAL_MACHINE")]
 
 keys_objects = list()
 keys_strings = list()

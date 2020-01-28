@@ -56,13 +56,13 @@ def get_configuration(request):
 @pytest.mark.parametrize('filename, mode, content, triggers_event, tags_to_apply', [
     ('.restricted', 'w', "Sample content", True, {'valid_regex1'}),
     ('binary.restricted', 'wb', b"Sample content", True, {'valid_regex1'}),
-    ('testfile2', 'w', "", False, {'valid_regex'}),
+    ('testfile2', 'w', "", False, {'valid_regex', 'valid_regex_incomplete'}),
     ("btestfile2", "wb", b"", False, {'valid_regex'}),
     ('testfile2', 'w', "", True, {'valid_empty'}),
     ("btestfile2", "wb", b"", True, {'valid_empty'}),
-    ("restricted", "w", "Test", False, {'valid_regex'}),
-    ("myfilerestricted", "w", "", True, {'valid_regex_3'}),
-    ("myother_restricted", "wb", b"", True, {'valid_regex_3'})
+    ("restricted", "w", "Test", False, {'valid_regex', 'valid_regex_incomplete'}),
+    ("myfilerestricted", "w", "", True, {'valid_regex_2'}),
+    ("myother_restricted", "wb", b"", True, {'valid_regex_2'})
 ])
 def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply,
                   get_configuration, configure_environment, restart_syscheckd,
