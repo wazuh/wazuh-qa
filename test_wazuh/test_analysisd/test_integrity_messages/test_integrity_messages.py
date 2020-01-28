@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2019, Wazuh Inc.
+# Copyright (C) 2015-2020, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -7,7 +7,7 @@ import os
 import pytest
 import yaml
 from wazuh_testing.analysis import callback_analysisd_message, validate_analysis_integrity_state
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH, FileMonitor
+from wazuh_testing.tools import WAZUH_PATH
 
 # All tests in this module apply to linux only
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
