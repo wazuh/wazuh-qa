@@ -518,16 +518,20 @@ class FileMonitor:
         self.extra_timer = None
         self.extra_timer_is_running = False
 
-    def _monitor(self, callback=_callback_default, accum_results=1, update_position=True, timeout_extra=0):
+    def _monitor(self, callback=_callback_default, accum_results=1, update_position=True, timeout_extra=0,
+                 encoding=None):
         """Wait for new lines to be appended to the file.
         A callback function will be called every time a new line is detected. This function must receive two
         positional parameters: a references to the FileMonitor object and the line detected.
         """
         previous_position = self._position
-        encode = None if sys.platform == 'win32' else 'utf-8'
+        if sys.platform == 'win32':
+            encoding = None if encoding is None else encoding
+        elif encoding is None:
+            encoding = 'utf-8'
         self.extra_timer_is_running = False
         self._result = [] if accum_results > 1 or timeout_extra > 0 else None
-        with open(self.file_path, encoding=encode) as f:
+        with open(self.file_path, encoding=encoding) as f:
             f.seek(self._position)
             while self._continue:
                 if self._abort and not self.extra_timer_is_running:
@@ -557,7 +561,8 @@ class FileMonitor:
                                 self.stop()
             self._position = f.tell() if update_position else previous_position
 
-    def start(self, timeout=-1, callback=_callback_default, accum_results=1, update_position=True, timeout_extra=0):
+    def start(self, timeout=-1, callback=_callback_default, accum_results=1, update_position=True, timeout_extra=0,
+              encoding=None):
         """Start the file monitoring until the stop method is called."""
         if not self._continue:
             self._continue = True
@@ -565,7 +570,8 @@ class FileMonitor:
             if timeout > 0:
                 self.timeout_timer = Timer(timeout, self.abort)
                 self.timeout_timer.start()
-            self._monitor(callback=callback, accum_results=accum_results, update_position=update_position, timeout_extra=timeout_extra)
+            self._monitor(callback=callback, accum_results=accum_results, update_position=update_position,
+                          timeout_extra=timeout_extra, encoding=encoding)
 
         return self
 
@@ -643,7 +649,7 @@ def random_string(length, encode=None):
         Random string.
     """
     letters = string.ascii_letters + string.digits
-    st = str(''.join(random.choice(letters) for i in range(length)))
+    st = str(''.join(random.choice(letters) for _ in range(length)))
 
     if encode is not None:
         st = st.encode(encode)

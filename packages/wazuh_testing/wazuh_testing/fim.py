@@ -500,9 +500,13 @@ def modify_file_inode(path, name):
     if sys.platform == 'win32':
         return
 
+    inode_file = 'inodetmp'
     path_to_file = os.path.join(path, name)
-    shutil.copy2(path_to_file, os.path.join(path, "inodetmp"))
-    os.replace(os.path.join(path, "inodetmp"), path_to_file)
+    if isinstance(name, bytes):
+        inode_file = inode_file.encode()
+
+    shutil.copy2(path_to_file, os.path.join(path, inode_file))
+    os.replace(os.path.join(path, inode_file), path_to_file)
 
 
 def modify_file_win_attributes(path, name):
@@ -787,12 +791,13 @@ def callback_entries_path_count(line):
 class EventChecker:
     """Utility to allow fetch events and validate them."""
 
-    def __init__(self, log_monitor, folder, file_list=['testfile0'], options=None, custom_validator=None):
+    def __init__(self, log_monitor, folder, file_list=['testfile0'], options=None, custom_validator=None, encoding=None):
         self.log_monitor = log_monitor
         self.folder = folder
         self.file_list = file_list
         self.custom_validator = custom_validator
         self.options = options
+        self.encoding = encoding
         self.events = None
 
     def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0):
@@ -849,7 +854,8 @@ class EventChecker:
             result = self.log_monitor.start(timeout=max(len(self.file_list) * 0.01, min_timeout),
                                             callback=callback_detect_event,
                                             accum_results=len(self.file_list),
-                                            timeout_extra=extra_timeout
+                                            timeout_extra=extra_timeout,
+                                            encoding=self.encoding
                                             ).result()
             assert triggers_event, f'No events should be detected.'
             if extra_timeout > 0:
@@ -890,6 +896,9 @@ class EventChecker:
             for file_name in file_list:
                 expected_file_path = os.path.join(folder, file_name)
                 expected_file_path = expected_file_path[:1].lower() + expected_file_path[1:]
+                if self.encoding is not None:
+                    for index, item in enumerate(file_paths):
+                        file_paths[index] = item.encode(self.encoding)
                 assert (expected_file_path in file_paths), f'{expected_file_path} does not exist in {file_paths}'
 
         def filter_events(events, mask):
@@ -982,7 +991,7 @@ class CustomValidator:
 
 
 def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=False, min_timeout=1, options=None,
-                     triggers_event=True, validators_after_create=None, validators_after_update=None,
+                     triggers_event=True, encoding=None, validators_after_create=None, validators_after_update=None,
                      validators_after_delete=None, validators_after_cud=None):
     """
     Checks if creation, update and delete events are detected by syscheck.
@@ -995,7 +1004,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         Path where the files will be created.
     log_monitor : FileMonitor
         File event monitor.
-    file_list : list of str or dict, optional
+    file_list : list(str) or dict, optional
         If it is a list, it will be transformed to a dict with empty strings in each value. Default `['testfile0']`
     time_travel : boolean, optional
         Boolean to determine if there will be time travels or not. Default `False`
@@ -1005,6 +1014,8 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         Set with all the checkers. Default `None`
     triggers_event : boolean, optional
         Boolean to determine if the event should be raised or not. Default `True`
+    encoding : str, optional
+        String to determine the encoding of the file name. Default `None`
     validators_after_create : list, optional
         List of functions that validates an event triggered when a new file is created. Each function must accept
         a param to receive the event to be validated. Default `None`
@@ -1026,7 +1037,8 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     custom_validator = CustomValidator(validators_after_create, validators_after_update,
                                        validators_after_delete, validators_after_cud)
-    event_checker = EventChecker(log_monitor, folder, file_list, options, custom_validator)
+    event_checker = EventChecker(log_monitor=log_monitor, folder=folder, file_list=file_list, options=options,
+                                 custom_validator=custom_validator, encoding=encoding)
 
     # Create text files
     for name, content in file_list.items():
