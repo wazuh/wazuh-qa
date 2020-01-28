@@ -24,10 +24,11 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [os.path.join(PREFIX, 'testdir1'),
                     os.path.join(PREFIX, 'testdir1', 'subdir'),
+                    os.path.join(PREFIX, 'testdir1', 'folder'),
                     os.path.join(PREFIX, 'testdir2'),
                     os.path.join(PREFIX, 'testdir2', 'subdir')
                     ]
-testdir1, testdir1_sub, testdir2, testdir2_sub = test_directories
+testdir1, testdir1_sub, testdir1_restrict_folder, testdir2, testdir2_sub = test_directories
 
 directory_str = ','.join([test_directories[0], test_directories[2]])
 

@@ -63,3 +63,19 @@
       - check_all: 'yes'
       - FIM_MODE
       - restrict: "filerestricted|other_restricted$"
+# conf 5
+- tags:
+  - valid_regex
+  - valid_regex2
+  apply_to_modules:
+  - test_restrict_valid
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: TEST_DIRECTORIES
+      attributes:
+      - check_all: 'yes'
+      - FIM_MODE
+      - restrict: "^/testdir1/f"

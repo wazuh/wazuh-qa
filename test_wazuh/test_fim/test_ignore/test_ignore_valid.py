@@ -27,10 +27,11 @@ configurations_path = os.path.join(test_data_path,
 test_directories = [os.path.join(PREFIX, 'testdir1'),
                     os.path.join(PREFIX, 'testdir1', 'subdir'),
                     os.path.join(PREFIX, 'testdir1', 'ignore_this'),
+                    os.path.join(PREFIX, 'testdir1', 'folder'),
                     os.path.join(PREFIX, 'testdir2'),
                     os.path.join(PREFIX, 'testdir2', 'subdir')
                     ]
-testdir1, testdir1_sub, testdir1_ignore, testdir2, testdir2_sub = test_directories
+testdir1, testdir1_sub, testdir1_ignore, testdir1_ignore_folder, testdir2, testdir2_sub = test_directories
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
@@ -74,7 +75,9 @@ def get_configuration(request):
     (testdir1, 'whatever.txt', "test", False, {'valid_empty'}),
     (testdir2, 'whatever2.txt', "test", False, {'valid_empty'}),
     (testdir1, 'mytest', "test", True, {'negation_regex'}),
-    (testdir1, 'othername', "test", False, {'negation_regex'})
+    (testdir1, 'othername', "test", False, {'negation_regex'}),
+    (testdir1, 'file1', "test", False, {'incomplete_regex'}),
+    (testdir1_ignore_folder, 'file2', "test", False, {'incomplete_regex'})
 ])
 def test_ignore_subdirectory(folder, filename, content, triggers_event,
                              tags_to_apply, get_configuration,

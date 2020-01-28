@@ -170,7 +170,7 @@
       attributes:
       - check_all: 'yes'
       - FIM_MODE
-# conf 11
+# conf 10
 - tags:
   - negation_regex
   apply_to_modules:
@@ -185,6 +185,24 @@
       - type: sregex
   - directories:
       value: "/testdir1,/testdir2"
+      attributes:
+      - check_all: 'yes'
+      - FIM_MODE
+# conf 11
+- tags:
+  - incomplete_regex
+  apply_to_modules:
+  - test_ignore_valid
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - ignore:
+      value: "^/testdir1/f"
+      attributes:
+      - type: sregex
+  - directories:
+      value: "/testdir1"
       attributes:
       - check_all: 'yes'
       - FIM_MODE
