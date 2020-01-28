@@ -11,12 +11,14 @@ if sys.platform == 'win32':
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'ossec.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     PREFIX = os.path.join('c:', os.sep)
+    GEN_OSSEC = None
 
 elif sys.platform == 'darwin':
     WAZUH_PATH = os.path.join('/', 'Library', 'Ossec')
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     PREFIX = os.sep
+    GEN_OSSEC = None
 
 else:
     WAZUH_PATH = os.path.join('/', 'var', 'ossec')
