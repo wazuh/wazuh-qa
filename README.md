@@ -3,6 +3,8 @@ Wazuh - Quality assurance automation templates
 
 ## Integration tests
 
+**DISCLAIMER:** this guide assumes you have a proper testing environment. If you do not, please check our [wiki](https://github.com/wazuh/wazuh-qa/wiki).
+
 Our newest integration tests are located in `wazuh-qa/test_wazuh/`. They are organized by groups:
 
 - _test_analysisd_
@@ -21,7 +23,7 @@ Every group will have the following structure _(this is an example)_:
 │   │   │   └── wazuh_conf.yaml
 │   │   ├── test_<module>.py
 │   │   ├── test_<module>.py
-│   │   └── test_<module>>.py
+│   │   └── test_<module>.py
 │   ├── test_<functionality>
 │   │   ├── data
 │   │   │   ├── <wazuh_conf>.yaml
@@ -33,7 +35,7 @@ Every group will have the following structure _(this is an example)_:
 
 #### conftest
 
-Every group could have its own `conftest` if it needed some specific configurations. For reference, please check the [official pytest documentation](https://docs.pytest.org/en/latest/contents.html).
+Every group could have its own `conftest` if it needed some specific configurations. For reference, please check [pytest](#pytest) section below.
 
 #### data
 
@@ -103,7 +105,7 @@ pip3 uninstall -y wazuh_testing && pip3 install .
 
 ### Pytest
 
-We use `pytest` to run our integrity tests. Pytest will recursively look for the closest `conftest` to import all the variables and fixtures needed for every test. If something is lacking from the closest one, it will look for the next one (if possible) until reaching the current directory. This means we need to run every test from the following path, where the general _conftest_ is:
+We use [pytest](https://docs.pytest.org/en/latest/contents.html) to run our integrity tests. Pytest will recursively look for the closest `conftest` to import all the variables and fixtures needed for every test. If something is lacking from the closest one, it will look for the next one (if possible) until reaching the current directory. This means we need to run every test from the following path, where the general _conftest_ is:
 
 ```shell script
 cd wazuh-qa/test_wazuh
@@ -123,7 +125,8 @@ python3 -m pytest [options] [file_or_dir] [file_or_dir] [...]
 - `m` : only run tests matching given expression (-m MARKEXPR)
 - `--tier` : only run tests with given tier (ex. --tier 2)
 
-_Use `-h` to see the rest._
+_Use `-h` to see the rest or check its [documentation](https://docs.pytest.org/en/latest/usage.html)._
+
 #### FIM integration tests examples
 
 ```shell script
