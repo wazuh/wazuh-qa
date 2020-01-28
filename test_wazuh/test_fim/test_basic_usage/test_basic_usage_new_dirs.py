@@ -7,9 +7,11 @@ import shutil
 
 import pytest
 
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.fim import DEFAULT_TIMEOUT, LOG_FILE_PATH, generate_params, \
     regular_file_cud, check_time_travel
-from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
 
 
 # Marks
