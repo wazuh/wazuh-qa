@@ -31,10 +31,49 @@ Every group will have the following structure _(this is an example)_:
 └── └── └── <script>
 ```
 
-- Every group could have its own `conftest` if it needed some specific configurations. 
-- `data` directory 
+#### conftest
 
-#### Dependencies
+Every group could have its own `conftest` if it needed some specific configurations. For reference, please check the [official pytest documentation](https://docs.pytest.org/en/latest/contents.html).
+
+#### data
+
+Folder with the configuration yaml's to create the testing environment. These yaml's have the `ossec.conf` that will be applied to each module.
+This is a sample yaml used for `FIM`:
+
+```yaml
+---
+# sample configuration
+- tags:
+  - sample_tag
+  apply_to_modules:
+  - sample_module
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: '/sample_directory'
+      attributes:
+      - check_all: 'yes'
+  - nodiff:
+      value: '/sample_directory/nodiff_file'
+```
+
+- **tags**: Informative tag that could be used to filter out within test functions for the same module.
+- **apply_to_modules**: Module/s that will load this configuration.
+- **section**: Section that will be modified within `<ossec_config`.
+- **elements**: Elements that will be written within the given section.
+    - disabled: `<disabled>no</disabled>`
+    - directories: `<directories check_all="yes">/sample_directory</directories>`
+    - nodiff: `<nodiff>/sample_directory/nodiff_file</nodiff>`
+
+We can use `wildcards` as well to parametrize values or attributes. For example, if we add a new attribute into the previous configuration called `FIM_MODE` and we set this wildcard to `''`, `realtime="yes"` and `whodata="yes"`, it will generate **three** different configurations. One for each _WILDCARD_ value.
+
+#### test_module
+
+This will be our python module with all the needed code to test everything. 
+
+### Dependencies
 
 To run them, we need to install all these Python dependencies:
 
@@ -44,7 +83,7 @@ pip3 install distro freezegun jq jsonschema paramiko psutil pydevd-pycharm pytes
 
 _**NOTE:** `jq` library can only be installed with `pip` on **Linux**_
 
-#### Wazuh-Testing package
+### Wazuh-Testing package
 
 We have a Python package with all the tools needed to run these tests. From file monitoring classes to callbacks or functions to create the test environment. Without installing this package, we cannot run these tests. 
 
@@ -62,7 +101,7 @@ cd wazuh-qa/packages/wazuh_testing
 pip3 uninstall -y wazuh_testing && pip3 install .
 ```
 
-#### Pytest
+### Pytest
 
 We use `pytest` to run our integrity tests. Pytest will recursively look for the closest `conftest` to import all the variables and fixtures needed for every test. If something is lacking from the closest one, it will look for the next one (if possible) until reaching the current directory. This means we need to run every test from the following path, where the general _conftest_ is:
 
@@ -85,7 +124,7 @@ python3 -m pytest [options] [file_or_dir] [file_or_dir] [...]
 - `--tier` : only run tests with given tier (ex. --tier 2)
 
 _Use `-h` to see the rest._
-##### FIM integration tests examples
+#### FIM integration tests examples
 
 ```shell script
 python3 -m pytest -vvx test_fim/test_basic_usage/test_basic_usage_create_scheduled.py
