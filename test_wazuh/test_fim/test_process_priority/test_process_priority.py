@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2019, Wazuh Inc.
+# Copyright (C) 2015-2020, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -7,7 +7,8 @@ import os
 import pytest
 
 from wazuh_testing.fim import generate_params
-from wazuh_testing.tools import check_apply_test, load_wazuh_configurations, get_process
+from wazuh_testing.tools.services import get_process
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 

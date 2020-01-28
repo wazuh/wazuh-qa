@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2019, Wazuh Inc.
+# Copyright (C) 2015-2020, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -8,8 +8,10 @@ import sys
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_registry, modify_registry, delete_registry, \
-    TimeMachine, timedelta, DEFAULT_TIMEOUT, callback_detect_event
-from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations
+    timedelta, DEFAULT_TIMEOUT, callback_detect_event
+from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 if sys.platform == 'win32':
     import winreg

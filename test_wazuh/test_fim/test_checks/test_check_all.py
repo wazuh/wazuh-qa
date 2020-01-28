@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2019, Wazuh Inc.
+# Copyright (C) 2015-2020, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -9,8 +9,11 @@ import pytest
 
 from wazuh_testing.fim import (CHECK_ALL, CHECK_ATTRS, CHECK_GROUP, CHECK_INODE, CHECK_MD5SUM, CHECK_MTIME, CHECK_OWNER,
                                CHECK_PERM, CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_SIZE, CHECK_SUM, LOG_FILE_PATH,
-                               REQUIRED_ATTRIBUTES, regular_file_cud, generate_params)
-from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
+                               REQUIRED_ATTRIBUTES, regular_file_cud, generate_params, create_file, REGULAR,
+                               check_time_travel, callback_detect_event, delete_file, modify_file)
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 
@@ -130,3 +133,44 @@ def test_check_all(path, checkers, get_configuration, configure_environment, res
 
     regular_file_cud(path, wazuh_log_monitor, min_timeout=15, options=checkers,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled')
+
+
+@pytest.mark.parametrize('path, checkers', [(testdir1, {})])
+def test_check_all_no(path, checkers, get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
+    """Test the functionality of `check_all` option when set to no.
+
+    When setting `check_all` to no, only 'type' and 'checksum' attributes should appear in every event. This will
+    avoid any modification event.
+
+    This test is intended to be used with valid configurations files. Each execution of this test will configure the
+    environment properly, restart the service and wait for the initial scan.
+
+    Parameters
+    ----------
+    path : str
+        Directory where the file is being created and monitored
+    checkers : dict
+        Dict with all the check options to be used
+    """
+    check_apply_test({'test_check_all_no'}, get_configuration['tags'])
+    scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
+
+    # Create regular file and dont expect any check
+    file = 'regular'
+    create_file(REGULAR, path, file)
+    check_time_travel(scheduled)
+    create_event = wazuh_log_monitor.start(callback=callback_detect_event, timeout=15).result()
+    assert create_event['data']['type'] == 'added'
+    assert list(create_event['data']['attributes'].keys()) == ['type', 'checksum']
+
+    # Delete regular file and dont expect any check. Since it is not using any check, modification events will not
+    # be triggered
+    modify_file(path, file, 'Sample modification')
+    with pytest.raises(TimeoutError):
+        wazuh_log_monitor.start(callback=callback_detect_event, timeout=5)
+
+    delete_file(path, file)
+    check_time_travel(scheduled)
+    delete_event = wazuh_log_monitor.start(callback=callback_detect_event, timeout=15).result()
+    assert delete_event['data']['type'] == 'deleted'
+    assert list(delete_event['data']['attributes'].keys()) == ['type', 'checksum']

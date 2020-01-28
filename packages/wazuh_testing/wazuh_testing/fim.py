@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2019, Wazuh Inc.
+# Copyright (C) 2015-2020, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -21,7 +21,7 @@ from json import JSONDecodeError
 from jsonschema import validate
 from typing import Sequence, Union, Generator, Any
 
-from wazuh_testing.tools import TimeMachine
+from wazuh_testing.tools.time import TimeMachine
 
 if sys.platform == 'win32':
     import win32con
