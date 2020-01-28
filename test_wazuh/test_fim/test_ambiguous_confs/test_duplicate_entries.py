@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2019, Wazuh Inc.
+# Copyright (C) 2015-2020, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -11,7 +11,9 @@ import pytest
 from wazuh_testing.fim import LOG_FILE_PATH, modify_file_group, modify_file_content, modify_file_owner, \
     modify_file_permission, check_time_travel, callback_detect_event, get_fim_mode_param, deepcopy, create_file, \
     REGULAR, generate_params, DEFAULT_TIMEOUT
-from wazuh_testing.tools import FileMonitor, load_wazuh_configurations, PREFIX, check_apply_test
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -65,8 +67,7 @@ def check_event2(mode2, event1, file):
 # tests
 
 
-def test_duplicate_entries(get_configuration, configure_environment,
-                           restart_syscheckd, wait_for_initial_scan):
+def test_duplicate_entries(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
     """Checks if syscheckd ignores duplicate entries.
        For instance:
            - The second entry should prevail over the first one.
@@ -125,8 +126,7 @@ def test_duplicate_entries_sregex(get_configuration, configure_environment,
         assert True
 
 
-def test_duplicate_entries_report(get_configuration, configure_environment,
-                                  restart_syscheckd, wait_for_initial_scan):
+def test_duplicate_entries_report(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
     """Checks if syscheckd ignores duplicate entries, report changes.
        For instance:
            - The second entry should prevail over the first one.
@@ -149,8 +149,7 @@ def test_duplicate_entries_report(get_configuration, configure_environment,
     wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
 
 
-def test_duplicate_entries_complex(get_configuration, configure_environment,
-                                   restart_syscheckd, wait_for_initial_scan):
+def test_duplicate_entries_complex(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
     """Checks if syscheckd ignores duplicate entries, complex entries.
        For instance:
            - The second entry should prevail over the first one.

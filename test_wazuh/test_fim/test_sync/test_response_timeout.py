@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2019, Wazuh Inc.
+# Copyright (C) 2015-2020, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
@@ -10,8 +10,10 @@ import pytest
 import sys
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, callback_detect_synchronization, generate_params
-from wazuh_testing.tools import FileMonitor, TimeMachine, check_apply_test, load_wazuh_configurations, \
-    time_to_timedelta, PREFIX
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.time import TimeMachine, time_to_timedelta
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 if sys.platform == "linux":
     import paramiko

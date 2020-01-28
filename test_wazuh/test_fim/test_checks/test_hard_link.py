@@ -1,15 +1,16 @@
-# Copyright (C) 2015-2019, Wazuh Inc.
+# Copyright (C) 2015-2020, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
 import sys
-from copy import deepcopy
 
 import pytest
 from wazuh_testing.fim import (DEFAULT_TIMEOUT, HARDLINK, LOG_FILE_PATH, REGULAR, EventChecker,
                                check_time_travel, create_file, delete_file, modify_file_content, generate_params)
-from wazuh_testing.tools import FileMonitor, load_wazuh_configurations, truncate_file
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 
 # Marks
 

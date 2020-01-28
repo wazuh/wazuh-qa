@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2019, Wazuh Inc.
+# Copyright (C) 2015-2020, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -7,7 +7,9 @@ import shutil
 import pytest
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
     callback_detect_event, check_time_travel, DEFAULT_TIMEOUT
-from wazuh_testing.tools import FileMonitor, check_apply_test, load_wazuh_configurations, PREFIX
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # variables
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
