@@ -34,6 +34,7 @@ options = {CHECK_ALL}
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
+FILE_NAME = 'regularfile'
 
 # configurations
 
@@ -156,12 +157,38 @@ def test_no_report_changes(folder, checkers, delete_dir, tags_to_apply,
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    filename = 'regularfile'
     fim_mode = get_configuration['metadata']['fim_mode']
     if delete_dir:
-        check_when_deleted_directories(filename, folder, fim_mode)
+        check_when_deleted_directories(FILE_NAME, folder, fim_mode)
     else:
         new_conf = change_conf(report_value='no')
         new_ossec_conf = set_section_wazuh_conf(new_conf[0].get('section'),
                                                 new_conf[0].get('elements'))
-        check_when_no_report_changes(filename, folder, fim_mode, new_ossec_conf)
+        check_when_no_report_changes(FILE_NAME, folder, fim_mode, new_ossec_conf)
+
+
+def test_no_report_changes_after_restart(get_configuration, configure_environment, restart_syscheckd,
+                                         wait_for_initial_scan):
+    """Check if duplicated directories in diff are deleted when restarting syscheck.
+
+    The duplicated directories in diff will be removed after Syscheck restarts but will be created again if the report
+    changes is still active. To avoid this we disable turn off report_changes option before restarting Syscheck to
+    ensure directories won't be created again.
+
+    * This test is intended to be used with valid configurations files. Each execution of this test will configure
+    the environment properly, restart the service and wait for the initial scan. This test will restart with a new
+    configuration throughout its execution as well.
+    """
+    fim_mode = get_configuration['metadata']['fim_mode']
+
+    # Create a file in the monitored path to force the creation of a report in diff
+    diff_file_path = create_and_check_diff(FILE_NAME, testdir_reports, fim_mode)
+
+    # Disable report_changes before restarting Syscheck
+    new_conf = change_conf(report_value='no')
+    new_ossec_conf = set_section_wazuh_conf(new_conf[0].get('section'), new_conf[0].get('elements'))
+
+    restart_wazuh_with_new_conf(new_ossec_conf)
+    detect_initial_scan(wazuh_log_monitor)
+
+    assert not os.path.exists(diff_file_path), f'{diff_file_path} exists'
