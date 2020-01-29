@@ -47,9 +47,12 @@ def get_configuration(request):
 
 def extra_configuration_before_yield():
     """Make sure to delete any existing directory with the same name before performing the test"""
-    if os.path.exists(directory_str) and os.path.isdir(directory_str):
-        shutil.rmtree(directory_str, ignore_errors=True)
+    shutil.rmtree(directory_str, ignore_errors=True)
 
+
+def extra_configuration_after_yield():
+    """Make sure to delete the directory after performing the test"""
+    shutil.rmtree(directory_str, ignore_errors=True)
 
 # Tests
 
