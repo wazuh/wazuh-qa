@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2019, Wazuh Inc.
+# Copyright (C) 2015-2020, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -16,7 +16,7 @@ from wazuh_testing.fim import DEFAULT_TIMEOUT, LOG_FILE_PATH, generate_params, \
 
 # Marks
 
-pytestmark = pytest.mark.tier(level=0)
+pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0)]
 
 
 # Variables
@@ -46,7 +46,7 @@ def get_configuration(request):
 # Functions
 
 def extra_configuration_before_yield():
-    """Make sure to delete any existing directory with the same name before test"""
+    """Make sure to delete any existing directory with the same name before performing the test"""
     if os.path.exists(directory_str) and os.path.isdir(directory_str):
         shutil.rmtree(directory_str, ignore_errors=True)
 
@@ -58,13 +58,13 @@ def extra_configuration_before_yield():
 ])
 def test_new_directory(tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                        wait_for_initial_scan):
-    """Non-existent monitored directory does not generate events until the next scheduled scan after creating it.
+    """Check that a new monitored directory generates events after the next scheduled scan.
 
     This test performs the following steps:
-    - Monitor a test that does not exist.
+    - Monitor a directory that does not exist.
     - Create the directory with files inside. Check that this does not produce events in ossec.log.
-    - Advance time to the next scheduled scan.
-    - Check that now CUD actions within the directory do generate events.
+    - Move time forward to the next scheduled scan.
+    - Check that now creating files within the directory do generate events.
 
     Parameters
     ----------
@@ -73,7 +73,7 @@ def test_new_directory(tags_to_apply, get_configuration, configure_environment, 
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    # Create the monitored directory with files and check that events are not raised on it
+    # Create the monitored directory with files and check that events are not raised
     regular_file_cud(directory_str, wazuh_log_monitor, file_list=['file1', 'file2', 'file3'],
                      min_timeout=DEFAULT_TIMEOUT, triggers_event=False)
 
@@ -82,4 +82,4 @@ def test_new_directory(tags_to_apply, get_configuration, configure_environment, 
 
     # Assert that events of new CUD actions are raised after next scheduled scan
     regular_file_cud(directory_str, wazuh_log_monitor, file_list=['file4', 'file5', 'file6'],
-                     time_travel=False, min_timeout=DEFAULT_TIMEOUT, triggers_event=True)
+                     min_timeout=DEFAULT_TIMEOUT, triggers_event=True)
