@@ -11,13 +11,13 @@ This guide will cover the following platforms: [Linux](#linux), [Windows](#windo
 
 You can run these tests on a manager or an agent. In case you are using an agent, please remember to register it and use the correct version (Wazuh branch).
 
-_We are avoiding Wazuh installation steps. For further information, check [Wazuh documentation](https://documentation.wazuh.com/3.11/installation-guide/index.html)._
+_We are skipping Wazuh installation steps. For further information, check [Wazuh documentation](https://documentation.wazuh.com/3.11/installation-guide/index.html)._
 
 ### Linux
 
 _We are using **CentOS** for this example:_
 
-- Install **Wazuh** using the correct branch
+- Install **Wazuh** 
 
 - Disable firewall (only for **CentOS**)
 
@@ -60,7 +60,7 @@ echo 'monitord.rotate_log=0' >> $wazuh_path/etc/local_internal_options.conf
 
 ### Windows
 
-- Install **Wazuh** using the correct branch
+- Install **Wazuh** 
 
 - Download and install [Python](https://www.python.org/downloads/windows/)
 
@@ -98,7 +98,7 @@ echo 'monitord.rotate_log=0' >> "C:\Program Files (x86)\ossec-agent\local_intern
 
 ### MacOS
 
-- Install **Wazuh** using the correct branch
+- Install **Wazuh** 
 
 - Install Python and its dependencies
 
@@ -116,14 +116,6 @@ pip3 install pytest freezegun jq jsonschema pyyaml psutil paramiko distro
 - Add some internal options and restart
 
 ```shell script
-# Install Python
-brew install python3
-
-# Install dependencies
-brew install autoconf automake libtool
-
-# Install Python libraries
-pip3 install pytest freezegun jq jsonschema pyyaml psutil paramiko distro
 
 # Enable debug 2
 echo 'syscheck.debug=2' >> /Library/Ossec/etc/local_internal_options.conf
@@ -147,32 +139,75 @@ Finally, copy your `wazuh-qa` repository within your testing environment and you
 
 **DISCLAIMER:** this guide assumes you have a proper testing environment. If you do not, please check our [testing environment guide](#setting-up-a-test-environment).
 
-Our newest integration tests are located in `wazuh-qa/test_wazuh/`. They are organized by groups:
+Our newest integration tests are located in `wazuh-qa/test_wazuh/`. They are organized by capabilities:
 
 - _test_analysisd_
 - _test_fim_
 - _test_mitre_
 - _test_wazuh_db_
 
-Every group will have the following structure _(this is an example)_:
+Every group will have the following structure:
 
 ```bash
-├── test_<group>
+├── test_<capability>
 │   ├── conftest.py (optional)
 │   ├── test_<functionality>
 │   │   ├── data
-│   │   │   ├── <wazuh_conf_>win32.yaml (optional)
-│   │   │   └── wazuh_conf.yaml
+│   │   │   ├── <wazuh_conf>.yaml
+│   │   │   └── <wazuh_conf>.yaml
 │   │   ├── test_<module>.py
 │   │   ├── test_<module>.py
 │   │   └── test_<module>.py
 │   ├── test_<functionality>
 │   │   ├── data
-│   │   │   ├── <wazuh_conf>.yaml
+│   │   │   └── <wazuh_conf>.yaml
 │   │   ├── test_<module>.py
 │   │   ├── test_<module>.py
-│   │   ├── <auxiliary_module>.py
-└── └── └── <script>
+│   │   ├── <auxiliary_module>.py (optional)
+└── └── └── <script> (optional)
+```
+
+FIM test structure example:
+
+```bash
+├── test_fim
+│   ├── conftest.py
+.
+.
+.
+│   ├── test_basic_usage
+│   │   ├── data
+│   │   │   ├── wazuh_conf_disabled.yaml
+│   │   │   └── wazuh_conf.yaml
+│   │   ├── test_basic_disabled.py
+│   │   ├── test_basic_usage_baseline_generation.py
+│   │   ├── test_basic_usage_changes.py
+│   │   ├── test_basic_usage_create_rt_wd.py
+│   │   ├── test_basic_usage_create_scheduled.py
+│   │   ├── test_basic_usage_delete_folder.py
+│   │   ├── test_basic_usage_entries_match_path_count.py
+│   │   ├── test_basic_usage_move_dir.py
+│   │   ├── test_basic_usage_move_file.py
+│   │   ├── test_basic_usage_rename.py
+│   │   └── test_basic_usage_starting_agent.py
+.
+.
+.
+│   ├── test_skip
+│   │   ├── data
+│   │   │   ├── configure_nfs.sh
+│   │   │   ├── proc.py
+│   │   │   ├── remove_nfs.sh
+│   │   │   └── wazuh_conf.yaml
+│   │   └── test_skip.py
+│   ├── test_windows_audit_interval
+│   │   ├── data
+│   │   │   └── wazuh_conf.yaml
+│   │   ├── manage_acl.py
+│   │   └── test_windows_audit_interval.py
+.
+.
+.
 ```
 
 #### conftest
@@ -229,7 +264,61 @@ _**NOTE:** `jq` library can only be installed with `pip` on **Linux**_
 
 ### Wazuh-Testing package
 
-We have a Python package with all the tools needed to run these tests. From file monitoring classes to callbacks or functions to create the test environment. Without installing this package, we cannot run these tests. 
+We have a Python package with all the tools needed to run these tests. From file monitoring classes to callbacks or functions to create the test environment. Without installing this package, we cannot run these tests. It has the following structure:
+
+```bash
+── wazuh_testing
+    ├── setup.py
+    └── wazuh_testing
+        ├── __init__.py
+        ├── analysis.py
+        ├── data
+        │   ├── event_analysis_schema.json
+        │   ├── mitre_event.json
+        │   ├── state_integrity_analysis_schema.json
+        │   ├── syscheck_event.json
+        │   └── syscheck_event_windows.json
+        ├── fim.py
+        ├── mitre.py
+        ├── tools
+        │   ├── __init__.py
+        │   ├── configuration.py
+        │   ├── file.py
+        │   ├── monitoring.py
+        │   ├── services.py
+        │   └── time.py
+        └── wazuh_db.py
+```
+
+#### setup.py
+
+Python module with the needed code to install this package into our Python interpreter.
+
+#### wazuh_testing
+
+##### Python modules
+
+These are _analysis.py_, _fim.py_, _mitre.py_ and _wazuh_db.py_. They have very specific tools needed for each capability.
+
+##### data
+
+Folder with all the json schemas. One capability could have more than one schema depending on the platform.
+
+##### tools
+
+Folder with all the general tools that could be used in every test. They are grouped by:
+
+- **Init**: `__init__` file with the common information between all these modules (paths set in execution time).
+
+- **Configuration**:  functions to configure our environment (rewrite `ossec.conf`, load it, change metadata...)
+
+- **File**: functions to work with files.
+
+- **Monitoring**: everything related to monitoring a file.
+
+- **Services**: from controlling Wazuh services, daemons and socket to common processes.
+
+- **Time**:  classes and functions to 'travel in time' (needed for scheduled monitoring) and manage dates.
 
 To install it:
 
@@ -268,6 +357,8 @@ python3 -m pytest [options] [file_or_dir] [file_or_dir] [...]
 - `--tier` : only run tests with given tier (ex. --tier 2)
 
 _Use `-h` to see the rest or check its [documentation](https://docs.pytest.org/en/latest/usage.html)._
+
+Also, these integration tests are heavily based on [fixtures](https://docs.pytest.org/en/latest/fixture.html), so please check its documentation for further information.
 
 #### FIM integration tests examples
 
