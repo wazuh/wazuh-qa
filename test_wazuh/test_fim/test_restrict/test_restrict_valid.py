@@ -10,9 +10,9 @@ import pytest
 from wazuh_testing.fim import LOG_FILE_PATH, DEFAULT_TIMEOUT, callback_detect_event, callback_restricted, create_file, \
     REGULAR, generate_params
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.time import TimeMachine
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.time import TimeMachine
 
 # Marks
 
@@ -24,13 +24,12 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [os.path.join(PREFIX, 'testdir1'),
                     os.path.join(PREFIX, 'testdir1', 'subdir'),
-                    os.path.join(PREFIX, 'testdir1', 'folder'),
                     os.path.join(PREFIX, 'testdir2'),
                     os.path.join(PREFIX, 'testdir2', 'subdir')
                     ]
-testdir1, testdir1_sub, testdir1_restrict_folder, testdir2, testdir2_sub = test_directories
+testdir1, testdir1_sub, testdir2, testdir2_sub = test_directories
 
-directory_str = ','.join([test_directories[0], test_directories[2]])
+directory_str = ','.join([os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')])
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
@@ -56,13 +55,16 @@ def get_configuration(request):
 @pytest.mark.parametrize('filename, mode, content, triggers_event, tags_to_apply', [
     ('.restricted', 'w', "Sample content", True, {'valid_regex1'}),
     ('binary.restricted', 'wb', b"Sample content", True, {'valid_regex1'}),
-    ('testfile2', 'w', "", False, {'valid_regex', 'valid_regex_incomplete'}),
+    ('testfile2', 'w', "", False, {'valid_regex'}),
     ("btestfile2", "wb", b"", False, {'valid_regex'}),
     ('testfile2', 'w', "", True, {'valid_empty'}),
     ("btestfile2", "wb", b"", True, {'valid_empty'}),
-    ("restricted", "w", "Test", False, {'valid_regex', 'valid_regex_incomplete'}),
-    ("myfilerestricted", "w", "", True, {'valid_regex_2'}),
-    ("myother_restricted", "wb", b"", True, {'valid_regex_2'})
+    ("restricted", "w", "Test", False, {'valid_regex'}),
+    ("myfilerestricted", "w", "", True, {'valid_regex_3'}),
+    ("myother_restricted", "wb", b"", True, {'valid_regex_3'}),
+    ('folder' + os.sep + '.restricted', 'w', "Sample content", True, {'valid_regex_incomplete'}),
+    ('fake' + os.sep + 'binary.restricted', 'wb', b"Sample content", True, {'valid_regex_incomplete'}),
+    ('folder' + os.sep + 'testfile2', 'w', "", True, {'valid_regex_incomplete'}),
 ])
 def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply,
                   get_configuration, configure_environment, restart_syscheckd,
@@ -72,14 +74,26 @@ def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply
     This test is intended to be used with valid configurations files. Each execution of this test will configure the
     environment properly, restart the service and wait for the initial scan.
 
-    :param folder string Directory where the file is being created
-    :param filename string Name of the file to be created
-    :param mode string same as mode in open built-in function
-    :param content string, bytes Content to fill the new file
-    :param triggers_event bool True if an event must be generated, False otherwise
-    :param tags_to_apply set Run test if match with a configuration identifier, skip otherwise
+    Parameters
+    ----------
+    folder : str
+        Directory where the file is being created
+    filename : str
+        Name of the file to be created
+    mode : str
+        Same as mode in open built-in function
+    content : str or bytes
+        Content to fill the new file
+    triggers_event : bool
+        True if an event must be generated, False otherwise
+    tags_to_apply : set
+        Run test if match with a configuration identifier, skip otherwise
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
+
+    if os.sep in filename:
+        filename = filename.split(os.sep)
+        folder, filename = os.path.join(folder, *filename[:-1]), filename[-1]
 
     # Create text files
     create_file(REGULAR, folder, filename, content=content)

@@ -75,4 +75,4 @@
       attributes:
       - check_all: 'yes'
       - FIM_MODE
-      - restrict: "^/testdir1/f"
+      - restrict: "^/testdir1/f|^/testdir1/subdir/f|^/testdir2/f|^/testdir2/subdir/f"
