@@ -10,14 +10,14 @@ import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, modify_file_group, modify_file_content, modify_file_owner, \
     modify_file_permission, check_time_travel, callback_detect_event, get_fim_mode_param, deepcopy, create_file, \
-    REGULAR, generate_params, DEFAULT_TIMEOUT
+    REGULAR, generate_params, validate_event, DEFAULT_TIMEOUT, CHECK_PERM, CHECK_SIZE, WAZUH_PATH
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
-pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=2)]
+pytestmark = [pytest.mark.tier(level=2)]
 
 # variables
 test_directories = [os.path.join(PREFIX, 'testdir1')]*2
@@ -53,15 +53,36 @@ def get_configuration(request):
 
 
 # Functions
-def check_event2(mode2, event1, file):
-    event2 = None
-    try:
-        event2 = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
-    except TimeoutError:
-        assert 'added' in event1['data']['type'] and os.path.join(testdir1, file) in event1['data']['path'] \
-            and mode2 in event1['data']['mode']
+def check_event(previous_mode: str, previous_event: dict, file: str):
+    """Check if a file modification does not trigger an event but its creation did.
 
-    return event2
+    In case of TimeOut, checks that the type of the previous event was addition
+    on the correct path and with correct mode.
+
+    Parameters
+    ----------
+    previous_mode : str
+        String that contains the mode that the previous event should have
+    previous_event : dict
+        Dict with the previous event
+    file : str
+        String that contains the name of the monitored file
+
+    Returns
+    -------
+    dict
+        Dict with the triggered event
+
+    """
+    current_event = None
+    try:
+        current_event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+    except TimeoutError:
+        assert 'added' in previous_event['data']['type'] and \
+               os.path.join(testdir1, file) in previous_event['data']['path'] and \
+               previous_mode in previous_event['data']['mode']
+
+    return current_event
 
 
 # tests
@@ -90,7 +111,7 @@ def test_duplicate_entries(get_configuration, configure_environment, restart_sys
     event1 = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
 
     # Check for a second event
-    event2 = check_event2(mode2=mode2, event1=event1, file=file)
+    event2 = check_event(previous_mode=mode2, previous_event=event1, file=file)
     assert event2 is None, "Error: Multiple events created"
 
 
@@ -111,19 +132,14 @@ def test_duplicate_entries_sregex(get_configuration, configure_environment,
     # Check for an event
     create_file(REGULAR, testdir1, file, content=' ')
     check_time_travel(scheduled)
-    try:
+    with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
-        assert False
-    except TimeoutError:
-        assert True
 
     # Check for a second event
     modify_file_content(testdir1, file)
     check_time_travel(scheduled)
-    try:
+    with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
-    except TimeoutError:
-        assert True
 
 
 def test_duplicate_entries_report(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
@@ -147,6 +163,8 @@ def test_duplicate_entries_report(get_configuration, configure_environment, rest
     modify_file_content(testdir1, file)
     check_time_travel(scheduled)
     wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+    assert not os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'diff', 'local', testdir1[1:], file)), \
+        'Error: Diff file created'
 
 
 def test_duplicate_entries_complex(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
@@ -182,11 +200,12 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
     modify_file_owner(testdir1, file)
     Path(file_path).touch()
     check_time_travel(scheduled)
-    event2 = check_event2(mode2=mode2, event1=event1, file=file)
+    event2 = check_event(previous_mode=mode2, previous_event=event1, file=file)
     assert event2 is None, "Error: Multiple events created"
 
     # Change the permissions and the size of the file
     modify_file_permission(testdir1, file)
     modify_file_content(testdir1, file)
     check_time_travel(scheduled)
-    wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+    event3 = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+    validate_event(event3, [CHECK_PERM, CHECK_SIZE])
