@@ -17,9 +17,9 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-messages_path = os.path.join(test_data_path, 'messages.yaml')
+messages_path = os.path.join(test_data_path, 'fim_messages.yaml')
 with open(messages_path) as f:
-    messages = yaml.safe_load(f)
+    test_cases = yaml.safe_load(f)
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
 analysis_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'queue'))
 monitored_sockets, receiver_sockets = None, None  # These variables will be set in the fixture create_unix_sockets
@@ -30,15 +30,16 @@ used_daemons = ['wazuh-db']
 
 # tests
 
-@pytest.mark.parametrize('message_', [
-    message_ for message_ in messages
-])
-def test_wazuh_db_messages(configure_environment_standalone_daemons, create_unix_sockets, message_):
+@pytest.mark.parametrize('test_case',
+                         [test_case['test_case'] for test_case in test_cases],
+                         ids=[test_case['name'] for test_case in test_cases])
+def test_wazuh_db_messages(configure_environment_standalone_daemons, create_unix_sockets, test_case):
     """ Check wazuh-db messages
 
-    * This test checks that an input message in wazuh-db socket generates the adequate output to wazuh-db socket
+    * This test checks that every input message in wazuh-db socket generates the adequate output to wazuh-db socket
     """
-    expected = message_['output']
-    receiver_sockets[0].send([message_['input']], size=True)
-    response = monitored_sockets[0].start(timeout=5, callback=callback_fim_query).result()
-    assert response == expected, 'Failed test case type: {}'.format(message_['type'])
+    for stage in test_case:
+        expected = stage['output']
+        receiver_sockets[0].send([stage['input']], size=True)
+        response = monitored_sockets[0].start(timeout=5, callback=callback_fim_query).result()
+        assert response == expected, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1, stage['stage'])
