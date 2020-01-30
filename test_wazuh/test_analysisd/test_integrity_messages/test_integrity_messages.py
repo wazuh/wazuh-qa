@@ -9,7 +9,8 @@ import yaml
 from wazuh_testing.analysis import callback_analysisd_message, validate_analysis_integrity_state
 from wazuh_testing.tools import WAZUH_PATH
 
-# All tests in this module apply to linux only
+# marks
+
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
 
 # variables
@@ -17,7 +18,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 messages_path = os.path.join(test_data_path, 'integrity_messages.yaml')
 with open(messages_path) as f:
-    messages = yaml.safe_load(f)
+    test_cases = yaml.safe_load(f)
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
 analysis_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'queue'))
 monitored_sockets, receiver_sockets = None, None  # These variables will be set in the fixture create_unix_sockets
@@ -28,10 +29,10 @@ used_daemons = ['ossec-analysisd']
 
 # tests
 
-@pytest.mark.parametrize('message_', [
-    message_ for message_ in messages
-])
-def test_integrity_messages(configure_environment_standalone_daemons, create_unix_sockets, message_):
+@pytest.mark.parametrize('test_case',
+                         [test_case['test_case'] for test_case in test_cases],
+                         ids=[test_case['name'] for test_case in test_cases])
+def test_integrity_messages(configure_environment_standalone_daemons, create_unix_sockets, test_case):
     """ Checks the integration test for the integrity handling by analysisd.
 
     The variable messages is a yaml file that contains the input and the expected output for every test case.
@@ -39,8 +40,9 @@ def test_integrity_messages(configure_environment_standalone_daemons, create_uni
     certain jsonschema.
 
     """
-    expected = callback_analysisd_message(message_['output'])
-    receiver_sockets[0].send([message_['input']])
-    response = monitored_sockets[0].start(timeout=5, callback=callback_analysisd_message).result()
-    assert response == expected, 'Failed test case type: {}'.format(message_['type'])
-    message_['validate'] and validate_analysis_integrity_state(response[2])
+    for stage in test_case:
+        expected = callback_analysisd_message(stage['output'])
+        receiver_sockets[0].send([stage['input']])
+        response = monitored_sockets[0].start(timeout=5, callback=callback_analysisd_message).result()
+        assert response == expected, 'Failed test case type: {}'.format(stage['type'])
+        stage['validate'] and validate_analysis_integrity_state(response[2])

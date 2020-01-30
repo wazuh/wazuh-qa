@@ -1,26 +1,46 @@
 ---
 -
-  input: "5:[001] (vm-test-agent) 192.168.57.2->syscheck:{\"component\":\"syscheck\",\"type\":\"integrity_check_global\",\"data\":{\"id\": 1575421330,\"begin\":\"/home/test/file\",\"end\":\"/home/test/file2\",\"checksum\":\"6bdaf5656029544cf0d08e7c4f4feceb0c45853c\"}}"
-  output: "agent 001 syscheck integrity_check_global {\"id\":1575421330,\"begin\":\"/home/test/file\",\"end\":\"/home/test/file2\",\"checksum\":\"6bdaf5656029544cf0d08e7c4f4feceb0c45853c\"}"
-  type: "Global integrity message"
-  validate: False
+  name: "Integrity_check_global"
+  description: "Check global integrity output"
+  test_case:
+  -
+    input: "5:[001] (vm-test-agent) 192.168.57.2->syscheck:{\"component\":\"syscheck\",\"type\":\"integrity_check_global\",\"data\":{\"id\": 1575421330,\"begin\":\"/home/test/file\",\"end\":\"/home/test/file2\",\"checksum\":\"6bdaf5656029544cf0d08e7c4f4feceb0c45853c\"}}"
+    output: "agent 001 syscheck integrity_check_global {\"id\":1575421330,\"begin\":\"/home/test/file\",\"end\":\"/home/test/file2\",\"checksum\":\"6bdaf5656029544cf0d08e7c4f4feceb0c45853c\"}"
+    stage: "Global integrity message"
+    validate: False
 -
-  input: "5:[001] (vm-test-agent) 192.168.57.2->syscheck:{\"component\":\"syscheck\",\"type\":\"integrity_check_left\",\"data\":{\"id\": 1575421330,\"begin\":\"/home/test/file\",\"end\":\"/home/test/file2\",\"checksum\":\"6bdaf5656029544cf0d08e7c4f4feceb0c45853c\"}}"
-  output: "agent 001 syscheck integrity_check_left {\"id\":1575421330,\"begin\":\"/home/test/file\",\"end\":\"/home/test/file2\",\"checksum\":\"6bdaf5656029544cf0d08e7c4f4feceb0c45853c\"}"
-  type: "Left integrity message"
-  validate: False
+  name: "Integrity_check_left"
+  description: "Check left integrity output"
+  test_case:
+  -
+    input: "5:[001] (vm-test-agent) 192.168.57.2->syscheck:{\"component\":\"syscheck\",\"type\":\"integrity_check_left\",\"data\":{\"id\": 1575421330,\"begin\":\"/home/test/file\",\"end\":\"/home/test/file2\",\"checksum\":\"6bdaf5656029544cf0d08e7c4f4feceb0c45853c\"}}"
+    output: "agent 001 syscheck integrity_check_left {\"id\":1575421330,\"begin\":\"/home/test/file\",\"end\":\"/home/test/file2\",\"checksum\":\"6bdaf5656029544cf0d08e7c4f4feceb0c45853c\"}"
+    stage: "Left integrity message"
+    validate: False
 -
-  input: "5:[001] (vm-test-agent) 192.168.57.2->syscheck:{\"component\":\"syscheck\",\"type\":\"integrity_check_right\",\"data\":{\"id\": 1575421330,\"begin\":\"/home/test/file\",\"end\":\"/home/test/file2\",\"checksum\":\"6bdaf5656029544cf0d08e7c4f4feceb0c45853c\"}}"
-  output: "agent 001 syscheck integrity_check_right {\"id\":1575421330,\"begin\":\"/home/test/file\",\"end\":\"/home/test/file2\",\"checksum\":\"6bdaf5656029544cf0d08e7c4f4feceb0c45853c\"}"
-  type: "Right integrity message"
-  validate: False
+  name: "Integrity_check_right"
+  description: "Check right integrity output"
+  test_case:
+  -
+    input: "5:[001] (vm-test-agent) 192.168.57.2->syscheck:{\"component\":\"syscheck\",\"type\":\"integrity_check_right\",\"data\":{\"id\": 1575421330,\"begin\":\"/home/test/file\",\"end\":\"/home/test/file2\",\"checksum\":\"6bdaf5656029544cf0d08e7c4f4feceb0c45853c\"}}"
+    output: "agent 001 syscheck integrity_check_right {\"id\":1575421330,\"begin\":\"/home/test/file\",\"end\":\"/home/test/file2\",\"checksum\":\"6bdaf5656029544cf0d08e7c4f4feceb0c45853c\"}"
+    stage: "Right integrity message"
+    validate: False
 -
-  input: "5:[001] (vm-test-agent) 192.168.57.2->syscheck:{\"component\":\"syscheck\",\"type\":\"integrity_clear\",\"data\":{\"id\":1575421785}}"
-  output: "agent 001 syscheck integrity_clear {\"id\":1575421785}"
-  type: "Clear integrity message"
-  validate: False
+  name: "Integrity_clear"
+  description: "Check integrity clear output"
+  test_case:
+  -
+    input: "5:[001] (vm-test-agent) 192.168.57.2->syscheck:{\"component\":\"syscheck\",\"type\":\"integrity_clear\",\"data\":{\"id\":1575421785}}"
+    output: "agent 001 syscheck integrity_clear {\"id\":1575421785}"
+    stage: "Clear integrity message"
+    validate: False
 -
-  input: "5:[001] (vm-test-agent) 192.168.57.2->syscheck:{\"component\":\"syscheck\",\"type\":\"state\",\"data\":{\"path\":\"/home/test/file\",\"timestamp\":1575416071,\"attributes\":{\"type\":\"file\",\"size\":6,\"perm\":\"rw-r--r--\",\"uid\":\"0\",\"gid\":\"0\",\"user_name\":\"root\",\"group_name\":\"root\",\"inode\":125,\"mtime\":1575415990,\"hash_md5\":\"69ca1267b41f51080ca4d902efbb5188\",\"hash_sha1\":\"8e7140c401269dc35ae934f0e102edf934631637\",\"hash_sha256\":\"d4e20c4f2ce54700f45fbabec686e68598d4db3b09ef9bf6efdaae9fc6386d69\",\"checksum\":\"e08e4f62f8b2bc0f2e54f38aae08cc4bed14f0d8\"}}}"
-  output: "agent 001 syscheck save2 {\"path\":\"/home/test/file\",\"timestamp\":1575416071,\"attributes\":{\"type\":\"file\",\"size\":6,\"perm\":\"rw-r--r--\",\"uid\":\"0\",\"gid\":\"0\",\"user_name\":\"root\",\"group_name\":\"root\",\"inode\":125,\"mtime\":1575415990,\"hash_md5\":\"69ca1267b41f51080ca4d902efbb5188\",\"hash_sha1\":\"8e7140c401269dc35ae934f0e102edf934631637\",\"hash_sha256\":\"d4e20c4f2ce54700f45fbabec686e68598d4db3b09ef9bf6efdaae9fc6386d69\",\"checksum\":\"e08e4f62f8b2bc0f2e54f38aae08cc4bed14f0d8\"}}"
-  type: "State message"
-  validate: True
+  name: "State"
+  description: "Check state output"
+  test_case:
+  -
+    input: "5:[001] (vm-test-agent) 192.168.57.2->syscheck:{\"component\":\"syscheck\",\"type\":\"state\",\"data\":{\"path\":\"/home/test/file\",\"timestamp\":1575416071,\"attributes\":{\"type\":\"file\",\"size\":6,\"perm\":\"rw-r--r--\",\"uid\":\"0\",\"gid\":\"0\",\"user_name\":\"root\",\"group_name\":\"root\",\"inode\":125,\"mtime\":1575415990,\"hash_md5\":\"69ca1267b41f51080ca4d902efbb5188\",\"hash_sha1\":\"8e7140c401269dc35ae934f0e102edf934631637\",\"hash_sha256\":\"d4e20c4f2ce54700f45fbabec686e68598d4db3b09ef9bf6efdaae9fc6386d69\",\"checksum\":\"e08e4f62f8b2bc0f2e54f38aae08cc4bed14f0d8\"}}}"
+    output: "agent 001 syscheck save2 {\"path\":\"/home/test/file\",\"timestamp\":1575416071,\"attributes\":{\"type\":\"file\",\"size\":6,\"perm\":\"rw-r--r--\",\"uid\":\"0\",\"gid\":\"0\",\"user_name\":\"root\",\"group_name\":\"root\",\"inode\":125,\"mtime\":1575415990,\"hash_md5\":\"69ca1267b41f51080ca4d902efbb5188\",\"hash_sha1\":\"8e7140c401269dc35ae934f0e102edf934631637\",\"hash_sha256\":\"d4e20c4f2ce54700f45fbabec686e68598d4db3b09ef9bf6efdaae9fc6386d69\",\"checksum\":\"e08e4f62f8b2bc0f2e54f38aae08cc4bed14f0d8\"}}"
+    stage: "State message"
+    validate: True
