@@ -47,7 +47,7 @@ def get_configuration(request):
 
 
 def extra_configuration_before_yield():
-    # Create 5000 files before restarting Wazuh to make sure the integrity scan will not finish before testing
+    # Create 3000 files before restarting Wazuh to make sure the integrity scan will not finish before testing
     for testdir in test_directories:
         for file in file_list:
             create_file(REGULAR, testdir, file, content='Sample content')
