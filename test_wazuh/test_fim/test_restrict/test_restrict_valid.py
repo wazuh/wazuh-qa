@@ -62,9 +62,9 @@ def get_configuration(request):
     ("restricted", "w", "Test", False, {'valid_regex'}),
     ("myfilerestricted", "w", "", True, {'valid_regex_3'}),
     ("myother_restricted", "wb", b"", True, {'valid_regex_3'}),
-    ('folder' + os.sep + '.restricted', 'w', "Sample content", True, {'valid_regex_incomplete'}),
-    ('fake' + os.sep + 'binary.restricted', 'wb', b"Sample content", True, {'valid_regex_incomplete'}),
-    ('folder' + os.sep + 'testfile2', 'w', "", True, {'valid_regex_incomplete'}),
+    ('fileinfolder', 'w', "Sample content", True, {'valid_regex_incomplete'}),
+    ('fileinfolder1', 'wb', b"Sample content", True, {'valid_regex_incomplete'}),
+    ('testing_regex', 'w', "", False, {'valid_regex_incomplete'}),
 ])
 def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply,
                   get_configuration, configure_environment, restart_syscheckd,
@@ -90,10 +90,6 @@ def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply
         Run test if match with a configuration identifier, skip otherwise
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-
-    if os.sep in filename:
-        filename = filename.split(os.sep)
-        folder, filename = os.path.join(folder, *filename[:-1]), filename[-1]
 
     # Create text files
     create_file(REGULAR, folder, filename, content=content)

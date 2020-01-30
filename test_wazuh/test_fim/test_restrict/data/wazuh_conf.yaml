@@ -33,6 +33,7 @@
 # conf 3
 - tags:
   - valid_regex
+  - valid_regex2
   apply_to_modules:
   - test_restrict_valid
   section: syscheck
@@ -48,7 +49,7 @@
 # conf 4
 - tags:
   - valid_regex
-  - valid_regex2
+  - valid_regex3
   apply_to_modules:
   - test_restrict_valid
   section: syscheck
