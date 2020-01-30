@@ -1,9 +1,9 @@
 ---
 # conf 1
 - tags:
-  - ossec_benchmark
+  - ossec_conf
   apply_to_modules:
-  - test_benchmark
+  - MODULE_NAME
   section: syscheck
   elements:
   - disabled:
@@ -13,3 +13,4 @@
       attributes:
       - check_all: 'yes'
       - FIM_MODE
+      - REPORT_CHANGES

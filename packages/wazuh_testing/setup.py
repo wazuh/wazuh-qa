@@ -21,5 +21,5 @@ setup(name='wazuh_testing',
                                       'data/state_integrity_analysis_schema.json']
                     },
       include_package_data=True,
-      zip_safe=False
+      zip_safe=False, install_requires=['pandas']
       )
