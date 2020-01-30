@@ -1,0 +1,21 @@
+---
+  - name: Install gnupg on Debian 9 Agents
+    apt:
+      name: gnupg
+      state: present
+    when:
+      - ansible_distribution == "Debian"
+
+  - name: Fix /etc/apt/sources.list for Debian instance
+    copy:
+      dest: /etc/apt/sources.list
+      content: |
+        deb http://deb.debian.org/debian stretch main
+        deb-src http://deb.debian.org/debian stretch main
+    when:
+      - ansible_distribution == "Debian"
+
+  - name: Updating packages on Debian instance
+    shell: "apt update"
+    when:
+      - ansible_distribution == "Debian"

@@ -1,0 +1,24 @@
+---
+
+  - hosts: kibana
+    strategy: free
+    vars_files:
+      - ./vars/elastic_nginx.yml
+    tasks:
+      - import_tasks: ../demo-environment/roles/provisioning/tasks/nginx.yml
+    handlers:
+      - include: ../demo-environment/roles/provisioning/handlers/main.yml
+    become: yes
+    become_user: root
+
+  - hosts: kibana, masters
+    strategy: free
+    vars_files:
+      - ./vars/wazuh_manager.yml
+      - ./vars/elastic_nginx.yml
+    tasks:
+        - import_tasks: ../demo-environment/roles/provisioning/tasks/post_installation.yml
+    handlers:
+      - include: ../demo-environment/roles/provisioning/handlers/main.yml
+    become: yes
+    become_user: root

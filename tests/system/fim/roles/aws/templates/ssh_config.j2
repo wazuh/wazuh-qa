@@ -1,0 +1,8 @@
+{% for instance in instances_query_list %}
+{% if not 'agent_windows' in instance.0.Name %}
+Host {{ instance.0.PublicIP }}
+    User {{ ssh_username }}
+    IdentityFile {{ ssh_key_path_private }}
+    StrictHostKeyChecking no
+{% endif %}
+{% endfor %}

@@ -1,0 +1,27 @@
+---
+  - hosts: all, !windows, !windowsagents
+    strategy: free
+    vars_files:
+      - ./vars/credentials.yml
+    tasks:
+      - name: Testing ssh access for newly configured user and password
+        shell: "/usr/bin/sshpass -p {{ ssh_password }} ssh -T {{ ssh_username }}{{ '@' }}{{ inventory_hostname }} "
+        delegate_to: localhost
+        changed_when: False
+        when:
+          - test_selector and test_selector == "ssh"
+
+  - hosts: localhost
+    vars_files:
+      - ./vars/aws.yml
+      - ./vars/wazuh_manager.yml
+      - ./vars/elastic_nginx.yml
+      - ./vars/use_cases.yml
+      - ./vars/credentials.yml
+    tasks:
+      - name: Awaiting while alerts get properly indexed in ES
+        pause:
+          seconds: 10
+      - import_tasks: ../demo-environment/roles/aws/tasks/launch_tests.yml
+      - import_tasks: ../demo-environment/roles/use_cases/tasks/launch_tests.yml
+      - import_tasks: ../demo-environment/roles/aws/tests/route53_records.yml

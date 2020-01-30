@@ -1,0 +1,272 @@
+---
+  - name: Configure Wazuh API SSL
+    shell: >- 
+      openssl req -x509 -batch
+      -nodes -days 3650 -newkey
+      rsa:2048
+      -keyout {{ wazuh_installation_path }}/api/configuration/server.key
+      -out {{ wazuh_installation_path }}/api/configuration/server.crt
+    when:
+      - inventory_hostname in groups['masters']
+    notify: restart wazuh-api
+
+  - name: Create Agents groups
+    shell: >-
+      /var/ossec/bin/agent_groups -a -g {{ item }} -q
+    with_items:
+      - apache
+      - redhat
+      - windows
+      - mysql
+    when:
+      - inventory_hostname in groups['masters']
+
+  - name: Obtain RHEL Agent ID
+    shell: /var/ossec/bin/manage_agents -l | grep RHEL | cut -d':' -f2 | cut -d ',' -f1
+    register: rhel_id
+    when:
+      - inventory_hostname in groups['masters']
+  
+  - name: Obtain Windows Agent ID
+    shell: /var/ossec/bin/manage_agents -l | grep Windows | cut -d':' -f2 | cut -d ',' -f1
+    register: windows_id  
+    when:
+      - inventory_hostname in groups['masters']
+
+  - name: Add RHEL Agent to MySQL, Apache and RHEL group
+    shell: /var/ossec/bin/agent_groups -a -g {{ item }} -i {{ rhel_id.stdout }} -q
+    with_items:
+      - redhat
+      - apache
+      - mysql
+    when:
+      - inventory_hostname in groups['masters']
+
+  - name: Add Windows Agent to Windows group 
+    shell: /var/ossec/bin/agent_groups -a -g windows -i {{ windows_id.stdout }} -q    
+    when:
+      - inventory_hostname in groups['masters']
+
+#Kibana
+  # - name: Redirect Kibana welcome screen to Discover ## Deprecated
+  #   lineinfile:
+  #     path: "{{ item }}"
+  #     regex: "/app/kibana#/home"
+  #     line: "/app/wazuh"
+  #   with_items:
+  #     - "/usr/share/kibana/src/core/ui/public/chrome/directives/global_nav/global_nav.html"
+  #     - "/usr/share/kibana/src/core/ui/public/chrome/directives/header_global_nav/header_global_nav.js"
+  #   notify: restart kibana  
+  #   when:
+  #     - inventory_hostname in groups['kibana']
+
+  - name: Disable extra features in Kibana configuration
+    blockinfile:
+      path: /etc/kibana/kibana.yml
+      marker: "# {mark} Kibana extra configs"
+      block: |
+        server.defaultRoute: /app/wazuh
+        xpack.apm.ui.enabled: false
+        xpack.grokdebugger.enabled: false
+        xpack.searchprofiler.enabled: false
+        xpack.ml.enabled: false
+        xpack.canvas.enabled: false
+        xpack.infra.enabled: false
+        xpack.monitoring.enabled: false
+        console.enabled: false
+    when:
+      - inventory_hostname in groups['kibana']
+
+  - name: Explicitly restarting Kibana to avoid overriding bundles with handlers restart
+    service:
+      name: kibana
+      state: restarted
+    when:
+      - inventory_hostname in groups['kibana']
+
+  - name: Obtain Kibana status
+    uri:
+      url: "{{ kibana_api_protocol }}://{{ hostvars[groups['kibana'][0]]['private_ip'] }}:{{ kibana_port }}/status"
+      method: GET
+      url_username: "{{ elastic_user }}"
+      url_password: "{{ elastic_password }}"
+      validate_certs: no
+    register: kibana_response
+    until: kibana_response.status == 200
+    retries: 10
+    delay: 20
+    when:
+      - inventory_hostname in groups['kibana']
+
+  - name: Calculating API time
+    shell: echo $(($(date +%s%N)/1000000))
+    register: api_time
+    when:
+      - inventory_hostname in groups['kibana'] 
+    
+  - name: Configure Wazuh APP API
+    shell: >- # Using curl due to inconsistencies with uri module
+      curl -XPUT "{{ elastic_api_protocol }}://{{ hostvars[groups['elasticsearch'][0]]['private_ip'] }}:{{ elasticsearch_port }}/.wazuh/_doc/{{ api_time.stdout }}"
+      -k -u {{ elastic_user }}:{{ elastic_password }}
+      -H "Content-Type: application/json"
+      -d '{
+      "api_user":"{{ wazuh_api_admin_username }}",
+      "api_password":"{{ wazuh_api_password | b64encode }}",
+      "url":"{{ wazuh_api_protocol }}://{{ hostvars[groups['masters'][0]]['private_ip'] }}",
+      "api_port":"{{ wazuh_api_port }}",
+      "insecure":"false",
+      "component":"API",
+      "cluster_info":{}
+      }'
+    register: wazuh_api_config_response
+    when:
+      - inventory_hostname in groups['kibana']
+
+  - name: Configure Kibana Time Picker
+    shell: >-
+      curl -XPOST "{{ kibana_api_protocol }}://{{ hostvars[groups['kibana'][0]]['private_ip'] }}:{{ kibana_port }}/api/kibana/settings"
+      -k -u {{ elastic_user }}:{{ elastic_password }}
+      -H "Content-Type: application/json" -H "kbn-xsrf: true"
+      -d '{"changes":{"timepicker:timeDefaults":"{\n  \"from\": \"now-24h\",\n  \"to\": \"now\",\n  \"mode\": \"quick\"}"}}'
+    when:
+      - inventory_hostname in groups['kibana']
+    args:
+      warn: false
+
+  - name: Configure Kibana Default index
+    shell: >-
+      curl -XPOST "{{ kibana_api_protocol }}://{{ hostvars[groups['kibana'][0]]['private_ip'] }}:{{ kibana_port }}/api/kibana/settings"
+      -k -u {{ elastic_user }}:{{ elastic_password }}
+      -H "Content-Type: application/json" -H "kbn-xsrf: true"
+      -d '{"changes":{"defaultIndex":"wazuh-alerts-3.x-*"}}'
+    when:
+      - inventory_hostname in groups['kibana']
+    args:
+      warn: false
+
+  - name: Reject Kibana permission for telemetry
+    shell: >-
+      curl -k -XPOST "{{ kibana_api_protocol }}://{{ hostvars[groups['kibana'][0]]['private_ip'] }}:{{ kibana_port }}/api/telemetry/v2/optIn"
+      -u {{ elastic_user }}:{{ elastic_password }}
+      -H "Content-Type: application/json" -H "kbn-xsrf: true"
+      -d '{"enabled":false}'
+    when:
+      - inventory_hostname in groups['kibana']
+
+# Kibana: Custom welcome screen
+
+  - name: Download required files to configure Kibana Welcome screen
+    get_url:
+      url: https://s3.amazonaws.com/wazuh.com/wp-content/uploads/demo/custom-welcome.tar.gz
+      dest: "/tmp/custom-welcome.tar.gz"
+    when:
+      - inventory_hostname in groups['kibana']
+    tags:
+      - welcome_screen      
+
+  - name: Unarchive custom-welcome.tar.gz
+    unarchive:
+      src: "/tmp/custom-welcome.tar.gz"
+      dest: "/tmp/"
+      remote_src: yes
+    when:
+      - inventory_hostname in groups['kibana']
+    tags:
+      - welcome_screen      
+
+  - name: Copy .svg files from custom-welcome folder to Kibana
+    copy:
+      src: "/tmp/{{ item }}"
+      dest: /usr/share/kibana/optimize/bundles/
+      remote_src: yes
+    with_items:
+      - custom_welcome/wazuh_wazuh_bg.svg
+      - custom_welcome/wazuh_logo_circle.svg
+    when:
+      - inventory_hostname in groups['kibana']
+    tags:
+      - welcome_screen
+
+  - name: Create dictionary for /optimize/bundles files configuration
+    set_fact:
+      files:
+        common:
+          regex_string: Welcome to Kibana Vega Plugin!
+          line_string: Welcome to Wazuh
+          path_string: /usr/share/kibana/optimize/bundles/commons.bundle.js
+        login:
+          regex_string: Welcome to Kibana
+          line_string: Welcome to Wazuh
+          path_string: /usr/share/kibana/optimize/bundles/login.bundle.js
+        kibana:
+          regex_string: Welcome to Kibana
+          line_string: Welcome to Wazuh
+          path_string: /usr/share/kibana/optimize/bundles/kibana.bundle.js
+        kibana02:
+          regex_string: Your window into the Elastic Stack
+          line_string: The Open Source Security Platform
+          path_string: /usr/share/kibana/optimize/bundles/kibana.bundle.js      
+        login02:
+          regex_string: Your window into the Elastic Stack
+          line_string: The Open Source Security Platform
+          path_string: /usr/share/kibana/optimize/bundles/login.bundle.js
+    when:
+      - inventory_hostname in groups['kibana']
+    tags:
+      - welcome_screen
+
+  - name: Configuring /optimize/bundles files
+    replace:
+      path: "{{ item.value.path_string }}"
+      regexp: "{{ item.value.regex_string }}"
+      replace: "{{ item.value.line_string }}"
+    with_dict: "{{ files }}"
+    when:
+      - inventory_hostname in groups['kibana']
+    tags:
+      - welcome_screen      
+
+  - name: Override login.style.css in /optimize/bundles
+    copy:
+      src: "/tmp/custom_welcome/login.style.css"
+      dest: /usr/share/kibana/optimize/bundles/login.style.css
+      force: yes
+      remote_src: yes
+    when:
+      - inventory_hostname in groups['kibana']
+    tags:
+      - welcome_screen
+
+  - name: Comment the font's import that generates error in the welcome screen
+    lineinfile:
+      path: /usr/share/kibana/optimize/bundles/login.style.css
+      regexp: "@import url\\S*fonts.googleapis.com\\S*Montserrat\\S*"
+      line: "# @import url('https://fonts.googleapis.com/css?family=Montserrat&display=swap');"
+    when:
+      - inventory_hostname in groups['kibana']
+
+  - name: Ensure Kibana optimize/bundles folder owner and group
+    file:
+      dest: /usr/share/kibana/optimize/bundles/
+      owner: kibana
+      group: kibana
+      recurse: yes
+    when:
+      - inventory_hostname in groups['kibana']
+    tags:
+      - welcome_screen
+
+# Fix Alienvault CDB list
+
+  - name: Check if the Alienvault CDB list exists
+    stat:
+      path: "/var/ossec/etc/lists/blacklist-alienvault.cdb"
+    register: blacklist_alienvault
+    when:
+      - inventory_hostname in groups['masters']
+
+  - name: Rerunning /var/ossec/bin/ossec-makelists
+    shell: "/var/ossec/bin/ossec-makelists"
+    when:
+      - inventory_hostname in groups['masters']
+      - not (blacklist_alienvault.stat.exists)

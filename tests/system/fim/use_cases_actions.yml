@@ -1,0 +1,9 @@
+- hosts: rhel, windows, masters
+  vars_files:
+    - ./vars/use_cases.yml
+    - ./vars/wazuh_manager.yml
+  tasks:
+    - name: Awaiting while instances finish restarting...
+      pause:
+        seconds: 60
+    - import_tasks: ../demo-environment/roles/use_cases/tasks/actions.yml
