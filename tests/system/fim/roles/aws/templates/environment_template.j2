@@ -765,7 +765,7 @@ ElasticMaster{{ n }}:
         - NetworkInterfaceId: !Ref ElasticMaster{{ n }}Eth0
       Tags:
         - Key: Name
-          Value: ElasticMaster{{ n }}
+          Value: ElasticMaster0{{ n }}
         - Key: Identifier
           Value: elastic_0{{ n + 2 }}   
   
