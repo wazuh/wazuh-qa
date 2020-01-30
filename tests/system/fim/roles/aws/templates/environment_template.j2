@@ -898,14 +898,14 @@ ElasticMaster{{ n }}:
       ImageId: !FindInMap
         - "RegionMap"
         - Ref: "AWS::Region"
-        - HVM64
+        - AMAZONLINUX2HVM
       InstanceType: !Ref WazuhInstanceType
       IamInstanceProfile: !Ref InstanceProfile
       KeyName: !Ref KeyPairName
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
-            VolumeSize: 200
+            VolumeSize: 30
             VolumeType: gp2
 
       NetworkInterfaces:
