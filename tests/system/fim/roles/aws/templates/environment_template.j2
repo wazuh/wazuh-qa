@@ -588,7 +588,6 @@ Resources:
             VolumeType: gp2
       NetworkInterfaces:
         - NetworkInterfaceId: !Ref ElasticBootstrapEth0
-          DeviceIndex: 0
       Tags:
         - Key: Name
           Value: ElasticBootstrap
@@ -605,20 +604,8 @@ Resources:
     Properties:
       SubnetId: !Ref SubnetElasticsearch
       GroupSet: [!Ref 'ElasticSecurityGroup']
-  ElasticBootstrapEIP:
-    Type: AWS::EC2::EIP
-    Properties:
-      Domain: vpc
-      Tags:
-        - Key: Name
-          Value: !Sub 'ElasticBootstrapEIP-${AWS::StackName}'
-  ElasticBootstrapEIPAssociation:
-    Type: 'AWS::EC2::EIPAssociation'
-    Properties:
-      NetworkInterfaceId: !Ref ElasticBootstrapEth0
-      AllocationId: !GetAtt
-        - ElasticBootstrapEIP
-        - AllocationId
+      DeviceIndex: "0"
+      AssociatePublicIpAddress: "true"
   
   ElasticMasterB:
     Type: AWS::EC2::Instance
@@ -654,7 +641,6 @@ Resources:
             VolumeType: gp2
       NetworkInterfaces:
         - NetworkInterfaceId: !Ref ElasticMasterBEth0
-          DeviceIndex: 0
       Tags:
         - Key: Name
           Value: ElasticMasterB
@@ -668,24 +654,12 @@ Resources:
           /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource ElasticMasterB --region ${AWS::Region}
     DependsOn: GatewayToInternet
   ElasticMasterBEth0:
-    Type: AWS::EC2::NetworkInterface
-    Properties:
-      SubnetId: !Ref SubnetElasticsearch
-      GroupSet: [!Ref 'ElasticSecurityGroup']
-  ElasticMasterBEIP:
-    Type: AWS::EC2::EIP
-    Properties:
-      Domain: vpc
-      Tags:
-        - Key: Name
-          Value: !Sub 'ElasticMasterBEIP-${AWS::StackName}'
-  ElasticMasterBEIPAssociation:
-    Type: 'AWS::EC2::EIPAssociation'
-    Properties:
-      NetworkInterfaceId: !Ref ElasticMasterBEth0
-      AllocationId: !GetAtt
-        - ElasticMasterBEIP
-        - AllocationId
+      Type: AWS::EC2::NetworkInterface
+      Properties:
+          SubnetId: !Ref SubnetElasticsearch
+          GroupSet: [!Ref 'ElasticSecurityGroup']
+          DeviceIndex: "0"
+          AssociatePublicIpAddress: "true"
 
   ElasticMasterC:
     Type: AWS::EC2::Instance
@@ -721,7 +695,6 @@ Resources:
             VolumeType: gp2
       NetworkInterfaces:
         - NetworkInterfaceId: !Ref ElasticMasterCEth0
-          DeviceIndex: 0
       Tags:
         - Key: Name
           Value: ElasticMasterC
@@ -738,20 +711,8 @@ Resources:
     Properties:
       SubnetId: !Ref SubnetElasticsearch
       GroupSet: [!Ref 'ElasticSecurityGroup']
-  ElasticMasterCEIP:
-    Type: AWS::EC2::EIP
-    Properties:
-      Domain: vpc
-      Tags:
-        - Key: Name
-          Value: !Sub 'ElasticMasterCEIP-${AWS::StackName}'
-  ElasticMasterCEIPAssociation:
-    Type: 'AWS::EC2::EIPAssociation'
-    Properties:
-      NetworkInterfaceId: !Ref ElasticMasterCEth0
-      AllocationId: !GetAtt
-        - ElasticMasterCEIP
-        - AllocationId
+      DeviceIndex: "0"
+      AssociatePublicIpAddress: "true"
 
   # Wazuh Network Load Balancer
   WazuhNetworkLoadBalancer:
@@ -996,7 +957,6 @@ Resources:
 
       NetworkInterfaces:
         - NetworkInterfaceId: !Ref WazuhMasterEth0
-          DeviceIndex: 0
       Tags:
         - Key: Name
           Value: WazuhMaster
@@ -1013,20 +973,8 @@ Resources:
     Properties:
       SubnetId: !Ref SubnetWazuh
       GroupSet: [!Ref 'WazuhSecurityGroup']
-  WazuhMasterEIP:
-    Type: AWS::EC2::EIP
-    Properties:
-      Domain: vpc
-      Tags:
-        - Key: Name
-          Value: !Sub 'MasterEIP-${AWS::StackName}'
-  WazuhMasterEIPAssociation:
-    Type: 'AWS::EC2::EIPAssociation'
-    Properties:
-      NetworkInterfaceId: !Ref WazuhMasterEth0
-      AllocationId: !GetAtt
-        - WazuhMasterEIP
-        - AllocationId
+      DeviceIndex: "0"
+      AssociatePublicIpAddress: "true"
 
   # Wazuh worker instance
   WazuhWorkerInstance:
@@ -1070,7 +1018,6 @@ Resources:
             VolumeType: gp2
       NetworkInterfaces:
         - NetworkInterfaceId: !Ref WazuhWorkerEth0
-          DeviceIndex: 0
       Tags:
         - Key: Name
           Value: WazuhWorker
@@ -1087,20 +1034,8 @@ Resources:
     Properties:
       SubnetId: !Ref SubnetWazuh
       GroupSet: [!Ref 'WazuhSecurityGroup']
-  WazuhWorkerEIP:
-    Type: AWS::EC2::EIP
-    Properties:
-      Domain: vpc
-      Tags:
-        - Key: Name
-          Value: !Sub 'WorkerEIP-${AWS::StackName}'
-  WazuhWorkerEIPAssociation:
-    Type: 'AWS::EC2::EIPAssociation'
-    Properties:
-      NetworkInterfaceId: !Ref WazuhWorkerEth0
-      AllocationId: !GetAtt
-        - WazuhWorkerEIP
-        - AllocationId
+      DeviceIndex: "0"
+      AssociatePublicIpAddress: "true"
 
   # Amazon Linux agent instance and networking requirements
   Amazon:
@@ -1143,7 +1078,6 @@ Resources:
             VolumeType: gp2
       NetworkInterfaces:
         - NetworkInterfaceId: !Ref AmazonEth0
-          DeviceIndex: 0
       Tags:
         - Key: Name
           Value: Amazon
@@ -1160,20 +1094,8 @@ Resources:
     Properties:
       SubnetId: !Ref SubnetAgents
       GroupSet: [!Ref 'WazuhSecurityGroup']
-  AmazonEIP:
-    Type: AWS::EC2::EIP
-    Properties:
-      Domain: vpc
-      Tags:
-        - Key: Name
-          Value: !Sub 'AmazonEIP-${AWS::StackName}'
-  AmazonEIPAssociation:
-    Type: 'AWS::EC2::EIPAssociation'
-    Properties:
-      NetworkInterfaceId: !Ref AmazonEth0
-      AllocationId: !GetAtt
-        - AmazonEIP
-        - AllocationId
+      DeviceIndex: "0"
+      AssociatePublicIpAddress: "true"
 
   # CentOS agent instance and networking requirements
   Centos:
@@ -1216,7 +1138,6 @@ Resources:
             VolumeType: gp2
       NetworkInterfaces:
         - NetworkInterfaceId: !Ref CentosEth0
-          DeviceIndex: 0
       Tags:
         - Key: Name
           Value: Centos
@@ -1242,20 +1163,8 @@ Resources:
     Properties:
       SubnetId: !Ref SubnetAgents
       GroupSet: [!Ref 'WazuhSecurityGroup']
-  CentosEIP:
-    Type: AWS::EC2::EIP
-    Properties:
-      Domain: vpc
-      Tags:
-        - Key: Name
-          Value: !Sub 'CentosEIP-${AWS::StackName}'
-  CentosEIPAssociation:
-    Type: 'AWS::EC2::EIPAssociation'
-    Properties:
-      NetworkInterfaceId: !Ref CentosEth0
-      AllocationId: !GetAtt
-        - CentosEIP
-        - AllocationId
+      DeviceIndex: "0"
+      AssociatePublicIpAddress: "true"
 
   # Windows agent instance and networking requirements
   Windows:
@@ -1275,7 +1184,6 @@ Resources:
             VolumeType: gp2
       NetworkInterfaces:
         - NetworkInterfaceId: !Ref WindowsEth0
-          DeviceIndex: 0
       Tags:
         - Key: Name
           Value: Windows
@@ -1325,20 +1233,8 @@ Resources:
     Properties:
       SubnetId: !Ref SubnetAgents
       GroupSet: [!Ref 'WazuhSecurityGroup']
-  WindowsEIP:
-    Type: AWS::EC2::EIP
-    Properties:
-      Domain: vpc
-      Tags:
-        - Key: Name
-          Value: !Sub 'WindowsEIP-${AWS::StackName}'
-  WindowsEIPAssociation:
-    Type: 'AWS::EC2::EIPAssociation'
-    Properties:
-      NetworkInterfaceId: !Ref WindowsEth0
-      AllocationId: !GetAtt
-        - WindowsEIP
-        - AllocationId
+      DeviceIndex: "0"
+      AssociatePublicIpAddress: "true"
 
   # Debian agent instance and networking requirements
   Debian:
@@ -1376,7 +1272,6 @@ Resources:
       KeyName: !Ref KeyPairName
       NetworkInterfaces:
         - NetworkInterfaceId: !Ref DebianEth0
-          DeviceIndex: 0
       Tags:
         - Key: Name
           Value: Debian
@@ -1405,20 +1300,8 @@ Resources:
     Properties:
       SubnetId: !Ref SubnetAgents
       GroupSet: [!Ref 'WazuhSecurityGroup']
-  DebianEIP:
-    Type: AWS::EC2::EIP
-    Properties:
-      Domain: vpc
-      Tags:
-        - Key: Name
-          Value: !Sub 'DebianEIP-${AWS::StackName}'
-  DebianEIPAssociation:
-    Type: 'AWS::EC2::EIPAssociation'
-    Properties:
-      NetworkInterfaceId: !Ref DebianEth0
-      AllocationId: !GetAtt
-        - DebianEIP
-        - AllocationId
+      DeviceIndex: "0"
+      AssociatePublicIpAddress: "true"
 
   # Ubuntu agent instance and networking requirements
   Ubuntu:
@@ -1461,7 +1344,6 @@ Resources:
             VolumeType: gp2
       NetworkInterfaces:
         - NetworkInterfaceId: !Ref UbuntuEth0
-          DeviceIndex: 0
       Tags:
         - Key: Name
           Value: Ubuntu
@@ -1485,20 +1367,8 @@ Resources:
     Properties:
       SubnetId: !Ref SubnetAgents
       GroupSet: [!Ref 'WazuhSecurityGroup']
-  UbuntuEIP:
-    Type: AWS::EC2::EIP
-    Properties:
-      Domain: vpc
-      Tags:
-        - Key: Name
-          Value: !Sub 'UbuntuEIP-${AWS::StackName}'
-  UbuntuEIPAssociation:
-    Type: 'AWS::EC2::EIPAssociation'
-    Properties:
-      NetworkInterfaceId: !Ref UbuntuEth0
-      AllocationId: !GetAtt
-        - UbuntuEIP
-        - AllocationId
+      DeviceIndex: "0"
+      AssociatePublicIpAddress: "true"
 
   # RHEL7 agent instance and networking requirements
   RHEL7:
@@ -1541,7 +1411,6 @@ Resources:
             VolumeType: gp2
       NetworkInterfaces:
         - NetworkInterfaceId: !Ref RHELEth0
-          DeviceIndex: 0
       Tags:
         - Key: Name
           Value: RHEL7
@@ -1567,20 +1436,8 @@ Resources:
     Properties:
       SubnetId: !Ref SubnetAgents
       GroupSet: [!Ref 'WazuhSecurityGroup']
-  RHELEIP:
-    Type: AWS::EC2::EIP
-    Properties:
-      Domain: vpc
-      Tags:
-        - Key: Name
-          Value: !Sub 'RhelEIP-${AWS::StackName}'
-  RHELEIPAssociation:
-    Type: 'AWS::EC2::EIPAssociation'
-    Properties:
-      NetworkInterfaceId: !Ref RHELEth0
-      AllocationId: !GetAtt
-        - RHELEIP
-        - AllocationId
+      DeviceIndex: "0"
+      AssociatePublicIpAddress: "true"
 
 Outputs:
   ElasticBootstrapIp:
