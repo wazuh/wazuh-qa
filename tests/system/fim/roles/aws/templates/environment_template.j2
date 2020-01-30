@@ -802,6 +802,63 @@ Resources:
       GroupSet: [!Ref 'ElasticSecurityGroup']
       DeviceIndex: "0"
       AssociatePublicIpAddress: "true"
+
+{% for n in range(n_elasticsearch_instances) %}
+ElasticMaster{{ n }}:
+    Type: AWS::EC2::Instance
+    Metadata:
+      'AWS::CloudFormation::Init':
+        configSets:
+          ElasticInstallationSet:
+            - Elasticfiles
+            - ElasticInstall
+        Elasticfiles:
+          files:
+            /tmp/wazuh_cf_settings:
+              content: !Sub |
+                SshUsername: ${SshUsername}
+                SshPassword: ${SshPassword}
+                Elastic_Wazuh: ${ElasticWazuhVersion}
+                NodeName: 1
+              mode: '000600'
+              owner: root
+              group: root
+    Properties:
+      ImageId: !FindInMap
+        - "RegionMap"
+        - Ref: "AWS::Region"
+        - AMAZONLINUX2HVM
+      InstanceType: !Ref ElasticInstanceType
+      IamInstanceProfile: !Ref InstanceProfile
+      KeyName: !Ref KeyPairName
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 30
+            VolumeType: gp2
+      NetworkInterfaces:
+        - NetworkInterfaceId: !Ref ElasticMaster{{ n }}Eth0
+      Tags:
+        - Key: Name
+          Value: ElasticMaster{{ n }}
+        - Key: Identifier
+          Value: elastic_0{{ n + 2 }}   
+  
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource ElasticMaster{{ n }} --configsets ElasticInstallationSet --region ${AWS::Region}
+          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource ElasticMaster{{ n }} --region ${AWS::Region}
+    DependsOn: GatewayToInternet
+  ElasticMaster{{ n }}Eth0:
+      Type: AWS::EC2::NetworkInterface
+      Properties:
+          SubnetId: !Ref SubnetElasticsearch
+          GroupSet: [!Ref 'ElasticSecurityGroup']
+          DeviceIndex: "0"
+          AssociatePublicIpAddress: "true"
+{% endfor %}
+  
   # Kibana instance
   KibanaInstance:
     Type: AWS::EC2::Instance
@@ -1391,16 +1448,13 @@ Outputs:
     Value: !GetAtt 
       - ElasticBootstrap
       - PublicIp
-  ElasticMasterB:
+{% for n in range(n_elasticsearch_instances) %}      
+  ElasticMaster{{ n }}:
     Description: Elastic Stack and Wazuh versions
     Value: !GetAtt
-      - ElasticMasterB
+      - ElasticMaster{{ n }}:
       - PublicIp
-  ElasticMasterC:
-    Description: Elastic Stack and Wazuh versions
-    Value: !GetAtt
-      - ElasticMasterC
-      - PublicIp
+{% endfor %}
   WazuhMasterInstance:
     Description: Elastic Stack and Wazuh versions
     Value: !GetAtt
