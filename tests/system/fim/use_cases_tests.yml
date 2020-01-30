@@ -22,6 +22,6 @@
       - name: Awaiting while alerts get properly indexed in ES
         pause:
           seconds: 10
-      - import_tasks: ../demo-environment/roles/aws/tasks/launch_tests.yml
-      - import_tasks: ../demo-environment/roles/use_cases/tasks/launch_tests.yml
-      - import_tasks: ../demo-environment/roles/aws/tests/route53_records.yml
+      - import_tasks: ../fim/roles/aws/tasks/launch_tests.yml
+      - import_tasks: ../fim/roles/use_cases/tasks/launch_tests.yml
+      - import_tasks: ../fim/roles/aws/tests/route53_records.yml

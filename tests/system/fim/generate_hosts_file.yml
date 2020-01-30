@@ -7,4 +7,4 @@
       - ./vars/wazuh_agent.yml
       - ./vars/elastic_nginx.yml
     tasks:
-      - import_tasks: ../demo-environment/roles/aws/tasks/generate_hosts_file.yml
+      - import_tasks: ../fim/roles/aws/tasks/generate_hosts_file.yml

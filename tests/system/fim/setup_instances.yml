@@ -17,16 +17,16 @@
     vars_files:
       - ./vars/credentials.yml
     tasks:
-      - import_tasks: ../demo-environment/roles/aws/tasks/configure_ssh.yml
+      - import_tasks: ../fim/roles/aws/tasks/configure_ssh.yml
     handlers:
-      - include: ../demo-environment/roles/aws/handlers/main.yml
+      - include: ../fim/roles/aws/handlers/main.yml
     become: yes
     become_user: root
 
   - hosts: linuxagents
     tasks:
-      - import_tasks: ../demo-environment/roles/aws/tasks/prepare_instances.yml
+      - import_tasks: ../fim/roles/aws/tasks/prepare_instances.yml
     handlers:
-      - include: ../demo-environment/roles/provisioning/handlers/main.yml
+      - include: ../fim/roles/provisioning/handlers/main.yml
     become: yes
     become_user: root

@@ -26,7 +26,7 @@ bucket_name: demo-cloudformation-templates
 template_url: https://demo-cloudformation-templates.s3-us-west-1.amazonaws.com/
 availability_zone: us-west-1b
 aws_cli_profile: ansible_demo
-service_name_tag: demo-environment
+service_name_tag: fim-tests
 team_tag: DevOps
 
 # Template paths and names 
