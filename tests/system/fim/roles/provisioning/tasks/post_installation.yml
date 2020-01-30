@@ -10,17 +10,6 @@
       - inventory_hostname in groups['masters']
     notify: restart wazuh-api
 
-  - name: Create Agents groups
-    shell: >-
-      /var/ossec/bin/agent_groups -a -g {{ item }} -q
-    with_items:
-      - apache
-      - redhat
-      - windows
-      - mysql
-    when:
-      - inventory_hostname in groups['masters']
-
   - name: Obtain RHEL Agent ID
     shell: /var/ossec/bin/manage_agents -l | grep RHEL | cut -d':' -f2 | cut -d ',' -f1
     register: rhel_id
@@ -30,15 +19,6 @@
   - name: Obtain Windows Agent ID
     shell: /var/ossec/bin/manage_agents -l | grep Windows | cut -d':' -f2 | cut -d ',' -f1
     register: windows_id  
-    when:
-      - inventory_hostname in groups['masters']
-
-  - name: Add RHEL Agent to MySQL, Apache and RHEL group
-    shell: /var/ossec/bin/agent_groups -a -g {{ item }} -i {{ rhel_id.stdout }} -q
-    with_items:
-      - redhat
-      - apache
-      - mysql
     when:
       - inventory_hostname in groups['masters']
 
