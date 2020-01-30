@@ -1,7 +1,7 @@
 ---
 # conf 1
 - tags:
-  - ossec_conf
+  - ossec_conf_duplicate_simple
   apply_to_modules:
   - MODULE_NAME
   section: syscheck
@@ -17,4 +17,65 @@
       value: TEST_DIRECTORIES
       attributes:
       - check_all: 'yes'
+      - FIM_MODE2
+# conf 2
+- tags:
+  - ossec_conf_duplicate_complex
+  apply_to_modules:
+  - MODULE_NAME
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: TEST_DIRECTORIES
+      attributes:
+      - check_all: 'no'
+      - check_owner: 'yes'
+      - check_inode: 'yes'
+      - FIM_MODE
+  - directories:
+      value: TEST_DIRECTORIES
+      attributes:
+      - check_all: 'no'
+      - check_size: 'yes'
+      - check_perm: 'yes'
+      - FIM_MODE2
+# conf 3
+- tags:
+  - ossec_conf_duplicate_report
+  apply_to_modules:
+  - MODULE_NAME
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: TEST_DIRECTORIES
+      attributes:
+      - report_changes: 'yes'
+      - FIM_MODE
+  - directories:
+      value: TEST_DIRECTORIES
+      attributes:
+      - report_changes: 'no'
+      - FIM_MODE2
+# conf 4
+- tags:
+  - ossec_conf_duplicate_sregex
+  apply_to_modules:
+  - MODULE_NAME
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: TEST_DIRECTORIES
+      attributes:
+      - restrict: '^good.*$'
+      - FIM_MODE
+  - directories:
+      value: TEST_DIRECTORIES
+      attributes:
+      - restrict: '^he.*$'
       - FIM_MODE2
