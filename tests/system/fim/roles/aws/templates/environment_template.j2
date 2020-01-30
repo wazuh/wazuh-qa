@@ -553,56 +553,6 @@ Resources:
         - Key: Name
           Value: !Sub '${AWS::StackName}-ElbElasticSecurityGroup'
 
-  # Wazuh registration Listener for Network Load Balancer
-  ElasticBootstrap:
-    Type: AWS::EC2::Instance
-    Metadata:
-      'AWS::CloudFormation::Init':
-        configSets:
-          ElasticInstallationSet:
-            - Elasticfiles
-            - ElasticInstall
-        Elasticfiles:
-          files:
-            /tmp/wazuh_cf_settings:
-              content: !Sub |
-                SshUsername: ${SshUsername}
-                SshPassword: ${SshPassword}
-                Elastic_Wazuh: ${ElasticWazuhVersion}
-                MasterIp: ${WazuhMasterInstance.PrivateIp}
-                WorkerIp: ${WazuhWorkerInstance.PrivateIp}
-                KibanaIp: ${KibanaInstance.PrivateIp}
-                NodeName: 3
-              mode: '000600'
-              owner: root
-              group: root
-    Properties:
-      ImageId: !FindInMap
-        - "RegionMap"
-        - Ref: "AWS::Region"
-        - HVM64
-      InstanceType: !Ref ElasticInstanceType
-      IamInstanceProfile: !Ref InstanceProfile
-      KeyName: !Ref KeyPairName
-      BlockDeviceMappings:
-        - DeviceName: /dev/xvda
-          Ebs:
-            VolumeSize: 100
-            VolumeType: gp2
-      NetworkInterfaces:
-        - NetworkInterfaceId: !Ref ElasticBootstrapEth0
-      Tags:
-        - Key: Name
-          Value: ElasticBootstrap
-        - Key: Identifier
-          Value: elastic_01  
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash -xe
-          /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource ElasticBootstrap --configsets ElasticInstallationSet --region ${AWS::Region}
-          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource ElasticBootstrap --region ${AWS::Region}
-    DependsOn: GatewayToInternet
-
   # Wazuh Network Load Balancer
   WazuhNetworkLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
