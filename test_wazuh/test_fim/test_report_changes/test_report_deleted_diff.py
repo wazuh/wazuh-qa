@@ -8,31 +8,32 @@ from datetime import timedelta
 
 import pytest
 
-from wazuh_testing.fim import (CHECK_ALL, DEFAULT_TIMEOUT, LOG_FILE_PATH, WAZUH_PATH, callback_detect_event,
+from wazuh_testing.fim import (DEFAULT_TIMEOUT, LOG_FILE_PATH, WAZUH_PATH, callback_detect_event,
                                REGULAR, create_file, detect_initial_scan, generate_params)
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import restart_wazuh_with_new_conf
-from wazuh_testing.tools.configuration import set_section_wazuh_conf, load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, load_wazuh_configurations
+
 
 # Marks
 
 pytestmark = pytest.mark.tier(level=1)
 
+
 # variables
 
+wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 
 test_directories = [os.path.join(PREFIX, 'testdir_reports'), os.path.join(PREFIX, 'testdir_nodiff')]
-nodiff_file = os.path.join(PREFIX, 'testdir_nodiff', 'regular_file')
-
-directory_str = ','.join(test_directories)
 testdir_reports, testdir_nodiff = test_directories
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-options = {CHECK_ALL}
+directory_str = ','.join(test_directories)
 
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+nodiff_file = os.path.join(PREFIX, 'testdir_nodiff', 'regular_file')
+FILE_NAME = 'regularfile'
 
 
 # configurations
@@ -62,10 +63,14 @@ def get_configuration(request):
 
 
 # functions
-def wait_for_event(fim_mode):
-    """ Wait for the event to be scanned
 
-    :param fim_mode: FIM mode (scheduled, realtime, whodata)
+def wait_for_event(fim_mode):
+    """Wait for the event to be scanned.
+
+    Parameters
+    ----------
+    fim_mode : str
+        FIM mode (scheduled, realtime, whodata)
     """
     if fim_mode == 'scheduled':
         TimeMachine.travel_to_future(timedelta(hours=13))
@@ -74,94 +79,124 @@ def wait_for_event(fim_mode):
     wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event)
 
 
-def create_and_check_diff(name, directory, fim_mode):
-    """ Create a file and check if it is duplicated in diff directory
+def create_and_check_diff(name, path, fim_mode):
+    """Create a file and check if it is duplicated in diff directory.
 
-    :param name: File name
-    :param directory: File directory
-    :param fim_mode: FIM mode (scheduled, realtime, whodata)
-    :return: String with with the duplicated file path (diff)
+    Parameters
+    ----------
+    name : str
+        Name of the file to be created
+    path : str
+        path where the file will be created
+    fim_mode : str
+        FIM mode (scheduled, realtime, whodata)
+
+    Returns
+    -------
+    str
+        String with the duplicated file path (diff)
     """
-    create_file(REGULAR, directory, name, content='Sample content')
+    create_file(REGULAR, path, name, content='Sample content')
     wait_for_event(fim_mode)
     diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
     if sys.platform == 'win32':
         diff_file = os.path.join(diff_file, 'c')
-        diff_file = os.path.join(diff_file, directory.strip('C:\\'), name)
+        diff_file = os.path.join(diff_file, path.strip('C:\\'), name)
     else:
-        diff_file = os.path.join(diff_file, directory.strip('/'), name)
+        diff_file = os.path.join(diff_file, path.strip('/'), name)
     assert os.path.exists(diff_file), f'{diff_file} does not exist'
     return diff_file
 
 
-def check_when_no_report_changes(name, directory, fim_mode, new_conf):
-    """ Restart Wazuh without report_changes
-
-    :param name: File name
-    :param directory: File directory
-    :param fim_mode: FIM mode (scheduled, realtime, whodata)
-    :param new_conf: New configuration to apply to syscheck
-    :return:
-    """
-    diff_file = create_and_check_diff(name, directory, fim_mode)
-    restart_wazuh_with_new_conf(new_conf)
+def disable_report_changes():
+    """Change the `report_changes` value in the `ossec.conf` file and then restart `Syscheck` to apply the changes."""
+    new_conf = change_conf(report_value='no')
+    new_ossec_conf = set_section_wazuh_conf(new_conf[0].get('section'), new_conf[0].get('elements'))
+    restart_wazuh_with_new_conf(new_ossec_conf)
     # Wait for FIM scan to finish
     detect_initial_scan(wazuh_log_monitor)
-
-    assert not os.path.exists(diff_file), f'{diff_file} exists'
-
-
-def check_when_deleted_directories(name, directory, fim_mode):
-    """ Check if the diff directory is empty when the monitored directory is deleted
-
-    :param name: File name
-    :param directory: File directory
-    :param fim_mode: FIM mode (scheduled, realtime, whodata)
-    :return: None
-    """
-    diff_dir = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
-    if sys.platform == 'win32':
-        diff_dir = os.path.join(diff_dir, 'c')
-        diff_dir = os.path.join(diff_dir, directory.strip('C:\\'), name)
-    else:
-        diff_dir = os.path.join(diff_dir, directory.strip('/'), name)
-    create_and_check_diff(name, directory, fim_mode)
-    shutil.rmtree(directory, ignore_errors=True)
-    wait_for_event(fim_mode)
-    assert not os.path.exists(diff_dir), f'{diff_dir} exists'
 
 
 # tests
 
+@pytest.mark.parametrize('path', [testdir_nodiff])
+def test_report_when_deleted_directories(path, get_configuration, configure_environment, restart_syscheckd,
+                                         wait_for_initial_scan):
+    """Check if the diff directory is empty when the monitored directory is deleted.
 
-@pytest.mark.parametrize('tags_to_apply', [
-    {'ossec_conf_report'},
-])
-@pytest.mark.parametrize('folder, checkers, delete_dir', [
-    (testdir_nodiff, options, True),
-    (testdir_reports, options, False)
-])
-def test_no_report_changes(folder, checkers, delete_dir, tags_to_apply,
-                           get_configuration, configure_environment,
+    * This test is intended to be used with valid configurations files. Each execution of this test will configure
+    the environment properly, restart the service and wait for the initial scan. This test will restart with a new
+    configuration throughout its execution as well.
+
+    Parameters
+    ----------
+    path : str
+        Path to the file to be deleted
+    """
+    fim_mode = get_configuration['metadata']['fim_mode']
+    diff_dir = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
+
+    if sys.platform == 'win32':
+        diff_dir = os.path.join(diff_dir, 'c')
+        diff_dir = os.path.join(diff_dir, path.strip('C:\\'), FILE_NAME)
+    else:
+        diff_dir = os.path.join(diff_dir, path.strip('/'), FILE_NAME)
+    create_and_check_diff(FILE_NAME, path, fim_mode)
+    shutil.rmtree(path, ignore_errors=True)
+    wait_for_event(fim_mode)
+    assert not os.path.exists(diff_dir), f'{diff_dir} exists'
+
+
+@pytest.mark.parametrize('path', [testdir_reports])
+def test_no_report_changes(path, get_configuration, configure_environment,
                            restart_syscheckd, wait_for_initial_scan):
-    """ Check if duplicated directories in diff are deleted when changing
-    report_changes to 'no' or deleting the monitored directories
+    """Check if duplicated directories in diff are deleted when changing `report_changes` to 'no' or deleting the
+    monitored directories.
 
-    Since report_changes duplicates monitored files, we need to assert that once the original files are deleted,
-    the duplicated ones are deleted too.
+    * This test is intended to be used with valid configurations files. Each execution of this test will configure
+    the environment properly, restart the service and wait for the initial scan. This test will restart with a new
+    configuration throughout its execution as well.
+
+    Parameters
+    ----------
+    path : str
+        Path to the file
+    """
+    fim_mode = get_configuration['metadata']['fim_mode']
+    diff_file = create_and_check_diff(FILE_NAME, path, fim_mode)
+    backup_conf = get_wazuh_conf()
+
+    try:
+        disable_report_changes()
+        assert not os.path.exists(diff_file), f'{diff_file} exists'
+    finally:
+        # Restore the original conf file so as not to interfere with other tests
+        restart_wazuh_with_new_conf(backup_conf)
+        detect_initial_scan(wazuh_log_monitor)
+
+
+def test_report_changes_after_restart(get_configuration, configure_environment, restart_syscheckd,
+                                      wait_for_initial_scan):
+    """Check if duplicated directories in diff are deleted when restarting syscheck.
+
+    The duplicated directories in diff will be removed after Syscheck restarts but will be created again if the report
+    changes is still active. To avoid this we disable turn off report_changes option before restarting Syscheck to
+    ensure directories won't be created again.
 
     * This test is intended to be used with valid configurations files. Each execution of this test will configure
     the environment properly, restart the service and wait for the initial scan. This test will restart with a new
     configuration throughout its execution as well.
     """
-    check_apply_test(tags_to_apply, get_configuration['tags'])
-
-    filename = 'regularfile'
     fim_mode = get_configuration['metadata']['fim_mode']
-    if delete_dir:
-        check_when_deleted_directories(filename, folder, fim_mode)
-    else:
-        new_conf = change_conf(report_value='no')
-        new_ossec_conf = set_section_wazuh_conf(new_conf[0].get('section'),
-                                                new_conf[0].get('elements'))
-        check_when_no_report_changes(filename, folder, fim_mode, new_ossec_conf)
+
+    # Create a file in the monitored path to force the creation of a report in diff
+    diff_file_path = create_and_check_diff(FILE_NAME, testdir_reports, fim_mode)
+
+    backup_conf = get_wazuh_conf()
+    try:
+        disable_report_changes()
+        assert not os.path.exists(diff_file_path), f'{diff_file_path} exists'
+    finally:
+        # Restore the original conf file so as not to interfere with other tests
+        restart_wazuh_with_new_conf(backup_conf)
+        detect_initial_scan(wazuh_log_monitor)
