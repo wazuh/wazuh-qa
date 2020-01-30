@@ -705,20 +705,6 @@ Resources:
           ElasticInstallationSet:
             - Elasticfiles
             - ElasticInstall
-        Elasticfiles:
-          files:
-            /tmp/wazuh_cf_settings:
-              content: !Sub |
-                SshUsername: ${SshUsername}
-                SshPassword: ${SshPassword}
-                Elastic_Wazuh: ${ElasticWazuhVersion}
-                MasterIp: ${WazuhMasterInstance.PrivateIp}
-                WorkerIp: ${WazuhWorkerInstance.PrivateIp}
-                KibanaIp: ${KibanaInstance.PrivateIp}
-                NodeName: 3
-              mode: '000600'
-              owner: root
-              group: root
     Properties:
       ImageId: !FindInMap
         - "RegionMap"
@@ -762,17 +748,6 @@ ElasticMaster{{ n }}:
           ElasticInstallationSet:
             - Elasticfiles
             - ElasticInstall
-        Elasticfiles:
-          files:
-            /tmp/wazuh_cf_settings:
-              content: !Sub |
-                SshUsername: ${SshUsername}
-                SshPassword: ${SshPassword}
-                Elastic_Wazuh: ${ElasticWazuhVersion}
-                NodeName: 1
-              mode: '000600'
-              owner: root
-              group: root
     Properties:
       ImageId: !FindInMap
         - "RegionMap"
@@ -818,22 +793,6 @@ ElasticMaster{{ n }}:
           KibanaInstallationSet:
             - KibanaFiles
             - KibanaInstall
-        KibanaFiles:
-          files:
-            /tmp/wazuh_cf_settings:
-              content: !Sub |
-                SshUsername: ${SshUsername}
-                SshPassword: ${SshPassword}
-                Elastic_Wazuh: ${ElasticWazuhVersion}
-                KibanaPort: ${KibanaPort}
-                WazuhApiAdminUsername: ${WazuhApiAdminUsername}
-                WazuhApiAdminPassword: ${WazuhApiAdminPassword}
-                WazuhApiPort: ${WazuhApiPort}
-                WazuhMasterIP: ${WazuhMasterInstance.PrivateIp}
-                EnvironmentType: ${EnvironmentType}
-              mode: '000600'
-              owner: root
-              group: root
     Properties:
       ImageId: !FindInMap
         - "RegionMap"
@@ -871,29 +830,6 @@ ElasticMaster{{ n }}:
           WazuhInstallationSet:
             - WazuhFiles
             - WazuhInstall
-        WazuhFiles:
-          files:
-            /tmp/wazuh_cf_settings:
-              content: !Sub |
-                SshUsername: ${SshUsername}
-                SshPassword: ${SshPassword}
-                Elastic_Wazuh: ${ElasticWazuhVersion}
-                WazuhApiAdminUsername: ${WazuhApiAdminUsername}
-                WazuhApiAdminPassword: ${WazuhApiAdminPassword}
-                WazuhApiPort: ${WazuhApiPort}
-                WazuhServerPort: ${WazuhServerPort}
-                WazuhRegistrationPort: ${WazuhRegistrationPort}
-                WazuhRegistrationPassword: ${WazuhRegistrationPassword}
-                WazuhClusterKey: ${WazuhClusterKey}
-                WindowsPublicIp: ${Windows.PublicIp}
-                AwsSecretKey: ${AwsSecretKey}
-                AwsAccessKey: ${AwsAccessKey}
-                VirusTotalKey: ${VirusTotalKey}
-                SlackHook: ${SlackHook}
-                EnvironmentType: ${EnvironmentType}
-              mode: '000600'
-              owner: root
-              group: root
     Properties:
       ImageId: !FindInMap
         - "RegionMap"
@@ -938,24 +874,6 @@ ElasticMaster{{ n }}:
           WazuhInstallationSet:
             - WazuhFiles
             - WazuhInstall
-        WazuhFiles:
-          files:
-            /tmp/wazuh_cf_settings:
-              content: !Sub |
-                SshUsername: ${SshUsername}
-                SshPassword: ${SshPassword}
-                Elastic_Wazuh: ${ElasticWazuhVersion}
-                WazuhServerPort: ${WazuhServerPort}
-                WazuhClusterKey: ${WazuhClusterKey}
-                WazuhMasterIP: ${WazuhMasterInstance.PrivateIp}
-                AwsSecretKey: ${AwsSecretKey}
-                AwsAccessKey: ${AwsAccessKey}
-                VirusTotalKey: ${VirusTotalKey}
-                SlackHook: ${SlackHook}
-                EnvironmentType: ${EnvironmentType}
-              mode: '000600'
-              owner: root
-              group: root
     Properties:
       ImageId: !FindInMap
         - "RegionMap"
@@ -999,23 +917,6 @@ ElasticMaster{{ n }}:
           AmazonInstallationSet:
             - WazuhFiles
             - WazuhInstall
-        WazuhFiles:
-          files:
-            /tmp/wazuh_cf_settings:
-              content: !Sub |
-                SshUsername: ${SshUsername}
-                SshPassword: ${SshPassword}
-                Elastic_Wazuh: ${ElasticWazuhVersion}
-                WazuhServerPort: ${WazuhServerPort}
-                WazuhRegistrationPort: ${WazuhRegistrationPort}
-                WazuhRegistrationPassword: ${WazuhRegistrationPassword}
-                WazuhMasterIP: ${WazuhMasterInstance.PrivateIp}
-                ElbWazuhDNS: ${WazuhNetworkLoadBalancer.DNSName}
-                AgentName: Amazon
-                EnvironmentType: ${EnvironmentType}
-              mode: '000600'
-              owner: root
-              group: root
     Properties:
       ImageId: !FindInMap
         - "RegionMap"
@@ -1059,23 +960,6 @@ ElasticMaster{{ n }}:
           CentosInstallationSet:
             - WazuhFiles
             - WazuhInstall
-        WazuhFiles:
-          files:
-            /tmp/wazuh_cf_settings:
-              content: !Sub |
-                SshUsername: ${SshUsername}
-                SshPassword: ${SshPassword}
-                Elastic_Wazuh: ${ElasticWazuhVersion}
-                WazuhServerPort: ${WazuhServerPort}
-                WazuhRegistrationPort: ${WazuhRegistrationPort}
-                WazuhRegistrationPassword: ${WazuhRegistrationPassword}
-                WazuhMasterIP: ${WazuhMasterInstance.PrivateIp}
-                ElbWazuhDNS: ${WazuhNetworkLoadBalancer.DNSName}
-                AgentName: Centos
-                EnvironmentType: ${EnvironmentType}
-              mode: '000600'
-              owner: root
-              group: root
     Properties:
       ImageId: !FindInMap
         - "RegionMap"
@@ -1198,23 +1082,6 @@ ElasticMaster{{ n }}:
           DebianInstallationSet:
             - WazuhFiles
             - WazuhInstall
-        WazuhFiles:
-          files:
-            /tmp/wazuh_cf_settings:
-              content: !Sub |
-                SshUsername: ${SshUsername}
-                SshPassword: ${SshPassword}
-                Elastic_Wazuh: ${ElasticWazuhVersion}
-                WazuhServerPort: ${WazuhServerPort}
-                WazuhRegistrationPort: ${WazuhRegistrationPort}
-                WazuhRegistrationPassword: ${WazuhRegistrationPassword}
-                WazuhMasterIP: ${WazuhMasterInstance.PrivateIp}
-                ElbWazuhDNS: ${WazuhNetworkLoadBalancer.DNSName}
-                AgentName: Debian
-                EnvironmentType: ${EnvironmentType}
-              mode: '000600'
-              owner: root
-              group: root
     Properties:
       ImageId: !FindInMap
         - "RegionMap"
@@ -1265,23 +1132,6 @@ ElasticMaster{{ n }}:
           UbuntuInstallationSet:
             - WazuhFiles
             - WazuhInstall
-        WazuhFiles:
-          files:
-            /tmp/wazuh_cf_settings:
-              content: !Sub |
-                SshUsername: ${SshUsername}
-                SshPassword: ${SshPassword}
-                Elastic_Wazuh: ${ElasticWazuhVersion}
-                WazuhServerPort: ${WazuhServerPort}
-                WazuhRegistrationPort: ${WazuhRegistrationPort}
-                WazuhRegistrationPassword: ${WazuhRegistrationPassword}
-                WazuhMasterIP: ${WazuhMasterInstance.PrivateIp}
-                ElbWazuhDNS: ${WazuhNetworkLoadBalancer.DNSName}
-                AgentName: Ubuntu
-                EnvironmentType: ${EnvironmentType}
-              mode: '000600'
-              owner: root
-              group: root
     Properties:
       ImageId: !FindInMap
         - "RegionMap"
@@ -1332,23 +1182,6 @@ ElasticMaster{{ n }}:
           RHEL7InstallationSet:
             - WazuhFiles
             - WazuhInstall
-        WazuhFiles:
-          files:
-            /tmp/wazuh_cf_settings:
-              content: !Sub |
-                SshUsername: ${SshUsername}
-                SshPassword: ${SshPassword}
-                Elastic_Wazuh: ${ElasticWazuhVersion}
-                WazuhServerPort: ${WazuhServerPort}
-                WazuhRegistrationPort: ${WazuhRegistrationPort}
-                WazuhRegistrationPassword: ${WazuhRegistrationPassword}
-                WazuhMasterIP: ${WazuhMasterInstance.PrivateIp}
-                ElbWazuhDNS: ${WazuhNetworkLoadBalancer.DNSName}
-                AgentName: RHEL7
-                EnvironmentType: ${EnvironmentType}
-              mode: '000600'
-              owner: root
-              group: root
     Properties:
       ImageId: !FindInMap
         - "RegionMap"
