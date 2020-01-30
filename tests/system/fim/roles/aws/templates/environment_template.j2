@@ -838,7 +838,7 @@ ElasticMaster{{ n }}:
       ImageId: !FindInMap
         - "RegionMap"
         - Ref: "AWS::Region"
-        - HVM64
+        - AMAZONLINUX2HVM
       InstanceType: !Ref KibanaInstanceType
       IamInstanceProfile: !Ref InstanceProfile
       KeyName: !Ref KeyPairName
