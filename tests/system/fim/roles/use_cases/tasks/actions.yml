@@ -2,13 +2,6 @@
 
   # Audit
 
-  - name: Pinging as wazuh user to generate audit alerts
-    shell: ping -c 5 www.google.com
-    become: true
-    become_user: wazuh
-    when:
-      - inventory_hostname in groups['rhel']
-
   - name: Create file under /home/ssh_user folder
     copy:
       dest: "/home/{{ ansible_ssh_user}}/test_syscheck_file"

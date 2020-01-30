@@ -1,38 +1,4 @@
-
-# AWS
-aws_fetch_from_date: 2020-JAN-05
-
-# Docker
-docker_repository: https://download.docker.com/linux/centos/docker-ce.repo
-selinux_package_url: http://mirror.centos.org/centos/7/extras/x86_64/Packages/
-selinux_package_name: container-selinux-2.107-1.el7_6.noarch.rpm
-
 # FIM
 fim_linux_folder_path: /tmp/
 fim_windows_folder_path: C:\Santiago\
 fim_test_file_name: test_file_for_fim
-
-# MySQL
-
-mysql_url: https://repo.mysql.com//mysql80-community-release-el7-2.noarch.rpm
-
-# Virustotal 
-linux_virustotal_folder_path: /tmp/virus/
-windows_virustotal_folder_path: C:\Santiago\virus\
-virustotal_test_file: virustotal_test_file
-malware_test_file_url: https://secure.eicar.org/eicar.com
-
-# IP-reputation lists
-alienvault_ipset_url: https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/alienvault_reputation.ipset
-wazuh_script_iplist_to_cdblist: https://wazuh.com/resources/iplist-to-cdblist.py
-
-# Osquery
-osquery_package: https://pkg.osquery.io/rpm/osquery-3.3.2-1.linux.x86_64.rpm
-osquery_package_windows: https://pkg.osquery.io/windows/osquery-3.3.2.msi
-osquery_installation_path: /etc/osquery/
-osquery_installation_path_windows: C:\
-osquery_download_path_windows: C:\Users\Administrator\Desktop\osquery.msi
-
-# Suricata
-suricata_installation_path: /etc/suricata/
-
