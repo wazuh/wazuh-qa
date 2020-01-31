@@ -19,6 +19,9 @@ n_agents_ubuntu_14: 1
 n_agents_centos7: 1
 n_agents_rhel8: 1
 n_agents_amazon_linux_2: 1
+n_agents_windows2012: 1
+n_agents_windows2016: 1
+n_agents_windows2019: 1
 
 # Configuration
 
