@@ -1,5 +1,5 @@
 ---
-  - name: Rendering template for Elasticsearch bootstrap
+  - name: Render provisioning playbook
     template:
       src: "../templates/provision_playbook.yml.j2"
       dest: "./provision_playbook.yml"
