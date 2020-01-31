@@ -76,7 +76,7 @@ def pytest_addoption(parser):
         default=None,
         type=int,
         help="number of seconds that any timer will wait until an event is generated. This apply to all tests except"
-             "all of them with a hardcoded timeout not depending on global_parameters.default_timeout "
+             "those with a hardcoded timeout not depending on global_parameters.default_timeout "
              "variable from wazuh_testing package"
     )
 
