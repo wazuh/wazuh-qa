@@ -6,4 +6,5 @@
 
   - name: restart ubuntu14 sshd service
     shell: "service ssh restart"
-    
+    when:
+      - not ansible_distribution != "Ubuntu" and ansible_distribution_version != "14.04"
