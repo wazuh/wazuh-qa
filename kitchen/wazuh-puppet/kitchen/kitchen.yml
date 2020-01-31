@@ -11,11 +11,11 @@ provisioner:
   hiera_data_path: hieradata
 
 platforms:
-  - name: <%= ENV['PLATFORM'] %>-manager_kitchen
+  - name: <%= ENV['PLATFORM'] %>_<%= ENV['RELEASE'] %>_manager_kitchen
     driver_config:
       image: <%= ENV['IMAGE'] %>
       platform: <%= ENV['PLATFORM'] %>
-      hostname: manager_<%= ENV['PLATFORM'] %>  
+      hostname: manager_<%= ENV['PLATFORM'] %>_<%= ENV['RELEASE'] %>  
       run_command: /sbin/init
       privileged: true
       volume:
@@ -23,11 +23,11 @@ platforms:
       provision_command:
         - sed -i 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config
 
-  - name: <%= ENV['PLATFORM'] %>-agent-kitchen
+  - name: <%= ENV['PLATFORM'] %>_<%= ENV['RELEASE'] %>_agent-kitchen
     driver_config:
       image: <%= ENV['IMAGE'] %>
       platform: <%= ENV['PLATFORM'] %>
-      hostname: agent_<%= ENV['PLATFORM'] %>
+      hostname: agent_<%= ENV['PLATFORM'] %>_<%= ENV['RELEASE'] %>
       run_command: /sbin/init
       privileged: true
       volume:
