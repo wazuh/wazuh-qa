@@ -913,7 +913,7 @@ Resources:
         - Key: Name
           Value: Amazon_0{{ n }}
         - Key: Identifier
-          Value: agent_amazon_0{{ n }}
+          Value: agent_linux_amazon_0{{ n }}
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
@@ -956,7 +956,7 @@ Resources:
         - Key: Name
           Value: Centos_0{{ n }}
         - Key: Identifier
-          Value: agent_centos_0{{ n }}
+          Value: agent_linux_centos_0{{ n }}
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
@@ -1217,7 +1217,7 @@ Resources:
         - Key: Name
           Value: Ubuntu14_0{{ n }}
         - Key: Identifier
-          Value: agent_ubuntu14_0{{ n }}
+          Value: agent_linux_ubuntu14_0{{ n }}
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
@@ -1267,7 +1267,7 @@ Resources:
         - Key: Name
           Value: Ubuntu16_0{{ n }}
         - Key: Identifier
-          Value: agent_ubuntu16_0{{ n }}
+          Value: agent_linux_ubuntu16_0{{ n }}
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
@@ -1317,7 +1317,7 @@ Resources:
         - Key: Name
           Value: Ubuntu18_0{{ n }}
         - Key: Identifier
-          Value: agent_ubuntu18_0{{ n }}
+          Value: agent_linux_ubuntu18_0{{ n }}
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
@@ -1367,7 +1367,7 @@ Resources:
         - Key: Name
           Value: RHEL8_0{{ n }}
         - Key: Identifier
-          Value: agent_rhel8_0{{ n }}
+          Value: agent_linux_rhel8_0{{ n }}
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
