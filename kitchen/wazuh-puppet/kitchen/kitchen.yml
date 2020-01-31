@@ -11,7 +11,7 @@ provisioner:
   hiera_data_path: hieradata
 
 platforms:
-  - name: <%= ENV['PLATFORM'] %>_<%= ENV['RELEASE'] %>_manager_kitchen
+  - name: <%= ENV['PLATFORM'] %>_<%= ENV['RELEASE'] %>_manager_kitchen_puppet
     driver_config:
       image: <%= ENV['IMAGE'] %>
       platform: <%= ENV['PLATFORM'] %>
@@ -23,7 +23,7 @@ platforms:
       provision_command:
         - sed -i 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config
 
-  - name: <%= ENV['PLATFORM'] %>_<%= ENV['RELEASE'] %>_agent-kitchen
+  - name: <%= ENV['PLATFORM'] %>_<%= ENV['RELEASE'] %>_agent-kitchen_puppet
     driver_config:
       image: <%= ENV['IMAGE'] %>
       platform: <%= ENV['PLATFORM'] %>
