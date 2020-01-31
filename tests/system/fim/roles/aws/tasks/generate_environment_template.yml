@@ -2,6 +2,6 @@
   - name: Classifying hosts file with obtained names and IPs
     template:
       src: "../templates/environment_template.j2"
-      dest: "./environment.yml"
+      dest: "{{ cloudformation_template_path }}{{ cloudformation_template_name }}"
       mode: '664'
       force: yes
