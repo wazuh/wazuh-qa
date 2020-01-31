@@ -6,7 +6,8 @@ import sys
 
 import pytest
 
-from wazuh_testing.fim import (CHECK_ALL, DEFAULT_TIMEOUT, LOG_FILE_PATH, regular_file_cud, WAZUH_PATH, generate_params)
+from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH, regular_file_cud, WAZUH_PATH, generate_params)
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -101,5 +102,5 @@ def test_reports_file_and_nodiff(folder, checkers, tags_to_apply,
 
     regular_file_cud(folder, wazuh_log_monitor, file_list=file_list,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                     min_timeout=DEFAULT_TIMEOUT, triggers_event=True,
+                     min_timeout=global_parameters.default_timeout, triggers_event=True,
                      validators_after_update=[report_changes_validator, no_diff_validator])

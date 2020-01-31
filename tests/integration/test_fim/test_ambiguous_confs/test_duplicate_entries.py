@@ -10,7 +10,8 @@ import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, modify_file_group, modify_file_content, modify_file_owner, \
     modify_file_permission, check_time_travel, callback_detect_event, get_fim_mode_param, deepcopy, create_file, \
-    REGULAR, generate_params, validate_event, DEFAULT_TIMEOUT, CHECK_PERM, CHECK_SIZE, WAZUH_PATH
+    REGULAR, generate_params, validate_event, CHECK_PERM, CHECK_SIZE, WAZUH_PATH
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -76,7 +77,7 @@ def check_event(previous_mode: str, previous_event: dict, file: str):
     """
     current_event = None
     try:
-        current_event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+        current_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
     except TimeoutError:
         assert 'added' in previous_event['data']['type'] and \
                os.path.join(testdir1, file) in previous_event['data']['path'] and \
@@ -108,7 +109,7 @@ def test_duplicate_entries(get_configuration, configure_environment, restart_sys
     create_file(REGULAR, testdir1, file, content=' ')
 
     check_time_travel(scheduled)
-    event1 = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+    event1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
     # Check for a second event
     event2 = check_event(previous_mode=mode2, previous_event=event1, file=file)
@@ -133,13 +134,13 @@ def test_duplicate_entries_sregex(get_configuration, configure_environment,
     create_file(REGULAR, testdir1, file, content=' ')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
     # Check for a second event
     modify_file_content(testdir1, file)
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
 
 def test_duplicate_entries_report(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
@@ -157,12 +158,12 @@ def test_duplicate_entries_report(get_configuration, configure_environment, rest
     # Check for an event
     create_file(REGULAR, testdir1, file, content=' ')
     check_time_travel(scheduled)
-    wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
     # Check for a second event
     modify_file_content(testdir1, file)
     check_time_travel(scheduled)
-    wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
     assert not os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'diff', 'local', testdir1[1:], file)), \
         'Error: Diff file created'
 
@@ -192,7 +193,7 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
     file_path = os.path.join(testdir1, file)
 
     check_time_travel(scheduled)
-    event1 = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+    event1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
     # Replace character, change the group and ownership and touch the file
     replace_character('i', '1', file_path)
@@ -207,5 +208,5 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
     modify_file_permission(testdir1, file)
     modify_file_content(testdir1, file)
     check_time_travel(scheduled)
-    event3 = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+    event3 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
     validate_event(event3, [CHECK_PERM, CHECK_SIZE])

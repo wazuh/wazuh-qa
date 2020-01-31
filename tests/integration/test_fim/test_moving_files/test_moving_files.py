@@ -6,7 +6,8 @@ import os
 
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH, REGULAR, DEFAULT_TIMEOUT, callback_detect_event, create_file)
+from wazuh_testing.fim import (LOG_FILE_PATH, REGULAR, callback_detect_event, create_file)
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -56,7 +57,7 @@ def check_event(dirsrc, dirdst, filename, mod_del_event, mod_add_event):
     :param mod_del_event: Mode of deleted event
     :param mod_add_event: Mode of added event
     """
-    event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+    event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
     try:
         assert (event['data']['mode'] == mod_del_event and event['data']['type'] == deleted and

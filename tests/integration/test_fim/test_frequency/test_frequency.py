@@ -8,7 +8,8 @@ from datetime import timedelta
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, DEFAULT_TIMEOUT, regular_file_cud, generate_params
+from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, generate_params
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -94,7 +95,7 @@ def test_frequency(folder, tags_to_apply, get_configuration, configure_environme
 
         # Expect events now
         regular_file_cud(folder, wazuh_log_monitor, file_list=['regular'],
-                         min_timeout=DEFAULT_TIMEOUT, triggers_event=True)
+                         min_timeout=global_parameters.default_timeout, triggers_event=True)
     finally:
         # Remove directory since it is not included in fixture
         shutil.rmtree(directory_str, ignore_errors=True)

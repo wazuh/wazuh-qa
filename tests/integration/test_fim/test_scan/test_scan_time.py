@@ -6,7 +6,8 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, DEFAULT_TIMEOUT, callback_detect_end_scan, generate_params
+from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, generate_params
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.time import TimeMachine, reformat_time
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -68,6 +69,6 @@ def test_scan_time(tags_to_apply,
         ((scan_time - current_time) + timedelta(days=2))
     TimeMachine.travel_to_future(time_difference + timedelta(minutes=-30))
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_end_scan)
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
     TimeMachine.travel_to_future(timedelta(minutes=31))
-    wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_end_scan)
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
