@@ -1,0 +1,6 @@
+---
+	- name: Unlock python-apt package on Debian's families instances
+		shell: "apt-mark unhold python-apt"
+		when:
+			- inventory_hostname in groups['linuxagents']
+			- ansible_os_family == "Debian"

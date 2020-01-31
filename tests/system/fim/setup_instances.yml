@@ -18,15 +18,10 @@
       - ./vars/credentials.yml
     tasks:
       - import_tasks: ../fim/roles/aws/tasks/configure_ssh.yml
+      - import_tasks: ../fim/roles/aws/tasks/setup_instances.yml
     handlers:
       - include: ../fim/roles/aws/handlers/main.yml
-    become: yes
-    become_user: root
-
-  - hosts: linuxagents
-    tasks:
-      - import_tasks: ../fim/roles/aws/tasks/prepare_instances.yml
-    handlers:
-      - include: ../fim/roles/provisioning/handlers/main.yml
+        when:
+          - not ansible_distribution != "Ubuntu" and ansible_distribution_version != "14.04"
     become: yes
     become_user: root
