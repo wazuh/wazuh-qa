@@ -18,11 +18,8 @@ manager_ip="$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' `docker
 echo "getting a copy of ./manifests/site.pp.template"
 cp ./manifests/site.pp.template ./manifests/site.pp
 
-echo "PRINT MANAGER IP"
+echo "wazuh-manager IP"
 echo $manager_ip
-
-echo "PRINT MANIFEST SITE.PP"
-cat ./manifests/site.pp
 
 echo "Assigning Wazuh managers IPs to the corresponding agents."
 sed -i 's/manager_ip/'${manager_ip}'/g' ./manifests/site.pp
