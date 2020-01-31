@@ -82,7 +82,7 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
-    # register an additional marker
+    # Register an additional marker
     config.addinivalue_line(
         "markers", "tier(level): mark test to run only if it matches tier level"
     )
