@@ -21,6 +21,6 @@ def test_wazuh_services_are_running(host):
     a wrong exit code: https://github.com/wazuh/wazuh-ansible/issues/107
     """
     agent = host.service("wazuh-agent")
-
-    assert agent.is_running
-    assert agent.is_enabled
+    with host.sudo():
+        assert agent.is_running
+        assert agent.is_enabled

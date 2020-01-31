@@ -40,6 +40,6 @@ def test_wazuh_services_are_running(host):
     a wrong exit code: https://github.com/wazuh/wazuh-ansible/issues/107
     """
     manager = host.service("wazuh-manager")
-
-    assert manager.is_running
-    assert manager.is_enabled
+    with host.sudo():
+        assert manager.is_running
+        assert manager.is_enabled
