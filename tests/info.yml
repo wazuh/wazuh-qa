@@ -1,0 +1,97 @@
+description: "Information template about available modules and options."
+version: "0.1"
+available_provisioners:
+  - docker
+  - vm
+
+available_modules:
+  - fim
+  - logcollector
+  - sca
+
+available_tiers:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+
+available_categories:
+  - File integrity monitoring
+  - System configuracion assessment
+  - Log data collector
+  - System inventory
+  - Intrusion detection system
+  - Incident response
+  - Cloud provider security
+  - Container security
+
+available_tags:
+  - fim
+  - whodata
+  - logcollector
+  - syscheck
+  - rootcheck
+  - sca
+  - syscollector
+  - ciscat
+  - openscap
+  - woodle
+  - azure
+  - amazon
+  - db
+  - generic
+
+available_targets:
+  - manager
+  - agent
+  - api
+
+available_cluster_mode:
+  - enabled
+  - disabled
+
+available_cluster_target:
+  - master
+  - worker
+
+available_systems:
+  - centos-7
+  - centos-6
+  - centos-5
+  - redhat-8
+  - redhat-7
+  - redhat-6
+  - oraclelinux-7
+  - oraclelinux-6
+  - amazonlinux-2
+  - fedora-30
+  - fedora-29
+  - fedora-28
+  - fedora-27
+  - fedora-26
+  - fedora-25
+  - fedora-24
+  - fedora-23
+  - fedora-22
+  - debian-buster
+  - debian-stretch
+  - debian-jessie
+  - debian-wheezy
+  - ubuntu-disco
+  - ubuntu-cosmic
+  - ubuntu-bionic
+  - ubuntu-artful
+  - ubuntu-zesty
+  - ubuntu-yakkety
+  - ubuntu-xenial
+  - ubuntu-wily
+  - ubuntu-vivid
+  - ubuntu-trusty
+  - ubuntu-precise
+
+minimum_supported_version: "3.5.0"
+
+maximum_supported_version: "3.9.3"
+

@@ -1,0 +1,53 @@
+---
+# conf 1
+- tags:
+  - non_monitored_dir
+  apply_to_modules:
+  - test_not_following_symbolic_link
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: '/testdir_link'
+      attributes:
+      - FIM_MODE
+# conf 2
+- tags:
+  - monitored_file
+  apply_to_modules:
+    - test_change_target
+    - test_change_target_inside_folder
+    - test_delete_symlink
+    - test_delete_target
+    - test_monitor_symlink
+    - test_revert_symlink
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: '/testdir_link/symlink'
+      attributes:
+      - FIM_MODE
+  - directories:
+      value: '/testdir2'
+      attributes:
+      - FIM_MODE
+# conf 3
+- tags:
+    - monitored_dir
+  apply_to_modules:
+    - test_change_target
+    - test_change_target_inside_folder
+    - test_delete_symlink
+    - test_delete_target
+    - test_monitor_symlink
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: '/testdir_link/symlink2'
+      attributes:
+        - FIM_MODE

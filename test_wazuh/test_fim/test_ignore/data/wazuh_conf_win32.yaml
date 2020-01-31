@@ -1,0 +1,263 @@
+---
+# conf 1
+- tags:
+  - valid_empty
+  - valid_empty1
+  apply_to_modules:
+  - test_ignore_valid
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - ignore:
+      value: ""
+      attributes:
+      - type: "sregex"
+  - directories:
+      value: "c:\\testdir1,c:\\testdir2"
+      attributes:
+      - check_all: 'yes'
+      - FIM_MODE
+# conf 2
+- tags:
+  - valid_no_regex
+  - valid_no_regex1
+  apply_to_modules:
+  - test_ignore_valid
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: "c:\\testdir1,c:\\testdir2"
+      attributes:
+      - check_all: 'yes'
+      - FIM_MODE
+  - ignore:
+      value: "c:\\testdir1\\ignore_this"
+# conf 3
+- tags:
+  - valid_no_regex
+  - valid_no_regex2
+  apply_to_modules:
+  - test_ignore_valid
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - ignore:
+      value: "c:\\testdir1\\ignore_this"
+  - directories:
+      value: "c:\\testdir1,c:\\testdir2"
+      attributes:
+      - check_all: 'yes'
+      - FIM_MODE
+# conf 4
+- tags:
+  - valid_no_regex
+  - valid_no_regex3
+  apply_to_modules:
+  - test_ignore_valid
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - ignore:
+      value: "c:\\testdir1\\ignore_this"
+  - ignore:
+      value: "c:\\testdir1\\not_exists"
+  - directories:
+      value: "c:\\testdir1,c:\\testdir2"
+      attributes:
+      - check_all: 'yes'
+      - FIM_MODE
+# conf 5
+- tags:
+  - valid_regex
+  - valid_regex1
+  apply_to_modules:
+  - test_ignore_valid
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - ignore:
+      value: ".ignore$"
+      attributes:
+      - type: sregex
+  - directories:
+      value: "c:\\testdir1,c:\\testdir2"
+      attributes:
+      - check_all: 'yes'
+      - FIM_MODE
+# conf 6
+- tags:
+  - valid_regex
+  - valid_regex2
+  apply_to_modules:
+  - test_ignore_valid
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - ignore:
+      value: ".ignore$|.ignore2$"
+      attributes:
+      - type: sregex
+  - directories:
+      value: "c:\\testdir1,c:\\testdir2"
+      attributes:
+      - check_all: 'yes'
+      - FIM_MODE
+# conf 7
+- tags:
+  - valid_regex
+  - valid_regex3
+  apply_to_modules:
+  - test_ignore_valid
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - ignore:
+      value: ".ignore$"
+      attributes:
+      - type: sregex
+  - ignore:
+      value: ".ignore2$"
+      attributes:
+      - type: sregex
+  - directories:
+      value: "c:\\testdir1,c:\\testdir2"
+      attributes:
+      - check_all: 'yes'
+      - FIM_MODE
+# conf 8
+- tags:
+  - valid_regex
+  - valid_regex4
+  apply_to_modules:
+  - test_ignore_valid
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - ignore:
+      value: "^ignore_prefix"
+      attributes:
+      - type: sregex
+  - directories:
+      value: "c:\\testdir1,c:\\testdir2"
+      attributes:
+      - check_all: 'yes'
+      - FIM_MODE
+# conf 9
+- tags:
+  - valid_regex
+  - valid_regex5
+  apply_to_modules:
+  - test_ignore_valid
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - ignore:
+      value: "^c:\\testdir1\\ignore_prefix"
+      attributes:
+      - type: sregex
+  - directories:
+      value: "c:\\testdir1,c:\\testdir2"
+      attributes:
+      - check_all: 'yes'
+      - FIM_MODE
+# conf 11
+- tags:
+  - negation_regex
+  apply_to_modules:
+  - test_ignore_valid
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - ignore:
+      value: "!mytest"
+      attributes:
+      - type: sregex
+  - directories:
+      value: "c:\\testdir1,c:\\testdir2"
+      attributes:
+      - check_all: 'yes'
+      - FIM_MODE
+# conf 12
+- tags:
+  - ignore_registry
+  apply_to_modules:
+  - test_ignore_registry
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - registry_ignore:
+      value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\test\\testreg32"
+  - registry_ignore:
+      value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\test\\testreg64"
+      attributes:
+      - arch: '64bit'
+  - registry_ignore:
+      value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\test2\\testregboth_32"
+      attributes:
+      - type: 'sregex'
+      - arch: 'both'
+  - registry_ignore:
+      value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\test2\\testregboth_64"
+      attributes:
+      - type: 'sregex'
+      - arch: 'both'
+  - windows_registry:
+      value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\test"
+  - windows_registry:
+      value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\test"
+      attributes:
+      - arch: '64bit'
+  - windows_registry:
+      value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\test2"
+      attributes:
+      - arch: 'both'
+# conf 13
+- tags:
+  - ignore_registry
+  apply_to_modules:
+  - test_ignore_registry
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - registry_ignore:
+      value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\test\\testreg32"
+      attributes:
+      - type: 'sregex'
+  - registry_ignore:
+      value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\test\\testreg64"
+      attributes:
+      - type: 'sregex'
+      - arch: '64bit'
+  - registry_ignore:
+      value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\test2\\testregboth_32"
+      attributes:
+      - type: 'sregex'
+      - arch: 'both'
+  - registry_ignore:
+      value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\test2\\testregboth_64"
+      attributes:
+      - type: 'sregex'
+      - arch: 'both'
+  - windows_registry:
+      value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\test"
+  - windows_registry:
+      value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\test"
+      attributes:
+      - arch: '64bit'
+  - windows_registry:
+      value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\test2"
+      attributes:
+      - arch: 'both'

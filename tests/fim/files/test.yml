@@ -1,0 +1,98 @@
+id: 1
+description: 'Test of fim alert related with files.'
+provisioner: docker
+tier: 5
+target:
+  - manager
+  - agent
+
+cluster_mode: disabled
+
+system_target:
+  - centos-7
+  - debian-buster
+
+available_tests:
+  - add
+  - delete
+  - modify
+
+number_of_agents: 1
+number_of_managers: 1
+minimum_supported_version: '3.5.0'
+maximum_supported_version: '3.9.3'
+
+##########################################################
+#                      TEST SECTION                      #
+##########################################################
+
+tests:
+  add:
+    managers:
+      0:
+#        configuration_template: "---"
+        arrangement:
+          binary: "python"
+          file: "manager/arrangement.py"
+#        trigger: "manager/trigger.py"
+        output:
+          binary: "pytest"
+          file: "manager/checker.py"
+
+    agents:
+      0:
+#        configuration_template : "---"
+        arrangement:
+          binary: "python"
+          file: "agent/arrangement.py"
+        trigger:
+          binary: "python"
+          file: "agent/trigger.py"
+#        output: "agent/checker.py"
+
+  delete:
+    managers:
+      0:
+#        configuration_template: "---"
+        arrangement:
+          binary: "python"
+          file: "manager/arrangement.py"
+#        trigger: "manager/trigger.py"
+        output:
+          binary: "pytest"
+          file: "manager/checker.py"
+
+    agents:
+      0:
+#        configuration_template: "---"
+        arrangement:
+          binary: "python"
+          file: "agent/arrangement.py"
+        trigger:
+          binary: "python"
+          file: "agent/trigger.py"
+#        output: "agent/checker.py"
+
+  modify:
+    managers:
+      0:
+#        configuration_template: "---"
+        arrangement:
+          binary: "python"
+          file: "manager/arrangement.py"
+#        trigger: "manager/trigger.py"
+        output:
+          binary: "pytest"
+          file: "manager/checker.py"
+
+    agents:
+      0:
+#        configuration_template: "---"
+        arrangement:
+          binary: "python"
+          file: "agent/arrangement.py"
+        trigger:
+          binary: "python"
+          file: "agent/trigger.py"
+#        output: "agent/checker.py"
+

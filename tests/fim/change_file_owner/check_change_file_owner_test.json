@@ -1,0 +1,5 @@
+{"timestamp":"2019-02-18T11:35:54.934+0000","rule":{"level":7,"description":"Integrity checksum changed.","id":"550","firedtimes":22,"mail":false,"groups":["ossec","syscheck"],"pci_dss":["11.5"],"gpg13":["4.11"],"gdpr":["II_5.1.f"]},"agent":{"id":"001","name":"agent-centos-7","ip":"10.0.0.50"},"manager":{"name":"manager-ubuntu-18"},"id":"1550489754.110935","full_log":"File '/fim_test/check_change_file_perm_test.txt' checksum changed.\nOwnership was 'root (0)', now it is 'wazuh (1002)'\n","syscheck":{"path":"/fim_test/check_change_file_perm_test.txt","size_after":"0","perm_after":"100644","uid_before":"0","uid_after":"1002","gid_after":"0","md5_after":"d41d8cd98f00b204e9800998ecf8427e","sha1_after":"da39a3ee5e6b4b0d3255bfef95601890afd80709","sha256_after":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","uname_before":"root","uname_after":"wazuh","gname_after":"root","mtime_after":"2019-02-18T11:35:16","inode_after":100680516,"event":"modified"},"decoder":{"name":"syscheck_integrity_changed"},"location":"syscheck"}
+
+
+
+

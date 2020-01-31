@@ -1,0 +1,6 @@
+Exception: No module named 'pollas'
+Traceback (most recent call last):
+  File "/home/danielruiz/git/wazuh-qa/packages/test_api/test_api/controllers/executor.py", line 21, in execute_code
+    exec(script)
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'pollas'
