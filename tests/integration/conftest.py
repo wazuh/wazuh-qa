@@ -7,6 +7,7 @@ import sys
 
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_LOGS_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, SocketController, SocketMonitor
@@ -68,13 +69,28 @@ def pytest_addoption(parser):
         type=int,
         help="only run tests with a tier level less or equal than 'minimum_level'"
     )
+    parser.addoption(
+        "--default-timeout",
+        action="store",
+        metavar="default_timeout",
+        default=None,
+        type=int,
+        help="number of seconds that any timer will wait until an event is generated. This apply to all tests except"
+             "all of them with a hardcoded timeout not depending on global_parameters.default_timeout "
+             "variable from wazuh_testing package"
+    )
 
 
 def pytest_configure(config):
     # register an additional marker
     config.addinivalue_line(
-        "markers", "tier(level): mark test to run only if match tier level"
+        "markers", "tier(level): mark test to run only if it matches tier level"
     )
+
+    # Set default timeout only if it is passed through command line args
+    default_timeout = config.getoption("--default-timeout")
+    if default_timeout:
+        global_parameters.default_timeout = default_timeout
 
 
 @pytest.fixture(scope='module')

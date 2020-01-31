@@ -351,11 +351,14 @@ python3 -m pytest [options] [file_or_dir] [file_or_dir] [...]
 
 **Options:**
 
-- `v` : verbosity level (-v or -vv. Highly recommended to use -vv when tests are failing)
-- `s` : shortcut for --capture=no. This will show the output in real time
-- `x` : instantly exit after the first error. Very helpful when using a log truncate since it will keep the last failed result
-- `m` : only run tests matching given expression (-m MARKEXPR)
-- `--tier` : only run tests with given tier (ex. --tier 2)
+- `v`: verbosity level (-v or -vv. Highly recommended to use -vv when tests are failing)
+- `s`: shortcut for --capture=no. This will show the output in real time
+- `x`: instantly exit after the first error. Very helpful when using a log truncate since it will keep the last failed result
+- `m`: only run tests matching given expression (-m MARKEXPR)
+- `--tier`: only run tests with given tier (ex. --tier 2)
+- `--default-timeout`: overwrites the default timeout (in seconds). This value is used to make a test fail if a condition 
+is not met before the given time lapse. Some tests make use of this value and other has other fixed timeout that cannot be 
+modified.
 
 _Use `-h` to see the rest or check its [documentation](https://docs.pytest.org/en/latest/usage.html)._
 

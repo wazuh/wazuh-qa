@@ -6,8 +6,9 @@ import sys
 
 import pytest
 
-from wazuh_testing.fim import (DEFAULT_TIMEOUT, LOG_FILE_PATH, callback_audit_event_too_long, regular_file_cud,
+from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_event_too_long, regular_file_cud,
                                generate_params)
+from wazuh_testing import global_parameters
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 
@@ -165,5 +166,5 @@ def test_recursion_level(dirname, subdirname, recursion_level, get_configuration
     :param recursion_level int Recursion level. Also used as the number of subdirectories to be created and checked for
     the current test.
     """
-    recursion_test(dirname, subdirname, recursion_level, timeout=DEFAULT_TIMEOUT,
+    recursion_test(dirname, subdirname, recursion_level, timeout=global_parameters.default_timeout,
                    is_scheduled=get_configuration['metadata']['fim_mode'] == 'scheduled')

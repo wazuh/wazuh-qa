@@ -5,7 +5,8 @@
 import os
 import pytest
 
-from wazuh_testing.fim import CHECK_ALL, LOG_FILE_PATH, regular_file_cud, generate_params, DEFAULT_TIMEOUT
+from wazuh_testing.fim import CHECK_ALL, LOG_FILE_PATH, regular_file_cud, generate_params
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -77,4 +78,4 @@ def test_regular_file_changes(folder, name, encoding, checkers, tags_to_apply,
 
     regular_file_cud(folder, wazuh_log_monitor, file_list=[name],
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                     min_timeout=DEFAULT_TIMEOUT, options=checkers, encoding=encoding, triggers_event=True)
+                     min_timeout=global_parameters.default_timeout, options=checkers, encoding=encoding, triggers_event=True)

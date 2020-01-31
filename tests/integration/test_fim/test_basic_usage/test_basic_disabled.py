@@ -6,8 +6,8 @@ import os
 
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, regular_file_cud, DEFAULT_TIMEOUT,
-                               callback_detect_end_scan)
+from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, regular_file_cud, callback_detect_end_scan)
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -63,5 +63,5 @@ def test_disabled(folder, get_configuration, configure_environment, restart_sysc
 
     # Use `regular_file_cud` and don't expect any event
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
-    regular_file_cud(folder, wazuh_log_monitor, time_travel=scheduled, min_timeout=DEFAULT_TIMEOUT,
+    regular_file_cud(folder, wazuh_log_monitor, time_travel=scheduled, min_timeout=global_parameters.default_timeout,
                      triggers_event=False)

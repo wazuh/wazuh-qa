@@ -9,7 +9,8 @@ from datetime import timedelta
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
-    callback_detect_event, check_time_travel, DEFAULT_TIMEOUT
+    callback_detect_event, check_time_travel
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -79,7 +80,7 @@ def test_rename(folder, tags_to_apply,
     """
 
     def expect_events(path):
-        event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
         try:
             assert 'added' in event['data']['type'] and path in event['data']['path'], \
                 f'Deleted event not detected'
@@ -92,7 +93,7 @@ def test_rename(folder, tags_to_apply,
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     create_file(REGULAR, folder, old_name, content='')
     check_time_travel(scheduled)
-    wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event)
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event)
 
     # testdir1 will have renamed files within. testdir2 will be renamed with files within
     if folder == testdir1:
@@ -100,14 +101,14 @@ def test_rename(folder, tags_to_apply,
         os.rename(os.path.join(folder, old_name), os.path.join(folder, new_name))
         check_time_travel(scheduled)
         # Expect deleted and created events
-        deleted = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+        deleted = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
         try:
             assert 'deleted' in deleted['data']['type'] and os.path.join(folder, old_name) in deleted['data']['path']
         except AssertionError:
             if 'added' not in deleted['data']['type'] and os.path.join(folder, old_name) not in deleted['data']['path']:
                 raise AssertionError(f'Wrong event when renaming a file')
 
-        added = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+        added = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
         try:
             assert 'added' in added['data']['type'] and os.path.join(folder, new_name) in added['data']['path']
         except AssertionError:

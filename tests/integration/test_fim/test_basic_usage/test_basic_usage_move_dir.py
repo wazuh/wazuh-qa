@@ -6,7 +6,8 @@ import os
 import shutil
 import pytest
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
-    callback_detect_event, check_time_travel, DEFAULT_TIMEOUT
+    callback_detect_event, check_time_travel
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -86,7 +87,7 @@ def test_move_file(source_folder, target_folder, subdir, tags_to_apply,
     check_time_travel(scheduled)
 
     # Monitor expected events
-    events = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT,
+    events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                      callback=callback_detect_event,
                                      accum_results=(triggers_add_event + triggers_delete_event)).result()
 

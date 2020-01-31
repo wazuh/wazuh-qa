@@ -9,7 +9,8 @@ from datetime import timedelta
 import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, create_file, WAZUH_PATH,
-                               callback_restricted, REGULAR, generate_params, DEFAULT_TIMEOUT)
+                               callback_restricted, REGULAR, generate_params)
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -201,7 +202,7 @@ def test_ambiguous_complex(tags_to_apply,
 
     # Standard params for each test
     file_list = ['example.csv']
-    min_timeout = DEFAULT_TIMEOUT
+    min_timeout = global_parameters.default_timeout
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
     conf_list, check_list = get_dir_and_attributes(get_configuration['elements'])

@@ -8,8 +8,9 @@ from datetime import timedelta
 
 import pytest
 
-from wazuh_testing.fim import CHECK_ALL, DEFAULT_TIMEOUT, FIFO, LOG_FILE_PATH, REGULAR, SOCKET, callback_detect_event, \
+from wazuh_testing.fim import CHECK_ALL, FIFO, LOG_FILE_PATH, REGULAR, SOCKET, callback_detect_event, \
     create_file, validate_event, generate_params
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -100,8 +101,8 @@ def test_create_file_scheduled(folder, name, filetype, content, checkers, tags_t
     if filetype == REGULAR:
         # Wait until event is detected
         event = wazuh_log_monitor.start(
-            timeout=DEFAULT_TIMEOUT, callback=callback_detect_event, encoding=encoding).result()
+            timeout=global_parameters.default_timeout, callback=callback_detect_event, encoding=encoding).result()
         validate_event(event, checkers)
     else:
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event)
+            wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event)

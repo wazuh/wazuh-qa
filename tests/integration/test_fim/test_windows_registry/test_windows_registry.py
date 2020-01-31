@@ -8,7 +8,8 @@ import sys
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_registry, modify_registry, delete_registry, \
-    timedelta, DEFAULT_TIMEOUT, callback_detect_event
+    timedelta, callback_detect_event
+from wazuh_testing import global_parameters
 from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -101,12 +102,12 @@ def test_windows_registry(arch_list, tag, tags_to_apply,
     create_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 32)
     TimeMachine.travel_to_future(timedelta(seconds=frequency))
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event, accum_results=len(arch_list))
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event, accum_results=len(arch_list))
 
     # Check that windows_registry trigger alerts when adding an entry
     modify_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 'test_add')
     TimeMachine.travel_to_future(timedelta(seconds=frequency))
-    event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event,
+    event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                     accum_results=len(arch_list)).result()
     if not isinstance(event, list):
         event = [event]
@@ -117,7 +118,7 @@ def test_windows_registry(arch_list, tag, tags_to_apply,
     # and check arch and tag values match with the ones in event
     modify_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 'test_modify')
     TimeMachine.travel_to_future(timedelta(seconds=frequency))
-    event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event,
+    event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                     accum_results=len(arch_list)).result()
     if not isinstance(event, list):
         event = [event]
@@ -131,7 +132,7 @@ def test_windows_registry(arch_list, tag, tags_to_apply,
     # Check that windows_registry trigger alerts when deleting a key
     delete_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 32)
     TimeMachine.travel_to_future(timedelta(seconds=frequency))
-    event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event,
+    event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                     accum_results=len(arch_list)).result()
     if not isinstance(event, list):
         event = [event]
