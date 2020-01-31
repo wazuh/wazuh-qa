@@ -628,8 +628,10 @@ Resources:
       Targets:
       - Id: !Ref WazuhMasterInstance
         Port: !Ref WazuhServerPort
-      - Id: !Ref WazuhWorkerInstance
+{% for n in range(n_wazuh_workers) %}
+      - Id: !Ref WazuhWorkerInstance{{ n }}
         Port: !Ref WazuhServerPort  
+{% endfor %}
       Tags:
         - Key: Name
           Value: reportingTG
@@ -713,34 +715,32 @@ Resources:
       InstanceType: !Ref ElasticInstanceType
       IamInstanceProfile: !Ref InstanceProfile
       KeyName: !Ref KeyPairName
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: "ElasticSecurityGroup"
+          SubnetId: 
+            Ref: "SubnetElasticsearch"
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
             VolumeSize: 50
             VolumeType: gp2
-      NetworkInterfaces:
-        - NetworkInterfaceId: !Ref ElasticBootstrapEth0
       Tags:
         - Key: Name
           Value: ElasticBootstrap
         - Key: Identifier
-          Value: elastic_01
+          Value: elastic00
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
           /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource ElasticBootstrap --configsets ElasticInstallationSet --region ${AWS::Region}
           /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource ElasticBootstrap --region ${AWS::Region}
     DependsOn: GatewayToInternet
-  ElasticBootstrapEth0:
-    Type: AWS::EC2::NetworkInterface
-    Properties:
-      SubnetId: !Ref SubnetElasticsearch
-      GroupSet: [!Ref 'ElasticSecurityGroup']
-      DeviceIndex: "0"
-      AssociatePublicIpAddress: "true"
 
 {% for n in range(n_elasticsearch_instances) %}
-ElasticMaster{{ n }}:
+  ElasticMaster{{ n }}:
     Type: AWS::EC2::Instance
     Metadata:
       'AWS::CloudFormation::Init':
@@ -756,18 +756,23 @@ ElasticMaster{{ n }}:
       InstanceType: !Ref ElasticInstanceType
       IamInstanceProfile: !Ref InstanceProfile
       KeyName: !Ref KeyPairName
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: "ElasticSecurityGroup" 
+          SubnetId: 
+            Ref: "SubnetElasticsearch"
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
             VolumeSize: 30
             VolumeType: gp2
-      NetworkInterfaces:
-        - NetworkInterfaceId: !Ref ElasticMaster{{ n }}Eth0
       Tags:
         - Key: Name
-          Value: ElasticMaster0{{ n }}
+          Value: ElasticMaster_0{{ n }}
         - Key: Identifier
-          Value: elastic_0{{ n + 2 }}   
+          Value: elastic_0{{ n }}   
   
       UserData:
         Fn::Base64: !Sub |
@@ -775,14 +780,7 @@ ElasticMaster{{ n }}:
           /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource ElasticMaster{{ n }} --configsets ElasticInstallationSet --region ${AWS::Region}
           /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource ElasticMaster{{ n }} --region ${AWS::Region}
     DependsOn: GatewayToInternet
-  ElasticMaster{{ n }}Eth0:
-      Type: AWS::EC2::NetworkInterface
-      Properties:
-          SubnetId: !Ref SubnetElasticsearch
-          GroupSet: [!Ref 'ElasticSecurityGroup']
-          DeviceIndex: "0"
-          AssociatePublicIpAddress: "true"
-{% endfor %}
+{% endfor %}      
   
   # Kibana instance
   KibanaInstance:
@@ -813,7 +811,6 @@ ElasticMaster{{ n }}:
           Value: WazuhKibana
         - Key: Identifier
           Value: kibana_01
-        
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
@@ -838,14 +835,18 @@ ElasticMaster{{ n }}:
       InstanceType: !Ref WazuhInstanceType
       IamInstanceProfile: !Ref InstanceProfile
       KeyName: !Ref KeyPairName
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: "KibanaSecurityGroup"
+          SubnetId: 
+            Ref: "SubnetWazuh"
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
             VolumeSize: 30
             VolumeType: gp2
-
-      NetworkInterfaces:
-        - NetworkInterfaceId: !Ref WazuhMasterEth0
       Tags:
         - Key: Name
           Value: WazuhMaster
@@ -857,16 +858,10 @@ ElasticMaster{{ n }}:
           /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource WazuhMasterInstance --configsets WazuhInstallationSet --region ${AWS::Region}
           /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource WazuhMasterInstance --region ${AWS::Region}
     DependsOn: GatewayToInternet
-  WazuhMasterEth0: 
-    Type: AWS::EC2::NetworkInterface
-    Properties:
-      SubnetId: !Ref SubnetWazuh
-      GroupSet: [!Ref 'WazuhSecurityGroup']
-      DeviceIndex: "0"
-      AssociatePublicIpAddress: "true"
 
-  # Wazuh worker instance
-  WazuhWorkerInstance:
+  # Wazuh worker instances
+{% for n in range(n_wazuh_workers) %}
+  WazuhWorkerInstance{{ n }}:
     Type: AWS::EC2::Instance
     Metadata:
       'AWS::CloudFormation::Init':
@@ -878,38 +873,38 @@ ElasticMaster{{ n }}:
       ImageId: !FindInMap
         - "RegionMap"
         - Ref: "AWS::Region"
-        - HVM64
+        - AMAZONLINUX2HVM
       InstanceType: !Ref WazuhInstanceType
       IamInstanceProfile: !Ref InstanceProfile
       KeyName: !Ref KeyPairName
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: "WazuhSecurityGroup"
+          SubnetId: 
+            Ref: "SubnetWazuh"
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
-            VolumeSize: 200
+            VolumeSize: 30
             VolumeType: gp2
-      NetworkInterfaces:
-        - NetworkInterfaceId: !Ref WazuhWorkerEth0
       Tags:
         - Key: Name
-          Value: WazuhWorker
+          Value: WazuhWorker_0{{ n }}
         - Key: Identifier
-          Value: worker_01          
+          Value: worker_0{{ n }}
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
-          /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource WazuhWorkerInstance --configsets WazuhInstallationSet --region ${AWS::Region}
-          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource WazuhWorkerInstance --region ${AWS::Region}
+          /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource WazuhWorkerInstance{{ n }} --configsets WazuhInstallationSet --region ${AWS::Region}
+          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource WazuhWorkerInstance{{ n }} --region ${AWS::Region}
     DependsOn: GatewayToInternet
-  WazuhWorkerEth0: 
-    Type: AWS::EC2::NetworkInterface
-    Properties:
-      SubnetId: !Ref SubnetWazuh
-      GroupSet: [!Ref 'WazuhSecurityGroup']
-      DeviceIndex: "0"
-      AssociatePublicIpAddress: "true"
+{% endfor %}
 
   # Amazon Linux agent instance and networking requirements
-  Amazon:
+{% for n in range(n_agents_amazonlinux2) %}  
+  Amazon{{ n }}:
     Type: AWS::EC2::Instance
     Metadata:
       'AWS::CloudFormation::Init':
@@ -921,38 +916,38 @@ ElasticMaster{{ n }}:
       ImageId: !FindInMap
         - "RegionMap"
         - Ref: "AWS::Region"
-        - HVM64
+        - AMAZONLINUX2HVM
       InstanceType: !Ref AgentInstanceType
       IamInstanceProfile: !Ref InstanceProfile
       KeyName: !Ref KeyPairName
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
-            VolumeSize: 200
+            VolumeSize: 30
             VolumeType: gp2
       NetworkInterfaces:
-        - NetworkInterfaceId: !Ref AmazonEth0
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: "WazuhSecurityGroup"
+          SubnetId: 
+            Ref: "SubnetWazuh"
       Tags:
         - Key: Name
-          Value: Amazon
+          Value: Amazon_0{{ n }}
         - Key: Identifier
-          Value: agent_linux_05          
+          Value: agent_amazon_0{{ n }}
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
-          /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource Amazon --configsets AmazonInstallationSet --region ${AWS::Region}
-          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource Amazon --region ${AWS::Region}
+          /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource Amazon{{ n }} --configsets AmazonInstallationSet --region ${AWS::Region}
+          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource Amazon{{ n }} --region ${AWS::Region}
     DependsOn: GatewayToInternet
-  AmazonEth0: 
-    Type: AWS::EC2::NetworkInterface
-    Properties:
-      SubnetId: !Ref SubnetAgents
-      GroupSet: [!Ref 'WazuhSecurityGroup']
-      DeviceIndex: "0"
-      AssociatePublicIpAddress: "true"
+{% endfor %}      
 
   # CentOS agent instance and networking requirements
-  Centos:
+{% for n in range(n_agents_centos7) %}    
+  Centos{{ n }}:
     Type: AWS::EC2::Instance
     Metadata:
       'AWS::CloudFormation::Init':
@@ -964,22 +959,27 @@ ElasticMaster{{ n }}:
       ImageId: !FindInMap
         - "RegionMap"
         - Ref: "AWS::Region"
-        - HVMCENTOS7
+        - CENTOS7HVM
       InstanceType: !Ref CentosAgentInstanceType
       IamInstanceProfile: !Ref InstanceProfile
       KeyName: !Ref KeyPairName
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: "WazuhSecurityGroup"
+          SubnetId: 
+            Ref: "SubnetWazuh"
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
-            VolumeSize: 200
+            VolumeSize: 30
             VolumeType: gp2
-      NetworkInterfaces:
-        - NetworkInterfaceId: !Ref CentosEth0
       Tags:
         - Key: Name
-          Value: Centos
+          Value: Centos_0{{ n }}
         - Key: Identifier
-          Value: agent_linux_03
+          Value: agent_centos_0{{ n }}
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
@@ -991,41 +991,41 @@ ElasticMaster{{ n }}:
           sleep 10
           cp /usr/local/lib/python2.7/site-packages/cfnbootstrap/ /usr/lib/python2.7/site-packages/ -R
           echo 'Copied' > /tmp/checkpoint.log
-          /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource Centos --configsets CentosInstallationSet --region ${AWS::Region} 2> /tmp/cfnerror.log
-          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource Centos --region ${AWS::Region} 2> /tmp/cfnerror.log
+          /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource Centos{{ n }} --configsets CentosInstallationSet --region ${AWS::Region} 2> /tmp/cfnerror.log
+          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource Centos{{ n }} --region ${AWS::Region} 2> /tmp/cfnerror.log
           echo 'Exiting...' >> /tmp/cflog.log
     DependsOn: GatewayToInternet
-  CentosEth0: 
-    Type: AWS::EC2::NetworkInterface
-    Properties:
-      SubnetId: !Ref SubnetAgents
-      GroupSet: [!Ref 'WazuhSecurityGroup']
-      DeviceIndex: "0"
-      AssociatePublicIpAddress: "true"
+{% endfor %}
 
+{% for n in range(n_agents_windows2012) %}
   # Windows agent instance and networking requirements
-  Windows:
+  Windows20120{{ n }}:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: !FindInMap
         - "RegionMap"
         - Ref: "AWS::Region"
-        - HVMWINDOWS
+        - WINDOWS2012HVM
       InstanceType: !Ref WindowsInstanceType
       IamInstanceProfile: !Ref InstanceProfile
       KeyName: !Ref KeyPairName
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: "WazuhSecurityGroup"
+          SubnetId: 
+            Ref: "SubnetWazuh"
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
-            VolumeSize: 200
+            VolumeSize: 50
             VolumeType: gp2
-      NetworkInterfaces:
-        - NetworkInterfaceId: !Ref WindowsEth0
       Tags:
         - Key: Name
-          Value: Windows
+          Value: Windows2012_0{{ n }}
         - Key: Identifier
-          Value: agent_windows_01
+          Value: agent_windows_2012_0{{ n }}
       UserData:
         Fn::Base64: !Sub |
           <powershell>
@@ -1065,66 +1065,150 @@ ElasticMaster{{ n }}:
           }
           </powershell>
     DependsOn: GatewayToInternet
-  WindowsEth0: 
-    Type: AWS::EC2::NetworkInterface
-    Properties:
-      SubnetId: !Ref SubnetAgents
-      GroupSet: [!Ref 'WazuhSecurityGroup']
-      DeviceIndex: "0"
-      AssociatePublicIpAddress: "true"
-
-  # Debian agent instance and networking requirements
-  Debian:
+{% endfor %}
+{% for n in range(n_agents_windows2016) %}
+  # Windows agent instance and networking requirements
+  Windows20160{{ n }}:
     Type: AWS::EC2::Instance
-    Metadata:
-      'AWS::CloudFormation::Init':
-        configSets:
-          DebianInstallationSet:
-            - WazuhFiles
-            - WazuhInstall
     Properties:
       ImageId: !FindInMap
         - "RegionMap"
         - Ref: "AWS::Region"
-        - HVMDEBIAN
-      InstanceType: !Ref DebianInstanceType
+        - WINDOWS2016HVM
+      InstanceType: !Ref WindowsInstanceType
       IamInstanceProfile: !Ref InstanceProfile
       KeyName: !Ref KeyPairName
       NetworkInterfaces:
-        - NetworkInterfaceId: !Ref DebianEth0
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: "WazuhSecurityGroup"
+          SubnetId: 
+            Ref: "SubnetWazuh"
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 50
+            VolumeType: gp2
       Tags:
         - Key: Name
-          Value: Debian
+          Value: Windows2016_0{{ n }}
         - Key: Identifier
-          Value: agent_linux_02        
+          Value: agent_windows_2016_0{{ n }}
       UserData:
         Fn::Base64: !Sub |
-          #!/bin/bash -xe
-          echo 'Starting...' > /tmp/cflog.log
-          # the current sources seems to be down, so we gotta change them as a workaround
-          rm -rf /etc/apt/sources.list
-          echo 'deb http://deb.debian.org/debian jessie main' > /etc/apt/sources.list
-          echo 'deb-src http://deb.debian.org/debian jessie main' >> /etc/apt/sources.list
-          apt update
-          apt-get -y install python-setuptools curl 
-          mkdir aws-cfn-bootstrap-latest
-          curl https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz | tar xz -C aws-cfn-bootstrap-latest --strip-components 1
-          easy_install aws-cfn-bootstrap-latest
-          echo 'Copied' > /tmp/checkpoint.log
-          /usr/local/bin/cfn-init --stack ${AWS::StackName} --resource Debian --configsets DebianInstallationSet --region ${AWS::Region} 2> /tmp/cfnerror.log
-          /usr/local/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource Debian --region ${AWS::Region} 2> /tmp/cfnerror.log
-          echo 'Exiting...' >> /tmp/cflog.log
+          <powershell>
+          $Password = (convertto-securestring -asplaintext ${SshPassword} -force)
+          New-LocalUser "wazuh" -Password $Password -FullName "wazuh" -Description "Wazuh user for remote desktop"
+          Add-LocalGroupMember -Group "Remote Desktop Users" -Member "wazuh"
+          net user Administrator ${SshPassword}
+          $master_ip=${WazuhNetworkLoadBalancer.DNSName} 
+          $url_osquery = "https://pkg.osquery.io/windows/osquery-3.3.2.msi"
+          $path_osquery = "C:\\Users\\Administrator\\Desktop\\osquery.msi" 
+          if(!(Split-Path -parent $path) -or !(Test-Path -pathType Container (Split-Path -parent $path))) { 
+            $targetFile = Join-Path $pwd (Split-Path -leaf $path) 
+          } 
+          try {
+            $LocalTempDir = $env:TEMP; $ChromeInstaller = "ChromeInstaller.exe"; (new-object    System.Net.WebClient).DownloadFile('http://dl.google.com/chrome/install/375.126/chrome_installer.exe', "$LocalTempDir\$ChromeInstaller"); & "$LocalTempDir\$ChromeInstaller" /silent /install; $Process2Monitor =  "ChromeInstaller"; Do { $ProcessesFound = Get-Process | ?{$Process2Monitor -contains $_.Name} | Select-Object -ExpandProperty Name; If ($ProcessesFound) { "Still running: $($ProcessesFound -join ', ')" | Write-Host; Start-Sleep -Seconds 2 } else { rm "$LocalTempDir\$ChromeInstaller" -ErrorAction SilentlyContinue -Verbose } } Until (!$ProcessesFound)
+          } catch {
+            $_.Exception.Message
+            "Error installing Google Chrome."
+          }
+          (New-Object Net.WebClient).DownloadFile($url_osquery, $path_osquery)
+          New-Item -ItemType directory -Path C:\Santiago
+          try {
+            Start-Process -FilePath "C:\\Users\\Administrator\\Desktop\\osquery.msi" -Wait
+          } catch {
+            $_.Exception.Message
+            "Error installing Osquery"
+            Exit
+          }
+          try {
+              $url = "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1"
+              $file = "$env:temp\ConfigureRemotingForAnsible.ps1"
+              (New-Object -TypeName System.Net.WebClient).DownloadFile($url, $file)
+              powershell.exe -ExecutionPolicy ByPass -File $file
+          } catch {
+              $_.Exception.Message
+              "Error enabling WinRM on HTTPS."
+          }
+          </powershell>
     DependsOn: GatewayToInternet
-  DebianEth0: 
-    Type: AWS::EC2::NetworkInterface
-    Properties:
-      SubnetId: !Ref SubnetAgents
-      GroupSet: [!Ref 'WazuhSecurityGroup']
-      DeviceIndex: "0"
-      AssociatePublicIpAddress: "true"
+{% endfor %}
 
+{% for n in range(n_agents_windows2019) %}
+  # Windows agent instance and networking requirements
+  Windows20190{{ n }}:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap
+        - "RegionMap"
+        - Ref: "AWS::Region"
+        - WINDOWS2019HVM
+      InstanceType: !Ref WindowsInstanceType
+      IamInstanceProfile: !Ref InstanceProfile
+      KeyName: !Ref KeyPairName
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 50
+            VolumeType: gp2
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: "WazuhSecurityGroup"
+          SubnetId: 
+            Ref: "SubnetWazuh"
+      Tags:
+        - Key: Name
+          Value: Windows2019_0{{ n }}
+        - Key: Identifier
+          Value: agent_windows_2019_0{{ n }}
+      UserData:
+        Fn::Base64: !Sub |
+          <powershell>
+          $Password = (convertto-securestring -asplaintext ${SshPassword} -force)
+          New-LocalUser "wazuh" -Password $Password -FullName "wazuh" -Description "Wazuh user for remote desktop"
+          Add-LocalGroupMember -Group "Remote Desktop Users" -Member "wazuh"
+          net user Administrator ${SshPassword}
+          $master_ip=${WazuhNetworkLoadBalancer.DNSName} 
+          $url_osquery = "https://pkg.osquery.io/windows/osquery-3.3.2.msi"
+          $path_osquery = "C:\\Users\\Administrator\\Desktop\\osquery.msi" 
+          if(!(Split-Path -parent $path) -or !(Test-Path -pathType Container (Split-Path -parent $path))) { 
+            $targetFile = Join-Path $pwd (Split-Path -leaf $path) 
+          } 
+          try {
+            $LocalTempDir = $env:TEMP; $ChromeInstaller = "ChromeInstaller.exe"; (new-object    System.Net.WebClient).DownloadFile('http://dl.google.com/chrome/install/375.126/chrome_installer.exe', "$LocalTempDir\$ChromeInstaller"); & "$LocalTempDir\$ChromeInstaller" /silent /install; $Process2Monitor =  "ChromeInstaller"; Do { $ProcessesFound = Get-Process | ?{$Process2Monitor -contains $_.Name} | Select-Object -ExpandProperty Name; If ($ProcessesFound) { "Still running: $($ProcessesFound -join ', ')" | Write-Host; Start-Sleep -Seconds 2 } else { rm "$LocalTempDir\$ChromeInstaller" -ErrorAction SilentlyContinue -Verbose } } Until (!$ProcessesFound)
+          } catch {
+            $_.Exception.Message
+            "Error installing Google Chrome."
+          }
+          (New-Object Net.WebClient).DownloadFile($url_osquery, $path_osquery)
+          New-Item -ItemType directory -Path C:\Santiago
+          try {
+            Start-Process -FilePath "C:\\Users\\Administrator\\Desktop\\osquery.msi" -Wait
+          } catch {
+            $_.Exception.Message
+            "Error installing Osquery"
+            Exit
+          }
+          try {
+              $url = "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1"
+              $file = "$env:temp\ConfigureRemotingForAnsible.ps1"
+              (New-Object -TypeName System.Net.WebClient).DownloadFile($url, $file)
+              powershell.exe -ExecutionPolicy ByPass -File $file
+          } catch {
+              $_.Exception.Message
+              "Error enabling WinRM on HTTPS."
+          }
+          </powershell>
+    DependsOn: GatewayToInternet
+{% endfor %}
+
+{% for n in range(n_agents_ubuntu14) %}
   # Ubuntu agent instance and networking requirements
-  Ubuntu:
+  Ubuntu140{{ n }}:
     Type: AWS::EC2::Instance
     Metadata:
       'AWS::CloudFormation::Init':
@@ -1136,22 +1220,27 @@ ElasticMaster{{ n }}:
       ImageId: !FindInMap
         - "RegionMap"
         - Ref: "AWS::Region"
-        - HVMUBUNTU64
+        - UBUNTU14HVM
       InstanceType: !Ref UbuntuInstanceType
       IamInstanceProfile: !Ref InstanceProfile
       KeyName: !Ref KeyPairName
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: "WazuhSecurityGroup"
+          SubnetId: 
+            Ref: "SubnetWazuh"
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
-            VolumeSize: 200
+            VolumeSize: 30
             VolumeType: gp2
-      NetworkInterfaces:
-        - NetworkInterfaceId: !Ref UbuntuEth0
       Tags:
         - Key: Name
-          Value: Ubuntu
+          Value: Ubuntu14_0{{ n }}
         - Key: Identifier
-          Value: agent_linux_04
+          Value: agent_ubuntu14_0{{ n }}
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
@@ -1161,47 +1250,147 @@ ElasticMaster{{ n }}:
           apt-get -y install python-setuptools curl python-pip
           pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
           echo 'Copied' > /tmp/checkpoint.log
-          /usr/local/bin/cfn-init --stack ${AWS::StackName} --resource Ubuntu --configsets UbuntuInstallationSet --region ${AWS::Region} 2> /tmp/cfnerror.log
-          /usr/local/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource Ubuntu --region ${AWS::Region} 2> /tmp/cfnerror.log
+          /usr/local/bin/cfn-init --stack ${AWS::StackName} --resource Ubuntu140{{ n }} --configsets UbuntuInstallationSet --region ${AWS::Region} 2> /tmp/cfnerror.log
+          /usr/local/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource Ubuntu140{{ n }} --region ${AWS::Region} 2> /tmp/cfnerror.log
           echo 'Exiting...' >> /tmp/cflog.log
     DependsOn: GatewayToInternet
-  UbuntuEth0: 
-    Type: AWS::EC2::NetworkInterface
-    Properties:
-      SubnetId: !Ref SubnetAgents
-      GroupSet: [!Ref 'WazuhSecurityGroup']
-      DeviceIndex: "0"
-      AssociatePublicIpAddress: "true"
+{% endfor %}
 
-  # RHEL7 agent instance and networking requirements
-  RHEL7:
+{% for n in range(n_agents_ubuntu16) %}
+  # Ubuntu agent instance and networking requirements
+  Ubuntu160{{ n }}:
     Type: AWS::EC2::Instance
     Metadata:
       'AWS::CloudFormation::Init':
         configSets:
-          RHEL7InstallationSet:
+          UbuntuInstallationSet:
             - WazuhFiles
             - WazuhInstall
     Properties:
       ImageId: !FindInMap
         - "RegionMap"
         - Ref: "AWS::Region"
-        - HVMREDHAT7
-      InstanceType: !Ref RedHatInstanceType
+        - UBUNTU16HVM
+      InstanceType: !Ref UbuntuInstanceType
       IamInstanceProfile: !Ref InstanceProfile
       KeyName: !Ref KeyPairName
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: "WazuhSecurityGroup"
+          SubnetId: 
+            Ref: "SubnetWazuh"
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
-            VolumeSize: 200
+            VolumeSize: 30
             VolumeType: gp2
-      NetworkInterfaces:
-        - NetworkInterfaceId: !Ref RHELEth0
       Tags:
         - Key: Name
-          Value: RHEL7
+          Value: Ubuntu16_0{{ n }}
         - Key: Identifier
-          Value: agent_linux_01
+          Value: agent_ubuntu16_0{{ n }}
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          export DEBIAN_FRONTEND=noninteractive
+          echo 'Starting...' > /tmp/cflog.log
+          apt update
+          apt-get -y install python-setuptools curl python-pip
+          pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+          echo 'Copied' > /tmp/checkpoint.log
+          /usr/local/bin/cfn-init --stack ${AWS::StackName} --resource Ubuntu160{{ n }} --configsets UbuntuInstallationSet --region ${AWS::Region} 2> /tmp/cfnerror.log
+          /usr/local/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource Ubuntu160{{ n }} --region ${AWS::Region} 2> /tmp/cfnerror.log
+          echo 'Exiting...' >> /tmp/cflog.log
+    DependsOn: GatewayToInternet
+{% endfor %}
+
+{% for n in range(n_agents_ubuntu18) %}
+  # Ubuntu agent instance and networking requirements
+  Ubuntu180{{ n }}:
+    Type: AWS::EC2::Instance
+    Metadata:
+      'AWS::CloudFormation::Init':
+        configSets:
+          UbuntuInstallationSet:
+            - WazuhFiles
+            - WazuhInstall
+    Properties:
+      ImageId: !FindInMap
+        - "RegionMap"
+        - Ref: "AWS::Region"
+        - UBUNTU18HVM
+      InstanceType: !Ref UbuntuInstanceType
+      IamInstanceProfile: !Ref InstanceProfile
+      KeyName: !Ref KeyPairName
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: "WazuhSecurityGroup"
+          SubnetId: 
+            Ref: "SubnetWazuh"
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 30
+            VolumeType: gp2
+      Tags:
+        - Key: Name
+          Value: Ubuntu18_0{{ n }}
+        - Key: Identifier
+          Value: agent_ubuntu18_0{{ n }}
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          export DEBIAN_FRONTEND=noninteractive
+          echo 'Starting...' > /tmp/cflog.log
+          apt update
+          apt-get -y install python-setuptools curl python-pip
+          pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+          echo 'Copied' > /tmp/checkpoint.log
+          /usr/local/bin/cfn-init --stack ${AWS::StackName} --resource Ubuntu180{{ n }} --configsets UbuntuInstallationSet --region ${AWS::Region} 2> /tmp/cfnerror.log
+          /usr/local/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource Ubuntu180{{ n }} --region ${AWS::Region} 2> /tmp/cfnerror.log
+          echo 'Exiting...' >> /tmp/cflog.log
+    DependsOn: GatewayToInternet
+{% endfor %}
+
+  # RHEL8 agent instance and networking requirements
+{% for n in range(n_agents_rhel8) %}
+  RHEL80{{ n }}:
+    Type: AWS::EC2::Instance
+    Metadata:
+      'AWS::CloudFormation::Init':
+        configSets:
+          RHEL80{{ n }}InstallationSet:
+            - WazuhFiles
+            - WazuhInstall
+    Properties:
+      ImageId: !FindInMap
+        - "RegionMap"
+        - Ref: "AWS::Region"
+        - RHEL8HVM
+      InstanceType: !Ref RedHatInstanceType
+      IamInstanceProfile: !Ref InstanceProfile
+      KeyName: !Ref KeyPairName
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: "WazuhSecurityGroup"
+          SubnetId: 
+            Ref: "SubnetWazuh"
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 30
+            VolumeType: gp2
+      Tags:
+        - Key: Name
+          Value: RHEL8_0{{ n }}
+        - Key: Identifier
+          Value: agent_rhel8_0{{ n }}
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
@@ -1213,78 +1402,102 @@ ElasticMaster{{ n }}:
           yum -y install python-pip
           # Now install cfn scripts
           /bin/easy_install --script-dir /opt/aws/bin https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-          /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource RHEL7 --configsets RHEL7InstallationSet --region ${AWS::Region} 2> /tmp/cfnerror.log
-          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource RHEL7 --region ${AWS::Region} 2> /tmp/cfnerror.log
+          /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource RHEL80{{ n }} --configsets RHEL80{{ n }}InstallationSet --region ${AWS::Region} 2> /tmp/cfnerror.log
+          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource RHEL80{{ n }} --region ${AWS::Region} 2> /tmp/cfnerror.log
           echo 'Exiting...' >> /tmp/cflog.log
     DependsOn: GatewayToInternet
-  RHELEth0: 
-    Type: AWS::EC2::NetworkInterface
-    Properties:
-      SubnetId: !Ref SubnetAgents
-      GroupSet: [!Ref 'WazuhSecurityGroup']
-      DeviceIndex: "0"
-      AssociatePublicIpAddress: "true"
+{% endfor %}
 
 Outputs:
   ElasticBootstrapIp:
-    Description: Elastic Stack and Wazuh versions
+    Description: Elastic Stack versions
     Value: !GetAtt 
       - ElasticBootstrap
       - PublicIp
 {% for n in range(n_elasticsearch_instances) %}      
   ElasticMaster{{ n }}:
-    Description: Elastic Stack and Wazuh versions
+    Description: Elastic Stack versions
     Value: !GetAtt
-      - ElasticMaster{{ n }}:
+      - ElasticMaster{{ n }}
       - PublicIp
 {% endfor %}
   WazuhMasterInstance:
-    Description: Elastic Stack and Wazuh versions
+    Description: Wazuh Master version
     Value: !GetAtt
       - WazuhMasterInstance
       - PublicIp
-  WazuhWorkerInstance:
-    Description: Elastic Stack and Wazuh versions
+{% for n in range(n_wazuh_workers) %}         
+  WazuhWorkerInstance{{ n }}:
+    Description: Wazuh workers versions
     Value: !GetAtt
-      - WazuhWorkerInstance
+      - WazuhWorkerInstance{{ n }}
       - PublicIp
+{% endfor %}      
   KibanaInstance:
-    Description: Elastic Stack and Wazuh versions
+    Description: Kibana versions
     Value: !GetAtt
       - KibanaInstance
       - PublicIp
-  Amazon:
-    Description: Elastic Stack and Wazuh versions
+{% for n in range(n_agents_amazonlinux2) %}
+  Amazon{{ n }}:
+    Description: Amazon Linux agents versions
     Value: !GetAtt
-      - Amazon
+      - Amazon{{ n }}
       - PublicIp
-  Centos:
-    Description: Elastic Stack and Wazuh versions
+{% endfor %}
+{% for n in range(n_agents_centos7) %}
+  Centos{{ n }}:
+    Description: Centos Agents versions
     Value: !GetAtt
-      - Centos
+      - Centos{{ n }}
       - PublicIp
-  Debian:
-    Description: Elastic Stack and Wazuh versions
+{% endfor %}
+{% for n in range(n_agents_ubuntu14) %}
+  Ubuntu140{{ n }}:
+    Description: Ubuntu14 Agents versions
     Value: !GetAtt
-      - Debian
+      - Ubuntu140{{ n }}
       - PublicIp
-  Ubuntu:
-    Description: Elastic Stack and Wazuh versions
+{% endfor %}
+{% for n in range(n_agents_ubuntu16) %}
+  Ubuntu160{{ n }}:
+    Description: Ubuntu16 Agents versions
     Value: !GetAtt
-      - Ubuntu
+      - Ubuntu160{{ n }}
       - PublicIp
-  Windows:
-    Description: Elastic Stack and Wazuh versions
+{% endfor %}
+{% for n in range(n_agents_ubuntu18) %}
+  Ubuntu180{{ n }}:
+    Description: Ubuntu18 Agents versions
     Value: !GetAtt
-      - Windows
+      - Ubuntu180{{ n }}
       - PublicIp
-  RHEL7:
-    Description: Elastic Stack and Wazuh versions
+{% endfor %}
+{% for n in range(n_agents_windows2012) %}
+  Windows20120{{ n }}:
+    Description: Windows2012 Agents versions
     Value: !GetAtt
-      - RHEL7
+      - Windows20120{{ n }}
       - PublicIp
-  Centos:
-    Description: Elastic Stack and Wazuh versions
+{% endfor %}
+{% for n in range(n_agents_windows2016) %}
+  Windows20160{{ n }}:
+    Description: Windows2016 Agents versions
     Value: !GetAtt
-      - Centos
+      - Windows20160{{ n }}
       - PublicIp
+{% endfor %}
+{% for n in range(n_agents_windows2019) %}
+  Windows20190{{ n }}:
+    Description: Windows 2019 Agents versions
+    Value: !GetAtt
+      - Windows20190{{ n }}
+      - PublicIp
+{% endfor %}
+{% for n in range(n_agents_rhel8) %}
+  RHEL80{{ n }}:
+    Description: RHEL8 Agents versions
+    Value: !GetAtt
+      - RHEL80{{ n }}
+      - PublicIp
+{% endfor %}
