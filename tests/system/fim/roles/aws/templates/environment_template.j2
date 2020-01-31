@@ -782,7 +782,7 @@ Resources:
           GroupSet: 
             - Ref: "KibanaSecurityGroup"
           SubnetId: 
-            Ref: "SubnetWazuh"
+            Ref: "SubnetElasticsearch"
       Tags:
         - Key: Name
           Value: WazuhKibana
@@ -816,7 +816,7 @@ Resources:
         - AssociatePublicIpAddress: "true"
           DeviceIndex: "0"
           GroupSet: 
-            - Ref: "KibanaSecurityGroup"
+            - Ref: "WazuhSecurityGroup"
           SubnetId: 
             Ref: "SubnetWazuh"
       BlockDeviceMappings:
@@ -908,7 +908,7 @@ Resources:
           GroupSet: 
             - Ref: "WazuhSecurityGroup"
           SubnetId: 
-            Ref: "SubnetWazuh"
+            Ref: "SubnetAgents"
       Tags:
         - Key: Name
           Value: Amazon_0{{ n }}
@@ -946,7 +946,7 @@ Resources:
           GroupSet: 
             - Ref: "WazuhSecurityGroup"
           SubnetId: 
-            Ref: "SubnetWazuh"
+            Ref: "SubnetAgents"
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
@@ -992,7 +992,7 @@ Resources:
           GroupSet: 
             - Ref: "WazuhSecurityGroup"
           SubnetId: 
-            Ref: "SubnetWazuh"
+            Ref: "SubnetAgents"
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
@@ -1061,7 +1061,7 @@ Resources:
           GroupSet: 
             - Ref: "WazuhSecurityGroup"
           SubnetId: 
-            Ref: "SubnetWazuh"
+            Ref: "SubnetAgents"
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
@@ -1136,7 +1136,7 @@ Resources:
           GroupSet: 
             - Ref: "WazuhSecurityGroup"
           SubnetId: 
-            Ref: "SubnetWazuh"
+            Ref: "SubnetAgents"
       Tags:
         - Key: Name
           Value: Windows2019_0{{ n }}
@@ -1207,7 +1207,7 @@ Resources:
           GroupSet: 
             - Ref: "WazuhSecurityGroup"
           SubnetId: 
-            Ref: "SubnetWazuh"
+            Ref: "SubnetAgents"
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
@@ -1257,7 +1257,7 @@ Resources:
           GroupSet: 
             - Ref: "WazuhSecurityGroup"
           SubnetId: 
-            Ref: "SubnetWazuh"
+            Ref: "SubnetAgents"
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
@@ -1307,7 +1307,7 @@ Resources:
           GroupSet: 
             - Ref: "WazuhSecurityGroup"
           SubnetId: 
-            Ref: "SubnetWazuh"
+            Ref: "SubnetAgents"
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
@@ -1357,7 +1357,7 @@ Resources:
           GroupSet: 
             - Ref: "WazuhSecurityGroup"
           SubnetId: 
-            Ref: "SubnetWazuh"
+            Ref: "SubnetAgents"
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
