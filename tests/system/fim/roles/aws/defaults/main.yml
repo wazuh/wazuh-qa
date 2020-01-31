@@ -3,8 +3,13 @@ environment_type: devel
 
 ### Wazuh Manager configuration
 
-n_wazuh_workers: 1 # A Master Manager will be always deployed
-manager_installation_type: packages # Choose between source/package installation
+# Number of instances
+
+n_wazuh_workers: 1 # A Master Manager will always be deployed
+
+# Configuration
+
+manager_installation_type: packages # Choose between sources/packages installation
 sources_manager_branch: v3.11.2
 api_installation_type: packages
 sources_api_branch: v3.11.2
@@ -13,12 +18,12 @@ sources_api_branch: v3.11.2
 
 # Number of instances
 
-n_agents_ubuntu_18: 1
-n_agents_ubuntu_16: 1
-n_agents_ubuntu_14: 1
+n_agents_ubuntu18: 1
+n_agents_ubuntu16: 1
+n_agents_ubuntu14: 1
 n_agents_centos7: 1
 n_agents_rhel8: 1
-n_agents_amazon_linux_2: 1
+n_agents_amazonlinux2: 1
 n_agents_windows2012: 1
 n_agents_windows2016: 1
 n_agents_windows2019: 1
@@ -35,7 +40,7 @@ packages_repository: production
 
 # Number of instances
 
-n_elasticsearch_instances: 1 # An Elasticsearch bootstrap instance will be always deployed
+n_elasticsearch_instances: 1 # An Elasticsearch bootstrap instance will always be deployed
 
 # Configuration
 
