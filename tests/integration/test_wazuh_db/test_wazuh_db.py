@@ -7,8 +7,9 @@ import os
 import pytest
 import yaml
 
-from wazuh_testing.wazuh_db import callback_fim_query
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.wazuh_db import callback_fim_query
 
 # marks
 
@@ -50,5 +51,6 @@ def test_wazuh_db_messages(configure_environment_standalone_daemons, create_unix
     for stage in test_case:
         expected = stage['output']
         receiver_sockets[0].send([stage['input']], size=True)
-        response = monitored_sockets[0].start(timeout=5, callback=callback_fim_query).result()
+        response = monitored_sockets[0].start(timeout=global_parameters.default_timeout,
+                                              callback=callback_fim_query).result()
         assert response == expected, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1, stage['stage'])

@@ -6,6 +6,7 @@ import os
 
 import pytest
 import yaml
+from wazuh_testing import global_parameters
 from wazuh_testing.analysis import callback_fim_error
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -44,6 +45,6 @@ def test_error_messages(configure_environment_standalone_daemons, create_unix_so
     """
     for stage in test_case:
         receiver_sockets[0].send([stage['input']])
-        result = wazuh_log_monitor.start(timeout=20, callback=callback_fim_error).result()
+        result = wazuh_log_monitor.start(timeout=4*global_parameters.default_timeout, callback=callback_fim_error).result()
         assert result == stage['output'], 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1,
                                                                                  stage['stage'])

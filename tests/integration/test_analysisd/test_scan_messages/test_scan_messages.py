@@ -6,6 +6,7 @@ import os
 
 import pytest
 import yaml
+from wazuh_testing import global_parameters
 from wazuh_testing.analysis import callback_analysisd_message
 from wazuh_testing.tools import WAZUH_PATH
 
@@ -43,5 +44,6 @@ def test_scan_messages(configure_environment_standalone_daemons, create_unix_soc
     for stage in test_case:
         expected = callback_analysisd_message(stage['output'])
         receiver_sockets[0].send([stage['input']])
-        response = monitored_sockets[0].start(timeout=5, callback=callback_analysisd_message).result()
+        response = monitored_sockets[0].start(timeout=global_parameters.default_timeout,
+                                              callback=callback_analysisd_message).result()
         assert response == expected, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1, stage['stage'])
