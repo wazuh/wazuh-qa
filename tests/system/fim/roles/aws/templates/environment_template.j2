@@ -75,14 +75,6 @@ Metadata:
           - KibanaPort
       -
         Label:
-          default: "Integration keys"
-        Parameters:
-          - AwsSecretKey
-          - AwsAccessKey
-          - VirusTotalKey
-          - SlackHook
-      -
-        Label:
           default: "SSL Certificate"
         Parameters:
           - SSLCertificateARN
@@ -311,21 +303,6 @@ Parameters:
   KibanaPort:
     Default: '443'
     Description: Port for Kibana WUI
-    Type: String
-  AwsSecretKey:
-    Description: (Optional) Secret key for AWS integration
-    Type: String
-
-  AwsAccessKey:
-    Description: (Optional) Access key for AWS integration
-    Type: String
-
-  VirusTotalKey:
-    Description: (Optional) Key for VirusTotal integration
-    Type: String
-
-  SlackHook:
-    Description: (Optional) Webhook for Slack integration
     Type: String
 
   SSLCertificateARN:
