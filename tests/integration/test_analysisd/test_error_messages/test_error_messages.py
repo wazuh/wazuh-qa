@@ -34,12 +34,16 @@ used_daemons = ['ossec-analysisd']
 @pytest.mark.parametrize('test_case',
                          [test_case['test_case'] for test_case in test_cases],
                          ids=[test_case['name'] for test_case in test_cases])
-def test_error_messages(configure_environment_standalone_daemons, create_unix_sockets, test_case):
-    """ Checks the error messages handling by analysisd.
-    The variable messages is a yaml file that contains the input and the expected output for every test case.
+def test_error_messages(configure_environment_standalone_daemons, create_unix_sockets, test_case: list):
+    """Check that every input message in analysisd socket generates the adequate output to wazuh-db socket
 
+    Parameters
+    ----------
+    test_case : list
+        List of test_case stages (dicts with input, output and stage keys)
     """
     for stage in test_case:
         receiver_sockets[0].send([stage['input']])
         result = wazuh_log_monitor.start(timeout=20, callback=callback_fim_error).result()
-        assert result == stage['output'], 'Failed test case type: {}'.format(stage['type'])
+        assert result == stage['output'], 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1,
+                                                                                 stage['stage'])
