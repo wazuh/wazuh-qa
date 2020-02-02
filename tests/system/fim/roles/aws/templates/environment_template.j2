@@ -1012,10 +1012,7 @@ Resources:
           net user Administrator ${SshPassword}
           $master_ip=${WazuhNetworkLoadBalancer.DNSName} 
           $url_osquery = "https://pkg.osquery.io/windows/osquery-3.3.2.msi"
-          $path_osquery = "C:\\Users\\Administrator\\Desktop\\osquery.msi" 
-          if(!(Split-Path -parent $path) -or !(Test-Path -pathType Container (Split-Path -parent $path))) { 
-            $targetFile = Join-Path $pwd (Split-Path -leaf $path) 
-          } 
+          $path_osquery = "C:\\Users\\Administrator\\Desktop\\osquery.msi"
           try {
             $LocalTempDir = $env:TEMP; $ChromeInstaller = "ChromeInstaller.exe"; (new-object    System.Net.WebClient).DownloadFile('http://dl.google.com/chrome/install/375.126/chrome_installer.exe', "$LocalTempDir\$ChromeInstaller"); & "$LocalTempDir\$ChromeInstaller" /silent /install; $Process2Monitor =  "ChromeInstaller"; Do { $ProcessesFound = Get-Process | ?{$Process2Monitor -contains $_.Name} | Select-Object -ExpandProperty Name; If ($ProcessesFound) { "Still running: $($ProcessesFound -join ', ')" | Write-Host; Start-Sleep -Seconds 2 } else { rm "$LocalTempDir\$ChromeInstaller" -ErrorAction SilentlyContinue -Verbose } } Until (!$ProcessesFound)
           } catch {
@@ -1081,10 +1078,7 @@ Resources:
           net user Administrator ${SshPassword}
           $master_ip=${WazuhNetworkLoadBalancer.DNSName} 
           $url_osquery = "https://pkg.osquery.io/windows/osquery-3.3.2.msi"
-          $path_osquery = "C:\\Users\\Administrator\\Desktop\\osquery.msi" 
-          if(!(Split-Path -parent $path) -or !(Test-Path -pathType Container (Split-Path -parent $path))) { 
-            $targetFile = Join-Path $pwd (Split-Path -leaf $path) 
-          } 
+          $path_osquery = "C:\\Users\\Administrator\\Desktop\\osquery.msi"
           try {
             $LocalTempDir = $env:TEMP; $ChromeInstaller = "ChromeInstaller.exe"; (new-object    System.Net.WebClient).DownloadFile('http://dl.google.com/chrome/install/375.126/chrome_installer.exe', "$LocalTempDir\$ChromeInstaller"); & "$LocalTempDir\$ChromeInstaller" /silent /install; $Process2Monitor =  "ChromeInstaller"; Do { $ProcessesFound = Get-Process | ?{$Process2Monitor -contains $_.Name} | Select-Object -ExpandProperty Name; If ($ProcessesFound) { "Still running: $($ProcessesFound -join ', ')" | Write-Host; Start-Sleep -Seconds 2 } else { rm "$LocalTempDir\$ChromeInstaller" -ErrorAction SilentlyContinue -Verbose } } Until (!$ProcessesFound)
           } catch {
@@ -1151,10 +1145,7 @@ Resources:
           net user Administrator ${SshPassword}
           $master_ip=${WazuhNetworkLoadBalancer.DNSName} 
           $url_osquery = "https://pkg.osquery.io/windows/osquery-3.3.2.msi"
-          $path_osquery = "C:\\Users\\Administrator\\Desktop\\osquery.msi" 
-          if(!(Split-Path -parent $path) -or !(Test-Path -pathType Container (Split-Path -parent $path))) { 
-            $targetFile = Join-Path $pwd (Split-Path -leaf $path) 
-          } 
+          $path_osquery = "C:\\Users\\Administrator\\Desktop\\osquery.msi"
           try {
             $LocalTempDir = $env:TEMP; $ChromeInstaller = "ChromeInstaller.exe"; (new-object    System.Net.WebClient).DownloadFile('http://dl.google.com/chrome/install/375.126/chrome_installer.exe', "$LocalTempDir\$ChromeInstaller"); & "$LocalTempDir\$ChromeInstaller" /silent /install; $Process2Monitor =  "ChromeInstaller"; Do { $ProcessesFound = Get-Process | ?{$Process2Monitor -contains $_.Name} | Select-Object -ExpandProperty Name; If ($ProcessesFound) { "Still running: $($ProcessesFound -join ', ')" | Write-Host; Start-Sleep -Seconds 2 } else { rm "$LocalTempDir\$ChromeInstaller" -ErrorAction SilentlyContinue -Verbose } } Until (!$ProcessesFound)
           } catch {
