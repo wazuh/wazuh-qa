@@ -75,7 +75,7 @@ choco install jq
 - Install Python dependencies
 
 ```shell script
-pip install pytest freezegun jsonschema pyyaml psutil paramiko distro pywin32 pypiwin32
+pip install pytest freezegun jsonschema pyyaml psutil paramiko distro pywin32 pypiwin32 wmi
 ```
 
 - Change `time-reconnect` from `C:\Program Files (x86)\ossec-agent\ossec.conf`
@@ -128,7 +128,7 @@ gsed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time
 echo 'monitord.rotate_log=0' >> /Library/Ossec/etc/local_internal_options.conf
 
 # Restart Wazuh
-/Library/Ossec/etc/bin/ossec-control restart
+/Library/Ossec/bin/ossec-control restart
 ```
 
 -----------
