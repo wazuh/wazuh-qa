@@ -10,9 +10,9 @@ n_wazuh_workers: 1 # A Master Manager will always be deployed
 # Configuration
 
 manager_installation_type: packages # Choose between sources/packages installation
-sources_manager_branch: v3.11.2
+sources_manager_branch: v3.11.3
 api_installation_type: packages
-sources_api_branch: v3.11.2
+sources_api_branch: v3.11.3
 
 ### Wazuh Agent configuration
 
@@ -31,9 +31,9 @@ n_agents_windows2019: 1
 # Configuration
 
 agent_installation_type: packages
-sources_agent_branch: v3.11.2
+sources_agent_branch: v3.11.3
 wazuh_kibana_plugin_installation: packages
-wazuh_kibana_plugin_branch: 3.11.2_7.5.1
+wazuh_kibana_plugin_branch: 3.11.3_7.5.2
 packages_repository: production
 
 ### Elastic and Kibana configuration
@@ -44,7 +44,7 @@ n_elasticsearch_instances: 1 # An Elasticsearch bootstrap instance will always b
 
 # Configuration
 
-elastic_wazuh_version: 7.5.1_3.11.2
+elastic_wazuh_version: 7.5.1_3.11.3
 wazuh_instance_type: t2.medium
 elastic_instance_type: t2.large
 kibana_instance_type: t2.large
