@@ -8,48 +8,37 @@ development_manager_path_master="../wazuh_manager/test/environments/development-
 
 template=".template"
 
-if [ -z "$1" ]
-then
-        suites=( "suite1" "suite2" )
-else
-        suites=$1
+
+echo "Kitchen is creating the new instances"
+
+kitchen create
+
+echo "Getting Wazuh managers IPs to the agents"
+manager_ip="$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' `docker ps | awk '{print $NF}' | grep  $PLATFORM | grep $RELEASE | grep manager`)"
+
+cp "$development_agent_path$template" "$development_agent_path"
+
+echo "Assigning Wazuh managers IPs to the corresponding agents."
+sed -i 's/manager-master.wazuh-test.com/'${manager_ip}'/g' $development_agent_path
+
+echo "setting the manager registration and report IPs"
+
+cp "$development_manager_path$template" "$development_manager_path"
+sed -i 's/MANAGER_IP/'${manager_ip}'/g' $development_manager_path
+cat $development_manager_path
+
+cp "$development_manager_path_master$template" "$development_manager_path_master"
+sed -i 's/MANAGER_IP/'${manager_ip}'/g' $development_manager_path_master
+cat $development_manager_path_master
+
+
+if [[ $PLATFORM == *"centos"* ]] || [[ $PLATFORM == *"amazon"* ]]; then
+    echo "Platform is $PLATFORM and require OpenSSL to be installed. .. Installing .."
+    kitchen exec $PLATFORM -c "sudo yum install -y openssl"
 fi
 
-
-echo "Kitchen is creating the new instances to suite=$suite"
-
-kitchen create $suite
-
-
-if [[ ${suite} != *"suite2"* ]];then # If suite is suite 1 and so it contains a manager and agent.
-
-    echo "Getting Wazuh managers IPs to the agents"
-    manager_ip="$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' `docker ps | awk '{print $NF}' | grep  $suite | grep manager`)"
-    echo $manager_ip
-
-    cp "$development_agent_path$template" "$development_agent_path"
-
-    echo "Assigning Wazuh managers IPs to the corresponding agents."
-    sed -i 's/manager-master.wazuh-test.com/'${manager_ip}'/g' $development_agent_path
-
-    echo "setting the manager registration and report IPs"
-
-    cp "$development_manager_path$template" "$development_manager_path"
-    sed -i 's/MANAGER_IP/'${manager_ip}'/g' $development_manager_path
-    cat $development_manager_path
-
-    cp "$development_manager_path_master$template" "$development_manager_path_master"
-    sed -i 's/MANAGER_IP/'${manager_ip}'/g' $development_manager_path_master
-    cat $development_manager_path_master
-fi
 echo "Kitchen is converging ..."
-
-if [[ $suite == *"centos"* ]]; then
-    echo "suite is a centos and require OpenSSL to be installed. .. Installing .."
-    kitchen exec $suite -c "sudo yum install -y openssl"
-fi
-
-kitchen converge $suite
+kitchen converge
 
 
 echo "Getting default things back"
@@ -58,7 +47,7 @@ cp "$development_manager_path$template" "$development_manager_path"
 cp "$development_manager_path_master$template" "$development_manager_path_master"
 
 echo "Kitchen is testing ..."
-kitchen verify $suite
+kitchen verify
 
 echo "Kitchen is destroying"
-kitchen destroy $suite
+kitchen destroy
