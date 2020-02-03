@@ -395,15 +395,12 @@ def check_apply_test(apply_to_tags: Set, tags: List):
 
 def generate_syscheck_config():
     """Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags'."""
-    check_names = ['check_all', 'check_sha1sum', 'check_md5sum', 'check_sha256sum', 'check_size', 'check_owner', 'check_group',
-                  'check_perm', 'check_attrs', 'check_mtime', 'check_inode', 'report_changes']
-
-    # Remove 'check_inode' if we are on Windows
-    if sys.platform == 'win32':
-        check_names.remove('check_inode')
+    check_platform = 'check_attrs' if sys.platform == 'win32' else 'check_inode'
+    check_names = ['check_all', 'check_sha1sum', 'check_md5sum', 'check_sha256sum', 'check_size', 'check_owner',
+                   'check_group', 'check_perm', 'check_mtime', check_platform, 'report_changes']
 
     values_list = itertools.product(['yes', 'no'], repeat=len(check_names))
-    tags = ['tags="Sample tag"', 'tags=""']
+    tags = ['tags="Sample"', 'tags=""']
 
     for yn_values, tag_value in itertools.product(values_list, tags):
         yn_str = ' '.join([f'{name}="{value}"' for name, value in zip(check_names, yn_values)])

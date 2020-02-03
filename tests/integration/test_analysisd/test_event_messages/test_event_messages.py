@@ -6,7 +6,7 @@ import os
 
 import pytest
 import yaml
-from wazuh_testing.analysis import callback_fim_event_alert, callback_analysisd_message, validate_analysis_event
+from wazuh_testing.analysis import callback_fim_event_alert, callback_analysisd_message, validate_analysis_alert
 from wazuh_testing.tools import WAZUH_LOGS_PATH, WAZUH_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -46,5 +46,5 @@ def test_event_messages(configure_environment_standalone_daemons, create_unix_so
     receiver_sockets[0].send([message_['input']])
     response = monitored_sockets[0].start(timeout=5, callback=callback_analysisd_message).result()
     assert response == expected, 'Failed test case type: {}'.format(message_['type'])
-    event = wazuh_log_monitor.start(timeout=10, callback=callback_fim_event_alert).result()
-    validate_analysis_event(event)
+    alert = wazuh_log_monitor.start(timeout=10, callback=callback_fim_event_alert).result()
+    validate_analysis_alert(alert)

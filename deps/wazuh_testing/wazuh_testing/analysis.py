@@ -36,18 +36,18 @@ def callback_fim_error(line):
     return None
 
 
-def validate_analysis_event(event):
+def validate_analysis_alert(alert):
     """Checks if an Analysis event is properly formatted.
 
     Parameters
     ----------
-    event : dict
-        Dictionary that represent an event
+    alert : dict
+        Dictionary that represent an alert
 
     """
     with open(os.path.join(_data_path, 'event_analysis_schema.json'), 'r') as f:
         schema = json.load(f)
-    validate(schema=schema, instance=event)
+    validate(schema=schema, instance=alert)
 
 
 def validate_analysis_integrity_state(event):
