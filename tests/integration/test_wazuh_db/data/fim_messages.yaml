@@ -236,14 +236,6 @@
     output: "ok "
     stage: "Syscheck - Less than three digits for the agent ID"
 -
-  name: "Create agent"
-  description: "Wazuh DB creates automatically the agent's database the first time a query with a new agent ID reaches it. Once the database is created, the query is processed as expected."
-  test_case:
-  -
-    input: "agent 999 syscheck integrity_check_left"
-    output: "err Invalid FIM query syntax, near 'integrity_check_left'"
-    stage: "Syscheck - Agent does not exits yet"
--
   name: "Update existing file"
   description: "Update attributes for an existing file"
   test_case:
