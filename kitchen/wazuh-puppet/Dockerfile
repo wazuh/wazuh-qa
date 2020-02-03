@@ -1,5 +1,6 @@
 FROM ubuntu:18.04
 
+
 # Global required packages
 RUN apt-get update -qq -y && \
     apt-get upgrade -qq -y && \
@@ -8,6 +9,7 @@ RUN apt-get update -qq -y && \
       apt-transport-https \
       ca-certificates \
       curl \
+      wget \
       software-properties-common \
       dirmngr \
       libreadline-dev \
@@ -23,6 +25,14 @@ RUN apt-get update -qq -y && \
       systemd-sysv \
       wget \
       zlib1g-dev
+
+
+# PDK dependencies
+RUN wget https://apt.puppet.com/puppet-tools-release-bionic.deb && \
+    dpkg -i puppet-tools-release-bionic.deb && \
+    apt-get update && \
+    apt-get install -y pdk
+
 
 # docker-ce related installation tasks.
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - && \
