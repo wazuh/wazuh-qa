@@ -4,3 +4,25 @@
     when:
       - inventory_hostname in groups['linuxagents']
       - ansible_os_family == "Debian"
+
+  - name: Configuring Windows Agents
+    block:
+      - name: Installing Google Chrome
+        win_chocolatey:
+          name: googlechrome
+          state: present
+
+      - name: Creating User on Windows instances
+        win_user:
+          name: "{{ windows_user }}"
+          password: "{{ windows_password }}"
+          state: present
+          groups: "Remote Desktop Users"
+
+      - name: Configuring Administrator password on Windows instances
+        win_user:
+          name: "Administrator"
+          password: "{{ windows_password }}"
+          state: present
+    when:
+      - ansible_os_family == "Windows"
