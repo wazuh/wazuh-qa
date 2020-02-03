@@ -10,24 +10,19 @@ provisioner:
   chef_license: accept-no-persist
 
 platforms:
-  - name: ubuntu-kitchen-chef
+  - name: <%= ENV['PLATFORM'] %>_<%= ENV['RELEASE'] %>_kitchen_chef
     driver_config:
-      image: ubuntu:14.04
-      platform: ubuntu
-      provision_command: apt-get update && apt-get install -y --force-yes apt-transport-https ca-certificates && apt-get update
+      image: <%= ENV['IMAGE'] %>
+      platform: <%= ENV['PLATFORM'] %>
       forward: 443
       publish_all: true
-  - name: centos-kitchen-chef
-    driver_config:
-      image: centos:7
-      platform: centos
-      run_command: /usr/sbin/init
-      build_options:
-        rm: true
-      forward: 443
-      publish_all: true
+      privileged: true
+      volume:
+        - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      provision_command:
+        - sed -i 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config
 suites:
-  - name: manager-suite1
+  - name: manager
     environments_path: ../wazuh_manager/test/environments
     data_bags_path: ../wazuh_manager/test/data_bags
     encrypted_data_bag_secret_key_path: ../wazuh_manager/test/data_bags/wazuh_secrets/test_data_bag_key
@@ -45,7 +40,7 @@ suites:
       name: shell
       command: py.test -v test/base/*manager*
 
-  - name: agent-suite1
+  - name: agent
     environments_path: ../wazuh_agent/test/environments
     data_bags_path: ../wazuh_agent/test/data_bags
     encrypted_data_bag_secret_key_path: ../wazuh_agent/test/data_bags/wazuh_secrets/test_data_bag_key
@@ -62,25 +57,3 @@ suites:
     verifier:
       name: shell
       command: py.test -v test/base/*agent*
-
-  - name: elastic-suite2
-    environments_path: "../wazuh_elastic/test/environments"
-    data_bags_path: "../wazuh_elastic/test/data_bags"
-    encrypted_data_bag_secret_key_path: "test/data_bags/wazuh_secrets/test_data_bag_key"
-    driver:
-      customize:
-        memory: 4096
-        cpus: 2
-    run_list:
-      - recipe[test::test]
-      - recipe[wazuh_elastic::repository]
-      - recipe[wazuh_elastic::elasticsearch]
-      - recipe[wazuh_elastic::nginx]
-      - recipe[wazuh_elastic::kibana] 
-    attributes: { wazuh-elastic: {elasticsearch_ip: '127.0.0.1'} } 
-    provisioner:
-      client_rb:
-        environment: development
-    verifier:
-      name: shell
-      command: py.test -v test/base/test_wazuh_elastic.py

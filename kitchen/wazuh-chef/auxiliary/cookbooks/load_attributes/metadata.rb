@@ -1,4 +1,4 @@
-name             'test'
+name             'load_attributes'
 maintainer       'Wazuh Inc.'
 maintainer_email 'info@wazuh.com'
 license          'Apache 2.0'
