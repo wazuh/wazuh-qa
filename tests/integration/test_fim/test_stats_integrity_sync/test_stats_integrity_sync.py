@@ -1,27 +1,28 @@
 # Needs installed in system: sysstat, bc
 
-import asyncio
 import os
 import re
 import shutil
 import time
+from multiprocessing import Process, Manager
 from socket import socket, AF_UNIX, SOCK_STREAM
 from struct import pack, unpack
-from multiprocessing import Process, Queue
 
 import pytest
 
 from wazuh_testing.tools import AGENT_CONF
 from wazuh_testing.tools.services import control_service
 
+db_path = '/var/ossec/queue/db/wdb'
+manager_ip = '172.19.0.100'
+setup_environment_time = 1  # Seconds
+max_time_for_setup = 180  # Seconds
 tested_daemons = ["wazuh-db", "ossec-analysisd"]
 
 
 def db_query(agent, query):
-    WDB = '/var/ossec/queue/db/wdb'
-
     sock = socket(AF_UNIX, SOCK_STREAM)
-    sock.connect(WDB)
+    sock.connect(db_path)
 
     msg = 'agent {0} sql {1}'.format(agent, query).encode()
     sock.send(pack("<I{0}s".format(len(msg)), len(msg), msg))
@@ -48,15 +49,12 @@ def get_total_disk_info(daemon="ossec-analysisd"):
 def get_stats(daemon):
     regex_cpu = r"{} *([0-9]+.[0-9]+) *[0-9]+".format(daemon)
     regex_mem = r"{} *[0-9]+.[0-9]+ *([0-9]+)".format(daemon)
-    regex_disk_rd = r".*([0-9]+,[0-9]+) *[0-9]+,[0-9]+ *[0-9]+,[0-9]+ *{}".format(daemon)
-    regex_disk_wr = r".*[0-9]+,[0-9]+ *([0-9]+,[0-9]+) *[0-9]+,[0-9]+ *{}".format(daemon)
+    regex_disk_rd_wr = r".* *[0-9]* *[0-9]* *([0-9]+.[0-9]+) *([0-9].[0-9]+) *[0-9].[0-9]+ *{}".format(daemon)
     # char 37 is %
     ps = os.popen('ps -axo comm,' + chr(37) + 'cpu,rss | grep \"' + daemon + '\" | head -n1').read()
     pidstat = os.popen('pidstat -d | grep ' + daemon + ' | head -n1').read()
     cpu, mem = re.match(regex_cpu, ps).group(1), re.match(regex_mem, ps).group(1)
-    disk_rd, disk_wr = re.match(regex_disk_rd, pidstat).group(1).replace(",", "."), re.match(
-        regex_disk_wr, pidstat).group(1).replace(",", ".")
-
+    disk_rd, disk_wr = re.match(regex_disk_rd_wr, pidstat).group(1), re.match(regex_disk_rd_wr, pidstat).group(2)
     total_disk_info = get_total_disk_info(daemon)
 
     return [cpu, mem, disk_wr, disk_rd, total_disk_info[0], total_disk_info[1]]
@@ -64,22 +62,18 @@ def get_stats(daemon):
 
 # Return n_attempts in sync_info table
 def n_attempts(agent="001"):
-    regex = r".*\n.*\n.*\"n_attempts\": ([0-9]+)\n.*\n.*"
-
+    regex = r"ok \[{\"n_attempts\":([0-9]+)}\]"
     response = db_query(agent, 'SELECT n_attempts FROM sync_info')
-    result = re.match(regex, response).group(1)
 
-    return int(result)
+    return int(re.match(regex, response).group(1))
 
 
 # Return n_completions in sync_info table
 def n_completions(agent="001"):
-    regex = r".*\n.*\n.*\"n_completions\": ([0-9]+)\n.*\n.*"
-
+    regex = r"ok \[{\"n_completions\":([0-9]+)}\]"
     response = db_query(agent, 'SELECT n_completions FROM sync_info')
-    result = re.match(regex, response).group(1)
 
-    return int(result)
+    return int(re.match(regex, response).group(1))
 
 
 # Delete all database files
@@ -116,15 +110,13 @@ def get_agent_info(total_agents=1):
 
 
 def replace_conf(protocol, eps, directory):
-    manager_ip = '10.0.0.15'
-
     new_config = str()
     address_regex = r".*<address>([0-9.]+)</address>"
     directory_regex = r'.*<directories check_all=\"yes\">(.+)</directories>'
     eps_regex = r'.*<max_eps>([0-9]+)</max_eps>'
     protocol_regex = r'.*<protocol>([a-z]+)</protocol>'
 
-    with open('data/template_agent.conf', 'r') as f:
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/template_agent.conf'), 'r') as f:
         lines = f.readlines()
         for line in lines:
             line = re.sub(address_regex, '<address>' + manager_ip + '</address>', line)
@@ -135,6 +127,8 @@ def replace_conf(protocol, eps, directory):
 
         with open(AGENT_CONF, 'w') as agent_conf:
             agent_conf.write(new_config)
+    # Set Read/Write permissions to agent.conf
+    os.chmod(AGENT_CONF, 0o666)
 
 
 def check_all_n_attempts(agents_list):
@@ -158,57 +152,60 @@ def check_all_n_completions(agents_list):
 
 
 def setup_environment(protocol, eps, directory, agents_list):
+    global setup_environment_time
+    print('[INFO] Setting up the environment...')
     control_service('stop')
     dump_database()  # Delete all database files
     control_service('start')
     replace_conf(protocol, eps, directory)
-    while check_all_n_attempts(agents_list) != 0:
-        time.sleep(1)
+    seconds = 0
+    while check_all_n_attempts(agents_list) == 0:
+        print(f'[INFO] Environment not ready yet... {seconds} seconds')
+        seconds += setup_environment_time
+        if seconds >= max_time_for_setup:
+            raise TimeoutError('[ERROR] The environment could not be configured')
+        time.sleep(setup_environment_time)
+    print('[INFO] Environment ready!')
 
 
-def write_stats(daemon, file_name):
-    # Medir tiempo fuera de esta funcion
-    with open(file_name, 'a') as file_:
+def writer(id_, filename, daemon, messages_queue):
+    with open(filename, 'w') as file_:
         file_.write("seconds,cpu,ram,avg_disk_read,avg_disk_write,total_disk_read,total_disk_write\n")
         while True:
-            cpu, ram, avg_disk_write, avg_disk_read = get_stats(daemon)
+            cpu, ram, avg_disk_write, avg_disk_read = get_stats(daemon)[:4]
+            print(f'[INFO] Writer {id_} writing: {cpu},{ram},{avg_disk_read},{avg_disk_write},,')
             file_.write(f'{cpu},{ram},{avg_disk_read},{avg_disk_write},,\n')
+            if f'{id_}-WRITER_TERMINATE' in messages_queue:
+                print(f'[INFO] Writer {id_} terminated')
+                break
             time.sleep(1)
 
 
-def finish_write(filename, agents_list):
-    complete = False
+def closer(id_, filename, daemon, agents_list, messages_queue):
+    while True:
+        if check_all_n_completions(agents_list) > 0:
+            cpu, ram, avg_disk_write, avg_disk_read, total_disk_read, total_disk_write = get_stats(daemon)
+            messages_queue.append(f'{id_}-WRITER_TERMINATE')
+            if f'{id_}-CLOSER_TERMINATE' in messages_queue:
+                with open(filename, 'a') as result_file:
+                    result_file.write(f'{cpu},{ram},{avg_disk_read},{avg_disk_write},{total_disk_read},'
+                                      f'{total_disk_write}\n')
 
-    while not complete:
-        if check_all_n_completions(agents_list) != 0:
-            complete = True  # Finishing
-            with open(filename, 'a') as result_file:
-                for daemon in tested_daemons:
-                    cpu, ram, avg_disk_write, avg_disk_read, total_disk_read, total_disk_write = get_stats(daemon)
-
+                with open(filename.replace('results', 'info'), 'w') as info_agent:
                     for agent in agents_list:
                         agent['end'] = time.time()
                         agent['total'] = agent['end'] - agent['start']
                         agent['n_attempts'] = n_attempts(agent['id'])
                         agent['n_completions'] = n_completions(agent['id'])
-                        result_file.write(f',{cpu},{ram},{avg_disk_read},{avg_disk_write},{total_disk_read},'
-                                          f'{total_disk_write}\n')
-
-                        with open(filename.replace('results', 'info'), 'w') as info_agent:
-                            info_agent.write("agent_id,n_attempts,n_completions,start_time,end_time,total_time\n")
-                            info_agent.write(agent['id'] + "," + agent['n_attempts'] + "," +
-                                             agent['n_attempts'] + "," + agent['n_completions'] + "," +
-                                             agent['start'] + "," + agent['end'] + "," +
-                                             agent['total'])
+                        print(
+                            f'[INFO] Closer {id_} writing: {cpu},{ram},{avg_disk_read},{avg_disk_write},'
+                            f'{total_disk_read},{total_disk_write}')
+                        info_agent.write("agent_id,n_attempts,n_completions,start_time,end_time,total_time\n")
+                        info_agent.write(f"{','.join(map(str, agent.values()))}\n")
+                break
         time.sleep(5)
 
 
-@pytest.mark.parametrize('protocol, eps', [
-    ('udp', '1000'),
-    ('tcp', '1000'),
-    ('udp', '1000000'),
-    ('tcp', '1000000'),
-])
 @pytest.mark.parametrize('files, directory', [
     ('10000', '/test10k'),
     ('20000', '/test20k'),
@@ -218,26 +215,44 @@ def finish_write(filename, agents_list):
     ('500000', '/test500k'),
     ('1000000', '/test1M'),
 ])
+@pytest.mark.parametrize('protocol, eps', [
+    ('udp', '1000'),
+    ('tcp', '1000'),
+    ('udp', '1000000'),
+    ('tcp', '1000000'),
+])
 def test_initialize_stats_collector(protocol, eps, files, directory):
     writers = list()
     closers = list()
-    q = Queue()
+    process_ids = list()
+    messages_queue = Manager().list()
 
-    agents_list = get_agent_info(total_agents=3)
-    setup_environment(protocol=protocol, eps=eps, directory=directory, agents_list=agents_list)
-
-    print(f"[INFO] Starting test with {protocol}, {eps} eps and {files}k files")
+    agents_list = get_agent_info(total_agents=1)
     for agent in agents_list:
         agent['start'] = time.time()
+    setup_environment(protocol=protocol, eps=eps, directory=directory, agents_list=agents_list)
 
     for daemon in tested_daemons:
-        file_name = f"results_{daemon}_{protocol}_{eps}_{files}k.csv"
-        writers.append(Process(target=write_stats(daemon=daemon, file_name=file_name), args=(q,)))
-        closers.append(Process(target=finish_write(file_name, agents_list), args=(q,)))
+        id_ = f'{daemon}_{protocol}_{eps}_{files}'
+        print(f"[INFO] Starting test with {protocol}, {eps} eps and {files}k files in {directory} directory "
+              f"for {daemon} daemon")
+        filename = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                f"stats/results_{daemon}_{protocol}_{eps}_{files}k.csv")
+        writers.append(Process(target=writer, args=(id_, filename, daemon, messages_queue,)))
+        closers.append(Process(target=closer, args=(id_, filename, daemon, agents_list, messages_queue,)))
+        writers[-1].start()
+        closers[-1].start()
+        process_ids.append(id_)
 
+    can_finish_closers = False
     while True:
-        if check_all_n_completions(agents_list) != 0:
-            for writer, closer in zip(writers, closers):
-                writer.join()
-                closer.join()
-            break
+        if not any([writer_.is_alive() for writer_ in writers]) and not can_finish_closers:
+            can_finish_closers = True
+            print('[INFO] All writers are finished')
+        if can_finish_closers:
+            for id_ in process_ids:
+                messages_queue.append(f'{id_}-CLOSER_TERMINATE')
+            if not any([closer_.is_alive() for closer_ in closers]):
+                print('[INFO] All closers are finished')
+                print('[INFO] Process finished')
+                break
