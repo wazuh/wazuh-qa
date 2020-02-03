@@ -7,8 +7,8 @@ import sys
 
 import pytest
 
-from wazuh_testing.fim import (CHECK_ALL, CHECK_MD5SUM, CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_SUM, DEFAULT_TIMEOUT,
-                               LOG_FILE_PATH, REQUIRED_ATTRIBUTES, regular_file_cud, generate_params)
+from wazuh_testing.fim import (CHECK_ALL, CHECK_MD5SUM, CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_SUM, LOG_FILE_PATH, REQUIRED_ATTRIBUTES, regular_file_cud, generate_params)
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -83,7 +83,7 @@ def test_checksums_checkall(path, checkers, get_configuration, configure_environ
     """
     check_apply_test({'test_checksums_checkall'}, get_configuration['tags'])
 
-    regular_file_cud(path, wazuh_log_monitor, min_timeout=DEFAULT_TIMEOUT, options=checkers,
+    regular_file_cud(path, wazuh_log_monitor, min_timeout=global_parameters.default_timeout, options=checkers,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled')
 
 
@@ -119,5 +119,5 @@ def test_checksums(path, checkers, get_configuration, configure_environment, res
     """
     check_apply_test({'test_checksums'}, get_configuration['tags'])
 
-    regular_file_cud(path, wazuh_log_monitor, min_timeout=DEFAULT_TIMEOUT, options=checkers,
+    regular_file_cud(path, wazuh_log_monitor, min_timeout=global_parameters.default_timeout, options=checkers,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled')

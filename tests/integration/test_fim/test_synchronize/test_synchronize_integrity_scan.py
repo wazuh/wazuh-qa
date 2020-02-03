@@ -7,7 +7,8 @@ import os
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
-    callback_detect_event, DEFAULT_TIMEOUT
+    callback_detect_event
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -76,5 +77,5 @@ def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure
     # Create a file and assert syscheckd detects it while doing the integrity scan
     file_name = 'file'
     create_file(REGULAR, folder, file_name, content='')
-    sending_event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+    sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
     assert sending_event['data']['path'] == os.path.join(folder, file_name)

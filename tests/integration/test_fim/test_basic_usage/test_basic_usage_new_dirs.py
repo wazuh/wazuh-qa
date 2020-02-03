@@ -10,9 +10,9 @@ import pytest
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
-from wazuh_testing.fim import DEFAULT_TIMEOUT, LOG_FILE_PATH, generate_params, \
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, \
     regular_file_cud, check_time_travel
-
+from wazuh_testing import global_parameters
 
 # Marks
 
@@ -78,11 +78,11 @@ def test_new_directory(tags_to_apply, get_configuration, configure_environment, 
 
     # Create the monitored directory with files and check that events are not raised
     regular_file_cud(directory_str, wazuh_log_monitor, file_list=['file1', 'file2', 'file3'],
-                     min_timeout=DEFAULT_TIMEOUT, triggers_event=False)
+                     min_timeout=global_parameters.default_timeout, triggers_event=False)
 
     # Travel to the future to start next scheduled scan
     check_time_travel(True)
 
     # Assert that events of new CUD actions are raised after next scheduled scan
     regular_file_cud(directory_str, wazuh_log_monitor, file_list=['file4', 'file5', 'file6'],
-                     min_timeout=DEFAULT_TIMEOUT, triggers_event=True)
+                     min_timeout=global_parameters.default_timeout, triggers_event=True)

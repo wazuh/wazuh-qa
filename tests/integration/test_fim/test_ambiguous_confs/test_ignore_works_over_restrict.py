@@ -8,7 +8,8 @@ import sys
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_ignore, callback_detect_event, create_file, REGULAR, \
-    generate_params, check_time_travel, DEFAULT_TIMEOUT
+    generate_params, check_time_travel
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -80,13 +81,13 @@ def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_ap
     check_time_travel(scheduled)
 
     if triggers_event:
-        event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
         assert event['data']['type'] == 'added', 'Event type not equal'
         assert event['data']['path'] == os.path.join(folder, filename), 'Event path not equal'
     else:
         while True:
-            ignored_file = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_ignore).result()
+            ignored_file = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_ignore).result()
 
             if ignored_file == os.path.join(folder, filename):
                 break
