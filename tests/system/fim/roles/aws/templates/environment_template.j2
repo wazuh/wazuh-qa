@@ -9,9 +9,9 @@ Mappings:
       UBUNTU14HVM: ami-0e455abf97e7a143c
       UBUNTU16HVM: ami-03f1d906751fb41be
       UBUNTU18HVM: ami-0d0df38024bdd5db1
-      WINDOWS2012HVM: ami-01a34d7a4ece6a3e2
-      WINDOWS2016HVM: ami-07eb732e1bd85e2c0
-      WINDOWS2019HVM: ami-007237e458f14c2a2
+      WINDOWS2012HVM: ami-0c63b254fb157175a
+      WINDOWS2016HVM: ami-0468432f941de4315
+      WINDOWS2019HVM: ami-0f528a15e2a0bbe2c
   SubnetConfig:
     WazuhVpc:
       CIDR: 10.0.0.0/16
@@ -94,7 +94,6 @@ Parameters:
     Type: String
     MinLength: '5'
     MaxLength: '32'
-    AllowedPattern: '[a-zA-Z0-9]*'
     ConstraintDescription: Only alphanumeric characters. Minimum length 5. Maximum length 32.
   SshPassword:
     Description: SSH Password
@@ -102,7 +101,6 @@ Parameters:
     Type: String
     MinLength: '8'
     MaxLength: '64'
-    AllowedPattern: '[a-zA-Z0-9]*'
     ConstraintDescription: Only alphanumeric characters. Minimum length 8. Maximum length 64.
 
   # Version and instance types
@@ -269,7 +267,6 @@ Parameters:
     Type: String
     MinLength: '1'
     MaxLength: '48'
-    AllowedPattern: '[a-zA-Z0-9]*'
     ConstraintDescription: Only alphanumeric characters
   WazuhApiPort:
     Default: '55000'
@@ -281,7 +278,6 @@ Parameters:
     Type: String
     MinLength: '1'
     MaxLength: '16'
-    AllowedPattern: '[a-zA-Z0-9]*'
     ConstraintDescription: Only alphanumeric characters
   WazuhApiAdminPassword:
     Description: Admin password for Wazuh API
@@ -289,7 +285,6 @@ Parameters:
     Type: String
     MinLength: '1'
     MaxLength: '48'
-    AllowedPattern: '[a-zA-Z0-9]*'
     ConstraintDescription: Only alphanumeric characters
   WazuhClusterKey:
     Description: Key used for Wazuh servers cluster
@@ -297,14 +292,12 @@ Parameters:
     Type: String
     MinLength: '32'
     MaxLength: '32'
-    AllowedPattern: '[a-zA-Z0-9]*'
     ConstraintDescription: Any alphanumeric string of 32 characters
   # Kibana configuration
   KibanaPort:
     Default: '443'
     Description: Port for Kibana WUI
     Type: String
-
   SSLCertificateARN:
     Description: 'Used for HTTPS access to WUI. Existent certificate, identified by its Amazon Resource Name (ARN).'
     Type: String
