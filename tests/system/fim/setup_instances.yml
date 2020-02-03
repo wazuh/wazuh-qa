@@ -23,3 +23,12 @@
       - include: ../fim/roles/aws/handlers/main.yml
     become: yes
     become_user: root
+
+  - hosts: windowsagents, windows
+    strategy: free
+    vars_files:
+      - ./vars/credentials.yml
+    tasks:
+      - import_tasks: ../fim/roles/aws/tasks/setup_instances.yml
+
+      
