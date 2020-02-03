@@ -31,7 +31,7 @@ RUN apt-get update -qq -y && \
 RUN wget https://apt.puppet.com/puppet-tools-release-bionic.deb && \
     dpkg -i puppet-tools-release-bionic.deb && \
     apt-get update && \
-    apt-get install pdk
+    apt-get install -y pdk
 
 
 # docker-ce related installation tasks.
