@@ -313,10 +313,10 @@ windowsagents:
                 agent_name: {{ hostvars[groups['windows-agents'][loop.index-1]]['agent_name'] }}
 {% endfor %}
     vars:
-        ansible_ssh_user: {{ windows_user }}
-        ansible_ssh_pass: {{ windows_password }}
-        ansible_ssh_port: 5986
+        ansible_user: {{ windows_user }}
+        ansible_password: {{ windows_password }}
         ansible_connection: winrm
+        ansible_winrm_transport: basic
         ansible_winrm_server_cert_validation: ignore
         wazuh_winagent_config:
             version: {{ windows_agent_version }}
