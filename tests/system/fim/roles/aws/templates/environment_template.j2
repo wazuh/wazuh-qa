@@ -1003,41 +1003,6 @@ Resources:
           Value: Windows2012_0{{ n }}
         - Key: Identifier
           Value: agent_windows_2012_0{{ n }}
-      UserData:
-        Fn::Base64: !Sub |
-          <powershell>
-          $Password = (convertto-securestring -asplaintext ${SshPassword} -force)
-          New-LocalUser "wazuh" -Password $Password -FullName "wazuh" -Description "Wazuh user for remote desktop"
-          Add-LocalGroupMember -Group "Remote Desktop Users" -Member "wazuh"
-          net user Administrator ${SshPassword}
-          $master_ip=${WazuhNetworkLoadBalancer.DNSName} 
-          $url_osquery = "https://pkg.osquery.io/windows/osquery-3.3.2.msi"
-          $path_osquery = "C:\\Users\\Administrator\\Desktop\\osquery.msi"
-          try {
-            $LocalTempDir = $env:TEMP; $ChromeInstaller = "ChromeInstaller.exe"; (new-object    System.Net.WebClient).DownloadFile('http://dl.google.com/chrome/install/375.126/chrome_installer.exe', "$LocalTempDir\$ChromeInstaller"); & "$LocalTempDir\$ChromeInstaller" /silent /install; $Process2Monitor =  "ChromeInstaller"; Do { $ProcessesFound = Get-Process | ?{$Process2Monitor -contains $_.Name} | Select-Object -ExpandProperty Name; If ($ProcessesFound) { "Still running: $($ProcessesFound -join ', ')" | Write-Host; Start-Sleep -Seconds 2 } else { rm "$LocalTempDir\$ChromeInstaller" -ErrorAction SilentlyContinue -Verbose } } Until (!$ProcessesFound)
-          } catch {
-            $_.Exception.Message
-            "Error installing Google Chrome."
-          }
-          (New-Object Net.WebClient).DownloadFile($url_osquery, $path_osquery)
-          New-Item -ItemType directory -Path C:\Santiago
-          try {
-            Start-Process -FilePath "C:\\Users\\Administrator\\Desktop\\osquery.msi" -Wait
-          } catch {
-            $_.Exception.Message
-            "Error installing Osquery"
-            Exit
-          }
-          try {
-              $url = "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1"
-              $file = "$env:temp\ConfigureRemotingForAnsible.ps1"
-              (New-Object -TypeName System.Net.WebClient).DownloadFile($url, $file)
-              powershell.exe -ExecutionPolicy ByPass -File $file
-          } catch {
-              $_.Exception.Message
-              "Error enabling WinRM on HTTPS."
-          }
-          </powershell>
     DependsOn: GatewayToInternet
 {% endfor %}
 {% for n in range(n_agents_windows2016) %}
@@ -1069,41 +1034,6 @@ Resources:
           Value: Windows2016_0{{ n }}
         - Key: Identifier
           Value: agent_windows_2016_0{{ n }}
-      UserData:
-        Fn::Base64: !Sub |
-          <powershell>
-          $Password = (convertto-securestring -asplaintext ${SshPassword} -force)
-          New-LocalUser "wazuh" -Password $Password -FullName "wazuh" -Description "Wazuh user for remote desktop"
-          Add-LocalGroupMember -Group "Remote Desktop Users" -Member "wazuh"
-          net user Administrator ${SshPassword}
-          $master_ip=${WazuhNetworkLoadBalancer.DNSName} 
-          $url_osquery = "https://pkg.osquery.io/windows/osquery-3.3.2.msi"
-          $path_osquery = "C:\\Users\\Administrator\\Desktop\\osquery.msi"
-          try {
-            $LocalTempDir = $env:TEMP; $ChromeInstaller = "ChromeInstaller.exe"; (new-object    System.Net.WebClient).DownloadFile('http://dl.google.com/chrome/install/375.126/chrome_installer.exe', "$LocalTempDir\$ChromeInstaller"); & "$LocalTempDir\$ChromeInstaller" /silent /install; $Process2Monitor =  "ChromeInstaller"; Do { $ProcessesFound = Get-Process | ?{$Process2Monitor -contains $_.Name} | Select-Object -ExpandProperty Name; If ($ProcessesFound) { "Still running: $($ProcessesFound -join ', ')" | Write-Host; Start-Sleep -Seconds 2 } else { rm "$LocalTempDir\$ChromeInstaller" -ErrorAction SilentlyContinue -Verbose } } Until (!$ProcessesFound)
-          } catch {
-            $_.Exception.Message
-            "Error installing Google Chrome."
-          }
-          (New-Object Net.WebClient).DownloadFile($url_osquery, $path_osquery)
-          New-Item -ItemType directory -Path C:\Santiago
-          try {
-            Start-Process -FilePath "C:\\Users\\Administrator\\Desktop\\osquery.msi" -Wait
-          } catch {
-            $_.Exception.Message
-            "Error installing Osquery"
-            Exit
-          }
-          try {
-              $url = "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1"
-              $file = "$env:temp\ConfigureRemotingForAnsible.ps1"
-              (New-Object -TypeName System.Net.WebClient).DownloadFile($url, $file)
-              powershell.exe -ExecutionPolicy ByPass -File $file
-          } catch {
-              $_.Exception.Message
-              "Error enabling WinRM on HTTPS."
-          }
-          </powershell>
     DependsOn: GatewayToInternet
 {% endfor %}
 
@@ -1136,41 +1066,6 @@ Resources:
           Value: Windows2019_0{{ n }}
         - Key: Identifier
           Value: agent_windows_2019_0{{ n }}
-      UserData:
-        Fn::Base64: !Sub |
-          <powershell>
-          $Password = (convertto-securestring -asplaintext ${SshPassword} -force)
-          New-LocalUser "wazuh" -Password $Password -FullName "wazuh" -Description "Wazuh user for remote desktop"
-          Add-LocalGroupMember -Group "Remote Desktop Users" -Member "wazuh"
-          net user Administrator ${SshPassword}
-          $master_ip=${WazuhNetworkLoadBalancer.DNSName} 
-          $url_osquery = "https://pkg.osquery.io/windows/osquery-3.3.2.msi"
-          $path_osquery = "C:\\Users\\Administrator\\Desktop\\osquery.msi"
-          try {
-            $LocalTempDir = $env:TEMP; $ChromeInstaller = "ChromeInstaller.exe"; (new-object    System.Net.WebClient).DownloadFile('http://dl.google.com/chrome/install/375.126/chrome_installer.exe', "$LocalTempDir\$ChromeInstaller"); & "$LocalTempDir\$ChromeInstaller" /silent /install; $Process2Monitor =  "ChromeInstaller"; Do { $ProcessesFound = Get-Process | ?{$Process2Monitor -contains $_.Name} | Select-Object -ExpandProperty Name; If ($ProcessesFound) { "Still running: $($ProcessesFound -join ', ')" | Write-Host; Start-Sleep -Seconds 2 } else { rm "$LocalTempDir\$ChromeInstaller" -ErrorAction SilentlyContinue -Verbose } } Until (!$ProcessesFound)
-          } catch {
-            $_.Exception.Message
-            "Error installing Google Chrome."
-          }
-          (New-Object Net.WebClient).DownloadFile($url_osquery, $path_osquery)
-          New-Item -ItemType directory -Path C:\Santiago
-          try {
-            Start-Process -FilePath "C:\\Users\\Administrator\\Desktop\\osquery.msi" -Wait
-          } catch {
-            $_.Exception.Message
-            "Error installing Osquery"
-            Exit
-          }
-          try {
-              $url = "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1"
-              $file = "$env:temp\ConfigureRemotingForAnsible.ps1"
-              (New-Object -TypeName System.Net.WebClient).DownloadFile($url, $file)
-              powershell.exe -ExecutionPolicy ByPass -File $file
-          } catch {
-              $_.Exception.Message
-              "Error enabling WinRM on HTTPS."
-          }
-          </powershell>
     DependsOn: GatewayToInternet
 {% endfor %}
 
