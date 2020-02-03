@@ -44,7 +44,7 @@ n_elasticsearch_instances: 1 # An Elasticsearch bootstrap instance will always b
 
 # Configuration
 
-elastic_wazuh_version: 7.5.1_3.11.3
+elastic_wazuh_version: 7.5.2_3.11.3
 wazuh_instance_type: t2.medium
 elastic_instance_type: t2.large
 kibana_instance_type: t2.large
