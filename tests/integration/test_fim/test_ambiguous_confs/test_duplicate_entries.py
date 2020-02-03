@@ -18,7 +18,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
-pytestmark = [pytest.mark.tier(level=2)]
+pytestmark = [pytest.mark.tier(level=2), pytest.mark.linux, pytest.mark.win32]
 
 # variables
 test_directories = [os.path.join(PREFIX, 'testdir1')]*2
@@ -36,11 +36,12 @@ p, m = generate_params(extra_params={'MODULE_NAME': __name__, 'TEST_DIRECTORIES'
 params, metadata = list(), list()
 for mode in ['scheduled', 'realtime', 'whodata']:
     p_fim, m_fim = get_fim_mode_param(mode, key='FIM_MODE2')
-    for p_dict, m_dict in zip(p, m):
-        p_dict.update(p_fim.items())
-        m_dict.update(m_fim.items())
-        params.append(deepcopy(p_dict))
-        metadata.append(deepcopy(m_dict))
+    if p_fim:
+        for p_dict, m_dict in zip(p, m):
+            p_dict.update(p_fim.items())
+            m_dict.update(m_fim.items())
+            params.append(deepcopy(p_dict))
+            metadata.append(deepcopy(m_dict))
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
