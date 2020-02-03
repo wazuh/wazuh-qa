@@ -1,5 +1,5 @@
 ---
-
+  # Nginx Installation
   - hosts: kibana
     strategy: free
     vars_files:
@@ -11,6 +11,7 @@
     become: yes
     become_user: root
 
+# Configure Wazuh Groups and Kibana Welcome screen
   - hosts: kibana, masters
     strategy: free
     vars_files:
