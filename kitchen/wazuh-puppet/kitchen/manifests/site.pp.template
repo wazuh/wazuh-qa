@@ -1,7 +1,7 @@
-node 'manager00_platform' {
+node 'manager_platform_release' {
   class { "wazuh::manager":}
 }
-node 'agent00_platform' {
+node 'agent_platform_release' {
   class { "wazuh::agent":
         wazuh_register_endpoint => "manager_ip",
         wazuh_reporting_endpoint => "manager_ip",
