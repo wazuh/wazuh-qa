@@ -54,3 +54,6 @@ def test_wazuh_db_messages(configure_environment_standalone_daemons, create_unix
         response = monitored_sockets[0].start(timeout=global_parameters.default_timeout,
                                               callback=callback_fim_query).result()
         assert response == expected, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1, stage['stage'])
+
+        if stage['stage'] == 'Syscheck - Agent does not exits yet':
+            assert os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'db', "999.db"))
