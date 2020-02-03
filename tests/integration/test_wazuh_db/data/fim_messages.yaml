@@ -212,6 +212,30 @@
     output: "err Cannot perform range checksum"
     stage: "Syscheck integrity_clear fail - no id"
 -
+  name: "Invalid agent ID"
+  description: "The syntax for every query for Wazuh DB is agent {ID} {component} {query}. This section covers the dealing with unexpected values of the agent ID."
+  test_case:
+  -
+    input: "agent fake_id syscheck integrity_clear {\"id\":1}"
+    output: "err Invalid agent ID 'fake_id'"
+    stage: "Syscheck - Invalid agent ID"
+  -
+    input: "agent syscheck integrity_clear {\"id\":1}"
+    output: "err Invalid agent ID 'syscheck'"
+    stage: "Syscheck - Missing agent ID (one space)"
+  -
+    input: "agent  syscheck integrity_clear {\"id\":1}"
+    output: "ok "
+    stage: "Syscheck - Missing agent ID (two spaces)"
+  -
+    input: "agent   syscheck integrity_clear {\"id\":1}"
+    output: "err Invalid DB query syntax, near ''"
+    stage: "Syscheck - Missing agent ID (three spaces)"
+  -
+    input: "agent 1 syscheck integrity_clear {\"id\":1}"
+    output: "ok "
+    stage: "Syscheck - Less than three digits for the agent ID"
+-
   name: "Update existing file"
   description: "Update attributes for an existing file"
   test_case:
