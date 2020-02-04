@@ -1,11 +1,8 @@
 ---
   - hosts: localhost
     vars_files:
-      - ./vars/aws.yml
       - ./vars/credentials.yml
       - ./vars/wazuh_manager.yml
       - ./vars/elastic_nginx.yml
-    tasks:
-      - import_tasks: ../fim/roles/aws/tasks/parameters_generator.yml
-      - import_tasks: ../fim/roles/aws/tasks/launch_template.yml
-      - import_tasks: ../fim/roles/aws/tasks/classify_hosts.yml
+    roles:
+      - role: ../fim/roles/aws/

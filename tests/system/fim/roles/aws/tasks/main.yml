@@ -1,0 +1,2 @@
+---
+    - include_tasks: tasks/generate_environment_template.yml
