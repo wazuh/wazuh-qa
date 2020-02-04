@@ -196,7 +196,7 @@ def create_file(type_, path, name, **kwargs):
 
 def create_registry(key, subkey, arch):
     """
-    Creates a registry given the key and the subkey. The registry is opened if it already exists
+    Create a registry given the key and the subkey. The registry is opened if it already exists
 
     Parameters
     ----------
@@ -330,7 +330,7 @@ def delete_file(path, name):
 
 def delete_registry(key, subkey, arch):
     """
-    Deletes a registry
+    Delete a registry
 
     Parameters
     ----------
@@ -344,7 +344,7 @@ def delete_registry(key, subkey, arch):
 
 def modify_registry(key, subkey, value):
     """
-    Modifies the content of REG_SZ in a registry
+    Modify the content of REG_SZ in a registry
 
     Parameters
     ----------
@@ -922,7 +922,7 @@ class EventChecker:
 
 
 class CustomValidator:
-    """Enables using user-defined validators over the events when validating them with EventChecker"""
+    """Enable using user-defined validators over the events when validating them with EventChecker"""
     def __init__(self, validators_after_create=None, validators_after_update=None,
                  validators_after_delete=None, validators_after_cud=None):
         self.validators_create = validators_after_create
@@ -991,7 +991,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
                      triggers_event=True, encoding=None, validators_after_create=None, validators_after_update=None,
                      validators_after_delete=None, validators_after_cud=None):
     """
-    Checks if creation, update and delete events are detected by syscheck.
+    Check if creation, update and delete events are detected by syscheck.
 
     This function provides multiple tools to validate events with custom validators.
 

@@ -4,4 +4,4 @@
 
 
 def callback_fim_query(line):
-    return(line)
+    return line
