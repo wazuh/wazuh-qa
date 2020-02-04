@@ -32,14 +32,8 @@ sed -i 's/MANAGER_IP/'${manager_ip}'/g' $development_manager_path_master
 cat $development_manager_path_master
 
 
-if [[ $PLATFORM == *"centos"* ]] || [[ $PLATFORM == *"amazon"* ]]; then
-    echo "Platform is $PLATFORM and require OpenSSL to be installed. .. Installing .."
-    kitchen exec $PLATFORM -c "sudo yum install -y openssl"
-fi
-
 echo "Kitchen is converging ..."
 kitchen converge
-
 
 echo "Getting default things back"
 cp "$development_agent_path$template" "$development_agent_path"
