@@ -55,7 +55,7 @@ kibana_instance_type: t2.large
 stack_name: wazuh-env-3
 bucket_name: demo-cloudformation-templates
 template_url: https://demo-cloudformation-templates.s3-us-west-1.amazonaws.com/
-availability_zone: us-west-1b
+availability_zone: us-west-1a
 aws_cli_profile: ansible_demo
 service_name_tag: fim-tests
 team_tag: DevOps

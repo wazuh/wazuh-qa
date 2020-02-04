@@ -293,6 +293,10 @@ Parameters:
     MinLength: '32'
     MaxLength: '32'
     ConstraintDescription: Any alphanumeric string of 32 characters
+  AvailabilityZone:
+    Description: Key used for Wazuh servers cluster
+    Default: 'us-west-1a'
+    Type: String
   # Kibana configuration
   KibanaPort:
     Default: '443'
@@ -330,6 +334,7 @@ Resources:
         - SubnetConfig
         - SubnetWazuh
         - CIDR
+      AvailabilityZone: !Ref 'AvailabilityZone'
       Tags:
         - Key: Application
           Value: !Ref 'AWS::StackId'
@@ -343,6 +348,7 @@ Resources:
         - SubnetConfig
         - SubnetAgents
         - CIDR
+      AvailabilityZone: !Ref 'AvailabilityZone'
       Tags:
         - Key: Application
           Value: !Ref 'AWS::StackId'
@@ -356,6 +362,7 @@ Resources:
           - SubnetConfig
           - SubnetElasticsearch
           - CIDR
+        AvailabilityZone: !Ref 'AvailabilityZone'
         Tags:
           - Key: Application
             Value: !Ref 'AWS::StackId'
