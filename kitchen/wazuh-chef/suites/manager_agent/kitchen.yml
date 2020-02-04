@@ -21,6 +21,7 @@ platforms:
         - /sys/fs/cgroup:/sys/fs/cgroup:ro
       provision_command:
         - sed -i 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config
+        - apt-get install -y apt-transport-https gnupg2
 suites:
   - name: manager
     environments_path: <%= ENV['COOKBOOKS_PATH'] %>/wazuh_manager/test/environments
