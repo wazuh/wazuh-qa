@@ -32,7 +32,6 @@ suites:
       - recipe[load_attributes::load_attributes]
       - recipe[wazuh_manager::repository]
       - recipe[wazuh_manager::manager]
-      - recipe[wazuh_filebeat::default]
     attributes:
     provisioner:
       client_rb:
