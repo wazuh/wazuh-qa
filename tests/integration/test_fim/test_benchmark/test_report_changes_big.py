@@ -4,6 +4,7 @@
 
 import os
 import sys
+import psutil
 import pandas
 from datetime import datetime
 from statistics import mean, median
@@ -36,6 +37,8 @@ testdir1 = test_directories[0]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 filenames_list = [f'regular_{i}' for i in range(2000)]
 timeout = 240 if sys.platform == 'win32' else 160
+
+process = psutil.Process(os.getpid())
 
 # Configurations
 
@@ -133,6 +136,10 @@ def calculate_metrics(folder, event_list, fim_mode):
     -------
     size_original_folder : int
         Size of given folder in bytes.
+    used_rss_memory : float
+        “Resident Set Size”, this is the non-swapped physical memory a process has used.
+    used_vms_memory : float
+        “Virtual Memory Size”, this is the total amount of virtual memory used by the process.
     total_creation_time : int
         Time needed to create all files in seconds.
     mean : float
@@ -145,6 +152,8 @@ def calculate_metrics(folder, event_list, fim_mode):
         Max time taken to generate a log in seconds.
     """
     size_original_folder = get_size(folder)
+    used_rss_memory = process.memory_info().rss / (1024 * 1024)
+    used_vms_memory = process.memory_info().vms / (1024 * 1024)
     total_creation_time = event_list[-1]['data']['attributes']['mtime'] - event_list[0]['data']['attributes']['mtime']
 
     # If scheduled, measure scan time (time from the first to last log), otherwise,
@@ -154,7 +163,7 @@ def calculate_metrics(folder, event_list, fim_mode):
     else:
         elapsed_time_list = [event['data']['timestamp'] - event['data']['attributes']['mtime'] for event in event_list]
 
-    return size_original_folder, total_creation_time, mean(elapsed_time_list), median(elapsed_time_list),\
+    return size_original_folder, used_rss_memory, used_vms_memory, total_creation_time, mean(elapsed_time_list), median(elapsed_time_list),\
            min(elapsed_time_list), max(elapsed_time_list)
 
 
@@ -166,10 +175,10 @@ def write_csv(data):
     data : list of lists
         Each list is a row of data to write.
     """
-    df = pandas.DataFrame(data, columns=['FIM mode', 'Event type', 'N of files', 'Size/file (B)',
-                                         'Folder size (B)', 'Time to create files (s)', 'Mean time to show logs (s)',
-                                         'Median time to show logs (s)', 'Min time to show a log (s)',
-                                         'Max time to show a log (s)'])
+    df = pandas.DataFrame(data, columns=['FIM mode', 'Event type', 'N of files', 'Size/file (B)', 'Folder size (B)',
+                                         'Size RSS (MB)', 'Sieze VMS (MB)', 'Time to create files (s)',
+                                         'Mean time to show logs (s)', 'Median time to show logs (s)',
+                                         'Min time to show a log (s)', 'Max time to show a log (s)'])
     if not os.path.exists(metrics_dir):
         os.makedirs(metrics_dir)
     df.to_csv(metrics_path, sep='\t', mode='a', index=False, header=(not os.path.exists(metrics_path)))
@@ -187,11 +196,11 @@ def write_csv(data):
     (filenames_list[0:100], testdir1, 0),
     (filenames_list[0:1000], testdir1, 0),
     (filenames_list, testdir1, 0),
-    # 60KiB files.
-    (filenames_list[0:10], testdir1, 60),
-    (filenames_list[0:100], testdir1, 60),
-    (filenames_list[0:1000], testdir1, 60),
-    (filenames_list, testdir1, 60),
+    # 59KiB files.
+    (filenames_list[0:10], testdir1, 1024*59),
+    (filenames_list[0:100], testdir1, 1024*59),
+    (filenames_list[0:1000], testdir1, 1024*59),
+    (filenames_list, testdir1, 1024*59),
 ])
 def test_report_changes_big(file_list, folder, file_size, tags_to_apply, get_configuration,
                             configure_environment, restart_syscheckd, wait_for_initial_scan):
