@@ -41,11 +41,20 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 # functions
 
 def replace_date(date, days):
-    """ Adds a number of days to the given date and calculates if it should change the month as well.
+    """
+    Add a number of days to the given date and calculates if it should change the month as well.
 
-    :param date: Datetime with a date
-    :param days: Integer with a number of days
-    :return: Datetime with the new date
+    Parameters
+    ----------
+    date : datetime
+        Source date to be modified
+    days : int
+        Number of days that will be added to `date`
+
+    Returns
+    -------
+    datetime
+        `date` + `days` resulting datetime
     """
     today = datetime.now()
     max_days_in_month = monthrange(today.year, today.month)[1]
@@ -74,12 +83,10 @@ def get_configuration(request):
 def test_scan_day_and_time(tags_to_apply,
                            get_configuration, configure_environment,
                            restart_syscheckd, wait_for_initial_scan):
-    """ Check if there is a scan in a certain day and time
+    """
+    Check if there is a scan in a certain day and time
 
     This test must check both scan params.
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

@@ -54,31 +54,46 @@ def get_configuration(request):
 # functions
 
 def apply_test(directory: str, attributes: list, trigger: bool, check_list: list, args: tuple):
-    """ Applies each specified test for every given directory. If it doesn't detect any attribute,
-        it will check the default configuration.
+    """
+    Apply each specified test for every given directory. If it doesn't detect any attribute,
+    it will check the default configuration.
 
-    :param directory: Directory to test
-    :param attributes: List with each attribute given in conf. Used to call each test
-    :param trigger: Boolean to expect events or not
-    :param check_list: List with all the checks detected in conf
-    :param args: Tuple with additional parameters passed to each test
-    :return:
+    Parameters
+    ----------
+    directory : str
+        Directory to test.
+    attributes : list
+        Attributes given in conf. Used to call each test.
+    trigger : bool
+        Flag to expect events or not
+    check_list : list
+        List with all the checks detected in conf
+    args : tuple
+        Additional parameters passed to each test
     """
     for attribute in attributes:
         getattr(sys.modules[__name__], f'check_{attribute}')(directory, trigger, check_list, *args)
 
 
 def get_dir_and_attributes(configuration):
-    """ Returns a tuple with all the conf detected and a list of checker lists.
-        configuration must be: get_configuration['elements']
+    """
+    Return a tuple with all the configurations detected and a list of checkers.
+    This function will iterate over every element from the elements section from the current
+    configuration (based on the yaml file).	This will give us information about what tests
+    have to be applied to every directory.
+    configuration must be: get_configuration['elements']
 
-        The tuple has the following structure:
-        Tuple -> (config_list, directory_check_list)
-            - config_list -> [{dir_1: [attr_list_1]}, ... , {dir_n: attr_list_n}]
-            - directory_check_list -> [[checkers_dir_1], ... , [checkers_dir_n]]
+    Parameters
+    ----------
+    configuration : list
+        List of elements from the current configuration.
 
-    :param configuration: get_configuration['elements']
-    :return: Tuple with two values. Both a list
+    Returns
+    -------
+    config_list : list
+        Format: [{dir_1: [attr_list_1]}, ... , {dir_n: attr_list_n}]
+    directory_check_list : list
+        Format: [[checkers_dir_1], ... , [checkers_dir_n]]
     """
     config_list = []
     directory_check_list = []
@@ -112,10 +127,10 @@ def get_dir_and_attributes(configuration):
 
 
 def check_report_changes(directory, trigger, check_list, file_list, timeout, scheduled):
-    """ Standard report_changes test """
+    """Standard report_changes test"""
 
     def report_changes_validator(event):
-        """ Validate content_changes attribute exists in the event """
+        """Validate content_changes attribute exists in the event"""
         for file in file_list:
             diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
             if sys.platform == 'win32':
@@ -133,14 +148,14 @@ def check_report_changes(directory, trigger, check_list, file_list, timeout, sch
 
 
 def check_default(directory, trigger, check_list, file_list, timeout, scheduled):
-    """ Standard default conf test """
+    """Standard default conf test"""
     regular_file_cud(directory, wazuh_log_monitor, file_list=file_list,
                      time_travel=scheduled, options=get_checkers(check_list),
                      min_timeout=timeout, triggers_event=trigger)
 
 
 def check_restrict(directory, trigger, check_list, file_list, timeout, scheduled):
-    """ Standard restrict attribute test """
+    """Standard restrict attribute test"""
 
     create_file(REGULAR, directory, file_list[0], content='')
     if scheduled:
@@ -153,10 +168,10 @@ def check_restrict(directory, trigger, check_list, file_list, timeout, scheduled
 
 
 def check_tags(directory, trigger, check_list, file_list, timeout, scheduled):
-    """ Standard tags attribute test """
+    """Standard tags attribute test"""
 
     def tag_validator(event):
-        """ Validate tag attribute exists in the event """
+        """Validate tag attribute exists in the event"""
         assert tag == event['data']['tags'], f'defined_tags are not equal'
 
     regular_file_cud(directory, wazuh_log_monitor, file_list=file_list,
@@ -165,11 +180,12 @@ def check_tags(directory, trigger, check_list, file_list, timeout, scheduled):
 
 
 def get_checkers(check_list):
-    """ Transform check_list to set. It is scalable in case we want to make set operations for
-        more complex conf
+    """Transform check_list to set. It is scalable in case we want to make set operations for more complex conf
 
-    :param check_list: List with every check detected in conf
-    :return:
+    Parameters
+    ----------
+    check_list : list
+        checks detected in conf
     """
     checkers = set()
     if check_list:
@@ -187,16 +203,13 @@ def get_checkers(check_list):
 def test_ambiguous_complex(tags_to_apply,
                            get_configuration, configure_environment,
                            restart_syscheckd, wait_for_initial_scan):
-    """ Automatic test for each configuration given in the yaml.
+    """Automatic test for each configuration given in the yaml.
 
     The main purpose of this test is to check that syscheck will apply different configurations between subdirectories
     properly. Example:
 
     <directories realtime='yes' report_changes='yes' check_all='yes' check_owner='no'> /testdir </directories>
     <directories realtime='yes' report_changes='no' check_sum='no' check_owner='yes'> /testdir/subdir </directories>
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-      the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

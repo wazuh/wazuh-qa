@@ -43,17 +43,19 @@ def get_configuration(request):
 ])
 def test_symbolic_delete_symlink(tags_to_apply, main_folder, aux_folder, get_configuration, configure_environment,
                                  restart_syscheckd, wait_for_initial_scan):
-    """ Check if syscheck stops detecting events when deleting the monitored symlink.
+    """
+    Check if syscheck stops detecting events when deleting the monitored symlink.
 
     CHECK: Having a symbolic link pointing to a file/folder, remove that symbolic link file, wait for the symlink
     checker runs and modify the target file. No events should be detected. Restore the symbolic link and modify
     the target file again once symlink checker runs. Events should be detected now.
 
-    :param main_folder: Directory that is being pointed at or contains the pointed file
-    :param aux_folder: Directory that will be pointed at or will contain the future pointed file
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan.
+    Parameters
+    ----------
+    main_folder : str
+        Directory that is being pointed at or contains the pointed file.
+    aux_folder : str
+        Directory that will be pointed at or will contain the future pointed file.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'

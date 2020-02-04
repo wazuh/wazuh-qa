@@ -58,7 +58,7 @@ def get_configuration(request):
 def check_event(previous_mode: str, previous_event: dict, file: str):
     """Check if a file modification does not trigger an event but its creation did.
 
-    In case of TimeOut, checks that the type of the previous event was addition
+    In case of timeout, checks that the type of the previous event was addition
     on the correct path and with correct mode.
 
     Parameters
@@ -78,7 +78,8 @@ def check_event(previous_mode: str, previous_event: dict, file: str):
     """
     current_event = None
     try:
-        current_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
+        current_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                                callback=callback_detect_event).result()
     except TimeoutError:
         assert 'added' in previous_event['data']['type'] and \
                os.path.join(testdir1, file) in previous_event['data']['path'] and \
@@ -91,7 +92,7 @@ def check_event(previous_mode: str, previous_event: dict, file: str):
 
 
 def test_duplicate_entries(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Checks if syscheckd ignores duplicate entries.
+    """Check if syscheckd ignores duplicate entries.
        For instance:
            - The second entry should prevail over the first one.
             <directories realtime="yes">/home/user</directories> (IGNORED)
@@ -119,7 +120,7 @@ def test_duplicate_entries(get_configuration, configure_environment, restart_sys
 
 def test_duplicate_entries_sregex(get_configuration, configure_environment,
                                   restart_syscheckd, wait_for_initial_scan):
-    """Checks if syscheckd ignores duplicate entries, sregex patterns of restrict.
+    """Check if syscheckd ignores duplicate entries, sregex patterns of restrict.
        For instance:
            - The second entry should prevail over the first one.
             <directories restrict="^good.*$">/home/user</directories> (IGNORED)
@@ -145,7 +146,7 @@ def test_duplicate_entries_sregex(get_configuration, configure_environment,
 
 
 def test_duplicate_entries_report(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Checks if syscheckd ignores duplicate entries, report changes.
+    """Check if syscheckd ignores duplicate entries, report changes.
        For instance:
            - The second entry should prevail over the first one.
             <directories report_changes="yes">/home/user</directories> (IGNORED)
@@ -170,7 +171,7 @@ def test_duplicate_entries_report(get_configuration, configure_environment, rest
 
 
 def test_duplicate_entries_complex(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Checks if syscheckd ignores duplicate entries, complex entries.
+    """Check if syscheckd ignores duplicate entries, complex entries.
        For instance:
            - The second entry should prevail over the first one.
             <directories check_all="no" check_owner="yes" check_inode="yes">/home/user</directories> (IGNORED)

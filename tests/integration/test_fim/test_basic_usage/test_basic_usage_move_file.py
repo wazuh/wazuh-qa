@@ -59,14 +59,23 @@ def test_move_file(file, file_content, tags_to_apply, source_folder, target_fold
                    triggers_delete_event, triggers_add_event,
                    get_configuration, configure_environment,
                    restart_syscheckd, wait_for_initial_scan):
-    """ Checks if syscheckd detects 'added' or 'deleted' events when moving a file.
+    """
+    Check if syscheckd detects 'added' or 'deleted' events when moving a file.
 
-        :param file str Name of the file to be created
-        :param file_content str Content of the file to be created
-        :param source_folder str Folder to move the file from
-        :param target_folder str Destination folder to move the file to
-        :param triggers_delete_event boolean Expects a 'deleted' event in the source folder
-        :param triggers_add_event boolean Expects a 'added' event in the target folder
+    Parameters
+    ----------
+    file : str
+        Name of the file to be created.
+    file_content : str
+        Content of the file to be created.
+    source_folder : str
+        Folder to move the file from.
+    target_folder : str
+        Destination folder to move the file to.
+    triggers_delete_event : bool
+        Expects a 'deleted' event in the `source_folder`.
+    triggers_add_event : bool
+        Expects a 'added' event in the `target_folder`.
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])

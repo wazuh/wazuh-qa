@@ -19,7 +19,7 @@ symlink_interval = 20
 
 
 def debug_sym_check(func):
-    """ Decorator to see how long it's taking wazuh log monitor to detect the sym_check event """
+    """Decorator to see how long it's taking wazuh log monitor to detect the sym_check event"""
 
     def wrapper(*args, **kwargs):
         now1 = datetime.datetime.now()
@@ -32,7 +32,7 @@ def debug_sym_check(func):
 
 
 def modify_symlink(target, path, file=None):
-    """ Modify an existing symbolic link to point to another file or directory """
+    """Modify an existing symbolic link to point to another file or directory"""
     if file is not None:
         target = os.path.join(target, file)
     if sys.platform == "sunos5":
@@ -44,13 +44,13 @@ def modify_symlink(target, path, file=None):
 
 
 def wait_for_audit(whodata, monitor):
-    """ Wait for the audit callback if we are using whodata monitoring """
+    """Wait for the audit callback if we are using whodata monitoring"""
     if whodata:
         monitor.start(timeout=30, callback=callback_audit_loaded_rule)
 
 
 def delete_f(path, file=None):
-    """ Delete given path. Directory or file """
+    """Delete given path. Directory or file"""
     if file is None:
         shutil.rmtree(path, ignore_errors=True)
     else:
@@ -61,12 +61,12 @@ def delete_f(path, file=None):
 
 @debug_sym_check
 def wait_for_symlink_check(monitor):
-    """ Wait for symlink thread to finish its scan """
+    """Wait for symlink thread to finish its scan"""
     monitor.start(timeout=(symlink_interval + 2), callback=callback_symlink_scan_ended)
 
 
 def extra_configuration_before_yield():
-    """ Create files and symlinks """
+    """Create files and symlinks"""
     symlinkdir = testdir_link
     create_file(REGULAR, testdir1, 'regular1', content='')
     create_file(REGULAR, testdir1, 'regular2', content='')
@@ -81,5 +81,5 @@ def extra_configuration_before_yield():
 
 
 def extra_configuration_after_yield():
-    """ Set symlink_scan_interval to default value """
+    """Set symlink_scan_interval to default value"""
     change_internal_options(param='syscheck.symlink_scan_interval', value=600)

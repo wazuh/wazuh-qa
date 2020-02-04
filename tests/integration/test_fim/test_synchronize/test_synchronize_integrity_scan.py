@@ -66,9 +66,6 @@ def callback_integrity_synchronization_check(line):
 ])
 def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
     """Check that events are being generated while a synchronization is being performed simultaneously.
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-          the environment properly, restart the service and wait for the initial scan.
     """
     folder = testdir1 if get_configuration['metadata']['fim_mode'] == 'realtime' else testdir2
     # Check the integrity scan has begun

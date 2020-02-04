@@ -52,12 +52,11 @@ def extra_configuration_before_yield():
 
 
 def test_entries_match_path_count(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Checks if FIM entries match the path count
+    """
+    Check if FIM entries match the path count
 
-       It creates two regular files, a symlink and a hard link before the scan begins. After events are logged,
-       we should have 3 inode entries and a path count of 4.
-       * This test is intended to be used with valid configurations files. Each execution of this test will configure
-       the environment properly, restart the service and wait for the initial scan.
+    It creates two regular files, a symlink and a hard link before the scan begins. After events are logged,
+    we should have 3 inode entries and a path count of 4.
     """
     check_apply_test({'ossec_conf'}, get_configuration['tags'])
 

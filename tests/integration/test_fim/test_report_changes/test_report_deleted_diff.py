@@ -40,7 +40,7 @@ FILE_NAME = 'regularfile'
 # configurations
 
 def change_conf(report_value):
-    """" Returns a new ossec configuration with a changed report_value"""
+    """"Return a new ossec configuration with a changed report_value"""
     conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': report_value},
                                                                'TEST_DIRECTORIES': directory_str,
                                                                'NODIFF_FILE': nodiff_file,
@@ -125,10 +125,6 @@ def test_report_when_deleted_directories(path, get_configuration, configure_envi
                                          wait_for_initial_scan):
     """Check if the diff directory is empty when the monitored directory is deleted.
 
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan. This test will restart with a new
-    configuration throughout its execution as well.
-
     Parameters
     ----------
     path : str
@@ -153,10 +149,6 @@ def test_no_report_changes(path, get_configuration, configure_environment,
                            restart_syscheckd, wait_for_initial_scan):
     """Check if duplicated directories in diff are deleted when changing `report_changes` to 'no' or deleting the
     monitored directories.
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan. This test will restart with a new
-    configuration throughout its execution as well.
 
     Parameters
     ----------
@@ -183,10 +175,6 @@ def test_report_changes_after_restart(get_configuration, configure_environment, 
     The duplicated directories in diff will be removed after Syscheck restarts but will be created again if the report
     changes is still active. To avoid this we disable turn off report_changes option before restarting Syscheck to
     ensure directories won't be created again.
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan. This test will restart with a new
-    configuration throughout its execution as well.
     """
     fim_mode = get_configuration['metadata']['fim_mode']
 

@@ -49,9 +49,6 @@ def get_configuration(request):
 def test_disabled(folder, get_configuration, configure_environment, restart_syscheckd):
     """Check if syscheckd sends events when disabled="yes".
 
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-      the environment properly, restart the service and wait for the initial scan.
-
     Parameters
     ----------
     folder : str

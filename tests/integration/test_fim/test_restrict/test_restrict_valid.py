@@ -70,25 +70,23 @@ def get_configuration(request):
 def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply,
                   get_configuration, configure_environment, restart_syscheckd,
                   wait_for_initial_scan):
-    """Checks the only files detected are those matching the restrict regex
-
-    This test is intended to be used with valid configurations files. Each execution of this test will configure the
-    environment properly, restart the service and wait for the initial scan.
+    """
+    Check the only files detected are those matching the restrict regex
 
     Parameters
     ----------
     folder : str
-        Directory where the file is being created
+        Directory where the file is being created.
     filename : str
-        Name of the file to be created
+        Name of the file to be created.
     mode : str
-        Same as mode in open built-in function
+        Same as mode in open built-in function.
     content : str or bytes
-        Content to fill the new file
+        Content to fill the new file.
     triggers_event : bool
-        True if an event must be generated, False otherwise
+        True if an event must be generated, False otherwise.
     tags_to_apply : set
-        Run test if match with a configuration identifier, skip otherwise
+        Run test if match with a configuration identifier, skip otherwise.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

@@ -79,9 +79,6 @@ def test_windows_registry(arch_list, tag, tags_to_apply,
     it and then deletes the registry. It verifies that syscheck correctly monitors
     certain events while applying different settings.
 
-    This test is intended to be used with valid configurations files. Each execution of this test will configure the
-    environment properly, restart the service and wait for the initial scan.
-
     Parameters
     ----------
     arch_list : list
@@ -89,7 +86,7 @@ def test_windows_registry(arch_list, tag, tags_to_apply,
     tag : str
         Name of the tag to look for in the event.
     tags_to_apply : set
-         Run test if matches with a configuration identifier, skip otherwise.º
+         Run test if matches with a configuration identifier, skip otherwise.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

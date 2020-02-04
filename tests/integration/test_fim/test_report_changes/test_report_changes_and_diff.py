@@ -62,17 +62,19 @@ def get_configuration(request):
 def test_reports_file_and_nodiff(folder, checkers, tags_to_apply,
                                  get_configuration, configure_environment,
                                  restart_syscheckd, wait_for_initial_scan):
-    """ Check if report_changes events and diff truncated files are correct
+    """
+    Check if report_changes events and diff truncated files are correct
 
     The report_changes attribute adds a new event property to the 'modified' sent event: 'content_changes'
     It has information about what changed from the previous content. To do so, it duplicates the file in the diff
     directory. We call this duplicated file 'diff_file'.
 
-    :param folder: Directory where the files will be created
-    :param checkers: Dict of syscheck checkers (check_all)
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan.
+    Parameters
+    ----------
+    folder : str
+        Directory where the files will be created.
+    checkers : dict
+        Syscheck checkers
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -80,7 +82,7 @@ def test_reports_file_and_nodiff(folder, checkers, tags_to_apply,
     is_truncated = folder == testdir_nodiff
 
     def report_changes_validator(event):
-        """ Validate content_changes attribute exists in the event """
+        """Validate content_changes attribute exists in the event"""
         for file in file_list:
             diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
             if sys.platform == 'win32':
@@ -92,7 +94,7 @@ def test_reports_file_and_nodiff(folder, checkers, tags_to_apply,
             assert event['data'].get('content_changes') is not None, f'content_changes is empty'
 
     def no_diff_validator(event):
-        """ Validate content_changes value is truncated if the file is set to no_diff """
+        """Validate content_changes value is truncated if the file is set to no_diff"""
         if is_truncated:
             assert '<Diff truncated because nodiff option>' in event['data'].get('content_changes'), \
                 f'content_changes is not truncated'
