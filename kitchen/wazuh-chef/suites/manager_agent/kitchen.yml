@@ -1,7 +1,6 @@
 ---
 driver:
   name: docker
-  privileged: true
   use_sudo: false
   use_internal_docker_network: true
 
@@ -16,6 +15,7 @@ platforms:
       platform: <%= ENV['PLATFORM'] %>
       forward: 443
       publish_all: true
+      run_command: /sbin/init
       privileged: true
       volume:
         - /sys/fs/cgroup:/sys/fs/cgroup:ro
