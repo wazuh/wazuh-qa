@@ -97,7 +97,7 @@ def test_response_timeout(num_files, sync_interval, get_configuration, configure
     def purge_manager_db():
         for proc in psutil.process_iter(attrs=['name']):
             if proc.name() == "wazuh-db":
-                proc.kill()
+                proc.terminate()
 
         os.system("rm -f /var/ossec/queue/db/00{1..9}.db*")
         os.system("/var/ossec/bin/wazuh-db")
