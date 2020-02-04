@@ -235,18 +235,3 @@
       - inventory_hostname in groups['kibana']
     tags:
       - welcome_screen
-
-# Fix Alienvault CDB list
-
-  - name: Check if the Alienvault CDB list exists
-    stat:
-      path: "/var/ossec/etc/lists/blacklist-alienvault.cdb"
-    register: blacklist_alienvault
-    when:
-      - inventory_hostname in groups['masters']
-
-  - name: Rerunning /var/ossec/bin/ossec-makelists
-    shell: "/var/ossec/bin/ossec-makelists"
-    when:
-      - inventory_hostname in groups['masters']
-      - not (blacklist_alienvault.stat.exists)
