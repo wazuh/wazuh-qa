@@ -2,15 +2,15 @@
 
 set -e
 
-development_agent_path="../wazuh_agent/test/environments/development.json"
-development_manager_path="../wazuh_manager/test/environments/development.json"
-development_manager_path_master="../wazuh_manager/test/environments/development-master.json"
+development_agent_path="$COOKBOOKS_PATH/wazuh_agent/test/environments/development.json"
+development_manager_path="$COOKBOOKS_PATH/wazuh_manager/test/environments/development.json"
+development_manager_path_master="$COOKBOOKS_PATH/wazuh_manager/test/environments/development-master.json"
 
 template=".template"
 
+cd $SUITE_PATH
 
 echo "Kitchen is creating the new instances"
-
 kitchen create
 
 echo "Getting Wazuh managers IPs to the agents"
