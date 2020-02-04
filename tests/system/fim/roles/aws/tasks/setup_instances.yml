@@ -10,6 +10,8 @@
       - name: Installing Google Chrome
         win_chocolatey:
           name: googlechrome
+          version: 79.0.3945.130
+          pinned: yes
           state: present
     when:
       - ansible_os_family == "Windows"
