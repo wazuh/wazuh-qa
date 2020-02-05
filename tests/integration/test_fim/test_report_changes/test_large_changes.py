@@ -3,6 +3,9 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import sys
+import random
+import string
 
 import pytest
 
@@ -48,21 +51,49 @@ def get_configuration(request):
     return request.param
 
 
+# Functions
+
+def generateString(stringLength=10, character='0'):
+    """Generate a string with line breaks.
+
+    Parameters
+    ----------
+    stringLength : int
+        Number of characters to add in the string.
+    character : str
+         Character to be added.
+
+    Returns
+    -------
+    random_str : str
+        String with line breaks.
+    """
+    random_str = ''
+
+    for i in range(stringLength):
+        random_str += character
+
+        if i % 127 == 0:
+            random_str += '\n'
+
+    return random_str
+
+
 # Tests
 
 @pytest.mark.parametrize('tags_to_apply', [
     {'ossec_conf_report'}
 ])
 @pytest.mark.parametrize('filename, folder, original_size, modified_size', [
-    ('regular_0', testdir, 29660, 29660),
+    ('regular_0', testdir, 500, 500),
     ('regular_1', testdir, 30000, 30000),
     ('regular_2', testdir, 70000, 70000),
-    ('regular_4', testdir, 10, 29660),
+    ('regular_4', testdir, 10, 20000),
     ('regular_5', testdir, 10, 70000),
-    ('regular_6', testdir, 29660, 10),
+    ('regular_6', testdir, 20000, 10),
     ('regular_6', testdir, 70000, 10),
 ])
-def test_report_changes_big(filename, folder, original_size, modified_size, tags_to_apply, get_configuration,
+def test_large_changes(filename, folder, original_size, modified_size, tags_to_apply, get_configuration,
                             configure_environment, restart_syscheckd, wait_for_initial_scan):
     """Check content_changes when it exceeds the maximum size.
 
@@ -85,29 +116,27 @@ def test_report_changes_big(filename, folder, original_size, modified_size, tags
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     fim_mode = get_configuration['metadata']['fim_mode']
-    limit = 59370
+    limit = 58000
 
     # Create the file and and capture the event.
-    create_file(REGULAR, folder, filename, content=b'0'*original_size)
+    original_string = generateString(original_size, '0')
+    create_file(REGULAR, folder, filename, content=original_string)
     check_time_travel(fim_mode == 'scheduled')
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
     # Modify the file with new content
-    create_file(REGULAR, folder, filename, content=b'1'*modified_size)
+    modified_string = generateString(modified_size, '1')
+    create_file(REGULAR, folder, filename, content=modified_string)
     check_time_travel(fim_mode == 'scheduled')
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
     # Assert old content is shown in content_changes when it is lower than the limit.
-    if original_size < limit:
-        assert '0' * original_size in event['data']['content_changes']
-    # Assert new content is shown when it is lower than the limit (and the sum of both is still lower)
-    if modified_size < limit and (original_size + modified_size) < limit:
-        assert '1' * modified_size in event['data']['content_changes'], 'Not equal'
-    # Assert 'More changes' is shown when the sum of old and new content is greater than the limit.
-    if (original_size + modified_size) >= limit:
-        assert 'More changes' in event['data']['content_changes']
+    assert '0' in event['data']['content_changes']
 
-    # Delete all created files
-    delete_file(folder, filename)
-    check_time_travel(fim_mode == 'scheduled')
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
+    # Assert new content is shown when old content is lower than the limit
+    if original_size < limit or sys.platform == 'win32':
+        assert '1' in event['data']['content_changes'], f'Not equal {sys.getsizeof(original_string)}'
+
+    # Assert 'More changes' is shown when the sum of old and new content is greater than the limit.
+    if (original_size + modified_size) >= limit and sys.platform != 'win32':
+        assert 'More changes' in event['data']['content_changes']
