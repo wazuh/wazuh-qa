@@ -9,14 +9,16 @@ from struct import pack, unpack
 
 import pytest
 
-from wazuh_testing.fim import callback_detect_agent_restart
-from wazuh_testing.tools import AGENT_CONF, ALERT_FILE_PATH
+from wazuh_testing.tools import WAZUH_PATH, ALERT_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 
+agent_conf = os.path.join(WAZUH_PATH, 'etc', 'shared', 'default', 'agent.conf')
+state_path = os.path.join(WAZUH_PATH, 'var', 'run')
 db_path = '/var/ossec/queue/db/wdb'
 manager_ip = '172.19.0.100'
 setup_environment_time = 1  # Seconds
+state_collector_time = 5  # Seconds
 max_time_for_agent_setup = 180  # Seconds
 tested_daemons = ["wazuh-db", "ossec-analysisd", "ossec-remoted"]
 
@@ -90,6 +92,7 @@ def n_completions(agent="001"):
 def dump_database(agent_id):
     db_query(agent_id, 'UPDATE sync_info SET n_attempts=0')
     db_query(agent_id, 'UPDATE sync_info SET n_completions=0')
+    db_query(agent_id, 'DELETE FROM fim_entry')
 
 
 def get_agents(client_keys='/var/ossec/etc/client.keys'):
@@ -101,20 +104,21 @@ def get_agents(client_keys='/var/ossec/etc/client.keys'):
             agent_ids.append(re.match(agent_regex, line).group(1))
 
     for agent_id in agent_ids:
-        agent_dict[agent_id.zfill(3)] = {
+        agent_dict[agent_id.zfill(3)] = Manager().dict({
             'start': 0.0,
-            'check': list()
-        }
+            'check_info': False,
+        })
 
     return agent_dict
 
 
-def replace_conf(protocol, eps, directory):
+def replace_conf(protocol, eps, directory, buffer):
     new_config = str()
     address_regex = r".*<address>([0-9.]+)</address>"
     directory_regex = r'.*<directories check_all=\"yes\">(.+)</directories>'
     eps_regex = r'.*<max_eps>([0-9]+)</max_eps>'
     protocol_regex = r'.*<protocol>([a-z]+)</protocol>'
+    buffer_regex = r'<client_buffer><disabled>(yes|no)</disabled></client_buffer>'
 
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/template_agent.conf'), 'r') as f:
         lines = f.readlines()
@@ -123,13 +127,13 @@ def replace_conf(protocol, eps, directory):
             line = re.sub(directory_regex, '<directories check_all="yes">' + directory + '</directories>', line)
             line = re.sub(eps_regex, '<max_eps>' + eps + '</max_eps>', line)
             line = re.sub(protocol_regex, '<protocol>' + protocol + '</protocol>', line)
+            line = re.sub(buffer_regex, '<client_buffer><disabled>' + buffer + '</disabled></client_buffer>', line)
             new_config += line
 
-        time.sleep(10)
-        with open(AGENT_CONF, 'w') as agent_conf:
-            agent_conf.write(new_config)
+        with open(agent_conf, 'w') as conf:
+            conf.write(new_config)
     # Set Read/Write permissions to agent.conf
-    os.chmod(AGENT_CONF, 0o666)
+    os.chmod(agent_conf, 0o666)
 
 
 def check_all_n_completions(agents_list):
@@ -142,14 +146,59 @@ def check_all_n_completions(agents_list):
     return min(all_n_completions)
 
 
-def stats_collector(filename, daemon, agents_dict):
+def state_collector(protocol, eps, files, process_pool):
+    daemons_dict = {
+        'ossec-analysisd': [['syscheck_events_decoded', 'syscheck_edps', 'dbsync_queue_usage',
+                            'dbsync_messages_dispatched', 'dbsync_mdps', 'events_received', 'events_dropped',
+                            'syscheck_queue_usage', 'event_queue_usage'], True],
+        'ossec-remoted': [['queue_size', 'tcp_sessions', 'evt_count', 'discarded_count', 'recv_bytes'], True]
+    }
+
+    deleted = False
+    while True:
+        if process_pool['check_state_start']:
+            for file in os.listdir(state_path):
+                if file.endswith('.state'):
+                    daemon = file.split(".")[0]
+                    filename = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                            f"stats/state_{daemon}_{protocol}_{eps}_{files}k.csv")
+                    if os.path.exists(filename) and not deleted:
+                        os.unlink(filename)
+                        deleted = True
+                    with open(filename, 'a') as state:
+                        values = list()
+                        for field in daemons_dict[str(daemon)][0]:
+                            value = re.search(rf"{field}='([0-9]+)'",
+                                              open(os.path.join(state_path, file), 'r').read(), re.MULTILINE)
+                            if value:
+                                values.append(value.group(1))
+                        if daemons_dict[str(daemon)][1]:
+                            state.write(f"{','.join(daemons_dict[str(daemon)][0])}\n")
+                            daemons_dict[str(daemon)][1] = False
+                        print(f'[INFO] Writing {daemon} state: {",".join(values)}')
+                        state.write(f"{','.join(values)}\n")
+            time.sleep(state_collector_time)
+        if process_pool['check_state_finish']:
+            process_pool['state_collector'] = True
+            break
+    print(f'[INFO] Finished state collector')
+
+
+def stats_collector(filename, daemon, agent_id, agents_dict, process_pool):
     # Detect that the agent are been restarted
+    def callback_detect_agent_restart(line):
+        try:
+            return re.match(rf'.*\"agent\":{{\"id\":\"({agent_id})\".*', line).group(1)
+        except IndexError:
+            pass
+
     agent_id = FileMonitor(ALERT_FILE_PATH).start(timeout=max_time_for_agent_setup,
                                                   callback=callback_detect_agent_restart).result()
     if agents_dict[agent_id]['start'] == 0.0:
         agents_dict[agent_id]['start'] = time.time()
+        process_pool['check_state_start'] = True
+        print(f'[INFO] Agent {agent_id} started at {agents_dict[agent_id]["start"]}')
         dump_database(agent_id)  # Delete all database files
-    info_created = False
     with open(filename, 'w') as file_:
         file_.write("seconds,cpu,ram,avg_disk_read,avg_disk_write,total_disk_read,total_disk_write\n")
         while check_all_n_completions(agents_dict.keys()) == 0:
@@ -160,79 +209,78 @@ def stats_collector(filename, daemon, agents_dict):
                     print(f'[INFO] Stats {agent_id}_{daemon} writing: {time.time()},{cpu},{ram},{avg_disk_read},'
                           f'{avg_disk_write},,')
                     file_.write(f'{time.time()},{cpu},{ram},{avg_disk_read},{avg_disk_write},,\n')
-                if n_completions(agent_id) > 0 and not info_created:
-                    info_created = info_collector(
-                        agents_dict[agent_id], agent_id, filename.replace(f'results_{daemon}', 'info'), info_created)
-            time.sleep(1)
-    if not info_created:
-        info_collector(agents_dict[agent_id], agent_id, filename.replace(f'results_{daemon}', 'info'), info_created)
-    finish_stats_collector(agent_id, agents_dict, daemon, filename)
+                if n_completions(agent_id) > 0 and not agents_dict[agent_id]['check_info']:
+                    info_collector(agents_dict[agent_id], agent_id, filename.replace(f'results_{daemon}', 'info'))
+            time.sleep(setup_environment_time)
+        if not agents_dict[agent_id]['check_info']:
+            info_collector(agents_dict[agent_id], agent_id, filename.replace(f'results_{daemon}', 'info'))
+    finish_stats_collector(agent_id, agents_dict, process_pool, daemon, filename)
 
 
-def finish_stats_collector(agent_id, agents_dict, daemon, filename):
+def finish_stats_collector(agent_id, agents_dict, process_pool, daemon, filename):
     if check_all_n_completions(agents_dict.keys()) > 0:
         while True:
             stats = get_stats(daemon)
-            if stats:
+            process_pool['check_state_finish'] = True
+            if stats and process_pool['state_collector']:
                 print(f'[INFO] Finishing stats {agent_id}_{daemon} writing: {time.time()},{",".join(stats)}')
                 with open(filename, 'a') as file_:
                     file_.write(f'{time.time()},{",".join(get_stats(daemon))}\n')
                 break
 
 
-def info_collector(agent, agent_id, filename, info_created):
-    if not info_created:
-        with open(filename, 'w') as info_agent:
-            print(
-                f"[INFO] Info {agent_id} writing: "
-                f"{agent_id},{n_attempts(agent_id)},{n_completions(agent_id)},{agent['start']},"
-                f"{time.time()},{time.time() - agent['start']}")
-            info_agent.write("agent_id,n_attempts,n_completions,start_time,end_time,total_time\n")
-            info_agent.write(f"{agent_id},{n_attempts(agent_id)},{n_completions(agent_id)},{agent['start']},"
-                             f"{time.time()},{time.time() - agent['start']}\n")
-        info_created = True
-
-    return info_created
+def info_collector(agent, agent_id, filename):
+    agent['check_info'] = True
+    with open(filename, 'w') as info_agent:
+        print(
+            f"[INFO] Info {agent_id} writing: "
+            f"{agent_id},{n_attempts(agent_id)},{n_completions(agent_id)},{agent['start']},"
+            f"{time.time()},{time.time() - agent['start']}")
+        info_agent.write("agent_id,n_attempts,n_completions,start_time,end_time,total_time\n")
+        info_agent.write(f"{agent_id},{n_attempts(agent_id)},{n_completions(agent_id)},{agent['start']},"
+                         f"{time.time()},{time.time() - agent['start']}\n")
 
 
-@pytest.mark.parametrize('files, directory', [
-    ('10000', '/test10k'),
-    ('20000', '/test20k'),
-    ('50000', '/test50k'),
-    ('100000', '/test100k'),
-    ('200000', '/test200k'),
-    ('500000', '/test500k'),
-    ('1000000', '/test1M'),
+@pytest.mark.parametrize('protocol, eps, files, directory, buffer', [
+    ('udp', '200', '0', '/test0k', 'no'),
+    ('tcp', '200', '0', '/test0k', 'no'),
+    ('udp', '200', '5000', '/test5k', 'no'),
+    ('udp', '5000', '5000', '/test5k', 'no'),
+    ('tcp', '200', '5000', '/test5k', 'no'),
+    ('tcp', '5000', '5000', '/test5k', 'no'),
+    ('udp', '200', '50000', '/test50k', 'no'),
+    ('udp', '5000', '50000', '/test50k', 'yes'),
+    ('tcp', '200', '50000', '/test50k', 'no'),
+    ('tcp', '5000', '50000', '/test50k', 'yes'),
+    ('udp', '5000', '1000000', '/test1M', 'yes'),
+    ('udp', '1000000', '1000000', '/test1M', 'yes'),
+    ('tcp', '5000', '1000000', '/test1M', 'yes'),
+    ('tcp', '1000000', '1000000', '/test1M', 'yes')
 ])
-@pytest.mark.parametrize('protocol, eps', [
-    ('udp', '1000'),
-    ('tcp', '1000'),
-    ('udp', '1000000'),
-    ('tcp', '1000000'),
-])
-def test_initialize_stats_collector(protocol, eps, files, directory):
+def test_initialize_stats_collector(protocol, eps, files, directory, buffer):
     agents_dict = get_agents()
     writers = list()
+    process_pool = Manager().dict({
+        'check_state_start': False,
+        'check_state_finish': False,
+        'state_collector': False
+    })
 
     print('[INFO] Setting up the environment...')
     truncate_file(ALERT_FILE_PATH)
-    replace_conf(protocol, eps, directory)
+    replace_conf(protocol, eps, directory, buffer)
 
-    while True:
+    print(f'[INFO] Starting test for {protocol}-{eps}-{files}')
+    Process(target=state_collector, args=(protocol, eps, files, process_pool)).start()
+    for daemon in tested_daemons:
         for agent_id, value in agents_dict.items():
-            if n_attempts(agent_id) > 0:
-                if len(writers) == 0:
-                    print(f'[INFO] Starting test for {protocol}-{eps}-{files}')
-                for daemon in tested_daemons:
-                    if f'{agent_id}_{daemon}' not in value['check']:
-                        filename = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                                f"stats/results_{daemon}_{protocol}_{eps}_{files}k.csv")
-                        writers.append(Process(target=stats_collector, args=(filename, daemon, agents_dict,)))
-                        writers[-1].start()
-                        value['check'].append(f'{agent_id}_{daemon}')
+            filename = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                    f"stats/results_{daemon}_{protocol}_{eps}_{files}k.csv")
+            writers.append(Process(target=stats_collector, args=(filename, daemon, agent_id, agents_dict,
+                                                                 process_pool,)))
+            writers[-1].start()
+    while True:
         if len(writers) == len(tested_daemons) * len(agents_dict.keys()):
-            while True:
-                if not any([writer_.is_alive() for writer_ in writers]):
-                    print('[INFO] All writers are finished')
-                    break
-            break
+            if not any([writer_.is_alive() for writer_ in writers]):
+                print('[INFO] All writers are finished')
+                break

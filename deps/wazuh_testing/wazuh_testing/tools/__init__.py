@@ -40,3 +40,4 @@ else:
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
 WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
+ALERT_FILE_PATH = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.json')
