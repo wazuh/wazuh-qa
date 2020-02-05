@@ -18,6 +18,13 @@ RUN cd $HOME && \
     cd $HOME/wazuh-qa/kitchen/wazuh-chef/manager/files/ && \
     bundle install
 
+RUN git clone git@github.com:rshad/kitchen-docker.git && \
+    git checkout fix-docker-image-deletion && \
+    git pull origin fix-docker-image-deletion
+
+RUN rm -rf /usr/local/bundle/gems/kitchen-docker-2.9.0/* && \
+    cp -rf kitchen-docker/* /usr/local/bundle/gems/kitchen-docker-2.9.0/
+
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py
 
 RUN pip install pytest && pip install testinfra && pip install paramiko
