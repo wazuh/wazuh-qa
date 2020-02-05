@@ -26,10 +26,6 @@
           }
         }
       }
-    },
-    "filebeat": {
-      "ossec_type": "ossec-alerts-development",
-      "logstash_servers": "elk.wazuh-test.com:5000"
     }
   }
 }
