@@ -2,10 +2,16 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import json
 import os
+import re
 import sys
+from datetime import datetime
+from time import time
 
 import pytest
+from numpydoc.docscrape import FunctionDoc
+from py.xml import html
 
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_LOGS_PATH
@@ -14,6 +20,9 @@ from wazuh_testing.tools.monitoring import FileMonitor, SocketController, Socket
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_sockets
 
 ALL = set("darwin linux win32 sunos5".split())
+
+
+catalog = list()
 
 
 def pytest_runtest_setup(item):
@@ -91,6 +100,72 @@ def pytest_configure(config):
     default_timeout = config.getoption("--default-timeout")
     if default_timeout:
         global_parameters.default_timeout = default_timeout
+
+
+def pytest_html_results_table_header(cells):
+    cells.insert(2, html.th('Description'))
+    cells.insert(1, html.th('Time', class_='sortable time', col='time'))
+
+
+def pytest_html_results_table_row(report, cells):
+    cells.insert(2, html.td(report.description))
+    cells.insert(1, html.td(datetime.utcnow(), class_='col-time'))
+
+
+# HARDCODE: pytest-html generates too long file names. This temp fix is to reduce the name of
+# the assets
+def create_asset(
+        self, content, extra_index, test_index, file_extension, mode="w"
+):
+    asset_file_name = "{}_{}.{}".format(
+        re.sub(r"[^\w\.\:]", "_", self.test_id).split('::')[0],
+        str(time()),
+        file_extension
+    )
+    asset_path = os.path.join(
+        os.path.dirname(self.logfile), "assets", asset_file_name
+    )
+
+    if not os.path.exists(os.path.dirname(asset_path)):
+        os.makedirs(os.path.dirname(asset_path))
+
+    relative_path = f"assets/{asset_file_name}"
+
+    kwargs = {"encoding": "utf-8"} if "b" not in mode else {}
+
+    with open(asset_path, mode, **kwargs) as f:
+        f.write(content)
+    return relative_path
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    pytest_html = item.config.pluginmanager.getplugin('html')
+    outcome = yield
+    report = outcome.get_result()
+    documentation = FunctionDoc(item.function)
+    report.description = '. '.join(documentation["Summary"])
+
+    extra = getattr(report, 'extra', [])
+    if report.when == 'call':
+        # Apply hack to fix length filename problem
+        pytest_html.HTMLReport.TestResult.create_asset = create_asset
+        extra.append(pytest_html.extras.html('<div><h2>Test function details</h2></div>'))
+        for section in ('Extended Summary', 'Parameters'):
+            extra.append(pytest_html.extras.html(f'<div><h3>{section}</h3></div>'))
+            for line in documentation[section]:
+                extra.append(pytest_html.extras.html(f'<div>{line}</div>'))
+        arguments = dict()
+        for key, value in item.funcargs.items():
+            if isinstance(value, set):
+                arguments[key] = list(value)
+            try:
+                json.dumps(value)
+                arguments[key] = value
+            except (TypeError, OverflowError):
+                arguments[key] = str(value)
+        extra.append(pytest_html.extras.json(arguments, name="Test arguments"))
+        report.extra = extra
 
 
 @pytest.fixture(scope='module')
