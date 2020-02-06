@@ -23,10 +23,14 @@ def test_wazuh_services_are_running(host):
     """
     Test if the services are enabled and running.
     """
+    dist = host.system_info.distribution.lower()
+    release = host.system_info.release
     manager = host.service("wazuh-manager")
-    with host.sudo():
-        assert manager.is_running
-        assert manager.is_enabled
+
+    if( not( (dist == 'ubuntu') and (release.startswith("14")) ) ):
+        with host.sudo():
+            assert manager.is_running
+            assert manager.is_enabled
 
 @pytest.mark.filterwarnings('ignore')
 @pytest.mark.skipif('agent' in os.environ.get('KITCHEN_INSTANCE'), reason='Skip on wazuh agent instances')
