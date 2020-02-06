@@ -14,15 +14,20 @@ platforms:
     driver_config:
       image: <%= ENV['IMAGE'] %>
       platform: <%= ENV['PLATFORM'] %>
-      forward: 443
       publish_all: true
       run_command: /sbin/init
       privileged: true
       volume:
         - /sys/fs/cgroup:/sys/fs/cgroup:ro
       provision_command:
-        - sed -i 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config
-        - python -mplatform | grep -qi debian && apt-get install -y apt-transport-https gnupg2 || yum install -y openssl
+        - sed -i 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config && service ssh restart
+        - awk -F= '/^NAME/{print $2}' /etc/os-release | grep -qi 'debian\|ubuntu' && apt-get install -y apt-transport-https gnupg2 ca-certificates|| yum install -y openssl
+  - name: ubuntu-1404-kitchen-chef
+    driver_config:
+      image: ubuntu:14.04
+      platform: ubuntu
+      provision_command: apt-get update && apt-get install -y --force-yes apt-transport-https ca-certificates && apt-get update
+
 suites:
   - name: manager
     environments_path: <%= ENV['COOKBOOKS_PATH'] %>/wazuh_manager/test/environments
