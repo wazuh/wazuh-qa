@@ -103,11 +103,15 @@ def pytest_configure(config):
 
 
 def pytest_html_results_table_header(cells):
+    cells.insert(4, html.th('Tier'))
+    cells.insert(3, html.th('Markers'))
     cells.insert(2, html.th('Description'))
     cells.insert(1, html.th('Time', class_='sortable time', col='time'))
 
 
 def pytest_html_results_table_row(report, cells):
+    cells.insert(4, html.td(report.tier))
+    cells.insert(3, html.td(report.markers))
     cells.insert(2, html.td(report.description))
     cells.insert(1, html.td(datetime.utcnow(), class_='col-time'))
 
@@ -145,6 +149,8 @@ def pytest_runtest_makereport(item, call):
     report = outcome.get_result()
     documentation = FunctionDoc(item.function)
     report.description = '. '.join(documentation["Summary"])
+    report.tier = ', '.join(str(mark.kwargs['level']) for mark in item.iter_markers(name='tier'))
+    report.markers = ', '.join(mark.name for mark in item.iter_markers() if mark.name != 'tier')
 
     extra = getattr(report, 'extra', [])
     if report.when == 'call':
@@ -165,6 +171,9 @@ def pytest_runtest_makereport(item, call):
             except (TypeError, OverflowError):
                 arguments[key] = str(value)
         extra.append(pytest_html.extras.json(arguments, name="Test arguments"))
+        with open(LOG_FILE_PATH, 'r') as f:
+            ossec_log = f.read()
+            extra.append(pytest_html.extras.text(ossec_log, name='Ossec.log'))
         report.extra = extra
 
 
