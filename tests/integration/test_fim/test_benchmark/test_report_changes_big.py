@@ -4,18 +4,18 @@
 
 import os
 import sys
-import psutil
-import pandas
 from datetime import datetime
 from statistics import mean, median
 
+import pandas
+import psutil
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, WAZUH_PATH, REGULAR, generate_params, create_file,\
-    callback_detect_event, check_time_travel, delete_file
+from wazuh_testing.fim import LOG_FILE_PATH, WAZUH_PATH, REGULAR, generate_params, create_file, \
+    callback_detect_event, check_time_travel
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -35,7 +35,6 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories[0]
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-filenames_list = [f'regular_{i}' for i in range(2000)]
 timeout = 240 if sys.platform == 'win32' else 160
 
 process = psutil.Process(os.getpid())
@@ -163,8 +162,8 @@ def calculate_metrics(folder, event_list, fim_mode):
     else:
         elapsed_time_list = [event['data']['timestamp'] - event['data']['attributes']['mtime'] for event in event_list]
 
-    return size_original_folder, used_rss_memory, used_vms_memory, total_creation_time, mean(elapsed_time_list), median(elapsed_time_list),\
-           min(elapsed_time_list), max(elapsed_time_list)
+    return size_original_folder, used_rss_memory, used_vms_memory, total_creation_time, mean(elapsed_time_list), \
+           median(elapsed_time_list), min(elapsed_time_list), max(elapsed_time_list)
 
 
 def write_csv(data):
@@ -184,26 +183,18 @@ def write_csv(data):
     df.to_csv(metrics_path, sep='\t', mode='a', index=False, header=(not os.path.exists(metrics_path)))
 
 
-# Tests
-
 @pytest.mark.benchmark
 @pytest.mark.parametrize('tags_to_apply', [
     {'ossec_conf'}
 ])
-@pytest.mark.parametrize('file_list, folder, file_size', [
-    # Many almost empty files.
-    (filenames_list[0:10], testdir1, 0),
-    (filenames_list[0:100], testdir1, 0),
-    (filenames_list[0:1000], testdir1, 0),
-    (filenames_list, testdir1, 0),
-    # 59KiB files.
-    (filenames_list[0:10], testdir1, 1024*59),
-    (filenames_list[0:100], testdir1, 1024*59),
-    (filenames_list[0:1000], testdir1, 1024*59),
-    (filenames_list, testdir1, 1024*59),
+@pytest.mark.parametrize('n_files', [
+    10, 100, 1000, 2000
 ])
-def test_report_changes_big(file_list, folder, file_size, tags_to_apply, get_configuration,
-                            configure_environment, restart_syscheckd, wait_for_initial_scan):
+@pytest.mark.parametrize('file_size', [
+    0, 1024*59
+])
+def test_report_changes_big(file_size, n_files, tags_to_apply, get_configuration, configure_environment,
+                            restart_syscheckd, wait_for_initial_scan):
     """Verify syscheck when using the report_changes option with large amount of files.
 
     This test creates, in a monitored directory with the report_changes option,
@@ -216,10 +207,8 @@ def test_report_changes_big(file_list, folder, file_size, tags_to_apply, get_con
 
     Parameters
     ----------
-    file_list : list
-        List of names to create files.
-    folder : str
-        Directory where the files are being created
+    n_files : int
+        Number of files to create
     file_size : int
         Size of each file in bytes
     tags_to_apply : set
@@ -229,7 +218,9 @@ def test_report_changes_big(file_list, folder, file_size, tags_to_apply, get_con
     fim_mode = get_configuration['metadata']['fim_mode']
     data = []
 
-    # Create the list of files and check if they are duplicated in diff path.
+    # Create the list of files
+    folder = testdir1
+    file_list = [f'regular_{fim_mode}_{n_files}_{i}_{file_size}' for i in range(n_files)]
     create_files(file_list, folder, b'0'*file_size)
 
     # Get events generated when creating files
@@ -240,9 +231,11 @@ def test_report_changes_big(file_list, folder, file_size, tags_to_apply, get_con
     # Assert number of events and type match with expected
     assert len(event_list) == len(file_list), 'Not all files raised an event'
     assert all(event['data']['type'] == 'added' for event in event_list), 'Event type not equal'
+
+    # Check if the files are duplicated in diff path
     check_diff(file_list, folder)
 
-    # Save the metrics to write them in a CSV.
+    # Save the metrics to write them in a CSV
     data.append([fim_mode, 'Add', len(file_list), file_size,
                  *calculate_metrics(folder, event_list, fim_mode)])
 
@@ -261,15 +254,9 @@ def test_report_changes_big(file_list, folder, file_size, tags_to_apply, get_con
         f'content_changes is empty'
     check_diff(file_list, folder)
 
-    # Save the metrics to write them in a CSV.
+    # Save the metrics to write them in a CSV
     data.append([fim_mode, 'Modify', len(file_list), file_size,
                  *calculate_metrics(folder, event_list, fim_mode)])
 
-    # Write the CSV.
+    # Write the CSV
     write_csv(data)
-
-    # Delete all created files
-    for file in file_list:
-        delete_file(folder, file)
-    check_time_travel(fim_mode == 'scheduled')
-    wazuh_log_monitor.start(timeout=timeout, callback=callback_detect_event, accum_results=len(file_list))
