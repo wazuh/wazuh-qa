@@ -95,7 +95,7 @@ def generateString(stringLength=10, character='0'):
 ])
 def test_large_changes(filename, folder, original_size, modified_size, tags_to_apply, get_configuration,
                             configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Check content_changes when it exceeds the maximum size.
+    """Check content_changes shows the tag 'More changes' when it exceeds the maximum size.
 
     Every change in the content of the file shall produce an alert including
     the difference. But, if the difference is greater or equal than 59370 bytes, 'More changes'
@@ -130,13 +130,13 @@ def test_large_changes(filename, folder, original_size, modified_size, tags_to_a
     check_time_travel(fim_mode == 'scheduled')
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
-    # Assert old content is shown in content_changes when it is lower than the limit.
+    # Assert old content is shown in content_changes
     assert '0' in event['data']['content_changes']
 
-    # Assert new content is shown when old content is lower than the limit
+    # Assert new content is shown when old content is lower than the limit or platform is Windows
     if original_size < limit or sys.platform == 'win32':
         assert '1' in event['data']['content_changes'], f'Not equal {sys.getsizeof(original_string)}'
 
     # Assert 'More changes' is shown when the sum of old and new content is greater than the limit.
-    if (original_size + modified_size) >= limit and sys.platform != 'win32':
-        assert 'More changes' in event['data']['content_changes']
+    if (original_size + modified_size) >= limit:
+        assert 'More changes' in event['data']['content_changes'], 'More changes not found within content_changes.'
