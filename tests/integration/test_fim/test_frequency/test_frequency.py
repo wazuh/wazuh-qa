@@ -8,7 +8,8 @@ from datetime import timedelta
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, DEFAULT_TIMEOUT, regular_file_cud, generate_params
+from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, generate_params
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -70,15 +71,16 @@ def get_configuration(request):
 ])
 def test_frequency(folder, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                    wait_for_initial_scan):
-    """ Checks if a non existing directory is monitored in realtime after the frequency time has passed
+    """
+    Check if a non existing directory is monitored in realtime after the frequency time has passed
 
     Even with realtime monitoring, if we monitor a non existing directory and then we create it after restarting
     the service, syscheck won't detect anything from it until the scan restarts (using its frequency interval).
 
-    :param folder: Directory that is being monitored
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan.
+    Parameters
+    ----------
+    folder : str
+        Directory that is being monitored.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     try:
@@ -94,7 +96,7 @@ def test_frequency(folder, tags_to_apply, get_configuration, configure_environme
 
         # Expect events now
         regular_file_cud(folder, wazuh_log_monitor, file_list=['regular'],
-                         min_timeout=DEFAULT_TIMEOUT, triggers_event=True)
+                         min_timeout=global_parameters.default_timeout, triggers_event=True)
     finally:
         # Remove directory since it is not included in fixture
         shutil.rmtree(directory_str, ignore_errors=True)

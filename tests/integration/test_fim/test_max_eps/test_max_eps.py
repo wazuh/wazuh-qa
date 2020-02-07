@@ -52,13 +52,10 @@ def extra_configuration_before_yield():
 
 def test_max_eps_on_start(get_configuration, configure_environment, restart_syscheckd):
     """
-    Checks that max_eps is respected when a big quatity of events are generated
+    Check that max_eps is respected when a big quatity of events are generated
 
     Before starting the service, a great number of files is created thanks to function `extra_configuration_before_yield`.
     After that, syscheck is launched and starts generating as much events as files created.
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-          the environment properly and restart the service.
     """
     check_apply_test({'max_eps'}, get_configuration['tags'])
 

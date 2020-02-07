@@ -7,7 +7,8 @@ import os
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
-    callback_detect_event, check_time_travel, DEFAULT_TIMEOUT, delete_file
+    callback_detect_event, check_time_travel, delete_file
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -58,14 +59,23 @@ def test_move_file(file, file_content, tags_to_apply, source_folder, target_fold
                    triggers_delete_event, triggers_add_event,
                    get_configuration, configure_environment,
                    restart_syscheckd, wait_for_initial_scan):
-    """ Checks if syscheckd detects 'added' or 'deleted' events when moving a file.
+    """
+    Check if syscheckd detects 'added' or 'deleted' events when moving a file.
 
-        :param file str Name of the file to be created
-        :param file_content str Content of the file to be created
-        :param source_folder str Folder to move the file from
-        :param target_folder str Destination folder to move the file to
-        :param triggers_delete_event boolean Expects a 'deleted' event in the source folder
-        :param triggers_add_event boolean Expects a 'added' event in the target folder
+    Parameters
+    ----------
+    file : str
+        Name of the file to be created.
+    file_content : str
+        Content of the file to be created.
+    source_folder : str
+        Folder to move the file from.
+    target_folder : str
+        Destination folder to move the file to.
+    triggers_delete_event : bool
+        Expects a 'deleted' event in the `source_folder`.
+    triggers_add_event : bool
+        Expects a 'added' event in the `target_folder`.
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
@@ -76,14 +86,14 @@ def test_move_file(file, file_content, tags_to_apply, source_folder, target_fold
 
     if source_folder in test_directories:
         check_time_travel(scheduled)
-        wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event)
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event)
 
     # Move file to target directory
     os.rename(os.path.join(source_folder, file), os.path.join(target_folder, file))
     check_time_travel(scheduled)
 
     # Monitor expected events
-    events = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT,
+    events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                      callback=callback_detect_event,
                                      accum_results=(triggers_add_event + triggers_delete_event)).result()
 
@@ -107,4 +117,4 @@ def test_move_file(file, file_content, tags_to_apply, source_folder, target_fold
     delete_file(target_folder, file)
     if target_folder in test_directories:
         check_time_travel(scheduled)
-        wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event)
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event)

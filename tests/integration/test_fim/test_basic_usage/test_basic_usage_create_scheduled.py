@@ -8,8 +8,9 @@ from datetime import timedelta
 
 import pytest
 
-from wazuh_testing.fim import CHECK_ALL, DEFAULT_TIMEOUT, FIFO, LOG_FILE_PATH, REGULAR, SOCKET, callback_detect_event, \
+from wazuh_testing.fim import CHECK_ALL, FIFO, LOG_FILE_PATH, REGULAR, SOCKET, callback_detect_event, \
     create_file, validate_event, generate_params
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -73,18 +74,23 @@ def get_configuration(request):
 ])
 def test_create_file_scheduled(folder, name, filetype, content, checkers, tags_to_apply, encoding, get_configuration,
                                configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """ Checks if a special or regular file creation is detected by syscheck using scheduled monitoring
+    """
+    Check if a special or regular file creation is detected by syscheck using scheduled monitoring
 
-        Regular files must be monitored. Special files must not.
+    Regular files must be monitored. Special files must not.
 
-        :param folder: Name of the monitored folder
-        :param name: Name of the file
-        :param filetype: Type of the file
-        :param content: Content of the file
-        :param checkers: Checks that will compared to the ones from the event
-
-        * This test is intended to be used with valid configurations files. Each execution of this test will configure
-          the environment properly, restart the service and wait for the initial scan.
+    Parameters
+    ----------
+    folder : str
+        Name of the monitored folder.
+    name : str
+        Name of the file.
+    filetype : str
+        Type of the file.
+    content : str
+        Content of the file.
+    checkers : set
+        Checks that will compared to the ones from the event.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -100,8 +106,8 @@ def test_create_file_scheduled(folder, name, filetype, content, checkers, tags_t
     if filetype == REGULAR:
         # Wait until event is detected
         event = wazuh_log_monitor.start(
-            timeout=DEFAULT_TIMEOUT, callback=callback_detect_event, encoding=encoding).result()
+            timeout=global_parameters.default_timeout, callback=callback_detect_event, encoding=encoding).result()
         validate_event(event, checkers)
     else:
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event)
+            wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event)

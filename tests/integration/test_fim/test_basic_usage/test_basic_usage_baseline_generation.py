@@ -63,14 +63,13 @@ def extra_configuration_before_yield():
 
 
 def test_wait_until_baseline(get_configuration, configure_environment, restart_syscheckd):
-    """ Checks if events are appearing after the baseline
-        The message 'File integrity monitoring scan ended' informs about the end of the first scan, which generates the baseline
+    """
+    Check if events are appearing after the baseline
+    The message 'File integrity monitoring scan ended' informs about the end of the first scan,
+    which generates the baseline
 
-        It creates a file, checks if the baseline has generated before the file addition event, and then if this event has generated.
-
-
-        * This test is intended to be used with valid configurations files. Each execution of this test will configure
-          the environment properly, restart the service and wait for the initial scan.
+    It creates a file, checks if the baseline has generated before the file addition event, and then
+    if this event has generated.
     """
     check_apply_test({'ossec_conf'}, get_configuration['tags'])
 

@@ -5,7 +5,8 @@ import os
 
 import pytest
 
-from wazuh_testing.fim import DEFAULT_TIMEOUT, LOG_FILE_PATH, regular_file_cud, generate_params
+from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, generate_params
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -58,15 +59,18 @@ def get_configuration(request):
 ])
 def test_tags(folder, name, content,
               get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Checks the tags functionality by applying some tags an ensuring the events raised for the monitored directory has
+    """
+    Check the tags functionality by applying some tags an ensuring the events raised for the monitored directory has
     the expected tags.
 
-    This test is intended to be used with valid configurations files. Each execution of this test will configure the
-    environment properly, restart the service and wait for the initial scan.
-
-    :param folder string Directory where the file is being created
-    :param name string Name of the file to be created
-    :param content string, bytes Content to fill the new file
+    Parameters
+    ----------
+    folder : str
+        Directory where the file is being created.
+    name : str
+        Name of the file to be created.
+    content : str, bytes
+        Content to fill the new file.
     """
     defined_tags = get_configuration['metadata']['fim_tags']
 
@@ -77,5 +81,5 @@ def test_tags(folder, name, content,
 
     regular_file_cud(folder, wazuh_log_monitor, file_list=files,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                     min_timeout=DEFAULT_TIMEOUT, validators_after_cud=[tag_validator]
+                     min_timeout=global_parameters.default_timeout, validators_after_cud=[tag_validator]
                      )

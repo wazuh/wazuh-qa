@@ -6,8 +6,9 @@ import os
 
 import pytest
 
-from wazuh_testing.fim import DEFAULT_TIMEOUT, LOG_FILE_PATH, REGULAR, callback_detect_event, \
+from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_detect_event, \
     create_file, generate_params, modify_file_content, check_time_travel, delete_file
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -26,7 +27,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2 = test_directories
-timeout = DEFAULT_TIMEOUT
+timeout = global_parameters.default_timeout
 
 
 # Extra functions
@@ -65,9 +66,7 @@ def get_configuration(request):
 ])
 def test_events_from_existing_files(filename, tags_to_apply, get_configuration,
                                     configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """
-        Checks if syscheck generates modified alerts for files that exists when starting the agent
-    """
+    """Check if syscheck generates modified alerts for files that exists when starting the agent"""
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 

@@ -75,7 +75,7 @@ choco install jq
 - Install Python dependencies
 
 ```shell script
-pip install pytest freezegun jsonschema pyyaml psutil paramiko distro pywin32 pypiwin32
+pip install pytest freezegun jsonschema pyyaml psutil paramiko distro pywin32 pypiwin32 wmi
 ```
 
 - Change `time-reconnect` from `C:\Program Files (x86)\ossec-agent\ossec.conf`
@@ -128,7 +128,7 @@ gsed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time
 echo 'monitord.rotate_log=0' >> /Library/Ossec/etc/local_internal_options.conf
 
 # Restart Wazuh
-/Library/Ossec/etc/bin/ossec-control restart
+/Library/Ossec/bin/ossec-control restart
 ```
 
 -----------
@@ -139,12 +139,13 @@ Finally, copy your `wazuh-qa` repository within your testing environment and you
 
 **DISCLAIMER:** this guide assumes you have a proper testing environment. If you do not, please check our [testing environment guide](#setting-up-a-test-environment).
 
-Our newest integration tests are located in `wazuh-qa/test_wazuh/`. They are organized by capabilities:
+Our newest integration tests are located in `wazuh-qa/tests/integration/`. They are organized by capabilities:
 
 - _test_analysisd_
 - _test_fim_
 - _test_mitre_
 - _test_wazuh_db_
+- _test_sca_
 
 Every group will have the following structure:
 
@@ -264,10 +265,10 @@ _**NOTE:** `jq` library can only be installed with `pip` on **Linux**_
 
 ### Wazuh-Testing package
 
-We have a Python package with all the tools needed to run these tests. From file monitoring classes to callbacks or functions to create the test environment. Without installing this package, we cannot run these tests. It has the following structure:
+We have a Python package at `wazuh-qa/deps/` with all the tools needed to run these tests. From file monitoring classes to callbacks or functions to create the test environment. Without installing this package, we cannot run these tests. It has the following structure:
 
 ```bash
-── wazuh_testing
+wazuh_testing
     ├── setup.py
     └── wazuh_testing
         ├── __init__.py
@@ -323,14 +324,14 @@ Folder with all the general tools that could be used in every test. They are gro
 To install it:
 
 ```shell script
-cd wazuh-qa/packages/wazuh_testing
+cd wazuh-qa/deps/wazuh_testing
 pip3 install .
 ```
 
 _**NOTE:** It is important to reinstall this package every time we modify anything from `wazuh-qa/packages/wazuh_testing`_
 
 ```shell script
-cd wazuh-qa/packages/wazuh_testing
+cd wazuh-qa/deps/wazuh_testing
 pip3 uninstall -y wazuh_testing && pip3 install .
 ```
 
@@ -339,7 +340,7 @@ pip3 uninstall -y wazuh_testing && pip3 install .
 We use [pytest](https://docs.pytest.org/en/latest/contents.html) to run our integrity tests. Pytest will recursively look for the closest `conftest` to import all the variables and fixtures needed for every test. If something is lacking from the closest one, it will look for the next one (if possible) until reaching the current directory. This means we need to run every test from the following path, where the general _conftest_ is:
 
 ```shell script
-cd wazuh-qa/test_wazuh
+cd wazuh-qa/tests/integration
 ```
 
 To run any test, we just need to call `pytest` from `python3` using the following line:
@@ -350,11 +351,14 @@ python3 -m pytest [options] [file_or_dir] [file_or_dir] [...]
 
 **Options:**
 
-- `v` : verbosity level (-v or -vv. Highly recommended to use -vv when tests are failing)
-- `s` : shortcut for --capture=no. This will show the output in real time
-- `x` : instantly exit after the first error. Very helpful when using a log truncate since it will keep the last failed result
-- `m` : only run tests matching given expression (-m MARKEXPR)
-- `--tier` : only run tests with given tier (ex. --tier 2)
+- `v`: verbosity level (-v or -vv. Highly recommended to use -vv when tests are failing)
+- `s`: shortcut for --capture=no. This will show the output in real time
+- `x`: instantly exit after the first error. Very helpful when using a log truncate since it will keep the last failed result
+- `m`: only run tests matching given expression (-m MARKEXPR)
+- `--tier`: only run tests with given tier (ex. --tier 2)
+- `--default-timeout`: overwrites the default timeout (in seconds). This value is used to make a test fail if a condition 
+is not met before the given time lapse. Some tests make use of this value and other has other fixed timeout that cannot be 
+modified.
 
 _Use `-h` to see the rest or check its [documentation](https://docs.pytest.org/en/latest/usage.html)._
 

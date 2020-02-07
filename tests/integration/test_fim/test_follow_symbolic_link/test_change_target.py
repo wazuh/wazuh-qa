@@ -41,22 +41,25 @@ def get_configuration(request):
 ])
 def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_configuration, configure_environment,
                                 restart_wazuh, wait_for_initial_scan):
-    """ Check if syscheck updates the symlink target properly
+    """
+    Check if syscheck updates the symlink target properly
 
     CHECK: Having a symbolic link pointing to a file/folder, change the target of the link to another file/folder.
     Ensure that the old file is being monitored and the new one is not before symlink_checker runs.
     Wait until symlink_checker runs and ensure that the new file is being monitored and the old one is not.
 
-    :param main_folder: Directory that is being pointed at or contains the pointed file
-    :param aux_folder: Directory that will be pointed at or will contain the future pointed file
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan.
+    Parameters
+    ----------
+    main_folder : str
+        Directory that is being pointed at or contains the pointed file.
+    aux_folder : str
+        Directory that will be pointed at or will contain the future pointed file.
     """
 
     def modify_and_check_events(f1, f2, text):
-        """ Modify the content of 2 given files. We assume the first one is being monitored and the other one is not.
-            We expect a 'modified' event for the first one and a timeout for the second one.
+        """
+        Modify the content of 2 given files. We assume the first one is being monitored and the other one is not.
+        We expect a 'modified' event for the first one and a timeout for the second one.
         """
         modify_file_content(f1, file1, text)
         modify_file_content(f2, file1, text)

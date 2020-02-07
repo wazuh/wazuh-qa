@@ -49,12 +49,10 @@ def get_configuration(request):
     ({'invalid_no_regex', 'invalid_scan'})
 ])
 def test_invalid(tags_to_apply, get_configuration, configure_environment):
-    """ Checks if an invalid configuration is detected
+    """
+    Checks if an invalid configuration is detected
 
     Using invalid configurations with different attributes, expect an error message and syscheck unable to restart.
-
-    * This test is intended to be used with invalid configurations files. Each execution of this test will fail to
-     configure the environment properly.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     # Configuration error -> ValueError raised

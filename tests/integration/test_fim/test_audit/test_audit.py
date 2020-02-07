@@ -56,7 +56,7 @@ def get_configuration(request):
 ])
 def test_audit_health_check(tags_to_apply, get_configuration,
                             configure_environment, restart_syscheckd):
-    """Checks if the health check is passed."""
+    """Check if the health check is passed."""
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     wazuh_log_monitor.start(timeout=20, callback=callback_audit_health_check)
@@ -67,7 +67,7 @@ def test_audit_health_check(tags_to_apply, get_configuration,
 ])
 def test_added_rules(tags_to_apply, get_configuration,
                      configure_environment, restart_syscheckd):
-    """Checks if the specified folders are added to Audit rules list."""
+    """Check if the specified folders are added to Audit rules list."""
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     events = wazuh_log_monitor.start(timeout=20,
@@ -84,7 +84,7 @@ def test_added_rules(tags_to_apply, get_configuration,
 ])
 def test_readded_rules(tags_to_apply, get_configuration,
                        configure_environment, restart_syscheckd):
-    """Checks if the removed rules are added to Audit rules list."""
+    """Check if the removed rules are added to Audit rules list."""
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Remove added rules
@@ -105,7 +105,7 @@ def test_readded_rules(tags_to_apply, get_configuration,
 ])
 def test_readded_rules_on_restart(tags_to_apply, get_configuration,
                                   configure_environment, restart_syscheckd):
-    """Checks if the rules are added to Audit when it restarts."""
+    """Check if the rules are added to Audit when it restarts."""
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Restart Audit
@@ -129,7 +129,7 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
 ])
 def test_move_rules_realtime(tags_to_apply, get_configuration,
                              configure_environment, restart_syscheckd):
-    """Checks if the rules are changed to realtime when Audit stops."""
+    """Check if the rules are changed to realtime when Audit stops."""
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Stop Audit
@@ -153,10 +153,8 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
     ("custom_audit_key", "/testdir1")
 ])
 def test_audit_key(audit_key, path, get_configuration, configure_environment, restart_syscheckd):
-    """Checks <audit_key> functionality by adding a audit rule and checking if alerts with that key are triggered when
+    """Check <audit_key> functionality by adding a audit rule and checking if alerts with that key are triggered when
     a file is created.
-
-    This test is intended to be used with valid configurations
 
     Parameters
     ----------
@@ -192,10 +190,8 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
     ({'restart_audit_false'}, False)
 ])
 def test_restart_audit(tags_to_apply, should_restart, get_configuration, configure_environment, restart_syscheckd):
-    """Checks <restart_audit> functionality by removing the plugin and monitoring audit to see if it restart and create 
+    """Check <restart_audit> functionality by removing the plugin and monitoring audit to see if it restart and create
     the file again.
-
-    This test is intended to be used with valid configurations
 
     Parameters
     ----------

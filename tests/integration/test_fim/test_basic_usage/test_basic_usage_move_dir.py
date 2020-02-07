@@ -6,7 +6,8 @@ import os
 import shutil
 import pytest
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
-    callback_detect_event, check_time_travel, DEFAULT_TIMEOUT
+    callback_detect_event, check_time_travel
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -64,18 +65,22 @@ def test_move_file(source_folder, target_folder, subdir, tags_to_apply,
                    triggers_delete_event, triggers_add_event,
                    get_configuration, configure_environment,
                    restart_syscheckd, wait_for_initial_scan):
-    """ Checks if syscheckd detects 'added' or 'deleted' events when moving a
-        subfolder from a folder to another one.
+    """
+    Check if syscheckd detects 'added' or 'deleted' events when moving a
+    subfolder from a folder to another one.
 
-        :param subdir str Name of the subdir to be moved
-        :param source_folder str Folder to move the file from
-        :param target_folder str Destination folder to move the file to
-        :param triggers_delete_event boolean Expects a 'deleted' event in the source folder
-        :param triggers_add_event boolean Expects a 'added' event in the target folder
-
-        * This test is intended to be used with valid configurations files.
-        Each execution of this test will configure the environment properly, restart the
-        service and wait for the initial scan.
+    Parameters
+    ----------
+    subdir : str
+        Name of the subdir to be moved.
+    source_folder : str
+        Folder to move the file from.
+    target_folder : str
+        Destination folder to move the file to.
+    triggers_delete_event : bool
+        Expect a 'deleted' event in the source folder.
+    triggers_add_event : bool
+        Expect a 'added' event in the target folder.
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
@@ -86,7 +91,7 @@ def test_move_file(source_folder, target_folder, subdir, tags_to_apply,
     check_time_travel(scheduled)
 
     # Monitor expected events
-    events = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT,
+    events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                      callback=callback_detect_event,
                                      accum_results=(triggers_add_event + triggers_delete_event)).result()
 

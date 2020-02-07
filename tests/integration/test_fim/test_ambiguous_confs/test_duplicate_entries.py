@@ -10,14 +10,15 @@ import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, modify_file_group, modify_file_content, modify_file_owner, \
     modify_file_permission, check_time_travel, callback_detect_event, get_fim_mode_param, deepcopy, create_file, \
-    REGULAR, generate_params, validate_event, DEFAULT_TIMEOUT, CHECK_PERM, CHECK_SIZE, WAZUH_PATH
+    REGULAR, generate_params, validate_event, CHECK_PERM, CHECK_SIZE, WAZUH_PATH
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
-pytestmark = [pytest.mark.tier(level=2)]
+pytestmark = [pytest.mark.tier(level=2), pytest.mark.linux, pytest.mark.win32]
 
 # variables
 test_directories = [os.path.join(PREFIX, 'testdir1')]*2
@@ -35,11 +36,12 @@ p, m = generate_params(extra_params={'MODULE_NAME': __name__, 'TEST_DIRECTORIES'
 params, metadata = list(), list()
 for mode in ['scheduled', 'realtime', 'whodata']:
     p_fim, m_fim = get_fim_mode_param(mode, key='FIM_MODE2')
-    for p_dict, m_dict in zip(p, m):
-        p_dict.update(p_fim.items())
-        m_dict.update(m_fim.items())
-        params.append(deepcopy(p_dict))
-        metadata.append(deepcopy(m_dict))
+    if p_fim:
+        for p_dict, m_dict in zip(p, m):
+            p_dict.update(p_fim.items())
+            m_dict.update(m_fim.items())
+            params.append(deepcopy(p_dict))
+            metadata.append(deepcopy(m_dict))
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
@@ -56,7 +58,7 @@ def get_configuration(request):
 def check_event(previous_mode: str, previous_event: dict, file: str):
     """Check if a file modification does not trigger an event but its creation did.
 
-    In case of TimeOut, checks that the type of the previous event was addition
+    In case of timeout, checks that the type of the previous event was addition
     on the correct path and with correct mode.
 
     Parameters
@@ -76,7 +78,8 @@ def check_event(previous_mode: str, previous_event: dict, file: str):
     """
     current_event = None
     try:
-        current_event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+        current_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                                callback=callback_detect_event).result()
     except TimeoutError:
         assert 'added' in previous_event['data']['type'] and \
                os.path.join(testdir1, file) in previous_event['data']['path'] and \
@@ -89,7 +92,7 @@ def check_event(previous_mode: str, previous_event: dict, file: str):
 
 
 def test_duplicate_entries(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Checks if syscheckd ignores duplicate entries.
+    """Check if syscheckd ignores duplicate entries.
        For instance:
            - The second entry should prevail over the first one.
             <directories realtime="yes">/home/user</directories> (IGNORED)
@@ -108,7 +111,7 @@ def test_duplicate_entries(get_configuration, configure_environment, restart_sys
     create_file(REGULAR, testdir1, file, content=' ')
 
     check_time_travel(scheduled)
-    event1 = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+    event1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
     # Check for a second event
     event2 = check_event(previous_mode=mode2, previous_event=event1, file=file)
@@ -117,7 +120,7 @@ def test_duplicate_entries(get_configuration, configure_environment, restart_sys
 
 def test_duplicate_entries_sregex(get_configuration, configure_environment,
                                   restart_syscheckd, wait_for_initial_scan):
-    """Checks if syscheckd ignores duplicate entries, sregex patterns of restrict.
+    """Check if syscheckd ignores duplicate entries, sregex patterns of restrict.
        For instance:
            - The second entry should prevail over the first one.
             <directories restrict="^good.*$">/home/user</directories> (IGNORED)
@@ -133,17 +136,17 @@ def test_duplicate_entries_sregex(get_configuration, configure_environment,
     create_file(REGULAR, testdir1, file, content=' ')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
     # Check for a second event
     modify_file_content(testdir1, file)
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
 
 def test_duplicate_entries_report(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Checks if syscheckd ignores duplicate entries, report changes.
+    """Check if syscheckd ignores duplicate entries, report changes.
        For instance:
            - The second entry should prevail over the first one.
             <directories report_changes="yes">/home/user</directories> (IGNORED)
@@ -157,18 +160,18 @@ def test_duplicate_entries_report(get_configuration, configure_environment, rest
     # Check for an event
     create_file(REGULAR, testdir1, file, content=' ')
     check_time_travel(scheduled)
-    wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
     # Check for a second event
     modify_file_content(testdir1, file)
     check_time_travel(scheduled)
-    wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
     assert not os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'diff', 'local', testdir1[1:], file)), \
         'Error: Diff file created'
 
 
 def test_duplicate_entries_complex(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Checks if syscheckd ignores duplicate entries, complex entries.
+    """Check if syscheckd ignores duplicate entries, complex entries.
        For instance:
            - The second entry should prevail over the first one.
             <directories check_all="no" check_owner="yes" check_inode="yes">/home/user</directories> (IGNORED)
@@ -192,7 +195,7 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
     file_path = os.path.join(testdir1, file)
 
     check_time_travel(scheduled)
-    event1 = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+    event1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
     # Replace character, change the group and ownership and touch the file
     replace_character('i', '1', file_path)
@@ -207,5 +210,5 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
     modify_file_permission(testdir1, file)
     modify_file_content(testdir1, file)
     check_time_travel(scheduled)
-    event3 = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event).result()
+    event3 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
     validate_event(event3, [CHECK_PERM, CHECK_SIZE])

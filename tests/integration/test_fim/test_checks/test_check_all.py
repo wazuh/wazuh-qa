@@ -73,7 +73,8 @@ else:
 @pytest.mark.parametrize('path, checkers', parametrize_list)
 def test_check_all_single(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                           wait_for_initial_scan):
-    """Test the functionality of `check_all` option when used in conjunction with another check on the same directory,
+    """
+    Test the functionality of `check_all` option when used in conjunction with another check on the same directory,
     having "check_all" to "yes" and the other check to "no".
 
     Example:
@@ -81,11 +82,12 @@ def test_check_all_single(path, checkers, get_configuration, configure_environme
         check_all="yes" check_mtime="no"
         ...
 
-    This test is intended to be used with valid configurations files. Each execution of this test will configure the
-    environment properly, restart the service and wait for the initial scan.
-
-    :param path: Directory where the file is being created and monitored
-    :param checkers: Dict with all the check options to be used
+    Parameters
+    ----------
+    path : str
+        Directory where the file is being created and monitored.
+    checkers : dict
+        Check options to be used.
     """
     check_apply_test({'test_check_all_single'}, get_configuration['tags'])
     regular_file_cud(path, wazuh_log_monitor, min_timeout=15, options=checkers,
@@ -115,7 +117,8 @@ else:
 
 @pytest.mark.parametrize('path, checkers', parametrize_list)
 def test_check_all(path, checkers, get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Test the functionality of `check_all` option when used in conjunction with more than one check on the same directory,
+    """
+    Test the functionality of `check_all` option when used in conjunction with more than one check on the same directory,
     having "check_all" to "yes" and the other ones to "no".
 
     Example:
@@ -123,11 +126,12 @@ def test_check_all(path, checkers, get_configuration, configure_environment, res
         check_all="yes" check_perm="yes" check_mtime="no"
         ...
 
-    This test is intended to be used with valid configurations files. Each execution of this test will configure the
-    environment properly, restart the service and wait for the initial scan.
-
-    :param path: Directory where the file is being created and monitored
-    :param checkers: Dict with all the check options to be used
+    Parameters
+    ----------
+    path : str
+        Directory where the file is being created and monitored.
+    checkers : dict
+        Check options to be used.
     """
     check_apply_test({'test_check_all'}, get_configuration['tags'])
 
@@ -137,20 +141,18 @@ def test_check_all(path, checkers, get_configuration, configure_environment, res
 
 @pytest.mark.parametrize('path, checkers', [(testdir1, {})])
 def test_check_all_no(path, checkers, get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Test the functionality of `check_all` option when set to no.
+    """
+    Test the functionality of `check_all` option when set to no.
 
     When setting `check_all` to no, only 'type' and 'checksum' attributes should appear in every event. This will
     avoid any modification event.
 
-    This test is intended to be used with valid configurations files. Each execution of this test will configure the
-    environment properly, restart the service and wait for the initial scan.
-
     Parameters
     ----------
     path : str
-        Directory where the file is being created and monitored
+        Directory where the file is being created and monitored.
     checkers : dict
-        Dict with all the check options to be used
+        Check options to be used.
     """
     check_apply_test({'test_check_all_no'}, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'

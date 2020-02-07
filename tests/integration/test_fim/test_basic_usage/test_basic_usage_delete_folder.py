@@ -8,7 +8,8 @@ import shutil
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
-    callback_detect_event, check_time_travel, DEFAULT_TIMEOUT
+    callback_detect_event, check_time_travel
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -52,18 +53,21 @@ def get_configuration(request):
 def test_delete_folder(folder, file_list, filetype, tags_to_apply,
                        get_configuration, configure_environment,
                        restart_syscheckd, wait_for_initial_scan):
-    """ Checks if syscheckd detects 'deleted' events from the files contained
-        in a folder that is being deleted.
+    """
+    Check if syscheckd detects 'deleted' events from the files contained
+    in a folder that is being deleted.
 
-        If we are monitoring /testdir and we have r1, r2, r3 withing /testdir, if we delete /testdir,
-        we must see 3 events of the type 'deleted'. One for each one of the regular files.
+    If we are monitoring /testdir and we have r1, r2, r3 withing /testdir, if we delete /testdir,
+    we must see 3 events of the type 'deleted'. One for each one of the regular files.
 
-        :param folder: Directory where the files will be created
-        :param file_list: List with the names of the files
-        :param  filetype: Type of the files that will be created
-
-        * This test is intended to be used with valid configurations files. Each execution of this test will configure
-          the environment properly, restart the service and wait for the initial scan.
+    Parameters
+    ----------
+    folder : str
+        Directory where the files will be created.
+    file_list : list
+        Names of the files.
+    filetype : str
+        Type of the files that will be created.
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
@@ -74,14 +78,14 @@ def test_delete_folder(folder, file_list, filetype, tags_to_apply,
         create_file(filetype, folder, file, content='')
 
     check_time_travel(scheduled)
-    wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event, accum_results=len(file_list))
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event, accum_results=len(file_list))
 
     # Remove folder
     shutil.rmtree(folder, ignore_errors=True)
     check_time_travel(scheduled)
 
     # Expect deleted events
-    event = wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_event,
+    event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                     accum_results=len(file_list)).result()
     for i, file in enumerate(file_list):
         assert 'deleted' in event[i]['data']['type'] and os.path.join(folder, file) in event[i]['data']['path']

@@ -43,14 +43,12 @@ def get_configuration(request):
 ])
 def test_symbolic_revert_symlink(tags_to_apply, get_configuration, configure_environment,
                                  restart_syscheckd, wait_for_initial_scan):
-    """ Check if syscheck detects new targets properly
+    """
+    Check if syscheck detects new targets properly
 
-    CHECK: Having a symbolic link pointing to a file/folder, change its target to a folder. Check that the old file is not
-     being monitored anymore and the new folder is. Revert the target change and ensure the file is being monitored
-     and the folder is not.
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan.
+    CHECK: Having a symbolic link pointing to a file/folder, change its target to a folder. Check that the old file
+    is not being monitored anymore and the new folder is. Revert the target change and ensure the file is
+    being monitored and the folder is not.
     """
 
     def modify_and_assert(file):

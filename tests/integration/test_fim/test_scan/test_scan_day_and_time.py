@@ -7,7 +7,8 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, DEFAULT_TIMEOUT, callback_detect_end_scan, generate_params
+from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, generate_params
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.time import TimeMachine, reformat_time
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -40,11 +41,20 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 # functions
 
 def replace_date(date, days):
-    """ Adds a number of days to the given date and calculates if it should change the month as well.
+    """
+    Add a number of days to the given date and calculates if it should change the month as well.
 
-    :param date: Datetime with a date
-    :param days: Integer with a number of days
-    :return: Datetime with the new date
+    Parameters
+    ----------
+    date : datetime
+        Source date to be modified
+    days : int
+        Number of days that will be added to `date`
+
+    Returns
+    -------
+    datetime
+        `date` + `days` resulting datetime
     """
     today = datetime.now()
     max_days_in_month = monthrange(today.year, today.month)[1]
@@ -73,12 +83,10 @@ def get_configuration(request):
 def test_scan_day_and_time(tags_to_apply,
                            get_configuration, configure_environment,
                            restart_syscheckd, wait_for_initial_scan):
-    """ Check if there is a scan in a certain day and time
+    """
+    Check if there is a scan in a certain day and time
 
     This test must check both scan params.
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -106,7 +114,7 @@ def test_scan_day_and_time(tags_to_apply,
     if scan_today:
         if (scan_time - current_day).days == 0:
             TimeMachine.travel_to_future(scan_time - current_day + timedelta(minutes=1))
-            wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_end_scan)
+            wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
             return
         else:
             day_diff = 7
@@ -115,10 +123,10 @@ def test_scan_day_and_time(tags_to_apply,
         TimeMachine.travel_to_future(timedelta(days=day_diff - 1))
         current_day = datetime.now()
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_end_scan)
+            wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
 
     TimeMachine.travel_to_future(scan_time - current_day - timedelta(minutes=5))
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_end_scan)
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
     TimeMachine.travel_to_future(timedelta(minutes=6))
-    wazuh_log_monitor.start(timeout=DEFAULT_TIMEOUT, callback=callback_detect_end_scan)
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
