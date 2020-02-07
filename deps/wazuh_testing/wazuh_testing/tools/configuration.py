@@ -400,7 +400,7 @@ def generate_syscheck_config():
                    'check_group', 'check_perm', 'check_mtime', check_platform, 'report_changes']
 
     values_list = itertools.product(['yes', 'no'], repeat=len(check_names))
-    tags = ['tags="Sample"', 'tags=""']
+    tags = ['tags="Sample"', '']
 
     for yn_values, tag_value in itertools.product(values_list, tags):
         yn_str = ' '.join([f'{name}="{value}"' for name, value in zip(check_names, yn_values)])

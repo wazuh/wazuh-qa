@@ -255,17 +255,6 @@
       "title": "The Syscheck Schema",
       "required": [
         "path",
-        "size_after",
-        "perm_after",
-        "uid_after",
-        "gid_after",
-        "md5_after",
-        "sha1_after",
-        "sha256_after",
-        "uname_after",
-        "gname_after",
-        "mtime_after",
-        "inode_after",
         "event"
       ],
       "properties": {

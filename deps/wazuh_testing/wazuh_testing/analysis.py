@@ -5,6 +5,8 @@
 import json
 import os
 import re
+from copy import deepcopy
+from datetime import datetime
 
 from jsonschema import validate
 
@@ -48,6 +50,42 @@ def validate_analysis_alert(alert):
     with open(os.path.join(_data_path, 'event_analysis_schema.json'), 'r') as f:
         schema = json.load(f)
     validate(schema=schema, instance=alert)
+
+
+def validate_analysis_alert_complex(alert, event):
+    """Check if an Analysis alert is properly formatted in reference to its Syscheck event.
+
+    Parameters
+    ----------
+    alert : dict
+        Dictionary that represents an alert
+    event : dict
+        Dictionary that represents an event
+    """
+    def validate_attributes(syscheck_alert, syscheck_event, event_field, suffix):
+        for attribute, value in syscheck_event['data'][event_field].items():
+            if attribute in ['type', 'checksum']:
+                continue
+            else:
+                if attribute == 'mtime':
+                    value = datetime.utcfromtimestamp(value).isoformat()
+                elif 'hash' in attribute:
+                    attribute = attribute.split('_')[-1]
+                attribute = '{}name'.format(attribute[0]) if attribute in ['user_name', 'group_name'] else attribute
+                assert str(value) == str(syscheck_alert['{}_{}'.format(attribute, suffix)]), \
+                    f"{value} not equal to {syscheck_alert['{}_{}'.format(attribute, suffix)]}"
+        if 'tags' in event['data']:
+            assert event['data']['tags'] == syscheck_alert['tags'][0], f'Tags not in alert or with different value'
+        if 'content_changes' in event['data']:
+            assert event['data']['content_changes'] == syscheck_alert['diff']
+
+    with open(os.path.join(_data_path, 'event_analysis_schema.json'), 'r') as f:
+        schema = json.load(f)
+    validate(schema=schema, instance=alert)
+
+    validate_attributes(deepcopy(alert['syscheck']), deepcopy(event), 'attributes', 'after')
+    if event['data']['type'] == 'modified':
+        validate_attributes(deepcopy(alert['syscheck']), deepcopy(event), 'old_attributes', 'before')
 
 
 def validate_analysis_integrity_state(event):
