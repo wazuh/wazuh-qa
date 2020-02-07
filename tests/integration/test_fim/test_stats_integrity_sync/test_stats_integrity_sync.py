@@ -162,6 +162,10 @@ def n_completions(agent):
 def get_agents(client_keys='/var/ossec/etc/client.keys'):
     """ These function extract all agent ids in the client.keys file. It will not extract the ids that are removed (!)
 
+    Create an external dict (no shared by the processes) and an internal dict (shared by the processes), every process
+    has the external dict (agent_ids), that reference the internal and shared structure. This way, every process can
+    check the status of the agents.
+
     Parameters
     ----------
     client_keys : str
@@ -313,6 +317,23 @@ def modify_database(agent_id, directory, prefix, total_files, modify_file, modif
 
 
 def agent_checker(case, agent_id, agents_dict, filename, database_params):
+    """ Check that the current agent is restarted. When it has been restarted, marks the start time of the agent.
+    If n_completions of the agent_id is greater than 0, the info_collector must be called.
+
+    Parameters
+    ----------
+    case : int
+        Case number
+    agent_id : str
+        Agent id
+    agents_dict : dict of shared dict
+        Dictionary with the start time of every agent
+    filename : str
+        Path of the agent's info file
+    database_params : dict
+        Database params to be applied for the current test
+
+    """
     if case == Cases.case0.value:
         # Detect that the agent are been restarted
         def callback_detect_agent_restart(line):
@@ -336,6 +357,20 @@ def agent_checker(case, agent_id, agents_dict, filename, database_params):
 
 
 def info_collector(agent, agent_id, filename):
+    """ Write the stats of the agent during the test.
+
+    This stats will be written when the agent finish its test process (n_completions(agent_id) > 0)
+
+    Parameters
+    ----------
+    agent : dict
+        Individual dictionary with the start time of an agent
+    agent_id : str
+        Agent id
+    filename : str
+        Path of the agent's info file
+
+    """
     with open(filename, 'w') as info_agent:
         print(
             f"[AGENT] Info {agent_id} writing: "
@@ -347,6 +382,25 @@ def info_collector(agent, agent_id, filename):
 
 
 def state_collector(case, protocol, eps, files, agents_dict, buffer):
+    """ Gets the stats of the .state files in the WAZUH_PATH/var/run folder.
+    We can define the stats to get from each daemon in the daemons_dict.
+
+    Parameters
+    ----------
+    case : int
+        Case number
+    protocol : str
+        Desired protocol (udp or tcp)
+    eps : str
+        Events per second
+    files : str
+        Number of files
+    agents_dict : dict of shared dict
+        Dictionary with the start time of every agent
+    buffer : str
+        Set disabled to yes or no
+
+    """
     daemons_dict = {
         'ossec-analysisd': {
             'headers': ['syscheck_events_decoded', 'syscheck_edps', 'dbsync_queue_usage',
@@ -393,6 +447,18 @@ def state_collector(case, protocol, eps, files, agents_dict, buffer):
 
 
 def stats_collector(filename, daemon, agents_dict):
+    """ Collects the stats of the current daemon until all agents have finished the integry process.
+
+    Parameters
+    ----------
+    filename : str
+        Path of the stats file for the current daemon
+    daemon : str
+        Daemon tested
+    agents_dict : dict of shared dict
+        Dictionary with the start time of every agent
+
+    """
     with open(filename, 'w') as file_:
         file_.write("seconds,cpu,ram,avg_disk_read,avg_disk_write,total_disk_read,total_disk_write\n")
         while check_all_n_completions(agents_dict.keys()) == 0:
@@ -404,10 +470,22 @@ def stats_collector(filename, daemon, agents_dict):
                           f'{avg_disk_write},,')
                     file_.write(f'{time.time()},{cpu},{ram},{avg_disk_read},{avg_disk_write},,\n')
             time.sleep(setup_environment_time)
-    finish_stats_collector(agents_dict, daemon, filename)
+    finish_stats_collector(filename, daemon, agents_dict)
 
 
-def finish_stats_collector(agents_dict, daemon, filename):
+def finish_stats_collector(filename, daemon, agents_dict):
+    """ Finish the stats files for the monitored daemons. Adds full disk read and full disk write.
+
+    Parameters
+    ----------
+    filename : str
+        Path of the stats file for the current daemon
+    daemon : str
+        Daemon tested
+    agents_dict : dict of shared dict
+        Dictionary with the start time of every agent
+
+    """
     if check_all_n_completions(agents_dict.keys()) > 0:
         while True:
             stats = get_stats(daemon)
@@ -441,6 +519,8 @@ def finish_stats_collector(agents_dict, daemon, filename):
 ])
 def test_initialize_stats_collector(protocol, eps, files, directory, buffer, case, modify_file, modify_all,
                                     restore_all):
+    """ Execute and launch all the necessary processes to check all the cases with all the specified configurations
+    """
     agents_dict = get_agents()
     agents_checker, writers = list(), list()
     database_params = {
@@ -452,25 +532,31 @@ def test_initialize_stats_collector(protocol, eps, files, directory, buffer, cas
         'prefix': 'file_'
     }
 
+    # If we are in case 1 or in case 2 and the number of files is 0, we will not execute the test since we cannot
+    # modify the checksums because they do not exist
     if not (case == 1 and files == '0') and not (case == 2 and files == '0'):
-        print('\n\n[SETUP] Setting up the environment...')
+        print(f'\n\n[SETUP] Setting up the environment for for case{case}-{protocol}-{eps}eps-{files}files')
         truncate_file(ALERT_FILE_PATH)
+        # Only modify the configuration if case 0 is executing
         if case == Cases.case0.value:
             replace_conf(protocol, eps, directory, buffer)
 
+        # Launch one process for agent due to FileMonitor restriction (block the execution)
         for agent_id in agents_dict.keys():
             filename = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                     f"stats/info_case{case}-{protocol}_{eps}eps_{files}files_{buffer}.csv")
             agents_checker.append(Process(target=agent_checker, args=(case, agent_id, agents_dict, filename,
-                                                                      database_params, )))
+                                                                      database_params,)))
             agents_checker[-1].start()
 
+        # Block the test until one agent starts
         seconds = 0
         while check_all_n_attempts(agents_dict.keys()) != 0 and any(agent != 0.0 for agent in agents_dict.values()):
             print(f'[SETUP] Waiting for agent attempt... {seconds} seconds')
             time.sleep(setup_environment_time)
             seconds += setup_environment_time
 
+        # We started the stats collector as the agents are ready
         print(f'[ENV] Starting test for case{case}-{protocol}-{eps}eps-{files}files')
         state_collector_check = Process(target=state_collector, args=(case, protocol, eps, files, agents_dict, buffer,))
         state_collector_check.start()
