@@ -31,6 +31,11 @@ cp "$development_manager_path_master$template" "$development_manager_path_master
 sed -i 's/MANAGER_IP/'${manager_ip}'/g' $development_manager_path_master
 cat $development_manager_path_master
 
+if [[ $PLATFORM == *"amazon"* ]]; then
+
+   sed -i 's/node\['.*hostname.*'\]/"amazon_agent"/g' "$COOKBOOKS_PATH/wazuh_agent/attributes/authd.rb"
+fi
+
 
 echo "Kitchen is converging ..."
 kitchen converge
