@@ -38,7 +38,7 @@ fi
 
 
 echo "Kitchen is converging ..."
-kitchen converge
+kitchen converge -l debug
 
 echo "Getting default things back"
 cp "$development_agent_path$template" "$development_agent_path"

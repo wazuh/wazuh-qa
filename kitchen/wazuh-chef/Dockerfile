@@ -18,7 +18,8 @@ RUN cd $HOME && \
     cd $HOME/wazuh-qa/kitchen/wazuh-chef/manager/files/ && \
     bundle install
 
-RUN git clone git@github.com:rshad/kitchen-docker.git && \
+RUN git clone https://github.com/rshad/kitchen-docker && \
+    cd kitchen-docker && \
     git checkout fix-docker-image-deletion && \
     git pull origin fix-docker-image-deletion
 
