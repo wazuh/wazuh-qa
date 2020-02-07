@@ -71,15 +71,16 @@ def get_configuration(request):
 ])
 def test_frequency(folder, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                    wait_for_initial_scan):
-    """ Checks if a non existing directory is monitored in realtime after the frequency time has passed
+    """
+    Check if a non existing directory is monitored in realtime after the frequency time has passed
 
     Even with realtime monitoring, if we monitor a non existing directory and then we create it after restarting
     the service, syscheck won't detect anything from it until the scan restarts (using its frequency interval).
 
-    :param folder: Directory that is being monitored
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan.
+    Parameters
+    ----------
+    folder : str
+        Directory that is being monitored.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     try:

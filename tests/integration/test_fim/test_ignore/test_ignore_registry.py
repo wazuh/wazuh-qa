@@ -83,10 +83,7 @@ def get_configuration(request):
 def test_ignore_registry(key_string, key_object, tags_to_apply, get_configuration,
                          configure_environment, restart_syscheckd, wait_for_initial_scan):
     """
-    Checks registries are ignored according to configuration.
-
-    This test is intended to be used with valid configurations files. Each execution of this test will configure the
-    environment properly, restart the service and wait for the initial scan.
+    Check registries are ignored according to configuration.
 
     Parameters
     ----------

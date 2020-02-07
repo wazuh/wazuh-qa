@@ -42,15 +42,16 @@ def get_configuration(request):
 ])
 def test_symbolic_monitor_symlink(tags_to_apply, main_folder, get_configuration, configure_environment,
                                   restart_syscheckd, wait_for_initial_scan):
-    """ Check what happens with a symlink and its target when syscheck monitors it.
+    """
+    Check what happens with a symlink and its target when syscheck monitors it.
 
     CHECK: Having a symbolic link pointing to a file/folder, modify and delete the file. Check that alerts are
     being raised.
 
-    :param main_folder: Directory that is being pointed at or contains the pointed file
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan.
+    Parameters
+    ----------
+    main_folder : str
+        Directory that is being pointed at or contains the pointed file.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'

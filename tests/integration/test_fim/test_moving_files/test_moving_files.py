@@ -51,11 +51,19 @@ def extra_configuration_before_yield():
 def check_event(dirsrc, dirdst, filename, mod_del_event, mod_add_event):
     """
     Check the event has been generated
-    :param dirsrc: Source directory
-    :param dirdst: Target directory
-    :param filename: File name
-    :param mod_del_event: Mode of deleted event
-    :param mod_add_event: Mode of added event
+
+    Parameters
+    ----------
+    dirsrc : str
+        Source directory.
+    dirdst : str
+        Target directory.
+    filename : str
+        File name.
+    mod_del_event : str
+        Mode of deleted event.
+    mod_add_event : str
+        Mode of added event.
     """
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
@@ -90,11 +98,18 @@ def test_moving_file_to_whodata(dirsrc, dirdst, filename, mod_del_event, mod_add
     Test Syscheck's behaviors when moving files from a directory monitored by whodata to another
     monitored by realtime and vice versa.
 
-    :param dirsrc: Source directory
-    :param dirdst: Target directory
-    :param filename: File name
-    :param mod_del_event: Added event mode
-    :param mod_add_event: Deleted event mode
+    Parameters
+    ----------
+    dirsrc : str
+        Source directory.
+    dirdst : str
+        Target directory.
+    filename : str
+        File name.
+    mod_del_event : str
+        Mode of deleted event.
+    mod_add_event : str
+        Mode of added event.
     """
 
     os.rename(os.path.join(dirsrc, filename), os.path.join(dirdst, filename))

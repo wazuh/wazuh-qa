@@ -50,12 +50,10 @@ def get_configuration(request):
 def test_scan_time(tags_to_apply,
                    get_configuration, configure_environment,
                    restart_syscheckd, wait_for_initial_scan):
-    """ Check if there is a scan at a certain time
+    """
+    Check if there is a scan at a certain time
 
     scan_time option makes sure there is only one scan every 24 hours, at a certain time.
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

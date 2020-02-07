@@ -46,7 +46,7 @@ def test_wazuh_db_messages(configure_environment_standalone_daemons, create_unix
     Parameters
     ----------
     test_case : list
-        List of test_case stages (dicts with input, output and stage keys)
+        List of test_case stages (dicts with input, output and stage keys).
     """
     for stage in test_case:
         expected = stage['output']
@@ -59,10 +59,10 @@ def test_wazuh_db_messages(configure_environment_standalone_daemons, create_unix
 def test_wazuh_db_create_agent(configure_environment_standalone_daemons, create_unix_sockets):
     """Check that Wazuh DB creates the agent database when a query with a new agent ID is sent"""
     test = {"name": "Create agent",
-            "description": "Wazuh DB creates automatically the agent's database the first time a query with a new agent\
-                ID reaches it. Once the database is created, the query is processed as expected.",
-            "test_case":[{"input": "agent 999 syscheck integrity_check_left",
-                          "output": "err Invalid FIM query syntax, near 'integrity_check_left'",
-                          "stage": "Syscheck - Agent does not exits yet"}]}
+            "description": "Wazuh DB creates automatically the agent's database the first time a query with a new agent"
+                           " ID reaches it. Once the database is created, the query is processed as expected.",
+            "test_case": [{"input": "agent 999 syscheck integrity_check_left",
+                           "output": "err Invalid FIM query syntax, near 'integrity_check_left'",
+                           "stage": "Syscheck - Agent does not exits yet"}]}
     test_wazuh_db_messages(configure_environment_standalone_daemons, create_unix_sockets, test['test_case'])
     assert os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'db', "999.db"))

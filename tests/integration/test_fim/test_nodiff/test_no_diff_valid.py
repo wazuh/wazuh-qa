@@ -76,26 +76,31 @@ def test_no_diff_subdirectory(folder, filename, content, hidden_content,
                               tags_to_apply, get_configuration,
                               configure_environment, restart_syscheckd,
                               wait_for_initial_scan):
-    """ Checks files are ignored in the subdirectory according to configuration
+    """
+    Check files are ignored in the subdirectory according to configuration
 
     When using the nodiff option for a file in syscheck configuration, every time we get an event from this file,
     we won't be able to see its content. We'll see 'Diff truncated because nodiff option' instead.
 
-    :param folder: Directory where the file is being created
-    :param filename: Name of the file to be created
-    :param content: Content to fill the new file
-    :param hidden_content: True if content must be truncated,, False otherwise
-    :param tags_to_apply: Run test if matches with a configuration identifier, skip otherwise
-
-    * This test is intended to be used with valid nodiff configurations. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan.
+    Parameters
+    ----------
+    folder : str
+        Directory where the file is being created.
+    filename : str
+        Name of the file to be created.
+    content : str, bytes
+        Content to fill the new file.
+    hidden_content : bool
+        True if content must be truncated,, False otherwise.
+    tags_to_apply : set
+        Run test if matches with a configuration identifier, skip otherwise.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     files = {filename: content}
 
     def report_changes_validator(event):
-        """ Validate content_changes attribute exists in the event """
+        """Validate content_changes attribute exists in the event"""
         for file in files:
             diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
 
@@ -108,7 +113,7 @@ def test_no_diff_subdirectory(folder, filename, content, hidden_content,
             assert event['data'].get('content_changes') is not None, f'content_changes is empty'
 
     def no_diff_validator(event):
-        """ Validate content_changes value is truncated if the file is set to no_diff """
+        """Validate content_changes value is truncated if the file is set to no_diff"""
         if hidden_content:
             assert '<Diff truncated because nodiff option>' in event['data'].get('content_changes'), \
                 f'content_changes is not truncated'

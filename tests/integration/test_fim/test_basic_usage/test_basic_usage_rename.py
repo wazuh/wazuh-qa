@@ -69,14 +69,15 @@ def clean_directories(request):
 def test_rename(folder, tags_to_apply,
                 get_configuration, clean_directories, configure_environment,
                 restart_syscheckd, wait_for_initial_scan):
-    """ Checks if syscheckd detects events when renaming directories or files
+    """
+    Check if syscheckd detects events when renaming directories or files.
 
-        If we rename a directory or file, we expect 'deleted' and 'added' events.
+    If we rename a directory or file, we expect 'deleted' and 'added' events.
 
-        :param folder: Directory where the files will be created
-
-        * This test is intended to be used with valid configurations files. Each execution of this test will configure
-          the environment properly, restart the service and wait for the initial scan.
+    Parameters
+    ----------
+    folder : str
+        Directory where the files will be created.
     """
 
     def expect_events(path):

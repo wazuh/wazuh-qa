@@ -53,16 +53,18 @@ def get_configuration(request):
 ])
 def test_hard_link(path_file, path_link, num_links, get_configuration,
                    configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Test the check_inode option when used with Hard links by creating a hard link file inside and outside the
+    """
+    Test the check_inode option when used with Hard links by creating a hard link file inside and outside the
     monitored directory.
 
-    This test is intended to be used with valid configurations files. Each execution of this test will configure the
-    environment properly, restart the service and wait for the initial scan.
-
-    :param path_file: The path to the regular file to be created
-    :param path_link: The path to the Hard links to be created
-    :param num_links: Number of hard links to create. All of them will be pointing to the same regular file.
-    :param checkers: Dict with all the check options to be used
+    Parameters
+    ----------
+    path_file : str
+        The path to the regular file to be created.
+    path_link: str
+        The path to the Hard links to be created.
+    num_links : int
+        Number of hard links to create. All of them will be pointing to the same regular file.
     """
     truncate_file(LOG_FILE_PATH)
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)

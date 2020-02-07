@@ -51,13 +51,13 @@ configurations = change_conf(testdir)
 
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
-    """ Get configurations from the module """
+    """Get configurations from the module"""
     return request.param
 
 
 @pytest.fixture(scope='session')
 def configure_nfs():
-    """ Call NFS scripts to create and configure a NFS mount point """
+    """Call NFS scripts to create and configure a NFS mount point"""
     path = os.path.dirname(os.path.abspath(__file__))
     dist_list = ['centos', 'fedora', 'rhel']
     if distro.id() in dist_list:
@@ -86,15 +86,15 @@ def configure_nfs():
 def test_skip(directory, tags_to_apply,
               get_configuration, configure_environment, configure_nfs,
               restart_syscheckd, wait_for_initial_scan):
-    """ Check if syscheck is skipping the directory based on its skip configuration
+    """Check if syscheck is skipping the directory based on its skip configuration
 
     /proc, /sys, /dev and nfs directories are special directories. Unless it is specified with skip_*='no', syscheck
     will skip these directories. If not, they will be monitored like a normal directory.
 
-    :param directory: Directory that will be monitored. We only use it on skip_dev and skip_nfs
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan.
+    Parameters
+    ----------
+    directory : str
+        Directory that will be monitored. We only use it on skip_dev and skip_nfs.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

@@ -43,10 +43,8 @@ def get_configuration(request):
 # Tests
 
 def test_sync_interval(get_configuration, configure_environment, restart_syscheckd):
-    """Verify that synchronization checks take place at the expected time given SYNC_INTERVAL variable.
-
-    This test is intended to be used with valid configurations files. Each execution of this test will configure the
-    environment properly and restart the service.
+    """
+    Verify that synchronization checks take place at the expected time given SYNC_INTERVAL variable.
     """
 
     def truncate_log():

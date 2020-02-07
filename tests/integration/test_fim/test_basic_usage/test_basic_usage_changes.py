@@ -62,13 +62,15 @@ def get_configuration(request):
 def test_regular_file_changes(folder, name, encoding, checkers, tags_to_apply,
                               get_configuration, configure_environment,
                               restart_syscheckd, wait_for_initial_scan):
-    """ Checks if syscheckd detects regular file changes (add, modify, delete)
+    """
+    Check if syscheckd detects regular file changes (add, modify, delete)
 
-    :param folder: Directory where the files will be created
-    :param checkers: Dict of syscheck checkers (check_all)
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-          the environment properly, restart the service and wait for the initial scan.
+    Parameters
+    ----------
+    folder : str
+        Directory where the files will be created.
+    checkers : dict
+        Syscheck checkers (check_all).
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
