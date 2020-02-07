@@ -19,7 +19,6 @@ pytestmark = pytest.mark.tier(level=0)
 # Variables
 
 test_directories = []
-directory_str = '/testdir'
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
