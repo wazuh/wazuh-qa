@@ -39,7 +39,7 @@ yum groupinstall "Development Tools"
 yum install python36 python36-pip python36-devel -y
 
 # Install Python libraries
-pip3 install pytest freezegun jq jsonschema pyyaml psutil paramiko distro
+pip3 install pytest freezegun jq jsonschema pyyaml psutil paramiko distro pandas pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 - Add some internal options and restart
@@ -75,7 +75,7 @@ choco install jq
 - Install Python dependencies
 
 ```shell script
-pip install pytest freezegun jsonschema pyyaml psutil paramiko distro pywin32 pypiwin32 wmi
+pip install pytest freezegun jsonschema pyyaml psutil paramiko distro pywin32 pypiwin32 wmi pandas pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 - Change `time-reconnect` from `C:\Program Files (x86)\ossec-agent\ossec.conf`
@@ -110,7 +110,7 @@ brew install python3
 brew install autoconf automake libtool
 
 # Install Python libraries
-pip3 install pytest freezegun jq jsonschema pyyaml psutil paramiko distro
+pip3 install pytest freezegun jq jsonschema pyyaml psutil paramiko distro pandas pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 - Add some internal options and restart
@@ -258,7 +258,7 @@ This will be our python module with all the needed code to test everything.
 To run them, we need to install all these Python dependencies:
 
 ```shell script
-pip3 install distro freezegun jq jsonschema paramiko psutil pydevd-pycharm pytest pyyaml
+pip3 install distro freezegun jq jsonschema paramiko psutil pydevd-pycharm pytest pyyaml pandas pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 _**NOTE:** `jq` library can only be installed with `pip` on **Linux**_
@@ -356,6 +356,7 @@ python3 -m pytest [options] [file_or_dir] [file_or_dir] [...]
 - `x`: instantly exit after the first error. Very helpful when using a log truncate since it will keep the last failed result
 - `m`: only run tests matching given expression (-m MARKEXPR)
 - `--tier`: only run tests with given tier (ex. --tier 2)
+- `--html`: generates a HTML report for the test results. (ex. --html=report.html)
 - `--default-timeout`: overwrites the default timeout (in seconds). This value is used to make a test fail if a condition 
 is not met before the given time lapse. Some tests make use of this value and other has other fixed timeout that cannot be 
 modified.
