@@ -758,6 +758,15 @@ def callback_syscheck_message(line):
         return None
 
 
+def callback_empty_directories(line):
+    match = re.match(r'.*DEBUG: \(6338\): Empty directories tag found in the configuration.', line)
+
+    if match:
+        return True
+    else:
+        return None
+
+
 def check_time_travel(time_travel):
     """
     Change date and time of the system.
