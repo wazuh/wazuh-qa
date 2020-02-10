@@ -88,7 +88,7 @@ def test_delete_folder(folder, file_list, filetype, tags_to_apply,
     # Expect deleted events
     event_list = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                     accum_results=len(file_list)).result()
-    path_list = [event['data']['path'] for event in event_list]
+    path_list = set([event['data']['path'] for event in event_list])
     counter_type = Counter([event['data']['type'] for event in event_list])
 
     assert counter_type['deleted'] == len(file_list), f'Number of "deleted" events should be {len(file_list)}'
