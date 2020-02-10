@@ -57,6 +57,7 @@ def get_configuration(request):
 def test_audit_health_check(tags_to_apply, get_configuration,
                             configure_environment, restart_syscheckd):
     """Check if the health check is passed."""
+    print('[INFO] Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     wazuh_log_monitor.start(timeout=20, callback=callback_audit_health_check)
@@ -68,11 +69,16 @@ def test_audit_health_check(tags_to_apply, get_configuration,
 def test_added_rules(tags_to_apply, get_configuration,
                      configure_environment, restart_syscheckd):
     """Check if the specified folders are added to Audit rules list."""
+    print('[INFO] Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
-
-    events = wazuh_log_monitor.start(timeout=20,
-                                     callback=callback_audit_added_rule,
-                                     accum_results=3).result()
+    try:
+        print('[INFO] Checking the event...')
+        events = wazuh_log_monitor.start(timeout=20,
+                                         callback=callback_audit_added_rule,
+                                         accum_results=3).result()
+    except TimeoutError:
+        raise TimeoutError(f'[ERROR] First: It was expected that an event would be generated for file '
+                           f'{os.path.join(testdir1, file)}')
 
     assert testdir1 in events, f'{testdir1} not detected in scan'
     assert testdir2 in events, f'{testdir2} not detected in scan'
@@ -85,6 +91,7 @@ def test_added_rules(tags_to_apply, get_configuration,
 def test_readded_rules(tags_to_apply, get_configuration,
                        configure_environment, restart_syscheckd):
     """Check if the removed rules are added to Audit rules list."""
+    print('[INFO] Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Remove added rules
@@ -106,6 +113,7 @@ def test_readded_rules(tags_to_apply, get_configuration,
 def test_readded_rules_on_restart(tags_to_apply, get_configuration,
                                   configure_environment, restart_syscheckd):
     """Check if the rules are added to Audit when it restarts."""
+    print('[INFO] Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Restart Audit
@@ -130,6 +138,7 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
 def test_move_rules_realtime(tags_to_apply, get_configuration,
                              configure_environment, restart_syscheckd):
     """Check if the rules are changed to realtime when Audit stops."""
+    print('[INFO] Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Stop Audit
@@ -163,6 +172,7 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
     path : str
         Path of the folder to be monitored
     """
+    print('[INFO] Applying the test configuration')
     check_apply_test({audit_key}, get_configuration['tags'])
 
     # Add watch rule
@@ -209,6 +219,7 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
 
     plugin_path = "/etc/audisp/plugins.d/af_wazuh.conf"
 
+    print('[INFO] Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     os.remove(plugin_path)

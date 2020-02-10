@@ -843,8 +843,7 @@ class EventChecker:
             error_msg += "events were " if num_files > 1 else "event was "
             error_msg += "expected for " + str(self._get_file_list())
             error_msg += " but were not detected." if len(self.file_list) > 1 else " but was not detected."
-            print(error_msg)
-            raise
+            raise TimeoutError(error_msg)
         self.check_events(event_type)
 
 

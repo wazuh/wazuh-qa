@@ -92,7 +92,6 @@ def check_event(previous_mode: str, previous_event: dict, file: str):
                                  f'also the "{os.path.join(testdir1, file)}" file would be in '
                                  f'{previous_event["data"]["path"]} and that the "{previous_mode}" mode would be '
                                  f'"{previous_event["data"]["mode"]}"')
-        assert True
 
     return current_event
 
