@@ -78,12 +78,21 @@ def check_event(previous_mode: str, previous_event: dict, file: str):
     """
     current_event = None
     try:
+        print('[INFO] Checking for a second event...')
         current_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                 callback=callback_detect_event).result()
     except TimeoutError:
-        assert 'added' in previous_event['data']['type'] and \
-               os.path.join(testdir1, file) in previous_event['data']['path'] and \
-               previous_mode in previous_event['data']['mode']
+        if not isinstance(previous_event["data"]["path"], list):
+            previous_event["data"]["path"] = [previous_event["data"]["path"]]
+        if 'added' not in previous_event['data']['type'] and \
+                os.path.join(testdir1, file) in list(previous_event['data']['path']) and \
+                previous_mode in previous_event['data']['mode']:
+            raise AttributeError(f'[ERROR] It was expected that the previous event would be an "added" event, '
+                                 f'its type is "{previous_event["data"]["type"]}", '
+                                 f'also the "{os.path.join(testdir1, file)}" file would be in '
+                                 f'{previous_event["data"]["path"]} and that the "{previous_mode}" mode would be '
+                                 f'"{previous_event["data"]["mode"]}"')
+        assert True
 
     return current_event
 
@@ -101,6 +110,7 @@ def test_duplicate_entries(get_configuration, configure_environment, restart_sys
            - Just generate one event.
             <directories realtime="yes">/home/user,/home/user</directories>
     """
+    print('[INFO] Applying the test configuration')
     check_apply_test({'ossec_conf_duplicate_simple'}, get_configuration['tags'])
     file = 'hello'
     mode2 = get_configuration['metadata']['fim_mode2']
@@ -108,14 +118,22 @@ def test_duplicate_entries(get_configuration, configure_environment, restart_sys
     scheduled = mode2 == 'scheduled'
     mode2 = "real-time" if mode2 == "realtime" else mode2
 
+    print(f'[INFO] Adding file {os.path.join(testdir1, file)}, content: " "')
     create_file(REGULAR, testdir1, file, content=' ')
 
+    print(f'[INFO] Time travel: {scheduled}')
     check_time_travel(scheduled)
-    event1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
+    try:
+        print('[INFO] Checking the event...')
+        event1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                         callback=callback_detect_event).result()
+    except TimeoutError:
+        raise TimeoutError(f'[ERROR] Expected an "added" event type for "{os.path.join(testdir1, file)}", '
+                           f'no event has been generated')
 
     # Check for a second event
     event2 = check_event(previous_mode=mode2, previous_event=event1, file=file)
-    assert event2 is None, "Error: Multiple events created"
+    assert event2 is None, "[ERROR] Multiple events created"
 
 
 def test_duplicate_entries_sregex(get_configuration, configure_environment,
@@ -127,22 +145,35 @@ def test_duplicate_entries_sregex(get_configuration, configure_environment,
             <directories restrict="^he.*$">/home/user</directories>
        In this case, only the filenames that match with this regex '^he.*$'
     """
+    print('[INFO] Applying the test configuration')
     check_apply_test({'ossec_conf_duplicate_sregex'}, get_configuration['tags'])
     file = 'hello'
     mode2 = get_configuration['metadata']['fim_mode2']
     scheduled = mode2 == 'scheduled'
 
     # Check for an event
+    print(f'[INFO] Adding file {os.path.join(testdir1, file)}, content: " "')
     create_file(REGULAR, testdir1, file, content=' ')
+    print(f'[INFO] Time travel: {scheduled}')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
+        print('[INFO] Checking the event...')
+        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                        callback=callback_detect_event).result()
+        raise AttributeError(f'[ERROR] First: It was expected that an event would not be generated, '
+                             f'{event} has been generated ')
 
     # Check for a second event
+    print(f'[INFO] Modifying {os.path.join(testdir1, file)} content')
     modify_file_content(testdir1, file)
+    print(f'[INFO] Time travel: {scheduled}')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
+        print('[INFO] Checking the event...')
+        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                        callback=callback_detect_event).result()
+        raise AttributeError(f'[ERROR] Second: It was expected that an event would not be generated, '
+                             f'{event} has been generated ')
 
 
 def test_duplicate_entries_report(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
@@ -152,20 +183,34 @@ def test_duplicate_entries_report(get_configuration, configure_environment, rest
             <directories report_changes="yes">/home/user</directories> (IGNORED)
             <directories report_changes="no">/home/user</directories>
     """
+    print('[INFO] Applying the test configuration')
     check_apply_test({'ossec_conf_duplicate_report'}, get_configuration['tags'])
     file = 'hello'
     mode2 = get_configuration['metadata']['fim_mode2']
     scheduled = mode2 == 'scheduled'
 
     # Check for an event
+    print(f'[INFO] Adding file {os.path.join(testdir1, file)}, content: " "')
     create_file(REGULAR, testdir1, file, content=' ')
+    print(f'[INFO] Time travel: {scheduled}')
     check_time_travel(scheduled)
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
+    try:
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
+    except TimeoutError:
+        raise TimeoutError(f'[ERROR] First: It was expected that an event would be generated for file '
+                           f'{os.path.join(testdir1, file)}')
 
     # Check for a second event
+    print(f'[INFO] Modifying {os.path.join(testdir1, file)} content')
     modify_file_content(testdir1, file)
+    print(f'[INFO] Time travel: {scheduled}')
     check_time_travel(scheduled)
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
+    try:
+        print('[INFO] Checking the event...')
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
+    except TimeoutError:
+        raise TimeoutError(f'[ERROR] Second: It was expected that an event would be generated for file '
+                           f'{os.path.join(testdir1, file)}')
     assert not os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'diff', 'local', testdir1[1:], file)), \
         'Error: Diff file created'
 
@@ -184,6 +229,7 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
         content.replace(old, new)
         f.close()
 
+    print('[INFO] Applying the test configuration')
     check_apply_test({'ossec_conf_duplicate_complex'}, get_configuration['tags'])
     file = 'hello'
     mode2 = get_configuration['metadata']['fim_mode2']
@@ -191,24 +237,48 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
     scheduled = mode2 == 'scheduled'
     mode2 = "real-time" if mode2 == "realtime" else mode2
 
+    print(f'[INFO] Adding file {os.path.join(testdir1, file)}, content: "testing"')
     create_file(REGULAR, testdir1, file, content='testing')
     file_path = os.path.join(testdir1, file)
 
+    print(f'[INFO] Time travel: {scheduled}')
     check_time_travel(scheduled)
-    event1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
+    try:
+        print('[INFO] Checking the event...')
+        event1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                         callback=callback_detect_event).result()
+    except TimeoutError:
+        raise TimeoutError(f'[ERROR] First: It was expected that an event would be generated for file '
+                           f'{os.path.join(testdir1, file)}')
 
     # Replace character, change the group and ownership and touch the file
+    print(f'[INFO] Replacing a character of {os.path.join(testdir1, file)} content')
     replace_character('i', '1', file_path)
+    print(f'[INFO] Modifying {os.path.join(testdir1, file)}\'s group')
     modify_file_group(testdir1, file)
+    print(f'[INFO] Modifying {os.path.join(testdir1, file)}\'s owner')
     modify_file_owner(testdir1, file)
+    print(f'[INFO] Adding new file {file_path}')
     Path(file_path).touch()
+
+    print(f'[INFO] Time travel: {scheduled}')
     check_time_travel(scheduled)
     event2 = check_event(previous_mode=mode2, previous_event=event1, file=file)
-    assert event2 is None, "Error: Multiple events created"
+    assert event2 is None, "[ERROR] Multiple events created"
 
     # Change the permissions and the size of the file
+    print(f'[INFO] Modifying {os.path.join(testdir1, file)}\'s permissions')
     modify_file_permission(testdir1, file)
+    print(f'[INFO] Modifying {os.path.join(testdir1, file)} content')
     modify_file_content(testdir1, file)
+
+    print(f'[INFO] Time travel: {scheduled}')
     check_time_travel(scheduled)
-    event3 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
+    try:
+        print('[INFO] Checking the event...')
+        event3 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                         callback=callback_detect_event).result()
+    except TimeoutError:
+        raise TimeoutError(f'[ERROR] It was expected that an event would be generated for file '
+                           f'{os.path.join(testdir1, file)}')
     validate_event(event3, [CHECK_PERM, CHECK_SIZE])
