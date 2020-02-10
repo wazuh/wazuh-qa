@@ -441,7 +441,26 @@ class SuperQueue(queue.Queue):
         self.aux_queue.queue = deepcopy(self.queue)
 
 
-class ForwardStreamHandler(socketserver.BaseRequestHandler):
+class StreamServer(socketserver.ThreadingUnixStreamServer):
+
+    def shutdown_request(self, request):
+        pass
+
+
+class StreamHandler(socketserver.BaseRequestHandler):
+
+    def forward(self, data):
+        # Create a socket (SOCK_STREAM means a TCP socket)
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as forwarded_sock:
+            # Connect to server and send data
+            forwarded_sock.connect(self.server.mitm.forwarded_socket_path)
+            forwarded_sock.sendall(pack("<I", len(data)) + data)
+
+            # Receive data from the server and shut down
+            size = unpack("<I", self.recvall(forwarded_sock, 4, socket.MSG_WAITALL))[0]
+            response = self.recvall(forwarded_sock, size, socket.MSG_WAITALL)
+
+            return response
 
     def recvall(self, sock: socket.socket, size: int, mask: int):
         buffer = bytearray()
@@ -458,7 +477,6 @@ class ForwardStreamHandler(socketserver.BaseRequestHandler):
 
     def handle(self):
         self.request.settimeout(1)
-        i = 0
         while not self.server.mitm.event.is_set():
             header = self.recvall(self.request, 4, socket.MSG_WAITALL)
             if not header:
@@ -468,54 +486,39 @@ class ForwardStreamHandler(socketserver.BaseRequestHandler):
             if not data:
                 break
 
-            if self.server.mitm.queue is not None:
-                self.server.mitm.queue.put(data)
+            response = self.server.mitm.handler_func(data) if self.server.mitm.handler_func else self.forward(data)
 
-            # Create a socket (SOCK_STREAM means a TCP socket)
-            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as forwarded_sock:
-                # Connect to server and send data
-                forwarded_sock.connect(self.server.mitm.forwarded_socket_path)
-                forwarded_sock.sendall(pack("<I", len(data)) + data)
-
-                # Receive data from the server and shut down
-                size = unpack("<I", self.recvall(forwarded_sock, 4, socket.MSG_WAITALL))[0]
-                response = self.recvall(forwarded_sock, size, socket.MSG_WAITALL)
-
-                if self.server.mitm.queue is not None:
-                    self.server.mitm.queue.put(data)
-
+            # INSERT QUEUE HERE
             self.request.sendall(pack("<I", len(response)) + response)
 
 
-class ForwardDatagramHandler(socketserver.BaseRequestHandler):
+class DatagramHandler(socketserver.BaseRequestHandler):
 
-    def handle(self):
-        data = self.request[0]
-        if self.server.mitm.queue is not None:
-            self.server.mitm.queue.put(data)
+    def forward(self, data):
         with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as forwarded_sock:
             forwarded_sock.sendto(data, self.server.mitm.forwarded_socket_path)
 
+    def handle(self):
+        data = self.request[0]
 
-class StreamServer(socketserver.ThreadingUnixStreamServer):
+        self.server.mitm.handler_func(data) if self.server.mitm.handler_func else self.forward(data)
 
-    def shutdown_request(self, request):
-        pass
+        # INSERT QUEUE HERE
 
 
 class ManInTheMiddle:
 
-    def __init__(self, socket_path, mode='TCP', queue_item=None):
+    def __init__(self, socket_path, mode='TCP', func: callable = None):
         self.listener_socket_path = socket_path
         self.forwarded_socket_path = f'{socket_path}.original'
         os.rename(self.listener_socket_path, self.forwarded_socket_path)
         self.listener_class = StreamServer if mode == 'TCP' else socketserver.UnixDatagramServer
-        self.handler_class = ForwardStreamHandler if mode == 'TCP' else ForwardDatagramHandler
+        self.handler_class = StreamHandler if mode == 'TCP' else DatagramHandler
+        self.handler_func = func
         self.mode = mode
         self.listener = None
         self.thread = None
         self.event = threading.Event()
-        self.queue = queue_item
 
     def run(self, *args):
         self.listener = self.listener_class(self.listener_socket_path, self.handler_class)
