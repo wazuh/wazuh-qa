@@ -71,23 +71,36 @@ def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_ap
         Run test if it matches with a configuration identifier, skip otherwise
 
     """
+    print('[INFO] Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
     # Create file that must be ignored
+    print(f'[INFO] Adding file {os.path.join(testdir1, filename)}, content: ""')
     create_file(REGULAR, folder, filename, content='')
 
     # Go ahead in time to let syscheck perform a new scan if mode is scheduled
+    print(f'[INFO] Time travel: {scheduled}')
     check_time_travel(scheduled)
 
     if triggers_event:
-        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
+        print('[INFO] Checking the event...')
+        try:
+            event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                            callback=callback_detect_event).result()
+        except TimeoutError:
+            raise TimeoutError(f'[ERROR] It was expected that an event would be generated for file '
+                               f'{os.path.join(testdir1, filename)}')
 
         assert event['data']['type'] == 'added', 'Event type not equal'
         assert event['data']['path'] == os.path.join(folder, filename), 'Event path not equal'
     else:
         while True:
-            ignored_file = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_ignore).result()
+            try:
+                ignored_file = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_ignore).result()
 
-            if ignored_file == os.path.join(folder, filename):
-                break
+                if ignored_file == os.path.join(folder, filename):
+                    break
+            except TimeoutError:
+                raise TimeoutError(f'[ERROR] It was expected that an event would be generated for file '
+                                   f'{os.path.join(testdir1, filename)}')
