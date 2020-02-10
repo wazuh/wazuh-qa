@@ -182,7 +182,10 @@ def get_agents(client_keys='/var/ossec/etc/client.keys'):
     agent_ids = list()
     with open(client_keys, 'r') as keys:
         for line in keys.readlines():
-            agent_ids.append(re.match(agent_regex, line).group(1))
+            try:
+                agent_ids.append(re.match(agent_regex, line).group(1))
+            except AttributeError:
+                pass
 
     for agent_id in agent_ids:
         agent_dict[agent_id.zfill(3)] = Manager().dict({
@@ -421,7 +424,7 @@ def state_collector(case, protocol, eps, files, agents_dict, buffer):
                 if file.endswith('.state'):
                     daemon = str(file.split(".")[0])
                     filename = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                            f"stats/state_case{case}-{daemon}_{protocol}_{eps}eps_"
+                                            f"stats/state-{daemon}_case{case}_{protocol}_{eps}eps_"
                                             f"{files}files_{buffer}.csv")
                     if not daemons_dict[daemon]['deleted']:
                         try:
@@ -523,6 +526,7 @@ def test_initialize_stats_collector(protocol, eps, files, directory, buffer, cas
     """
     agents_dict = get_agents()
     agents_checker, writers = list(), list()
+    stats_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stats')
     database_params = {
         'modify_file': modify_file,
         'modify_all': modify_all,
@@ -531,6 +535,8 @@ def test_initialize_stats_collector(protocol, eps, files, directory, buffer, cas
         'total_files': files,
         'prefix': 'file_'
     }
+    if not os.path.exists(stats_dir):
+        os.mkdir(stats_dir)
 
     # If we are in case 1 or in case 2 and the number of files is 0, we will not execute the test since we cannot
     # modify the checksums because they do not exist
@@ -543,8 +549,7 @@ def test_initialize_stats_collector(protocol, eps, files, directory, buffer, cas
 
         # Launch one process for agent due to FileMonitor restriction (block the execution)
         for agent_id in agents_dict.keys():
-            filename = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                    f"stats/info_case{case}-{protocol}_{eps}eps_{files}files_{buffer}.csv")
+            filename = os.path.join(stats_dir, f"info-case{case}_{protocol}_{eps}eps_{files}files_{buffer}.csv")
             agents_checker.append(Process(target=agent_checker, args=(case, agent_id, agents_dict, filename,
                                                                       database_params,)))
             agents_checker[-1].start()
@@ -552,6 +557,8 @@ def test_initialize_stats_collector(protocol, eps, files, directory, buffer, cas
         # Block the test until one agent starts
         seconds = 0
         while check_all_n_attempts(agents_dict.keys()) != 0 and any(agent != 0.0 for agent in agents_dict.values()):
+            if seconds >= max_time_for_agent_setup:
+                raise TimeoutError('[ERROR] The agents are not ready')
             print(f'[SETUP] Waiting for agent attempt... {seconds} seconds')
             time.sleep(setup_environment_time)
             seconds += setup_environment_time
@@ -561,9 +568,8 @@ def test_initialize_stats_collector(protocol, eps, files, directory, buffer, cas
         state_collector_check = Process(target=state_collector, args=(case, protocol, eps, files, agents_dict, buffer,))
         state_collector_check.start()
         for daemon in tested_daemons:
-            filename = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                    f"stats/results_case{case}-{daemon}_{protocol}_{eps}eps_{files}"
-                                    f"files_{buffer}.csv")
+            filename = os.path.join(stats_dir, f"stats-{daemon}_case{case}_{protocol}_{eps}eps_"
+                                               f"{files}files_{buffer}.csv")
             writers.append(Process(target=stats_collector, args=(filename, daemon, agents_dict,)))
             writers[-1].start()
         while True:
