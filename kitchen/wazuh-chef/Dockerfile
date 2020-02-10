@@ -15,16 +15,13 @@ RUN cd $HOME && \
     git clone https://github.com/wazuh/wazuh-qa.git && \
     cd $HOME/wazuh-qa && \
     git checkout devel && \
-    cd $HOME/wazuh-qa/kitchen/wazuh-chef/manager/files/ && \
+    git pull origin devel
+
+RUN cd $HOME/wazuh-qa/kitchen/wazuh-chef/manager/files/ && \
     bundle install
 
-RUN git clone https://github.com/rshad/kitchen-docker && \
-    cd kitchen-docker && \
-    git checkout fix-docker-image-deletion && \
-    git pull origin fix-docker-image-deletion
-
 RUN rm -rf /usr/local/bundle/gems/kitchen-docker-2.9.0/* && \
-    cp -rf kitchen-docker/* /usr/local/bundle/gems/kitchen-docker-2.9.0/
+    cp -rf $HOME/wazuh-qa/kitchen/kitchen-docker/* /usr/local/bundle/gems/kitchen-docker-2.9.0/
 
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py
 
