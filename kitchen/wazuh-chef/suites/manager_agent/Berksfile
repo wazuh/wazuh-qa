@@ -1,0 +1,10 @@
+source 'https://supermarket.chef.io'
+
+cookbook 'chef-sugar'
+cookbook 'hostsfile'
+cookbook 'apt'
+cookbook 'yum'
+cookbook 'poise-python'
+cookbook 'wazuh_manager', path: "#{ENV['COOKBOOKS_PATH']}/wazuh_manager/"
+cookbook 'wazuh_agent', path: "#{ENV['COOKBOOKS_PATH']}/wazuh_agent/"
+cookbook 'load_attributes', path: "#{ENV['COOKBOOKS_PATH']}/load_attributes/"

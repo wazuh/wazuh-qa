@@ -1,0 +1,14 @@
+{
+  "name": "development",
+  "description": "The development environment",
+  "cookbook_versions": {
+  },
+  "json_class": "Chef::Environment",
+  "chef_type": "environment",
+  "override_attributes": {
+    "ossec": {
+      "registration_address": "MANAGER_IP",
+      "address": ["MANAGER_IP", "MANAGER_IP"]
+    }
+  }
+}
