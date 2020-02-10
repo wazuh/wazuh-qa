@@ -1,10 +1,17 @@
 # Copyright (C) 2015-2020, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+import datetime
+import grp
 import os
+import pwd
+import queue
 import socket
+import socketserver
 import sys
+import threading
 import time
+from copy import deepcopy
 from struct import pack, unpack
 
 from wazuh_testing.tools.time import Timer
@@ -345,3 +352,190 @@ class SocketMonitor:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
+
+
+class QueueMonitor:
+    def __init__(self, queue_item, time_step=0.5):
+        self._queue = queue_item
+        self._continue = False
+        self._abort = False
+        self._result = []
+        self._time_step = time_step
+
+    def get_results(self, callback=_callback_default, accum_results=1, timeout=-1, update_position=True):
+        result_list = []
+        timer = 0
+        while len(result_list) != accum_results:
+            if timer >= timeout:
+                self.abort()
+                break
+            now = datetime.datetime.now()
+            try:
+                method = self._queue.get if update_position else self._queue.pick
+                item = callback(method(block=True, timeout=self._time_step))
+                if item is not None:
+                    result_list.append(item)
+            except queue.Empty:
+                timer += self._time_step
+                continue
+
+            timer += (datetime.datetime.now() - now).seconds
+
+        return result_list if len(result_list) > 1 else result_list[0]
+
+    def start(self, timeout=-1, callback=_callback_default, accum_results=1, update_position=True):
+        """Start the queue monitoring until the stop method is called."""
+        if not self._continue:
+            self._continue = True
+            self._abort = False
+
+            while self._continue:
+                if self._abort:
+                    raise TimeoutError()
+                result = self.get_results(callback=callback, accum_results=accum_results, timeout=timeout,
+                                          update_position=update_position)
+                if result and not self._abort:
+                    for item in result:
+                        self._result.append(item)
+                    else:
+                        self._result = result
+                    if self._result:
+                        self.stop()
+
+        if not update_position:
+            self._queue.reset_aux()
+
+        return self
+
+    def stop(self):
+        """Stop the file monitoring. It can be restart calling the start method."""
+        self._continue = False
+        return self
+
+    def abort(self):
+        """Abort because of timeout."""
+        self._abort = True
+        return self
+
+    def result(self):
+        return self._result
+
+
+class SuperQueue(queue.Queue):
+    def __init__(self):
+        super().__init__()
+        self.aux_queue = queue.Queue()
+
+    def get(self, *args, **kwargs):
+        self.aux_queue.get(*args, **kwargs)
+        return super().get(*args, **kwargs)
+
+    def put(self, *args, **kwargs):
+        self.aux_queue.put(*args, **kwargs)
+        super().put(*args, **kwargs)
+
+    def pick(self, *args, **kwargs):
+        return self.aux_queue.get(*args, **kwargs)
+
+    def reset_aux(self):
+        self.aux_queue.queue = deepcopy(self.queue)
+
+
+class ForwardStreamHandler(socketserver.BaseRequestHandler):
+
+    def recvall(self, sock: socket.socket, size: int, mask: int):
+        buffer = bytearray()
+        while len(buffer) < size:
+            try:
+                data = sock.recv(size - len(buffer), mask)
+                if not data:
+                    break
+                buffer.extend(data)
+            except socket.timeout:
+                if self.server.mitm.event.is_set():
+                    break
+        return bytes(buffer)
+
+    def handle(self):
+        self.request.settimeout(1)
+        i = 0
+        while not self.server.mitm.event.is_set():
+            header = self.recvall(self.request, 4, socket.MSG_WAITALL)
+            if not header:
+                break
+            size = unpack("<I", header)[0]
+            data = self.recvall(self.request, size, socket.MSG_WAITALL)
+            if not data:
+                break
+
+            if self.server.mitm.queue is not None:
+                self.server.mitm.queue.put(data)
+
+            # Create a socket (SOCK_STREAM means a TCP socket)
+            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as forwarded_sock:
+                # Connect to server and send data
+                forwarded_sock.connect(self.server.mitm.forwarded_socket_path)
+                forwarded_sock.sendall(pack("<I", len(data)) + data)
+
+                # Receive data from the server and shut down
+                size = unpack("<I", self.recvall(forwarded_sock, 4, socket.MSG_WAITALL))[0]
+                response = self.recvall(forwarded_sock, size, socket.MSG_WAITALL)
+
+                if self.server.mitm.queue is not None:
+                    self.server.mitm.queue.put(data)
+
+            self.request.sendall(pack("<I", len(response)) + response)
+
+
+class ForwardDatagramHandler(socketserver.BaseRequestHandler):
+
+    def handle(self):
+        data = self.request[0]
+        if self.server.mitm.queue is not None:
+            self.server.mitm.queue.put(data)
+        with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as forwarded_sock:
+            forwarded_sock.sendto(data, self.server.mitm.forwarded_socket_path)
+
+
+class StreamServer(socketserver.ThreadingUnixStreamServer):
+
+    def shutdown_request(self, request):
+        pass
+
+
+class ManInTheMiddle:
+
+    def __init__(self, socket_path, mode='TCP', queue_item=None):
+        self.listener_socket_path = socket_path
+        self.forwarded_socket_path = f'{socket_path}.original'
+        os.rename(self.listener_socket_path, self.forwarded_socket_path)
+        self.listener_class = StreamServer if mode == 'TCP' else socketserver.UnixDatagramServer
+        self.handler_class = ForwardStreamHandler if mode == 'TCP' else ForwardDatagramHandler
+        self.mode = mode
+        self.listener = None
+        self.thread = None
+        self.event = threading.Event()
+        self.queue = queue_item
+
+    def run(self, *args):
+        self.listener = self.listener_class(self.listener_socket_path, self.handler_class)
+        self.listener.mitm = self
+
+        # set proper socket permissions
+        uid = pwd.getpwnam('ossec').pw_uid
+        gid = grp.getgrnam('ossec').gr_gid
+        os.chown(self.listener_socket_path, uid, gid)
+        os.chmod(self.listener_socket_path, 0o660)
+
+        self.thread = threading.Thread(target=self.listener.serve_forever)
+        self.thread.start()
+
+    def start(self):
+        self.run()
+
+    def shutdown(self):
+        self.listener.shutdown()
+        self.listener.socket.close()
+        self.event.set()
+        os.remove(self.listener_socket_path)
+        os.rename(self.forwarded_socket_path, self.listener_socket_path)
