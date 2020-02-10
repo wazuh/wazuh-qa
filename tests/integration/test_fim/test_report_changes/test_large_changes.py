@@ -88,9 +88,9 @@ def generateString(stringLength=10, character='0'):
     ('regular_0', testdir, 500, 500),
     ('regular_1', testdir, 30000, 30000),
     ('regular_2', testdir, 70000, 70000),
-    ('regular_4', testdir, 10, 20000),
-    ('regular_5', testdir, 10, 70000),
-    ('regular_6', testdir, 20000, 10),
+    ('regular_3', testdir, 10, 20000),
+    ('regular_4', testdir, 10, 70000),
+    ('regular_5', testdir, 20000, 10),
     ('regular_6', testdir, 70000, 10),
 ])
 def test_large_changes(filename, folder, original_size, modified_size, tags_to_apply, get_configuration,
@@ -131,12 +131,13 @@ def test_large_changes(filename, folder, original_size, modified_size, tags_to_a
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
     # Assert old content is shown in content_changes
-    assert '0' in event['data']['content_changes']
+    assert '0' in event['data']['content_changes'], '"0" is the old value but it is not found within content_changes'
 
     # Assert new content is shown when old content is lower than the limit or platform is Windows
     if original_size < limit or sys.platform == 'win32':
-        assert '1' in event['data']['content_changes'], f'Not equal {sys.getsizeof(original_string)}'
+        assert '1' in event['data']['content_changes'], '"1" is the new value but it is not found ' \
+                                                        'within content_changes'
 
     # Assert 'More changes' is shown when the sum of old and new content is greater than the limit.
     if (original_size + modified_size) >= limit:
-        assert 'More changes' in event['data']['content_changes'], 'More changes not found within content_changes.'
+        assert 'More changes' in event['data']['content_changes'], '"More changes" not found within content_changes.'
