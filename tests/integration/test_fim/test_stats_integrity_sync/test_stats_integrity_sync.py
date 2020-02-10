@@ -465,7 +465,7 @@ def stats_collector(filename, daemon, agents_dict):
             if check_all_n_attempts(agents_dict.keys()) > 0:
                 stats = get_stats(daemon)
                 if stats:
-                    cpu, ram, avg_disk_write, avg_disk_read = stats[:4]
+                    cpu, ram, avg_disk_read, avg_disk_write = stats[:4]
                     print(f'[STATS] Stats {daemon} writing: {time.time()},{cpu},{ram},{avg_disk_read},'
                           f'{avg_disk_write},,')
                     file_.write(f'{time.time()},{cpu},{ram},{avg_disk_read},{avg_disk_write},,\n')
