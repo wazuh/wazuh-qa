@@ -4,6 +4,7 @@
 
 import os
 import shutil
+from collections import Counter
 
 import pytest
 
@@ -85,7 +86,12 @@ def test_delete_folder(folder, file_list, filetype, tags_to_apply,
     check_time_travel(scheduled)
 
     # Expect deleted events
-    event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+    event_list = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                     accum_results=len(file_list)).result()
-    for i, file in enumerate(file_list):
-        assert 'deleted' in event[i]['data']['type'] and os.path.join(folder, file) in event[i]['data']['path']
+    path_list = [event['data']['path'] for event in event_list]
+    counter_type = Counter([event['data']['type'] for event in event_list])
+
+    assert counter_type['deleted'] == len(file_list), f'Number of "deleted" events should be {len(file_list)}'
+
+    for file in file_list:
+        assert os.path.join(folder, file) in path_list, f'File {file} not found within the events'
