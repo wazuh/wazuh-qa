@@ -684,7 +684,7 @@ def callback_audit_removed_rule(line):
 
 
 def callback_audit_deleting_rule(line):
-    match = re.match(r'.*Deleting Audit rules...', line)
+    match = re.match(r'.*Deleting Audit rules.', line)
     if match:
         return True
     return None
