@@ -1,8 +1,7 @@
 FROM ruby
 
-RUN apt-get update && apt install docker.io git curl wget -y
-
-RUN apt-get update
+RUN apt-get update && apt install docker.io git curl wget -y && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN gem install kitchen-docker && \
     gem install rbnacl && \
