@@ -4,6 +4,7 @@ driver:
   use_sudo: false
   use_internal_docker_network: true
   remove_images: true
+  use_cache: false
 
 provisioner:
   name: chef_zero
