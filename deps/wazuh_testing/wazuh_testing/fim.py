@@ -183,6 +183,7 @@ def create_file(type_, path, name, **kwargs):
     target : str
         Path where the link will be pointing to.
     """
+    print("[INFO] Creating file " + os.path.join(path, name) + " of " + str(type_) + " type")
     os.makedirs(path, exist_ok=True, mode=0o777)
     if type_ != REGULAR:
         try:
@@ -196,7 +197,7 @@ def create_file(type_, path, name, **kwargs):
 
 def create_registry(key, subkey, arch):
     """
-    Create a registry given the key and the subkey. The registry is opened if it already exists
+    Creates a registry given the key and the subkey. The registry is opened if it already exists
 
     Parameters
     ----------
@@ -323,6 +324,7 @@ def delete_file(path, name):
     name : str
         Name of the file to be deleted
     """
+    print("[INFO] Removing file", os.path.join(path, name))
     regular_path = os.path.join(path, name)
     if os.path.exists(regular_path):
         os.remove(regular_path)
@@ -355,6 +357,7 @@ def modify_registry(key, subkey, value):
     value : str
         The value to be set.
     """
+    print("[INFO] Modifying windows registry.")
     sys.platform == 'win32' and winreg.SetValue(key, subkey, winreg.REG_SZ, value)
 
 
@@ -374,6 +377,7 @@ def modify_file_content(path, name, new_content=None, is_binary=False):
         True if the file's content is in binary format. False otherwise. Default `False`
     """
     path_to_file = os.path.join(path, name)
+    print("[INFO] - Changing content of " + path_to_file)
     content = "1234567890qwertyu" if new_content is None else new_content
     with open(path_to_file, 'ab' if is_binary else 'a') as f:
         f.write(content.encode() if is_binary else content)
@@ -391,6 +395,7 @@ def modify_file_mtime(path, name):
         Name of the file to be modified.
     """
     path_to_file = os.path.join(path, name)
+    print("[INFO] - Changing mtime of " + path_to_file)
     stat = os.stat(path_to_file)
     access_time = stat[ST_ATIME]
     modification_time = stat[ST_MTIME]
@@ -419,6 +424,7 @@ def modify_file_owner(path, name):
         os.chown(path_to_file, 1, -1)
 
     path_to_file = os.path.join(path, name)
+    print("[INFO] - Changing owner of " + path_to_file)
 
     if sys.platform == 'win32':
         modify_file_owner_windows()
@@ -443,6 +449,7 @@ def modify_file_group(path, name):
         return
 
     path_to_file = os.path.join(path, name)
+    print("[INFO] - Changing group of " + path_to_file)
     os.chown(path_to_file, -1, 1)
 
 
@@ -477,6 +484,8 @@ def modify_file_permission(path, name):
 
     path_to_file = os.path.join(path, name)
 
+    print("[INFO] - Changing permission of " + path_to_file)
+
     if sys.platform == 'win32':
         modify_file_permission_windows()
     else:
@@ -497,6 +506,7 @@ def modify_file_inode(path, name):
     if sys.platform == 'win32':
         return
 
+    print("[INFO] - Changing inode of " + os.path.join(path, name))
     inode_file = 'inodetmp'
     path_to_file = os.path.join(path, name)
     if isinstance(name, bytes):
@@ -510,6 +520,7 @@ def modify_file_win_attributes(path, name):
     if sys.platform != 'win32':
         return
 
+    print("[INFO] - Changing win attributes of " + os.path.join(path, name))
     path_to_file = os.path.join(path, name)
     win32api.SetFileAttributes(path_to_file, win32con.FILE_ATTRIBUTE_HIDDEN)
 
@@ -529,6 +540,7 @@ def modify_file(path, name, new_content=None, is_binary=False):
     is_binary : boolean, optional
         True if the file is binary. False otherwise. Default `False`
     """
+    print("[INFO] Modiying file " + os.path.join(path, name))
     modify_file_inode(path, name)
     modify_file_content(path, name, new_content, is_binary)
     modify_file_mtime(path, name)
@@ -777,7 +789,9 @@ def check_time_travel(time_travel):
         True if we need to update time. False otherwise.
     """
     if time_travel:
+        before = str(datetime.now())
         TimeMachine.travel_to_future(timedelta(hours=13))
+        print("[INFO] Changing the system clock from", before, "to", str(datetime.now()))
 
 
 def callback_configuration_warning(line):
@@ -819,8 +833,20 @@ class EventChecker:
         triggers_event : boolean, optional
             True if the event should be raised. False otherwise. Default `True`
         """
-        self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout)
+        try:
+            self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout)
+        except TimeoutError:
+            num_files = len(self.file_list)
+            error_msg = "[ERROR] TimeoutError was raised because "
+            error_msg += str(num_files) if num_files > 1 else "a single"
+            error_msg += " '" + str(event_type) + "' "
+            error_msg += "events were " if num_files > 1 else "event was "
+            error_msg += "expected for " + str(self._get_file_list())
+            error_msg += " but were not detected." if len(self.file_list) > 1 else " but was not detected."
+            print(error_msg)
+            raise
         self.check_events(event_type)
+
 
     def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0):
         """
@@ -928,6 +954,13 @@ class EventChecker:
                     self.custom_validator.validate_after_update(self.events)
                 elif event_type == "deleted":
                     self.custom_validator.validate_after_delete(self.events)
+    def _get_file_list(self):
+        result_list = []
+        for file_name in self.file_list:
+            expected_file_path = os.path.join(self.folder, file_name)
+            expected_file_path = expected_file_path[:1].lower() + expected_file_path[1:]
+            result_list.append(expected_file_path)
+        return result_list
 
 
 class CustomValidator:
@@ -1052,6 +1085,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     check_time_travel(time_travel)
     event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event)
+    print("[INFO] 'added' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
     # Modify previous text files
     for name, content in file_list.items():
@@ -1059,6 +1093,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     check_time_travel(time_travel)
     event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
+    print("[INFO] 'modified' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
     # Delete previous text files
     for name in file_list:
@@ -1066,6 +1101,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     check_time_travel(time_travel)
     event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
+    print("[INFO] 'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
 
 def detect_initial_scan(file_monitor):
