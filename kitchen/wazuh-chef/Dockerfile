@@ -14,10 +14,11 @@ RUN gem install kitchen-docker && \
 RUN cd $HOME && \
     git clone https://github.com/wazuh/wazuh-qa.git && \
     cd $HOME/wazuh-qa && \
+    git fetch --all && \
     git checkout devel && \
     git pull origin devel
 
-RUN cd $HOME/wazuh-qa/kitchen/wazuh-chef/manager/files/ && \
+RUN cd $HOME/wazuh-qa/kitchen/wazuh-chef/ && \
     bundle install
 
 RUN rm -rf /usr/local/bundle/gems/kitchen-docker-2.9.0/* && \
