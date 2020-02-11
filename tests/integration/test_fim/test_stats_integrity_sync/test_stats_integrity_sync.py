@@ -13,7 +13,7 @@ from struct import pack, unpack
 
 import pytest
 
-from wazuh_testing.tools import WAZUH_PATH, ALERT_FILE_PATH
+from wazuh_testing.tools import WAZUH_PATH, WAZUH_CONF, ALERT_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -544,10 +544,27 @@ def stats_collector(filename, daemon, agents_dict):
                     # print(f'[STATS] Stats {daemon} writing: {time.time()},{",".join(stats.values())}')
                     file_.write(f'{time.time()},{",".join(stats.values())}\n')
             time.sleep(setup_environment_time)
-    stats = calculate_stats(daemon, **old_stats)
-    print(f'[STATS] Finishing stats {daemon} writing: {time.time()},{",".join(stats.values())}')
-    with open(filename, 'a') as file_:
-        file_.write(f'{time.time()},{",".join(stats.values())}\n')
+    if old_stats:
+        stats = calculate_stats(daemon, **old_stats)
+        print(f'[STATS] Finishing stats {daemon} writing: {time.time()},{",".join(stats.values())}')
+        with open(filename, 'a') as file_:
+            file_.write(f'{time.time()},{",".join(stats.values())}\n')
+    else:
+        regex_mem = r"ossec-syscheckd *([0-9]+)"
+        stats = get_stats(daemon)
+        ps = os.popen("ps -axo comm,rss | grep ossec-syscheckd | head -n1")
+        cpu, mem = stats["cpu"], re.match(regex_mem, ps.read()).group(1)
+        print(f'[STATS] Finishing stats {daemon} writing: {time.time()},{cpu},{mem},'
+              f'{",".join(stats.values())}')
+        with open(filename, 'a') as file_:
+            file_.write(f'{time.time()},{",".join(stats.values())}\n')
+
+
+def protocol_detection(ossec_conf_path=WAZUH_CONF):
+    try:
+        return re.search(r'<protocol>(udp|tcp)</protocol>', open(ossec_conf_path).read()).group(1)
+    except AttributeError:
+        raise AttributeError(f'[ERROR] No protocol detected in {ossec_conf_path}')
 
 
 @pytest.mark.parametrize('case, modify_file, modify_all, restore_all', [
@@ -580,7 +597,9 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
         'total_files': files,
         'prefix': 'file_'
     }
-    stats_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stats', f'{eps}eps-{files}files')
+    protocol = protocol_detection()
+    stats_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stats',
+                             f'{protocol}_{eps}eps-{files}files')
     if not os.path.exists(os.path.dirname(stats_dir)):
         os.mkdir(os.path.dirname(stats_dir))
     if not os.path.exists(stats_dir):
@@ -589,7 +608,7 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
     # If we are in case 1 or in case 2 and the number of files is 0, we will not execute the test since we cannot
     # modify the checksums because they do not exist
     if not (case == 1 and files == '0') and not (case == 2 and files == '0'):
-        print(f'\n\n[SETUP] Setting up the environment for for case{case}-{eps}eps-{files}files')
+        print(f'\n\n[SETUP] Setting up the environment for for case{case}_{protocol}-{eps}eps-{files}files')
         truncate_file(ALERT_FILE_PATH)
         # Only modify the configuration if case 0 is executing
         if case == Cases.case0.value:
@@ -607,12 +626,13 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
         while not start_stats_collector['start']:
             if seconds >= max_time_for_agent_setup:
                 raise TimeoutError('[ERROR] The agents are not ready')
-            print(f'[SETUP] Waiting for agent attempt... {seconds} seconds')
+            if seconds == 0:
+                print(f'[SETUP] Waiting for agent attempt...')
             time.sleep(setup_environment_time)
             seconds += setup_environment_time
 
         # We started the stats collector as the agents are ready
-        print(f'[ENV] Starting test for case{case}-{eps}eps-{files}files')
+        print(f'[ENV] Started test for case{case}_{protocol}-{eps}eps-{files}files')
         state_collector_check = Process(target=state_collector, args=(case, eps, files, agents_dict, buffer,
                                                                       stats_dir,))
         state_collector_check.start()
