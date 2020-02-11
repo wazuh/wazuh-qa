@@ -437,8 +437,7 @@ def state_collector(case, eps, files, agents_dict, buffer, stats_dir):
             for file in os.listdir(state_path):
                 if file.endswith('.state'):
                     daemon = str(file.split(".")[0])
-                    filename = os.path.join(os.path.join(stats_dir, f"state-{daemon}_case{case}_{eps}eps_"
-                                            f"{files}files_{buffer}.csv"))
+                    filename = os.path.join(os.path.join(stats_dir, f"state-{daemon}_case{case}_{buffer}.csv"))
                     if not daemons_dict[daemon]['deleted']:
                         try:
                             os.unlink(filename)
@@ -523,7 +522,6 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
         'start': False
     })
     agents_checker, writers = list(), list()
-    stats_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stats')
     database_params = {
         'modify_file': modify_file,
         'modify_all': modify_all,
@@ -532,6 +530,9 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
         'total_files': files,
         'prefix': 'file_'
     }
+    stats_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stats', f'{eps}eps-{files}files')
+    if not os.path.exists(os.path.dirname(stats_dir)):
+        os.mkdir(os.path.dirname(stats_dir))
     if not os.path.exists(stats_dir):
         os.mkdir(stats_dir)
 
@@ -546,7 +547,7 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
 
         # Launch one process for agent due to FileMonitor restriction (block the execution)
         for agent_id in agents_dict.keys():
-            filename = os.path.join(stats_dir, f"info-case{case}_{eps}eps_{files}files_{buffer}.csv")
+            filename = os.path.join(stats_dir, f"info-case{case}_{buffer}.csv")
             agents_checker.append(Process(target=agent_checker, args=(case, agent_id, agents_dict, filename,
                                                                       start_stats_collector, database_params,)))
             agents_checker[-1].start()
@@ -566,8 +567,7 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
                                                                       stats_dir,))
         state_collector_check.start()
         for daemon in tested_daemons:
-            filename = os.path.join(stats_dir, f"stats-{daemon}_case{case}_{eps}eps_"
-                                               f"{files}files_{buffer}.csv")
+            filename = os.path.join(stats_dir, f"stats-{daemon}_case{case}_{buffer}.csv")
             writers.append(Process(target=stats_collector, args=(filename, daemon, agents_dict,)))
             writers[-1].start()
         while True:
