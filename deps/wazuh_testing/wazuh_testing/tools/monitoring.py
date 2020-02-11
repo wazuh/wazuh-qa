@@ -420,6 +420,9 @@ class QueueMonitor:
     def result(self):
         return self._result
 
+    def get_queue(self):
+        return self._queue
+
 
 class SuperQueue(queue.Queue):
     def __init__(self):
@@ -488,7 +491,8 @@ class StreamHandler(socketserver.BaseRequestHandler):
 
             response = self.server.mitm.handler_func(data) if self.server.mitm.handler_func else self.forward(data)
 
-            # INSERT QUEUE HERE
+            self.server.mitm.put_queue((data, response))
+
             self.request.sendall(pack("<I", len(response)) + response)
 
 
@@ -503,7 +507,13 @@ class DatagramHandler(socketserver.BaseRequestHandler):
 
         self.server.mitm.handler_func(data) if self.server.mitm.handler_func else self.forward(data)
 
-        # INSERT QUEUE HERE
+        self.server.mitm.put_queue(data)
+
+
+class DatagramServer(socketserver.UnixDatagramServer):
+
+    def shutdown_request(self, request):
+        pass
 
 
 class ManInTheMiddle:
@@ -519,6 +529,7 @@ class ManInTheMiddle:
         self.listener = None
         self.thread = None
         self.event = threading.Event()
+        self._queue = SuperQueue()
 
     def run(self, *args):
         self.listener = self.listener_class(self.listener_socket_path, self.handler_class)
@@ -542,3 +553,10 @@ class ManInTheMiddle:
         self.event.set()
         os.remove(self.listener_socket_path)
         os.rename(self.forwarded_socket_path, self.listener_socket_path)
+
+    @property
+    def queue(self):
+        return self._queue
+
+    def put_queue(self, item):
+        self._queue.put(item)
