@@ -510,10 +510,10 @@ def stats_collector(filename, daemon, agents_dict):
     ('200', '0', '/test0k', 'no'),
     ('200', '5000', '/test5k', 'no'),
     ('5000', '5000', '/test5k', 'no'),
-    # ('200', '50000', '/test50k', 'no'),
-    # ('5000', '50000', '/test50k', 'yes'),
-    # ('5000', '1000000', '/test1M', 'yes'),
-    # ('1000000', '1000000', '/test1M', 'yes'),
+    ('200', '50000', '/test50k', 'no'),
+    ('5000', '50000', '/test50k', 'yes'),
+    ('5000', '1000000', '/test1M', 'yes'),
+    ('1000000', '1000000', '/test1M', 'yes'),
 ])
 def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_file, modify_all, restore_all):
     """ Execute and launch all the necessary processes to check all the cases with all the specified configurations
