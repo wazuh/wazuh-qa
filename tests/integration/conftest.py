@@ -8,13 +8,14 @@ import re
 import sys
 from datetime import datetime
 from time import time
+import uuid
 
 import pytest
 from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_LOGS_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_LOGS_PATH, WAZUH_CONF
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, SocketController, SocketMonitor
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_sockets
@@ -103,11 +104,15 @@ def pytest_configure(config):
 
 
 def pytest_html_results_table_header(cells):
+    cells.insert(4, html.th('Tier', class_='sortable tier', col='tier'))
+    cells.insert(3, html.th('Markers'))
     cells.insert(2, html.th('Description'))
     cells.insert(1, html.th('Time', class_='sortable time', col='time'))
 
 
 def pytest_html_results_table_row(report, cells):
+    cells.insert(4, html.td(report.tier))
+    cells.insert(3, html.td(report.markers))
     cells.insert(2, html.td(report.description))
     cells.insert(1, html.td(datetime.utcnow(), class_='col-time'))
 
@@ -117,9 +122,8 @@ def pytest_html_results_table_row(report, cells):
 def create_asset(
         self, content, extra_index, test_index, file_extension, mode="w"
 ):
-    asset_file_name = "{}_{}.{}".format(
-        re.sub(r"[^\w\.\:]", "_", self.test_id).split('::')[0],
-        str(time()),
+    asset_file_name = "{}.{}".format(
+        str(uuid.uuid4()),
         file_extension
     )
     asset_path = os.path.join(
@@ -144,18 +148,27 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     report = outcome.get_result()
     documentation = FunctionDoc(item.function)
+
+    # Add description, markers and tier to the report
     report.description = '. '.join(documentation["Summary"])
+    report.tier = ', '.join(str(mark.kwargs['level']) for mark in item.iter_markers(name="tier"))
+    report.markers = ', '.join(mark.name for mark in item.iter_markers() if
+                               mark.name != 'tier' and mark.name != 'parametrize')
 
     extra = getattr(report, 'extra', [])
     if report.when == 'call':
         # Apply hack to fix length filename problem
         pytest_html.HTMLReport.TestResult.create_asset = create_asset
+
+        # Add extended information from docstring inside 'Result' section
         extra.append(pytest_html.extras.html('<div><h2>Test function details</h2></div>'))
         for section in ('Extended Summary', 'Parameters'):
             extra.append(pytest_html.extras.html(f'<div><h3>{section}</h3></div>'))
             for line in documentation[section]:
                 extra.append(pytest_html.extras.html(f'<div>{line}</div>'))
         arguments = dict()
+
+        # Add arguments of each text as a json file
         for key, value in item.funcargs.items():
             if isinstance(value, set):
                 arguments[key] = list(value)
@@ -165,6 +178,13 @@ def pytest_runtest_makereport(item, call):
             except (TypeError, OverflowError):
                 arguments[key] = str(value)
         extra.append(pytest_html.extras.json(arguments, name="Test arguments"))
+
+        # Extra files to be added in 'Links' section
+        for filepath in (LOG_FILE_PATH, WAZUH_CONF):
+            with open(filepath, 'r') as f:
+                content = f.read()
+                extra.append(pytest_html.extras.text(content, name=os.path.split(filepath)[-1]))
+
         report.extra = extra
 
 
