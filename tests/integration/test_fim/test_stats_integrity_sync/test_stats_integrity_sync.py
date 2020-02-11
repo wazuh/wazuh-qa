@@ -1,4 +1,6 @@
-# Needs installed in system: sysstat, bc
+# Copyright (C) 2015-2020, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
 import re
@@ -14,6 +16,12 @@ import pytest
 from wazuh_testing.tools import WAZUH_PATH, ALERT_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
+
+# Marks
+
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=3)]
+
+# variables
 
 agent_conf = os.path.join(WAZUH_PATH, 'etc', 'shared', 'default', 'agent.conf')
 state_path = os.path.join(WAZUH_PATH, 'var', 'run')
@@ -195,18 +203,16 @@ def get_agents(client_keys='/var/ossec/etc/client.keys'):
     return agent_dict
 
 
-def replace_conf(protocol, eps, directory, buffer):
+def replace_conf(eps, directory, buffer):
     """ Function that sets up the configuration for the current test.
 
     Parameters
     ----------
-    protocol : str
-        Can be udp or tcp
-    eps :
+    eps : str
         Events per second
-    directory :
+    directory : str
         Directory to be monitored
-    buffer :
+    buffer : str
         Can be yes or no, <disabled>yes|no</disabled>
 
     """
@@ -214,7 +220,6 @@ def replace_conf(protocol, eps, directory, buffer):
     address_regex = r".*<address>([0-9.]+)</address>"
     directory_regex = r'.*<directories check_all=\"yes\">(.+)</directories>'
     eps_regex = r'.*<max_eps>([0-9]+)</max_eps>'
-    protocol_regex = r'.*<protocol>([a-z]+)</protocol>'
     buffer_regex = r'<client_buffer><disabled>(yes|no)</disabled></client_buffer>'
 
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/template_agent.conf'), 'r') as f:
@@ -223,7 +228,6 @@ def replace_conf(protocol, eps, directory, buffer):
             line = re.sub(address_regex, '<address>' + manager_ip + '</address>', line)
             line = re.sub(directory_regex, '<directories check_all="yes">' + directory + '</directories>', line)
             line = re.sub(eps_regex, '<max_eps>' + eps + '</max_eps>', line)
-            line = re.sub(protocol_regex, '<protocol>' + protocol + '</protocol>', line)
             line = re.sub(buffer_regex, '<client_buffer><disabled>' + buffer + '</disabled></client_buffer>', line)
             new_config += line
 
@@ -384,7 +388,7 @@ def info_collector(agent, agent_id, filename):
                          f"{time.time()},{time.time() - agent['start']}\n")
 
 
-def state_collector(case, protocol, eps, files, agents_dict, buffer):
+def state_collector(case, eps, files, agents_dict, buffer, stats_dir):
     """ Gets the stats of the .state files in the WAZUH_PATH/var/run folder.
     We can define the stats to get from each daemon in the daemons_dict.
 
@@ -392,8 +396,6 @@ def state_collector(case, protocol, eps, files, agents_dict, buffer):
     ----------
     case : int
         Case number
-    protocol : str
-        Desired protocol (udp or tcp)
     eps : str
         Events per second
     files : str
@@ -402,6 +404,8 @@ def state_collector(case, protocol, eps, files, agents_dict, buffer):
         Dictionary with the start time of every agent
     buffer : str
         Set disabled to yes or no
+    stats_dir : str
+        Stats folder
 
     """
     daemons_dict = {
@@ -423,9 +427,8 @@ def state_collector(case, protocol, eps, files, agents_dict, buffer):
             for file in os.listdir(state_path):
                 if file.endswith('.state'):
                     daemon = str(file.split(".")[0])
-                    filename = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                            f"stats/state-{daemon}_case{case}_{protocol}_{eps}eps_"
-                                            f"{files}files_{buffer}.csv")
+                    filename = os.path.join(os.path.join(stats_dir, f"state-{daemon}_case{case}_{eps}eps_"
+                                            f"{files}files_{buffer}.csv"))
                     if not daemons_dict[daemon]['deleted']:
                         try:
                             os.unlink(filename)
@@ -504,24 +507,16 @@ def finish_stats_collector(filename, daemon, agents_dict):
     (Cases.case1.value, True, False, False),
     (Cases.case2.value, False, True, False)
 ])
-@pytest.mark.parametrize('protocol, eps, files, directory, buffer', [
-    ('udp', '200', '0', '/test0k', 'no'),
-    ('tcp', '200', '0', '/test0k', 'no'),
-    ('udp', '200', '5000', '/test5k', 'no'),
-    ('udp', '5000', '5000', '/test5k', 'no'),
-    ('tcp', '200', '5000', '/test5k', 'no'),
-    ('tcp', '5000', '5000', '/test5k', 'no'),
-    ('udp', '200', '50000', '/test50k', 'no'),
-    ('udp', '5000', '50000', '/test50k', 'yes'),
-    ('tcp', '200', '50000', '/test50k', 'no'),
-    ('tcp', '5000', '50000', '/test50k', 'yes'),
-    ('udp', '5000', '1000000', '/test1M', 'yes'),
-    ('udp', '1000000', '1000000', '/test1M', 'yes'),
-    ('tcp', '5000', '1000000', '/test1M', 'yes'),
-    ('tcp', '1000000', '1000000', '/test1M', 'yes')
+@pytest.mark.parametrize('eps, files, directory, buffer', [
+    ('200', '0', '/test0k', 'no'),
+    ('200', '5000', '/test5k', 'no'),
+    ('5000', '5000', '/test5k', 'no'),
+    ('200', '50000', '/test50k', 'no'),
+    ('5000', '50000', '/test50k', 'yes'),
+    ('5000', '1000000', '/test1M', 'yes'),
+    ('1000000', '1000000', '/test1M', 'yes'),
 ])
-def test_initialize_stats_collector(protocol, eps, files, directory, buffer, case, modify_file, modify_all,
-                                    restore_all):
+def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_file, modify_all, restore_all):
     """ Execute and launch all the necessary processes to check all the cases with all the specified configurations
     """
     agents_dict = get_agents()
@@ -541,15 +536,15 @@ def test_initialize_stats_collector(protocol, eps, files, directory, buffer, cas
     # If we are in case 1 or in case 2 and the number of files is 0, we will not execute the test since we cannot
     # modify the checksums because they do not exist
     if not (case == 1 and files == '0') and not (case == 2 and files == '0'):
-        print(f'\n\n[SETUP] Setting up the environment for for case{case}-{protocol}-{eps}eps-{files}files')
+        print(f'\n\n[SETUP] Setting up the environment for for case{case}-{eps}eps-{files}files')
         truncate_file(ALERT_FILE_PATH)
         # Only modify the configuration if case 0 is executing
         if case == Cases.case0.value:
-            replace_conf(protocol, eps, directory, buffer)
+            replace_conf(eps, directory, buffer)
 
         # Launch one process for agent due to FileMonitor restriction (block the execution)
         for agent_id in agents_dict.keys():
-            filename = os.path.join(stats_dir, f"info-case{case}_{protocol}_{eps}eps_{files}files_{buffer}.csv")
+            filename = os.path.join(stats_dir, f"info-case{case}_{eps}eps_{files}files_{buffer}.csv")
             agents_checker.append(Process(target=agent_checker, args=(case, agent_id, agents_dict, filename,
                                                                       database_params,)))
             agents_checker[-1].start()
@@ -564,11 +559,12 @@ def test_initialize_stats_collector(protocol, eps, files, directory, buffer, cas
             seconds += setup_environment_time
 
         # We started the stats collector as the agents are ready
-        print(f'[ENV] Starting test for case{case}-{protocol}-{eps}eps-{files}files')
-        state_collector_check = Process(target=state_collector, args=(case, protocol, eps, files, agents_dict, buffer,))
+        print(f'[ENV] Starting test for case{case}-{eps}eps-{files}files')
+        state_collector_check = Process(target=state_collector, args=(case, eps, files, agents_dict, buffer,
+                                                                      stats_dir,))
         state_collector_check.start()
         for daemon in tested_daemons:
-            filename = os.path.join(stats_dir, f"stats-{daemon}_case{case}_{protocol}_{eps}eps_"
+            filename = os.path.join(stats_dir, f"stats-{daemon}_case{case}_{eps}eps_"
                                                f"{files}files_{buffer}.csv")
             writers.append(Process(target=stats_collector, args=(filename, daemon, agents_dict,)))
             writers[-1].start()
