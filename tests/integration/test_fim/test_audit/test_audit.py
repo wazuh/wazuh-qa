@@ -60,7 +60,8 @@ def test_audit_health_check(tags_to_apply, get_configuration,
     print('[INFO] Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    wazuh_log_monitor.start(timeout=20, callback=callback_audit_health_check)
+    wazuh_log_monitor.start(timeout=20, callback=callback_audit_health_check,
+                            error_message='[ERROR] Health check failed')
 
 
 @pytest.mark.parametrize('tags_to_apply', [
@@ -71,14 +72,12 @@ def test_added_rules(tags_to_apply, get_configuration,
     """Check if the specified folders are added to Audit rules list."""
     print('[INFO] Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    try:
-        print('[INFO] Checking the event...')
-        events = wazuh_log_monitor.start(timeout=20,
-                                         callback=callback_audit_added_rule,
-                                         accum_results=3).result()
-    except TimeoutError:
-        raise TimeoutError(f'[ERROR] First: It was expected that an event would be generated for file '
-                           f'{os.path.join(testdir1, file)}')
+    print('[INFO] Checking the event...')
+    events = wazuh_log_monitor.start(timeout=20,
+                                     callback=callback_audit_added_rule,
+                                     accum_results=3,
+                                     error_message='[ERROR] Folders were not added to Audit rules list'
+                                     ).result()
 
     assert testdir1 in events, f'{testdir1} not detected in scan'
     assert testdir2 in events, f'{testdir2} not detected in scan'
@@ -95,16 +94,21 @@ def test_readded_rules(tags_to_apply, get_configuration,
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Remove added rules
-    for dir in (testdir1, testdir2, testdir3):
-        os.system("auditctl -W {0} -p wa -k wazuh_fim".format(dir))
+    for dir_ in (testdir1, testdir2, testdir3):
+        command = f"auditctl -W {dir_} -p wa -k wazuh_fim"
+        os.system(command)
 
         wazuh_log_monitor.start(timeout=20,
-                                callback=callback_audit_rules_manipulation)
+                                callback=callback_audit_rules_manipulation,
+                                error_message=f'[ERROR] Did not receive expected manipulation event with the '
+                                              f'command {command}')
 
         events = wazuh_log_monitor.start(timeout=10,
-                                         callback=callback_audit_reloaded_rule).result()
+                                         callback=callback_audit_reloaded_rule,
+                                         error_message='[ERROR] Did not receive expected reload event with the rule '
+                                                       'modification').result()
 
-        assert dir in events, f'{dir} not in {events}'
+        assert dir_ in events, f'{dir_} not in {events}'
 
 
 @pytest.mark.parametrize('tags_to_apply', [
@@ -117,15 +121,20 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Restart Audit
-    p = subprocess.Popen(["service", "auditd", "restart"])
+    restart_command = ["service", "auditd", "restart"]
+    p = subprocess.Popen(restart_command)
     p.wait()
 
     wazuh_log_monitor.start(timeout=10,
-                            callback=callback_audit_connection)
+                            callback=callback_audit_connection,
+                            error_message=f'[ERROR] Did not receive expected connect event with the command '
+                                          f'{" ".join(restart_command)}')
 
     events = wazuh_log_monitor.start(timeout=30,
                                      callback=callback_audit_loaded_rule,
-                                     accum_results=3).result()
+                                     accum_results=3,
+                                     error_message=f'[ERROR] Did not receive expected load event with the command '
+                                                   f'{" ".join(restart_command)}').result()
 
     assert testdir1 in events, f'{testdir1} not in {events}'
     assert testdir2 in events, f'{testdir2} not in {events}'
@@ -142,12 +151,15 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Stop Audit
-    p = subprocess.Popen(["service", "auditd", "stop"])
+    stop_command = ["service", "auditd", "stop"]
+    p = subprocess.Popen(stop_command)
     p.wait()
 
     events = wazuh_log_monitor.start(timeout=30,
                                      callback=callback_realtime_added_directory,
-                                     accum_results=3).result()
+                                     accum_results=3,
+                                     error_message=f'[ERROR] Did not receive expected directory added for monitoring '
+                                                   f'with the command {" ".join(stop_command)}').result()
 
     assert testdir1 in events, f'{testdir1} not detected in scan'
     assert testdir2 in events, f'{testdir2} not detected in scan'
@@ -176,7 +188,8 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
     check_apply_test({audit_key}, get_configuration['tags'])
 
     # Add watch rule
-    os.system("auditctl -w " + path + " -p wa -k " + audit_key)
+    add_rule_command = "auditctl -w " + path + " -p wa -k " + audit_key
+    os.system(add_rule_command)
 
     # Restart and for wazuh
     truncate_file(LOG_FILE_PATH)
@@ -188,7 +201,9 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
     create_file(REGULAR, path, "testfile")
     events = wazuh_log_monitor.start(timeout=30,
                                      callback=callback_audit_key,
-                                     accum_results=1).result()
+                                     accum_results=1,
+                                     error_message=f'[ERROR] Did not receive expected event '
+                                                   f'with the command {" ".join(add_rule_command)}').result()
     assert audit_key in events
 
     # Remove watch rule

@@ -832,22 +832,22 @@ class EventChecker:
             Seconds to wait until an event is raised when trying to fetch. Default `1`
         triggers_event : boolean, optional
             True if the event should be raised. False otherwise. Default `True`
+        extra_timeout : int, optional
+            Additional time to wait after the min_timeout
+
         """
-        try:
-            self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout)
-        except TimeoutError:
-            num_files = len(self.file_list)
-            error_msg = "[ERROR] TimeoutError was raised because "
-            error_msg += str(num_files) if num_files > 1 else "a single"
-            error_msg += " '" + str(event_type) + "' "
-            error_msg += "events were " if num_files > 1 else "event was "
-            error_msg += "expected for " + str(self._get_file_list())
-            error_msg += " but were not detected." if len(self.file_list) > 1 else " but was not detected."
-            raise TimeoutError(error_msg)
+        num_files = len(self.file_list)
+        error_msg = "[ERROR] TimeoutError was raised because "
+        error_msg += str(num_files) if num_files > 1 else "a single"
+        error_msg += " '" + str(event_type) + "' "
+        error_msg += "events were " if num_files > 1 else "event was "
+        error_msg += "expected for " + str(self._get_file_list())
+        error_msg += " but were not detected." if len(self.file_list) > 1 else " but was not detected."
+
+        self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
         self.check_events(event_type)
 
-
-    def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0):
+    def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0, error_message=''):
         """
         Try to fetch events on a given log monitor. Will return a list with the events detected.
 
@@ -857,6 +857,11 @@ class EventChecker:
             Seconds to wait until an event is raised when trying to fetch. Default `1`
         triggers_event : boolean, optional
             True if the event should be raised. False otherwise. Default `True`
+        extra_timeout : int, optional
+            Additional time to wait after the min_timeout
+        error_message : str
+            Message to explain a possible timeout error
+
         """
         def clean_results(event_list):
             if not isinstance(event_list, list):
@@ -886,8 +891,8 @@ class EventChecker:
                                             callback=callback_detect_event,
                                             accum_results=len(self.file_list),
                                             timeout_extra=extra_timeout,
-                                            encoding=self.encoding
-                                            ).result()
+                                            encoding=self.encoding,
+                                            error_message=error_message).result()
             assert triggers_event, f'No events should be detected.'
             if extra_timeout > 0:
                 result = clean_results(result)

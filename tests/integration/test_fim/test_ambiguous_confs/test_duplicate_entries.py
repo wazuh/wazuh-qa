@@ -122,13 +122,12 @@ def test_duplicate_entries(get_configuration, configure_environment, restart_sys
 
     print(f'[INFO] Time travel: {scheduled}')
     check_time_travel(scheduled)
-    try:
-        print('[INFO] Checking the event...')
-        event1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                         callback=callback_detect_event).result()
-    except TimeoutError:
-        raise TimeoutError(f'[ERROR] Expected an "added" event type for "{os.path.join(testdir1, file)}", '
-                           f'no event has been generated')
+    print('[INFO] Checking the event...')
+    event1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                     callback=callback_detect_event,
+                                     error_message=f'[ERROR] First: Did not receive expected event for file '
+                                                   f'{os.path.join(testdir1, file)}'
+                                     ).result()
 
     # Check for a second event
     event2 = check_event(previous_mode=mode2, previous_event=event1, file=file)
@@ -159,8 +158,7 @@ def test_duplicate_entries_sregex(get_configuration, configure_environment,
         print('[INFO] Checking the event...')
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_detect_event).result()
-        raise AttributeError(f'[ERROR] First: It was expected that an event would not be generated, '
-                             f'{event} has been generated ')
+        raise AttributeError(f'[ERROR] First: Unexpected event {event}')
 
     # Check for a second event
     print(f'[INFO] Modifying {os.path.join(testdir1, file)} content')
@@ -171,8 +169,7 @@ def test_duplicate_entries_sregex(get_configuration, configure_environment,
         print('[INFO] Checking the event...')
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_detect_event).result()
-        raise AttributeError(f'[ERROR] Second: It was expected that an event would not be generated, '
-                             f'{event} has been generated ')
+        raise AttributeError(f'[ERROR] Second: Unexpected event {event}')
 
 
 def test_duplicate_entries_report(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
@@ -193,23 +190,19 @@ def test_duplicate_entries_report(get_configuration, configure_environment, rest
     create_file(REGULAR, testdir1, file, content=' ')
     print(f'[INFO] Time travel: {scheduled}')
     check_time_travel(scheduled)
-    try:
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
-    except TimeoutError:
-        raise TimeoutError(f'[ERROR] First: It was expected that an event would be generated for file '
-                           f'{os.path.join(testdir1, file)}')
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                            error_message=f'[ERROR] First: Did not receive expected event for file '
+                                          f'{os.path.join(testdir1, file)}').result()
 
     # Check for a second event
     print(f'[INFO] Modifying {os.path.join(testdir1, file)} content')
     modify_file_content(testdir1, file)
     print(f'[INFO] Time travel: {scheduled}')
     check_time_travel(scheduled)
-    try:
-        print('[INFO] Checking the event...')
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
-    except TimeoutError:
-        raise TimeoutError(f'[ERROR] Second: It was expected that an event would be generated for file '
-                           f'{os.path.join(testdir1, file)}')
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                            error_message=f'[ERROR] Second: Did not receive expected event for file '
+                                          f'{os.path.join(testdir1, file)}').result()
+
     assert not os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'diff', 'local', testdir1[1:], file)), \
         'Error: Diff file created'
 
@@ -242,13 +235,11 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
 
     print(f'[INFO] Time travel: {scheduled}')
     check_time_travel(scheduled)
-    try:
-        print('[INFO] Checking the event...')
-        event1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                         callback=callback_detect_event).result()
-    except TimeoutError:
-        raise TimeoutError(f'[ERROR] First: It was expected that an event would be generated for file '
-                           f'{os.path.join(testdir1, file)}')
+    print('[INFO] Checking the event...')
+    event1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                     callback=callback_detect_event,
+                                     error_message=f'[ERROR] First: It was expected that an event would be '
+                                                   f'generated for file {os.path.join(testdir1, file)}').result()
 
     # Replace character, change the group and ownership and touch the file
     print(f'[INFO] Replacing a character of {os.path.join(testdir1, file)} content')
@@ -273,11 +264,9 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
 
     print(f'[INFO] Time travel: {scheduled}')
     check_time_travel(scheduled)
-    try:
-        print('[INFO] Checking the event...')
-        event3 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                         callback=callback_detect_event).result()
-    except TimeoutError:
-        raise TimeoutError(f'[ERROR] It was expected that an event would be generated for file '
-                           f'{os.path.join(testdir1, file)}')
+    print('[INFO] Checking the event...')
+    event3 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                     callback=callback_detect_event,
+                                     error_message=f'[ERROR] First: Did not receive expected event for file '
+                                                   f'{os.path.join(testdir1, file)}').result()
     validate_event(event3, [CHECK_PERM, CHECK_SIZE])

@@ -160,13 +160,11 @@ def check_restrict(directory, trigger, check_list, file_list, timeout, scheduled
     if scheduled:
         TimeMachine.travel_to_future(timedelta(hours=13))
     while True:
-        try:
-            ignored_file = wazuh_log_monitor.start(timeout=timeout,
-                                                   callback=callback_restricted).result()
-        except TimeoutError:
-            raise TimeoutError(f'[ERROR] TimeoutError was raised because a single '
-                               f'"Ignoring file {file_list[0]} due to restriction ..." was '
-                               f'expected for {file_list[0]} but was not detected.')
+        ignored_file = wazuh_log_monitor.start(timeout=timeout,
+                                               callback=callback_restricted,
+                                               error_message=f'[ERROR] TimeoutError was raised because a single '
+                                               f'"ignoring file {file_list[0]} due to restriction ..." was '
+                                               f'expected for {file_list[0]} but was not detected.').result()
         if ignored_file == os.path.join(directory, file_list[0]):
             break
 

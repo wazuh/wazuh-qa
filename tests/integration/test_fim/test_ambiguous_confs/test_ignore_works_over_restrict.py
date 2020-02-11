@@ -82,25 +82,20 @@ def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_ap
     # Go ahead in time to let syscheck perform a new scan if mode is scheduled
     print(f'[INFO] Time travel: {scheduled}')
     check_time_travel(scheduled)
+    error_message = f'[ERROR] Did not receive expected event for file {os.path.join(testdir1, filename)}'
 
     if triggers_event:
         print('[INFO] Checking the event...')
-        try:
-            event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                            callback=callback_detect_event).result()
-        except TimeoutError:
-            raise TimeoutError(f'[ERROR] It was expected that an event would be generated for file '
-                               f'{os.path.join(testdir1, filename)}')
+        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                        callback=callback_detect_event,
+                                        error_message=error_message).result()
 
         assert event['data']['type'] == 'added', 'Event type not equal'
         assert event['data']['path'] == os.path.join(folder, filename), 'Event path not equal'
     else:
         while True:
-            try:
-                ignored_file = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_ignore).result()
+            ignored_file = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_ignore,
+                                                   error_message=error_message).result()
 
-                if ignored_file == os.path.join(folder, filename):
-                    break
-            except TimeoutError:
-                raise TimeoutError(f'[ERROR] It was expected that an event would be generated for file '
-                                   f'{os.path.join(testdir1, filename)}')
+            if ignored_file == os.path.join(folder, filename):
+                break

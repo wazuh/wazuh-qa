@@ -60,16 +60,20 @@ def test_remove_and_read_folder(tags_to_apply, folder, get_configuration,
     tags_to_apply : set
         Configuration tag to apply in the test
     folder : str
-        The folder to remove and readd
+        The folder to remove and read
+
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     shutil.rmtree(folder, ignore_errors=True)
-    wazuh_log_monitor.start(timeout=20, callback=callback_audit_removed_rule)
+    wazuh_log_monitor.start(timeout=20, callback=callback_audit_removed_rule,
+                            error_message=f'[ERROR] Did not receive expected removed event '
+                                          f'removing the folder {folder}')
 
     os.makedirs(folder, mode=0o777)
-    wazuh_log_monitor.start(timeout=30, callback=callback_audit_reloaded_rule)
+    wazuh_log_monitor.start(timeout=30, callback=callback_audit_reloaded_rule,
+                            error_message=f'[ERROR] Did not receive expected reload event')
 
 
 @pytest.mark.parametrize('tags_to_apply', [
@@ -83,11 +87,13 @@ def test_reconnect_to_audit(tags_to_apply, get_configuration, configure_environm
     ----------
     tags_to_apply : set
         Configuration tag to apply in the test
+
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    subprocess.run(["service", "auditd", "restart"], check=True)
+    restart_command = ["service", "auditd", "restart"]
+    subprocess.run(restart_command, check=True)
 
     wazuh_log_monitor.start(timeout=20, callback=callback_audit_connection_close)
     wazuh_log_monitor.start(timeout=20, callback=callback_audit_connection)
