@@ -511,7 +511,7 @@ def state_collector(case, eps, files, agents_dict, buffer, stats_dir):
                         if daemons_dict[daemon]['no_headers']:
                             state.write(f"{','.join(daemons_dict[daemon]['headers'])}\n")
                             daemons_dict[daemon]['no_headers'] = False
-                        print(f'[STATE] State {daemon} writing: {",".join(values)}')
+                        # print(f'[STATE] State {daemon} writing: {",".join(values)}')
                         state.write(f"{','.join(values)}\n")
             time.sleep(state_collector_time)
         if check_all_n_completions(agents_dict.keys()) > 0:
@@ -541,7 +541,7 @@ def stats_collector(filename, daemon, agents_dict):
                     stats = calculate_stats(daemon, **old_stats)
                 old_stats = get_stats(daemon)
                 if stats:
-                    print(f'[STATS] Stats {daemon} writing: {time.time()},{",".join(stats.values())}')
+                    # print(f'[STATS] Stats {daemon} writing: {time.time()},{",".join(stats.values())}')
                     file_.write(f'{time.time()},{",".join(stats.values())}\n')
             time.sleep(setup_environment_time)
     stats = calculate_stats(daemon, **old_stats)
