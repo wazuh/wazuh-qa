@@ -17,9 +17,44 @@ from struct import pack, unpack
 from wazuh_testing.tools.time import Timer
 
 
-def wait_for_condition(condition_checker, args=None, kwargs=None, timeout=-1):
+def wazuh_unpack(data, format_: str = "<I"):
     """
-    Wait for a given condition to check.
+
+    Parameters
+    ----------
+    data : bytes
+        Binary data to unpack
+    format_ : str, optional
+        Format used to unpack data. Default "<I"
+
+    Returns
+    -------
+    int
+        Unpacked value
+    """
+    return unpack(format_, data)[0]
+
+
+def wazuh_pack(data, format_: str = "<I"):
+    """
+
+    Parameters
+    ----------
+    data : int
+        Int number to pack
+    format_ : str, optional
+        Format used to pack data. Default "<I"
+
+    Returns
+    -------
+    bytes
+        Packed value
+    """
+    return pack(format_, data)
+
+
+def wait_for_condition(condition_checker, args=None, kwargs=None, timeout=-1):
+    """Wait for a given condition to check.
 
     Parameters
     ----------
@@ -208,7 +243,7 @@ class SocketController:
             msg_bytes = message_.encode()
             try:
                 if size:
-                    output.append(self.sock.send(pack("<I", len(msg_bytes)) + msg_bytes))
+                    output.append(self.sock.send(wazuh_pack(len(msg_bytes)) + msg_bytes))
                 else:
                     output.append(self.sock.send(msg_bytes))
             except OSError as e:
@@ -232,13 +267,13 @@ class SocketController:
         output = list()
         for _ in range(0, total_messages):
             try:
-                size = unpack("<I", self.sock.recv(4, socket.MSG_WAITALL))[0]
+                size = wazuh_unpack(self.sock.recv(4, socket.MSG_WAITALL))
                 output.append(self.sock.recv(size, socket.MSG_WAITALL).decode().rstrip('\x00'))
             except OSError:
                 try:
                     self.sock.listen(1)
                     conn, addr = self.sock.accept()
-                    size = unpack("<I", conn.recv(4, socket.MSG_WAITALL))[0]
+                    size = wazuh_unpack(conn.recv(4, socket.MSG_WAITALL)
                     output.append(conn.recv(size, socket.MSG_WAITALL).decode().rstrip('\x00'))
                 except OSError as e:
                     raise e
@@ -457,10 +492,10 @@ class StreamHandler(socketserver.BaseRequestHandler):
         with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as forwarded_sock:
             # Connect to server and send data
             forwarded_sock.connect(self.server.mitm.forwarded_socket_path)
-            forwarded_sock.sendall(pack("<I", len(data)) + data)
+            forwarded_sock.sendall(wazuh_pack(len(data)) + data)
 
             # Receive data from the server and shut down
-            size = unpack("<I", self.recvall(forwarded_sock, 4, socket.MSG_WAITALL))[0]
+            size = wazuh_unpack(self.recvall(forwarded_sock, 4, socket.MSG_WAITALL)
             response = self.recvall(forwarded_sock, size, socket.MSG_WAITALL)
 
             return response
@@ -484,7 +519,7 @@ class StreamHandler(socketserver.BaseRequestHandler):
             header = self.recvall(self.request, 4, socket.MSG_WAITALL)
             if not header:
                 break
-            size = unpack("<I", header)[0]
+            size = wazuh_unpack(header)
             data = self.recvall(self.request, size, socket.MSG_WAITALL)
             if not data:
                 break
@@ -493,7 +528,7 @@ class StreamHandler(socketserver.BaseRequestHandler):
 
             self.server.mitm.put_queue((data, response))
 
-            self.request.sendall(pack("<I", len(response)) + response)
+            self.request.sendall(wazuh_pack(len(response)) + response)
 
 
 class DatagramHandler(socketserver.BaseRequestHandler):
