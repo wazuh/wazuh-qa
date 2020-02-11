@@ -79,16 +79,27 @@ def get_total_disk_info(daemon):
         Total read value and total write value
 
     """
-    regex_write = r"write_bytes: ([0-9]+)"
+    regex_rchar = r"rchar: ([0-9]+)"
+    regex_wchar = r"wchar: ([0-9]+)"
+    regex_syscr = r"syscr: ([0-9]+)"
+    regex_syscw = r"syscw: ([0-9]+)"
     regex_read = r"read_bytes: ([0-9]+)"
+    regex_write = r"write_bytes: ([0-9]+)"
+    regex_cancelled_write_bytes = r"cancelled_write_bytes: ([0-9]+)"
     pid = os.popen('pidof ' + daemon).read().strip()
 
     with open(os.path.join(f'/proc/{pid}/io'), 'r') as io_info:
         info = io_info.read()
-        total_read = float(re.search(regex_read, info).group(1)) / 1024  # KB
-        total_write = float(re.search(regex_write, info).group(1)) / 1024  # KB
 
-    return int(total_read), int(total_write)
+    return {
+        'rchar': float(re.search(regex_rchar, info).group(1)) / 1024,  # KB
+        'wchar': float(re.search(regex_wchar, info).group(1)) / 1024,  # KB
+        'syscr': float(re.search(regex_syscr, info).group(1)) / 1024,  # KB
+        'syscw': float(re.search(regex_syscw, info).group(1)) / 1024,  # KB
+        'read_bytes': float(re.search(regex_read, info).group(1)) / 1024,  # KB
+        'write_bytes': float(re.search(regex_write, info).group(1)) / 1024,  # KB
+        'cancelled_write_bytes': float(re.search(regex_cancelled_write_bytes, info).group(1)) / 1024  # KB
+    }
 
 
 def get_total_cpu_info(daemon):
@@ -101,7 +112,7 @@ def get_total_cpu_info(daemon):
     return cpu_total
 
 
-def get_stats(daemon, total_write_prev, total_read_prev, cpu_prev):
+def get_stats(daemon):
     """ Get CPU, RAM, disk read and disk write stats using ps and pidstat
 
     Parameters
@@ -115,19 +126,66 @@ def get_stats(daemon, total_write_prev, total_read_prev, cpu_prev):
         Return CPU, RAM, Disk reading, Disk writing, Total disk reading, total disk writing
 
     """
+    io_stats = get_total_disk_info(daemon)
+
+    return {
+        'cpu': str(get_total_cpu_info(daemon)),
+        'rchar': str(io_stats['rchar']),
+        'wchar': str(io_stats['wchar']),
+        'syscr': str(io_stats['syscr']),
+        'syscw': str(io_stats['syscw']),
+        'read_bytes': str(io_stats['read_bytes']),
+        'write_bytes': str(io_stats['write_bytes']),
+        'cancelled_write_bytes': str(io_stats['cancelled_write_bytes'])
+    }
+
+
+def calculate_stats(daemon, cpu=0, rchar=0, wchar=0, syscr=0, syscw=0, read_bytes=0, write_bytes=0,
+                    cancelled_write_bytes=0):
+    """ Get CPU, RAM, disk read and disk write stats using ps and pidstat
+
+    Parameters
+    ----------
+    daemon : str
+        Daemon for whom we will get the stats.
+    cpu : str or float
+        Previous CPU value
+    rchar : str or float
+        Previous rchar value
+    wchar : str or float
+        Previous wchar value
+    syscr : str or float
+        Previous syscr value
+    syscw : str or float
+        Previous syscw value
+    read_bytes : str or float
+        Previous read_bytes value
+    write_bytes : str or float
+        Previous write_bytes value
+    cancelled_write_bytes : str or float
+        Previous cancelled_write_bytes value
+
+    Returns
+    -------
+    list of str
+        Return CPU, RAM, Disk reading, Disk writing, Total disk reading, total disk writing
+
+    """
     regex_mem = r"ossec-syscheckd *([0-9]+)"
     ps = os.popen("ps -axo comm,rss | grep ossec-syscheckd | head -n1")
-    ps = ps.read()
-    mem = re.match(regex_mem, ps).group(1)
+    io_stats = get_total_disk_info(daemon)
 
-    read_new, write_new = get_total_disk_info(daemon)
-    read_per_sec = str(int(read_new) - int(total_read_prev))
-    write_per_sec = str(int(write_new) - int(total_write_prev))
-
-    cpu_new = get_total_cpu_info(daemon)
-    cpu_per_sec = str(int(cpu_new) - int(cpu_prev))
-
-    return [cpu_per_sec, mem, read_per_sec, write_per_sec, str(read_new), str(write_new), str(cpu_new)]
+    return {
+        'cpu': str(float(get_total_cpu_info(daemon)) - float(cpu)),
+        'mem': re.match(regex_mem, ps.read()).group(1),
+        'rchar': str(float(io_stats['rchar']) - float(rchar)),
+        'wchar': str(float(io_stats['wchar']) - float(wchar)),
+        'syscr': str(float(io_stats['syscr']) - float(syscr)),
+        'syscw': str(float(io_stats['syscw']) - float(syscw)),
+        'read_bytes': str(float(io_stats['read_bytes']) - float(read_bytes)),
+        'write_bytes': str(float(io_stats['write_bytes']) - float(write_bytes)),
+        'cancelled_write_bytes': str(float(io_stats['cancelled_write_bytes']) - float(cancelled_write_bytes))
+    }
 
 
 def n_attempts(agent):
@@ -474,30 +532,22 @@ def stats_collector(filename, daemon, agents_dict):
         Dictionary with the start time of every agent
 
     """
-    initial_stats = get_stats(daemon, total_read_prev=0, total_write_prev=0, cpu_prev=0)
-    disk_read_cumulative = initial_stats[4]
-    disk_write_cumulative = initial_stats[5]
-    cpu_cumulative = initial_stats[6]
+    stats, old_stats = None, None
     with open(filename, 'w') as file_:
-        file_.write("seconds,cpu,ram,avg_disk_read,avg_disk_write,total_disk_read,total_disk_write\n")
+        file_.write(f"seconds,cpu,mem,{','.join(get_stats(daemon).keys())}\n")
         while check_all_n_completions(agents_dict.keys()) == 0:
             if check_all_n_attempts(agents_dict.keys()) > 0:
-                stats = get_stats(daemon, cpu_prev=cpu_cumulative, total_read_prev=disk_read_cumulative,
-                                  total_write_prev=disk_write_cumulative)
+                if old_stats:
+                    stats = calculate_stats(daemon, **old_stats)
+                old_stats = get_stats(daemon)
                 if stats:
-                    cpu, ram, avg_disk_read, avg_disk_write = stats[:4]
-                    print(f'[STATS] Stats {daemon} writing: {time.time()},{cpu},{ram},{avg_disk_read},'
-                          f'{avg_disk_write},,')
-                    file_.write(f'{time.time()},{cpu},{ram},{avg_disk_read},{avg_disk_write},,\n')
+                    print(f'[STATS] Stats {daemon} writing: {time.time()},{",".join(stats.values())}')
+                    file_.write(f'{time.time()},{",".join(stats.values())}\n')
             time.sleep(setup_environment_time)
-    while True:
-        stats = get_stats(daemon, cpu_prev=cpu_cumulative, total_read_prev=disk_read_cumulative,
-                          total_write_prev=disk_write_cumulative)[:-1]
-        if stats:
-            print(f'[STATS] Finishing stats {daemon} writing: {time.time()},{",".join(stats)}')
-            with open(filename, 'a') as file_:
-                file_.write(f'{time.time()},{",".join(stats)}\n')
-            break
+    stats = calculate_stats(daemon, **old_stats)
+    print(f'[STATS] Finishing stats {daemon} writing: {time.time()},{",".join(stats.values())}')
+    with open(filename, 'a') as file_:
+        file_.write(f'{time.time()},{",".join(stats.values())}\n')
 
 
 @pytest.mark.parametrize('case, modify_file, modify_all, restore_all', [
