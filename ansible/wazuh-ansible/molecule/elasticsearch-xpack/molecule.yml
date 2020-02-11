@@ -5,6 +5,7 @@ driver:
   name: docker
 lint:
   name: yamllint
+  enabled: false
   options:
     config-data:
       ignore: .virtualenv
