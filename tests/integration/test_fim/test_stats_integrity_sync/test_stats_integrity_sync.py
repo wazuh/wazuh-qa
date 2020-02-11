@@ -88,7 +88,7 @@ def get_total_disk_info(daemon):
         total_read = float(re.search(regex_read, info).group(1)) / 1024  # KB
         total_write = float(re.search(regex_write, info).group(1)) / 1024  # KB
 
-    return (str(total_read), str(total_write))
+    return str(total_read), str(total_write)
 
 
 def get_stats(daemon):
