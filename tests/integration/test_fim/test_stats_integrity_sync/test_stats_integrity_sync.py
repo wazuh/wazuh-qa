@@ -88,10 +88,20 @@ def get_total_disk_info(daemon):
         total_read = float(re.search(regex_read, info).group(1)) / 1024  # KB
         total_write = float(re.search(regex_write, info).group(1)) / 1024  # KB
 
-    return str(total_read), str(total_write)
+    return int(total_read), int(total_write)
 
 
-def get_stats(daemon):
+def get_total_cpu_info(daemon):
+    pid = os.popen('pidof ' + daemon).read().strip()
+    cpu_file = "/proc/" + pid + "/stat"
+    with open(cpu_file, 'r') as cpu_info:
+        data = cpu_info.read().split()
+        cpu_total = int(data[13]) + int(data[14])
+
+    return cpu_total
+
+
+def get_stats(daemon, total_write_prev, total_read_prev, cpu_prev):
     """ Get CPU, RAM, disk read and disk write stats using ps and pidstat
 
     Parameters
@@ -105,20 +115,19 @@ def get_stats(daemon):
         Return CPU, RAM, Disk reading, Disk writing, Total disk reading, total disk writing
 
     """
-    regex_cpu = rf"{daemon} *([0-9]+.[0-9]+) *[0-9]+"
-    regex_mem = rf"{daemon} *[0-9]+.[0-9]+ *([0-9]+)"
-    regex_disk_rd_wr = rf".* *[0-9]* *[0-9]* *([0-9]+.[0-9]+) *([0-9]+.[0-9]+) *[0-9]+.[0-9]+ *{daemon}"
-    # char 37 is %
-    ps = os.popen(f'ps -axo comm,%cpu,rss | grep \"{daemon}\" | head -n1').read()
-    pidstat = os.popen(f'pidstat -d | grep {daemon} | head -n1').read()
-    try:
-        cpu, mem = re.match(regex_cpu, ps).group(1), re.match(regex_mem, ps).group(1)
-        disk_rd, disk_wr = re.match(regex_disk_rd_wr, pidstat).group(1), re.match(regex_disk_rd_wr, pidstat).group(2)
-        total_disk_info = get_total_disk_info(daemon)
+    regex_mem = r"ossec-syscheckd *([0-9]+)"
+    ps = os.popen("ps -axo comm,rss | grep ossec-syscheckd | head -n1")
+    ps = ps.read()
+    mem = re.match(regex_mem, ps).group(1)
 
-        return [cpu, mem, disk_rd, disk_wr, total_disk_info[0], total_disk_info[1]]
-    except AttributeError:
-        pass
+    read_new, write_new = get_total_disk_info(daemon)
+    read_per_sec = str(int(read_new) - int(total_read_prev))
+    write_per_sec = str(int(write_new) - int(total_write_prev))
+
+    cpu_new = get_total_cpu_info(daemon)
+    cpu_per_sec = str(int(cpu_new) - int(cpu_prev))
+
+    return [cpu_per_sec, mem, read_per_sec, write_per_sec, str(read_new), str(write_new), str(cpu_new)]
 
 
 def n_attempts(agent):
@@ -323,7 +332,7 @@ def modify_database(agent_id, directory, prefix, total_files, modify_file, modif
         time.sleep(0.1)
 
 
-def agent_checker(case, agent_id, agents_dict, filename, database_params):
+def agent_checker(case, agent_id, agents_dict, filename, start_stats_collector, database_params):
     """ Check that the current agent is restarted. When it has been restarted, marks the start time of the agent.
     If n_completions of the agent_id is greater than 0, the info_collector must be called.
 
@@ -357,6 +366,7 @@ def agent_checker(case, agent_id, agents_dict, filename, database_params):
     while True:
         if n_attempts(agent_id) > 0 and agents_dict[agent_id]['start'] == 0.0:
             agents_dict[agent_id]['start'] = time.time()
+            start_stats_collector['start'] = True
             print(f'[AGENT] Agent {agent_id} started at {agents_dict[agent_id]["start"]}')
         if n_completions(agent_id) > 0 and agents_dict[agent_id]['start'] != 0.0:
             info_collector(agents_dict[agent_id], agent_id, filename)
@@ -453,7 +463,7 @@ def state_collector(case, eps, files, agents_dict, buffer, stats_dir):
 
 
 def stats_collector(filename, daemon, agents_dict):
-    """ Collects the stats of the current daemon until all agents have finished the integry process.
+    """ Collects the stats of the current daemon until all agents have finished the integrity process.
 
     Parameters
     ----------
@@ -465,41 +475,30 @@ def stats_collector(filename, daemon, agents_dict):
         Dictionary with the start time of every agent
 
     """
+    initial_stats = get_stats(daemon, total_read_prev=0, total_write_prev=0, cpu_prev=0)
+    disk_read_cumulative = initial_stats[4]
+    disk_write_cumulative = initial_stats[5]
+    cpu_cumulative = initial_stats[6]
     with open(filename, 'w') as file_:
         file_.write("seconds,cpu,ram,avg_disk_read,avg_disk_write,total_disk_read,total_disk_write\n")
         while check_all_n_completions(agents_dict.keys()) == 0:
             if check_all_n_attempts(agents_dict.keys()) > 0:
-                stats = get_stats(daemon)
+                stats = get_stats(daemon, cpu_prev=cpu_cumulative, total_read_prev=disk_read_cumulative,
+                                  total_write_prev=disk_write_cumulative)
                 if stats:
                     cpu, ram, avg_disk_read, avg_disk_write = stats[:4]
                     print(f'[STATS] Stats {daemon} writing: {time.time()},{cpu},{ram},{avg_disk_read},'
                           f'{avg_disk_write},,')
                     file_.write(f'{time.time()},{cpu},{ram},{avg_disk_read},{avg_disk_write},,\n')
             time.sleep(setup_environment_time)
-    finish_stats_collector(filename, daemon, agents_dict)
-
-
-def finish_stats_collector(filename, daemon, agents_dict):
-    """ Finish the stats files for the monitored daemons. Adds full disk read and full disk write.
-
-    Parameters
-    ----------
-    filename : str
-        Path of the stats file for the current daemon
-    daemon : str
-        Daemon tested
-    agents_dict : dict of shared dict
-        Dictionary with the start time of every agent
-
-    """
-    if check_all_n_completions(agents_dict.keys()) > 0:
-        while True:
-            stats = get_stats(daemon)
-            if stats:
-                print(f'[STATS] Finishing stats {daemon} writing: {time.time()},{",".join(stats)}')
-                with open(filename, 'a') as file_:
-                    file_.write(f'{time.time()},{",".join(get_stats(daemon))}\n')
-                break
+    while True:
+        stats = get_stats(daemon, cpu_prev=cpu_cumulative, total_read_prev=disk_read_cumulative,
+                          total_write_prev=disk_write_cumulative)[:-1]
+        if stats:
+            print(f'[STATS] Finishing stats {daemon} writing: {time.time()},{",".join(stats)}')
+            with open(filename, 'a') as file_:
+                file_.write(f'{time.time()},{",".join(stats)}\n')
+            break
 
 
 @pytest.mark.parametrize('case, modify_file, modify_all, restore_all', [
@@ -511,15 +510,18 @@ def finish_stats_collector(filename, daemon, agents_dict):
     ('200', '0', '/test0k', 'no'),
     ('200', '5000', '/test5k', 'no'),
     ('5000', '5000', '/test5k', 'no'),
-    ('200', '50000', '/test50k', 'no'),
-    ('5000', '50000', '/test50k', 'yes'),
-    ('5000', '1000000', '/test1M', 'yes'),
-    ('1000000', '1000000', '/test1M', 'yes'),
+    # ('200', '50000', '/test50k', 'no'),
+    # ('5000', '50000', '/test50k', 'yes'),
+    # ('5000', '1000000', '/test1M', 'yes'),
+    # ('1000000', '1000000', '/test1M', 'yes'),
 ])
 def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_file, modify_all, restore_all):
     """ Execute and launch all the necessary processes to check all the cases with all the specified configurations
     """
     agents_dict = get_agents()
+    start_stats_collector = Manager().dict({
+        'start': False
+    })
     agents_checker, writers = list(), list()
     stats_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stats')
     database_params = {
@@ -546,12 +548,12 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
         for agent_id in agents_dict.keys():
             filename = os.path.join(stats_dir, f"info-case{case}_{eps}eps_{files}files_{buffer}.csv")
             agents_checker.append(Process(target=agent_checker, args=(case, agent_id, agents_dict, filename,
-                                                                      database_params,)))
+                                                                      start_stats_collector, database_params,)))
             agents_checker[-1].start()
 
         # Block the test until one agent starts
         seconds = 0
-        while check_all_n_attempts(agents_dict.keys()) != 0 and any(agent != 0.0 for agent in agents_dict.values()):
+        while not start_stats_collector['start']:
             if seconds >= max_time_for_agent_setup:
                 raise TimeoutError('[ERROR] The agents are not ready')
             print(f'[SETUP] Waiting for agent attempt... {seconds} seconds')
