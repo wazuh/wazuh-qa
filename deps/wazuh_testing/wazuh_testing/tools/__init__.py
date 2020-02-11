@@ -40,3 +40,21 @@ else:
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
 WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
+
+QUEUE_OSSEC_PATH = os.path.join(WAZUH_PATH, 'queue', 'ossec')
+QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
+
+WAZUH_SOCKETS = {
+    'ossec-analysisd': [os.path.join(QUEUE_OSSEC_PATH, 'analysis'),
+                        os.path.join(QUEUE_OSSEC_PATH, 'queue')],
+    'ossec-authd': [os.path.join(QUEUE_OSSEC_PATH, 'auth')],
+    'ossec-execd': [os.path.join(QUEUE_OSSEC_PATH, 'com')],
+    'ossec-logcollector': [os.path.join(QUEUE_OSSEC_PATH, 'logcollector')],
+    'ossec-monitord': [os.path.join(QUEUE_OSSEC_PATH, 'monitor')],
+    'ossec-remoted': [os.path.join(QUEUE_OSSEC_PATH, 'request')],
+    'ossec-syscheckd': [os.path.join(QUEUE_OSSEC_PATH, 'syscheck')],
+    'wazuh-db': [os.path.join(QUEUE_DB_PATH, 'wdb')],
+    'wazuh-modulesd': [os.path.join(QUEUE_OSSEC_PATH, 'wmodules'),
+                       os.path.join(QUEUE_OSSEC_PATH, 'download'),
+                       os.path.join(QUEUE_OSSEC_PATH, 'control')]
+}
