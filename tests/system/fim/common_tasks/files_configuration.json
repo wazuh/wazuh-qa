@@ -1,0 +1,14 @@
+{
+    "root_folder": "/tmp/test_files",
+    "number_of_files": 1111,
+    "recursion_level": 3,
+    "folder_length": 5,
+    "file_length": 5,
+    "separator": "/",
+    "file_size_specifications":[
+        { "size": "1GB", "amount": 1},
+        { "size": "1MB", "amount": 100},
+        { "size": "1KB", "amount": 1000}
+
+    ]
+}

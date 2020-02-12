@@ -1,0 +1,18 @@
+---
+  - name: Unlock python-apt package on Debian's families instances
+    shell: "apt-mark unhold python-apt"
+    when:
+      - inventory_hostname in groups['linuxagents']
+      - ansible_os_family == "Debian"
+
+  - name: Configuring Windows Agents
+    block:
+      - name: Installing Google Chrome
+        win_chocolatey:
+          name: googlechrome
+          version: 79.0.3945.130
+          pinned: yes
+          state: present
+          ignore_checksums: yes
+    when:
+      - ansible_os_family == "Windows"

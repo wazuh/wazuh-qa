@@ -1,0 +1,10 @@
+---
+  - hosts: localhost
+    vars_files:
+      - ./vars/aws.yml
+      - ./vars/credentials.yml
+      - ./vars/wazuh_manager.yml
+      - ./vars/wazuh_agent.yml
+      - ./vars/elastic_nginx.yml
+    tasks:
+      - import_tasks: ../provisioning/roles/aws/tasks/generate_hosts_file.yml
