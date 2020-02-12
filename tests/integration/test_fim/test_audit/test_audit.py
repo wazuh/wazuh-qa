@@ -100,12 +100,12 @@ def test_readded_rules(tags_to_apply, get_configuration,
 
         wazuh_log_monitor.start(timeout=20,
                                 callback=callback_audit_rules_manipulation,
-                                error_message=f'[ERROR] Did not receive expected manipulation event with the '
+                                error_message=f'[ERROR] Did not receive expected "manipulation" event with the '
                                               f'command {command}')
 
         events = wazuh_log_monitor.start(timeout=10,
                                          callback=callback_audit_reloaded_rule,
-                                         error_message='[ERROR] Did not receive expected reload event with the rule '
+                                         error_message='[ERROR] Did not receive expected "reload" event with the rule '
                                                        'modification').result()
 
         assert dir_ in events, f'{dir_} not in {events}'
@@ -127,13 +127,13 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
 
     wazuh_log_monitor.start(timeout=10,
                             callback=callback_audit_connection,
-                            error_message=f'[ERROR] Did not receive expected connect event with the command '
+                            error_message=f'[ERROR] Did not receive expected "connect" event with the command '
                                           f'{" ".join(restart_command)}')
 
     events = wazuh_log_monitor.start(timeout=30,
                                      callback=callback_audit_loaded_rule,
                                      accum_results=3,
-                                     error_message=f'[ERROR] Did not receive expected load event with the command '
+                                     error_message=f'[ERROR] Did not receive expected "load" event with the command '
                                                    f'{" ".join(restart_command)}').result()
 
     assert testdir1 in events, f'{testdir1} not in {events}'
@@ -158,7 +158,7 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
     events = wazuh_log_monitor.start(timeout=30,
                                      callback=callback_realtime_added_directory,
                                      accum_results=3,
-                                     error_message=f'[ERROR] Did not receive expected directory added for monitoring '
+                                     error_message=f'[ERROR] Did not receive expected "directory added" for monitoring '
                                                    f'with the command {" ".join(stop_command)}').result()
 
     assert testdir1 in events, f'{testdir1} not detected in scan'
@@ -202,7 +202,7 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
     events = wazuh_log_monitor.start(timeout=30,
                                      callback=callback_audit_key,
                                      accum_results=1,
-                                     error_message=f'[ERROR] Did not receive expected event '
+                                     error_message=f'[ERROR] Did not receive expected "Match audit_key ..." event '
                                                    f'with the command {" ".join(add_rule_command)}').result()
     assert audit_key in events
 
@@ -246,8 +246,10 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
     time_after_restart = get_audit_creation_time()
 
     if should_restart:
-        assert time_before_restart != time_after_restart
+        assert time_before_restart != time_after_restart, '[ERROR] The time before restart audit is equal to ' \
+                                                          'the time after restart'
     else:
-        assert time_before_restart == time_after_restart
+        assert time_before_restart == time_after_restart, '[ERROR] The time before restart audit is not equal to ' \
+                                                          'the time after restart'
 
     assert os.path.isfile(plugin_path)

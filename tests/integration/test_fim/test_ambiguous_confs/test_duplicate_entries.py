@@ -238,8 +238,9 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
     print('[INFO] Checking the event...')
     event1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                      callback=callback_detect_event,
-                                     error_message=f'[ERROR] First: It was expected that an event would be '
-                                                   f'generated for file {os.path.join(testdir1, file)}').result()
+                                     error_message=f'[ERROR] First: It was expected that a "Sending FIM event:" '
+                                                   f'event would be generated for file {os.path.join(testdir1, file)}'
+                                     ).result()
 
     # Replace character, change the group and ownership and touch the file
     print(f'[INFO] Replacing a character of {os.path.join(testdir1, file)} content')
@@ -267,6 +268,6 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
     print('[INFO] Checking the event...')
     event3 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                      callback=callback_detect_event,
-                                     error_message=f'[ERROR] First: Did not receive expected event for file '
-                                                   f'{os.path.join(testdir1, file)}').result()
+                                     error_message=f'[ERROR] First: Did not receive expected "Sending FIM event:" '
+                                                   f'event for file {os.path.join(testdir1, file)}').result()
     validate_event(event3, [CHECK_PERM, CHECK_SIZE])

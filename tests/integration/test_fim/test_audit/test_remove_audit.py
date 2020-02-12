@@ -85,4 +85,6 @@ def test_move_folders_to_realtime(tags_to_apply, get_configuration, uninstall_in
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    wazuh_log_monitor.start(timeout=20, callback=callback_audit_cannot_start)
+    wazuh_log_monitor.start(timeout=20, callback=callback_audit_cannot_start,
+                            error_message='[ERROR] Did not receive expected "Who-data engine could not start. '
+                                          'Switching who-data to real-time" event')
