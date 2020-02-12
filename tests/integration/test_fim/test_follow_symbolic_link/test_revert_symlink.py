@@ -71,7 +71,8 @@ def test_symbolic_revert_symlink(tags_to_apply, get_configuration, configure_env
     modify_file_content(testdir1, file2, new_content='Sample modification')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+        event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+        raise AttributeError(f'[ERROR] Unexpected event {event}')
 
     # Change the target to the folder and now expect an event
     modify_symlink(testdir1, os.path.join(testdir_link, 'symlink'))
@@ -85,5 +86,6 @@ def test_symbolic_revert_symlink(tags_to_apply, get_configuration, configure_env
     modify_file_content(testdir1, file2, new_content='Sample modification2')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+        event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+        raise AttributeError(f'[ERROR] Unexpected event {event}')
     modify_and_assert(file1)

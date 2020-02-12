@@ -102,18 +102,22 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
 
     # Create the syslink and expect its event, since it's withing the monitored directory
     check_time_travel(scheduled)
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event)
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                            error_message='[ERROR] Did not receive expected "Sending FIM event: ..." event')
 
     # Modify the target file and don't expect any event
     modify_file(non_monitored_dir1, name1, new_content='Modify sample')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+        event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+        raise AttributeError(f'[ERROR] Unexpected event {event}')
 
     # Modify the target of the symlink and expect the modify event
     modify_symlink(target=b_path, path=sl_path)
     check_time_travel(scheduled)
-    result = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
+    result = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                                     error_message='[ERROR] Did not receive expected '
+                                                   '"Sending FIM event: ..." event').result()
     assert 'modified' in result['data']['type'], f"No 'modified' event when modifying symlink"
 
     # Remove and restore the target file. Don't expect any events
@@ -121,4 +125,5 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
     create_file(REGULAR, non_monitored_dir1, name2, content='')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+        event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+        raise AttributeError(f'[ERROR] Unexpected event {event}')

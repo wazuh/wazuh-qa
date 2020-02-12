@@ -70,7 +70,8 @@ def test_symbolic_change_target_inside_folder(tags_to_apply, previous_target, ne
     if tags_to_apply == {'monitored_dir'}:
         create_file(REGULAR, previous_target, file1, content='')
         check_time_travel(scheduled)
-        wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+        wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
+                                error_message='[ERROR] Did not receive expected "Sending FIM event: ..." event')
 
     # Change the target to another file and wait the symcheck to update the link information
     modify_symlink(new_target, os.path.join(testdir_link, symlink))
@@ -81,9 +82,13 @@ def test_symbolic_change_target_inside_folder(tags_to_apply, previous_target, ne
     modify_file_content(previous_target, file1, new_content='Sample modification')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+        event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+        raise AttributeError(f'[ERROR] Unexpected event {event}')
+
     modify_file_content(testdir2, file1, new_content='Sample modification')
     check_time_travel(scheduled)
-    modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
+    modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
+                                     error_message='[ERROR] Did not receive expected '
+                                                   '"Sending FIM event: ..." event').result()
     assert 'modified' in modify['data']['type'] and os.path.join(testdir2, file1) in modify['data']['path'], \
         f"'modified' event not matching for {testdir2} {file1}"

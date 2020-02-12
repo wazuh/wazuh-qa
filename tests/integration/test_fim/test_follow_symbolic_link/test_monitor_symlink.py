@@ -71,13 +71,17 @@ def test_symbolic_monitor_symlink(tags_to_apply, main_folder, get_configuration,
     # Modify the linked file and expect an event
     modify_file_content(main_folder, file1, 'Sample modification')
     check_time_travel(scheduled)
-    modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
+    modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
+                                     error_message='[ERROR] Did not receive expected '
+                                                   '"Sending FIM event: ..." event').result()
     assert 'modified' in modify['data']['type'] and file1 in modify['data']['path'], \
         f"'modified' event not matching"
 
     # Delete the linked file and expect an event
     delete_f(main_folder, file1)
     check_time_travel(scheduled)
-    delete = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
+    delete = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
+                                     error_message='[ERROR] Did not receive expected '
+                                                   '"Sending FIM event: ..." event').result()
     assert 'deleted' in delete['data']['type'] and file1 in delete['data']['path'], \
         f"'deleted' event not matching"

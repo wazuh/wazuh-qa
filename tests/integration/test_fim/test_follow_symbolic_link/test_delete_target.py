@@ -71,7 +71,8 @@ def test_symbolic_delete_target(tags_to_apply, main_folder, aux_folder, get_conf
     if tags_to_apply == {'monitored_dir'}:
         create_file(REGULAR, main_folder, file1, content='')
         check_time_travel(scheduled)
-        wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+        wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
+                                error_message='[ERROR] Did not receive expected "Sending FIM event: ..." event')
         delete_f(main_folder)
     else:
         delete_f(main_folder, file1)

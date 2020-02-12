@@ -84,15 +84,19 @@ def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_conf
         create_file(REGULAR, main_folder, file1, content='')
         create_file(REGULAR, aux_folder, file1, content='')
         check_time_travel(scheduled)
-        add = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
+        add = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
+                                      error_message='[ERROR] Did not receive expected "Sending FIM event: ..." event'
+                                      ).result()
         assert 'added' in add['data']['type'] and file1 in add['data']['path'], \
             f"'added' event not matching for {file1}"
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+            event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+            raise AttributeError(f'[ERROR] Unexpected event {event}')
     else:
         create_file(REGULAR, aux_folder, file1, content='')
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+            event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+            raise AttributeError(f'[ERROR] Unexpected event {event}')
 
     # Change the target of the symlink and expect events while there's no symcheck scan
     # Don't expect events from the new target
