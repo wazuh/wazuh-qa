@@ -1,7 +1,0 @@
----
-  - name: Rendering hosts file with obtained names and IPs
-    template:
-      src: "../templates/ansible_hosts.j2"
-      dest: "{{ ansible_hosts_destination }}"
-      mode: '664'
-      force: yes
