@@ -95,8 +95,8 @@ def get_total_disk_info(daemon):
     return {
         'rchar': float(re.search(regex_rchar, info).group(1)) / 1024,  # KB
         'wchar': float(re.search(regex_wchar, info).group(1)) / 1024,  # KB
-        'syscr': float(re.search(regex_syscr, info).group(1)) / 1024,  # KB
-        'syscw': float(re.search(regex_syscw, info).group(1)) / 1024,  # KB
+        'syscr': float(re.search(regex_syscr, info).group(1)),  # IO/operations
+        'syscw': float(re.search(regex_syscw, info).group(1)),  # IO/operations
         'read_bytes': float(re.search(regex_read, info).group(1)) / 1024,  # KB
         'write_bytes': float(re.search(regex_write, info).group(1)) / 1024,  # KB
         'cancelled_write_bytes': float(re.search(regex_cancelled_write_bytes, info).group(1)) / 1024  # KB
@@ -209,7 +209,7 @@ def n_attempts(agent):
     try:
         return int(re.match(regex, response).group(1))
     except AttributeError:
-        raise AttributeError('[ERROR] Database locked!')
+        raise AttributeError(f'[ERROR] Bad response (n_attempts) from wazuh-db: {response}')
 
 
 def n_completions(agent):
@@ -232,7 +232,7 @@ def n_completions(agent):
     try:
         return int(re.match(regex, response).group(1))
     except AttributeError:
-        raise AttributeError('[ERROR] Database locked!')
+        raise AttributeError(f'[ERROR] Bad response (n_completions) from wazuh-db: {response}')
 
 
 def get_agents(client_keys='/var/ossec/etc/client.keys'):
