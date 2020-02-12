@@ -243,9 +243,9 @@ class SocketController:
             msg_bytes = message_.encode()
             try:
                 if size:
-                    output.append(self.sock.send(wazuh_pack(len(msg_bytes)) + msg_bytes))
+                    output.append(self.sock.sendall(wazuh_pack(len(msg_bytes)) + msg_bytes))
                 else:
-                    output.append(self.sock.send(msg_bytes))
+                    output.append(self.sock.sendto(msg_bytes, self.path))
             except OSError as e:
                 raise e
 
@@ -273,7 +273,7 @@ class SocketController:
                 try:
                     self.sock.listen(1)
                     conn, addr = self.sock.accept()
-                    size = wazuh_unpack(conn.recv(4, socket.MSG_WAITALL)
+                    size = wazuh_unpack(conn.recv(4, socket.MSG_WAITALL))
                     output.append(conn.recv(size, socket.MSG_WAITALL).decode().rstrip('\x00'))
                 except OSError as e:
                     raise e
@@ -394,29 +394,30 @@ class QueueMonitor:
         self._queue = queue_item
         self._continue = False
         self._abort = False
-        self._result = []
+        self._result = None
         self._time_step = time_step
 
     def get_results(self, callback=_callback_default, accum_results=1, timeout=-1, update_position=True):
         result_list = []
-        timer = 0
+        timer = 0.0
+        time_wait = 0.1
         while len(result_list) != accum_results:
             if timer >= timeout:
                 self.abort()
                 break
-            now = datetime.datetime.now()
             try:
                 method = self._queue.get if update_position else self._queue.pick
                 item = callback(method(block=True, timeout=self._time_step))
                 if item is not None:
                     result_list.append(item)
             except queue.Empty:
-                timer += self._time_step
-                continue
+                time.sleep(time_wait)
+                timer += self._time_step + time_wait
 
-            timer += (datetime.datetime.now() - now).seconds
-
-        return result_list if len(result_list) > 1 else result_list[0]
+        if len(result_list) == 1:
+            return result_list[0]
+        else:
+            return result_list
 
     def start(self, timeout=-1, callback=_callback_default, accum_results=1, update_position=True):
         """Start the queue monitoring until the stop method is called."""
@@ -430,10 +431,7 @@ class QueueMonitor:
                 result = self.get_results(callback=callback, accum_results=accum_results, timeout=timeout,
                                           update_position=update_position)
                 if result and not self._abort:
-                    for item in result:
-                        self._result.append(item)
-                    else:
-                        self._result = result
+                    self._result = result
                     if self._result:
                         self.stop()
 
@@ -495,7 +493,7 @@ class StreamHandler(socketserver.BaseRequestHandler):
             forwarded_sock.sendall(wazuh_pack(len(data)) + data)
 
             # Receive data from the server and shut down
-            size = wazuh_unpack(self.recvall(forwarded_sock, 4, socket.MSG_WAITALL)
+            size = wazuh_unpack(self.recvall(forwarded_sock, 4, socket.MSG_WAITALL))
             response = self.recvall(forwarded_sock, size, socket.MSG_WAITALL)
 
             return response
@@ -526,7 +524,7 @@ class StreamHandler(socketserver.BaseRequestHandler):
 
             response = self.server.mitm.handler_func(data) if self.server.mitm.handler_func else self.forward(data)
 
-            self.server.mitm.put_queue((data, response))
+            self.server.mitm.put_queue((data.rstrip(b'\x00'), response.rstrip(b'\x00')))
 
             self.request.sendall(wazuh_pack(len(response)) + response)
 
@@ -542,7 +540,7 @@ class DatagramHandler(socketserver.BaseRequestHandler):
 
         self.server.mitm.handler_func(data) if self.server.mitm.handler_func else self.forward(data)
 
-        self.server.mitm.put_queue(data)
+        self.server.mitm.put_queue(data.rstrip(b'\x00'))
 
 
 class DatagramServer(socketserver.UnixDatagramServer):
