@@ -401,13 +401,17 @@ class QueueMonitor:
         result_list = []
         timer = 0.0
         time_wait = 0.1
+        position = 0
         while len(result_list) != accum_results:
             if timer >= timeout:
                 self.abort()
                 break
             try:
-                method = self._queue.get if update_position else self._queue.pick
-                item = callback(method(block=True, timeout=self._time_step))
+                if update_position:
+                    item = callback(self._queue.get(block=True, timeout=self._time_step))
+                else:
+                    item = callback(self._queue.peek(position=position, block=True, timeout=self._time_step))
+                    position += 1
                 if item is not None:
                     result_list.append(item)
             except queue.Empty:
@@ -435,9 +439,6 @@ class QueueMonitor:
                     if self._result:
                         self.stop()
 
-        if not update_position:
-            self._queue.reset_aux()
-
         return self
 
     def stop(self):
@@ -458,23 +459,12 @@ class QueueMonitor:
 
 
 class SuperQueue(queue.Queue):
-    def __init__(self):
-        super().__init__()
-        self.aux_queue = queue.Queue()
-
-    def get(self, *args, **kwargs):
-        self.aux_queue.get(*args, **kwargs)
-        return super().get(*args, **kwargs)
-
-    def put(self, *args, **kwargs):
-        self.aux_queue.put(*args, **kwargs)
-        super().put(*args, **kwargs)
-
-    def pick(self, *args, **kwargs):
-        return self.aux_queue.get(*args, **kwargs)
-
-    def reset_aux(self):
-        self.aux_queue.queue = deepcopy(self.queue)
+    def peek(self, position=0, *args, **kwargs):
+        aux_queue = queue.Queue()
+        aux_queue.queue = deepcopy(self.queue)
+        for _ in range(position):
+            aux_queue.get(*args, **kwargs)
+        return aux_queue.get(*args, **kwargs)
 
 
 class StreamServer(socketserver.ThreadingUnixStreamServer):
