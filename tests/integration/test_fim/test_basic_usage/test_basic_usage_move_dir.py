@@ -93,7 +93,9 @@ def test_move_file(source_folder, target_folder, subdir, tags_to_apply,
     # Monitor expected events
     events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                      callback=callback_detect_event,
-                                     accum_results=(triggers_add_event + triggers_delete_event)).result()
+                                     accum_results=(triggers_add_event + triggers_delete_event),
+                                     error_message='[ERROR] Did not receive expected "Sending FIM event: ..." event'
+                                     ).result()
 
     # Expect deleted events
     if isinstance(events, list):

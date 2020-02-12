@@ -79,7 +79,9 @@ def test_delete_folder(folder, file_list, filetype, tags_to_apply,
         create_file(filetype, folder, file, content='')
 
     check_time_travel(scheduled)
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event, accum_results=len(file_list))
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                            accum_results=len(file_list), error_message='[ERROR] Did not receive expected '
+                                                                        '"Sending FIM event: ..." event')
 
     # Remove folder
     shutil.rmtree(folder, ignore_errors=True)

@@ -62,9 +62,13 @@ def test_new_directory(tags_to_apply, get_configuration, configure_environment, 
     # Check that the warning is displayed when there is no directory.
     if not get_configuration['elements'][1]['directories']['value']:
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                callback=callback_empty_directories).result()
+                                callback=callback_empty_directories,
+                                error_message='[ERROR] Did not receive expected '
+                                              '"DEBUG: (6338): Empty directories tag found in the configuration" '
+                                              'event').result()
     # Check that the message is not displayed when the directory is specified.
     else:
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                    callback=callback_empty_directories).result()
+            event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                            callback=callback_empty_directories).result()
+            raise AttributeError(f'Unexpected event {event}')

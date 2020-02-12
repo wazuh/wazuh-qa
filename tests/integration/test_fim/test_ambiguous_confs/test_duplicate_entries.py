@@ -125,7 +125,7 @@ def test_duplicate_entries(get_configuration, configure_environment, restart_sys
     print('[INFO] Checking the event...')
     event1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                      callback=callback_detect_event,
-                                     error_message=f'[ERROR] First: Did not receive expected event for file '
+                                     error_message=f'[ERROR] Did not receive expected event for file '
                                                    f'{os.path.join(testdir1, file)}'
                                      ).result()
 
@@ -158,7 +158,7 @@ def test_duplicate_entries_sregex(get_configuration, configure_environment,
         print('[INFO] Checking the event...')
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_detect_event).result()
-        raise AttributeError(f'[ERROR] First: Unexpected event {event}')
+        raise AttributeError(f'[ERROR] Unexpected event {event}')
 
     # Check for a second event
     print(f'[INFO] Modifying {os.path.join(testdir1, file)} content')
@@ -169,7 +169,7 @@ def test_duplicate_entries_sregex(get_configuration, configure_environment,
         print('[INFO] Checking the event...')
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_detect_event).result()
-        raise AttributeError(f'[ERROR] Second: Unexpected event {event}')
+        raise AttributeError(f'[ERROR] Unexpected event {event}')
 
 
 def test_duplicate_entries_report(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
@@ -191,7 +191,7 @@ def test_duplicate_entries_report(get_configuration, configure_environment, rest
     print(f'[INFO] Time travel: {scheduled}')
     check_time_travel(scheduled)
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                            error_message=f'[ERROR] First: Did not receive expected event for file '
+                            error_message=f'[ERROR] Did not receive expected event for file '
                                           f'{os.path.join(testdir1, file)}').result()
 
     # Check for a second event
@@ -200,7 +200,7 @@ def test_duplicate_entries_report(get_configuration, configure_environment, rest
     print(f'[INFO] Time travel: {scheduled}')
     check_time_travel(scheduled)
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                            error_message=f'[ERROR] Second: Did not receive expected event for file '
+                            error_message=f'[ERROR] Did not receive expected event for file '
                                           f'{os.path.join(testdir1, file)}').result()
 
     assert not os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'diff', 'local', testdir1[1:], file)), \
@@ -238,7 +238,7 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
     print('[INFO] Checking the event...')
     event1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                      callback=callback_detect_event,
-                                     error_message=f'[ERROR] First: It was expected that a "Sending FIM event:" '
+                                     error_message=f'[ERROR] It was expected that a "Sending FIM event:" '
                                                    f'event would be generated for file {os.path.join(testdir1, file)}'
                                      ).result()
 
@@ -268,6 +268,6 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
     print('[INFO] Checking the event...')
     event3 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                      callback=callback_detect_event,
-                                     error_message=f'[ERROR] First: Did not receive expected "Sending FIM event:" '
+                                     error_message=f'[ERROR] Did not receive expected "Sending FIM event:" '
                                                    f'event for file {os.path.join(testdir1, file)}').result()
     validate_event(event3, [CHECK_PERM, CHECK_SIZE])

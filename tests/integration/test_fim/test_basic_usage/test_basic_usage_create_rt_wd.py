@@ -106,4 +106,5 @@ def test_create_file_realtime_whodata(folder, name, filetype, content, checkers,
         validate_event(event, checkers)
     else:
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event)
+            event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event)
+            raise AttributeError(f'[ERROR] Unexpected event {event}')
