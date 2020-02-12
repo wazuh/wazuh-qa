@@ -8,18 +8,19 @@ import platform
 import re
 import shutil
 import socket
-import sys
-import time
-from datetime import datetime
 import subprocess
+import sys
+import tempfile
+import time
 from collections import Counter
 from copy import deepcopy
+from datetime import datetime
 from datetime import timedelta
-from stat import ST_ATIME, ST_MTIME
-
 from json import JSONDecodeError
-from jsonschema import validate
+from stat import ST_ATIME, ST_MTIME
 from typing import Sequence, Union, Generator, Any
+
+from jsonschema import validate
 
 from wazuh_testing.tools.time import TimeMachine
 
@@ -502,8 +503,8 @@ def modify_file_inode(path, name):
     if isinstance(name, bytes):
         inode_file = inode_file.encode()
 
-    shutil.copy2(path_to_file, os.path.join(path, inode_file))
-    os.replace(os.path.join(path, inode_file), path_to_file)
+    shutil.copy2(path_to_file, os.path.join(tempfile.gettempdir(), inode_file))
+    os.replace(os.path.join(tempfile.gettempdir(), inode_file), path_to_file)
 
 
 def modify_file_win_attributes(path, name):
