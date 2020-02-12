@@ -1,0 +1,47 @@
+[masters]
+{% for instance in instances_query_list %}
+{% if 'master' in instance.0.Identifier|lower and instance.0.PrivateIP | length > 0 %}
+{{ instance.0.PublicIP }}   private_ip={{ instance.0.PrivateIP}}
+{% endif %}
+{% endfor %}
+
+[workers]
+{% for instance in instances_query_list %}
+{% if 'worker' in instance.0.Identifier|lower and instance.0.PrivateIP | length > 0 %}
+{{ instance.0.PublicIP }}   private_ip={{ instance.0.PrivateIP}}
+{% endif %}
+{% endfor %}
+
+[linux-agents]
+{% for instance in instances_query_list %}
+{% if 'agent_linux' in instance.0.Identifier|lower and instance.0.PrivateIP | length > 0 -%}
+{% if 'ubuntu' in instance.0.Identifier|lower %}
+{{ instance.0.PublicIP }}   private_ip={{ instance.0.PrivateIP}}    ansible_ssh_user=ubuntu agent_name={{ instance.0.Name}}
+{% elif 'centos' in instance.0.Identifier|lower %}
+{{ instance.0.PublicIP }}   private_ip={{ instance.0.PrivateIP}}    ansible_ssh_user=centos agent_name={{ instance.0.Name}}
+{% else %}
+{{ instance.0.PublicIP }}   private_ip={{ instance.0.PrivateIP}}    agent_name={{ instance.0.Name}}
+{% endif %}
+{% endif %}
+{% endfor %}
+
+[windows-agents]
+{% for instance in instances_query_list %}
+{% if 'agent_windows' in instance.0.Identifier|lower and instance.0.PrivateIP | length > 0 %}
+{{ instance.0.PublicIP }}   private_ip={{ instance.0.PrivateIP}}    agent_name={{ instance.0.Name}}
+{% endif %}
+{% endfor %}
+
+[kibana]
+{% for instance in instances_query_list %}
+{% if 'kibana' in instance.0.Identifier|lower and instance.0.PrivateIP | length > 0 %}
+{{ instance.0.PublicIP }}   private_ip={{ instance.0.PrivateIP}}
+{% endif %}
+{% endfor %}
+
+[elasticsearch]
+{% for instance in instances_query_list %}
+{% if 'elastic' in instance.0.Identifier|lower and instance.0.PrivateIP | length > 0 %}
+{{ instance.0.PublicIP }}   private_ip={{ instance.0.PrivateIP}}
+{% endif %}
+{% endfor %}

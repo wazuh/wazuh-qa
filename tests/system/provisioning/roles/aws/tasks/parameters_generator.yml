@@ -1,0 +1,9 @@
+---
+  - name: Render the template that AWS will use to configure the stack
+    template:
+      src: "{{ parameters_template_path }}"
+      dest: "{{ parameters_file_path }}"
+      owner: root
+      group: root
+      mode: '700'
+      force: yes

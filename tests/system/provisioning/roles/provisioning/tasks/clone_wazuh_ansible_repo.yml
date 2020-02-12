@@ -1,0 +1,24 @@
+---
+  - name: Clean destination folder for wazuh-ansible repository
+    file:
+      path: "{{ wazuh_ansible_repository_path }}"
+      state: absent
+
+  - name: Create destination folder for wazuh-ansible repository
+    file:
+      path: "{{ wazuh_ansible_repository_path }}"
+      state: directory
+      mode: '0777'
+
+  - name: Cloning https://github.com/wazuh/wazuh-ansible
+    git:
+      repo: "https://github.com/wazuh/wazuh-ansible.git"
+      dest: "{{ wazuh_ansible_repository_path }}"
+      version: "{{ wazuh_ansible_branch }}"
+
+  - name: Ensure permissions on wazuh-ansible repo folder
+    file:
+      path: "{{ wazuh_ansible_repository_path }}"
+      state: directory
+      mode: '0777'
+      recurse: yes

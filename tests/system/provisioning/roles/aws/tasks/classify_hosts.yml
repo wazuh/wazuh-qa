@@ -1,0 +1,28 @@
+---
+
+  - name: Obtaining Instances Identifiers
+    command: >-
+      aws 
+      --profile {{ aws_cli_profile }}
+      ec2 describe-instances
+      --filter Name=tag:aws:cloudformation:stack-name,Values={{ stack_name }}
+      --query 'Reservations[*].Instances[*].{Identifier:Tags[?Key==`Identifier`]|[0].Value,PublicIP:PublicIpAddress, PrivateIP:PrivateIpAddress, Name:Tags[?Key==`Name`]|[0].Value }'
+    register: instances_query_result
+
+  - set_fact:
+      instances_query_list: "{{ instances_query_result.stdout | from_json }}"
+
+  - name: Classifying hosts file with obtained names and IPs
+    template:
+      src: "../templates/classify_hosts.j2"
+      dest: "{{ hosts_classified_destination }}"
+      mode: '664'
+      force: yes
+
+  - name: Rendering ssh_config file to allow connection with Instances
+    template:
+      src: "../templates/ssh_config.j2"
+      dest: "{{ ansible_ssh_config_destination }}"
+      mode: '664'
+      force: yes
+

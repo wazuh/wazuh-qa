@@ -1,0 +1,25 @@
+### Elastic version
+
+elastic_version: 7.5.2
+
+### Elastic API configuration
+
+elastic_api_protocol: https
+elasticsearch_port: 9200
+
+### Elastic cluster configuration
+
+elastic_user: wazuh
+elastic_password: T3stP4ssw0rd--
+
+### Kibana API configuration
+
+# Privileged user is created with "elastic_user" and "elastic_password" credentials. ToDo: Add Kibana user with limited privileges
+# kibana_user: wazuh
+# kibana_password: 
+kibana_api_protocol: https
+kibana_port: 5601
+
+### Nginx 
+
+nginx_listen_port: 443

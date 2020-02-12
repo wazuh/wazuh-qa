@@ -1,0 +1,6 @@
+---
+  - include_vars: "./aws.yml"
+  - include_vars: "credentials.yml"
+  - include_vars: "elastic_nginx.yml"
+  - include_vars: "wazuh_manager.yml"
+  - include_vars: "use_cases.yml"

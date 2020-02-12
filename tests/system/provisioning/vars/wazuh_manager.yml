@@ -1,0 +1,43 @@
+### Wazuh Version
+
+wazuh_version: 3.11.3-1
+
+### Wazuh Server configuration
+
+wazuh_server_port: 1514
+wazuh_registration_port: 1515
+wazuh_registration_password: T3stP4ssw0rd--
+wazuh_cluster_key: 3ab980499de48d0998a39b338b7b750a
+
+### Wazuh API
+
+wazuh_api_protocol: https
+wazuh_api_port: 55000
+wazuh_api_admin_username: wazuh
+wazuh_api_password: T3stP4ssw0rd--
+
+### Paths
+
+wazuh_installation_path: /var/ossec/
+wazuh_installation_path_windows: C:\Program Files (x86)\
+
+### Wazuh Ansible repository
+
+wazuh_ansible_repository_path: "/tmp/wazuh-ansible"
+wazuh_ansible_branch: devel
+
+### Repositories
+# yum
+
+wazuh_yum_development_repo: https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/yum/\nprotect=1
+wazuh_yum_staging_repo: https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/yum/\nprotect=1
+wazuh_yum_production_repo: https://packages.wazuh.com/3.x/yum/
+
+# apt
+
+wazuh_apt_development_repo: https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/apt/ unstable main
+wazuh_apt_staging_repo: https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/apt/
+wazuh_apt_production_repo: https://packages.wazuh.com/3.x/apt/ stable main
+
+
+

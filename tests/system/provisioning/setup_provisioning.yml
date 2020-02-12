@@ -1,0 +1,11 @@
+---
+  - hosts: localhost
+    vars_files:
+      - ./vars/aws.yml
+      - ./vars/wazuh_manager.yml
+      - ./vars/elastic_nginx.yml
+    tasks:
+        - import_tasks: ../provisioning/roles/provisioning/tasks/clone_wazuh_ansible_repo.yml
+        - import_tasks: ../provisioning/roles/provisioning/tasks/render_provision_playbooks.yml
+    handlers:
+      - include: ../provisioning/roles/provisioning/handlers/main.yml
