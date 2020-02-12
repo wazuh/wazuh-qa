@@ -169,10 +169,14 @@ def test_check_all_no(path, checkers, get_configuration, configure_environment, 
     # be triggered
     modify_file(path, file, 'Sample modification')
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(callback=callback_detect_event, timeout=5)
+        event = wazuh_log_monitor.start(callback=callback_detect_event, timeout=5)
+        raise AttributeError(f'[ERROR] Unexpected event {event}')
 
     delete_file(path, file)
     check_time_travel(scheduled)
-    delete_event = wazuh_log_monitor.start(callback=callback_detect_event, timeout=15).result()
-    assert delete_event['data']['type'] == 'deleted'
-    assert list(delete_event['data']['attributes'].keys()) == ['type', 'checksum']
+    delete_event = wazuh_log_monitor.start(callback=callback_detect_event, timeout=15,
+                                           error_message='[ERROR] Did not receive expected '
+                                                         '"Sending FIM event: ..." event').result()
+    assert delete_event['data']['type'] == 'deleted', f'[ERROR] Current value is {delete_event["data"]["type"]}'
+    assert list(delete_event['data']['attributes'].keys()) == ['type', 'checksum'], \
+        f'[ERROR] Current value is {list(delete_event["data"]["attributes"].keys())}'
