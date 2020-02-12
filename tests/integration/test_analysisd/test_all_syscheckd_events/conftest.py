@@ -5,23 +5,22 @@ import json
 import os
 import re
 import shutil
-import sys
 import time
+import yaml
 
 import pytest
 
+from wazuh_testing.analysis import callback_analysisd_event, callback_analysisd_agent_id
 from wazuh_testing.fim import detect_initial_scan, REGULAR, create_file, callback_detect_event, modify_file, delete_file
-from wazuh_testing.tools import WAZUH_CONF, PREFIX, LOG_FILE_PATH
+from wazuh_testing.tools import WAZUH_CONF, PREFIX, LOG_FILE_PATH, WAZUH_LOGS_PATH
 from wazuh_testing.tools.configuration import generate_syscheck_config
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.monitoring import FileMonitor, ManInTheMiddle, SuperQueue, QueueMonitor
+from wazuh_testing.tools.services import control_service, check_daemon_status, delete_sockets
 
 
 @pytest.fixture(scope='module')
 def set_syscheck_config(request):
-    # import pydevd_pycharm
-    # pydevd_pycharm.settrace('172.20.0.1', port=12345, stdoutToServer=True, stderrToServer=True)
     original_conf = open(WAZUH_CONF, 'r').readlines()
     directory = 0
     testdir = getattr(request.module, 'testdir')
@@ -46,7 +45,7 @@ def set_syscheck_config(request):
                 else:
                     continue
 
-    setattr(sys.modules[__name__], 'n_directories', directory)
+    setattr(request.module, 'n_directories', directory)
 
     yield
 
@@ -77,24 +76,47 @@ def configure_syscheck_environment(request):
 
 @pytest.fixture(scope='module')
 def generate_analysisd_yaml(request):
-    def parse_events_into_yaml(event_list, yaml_file_):
-        with open(yaml_file_, 'a')as y_f:
+    def parse_events_into_yaml(requests, yaml_file_):
+        yaml_result = []
+        with open(yaml_file_, 'a') as y_f:
             id_ev = 0
-            for event in event_list:
-                stage_ev = event['data']['type'].title()
-                input_ev = json.dumps(event).replace('"', '\\\"')
+            for req, event in requests:
+                type_ev = event['data']['type']
+                stage_ev = type_ev.title()
+                mode = None
+                agent_id = callback_analysisd_agent_id(req) or '000'
+
                 del event['data']['mode']
                 del event['data']['type']
                 if 'tags' in event['data']:
                     del event['data']['tags']
-                output_ev = json.dumps(event['data']).replace('"', '\\\"')
+                if type_ev == 'added':
+                    mode = 'save2'
+                    output_ev = json.dumps(event['data'])
 
-                y_f.write(f'-\n  name: "{stage_ev}{id_ev}"\n  test_case:\n')
-                y_f.write('  -\n')
-                y_f.write(f'    input: "8:[001] (vm-ubuntu-agent) 192.168.57.2->syscheck:{input_ev}"\n')
-                y_f.write(f'    output: "agent 001 syscheck save2 {output_ev}"\n')
-                y_f.write(f'    stage: "{stage_ev}"\n')
+                elif type_ev == 'deleted':
+                    mode = 'delete'
+                    output_ev = json.dumps(event['data']['path']).replace('"', '')
+
+                elif type_ev == 'modified':
+                    mode = 'save2'
+                    for field in ['old_attributes', 'changed_attributes', 'content_changes']:
+                        if field in event['data']:
+                            del event['data'][field]
+                    output_ev = json.dumps(event['data'])
+
+                yaml_result.append({
+                    'name': f"{stage_ev}{id_ev}",
+                    'test_case': [
+                        {
+                            'input': f"{req}",
+                            'output': f"agent {agent_id} syscheck {mode} {output_ev}",
+                            'stage': f"{stage_ev}"
+                        }
+                    ]
+                })
                 id_ev += 1
+            y_f.write(yaml.safe_dump(yaml_result))
 
     file = 'regular'
 
@@ -102,7 +124,23 @@ def generate_analysisd_yaml(request):
     truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
-    control_service('restart')
+    control_service('stop')
+
+
+
+    control_service('start', daemon='wazuh-db', debug_mode=True)
+    check_daemon_status(running=True, daemon='wazuh-db')
+
+    control_service('start', daemon='ossec-analysisd', debug_mode=True)
+    check_daemon_status(running=True, daemon='ossec-analysisd')
+
+    analysis_path = getattr(request.module, 'analysis_path')
+    mitm_analysisd = ManInTheMiddle(analysis_path, mode='UDP')
+    analysis_queue = mitm_analysisd.queue
+    mitm_analysisd.start()
+
+    control_service('start', daemon='ossec-syscheckd', debug_mode=True)
+    check_daemon_status(running=True, daemon='ossec-syscheckd')
 
     # Wait for initial scan
     detect_initial_scan(file_monitor)
@@ -110,22 +148,24 @@ def generate_analysisd_yaml(request):
     # check_list, report_list, tags_list = parse_configurations()
     dir_list = getattr(request.module, 'directories_list')
 
+    analysis_monitor = QueueMonitor(analysis_queue)
+
     for directory in dir_list:
         create_file(REGULAR, directory, file, content='')
         time.sleep(0.01)
-    added = file_monitor.start(timeout=0.01 * len(dir_list), callback=callback_detect_event,
-                               accum_results=len(dir_list)).result()
+    added = analysis_monitor.start(timeout=0.01 * len(dir_list), callback=callback_analysisd_event,
+                                   accum_results=len(dir_list)).result()
 
     for directory in dir_list:
         modify_file(directory, file, new_content='Modified')
         time.sleep(0.01)
-    modified = file_monitor.start(timeout=0.01 * len(dir_list), callback=callback_detect_event,
-                                  accum_results=len(dir_list) - 8).result()
+    modified = analysis_monitor.start(timeout=0.01 * len(dir_list), callback=callback_analysisd_event,
+                                      accum_results=len(dir_list)-8).result()
     for directory in dir_list:
         delete_file(directory, file)
         time.sleep(0.01)
-    deleted = file_monitor.start(timeout=0.01 * len(dir_list), callback=callback_detect_event,
-                                 accum_results=len(dir_list)).result()
+    deleted = analysis_monitor.start(timeout=0.01 * len(dir_list), callback=callback_analysisd_event,
+                                     accum_results=len(dir_list)).result()
 
     test_data_path = getattr(request.module, 'test_data_path')
     yaml_file = os.path.join(test_data_path, 'syscheck_events.yaml')
@@ -137,6 +177,14 @@ def generate_analysisd_yaml(request):
     for ev_list in [added, modified, deleted]:
         parse_events_into_yaml(ev_list, yaml_file)
 
+    yield
+
+    mitm_analysisd.shutdown()
+
+    for daemon in ['ossec-analysisd', 'wazuh-db', 'ossec-syscheckd']:
+        control_service('stop', daemon=daemon)
+        check_daemon_status(running=False, daemon=daemon)
+
 
 @pytest.fixture(scope='module')
 def wait_for_analysisd_startup(request):
@@ -147,3 +195,49 @@ def wait_for_analysisd_startup(request):
 
     log_monitor = getattr(request.module, 'wazuh_log_monitor')
     log_monitor.start(timeout=30, callback=callback_analysisd_startup)
+
+
+@pytest.fixture(scope='module')
+def configure_mitm_environment_analysisd(request):
+    def remove_logs():
+        """Remove all Wazuh logs"""
+        for root, dirs, files in os.walk(WAZUH_LOGS_PATH):
+            for file in files:
+                os.remove(os.path.join(root, file))
+
+    analysis_path = getattr(request.module, 'analysis_path')
+    wdb_path = getattr(request.module, 'wdb_path')
+
+    # Stop wazuh-service and ensure all daemons are stopped
+    control_service('stop')
+    check_daemon_status(running=False)
+    remove_logs()
+
+    control_service('start', daemon='wazuh-db', debug_mode=True)
+    check_daemon_status(running=True, daemon='wazuh-db')
+
+    mitm_wdb = ManInTheMiddle(socket_path=wdb_path)
+    wdb_queue = mitm_wdb.queue
+    mitm_wdb.start()
+
+    control_service('start', daemon='ossec-analysisd', debug_mode=True)
+    check_daemon_status(running=True, daemon='ossec-analysisd')
+
+    mitm_analysisd = ManInTheMiddle(socket_path=analysis_path, mode='UDP')
+    analysisd_queue = mitm_analysisd.queue
+    mitm_analysisd.start()
+
+    analysis_monitor = QueueMonitor(queue_item=analysisd_queue)
+    wdb_monitor = QueueMonitor(queue_item=wdb_queue)
+
+    setattr(request.module, 'analysis_monitor', analysis_monitor)
+    setattr(request.module, 'wdb_monitor', wdb_monitor)
+
+    yield
+
+    mitm_analysisd.shutdown()
+    mitm_wdb.shutdown()
+
+    for daemon in ['wazuh-db', 'ossec-analysisd']:
+        control_service('stop', daemon=daemon)
+        check_daemon_status(running=False, daemon=daemon)
