@@ -34,20 +34,29 @@ except:
 
 
 def random_mode():
-    """ 
+    """
     Returns a random file permission
-    
+
     File permission in unix use octal format, but os.chmod expects a decimal.
     Numbers 0 and 511 are the min and max (decimal) numbers which chmod accepts,
     being 0 equivalent to 000 and 511 equivalent to 777 in octal.
     """
     return random.randint(0, 511)
 
+def modify_file_content(filepath):
+    """
+        Modify file content by adding a random number of bytes
+    """
+    content = 'qazxswedcvbnmklpoiuytggdfert'*random.randint(1,10)
+    content += str(random.random())
+    with open(filepath, 'ab') as f:
+        f.write(bytes(content, 'utf8'))
+
 
 def modify_file(filepath, owner, group, mode):
     """
         Modify a file owner, group and permissions.
-        
+
         :param str filepath: Full path of the file
         :param str owner: File owner
         :param str group: File group
@@ -68,15 +77,16 @@ def modify_file(filepath, owner, group, mode):
 
 def main():
     changed_files = []
-    for i in range(1,100):
+    for i in range(1,500):
         path = '/opt/{}'.format(i)
-        mode = random_mode()
-        user = random.choice(USERS)
-        group = random.choice(GROUPS)
-        change = modify_file(path, user, group, mode)
-        changed_files.append(change)
-    from pprint import pprint
-    pprint(changed_files)
+        #mode = random_mode()
+        #user = random.choice(USERS)
+        #group = random.choice(GROUPS)
+        #change = modify_file(path, user, group, mode)
+        #changed_files.append(change)
+        modify_file_content(path)
+    #from pprint import pprint
+    #pprint(changed_files)
 
 
 if __name__ == "__main__":
