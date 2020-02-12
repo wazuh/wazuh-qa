@@ -181,7 +181,7 @@ def pytest_runtest_makereport(item, call):
 
         # Extra files to be added in 'Links' section
         for filepath in (LOG_FILE_PATH, WAZUH_CONF):
-            with open(filepath, 'r') as f:
+            with open(filepath, 'r', errors='replace') as f:
                 content = f.read()
                 extra.append(pytest_html.extras.text(content, name=os.path.split(filepath)[-1]))
 
