@@ -39,7 +39,8 @@ def delete_files(input_file_path, n, output_file_path):
 
     # Delete the selected files
     try:
-        os.system("rm -rf "+' '.join(to_delete))
+        for path in to_delete:
+            os.remove(path)
     except Exception as e:
         logger.error('Failed when deleting the selected files: ', exc_info=True)
 
@@ -50,3 +51,5 @@ def delete_files(input_file_path, n, output_file_path):
         fout.close()
     except Exception as e:
         logger.error('Failed when writing to the output file: ', exc_info=True)
+
+delete_files("to_delete.json", 3, "to_delete_out.json")
