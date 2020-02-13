@@ -25,6 +25,8 @@
 
   - name: Verify there is no Stack with the same name
     command: >-
+      {{ aws_access_key_label|quote }}
+      {{ s3_secret_key_label|quote }}
       aws
       --profile {{ aws_cli_profile }}
       cloudformation describe-stacks

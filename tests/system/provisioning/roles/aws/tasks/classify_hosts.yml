@@ -2,7 +2,9 @@
 
   - name: Obtaining Instances Identifiers
     command: >-
-      aws 
+      {{ aws_access_key_label|quote }}
+      {{ s3_secret_key_label|quote }}
+      aws
       --profile {{ aws_cli_profile }}
       ec2 describe-instances
       --filter Name=tag:aws:cloudformation:stack-name,Values={{ stack_name }}
