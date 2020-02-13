@@ -71,7 +71,8 @@ def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_conf
         assert 'modified' in modify['data']['type'] and f1 in modify['data']['path'], \
             f"'modified' event not matching for {file1}"
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+            event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+            raise AttributeError(f'[ERROR] Unexpected event {event}')
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
@@ -98,7 +99,7 @@ def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_conf
             event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
             raise AttributeError(f'[ERROR] Unexpected event {event}')
 
-    # Change the target of the symlink and expect events while there's no symcheck scan
+    # Change the target of the symlink and expect events while there's no syscheck scan
     # Don't expect events from the new target
     if tags_to_apply == {'monitored_dir'}:
         modify_symlink(aux_folder, os.path.join(testdir_link, 'symlink2'))

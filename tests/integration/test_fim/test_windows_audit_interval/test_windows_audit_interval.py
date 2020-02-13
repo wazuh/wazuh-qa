@@ -94,9 +94,11 @@ def test_windows_audit_modify_sacl(tags_to_apply, get_configuration, configure_e
         # monitoring
         modify_sacl(lfss, 'delete', mask=next(iter(WAZUH_RULES)))
         dir_rules = get_sacl(lfss)
-        assert next(iter(WAZUH_RULES)) not in dir_rules
+        assert next(iter(WAZUH_RULES)) not in dir_rules, f'{next(iter(WAZUH_RULES))} found in {dir_rules}'
 
-    event = wazuh_log_monitor.start(timeout=windows_audit_interval, callback=callback_sacl_changed).result()
+    event = wazuh_log_monitor.start(timeout=windows_audit_interval, callback=callback_sacl_changed,
+                                    error_message='[ERROR] Did not receive expected "The SACL '
+                                                  'of \'...\' has been restored correctly" event').result()
     assert testdir_modify in event, f'{testdir_modify} not detected in SACL modification event'
 
 
@@ -115,10 +117,12 @@ def test_windows_audit_restore_sacl(tags_to_apply, get_configuration, configure_
 
         # Stop Wazuh service to force SACL rules to be restored
         control_service('stop')
-        event = wazuh_log_monitor.start(timeout=5, callback=callback_sacl_restored).result()
+        event = wazuh_log_monitor.start(timeout=5, callback=callback_sacl_restored,
+                                        error_message='[ERROR] Did not receive expected "The SACL '
+                                                      'of \'...\' has been restored correctly" event').result()
         assert testdir_restore in event, f'{testdir_restore} not detected in SACL restore event'
         dir_rules = set(get_sacl(lfss))
-        assert dir_rules == previous_rules
+        assert dir_rules == previous_rules, f'{dir_rules} is not equal to {previous_rules}'
 
     # Start Wazuh service again so the fixture does not crash
     control_service('start')
