@@ -35,9 +35,17 @@ tested_daemons = ["wazuh-db", "ossec-analysisd", "ossec-remoted"]
 
 
 class Cases(Enum):
-    case0 = 0  # Database empty
-    case1 = 1  # Change one random checksum in fim_entry table
-    case2 = 2  # Change all checksums in fim_entry table
+    """
+        Case 0: In this case, we start from an empty database.
+
+        Case 1: Once the synchronization process is completed,
+        a random checksum in the database will be changed.
+
+        Case 2: Modifies all the checksums of the database entries.
+    """
+    case0 = 0
+    case1 = 1
+    case2 = 2
 
 
 def db_query(agent, query):
@@ -104,6 +112,19 @@ def get_total_disk_info(daemon):
 
 
 def get_total_cpu_info(daemon):
+    """ Get the total CPU usage by the specified daemon
+
+    Parameters
+    ----------
+    daemon : str
+        Daemon to be monitored
+
+    Returns
+    -------
+    int
+        Total CPU usage at this moment
+
+    """
     pid = os.popen('pidof ' + daemon).read().strip()
     cpu_file = "/proc/" + pid + "/stat"
     with open(cpu_file, 'r') as cpu_info:
@@ -391,7 +412,7 @@ def modify_database(agent_id, directory, prefix, total_files, modify_file, modif
         time.sleep(0.1)
 
 
-def agent_checker(case, agent_id, agents_dict, filename, start_stats_collector, database_params):
+def agent_checker(case, agent_id, agents_dict, filename, attempts_info, database_params):
     """ Check that the current agent is restarted. When it has been restarted, marks the start time of the agent.
     If n_completions of the agent_id is greater than 0, the info_collector must be called.
 
@@ -401,10 +422,12 @@ def agent_checker(case, agent_id, agents_dict, filename, start_stats_collector, 
         Case number
     agent_id : str
         Agent id
-    agents_dict : dict of shared dict
+    agents_dict : dict of multi processes shared dict
         Dictionary with the start time of every agent
     filename : str
         Path of the agent's info file
+    attempts_info : shared dict
+        Dictionary with a flag that indicates if the stats collector must start
     database_params : dict
         Database params to be applied for the current test
 
@@ -426,21 +449,21 @@ def agent_checker(case, agent_id, agents_dict, filename, start_stats_collector, 
 
     while True:
         if n_attempts(agent_id) > 0 and agents_dict[agent_id]['start'] == 0.0:
-            if not start_stats_collector['start']:
+            if not attempts_info['start']:
                 with open(filename, 'w') as info_agent:
                     info_agent.write("agent_id,n_attempts,n_completions,start_time,end_time,total_time,state\n")
             agents_dict[agent_id]['start'] = time.time()
-            start_stats_collector['start'] = True
+            attempts_info['start'] = True
             print(f'[AGENT] Agent {agent_id} started at {agents_dict[agent_id]["start"]}')
         actual_n_attempts = n_attempts(agent_id)
         if (n_completions(agent_id) > 0 or actual_n_attempts > max_n_attempts) and \
                 agents_dict[agent_id]['start'] != 0.0:
             state = 'complete' if actual_n_attempts < max_n_attempts else 'except_max_attempts'
-            info_collector(agents_dict[agent_id], agent_id, filename, start_stats_collector, state=state)
+            info_collector(agents_dict[agent_id], agent_id, filename, attempts_info, state=state)
             break
 
 
-def info_collector(agent, agent_id, filename, start_stats_collector, state='complete'):
+def info_collector(agent, agent_id, filename, attempts_info, state='complete'):
     """ Write the stats of the agent during the test.
 
     This stats will be written when the agent finish its test process (n_completions(agent_id) > 0)
@@ -453,11 +476,15 @@ def info_collector(agent, agent_id, filename, start_stats_collector, state='comp
         Agent id
     filename : str
         Path of the agent's info file
+    attempts_info : shared dict
+        Dictionary with a flag that indicates if the stats collector must start
+    state : str
+        complete of except_max_attempts: Indicates if the agent took less attempts than the defined limits or not
 
     """
     if state != 'complete':
-        start_stats_collector['except_max_attempts'] = True
-        start_stats_collector['agents_failed'] += 1
+        attempts_info['except_max_attempts'] = True
+        attempts_info['agents_failed'] += 1
     with open(filename, 'a') as info_agent:
         print(
             f"[AGENT] Info {agent_id} writing: "
@@ -467,7 +494,7 @@ def info_collector(agent, agent_id, filename, start_stats_collector, state='comp
                          f"{time.time()},{time.time() - agent['start']},{state}\n")
 
 
-def state_collector(case, agents_dict, buffer, stats_dir, start_stats_collector):
+def state_collector(case, agents_dict, buffer, stats_dir, attempts_info):
     """ Gets the stats of the .state files in the WAZUH_PATH/var/run folder.
     We can define the stats to get from each daemon in the daemons_dict.
 
@@ -481,6 +508,8 @@ def state_collector(case, agents_dict, buffer, stats_dir, start_stats_collector)
         Set disabled to yes or no
     stats_dir : str
         Stats folder
+    attempts_info : shared dict
+        Dictionary with a flag that indicates if the stats collector must start
 
     """
     daemons_dict = {
@@ -498,7 +527,7 @@ def state_collector(case, agents_dict, buffer, stats_dir, start_stats_collector)
     }
 
     while check_all_n_completions(agents_dict.keys()) == 0 and \
-            start_stats_collector['agents_failed'] < len(agents_dict.keys()):
+            attempts_info['agents_failed'] < len(agents_dict.keys()):
         for file in os.listdir(state_path):
             if file.endswith('.state'):
                 daemon = str(file.split(".")[0])
@@ -525,7 +554,7 @@ def state_collector(case, agents_dict, buffer, stats_dir, start_stats_collector)
     print(f'[STATE] Finished state collector')
 
 
-def stats_collector(filename, daemon, agents_dict, start_stats_collector):
+def stats_collector(filename, daemon, agents_dict, attempts_info):
     """ Collects the stats of the current daemon until all agents have finished the integrity process.
 
     Parameters
@@ -536,13 +565,15 @@ def stats_collector(filename, daemon, agents_dict, start_stats_collector):
         Daemon tested
     agents_dict : dict of shared dict
         Dictionary with the start time of every agent
+    attempts_info : shared dict
+        Dictionary with a flag that indicates the number of agents that exceed the limit of n_attempts
 
     """
     stats, old_stats = None, None
     with open(filename, 'w') as file_:
         file_.write(f"seconds,cpu,mem,{','.join(list(get_stats(daemon).keys())[1:])}\n")
         while check_all_n_completions(agents_dict.keys()) == 0 and \
-                start_stats_collector['agents_failed'] < len(agents_dict.keys()):
+                attempts_info['agents_failed'] < len(agents_dict.keys()):
             if check_all_n_attempts(agents_dict.keys()) > 0:
                 if old_stats:
                     stats = calculate_stats(daemon, **old_stats)
@@ -552,7 +583,7 @@ def stats_collector(filename, daemon, agents_dict, start_stats_collector):
                     file_.write(f'{time.time()},{",".join(stats.values())}\n')
             time.sleep(setup_environment_time)
 
-    if start_stats_collector['agents_failed'] >= len(agents_dict.keys()):
+    if attempts_info['agents_failed'] >= len(agents_dict.keys()):
         print(f'[ATTEMPTS] Configuration finished. All agents reached the max_n_attempts, '
               f'currently set up to {max_n_attempts}')
 
@@ -573,6 +604,19 @@ def stats_collector(filename, daemon, agents_dict, start_stats_collector):
 
 
 def protocol_detection(ossec_conf_path=WAZUH_CONF):
+    """ Detects the protocol configuration
+
+    Parameters
+    ----------
+    ossec_conf_path : str
+        ossec.conf path
+
+    Returns
+    -------
+    str
+        udp or tcp
+
+    """
     try:
         return re.search(r'<protocol>(udp|tcp)</protocol>', open(ossec_conf_path).read()).group(1)
     except AttributeError:
@@ -580,6 +624,7 @@ def protocol_detection(ossec_conf_path=WAZUH_CONF):
 
 
 def clean_environment():
+    """ Remove the states files between tests """
     for file in os.listdir(state_path):
         if file.endswith('.state'):
             os.unlink(os.path.join(state_path, file))
@@ -601,10 +646,9 @@ def clean_environment():
     ('1000000', '1000000', '/test1M', 'yes'),
 ])
 def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_file, modify_all, restore_all):
-    """ Execute and launch all the necessary processes to check all the cases with all the specified configurations
-    """
+    """ Execute and launch all the necessary processes to check all the cases with all the specified configurations """
     agents_dict = get_agents()
-    start_stats_collector = Manager().dict({
+    attempts_info = Manager().dict({
         'start': False,
         'except_max_attempts': False,
         'agents_failed': 0
@@ -639,12 +683,12 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
         for agent_id in agents_dict.keys():
             filename = os.path.join(stats_dir, f"info-case{case}_{buffer}.csv")
             agents_checker.append(Process(target=agent_checker, args=(case, agent_id, agents_dict, filename,
-                                                                      start_stats_collector, database_params,)))
+                                                                      attempts_info, database_params,)))
             agents_checker[-1].start()
 
         # Block the test until one agent starts
         seconds = 0
-        while not start_stats_collector['start']:
+        while not attempts_info['start']:
             if seconds >= max_time_for_agent_setup:
                 raise TimeoutError('[ERROR] The agents are not ready')
             if seconds == 0:
@@ -655,12 +699,11 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
         # We started the stats collector as the agents are ready
         # print(f'[ENV] Started test for case{case}_{protocol}-{eps}eps-{files}files')
         state_collector_check = Process(target=state_collector, args=(case, agents_dict, buffer, stats_dir,
-                                                                      start_stats_collector,))
+                                                                      attempts_info,))
         state_collector_check.start()
         for daemon in tested_daemons:
             filename = os.path.join(stats_dir, f"stats-{daemon}_case{case}_{buffer}.csv")
-            stats_checker.append(Process(target=stats_collector, args=(filename, daemon, agents_dict,
-                                                                       start_stats_collector,)))
+            stats_checker.append(Process(target=stats_collector, args=(filename, daemon, agents_dict, attempts_info,)))
             stats_checker[-1].start()
         while True:
             if not any([writer_.is_alive() for writer_ in stats_checker]) and \
