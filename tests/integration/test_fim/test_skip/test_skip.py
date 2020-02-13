@@ -59,19 +59,21 @@ def get_configuration(request):
 def configure_nfs():
     """Call NFS scripts to create and configure a NFS mount point"""
     path = os.path.dirname(os.path.abspath(__file__))
-    dist_list = ['centos', 'fedora', 'rhel']
-    if distro.id() in dist_list:
-        dist = 'rpm -qa'
-        installer = 'yum -y install'
+    rpms = ['centos', 'fedora', 'rhel']
+    debs = ['ubuntu', 'debian', 'linuxmint']
+    if distro.id() in rpms:
+        conf_script = 'configure_nfs_rpm.sh'
+        remove_script = 'remove_nfs_rpm.sh'
+    elif distro.id() in debs:
+        conf_script = 'configure_nfs_deb.sh'
+        remove_script = 'remove_nfs_deb.sh'
     else:
-        dist = 'dpkg -l'
-        installer = 'apt-get install'
-    freebsd = 'true' if distro.id() == 'freebsd' else 'false'
-    subprocess.call([f'{path}/data/configure_nfs.sh', dist, installer, freebsd])
+        pytest.fail('The OS is not supported for this test')
+    subprocess.call([f'{path}/data/{conf_script}'])
     yield
 
     # remove nfs
-    subprocess.call([f'{path}/data/remove_nfs.sh'])
+    subprocess.call([f'{path}/data/{remove_script}'])
     shutil.rmtree(os.path.join('/', 'media', 'nfs-folder'), ignore_errors=True)
 
 

@@ -61,8 +61,7 @@ def test_max_eps_on_start(get_configuration, configure_environment, restart_sysc
 
     result = wazuh_log_monitor.start(timeout=150,
                                      accum_results=1000,
-                                     callback=callback_syscheck_message,
-                                     update_position=False).result()
+                                     callback=callback_syscheck_message).result()
 
     max_eps = int(get_configuration['metadata']['max_eps'])
     counter = Counter([date_time for date_time, _ in result])
