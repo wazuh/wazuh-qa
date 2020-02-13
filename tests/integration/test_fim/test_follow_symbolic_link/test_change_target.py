@@ -67,7 +67,9 @@ def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_conf
         modify_file_content(f1, file1, text)
         modify_file_content(f2, file1, text)
         check_time_travel(scheduled)
-        modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
+        modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
+                                         error_message='[ERROR] Did not receive expected "Sending FIM event: ..." event'
+                                         ).result()
         assert 'modified' in modify['data']['type'] and f1 in modify['data']['path'], \
             f"'modified' event not matching for {file1}"
         with pytest.raises(TimeoutError):

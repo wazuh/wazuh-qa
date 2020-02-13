@@ -80,7 +80,9 @@ def check_event(previous_mode: str, previous_event: dict, file: str):
     try:
         print('[INFO] Checking for a second event...')
         current_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                callback=callback_detect_event).result()
+                                                callback=callback_detect_event,
+                                                error_message='[ERROR] Did not receive expected '
+                                                              '"Sending FIM event: ..." event').result()
     except TimeoutError:
         if not isinstance(previous_event["data"]["path"], list):
             previous_event["data"]["path"] = [previous_event["data"]["path"]]

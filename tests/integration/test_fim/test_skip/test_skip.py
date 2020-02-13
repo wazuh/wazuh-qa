@@ -154,7 +154,8 @@ def test_skip(directory, tags_to_apply,
 
             # Do not expect any 'Sending event'
             with pytest.raises(TimeoutError):
-                wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+                event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+                raise AttributeError(f'[ERROR] Unexpected event {event}')
 
             # Remove module video and travel to future to check alerts
             subprocess.Popen(["modprobe", "-r", "video"])

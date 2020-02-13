@@ -61,7 +61,10 @@ def test_entries_match_path_count(get_configuration, configure_environment, rest
     check_apply_test({'ossec_conf'}, get_configuration['tags'])
 
     entries, path_count = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                  callback=callback_entries_path_count).result()
+                                                  callback=callback_entries_path_count,
+                                                  error_message='[ERROR] Did not receive expected '
+                                                                '"Fim inode entries: ..., path count: ..." event'
+                                                  ).result()
     check_time_travel(True)
 
     if entries and path_count:

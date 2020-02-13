@@ -76,4 +76,5 @@ def test_wait_until_baseline(get_configuration, configure_environment, restart_s
     # Create a file during initial scan to check if the event is logged after the 'scan ended' message
     create_file(REGULAR, testdir1, f'test_{int(round(time() * 10**6))}', content='')
 
-    wazuh_log_monitor.start(timeout=120, callback=callback_detect_event_before_end_scan)
+    wazuh_log_monitor.start(timeout=120, callback=callback_detect_event_before_end_scan,
+                            error_message='[ERROR] Did not receive expected event before end the scan')

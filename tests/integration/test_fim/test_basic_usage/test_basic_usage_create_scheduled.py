@@ -106,7 +106,8 @@ def test_create_file_scheduled(folder, name, filetype, content, checkers, tags_t
     if filetype == REGULAR:
         # Wait until event is detected
         event = wazuh_log_monitor.start(
-            timeout=global_parameters.default_timeout, callback=callback_detect_event, encoding=encoding).result()
+            timeout=global_parameters.default_timeout, callback=callback_detect_event, encoding=encoding,
+            error_message='[ERROR] Did not receive expected "Sending FIM event: ..." event').result()
         validate_event(event, checkers)
     else:
         with pytest.raises(TimeoutError):

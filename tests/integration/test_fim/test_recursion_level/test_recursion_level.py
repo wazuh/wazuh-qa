@@ -122,7 +122,9 @@ def recursion_test(dirname, subdirname, recursion_level, timeout=1, edge_limit=2
                              triggers_event=False)
 
     except TimeoutError:
-        if wazuh_log_monitor.start(timeout=5, callback=callback_audit_event_too_long, update_position=False).result():
+        if wazuh_log_monitor.start(timeout=5, callback=callback_audit_event_too_long, update_position=False,
+                                   error_message='[ERROR] Did not receive expected '
+                                                 '"Caching Audit message: event too long" event').result():
             pytest.skip(msg="Reached Whodata maximum path length.")
         pytest.fail("No 'Event Too Long' message was raised.")
 

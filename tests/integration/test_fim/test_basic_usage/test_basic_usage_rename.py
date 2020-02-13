@@ -82,7 +82,9 @@ def test_rename(folder, tags_to_apply,
 
     def expect_events(path):
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                        callback=callback_detect_event).result()
+                                        callback=callback_detect_event,
+                                        error_message='[ERROR] Did not receive expected '
+                                                      '"Sending FIM event: ..." event').result()
         try:
             assert 'added' in event['data']['type'] and path in event['data']['path'], \
                 f'Deleted event not detected'

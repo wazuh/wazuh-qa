@@ -161,7 +161,9 @@ def test_check_all_no(path, checkers, get_configuration, configure_environment, 
     file = 'regular'
     create_file(REGULAR, path, file)
     check_time_travel(scheduled)
-    create_event = wazuh_log_monitor.start(callback=callback_detect_event, timeout=15).result()
+    create_event = wazuh_log_monitor.start(callback=callback_detect_event, timeout=15,
+                                           error_message='[ERROR] Did not receive expected '
+                                                         '"Sending FIM event: ..." event').result()
     assert create_event['data']['type'] == 'added'
     assert list(create_event['data']['attributes'].keys()) == ['type', 'checksum']
 

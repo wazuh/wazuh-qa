@@ -75,7 +75,9 @@ def test_events_from_existing_files(filename, tags_to_apply, get_configuration,
 
     # Expect modified event
     check_time_travel(scheduled)
-    modified_event = wazuh_log_monitor.start(timeout=timeout, callback=callback_detect_event).result()
+    modified_event = wazuh_log_monitor.start(timeout=timeout, callback=callback_detect_event,
+                                             error_message='[ERROR] Did not receive expected '
+                                                           '"Sending FIM event: ..." event').result()
     assert 'modified' in modified_event['data']['type'] and \
            os.path.join(testdir1, filename) in modified_event['data']['path']
 
@@ -84,6 +86,8 @@ def test_events_from_existing_files(filename, tags_to_apply, get_configuration,
 
     # Expect deleted event
     check_time_travel(scheduled)
-    deleted_event = wazuh_log_monitor.start(timeout=timeout, callback=callback_detect_event).result()
+    deleted_event = wazuh_log_monitor.start(timeout=timeout, callback=callback_detect_event,
+                                            error_message='[ERROR] Did not receive expected '
+                                                          '"Sending FIM event: ..." event').result()
     assert 'deleted' in deleted_event['data']['type'] and \
            os.path.join(testdir1, filename) in deleted_event['data']['path']

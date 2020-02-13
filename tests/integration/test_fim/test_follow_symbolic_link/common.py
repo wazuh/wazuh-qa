@@ -46,7 +46,8 @@ def modify_symlink(target, path, file=None):
 def wait_for_audit(whodata, monitor):
     """Wait for the audit callback if we are using whodata monitoring"""
     if whodata:
-        monitor.start(timeout=30, callback=callback_audit_loaded_rule)
+        monitor.start(timeout=30, callback=callback_audit_loaded_rule,
+                      error_message='[ERROR] Did not receive expected "Audit rule loaded: -w ... -p" event')
 
 
 def delete_f(path, file=None):
@@ -62,7 +63,8 @@ def delete_f(path, file=None):
 @debug_sym_check
 def wait_for_symlink_check(monitor):
     """Wait for symlink thread to finish its scan"""
-    monitor.start(timeout=(symlink_interval + 2), callback=callback_symlink_scan_ended)
+    monitor.start(timeout=(symlink_interval + 2), callback=callback_symlink_scan_ended,
+                  error_message='[ERROR] Did not receive expected "Sending FIM event: ..." event')
 
 
 def extra_configuration_before_yield():
