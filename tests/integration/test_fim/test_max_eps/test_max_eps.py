@@ -61,7 +61,8 @@ def test_max_eps_on_start(get_configuration, configure_environment, restart_sysc
 
     result = wazuh_log_monitor.start(timeout=150,
                                      accum_results=1000,
-                                     callback=callback_syscheck_message).result()
+                                     callback=callback_syscheck_message,
+                                     error_message='[ERROR] Did not receive expected any integrity event').result()
 
     max_eps = int(get_configuration['metadata']['max_eps'])
     counter = Counter([date_time for date_time, _ in result])

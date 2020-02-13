@@ -77,7 +77,8 @@ def wait_for_event(fim_mode):
         TimeMachine.travel_to_future(timedelta(hours=13))
 
     # Wait until event is detected
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event)
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                            error_message='[ERROR] Did not receive expected "Sending FIM event: ..." event')
 
 
 def create_and_check_diff(name, path, fim_mode):
