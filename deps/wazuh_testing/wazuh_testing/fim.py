@@ -783,9 +783,9 @@ def check_time_travel(time_travel):
 
 
 def callback_configuration_warning(line):
-    match = re.match(r'.*WARNING: \(\d+\): Invalid element in the configuration: (.*)', line)
+    match = re.match(r'.*WARNING: \(\d+\): Invalid value for element', line)
     if match:
-        return match.group(1)
+        return True
     return None
 
 
