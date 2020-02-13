@@ -20,6 +20,7 @@ from stat import ST_ATIME, ST_MTIME
 from json import JSONDecodeError
 from jsonschema import validate
 from typing import Sequence, Union, Generator, Any
+from _pytest.outcomes import skip
 
 from wazuh_testing.tools.time import TimeMachine
 
@@ -183,16 +184,18 @@ def create_file(type_, path, name, **kwargs):
     target : str
         Path where the link will be pointing to.
     """
-    os.makedirs(path, exist_ok=True, mode=0o777)
-    if type_ != REGULAR:
-        try:
-            kwargs.pop('content')
-        except KeyError:
-            pass
-    if type_ in (SYMLINK, HARDLINK) and 'target' not in kwargs:
-        raise ValueError(f"'target' param is mandatory for type {type_}")
-    getattr(sys.modules[__name__], f'_create_{type_}')(path, name, **kwargs)
-
+    try:
+        os.makedirs(path, exist_ok=True, mode=0o777)
+        if type_ != REGULAR:
+            try:
+                kwargs.pop('content')
+            except KeyError:
+                pass
+        if type_ in (SYMLINK, HARDLINK) and 'target' not in kwargs:
+            raise ValueError(f"'target' param is mandatory for type {type_}")
+        getattr(sys.modules[__name__], f'_create_{type_}')(path, name, **kwargs)
+    except OSError:
+        skip("OS does not allow creating this file.")
 
 def create_registry(key, subkey, arch):
     """
@@ -781,9 +784,9 @@ def check_time_travel(time_travel):
 
 
 def callback_configuration_warning(line):
-    match = re.match(r'.*WARNING: \(\d+\): Invalid value for element', line)
+    match = re.match(r'.*WARNING: \(\d+\): Invalid element in the configuration: (.*)', line)
     if match:
-        return True
+        return match.group(1)
     return None
 
 

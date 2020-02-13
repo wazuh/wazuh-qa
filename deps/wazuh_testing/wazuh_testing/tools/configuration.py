@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import sys
 import xml.etree.ElementTree as ET
 from copy import deepcopy
 from subprocess import check_call, DEVNULL, check_output
@@ -11,7 +12,7 @@ from typing import List, Any, Set
 import yaml
 from _pytest.outcomes import skip
 
-from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF
+from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
@@ -370,10 +371,63 @@ def load_wazuh_configurations(yaml_file_path: str, test_name: str, params: list 
     with open(yaml_file_path) as stream:
         configurations = yaml.safe_load(stream)
 
+    if sys.platform == 'darwin':
+        configurations = set_correct_prefix(configurations, PREFIX)
+
     return [process_configuration(configuration, placeholders=replacement, metadata=meta)
             for replacement, meta in zip(params, metadata)
             for configuration in configurations
             if test_name in expand_placeholders(configuration.get('apply_to_modules'), placeholders=replacement)]
+
+
+def set_correct_prefix(configurations, new_prefix):
+    """Insert the correct prefix in the paths of each configuration.
+
+    In MacOS Catalina it is not possible to create files in the / directory.
+    Therefore, it is necessary to replace those paths that do not contain a
+    suitable prefix.
+
+    This function checks if the path inside directories and ignore sections
+    contains a certain prefix, and if it does not contain it, it inserts it.
+
+    Parameters
+    ----------
+    configurations : list
+        List of configurations loaded from the YAML.
+    new_prefix : str
+        Prefix to be inserted before every path.
+
+    Returns
+    -------
+    configurations : list
+        List of configurations with the correct prefix
+        added in the directories and ignore sections.
+
+    """
+    for config in configurations:
+        for element in config['elements']:
+            if isinstance(element, dict):
+                for sub_elements in (element.get('directories'), element.get('ignore')):
+                    if sub_elements:
+                        paths_list = sub_elements['value'].split(',')
+                        modified_paths = ''
+
+                        for path in paths_list:
+                            index = path.find(os.sep)
+
+                            # Add the prefix right before '/'.
+                            modified_paths += (path[0:index] + new_prefix + path[index:] if
+                                               new_prefix not in path and
+                                               index >= 0
+                                               else '')
+
+                            # Add a comma if directories.
+                            modified_paths += ',' if (element.get('directories') and modified_paths != '') else ''
+
+                        if modified_paths:
+                            sub_elements['value'] = modified_paths
+
+    return configurations
 
 
 def check_apply_test(apply_to_tags: Set, tags: List):
