@@ -57,6 +57,8 @@ def modify_file(filepath, owner, group, mode):
 def modify_file_content(filepath):
     """
         Modify file content by adding a random number of bytes
+
+        :param str filepath: The path of the file to modify
     """
     content = 'qazxswedcvbnmklpoiuytggdfert'*random.randint(1, 10)
     content += str(random.random())
