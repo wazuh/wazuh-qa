@@ -114,7 +114,9 @@ def test_scan_day_and_time(tags_to_apply,
     if scan_today:
         if (scan_time - current_day).days == 0:
             TimeMachine.travel_to_future(scan_time - current_day + timedelta(minutes=1))
-            wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
+            wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+                                    error_message='[ERROR] Did not receive expected '
+                                                  '"File integrity monitoring scan ended" event')
             return
         else:
             day_diff = 7
@@ -123,10 +125,16 @@ def test_scan_day_and_time(tags_to_apply,
         TimeMachine.travel_to_future(timedelta(days=day_diff - 1))
         current_day = datetime.now()
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
+            event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                            callback=callback_detect_end_scan)
+            raise AttributeError(f'[ERROR] Unexpected event {event}')
 
     TimeMachine.travel_to_future(scan_time - current_day - timedelta(minutes=5))
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
+        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
+        raise AttributeError(f'[ERROR] Unexpected event {event}')
+
     TimeMachine.travel_to_future(timedelta(minutes=6))
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+                            error_message='[ERROR] Did not receive expected '
+                                          '"File integrity monitoring scan ended" event')

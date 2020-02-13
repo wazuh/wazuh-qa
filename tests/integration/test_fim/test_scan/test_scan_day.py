@@ -72,7 +72,9 @@ def test_scan_day(tags_to_apply,
         day_diff %= 7
     elif day_diff == 0:
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
+            wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+                                    error_message='[ERROR] Did not receive expected '
+                                                  '"File integrity monitoring scan ended" event')
         return
 
     if day_diff > 1:
@@ -80,4 +82,6 @@ def test_scan_day(tags_to_apply,
         with pytest.raises(TimeoutError):
             wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
     TimeMachine.travel_to_future(timedelta(days=1))
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+                            error_message='[ERROR] Did not receive expected '
+                                          '"File integrity monitoring scan ended" event')

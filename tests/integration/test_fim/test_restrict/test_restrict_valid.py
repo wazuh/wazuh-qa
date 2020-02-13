@@ -105,6 +105,8 @@ def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply
     else:
         while True:
             ignored_file = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                   callback=callback_restricted).result()
+                                                   callback=callback_restricted,
+                                                   error_message='[ERROR] Did not receive expected '
+                                                                 '"Sending FIM event: ..." event').result()
             if ignored_file == os.path.join(folder, filename):
                 break

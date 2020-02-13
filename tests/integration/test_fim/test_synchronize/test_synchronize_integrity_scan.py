@@ -69,10 +69,14 @@ def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure
     """
     folder = testdir1 if get_configuration['metadata']['fim_mode'] == 'realtime' else testdir2
     # Check the integrity scan has begun
-    wazuh_log_monitor.start(timeout=15, callback=callback_integrity_synchronization_check)
+    wazuh_log_monitor.start(timeout=15, callback=callback_integrity_synchronization_check,
+                            error_message='[ERROR] Did not receive expected '
+                                          '"Initializing FIM Integrity Synchronization check" event')
 
     # Create a file and assert syscheckd detects it while doing the integrity scan
     file_name = 'file'
     create_file(REGULAR, folder, file_name, content='')
-    sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
+    sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                                            error_message='[ERROR] Did not receive expected '
+                                                          '"Sending FIM event: ..." event').result()
     assert sending_event['data']['path'] == os.path.join(folder, file_name)

@@ -40,4 +40,6 @@ def test_invalid_sync_response(get_configuration, configure_environment, restart
     """Checks if an invalid ignore configuration is detected by catching the warning message displayed on the log"""
     check_apply_test({'sync_invalid'}, get_configuration['tags'])
 
-    wazuh_log_monitor.start(timeout=3, callback=callback_configuration_warning)
+    wazuh_log_monitor.start(timeout=3, callback=callback_configuration_warning,
+                            error_message='[ERROR] Did not receive expected '
+                                          '"WARNING: ...: Invalid value for element" event')

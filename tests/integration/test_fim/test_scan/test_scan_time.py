@@ -67,6 +67,10 @@ def test_scan_time(tags_to_apply,
         ((scan_time - current_time) + timedelta(days=2))
     TimeMachine.travel_to_future(time_difference + timedelta(minutes=-30))
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
+        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
+        raise AttributeError(f'[ERROR] Unexpected event {event}')
+
     TimeMachine.travel_to_future(timedelta(minutes=31))
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+                            error_message='[ERROR] Did not receive expected '
+                                          '"File integrity monitoring scan ended" event')
