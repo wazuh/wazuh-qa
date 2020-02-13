@@ -1,4 +1,5 @@
-- hosts: agents
+- hosts:
+    - linuxagents
 
   tasks:
 
@@ -27,7 +28,9 @@
       path: /var/ossec
       state: absent
 
-- hosts: managers
+- hosts:
+    - masters
+    - workers
   gather_facts: yes
 
   tasks:
