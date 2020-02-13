@@ -12,6 +12,9 @@ from jsonschema import validate
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
+with open(os.path.join(_data_path, 'event_analysis_schema.json'), 'r') as f:
+    schema = json.load(f)
+
 
 def callback_analysisd_message(line):
     if isinstance(line, bytes):
@@ -79,9 +82,11 @@ def callback_wazuh_db_message(item):
 
 def callback_fim_alert(line):
     try:
-        return json.loads(line)
+        alert = json.loads(line)
+        if 'syscheck' in alert:
+            return alert
     except json.decoder.JSONDecodeError as e:
-        raise e
+        return None
 
 
 def callback_fim_error(line):
@@ -132,14 +137,14 @@ def validate_analysis_alert_complex(alert, event):
         if 'content_changes' in event['data']:
             assert event['data']['content_changes'] == syscheck_alert['diff']
 
-    # Move this out of this scope
-    with open(os.path.join(_data_path, 'event_analysis_schema.json'), 'r') as f:
-        schema = json.load(f)
     validate(schema=schema, instance=alert)
-
-    validate_attributes(deepcopy(alert['syscheck']), deepcopy(event), 'attributes', 'after')
-    if event['data']['type'] == 'modified':
-        validate_attributes(deepcopy(alert['syscheck']), deepcopy(event), 'old_attributes', 'before')
+    try:
+        validate_attributes(deepcopy(alert['syscheck']), deepcopy(event), 'attributes', 'after')
+        if event['data']['type'] == 'modified':
+            validate_attributes(deepcopy(alert['syscheck']), deepcopy(event), 'old_attributes', 'before')
+    except KeyError as e:
+        print('Alert does not have the same keys as the event.')
+        raise e
 
 
 def validate_analysis_integrity_state(event):
