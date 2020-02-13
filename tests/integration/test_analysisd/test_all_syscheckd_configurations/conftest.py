@@ -6,17 +6,17 @@ import os
 import re
 import shutil
 import time
-import yaml
 
 import pytest
+import yaml
 
 from wazuh_testing.analysis import callback_analysisd_event, callback_analysisd_agent_id
-from wazuh_testing.fim import detect_initial_scan, REGULAR, create_file, callback_detect_event, modify_file, delete_file
+from wazuh_testing.fim import detect_initial_scan, REGULAR, create_file, modify_file, delete_file
 from wazuh_testing.tools import WAZUH_CONF, PREFIX, LOG_FILE_PATH, WAZUH_LOGS_PATH
 from wazuh_testing.tools.configuration import generate_syscheck_config
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor, ManInTheMiddle, SuperQueue, QueueMonitor
-from wazuh_testing.tools.services import control_service, check_daemon_status, delete_sockets
+from wazuh_testing.tools.monitoring import FileMonitor, ManInTheMiddle, QueueMonitor
+from wazuh_testing.tools.services import control_service, check_daemon_status
 
 
 @pytest.fixture(scope='module')

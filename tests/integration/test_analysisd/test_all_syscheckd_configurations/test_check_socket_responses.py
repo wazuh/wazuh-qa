@@ -11,14 +11,14 @@ from wazuh_testing.analysis import callback_analysisd_message, callback_wazuh_db
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, WAZUH_LOGS_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 
-pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=2)]
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2)]
 
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 alerts_json = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.json')
 messages_path = os.path.join(test_data_path, 'syscheck_events.yaml')
-wazuh_alerts_monitor = FileMonitor(alerts_json)
+wazuh_alerts_monitor = None
 
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
 analysis_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'queue'))
@@ -55,9 +55,10 @@ def test_validate_socket_responses(configure_mitm_environment_analysisd, create_
     test_case : dict
         Dict with the input to inject to the analysisd socket and output to expect to be sent to the wazuh-db socket.
     """
-    for stage in test_case:
-        expected = callback_analysisd_message(stage['output'])
-        receiver_sockets[0].send([stage['input']])
-        response = wdb_monitor.start(timeout=global_parameters.default_timeout,
-                                     callback=callback_wazuh_db_message).result()
-        assert response == expected, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1, stage['stage'])
+    # There is only one stage per test_case
+    stage = test_case[0]
+    expected = callback_analysisd_message(stage['output'])
+    receiver_sockets[0].send([stage['input']])
+    response = wdb_monitor.start(timeout=global_parameters.default_timeout,
+                                 callback=callback_wazuh_db_message).result()
+    assert response == expected, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1, stage['stage'])
