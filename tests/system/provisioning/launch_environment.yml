@@ -34,7 +34,7 @@
           - use_cases_tests.log
 
       - name: Creating AWS Stack, generating configuration and host files
-        shell: "ansible-playbook {{ item }}"
+        shell: "ansible-playbook {{ item }} -e 'aws_access_key_label=\"{{ aws_access_key_label }}\"' -e 'aws_secret_key_label=\"{{ s3_secret_key_label }}\"'"
         with_items:
           - "deploy_aws_stack.yml >> ./deployment_logs/log_{{ current_date_time }}/deploy.log"
           - "generate_hosts_file.yml -i {{ hosts_classified_destination }} >> ./deployment_logs/log_{{ current_date_time }}/deploy.log"
@@ -77,7 +77,7 @@
         register: jobs_agents
         until: jobs_agents.finished
         retries: 1000
-        delay: 10      
+        delay: 10
 
       - name: Launching post installation tasks
         shell: "ansible-playbook -i {{ ansible_hosts_destination }} {{ item }}"
