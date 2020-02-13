@@ -10,26 +10,13 @@
 
 import os
 import sys
-import pwd
-import grp
+import platform
 import random
-
+if platform.system() == "Linux":
+    import pwd
+    import grp
 if sys.version_info.major < 3:
     print('ERROR: Python 2 is not supported.')
-    sys.exit(1)
-
-# predefined users and groups on the host
-USERS = 'devops1 devops2 devops3 ops1 ops2'.split()
-GROUPS = 'devops operations'.split()
-
-try:
-    for user in USERS:
-        pwd.getpwnam(user)
-    for group in GROUPS:
-        grp.getgrnam(group)
-except:
-    print('ERROR: The users {} and groups {} must exist on the system.'
-                    .format(USERS, GROUPS))
     sys.exit(1)
 
 
@@ -76,18 +63,14 @@ def modify_file(filepath, owner, group, mode):
 
 
 def main():
-    changed_files = []
-    for i in range(1,500):
-        path = '/opt/{}'.format(i)
-        #mode = random_mode()
-        #user = random.choice(USERS)
-        #group = random.choice(GROUPS)
-        #change = modify_file(path, user, group, mode)
-        #changed_files.append(change)
-        modify_file_content(path)
-    #from pprint import pprint
-    #pprint(changed_files)
-
+    import argparse
+    parser =  argparse.ArgumentParser()
+    parser.add_argument('filelist', action="store")
+    args = parser.parse_args()
+    filelist = args.filelist
+    with open(filelist) as flist:
+        for path in flist:
+            modify_file_content(path[:-1])
 
 if __name__ == "__main__":
     main()
