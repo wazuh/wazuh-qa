@@ -43,7 +43,7 @@
           # The elasticsearch[0] is the node which will generate certificates, it's a must to provision him first
           - "provision_playbook.yml -i {{ ansible_hosts_destination }} -l elasticsearch[0] >> ./deployment_logs/log_{{ current_date_time }}/elasticsearch_bootstrap.log"
 
-      - name: Deploying ES, Wazuh Managers, Agents and Kibana
+      - name: Deploying ES, Wazuh Managers and Kibana
         shell: "ansible-playbook provision_playbook.yml -i {{ ansible_hosts_destination }} {{ item }}"
         async: 10000
         poll: 0
@@ -62,7 +62,7 @@
         retries: 1000
         delay: 10
 
-      - name: Registering agents and running post installation tasks
+      - name: Installing and registering agents and running post installation tasks
         shell: "ansible-playbook -i {{ ansible_hosts_destination }} {{ item }}"
         async: 10000
         poll: 0
