@@ -365,9 +365,9 @@ def modify_file_content(path, name, new_content=None, is_binary=False):
 
     Parameters
     ----------
-    path : str
+    path : str, bytes
         Path to the file to be modified.
-    name : str
+    name : str, bytes
         Name of the file to be modified.
     new_content : str, optional
         New content to append to the file. Previous content will remain. Default `None`
@@ -386,9 +386,9 @@ def modify_file_mtime(path, name):
 
     Parameters
     ----------
-    path : str
+    path : str, bytes
         Path to the file to be modified.
-    name : str
+    name : str, bytes
         Name of the file to be modified.
     """
     path_to_file = os.path.join(path, name)
@@ -407,9 +407,9 @@ def modify_file_owner(path, name):
 
     Parameters
     ----------
-    path : str
+    path : str, bytes
         Path to the file to be modified.
-    name : str
+    name : str, bytes
         Name of the file to be modified.
     """
     def modify_file_owner_windows():
@@ -435,9 +435,9 @@ def modify_file_group(path, name):
 
     Parameters
     ----------
-    path : str
+    path : str, bytes
         Path to the file to be modified.
-    name : str
+    name : str, bytes
         Name of the file to be modified.
     """
     if sys.platform == 'win32':
@@ -457,9 +457,9 @@ def modify_file_permission(path, name):
 
     Parameters
     ----------
-    path : str
+    path : str, bytes
         Path to the file to be modified.
-    name : str
+    name : str, bytes
         Name of the file to be modified.
     """
     def modify_file_permission_windows():
@@ -490,9 +490,9 @@ def modify_file_inode(path, name):
 
     Parameters
     ----------
-    path : str
+    path : str, bytes
         Path to the file to be modified.
-    name : str
+    name : str, bytes
         Name of the file to be modified.
     """
     if sys.platform == 'win32':
@@ -519,9 +519,9 @@ def modify_file(path, name, new_content=None, is_binary=False):
 
     Parameters
     ----------
-    path : str
+    path : str, bytes
         Path where the file will be created.
-    name : str
+    name : str, bytes
         File name.
     new_content : str, optional
         New content to add to the file. Default `None`
