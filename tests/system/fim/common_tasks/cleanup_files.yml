@@ -1,13 +1,14 @@
+
 - hosts:
     - linuxagents
 
   tasks:
 
-  - name: check if wazuh-agent service exists
+  - name: Check if wazuh-agent service exists
     stat: path=/etc/init.d/wazuh-agent
     register: agent_service_status
 
-  - name: stop wazuh-agent service
+  - name: Stop wazuh-agent service
     service:
       name: "{{ item }}"
       state: stopped
@@ -16,14 +17,14 @@
     when: agent_service_status.stat.exists
 
 
-  - name: uninstall wazuh-agent service
+  - name: Uninstall wazuh-agent service
     package:
       name: "{{ item }}"
       state: absent
     with_items:
       - wazuh-agent
 
-  - name: ensure /var/ossec is deleted
+  - name: Ensure /var/ossec is deleted
     file:
       path: /var/ossec
       state: absent
@@ -39,15 +40,15 @@
     stat: path=/etc/init.d/wazuh-manager
     register: manager_service_status
 
-  - name: check if wazuh-api service exists
+  - name: Check if wazuh-api service exists
     stat: path=/etc/init.d/wazuh-api
     register: api_service_status
 
-  - name: check if filebeat service exists
+  - name: Check if filebeat service exists
     stat: path=/etc/init.d/filebeat
     register: filebeat_service_status
 
-  - name: stop wazuh stack services (wazuh-manager, wazuh-api, and, filebeat)
+  - name: Stop wazuh stack services (wazuh-manager, wazuh-api, and, filebeat)
     service:
       name: "{{ item }}"
       state: stopped
@@ -60,7 +61,7 @@
       - api_service_status.exists
       - filebeat_service_status.exists
 
-  - name: uninstall wazuh-manager service
+  - name: Uninstall wazuh-manager service
     package:
       name: "{{ item }}"
       state: absent
@@ -68,7 +69,7 @@
       - wazuh-manager
     when: manager_service_status.stat.exists
 
-  - name: ensure /var/ossec is deleted
+  - name: Ensure /var/ossec is deleted
     file:
       path: /var/ossec
       state: absent
@@ -77,33 +78,33 @@
 
   tasks:
 
-  - name: get service facts
+  - name: Get service facts
     service_facts:
 
-  - name: print elasticsearch indexes
+  - name: Print elasticsearch indexes
     debug: var=ansible_facts.services["elasticsearch.service"]
 
-  - name: list and delete elasticsearch indexes + stop elasticsearch service
+  - name: List and delete elasticsearch indexes + stop elasticsearch service
     block:
-    - name: list Elasticsearch indexes
+    - name: List Elasticsearch indexes
       command: curl -X GET "{{ ansible_eth1.ipv4.address }}:9200/_cat/indices/*?v&s=index&pretty"
       register: elasticsearch_indexes_get
       delegate_to: "{{ ansible_eth1.ipv4.address }}"
 
-    - name: print elasticsearch indexes
+    - name: Print elasticsearch indexes
       debug: var={{ item }}
       with_items: elasticsearch_indexes_get.stdout_lines
 
-    - name: delete Elasticsearch indexes
+    - name: Delete Elasticsearch indexes
       command:  curl -X DELETE "{{ ansible_eth1.ipv4.address }}:9200/*?pretty"
       register: elasticsearch_indexes_delete
       delegate_to: "{{ ansible_eth1.ipv4.address }}"
 
-    - name: print elasticsearch indexes after deletion
+    - name: Print elasticsearch indexes after deletion
       debug: var={{ item }}
       with_items: elasticsearch_indexes_delete.stdout_lines
 
-    - name: stop elasticsearch service
+    - name: Stop elasticsearch service
       service:
         name: "{{ item }}"
         state: stopped
@@ -115,14 +116,15 @@
 
   tasks:
 
-  - name: check if kibana service exists
+  - name: Check if kibana service exists
     stat: path=/etc/init.d/kibana
     register: kibana_service_status
 
-  - name: stop kibana service
+  - name: Stop kibana service
     service:
       name: "{{ item }}"
       state: stopped
     with_items:
       - kibana
     when: kibana_service_status.stat.exists
+
