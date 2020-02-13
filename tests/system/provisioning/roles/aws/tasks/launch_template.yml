@@ -26,7 +26,7 @@
   - name: Verify there is no Stack with the same name
     command: >-
       {{ aws_access_key_label|quote }}
-      {{ s3_secret_key_label|quote }}
+      {{ aws_secret_key_label|quote }}
       aws
       --profile {{ aws_cli_profile }}
       cloudformation describe-stacks
@@ -43,7 +43,7 @@
   - name: Upload CloudFormation template to S3
     command: >-
       {{ aws_access_key_label|quote }}
-      {{ s3_secret_key_label|quote }}
+      {{ aws_secret_key_label|quote }}
       aws
       --profile {{ aws_cli_profile }}
       s3 cp {{ cloudformation_template_path }}{{ cloudformation_template_name }}
@@ -54,7 +54,7 @@
   - name: Creating AWS Stack
     command: >-
       {{ aws_access_key_label|quote }}
-      {{ s3_secret_key_label|quote }}
+      {{ aws_secret_key_label|quote }}
       aws
       cloudformation create-stack
       --profile {{ aws_cli_profile }}
@@ -69,7 +69,7 @@
   - name: Awaiting for the AWS stack to finish, this could take a while...
     command: >-
       {{ aws_access_key_label|quote }}
-      {{ s3_secret_key_label|quote }}
+      {{ aws_secret_key_label|quote }}
       aws
       --profile {{ aws_cli_profile }}
       cloudformation wait stack-create-complete
