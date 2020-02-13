@@ -34,7 +34,7 @@
           - use_cases_tests.log
 
       - name: Creating AWS Stack, generating configuration and host files
-        shell: "ansible-playbook -e 'aws_access_key_label=\"{{ aws_access_key_label }}\"' -e 'aws_secret_key_label=\"{{ s3_secret_key_label }}\"' {{ item }}"
+        shell: "ansible-playbook -vvv -e 'aws_access_key_label=\"{{ aws_access_key_label }}\"' -e 'aws_secret_key_label=\"{{ s3_secret_key_label }}\"' {{ item }}"
         with_items:
           - "deploy_aws_stack.yml >> ./deployment_logs/log_{{ current_date_time }}/deploy.log"
           - "generate_hosts_file.yml -i {{ hosts_classified_destination }} >> ./deployment_logs/log_{{ current_date_time }}/deploy.log"
