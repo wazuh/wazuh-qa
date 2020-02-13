@@ -500,8 +500,6 @@ def modify_file_inode(path, name):
 
     inode_file = 'inodetmp'
     path_to_file = os.path.join(path, name)
-    if isinstance(name, bytes):
-        inode_file = inode_file.encode()
 
     shutil.copy2(path_to_file, os.path.join(tempfile.gettempdir(), inode_file))
     os.replace(os.path.join(tempfile.gettempdir(), inode_file), path_to_file)
