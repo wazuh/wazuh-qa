@@ -99,12 +99,13 @@ def test_ignore_registry(key_string, key_object, tags_to_apply, get_configuratio
     TimeMachine.travel_to_future(timedelta(hours=13))
 
     ignored_registry = wazuh_log_monitor.start(timeout=10, callback=callback_ignore,
-                                               accum_results=len(sub_keys)).result()
+                                               accum_results=len(sub_keys),
+                                               error_message='[ERROR] Did not receive expected '
+                                                             '"Ignoring ... due to( sregex)?" event').result()
     ignored_registry = set(ignored_registry)
     for ign_reg in sub_keys:
         try:
             ignored_registry.remove(os.path.join(keys_strings[0], ign_reg))
         except KeyError:
-            print(f'{os.path.join(keys_strings[0],ign_reg)} not in {ignored_registry}')
-            raise
+            raise KeyError(f'{os.path.join(keys_strings[0],ign_reg)} not in {ignored_registry}')
     assert len(ignored_registry) == 0

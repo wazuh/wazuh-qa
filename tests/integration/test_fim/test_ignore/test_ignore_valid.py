@@ -111,7 +111,9 @@ def test_ignore_subdirectory(folder, filename, content, triggers_event,
 
     if triggers_event:
         event = wazuh_log_monitor.start(timeout=10,
-                                        callback=callback_detect_event).result()
+                                        callback=callback_detect_event,
+                                        error_message='[ERROR] Did not receive expected '
+                                                      '"Sending FIM event: ..." event').result()
         assert event['data']['type'] == 'added', f'Event type not equal'
         assert event['data']['path'] == os.path.join(folder, filename), f'Event path not equal'
     else:
