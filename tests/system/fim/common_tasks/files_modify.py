@@ -8,8 +8,13 @@
 # License (version 2) as published by the FSF - Free Software
 # Foundation.
 
+import os
 import sys
 import random
+import platform
+if platform.system() == 'Linux':
+    import pwd
+    import grp
 
 
 if sys.version_info.major < 3:
@@ -26,6 +31,27 @@ def random_mode():
     being 0 equivalent to 000 and 511 equivalent to 777 in octal.
     """
     return random.randint(0, 511)
+
+
+def modify_file(filepath, owner, group, mode):
+    """
+        Modify a file owner, group and permissions.
+        :param str filepath: Full path of the file
+        :param str owner: File owner
+        :param str group: File group
+        :param int mode: File permissions in decimal format
+        :return: Returns a dictionary with the change metadata
+    """
+    uid = pwd.getpwnam(owner).pw_uid
+    gid = grp.getgrnam(group).gr_gid
+    os.chown(filepath, uid, gid)
+    os.chmod(filepath, mode)
+    return {
+        'path': filepath,
+        'uid': uid,
+        'gid': gid,
+        'mode': oct(mode).split('o')[1].zfill(3)  # convert to octal string
+        }
 
 
 def modify_file_content(filepath):
