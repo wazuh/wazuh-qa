@@ -16,7 +16,6 @@
   - hosts: kibana
     strategy: free
     roles:
-      - role: "/tmp/wazuh-ansible/roles/elastic-stack/ansible-elasticsearch"
       - role: "{{ wazuh_ansible_repository_path }}/roles/elastic-stack/ansible-kibana"
     become: yes
     become_user: root    
