@@ -122,22 +122,21 @@ def recursion_test(dirname, subdirname, recursion_level, timeout=1, edge_limit=2
                              triggers_event=False)
 
     except TimeoutError:
-        if wazuh_log_monitor.start(timeout=5, callback=callback_audit_event_too_long, update_position=False).result():
-            pytest.skip(msg="Reached Whodata maximum path length.")
-        pytest.fail("No 'Event Too Long' message was raised.")
+        timeout_log_monitor = FileMonitor(LOG_FILE_PATH)
+        if timeout_log_monitor.start(timeout=5, callback=callback_audit_event_too_long).result():
+            pytest.fail("Audit raised 'Event Too Long' message.")
+        raise
 
     except FileNotFoundError as ex:
         MAX_PATH_LENGTH_WINDOWS_ERROR = 206
-        if ex.winerror == MAX_PATH_LENGTH_WINDOWS_ERROR:
-            return
-        raise
+        if ex.winerror != MAX_PATH_LENGTH_WINDOWS_ERROR:
+            raise
 
     except OSError as ex:
         MAX_PATH_LENGTH_MACOS_ERROR = 63
         MAX_PATH_LENGTH_SOLARIS_ERROR = 78
-        if ex.errno in (MAX_PATH_LENGTH_SOLARIS_ERROR, MAX_PATH_LENGTH_MACOS_ERROR):
-            return
-        raise
+        if ex.errno not in (MAX_PATH_LENGTH_SOLARIS_ERROR, MAX_PATH_LENGTH_MACOS_ERROR):
+            raise
 
 
 # Fixtures
