@@ -2,10 +2,10 @@
 
   - name: Obtaining Instances Identifiers
     command: >-
-      {{ aws_access_key_label|quote }}
-      {{ s3_secret_key_label|quote }}
+      AWS_ACCESS_KEY_ID={{ aws_access_key|quote }}
+      AWS_SECRET_ACCESS_KEY={{ aws_secret_key|quote }}
       aws
-      --profile {{ aws_cli_profile }}
+      --region {{ aws_region }}
       ec2 describe-instances
       --filter Name=tag:aws:cloudformation:stack-name,Values={{ stack_name }}
       --query 'Reservations[*].Instances[*].{Identifier:Tags[?Key==`Identifier`]|[0].Value,PublicIP:PublicIpAddress, PrivateIP:PrivateIpAddress, Name:Tags[?Key==`Name`]|[0].Value }'
