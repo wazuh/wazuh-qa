@@ -20,7 +20,7 @@ def paths_acquisition(filenames_list_path):
     """
         Turn path lists file into a set.
         :param str filenames_list_path: path to filenames list
-        :return: Returns a list with the change metadata
+        :return: Returns a set containing the generated files path
     """
     filenames_list = []
     with open(filenames_list_path) as lines:
@@ -34,7 +34,7 @@ def alerts_prune(path, target_event):
         Extracts all events path to a set.
         :param str path: path to alerts.json file
         :param str target_event: target event kind (deleted|added|modified)
-        :return: Returns a list with the change metadata
+        :return: Returns a set containing the alerts files path
     """
     alerts_list = []
     with open(path) as json_file:
