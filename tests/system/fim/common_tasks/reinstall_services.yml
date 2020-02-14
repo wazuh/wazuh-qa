@@ -4,7 +4,7 @@
     - ../vars/wazuh_agent.yml
   tasks:
     - name: Deploying Wazuh Managers
-      shell: "ansible-playbook provision_playbook.yml -i ../hosts {{ item }}"
+      shell: "ansible-playbook provision_playbook.yml -i {{ ansible_hosts_destination }} {{ item }}"
       async: 10000
       poll: 0
       with_items:
@@ -20,12 +20,12 @@
       delay: 10
 
     - name: Installing and registering agents and running post installation tasks
-      shell: "ansible-playbook {{ item }}"
-      async: 50
+      shell: "ansible-playbook {{ item }} {{ ansible_hosts_destination }}"
+      async: 10000
       poll: 0
       with_items:
-        - provision_playbook.yml -l linuxagents >> ../logs/linux_agents.log
-  #      - provision_playbook.yml -l windowsagents >> ../logs/windows_agents.log -b
+        - provision_playbook.yml -l linuxagents
+  #      - provision_playbook.yml -l windowsagents
       register: register_agents
 
     - async_status:
