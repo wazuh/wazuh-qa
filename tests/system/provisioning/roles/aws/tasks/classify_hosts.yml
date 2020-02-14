@@ -2,14 +2,15 @@
 
   - name: Obtaining Instances Identifiers
     command: >-
-      AWS_ACCESS_KEY_ID={{ aws_access_key }}
-      AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
       aws
       --region {{ aws_region }}
       ec2 describe-instances
       --filter Name=tag:aws:cloudformation:stack-name,Values={{ stack_name }}
       --query 'Reservations[*].Instances[*].{Identifier:Tags[?Key==`Identifier`]|[0].Value,PublicIP:PublicIpAddress, PrivateIP:PrivateIpAddress, Name:Tags[?Key==`Name`]|[0].Value }'
     register: instances_query_result
+    environment:
+      AWS_ACCESS_KEY_ID: "{{ aws_access_key }}"
+      AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key }}"
 
   - set_fact:
       instances_query_list: "{{ instances_query_result.stdout | from_json }}"
