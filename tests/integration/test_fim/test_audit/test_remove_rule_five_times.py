@@ -3,15 +3,16 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 
-import pytest
 import os
 import subprocess
+
+import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH,
                                callback_audit_rules_manipulation,
                                callback_audit_deleting_rule)
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -25,7 +26,6 @@ test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2')
 testdir1, testdir2, testdir3 = test_directories
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
 
 # Configurations
 
@@ -65,8 +65,8 @@ def test_remove_rule_five_times(tags_to_apply, folder, audit_key,
     for _ in range(0, 5):
         subprocess.run(["auditctl", "-W", folder, "-p", "wa", "-k", audit_key], check=True)
         wazuh_log_monitor.start(timeout=20, callback=callback_audit_rules_manipulation,
-                                error_message='[ERROR] Did not receive expected '
+                                error_message='Did not receive expected '
                                               '"Detected Audit rules manipulation" event')
 
     wazuh_log_monitor.start(timeout=20, callback=callback_audit_deleting_rule,
-                            error_message='[ERROR] Did not receive expected "Deleting Audit rules" event')
+                            error_message='Did not receive expected "Deleting Audit rules" event')

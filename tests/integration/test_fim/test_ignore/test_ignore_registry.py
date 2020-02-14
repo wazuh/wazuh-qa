@@ -4,15 +4,18 @@
 
 import os
 import sys
-import pytest
 from datetime import timedelta
+
+import pytest
+
 from wazuh_testing.fim import LOG_FILE_PATH, callback_ignore, create_registry, delete_registry
-from wazuh_testing.tools.time import TimeMachine
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.time import TimeMachine
 
 if sys.platform == 'win32':
     import winreg
+
     keys = [(winreg.HKEY_LOCAL_MACHINE, "HKEY_LOCAL_MACHINE")]
 else:
     keys = []
@@ -33,7 +36,7 @@ for key in keys:
     keys_objects.append(object_)
     keys_strings.append(string_)
 
-regs = [os.path.join('SOFTWARE', 'test'),  os.path.join('SOFTWARE', 'test2')]
+regs = [os.path.join('SOFTWARE', 'test'), os.path.join('SOFTWARE', 'test2')]
 sub_keys = [os.path.join(regs[0], 'testreg32'), os.path.join(regs[0], 'testreg64'),
             os.path.join(regs[1], 'testregboth_32'), os.path.join(regs[1], 'testregboth_64')]
 
@@ -100,12 +103,12 @@ def test_ignore_registry(key_string, key_object, tags_to_apply, get_configuratio
 
     ignored_registry = wazuh_log_monitor.start(timeout=10, callback=callback_ignore,
                                                accum_results=len(sub_keys),
-                                               error_message='[ERROR] Did not receive expected '
+                                               error_message='Did not receive expected '
                                                              '"Ignoring ... due to( sregex)?" event').result()
     ignored_registry = set(ignored_registry)
     for ign_reg in sub_keys:
         try:
             ignored_registry.remove(os.path.join(keys_strings[0], ign_reg))
         except KeyError:
-            raise KeyError(f'{os.path.join(keys_strings[0],ign_reg)} not in {ignored_registry}')
+            raise KeyError(f'{os.path.join(keys_strings[0], ign_reg)} not in {ignored_registry}')
     assert len(ignored_registry) == 0

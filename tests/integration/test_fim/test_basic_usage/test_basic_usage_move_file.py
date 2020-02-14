@@ -6,12 +6,12 @@ import os
 
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
     callback_detect_event, check_time_travel, delete_file
-from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -87,7 +87,7 @@ def test_move_file(file, file_content, tags_to_apply, source_folder, target_fold
     if source_folder in test_directories:
         check_time_travel(scheduled)
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                                error_message='[ERROR] Did not receive expected "Sending FIM event: ..." event')
+                                error_message='Did not receive expected "Sending FIM event: ..." event')
 
     # Move file to target directory
     os.rename(os.path.join(source_folder, file), os.path.join(target_folder, file))
@@ -97,7 +97,7 @@ def test_move_file(file, file_content, tags_to_apply, source_folder, target_fold
     events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                      callback=callback_detect_event,
                                      accum_results=(triggers_add_event + triggers_delete_event),
-                                     error_message='[ERROR] Did not receive expected '
+                                     error_message='Did not receive expected '
                                                    '"Sending FIM event: ..." event').result()
 
     # Expect deleted events
@@ -121,4 +121,4 @@ def test_move_file(file, file_content, tags_to_apply, source_folder, target_fold
     if target_folder in test_directories:
         check_time_travel(scheduled)
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                                error_message='[ERROR] Did not receive expected "Sending FIM event: ..." event')
+                                error_message='Did not receive expected "Sending FIM event: ..." event')

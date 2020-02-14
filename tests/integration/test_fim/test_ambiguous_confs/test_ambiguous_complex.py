@@ -8,13 +8,13 @@ from datetime import timedelta
 
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, create_file, WAZUH_PATH,
                                callback_restricted, REGULAR, generate_params)
-from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.time import TimeMachine
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.time import TimeMachine
 
 # Marks
 
@@ -162,9 +162,10 @@ def check_restrict(directory, trigger, check_list, file_list, timeout, scheduled
     while True:
         ignored_file = wazuh_log_monitor.start(timeout=timeout,
                                                callback=callback_restricted,
-                                               error_message=f'[ERROR] TimeoutError was raised because a single '
-                                               f'"ignoring file {file_list[0]} due to restriction ..." was '
-                                               f'expected for {file_list[0]} but was not detected.').result()
+                                               error_message=f'TimeoutError was raised because a single '
+                                                             f'"ignoring file {file_list[0]} due to restriction ..." '
+                                                             f'was expected for {file_list[0]} but was not detected.'
+                                               ).result()
         if ignored_file == os.path.join(directory, file_list[0]):
             break
 

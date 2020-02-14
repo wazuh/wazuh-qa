@@ -3,16 +3,17 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import sys
 from datetime import timedelta
 
 import pytest
-import sys
+
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, callback_ignore, create_file, REGULAR, \
     generate_params
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.time import TimeMachine
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.time import TimeMachine
 
 # Marks
 
@@ -112,7 +113,7 @@ def test_ignore_subdirectory(folder, filename, content, triggers_event,
     if triggers_event:
         event = wazuh_log_monitor.start(timeout=10,
                                         callback=callback_detect_event,
-                                        error_message='[ERROR] Did not receive expected '
+                                        error_message='Did not receive expected '
                                                       '"Sending FIM event: ..." event').result()
         assert event['data']['type'] == 'added', f'Event type not equal'
         assert event['data']['path'] == os.path.join(folder, filename), f'Event path not equal'

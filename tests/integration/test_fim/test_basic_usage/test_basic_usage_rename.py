@@ -8,13 +8,13 @@ from datetime import timedelta
 
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
     callback_detect_event, check_time_travel
-from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.time import TimeMachine
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.time import TimeMachine
 
 # Marks
 
@@ -83,7 +83,7 @@ def test_rename(folder, tags_to_apply,
     def expect_events(path):
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_detect_event,
-                                        error_message='[ERROR] Did not receive expected '
+                                        error_message='Did not receive expected '
                                                       '"Sending FIM event: ..." event').result()
         try:
             assert 'added' in event['data']['type'] and path in event['data']['path'], \
@@ -98,7 +98,7 @@ def test_rename(folder, tags_to_apply,
     create_file(REGULAR, folder, old_name, content='')
     check_time_travel(scheduled)
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                            error_message='[ERROR] Did not receive expected "Sending FIM event: ..." event')
+                            error_message='Did not receive expected "Sending FIM event: ..." event')
 
     # testdir1 will have renamed files within. testdir2 will be renamed with files within
     if folder == testdir1:
@@ -108,7 +108,7 @@ def test_rename(folder, tags_to_apply,
         # Expect deleted and created events
         deleted = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                           callback=callback_detect_event,
-                                          error_message='[ERROR] Did not receive expected '
+                                          error_message='Did not receive expected '
                                                         '"Sending FIM event: ..." event'
                                           ).result()
         try:
@@ -119,7 +119,7 @@ def test_rename(folder, tags_to_apply,
 
         added = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_detect_event,
-                                        error_message='[ERROR] Did not receive expected '
+                                        error_message='Did not receive expected '
                                                       '"Sending FIM event: ..." event').result()
         try:
             assert 'added' in added['data']['type'] and os.path.join(folder, new_name) in added['data']['path']

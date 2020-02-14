@@ -2,6 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import logging
 import sys
 from collections import defaultdict
 
@@ -40,3 +41,11 @@ class Parameters:
 
 
 global_parameters = Parameters()
+logger = logging.getLogger('testing')
+logger.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler(sys.stderr)
+handler.setLevel(logging.DEBUG)
+handler.setFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+logger.addHandler(handler)

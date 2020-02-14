@@ -19,6 +19,7 @@ from datetime import timedelta
 from json import JSONDecodeError
 from stat import ST_ATIME, ST_MTIME
 from typing import Sequence, Union, Generator, Any
+from wazuh_testing import logger
 
 from jsonschema import validate
 
@@ -184,7 +185,8 @@ def create_file(type_, path, name, **kwargs):
     target : str
         Path where the link will be pointing to.
     """
-    print("[INFO] Creating file " + os.path.join(path, name) + " of " + str(type_) + " type")
+
+    logger.info("Creating file " + os.path.join(path, name) + " of " + str(type_) + " type")
     os.makedirs(path, exist_ok=True, mode=0o777)
     if type_ != REGULAR:
         try:
@@ -198,7 +200,7 @@ def create_file(type_, path, name, **kwargs):
 
 def create_registry(key, subkey, arch):
     """
-    Creates a registry given the key and the subkey. The registry is opened if it already exists
+    Create a registry given the key and the subkey. The registry is opened if it already exists
 
     Parameters
     ----------
@@ -325,7 +327,7 @@ def delete_file(path, name):
     name : str
         Name of the file to be deleted
     """
-    print("[INFO] Removing file", os.path.join(path, name))
+    logger.info(f"Removing file {os.path.join(path, name)}")
     regular_path = os.path.join(path, name)
     if os.path.exists(regular_path):
         os.remove(regular_path)
@@ -358,7 +360,7 @@ def modify_registry(key, subkey, value):
     value : str
         The value to be set.
     """
-    print("[INFO] Modifying windows registry.")
+    logger.info("Modifying windows registry.")
     sys.platform == 'win32' and winreg.SetValue(key, subkey, winreg.REG_SZ, value)
 
 
@@ -378,7 +380,7 @@ def modify_file_content(path, name, new_content=None, is_binary=False):
         True if the file's content is in binary format. False otherwise. Default `False`
     """
     path_to_file = os.path.join(path, name)
-    print("[INFO] - Changing content of " + path_to_file)
+    logger.info("- Changing content of " + path_to_file)
     content = "1234567890qwertyu" if new_content is None else new_content
     with open(path_to_file, 'ab' if is_binary else 'a') as f:
         f.write(content.encode() if is_binary else content)
@@ -396,7 +398,7 @@ def modify_file_mtime(path, name):
         Name of the file to be modified.
     """
     path_to_file = os.path.join(path, name)
-    print("[INFO] - Changing mtime of " + path_to_file)
+    logger.info("- Changing mtime of " + path_to_file)
     stat = os.stat(path_to_file)
     access_time = stat[ST_ATIME]
     modification_time = stat[ST_MTIME]
@@ -425,7 +427,7 @@ def modify_file_owner(path, name):
         os.chown(path_to_file, 1, -1)
 
     path_to_file = os.path.join(path, name)
-    print("[INFO] - Changing owner of " + path_to_file)
+    logger.info("- Changing owner of " + path_to_file)
 
     if sys.platform == 'win32':
         modify_file_owner_windows()
@@ -450,7 +452,7 @@ def modify_file_group(path, name):
         return
 
     path_to_file = os.path.join(path, name)
-    print("[INFO] - Changing group of " + path_to_file)
+    logger.info("- Changing group of " + path_to_file)
     os.chown(path_to_file, -1, 1)
 
 
@@ -485,7 +487,7 @@ def modify_file_permission(path, name):
 
     path_to_file = os.path.join(path, name)
 
-    print("[INFO] - Changing permission of " + path_to_file)
+    logger.info("- Changing permission of " + path_to_file)
 
     if sys.platform == 'win32':
         modify_file_permission_windows()
@@ -507,7 +509,7 @@ def modify_file_inode(path, name):
     if sys.platform == 'win32':
         return
 
-    print("[INFO] - Changing inode of " + os.path.join(path, name))
+    logger.info("- Changing inode of " + os.path.join(path, name))
     inode_file = 'inodetmp'
     path_to_file = os.path.join(path, name)
 
@@ -519,7 +521,7 @@ def modify_file_win_attributes(path, name):
     if sys.platform != 'win32':
         return
 
-    print("[INFO] - Changing win attributes of " + os.path.join(path, name))
+    logger.info("- Changing win attributes of " + os.path.join(path, name))
     path_to_file = os.path.join(path, name)
     win32api.SetFileAttributes(path_to_file, win32con.FILE_ATTRIBUTE_HIDDEN)
 
@@ -539,7 +541,7 @@ def modify_file(path, name, new_content=None, is_binary=False):
     is_binary : boolean, optional
         True if the file is binary. False otherwise. Default `False`
     """
-    print("[INFO] Modiying file " + os.path.join(path, name))
+    logger.info("Modiying file " + os.path.join(path, name))
     modify_file_inode(path, name)
     modify_file_content(path, name, new_content, is_binary)
     modify_file_mtime(path, name)
@@ -790,7 +792,7 @@ def check_time_travel(time_travel):
     if time_travel:
         before = str(datetime.now())
         TimeMachine.travel_to_future(timedelta(hours=13))
-        print("[INFO] Changing the system clock from", before, "to", str(datetime.now()))
+        logger.info(f"Changing the system clock from {before} to {str(datetime.now())}")
 
 
 def callback_configuration_warning(line):
@@ -836,7 +838,7 @@ class EventChecker:
 
         """
         num_files = len(self.file_list)
-        error_msg = "[ERROR] TimeoutError was raised because "
+        error_msg = "TimeoutError was raised because "
         error_msg += str(num_files) if num_files > 1 else "a single"
         error_msg += " '" + str(event_type) + "' "
         error_msg += "events were " if num_files > 1 else "event was "
@@ -899,6 +901,7 @@ class EventChecker:
         except TimeoutError:
             if triggers_event:
                 raise
+            logger.info("TimeoutError was expected and correctly caught.")
 
     def check_events(self, event_type):
         """Check and validate all events in the 'events' list.
@@ -1088,7 +1091,8 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     check_time_travel(time_travel)
     event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event)
-    print("[INFO] 'added' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
+    if triggers_event:
+        logger.info("'added' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
     # Modify previous text files
     for name, content in file_list.items():
@@ -1096,7 +1100,8 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     check_time_travel(time_travel)
     event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
-    print("[INFO] 'modified' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
+    if triggers_event:
+        logger.info("'modified' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
     # Delete previous text files
     for name in file_list:
@@ -1104,7 +1109,8 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     check_time_travel(time_travel)
     event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
-    print("[INFO] 'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
+    if triggers_event:
+        logger.info("'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
 
 def detect_initial_scan(file_monitor):
@@ -1117,7 +1123,7 @@ def detect_initial_scan(file_monitor):
         File log monitor to detect events
     """
     file_monitor.start(timeout=60, callback=callback_detect_end_scan,
-                       error_message='[ERROR] Did not receive expected "File integrity monitoring scan ended" event')
+                       error_message='Did not receive expected "File integrity monitoring scan ended" event')
     # Add additional sleep to avoid changing system clock issues (TO BE REMOVED when syscheck has not sleeps anymore)
     time.sleep(11)
 

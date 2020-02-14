@@ -3,16 +3,16 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import pytest
-
 from test_fim.test_follow_symbolic_link.common import configurations_path, testdir1, \
     wait_for_symlink_check, wait_for_audit, testdir_target, testdir_not_target, delete_f
 # noinspection PyUnresolvedReferences
 from test_fim.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
     extra_configuration_after_yield
+
 from wazuh_testing.fim import (generate_params, create_file, REGULAR, callback_detect_event,
                                check_time_travel, modify_file_content, LOG_FILE_PATH)
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -72,7 +72,7 @@ def test_symbolic_delete_target(tags_to_apply, main_folder, aux_folder, get_conf
         create_file(REGULAR, main_folder, file1, content='')
         check_time_travel(scheduled)
         wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
-                                error_message='[ERROR] Did not receive expected "Sending FIM event: ..." event')
+                                error_message='Did not receive expected "Sending FIM event: ..." event')
         delete_f(main_folder)
     else:
         delete_f(main_folder, file1)

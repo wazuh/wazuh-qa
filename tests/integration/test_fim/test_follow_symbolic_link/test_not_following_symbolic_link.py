@@ -5,16 +5,15 @@
 import os
 
 import pytest
-
-
 from test_fim.test_follow_symbolic_link.common import modify_symlink
+
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH,
                                generate_params, create_file, REGULAR, SYMLINK, callback_detect_event,
                                modify_file, delete_file, check_time_travel)
-from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -103,20 +102,20 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
     # Create the syslink and expect its event, since it's withing the monitored directory
     check_time_travel(scheduled)
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                            error_message='[ERROR] Did not receive expected "Sending FIM event: ..." event')
+                            error_message='Did not receive expected "Sending FIM event: ..." event')
 
     # Modify the target file and don't expect any event
     modify_file(non_monitored_dir1, name1, new_content='Modify sample')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
-        raise AttributeError(f'[ERROR] Unexpected event {event}')
+        raise AttributeError(f'Unexpected event {event}')
 
     # Modify the target of the symlink and expect the modify event
     modify_symlink(target=b_path, path=sl_path)
     check_time_travel(scheduled)
     result = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                                     error_message='[ERROR] Did not receive expected '
+                                     error_message='Did not receive expected '
                                                    '"Sending FIM event: ..." event').result()
     assert 'modified' in result['data']['type'], f"No 'modified' event when modifying symlink"
 
@@ -126,4 +125,4 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
-        raise AttributeError(f'[ERROR] Unexpected event {event}')
+        raise AttributeError(f'Unexpected event {event}')

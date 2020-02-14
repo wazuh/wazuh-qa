@@ -3,15 +3,16 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 
-import pytest
 import os
-import subprocess
-from distro import id
 import re
+import subprocess
+
+import pytest
+from distro import id
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_audit_cannot_start
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -25,7 +26,6 @@ test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2')
 testdir1, testdir2, testdir3 = test_directories
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
 
 # Configurations
 
@@ -86,5 +86,5 @@ def test_move_folders_to_realtime(tags_to_apply, get_configuration, uninstall_in
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     wazuh_log_monitor.start(timeout=20, callback=callback_audit_cannot_start,
-                            error_message='[ERROR] Did not receive expected "Who-data engine could not start. '
+                            error_message='Did not receive expected "Who-data engine could not start. '
                                           'Switching who-data to real-time" event')

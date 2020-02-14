@@ -6,12 +6,12 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, generate_params
 from wazuh_testing import global_parameters
+from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, generate_params
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.time import TimeMachine, reformat_time
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.time import TimeMachine, reformat_time
 
 # Marks
 
@@ -30,7 +30,7 @@ scan_times = ['9PM', '20:00', '3:07PM']
 # configurations
 
 p, m = generate_params(extra_params={'TEST_DIRECTORIES': directory_str, 'SCAN_TIME': scan_times},
-                       modes=['scheduled']*len(scan_times))
+                       modes=['scheduled'] * len(scan_times))
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
@@ -68,9 +68,9 @@ def test_scan_time(tags_to_apply,
     TimeMachine.travel_to_future(time_difference + timedelta(minutes=-30))
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
-        raise AttributeError(f'[ERROR] Unexpected event {event}')
+        raise AttributeError(f'Unexpected event {event}')
 
     TimeMachine.travel_to_future(timedelta(minutes=31))
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
-                            error_message='[ERROR] Did not receive expected '
+                            error_message='Did not receive expected '
                                           '"File integrity monitoring scan ended" event')

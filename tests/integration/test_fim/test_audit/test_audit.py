@@ -5,9 +5,11 @@
 import os
 import subprocess
 import time
+
 import psutil
 import pytest
 
+from wazuh_testing import logger
 from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_added_rule,
                                callback_audit_connection,
                                callback_audit_health_check,
@@ -18,10 +20,10 @@ from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_added_rule,
                                callback_audit_key,
                                create_file, REGULAR,
                                detect_initial_scan)
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 
@@ -57,11 +59,11 @@ def get_configuration(request):
 def test_audit_health_check(tags_to_apply, get_configuration,
                             configure_environment, restart_syscheckd):
     """Check if the health check is passed."""
-    print('[INFO] Applying the test configuration')
+    logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     wazuh_log_monitor.start(timeout=20, callback=callback_audit_health_check,
-                            error_message='[ERROR] Health check failed')
+                            error_message='Health check failed')
 
 
 @pytest.mark.parametrize('tags_to_apply', [
@@ -70,13 +72,13 @@ def test_audit_health_check(tags_to_apply, get_configuration,
 def test_added_rules(tags_to_apply, get_configuration,
                      configure_environment, restart_syscheckd):
     """Check if the specified folders are added to Audit rules list."""
-    print('[INFO] Applying the test configuration')
+    logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    print('[INFO] Checking the event...')
+    logger.info('Checking the event...')
     events = wazuh_log_monitor.start(timeout=20,
                                      callback=callback_audit_added_rule,
                                      accum_results=3,
-                                     error_message='[ERROR] Folders were not added to Audit rules list'
+                                     error_message='Folders were not added to Audit rules list'
                                      ).result()
 
     assert testdir1 in events, f'{testdir1} not detected in scan'
@@ -90,7 +92,7 @@ def test_added_rules(tags_to_apply, get_configuration,
 def test_readded_rules(tags_to_apply, get_configuration,
                        configure_environment, restart_syscheckd):
     """Check if the removed rules are added to Audit rules list."""
-    print('[INFO] Applying the test configuration')
+    logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Remove added rules
@@ -100,12 +102,12 @@ def test_readded_rules(tags_to_apply, get_configuration,
 
         wazuh_log_monitor.start(timeout=20,
                                 callback=callback_audit_rules_manipulation,
-                                error_message=f'[ERROR] Did not receive expected "manipulation" event with the '
+                                error_message=f'Did not receive expected "manipulation" event with the '
                                               f'command {command}')
 
         events = wazuh_log_monitor.start(timeout=10,
                                          callback=callback_audit_reloaded_rule,
-                                         error_message='[ERROR] Did not receive expected "reload" event with the rule '
+                                         error_message='Did not receive expected "reload" event with the rule '
                                                        'modification').result()
 
         assert dir_ in events, f'{dir_} not in {events}'
@@ -117,7 +119,7 @@ def test_readded_rules(tags_to_apply, get_configuration,
 def test_readded_rules_on_restart(tags_to_apply, get_configuration,
                                   configure_environment, restart_syscheckd):
     """Check if the rules are added to Audit when it restarts."""
-    print('[INFO] Applying the test configuration')
+    logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Restart Audit
@@ -127,13 +129,13 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
 
     wazuh_log_monitor.start(timeout=10,
                             callback=callback_audit_connection,
-                            error_message=f'[ERROR] Did not receive expected "connect" event with the command '
+                            error_message=f'Did not receive expected "connect" event with the command '
                                           f'{" ".join(restart_command)}')
 
     events = wazuh_log_monitor.start(timeout=30,
                                      callback=callback_audit_loaded_rule,
                                      accum_results=3,
-                                     error_message=f'[ERROR] Did not receive expected "load" event with the command '
+                                     error_message=f'Did not receive expected "load" event with the command '
                                                    f'{" ".join(restart_command)}').result()
 
     assert testdir1 in events, f'{testdir1} not in {events}'
@@ -147,7 +149,7 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
 def test_move_rules_realtime(tags_to_apply, get_configuration,
                              configure_environment, restart_syscheckd):
     """Check if the rules are changed to realtime when Audit stops."""
-    print('[INFO] Applying the test configuration')
+    logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Stop Audit
@@ -158,7 +160,7 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
     events = wazuh_log_monitor.start(timeout=30,
                                      callback=callback_realtime_added_directory,
                                      accum_results=3,
-                                     error_message=f'[ERROR] Did not receive expected "directory added" for monitoring '
+                                     error_message=f'Did not receive expected "directory added" for monitoring '
                                                    f'with the command {" ".join(stop_command)}').result()
 
     assert testdir1 in events, f'{testdir1} not detected in scan'
@@ -184,7 +186,7 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
     path : str
         Path of the folder to be monitored
     """
-    print('[INFO] Applying the test configuration')
+    logger.info('Applying the test configuration')
     check_apply_test({audit_key}, get_configuration['tags'])
 
     # Add watch rule
@@ -202,7 +204,7 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
     events = wazuh_log_monitor.start(timeout=30,
                                      callback=callback_audit_key,
                                      accum_results=1,
-                                     error_message=f'[ERROR] Did not receive expected "Match audit_key ..." event '
+                                     error_message=f'Did not receive expected "Match audit_key ..." event '
                                                    f'with the command {" ".join(add_rule_command)}').result()
     assert audit_key in events
 
@@ -234,7 +236,7 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
 
     plugin_path = "/etc/audisp/plugins.d/af_wazuh.conf"
 
-    print('[INFO] Applying the test configuration')
+    logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     os.remove(plugin_path)
@@ -246,10 +248,10 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
     time_after_restart = get_audit_creation_time()
 
     if should_restart:
-        assert time_before_restart != time_after_restart, '[ERROR] The time before restart audit is equal to ' \
+        assert time_before_restart != time_after_restart, 'The time before restart audit is equal to ' \
                                                           'the time after restart'
     else:
-        assert time_before_restart == time_after_restart, '[ERROR] The time before restart audit is not equal to ' \
+        assert time_before_restart == time_after_restart, 'The time before restart audit is not equal to ' \
                                                           'the time after restart'
 
     assert os.path.isfile(plugin_path)

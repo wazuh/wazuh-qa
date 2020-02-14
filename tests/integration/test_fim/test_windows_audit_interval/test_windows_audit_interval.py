@@ -3,16 +3,16 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import sys
 import re
+import sys
 
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 if sys.platform == 'win32':
     from test_fim.test_windows_audit_interval.manage_acl import Privilege, get_file_security_descriptor, modify_sacl, \
@@ -97,7 +97,7 @@ def test_windows_audit_modify_sacl(tags_to_apply, get_configuration, configure_e
         assert next(iter(WAZUH_RULES)) not in dir_rules, f'{next(iter(WAZUH_RULES))} found in {dir_rules}'
 
     event = wazuh_log_monitor.start(timeout=windows_audit_interval, callback=callback_sacl_changed,
-                                    error_message='[ERROR] Did not receive expected "The SACL '
+                                    error_message='Did not receive expected "The SACL '
                                                   'of \'...\' has been restored correctly" event').result()
     assert testdir_modify in event, f'{testdir_modify} not detected in SACL modification event'
 
@@ -118,7 +118,7 @@ def test_windows_audit_restore_sacl(tags_to_apply, get_configuration, configure_
         # Stop Wazuh service to force SACL rules to be restored
         control_service('stop')
         event = wazuh_log_monitor.start(timeout=5, callback=callback_sacl_restored,
-                                        error_message='[ERROR] Did not receive expected "The SACL '
+                                        error_message='Did not receive expected "The SACL '
                                                       'of \'...\' has been restored correctly" event').result()
         assert testdir_restore in event, f'{testdir_restore} not detected in SACL restore event'
         dir_rules = set(get_sacl(lfss))

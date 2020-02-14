@@ -8,20 +8,18 @@ from datetime import timedelta
 
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, WAZUH_PATH, callback_detect_event,
                                REGULAR, create_file, detect_initial_scan, generate_params)
-from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import restart_wazuh_with_new_conf
-from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, load_wazuh_configurations
-
+from wazuh_testing.tools.time import TimeMachine
 
 # Marks
 
 pytestmark = pytest.mark.tier(level=1)
-
 
 # variables
 
@@ -78,7 +76,7 @@ def wait_for_event(fim_mode):
 
     # Wait until event is detected
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                            error_message='[ERROR] Did not receive expected "Sending FIM event: ..." event')
+                            error_message='Did not receive expected "Sending FIM event: ..." event')
 
 
 def create_and_check_diff(name, path, fim_mode):

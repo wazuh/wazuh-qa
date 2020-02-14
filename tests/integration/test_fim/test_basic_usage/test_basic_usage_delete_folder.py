@@ -8,12 +8,12 @@ from collections import Counter
 
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
     callback_detect_event, check_time_travel
-from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -80,7 +80,7 @@ def test_delete_folder(folder, file_list, filetype, tags_to_apply,
 
     check_time_travel(scheduled)
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                            accum_results=len(file_list), error_message='[ERROR] Did not receive expected '
+                            accum_results=len(file_list), error_message='Did not receive expected '
                                                                         '"Sending FIM event: ..." event')
 
     # Remove folder
@@ -89,7 +89,7 @@ def test_delete_folder(folder, file_list, filetype, tags_to_apply,
 
     # Expect deleted events
     event_list = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                                         error_message='[ERROR] Did not receive expected '
+                                         error_message='Did not receive expected '
                                                        '"Sending FIM event: ..." event',
                                          accum_results=len(file_list)).result()
     path_list = set([event['data']['path'] for event in event_list])

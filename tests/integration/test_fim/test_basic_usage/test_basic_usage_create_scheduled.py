@@ -8,13 +8,13 @@ from datetime import timedelta
 
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import CHECK_ALL, FIFO, LOG_FILE_PATH, REGULAR, SOCKET, callback_detect_event, \
     create_file, validate_event, generate_params
-from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.time import TimeMachine
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.time import TimeMachine
 
 # Marks
 
@@ -63,13 +63,17 @@ def get_configuration(request):
     ('file4', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, None),
     ('file-ñ', REGULAR, b'', {CHECK_ALL}, {'ossec_conf'}, None),
     pytest.param('檔案', REGULAR, b'', {CHECK_ALL}, {'ossec_conf'}, 'cp950', marks=(pytest.mark.linux,
-                 pytest.mark.darwin, pytest.mark.sunos5)),
+                                                                                  pytest.mark.darwin,
+                                                                                  pytest.mark.sunos5)),
     pytest.param('Образецтекста', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, 'koi8-r', marks=(pytest.mark.linux,
-                 pytest.mark.darwin, pytest.mark.sunos5)),
+                                                                                             pytest.mark.darwin,
+                                                                                             pytest.mark.sunos5)),
     pytest.param('Δείγμακειμένου', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, 'cp737', marks=(pytest.mark.linux,
-                 pytest.mark.darwin, pytest.mark.sunos5)),
+                                                                                             pytest.mark.darwin,
+                                                                                             pytest.mark.sunos5)),
     pytest.param('نصبسيط', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, 'cp720', marks=(pytest.mark.linux,
-                 pytest.mark.darwin, pytest.mark.sunos5)),
+                                                                                     pytest.mark.darwin,
+                                                                                     pytest.mark.sunos5)),
     pytest.param('Ξ³ΞµΞΉΞ±', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, None, marks=pytest.mark.win32)
 ])
 def test_create_file_scheduled(folder, name, filetype, content, checkers, tags_to_apply, encoding, get_configuration,
@@ -107,9 +111,9 @@ def test_create_file_scheduled(folder, name, filetype, content, checkers, tags_t
         # Wait until event is detected
         event = wazuh_log_monitor.start(
             timeout=global_parameters.default_timeout, callback=callback_detect_event, encoding=encoding,
-            error_message='[ERROR] Did not receive expected "Sending FIM event: ..." event').result()
+            error_message='Did not receive expected "Sending FIM event: ..." event').result()
         validate_event(event, checkers)
     else:
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event)
-            raise AttributeError(f'[ERROR] Unexpected event {event}')
+            raise AttributeError(f'Unexpected event {event}')

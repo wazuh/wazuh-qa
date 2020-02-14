@@ -8,12 +8,12 @@ from datetime import timedelta
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, generate_params
 from wazuh_testing import global_parameters
+from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, generate_params
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.time import TimeMachine
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.time import TimeMachine
 
 # Marks
 
@@ -35,7 +35,6 @@ frequencies = ['5', '3600', '10000']
 p, m = generate_params(extra_params={'TEST_DIRECTORIES': directory_str},
                        apply_to_all=({'FREQUENCY': frequency} for frequency in frequencies),
                        modes=['realtime', 'whodata'])
-
 
 configurations1 = load_wazuh_configurations(configurations_path, __name__,
                                             params=p,

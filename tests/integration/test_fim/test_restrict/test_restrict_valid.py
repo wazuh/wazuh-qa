@@ -7,9 +7,9 @@ from datetime import timedelta
 
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, callback_restricted, create_file, \
     REGULAR, generate_params
-from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -106,7 +106,7 @@ def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply
         while True:
             ignored_file = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                    callback=callback_restricted,
-                                                   error_message='[ERROR] Did not receive expected '
+                                                   error_message='Did not receive expected '
                                                                  '"Sending FIM event: ..." event').result()
             if ignored_file == os.path.join(folder, filename):
                 break

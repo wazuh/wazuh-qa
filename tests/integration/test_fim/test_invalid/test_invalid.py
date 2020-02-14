@@ -8,9 +8,9 @@ import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_configuration_error
 from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 
@@ -59,5 +59,5 @@ def test_invalid(tags_to_apply, get_configuration, configure_environment):
     with pytest.raises(ValueError):
         control_service('restart')
     wazuh_log_monitor.start(timeout=3, callback=callback_configuration_error,
-                            error_message='[ERROR] Did not receive expected '
+                            error_message='Did not receive expected '
                                           '"CRITICAL: ...: Configuration error at" event')

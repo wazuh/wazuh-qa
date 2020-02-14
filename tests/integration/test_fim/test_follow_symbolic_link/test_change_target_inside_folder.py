@@ -4,16 +4,16 @@
 import os
 
 import pytest
-
 from test_fim.test_follow_symbolic_link.common import configurations_path, testdir1, \
     modify_symlink, testdir_link, wait_for_symlink_check, wait_for_audit, testdir_target, testdir2
 # noinspection PyUnresolvedReferences
 from test_fim.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
     extra_configuration_after_yield
+
 from wazuh_testing.fim import (generate_params, create_file, REGULAR, callback_detect_event,
                                check_time_travel, modify_file_content, LOG_FILE_PATH)
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -71,7 +71,7 @@ def test_symbolic_change_target_inside_folder(tags_to_apply, previous_target, ne
         create_file(REGULAR, previous_target, file1, content='')
         check_time_travel(scheduled)
         wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
-                                error_message='[ERROR] Did not receive expected "Sending FIM event: ..." event')
+                                error_message='Did not receive expected "Sending FIM event: ..." event')
 
     # Change the target to another file and wait the symcheck to update the link information
     modify_symlink(new_target, os.path.join(testdir_link, symlink))
@@ -83,12 +83,12 @@ def test_symbolic_change_target_inside_folder(tags_to_apply, previous_target, ne
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
-        raise AttributeError(f'[ERROR] Unexpected event {event}')
+        raise AttributeError(f'Unexpected event {event}')
 
     modify_file_content(testdir2, file1, new_content='Sample modification')
     check_time_travel(scheduled)
     modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
-                                     error_message='[ERROR] Did not receive expected '
+                                     error_message='Did not receive expected '
                                                    '"Sending FIM event: ..." event').result()
     assert 'modified' in modify['data']['type'] and os.path.join(testdir2, file1) in modify['data']['path'], \
         f"'modified' event not matching for {testdir2} {file1}"

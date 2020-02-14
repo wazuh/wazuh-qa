@@ -1,12 +1,14 @@
 # Copyright (C) 2015-2020, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import os
 import socket
 import sys
 import time
 from struct import pack, unpack
 
+from wazuh_testing import logger
 from wazuh_testing.tools.time import Timer
 
 
@@ -80,7 +82,8 @@ class FileMonitor:
                 if self._abort and not self.extra_timer_is_running:
                     self.stop()
                     if type(self._result) != list or accum_results != len(self._result):
-                        raise TimeoutError(error_message)
+                        logger.error(error_message)
+                        raise TimeoutError()
                 self._position = f.tell()
                 line = f.readline()
                 if not line:

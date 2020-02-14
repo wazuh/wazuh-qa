@@ -4,12 +4,12 @@
 import os
 
 import pytest
-
 from test_fim.test_follow_symbolic_link.common import configurations_path, testdir1, \
     modify_symlink, testdir_link, wait_for_symlink_check, wait_for_audit, testdir_target, testdir_not_target
 # noinspection PyUnresolvedReferences
 from test_fim.test_follow_symbolic_link.common import test_directories, extra_configuration_after_yield, \
     extra_configuration_before_yield
+
 from wazuh_testing.fim import (generate_params, create_file, REGULAR, callback_detect_event,
                                check_time_travel, modify_file_content, LOG_FILE_PATH)
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -68,13 +68,13 @@ def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_conf
         modify_file_content(f2, file1, text)
         check_time_travel(scheduled)
         modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
-                                         error_message='[ERROR] Did not receive expected "Sending FIM event: ..." event'
+                                         error_message='Did not receive expected "Sending FIM event: ..." event'
                                          ).result()
         assert 'modified' in modify['data']['type'] and f1 in modify['data']['path'], \
             f"'modified' event not matching for {file1}"
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
-            raise AttributeError(f'[ERROR] Unexpected event {event}')
+            raise AttributeError(f'Unexpected event {event}')
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
@@ -88,18 +88,18 @@ def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_conf
         create_file(REGULAR, aux_folder, file1, content='')
         check_time_travel(scheduled)
         add = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
-                                      error_message='[ERROR] Did not receive expected "Sending FIM event: ..." event'
+                                      error_message='Did not receive expected "Sending FIM event: ..." event'
                                       ).result()
         assert 'added' in add['data']['type'] and file1 in add['data']['path'], \
             f"'added' event not matching for {file1}"
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
-            raise AttributeError(f'[ERROR] Unexpected event {event}')
+            raise AttributeError(f'Unexpected event {event}')
     else:
         create_file(REGULAR, aux_folder, file1, content='')
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
-            raise AttributeError(f'[ERROR] Unexpected event {event}')
+            raise AttributeError(f'Unexpected event {event}')
 
     # Change the target of the symlink and expect events while there's no syscheck scan
     # Don't expect events from the new target
