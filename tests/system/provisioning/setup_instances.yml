@@ -12,7 +12,7 @@
   #   # Stopping the playbook if one of the hosts fails
   #   any_errors_fatal: true
 
-  - hosts: all, !windowsagents, !windows # "!" ignores groups. "windows" do not apply to this
+  - hosts: all, !windowsagents # "!" ignores groups. "windows" do not apply to this
     strategy: free
     vars_files:
       - ./vars/credentials.yml
@@ -24,7 +24,7 @@
     become: yes
     become_user: root
 
-  - hosts: windowsagents, windows
+  - hosts: windowsagents
     strategy: free
     vars_files:
       - ./vars/credentials.yml
