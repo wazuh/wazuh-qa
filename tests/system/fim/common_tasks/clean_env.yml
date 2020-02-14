@@ -56,15 +56,6 @@
             when:
             - not wazuh_package_downloaded.stat.exists
 
-        - name: Windows | Verify the Wazuh Agent installer
-            win_stat:
-            path: "C:\\wazuh-agent-{{ windows_agent_version }}-{{ windows_agent_revision }}.msi"
-            get_checksum: true
-            checksum_algorithm: md5
-            register: wazuh_agent_status
-            failed_when:
-            - wazuh_agent_status.stat.checksum != windows_md5
-
         - name: Uninstall Wazuh Agent
             win_package:
             path: "C:\\wazuh-agent-{{ windows_agent_version }}-{{ windows_agent_revision }}.msi"
