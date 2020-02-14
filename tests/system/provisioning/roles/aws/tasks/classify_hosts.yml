@@ -2,8 +2,8 @@
 
   - name: Obtaining Instances Identifiers
     command: >-
-      AWS_ACCESS_KEY_ID={{ aws_access_key|quote }}
-      AWS_SECRET_ACCESS_KEY={{ aws_secret_key|quote }}
+      AWS_ACCESS_KEY_ID={{ aws_access_key }}
+      AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
       aws
       --region {{ aws_region }}
       ec2 describe-instances

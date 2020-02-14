@@ -25,8 +25,8 @@
 
   - name: Verify there is no Stack with the same name
     command: >-
-      AWS_ACCESS_KEY_ID={{ aws_access_key|quote }}
-      AWS_SECRET_ACCESS_KEY={{ aws_secret_key|quote }}
+      AWS_ACCESS_KEY_ID={{ aws_access_key }}
+      AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
       aws
       --region {{ aws_region }}
       cloudformation describe-stacks
@@ -42,8 +42,8 @@
 
   - name: Upload CloudFormation template to S3
     command: >-
-      AWS_ACCESS_KEY_ID={{ aws_access_key|quote }}
-      AWS_SECRET_ACCESS_KEY={{ aws_secret_key|quote }}
+      AWS_ACCESS_KEY_ID={{ aws_access_key }}
+      AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
       aws
       --region {{ aws_region }}
       s3 cp {{ cloudformation_template_path }}{{ cloudformation_template_name }}
@@ -53,8 +53,8 @@
 
   - name: Creating AWS Stack
     command: >-
-      AWS_ACCESS_KEY_ID={{ aws_access_key|quote }}
-      AWS_SECRET_ACCESS_KEY={{ aws_secret_key|quote }}
+      AWS_ACCESS_KEY_ID={{ aws_access_key }}
+      AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
       aws
       --region {{ aws_region }}
       cloudformation create-stack
@@ -68,8 +68,8 @@
 
   - name: Awaiting for the AWS stack to finish, this could take a while...
     command: >-
-      AWS_ACCESS_KEY_ID={{ aws_access_key|quote }}
-      AWS_SECRET_ACCESS_KEY={{ aws_secret_key|quote }}
+      AWS_ACCESS_KEY_ID={{ aws_access_key }}
+      AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
       aws
       --region {{ aws_region }}
       cloudformation wait stack-create-complete
