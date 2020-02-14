@@ -6,7 +6,6 @@
 # License (version 2) as published by the FSF - Free Software
 # Foundation.
 
-import json
 import random
 import logging
 import os
@@ -14,28 +13,29 @@ import os
 
 def delete_files(input_file_path, n, output_file_path):
     """
-    Delete files, given a JSON file with complete list of files, we will randomly delete
-    n files of them.
-    
-    :param str input_file_path: path of the JSON file which contains the list of files.
+    Delete files, given a file with complete list of files where each line 
+    represents a file path, we will randomly delete n files of them.
+
+    :param str input_file_path: path of the input file which contains the list of files.
     :param int n: number of file to delete.
-    :return: Returns a JSON file with the list of the deleted files.
+    :return: Returns a file with the list of the deleted files.
     """
     logger = logging.getLogger()
-
-    # Read JSON data into the variable 'data'
+    data = []
+    # Read data into the variable 'data'
     try:
         if input_file_path:
-            with open(input_file_path, 'r') as f: # open the file
-                data = json.load(f) # put the lines to a variable.
-            f.close()
+            with open(input_file_path) as f:
+                data_ = f.readlines()
+            # remove whitespace characters like `\n` at the end of each line
+            data = [x.strip() for x in data_]
+            f.close() # close f
     except Exception as e:
         logger.error('Failed when reading the input file: ', exc_info=True)
 
 
     # Randomly select n paths from data
-    list_dict_to_delete = random.sample(data['files'],n)
-    to_delete = [f['path'] for f in list_dict_to_delete]
+    to_delete = random.sample(data,n)
 
     # Delete the selected files
     try:
@@ -46,10 +46,9 @@ def delete_files(input_file_path, n, output_file_path):
 
     # Write the list of the deleted files into output_file_path
     try:
-        with open(output_file_path, 'w') as fout:
-            json.dump(list_dict_to_delete , fout)
-        fout.close()
+        with open(output_file_path, 'w') as f:
+            for item in to_delete:
+                f.write("%s\n" % item)
+        f.close()
     except Exception as e:
         logger.error('Failed when writing to the output file: ', exc_info=True)
-
-delete_files("to_delete.json", 3, "to_delete_out.json")
