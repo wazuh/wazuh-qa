@@ -52,7 +52,6 @@ kibana_instance_type: t2.large
 ### Stack variables
 
 # Configuration parameters
-stack_name: fim-tests-1
 bucket_name: demo-cloudformation-templates
 template_url: https://demo-cloudformation-templates.s3-us-west-1.amazonaws.com/
 availability_zone: us-west-1a
