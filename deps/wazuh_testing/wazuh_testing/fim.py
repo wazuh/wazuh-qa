@@ -29,7 +29,7 @@ if sys.platform == 'win32':
     import win32con
     import win32api
     import winreg
-elif sys.platform == 'linux2' or sys.platform == 'linux':
+elif sys.platform == 'linux2' or sys.platform == 'linux' or sys.platform == 'darwin':
     from jq import jq
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -906,7 +906,7 @@ class EventChecker:
                 expected_file_path = expected_file_path[:1].lower() + expected_file_path[1:]
                 if self.encoding is not None:
                     for index, item in enumerate(file_paths):
-                        file_paths[index] = item.encode(self.encoding)
+                        file_paths[index] = item.encode(encoding=self.encoding)
                 assert (expected_file_path in file_paths), f'{expected_file_path} does not exist in {file_paths}'
 
         def filter_events(events, mask):

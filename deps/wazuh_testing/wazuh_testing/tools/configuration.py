@@ -387,7 +387,7 @@ def set_correct_prefix(configurations, new_prefix):
     Therefore, it is necessary to replace those paths that do not contain a
     suitable prefix.
 
-    This function checks if the path inside directories and ignore sections
+    This function checks if the path inside directories, ignore, nodiff and restrict sections
     contains a certain prefix, and if it does not contain it, it inserts it.
 
     Parameters
@@ -404,28 +404,49 @@ def set_correct_prefix(configurations, new_prefix):
         added in the directories and ignore sections.
 
     """
+    def inserter(path):
+        """Insert new_prefix inside path, right before the first '/'."""
+        index = path.find(os.sep)
+        result = (path[0:index] + new_prefix + path[index:] if
+                  new_prefix not in path and
+                  index >= 0
+                  else '')
+
+        return result
+
     for config in configurations:
         for element in config['elements']:
             if isinstance(element, dict):
-                for sub_elements in (element.get('directories'), element.get('ignore')):
-                    if sub_elements:
-                        paths_list = sub_elements['value'].split(',')
+                # ADD HERE all fields with format sub_element: - value
+                for sub_element in (element.get('directories'), element.get('ignore'), element.get('nodiff')):
+                    if sub_element:
+                        # Get restrict, directories, ignore and nodiff fields and split them into paths lists
+                        restrict_dict = next(
+                            (restrict for restrict in sub_element.get('attributes', []) if
+                             isinstance(restrict, dict) if restrict.get('restrict')), {})
+                        restrict_list = restrict_dict['restrict'].split('|') if restrict_dict != {} else []
+                        paths_list = sub_element['value'].split(',')
+                        modified_restricts = ''
                         modified_paths = ''
 
+                        # Insert the prefix in every path/regex and add a comma if directories.
                         for path in paths_list:
-                            index = path.find(os.sep)
-
-                            # Add the prefix right before '/'.
-                            modified_paths += (path[0:index] + new_prefix + path[index:] if
-                                               new_prefix not in path and
-                                               index >= 0
-                                               else '')
-
-                            # Add a comma if directories.
+                            modified_paths += inserter(path)
                             modified_paths += ',' if (element.get('directories') and modified_paths != '') else ''
 
+                        # Insert the prefix in every path inside restrict
+                        for restrict in restrict_list:
+                            modified_restricts += inserter(restrict)
+                            modified_restricts += '|'
+                        modified_restricts = modified_restricts.rstrip('|')
+
+                        # Replace the previous values with the new ones.
                         if modified_paths:
-                            sub_elements['value'] = modified_paths
+                            sub_element['value'] = modified_paths
+                        if modified_restricts:
+                            for i, sub_sub_element in enumerate(sub_element['attributes']):
+                                if sub_sub_element == restrict_dict:
+                                    sub_element['attributes'][i] = {'restrict': modified_restricts}
 
     return configurations
 
