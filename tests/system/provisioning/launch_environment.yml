@@ -85,10 +85,3 @@
         with_items:
           - post_installation.yml >> ./deployment_logs/log_{{ current_date_time }}/post_installation.log
 
-      - async_status:
-          jid: "{{ item.ansible_job_id }}"
-        loop: "{{ post_installation.results }}"
-        register: jobs_post
-        until: jobs_post.finished
-        retries: 1000
-        delay: 10 
