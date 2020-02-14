@@ -1,8 +1,0 @@
----
-  - hosts: localhost
-    vars_files:
-      - ./vars/credentials.yml
-      - ./vars/wazuh_manager.yml
-      - ./vars/elastic_nginx.yml
-    roles:
-      - role: ../fim/roles/aws/
