@@ -60,9 +60,9 @@ aws_cli_profile: ansible_demo
 service_name_tag: fim-tests
 team_tag: DevOps
 
-# Template paths and names 
+# Template paths and names
 cloudformation_template_path: roles/aws/templates/
-cloudformation_template_name: environment_template.yml
+cloudformation_template_name: jenkins_environment_template.yml
 
 parameters_template_path: roles/aws/templates/parameters_template.j2
 parameters_file_path: roles/aws/templates/parameters.json
