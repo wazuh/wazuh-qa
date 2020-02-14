@@ -49,19 +49,19 @@ class Cases(Enum):
 
 
 def db_query(agent, query):
-    """ Run a query against wazuh_db for a specific agent
+    """Run a query against wazuh_db for a specific agent.
 
     Parameters
     ----------
     agent : str
-        Database identifier
+        Database identifier.
     query : str
-        Query to be executed
+        Query to be executed.
 
     Returns
     -------
     str
-        Return the wazuh-db's socket response
+        Return the wazuh-db's socket response.
 
     """
     sock = socket(AF_UNIX, SOCK_STREAM)
@@ -75,7 +75,7 @@ def db_query(agent, query):
 
 
 def get_total_disk_info(daemon):
-    """ Get total disk read/write info from /proc/[pid]/io
+    """Get total disk read/write info from /proc/[pid]/io.
 
     Parameters
     ----------
@@ -112,17 +112,17 @@ def get_total_disk_info(daemon):
 
 
 def get_total_cpu_info(daemon):
-    """ Get the total CPU usage by the specified daemon
+    """Get the total CPU usage by the specified daemon.
 
     Parameters
     ----------
     daemon : str
-        Daemon to be monitored
+        Daemon to be monitored.
 
     Returns
     -------
     int
-        Total CPU usage at this moment
+        Total CPU usage at this moment.
 
     """
     pid = os.popen('pidof ' + daemon).read().strip()
@@ -135,7 +135,7 @@ def get_total_cpu_info(daemon):
 
 
 def get_stats(daemon):
-    """ Get CPU, RAM, disk read and disk write stats using ps and pidstat
+    """Get CPU, RAM, disk read and disk write stats using ps and pidstat.
 
     Parameters
     ----------
@@ -145,7 +145,7 @@ def get_stats(daemon):
     Returns
     -------
     list of str
-        Return CPU, RAM, Disk reading, Disk writing, Total disk reading, total disk writing
+        Return CPU, RAM, Disk reading, Disk writing, Total disk reading, total disk writing.
 
     """
     io_stats = get_total_disk_info(daemon)
@@ -164,33 +164,33 @@ def get_stats(daemon):
 
 def calculate_stats(daemon, cpu=0, rchar=0, wchar=0, syscr=0, syscw=0, read_bytes=0, write_bytes=0,
                     cancelled_write_bytes=0):
-    """ Get CPU, RAM, disk read and disk write stats using ps and pidstat
+    """Get CPU, RAM, disk read and disk write stats using ps and pidstat.
 
     Parameters
     ----------
     daemon : str
         Daemon for whom we will get the stats.
     cpu : str or float
-        Previous CPU value
+        Previous CPU value.
     rchar : str or float
-        Previous rchar value
+        Previous rchar value.
     wchar : str or float
-        Previous wchar value
+        Previous wchar value.
     syscr : str or float
-        Previous syscr value
+        Previous syscr value.
     syscw : str or float
-        Previous syscw value
+        Previous syscw value.
     read_bytes : str or float
-        Previous read_bytes value
+        Previous read_bytes value.
     write_bytes : str or float
-        Previous write_bytes value
+        Previous write_bytes value.
     cancelled_write_bytes : str or float
-        Previous cancelled_write_bytes value
+        Previous cancelled_write_bytes value.
 
     Returns
     -------
     list of str
-        Return CPU, RAM, Disk reading, Disk writing, Total disk reading, total disk writing
+        Return CPU, RAM, Disk reading, Disk writing, Total disk reading, total disk writing.
 
     """
     regex_mem = r"ossec-syscheckd *([0-9]+)"
@@ -211,17 +211,17 @@ def calculate_stats(daemon, cpu=0, rchar=0, wchar=0, syscr=0, syscw=0, read_byte
 
 
 def n_attempts(agent):
-    """ Return n_attempts in sync_info table
+    """Return n_attempts in sync_info table.
 
     Parameters
     ----------
     agent : str
-        Check the number of attempts for this agent
+        Check the number of attempts for this agent.
 
     Returns
     -------
     int
-        Return the number of attempts for the specified agent
+        Return the number of attempts for the specified agent.
 
     """
     regex = r"ok \[{\"n_attempts\":([0-9]+)}\]"
@@ -234,17 +234,17 @@ def n_attempts(agent):
 
 
 def n_completions(agent):
-    """ Return n_completions in sync_info table
+    """Return n_completions in sync_info table.
 
     Parameters
     ----------
     agent : str
-        Check the number of completions for this agent
+        Check the number of completions for this agent.
 
     Returns
     -------
     int
-        Return the number of completions for the specified agent
+        Return the number of completions for the specified agent.
 
     """
     regex = r"ok \[{\"n_completions\":([0-9]+)}\]"
@@ -257,7 +257,7 @@ def n_completions(agent):
 
 
 def get_agents(client_keys='/var/ossec/etc/client.keys'):
-    """ These function extract all agent ids in the client.keys file. It will not extract the ids that are removed (!)
+    """These function extract all agent ids in the client.keys file. It will not extract the ids that are removed (!)
 
     Create an external dict (no shared by the processes) and an internal dict (shared by the processes), every process
     has the external dict (agent_ids), that reference the internal and shared structure. This way, every process can
@@ -266,12 +266,12 @@ def get_agents(client_keys='/var/ossec/etc/client.keys'):
     Parameters
     ----------
     client_keys : str
-        Path of the client.keys file
+        Path of the client.keys file.
 
     Returns
     -------
     dict
-        Dictionary shared by all processes
+        Dictionary shared by all processes.
 
     """
     agent_regex = r'([0-9]+) [^!.+]+ .+ .+'
@@ -293,16 +293,16 @@ def get_agents(client_keys='/var/ossec/etc/client.keys'):
 
 
 def replace_conf(eps, directory, buffer):
-    """ Function that sets up the configuration for the current test.
+    """Function that sets up the configuration for the current test.
 
     Parameters
     ----------
     eps : str
-        Events per second
+        Events per second.
     directory : str
-        Directory to be monitored
+        Directory to be monitored.
     buffer : str
-        Can be yes or no, <disabled>yes|no</disabled>
+        Can be yes or no, <disabled>yes|no</disabled>.
 
     """
     new_config = str()
@@ -327,17 +327,17 @@ def replace_conf(eps, directory, buffer):
 
 
 def check_all_n_attempts(agents_list):
-    """ Return max value of n_attempts between all agents
+    """Return max value of n_attempts between all agents.
 
     Parameters
     ----------
     agents_list : list
-        List of agent ids
+        List of agent ids.
 
     Returns
     -------
     int
-        Maximum number of attempts of the tested agents
+        Maximum number of attempts of the tested agents.
 
     """
     all_n_attempts = list()
@@ -348,17 +348,17 @@ def check_all_n_attempts(agents_list):
 
 
 def check_all_n_completions(agents_list):
-    """ Return min value of n_completions between all agents
+    """Return min value of n_completions between all agents.
 
     Parameters
     ----------
     agents_list : list
-        List of agent ids
+        List of agent ids.
 
     Returns
     -------
     int
-        Minimum number of completions of the tested agents
+        Minimum number of completions of the tested agents.
 
     """
     all_n_completions = list()
@@ -369,24 +369,24 @@ def check_all_n_completions(agents_list):
 
 
 def modify_database(agent_id, directory, prefix, total_files, modify_file, modify_all, restore_all):
-    """  Modify the database files
+    """ Modify the database files
 
     Parameters
     ----------
     agent_id : str
-        Database identifier
+        Database identifier.
     directory : str
-        Directory of the file to which we will modify your checksum
+        Directory of the file to which we will modify your checksum.
     prefix : str
-        Prefix of the filename
+        Prefix of the filename.
     total_files
-        Total files in the directory
+        Total files in the directory.
     modify_file : bool
-        Flag for modify the checksum of a file
+        Flag for modify the checksum of a file.
     modify_all
-        Flag for modify all checksums in the database
+        Flag for modify all checksums in the database.
     restore_all
-        Flag that indicate if all entries in the fim_entry table should be deleted
+        Flag that indicate if all entries in the fim_entry table should be deleted.
 
     """
     if modify_file:
@@ -413,28 +413,29 @@ def modify_database(agent_id, directory, prefix, total_files, modify_file, modif
 
 
 def agent_checker(case, agent_id, agents_dict, filename, attempts_info, database_params):
-    """ Check that the current agent is restarted. When it has been restarted, marks the start time of the agent.
+    """Check that the current agent is restarted. When it has been restarted, marks the start time of the agent.
     If n_completions of the agent_id is greater than 0, the info_collector must be called.
 
     Parameters
     ----------
     case : int
-        Case number
+        Case number.
     agent_id : str
-        Agent id
+        Agent id.
     agents_dict : dict of multi processes shared dict
-        Dictionary with the start time of every agent
+        Dictionary with the start time of every agent.
     filename : str
-        Path of the agent's info file
+        Path of the agent's info file.
     attempts_info : shared dict
-        Dictionary with a flag that indicates if the stats collector must start
+        Dictionary with a flag that indicates if the stats collector must start.
     database_params : dict
-        Database params to be applied for the current test
+        Database params to be applied for the current test.
 
     """
     if case == Cases.case0.value:
         alerts = open(ALERT_FILE_PATH, 'w')
         alerts.close()
+
         # Detect that the agent are been restarted
         def callback_detect_agent_restart(line):
             try:
@@ -464,22 +465,22 @@ def agent_checker(case, agent_id, agents_dict, filename, attempts_info, database
 
 
 def info_collector(agent, agent_id, filename, attempts_info, state='complete'):
-    """ Write the stats of the agent during the test.
+    """Write the stats of the agent during the test.
 
-    This stats will be written when the agent finish its test process (n_completions(agent_id) > 0)
+    This stats will be written when the agent finish its test process (n_completions(agent_id) > 0).
 
     Parameters
     ----------
     agent : dict
-        Individual dictionary with the start time of an agent
+        Individual dictionary with the start time of an agent.
     agent_id : str
-        Agent id
+        Agent id.
     filename : str
-        Path of the agent's info file
+        Path of the agent's info file.
     attempts_info : shared dict
-        Dictionary with a flag that indicates if the stats collector must start
+        Dictionary with a flag that indicates if the stats collector must start.
     state : str
-        complete of except_max_attempts: Indicates if the agent took less attempts than the defined limits or not
+        complete of except_max_attempts: Indicates if the agent took less attempts than the defined limits or not.
 
     """
     if state != 'complete':
@@ -495,21 +496,21 @@ def info_collector(agent, agent_id, filename, attempts_info, state='complete'):
 
 
 def state_collector(case, agents_dict, buffer, stats_dir, attempts_info):
-    """ Gets the stats of the .state files in the WAZUH_PATH/var/run folder.
+    """Gets the stats of the .state files in the WAZUH_PATH/var/run folder.
     We can define the stats to get from each daemon in the daemons_dict.
 
     Parameters
     ----------
     case : int
-        Case number
+        Case number.
     agents_dict : dict of shared dict
-        Dictionary with the start time of every agent
+        Dictionary with the start time of every agent.
     buffer : str
-        Set disabled to yes or no
+        Set disabled to yes or no.
     stats_dir : str
-        Stats folder
+        Stats folder.
     attempts_info : shared dict
-        Dictionary with a flag that indicates if the stats collector must start
+        Dictionary with a flag that indicates if the stats collector must start.
 
     """
     daemons_dict = {
@@ -555,18 +556,18 @@ def state_collector(case, agents_dict, buffer, stats_dir, attempts_info):
 
 
 def stats_collector(filename, daemon, agents_dict, attempts_info):
-    """ Collects the stats of the current daemon until all agents have finished the integrity process.
+    """Collects the stats of the current daemon until all agents have finished the integrity process.
 
     Parameters
     ----------
     filename : str
-        Path of the stats file for the current daemon
+        Path of the stats file for the current daemon.
     daemon : str
-        Daemon tested
+        Daemon tested.
     agents_dict : dict of shared dict
-        Dictionary with the start time of every agent
+        Dictionary with the start time of every agent.
     attempts_info : shared dict
-        Dictionary with a flag that indicates the number of agents that exceed the limit of n_attempts
+        Dictionary with a flag that indicates the number of agents that exceed the limit of n_attempts.
 
     """
     stats, old_stats = None, None
@@ -604,17 +605,17 @@ def stats_collector(filename, daemon, agents_dict, attempts_info):
 
 
 def protocol_detection(ossec_conf_path=WAZUH_CONF):
-    """ Detects the protocol configuration
+    """Detects the protocol configuration.
 
     Parameters
     ----------
     ossec_conf_path : str
-        ossec.conf path
+        ossec.conf path.
 
     Returns
     -------
     str
-        udp or tcp
+        udp or tcp.
 
     """
     try:
@@ -624,7 +625,7 @@ def protocol_detection(ossec_conf_path=WAZUH_CONF):
 
 
 def clean_environment():
-    """ Remove the states files between tests """
+    """Remove the states files between tests."""
     for file in os.listdir(state_path):
         if file.endswith('.state'):
             os.unlink(os.path.join(state_path, file))
@@ -646,7 +647,7 @@ def clean_environment():
     ('1000000', '1000000', '/test1M', 'yes'),
 ])
 def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_file, modify_all, restore_all):
-    """ Execute and launch all the necessary processes to check all the cases with all the specified configurations """
+    """Execute and launch all the necessary processes to check all the cases with all the specified configurations."""
     agents_dict = get_agents()
     attempts_info = Manager().dict({
         'start': False,
