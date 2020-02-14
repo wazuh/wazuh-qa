@@ -1,130 +1,126 @@
+---
+  - hosts: all
+    strategy: free
+    tasks:
+    # Wazuh Agents cleanup
+      - block:
+        - name: Check if wazuh-agent service exists
+          stat: path=/etc/init.d/wazuh-agent
+          register: agent_service_status
 
-- hosts:
-    - linuxagents
+        - name: Stop wazuh-agent service
+          service:
+            name: wazuh-agent
+            state: stopped
+          when: agent_service_status.stat.exists
 
-  tasks:
+        - name: Uninstall wazuh-agent service
+          package:
+            name: wazuh-agent
+            state: absent
 
-  - name: Check if wazuh-agent service exists
-    stat: path=/etc/init.d/wazuh-agent
-    register: agent_service_status
+        - name: Ensure /var/ossec is deleted
+          file:
+            path: /var/ossec
+            state: absent
+        when:
+          - inventory_hostname in groups['linuxagents']
 
-  - name: Stop wazuh-agent service
-    service:
-      name: "{{ item }}"
-      state: stopped
-    with_items:
-      - wazuh-agent
-    when: agent_service_status.stat.exists
+    # Wazuh Managers cleanup
 
+      - block:
+        - name: check if wazuh-manager service exists
+          stat: path=/etc/init.d/wazuh-manager
+          register: manager_service_status
 
-  - name: Uninstall wazuh-agent service
-    package:
-      name: "{{ item }}"
-      state: absent
-    with_items:
-      - wazuh-agent
+        - name: Check if wazuh-api service exists
+          stat: path=/etc/init.d/wazuh-api
+          register: api_service_status
 
-  - name: Ensure /var/ossec is deleted
-    file:
-      path: /var/ossec
-      state: absent
+        - name: Check if filebeat service exists
+          stat: path=/etc/init.d/filebeat
+          register: filebeat_service_status
 
-- hosts:
-    - masters
-    - workers
-  gather_facts: yes
+        - name: Stop wazuh stack services (wazuh-manager, wazuh-api, and, filebeat)
+          service:
+            name: "{{ item }}"
+            state: stopped
+          with_items:
+            - wazuh-manager
+            - wazuh-api
+            - filebeat
+          when:
+            - manager_service_status.stat.exists
+            - api_service_status.exists
+            - filebeat_service_status.exists
 
-  tasks:
+        - name: Uninstall wazuh-manager service
+          package:
+            name: "{{ item }}"
+            state: absent
+          with_items:
+            - wazuh-manager
+          when: manager_service_status.stat.exists
 
-  - name: check if wazuh-manager service exists
-    stat: path=/etc/init.d/wazuh-manager
-    register: manager_service_status
+        - name: Ensure /var/ossec is deleted
+          file:
+            path: /var/ossec
+            state: absent
+        when:
+          - inventory_hostname in groups['masters'] or inventory_hostname in groups['workers']
+      
+    # Elasticsearch cleanup
 
-  - name: Check if wazuh-api service exists
-    stat: path=/etc/init.d/wazuh-api
-    register: api_service_status
+      - block:
+        - name: Get service facts
+          service_facts:
 
-  - name: Check if filebeat service exists
-    stat: path=/etc/init.d/filebeat
-    register: filebeat_service_status
+        - name: Print elasticsearch indexes
+          debug: var=ansible_facts.services["elasticsearch.service"]
 
-  - name: Stop wazuh stack services (wazuh-manager, wazuh-api, and, filebeat)
-    service:
-      name: "{{ item }}"
-      state: stopped
-    with_items:
-      - wazuh-manager
-      - wazuh-api
-      - filebeat
-    when:
-      - manager_service_status.stat.exists
-      - api_service_status.exists
-      - filebeat_service_status.exists
+        - name: List and delete elasticsearch indexes + stop elasticsearch service
+          block:
+            - name: List Elasticsearch indexes
+              command: curl -X GET "{{ ansible_eth1.ipv4.address }}:9200/_cat/indices/*?v&s=index&pretty"
+              register: elasticsearch_indexes_get
+              delegate_to: "{{ ansible_eth1.ipv4.address }}"
 
-  - name: Uninstall wazuh-manager service
-    package:
-      name: "{{ item }}"
-      state: absent
-    with_items:
-      - wazuh-manager
-    when: manager_service_status.stat.exists
+            - name: Print elasticsearch indexes
+              debug: var={{ item }}
+              with_items: elasticsearch_indexes_get.stdout_lines
 
-  - name: Ensure /var/ossec is deleted
-    file:
-      path: /var/ossec
-      state: absent
+            - name: Delete Elasticsearch indexes
+              command:  curl -X DELETE "{{ ansible_eth1.ipv4.address }}:9200/*?pretty"
+              register: elasticsearch_indexes_delete
+              delegate_to: "{{ ansible_eth1.ipv4.address }}"
 
-- hosts: elasticsearch
+            - name: Print elasticsearch indexes after deletion
+              debug: var={{ item }}
+              with_items: elasticsearch_indexes_delete.stdout_lines
 
-  tasks:
+            - name: Stop elasticsearch service
+              service:
+                name: "{{ item }}"
+                state: stopped
+              with_items:
+                - elasticsearch
+          when: ansible_facts.services["elasticsearch.service"]["state"] == "running"
+        when:
+          - inventory_hostname in groups['elasticsearch']
 
-  - name: Get service facts
-    service_facts:
+    # Kibana cleanup
 
-  - name: Print elasticsearch indexes
-    debug: var=ansible_facts.services["elasticsearch.service"]
+      - block:
+        - name: Check if kibana service exists
+          stat: path=/etc/init.d/kibana
+          register: kibana_service_status
 
-  - name: List and delete elasticsearch indexes + stop elasticsearch service
-    block:
-    - name: List Elasticsearch indexes
-      command: curl -X GET "{{ ansible_eth1.ipv4.address }}:9200/_cat/indices/*?v&s=index&pretty"
-      register: elasticsearch_indexes_get
-      delegate_to: "{{ ansible_eth1.ipv4.address }}"
+        - name: Stop kibana service
+          service:
+            name: kibana
+            state: stopped
+          when: kibana_service_status.stat.exists
 
-    - name: Print elasticsearch indexes
-      debug: var={{ item }}
-      with_items: elasticsearch_indexes_get.stdout_lines
-
-    - name: Delete Elasticsearch indexes
-      command:  curl -X DELETE "{{ ansible_eth1.ipv4.address }}:9200/*?pretty"
-      register: elasticsearch_indexes_delete
-      delegate_to: "{{ ansible_eth1.ipv4.address }}"
-
-    - name: Print elasticsearch indexes after deletion
-      debug: var={{ item }}
-      with_items: elasticsearch_indexes_delete.stdout_lines
-
-    - name: Stop elasticsearch service
-      service:
-        name: "{{ item }}"
-        state: stopped
-      with_items:
-        - elasticsearch
-    when: ansible_facts.services["elasticsearch.service"]["state"] == "running"
-
-- hosts: kibana
-
-  tasks:
-
-  - name: Check if kibana service exists
-    stat: path=/etc/init.d/kibana
-    register: kibana_service_status
-
-  - name: Stop kibana service
-    service:
-      name: "{{ item }}"
-      state: stopped
-    with_items:
-      - kibana
-    when: kibana_service_status.stat.exists
+        when:
+          - inventory_hostname in groups['kibana']
 
