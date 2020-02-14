@@ -26,6 +26,58 @@
         when:
           - inventory_hostname in groups['linuxagents']
 
+      - block:
+        - name: Windows | Check if Program Files (x86) exists
+            win_stat:
+            path: C:\Program Files (x86)
+            register: check_path
+
+        - name: Windows | Set Win Path (x86)
+            set_fact:
+            wazuh_agent_win_path: "{{ windows_install_dir_x86 }}"
+            when:
+            - check_path.stat.exists
+
+        - name: Windows | Set Win Path (x64)
+            set_fact:
+            wazuh_agent_win_path: "{{ windows_install_dir }}"
+            when:
+            - not check_path.stat.exists
+
+        - name: Windows | Check if Wazuh installer is already downloaded
+            win_stat:
+            path: "C:\\wazuh-agent-{{ windows_agent_version }}-{{ windows_agent_revision }}.msi"
+            register: wazuh_package_downloaded
+
+        - name: Windows | Download Wazuh Agent package
+            win_get_url:
+            url: "{{ windows_repo }}wazuh-agent-{{ windows_agent_version }}-{{ windows_agent_revision }}.msi"
+            dest: C:\
+            when:
+            - not wazuh_package_downloaded.stat.exists
+
+        - name: Windows | Verify the Wazuh Agent installer
+            win_stat:
+            path: "C:\\wazuh-agent-{{ windows_agent_version }}-{{ windows_agent_revision }}.msi"
+            get_checksum: true
+            checksum_algorithm: md5
+            register: wazuh_agent_status
+            failed_when:
+            - wazuh_agent_status.stat.checksum != windows_md5
+
+        - name: Uninstall Wazuh Agent
+            win_package:
+            path: "C:\\wazuh-agent-{{ windows_agent_version }}-{{ windows_agent_revision }}.msi"
+            state: absent
+
+        - name: Delete Wazuh installation folder
+            win_file:
+            path: "{{ wazuh_agent_win_path }}"
+            state: absent
+        when:
+          - inventory_hostname in groups['windowsagents']
+
+
     # Wazuh Managers cleanup
 
       - block:
