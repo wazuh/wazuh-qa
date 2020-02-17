@@ -5,6 +5,8 @@
       - role: "{{ wazuh_ansible_repository_path }}/roles/elastic-stack/ansible-elasticsearch"
     become: yes
     become_user: root
+    environment:
+      ANSIBLE_HASH_BEHAVIOUR: merge
 
   - hosts: elasticsearch[1:]
     strategy: free
@@ -12,21 +14,27 @@
       - role: "{{ wazuh_ansible_repository_path }}/roles/elastic-stack/ansible-elasticsearch"
     become: yes
     become_user: root
+    environment:
+      ANSIBLE_HASH_BEHAVIOUR: merge
 
   - hosts: kibana
     strategy: free
     roles:
       - role: "{{ wazuh_ansible_repository_path }}/roles/elastic-stack/ansible-kibana"
     become: yes
-    become_user: root    
+    become_user: root
+    environment:
+      ANSIBLE_HASH_BEHAVIOUR: merge
 
   - hosts: masters
     strategy: free
     roles:
       - role: "{{ wazuh_ansible_repository_path }}/roles/wazuh/ansible-wazuh-manager"
-      - role: "{{ wazuh_ansible_repository_path }}/roles/wazuh/ansible-filebeat"      
+      - role: "{{ wazuh_ansible_repository_path }}/roles/wazuh/ansible-filebeat"
     become: yes
     become_user: root
+    environment:
+      ANSIBLE_HASH_BEHAVIOUR: merge
 
   - hosts: workers
     strategy: free
@@ -34,7 +42,9 @@
       - role: "{{ wazuh_ansible_repository_path }}/roles/wazuh/ansible-wazuh-manager"
       - role: "{{ wazuh_ansible_repository_path }}/roles/wazuh/ansible-filebeat"
     become: yes
-    become_user: root 
+    become_user: root
+    environment:
+      ANSIBLE_HASH_BEHAVIOUR: merge
 
   - hosts: linuxagents
     strategy: free
@@ -42,8 +52,12 @@
       - {{ wazuh_ansible_repository_path }}/roles/wazuh/ansible-wazuh-agent
     become: yes
     become_user: root
+    environment:
+      ANSIBLE_HASH_BEHAVIOUR: merge
 
   - hosts: windowsagents
     strategy: free
     roles:
       - {{ wazuh_ansible_repository_path }}/roles/wazuh/ansible-wazuh-agent
+    environment:
+      ANSIBLE_HASH_BEHAVIOUR: merge
