@@ -53,9 +53,9 @@ def main():
     parser.add_argument("-f", "--files", type=str, required=True, dest='files',
                         help="File containing the list of modified files, one per line")
 
-    parser.add_argument("-a", "--alert", type=str, required=True, dest='alert',
+    parser.add_argument("-e", "--event", type=str, required=True, dest='event',
                         choices=['added', 'modified', 'deleted'],
-                        help="Type of alert that we expect: added, modified, deleted")
+                        help="Type of alert's event that we expect: added, modified, deleted")
 
     parser.add_argument("-l", "--log_json", type=str, required=False, dest='log_json_path',
                         help="alerts.json path. default value '/var/ossec/logs/alerts/alerts.json'",
@@ -66,7 +66,7 @@ def main():
                         default="debug_missing_file_alerts.log")
     args = parser.parse_args()
     paths_list_set = paths_acquisition(args.files)
-    pruned_alerts_set = alerts_prune(args.log_json_path, args.alert)
+    pruned_alerts_set = alerts_prune(args.log_json_path, args.event)
     sub_paths = paths_list_set - pruned_alerts_set
     if len(sub_paths) == 0:
         print("Test passed")
@@ -82,4 +82,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
