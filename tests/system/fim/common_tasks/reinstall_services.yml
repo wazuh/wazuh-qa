@@ -27,11 +27,11 @@
         name: elasticsearch
         state: started
       when:
-        - ansible_inventory in groups["elasticsearch"]
+        - inventory_hostname in groups["elasticsearch"]
 
     - name: Starting Kibana
       service:
         name: kibana
         state: started
       when:
-        ansible_inventory in groups["kibana"]
+        - inventory_hostname in groups["kibana"]
