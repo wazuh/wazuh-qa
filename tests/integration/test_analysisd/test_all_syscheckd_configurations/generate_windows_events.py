@@ -9,6 +9,7 @@ import shutil
 import sys
 import time
 
+from wazuh_testing import logger
 from wazuh_testing.fim import REGULAR, create_file, modify_file, delete_file, callback_detect_event
 from wazuh_testing.tools import WAZUH_CONF, PREFIX, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import generate_syscheck_config
@@ -153,39 +154,38 @@ def configure_syscheck_environment(time_sleep):
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     control_service('restart')
+    logger.debug('Waiting 15 seconds for syscheckd to start.')
     time.sleep(15)
 
     file = 'regular'
 
-    print(f'Waiting {str(time_sleep)} seconds.')
+    logger.debug(f'Waiting {str(time_sleep)} seconds. Execute `generate_windows_yaml.py` now.')
     time.sleep(time_sleep)
 
-    print('Creo ficheros')
+    logger.debug('Creating files...')
     for directory in directories_list:
         create_file(REGULAR, directory, file, content='')
         time.sleep(0.01)
-
     try:
         while True:
             wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
     except TimeoutError:
         pass
-    print('Modifico ficheros')
+
+    logger.debug('Modifying files...')
     for directory in directories_list:
         modify_file(directory, file, new_content='Modified')
         time.sleep(0.01)
-
     try:
         while True:
             wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
     except TimeoutError:
         pass
 
-    print('Elimino ficheros')
+    logger.debug('Deleting files...')
     for directory in directories_list:
         delete_file(directory, file)
         time.sleep(0.01)
-
     try:
         while True:
             wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
@@ -204,17 +204,23 @@ def clean_environment(original_conf):
 
 
 def get_script_arguments():
+    list_of_choices = ['DEBUG', 'ERROR']
     parser = argparse.ArgumentParser(usage="usage: %(prog)s [options]",
                                      description="Syscheck event generator (Windows)",
                                      formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-t', '--time', dest='time_sleep', default=5,
                         help='Time to sleep until the events will be generated. Default 5.', action='store')
+    parser.add_argument('-d', '--debug', dest='debug_level', default='ERROR', choices=list_of_choices,
+                        help='Specify debug level. Default "ERROR".', action='store')
     return parser.parse_args()
 
 
 if __name__ == '__main__':
+    log_level = {'DEBUG': 10, 'ERROR': 40}
+
     options = get_script_arguments()
     time_sleep = int(options.time_sleep)
+    logger.setLevel(log_level[options.debug_level])
 
     original_conf = set_syscheck_config()
     configure_syscheck_environment(time_sleep)

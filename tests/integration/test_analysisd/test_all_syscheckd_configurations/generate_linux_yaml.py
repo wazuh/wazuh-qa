@@ -12,6 +12,7 @@ import time
 
 import yaml
 
+from wazuh_testing import logger
 from wazuh_testing.analysis import callback_analysisd_agent_id, callback_analysisd_event
 from wazuh_testing.fim import REGULAR, create_file, modify_file, delete_file, detect_initial_scan
 from wazuh_testing.tools import WAZUH_LOGS_PATH, LOG_FILE_PATH, WAZUH_PATH, WAZUH_CONF, PREFIX
@@ -157,17 +158,21 @@ def generate_analysisd_yaml(n_events, modify_events):
         time.sleep(0.01)
     added = analysis_monitor.start(timeout=max(0.01 * n_events, 10), callback=callback_analysisd_event,
                                    accum_results=len(directories_list)).result()
+    logger.debug('"added" alerts collected.')
 
     for directory in directories_list:
         modify_file(directory, file, new_content='Modified')
         time.sleep(0.01)
     modified = analysis_monitor.start(timeout=max(0.01 * n_events, 10), callback=callback_analysisd_event,
                                       accum_results=modify_events).result()
+    logger.debug('"modified" alerts collected.')
+
     for directory in directories_list:
         delete_file(directory, file)
         time.sleep(0.01)
     deleted = analysis_monitor.start(timeout=max(0.01 * len(directories_list), 10), callback=callback_analysisd_event,
                                      accum_results=len(directories_list)).result()
+    logger.debug('"deleted" alerts collected.')
 
     # Truncate file
     with open(yaml_file, 'w')as y_f:
@@ -175,6 +180,7 @@ def generate_analysisd_yaml(n_events, modify_events):
 
     for ev_list in [added, modified, deleted]:
         parse_events_into_yaml(ev_list, yaml_file)
+    logger.debug(f'YAML done: "{yaml_file}"')
 
     return mitm_analysisd
 
@@ -186,6 +192,7 @@ def kill_daemons():
 
 
 def get_script_arguments():
+    list_of_choices = ['DEBUG', 'ERROR']
     parser = argparse.ArgumentParser(usage="usage: %(prog)s [options]",
                                      description="Analysisd YAML generator (Linux)",
                                      formatter_class=argparse.RawTextHelpFormatter)
@@ -193,13 +200,18 @@ def get_script_arguments():
                         help='Specify how many events will be expected. Default 4096.', action='store')
     parser.add_argument('-m', '--modified', dest='dropped_events', default=4088,
                         help='Specify how many modified events will be expected. Default 4088.', action='store')
+    parser.add_argument('-d', '--debug', dest='debug_level', default='ERROR', choices=list_of_choices,
+                        help='Specify debug level. Default "ERROR".', action='store')
     return parser.parse_args()
 
 
 if __name__ == '__main__':
+    log_level = {'DEBUG': 10, 'ERROR': 40}
+
     options = get_script_arguments()
     events = int(options.n_events)
     modify = int(options.dropped_events)
+    logger.setLevel(log_level[options.debug_level])
 
     original_conf = set_syscheck_config()
     create_syscheck_environment()
@@ -207,6 +219,7 @@ if __name__ == '__main__':
         mitm = generate_analysisd_yaml(n_events=events, modify_events=modify)
         mitm.shutdown()
     except (TimeoutError, FileNotFoundError):
+        logger.error('Could not generate the YAML. Please clean the environment.')
         delete_sockets()
     finally:
         set_syscheck_backup(original_conf)

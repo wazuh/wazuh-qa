@@ -11,6 +11,7 @@ import time
 
 import yaml
 
+from wazuh_testing import logger
 from wazuh_testing.analysis import callback_analysisd_agent_id, callback_analysisd_event
 from wazuh_testing.tools import WAZUH_LOGS_PATH, LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.file import truncate_file
@@ -23,7 +24,7 @@ analysis_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'queue')
 # Syscheck variables
 n_directories = 0
 testdir = 'testdir'
-yaml_file = 'syscheck_events_windows.yaml'
+yaml_file = 'syscheck_events_win32.yaml'
 expected_deleted = None
 
 
@@ -103,21 +104,21 @@ def generate_analysisd_yaml(n_events, modify_events):
         if wc >= n_events:
             logging.debug('All alerts received. Collecting by alert type...')
             break
-        logging.debug(f'{wc} deleted events so far.')
-        logging.debug('Waiting for alerts. Sleeping 5 seconds.')
+        logger.debug(f'{wc} deleted events so far.')
+        logger.debug('Waiting for alerts. Sleeping 5 seconds.')
         time.sleep(5)
 
     added = analysis_monitor.start(timeout=max(0.01 * n_events, 10), callback=callback_analysisd_event,
                                    accum_results=n_events).result()
-    logging.debug('"added" alerts collected.')
+    logger.debug('"added" alerts collected.')
 
     modified = analysis_monitor.start(timeout=max(0.01 * n_events, 10), callback=callback_analysisd_event,
                                       accum_results=modify_events).result()
-    logging.debug('"modified" alerts collected.')
+    logger.debug('"modified" alerts collected.')
 
     deleted = analysis_monitor.start(timeout=max(0.01 * n_events, 10), callback=callback_analysisd_event,
                                      accum_results=n_events).result()
-    logging.debug('"deleted" alerts collected.')
+    logger.debug('"deleted" alerts collected.')
 
     # Truncate file
     with open(yaml_file, 'w')as y_f:
@@ -125,7 +126,7 @@ def generate_analysisd_yaml(n_events, modify_events):
 
     for ev_list in [added, modified, deleted]:
         parse_events_into_yaml(ev_list, yaml_file)
-    logging.debug(f'YAML done: "{yaml_file}"')
+    logger.debug(f'YAML done: "{yaml_file}"')
 
     return mitm_analysisd
 
@@ -137,31 +138,32 @@ def kill_daemons():
 
 
 def get_script_arguments():
-    parser = argparse.ArgumentParser(usage="usage: %(prog)s [options]",
+    list_of_choices = ['DEBUG', 'ERROR']
+    parser = argparse.ArgumentParser(usage="python3 %(prog)s [options]",
                                      description="Analysisd YAML generator (Windows)",
                                      formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-e', '--events', dest='n_events', default=4096,
+    parser.add_argument('-e', '--events', dest='n_events', default=4096, type=int,
                         help='Specify how many events will be expected. Default 4096.', action='store')
-    parser.add_argument('-m', '--modified', dest='dropped_events', default=4088,
+    parser.add_argument('-m', '--modified', dest='dropped_events', default=4088, type=int,
                         help='Specify how many modified events will be expected. Default 4088.', action='store')
-    parser.add_argument('-d', '--debug', dest='debug_level', default=0, help='Specify debug level. Default 0.',
-                        action='store')
+    parser.add_argument('-d', '--debug', dest='debug_level', default='ERROR', choices=list_of_choices,
+                        help='Specify debug level. Default "ERROR".', action='store')
     return parser.parse_args()
 
 
 if __name__ == '__main__':
+    log_level = {'DEBUG': 10, 'ERROR': 40}
+
     options = get_script_arguments()
-    events = int(options.n_events)
-    modify = int(options.dropped_events)
-    debug_level = int(options.debug_level)
-    debug = logging.ERROR if debug_level == 0 else logging.DEBUG
-    logging.basicConfig(level=debug)
+    events = options.n_events
+    modify = options.dropped_events
+    logger.setLevel(log_level[options.debug_level])
 
     try:
         mitm = generate_analysisd_yaml(n_events=events, modify_events=modify)
         mitm.shutdown()
     except (TimeoutError, FileNotFoundError):
-        logging.error('Could not generate the YAML. Please clean the environment.')
+        logger.error('Could not generate the YAML. Please clean the environment.')
         delete_sockets()
     finally:
         kill_daemons()
