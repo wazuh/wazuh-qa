@@ -33,7 +33,9 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 # configurations
 
 monitoring_modes = ['realtime', 'whodata']
-conf_params, conf_metadata = generate_params(extra_params={'TEST_DIRECTORIES': directory_str},
+conf_params, conf_metadata = generate_params(extra_params={'TEST_DIRECTORIES': directory_str,
+                                                           'REPORT_CHANGES': {'report_changes': 'no'},
+                                                           'MODULE_NAME': __name__},
                                              modes=monitoring_modes)
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
@@ -51,10 +53,10 @@ def get_configuration(request):
 
 @pytest.mark.benchmark
 @pytest.mark.parametrize('files, folder, tags_to_apply', [
-    (file_list[0:10], testdir1, {'ossec_benchmark'}),
-    (file_list[0:100], testdir1, {'ossec_benchmark'}),
-    (file_list[0:1000], testdir1, {'ossec_benchmark'}),
-    (file_list, testdir1, {'ossec_benchmark'})
+    (file_list[0:10], testdir1, {'ossec_conf'}),
+    (file_list[0:100], testdir1, {'ossec_conf'}),
+    (file_list[0:1000], testdir1, {'ossec_conf'}),
+    (file_list, testdir1, {'ossec_conf'})
 ])
 def test_benchmark_regular_files(files, folder, tags_to_apply, get_configuration,
                                  configure_environment, restart_syscheckd,
