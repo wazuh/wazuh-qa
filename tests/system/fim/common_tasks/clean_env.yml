@@ -1,5 +1,7 @@
 ---
   - hosts: all
+    vars_files:
+      - ../../provisioning/vars/elastic_nginx.yml
     strategy: free
     tasks:
     # Wazuh Agents cleanup
@@ -25,46 +27,48 @@
             state: absent
         when:
           - inventory_hostname in groups['linuxagents']
+        become: yes
 
       - block:
         - name: Windows | Check if Program Files (x86) exists
-            win_stat:
+          win_stat:
             path: C:\Program Files (x86)
-            register: check_path
+          register: check_path
 
         - name: Windows | Set Win Path (x86)
-            set_fact:
+          set_fact:
             wazuh_agent_win_path: "{{ windows_install_dir_x86 }}"
-            when:
-            - check_path.stat.exists
+          when:
+           - check_path.stat.exists
 
         - name: Windows | Set Win Path (x64)
-            set_fact:
+          set_fact:
             wazuh_agent_win_path: "{{ windows_install_dir }}"
-            when:
+          when:
             - not check_path.stat.exists
 
         - name: Windows | Check if Wazuh installer is already downloaded
-            win_stat:
+          win_stat:
             path: "C:\\wazuh-agent-{{ windows_agent_version }}-{{ windows_agent_revision }}.msi"
-            register: wazuh_package_downloaded
+          register: wazuh_package_downloaded
 
         - name: Windows | Download Wazuh Agent package
-            win_get_url:
+          win_get_url:
             url: "{{ windows_repo }}wazuh-agent-{{ windows_agent_version }}-{{ windows_agent_revision }}.msi"
             dest: C:\
-            when:
+          when:
             - not wazuh_package_downloaded.stat.exists
 
         - name: Uninstall Wazuh Agent
-            win_package:
+          win_package:
             path: "C:\\wazuh-agent-{{ windows_agent_version }}-{{ windows_agent_revision }}.msi"
             state: absent
 
         - name: Delete Wazuh installation folder
-            win_file:
+          win_file:
             path: "{{ wazuh_agent_win_path }}"
             state: absent
+
         when:
           - inventory_hostname in groups['windowsagents']
 
@@ -72,17 +76,6 @@
     # Wazuh Managers cleanup
 
       - block:
-        - name: check if wazuh-manager service exists
-          stat: path=/etc/init.d/wazuh-manager
-          register: manager_service_status
-
-        - name: Check if wazuh-api service exists
-          stat: path=/etc/init.d/wazuh-api
-          register: api_service_status
-
-        - name: Check if filebeat service exists
-          stat: path=/etc/init.d/filebeat
-          register: filebeat_service_status
 
         - name: Stop wazuh stack services (wazuh-manager, wazuh-api, and, filebeat)
           service:
@@ -92,10 +85,6 @@
             - wazuh-manager
             - wazuh-api
             - filebeat
-          when:
-            - manager_service_status.stat.exists
-            - api_service_status.exists
-            - filebeat_service_status.exists
 
         - name: Uninstall wazuh-manager service
           package:
@@ -103,39 +92,46 @@
             state: absent
           with_items:
             - wazuh-manager
-          when: manager_service_status.stat.exists
 
         - name: Ensure /var/ossec is deleted
           file:
             path: /var/ossec
             state: absent
+
         when:
           - inventory_hostname in groups['masters'] or inventory_hostname in groups['workers']
+        become: yes
       
     # Elasticsearch cleanup
 
       - block:
-        - name: Get service facts
-          service_facts:
-
-        - name: Print elasticsearch indexes
-          debug: var=ansible_facts.services["elasticsearch.service"]
 
         - name: List and delete elasticsearch indexes + stop elasticsearch service
           block:
             - name: List Elasticsearch indexes
-              command: curl -X GET "{{ ansible_eth1.ipv4.address }}:9200/_cat/indices/*?v&s=index&pretty"
+              uri:
+                url: "{{ elastic_api_protocol }}://{{ inventory_hostname }}:{{ elasticsearch_port }}/_cat/indices/*?v&s=index&pretty"
+                url_username: "{{ elastic_user }}"
+                url_password: "{{ elastic_password }}"
+                method: GET
+                validate_certs: no
               register: elasticsearch_indexes_get
-              delegate_to: "{{ ansible_eth1.ipv4.address }}"
+              delegate_to: "{{ inventory_hostname }}"
 
             - name: Print elasticsearch indexes
-              debug: var={{ item }}
+              debug:
+                msg: "{{ item.std }}"
               with_items: elasticsearch_indexes_get.stdout_lines
 
-            - name: Delete Elasticsearch indexes
-              command:  curl -X DELETE "{{ ansible_eth1.ipv4.address }}:9200/*?pretty"
-              register: elasticsearch_indexes_delete
-              delegate_to: "{{ ansible_eth1.ipv4.address }}"
+            - name: Delete Elasticsearch indexes (HTTP)
+              uri:
+                url: "{{ elastic_api_protocol }}://{{ inventory_hostname }}:{{ elasticsearch_port }}/*"
+                url_username: "{{ elastic_user }}"
+                url_password: "{{ elastic_password }}"
+                method: DELETE
+                validate_certs: no
+              register: elasticsearch_indexes_get
+              delegate_to: "{{ inventory_hostname }}"
 
             - name: Print elasticsearch indexes after deletion
               debug: var={{ item }}
@@ -147,9 +143,10 @@
                 state: stopped
               with_items:
                 - elasticsearch
-          when: ansible_facts.services["elasticsearch.service"]["state"] == "running"
+
         when:
           - inventory_hostname in groups['elasticsearch']
+        become: yes          
 
     # Kibana cleanup
 
@@ -166,4 +163,5 @@
 
         when:
           - inventory_hostname in groups['kibana']
+        become: yes          
 
