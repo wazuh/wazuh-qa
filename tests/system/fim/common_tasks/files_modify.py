@@ -69,10 +69,11 @@ def modify_file_content(filepath):
 def main():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('filelist', action="store")
+    parser.add_argument("-i", "--input-list", type=str, required=True, dest='input_file',
+                        help="File containing the list of files to modify")
     args = parser.parse_args()
-    filelist = args.filelist
-    with open(filelist) as flist:
+    input_file = args.input_file
+    with open(input_file) as flist:
         for path in flist:
             modify_file_content(path[:-1])
 
