@@ -61,7 +61,6 @@ def test_remove_and_read_folder(tags_to_apply, folder, get_configuration,
         Configuration tag to apply in the test
     folder : str
         The folder to remove and read
-
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
@@ -87,7 +86,6 @@ def test_reconnect_to_audit(tags_to_apply, get_configuration, configure_environm
     ----------
     tags_to_apply : set
         Configuration tag to apply in the test
-
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])

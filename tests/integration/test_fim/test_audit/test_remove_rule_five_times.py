@@ -57,7 +57,6 @@ def test_remove_rule_five_times(tags_to_apply, folder, audit_key,
         The folder to remove and read
     audit_key : str
         The key which Wazuh put.
-
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])

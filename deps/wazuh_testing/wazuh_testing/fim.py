@@ -835,7 +835,6 @@ class EventChecker:
             True if the event should be raised. False otherwise. Default `True`
         extra_timeout : int, optional
             Additional time to wait after the min_timeout
-
         """
         num_files = len(self.file_list)
         error_msg = "TimeoutError was raised because "
@@ -862,7 +861,6 @@ class EventChecker:
             Additional time to wait after the min_timeout
         error_message : str
             Message to explain a possible timeout error
-
         """
         def clean_results(event_list):
             if not isinstance(event_list, list):

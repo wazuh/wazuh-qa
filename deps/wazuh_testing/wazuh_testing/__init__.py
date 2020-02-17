@@ -41,11 +41,12 @@ class Parameters:
 
 
 global_parameters = Parameters()
-logger = logging.getLogger('testing')
+logger = logging.getLogger('wazuh_testing')
 logger.setLevel(logging.DEBUG)
 
 handler = logging.StreamHandler(sys.stderr)
 handler.setLevel(logging.DEBUG)
-handler.setFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
 
 logger.addHandler(handler)
