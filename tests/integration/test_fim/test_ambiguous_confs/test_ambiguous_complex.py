@@ -8,13 +8,13 @@ from datetime import timedelta
 
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, create_file, WAZUH_PATH,
                                callback_restricted, REGULAR, generate_params)
-from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.time import TimeMachine
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.time import TimeMachine
 
 # Marks
 
@@ -156,13 +156,16 @@ def check_default(directory, trigger, check_list, file_list, timeout, scheduled)
 
 def check_restrict(directory, trigger, check_list, file_list, timeout, scheduled):
     """Standard restrict attribute test"""
-
     create_file(REGULAR, directory, file_list[0], content='')
     if scheduled:
         TimeMachine.travel_to_future(timedelta(hours=13))
     while True:
         ignored_file = wazuh_log_monitor.start(timeout=timeout,
-                                               callback=callback_restricted).result()
+                                               callback=callback_restricted,
+                                               error_message=f'TimeoutError was raised because a single '
+                                                             f'"ignoring file {file_list[0]} due to restriction ..." '
+                                                             f'was expected for {file_list[0]} but was not detected.'
+                                               ).result()
         if ignored_file == os.path.join(directory, file_list[0]):
             break
 

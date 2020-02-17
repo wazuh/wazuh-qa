@@ -7,12 +7,12 @@ import sys
 
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_registry, modify_registry, delete_registry, \
     timedelta, callback_detect_event
-from wazuh_testing import global_parameters
-from wazuh_testing.tools.time import TimeMachine
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.time import TimeMachine
 
 if sys.platform == 'win32':
     import winreg
@@ -99,12 +99,15 @@ def test_windows_registry(arch_list, tag, tags_to_apply,
     create_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 32)
     TimeMachine.travel_to_future(timedelta(seconds=frequency))
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event, accum_results=len(arch_list))
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                                error_message='Did not receive expected "Sending FIM event: ..." event',
+                                accum_results=len(arch_list))
 
     # Check that windows_registry trigger alerts when adding an entry
     modify_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 'test_add')
     TimeMachine.travel_to_future(timedelta(seconds=frequency))
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                                    error_message='Did not receive expected "Sending FIM event: ..." event',
                                     accum_results=len(arch_list)).result()
     if not isinstance(event, list):
         event = [event]
@@ -116,6 +119,7 @@ def test_windows_registry(arch_list, tag, tags_to_apply,
     modify_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 'test_modify')
     TimeMachine.travel_to_future(timedelta(seconds=frequency))
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                                    error_message='Did not receive expected "Sending FIM event: ..." event',
                                     accum_results=len(arch_list)).result()
     if not isinstance(event, list):
         event = [event]
@@ -130,8 +134,9 @@ def test_windows_registry(arch_list, tag, tags_to_apply,
     delete_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 32)
     TimeMachine.travel_to_future(timedelta(seconds=frequency))
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                                    error_message='Did not receive expected "Sending FIM event: ..." event',
                                     accum_results=len(arch_list)).result()
     if not isinstance(event, list):
         event = [event]
     for i, arch in enumerate(arch_list):
-        assert event[i]['data']['type'] == 'deleted', f'Event type not equal'
+        assert event[i]['data']['type'] == 'deleted', f'{event[i]["data"]["type"]} type not equal to deleted'

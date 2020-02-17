@@ -6,12 +6,12 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, generate_params
 from wazuh_testing import global_parameters
+from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, generate_params
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.time import TimeMachine
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.time import TimeMachine
 
 # Marks
 
@@ -30,7 +30,7 @@ scan_days = ['monday', 'thursday', 'wednesday']
 # configurations
 
 p, m = generate_params(extra_params={'TEST_DIRECTORIES': directory_str, 'SCAN_DAY': scan_days},
-                       modes=['scheduled']*len(scan_days))
+                       modes=['scheduled'] * len(scan_days))
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
@@ -72,12 +72,18 @@ def test_scan_day(tags_to_apply,
         day_diff %= 7
     elif day_diff == 0:
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
+            event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                            callback=callback_detect_end_scan)
+            raise AttributeError(f'Unexpected event {event}')
         return
 
     if day_diff > 1:
         TimeMachine.travel_to_future(timedelta(days=day_diff - 1))
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
+            event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                            callback=callback_detect_end_scan)
+            raise AttributeError(f'Unexpected event {event}')
     TimeMachine.travel_to_future(timedelta(days=1))
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+                            error_message='Did not receive expected '
+                                          '"File integrity monitoring scan ended" event')

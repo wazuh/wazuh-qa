@@ -13,10 +13,10 @@ import pytest
 from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, detect_initial_scan, callback_detect_event,
                                generate_params, callback_detect_integrity_state)
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.tools.configuration import set_section_wazuh_conf, load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import restart_wazuh_with_new_conf
-from wazuh_testing.tools.configuration import set_section_wazuh_conf, load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.time import TimeMachine
 
 # Marks
 
@@ -35,7 +35,8 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 # configurations
 
 def change_conf(dir_value):
-    p, m = generate_params(extra_params={'DIRECTORY': dir_value}, apply_to_all=({'SKIP': skip} for skip in ['yes', 'no']),
+    p, m = generate_params(extra_params={'DIRECTORY': dir_value},
+                           apply_to_all=({'SKIP': skip} for skip in ['yes', 'no']),
                            modes=['scheduled'])
 
     return load_wazuh_configurations(configurations_path, __name__,
@@ -126,13 +127,16 @@ def test_skip(directory, tags_to_apply,
 
             # Do not expect any 'Sending event'
             with pytest.raises(TimeoutError):
-                proc_monitor.start(timeout=3, callback=callback_detect_event)
+                proc_monitor.start(timeout=3, callback=callback_detect_event,
+                                   error_message='Did not receive expected "Sending FIM event: ..." event')
 
             TimeMachine.travel_to_future(timedelta(hours=13))
 
             found_event = False
             while not found_event:
-                event = proc_monitor.start(timeout=5, callback=callback_detect_event).result()
+                event = proc_monitor.start(timeout=5, callback=callback_detect_event,
+                                           error_message='Did not receive expected '
+                                                         '"Sending FIM event: ..." event').result()
                 if f'/proc/{proc.pid}/' in event['data'].get('path'):
                     found_event = True
 
@@ -141,7 +145,8 @@ def test_skip(directory, tags_to_apply,
 
         else:
             with pytest.raises(TimeoutError):
-                wazuh_log_monitor.start(timeout=3, callback=callback_detect_integrity_state)
+                event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_integrity_state)
+                raise AttributeError(f'Unexpected event {event}')
 
     elif tags_to_apply == {'skip_sys'}:
         if trigger:
@@ -150,14 +155,17 @@ def test_skip(directory, tags_to_apply,
 
             # Do not expect any 'Sending event'
             with pytest.raises(TimeoutError):
-                wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+                event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+                raise AttributeError(f'Unexpected event {event}')
 
             # Remove module video and travel to future to check alerts
             subprocess.Popen(["modprobe", "-r", "video"])
             TimeMachine.travel_to_future(timedelta(hours=13))
 
             # Detect at least one 'delete' event in /sys/module/video path
-            event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event).result()
+            event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event,
+                                            error_message='Did not receive expected '
+                                                          '"Sending FIM event: ..." event').result()
             assert event['data'].get('type') == 'deleted' and '/sys/module/video' in event['data'].get('path'), \
                 f'Sys event not detected'
 
@@ -165,7 +173,8 @@ def test_skip(directory, tags_to_apply,
             subprocess.Popen(["modprobe", "video"])
         else:
             with pytest.raises(TimeoutError):
-                wazuh_log_monitor.start(timeout=3, callback=callback_detect_integrity_state)
+                event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_integrity_state)
+                raise AttributeError(f'Unexpected event {event}')
     else:
         regular_file_cud(directory, wazuh_log_monitor,
                          time_travel=True,

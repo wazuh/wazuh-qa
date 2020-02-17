@@ -4,21 +4,20 @@
 import os
 
 import pytest
-
 from test_fim.test_follow_symbolic_link.common import configurations_path, testdir1, \
     modify_symlink, testdir_link, wait_for_symlink_check, wait_for_audit
 # noinspection PyUnresolvedReferences
 from test_fim.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
     extra_configuration_after_yield
+
 from wazuh_testing.fim import (generate_params, callback_detect_event,
                                check_time_travel, modify_file_content, LOG_FILE_PATH)
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.sunos5, pytest.mark.darwin, pytest.mark.tier(level=1)]
-
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
@@ -71,7 +70,8 @@ def test_symbolic_revert_symlink(tags_to_apply, get_configuration, configure_env
     modify_file_content(testdir1, file2, new_content='Sample modification')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+        event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+        raise AttributeError(f'Unexpected event {event}')
 
     # Change the target to the folder and now expect an event
     modify_symlink(testdir1, os.path.join(testdir_link, 'symlink'))
@@ -85,5 +85,6 @@ def test_symbolic_revert_symlink(tags_to_apply, get_configuration, configure_env
     modify_file_content(testdir1, file2, new_content='Sample modification2')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+        event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+        raise AttributeError(f'Unexpected event {event}')
     modify_and_assert(file1)

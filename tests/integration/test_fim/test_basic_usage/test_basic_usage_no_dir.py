@@ -6,15 +6,14 @@ import os
 
 import pytest
 
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_empty_directories
 from wazuh_testing import global_parameters
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_empty_directories
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
 pytestmark = pytest.mark.tier(level=0)
-
 
 # Variables
 
@@ -22,7 +21,6 @@ test_directories = []
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
 
 # Configurations
 
@@ -62,9 +60,13 @@ def test_new_directory(tags_to_apply, get_configuration, configure_environment, 
     # Check that the warning is displayed when there is no directory.
     if not get_configuration['elements'][1]['directories']['value']:
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                callback=callback_empty_directories).result()
+                                callback=callback_empty_directories,
+                                error_message='Did not receive expected '
+                                              '"DEBUG: (6338): Empty directories tag found in the configuration" '
+                                              'event').result()
     # Check that the message is not displayed when the directory is specified.
     else:
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                    callback=callback_empty_directories).result()
+            event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                            callback=callback_empty_directories).result()
+            raise AttributeError(f'Unexpected event {event}')

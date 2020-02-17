@@ -5,11 +5,11 @@ import os
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, generate_params
 from wazuh_testing import global_parameters
+from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, generate_params
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 

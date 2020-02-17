@@ -1,7 +1,8 @@
-import os
-import wmi
 import ctypes
+import os
 from ctypes import wintypes
+
+import wmi
 
 # Imports and constants
 

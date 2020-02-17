@@ -9,8 +9,8 @@ import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, create_file, generate_params, callback_syscheck_message
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -61,11 +61,13 @@ def test_max_eps_on_start(get_configuration, configure_environment, restart_sysc
 
     result = wazuh_log_monitor.start(timeout=150,
                                      accum_results=1000,
-                                     callback=callback_syscheck_message).result()
+                                     callback=callback_syscheck_message,
+                                     error_message='Did not receive expected any integrity event').result()
 
     max_eps = int(get_configuration['metadata']['max_eps'])
     counter = Counter([date_time for date_time, _ in result])
     error_margin = (max_eps * 0.1)
 
     for date_time, n_occurrences in counter.items():
-        assert n_occurrences <= round(max_eps + error_margin), f'Sent {n_occurrences} but a maximum of {max_eps} was set'
+        assert n_occurrences <= round(
+            max_eps + error_margin), f'Sent {n_occurrences} but a maximum of {max_eps} was set'
