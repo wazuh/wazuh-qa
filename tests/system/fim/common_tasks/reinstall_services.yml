@@ -1,37 +1,37 @@
 - hosts: localhost
   vars_files:
-    - ../vars/wazuh_manager.yml
-    - ../vars/wazuh_agent.yml
+    - ../../provisioning/vars/wazuh_manager.yml
+    - ../../provisioning/vars/wazuh_agent.yml
+    - ../../provisioning/vars/credentials.yml
   tasks:
     - name: Deploying Wazuh Managers
       shell: "ansible-playbook provision_playbook.yml -i {{ ansible_hosts_destination }} {{ item }}"
-      async: 10000
-      poll: 0
       with_items:
-        - -l masters >> ../logs/masters.log
-      register: playbooks_run
+        - -l masters
+      args:
+        chdir: "../../provisioning/"
 
-    - async_status:
-        jid: "{{ item.ansible_job_id }}"
-      loop: "{{ playbooks_run.results }}"
-      register: jobs
-      until: jobs.finished
-      retries: 1000
-      delay: 10
-
-    - name: Installing and registering agents and running post installation tasks
-      shell: "ansible-playbook {{ item }} {{ ansible_hosts_destination }}"
-      async: 10000
-      poll: 0
+    - name: Installing and registering Wazuh Agents
+      shell: "ansible-playbook provision_playbook.yml -i {{ ansible_hosts_destination }} {{ item }} "
       with_items:
-        - provision_playbook.yml -l linuxagents
-  #      - provision_playbook.yml -l windowsagents
+        - -l linuxagents
+        - -l windowsagents
       register: register_agents
+      args:
+        chdir: "../../provisioning/"
 
-    - async_status:
-        jid: "{{ item.ansible_job_id }}"
-      loop: "{{ register_agents.results }}"
-      register: jobs_agents
-      until: jobs_agents.finished
-      retries: 50
-      delay: 10
+- hosts: all
+  tasks:
+    - name: Starting Elasticsearch
+      service:
+        name: elasticsearch
+        state: started
+      when:
+        - ansible_inventory in groups["elasticsearch"]
+
+    - name: Starting Kibana
+      service:
+        name: kibana
+        state: started
+      when:
+        ansible_inventory in groups["kibana"]
