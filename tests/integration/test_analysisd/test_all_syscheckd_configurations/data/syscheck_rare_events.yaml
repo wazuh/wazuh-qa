@@ -1,13 +1,13 @@
 ---
 - name: Added0
   test_case:
-  - input: 8:syscheck:{"type":"event","data":{"path":"/testdir0/��嚣�","mode":"real-time","type":"added","timestamp":1581438201,"attributes":{"type":"file","size":0,"perm":"rw-r--r--","uid":"0","gid":"0","user_name":"root","group_name":"root","inode":1185139,"mtime":1581438201,"hash_md5":"d41d8cd98f00b204e9800998ecf8427e","hash_sha1":"da39a3ee5e6b4b0d3255bfef95601890afd80709","hash_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","checksum":"0cae53db223561d1a96bba22e0600a178f6aaeba"},"tags":"Sample"}}
+  - input: 8:syscheck:{"type":"event","data":{"path":"/testdir0/��嚣�","mode":"real-time","type":"added","timestamp":1581438201,"attributes":{"type":"file","size":0,"perm":"rw-r--r--","uid":"0","gid":"0","user_name":"��嚣�","group_name":"��嚣�","inode":1185139,"mtime":1581438201,"hash_md5":"d41d8cd98f00b204e9800998ecf8427e","hash_sha1":"da39a3ee5e6b4b0d3255bfef95601890afd80709","hash_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","checksum":"��嚣�1234"},"tags":"Sample"}}
     output: 'agent 000 syscheck save2 {"path": "/testdir0/��嚣�", "timestamp": 1581438201,
       "attributes": {"type": "file", "size": 0, "perm": "rw-r--r--", "uid": "0", "gid":
-      "0", "user_name": "root", "group_name": "root", "inode": 1185139, "mtime": 1581438201,
+      "0", "user_name": "��嚣�", "group_name": "��嚣�", "inode": 1185139, "mtime": 1581438201,
       "hash_md5": "d41d8cd98f00b204e9800998ecf8427e", "hash_sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
       "hash_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "checksum": "0cae53db223561d1a96bba22e0600a178f6aaeba"}}'
+      "checksum": "��嚣�1234"}}'
     stage: Added
 - name: Modified0
   test_case:
