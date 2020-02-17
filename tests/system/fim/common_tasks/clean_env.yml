@@ -2,6 +2,7 @@
   - hosts: all
     vars_files:
       - ../../provisioning/vars/elastic_nginx.yml
+      - ../../provisioning/vars/wazuh_agent.yml
     strategy: free
     tasks:
     # Wazuh Agents cleanup
