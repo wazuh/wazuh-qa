@@ -394,7 +394,10 @@ def check_apply_test(apply_to_tags: Set, tags: List):
 
 
 def generate_syscheck_config():
-    """Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags'."""
+    """Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags'.
+
+    Every configuration is ready to be applied in the tag <directories>.
+    """
     check_platform = 'check_attrs' if sys.platform == 'win32' else 'check_inode'
     check_names = ['check_all', 'check_sha1sum', 'check_md5sum', 'check_sha256sum', 'check_size', 'check_owner',
                    'check_group', 'check_perm', 'check_mtime', check_platform, 'report_changes']

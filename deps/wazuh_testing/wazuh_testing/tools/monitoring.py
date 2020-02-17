@@ -391,6 +391,15 @@ class SocketMonitor:
 
 class QueueMonitor:
     def __init__(self, queue_item, time_step=0.5):
+        """Create a new instance to monitor any given queue.
+
+        Parameters
+        ----------
+        queue_item : SuperQueue
+            Queue to monitor.
+        time_step : float
+            Fraction of time to wait in every get. Default `0.5`
+        """
         self._queue = queue_item
         self._continue = False
         self._abort = False
@@ -398,6 +407,24 @@ class QueueMonitor:
         self._time_step = time_step
 
     def get_results(self, callback=_callback_default, accum_results=1, timeout=-1, update_position=True):
+        """Get as many matched results as `accum_results`.
+
+        Parameters
+        ----------
+        callback : callable
+            Callback function to filter results.
+        accum_results : int
+            Number of results to get. Default `1`
+        timeout : int
+            Maximum timeout. Default `-1`
+        update_position : bool
+            True if we pop items from the queue once they are read. False otherwise. Default `True`
+
+        Returns
+        -------
+        list of any or any
+            It can return either a list of any type or simply any type. If `accum_results > 1`, it will be a list.
+        """
         result_list = []
         timer = 0.0
         time_wait = 0.1
@@ -442,7 +469,7 @@ class QueueMonitor:
         return self
 
     def stop(self):
-        """Stop the file monitoring. It can be restart calling the start method."""
+        """Stop the queue monitoring. It can be restart calling the start method."""
         self._continue = False
         return self
 
@@ -452,14 +479,30 @@ class QueueMonitor:
         return self
 
     def result(self):
+        """Return the current result."""
         return self._result
 
     def get_queue(self):
+        """Return the monitored queue."""
         return self._queue
 
 
 class SuperQueue(queue.Queue):
     def peek(self, position=0, *args, **kwargs):
+        """Peek any given position without modifying the queue status.
+
+        The difference between `peek` and `get` is `peek` pops the item and `get` does not.
+
+        Parameters
+        ----------
+        position : int
+            Element of the queue to return. Default `0`
+
+        Returns
+        -------
+        any
+            Any item in the given position.
+        """
         aux_queue = queue.Queue()
         aux_queue.queue = deepcopy(self.queue)
         for _ in range(position):
@@ -542,6 +585,17 @@ class DatagramServer(socketserver.UnixDatagramServer):
 class ManInTheMiddle:
 
     def __init__(self, socket_path, mode='TCP', func: callable = None):
+        """Create a MITM for the socket `socket_path`.
+
+        Parameters
+        ----------
+        socket_path : str
+            Path of the socket to be replaced.
+        mode : str
+            It can be either 'TCP' or 'UDP'. Default `'TCP'`
+        func : callable
+            Function to be applied to every data before sending it.
+        """
         self.listener_socket_path = socket_path
         self.forwarded_socket_path = f'{socket_path}.original'
         os.rename(self.listener_socket_path, self.forwarded_socket_path)

@@ -187,6 +187,7 @@ def generate_analysisd_yaml(request):
 
 @pytest.fixture(scope='module')
 def wait_for_analysisd_startup(request):
+    """Wait until analysisd has begun and alerts.json is created."""
     def callback_analysisd_startup(line):
         if 'Input message handler thread started.' in line:
             return line
@@ -198,8 +199,8 @@ def wait_for_analysisd_startup(request):
 
 @pytest.fixture(scope='module')
 def configure_mitm_environment_analysisd(request):
+    """Use MITM to replace analysisd and wazuh-db sockets."""
     def remove_logs():
-        """Remove all Wazuh logs"""
         for root, dirs, files in os.walk(WAZUH_LOGS_PATH):
             for file in files:
                 os.remove(os.path.join(root, file))
@@ -244,6 +245,19 @@ def configure_mitm_environment_analysisd(request):
 
 @pytest.fixture(scope='module')
 def generate_events_and_alerts(request):
+    """Read the specified yaml and generate every event and alert using the input from every test case.
+
+    Alerts are saved in a list and events have the following structure:
+        {
+            'path':
+            {
+                'Added': event
+                'Modified': event
+                'Deleted': event
+            }
+            ...
+        }
+    """
     alerts_json = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.json')
     test_cases = getattr(request.module, 'test_cases')
     socket_controller = getattr(request.module, 'receiver_sockets')[0]
