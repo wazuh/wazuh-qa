@@ -1,0 +1,15 @@
+---  
+  - name: "Verify alert log"
+    script: "verify_alerts_json.py -f {{ file_list_path }} -e {{ syscheck_event }}"
+    args:
+      executable: 
+        - "python3"
+    when: 
+      - inventory_hostname in groups['masters']
+
+  - name: "Verify elastic alerts"
+    script: "verify_alerts_elasticsearch.py -f {{ file_list_path }} -e {{ syscheck_event }} -i {{ private_ip }}"
+    args:
+      executable: python3
+    when: 
+      - inventory_hostname in groups['elasticsearch'][0]
