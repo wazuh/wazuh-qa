@@ -433,6 +433,7 @@ def set_correct_prefix(configurations, new_prefix):
                         for path in paths_list:
                             modified_paths += inserter(path)
                             modified_paths += ',' if (element.get('directories') and modified_paths != '') else ''
+                        modified_restricts = modified_restricts.rstrip(',')
 
                         # Insert the prefix in every path inside restrict
                         for restrict in restrict_list:
