@@ -68,8 +68,6 @@ def configure_syscheck_environment(request):
         os.makedirs(t_dir, exist_ok=True, mode=0o777)
         directories_list.append(t_dir)
 
-    setattr(request.module, 'directories_list', directories_list)
-
     yield
 
     # Delete every created directory
@@ -129,8 +127,6 @@ def generate_analysisd_yaml(request):
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
     control_service('stop')
 
-
-
     control_service('start', daemon='wazuh-db', debug_mode=True)
     check_daemon_status(running=True, daemon='wazuh-db')
 
@@ -156,18 +152,18 @@ def generate_analysisd_yaml(request):
     for directory in dir_list:
         create_file(REGULAR, directory, file, content='')
         time.sleep(0.01)
-    added = analysis_monitor.start(timeout=0.01 * len(dir_list), callback=callback_analysisd_event,
+    added = analysis_monitor.start(timeout=max(0.01 * len(dir_list), 10), callback=callback_analysisd_event,
                                    accum_results=len(dir_list)).result()
 
     for directory in dir_list:
         modify_file(directory, file, new_content='Modified')
         time.sleep(0.01)
-    modified = analysis_monitor.start(timeout=0.01 * len(dir_list), callback=callback_analysisd_event,
+    modified = analysis_monitor.start(timeout=max(0.01 * len(dir_list), 10), callback=callback_analysisd_event,
                                       accum_results=len(dir_list)-8).result()
     for directory in dir_list:
         delete_file(directory, file)
         time.sleep(0.01)
-    deleted = analysis_monitor.start(timeout=0.01 * len(dir_list), callback=callback_analysisd_event,
+    deleted = analysis_monitor.start(timeout=max(0.01 * len(dir_list), 10), callback=callback_analysisd_event,
                                      accum_results=len(dir_list)).result()
 
     test_data_path = getattr(request.module, 'test_data_path')
