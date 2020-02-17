@@ -1,8 +1,0 @@
-### Linux Agents version
-
-linux_agents_version: "3.11.2-1"
-
-### Windows Agents version
-
-windows_agent_version: "3.11.2" # wazuh-ansible appends the winagent.config.revision = "-1"
-windows_md5: "9b6e57054353e31f449ce61bf3695271"

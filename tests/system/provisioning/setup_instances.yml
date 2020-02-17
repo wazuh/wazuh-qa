@@ -1,0 +1,34 @@
+---
+  # - hosts: all
+  #   # Disabling gather_facts phase, not required for this task and could cause incompatibilities
+  #   gather_facts: no
+  #   tasks:
+  #     - name: Verifying connection with the hosts
+  #       wait_for_connection:
+  #         delay: 60
+  #         sleep: 15
+  #         # Centos instance takes a while to initialize
+  #         timeout: 300
+  #   # Stopping the playbook if one of the hosts fails
+  #   any_errors_fatal: true
+
+  - hosts: all, !windowsagents # "!" ignores groups. "windows" do not apply to this
+    strategy: free
+    vars_files:
+      - ./vars/credentials.yml
+    tasks:
+      - import_tasks: ../provisioning/roles/aws/tasks/configure_ssh.yml
+      - import_tasks: ../provisioning/roles/aws/tasks/setup_instances.yml
+    handlers:
+      - include: ../provisioning/roles/aws/handlers/main.yml
+    become: yes
+    become_user: root
+
+  - hosts: windowsagents
+    strategy: free
+    vars_files:
+      - ./vars/credentials.yml
+    tasks:
+      - import_tasks: ../provisioning/roles/aws/tasks/setup_instances.yml
+
+      

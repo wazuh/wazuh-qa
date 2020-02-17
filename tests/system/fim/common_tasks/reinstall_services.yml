@@ -1,0 +1,37 @@
+- hosts: localhost
+  vars_files:
+    - ../../provisioning/vars/wazuh_manager.yml
+    - ../../provisioning/vars/wazuh_agent.yml
+    - ../../provisioning/vars/credentials.yml
+  tasks:
+    - name: Deploying Wazuh Managers
+      shell: "ansible-playbook provision_playbook.yml -i {{ ansible_hosts_destination }} {{ item }}"
+      with_items:
+        - -l masters
+      args:
+        chdir: "../../provisioning/"
+
+    - name: Installing and registering Wazuh Agents
+      shell: "ansible-playbook provision_playbook.yml -i {{ ansible_hosts_destination }} {{ item }} "
+      with_items:
+        - -l linuxagents
+        - -l windowsagents
+      register: register_agents
+      args:
+        chdir: "../../provisioning/"
+
+- hosts: all
+  tasks:
+    - name: Starting Elasticsearch
+      service:
+        name: elasticsearch
+        state: started
+      when:
+        - inventory_hostname in groups["elasticsearch"]
+
+    - name: Starting Kibana
+      service:
+        name: kibana
+        state: started
+      when:
+        - inventory_hostname in groups["kibana"]

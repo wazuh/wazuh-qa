@@ -1,0 +1,49 @@
+---
+  # Boostrap node
+  - hosts: elasticsearch[0]
+    roles:
+      - role: "{{ wazuh_ansible_repository_path }}/roles/elastic-stack/ansible-elasticsearch"
+    become: yes
+    become_user: root
+
+  - hosts: elasticsearch[1:]
+    strategy: free
+    roles:
+      - role: "{{ wazuh_ansible_repository_path }}/roles/elastic-stack/ansible-elasticsearch"
+    become: yes
+    become_user: root
+
+  - hosts: kibana
+    strategy: free
+    roles:
+      - role: "{{ wazuh_ansible_repository_path }}/roles/elastic-stack/ansible-kibana"
+    become: yes
+    become_user: root    
+
+  - hosts: masters
+    strategy: free
+    roles:
+      - role: "{{ wazuh_ansible_repository_path }}/roles/wazuh/ansible-wazuh-manager"
+      - role: "{{ wazuh_ansible_repository_path }}/roles/wazuh/ansible-filebeat"      
+    become: yes
+    become_user: root
+
+  - hosts: workers
+    strategy: free
+    roles:
+      - role: "{{ wazuh_ansible_repository_path }}/roles/wazuh/ansible-wazuh-manager"
+      - role: "{{ wazuh_ansible_repository_path }}/roles/wazuh/ansible-filebeat"
+    become: yes
+    become_user: root 
+
+  - hosts: linuxagents
+    strategy: free
+    roles:
+      - {{ wazuh_ansible_repository_path }}/roles/wazuh/ansible-wazuh-agent
+    become: yes
+    become_user: root
+
+  - hosts: windowsagents
+    strategy: free
+    roles:
+      - {{ wazuh_ansible_repository_path }}/roles/wazuh/ansible-wazuh-agent

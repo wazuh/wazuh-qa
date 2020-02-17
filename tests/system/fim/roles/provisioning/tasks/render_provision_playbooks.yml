@@ -1,8 +1,0 @@
----
-  - name: Rendering template for Elasticsearch bootstrap
-    template:
-      src: "../templates/provision_playbook.yml.j2"
-      dest: "./provision_playbook.yml"
-      mode: '664'
-    delegate_to: localhost
-    run_once: true
