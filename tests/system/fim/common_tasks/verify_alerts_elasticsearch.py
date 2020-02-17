@@ -17,9 +17,9 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument("-f", "--files", type=str, required=True, dest='files',
     help="File containing the list of modified files, one per line")
-  parser.add_argument("-a", "--alert", type=str, required=True, dest='alert',
+  parser.add_argument("-e", "--event", type=str, required=True, dest='alert',
     choices=['added', 'modified', 'deleted'],
-    help="Type of alert that we expect: added, modified, deleted")
+    help="Type of event that we expect: added, modified, deleted")
   parser.add_argument("-i", "--ip", type=str, required=True, dest='ip',
     help="ElasticSearch server IP")
   args = parser.parse_args()
