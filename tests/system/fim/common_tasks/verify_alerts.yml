@@ -2,8 +2,7 @@
   - name: "Verify alert log"
     script: "verify_alerts_json.py -f {{ file_list_path }} -e {{ syscheck_event }}"
     args:
-      executable: 
-        - "python3"
+      executable: "python3"
     when: 
       - inventory_hostname in groups['masters']
 
