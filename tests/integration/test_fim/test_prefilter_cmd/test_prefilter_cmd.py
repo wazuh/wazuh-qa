@@ -9,10 +9,10 @@ import distro
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, detect_initial_scan, generate_params
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import restart_wazuh_daemon
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 

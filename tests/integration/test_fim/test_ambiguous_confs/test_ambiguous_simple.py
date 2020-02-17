@@ -7,15 +7,15 @@ import sys
 
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, WAZUH_PATH,
                                CHECK_ALL, CHECK_GROUP, CHECK_INODE,
                                CHECK_MTIME, CHECK_OWNER,
                                CHECK_PERM, CHECK_SHA256SUM,
                                CHECK_SIZE, CHECK_SUM, REQUIRED_ATTRIBUTES, generate_params)
-from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -56,6 +56,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 conf_params, conf_metadata = generate_params(extra_params={'TAGS': tag})
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
+
 
 # fixtures
 
@@ -352,4 +353,5 @@ def test_ambiguous_check(dirname, checkers, tags_to_apply, get_configuration, co
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
-    regular_file_cud(dirname, wazuh_log_monitor, min_timeout=global_parameters.default_timeout, options=checkers, time_travel=scheduled)
+    regular_file_cud(dirname, wazuh_log_monitor, min_timeout=global_parameters.default_timeout, options=checkers,
+                     time_travel=scheduled)

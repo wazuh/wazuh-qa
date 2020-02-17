@@ -6,11 +6,11 @@ import os
 
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, regular_file_cud, callback_detect_end_scan)
 from wazuh_testing import global_parameters
+from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, regular_file_cud, callback_detect_end_scan)
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -56,7 +56,8 @@ def test_disabled(folder, get_configuration, configure_environment, restart_sysc
     """
     # Expect a timeout when checking for syscheckd initial scan
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=20, callback=callback_detect_end_scan)
+        event = wazuh_log_monitor.start(timeout=20, callback=callback_detect_end_scan)
+        raise AttributeError(f'Unexpected event {event}')
 
     # Use `regular_file_cud` and don't expect any event
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'

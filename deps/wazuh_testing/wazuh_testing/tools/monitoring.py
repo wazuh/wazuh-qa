@@ -1,12 +1,14 @@
 # Copyright (C) 2015-2020, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import os
 import socket
 import sys
 import time
 from struct import pack, unpack
 
+from wazuh_testing import logger
 from wazuh_testing.tools.time import Timer
 
 
@@ -62,7 +64,7 @@ class FileMonitor:
         self.extra_timer_is_running = False
 
     def _monitor(self, callback=_callback_default, accum_results=1, update_position=True, timeout_extra=0,
-                 encoding=None):
+                 encoding=None, error_message=''):
         """Wait for new lines to be appended to the file.
         A callback function will be called every time a new line is detected. This function must receive two
         positional parameters: a references to the FileMonitor object and the line detected.
@@ -80,6 +82,7 @@ class FileMonitor:
                 if self._abort and not self.extra_timer_is_running:
                     self.stop()
                     if type(self._result) != list or accum_results != len(self._result):
+                        logger.error(error_message)
                         raise TimeoutError()
                 self._position = f.tell()
                 line = f.readline()
@@ -105,7 +108,7 @@ class FileMonitor:
             self._position = f.tell() if update_position else previous_position
 
     def start(self, timeout=-1, callback=_callback_default, accum_results=1, update_position=True, timeout_extra=0,
-              encoding=None):
+              encoding=None, error_message=''):
         """Start the file monitoring until the stop method is called."""
         if not self._continue:
             self._continue = True
@@ -114,7 +117,7 @@ class FileMonitor:
                 self.timeout_timer = Timer(timeout, self.abort)
                 self.timeout_timer.start()
             self._monitor(callback=callback, accum_results=accum_results, update_position=update_position,
-                          timeout_extra=timeout_extra, encoding=encoding)
+                          timeout_extra=timeout_extra, encoding=encoding, error_message=error_message)
 
         return self
 

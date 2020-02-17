@@ -7,8 +7,8 @@ import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_configuration_warning
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -40,4 +40,6 @@ def test_invalid_sync_response(get_configuration, configure_environment, restart
     """Checks if an invalid ignore configuration is detected by catching the warning message displayed on the log"""
     check_apply_test({'sync_invalid'}, get_configuration['tags'])
 
-    wazuh_log_monitor.start(timeout=3, callback=callback_configuration_warning)
+    wazuh_log_monitor.start(timeout=3, callback=callback_configuration_warning,
+                            error_message='Did not receive expected '
+                                          '"WARNING: ...: Invalid value for element" event')

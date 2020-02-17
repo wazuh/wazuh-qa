@@ -7,17 +7,16 @@ import shutil
 
 import pytest
 
-from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, \
     regular_file_cud, check_time_travel
-from wazuh_testing import global_parameters
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0)]
-
 
 # Variables
 
@@ -26,7 +25,6 @@ directory_str = os.path.join(PREFIX, 'testdir1')
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
 
 # Configurations
 
@@ -53,6 +51,7 @@ def extra_configuration_before_yield():
 def extra_configuration_after_yield():
     """Make sure to delete the directory after performing the test"""
     shutil.rmtree(directory_str, ignore_errors=True)
+
 
 # Tests
 

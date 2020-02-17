@@ -6,12 +6,13 @@ import os
 import sys
 
 import pytest
+
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import (HARDLINK, LOG_FILE_PATH, REGULAR, EventChecker,
                                check_time_travel, create_file, delete_file, modify_file_content, generate_params)
-from wazuh_testing import global_parameters
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.configuration import load_wazuh_configurations
 
 # Marks
 
@@ -24,7 +25,6 @@ configurations_path = os.path.join(test_data_path, 'wazuh_hard_link.yaml')
 testdir1 = os.path.join('/', 'testdir1')
 unmonitored_dir = os.path.join('/', 'test_unmonitorized')
 test_directories = [testdir1, unmonitored_dir]
-
 
 # configurations
 

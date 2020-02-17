@@ -2,22 +2,21 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
+import sys
 import time
 from datetime import datetime, timedelta
 
 import psutil
 import pytest
-import sys
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, callback_detect_synchronization, generate_params
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.time import TimeMachine, time_to_timedelta
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.time import TimeMachine, time_to_timedelta
 
 if sys.platform == "linux":
     import paramiko
-
 
 # Marks
 
