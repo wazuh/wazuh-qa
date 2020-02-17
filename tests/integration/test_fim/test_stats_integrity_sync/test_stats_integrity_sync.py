@@ -4,15 +4,17 @@
 
 import os
 import re
+import subprocess
 import time
 from enum import Enum
 from multiprocessing import Process, Manager
 from random import randrange
-from socket import socket, AF_UNIX, SOCK_STREAM
+from socket import socket, AF_UNIX, SOCK_STREAM, MSG_WAITALL
 from struct import pack, unpack
 
 import pytest
 
+from wazuh_testing import logger
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_CONF, ALERT_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -62,16 +64,15 @@ def db_query(agent, query):
     -------
     str
         Return the wazuh-db's socket response.
-
     """
-    sock = socket(AF_UNIX, SOCK_STREAM)
-    sock.connect(db_path)
+    with socket(AF_UNIX, SOCK_STREAM) as sock:
+        sock.connect(db_path)
 
-    msg = f'agent {agent} sql {query}'.encode()
-    sock.send(pack(f"<I{len(msg)}s", len(msg), msg))
+        msg = f'agent {agent} sql {query}'.encode()
+        sock.sendall(pack(f"<I{len(msg)}s", len(msg), msg))
 
-    length = unpack("<I", sock.recv(4))[0]
-    return sock.recv(length).decode(errors='ignore')
+        length = unpack("<I", sock.recv(4, MSG_WAITALL))[0]
+        return sock.recv(length, MSG_WAITALL).decode(errors='ignore')
 
 
 def get_total_disk_info(daemon):
@@ -86,7 +87,6 @@ def get_total_disk_info(daemon):
     -------
     tuple of str
         Total read value and total write value
-
     """
     regex_rchar = r"rchar: ([0-9]+)"
     regex_wchar = r"wchar: ([0-9]+)"
@@ -95,7 +95,7 @@ def get_total_disk_info(daemon):
     regex_read = r"read_bytes: ([0-9]+)"
     regex_write = r"write_bytes: ([0-9]+)"
     regex_cancelled_write_bytes = r"cancelled_write_bytes: ([0-9]+)"
-    pid = os.popen('pidof ' + daemon).read().strip()
+    pid = subprocess.check_output(['pidof', daemon]).decode().strip()
 
     with open(os.path.join(f'/proc/{pid}/io'), 'r') as io_info:
         info = io_info.read()
@@ -123,9 +123,8 @@ def get_total_cpu_info(daemon):
     -------
     int
         Total CPU usage at this moment.
-
     """
-    pid = os.popen('pidof ' + daemon).read().strip()
+    pid = subprocess.check_output(['pidof', daemon]).decode().strip()
     cpu_file = "/proc/" + pid + "/stat"
     with open(cpu_file, 'r') as cpu_info:
         data = cpu_info.read().split()
@@ -146,7 +145,6 @@ def get_stats(daemon):
     -------
     list of str
         Return CPU, RAM, Disk reading, Disk writing, Total disk reading, total disk writing.
-
     """
     io_stats = get_total_disk_info(daemon)
 
@@ -191,15 +189,16 @@ def calculate_stats(daemon, cpu=0, rchar=0, wchar=0, syscr=0, syscw=0, read_byte
     -------
     list of str
         Return CPU, RAM, Disk reading, Disk writing, Total disk reading, total disk writing.
-
     """
-    regex_mem = r"ossec-syscheckd *([0-9]+)"
-    ps = os.popen("ps -axo comm,rss | grep ossec-syscheckd | head -n1")
+    regex_mem = rf"{daemon} *([0-9]+)"
+    ps = subprocess.Popen(["ps", "-axo", "comm,rss"], stdout=subprocess.PIPE)
+    grep = subprocess.Popen(["grep", daemon], stdin=ps.stdout, stdout=subprocess.PIPE)
+    head = subprocess.check_output(["head", "-n1"], stdin=grep.stdout).decode().strip()
     io_stats = get_total_disk_info(daemon)
 
     return {
         'cpu': str(float(get_total_cpu_info(daemon)) - float(cpu)),
-        'mem': re.match(regex_mem, ps.read()).group(1),
+        'mem': re.match(regex_mem, head).group(1),
         'rchar': str(float(io_stats['rchar']) - float(rchar)),
         'wchar': str(float(io_stats['wchar']) - float(wchar)),
         'syscr': str(float(io_stats['syscr']) - float(syscr)),
@@ -222,7 +221,6 @@ def n_attempts(agent):
     -------
     int
         Return the number of attempts for the specified agent.
-
     """
     regex = r"ok \[{\"n_attempts\":([0-9]+)}\]"
     response = db_query(agent, 'SELECT n_attempts FROM sync_info')
@@ -245,7 +243,6 @@ def n_completions(agent):
     -------
     int
         Return the number of completions for the specified agent.
-
     """
     regex = r"ok \[{\"n_completions\":([0-9]+)}\]"
     response = db_query(agent, 'SELECT n_completions FROM sync_info')
@@ -272,7 +269,6 @@ def get_agents(client_keys='/var/ossec/etc/client.keys'):
     -------
     dict
         Dictionary shared by all processes.
-
     """
     agent_regex = r'([0-9]+) [^!.+]+ .+ .+'
     agent_dict = dict()
@@ -303,7 +299,6 @@ def replace_conf(eps, directory, buffer):
         Directory to be monitored.
     buffer : str
         Can be yes or no, <disabled>yes|no</disabled>.
-
     """
     new_config = str()
     address_regex = r".*<address>([0-9.]+)</address>"
@@ -311,7 +306,7 @@ def replace_conf(eps, directory, buffer):
     eps_regex = r'.*<max_eps>([0-9]+)</max_eps>'
     buffer_regex = r'<client_buffer><disabled>(yes|no)</disabled></client_buffer>'
 
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/template_agent.conf'), 'r') as f:
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'template_agent.conf'), 'r') as f:
         lines = f.readlines()
         for line in lines:
             line = re.sub(address_regex, '<address>' + manager_ip + '</address>', line)
@@ -338,7 +333,6 @@ def check_all_n_attempts(agents_list):
     -------
     int
         Maximum number of attempts of the tested agents.
-
     """
     all_n_attempts = list()
     for agent_id in list(agents_list):
@@ -359,7 +353,6 @@ def check_all_n_completions(agents_list):
     -------
     int
         Minimum number of completions of the tested agents.
-
     """
     all_n_completions = list()
     for agent_id in list(agents_list):
@@ -387,7 +380,6 @@ def modify_database(agent_id, directory, prefix, total_files, modify_file, modif
         Flag for modify all checksums in the database.
     restore_all
         Flag that indicate if all entries in the fim_entry table should be deleted.
-
     """
     if modify_file:
         total_files = int(total_files)
@@ -396,11 +388,11 @@ def modify_database(agent_id, directory, prefix, total_files, modify_file, modif
         checksum = 'new_checksum'
         file = f"{directory}/{prefix}{randrange(total_files)}"
         db_query(agent_id, f'UPDATE fim_entry SET checksum="{checksum}" WHERE file="{file}"')
-        print(f'[DB] Modify checksum of {file}, set to {checksum}')
+        logger.info(f'Modify checksum of {file}, set to {checksum}')
     if modify_all:
         checksum = 'new_checksum2'
         db_query(agent_id, f'UPDATE fim_entry SET checksum="{checksum}"')
-        print(f'[DB] Modify all checksums to {checksum}')
+        logger.info(f'Modify all checksums to {checksum}')
     if restore_all:
         db_query(agent_id, 'DELETE FROM fim_entry')
 
@@ -408,7 +400,7 @@ def modify_database(agent_id, directory, prefix, total_files, modify_file, modif
     db_query(agent_id, 'UPDATE sync_info SET n_completions=0')
 
     while n_completions(agent_id) != 0 and n_attempts(agent_id) != 0:
-        print('[INFO] Waiting for wazuh-db')
+        logger.debug('Waiting for wazuh-db')
         time.sleep(0.1)
 
 
@@ -430,7 +422,6 @@ def agent_checker(case, agent_id, agents_dict, filename, attempts_info, database
         Dictionary with a flag that indicates if the stats collector must start.
     database_params : dict
         Database params to be applied for the current test.
-
     """
     if case == Cases.case0.value:
         alerts = open(ALERT_FILE_PATH, 'w')
@@ -455,7 +446,7 @@ def agent_checker(case, agent_id, agents_dict, filename, attempts_info, database
                     info_agent.write("agent_id,n_attempts,n_completions,start_time,end_time,total_time,state\n")
             agents_dict[agent_id]['start'] = time.time()
             attempts_info['start'] = True
-            print(f'[AGENT] Agent {agent_id} started at {agents_dict[agent_id]["start"]}')
+            logger.info(f'Agent {agent_id} started at {agents_dict[agent_id]["start"]}')
         actual_n_attempts = n_attempts(agent_id)
         if (n_completions(agent_id) > 0 or actual_n_attempts > max_n_attempts) and \
                 agents_dict[agent_id]['start'] != 0.0:
@@ -481,13 +472,12 @@ def info_collector(agent, agent_id, filename, attempts_info, state='complete'):
         Dictionary with a flag that indicates if the stats collector must start.
     state : str
         complete of except_max_attempts: Indicates if the agent took less attempts than the defined limits or not.
-
     """
     if state != 'complete':
         attempts_info['except_max_attempts'] = True
         attempts_info['agents_failed'] += 1
     with open(filename, 'a') as info_agent:
-        print(
+        logger.debug(
             f"[AGENT] Info {agent_id} writing: "
             f"{agent_id},{n_attempts(agent_id)},{n_completions(agent_id)},{agent['start']},"
             f"{time.time()},{time.time() - agent['start']},{state}")
@@ -496,7 +486,7 @@ def info_collector(agent, agent_id, filename, attempts_info, state='complete'):
 
 
 def state_collector(case, agents_dict, buffer, stats_dir, attempts_info):
-    """Gets the stats of the .state files in the WAZUH_PATH/var/run folder.
+    """Get the stats of the .state files in the WAZUH_PATH/var/run folder.
     We can define the stats to get from each daemon in the daemons_dict.
 
     Parameters
@@ -511,7 +501,6 @@ def state_collector(case, agents_dict, buffer, stats_dir, attempts_info):
         Stats folder.
     attempts_info : shared dict
         Dictionary with a flag that indicates if the stats collector must start.
-
     """
     daemons_dict = {
         'ossec-analysisd': {
@@ -541,22 +530,23 @@ def state_collector(case, agents_dict, buffer, stats_dir, attempts_info):
                     daemons_dict[daemon]['deleted'] = True
                 with open(filename, 'a') as state:
                     values = list()
-                    file_content = open(os.path.join(state_path, file), 'r').read()
+                    with open(os.path.join(state_path, file), 'r') as state_file:
+                        file_content = state_file.read()
                     for field in daemons_dict[daemon]['headers']:
                         values.append(
                             re.search(rf"{field}='([0-9.]+)'", file_content, re.MULTILINE).group(1))
                     if daemons_dict[daemon]['no_headers']:
                         state.write(f"seconds,{','.join(daemons_dict[daemon]['headers'])}\n")
                         daemons_dict[daemon]['no_headers'] = False
-                    # print(f'[STATE] State {daemon} writing: {time.time()},{",".join(values)}')
+                    logger.debug(f'State {daemon} writing: {time.time()},{",".join(values)}')
                     state.write(f"{time.time()},{','.join(values)}\n")
         time.sleep(state_collector_time)
 
-    print(f'[STATE] Finished state collector')
+    logger.info(f'Finished state collector')
 
 
 def stats_collector(filename, daemon, agents_dict, attempts_info):
-    """Collects the stats of the current daemon until all agents have finished the integrity process.
+    """Collect the stats of the current daemon until all agents have finished the integrity process.
 
     Parameters
     ----------
@@ -568,7 +558,6 @@ def stats_collector(filename, daemon, agents_dict, attempts_info):
         Dictionary with the start time of every agent.
     attempts_info : shared dict
         Dictionary with a flag that indicates the number of agents that exceed the limit of n_attempts.
-
     """
     stats, old_stats = None, None
     with open(filename, 'w') as file_:
@@ -580,32 +569,28 @@ def stats_collector(filename, daemon, agents_dict, attempts_info):
                     stats = calculate_stats(daemon, **old_stats)
                 old_stats = get_stats(daemon)
                 if stats:
-                    # print(f'[STATS] Stats {daemon} writing: {time.time()},{",".join(stats.values())}')
+                    logger.debug(f'Stats {daemon} writing: {time.time()},{",".join(stats.values())}')
                     file_.write(f'{time.time()},{",".join(stats.values())}\n')
             time.sleep(setup_environment_time)
 
     if attempts_info['agents_failed'] >= len(agents_dict.keys()):
-        print(f'[ATTEMPTS] Configuration finished. All agents reached the max_n_attempts, '
-              f'currently set up to {max_n_attempts}')
+        logger.info(f'Configuration finished. All agents reached the max_n_attempts, '
+                    f'currently set up to {max_n_attempts}')
 
     if old_stats:
         stats = calculate_stats(daemon, **old_stats)
-        print(f'[STATS] Finishing stats {daemon} writing: {time.time()},{",".join(stats.values())}')
+        logger.info(f'Finishing stats {daemon} writing: {time.time()},{",".join(stats.values())}')
         with open(filename, 'a') as file_:
             file_.write(f'{time.time()},{",".join(stats.values())}\n')
     else:
-        regex_mem = r"ossec-syscheckd *([0-9]+)"
-        stats = get_stats(daemon)
-        ps = os.popen("ps -axo comm,rss | grep ossec-syscheckd | head -n1")
-        cpu, mem = stats.pop('cpu'), re.match(regex_mem, ps.read()).group(1)
-        print(f'[STATS] Finishing stats {daemon} writing: {time.time()},{cpu},{mem},'
-              f'{",".join(stats.values())}')
+        stats = calculate_stats(daemon)
+        logger.info(f'Finishing stats {daemon} writing: {time.time()},{",".join(stats.values())}')
         with open(filename, 'a') as file_:
             file_.write(f'{time.time()},{",".join(stats.values())}\n')
 
 
 def protocol_detection(ossec_conf_path=WAZUH_CONF):
-    """Detects the protocol configuration.
+    """Detect the protocol configuration.
 
     Parameters
     ----------
@@ -616,10 +601,10 @@ def protocol_detection(ossec_conf_path=WAZUH_CONF):
     -------
     str
         udp or tcp.
-
     """
     try:
-        return re.search(r'<protocol>(udp|tcp)</protocol>', open(ossec_conf_path).read()).group(1)
+        with open(ossec_conf_path) as ossec_conf:
+            return re.search(r'<protocol>(udp|tcp)</protocol>', ossec_conf.read()).group(1)
     except AttributeError:
         raise AttributeError(f'[ERROR] No protocol detected in {ossec_conf_path}')
 
@@ -674,7 +659,7 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
     # If we are in case 1 or in case 2 and the number of files is 0, we will not execute the test since we cannot
     # modify the checksums because they do not exist
     if not (case == 1 and files == '0') and not (case == 2 and files == '0'):
-        print(f'\n\n[SETUP] Setting up the environment for for case{case}_{protocol}-{eps}eps-{files}files')
+        logger.info(f'Setting up the environment for for case{case}_{protocol}-{eps}eps-{files}files')
         truncate_file(ALERT_FILE_PATH)
         # Only modify the configuration if case 0 is executing
         if case == Cases.case0.value:
@@ -693,12 +678,12 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
             if seconds >= max_time_for_agent_setup:
                 raise TimeoutError('[ERROR] The agents are not ready')
             if seconds == 0:
-                print(f'[SETUP] Waiting for agent attempt...')
+                logger.info(f'Waiting for agent attempt...')
             time.sleep(setup_environment_time)
             seconds += setup_environment_time
 
         # We started the stats collector as the agents are ready
-        # print(f'[ENV] Started test for case{case}_{protocol}-{eps}eps-{files}files')
+        logger.info(f'Started test for case{case}_{protocol}-{eps}eps-{files}files')
         state_collector_check = Process(target=state_collector, args=(case, agents_dict, buffer, stats_dir,
                                                                       attempts_info,))
         state_collector_check.start()
@@ -710,7 +695,7 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
             if not any([writer_.is_alive() for writer_ in stats_checker]) and \
                     not any([check_agent.is_alive() for check_agent in agents_checker]) and \
                     not state_collector_check.is_alive():
-                print('[ENV] All processes are finished')
+                logger.info('All processes are finished')
                 break
             time.sleep(setup_environment_time)
     clean_environment()
