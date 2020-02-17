@@ -50,8 +50,8 @@ def get_alert(request):
     return alerts_list[request.param]
 
 
-def test_validate_all_alerts(configure_mitm_environment_analysisd, create_unix_sockets, wait_for_analysisd_startup,
-                             generate_events_and_alerts, get_alert):
+def test_validate_all_linux_alerts(configure_mitm_environment_analysisd, create_unix_sockets,
+                                   wait_for_analysisd_startup, generate_events_and_alerts, get_alert):
     """Check the event messages handling by analysisd.
 
     The variable `test_case` is a yaml file that contains the input and the expected output for every test case.

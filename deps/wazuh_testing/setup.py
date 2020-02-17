@@ -17,8 +17,10 @@ setup(name='wazuh_testing',
       package_data={'wazuh_testing': ['data/syscheck_event.json',
                                       'data/syscheck_event_windows.json',
                                       'data/mitre_event.json',
-                                      'data/event_analysis_schema.json',
-                                      'data/state_integrity_analysis_schema.json']
+                                      'data/analysis_alert.json',
+                                      'data/analysis_alert_windows.json',
+                                      'data/state_integrity_analysis_schema.json',
+                                      ]
                     },
       include_package_data=True,
       zip_safe=False
