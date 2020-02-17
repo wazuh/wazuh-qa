@@ -7,11 +7,12 @@ import sys
 
 import pytest
 
-from wazuh_testing.fim import (CHECK_ALL, CHECK_MD5SUM, CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_SUM, LOG_FILE_PATH, REQUIRED_ATTRIBUTES, regular_file_cud, generate_params)
 from wazuh_testing import global_parameters
+from wazuh_testing.fim import (CHECK_ALL, CHECK_MD5SUM, CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_SUM, LOG_FILE_PATH,
+                               REQUIRED_ATTRIBUTES, regular_file_cud, generate_params)
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -67,7 +68,8 @@ def get_configuration(request):
 ])
 def test_checksums_checkall(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                             wait_for_initial_scan):
-    """Test the behaviour of check_all="yes" when using it with one or more check_sum options (checksum, sha1sum,
+    """
+    Test the behaviour of check_all="yes" when using it with one or more check_sum options (checksum, sha1sum,
     sha256sum and md5sum) set to "no".
 
     Example:
@@ -75,11 +77,12 @@ def test_checksums_checkall(path, checkers, get_configuration, configure_environ
         check_all="yes" check_sum="no" check_md5sum="no"
         ...
 
-    This test is intended to be used with valid configurations files. Each execution of this test will configure the
-    environment properly, restart the service and wait for the initial scan.
-
-    :param path: Directory where the file is being created and monitored
-    :param checkers: Dict with all the check options to be used
+    Parameters
+    ----------
+    path : str
+        Directory where the file is being created and monitored.
+    checkers : dict
+        Check options to be used.
     """
     check_apply_test({'test_checksums_checkall'}, get_configuration['tags'])
 
@@ -102,7 +105,8 @@ def test_checksums_checkall(path, checkers, get_configuration, configure_environ
     (testdir8, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_SHA256SUM} - {CHECK_MD5SUM})
 ])
 def test_checksums(path, checkers, get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Test the checksum options (checksum, sha1sum, sha256sum and md5sum)
+    """
+    Test the checksum options (checksum, sha1sum, sha256sum and md5sum)
     behaviour when is used alone or in conjunction.
     Check_all option will be set to "no" in order to avoid using the default check_all configuration.
 
@@ -111,11 +115,12 @@ def test_checksums(path, checkers, get_configuration, configure_environment, res
         check_all: "no" check_sum: "yes" check_md5sum: "no"
         ...
 
-    This test is intended to be used with valid configurations files. Each execution of this test will configure the
-    environment properly, restart the service and wait for the initial scan.
-
-    :param path: Directory where the file is being created
-    :param checkers: Dict with all the check options to be used
+    Parameters
+    ----------
+    path : str
+        Directory where the file is being created.
+    checkers : dict
+        Check options to be used.
     """
     check_apply_test({'test_checksums'}, get_configuration['tags'])
 

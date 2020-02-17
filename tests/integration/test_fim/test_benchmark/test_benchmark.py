@@ -8,8 +8,8 @@ import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, generate_params
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -33,7 +33,9 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 # configurations
 
 monitoring_modes = ['realtime', 'whodata']
-conf_params, conf_metadata = generate_params(extra_params={'TEST_DIRECTORIES': directory_str},
+conf_params, conf_metadata = generate_params(extra_params={'TEST_DIRECTORIES': directory_str,
+                                                           'REPORT_CHANGES': {'report_changes': 'no'},
+                                                           'MODULE_NAME': __name__},
                                              modes=monitoring_modes)
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
@@ -51,21 +53,23 @@ def get_configuration(request):
 
 @pytest.mark.benchmark
 @pytest.mark.parametrize('files, folder, tags_to_apply', [
-    (file_list[0:10], testdir1, {'ossec_benchmark'}),
-    (file_list[0:100], testdir1, {'ossec_benchmark'}),
-    (file_list[0:1000], testdir1, {'ossec_benchmark'}),
-    (file_list, testdir1, {'ossec_benchmark'})
+    (file_list[0:10], testdir1, {'ossec_conf'}),
+    (file_list[0:100], testdir1, {'ossec_conf'}),
+    (file_list[0:1000], testdir1, {'ossec_conf'}),
+    (file_list, testdir1, {'ossec_conf'})
 ])
 def test_benchmark_regular_files(files, folder, tags_to_apply, get_configuration,
                                  configure_environment, restart_syscheckd,
                                  wait_for_initial_scan):
-    """ Checks syscheckd detects a certain volume of file changes (add, modify, delete)
+    """
+    Check syscheckd detects a certain volume of file changes (add, modify, delete)
 
-        :param files: List of regular files to be created
-        :param folder: Monitored directory where files will be created
-
-        * This test is intended to be used with valid configurations files. Each execution of this test will configure
-          the environment properly, restart the service and wait for the initial scan.
+    Parameters
+    ----------
+    files: list
+        List of regular files to be created.
+    folder : str
+        Monitored directory where files will be created.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     min_timeout = 30

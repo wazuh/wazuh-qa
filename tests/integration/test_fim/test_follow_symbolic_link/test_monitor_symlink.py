@@ -3,13 +3,16 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import pytest
-
 from test_fim.test_follow_symbolic_link.common import configurations_path, testdir1, \
     testdir_target, delete_f
+# noinspection PyUnresolvedReferences
+from test_fim.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
+    extra_configuration_after_yield
+
 from wazuh_testing.fim import (generate_params, create_file, REGULAR, callback_detect_event,
                                check_time_travel, modify_file_content, LOG_FILE_PATH)
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -42,15 +45,16 @@ def get_configuration(request):
 ])
 def test_symbolic_monitor_symlink(tags_to_apply, main_folder, get_configuration, configure_environment,
                                   restart_syscheckd, wait_for_initial_scan):
-    """ Check what happens with a symlink and its target when syscheck monitors it.
+    """
+    Check what happens with a symlink and its target when syscheck monitors it.
 
     CHECK: Having a symbolic link pointing to a file/folder, modify and delete the file. Check that alerts are
     being raised.
 
-    :param main_folder: Directory that is being pointed at or contains the pointed file
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan.
+    Parameters
+    ----------
+    main_folder : str
+        Directory that is being pointed at or contains the pointed file.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
@@ -67,13 +71,17 @@ def test_symbolic_monitor_symlink(tags_to_apply, main_folder, get_configuration,
     # Modify the linked file and expect an event
     modify_file_content(main_folder, file1, 'Sample modification')
     check_time_travel(scheduled)
-    modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
+    modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
+                                     error_message='Did not receive expected '
+                                                   '"Sending FIM event: ..." event').result()
     assert 'modified' in modify['data']['type'] and file1 in modify['data']['path'], \
         f"'modified' event not matching"
 
     # Delete the linked file and expect an event
     delete_f(main_folder, file1)
     check_time_travel(scheduled)
-    delete = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
+    delete = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
+                                     error_message='Did not receive expected '
+                                                   '"Sending FIM event: ..." event').result()
     assert 'deleted' in delete['data']['type'] and file1 in delete['data']['path'], \
         f"'deleted' event not matching"

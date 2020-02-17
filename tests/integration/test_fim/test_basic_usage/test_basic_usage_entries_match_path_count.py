@@ -6,12 +6,12 @@ import os
 
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, SYMLINK, HARDLINK, \
     callback_entries_path_count, check_time_travel
-from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -52,17 +52,19 @@ def extra_configuration_before_yield():
 
 
 def test_entries_match_path_count(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Checks if FIM entries match the path count
+    """
+    Check if FIM entries match the path count
 
-       It creates two regular files, a symlink and a hard link before the scan begins. After events are logged,
-       we should have 3 inode entries and a path count of 4.
-       * This test is intended to be used with valid configurations files. Each execution of this test will configure
-       the environment properly, restart the service and wait for the initial scan.
+    It creates two regular files, a symlink and a hard link before the scan begins. After events are logged,
+    we should have 3 inode entries and a path count of 4.
     """
     check_apply_test({'ossec_conf'}, get_configuration['tags'])
 
     entries, path_count = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                  callback=callback_entries_path_count).result()
+                                                  callback=callback_entries_path_count,
+                                                  error_message='Did not receive expected '
+                                                                '"Fim inode entries: ..., path count: ..." event'
+                                                  ).result()
     check_time_travel(True)
 
     if entries and path_count:

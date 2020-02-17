@@ -4,13 +4,16 @@
 import os
 
 import pytest
-
 from test_fim.test_follow_symbolic_link.common import configurations_path, testdir1, \
     modify_symlink, testdir_link, wait_for_symlink_check, wait_for_audit, testdir_target, testdir_not_target
+# noinspection PyUnresolvedReferences
+from test_fim.test_follow_symbolic_link.common import test_directories, extra_configuration_after_yield, \
+    extra_configuration_before_yield
+
 from wazuh_testing.fim import (generate_params, create_file, REGULAR, callback_detect_event,
                                check_time_travel, modify_file_content, LOG_FILE_PATH)
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # All tests in this module apply to linux only
 pytestmark = [pytest.mark.linux, pytest.mark.sunos5, pytest.mark.darwin, pytest.mark.tier(level=1)]
@@ -41,31 +44,37 @@ def get_configuration(request):
 ])
 def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_configuration, configure_environment,
                                 restart_wazuh, wait_for_initial_scan):
-    """ Check if syscheck updates the symlink target properly
+    """
+    Check if syscheck updates the symlink target properly
 
     CHECK: Having a symbolic link pointing to a file/folder, change the target of the link to another file/folder.
     Ensure that the old file is being monitored and the new one is not before symlink_checker runs.
     Wait until symlink_checker runs and ensure that the new file is being monitored and the old one is not.
 
-    :param main_folder: Directory that is being pointed at or contains the pointed file
-    :param aux_folder: Directory that will be pointed at or will contain the future pointed file
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan.
+    Parameters
+    ----------
+    main_folder : str
+        Directory that is being pointed at or contains the pointed file.
+    aux_folder : str
+        Directory that will be pointed at or will contain the future pointed file.
     """
 
     def modify_and_check_events(f1, f2, text):
-        """ Modify the content of 2 given files. We assume the first one is being monitored and the other one is not.
-            We expect a 'modified' event for the first one and a timeout for the second one.
+        """
+        Modify the content of 2 given files. We assume the first one is being monitored and the other one is not.
+        We expect a 'modified' event for the first one and a timeout for the second one.
         """
         modify_file_content(f1, file1, text)
         modify_file_content(f2, file1, text)
         check_time_travel(scheduled)
-        modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
+        modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
+                                         error_message='Did not receive expected "Sending FIM event: ..." event'
+                                         ).result()
         assert 'modified' in modify['data']['type'] and f1 in modify['data']['path'], \
             f"'modified' event not matching for {file1}"
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+            event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+            raise AttributeError(f'Unexpected event {event}')
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
@@ -78,17 +87,21 @@ def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_conf
         create_file(REGULAR, main_folder, file1, content='')
         create_file(REGULAR, aux_folder, file1, content='')
         check_time_travel(scheduled)
-        add = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
+        add = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
+                                      error_message='Did not receive expected "Sending FIM event: ..." event'
+                                      ).result()
         assert 'added' in add['data']['type'] and file1 in add['data']['path'], \
             f"'added' event not matching for {file1}"
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+            event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+            raise AttributeError(f'Unexpected event {event}')
     else:
         create_file(REGULAR, aux_folder, file1, content='')
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+            event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+            raise AttributeError(f'Unexpected event {event}')
 
-    # Change the target of the symlink and expect events while there's no symcheck scan
+    # Change the target of the symlink and expect events while there's no syscheck scan
     # Don't expect events from the new target
     if tags_to_apply == {'monitored_dir'}:
         modify_symlink(aux_folder, os.path.join(testdir_link, 'symlink2'))

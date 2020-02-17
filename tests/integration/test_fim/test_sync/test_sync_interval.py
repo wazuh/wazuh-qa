@@ -7,10 +7,10 @@ import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_synchronization, detect_initial_scan, generate_params
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.time import TimeMachine, time_to_timedelta
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.time import TimeMachine, time_to_timedelta
 
 # Marks
 
@@ -43,10 +43,8 @@ def get_configuration(request):
 # Tests
 
 def test_sync_interval(get_configuration, configure_environment, restart_syscheckd):
-    """Verify that synchronization checks take place at the expected time given SYNC_INTERVAL variable.
-
-    This test is intended to be used with valid configurations files. Each execution of this test will configure the
-    environment properly and restart the service.
+    """
+    Verify that synchronization checks take place at the expected time given SYNC_INTERVAL variable.
     """
 
     def truncate_log():
@@ -58,11 +56,15 @@ def test_sync_interval(get_configuration, configure_environment, restart_syschec
 
     wazuh_log_monitor = truncate_log()
     detect_initial_scan(wazuh_log_monitor)
-    wazuh_log_monitor.start(timeout=5, callback=callback_detect_synchronization)
+    wazuh_log_monitor.start(timeout=5, callback=callback_detect_synchronization,
+                            error_message='Did not receive expected '
+                                          '"Performing synchronization check" event')
 
     wazuh_log_monitor = truncate_log()
     TimeMachine.travel_to_future(time_to_timedelta(get_configuration['metadata']['sync_interval']))
-    wazuh_log_monitor.start(timeout=5, callback=callback_detect_synchronization)
+    wazuh_log_monitor.start(timeout=5, callback=callback_detect_synchronization,
+                            error_message='Did not receive expected '
+                                          '"Performing synchronization check" event')
 
     # This should fail as we are only advancing half the time needed for synchronization to occur
     wazuh_log_monitor = truncate_log()
@@ -70,8 +72,9 @@ def test_sync_interval(get_configuration, configure_environment, restart_syschec
     try:
         result = wazuh_log_monitor.start(timeout=1,
                                          callback=callback_detect_synchronization,
-                                         accum_results=1
-                                         ).result()
+                                         accum_results=1,
+                                         error_message='Did not receive expected '
+                                                       '"Performing synchronization check" event').result()
         if result is not None:
             pytest.fail("Synchronization shouldn't happen at this point")
     except TimeoutError:

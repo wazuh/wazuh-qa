@@ -10,8 +10,8 @@ import pytest
 from wazuh_testing.fim import (LOG_FILE_PATH, REGULAR, callback_detect_event, callback_detect_end_scan, create_file,
                                generate_params)
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -58,23 +58,23 @@ def callback_detect_event_before_end_scan(line):
 
 def extra_configuration_before_yield():
     for _ in range(1000):
-        create_file(REGULAR, testdir1, f'test_{int(round(time() * 10**6))}', content='')
-        create_file(REGULAR, testdir2, f'test_{int(round(time() * 10**6))}', content='')
+        create_file(REGULAR, testdir1, f'test_{int(round(time() * 10 ** 6))}', content='')
+        create_file(REGULAR, testdir2, f'test_{int(round(time() * 10 ** 6))}', content='')
 
 
 def test_wait_until_baseline(get_configuration, configure_environment, restart_syscheckd):
-    """ Checks if events are appearing after the baseline
-        The message 'File integrity monitoring scan ended' informs about the end of the first scan, which generates the baseline
+    """
+    Check if events are appearing after the baseline
+    The message 'File integrity monitoring scan ended' informs about the end of the first scan,
+    which generates the baseline
 
-        It creates a file, checks if the baseline has generated before the file addition event, and then if this event has generated.
-
-
-        * This test is intended to be used with valid configurations files. Each execution of this test will configure
-          the environment properly, restart the service and wait for the initial scan.
+    It creates a file, checks if the baseline has generated before the file addition event, and then
+    if this event has generated.
     """
     check_apply_test({'ossec_conf'}, get_configuration['tags'])
 
     # Create a file during initial scan to check if the event is logged after the 'scan ended' message
-    create_file(REGULAR, testdir1, f'test_{int(round(time() * 10**6))}', content='')
+    create_file(REGULAR, testdir1, f'test_{int(round(time() * 10 ** 6))}', content='')
 
-    wazuh_log_monitor.start(timeout=120, callback=callback_detect_event_before_end_scan)
+    wazuh_log_monitor.start(timeout=120, callback=callback_detect_event_before_end_scan,
+                            error_message='Did not receive expected event before end the scan')

@@ -9,10 +9,10 @@ import distro
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, detect_initial_scan, generate_params
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import restart_wazuh_daemon
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 
@@ -67,14 +67,12 @@ def check_prelink():
     ({'prefilter_cmd'})
 ])
 def test_prefilter_cmd(tags_to_apply, get_configuration, configure_environment, check_prelink):
-    """ Checks if prelink is installed and syscheck works
+    """
+    Check if prelink is installed and syscheck works
 
     This test was implemented when prefilter_cmd could only be set with 'prelink'.
 
     This test will have to updated if prefilter_cmd is updated as well.
-
-    * This test is intended to be used with valid prefilter configuration. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

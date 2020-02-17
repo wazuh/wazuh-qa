@@ -20,6 +20,7 @@ for i in range(1, 15):
     file_test = os.path.join(_data_path, f"test{i}.xml")
     configurations.append(file_test)
 
+
 # fixtures
 
 @pytest.fixture(scope='module', params=configurations)
@@ -27,10 +28,11 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
+
 # tests
 
 def test_mitre_check_alert(get_configuration, restart_wazuh, configure_local_rules):
-    """Checks Mitre alerts have correct format in accordance with configuration"""
+    """Check Mitre alerts have correct format in accordance with configuration"""
 
     # Wait until analysisd start
     detect_initial_analysisd(wazuh_log_monitor)

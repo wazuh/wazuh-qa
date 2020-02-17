@@ -8,12 +8,12 @@ from datetime import timedelta
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, generate_params
 from wazuh_testing import global_parameters
+from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, generate_params
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.time import TimeMachine
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.time import TimeMachine
 
 # Marks
 
@@ -35,7 +35,6 @@ frequencies = ['5', '3600', '10000']
 p, m = generate_params(extra_params={'TEST_DIRECTORIES': directory_str},
                        apply_to_all=({'FREQUENCY': frequency} for frequency in frequencies),
                        modes=['realtime', 'whodata'])
-
 
 configurations1 = load_wazuh_configurations(configurations_path, __name__,
                                             params=p,
@@ -71,15 +70,16 @@ def get_configuration(request):
 ])
 def test_frequency(folder, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                    wait_for_initial_scan):
-    """ Checks if a non existing directory is monitored in realtime after the frequency time has passed
+    """
+    Check if a non existing directory is monitored in realtime after the frequency time has passed
 
     Even with realtime monitoring, if we monitor a non existing directory and then we create it after restarting
     the service, syscheck won't detect anything from it until the scan restarts (using its frequency interval).
 
-    :param folder: Directory that is being monitored
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan.
+    Parameters
+    ----------
+    folder : str
+        Directory that is being monitored.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     try:

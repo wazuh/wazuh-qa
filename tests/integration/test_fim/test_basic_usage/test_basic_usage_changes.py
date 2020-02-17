@@ -3,13 +3,14 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+
 import pytest
 
-from wazuh_testing.fim import CHECK_ALL, LOG_FILE_PATH, regular_file_cud, generate_params
 from wazuh_testing import global_parameters
+from wazuh_testing.fim import CHECK_ALL, LOG_FILE_PATH, regular_file_cud, generate_params
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -49,26 +50,30 @@ def get_configuration(request):
 @pytest.mark.parametrize('name, encoding, checkers,  tags_to_apply', [
     ('regular0', None, {CHECK_ALL}, {'ossec_conf'}),
     pytest.param('檔案', 'cp950', {CHECK_ALL}, {'ossec_conf'}, marks=(pytest.mark.linux,
-                 pytest.mark.darwin, pytest.mark.sunos5)),
+                                                                    pytest.mark.darwin, pytest.mark.sunos5)),
     pytest.param('Образецтекста', 'koi8-r', {CHECK_ALL}, {'ossec_conf'}, marks=(pytest.mark.linux,
-                 pytest.mark.darwin, pytest.mark.sunos5)),
+                                                                                pytest.mark.darwin,
+                                                                                pytest.mark.sunos5)),
     pytest.param('Δείγμακειμένου', 'cp737', {CHECK_ALL}, {'ossec_conf'}, marks=(pytest.mark.linux,
-                 pytest.mark.darwin, pytest.mark.sunos5)),
+                                                                                pytest.mark.darwin,
+                                                                                pytest.mark.sunos5)),
     pytest.param('نصبسيط', 'cp720', {CHECK_ALL}, {'ossec_conf'}, marks=(pytest.mark.linux,
-                 pytest.mark.darwin, pytest.mark.sunos5)),
+                                                                        pytest.mark.darwin, pytest.mark.sunos5)),
     pytest.param('Ξ³ΞµΞΉΞ±', None, {CHECK_ALL}, {'ossec_conf'}, marks=pytest.mark.win32)
 
 ])
 def test_regular_file_changes(folder, name, encoding, checkers, tags_to_apply,
                               get_configuration, configure_environment,
                               restart_syscheckd, wait_for_initial_scan):
-    """ Checks if syscheckd detects regular file changes (add, modify, delete)
+    """
+    Check if syscheckd detects regular file changes (add, modify, delete)
 
-    :param folder: Directory where the files will be created
-    :param checkers: Dict of syscheck checkers (check_all)
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-          the environment properly, restart the service and wait for the initial scan.
+    Parameters
+    ----------
+    folder : str
+        Directory where the files will be created.
+    checkers : dict
+        Syscheck checkers (check_all).
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -78,4 +83,5 @@ def test_regular_file_changes(folder, name, encoding, checkers, tags_to_apply,
 
     regular_file_cud(folder, wazuh_log_monitor, file_list=[name],
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                     min_timeout=global_parameters.default_timeout, options=checkers, encoding=encoding, triggers_event=True)
+                     min_timeout=global_parameters.default_timeout, options=checkers, encoding=encoding,
+                     triggers_event=True)

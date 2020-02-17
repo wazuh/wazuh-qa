@@ -6,11 +6,11 @@ import sys
 
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_event_too_long, regular_file_cud,
                                generate_params)
-from wazuh_testing import global_parameters
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -55,7 +55,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 def recursion_test(dirname, subdirname, recursion_level, timeout=1, edge_limit=2, ignored_levels=1, is_scheduled=False):
     """
-    Checks that events are generated in the first and last `edge_limit` directory levels in the hierarchy
+    Check that events are generated in the first and last `edge_limit` directory levels in the hierarchy
     dirname/subdirname1/.../subdirname{recursion_level}. It also checks that no events are generated for
     subdirname{recursion_level+ignored_levels}. All directories and subdirectories needed will be created using the info
     provided by parameter.
@@ -87,16 +87,23 @@ def recursion_test(dirname, subdirname, recursion_level, timeout=1, edge_limit=2
     of its path length limitations. In a similar way, on Linux environments a `Event Too Long` will be raised if the
     path name is too long.
 
-    :param dirname string The path being monitored by syscheck (indicated in the .conf file)
-    :param subdirname string The name of the subdirectories that will be created during the execution for testing
-    purposes.
-    :param recursion_level int Recursion level. Also used as the number of subdirectories to be created and checked for
-    the current test.
-    :param timeout int Max time to wait until an event is raised.
-    :param edge_limit Number of directories where the test will monitor events
-    :param ignored_levels Number of directories exceeding the specified recursion_level to verify events are not raised
-    :param is_scheduled bool If True the internal date will be modified to trigger scheduled checks by syschecks.
-    False if realtime or Whodata.
+    Parameters
+    ----------
+    dirname : str
+        The path being monitored by syscheck (indicated in the .conf file).
+    subdirname : str
+        The name of the subdirectories that will be created during the execution for testing purposes.
+    recursion_level : int
+        Recursion level. Also used as the number of subdirectories to be created and checked for the current test.
+    timeout : int
+        Max time to wait until an event is raised.
+    edge_limit : int
+        Number of directories where the test will monitor events.
+    ignored_levels : int
+        Number of directories exceeding the specified recursion_level to verify events are not raised.
+    is_scheduled : bool
+        If True the internal date will be modified to trigger scheduled checks by syschecks.
+        False if realtime or Whodata.
     """
     path = dirname
     try:
@@ -115,22 +122,21 @@ def recursion_test(dirname, subdirname, recursion_level, timeout=1, edge_limit=2
                              triggers_event=False)
 
     except TimeoutError:
-        if wazuh_log_monitor.start(timeout=5, callback=callback_audit_event_too_long, update_position=False).result():
-            pytest.skip(msg="Reached Whodata maximum path length.")
-        pytest.fail("No 'Event Too Long' message was raised.")
+        timeout_log_monitor = FileMonitor(LOG_FILE_PATH)
+        if timeout_log_monitor.start(timeout=5, callback=callback_audit_event_too_long).result():
+            pytest.fail("Audit raised 'Event Too Long' message.")
+        raise
 
     except FileNotFoundError as ex:
         MAX_PATH_LENGTH_WINDOWS_ERROR = 206
-        if ex.winerror == MAX_PATH_LENGTH_WINDOWS_ERROR:
-            return
-        raise
+        if ex.winerror != MAX_PATH_LENGTH_WINDOWS_ERROR:
+            raise
 
     except OSError as ex:
         MAX_PATH_LENGTH_MACOS_ERROR = 63
         MAX_PATH_LENGTH_SOLARIS_ERROR = 78
-        if ex.errno in (MAX_PATH_LENGTH_SOLARIS_ERROR, MAX_PATH_LENGTH_MACOS_ERROR):
-            return
-        raise
+        if ex.errno not in (MAX_PATH_LENGTH_SOLARIS_ERROR, MAX_PATH_LENGTH_MACOS_ERROR):
+            raise
 
 
 # Fixtures
@@ -154,17 +160,18 @@ def get_configuration(request):
 ])
 def test_recursion_level(dirname, subdirname, recursion_level, get_configuration, configure_environment,
                          restart_syscheckd, wait_for_initial_scan):
-    """Checks if files are correctly detected by syscheck with recursion level using scheduled, realtime and whodata
+    """
+    Check if files are correctly detected by syscheck with recursion level using scheduled, realtime and whodata
     monitoring.
 
-    This test is intended to be used with valid configurations files. Each execution of this test will configure the
-    environment properly, restart the service and wait for the initial scan.
-
-    :param dirname string The path being monitored by syscheck (indicated in the .conf file)
-    :param subdirname string The name of the subdirectories that will be created during the execution for testing
-    purposes.
-    :param recursion_level int Recursion level. Also used as the number of subdirectories to be created and checked for
-    the current test.
+    Parameters
+    ----------
+    dirname : str
+        The path being monitored by syscheck (indicated in the .conf file).
+    subdirname : str
+        The name of the subdirectories that will be created during the execution for testing purposes.
+    recursion_level : int
+        Recursion level. Also used as the number of subdirectories to be created and checked for the current test.
     """
     recursion_test(dirname, subdirname, recursion_level, timeout=global_parameters.default_timeout,
                    is_scheduled=get_configuration['metadata']['fim_mode'] == 'scheduled')

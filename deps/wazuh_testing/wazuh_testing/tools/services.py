@@ -27,7 +27,7 @@ def restart_wazuh_daemon(daemon):
     """
     for proc in psutil.process_iter(attrs=['name']):
         if proc.name() == daemon:
-            proc.kill()
+            proc.terminate()
 
     daemon_path = os.path.join(WAZUH_PATH, 'bin')
     check_call([f'{daemon_path}/{daemon}'])
@@ -115,7 +115,7 @@ def control_service(action, daemon=None, debug_mode=False):
                 control_service('start', daemon=daemon)
             elif action == 'stop':
                 for proc in psutil.process_iter(attrs=['name']):
-                    proc.name() == daemon and proc.kill()
+                    proc.name() == daemon and proc.terminate()
                 delete_sockets(WAZUH_SOCKETS[daemon])
             else:
                 daemon_path = os.path.join(WAZUH_PATH, 'bin')

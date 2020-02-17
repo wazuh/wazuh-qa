@@ -5,16 +5,15 @@
 import os
 
 import pytest
-
-
 from test_fim.test_follow_symbolic_link.common import modify_symlink
+
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH,
                                generate_params, create_file, REGULAR, SYMLINK, callback_detect_event,
                                modify_file, delete_file, check_time_travel)
-from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -69,18 +68,21 @@ def clean_directories(request):
 def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_dir1, non_monitored_dir2,
                                                  sym_target, tags_to_apply, get_configuration, configure_environment,
                                                  clean_directories, restart_syscheckd, wait_for_initial_scan):
-    """ Check what happens with a symlink and its target when syscheck monitors a directory with a symlink
+    """
+    Check what happens with a symlink and its target when syscheck monitors a directory with a symlink
     and not the symlink itself.
 
     When this happens, the symbolic link is considered a regular file and it will not follow its target path.
     It will only generate events if it changes somehow, not its target (file or directory)
 
-    :param monitored_dir: Monitored directory
-    :param non_monitored_dir1: Non-monitored directory
-    :param non_monitored_dir2: Non-monitored directory
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan.
+    Parameters
+    ----------
+    monitored_dir : str
+        Monitored directory.
+    non_monitored_dir1 : str
+        Non-monitored directory.
+    non_monitored_dir2 : str
+        Non-monitored directory.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     name1 = 'regular1'
@@ -99,18 +101,22 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
 
     # Create the syslink and expect its event, since it's withing the monitored directory
     check_time_travel(scheduled)
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event)
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                            error_message='Did not receive expected "Sending FIM event: ..." event')
 
     # Modify the target file and don't expect any event
     modify_file(non_monitored_dir1, name1, new_content='Modify sample')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+        event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+        raise AttributeError(f'Unexpected event {event}')
 
     # Modify the target of the symlink and expect the modify event
     modify_symlink(target=b_path, path=sl_path)
     check_time_travel(scheduled)
-    result = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
+    result = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                                     error_message='Did not receive expected '
+                                                   '"Sending FIM event: ..." event').result()
     assert 'modified' in result['data']['type'], f"No 'modified' event when modifying symlink"
 
     # Remove and restore the target file. Don't expect any events
@@ -118,4 +124,5 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
     create_file(REGULAR, non_monitored_dir1, name2, content='')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+        event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+        raise AttributeError(f'Unexpected event {event}')

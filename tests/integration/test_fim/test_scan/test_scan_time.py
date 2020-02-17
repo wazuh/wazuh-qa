@@ -6,12 +6,12 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, generate_params
 from wazuh_testing import global_parameters
+from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, generate_params
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.time import TimeMachine, reformat_time
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.time import TimeMachine, reformat_time
 
 # Marks
 
@@ -30,7 +30,7 @@ scan_times = ['9PM', '20:00', '3:07PM']
 # configurations
 
 p, m = generate_params(extra_params={'TEST_DIRECTORIES': directory_str, 'SCAN_TIME': scan_times},
-                       modes=['scheduled']*len(scan_times))
+                       modes=['scheduled'] * len(scan_times))
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
@@ -50,12 +50,10 @@ def get_configuration(request):
 def test_scan_time(tags_to_apply,
                    get_configuration, configure_environment,
                    restart_syscheckd, wait_for_initial_scan):
-    """ Check if there is a scan at a certain time
+    """
+    Check if there is a scan at a certain time
 
     scan_time option makes sure there is only one scan every 24 hours, at a certain time.
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -69,6 +67,10 @@ def test_scan_time(tags_to_apply,
         ((scan_time - current_time) + timedelta(days=2))
     TimeMachine.travel_to_future(time_difference + timedelta(minutes=-30))
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
+        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
+        raise AttributeError(f'Unexpected event {event}')
+
     TimeMachine.travel_to_future(timedelta(minutes=31))
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan)
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+                            error_message='Did not receive expected '
+                                          '"File integrity monitoring scan ended" event')

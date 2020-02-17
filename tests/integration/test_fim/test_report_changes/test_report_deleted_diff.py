@@ -8,20 +8,18 @@ from datetime import timedelta
 
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, WAZUH_PATH, callback_detect_event,
                                REGULAR, create_file, detect_initial_scan, generate_params)
-from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import restart_wazuh_with_new_conf
-from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, load_wazuh_configurations
-
+from wazuh_testing.tools.time import TimeMachine
 
 # Marks
 
 pytestmark = pytest.mark.tier(level=1)
-
 
 # variables
 
@@ -40,7 +38,7 @@ FILE_NAME = 'regularfile'
 # configurations
 
 def change_conf(report_value):
-    """" Returns a new ossec configuration with a changed report_value"""
+    """"Return a new ossec configuration with a changed report_value"""
     conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': report_value},
                                                                'TEST_DIRECTORIES': directory_str,
                                                                'NODIFF_FILE': nodiff_file,
@@ -77,7 +75,8 @@ def wait_for_event(fim_mode):
         TimeMachine.travel_to_future(timedelta(hours=13))
 
     # Wait until event is detected
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event)
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                            error_message='Did not receive expected "Sending FIM event: ..." event')
 
 
 def create_and_check_diff(name, path, fim_mode):
@@ -125,10 +124,6 @@ def test_report_when_deleted_directories(path, get_configuration, configure_envi
                                          wait_for_initial_scan):
     """Check if the diff directory is empty when the monitored directory is deleted.
 
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan. This test will restart with a new
-    configuration throughout its execution as well.
-
     Parameters
     ----------
     path : str
@@ -153,10 +148,6 @@ def test_no_report_changes(path, get_configuration, configure_environment,
                            restart_syscheckd, wait_for_initial_scan):
     """Check if duplicated directories in diff are deleted when changing `report_changes` to 'no' or deleting the
     monitored directories.
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan. This test will restart with a new
-    configuration throughout its execution as well.
 
     Parameters
     ----------
@@ -183,10 +174,6 @@ def test_report_changes_after_restart(get_configuration, configure_environment, 
     The duplicated directories in diff will be removed after Syscheck restarts but will be created again if the report
     changes is still active. To avoid this we disable turn off report_changes option before restarting Syscheck to
     ensure directories won't be created again.
-
-    * This test is intended to be used with valid configurations files. Each execution of this test will configure
-    the environment properly, restart the service and wait for the initial scan. This test will restart with a new
-    configuration throughout its execution as well.
     """
     fim_mode = get_configuration['metadata']['fim_mode']
 

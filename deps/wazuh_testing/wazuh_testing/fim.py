@@ -8,18 +8,20 @@ import platform
 import re
 import shutil
 import socket
-import sys
-import time
-from datetime import datetime
 import subprocess
+import sys
+import tempfile
+import time
 from collections import Counter
 from copy import deepcopy
+from datetime import datetime
 from datetime import timedelta
-from stat import ST_ATIME, ST_MTIME
-
 from json import JSONDecodeError
-from jsonschema import validate
+from stat import ST_ATIME, ST_MTIME
 from typing import Sequence, Union, Generator, Any
+from wazuh_testing import logger
+
+from jsonschema import validate
 
 from wazuh_testing.tools.time import TimeMachine
 
@@ -183,6 +185,8 @@ def create_file(type_, path, name, **kwargs):
     target : str
         Path where the link will be pointing to.
     """
+
+    logger.info("Creating file " + os.path.join(path, name) + " of " + str(type_) + " type")
     os.makedirs(path, exist_ok=True, mode=0o777)
     if type_ != REGULAR:
         try:
@@ -196,7 +200,7 @@ def create_file(type_, path, name, **kwargs):
 
 def create_registry(key, subkey, arch):
     """
-    Creates a registry given the key and the subkey. The registry is opened if it already exists
+    Create a registry given the key and the subkey. The registry is opened if it already exists
 
     Parameters
     ----------
@@ -323,6 +327,7 @@ def delete_file(path, name):
     name : str
         Name of the file to be deleted
     """
+    logger.info(f"Removing file {os.path.join(path, name)}")
     regular_path = os.path.join(path, name)
     if os.path.exists(regular_path):
         os.remove(regular_path)
@@ -330,7 +335,7 @@ def delete_file(path, name):
 
 def delete_registry(key, subkey, arch):
     """
-    Deletes a registry
+    Delete a registry
 
     Parameters
     ----------
@@ -344,7 +349,7 @@ def delete_registry(key, subkey, arch):
 
 def modify_registry(key, subkey, value):
     """
-    Modifies the content of REG_SZ in a registry
+    Modify the content of REG_SZ in a registry
 
     Parameters
     ----------
@@ -355,6 +360,7 @@ def modify_registry(key, subkey, value):
     value : str
         The value to be set.
     """
+    logger.info("Modifying windows registry.")
     sys.platform == 'win32' and winreg.SetValue(key, subkey, winreg.REG_SZ, value)
 
 
@@ -364,9 +370,9 @@ def modify_file_content(path, name, new_content=None, is_binary=False):
 
     Parameters
     ----------
-    path : str
+    path : str, bytes
         Path to the file to be modified.
-    name : str
+    name : str, bytes
         Name of the file to be modified.
     new_content : str, optional
         New content to append to the file. Previous content will remain. Default `None`
@@ -374,6 +380,7 @@ def modify_file_content(path, name, new_content=None, is_binary=False):
         True if the file's content is in binary format. False otherwise. Default `False`
     """
     path_to_file = os.path.join(path, name)
+    logger.info("- Changing content of " + path_to_file)
     content = "1234567890qwertyu" if new_content is None else new_content
     with open(path_to_file, 'ab' if is_binary else 'a') as f:
         f.write(content.encode() if is_binary else content)
@@ -385,12 +392,13 @@ def modify_file_mtime(path, name):
 
     Parameters
     ----------
-    path : str
+    path : str, bytes
         Path to the file to be modified.
-    name : str
+    name : str, bytes
         Name of the file to be modified.
     """
     path_to_file = os.path.join(path, name)
+    logger.info("- Changing mtime of " + path_to_file)
     stat = os.stat(path_to_file)
     access_time = stat[ST_ATIME]
     modification_time = stat[ST_MTIME]
@@ -406,9 +414,9 @@ def modify_file_owner(path, name):
 
     Parameters
     ----------
-    path : str
+    path : str, bytes
         Path to the file to be modified.
-    name : str
+    name : str, bytes
         Name of the file to be modified.
     """
     def modify_file_owner_windows():
@@ -419,6 +427,7 @@ def modify_file_owner(path, name):
         os.chown(path_to_file, 1, -1)
 
     path_to_file = os.path.join(path, name)
+    logger.info("- Changing owner of " + path_to_file)
 
     if sys.platform == 'win32':
         modify_file_owner_windows()
@@ -434,15 +443,16 @@ def modify_file_group(path, name):
 
     Parameters
     ----------
-    path : str
+    path : str, bytes
         Path to the file to be modified.
-    name : str
+    name : str, bytes
         Name of the file to be modified.
     """
     if sys.platform == 'win32':
         return
 
     path_to_file = os.path.join(path, name)
+    logger.info("- Changing group of " + path_to_file)
     os.chown(path_to_file, -1, 1)
 
 
@@ -456,9 +466,9 @@ def modify_file_permission(path, name):
 
     Parameters
     ----------
-    path : str
+    path : str, bytes
         Path to the file to be modified.
-    name : str
+    name : str, bytes
         Name of the file to be modified.
     """
     def modify_file_permission_windows():
@@ -477,6 +487,8 @@ def modify_file_permission(path, name):
 
     path_to_file = os.path.join(path, name)
 
+    logger.info("- Changing permission of " + path_to_file)
+
     if sys.platform == 'win32':
         modify_file_permission_windows()
     else:
@@ -489,27 +501,27 @@ def modify_file_inode(path, name):
 
     Parameters
     ----------
-    path : str
+    path : str, bytes
         Path to the file to be modified.
-    name : str
+    name : str, bytes
         Name of the file to be modified.
     """
     if sys.platform == 'win32':
         return
 
+    logger.info("- Changing inode of " + os.path.join(path, name))
     inode_file = 'inodetmp'
     path_to_file = os.path.join(path, name)
-    if isinstance(name, bytes):
-        inode_file = inode_file.encode()
 
-    shutil.copy2(path_to_file, os.path.join(path, inode_file))
-    os.replace(os.path.join(path, inode_file), path_to_file)
+    shutil.copy2(path_to_file, os.path.join(tempfile.gettempdir(), inode_file))
+    os.replace(os.path.join(tempfile.gettempdir(), inode_file), path_to_file)
 
 
 def modify_file_win_attributes(path, name):
     if sys.platform != 'win32':
         return
 
+    logger.info("- Changing win attributes of " + os.path.join(path, name))
     path_to_file = os.path.join(path, name)
     win32api.SetFileAttributes(path_to_file, win32con.FILE_ATTRIBUTE_HIDDEN)
 
@@ -520,15 +532,16 @@ def modify_file(path, name, new_content=None, is_binary=False):
 
     Parameters
     ----------
-    path : str
+    path : str, bytes
         Path where the file will be created.
-    name : str
+    name : str, bytes
         File name.
     new_content : str, optional
         New content to add to the file. Default `None`
     is_binary : boolean, optional
         True if the file is binary. False otherwise. Default `False`
     """
+    logger.info("Modiying file " + os.path.join(path, name))
     modify_file_inode(path, name)
     modify_file_content(path, name, new_content, is_binary)
     modify_file_mtime(path, name)
@@ -684,7 +697,7 @@ def callback_audit_removed_rule(line):
 
 
 def callback_audit_deleting_rule(line):
-    match = re.match(r'.*Deleting Audit rules...', line)
+    match = re.match(r'.*Deleting Audit rules\.', line)
     if match:
         return True
     return None
@@ -758,6 +771,15 @@ def callback_syscheck_message(line):
         return None
 
 
+def callback_empty_directories(line):
+    match = re.match(r'.*DEBUG: \(6338\): Empty directories tag found in the configuration.', line)
+
+    if match:
+        return True
+    else:
+        return None
+
+
 def check_time_travel(time_travel):
     """
     Change date and time of the system.
@@ -768,7 +790,9 @@ def check_time_travel(time_travel):
         True if we need to update time. False otherwise.
     """
     if time_travel:
+        before = str(datetime.now())
         TimeMachine.travel_to_future(timedelta(hours=13))
+        logger.info(f"Changing the system clock from {before} to {str(datetime.now())}")
 
 
 def callback_configuration_warning(line):
@@ -809,11 +833,21 @@ class EventChecker:
             Seconds to wait until an event is raised when trying to fetch. Default `1`
         triggers_event : boolean, optional
             True if the event should be raised. False otherwise. Default `True`
+        extra_timeout : int, optional
+            Additional time to wait after the min_timeout
         """
-        self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout)
+        num_files = len(self.file_list)
+        error_msg = "TimeoutError was raised because "
+        error_msg += str(num_files) if num_files > 1 else "a single"
+        error_msg += " '" + str(event_type) + "' "
+        error_msg += "events were " if num_files > 1 else "event was "
+        error_msg += "expected for " + str(self._get_file_list())
+        error_msg += " but were not detected." if len(self.file_list) > 1 else " but was not detected."
+
+        self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
         self.check_events(event_type)
 
-    def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0):
+    def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0, error_message=''):
         """
         Try to fetch events on a given log monitor. Will return a list with the events detected.
 
@@ -823,6 +857,10 @@ class EventChecker:
             Seconds to wait until an event is raised when trying to fetch. Default `1`
         triggers_event : boolean, optional
             True if the event should be raised. False otherwise. Default `True`
+        extra_timeout : int, optional
+            Additional time to wait after the min_timeout
+        error_message : str
+            Message to explain a possible timeout error
         """
         def clean_results(event_list):
             if not isinstance(event_list, list):
@@ -852,8 +890,8 @@ class EventChecker:
                                             callback=callback_detect_event,
                                             accum_results=len(self.file_list),
                                             timeout_extra=extra_timeout,
-                                            encoding=self.encoding
-                                            ).result()
+                                            encoding=self.encoding,
+                                            error_message=error_message).result()
             assert triggers_event, f'No events should be detected.'
             if extra_timeout > 0:
                 result = clean_results(result)
@@ -861,6 +899,7 @@ class EventChecker:
         except TimeoutError:
             if triggers_event:
                 raise
+            logger.info("TimeoutError was expected and correctly caught.")
 
     def check_events(self, event_type):
         """Check and validate all events in the 'events' list.
@@ -919,10 +958,17 @@ class EventChecker:
                     self.custom_validator.validate_after_update(self.events)
                 elif event_type == "deleted":
                     self.custom_validator.validate_after_delete(self.events)
+    def _get_file_list(self):
+        result_list = []
+        for file_name in self.file_list:
+            expected_file_path = os.path.join(self.folder, file_name)
+            expected_file_path = expected_file_path[:1].lower() + expected_file_path[1:]
+            result_list.append(expected_file_path)
+        return result_list
 
 
 class CustomValidator:
-    """Enables using user-defined validators over the events when validating them with EventChecker"""
+    """Enable using user-defined validators over the events when validating them with EventChecker"""
     def __init__(self, validators_after_create=None, validators_after_update=None,
                  validators_after_delete=None, validators_after_cud=None):
         self.validators_create = validators_after_create
@@ -991,7 +1037,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
                      triggers_event=True, encoding=None, validators_after_create=None, validators_after_update=None,
                      validators_after_delete=None, validators_after_cud=None):
     """
-    Checks if creation, update and delete events are detected by syscheck.
+    Check if creation, update and delete events are detected by syscheck.
 
     This function provides multiple tools to validate events with custom validators.
 
@@ -1043,6 +1089,8 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     check_time_travel(time_travel)
     event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event)
+    if triggers_event:
+        logger.info("'added' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
     # Modify previous text files
     for name, content in file_list.items():
@@ -1050,6 +1098,8 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     check_time_travel(time_travel)
     event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
+    if triggers_event:
+        logger.info("'modified' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
     # Delete previous text files
     for name in file_list:
@@ -1057,6 +1107,8 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     check_time_travel(time_travel)
     event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
+    if triggers_event:
+        logger.info("'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
 
 def detect_initial_scan(file_monitor):
@@ -1068,7 +1120,8 @@ def detect_initial_scan(file_monitor):
     file_monitor : FileMonitor
         File log monitor to detect events
     """
-    file_monitor.start(timeout=60, callback=callback_detect_end_scan)
+    file_monitor.start(timeout=60, callback=callback_detect_end_scan,
+                       error_message='Did not receive expected "File integrity monitoring scan ended" event')
     # Add additional sleep to avoid changing system clock issues (TO BE REMOVED when syscheck has not sleeps anymore)
     time.sleep(11)
 

@@ -7,12 +7,13 @@ import sys
 
 import pytest
 
+from wazuh_testing import global_parameters
+from wazuh_testing import logger
 from wazuh_testing.fim import LOG_FILE_PATH, callback_ignore, callback_detect_event, create_file, REGULAR, \
     generate_params, check_time_travel
-from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -22,7 +23,7 @@ pytestmark = pytest.mark.tier(level=2)
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_ignore_restrict_win32.yaml' if sys.platform == 'win32'
-                                   else 'wazuh_conf_ignore_restrict.yaml')
+else 'wazuh_conf_ignore_restrict.yaml')
 
 test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')]
 testdir1, testdir2 = test_directories
@@ -54,7 +55,7 @@ def get_configuration(request):
 ])
 def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_apply, get_configuration,
                                     configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Checks if the ignore tag prevails over the restrict one when using both in the same directory.
+    """Check if the ignore tag prevails over the restrict one when using both in the same directory.
 
     This test is intended to be used with valid configurations files. Each execution of this test will configure
     the environment properly, restart the service and wait for the initial scan.
@@ -71,23 +72,33 @@ def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_ap
         Run test if it matches with a configuration identifier, skip otherwise
 
     """
+    logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
     # Create file that must be ignored
+    logger.info(f'Adding file {os.path.join(testdir1, filename)}, content: ""')
     create_file(REGULAR, folder, filename, content='')
 
     # Go ahead in time to let syscheck perform a new scan if mode is scheduled
+    logger.info(f'Time travel: {scheduled}')
     check_time_travel(scheduled)
 
     if triggers_event:
-        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
+        logger.info('Checking the event...')
+        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                        callback=callback_detect_event,
+                                        error_message=f'Did not receive expected "Sending FIM event" '
+                                                      f'event for file {os.path.join(testdir1, filename)}').result()
 
         assert event['data']['type'] == 'added', 'Event type not equal'
         assert event['data']['path'] == os.path.join(folder, filename), 'Event path not equal'
     else:
         while True:
-            ignored_file = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_ignore).result()
+            ignored_file = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_ignore,
+                                                   error_message=f'Did not receive expected '
+                                                                 f'"Ignoring ... due to ..." event for file '
+                                                                 f'{os.path.join(testdir1, filename)}').result()
 
             if ignored_file == os.path.join(folder, filename):
                 break

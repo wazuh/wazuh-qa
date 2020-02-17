@@ -2,22 +2,21 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
+import sys
 import time
 from datetime import datetime, timedelta
 
 import psutil
 import pytest
-import sys
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, callback_detect_synchronization, generate_params
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.time import TimeMachine, time_to_timedelta
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.time import TimeMachine, time_to_timedelta
 
 if sys.platform == "linux":
     import paramiko
-
 
 # Marks
 
@@ -52,15 +51,18 @@ def get_configuration(request):
 @pytest.mark.parametrize('num_files', [1, 100])
 @pytest.mark.parametrize('sync_interval', ['10', '10h'])
 def test_response_timeout(num_files, sync_interval, get_configuration, configure_environment, restart_syscheckd):
-    """Verify that synchronization checks take place at the expected time given SYNC_INTERVAL and RESPONSE_TIMEOUT
+    """
+    Verify that synchronization checks take place at the expected time given SYNC_INTERVAL and RESPONSE_TIMEOUT
     parameters. To accomplish this a connection with a Wazuh Agent (Linux based) must be established via SSH using
     Paramiko. All operations will take place on the Agent side.
 
-    This test is intended to be used with valid configurations files and requires a properly configured agent.
-
-    :param num_files String Number of files to create within the test
-    :param sync_interval String The value to the SYNC_INTERVAL variable. Must be a number with one of the following 
-    units 's', 'm', 'h', 'd' or 'w'. If no unit is specified the default 's' will be used.
+    Parameters
+    ----------
+    num_files : int
+        Number of files to create within the test
+    sync_interval : str
+        The value to the SYNC_INTERVAL variable. Must be a number with one of the following units 's', 'm', 'h', 'd'
+        or 'w'. If no unit is specified the default 's' will be used.
     """
 
     def overwrite_agent_conf_file():
@@ -94,7 +96,7 @@ def test_response_timeout(num_files, sync_interval, get_configuration, configure
     def purge_manager_db():
         for proc in psutil.process_iter(attrs=['name']):
             if proc.name() == "wazuh-db":
-                proc.kill()
+                proc.terminate()
 
         os.system("rm -f /var/ossec/queue/db/00{1..9}.db*")
         os.system("/var/ossec/bin/wazuh-db")

@@ -12,8 +12,8 @@ from wazuh_testing.fim import (CHECK_ALL, CHECK_ATTRS, CHECK_GROUP, CHECK_INODE,
                                REQUIRED_ATTRIBUTES, regular_file_cud, generate_params, create_file, REGULAR,
                                check_time_travel, callback_detect_event, delete_file, modify_file)
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -73,7 +73,8 @@ else:
 @pytest.mark.parametrize('path, checkers', parametrize_list)
 def test_check_all_single(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                           wait_for_initial_scan):
-    """Test the functionality of `check_all` option when used in conjunction with another check on the same directory,
+    """
+    Test the functionality of `check_all` option when used in conjunction with another check on the same directory,
     having "check_all" to "yes" and the other check to "no".
 
     Example:
@@ -81,11 +82,12 @@ def test_check_all_single(path, checkers, get_configuration, configure_environme
         check_all="yes" check_mtime="no"
         ...
 
-    This test is intended to be used with valid configurations files. Each execution of this test will configure the
-    environment properly, restart the service and wait for the initial scan.
-
-    :param path: Directory where the file is being created and monitored
-    :param checkers: Dict with all the check options to be used
+    Parameters
+    ----------
+    path : str
+        Directory where the file is being created and monitored.
+    checkers : dict
+        Check options to be used.
     """
     check_apply_test({'test_check_all_single'}, get_configuration['tags'])
     regular_file_cud(path, wazuh_log_monitor, min_timeout=15, options=checkers,
@@ -115,7 +117,8 @@ else:
 
 @pytest.mark.parametrize('path, checkers', parametrize_list)
 def test_check_all(path, checkers, get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Test the functionality of `check_all` option when used in conjunction with more than one check on the same directory,
+    """
+    Test the functionality of `check_all` option when used in conjunction with more than one check on the same directory,
     having "check_all" to "yes" and the other ones to "no".
 
     Example:
@@ -123,11 +126,12 @@ def test_check_all(path, checkers, get_configuration, configure_environment, res
         check_all="yes" check_perm="yes" check_mtime="no"
         ...
 
-    This test is intended to be used with valid configurations files. Each execution of this test will configure the
-    environment properly, restart the service and wait for the initial scan.
-
-    :param path: Directory where the file is being created and monitored
-    :param checkers: Dict with all the check options to be used
+    Parameters
+    ----------
+    path : str
+        Directory where the file is being created and monitored.
+    checkers : dict
+        Check options to be used.
     """
     check_apply_test({'test_check_all'}, get_configuration['tags'])
 
@@ -136,21 +140,20 @@ def test_check_all(path, checkers, get_configuration, configure_environment, res
 
 
 @pytest.mark.parametrize('path, checkers', [(testdir1, {})])
-def test_check_all_no(path, checkers, get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """Test the functionality of `check_all` option when set to no.
+def test_check_all_no(path, checkers, get_configuration, configure_environment, restart_syscheckd,
+                      wait_for_initial_scan):
+    """
+    Test the functionality of `check_all` option when set to no.
 
     When setting `check_all` to no, only 'type' and 'checksum' attributes should appear in every event. This will
     avoid any modification event.
 
-    This test is intended to be used with valid configurations files. Each execution of this test will configure the
-    environment properly, restart the service and wait for the initial scan.
-
     Parameters
     ----------
     path : str
-        Directory where the file is being created and monitored
+        Directory where the file is being created and monitored.
     checkers : dict
-        Dict with all the check options to be used
+        Check options to be used.
     """
     check_apply_test({'test_check_all_no'}, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
@@ -159,7 +162,9 @@ def test_check_all_no(path, checkers, get_configuration, configure_environment, 
     file = 'regular'
     create_file(REGULAR, path, file)
     check_time_travel(scheduled)
-    create_event = wazuh_log_monitor.start(callback=callback_detect_event, timeout=15).result()
+    create_event = wazuh_log_monitor.start(callback=callback_detect_event, timeout=15,
+                                           error_message='Did not receive expected '
+                                                         '"Sending FIM event: ..." event').result()
     assert create_event['data']['type'] == 'added'
     assert list(create_event['data']['attributes'].keys()) == ['type', 'checksum']
 
@@ -167,10 +172,14 @@ def test_check_all_no(path, checkers, get_configuration, configure_environment, 
     # be triggered
     modify_file(path, file, 'Sample modification')
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(callback=callback_detect_event, timeout=5)
+        event = wazuh_log_monitor.start(callback=callback_detect_event, timeout=5)
+        raise AttributeError(f'Unexpected event {event}')
 
     delete_file(path, file)
     check_time_travel(scheduled)
-    delete_event = wazuh_log_monitor.start(callback=callback_detect_event, timeout=15).result()
-    assert delete_event['data']['type'] == 'deleted'
-    assert list(delete_event['data']['attributes'].keys()) == ['type', 'checksum']
+    delete_event = wazuh_log_monitor.start(callback=callback_detect_event, timeout=15,
+                                           error_message='Did not receive expected '
+                                                         '"Sending FIM event: ..." event').result()
+    assert delete_event['data']['type'] == 'deleted', f'Current value is {delete_event["data"]["type"]}'
+    assert list(delete_event['data']['attributes'].keys()) == ['type', 'checksum'], \
+        f'Current value is {list(delete_event["data"]["attributes"].keys())}'

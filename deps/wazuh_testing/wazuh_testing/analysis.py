@@ -131,6 +131,8 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
         Dictionary that represents an event
     schema : str
         String with the schema to apply. Default `linux`
+    event : dict
+        Dictionary that represent an event
     """
     def validate_attributes(syscheck_alert, syscheck_event, event_field, suffix):
         for attribute, value in syscheck_event['data'][event_field].items():
@@ -165,13 +167,12 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
 
 
 def validate_analysis_integrity_state(event):
-    """Checks if an Analysis integrity message is properly formatted.
+    """Check if an Analysis integrity message is properly formatted.
 
     Parameters
     ----------
     event : dict
-        Dictionary that represent an event
-
+        Dictionary that represents an event.
     """
     with open(os.path.join(_data_path, 'state_integrity_analysis_schema.json'), 'r') as f:
         schema = json.load(f)
