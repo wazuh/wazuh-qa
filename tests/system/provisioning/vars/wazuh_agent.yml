@@ -4,5 +4,9 @@ linux_agents_version: "3.11.3-1"
 
 ### Windows Agents version
 
-windows_agent_version: "3.11.3" # wazuh-ansible appends the winagent.config.revision = "-1"
+windows_agent_version: "3.11.3"
+windows_agent_revision: '1'
 windows_md5: "e4623e7cd3f2fc6ac8a313cbdd7c3cba"
+windows_repo: https://packages.wazuh.com/3.x/windows/
+windows_install_dir: C:\Program Files\ossec-agent\
+windows_install_dir_x86: C:\Program Files (x86)\ossec-agent\

@@ -2,6 +2,22 @@
 
   - name: Install Nginx
     shell: "amazon-linux-extras install nginx1.12 -y"
+    when:
+      - ansible_distribution|lower == "amazon"
+
+  - name: Install Epel-release
+    package:
+      name: epel-release
+      state: present
+    when:
+      - ansible_distribution|lower == "centos"
+
+  - name: Install Nginx
+    package:
+      name: nginx
+      state: present
+    when:
+      - ansible_distribution|lower == "centos"
 
   - name: Create SSL required folders
     file:
@@ -18,17 +34,10 @@
 
   - name: Install htpasswd
     yum:
-      name: httpd-tools-2.4.33-2.amzn2.0.2.x86_64
+      name: httpd-tools
       state: present
     when:
       - ansible_distribution|lower != "amazon"
-
-  - name: Install htpasswd in Amazon Linux
-    yum:
-      name: httpd-tools-2.4.33-2.amzn2.0.2.x86_64
-      state: present
-    when:
-      - ansible_distribution|lower == "amazon"
 
   - name: Configure Nginx
     blockinfile:
