@@ -1,4 +1,5 @@
 # Create/Modify/Delete files
+agents_local_output_path: "/opt/fim_files_output"
 files_config_destination_path: "/tmp/files_configuration.json"
 files_config_source_path: "config/files_configuration.json"
 files_generated_output_path: "tests/files_generated.txt"
@@ -11,6 +12,6 @@ syscheck_event: "created"
 alerts_json_path: "/var/ossec/logs/alerts/alerts.json"
 
 # Results
-agents_results_manager_path: "/opt/agents_fim_results"
+agents_results_manager_path: "/opt/agents_files_output"
 missing_alerts_json_path: "missing_alerts_json.txt"
 missing_alerts_elasticsearch_path: "missing_alerts_elasticsearch.txt"
