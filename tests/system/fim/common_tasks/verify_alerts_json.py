@@ -73,6 +73,7 @@ def main():
         return 0
     else:
         print("Test failed. %s alerts are missing\n" % len(sub_paths))
+
         with open(args.output_file, 'w') as f:
             for item in sub_paths:
                 f.write("%s\n" % item)
