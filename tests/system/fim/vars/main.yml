@@ -1,9 +1,5 @@
-
-
-
-
 # Create/Modify/Delete files
-
+files_config_destination_path: "/tmp/files_configuration.json"
 files_generation_config_path: "config/files_configuration.json"
 files_generated_output_path: "tests/files_generated.txt"
 files_modified_output_path: "tests/files_modified.txt"
@@ -15,6 +11,6 @@ alert_event: "created"
 alerts_json_path: "/var/ossec/logs/alerts/alerts.json"
 
 # Results
-
-missing_alerts_json_path: missing_alerts_json.txt
-missing_alerts_elasticsearch_path: missing_alerts_elasticsearch.txt
+agents_results_manager_path: "/opt/agents_fim_results"
+missing_alerts_json_path: "missing_alerts_json.txt"
+missing_alerts_elasticsearch_path: "missing_alerts_elasticsearch.txt"
