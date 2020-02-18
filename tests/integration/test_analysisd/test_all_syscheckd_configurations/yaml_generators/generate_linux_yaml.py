@@ -197,8 +197,9 @@ def get_script_arguments():
                                      description="Analysisd YAML generator (Linux)",
                                      formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-e', '--events', dest='n_events', default=4096,
-                        help='Specify how many events will be expected. Default 4096.', action='store')
-    parser.add_argument('-m', '--modified', dest='dropped_events', default=4088,
+                        help='Specify how many events will be expected to be created and deleted. Default 4096.',
+                        action='store')
+    parser.add_argument('-m', '--modified', dest='modified_events', default=4088,
                         help='Specify how many modified events will be expected. Default 4088.', action='store')
     parser.add_argument('-d', '--debug', dest='debug_level', default='ERROR', choices=list_of_choices,
                         help='Specify debug level. Default "ERROR".', action='store')
@@ -210,13 +211,13 @@ if __name__ == '__main__':
 
     options = get_script_arguments()
     events = int(options.n_events)
-    modify = int(options.dropped_events)
+    modified = int(options.modified_events)
     logger.setLevel(log_level[options.debug_level])
 
     original_conf = set_syscheck_config()
     create_syscheck_environment()
     try:
-        mitm = generate_analysisd_yaml(n_events=events, modify_events=modify)
+        mitm = generate_analysisd_yaml(n_events=events, modify_events=modified)
         mitm.shutdown()
     except (TimeoutError, FileNotFoundError):
         logger.error('Could not generate the YAML. Please clean the environment.')

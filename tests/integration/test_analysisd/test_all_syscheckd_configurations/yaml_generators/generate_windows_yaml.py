@@ -144,8 +144,8 @@ def get_script_arguments():
                                      formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-e', '--events', dest='n_events', default=4096, type=int,
                         help='Specify how many events will be expected. Default 4096.', action='store')
-    parser.add_argument('-m', '--modified', dest='dropped_events', default=4088, type=int,
-                        help='Specify how many modified events will be expected. Default 4088.', action='store')
+    parser.add_argument('-m', '--modified', dest='modified_events', default=4080, type=int,
+                        help='Specify how many modified events will be expected. Default 4080.', action='store')
     parser.add_argument('-d', '--debug', dest='debug_level', default='ERROR', choices=list_of_choices,
                         help='Specify debug level. Default "ERROR".', action='store')
     return parser.parse_args()
@@ -156,11 +156,11 @@ if __name__ == '__main__':
 
     options = get_script_arguments()
     events = options.n_events
-    modify = options.dropped_events
+    modified = options.dropped_events
     logger.setLevel(log_level[options.debug_level])
 
     try:
-        mitm = generate_analysisd_yaml(n_events=events, modify_events=modify)
+        mitm = generate_analysisd_yaml(n_events=events, modify_events=modified)
         mitm.shutdown()
     except (TimeoutError, FileNotFoundError):
         logger.error('Could not generate the YAML. Please clean the environment.')
