@@ -30,10 +30,21 @@ configurations_path = os.path.join(test_data_path, 'wazuh_response_conf.yaml')
 test_directories = [os.path.join(PREFIX, 'testdir1')]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 response_timeouts = ['10', '10m', '10h', '10d', '10w']
+sync_interval = ['20', '20m', '20h', '20d', '20w']
+
+
+
+list_ = []
+for response in response_timeouts:
+    for sync in sync_interval:
+        if time_to_timedelta(sync) > time_to_timedelta(response):
+            list_.append({'RESPONSE_TIMEOUT': response, 'INTERVAL': sync})
+
 
 # configurations
-p, m = generate_params(apply_to_all=({'RESPONSE_TIMEOUT': response_timeout} for response_timeout in response_timeouts),
-                       modes=['scheduled'])
+#p, m = generate_params(apply_to_all=({'RESPONSE_TIMEOUT': response_timeout, 'INTERVAL': sync_inter} for response_timeout in response_timeouts for sync_inter in sync_interval), modes=['scheduled'])
+p, m = generate_params(apply_to_all=list_, modes=['scheduled'])
+print("P:", p)
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
@@ -49,30 +60,25 @@ def get_configuration(request):
 # Tests
 
 @pytest.mark.parametrize('num_files', [1, 100])
-@pytest.mark.parametrize('sync_interval', ['10', '10h'])
-def test_response_timeout(num_files, sync_interval, get_configuration, configure_environment, restart_syscheckd):
-    """
-    Verify that synchronization checks take place at the expected time given SYNC_INTERVAL and RESPONSE_TIMEOUT
-    parameters. To accomplish this a connection with a Wazuh Agent (Linux based) must be established via SSH using
+def test_response_timeout(num_files, get_configuration, configure_environment, restart_syscheckd):
+    """Verify that synchronization checks take place at the expected time given INTERVAL and RESPONSE_TIMEOUT
+    parameters, being INTERVAL greater than RESPONSE_TIMEOUT.
+
+    To accomplish this a connection with a Wazuh Agent (Linux based) must be established via SSH using
     Paramiko. All operations will take place on the Agent side.
 
     Parameters
     ----------
     num_files : int
         Number of files to create within the test
-    sync_interval : str
-        The value to the SYNC_INTERVAL variable. Must be a number with one of the following units 's', 'm', 'h', 'd'
-        or 'w'. If no unit is specified the default 's' will be used.
     """
-
     def overwrite_agent_conf_file():
-        sync_cmd = "sudo sed -i 's|<sync_interval>.*|<sync_interval>" + str(
-            sync_interval) + "</sync_interval>|g' /var/ossec/etc/ossec.conf"
-        ssh.exec_command(sync_cmd)
-
-        response_cmd = "sudo sed -i 's|<response_timeout>.*|<response_timeout>" + response_timeout + \
-                       "</response_timeout>|g' /var/ossec/etc/ossec.conf"
-        ssh.exec_command(response_cmd)
+        cmd = "sudo sed -i ':a;N;$!ba;s|<synchronization>.*</synchronization>|<synchronization>\
+            <enabled>yes</enabled>\
+                <interval>" + str(sync_interval) + "</interval>\
+                    <response_timeout>" + str(response_timeout) + "</response_timeout>\
+                        </synchronization>|g' /var/ossec/etc/ossec.conf"
+        ssh.exec_command(cmd)
 
     def wait_agent_initial_scan(time_out=60):
         truncate_agent_log()
@@ -160,6 +166,7 @@ def test_response_timeout(num_files, sync_interval, get_configuration, configure
     USERNAME = "vagrant"
     PASSWORD = "vagrant"
     response_timeout = get_configuration['metadata']['response_timeout']
+    sync_interval = get_configuration['metadata']['interval']
 
     # Connect to the agent
     ssh = paramiko.SSHClient()
@@ -209,5 +216,5 @@ def test_response_timeout(num_files, sync_interval, get_configuration, configure
     update_agent_datetime()
 
     # Wait until next synchronization is detected
-    if detect_synchronization_start(time_out=30) is None:
+    if detect_synchronization_start(time_out=10) is None:
         pytest.fail("No synchronization was detected.")
