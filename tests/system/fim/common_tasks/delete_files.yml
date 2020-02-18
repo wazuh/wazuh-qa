@@ -4,4 +4,4 @@
     args:
       executable: "python3"
     when:
-      - inventory_hostname in groups['agents']      
+      - inventory_hostname in groups['linuxagents'] or inventory_hostname in groups['windowsagents']
