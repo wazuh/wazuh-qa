@@ -242,6 +242,8 @@ def configure_mitm_environment_analysisd(request):
         control_service('stop', daemon=daemon)
         check_daemon_status(running=False, daemon=daemon)
 
+    control_service('start')
+
 
 @pytest.fixture(scope='module')
 def generate_events_and_alerts(request):
