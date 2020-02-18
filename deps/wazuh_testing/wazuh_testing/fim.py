@@ -907,7 +907,11 @@ class EventChecker:
                 if self.encoding is not None:
                     for index, item in enumerate(file_paths):
                         file_paths[index] = item.encode(encoding=self.encoding)
-                assert (expected_file_path in file_paths), f'{expected_file_path} does not exist in {file_paths}'
+                if sys.platform == 'darwin' and self.encoding != 'utf-8':
+                    logger.DEBUG(f'Not asserting {expected_file_path} in event.data.path. '
+                                 f'Reason: using non-utf-8 encoding in darwin.')
+                else:
+                    assert (expected_file_path in file_paths), f'{expected_file_path} does not exist in {file_paths}'
 
         def filter_events(events, mask):
             """Returns a list of elements matching a specified mask in the events list using jq module."""

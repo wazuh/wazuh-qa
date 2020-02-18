@@ -421,9 +421,10 @@ def set_correct_prefix(configurations, new_prefix):
                 for sub_element in (element.get('directories'), element.get('ignore'), element.get('nodiff')):
                     if sub_element:
                         # Get restrict, directories, ignore and nodiff fields and split them into paths lists
-                        restrict_dict = next(
-                            (restrict for restrict in sub_element.get('attributes', []) if
-                             isinstance(restrict, dict) if restrict.get('restrict')), {})
+                        restrict_dict = {}
+                        attributes = sub_element.get('attributes', [])
+                        if isinstance(attributes, dict):
+                            restrict_dict = attributes.get('restrict', {})
                         restrict_list = restrict_dict['restrict'].split('|') if restrict_dict != {} else []
                         paths_list = sub_element['value'].split(',')
                         modified_restricts = ''
@@ -433,7 +434,7 @@ def set_correct_prefix(configurations, new_prefix):
                         for path in paths_list:
                             modified_paths += inserter(path)
                             modified_paths += ',' if (element.get('directories') and modified_paths != '') else ''
-                        modified_restricts = modified_restricts.rstrip(',')
+                        modified_paths = modified_paths.rstrip(',')
 
                         # Insert the prefix in every path inside restrict
                         for restrict in restrict_list:
