@@ -30,7 +30,7 @@ if sys.platform == 'win32':
     import win32con
     import win32api
     import winreg
-elif sys.platform == 'linux2' or sys.platform == 'linux' or sys.platform == 'darwin':
+elif sys.platform == 'linux2' or sys.platform == 'linux':
     from jq import jq
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -948,7 +948,7 @@ class EventChecker:
 
         def filter_events(events, mask):
             """Returns a list of elements matching a specified mask in the events list using jq module."""
-            if sys.platform in ("win32", 'sunos5'):
+            if sys.platform in ("win32", 'sunos5', 'darwin'):
                 stdout = subprocess.check_output(["jq", "-r", mask], input=json.dumps(events).encode())
                 return stdout.decode("utf8").strip().split(os.linesep)
             else:
