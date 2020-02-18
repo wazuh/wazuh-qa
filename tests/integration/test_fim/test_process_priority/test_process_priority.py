@@ -7,8 +7,8 @@ import os
 import pytest
 
 from wazuh_testing.fim import generate_params
-from wazuh_testing.tools.services import get_process
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.services import get_process
 
 # Marks
 
@@ -26,7 +26,8 @@ test_directories = []
 
 priority_list = ['0', '4', '-5']
 
-p, m = generate_params(apply_to_all=({'PROCESS_PRIORITY': priority_value} for priority_value in priority_list), modes=monitoring_modes)
+p, m = generate_params(apply_to_all=({'PROCESS_PRIORITY': priority_value} for priority_value in priority_list),
+                       modes=monitoring_modes)
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 

@@ -3,16 +3,16 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import pytest
-
 from test_fim.test_follow_symbolic_link.common import configurations_path, testdir1, \
     testdir_target, delete_f
 # noinspection PyUnresolvedReferences
 from test_fim.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
     extra_configuration_after_yield
+
 from wazuh_testing.fim import (generate_params, create_file, REGULAR, callback_detect_event,
                                check_time_travel, modify_file_content, LOG_FILE_PATH)
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -71,13 +71,17 @@ def test_symbolic_monitor_symlink(tags_to_apply, main_folder, get_configuration,
     # Modify the linked file and expect an event
     modify_file_content(main_folder, file1, 'Sample modification')
     check_time_travel(scheduled)
-    modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
+    modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
+                                     error_message='Did not receive expected '
+                                                   '"Sending FIM event: ..." event').result()
     assert 'modified' in modify['data']['type'] and file1 in modify['data']['path'], \
         f"'modified' event not matching"
 
     # Delete the linked file and expect an event
     delete_f(main_folder, file1)
     check_time_travel(scheduled)
-    delete = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
+    delete = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
+                                     error_message='Did not receive expected '
+                                                   '"Sending FIM event: ..." event').result()
     assert 'deleted' in delete['data']['type'] and file1 in delete['data']['path'], \
         f"'deleted' event not matching"

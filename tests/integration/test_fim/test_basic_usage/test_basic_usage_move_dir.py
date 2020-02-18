@@ -4,13 +4,15 @@
 
 import os
 import shutil
+
 import pytest
+
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
     callback_detect_event, check_time_travel
-from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # variables
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -32,6 +34,7 @@ conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
 p, m = generate_params(extra_params=conf_params)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
+
 # fixtures
 
 
@@ -39,6 +42,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
+
 
 # tests
 
@@ -93,7 +97,9 @@ def test_move_file(source_folder, target_folder, subdir, tags_to_apply,
     # Monitor expected events
     events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                      callback=callback_detect_event,
-                                     accum_results=(triggers_add_event + triggers_delete_event)).result()
+                                     accum_results=(triggers_add_event + triggers_delete_event),
+                                     error_message='Did not receive expected "Sending FIM event: ..." event'
+                                     ).result()
 
     # Expect deleted events
     if isinstance(events, list):

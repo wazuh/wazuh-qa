@@ -4,16 +4,16 @@
 import os
 
 import pytest
-
 from test_fim.test_follow_symbolic_link.common import configurations_path, testdir1, \
     testdir_link, wait_for_symlink_check, testdir_target, testdir_not_target, delete_f
 # noinspection PyUnresolvedReferences
 from test_fim.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
     extra_configuration_after_yield
+
 from wazuh_testing.fim import (generate_params, create_file, REGULAR, SYMLINK, callback_detect_event,
                                check_time_travel, modify_file_content, LOG_FILE_PATH)
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -66,7 +66,8 @@ def test_symbolic_delete_symlink(tags_to_apply, main_folder, aux_folder, get_con
     if tags_to_apply == {'monitored_dir'}:
         create_file(REGULAR, main_folder, file1, content='')
         check_time_travel(scheduled)
-        wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+        wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
+                                error_message='Did not receive expected "Sending FIM event: ..." event')
 
     # Remove symlink and don't expect events
     symlink = 'symlink' if tags_to_apply == {'monitored_file'} else 'symlink2'
@@ -75,7 +76,8 @@ def test_symbolic_delete_symlink(tags_to_apply, main_folder, aux_folder, get_con
     modify_file_content(main_folder, file1, new_content='Sample modification')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+        event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+        raise AttributeError(f'Unexpected event {event}')
 
     # Restore symlink and modify the target again. Expect events now
     create_file(SYMLINK, testdir_link, symlink, target=os.path.join(main_folder, file1))

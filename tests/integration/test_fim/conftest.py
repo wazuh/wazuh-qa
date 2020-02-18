@@ -8,12 +8,13 @@ import subprocess
 import sys
 
 import pytest
+
 from wazuh_testing.fim import LOG_FILE_PATH, detect_initial_scan
+from wazuh_testing.tools.configuration import get_wazuh_conf, write_wazuh_conf, set_section_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.configuration import get_wazuh_conf, write_wazuh_conf, set_section_wazuh_conf
+from wazuh_testing.tools.time import TimeMachine
 
 
 @pytest.fixture(scope='module')
@@ -54,7 +55,8 @@ def configure_environment(get_configuration, request):
 
     # Change Windows Date format to ensure TimeMachine will work properly
     if sys.platform == 'win32':
-        subprocess.call('reg add "HKCU\\Control Panel\\International" /f /v sShortDate /t REG_SZ /d "dd/MM/yyyy" >nul', shell=True)
+        subprocess.call('reg add "HKCU\\Control Panel\\International" /f /v sShortDate /t REG_SZ /d "dd/MM/yyyy" >nul',
+                        shell=True)
 
     # Call extra functions before yield
     if hasattr(request.module, 'extra_configuration_before_yield'):

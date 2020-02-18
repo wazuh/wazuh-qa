@@ -6,12 +6,12 @@ import os
 
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, SYMLINK, HARDLINK, \
     callback_entries_path_count, check_time_travel
-from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -61,7 +61,10 @@ def test_entries_match_path_count(get_configuration, configure_environment, rest
     check_apply_test({'ossec_conf'}, get_configuration['tags'])
 
     entries, path_count = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                  callback=callback_entries_path_count).result()
+                                                  callback=callback_entries_path_count,
+                                                  error_message='Did not receive expected '
+                                                                '"Fim inode entries: ..., path count: ..." event'
+                                                  ).result()
     check_time_travel(True)
 
     if entries and path_count:

@@ -23,7 +23,7 @@
   - disabled:
       value: 'no'
   - directories:
-      value: "/sys/module/video"
+      value: "/sys/module/isofs"
       attributes:
   - skip_sys:
       value: SKIP
