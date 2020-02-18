@@ -7,10 +7,10 @@
   elements:
   - disabled:
       value: 'no'
-  - inventory:
+  - synchronization:
       elements:
-      - sync_interval:
-          value: SYNC_INTERVAL
+      - interval:
+          value: INTERVAL
   - directories:
       value: "/testdir1"
       attributes:

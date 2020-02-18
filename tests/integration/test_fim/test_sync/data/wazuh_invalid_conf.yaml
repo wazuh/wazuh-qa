@@ -7,9 +7,9 @@
   elements:
   - disabled:
       value: 'no'
-  - inventory:
+  - synchronization:
       elements:
-      - sync_interval:
+      - interval:
           value: "invalid_value"
   - directories:
       value: "/testdir1"
@@ -23,10 +23,10 @@
   elements:
   - disabled:
       value: 'no'
-  - inventory:
+  - synchronization:
       elements:
-      - response_timeout:
-          value: "invalid_value"
+      - interval:
+          value: "-1"
   - directories:
       value: "/testdir1"
       attributes:
