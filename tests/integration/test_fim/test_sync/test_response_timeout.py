@@ -32,8 +32,6 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 response_timeouts = ['10', '10m', '10h', '10d', '10w']
 sync_interval = ['20', '20m', '20h', '20d', '20w']
 
-
-
 list_ = []
 for response in response_timeouts:
     for sync in sync_interval:
@@ -42,10 +40,7 @@ for response in response_timeouts:
 
 
 # configurations
-#p, m = generate_params(apply_to_all=({'RESPONSE_TIMEOUT': response_timeout, 'INTERVAL': sync_inter} for response_timeout in response_timeouts for sync_inter in sync_interval), modes=['scheduled'])
 p, m = generate_params(apply_to_all=list_, modes=['scheduled'])
-print("P:", p)
-
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 

@@ -18,6 +18,8 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import restart_wazuh_with_new_conf
 from wazuh_testing.tools.time import TimeMachine
 
+from unittest.mock import patch
+
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
@@ -78,11 +80,16 @@ def configure_nfs():
     shutil.rmtree(os.path.join('/', 'media', 'nfs-folder'), ignore_errors=True)
 
 
+def extra_configuration_before_yield():
+    # Load isofs module in kernel just in case
+    subprocess.call(['modprobe', 'isofs'])
+
+
 # tests
 
 @pytest.mark.parametrize('directory,  tags_to_apply', [
     (os.path.join('/', 'proc'), {'skip_proc'}),
-    (os.path.join('/', 'sys', 'video'), {'skip_sys'}),
+    (os.path.join('/', 'sys', 'isofs'), {'skip_sys'}),
     (os.path.join('/', 'dev'), {'skip_dev'}),
     (os.path.join('/', 'nfs-mount-point'), {'skip_nfs'})
 ])
@@ -150,32 +157,33 @@ def test_skip(directory, tags_to_apply,
 
     elif tags_to_apply == {'skip_sys'}:
         if trigger:
-            # If /sys/module/video does not exist, use 'modprobe video'
-            assert os.path.exists('/sys/module/video'), f'/sys/module/video does not exist'
+            # If /sys/module/isofs does not exist, use 'modprobe isofs'
+            assert os.path.exists('/sys/module/isofs'), f'/sys/module/isofs does not exist'
 
             # Do not expect any 'Sending event'
             with pytest.raises(TimeoutError):
                 event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
                 raise AttributeError(f'Unexpected event {event}')
 
-            # Remove module video and travel to future to check alerts
-            subprocess.Popen(["modprobe", "-r", "video"])
+            # Remove module isofs and travel to future to check alerts
+            subprocess.Popen(["modprobe", "-r", "isofs"])
             TimeMachine.travel_to_future(timedelta(hours=13))
 
-            # Detect at least one 'delete' event in /sys/module/video path
+            # Detect at least one 'delete' event in /sys/module/isofs path
             event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event,
                                             error_message='Did not receive expected '
                                                           '"Sending FIM event: ..." event').result()
-            assert event['data'].get('type') == 'deleted' and '/sys/module/video' in event['data'].get('path'), \
+            assert event['data'].get('type') == 'deleted' and '/sys/module/isofs' in event['data'].get('path'), \
                 f'Sys event not detected'
 
-            # Restore module video
-            subprocess.Popen(["modprobe", "video"])
+            # Restore module isofs
+            subprocess.Popen(["modprobe", "isofs"])
         else:
             with pytest.raises(TimeoutError):
                 event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_integrity_state)
                 raise AttributeError(f'Unexpected event {event}')
     else:
-        regular_file_cud(directory, wazuh_log_monitor,
-                         time_travel=True,
-                         min_timeout=3, triggers_event=trigger)
+        with patch('wazuh_testing.fim.modify_file_inode'):
+            regular_file_cud(directory, wazuh_log_monitor,
+                             time_travel=True,
+                             min_timeout=3, triggers_event=trigger)
