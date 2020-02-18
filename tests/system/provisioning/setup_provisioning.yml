@@ -1,7 +1,5 @@
 ---
   - hosts: localhost
-    environment:
-      ANSIBLE_HASH_BEHAVIOUR: merge
     vars_files:
       - ./vars/aws.yml
       - ./vars/wazuh_manager.yml
