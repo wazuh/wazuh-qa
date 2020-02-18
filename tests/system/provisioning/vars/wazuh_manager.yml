@@ -24,7 +24,7 @@ wazuh_installation_path_windows: C:\Program Files (x86)\
 ### Wazuh Ansible repository
 
 wazuh_ansible_repository_path: "/tmp/wazuh-ansible"
-wazuh_ansible_branch: devel
+wazuh_ansible_branch: qa467-jenkins-pipeline
 
 ### Repositories
 # yum
@@ -38,6 +38,4 @@ wazuh_yum_production_repo: https://packages.wazuh.com/3.x/yum/
 wazuh_apt_development_repo: https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/apt/ unstable main
 wazuh_apt_staging_repo: https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/apt/
 wazuh_apt_production_repo: https://packages.wazuh.com/3.x/apt/ stable main
-
-
 
