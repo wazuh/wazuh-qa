@@ -1,10 +1,11 @@
 # Create/Modify/Delete files
-agents_local_output_path: "/opt/fim_files_output"
+agents_linux_output_path: "/opt/fim_files_output"
+agents_windows_output_path: C:\fim_files_output
 files_config_destination_path: "/tmp/files_configuration.json"
-files_config_source_path: "config/files_configuration.json"
-files_generated_output_path: "tests/files_generated.txt"
-files_modified_output_path: "tests/files_modified.txt"
-files_deleted_output_path: "tests/files_deleted.txt"
+files_config_source_path: "files_configuration.json"
+files_generated_output_path: "files_generated.txt"
+files_modified_output_path: "files_modified.txt"
+files_deleted_output_path: "files_deleted.txt"
 
 ### Tests 
 
