@@ -1,0 +1,23 @@
+---
+  - hosts: all
+    vars_files:
+      - ../../vars/main.yml
+    tasks:
+      - name: Creates directories to store agents' outputs in managers
+        file:
+          path: "{{ item }}"
+          state: directory
+        with_items:
+          - "{{ agents_results_manager_path }}"
+          - "{{ agents_results_manager_path }}/create"
+          - "{{ agents_results_manager_path }}/modify"
+          - "{{ agents_results_manager_path }}/delete"
+        when:
+          - inventory_hostname in groups['masters']
+
+      - name: Copy {{ files_generation_config_path }} to the agents
+        copy:
+          src: "{{ files_generation_config_path }}"
+          dest: "{{ agents_local_output_path }}/" 
+        when:
+          - inventory_hostname in groups['linuxagents'] or inventory_hostname in groups['windowsagents']
