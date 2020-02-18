@@ -1,5 +1,5 @@
 ---
-  - name: "Delete FIM test files at Wazuh Managers"
+  - name: "Modify FIM test files at Wazuh Managers"
     script: "modify_files.py -i {{ input_list }} -o {{ output_list }}"
     args:
       executable: "python3"
