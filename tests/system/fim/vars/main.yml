@@ -12,6 +12,6 @@ syscheck_event: "created"
 alerts_json_path: "/var/ossec/logs/alerts/alerts.json"
 
 # Results
-agents_results_manager_path: "/opt/agents_files_output"
+agents_results_manager_path: "/opt/agents_files_output"  # Path on Manager of the imported results from Agents
 missing_alerts_json_path: "missing_alerts_json.txt"
 missing_alerts_elasticsearch_path: "missing_alerts_elasticsearch.txt"
