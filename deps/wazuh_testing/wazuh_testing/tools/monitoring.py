@@ -2,9 +2,14 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import grp
+# Unix only modules
+try:
+    import grp
+    import pwd
+except ModuleNotFoundError:
+    pass
+
 import os
-import pwd
 import queue
 import socket
 import socketserver
@@ -397,7 +402,7 @@ class QueueMonitor:
 
         Parameters
         ----------
-        queue_item : SuperQueue
+        queue_item : Queue
             Queue to monitor.
         time_step : float
             Fraction of time to wait in every get. Default `0.5`
@@ -489,7 +494,7 @@ class QueueMonitor:
         return self._queue
 
 
-class SuperQueue(queue.Queue):
+class Queue(queue.Queue):
     def peek(self, position=0, *args, **kwargs):
         """Peek any given position without modifying the queue status.
 
@@ -512,130 +517,131 @@ class SuperQueue(queue.Queue):
         return aux_queue.get(*args, **kwargs)
 
 
-class StreamServer(socketserver.ThreadingUnixStreamServer):
+if hasattr(socketserver, 'ThreadingUnixStreamServer'):
+    class StreamServer(socketserver.ThreadingUnixStreamServer):
 
-    def shutdown_request(self, request):
-        pass
+        def shutdown_request(self, request):
+            pass
 
 
-class StreamHandler(socketserver.BaseRequestHandler):
+    class StreamHandler(socketserver.BaseRequestHandler):
 
-    def forward(self, data):
-        # Create a socket (SOCK_STREAM means a TCP socket)
-        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as forwarded_sock:
-            # Connect to server and send data
-            forwarded_sock.connect(self.server.mitm.forwarded_socket_path)
-            forwarded_sock.sendall(wazuh_pack(len(data)) + data)
+        def forward(self, data):
+            # Create a socket (SOCK_STREAM means a TCP socket)
+            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as forwarded_sock:
+                # Connect to server and send data
+                forwarded_sock.connect(self.server.mitm.forwarded_socket_path)
+                forwarded_sock.sendall(wazuh_pack(len(data)) + data)
 
-            # Receive data from the server and shut down
-            size = wazuh_unpack(self.recvall(forwarded_sock, 4, socket.MSG_WAITALL))
-            response = self.recvall(forwarded_sock, size, socket.MSG_WAITALL)
+                # Receive data from the server and shut down
+                size = wazuh_unpack(self.recvall(forwarded_sock, 4, socket.MSG_WAITALL))
+                response = self.recvall(forwarded_sock, size, socket.MSG_WAITALL)
 
-            return response
+                return response
 
-    def recvall(self, sock: socket.socket, size: int, mask: int):
-        buffer = bytearray()
-        while len(buffer) < size:
-            try:
-                data = sock.recv(size - len(buffer), mask)
+        def recvall(self, sock: socket.socket, size: int, mask: int):
+            buffer = bytearray()
+            while len(buffer) < size:
+                try:
+                    data = sock.recv(size - len(buffer), mask)
+                    if not data:
+                        break
+                    buffer.extend(data)
+                except socket.timeout:
+                    if self.server.mitm.event.is_set():
+                        break
+            return bytes(buffer)
+
+        def handle(self):
+            self.request.settimeout(1)
+            while not self.server.mitm.event.is_set():
+                header = self.recvall(self.request, 4, socket.MSG_WAITALL)
+                if not header:
+                    break
+                size = wazuh_unpack(header)
+                data = self.recvall(self.request, size, socket.MSG_WAITALL)
                 if not data:
                     break
-                buffer.extend(data)
-            except socket.timeout:
-                if self.server.mitm.event.is_set():
-                    break
-        return bytes(buffer)
 
-    def handle(self):
-        self.request.settimeout(1)
-        while not self.server.mitm.event.is_set():
-            header = self.recvall(self.request, 4, socket.MSG_WAITALL)
-            if not header:
-                break
-            size = wazuh_unpack(header)
-            data = self.recvall(self.request, size, socket.MSG_WAITALL)
-            if not data:
-                break
+                response = self.server.mitm.handler_func(data) if self.server.mitm.handler_func else self.forward(data)
 
-            response = self.server.mitm.handler_func(data) if self.server.mitm.handler_func else self.forward(data)
+                self.server.mitm.put_queue((data.rstrip(b'\x00'), response.rstrip(b'\x00')))
 
-            self.server.mitm.put_queue((data.rstrip(b'\x00'), response.rstrip(b'\x00')))
-
-            self.request.sendall(wazuh_pack(len(response)) + response)
+                self.request.sendall(wazuh_pack(len(response)) + response)
 
 
-class DatagramHandler(socketserver.BaseRequestHandler):
+    class DatagramHandler(socketserver.BaseRequestHandler):
 
-    def forward(self, data):
-        with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as forwarded_sock:
-            forwarded_sock.sendto(data, self.server.mitm.forwarded_socket_path)
+        def forward(self, data):
+            with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as forwarded_sock:
+                forwarded_sock.sendto(data, self.server.mitm.forwarded_socket_path)
 
-    def handle(self):
-        data = self.request[0]
+        def handle(self):
+            data = self.request[0]
 
-        self.server.mitm.handler_func(data) if self.server.mitm.handler_func else self.forward(data)
+            self.server.mitm.handler_func(data) if self.server.mitm.handler_func else self.forward(data)
 
-        self.server.mitm.put_queue(data.rstrip(b'\x00'))
-
-
-class DatagramServer(socketserver.UnixDatagramServer):
-
-    def shutdown_request(self, request):
-        pass
+            self.server.mitm.put_queue(data.rstrip(b'\x00'))
 
 
-class ManInTheMiddle:
+    class DatagramServer(socketserver.UnixDatagramServer):
 
-    def __init__(self, socket_path, mode='TCP', func: callable = None):
-        """Create a MITM for the socket `socket_path`.
+        def shutdown_request(self, request):
+            pass
 
-        Parameters
-        ----------
-        socket_path : str
-            Path of the socket to be replaced.
-        mode : str
-            It can be either 'TCP' or 'UDP'. Default `'TCP'`
-        func : callable
-            Function to be applied to every data before sending it.
-        """
-        self.listener_socket_path = socket_path
-        self.forwarded_socket_path = f'{socket_path}.original'
-        os.rename(self.listener_socket_path, self.forwarded_socket_path)
-        self.listener_class = StreamServer if mode == 'TCP' else socketserver.UnixDatagramServer
-        self.handler_class = StreamHandler if mode == 'TCP' else DatagramHandler
-        self.handler_func = func
-        self.mode = mode
-        self.listener = None
-        self.thread = None
-        self.event = threading.Event()
-        self._queue = SuperQueue()
 
-    def run(self, *args):
-        self.listener = self.listener_class(self.listener_socket_path, self.handler_class)
-        self.listener.mitm = self
+    class ManInTheMiddle:
 
-        # set proper socket permissions
-        uid = pwd.getpwnam('ossec').pw_uid
-        gid = grp.getgrnam('ossec').gr_gid
-        os.chown(self.listener_socket_path, uid, gid)
-        os.chmod(self.listener_socket_path, 0o660)
+        def __init__(self, socket_path, mode='TCP', func: callable = None):
+            """Create a MITM for the socket `socket_path`.
 
-        self.thread = threading.Thread(target=self.listener.serve_forever)
-        self.thread.start()
+            Parameters
+            ----------
+            socket_path : str
+                Path of the socket to be replaced.
+            mode : str
+                It can be either 'TCP' or 'UDP'. Default `'TCP'`
+            func : callable
+                Function to be applied to every data before sending it.
+            """
+            self.listener_socket_path = socket_path
+            self.forwarded_socket_path = f'{socket_path}.original'
+            os.rename(self.listener_socket_path, self.forwarded_socket_path)
+            self.listener_class = StreamServer if mode == 'TCP' else socketserver.UnixDatagramServer
+            self.handler_class = StreamHandler if mode == 'TCP' else DatagramHandler
+            self.handler_func = func
+            self.mode = mode
+            self.listener = None
+            self.thread = None
+            self.event = threading.Event()
+            self._queue = Queue()
 
-    def start(self):
-        self.run()
+        def run(self, *args):
+            self.listener = self.listener_class(self.listener_socket_path, self.handler_class)
+            self.listener.mitm = self
 
-    def shutdown(self):
-        self.listener.shutdown()
-        self.listener.socket.close()
-        self.event.set()
-        os.remove(self.listener_socket_path)
-        os.rename(self.forwarded_socket_path, self.listener_socket_path)
+            # set proper socket permissions
+            uid = pwd.getpwnam('ossec').pw_uid
+            gid = grp.getgrnam('ossec').gr_gid
+            os.chown(self.listener_socket_path, uid, gid)
+            os.chmod(self.listener_socket_path, 0o660)
 
-    @property
-    def queue(self):
-        return self._queue
+            self.thread = threading.Thread(target=self.listener.serve_forever)
+            self.thread.start()
 
-    def put_queue(self, item):
-        self._queue.put(item)
+        def start(self):
+            self.run()
+
+        def shutdown(self):
+            self.listener.shutdown()
+            self.listener.socket.close()
+            self.event.set()
+            os.remove(self.listener_socket_path)
+            os.rename(self.forwarded_socket_path, self.listener_socket_path)
+
+        @property
+        def queue(self):
+            return self._queue
+
+        def put_queue(self, item):
+            self._queue.put(item)
