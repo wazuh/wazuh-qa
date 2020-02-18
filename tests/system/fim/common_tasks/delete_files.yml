@@ -1,0 +1,7 @@
+---
+  - name: "Delete FIM test files at Wazuh Managers"
+    script: "delete_files.py -i {{ input_list }} -o {{ output_list }}"
+    args:
+      executable: "python3"
+    when:
+      - inventory_hostname in groups['masters'] or inventory_hostname in groups['agents']      
