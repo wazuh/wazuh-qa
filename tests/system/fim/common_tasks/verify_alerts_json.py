@@ -50,7 +50,7 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description='Compares paths list and alerts.json paths')
 
-    parser.add_argument("-f", "--files", type=str, required=True, dest='files',
+    parser.add_argument("-i", "--input_path", type=str, required=True, dest='files',
                         help="File containing the list of modified files, one per line")
 
     parser.add_argument("-e", "--event", type=str, required=True, dest='event',
