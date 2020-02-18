@@ -1,13 +1,13 @@
 ---  
   - name: "Verify alert log"
-    script: "verify_alerts_json.py -i {{ file_list_path }} -e {{ syscheck_event }}"
+    script: "verify_alerts_json.py -i {{ input_list }} -e {{ event }}"
     args:
       executable: "python3"
     when: 
       - inventory_hostname in groups['masters']
 
   - name: "Verify elastic alerts"
-    script: "verify_alerts_elasticsearch.py -i {{ file_list_path }} -e {{ syscheck_event }} -a {{ private_ip }}"
+    script: "verify_alerts_elasticsearch.py -i {{ input_list }} -e {{ event }} -a {{ address }}"
     args:
       executable: python3
     when: 
