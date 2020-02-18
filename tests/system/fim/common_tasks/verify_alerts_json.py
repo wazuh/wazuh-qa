@@ -61,7 +61,7 @@ def main():
                         help="alerts.json path. default value '/var/ossec/logs/alerts/alerts.json'",
                         default="/var/ossec/logs/alerts/alerts.json")
 
-    parser.add_argument("-o", "--output_path", type=str, required=False, dest='output_path',
+    parser.add_argument("-o", "--output-list", type=str, required=False, dest='output',
                         help="Output path for missing files alerts.",
                         default="debug_missing_file_alerts.log")
     args = parser.parse_args()
@@ -73,7 +73,7 @@ def main():
         return 0
     else:
         print("Test failed. %s alerts are missing\n" % len(sub_paths))
-        with open(args.output_path, 'w') as f:
+        with open(args.output, 'w') as f:
             for item in sub_paths:
                 f.write("%s\n" % item)
             f.write("%s alerts for the paths above are missing on alerts.json\n" % len(sub_paths))

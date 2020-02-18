@@ -46,8 +46,8 @@ if __name__ == "__main__":
         help="ElasticSearch server IP address"
     )
     parser.add_argument(
-        "-o", "--output_path", type=str, required=False,
-        dest='output_path', help="Output path for missing files alerts.",
+        "-o", "--output-list", type=str, required=False,
+        dest='output', help="Output path for missing files alerts.",
         default="debug_missing_file_alerts.log"
     )
     args = parser.parse_args()
@@ -77,11 +77,11 @@ if __name__ == "__main__":
             if query_result['hits']['total']['value'] == 1:
                 success += 1
             else:
-                failure_list.append(
-                    query_result['hits']['hits']['_source']
-                    ['syscheck']['syscheck']['path']
-                )
+                failure_list.append(line)
                 failure += 1
+
+    with open(args.output, 'w+') as output:
+        output.writelines(failure_list)
 
     assert failure == 0, "number of failed files: {}\n".format(failure)
 
