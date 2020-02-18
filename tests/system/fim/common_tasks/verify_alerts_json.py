@@ -50,7 +50,7 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description='Compares paths list and alerts.json paths')
 
-    parser.add_argument("-f", "--files", type=str, required=True, dest='files',
+    parser.add_argument("-i", "--input-list", type=str, required=True, dest='input_file',
                         help="File containing the list of modified files, one per line")
 
     parser.add_argument("-e", "--event", type=str, required=True, dest='event',
@@ -61,11 +61,11 @@ def main():
                         help="alerts.json path. default value '/var/ossec/logs/alerts/alerts.json'",
                         default="/var/ossec/logs/alerts/alerts.json")
 
-    parser.add_argument("-o", "--output_path", type=str, required=False, dest='output_path',
+    parser.add_argument("-o", "--output-list", type=str, required=False, dest='output_file',
                         help="Output path for missing files alerts.",
                         default="debug_missing_file_alerts.log")
     args = parser.parse_args()
-    paths_list_set = paths_acquisition(args.files)
+    paths_list_set = paths_acquisition(args.input_file)
     pruned_alerts_set = alerts_prune(args.log_json_path, args.event)
     sub_paths = paths_list_set - pruned_alerts_set
     if len(sub_paths) == 0:
@@ -73,7 +73,8 @@ def main():
         return 0
     else:
         print("Test failed. %s alerts are missing\n" % len(sub_paths))
-        with open(args.output_path, 'w') as f:
+
+        with open(args.output_file, 'w') as f:
             for item in sub_paths:
                 f.write("%s\n" % item)
             f.write("%s alerts for the paths above are missing on alerts.json\n" % len(sub_paths))

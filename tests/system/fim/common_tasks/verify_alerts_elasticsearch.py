@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-f", "--files", type=str, required=True, dest='files',
+        "-i", "--input-list", type=str, required=True, dest='files',
         help="File containing the list of modified files, one per line"
     )
     parser.add_argument(
@@ -42,8 +42,13 @@ if __name__ == "__main__":
         help="Type of event that we expect: added, modified, deleted"
     )
     parser.add_argument(
-        "-i", "--ip", type=str, required=True, dest='ip',
-        help="ElasticSearch server IP"
+        "-a", "--address", type=str, required=True, dest='ip',
+        help="ElasticSearch server IP address"
+    )
+    parser.add_argument(
+        "-o", "--output-list", type=str, required=False,
+        dest='output', help="Output path for missing files alerts.",
+        default="debug_missing_file_alerts.log"
     )
     args = parser.parse_args()
 
@@ -62,6 +67,7 @@ if __name__ == "__main__":
     index_name = "wazuh-alerts-3.x*"
     success = 0
     failure = 0
+    failure_list = []
 
     with open(args.files, 'r') as file_list:
         for line in file_list:
@@ -71,7 +77,11 @@ if __name__ == "__main__":
             if query_result['hits']['total']['value'] == 1:
                 success += 1
             else:
+                failure_list.append(line)
                 failure += 1
+
+    with open(args.output, 'w+') as output:
+        output.writelines(failure_list)
 
     assert failure == 0, "number of failed files: {}\n".format(failure)
 

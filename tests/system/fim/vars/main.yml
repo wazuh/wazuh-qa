@@ -1,0 +1,11 @@
+# Create files
+files_generation_config_path: "config/files_configuration.json"
+files_generated_output_path: "tests/files_generated.txt"
+
+# Modify/Delete/Verify files
+alerts_json_path: "/var/ossec/logs/alerts/alerts.json"
+files_modified_output_path: "tests/files_modified.txt"
+files_deleted_output_path: "tests/files_deleted.txt"
+alert_event: "created"
+n_files: 1000
+
