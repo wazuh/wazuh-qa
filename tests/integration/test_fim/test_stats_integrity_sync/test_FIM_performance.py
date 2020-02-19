@@ -2,13 +2,6 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-# Needs installed in system: sysstat, bc
-# This line needs to be in syscheck section of ossec.conf
-#   <directories check_all="yes" realtime="yes">/test</directories>
-# This line needs to be in local_internal_options.conf
-#   syscheck.debug=2
-# Needs a modification of /wazuh/src/syscheckd/fim_sync.c
-
 import os
 import re
 import shutil
@@ -19,6 +12,7 @@ from multiprocessing import Process
 import pandas as pd
 import pytest
 
+from wazuh_testing import logger
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_CONF, LOG_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.services import control_service, check_daemon_status
@@ -256,14 +250,14 @@ def clean_environment(stats=False):
 
 def scan_test(scan_df, length, n_files, file_size):
     time_printing, pause = 0, 0
-    print(f"Info: Test scan with {str(length)} path length, {str(n_files)} files and {str(file_size)} KB file size")
+    logger.info(
+        f"[SCAN] Test scan with {str(length)} path length, {str(n_files)} files and {str(file_size)} KB file size")
     previous_stats = get_stats(daemon=tested_daemon)
 
     while True:
         stats = calculate_stats(daemon=tested_daemon, **previous_stats)
-        print(stats)
+        logger.info(stats)
         time_fim = tail_ossec_fim_print_info()
-        print(f"Writing info {str(time_printing)}\r")
         if time_fim > 0:
             scan_df.loc[len(scan_df)] = [str(time_printing), *list(stats.values()), time_fim, 'scan']
             break
@@ -278,20 +272,20 @@ def scan_test(scan_df, length, n_files, file_size):
 
 def integrity_test(data_df, integrity_df, length, n_files, file_size):
     time_printing = 0
-    print(f"Info: Test integrity with {str(length)} path length, {str(n_files)} files and {str(file_size)} KB file "
-          f"size")
+    logger.info(
+        f"[INTEGRITY] Test integrity with {str(length)} path length, {str(n_files)} files and {str(file_size)} KB file "
+        f"size")
     previous_stats = get_stats(daemon=tested_daemon)
 
     while True:
         stats = calculate_stats(daemon=tested_daemon, **previous_stats)
-        print(stats)
+        logger.info(stats)
 
         time_integrity = tail_ossec_fim_sync_checksum()
         if time_integrity is not False:
             integrity_df.loc[len(integrity_df)] = [str(n_files), str(length), str(file_size), str(time_integrity)]
             break
 
-        print(f"Writing info {str(time_printing)}\r")
         if any(float(stat) != 0 for stat in stats.values()):
             data_df.loc[len(data_df)] = [str(time_printing), *list(stats.values()), str(time_integrity), 'integrity']
 
@@ -301,21 +295,18 @@ def integrity_test(data_df, integrity_df, length, n_files, file_size):
 
 
 def real_test(test_name, real_df, length, n_files, file_size):
-    time_printing = 0
-    time_out = 5
     started = False
-    last_count = 0
-    process = None
-    grep_name = None
-    time_start = 0
-    time_fim = 0
+    process, grep_name = None, None
+    time_printing, time_start, time_fim, last_count = 0, 0, 0, 0
+    time_out = 5
 
-    print(f"Info: Test {test_name} with {str(length)} path length, {str(n_files)} files and {str(file_size)} KB file "
-          f"size")
+    logger.info(
+        f"[REAL] Test {test_name} with {str(length)} path length, {str(n_files)} files and {str(file_size)} KB file "
+        f"size")
     previous_stats = get_stats(daemon=tested_daemon)
     while True:
         stats = calculate_stats(daemon=tested_daemon, **previous_stats)
-        print(stats)
+        logger.info(stats)
         if not started:
             last_count = 0
             started = True
@@ -334,8 +325,9 @@ def real_test(test_name, real_df, length, n_files, file_size):
                 process = Process(target=delete_n_files, args=(path_name, n_files,))
                 process.start()
         else:
-            events = os.popen(f"cat {LOG_FILE_PATH} | grep {grep_name} | wc -l")
-            events = events.read().strip('\0')
+            head = subprocess.Popen(["cat", LOG_FILE_PATH], stdout=subprocess.PIPE)
+            grep = subprocess.Popen(["grep", grep_name], stdin=head.stdout, stdout=subprocess.PIPE)
+            events = subprocess.check_output(["wc", "-l"], stdin=grep.stdout).decode().strip()
 
             count = int(events)
             if count - last_count > 0:
@@ -349,10 +341,10 @@ def real_test(test_name, real_df, length, n_files, file_size):
                 time_fim = time_finish - time_start
 
             if time_out == 0:
-                print(f"[WARNING] Timeout: Event read {str(count)} last: {str(last_count)}")
+                logger.warning(f"Timeout: Event read {str(count)} last: {str(last_count)}")
                 break
 
-            print(f"[{test_name}] Writing info {str(time_printing)} Events: {str(count)}/{str(n_files)}\r")
+            logger.info(f"[{test_name}] Writing info {str(time_printing)} Events: {str(count)}/{str(n_files)}")
 
         if any(float(stat) != 0 for stat in stats.values()):
             real_df.loc[len(real_df)] = [str(time_printing), *list(stats.values()), time_fim, test_name]
@@ -360,7 +352,7 @@ def real_test(test_name, real_df, length, n_files, file_size):
         previous_stats = get_stats(daemon=tested_daemon)
         time_printing += 1
         time.sleep(1)
-    print(f'[INFO] Time FIM: {time_fim}')
+    logger.info(f'[REAL] Time FIM: {time_fim}')
     process.join()
 
 
@@ -387,7 +379,6 @@ def test_performance(mode, file_size, path_length, number_files, initial_clean, 
         integrity_df = pd.read_csv(integrity_filename)
     except FileNotFoundError:
         integrity_df = pd.DataFrame(columns=['files', 'length', 'size', 'time'])
-        print(integrity_df)
     data_df = pd.DataFrame(columns=['seconds', 'cpu(%)', 'mem(KB)', 'rchar(KB/s)', 'wchar(KB/s)', 'syscr(Input/s)',
                                     'syscw(Output/s)', 'read_bytes(KB/s)', 'write_bytes(KB/s)',
                                     'cancelled_write_bytes(KB)', 'duration(s)', 'stage'])
