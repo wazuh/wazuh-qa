@@ -10,5 +10,4 @@
         { "size": 10485760, "amount": 10},
         { "size": 1073741824, "amount": 1}
     ],
-    "output_file": "created_files.txt"
 }
