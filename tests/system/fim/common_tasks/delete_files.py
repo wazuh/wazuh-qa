@@ -22,7 +22,11 @@ def delete_files(input_file_path, n, output_file_path):
     :param int n: number of file to delete.
     :return: Returns a file with the list of the deleted files.
     """
-    logger = logging.getLogger()
+    log_filename = 'delete_files.log'
+    logging.basicConfig(
+        filename=log_filename,
+        level=logging.DEBUG,
+    )
     data = []
     # Read data into the variable 'data'
     try:
@@ -33,7 +37,7 @@ def delete_files(input_file_path, n, output_file_path):
             data = [x.strip() for x in data_]
             f.close()  # close f
     except Exception:
-        logger.error('Failed when reading the input file: ', exc_info=True)
+        logging.error('Failed when reading the input file: ', exc_info=True)
 
     if n is not None:  # Randomly select n paths from data
         to_delete = random.sample(data, n)
@@ -45,7 +49,7 @@ def delete_files(input_file_path, n, output_file_path):
         for path in to_delete:
             os.remove(path)
     except Exception:
-        logger.error('Failed when deleting the selected files: ', exc_info=True)
+        logging.error('Failed when deleting the selected files: ', exc_info=True)
 
     # Write the list of the deleted files into output_file_path
     try:
@@ -54,7 +58,7 @@ def delete_files(input_file_path, n, output_file_path):
                 f.write("%s\n" % item)
         f.close()
     except Exception:
-        logger.error('Failed when writing to the output file: ', exc_info=True)
+        logging.error('Failed when writing to the output file: ', exc_info=True)
 
 
 def main():

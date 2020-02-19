@@ -118,7 +118,7 @@ def create_files(files_path):
     """
     for key, value in files_path.items():
         with open(key, "wb") as f:
-            f.write(b'0'*value)
+            f.write(b'0' * value)
 
 
 def create_file_summary(files_path, logfile):
@@ -132,7 +132,7 @@ def create_file_summary(files_path, logfile):
         os.remove(logfile)
     with open(logfile, 'w') as f:
         for path in files_path:
-            f.write(path+'\n')
+            f.write(path + '\n')
 
 
 def main():
@@ -146,10 +146,10 @@ def main():
     output_file = args.output_list
     config = parse_files_configuration(config_file)
     folders = generate_folders_paths(
-                                        config["root_folder"],
-                                        config["recursion_level"],
-                                        config["folder_length"]
-                                    )
+        config["root_folder"],
+        config["recursion_level"],
+        config["folder_length"]
+    )
     create_folders(folders)
     n_files = sum(x['amount'] for x in config['file_size_specifications'])
     files = generate_files_paths(folders, n_files, config["file_length"])
