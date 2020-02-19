@@ -1,5 +1,5 @@
 {
-    "root_folder": "/opt/testing/",
+    "root_folder": "/opt/fim_testing",
     "recursion_level": 3,
     "folder_length": 5,
     "file_length": 5,
