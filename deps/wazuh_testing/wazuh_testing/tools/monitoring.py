@@ -76,7 +76,7 @@ class FileMonitor:
             encoding = 'utf-8'
         self.extra_timer_is_running = False
         self._result = [] if accum_results > 1 or timeout_extra > 0 else None
-        with open(self.file_path, encoding=encoding) as f:
+        with open(self.file_path, encoding=encoding, errors='backslashreplace') as f:
             f.seek(self._position)
             while self._continue:
                 if self._abort and not self.extra_timer_is_running:
