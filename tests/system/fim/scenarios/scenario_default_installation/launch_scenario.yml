@@ -13,16 +13,13 @@
             output_list: "{{ agents_linux_output_path }}"
           when:
             - inventory_hostname in groups["linuxagents"]
-            
-        - name: Generating files to trigger FIM alerts
-          import_tasks: "../../common_tasks/create_files.yml"
-          become: yes
-          when:
-            - inventory_hostname in groups["linuxagents"]
 
         - name: Configuring the files generation for Windows hosts
           set_fact:
             config_file: "{{ files_config_windows_destination_path }}"
             output_list: "{{ agents_windows_output_path }}"
           when:
-            - inventory_hostname in groups["windowsagents"]      
+            - inventory_hostname in groups["windowsagents"]
+
+        - name: Generating files to trigger FIM alerts
+          import_tasks: "../../common_tasks/create_files.yml"
