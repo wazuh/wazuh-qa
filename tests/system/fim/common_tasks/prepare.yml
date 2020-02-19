@@ -1,12 +1,29 @@
-- name: Creates directories to store agents' outputs in managers hosts
-  file:
-    path: "{{ item }}"
-    state: directory
-  with_items:
-    - "{{ agents_results_manager_path }}"
-    - "{{ agents_results_manager_path }}/create"
-    - "{{ agents_results_manager_path }}/modify"
-    - "{{ agents_results_manager_path }}/delete"
+- block:
+  - name: Creates directories to store agents' outputs in Managers hosts
+    file:
+      path: "{{ item }}"
+      state: directory
+    with_items:
+      - "{{ agents_results_manager_path }}"
+      - "{{ agents_results_manager_path }}/create"
+      - "{{ agents_results_manager_path }}/modify"
+      - "{{ agents_results_manager_path }}/delete"
+  
+  - name: Stop wazuh-manager service
+    service:
+      name: wazuh-manager
+      state: stopped
+
+  - name: Copy {{ files_config_manager_ossec_conf }} to the Managers hosts
+    copy:
+      src: "config/{{ files_config_manager_ossec_conf }}"
+      dest: "{{ linux_ossec_folder_path }}/ossec.conf" 
+  
+  - name: Start wazuh-manager service
+    service:
+      name: wazuh-manager
+      state: started
+
   when:
     - inventory_hostname in groups['masters']
   become: yes
@@ -20,26 +37,53 @@
       - inventory_hostname in groups['linuxagents']
     become: yes      
 
-  - name: Create {{ agents_windows_output_path }} directory to store agents' outputs in agents hosts | Windows
+  - name: Copy {{ files_config_linux_source_path }} to the Agents hosts | Linux
+    copy:
+      src: "config/{{ files_config_linux_source_path }}"
+      dest: "{{ files_config_linux_destination_path }}" 
+
+  - name: Stop wazuh-agent service | Linux
+    service:
+      name: wazuh-agent
+      state: stopped
+
+  - name: Copy {{ files_config_agent_linux_ossec_conf }} to the Agents hosts | Linux
+    copy:
+      src: "config/{{ files_config_agent_linux_ossec_conf }}"
+      dest: "{{ linux_ossec_folder_path }}/ossec.conf" 
+
+  - name: Start wazuh-agent service | Linux
+    service:
+      name: wazuh-agent
+      state: started     
+
+  when:
+    - inventory_hostname in groups['linuxagents']
+  become: yes
+
+- block:
+  - name: Create {{ agents_windows_output_path }} directory to store Agents' outputs in agents hosts | Windows
     win_file:
       path: "{{ agents_windows_output_path }}"
       state: directory
-    when:
-      - inventory_hostname in groups['windowsagents']
 
-  - name: Copy {{ files_config_linux_source_path }} to the Agents hosts | Linux
-    copy:
-      src: "{{ files_config_linux_source_path }}"
-      dest: "{{ files_config_linux_destination_path }}" 
-    when:
-      - inventory_hostname in groups['linuxagents']
-    become: yes
-
-  - name: Copy {{ files_config_windows_source_path }} to the Agents hosts | Windows
+  - name: Copy {{ files_config_windows_source_path }} to the agents | Windows
     win_copy:
-      src: "{{ files_config_windows_source_path }}"
-      dest: "{{ files_config_windows_destination_path }}" 
+      src: "config/{{ files_config_windows_source_path }}"
+      dest: "{{ files_config_windows_destination_path }}"
     when:
       - inventory_hostname in groups['windowsagents']
+
+  - name: Stop wazuh-agent service | Windows
+    win_service: name=OssecSvc start_mode=auto state=stopped
+
+  - name: Copy {{ files_config_agent_windows_ossec_conf }} to the agents hosts | Windows
+    win_copy:
+      src: "config/{{ files_config_agent_windows_ossec_conf }}"
+      dest: "{{ windows_ossec_folder_path }}/ossec.conf" 
+
+  - name: Start wazuh-agent service | Windows
+    win_service: name=OssecSvc start_mode=auto state=started
+
   when:
-    - inventory_hostname in groups['linuxagents'] or inventory_hostname in groups['windowsagents']
+    - inventory_hostname in groups['windowsagents']
