@@ -5,9 +5,9 @@
       state: directory
     with_items:
       - "{{ agents_results_manager_path }}"
-      - "{{ agents_results_manager_path }}/create"
-      - "{{ agents_results_manager_path }}/modify"
-      - "{{ agents_results_manager_path }}/delete"
+      - "{{ agents_results_manager_path }}/added"
+      - "{{ agents_results_manager_path }}/modified"
+      - "{{ agents_results_manager_path }}/deleted"
   
   - name: Stop wazuh-manager service
     service:
@@ -95,9 +95,9 @@
       state: directory
     with_items:
       - "{{ agents_results_elastic_path }}"
-      - "{{ agents_results_elastic_path }}/create"
-      - "{{ agents_results_elastic_path }}/modify"
-      - "{{ agents_results_elastic_path }}/delete"
+      - "{{ agents_results_elastic_path }}/added"
+      - "{{ agents_results_elastic_path }}/modified"
+      - "{{ agents_results_elastic_path }}/deleted"
 
   when:
     - inventory_hostname in groups['elasticsearch']
