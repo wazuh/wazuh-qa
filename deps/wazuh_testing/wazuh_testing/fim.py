@@ -644,7 +644,7 @@ def callback_detect_integrity_state(line):
 
 
 def callback_detect_synchronization(line):
-    if 'Initializing FIM Integrity Synchronization check' in line:
+    if 'Performing synchronization check' in line:
         return line
     return None
 
@@ -725,6 +725,13 @@ def callback_audit_loaded_rule(line):
 
 def callback_audit_event_too_long(line):
     if 'Caching Audit message: event too long' in line:
+        return True
+    return None
+
+
+def callback_audit_reloading_rules(line):
+    match = re.match(r'.*Reloading Audit rules', line)
+    if match:
         return True
     return None
 

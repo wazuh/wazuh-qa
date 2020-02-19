@@ -2,15 +2,17 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import os
 import pytest
+import time
 from test_fim.test_follow_symbolic_link.common import configurations_path, testdir1, \
-    wait_for_symlink_check, wait_for_audit, testdir_target, testdir_not_target, delete_f
+    wait_for_symlink_check, wait_for_audit, testdir_target, testdir_not_target, delete_f, symlink_interval
 # noinspection PyUnresolvedReferences
 from test_fim.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
     extra_configuration_after_yield
 
-from wazuh_testing.fim import (generate_params, create_file, REGULAR, callback_detect_event,
-                               check_time_travel, modify_file_content, LOG_FILE_PATH)
+from wazuh_testing.fim import (generate_params, create_file, REGULAR, callback_detect_event, callback_audit_removed_rule,
+                               callback_audit_reloaded_rule, callback_audit_reloading_rules, check_time_travel, modify_file_content, LOG_FILE_PATH)
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -76,20 +78,38 @@ def test_symbolic_delete_target(tags_to_apply, main_folder, aux_folder, get_conf
         delete_f(main_folder)
     else:
         delete_f(main_folder, file1)
+
     check_time_travel(scheduled)
-    delete = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
+    delete = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
+                                     error_message='Did not receive expected "Sending FIM event: ..." event').result()
     assert 'deleted' in delete['data']['type'] and file1 in delete['data']['path'], \
         f"'deleted' event not matching for {file1}"
 
-    # If syscheck is monitoring with whodata, wait for audit to reload rules
-    wait_for_audit(whodata, wazuh_log_monitor)
-    wait_for_symlink_check(wazuh_log_monitor)
+    if tags_to_apply == {'monitored_dir'} and whodata:
+        os.makedirs(main_folder, exist_ok=True, mode=0o777)
+        wazuh_log_monitor.start(timeout=3, callback=callback_audit_removed_rule,
+                                error_message='Did not receive expected "Monitored directory \'{main_folder}\' was removed: Audit rule removed')
+        wazuh_log_monitor.start(timeout=symlink_interval, callback=callback_audit_reloading_rules,
+                                error_message='Did not receive expected "Reloading Audit rules" event')
+        wazuh_log_monitor.start(timeout=symlink_interval, callback=callback_audit_reloaded_rule,
+                                error_message='Did not receive expected "Reloaded audit rule for monitoring directory: \'{main_folder}\'" event')
+    else:
+        # If syscheck is monitoring with whodata, wait for audit to reload rules
+        wait_for_audit(whodata, wazuh_log_monitor)
+        wait_for_symlink_check(wazuh_log_monitor)
 
-    # Restore the target and don't expect any event since symlink hasn't updated the link information
+    # Restore the target
     create_file(REGULAR, main_folder, file1, content='')
     check_time_travel(scheduled)
-    with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+
+    if tags_to_apply == {'monitored_dir'} and whodata:
+        wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
+                                error_message='Did not receive expected "Sending FIM event: ..." event')
+    else:
+        # We don't expect any event since symlink hasn't updated the link information
+        with pytest.raises(TimeoutError):
+            event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
+            raise AttributeError(f'Unexpected event {event}')
 
     wait_for_symlink_check(wazuh_log_monitor)
     wait_for_audit(whodata, wazuh_log_monitor)
@@ -97,6 +117,7 @@ def test_symbolic_delete_target(tags_to_apply, main_folder, aux_folder, get_conf
     # Modify the files and expect events since symcheck has updated now
     modify_file_content(main_folder, file1, 'Sample modification')
     check_time_travel(scheduled)
-    modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
+    modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
+                                     error_message='Did not receive expected "Sending FIM event: ..." event').result()
     assert 'modified' in modify['data']['type'] and file1 in modify['data']['path'], \
         f"'modified' event not matching for {file1}"
