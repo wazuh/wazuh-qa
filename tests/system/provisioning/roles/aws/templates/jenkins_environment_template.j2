@@ -103,35 +103,6 @@ Parameters:
     MaxLength: '64'
     ConstraintDescription: Only alphanumeric characters. Minimum length 8. Maximum length 64.
 
-  JenkinsVPC:
-    Description: VPC with Jenkins service
-    Type: AWS::EC2::VPC::Id
-    Default: vpc-921e61fa
-  JenkinsRouteTableVPC:
-    Description: Route Table for Subnets in Jenkins VPC
-    Type: String
-    Default: rtb-691d6201
-  JenkinsVPCCIDR:
-    Description: CIDR of Jenkins VPC
-    Type: String
-    MinLength: '9'
-    MaxLength: '18'
-    Default: 10.0.0.0/16
-    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
-    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
-  WazuhVPCCIDR:
-    Description: CIDR of Wazuh VPC
-    Type: String
-    MinLength: '9'
-    MaxLength: '18'
-    Default: 172.21.0.0/24
-    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
-    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
-  WazuhRouteTableVPC:
-    Description: Route Table for Subnets in Jenkins VPC
-    Type: String
-    Default: rtb-691d6201
-
   # Version and instance types
   ElasticWazuhVersion:
     AllowedValues:
@@ -452,26 +423,6 @@ Resources:
     Properties:
       SubnetId: !Ref SubnetAgents
       RouteTableId: !Ref PublicRouteTable
-
-  myVPCPeeringConnection:
-    Type: AWS::EC2::VPCPeeringConnection
-    Properties:
-      VpcId: !Ref WazuhVpc
-      PeerVpcId: !Ref JenkinsVPC
-
-  PeeringRoutetoJenkins:
-    Type: AWS::EC2::Route
-    Properties:
-      DestinationCidrBlock: !Ref JenkinsVPCCIDR
-      RouteTableId: !Ref PublicRouteTable
-      VpcPeeringConnectionId: !Ref myVPCPeeringConnection
-
-  PeeringRoutetoWazuh:
-    Type: AWS::EC2::Route
-    Properties:
-      DestinationCidrBlock: !Ref WazuhVPCCIDR
-      RouteTableId: !Ref JenkinsRouteTableVPC
-      VpcPeeringConnectionId: !Ref myVPCPeeringConnection
 
   # Security groups
   ElasticSecurityGroup:
