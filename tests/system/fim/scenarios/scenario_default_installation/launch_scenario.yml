@@ -1,7 +1,28 @@
-- hosts: all
-  vars_files:
-    - ../../vars/main.yml
-  tasks:
+---
+  - hosts: all
+    vars_files:
+      - ../../vars/main.yml
+    tasks:
+      - block:
+        - name: Launching prepare tasks 
+          import_tasks: "../../common_tasks/prepare.yml"
 
-    - name: Run Prepare tasks
-      import_tasks: "../../common_tasks/prepare.yml"
+        - name: Configuring the files generation for Linux hosts
+          set_fact:
+            config_file: "{{ files_config_linux_destination_path }}"
+            output_list: "{{ agents_linux_output_path }}"
+          when:
+            - inventory_hostname in groups["linuxagents"]
+            
+        - name: Generating files to trigger FIM alerts
+          import_tasks: "../../common_tasks/create_files.yml"
+          become: yes
+          when:
+            - inventory_hostname in groups["linuxagents"]
+
+        - name: Configuring the files generation for Windows hosts
+          set_fact:
+            config_file: "{{ files_config_windows_destination_path }}"
+            output_list: "{{ agents_windows_output_path }}"
+          when:
+            - inventory_hostname in groups["windowsagents"]      
