@@ -1,13 +1,17 @@
----  
-  - name: "Verify alert log"
-    script: "verify_alerts_json.py -i {{ input_list }} -e {{ event }}"
+---
+  - name: "Verify alert json log"
+    script: >
+      verify_alerts_json.py -i {{ input_list }} -e {{ event }} 
+      -o {{ json_output_list }} -t {{ alert_timeout }} -r {{ alert_retry }}
     args:
       executable: "python3"
     when: 
       - inventory_hostname in groups['masters']
 
   - name: "Verify elastic alerts"
-    script: "verify_alerts_elasticsearch.py -i {{ input_list }} -e {{ event }} -a {{ address }}"
+    script: >
+      verify_alerts_elasticsearch.py -i {{ input_list }} -e {{ event }} 
+      -a {{ private_ip }} -o {{ elastic_output_list }}
     args:
       executable: python3
     when: 

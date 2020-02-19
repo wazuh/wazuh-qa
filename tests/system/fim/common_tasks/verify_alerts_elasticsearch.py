@@ -1,6 +1,14 @@
 #!/usr/bin/python3
+# Copyright (C) 2015-2020, Wazuh Inc.
+# All rights reserved.
+#
+# This program is free software; you can redistribute it
+# and/or modify it under the terms of the GNU General Public
+# License (version 2) as published by the FSF - Free Software
+# Foundation.
 
 import argparse
+import traceback
 from elasticsearch import Elasticsearch
 
 
@@ -30,59 +38,62 @@ def makeQuery(query, Elastic, index_name):
 
 
 if __name__ == "__main__":
+    try:
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+            "-i", "--input-list", type=str, required=True, dest='files',
+            help="File containing the list of modified files, one per line"
+        )
+        parser.add_argument(
+            "-e", "--event", type=str, required=True, dest='alert',
+            choices=['added', 'modified', 'deleted'],
+            help="Type of event that we expect: added, modified, deleted"
+        )
+        parser.add_argument(
+            "-a", "--address", type=str, required=True, dest='ip',
+            help="ElasticSearch server IP address"
+        )
+        parser.add_argument(
+            "-o", "--output-list", type=str, required=False,
+            dest='output', help="Output path for missing files alerts.",
+            default="debug_missing_file_alerts.log"
+        )
+        args = parser.parse_args()
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-i", "--input-list", type=str, required=True, dest='files',
-        help="File containing the list of modified files, one per line"
-    )
-    parser.add_argument(
-        "-e", "--event", type=str, required=True, dest='alert',
-        choices=['added', 'modified', 'deleted'],
-        help="Type of event that we expect: added, modified, deleted"
-    )
-    parser.add_argument(
-        "-a", "--address", type=str, required=True, dest='ip',
-        help="ElasticSearch server IP address"
-    )
-    parser.add_argument(
-        "-o", "--output-list", type=str, required=False,
-        dest='output', help="Output path for missing files alerts.",
-        default="debug_missing_file_alerts.log"
-    )
-    args = parser.parse_args()
-
-    query = {
-        "query": {
-            "bool": {
-                "filter": [
-                    {"term": {"syscheck.path": ""}},
-                    {"term": {"syscheck.event": args.alert}}
-                ]
+        query = {
+            "query": {
+                "bool": {
+                    "filter": [
+                        {"term": {"syscheck.path": ""}},
+                        {"term": {"syscheck.event": args.alert}}
+                    ]
+                }
             }
         }
-    }
 
-    es = setElasticsearch(args.ip)
-    index_name = "wazuh-alerts-3.x*"
-    success = 0
-    failure = 0
-    failure_list = []
+        es = setElasticsearch(args.ip)
+        index_name = "wazuh-alerts-3.x*"
+        success = 0
+        failure = 0
+        failure_list = []
 
-    with open(args.files, 'r') as file_list:
-        for line in file_list:
-            query['query']['bool']['filter'][0]['term']['syscheck.path'] = \
-                line.rstrip()
-            query_result = makeQuery(query, es, index_name)
-            if query_result['hits']['total']['value'] == 1:
-                success += 1
-            else:
-                failure_list.append(line)
-                failure += 1
+        with open(args.files, 'r') as file_list:
+            for line in file_list:
+                query['query']['bool']['filter'][0]['term']['syscheck.path'] =\
+                    line.rstrip()
+                query_result = makeQuery(query, es, index_name)
+                if query_result['hits']['total']['value'] == 1:
+                    success += 1
+                else:
+                    failure_list.append(line)
+                    failure += 1
 
-    with open(args.output, 'w+') as output:
-        output.writelines(failure_list)
+        with open(args.output, 'w+') as output:
+            output.writelines(failure_list)
 
-    assert failure == 0, "number of failed files: {}\n".format(failure)
+        assert failure == 0, "number of failed files: {}\n".format(failure)
 
-    print("number of succeded files: {}\n".format(success))
+        print("number of succeded files: {}\n".format(success))
+
+    except Exception:
+        traceback.print_exc()
