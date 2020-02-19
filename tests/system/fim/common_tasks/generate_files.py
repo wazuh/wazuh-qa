@@ -119,7 +119,12 @@ def create_files(files_path):
     """
     for key, value in files_path.items():
         with open(key, "wb") as f:
-            f.write(b'0' * value)
+            if value > 1048576:
+                nval = value // 1048576
+                for val in range(nval):
+                    f.write(b'0' * 1048576)
+            else:
+                f.write(b'0' * value)
             f.write(secrets.token_bytes(32))
 
 
