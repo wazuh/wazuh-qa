@@ -6,6 +6,7 @@
     chdir: "{{ agents_linux_output_path }}"
   when:
     - inventory_hostname in groups['linuxagents']
+  become: yes
 
 - name: "Delete FIM test files at Wazuh Managers | Windows"
   script: "modify_files.py -i {{ files_generated_output_path }} -o {{ files_deleted_output_path }}"
