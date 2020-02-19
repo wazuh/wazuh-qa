@@ -463,14 +463,14 @@ Resources:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: !Ref JenkinsVPCCIDR
-      RouteTableId: !Ref JenkinsRouteTableVPC
+      RouteTableId: !Ref PublicRouteTable
       VpcPeeringConnectionId: !Ref myVPCPeeringConnection
 
   PeeringRoutetoWazuh:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: !Ref WazuhVPCCIDR
-      RouteTableId: !Ref PublicRouteTable
+      RouteTableId: !Ref JenkinsRouteTableVPC
       VpcPeeringConnectionId: !Ref myVPCPeeringConnection
 
   # Security groups
