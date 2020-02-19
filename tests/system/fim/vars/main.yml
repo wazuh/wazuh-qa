@@ -1,11 +1,16 @@
 # Create/Modify/Delete files
 agents_linux_output_path: "/opt/fim_files_output"
 agents_windows_output_path: C:\fim_files_output
-files_config_destination_path: "/tmp/files_configuration.json"
-files_config_source_path: "files_configuration.json"
 files_generated_output_path: "files_generated.txt"
 files_modified_output_path: "files_modified.txt"
 files_deleted_output_path: "files_deleted.txt"
+
+### Config files
+files_config_source_path: "files_configuration.json"
+files_config_destination_path: "/tmp/{{ files_config_source_path }}"
+files_config_manager_ossec_conf: "manager_ossec.conf"
+files_config_agent_linux_ossec_conf: "agent_linux_ossec.conf"
+files_config_agent_windows_ossec_conf: "agent_windows_ossec.conf"
 
 ### Tests 
 
