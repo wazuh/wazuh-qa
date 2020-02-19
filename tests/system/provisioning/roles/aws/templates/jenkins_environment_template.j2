@@ -336,7 +336,7 @@ Parameters:
     Type: String
 
 Conditions:
-  HasSslCert: !Not [!Equals [!Ref SSLCertificateARN, " "]]
+  HasSslCert: !Not [!Equals [!Ref SSLCertificateARN, ""]]
 
 Resources:
 
@@ -456,7 +456,7 @@ Resources:
   myVPCPeeringConnection:
     Type: AWS::EC2::VPCPeeringConnection
     Properties:
-      VpcId: !Ref WazuhVPC
+      VpcId: !Ref WazuhVpc
       PeerVpcId: !Ref JenkinsVPC
 
   PeeringRoutetoJenkins:
