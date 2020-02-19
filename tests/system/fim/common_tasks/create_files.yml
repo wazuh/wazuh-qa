@@ -11,7 +11,7 @@
   - name: Copy the output files from Agents to Ansible Controller host
     fetch:
       src: "{{ agents_linux_output_path }}/{{ files_generated_output_path }}"
-      dest: "agents_outputs/added/{{ files_generated_output_path }}-{{ inventory_hostname }}"
+      dest: "agents_outputs/{{ event }}/{{ files_generated_output_path }}-{{ inventory_hostname }}"
       flat: yes
     when:
      - inventory_hostname in groups['linuxagents']
@@ -25,6 +25,7 @@
   when:
     - inventory_hostname in groups['linuxagents'] or inventory_hostname in groups['masters']
   become: yes
+
 
 - block:
   - name: Run script generate_files.py on agents | Windows
