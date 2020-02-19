@@ -1,0 +1,7 @@
+- hosts: all
+  vars_files:
+    - ../../vars/main.yml
+  tasks:
+
+    - name: Run Prepare tasks
+      import_tasks: "../../common_tasks/prepare.yml"
