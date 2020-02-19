@@ -85,7 +85,7 @@ def log_modified_files(files_path, logfile):
 
 
 def main():
-    log_filename = 'files_modify.log'
+    log_filename = 'modify_files.log'
     logging.basicConfig(
         filename=log_filename,
         level=logging.DEBUG,
