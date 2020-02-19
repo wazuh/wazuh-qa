@@ -19,11 +19,11 @@ from datetime import timedelta
 from json import JSONDecodeError
 from stat import ST_ATIME, ST_MTIME
 from typing import Sequence, Union, Generator, Any
-from _pytest.outcomes import skip
-from wazuh_testing import logger
 
+import pytest
 from jsonschema import validate
 
+from wazuh_testing import logger
 from wazuh_testing.tools.time import TimeMachine
 
 if sys.platform == 'win32':
@@ -200,7 +200,7 @@ def create_file(type_, path, name, **kwargs):
         getattr(sys.modules[__name__], f'_create_{type_}')(path, name, **kwargs)
     except OSError:
         logger.info("File could not be created.")
-        skip("OS does not allow creating this file.")
+        pytest.skip("OS does not allow creating this file.")
 
 
 def create_registry(key, subkey, arch):

@@ -9,8 +9,8 @@ from copy import deepcopy
 from subprocess import check_call, DEVNULL, check_output
 from typing import List, Any, Set
 
+import pytest
 import yaml
-from _pytest.outcomes import skip
 
 from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX
 
@@ -383,7 +383,7 @@ def load_wazuh_configurations(yaml_file_path: str, test_name: str, params: list 
 def set_correct_prefix(configurations, new_prefix):
     """Insert the correct prefix in the paths of each configuration.
 
-    In MacOS Catalina it is not possible to create files in the / directory.
+    In Mac OS X it is not possible to create files in the / directory.
     Therefore, it is necessary to replace those paths that do not contain a
     suitable prefix.
 
@@ -406,11 +406,11 @@ def set_correct_prefix(configurations, new_prefix):
     """
     def inserter(path):
         """Insert new_prefix inside path, right before the first '/'."""
+        result = path
         index = path.find(os.sep)
-        result = (path[0:index] + new_prefix + path[index:] if
-                  new_prefix not in path and
-                  index >= 0
-                  else '')
+
+        if new_prefix not in path and index >= 0:
+            result = path[0:index] + new_prefix + path[index:]
 
         return result
 
@@ -466,4 +466,4 @@ def check_apply_test(apply_to_tags: Set, tags: List):
     """
     if not (apply_to_tags.intersection(tags) or
             'all' in apply_to_tags):
-        skip("Does not apply to this config file")
+        pytest.skip("Does not apply to this config file")
