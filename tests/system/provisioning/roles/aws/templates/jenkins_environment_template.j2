@@ -675,47 +675,6 @@ Resources:
       Roles:
         - !Ref InstanceRole
 
-  # Instances
-  ElasticBootstrap:
-    Type: AWS::EC2::Instance
-    Metadata:
-      'AWS::CloudFormation::Init':
-        configSets:
-          ElasticInstallationSet:
-            - Elasticfiles
-            - ElasticInstall
-    Properties:
-      ImageId: !FindInMap
-        - "RegionMap"
-        - Ref: "AWS::Region"
-        - AMAZONLINUX2HVM
-      InstanceType: !Ref ElasticInstanceType
-      IamInstanceProfile: !Ref InstanceProfile
-      KeyName: !Ref KeyPairName
-      NetworkInterfaces:
-        - AssociatePublicIpAddress: "true"
-          DeviceIndex: "0"
-          GroupSet:
-            - Ref: "ElasticSecurityGroup"
-          SubnetId:
-            Ref: "SubnetElasticsearch"
-      BlockDeviceMappings:
-        - DeviceName: /dev/xvda
-          Ebs:
-            VolumeSize: 50
-            VolumeType: gp2
-      Tags:
-        - Key: Name
-          Value: ElasticBootstrap
-        - Key: Identifier
-          Value: elastic00
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash -xe
-          /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource ElasticBootstrap --configsets ElasticInstallationSet --region ${AWS::Region}
-          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource ElasticBootstrap --region ${AWS::Region}
-    DependsOn: GatewayToInternet
-
 {% for n in range(n_elasticsearch_instances) %}
   ElasticMaster{{ n }}:
     Type: AWS::EC2::Instance
