@@ -29,15 +29,10 @@ used_daemons = ['ossec-analysisd']
 socket_path = analysis_path
 analysis_monitor = None
 wdb_monitor = None
+wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 with open(messages_path) as f:
     test_cases = yaml.safe_load(f)
-
-# Syscheck variables
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-n_directories = 0
-directories_list = list()
-testdir = 'testdir'
 
 
 @pytest.mark.parametrize('test_case',

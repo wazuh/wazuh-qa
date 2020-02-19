@@ -13,8 +13,8 @@ from wazuh_testing import logger
 from wazuh_testing.fim import REGULAR, create_file, modify_file, delete_file, callback_detect_event
 from wazuh_testing.tools import WAZUH_CONF, PREFIX, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import generate_syscheck_config
+from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.time import Timer
 
 n_directories = 0
 directories_list = list()
@@ -24,97 +24,6 @@ testdir = 'testdir'
 def _callback_default(line):
     print(line)
     return None
-
-
-class FileMonitor:
-
-    def __init__(self, file_path, time_step=0.5):
-        self.file_path = file_path
-        self._position = 0
-        self.time_step = time_step
-        self._continue = False
-        self._abort = False
-        self._previous_event = None
-        self._result = None
-        self.timeout_timer = None
-        self.extra_timer = None
-        self.extra_timer_is_running = False
-
-    def _monitor(self, callback=_callback_default, accum_results=1, update_position=True, timeout_extra=0,
-                 encoding=None):
-        """Wait for new lines to be appended to the file.
-        A callback function will be called every time a new line is detected. This function must receive two
-        positional parameters: a references to the FileMonitor object and the line detected.
-        """
-        previous_position = self._position
-        if sys.platform == 'win32':
-            encoding = None if encoding is None else encoding
-        elif encoding is None:
-            encoding = 'utf-8'
-        self.extra_timer_is_running = False
-        self._result = [] if accum_results > 1 or timeout_extra > 0 else None
-        with open(self.file_path, encoding=encoding) as f:
-            f.seek(self._position)
-            while self._continue:
-                if self._abort and not self.extra_timer_is_running:
-                    self.stop()
-                    if type(self._result) != list or accum_results != len(self._result):
-                        raise TimeoutError()
-                self._position = f.tell()
-                line = f.readline()
-                if not line:
-                    f.seek(self._position)
-                    time.sleep(self.time_step)
-                else:
-                    result = callback(line)
-                    if result:
-                        if type(self._result) == list:
-                            self._result.append(result)
-                            if accum_results == len(self._result):
-                                if timeout_extra > 0 and not self.extra_timer_is_running:
-                                    self.extra_timer = Timer(timeout_extra, self.stop)
-                                    self.extra_timer.start()
-                                    self.extra_timer_is_running = True
-                                elif timeout_extra == 0:
-                                    self.stop()
-                        else:
-                            self._result = result
-                            if self._result:
-                                self.stop()
-            self._position = f.tell() if update_position else previous_position
-
-    def start(self, timeout=-1, callback=_callback_default, accum_results=1, update_position=True, timeout_extra=0,
-              encoding=None):
-        """Start the file monitoring until the stop method is called."""
-        if not self._continue:
-            self._continue = True
-            self._abort = False
-            if timeout > 0:
-                self.timeout_timer = Timer(timeout, self.abort)
-                self.timeout_timer.start()
-            self._monitor(callback=callback, accum_results=accum_results, update_position=update_position,
-                          timeout_extra=timeout_extra, encoding=encoding)
-
-        return self
-
-    def stop(self):
-        """Stop the file monitoring. It can be restart calling the start method."""
-        self._continue = False
-        if self.timeout_timer:
-            self.timeout_timer.cancel()
-            self.timeout_timer.join()
-        if self.extra_timer and self.extra_timer_is_running:
-            self.extra_timer.cancel()
-            self.extra_timer_is_running = False
-        return self
-
-    def abort(self):
-        """Abort because of timeout."""
-        self._abort = True
-        return self
-
-    def result(self):
-        return self._result
 
 
 def set_syscheck_config():

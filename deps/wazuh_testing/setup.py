@@ -19,7 +19,7 @@ setup(name='wazuh_testing',
                                       'data/mitre_event.json',
                                       'data/analysis_alert.json',
                                       'data/analysis_alert_windows.json',
-                                      'data/state_integrity_analysis_schema.json',
+                                      'data/state_integrity_analysis_schema.json'
                                       ]
                     },
       include_package_data=True,

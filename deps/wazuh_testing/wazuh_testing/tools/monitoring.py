@@ -24,7 +24,7 @@ from wazuh_testing.tools.time import Timer
 
 
 def wazuh_unpack(data, format_: str = "<I"):
-    """
+    """Unpack data with a given header. Using Wazuh header by default.
 
     Parameters
     ----------
@@ -42,7 +42,7 @@ def wazuh_unpack(data, format_: str = "<I"):
 
 
 def wazuh_pack(data, format_: str = "<I"):
-    """
+    """Pack data with a given header. Using Wazuh header by default.
 
     Parameters
     ----------
@@ -196,7 +196,7 @@ class SocketController:
         ----------
         path : str
             Path where the file will be created.
-        timeout : int
+        timeout : int, optional
             Socket's timeout, 0 for non-blocking mode.
         connection_protocol : str
             Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM).
@@ -404,7 +404,7 @@ class QueueMonitor:
         ----------
         queue_item : Queue
             Queue to monitor.
-        time_step : float
+        time_step : float, optional
             Fraction of time to wait in every get. Default `0.5`
         """
         self._queue = queue_item
@@ -418,13 +418,13 @@ class QueueMonitor:
 
         Parameters
         ----------
-        callback : callable
+        callback : callable, optional
             Callback function to filter results.
-        accum_results : int
+        accum_results : int, optional
             Number of results to get. Default `1`
-        timeout : int
+        timeout : int, optional
             Maximum timeout. Default `-1`
-        update_position : bool
+        update_position : bool, optional
             True if we pop items from the queue once they are read. False otherwise. Default `True`
 
         Returns
@@ -495,14 +495,14 @@ class QueueMonitor:
 
 
 class Queue(queue.Queue):
-    def peek(self, position=0, *args, **kwargs):
+    def peek(self, *args, position=0, **kwargs):
         """Peek any given position without modifying the queue status.
 
         The difference between `peek` and `get` is `peek` pops the item and `get` does not.
 
         Parameters
         ----------
-        position : int
+        position : int, optional
             Element of the queue to return. Default `0`
 
         Returns

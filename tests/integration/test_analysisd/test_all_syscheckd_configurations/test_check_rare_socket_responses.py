@@ -29,15 +29,10 @@ used_daemons = ['ossec-analysisd']
 socket_path = analysis_path
 analysis_monitor = None
 wdb_monitor = None
+wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 with open(messages_path) as f:
     test_cases = yaml.safe_load(f)
-
-# Syscheck variables
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-n_directories = 0
-directories_list = list()
-testdir = 'testdir'
 
 
 @pytest.mark.parametrize('test_case',
@@ -45,7 +40,7 @@ testdir = 'testdir'
                          ids=[test_case['name'] for test_case in test_cases])
 def test_validate_rare_socket_responses(configure_mitm_environment_analysisd, create_unix_sockets,
                                         wait_for_analysisd_startup, test_case: list):
-    """Validate every response from the analysisd socket to the wazuh-db socket.
+    """Validate every response from the analysisd socket to the wazuh-db socket using rare cases with encoded characters.
 
     This test will catch every response from analysisd to wazuh-db in real-time using the yaml
     `/data/syscheck_events.yaml`.

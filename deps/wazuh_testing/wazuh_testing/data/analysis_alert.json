@@ -3,7 +3,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "http://example.com/root.json",
   "type": "object",
-  "title": "The Root Schema",
+  "title": "Analysis alert schema",
   "required": [
     "timestamp",
     "rule",
@@ -184,7 +184,8 @@
             "pattern": "^(.*)$"
           }
         }
-      }
+      },
+      "additionalProperties": false
     },
     "agent": {
       "$id": "#/properties/agent",
@@ -284,7 +285,7 @@
       "title": "The Full_log Schema",
       "default": "",
       "examples": [
-        "File '/testdir0/regular' modified\nMode: real-time\nChanged attributes: size,permission,uid,user_name,gid,group_name,mtime,inode,md5,sha1,sha256\nSize changed from '0' to '8'\nPermissions changed from 'rw-r--r--' to 'rw-rw-rw-'\nOwnership was '0', now it is '1'\nUser name was 'root', now it is 'bin'\nGroup ownership was '0', now it is '1'\nGroup name was 'root', now it is 'bin'\nOld modification time was: '1581438201', now it is '1581439247'\nOld inode was: '1185139', now it is '1184275'\nOld md5sum was: 'd41d8cd98f00b204e9800998ecf8427e'\nNew md5sum is : '35e0c8c0b180c95d4e122e55ed62cc64'\nOld sha1sum was: 'da39a3ee5e6b4b0d3255bfef95601890afd80709'\nNew sha1sum is : '19a532c8bc61c311f583455c80ffe37067bbc9bb'\nOld sha256sum was: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'\nNew sha256sum is : 'e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37'\n"
+        "File '/testdir0/example' modified\nMode: real-time\nChanged attributes: size,permission,uid,user_name,gid,group_name,mtime,inode,md5,sha1,sha256\nSize changed from '0' to '8'\nPermissions changed from 'rw-r--r--' to 'rw-rw-rw-'\nOwnership was '0', now it is '1'\nUser name was 'root', now it is 'bin'\nGroup ownership was '0', now it is '1'\nGroup name was 'root', now it is 'bin'\nOld modification time was: '1581438201', now it is '1581439247'\nOld inode was: '1185139', now it is '1184275'\nOld md5sum was: 'd41d8cd98f00b204e9800998ecf8427e'\nNew md5sum is : '35e0c8c0b180c95d4e122e55ed62cc64'\nOld sha1sum was: 'da39a3ee5e6b4b0d3255bfef95601890afd80709'\nNew sha1sum is : '19a532c8bc61c311f583455c80ffe37067bbc9bb'\nOld sha256sum was: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'\nNew sha256sum is : 'e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37'\n"
       ],
       "pattern": "^[\\s\\S]*$"
     },
@@ -303,7 +304,7 @@
           "title": "The Path Schema",
           "default": "",
           "examples": [
-            "/testdir0/regular"
+            "/testdir0/example"
           ],
           "pattern": "^(?:\/[^\/]+)+$"
         },
@@ -355,7 +356,7 @@
           "examples": [
             "0"
           ],
-          "pattern": "^(.*)$"
+          "pattern": "^[0-9a-fA-F]+$"
         },
         "uid_after": {
           "$id": "#/properties/syscheck/properties/uid_after",
@@ -365,7 +366,7 @@
           "examples": [
             "1"
           ],
-          "pattern": "^(.*)$"
+          "pattern": "^[0-9a-fA-F]+$"
         },
         "gid_before": {
           "$id": "#/properties/syscheck/properties/gid_before",
@@ -375,7 +376,7 @@
           "examples": [
             "0"
           ],
-          "pattern": "^(.*)$"
+          "pattern": "^[0-9a-fA-F]+$"
         },
         "gid_after": {
           "$id": "#/properties/syscheck/properties/gid_after",
@@ -385,7 +386,7 @@
           "examples": [
             "1"
           ],
-          "pattern": "^(.*)$"
+          "pattern": "^[0-9a-fA-F]+$"
         },
         "md5_before": {
           "$id": "#/properties/syscheck/properties/md5_before",
@@ -395,7 +396,7 @@
           "examples": [
             "d41d8cd98f00b204e9800998ecf8427e"
           ],
-          "pattern": "^(.*)$"
+          "pattern": "^[a-f0-9]{32}$"
         },
         "md5_after": {
           "$id": "#/properties/syscheck/properties/md5_after",
@@ -405,7 +406,7 @@
           "examples": [
             "35e0c8c0b180c95d4e122e55ed62cc64"
           ],
-          "pattern": "^(.*)$"
+          "pattern": "^[a-f0-9]{32}$"
         },
         "sha1_before": {
           "$id": "#/properties/syscheck/properties/sha1_before",
@@ -415,7 +416,7 @@
           "examples": [
             "da39a3ee5e6b4b0d3255bfef95601890afd80709"
           ],
-          "pattern": "^(.*)$"
+          "pattern": "^[0-9a-f]{5,40}$"
         },
         "sha1_after": {
           "$id": "#/properties/syscheck/properties/sha1_after",
@@ -425,7 +426,7 @@
           "examples": [
             "19a532c8bc61c311f583455c80ffe37067bbc9bb"
           ],
-          "pattern": "^(.*)$"
+          "pattern": "^[0-9a-f]{5,40}$"
         },
         "sha256_before": {
           "$id": "#/properties/syscheck/properties/sha256_before",
@@ -435,7 +436,7 @@
           "examples": [
             "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
           ],
-          "pattern": "^(.*)$"
+          "pattern": "^[a-f0-9]{64}$"
         },
         "sha256_after": {
           "$id": "#/properties/syscheck/properties/sha256_after",
@@ -445,7 +446,7 @@
           "examples": [
             "e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37"
           ],
-          "pattern": "^(.*)$"
+          "pattern": "^[a-f0-9]{64}$"
         },
         "uname_before": {
           "$id": "#/properties/syscheck/properties/uname_before",
@@ -495,7 +496,7 @@
           "examples": [
             "2020-02-11T16:23:21"
           ],
-          "pattern": "^(.*)$"
+          "pattern": "^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2})$"
         },
         "mtime_after": {
           "$id": "#/properties/syscheck/properties/mtime_after",
@@ -505,7 +506,7 @@
           "examples": [
             "2020-02-11T16:40:47"
           ],
-          "pattern": "^(.*)$"
+          "pattern": "^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2})$"
         },
         "inode_before": {
           "$id": "#/properties/syscheck/properties/inode_before",
@@ -585,7 +586,8 @@
           ],
           "pattern": "^(.*)$"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "decoder": {
       "$id": "#/properties/decoder",
@@ -617,5 +619,6 @@
       ],
       "pattern": "^(.*)$"
     }
-  }
+  },
+  "additionalProperties": false
 }

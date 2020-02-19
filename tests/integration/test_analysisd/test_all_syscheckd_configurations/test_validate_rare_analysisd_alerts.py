@@ -29,18 +29,11 @@ analysis_monitor = None
 wdb_monitor = None
 events_dict = {}
 alerts_list = []
+analysisd_injections_per_second = 200
+wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 with open(messages_path) as f:
     test_cases = yaml.safe_load(f)
-
-# Syscheck variables
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-wazuh_alerts_monitor = None
-n_directories = 0
-directories_list = list()
-testdir = 'testdir'
-analysisd_injections_per_second = 200
-
 
 # fixtures
 
@@ -52,7 +45,7 @@ def get_alert(request):
 
 def test_validate_rare_alerts(configure_mitm_environment_analysisd, create_unix_sockets, wait_for_analysisd_startup,
                               generate_events_and_alerts, get_alert):
-    """Check the event messages handling by analysisd.
+    """Check the event messages handling by analysisd using rare cases with encoded characters.
 
     The variable `test_case` is a yaml file that contains the input and the expected output for every test case.
     The function validate_analysis_integrity_state is a function responsible for checking that the output follows a

@@ -8,7 +8,9 @@ import re
 from copy import deepcopy
 from datetime import datetime
 
-from jsonschema import validate
+from jsonschema import validate, exceptions
+
+from wazuh_testing import logger
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
@@ -18,6 +20,8 @@ with open(os.path.join(_data_path, 'analysis_alert.json'), 'r') as f:
 with open(os.path.join(_data_path, 'analysis_alert_windows.json'), 'r') as f:
     win32_schema = json.load(f)
 
+with open(os.path.join(_data_path, 'state_integrity_analysis_schema.json'), 'r') as f:
+    state_integrity_analysis_schema = json.load(f)
 
 def callback_analysisd_message(line):
     if isinstance(line, bytes):
@@ -90,9 +94,10 @@ def callback_wazuh_db_message(item):
 def callback_fim_alert(line):
     try:
         alert = json.loads(line)
-        if 'syscheck' in alert:
+        # Avoid syscheck alerts that are not 'added', 'modified' or 'deleted'
+        if alert['rule']['id'] in ['550', '553', '554'] and 'syscheck' in alert:
             return alert
-    except json.decoder.JSONDecodeError as e:
+    except json.decoder.JSONDecodeError:
         return None
 
 
@@ -110,7 +115,7 @@ def validate_analysis_alert(alert, schema='linux'):
     ----------
     alert : dict
         Dictionary that represent an alert
-    schema : str
+    schema : str, optional
         String with the platform to validate the alert from. Default `linux`
     """
     if schema == 'win32':
@@ -129,19 +134,23 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
         Dictionary that represents an alert
     event : dict
         Dictionary that represents an event
-    schema : str
-        String with the schema to apply. Default `linux`
     event : dict
         Dictionary that represent an event
+    schema : str, optional
+        String with the schema to apply. Default `linux`
     """
     def validate_attributes(syscheck_alert, syscheck_event, event_field, suffix):
         for attribute, value in syscheck_event['data'][event_field].items():
+            # Skip certain attributes since their alerts will not have them
             if attribute in ['type', 'checksum', 'attributes'] or ('inode' in attribute and schema == 'win32'):
                 continue
+            # Change `mtime` format to match with alerts
             elif attribute == 'mtime':
                 value = datetime.utcfromtimestamp(value).isoformat()
+            # Remove `hash_` from hash attributes since alerts do not have them
             elif 'hash' in attribute:
                 attribute = attribute.split('_')[-1]
+            # `perm` attribute has a different format on Windows
             elif 'perm' in attribute and schema == 'win32':
                 attribute = 'win_perm'
                 win_perm_list = []
@@ -156,8 +165,11 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
             assert event['data']['tags'] == syscheck_alert['tags'][0], f'Tags not in alert or with different value'
         if 'content_changes' in event['data']:
             assert event['data']['content_changes'] == syscheck_alert['diff']
-
-    validate_analysis_alert(alert, schema)
+    try:
+        validate_analysis_alert(alert, schema)
+    except exceptions.ValidationError as e:
+        logger.error(f'Validation Error with: {alert}')
+        raise e
     try:
         validate_attributes(deepcopy(alert['syscheck']), deepcopy(event), 'attributes', 'after')
         if event['data']['type'] == 'modified':
@@ -172,8 +184,6 @@ def validate_analysis_integrity_state(event):
     Parameters
     ----------
     event : dict
-        Dictionary that represents an event.
+        Candidate event to be validated against the state integrity schema
     """
-    with open(os.path.join(_data_path, 'state_integrity_analysis_schema.json'), 'r') as f:
-        schema = json.load(f)
-    validate(schema=schema, instance=event)
+    validate(schema=state_integrity_analysis_schema, instance=event)

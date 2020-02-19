@@ -7,7 +7,7 @@ import pytest
 import yaml
 
 from wazuh_testing.analysis import validate_analysis_alert_complex
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, WAZUH_LOGS_PATH
+from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2)]
@@ -29,18 +29,11 @@ analysis_monitor = None
 wdb_monitor = None
 events_dict = {}
 alerts_list = []
+analysisd_injections_per_second = 200
+wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 with open(messages_path) as f:
     test_cases = yaml.safe_load(f)
-
-# Syscheck variables
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-wazuh_alerts_monitor = None
-n_directories = 0
-directories_list = list()
-testdir = 'testdir'
-analysisd_injections_per_second = 200
-
 
 # fixtures
 
