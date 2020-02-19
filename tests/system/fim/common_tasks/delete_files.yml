@@ -1,7 +1,16 @@
 ---
-  - name: "Delete FIM test files at Wazuh Managers"
-    script: "delete_files.py -i {{ input_list }} -o {{ output_list }}"
-    args:
-      executable: "python3"
-    when:
-      - inventory_hostname in groups['linuxagents'] or inventory_hostname in groups['windowsagents']
+- name: "Delete FIM test files at Wazuh Managers | Linux"
+  script: "delete_files.py -i {{ files_generated_output_path }} -o {{ files_deleted_output_path }}"
+  args:
+    executable: "python3"
+    chdir: "{{ agents_linux_output_path }}"
+  when:
+    - inventory_hostname in groups['linuxagents']
+
+- name: "Delete FIM test files at Wazuh Managers | Windows"
+  script: "modify_files.py -i {{ files_generated_output_path }} -o {{ files_deleted_output_path }}"
+  args:
+    executable: "python"
+    chdir: "{{ agents_windows_output_path }}"
+  when:
+    - inventory_hostname in groups['windowsagents']
