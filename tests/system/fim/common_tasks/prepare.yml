@@ -30,7 +30,7 @@
   - name: Copy {{ files_config_linux_source_path }} to the Agents hosts | Linux
     copy:
       src: "{{ files_config_linux_source_path }}"
-      dest: "{{ agents_linux_output_path }}/" 
+      dest: "{{ files_config_linux_destination_path }}" 
     when:
       - inventory_hostname in groups['linuxagents']
     become: yes
@@ -38,7 +38,7 @@
   - name: Copy {{ files_config_windows_source_path }} to the Agents hosts | Windows
     win_copy:
       src: "{{ files_config_windows_source_path }}"
-      dest: "{{ agents_windows_output_path }}/" 
+      dest: "{{ files_config_windows_destination_path }}" 
     when:
       - inventory_hostname in groups['windowsagents']
   when:
