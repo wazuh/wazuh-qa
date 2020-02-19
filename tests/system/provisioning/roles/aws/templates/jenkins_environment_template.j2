@@ -45,7 +45,6 @@ Metadata:
           - ElasticInstanceType
           - KibanaInstanceType
           - SshUsername
-          - SshPassword
       -
         Label:
           default: "Wazuh Amazon Linux agent instance type"
@@ -95,13 +94,6 @@ Parameters:
     MinLength: '5'
     MaxLength: '32'
     ConstraintDescription: Only alphanumeric characters. Minimum length 5. Maximum length 32.
-  SshPassword:
-    Description: SSH Password
-    NoEcho: 'True'
-    Type: String
-    MinLength: '8'
-    MaxLength: '64'
-    ConstraintDescription: Only alphanumeric characters. Minimum length 8. Maximum length 64.
 
   # Version and instance types
   ElasticWazuhVersion:

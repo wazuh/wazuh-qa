@@ -1,6 +1,6 @@
 ---
   - name: Testing Route 53 records resolving for Wazuh Demo Environment instances
-    shell: "/usr/bin/sshpass -p {{ ssh_password }} ssh -o StrictHostKeyChecking=no {{ ssh_username }}{{ '@' }}{{ item }}.{{ environment_type }}"
+    shell: "ssh -i {{ ssh_key_path_private }} -o StrictHostKeyChecking=no {{ ssh_username }}{{ '@' }}{{ item }}.{{ environment_type }}"
     async: 10000
     poll: 0
     with_items:
