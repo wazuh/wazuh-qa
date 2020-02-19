@@ -39,7 +39,7 @@
 
   - name: Copy {{ files_config_linux_source_path }} to the Agents hosts | Linux
     copy:
-      src: "config/{{ files_config_linux_source_path }}"
+      src: "../../common_tasks/{{ files_config_linux_source_path }}"
       dest: "{{ files_config_linux_destination_path }}" 
 
   - name: Stop wazuh-agent service | Linux
@@ -69,7 +69,7 @@
 
   - name: Copy {{ files_config_windows_source_path }} to the agents | Windows
     win_copy:
-      src: "config/{{ files_config_windows_source_path }}"
+      src: "../../common_tasks/{{ files_config_windows_source_path }}"
       dest: "{{ files_config_windows_destination_path }}"
     when:
       - inventory_hostname in groups['windowsagents']
