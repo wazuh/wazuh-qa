@@ -12,6 +12,8 @@ import os
 import sys
 import random
 import platform
+import argparse
+import logging
 if platform.system() == 'Linux':
     import pwd
     import grp
@@ -51,7 +53,7 @@ def modify_file(filepath, owner, group, mode):
         'uid': uid,
         'gid': gid,
         'mode': oct(mode).split('o')[1].zfill(3)  # convert to octal string
-        }
+    }
 
 
 def modify_file_content(filepath):
@@ -60,22 +62,63 @@ def modify_file_content(filepath):
 
         :param str filepath: The path of the file to modify
     """
-    content = 'qazxswedcvbnmklpoiuytggdfert'*random.randint(1, 10)
+    content = 'qazxswedcvbnmklpoiuytggdfert' * random.randint(1, 10)
     content += str(random.random())
+    if not os.path.exists(filepath):
+        raise FileNotFoundError
     with open(filepath, 'ab') as f:
         f.write(bytes(content, 'utf8'))
 
 
+def log_modified_files(files_path, logfile):
+    """
+    Creates a file that summarizes all the modified files
+
+    :param dict files_path: Contains the list of modified files
+    :param str logfile: File to write the list of paths
+    """
+    if os.path.exists(logfile):
+        os.remove(logfile)
+    with open(logfile, 'w') as f:
+        for path in files_path:
+            f.write(path + '\n')
+
+
 def main():
-    import argparse
+    log_filename = 'files_modify.log'
+    logging.basicConfig(
+        filename=log_filename,
+        level=logging.DEBUG,
+    )
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input-list", type=str, required=True, dest='input_file',
+    parser.add_argument("-i", "--input-list", type=str,
+                        required=True, dest='input_file',
                         help="File containing the list of files to modify")
+    parser.add_argument("-o", "--output-list", type=str,
+                        required=True, dest='output_file',
+                        help="File containing the list of modified files")
     args = parser.parse_args()
+
     input_file = args.input_file
+    output_file = args.output_file
+
+    changed_files = []
+
     with open(input_file) as flist:
         for path in flist:
-            modify_file_content(path[:-1])
+            try:
+                modify_file_content(path[:-1])
+                changed_files.append(path[:-1])
+            except PermissionError:
+                logging.error("Not enough permissions to modify: {}".format(path[:-1]))
+                continue
+            except FileNotFoundError:
+                logging.error("File not found: {}".format(path[:-1]))
+                continue
+            except Exception:
+                logging.error("Unexpected error: ", exc_info=True)
+                continue
+    log_modified_files(changed_files, output_file)
 
 
 if __name__ == "__main__":
