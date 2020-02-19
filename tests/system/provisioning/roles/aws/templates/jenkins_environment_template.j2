@@ -1231,11 +1231,6 @@ Resources:
 {% endfor %}
 
 Outputs:
-  ElasticBootstrapIp:
-    Description: Elastic Stack versions
-    Value: !GetAtt
-      - ElasticBootstrap
-      - PublicIp
 {% for n in range(n_elasticsearch_instances) %}
   ElasticMaster{{ n }}:
     Description: Elastic Stack versions
