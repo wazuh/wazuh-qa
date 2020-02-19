@@ -12,6 +12,7 @@ import os
 import json
 import random
 import string
+import secrets
 import argparse
 
 
@@ -119,6 +120,7 @@ def create_files(files_path):
     for key, value in files_path.items():
         with open(key, "wb") as f:
             f.write(b'0' * value)
+            f.write(secrets.token_bytes(32))
 
 
 def create_file_summary(files_path, logfile):
