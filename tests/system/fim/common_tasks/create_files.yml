@@ -1,0 +1,16 @@
+---
+- name: "Run script generate_files.py on agents | Linux"
+  script: "generate_files.py -c {{ files_config_linux_source_path }} -o {{ files_generated_output_path }}"
+  args:
+    chdir: "{{ agents_linux_output_path }}"
+    executable: "python3"
+  when:
+    - inventory_hostname in groups['linuxagents']
+
+- name: "Run script generate_files.py on agents | Windows"
+  script: "generate_files.py -c {{ files_config_windows_source_path }} -o {{ files_generated_output_path }}"
+  args:
+    executable: "python"
+    chdir: "{{ agents_windows_output_path }}"
+  when:
+    - inventory_hostname in groups['windowsagents']
