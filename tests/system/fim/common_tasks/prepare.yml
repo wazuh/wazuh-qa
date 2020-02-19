@@ -87,3 +87,17 @@
 
   when:
     - inventory_hostname in groups['windowsagents']
+  
+- block:
+  - name: Creates directories to store agents' outputs in Elasticsearch hosts
+    file:
+      path: "{{ item }}"
+      state: directory
+    with_items:
+      - "{{ agents_results_elastic_path }}"
+      - "{{ agents_results_elastic_path }}/create"
+      - "{{ agents_results_elastic_path }}/modify"
+      - "{{ agents_results_elastic_path }}/delete"
+
+  when:
+    - inventory_hostname in groups['elasticsearch']
