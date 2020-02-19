@@ -19,9 +19,6 @@
           - name: Configure syscheck event.
             set_fact:
               event: "added"
-          
-          - name: Configure input file list.
-            set_fact:
               input_list: "{{ item }}"
         
           - name: Verify generated alerts
@@ -43,9 +40,6 @@
           - name: Configure syscheck event.
             set_fact:
               event: "modified"
-          
-          - name: Configure input file list.
-            set_fact:
               input_list: "{{ item }}"
         
           - name: Verify generated alerts
@@ -67,9 +61,6 @@
           - name: Configure syscheck event.
             set_fact:
               event: "deleted"
-          
-          - name: Configure input file list.
-            set_fact:
               input_list: "{{ item }}"
         
           - name: Verify generated alerts
