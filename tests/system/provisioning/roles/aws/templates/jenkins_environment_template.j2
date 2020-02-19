@@ -355,6 +355,7 @@ Resources:
           Value: !Ref 'AWS::StackId'
         - Key: Name
           Value: !Ref 'AWS::StackName'
+
   SubnetWazuh:
     Type: 'AWS::EC2::Subnet'
     Properties:
@@ -369,6 +370,7 @@ Resources:
           Value: !Ref 'AWS::StackId'
         - Key: Name
           Value: !Sub '${AWS::StackName}-SubnetWazuh'
+
   SubnetAgents:
     Type: 'AWS::EC2::Subnet'
     Properties:
@@ -383,6 +385,7 @@ Resources:
           Value: !Ref 'AWS::StackId'
         - Key: Name
           Value: !Sub '${AWS::StackName}-SubnetAgents'
+
   SubnetElasticsearch:
       Type: 'AWS::EC2::Subnet'
       Properties:
@@ -453,30 +456,22 @@ Resources:
   myVPCPeeringConnection:
     Type: AWS::EC2::VPCPeeringConnection
     Properties:
-      VpcId:
-        Ref: WazuhVPC
-      PeerVpcId:
-        Ref: JenkinsVPC
+      VpcId: !Ref WazuhVPC
+      PeerVpcId: !Ref JenkinsVPC
 
   PeeringRoutetoJenkins:
     Type: AWS::EC2::Route
     Properties:
-      DestinationCidrBlock:
-        Ref: JenkinsVPCCIDR
-      RouteTableId:
-        Ref: JenkinsRouteTableVPC
-      VpcPeeringConnectionId:
-        Ref: myVPCPeeringConnection
+      DestinationCidrBlock: !Ref JenkinsVPCCIDR
+      RouteTableId: !Ref JenkinsRouteTableVPC
+      VpcPeeringConnectionId: !Ref myVPCPeeringConnection
 
   PeeringRoutetoWazuh:
     Type: AWS::EC2::Route
     Properties:
-      DestinationCidrBlock:
-        Ref: WazuhVPCCIDR
-      RouteTableId:
-        Ref: PublicRouteTable
-      VpcPeeringConnectionId:
-        Ref: myVPCPeeringConnection
+      DestinationCidrBlock: !Ref WazuhVPCCIDR
+      RouteTableId: !Ref PublicRouteTable
+      VpcPeeringConnectionId: !Ref myVPCPeeringConnection
 
   # Security groups
   ElasticSecurityGroup:
