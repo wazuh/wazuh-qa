@@ -14,6 +14,7 @@
           - "{{ agents_results_manager_path }}/delete"
         when:
           - inventory_hostname in groups['masters']
+
       - block:
         - name: Create {{ agents_linux_output_path }} directory to store agents' outputs in agents hosts | Linux
           file:
@@ -33,16 +34,16 @@
           when:
             - inventory_hostname in groups['windowsagents']
   
-        - name: Copy {{ files_generation_config_path }} to the agents | Linux
+        - name: Copy {{ files_generated_output_path }} to the agents | Linux
           copy:
-            src: "config/{{ files_generation_config_path }}"
+            src: "config/{{ files_generated_output_path }}"
             dest: "{{ agents_linux_output_path }}/" 
           when:
             - inventory_hostname in groups['linuxagents']
   
-        - name: Copy {{ files_generation_config_path }} to the agents | Windows
+        - name: Copy {{ files_generated_output_path }} to the agents | Windows
           copy:
-            src: "config/{{ files_generation_config_path }}"
+            src: "config/{{ files_generated_output_path }}"
             dest: "{{ agents_windows_output_path }}/" 
           when:
             - inventory_hostname in groups['windowsagents']
