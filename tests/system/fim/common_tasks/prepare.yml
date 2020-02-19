@@ -20,7 +20,7 @@
       - inventory_hostname in groups['linuxagents']
     become: yes      
 
-  - name: Create {{ agents_linux_output_path }} directory to store Agents' outputs in Agents hosts | Windows
+  - name: Create {{ agents_windows_output_path }} directory to store agents' outputs in agents hosts | Windows
     win_file:
       path: "{{ agents_windows_output_path }}"
       state: directory
@@ -42,4 +42,4 @@
     when:
       - inventory_hostname in groups['windowsagents']
   when:
-    - inventory_hostname in groups['linuxagents'] or inventory_hostname in groups['windowsagents'] 
+    - inventory_hostname in groups['linuxagents'] or inventory_hostname in groups['windowsagents']
