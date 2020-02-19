@@ -7,19 +7,77 @@
         - name: Launching prepare tasks 
           import_tasks: "../../common_tasks/prepare.yml"
 
-        - name: Configuring the files generation for Linux hosts
-          set_fact:
-            config_file: "{{ files_config_linux_destination_path }}"
-            output_list: "{{ agents_linux_output_path }}"
-          when:
-            - inventory_hostname in groups["linuxagents"]
-
-        - name: Configuring the files generation for Windows hosts
-          set_fact:
-            config_file: "{{ files_config_windows_destination_path }}"
-            output_list: "{{ agents_windows_output_path }}"
-          when:
-            - inventory_hostname in groups["windowsagents"]
-
         - name: Generating files to trigger FIM alerts
           import_tasks: "../../common_tasks/create_files.yml"
+
+        - name: Find input files for added event
+          find:
+            paths: "{{ agents_results_manager_path }}/added"
+          register: added_find_result
+
+        - block:
+          - name: Configure syscheck event.
+            set_fact:
+              event: "added"
+          
+          - name: Configure input file list.
+            set_fact:
+              input_list: "{{ item }}"
+        
+          - name: Verify generated alerts
+            import_tasks: "../../common_tasks/verify_alerts.yml"
+            become: yes 
+  
+          with_items:
+            - added_find_result.files
+
+        - name: Modifiying files to trigger FIM alerts
+          import_tasks: "../../common_tasks/modify_files.yml"
+
+        - name: Find input files for modified event
+          find:
+            paths: "{{ agents_results_manager_path }}/modified"
+          register: modified_find_result
+
+        - block:
+          - name: Configure syscheck event.
+            set_fact:
+              event: "modified"
+          
+          - name: Configure input file list.
+            set_fact:
+              input_list: "{{ item }}"
+        
+          - name: Verify generated alerts
+            import_tasks: "../../common_tasks/verify_alerts.yml"
+            become: yes 
+  
+          with_items:
+            - modified_find_result.files
+
+        - name: Deleting files to trigger FIM alerts
+          import_tasks: "../../common_tasks/delete_files.yml"
+
+        - name: Find input files for deleted event
+          find:
+            paths: "{{ agents_results_manager_path }}/deleted"
+          register: deleted_find_result
+
+        - block:
+          - name: Configure syscheck event.
+            set_fact:
+              event: "deleted"
+          
+          - name: Configure input file list.
+            set_fact:
+              input_list: "{{ item }}"
+        
+          - name: Verify generated alerts
+            import_tasks: "../../common_tasks/verify_alerts.yml"
+            become: yes 
+  
+          with_items:
+            - deleted_find_result.files
+          when:
+            - inventory_hostname in groups['masters']
+            - inventory_hostname in groups['elasticsearch'][0]      

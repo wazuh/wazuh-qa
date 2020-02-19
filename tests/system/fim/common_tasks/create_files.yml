@@ -11,7 +11,7 @@
 - name: Run script generate_files.py on agents | Windows
   script: "generate_files.py -c {{ files_config_windows_destination_path }} -o {{ files_generated_output_path }}"
   args:
-    executable: "python"
+    executable: "python3"
     chdir: "{{ agents_windows_output_path }}"
   when:
     - inventory_hostname in groups['windowsagents']
