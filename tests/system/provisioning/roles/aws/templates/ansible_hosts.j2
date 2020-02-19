@@ -213,7 +213,7 @@ kibana:
 {% for instance in groups['kibana'] %}
         {{ groups['kibana'][loop.index-1]}}:
             private_ip: {{ hostvars[instance]['private_ip'] }}
-            elasticsearch_network_host: {{ hostvars[instance]['private_ip'] }}
+            elasticsearch_network_host: {{ hostvars[groups['elasticsearch'][0]]['private_ip'] }}
             elasticsearch_reachable_host: {{ hostvars[groups['kibana'][0]]['private_ip'] }}
             elasticsearch_node_name: node-{{ (groups['elasticsearch'] | length) + (groups['workers'] | length) + 2 }}            
             single_node: false

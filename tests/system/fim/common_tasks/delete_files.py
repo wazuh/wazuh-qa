@@ -6,6 +6,8 @@
 # License (version 2) as published by the FSF - Free Software
 # Foundation.
 
+
+import argparse
 import random
 import logging
 import os
@@ -34,8 +36,10 @@ def delete_files(input_file_path, n, output_file_path):
         logger.error('Failed when reading the input file: ', exc_info=True)
 
 
-    # Randomly select n paths from data
-    to_delete = random.sample(data,n)
+    if n is not None: # Randomly select n paths from data
+        to_delete = random.sample(data,n)
+    else: # Delete all files
+        to_delete = data
 
     # Delete the selected files
     try:
@@ -52,3 +56,21 @@ def delete_files(input_file_path, n, output_file_path):
         f.close()
     except Exception as e:
         logger.error('Failed when writing to the output file: ', exc_info=True)
+
+def main():
+    parser = argparse.ArgumentParser()
+
+    # Parse arguments
+    parser.add_argument("-i", "--input-list", type=str, required=True, dest='input_file',
+                        help="File containing the list of files from which we will randomly \
+                              select files to be deleted, one per line")
+    parser.add_argument("-n", "--n_files", type=int, required=False, dest='n_files',
+                        help="Number of files to be randomly selected and deleted")
+    parser.add_argument("-o", "--output-list", type=str, required=True, dest='output_file',
+                        help="File containing the list of the deleted files, one per line")
+    args = parser.parse_args()
+
+    delete_files(args.input_file, args.n_files, args.output_file)
+
+if __name__ == '__main__':
+    main()

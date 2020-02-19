@@ -137,10 +137,14 @@ def create_file_summary(files_path, logfile):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('configuration', action="store")
+    parser.add_argument("-c", "--config", type=str, required=True,
+                        dest="config", help="Configuration file")
+    parser.add_argument("-o", '--output-list', type=str, required=True,
+                        dest="output_list", help="List of generated files")
     args = parser.parse_args()
-    configuration = args.configuration
-    config = parse_files_configuration(configuration)
+    config_file = args.config
+    output_file = args.output_list
+    config = parse_files_configuration(config_file)
     folders = generate_folders_paths(
                                         config["root_folder"],
                                         config["recursion_level"],
@@ -151,7 +155,7 @@ def main():
     files = generate_files_paths(folders, n_files, config["file_length"])
     associated_files = associate_files_size(files, config["file_size_specifications"])
     create_files(associated_files)
-    create_file_summary(files, config['output_file'])
+    create_file_summary(files, output_file)
 
 
 if __name__ == '__main__':
