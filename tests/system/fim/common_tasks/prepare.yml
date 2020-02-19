@@ -9,25 +9,19 @@
     - "{{ agents_results_manager_path }}/delete"
   when:
     - inventory_hostname in groups['masters']
-  become: yes
 
 - block:
   - name: Create {{ agents_linux_output_path }} directory to store agents' outputs in agents hosts | Linux
     file:
-      path: "{{ item }}"
+      path: "{{ agents_linux_output_path }}"
       state: directory
-    with_items:
-      - "{{ agents_linux_output_path }}"
     when:
       - inventory_hostname in groups['linuxagents']
-    become: yes
 
   - name: Create {{ agents_linux_output_path }} directory to store agents' outputs in agents hosts | Windows
     win_file:
-      path: "{{ item }}"
+      path: "{{ agents_windows_output_path }}"
       state: directory
-    with_items:
-      - "{{ agents_windows_output_path }}"
     when:
       - inventory_hostname in groups['windowsagents']
 
@@ -37,7 +31,6 @@
       dest: "{{ agents_linux_output_path }}/" 
     when:
       - inventory_hostname in groups['linuxagents']
-    become: yes
 
   - name: Copy {{ files_config_source_path }} to the agents hosts | Windows
     win_copy:
