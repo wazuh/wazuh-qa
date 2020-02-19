@@ -6,14 +6,16 @@ import os
 import re
 import subprocess
 import time
+from copy import deepcopy
 from enum import Enum
 from multiprocessing import Process, Manager
 from random import randrange
+from shutil import rmtree
 from socket import socket, AF_UNIX, SOCK_STREAM, MSG_WAITALL
 from struct import pack, unpack
 
+import pandas as pd
 import pytest
-from pandas import DataFrame
 
 from wazuh_testing import logger
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_CONF, ALERT_FILE_PATH
@@ -35,6 +37,7 @@ state_collector_time = 5  # Seconds
 max_time_for_agent_setup = 180  # Seconds
 max_n_attempts = 20
 tested_daemons = ["wazuh-db", "ossec-analysisd", "ossec-remoted"]
+stats_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stats', 'metrics')
 
 
 class Cases(Enum):
@@ -49,6 +52,15 @@ class Cases(Enum):
     case0 = 0
     case1 = 1
     case2 = 2
+
+
+# Fixtures
+
+@pytest.fixture(scope='module')
+def initial_clean():
+    """Clean the environment."""
+    rmtree(stats_dir, ignore_errors=True)
+    os.makedirs(stats_dir, exist_ok=True)
 
 
 def db_query(agent, query):
@@ -148,21 +160,25 @@ def get_stats(daemon):
         Return CPU, RAM, Disk reading, Disk writing, Total disk reading, total disk writing.
     """
     io_stats = get_total_disk_info(daemon)
+    regex_mem = rf"{daemon} *([0-9]+)"
+    ps = subprocess.Popen(["ps", "-axo", "comm,rss"], stdout=subprocess.PIPE)
+    grep = subprocess.Popen(["grep", daemon], stdin=ps.stdout, stdout=subprocess.PIPE)
+    head = subprocess.check_output(["head", "-n1"], stdin=grep.stdout).decode().strip()
 
     return {
-        'cpu': str(get_total_cpu_info(daemon)),
-        'rchar': str(io_stats['rchar']),
-        'wchar': str(io_stats['wchar']),
-        'syscr': str(io_stats['syscr']),
-        'syscw': str(io_stats['syscw']),
-        'read_bytes': str(io_stats['read_bytes']),
-        'write_bytes': str(io_stats['write_bytes']),
-        'cancelled_write_bytes': str(io_stats['cancelled_write_bytes'])
+        'cpu': get_total_cpu_info(daemon),
+        'mem': re.match(regex_mem, head).group(1),
+        'rchar': io_stats['rchar'],
+        'wchar': io_stats['wchar'],
+        'syscr': io_stats['syscr'],
+        'syscw': io_stats['syscw'],
+        'read_bytes': io_stats['read_bytes'],
+        'write_bytes': io_stats['write_bytes'],
+        'cancelled_write_bytes': io_stats['cancelled_write_bytes']
     }
 
 
-def calculate_stats(daemon, cpu=0, rchar=0, wchar=0, syscr=0, syscw=0, read_bytes=0, write_bytes=0,
-                    cancelled_write_bytes=0):
+def calculate_stats(old_stats, current_stats):
     """Get CPU, RAM, disk read and disk write stats using ps and pidstat.
 
     Parameters
@@ -191,22 +207,16 @@ def calculate_stats(daemon, cpu=0, rchar=0, wchar=0, syscr=0, syscw=0, read_byte
     list of str
         Return CPU, RAM, Disk reading, Disk writing, Total disk reading, total disk writing.
     """
-    regex_mem = rf"{daemon} *([0-9]+)"
-    ps = subprocess.Popen(["ps", "-axo", "comm,rss"], stdout=subprocess.PIPE)
-    grep = subprocess.Popen(["grep", daemon], stdin=ps.stdout, stdout=subprocess.PIPE)
-    head = subprocess.check_output(["head", "-n1"], stdin=grep.stdout).decode().strip()
-    io_stats = get_total_disk_info(daemon)
-
     return {
-        'cpu': str(float(get_total_cpu_info(daemon)) - float(cpu)),
-        'mem': re.match(regex_mem, head).group(1),
-        'rchar': str(float(io_stats['rchar']) - float(rchar)),
-        'wchar': str(float(io_stats['wchar']) - float(wchar)),
-        'syscr': str(float(io_stats['syscr']) - float(syscr)),
-        'syscw': str(float(io_stats['syscw']) - float(syscw)),
-        'read_bytes': str(float(io_stats['read_bytes']) - float(read_bytes)),
-        'write_bytes': str(float(io_stats['write_bytes']) - float(write_bytes)),
-        'cancelled_write_bytes': str(float(io_stats['cancelled_write_bytes']) - float(cancelled_write_bytes))
+        'cpu': str(current_stats['cpu'] - old_stats['cpu']),
+        'mem': str(current_stats['mem']),
+        'rchar': str(current_stats['rchar'] - old_stats['rchar']),
+        'wchar': str(current_stats['wchar'] - old_stats['wchar']),
+        'syscr': str(current_stats['syscr'] - old_stats['syscr']),
+        'syscw': str(current_stats['syscw'] - old_stats['syscw']),
+        'read_bytes': str(current_stats['read_bytes'] - old_stats['read_bytes']),
+        'write_bytes': str(current_stats['write_bytes'] - old_stats['write_bytes']),
+        'cancelled_write_bytes': str(current_stats['cancelled_write_bytes'] - old_stats['cancelled_write_bytes'])
     }
 
 
@@ -322,24 +332,24 @@ def replace_conf(eps, directory, buffer):
     os.chmod(agent_conf, 0o666)
 
 
-def check_all_n_attempts(agents_list):
-    """Return max value of n_attempts between all agents.
-
-    Parameters
-    ----------
-    agents_list : list
-        List of agent ids.
-
-    Returns
-    -------
-    int
-        Maximum number of attempts of the tested agents.
-    """
-    all_n_attempts = list()
-    for agent_id in list(agents_list):
-        all_n_attempts.append(n_attempts(agent_id))
-
-    return max(all_n_attempts)
+# def check_all_n_attempts(agents_list):
+#     """Return max value of n_attempts between all agents.
+#
+#     Parameters
+#     ----------
+#     agents_list : list
+#         List of agent ids.
+#
+#     Returns
+#     -------
+#     int
+#         Maximum number of attempts of the tested agents.
+#     """
+#     all_n_attempts = list()
+#     for agent_id in list(agents_list):
+#         all_n_attempts.append(n_attempts(agent_id))
+#
+#     return max(all_n_attempts)
 
 
 def check_all_n_completions(agents_list):
@@ -400,12 +410,8 @@ def modify_database(agent_id, directory, prefix, total_files, modify_file, modif
     db_query(agent_id, 'UPDATE sync_info SET n_attempts=0')
     db_query(agent_id, 'UPDATE sync_info SET n_completions=0')
 
-    while n_completions(agent_id) != 0 and n_attempts(agent_id) != 0:
-        logger.debug('Waiting for wazuh-db')
-        time.sleep(0.1)
 
-
-def agent_checker(case, agent_id, agents_dict, filename, attempts_info, database_params):
+def agent_checker(case, agent_id, agents_dict, filename, attempts_info, database_params, configuration):
     """Check that the current agent is restarted. When it has been restarted, marks the start time of the agent.
     If n_completions of the agent_id is greater than 0, the info_collector must be called.
 
@@ -423,6 +429,8 @@ def agent_checker(case, agent_id, agents_dict, filename, attempts_info, database
         Dictionary with a flag that indicates if the stats collector must start.
     database_params : dict
         Database params to be applied for the current test.
+    configuration : str
+        Test configuration
     """
     if case == Cases.case0.value:
         alerts = open(ALERT_FILE_PATH, 'w')
@@ -441,19 +449,24 @@ def agent_checker(case, agent_id, agents_dict, filename, attempts_info, database
     modify_database(agent_id, **database_params)
 
     while True:
-        if n_attempts(agent_id) > 0 and agents_dict[agent_id]['start'] == 0.0:
+        actual_n_attempts = n_attempts(agent_id)
+        actual_n_completions = n_completions(agent_id)
+        if agents_dict[agent_id]['start'] == 0.0 and actual_n_attempts > 0:
             agents_dict[agent_id]['start'] = time.time()
             attempts_info['start'] = True
             logger.info(f'Agent {agent_id} started at {agents_dict[agent_id]["start"]}')
-        actual_n_attempts = n_attempts(agent_id)
-        if (n_completions(agent_id) > 0 or actual_n_attempts > max_n_attempts) and \
-                agents_dict[agent_id]['start'] != 0.0:
+
+        if agents_dict[agent_id]['start'] != 0.0 and \
+                (actual_n_attempts > max_n_attempts or actual_n_completions > 0):
             state = 'complete' if actual_n_attempts < max_n_attempts else 'except_max_attempts'
-            info_collector(agents_dict[agent_id], agent_id, filename, attempts_info, state=state)
+            info_collector(agents_dict[agent_id], agent_id, filename, attempts_info, configuration, actual_n_attempts,
+                           actual_n_completions, state=state)
             break
+        time.sleep(setup_environment_time)
 
 
-def info_collector(agent, agent_id, filename, attempts_info, state='complete'):
+def info_collector(agent, agent_id, filename, attempts_info, configuration, actual_n_attempts,
+                   actual_n_completions, state='complete'):
     """Write the stats of the agent during the test.
 
     This stats will be written when the agent finish its test process (n_completions(agent_id) > 0).
@@ -470,22 +483,27 @@ def info_collector(agent, agent_id, filename, attempts_info, state='complete'):
         Dictionary with a flag that indicates if the stats collector must start.
     state : str
         complete of except_max_attempts: Indicates if the agent took less attempts than the defined limits or not.
+    configuration : str
+        Test configuration
     """
-    agent_df = DataFrame(columns=["agent_id", "n_attempts", "n_completions", "start_time", "end_time",
-                                  "total_time", "state"])
+    try:
+        agent_df = pd.read_csv(filename)
+    except FileNotFoundError:
+        agent_df = pd.DataFrame(columns=["configuration", "agent_id", "n_attempts", "n_completions", "start_time",
+                                         "end_time", "total_time", "state"])
     if state != 'complete':
         attempts_info['except_max_attempts'] = True
         attempts_info['agents_failed'] += 1
     logger.info(
         f"Info {agent_id} writing: "
-        f"{agent_id},{n_attempts(agent_id)},{n_completions(agent_id)},{agent['start']},"
+        f"{agent_id},{actual_n_attempts},{actual_n_completions},{agent['start']},"
         f"{time.time()},{time.time() - agent['start']},{state}")
-    agent_df.loc[len(agent_df)] = [agent_id, n_attempts(agent_id), n_completions(agent_id), agent['start'],
-                                   time.time(), time.time() - agent['start'], state]
+    agent_df.loc[len(agent_df)] = [configuration, agent_id, actual_n_attempts, actual_n_completions,
+                                   agent['start'], time.time(), time.time() - agent['start'], state]
     agent_df.to_csv(filename, index=False)
 
 
-def state_collector(case, agents_dict, buffer, stats_dir, attempts_info):
+def state_collector(case, agents_dict, configuration, stats_dir, attempts_info):
     """Get the stats of the .state files in the WAZUH_PATH/var/run folder.
     We can define the stats to get from each daemon in the daemons_dict.
 
@@ -495,33 +513,46 @@ def state_collector(case, agents_dict, buffer, stats_dir, attempts_info):
         Case number.
     agents_dict : dict of shared dict
         Dictionary with the start time of every agent.
-    buffer : str
-        Set disabled to yes or no.
+    configuration : str
+        Test configuration
     stats_dir : str
         Stats folder.
     attempts_info : shared dict
         Dictionary with a flag that indicates if the stats collector must start.
     """
+
+    def get_csv(daemon_df='ossec-analysisd'):
+        filename_df = os.path.join(os.path.join(stats_dir, f"case{case}_state-{daemon_df}.csv"))
+        try:
+            return pd.read_csv(filename_df)
+        except FileNotFoundError:
+            if daemon_df == 'ossec-analysisd':
+                return pd.DataFrame(columns=['configuration', 'seconds', 'syscheck_events_decoded', 'syscheck_edps',
+                                             'dbsync_queue_usage', 'dbsync_messages_dispatched', 'dbsync_mdps',
+                                             'events_received', 'events_dropped', 'syscheck_queue_usage',
+                                             'event_queue_usage'])
+            elif daemon_df == 'ossec-remoted':
+                return pd.DataFrame(columns=['configuration', 'seconds', 'queue_size', 'tcp_sessions', 'evt_count',
+                                             'discarded_count', 'recv_bytes'])
+            else:
+                raise NameError(f'Invalid daemon detected: {daemon_df}')
+
     daemons_dict = {
-        'ossec-analysisd': DataFrame(columns=['seconds', 'syscheck_events_decoded', 'syscheck_edps',
-                                              'dbsync_queue_usage', 'dbsync_messages_dispatched', 'dbsync_mdps',
-                                              'events_received', 'events_dropped', 'syscheck_queue_usage',
-                                              'event_queue_usage']),
-        'ossec-remoted': DataFrame(columns=['seconds', 'queue_size', 'tcp_sessions', 'evt_count', 'discarded_count',
-                                            'recv_bytes'])
+        'ossec-analysisd': get_csv('ossec-analysisd'),
+        'ossec-remoted': get_csv('ossec-remoted')
     }
 
     states_exists = False
-    while check_all_n_completions(agents_dict.keys()) == 0 and \
-            attempts_info['agents_failed'] < len(agents_dict.keys()):
+    while not attempts_info['finish'] and attempts_info['agents_failed'] < len(agents_dict.keys()):
         for file in os.listdir(state_path):
             if file.endswith('.state'):
                 states_exists = True
                 daemon = str(file.split(".")[0])
                 with open(os.path.join(state_path, file), 'r') as state_file:
                     file_content = state_file.read()
-                values = [str(time.time())]
-                for field in list(daemons_dict[daemon])[1:]:
+                values = [configuration, str(time.time())]
+                # Skip configuration and seconds columns
+                for field in list(daemons_dict[daemon])[2:]:
                     values.append(re.search(rf"{field}='([0-9.]+)'", file_content, re.MULTILINE).group(1))
 
                 logger.debug(f'State {daemon} writing: {",".join(values)}')
@@ -530,12 +561,12 @@ def state_collector(case, agents_dict, buffer, stats_dir, attempts_info):
 
     if states_exists:
         for daemon, df in daemons_dict.items():
-            filename = os.path.join(os.path.join(stats_dir, f"state-{daemon}_case{case}_{buffer}.csv"))
+            filename = os.path.join(os.path.join(stats_dir, f"case{case}_state-{daemon}.csv"))
             df.to_csv(filename, index=False)
         logger.info(f'Finished state collector')
 
 
-def stats_collector(filename, daemon, agents_dict, attempts_info):
+def stats_collector(filename, daemon, agents_dict, attempts_info, configuration):
     """Collect the stats of the current daemon until all agents have finished the integrity process.
 
     Parameters
@@ -548,27 +579,34 @@ def stats_collector(filename, daemon, agents_dict, attempts_info):
         Dictionary with the start time of every agent.
     attempts_info : shared dict
         Dictionary with a flag that indicates the number of agents that exceed the limit of n_attempts.
+    configuration : str
+        Test configuration
     """
-    stats, old_stats = None, None
-    stats_df = DataFrame(columns=['seconds', 'cpu', 'mem', *list(get_stats(daemon).keys())[1:]])
-    while check_all_n_completions(agents_dict.keys()) == 0 and \
-            attempts_info['agents_failed'] < len(agents_dict.keys()):
-        if check_all_n_attempts(agents_dict.keys()) > 0:
-            if old_stats:
-                stats = calculate_stats(daemon, **old_stats)
-            old_stats = get_stats(daemon)
-            if stats:
-                logger.debug(f'Stats {daemon} writing: {time.time()},{",".join(stats.values())}')
-                stats_df.loc[len(stats_df)] = [time.time(), *list(stats.values())]
+    stats = get_stats(daemon)
+    old_stats = deepcopy(stats)
+    diff = None
+    try:
+        stats_df = pd.read_csv(filename)
+    except FileNotFoundError:
+        stats_df = pd.DataFrame(columns=['configuration', 'seconds', *list(get_stats(daemon).keys())])
+    while not attempts_info['finish'] and attempts_info['agents_failed'] < len(agents_dict.keys()):
+        diff = calculate_stats(old_stats, stats)
+        old_stats = deepcopy(stats)
+        logger.debug(f'Stats {daemon} writing: {time.time()},{",".join(diff.values())}')
+        stats_df.loc[len(stats_df)] = [configuration, time.time(), *list(diff.values())]
         time.sleep(setup_environment_time)
+        stats = get_stats(daemon)
 
     if attempts_info['agents_failed'] >= len(agents_dict.keys()):
         logger.info(f'Configuration finished. All agents reached the max_n_attempts, '
                     f'currently set up to {max_n_attempts}')
 
-    stats = calculate_stats(daemon, **old_stats) if old_stats else calculate_stats(daemon)
-    logger.info(f'Finishing stats {daemon} writing: {time.time()},{",".join(stats.values())}')
-    stats_df.loc[len(stats_df)] = [time.time(), *list(stats.values())]
+    # Avoid empty stats file in 0 files case
+    if not diff:
+        diff = calculate_stats(old_stats, stats)
+        logger.info(f'Finishing stats {daemon} writing: {time.time()},{",".join(diff.values())}')
+        stats_df.loc[len(stats_df)] = [configuration, time.time(), *list(diff.values())]
+
     stats_df.to_csv(filename, index=False)
 
 
@@ -614,11 +652,13 @@ def clean_environment():
     ('5000', '1000000', '/test1M', 'yes'),
     ('1000000', '1000000', '/test1M', 'yes'),
 ])
-def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_file, modify_all, restore_all):
+def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_file, modify_all, restore_all,
+                                    initial_clean):
     """Execute and launch all the necessary processes to check all the cases with all the specified configurations."""
     agents_dict = get_agents()
     attempts_info = Manager().dict({
         'start': False,
+        'finish': False,
         'except_max_attempts': False,
         'agents_failed': 0
     })
@@ -632,12 +672,7 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
         'prefix': 'file_'
     }
     protocol = protocol_detection()
-    stats_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stats',
-                             f'{protocol}_{eps}eps-{files}files')
-    if not os.path.exists(os.path.dirname(stats_dir)):
-        os.mkdir(os.path.dirname(stats_dir))
-    if not os.path.exists(stats_dir):
-        os.mkdir(stats_dir)
+    configuration = f'{protocol}_{eps}_eps_{files}files_client-buffer-{buffer}'
 
     # If we are in case 1 or in case 2 and the number of files is 0, we will not execute the test since we cannot
     # modify the checksums because they do not exist
@@ -650,9 +685,9 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
 
         # Launch one process for agent due to FileMonitor restriction (block the execution)
         for agent_id in agents_dict.keys():
-            filename = os.path.join(stats_dir, f"info-case{case}_{buffer}.csv")
+            filename = os.path.join(stats_dir, f"case{case}_info.csv")
             agents_checker.append(Process(target=agent_checker, args=(case, agent_id, agents_dict, filename,
-                                                                      attempts_info, database_params,)))
+                                                                      attempts_info, database_params, configuration,)))
             agents_checker[-1].start()
 
         # Block the test until one agent starts
@@ -667,14 +702,17 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
 
         # We started the stats collector as the agents are ready
         logger.info(f'Started test for case{case}_{protocol}-{eps}eps-{files}files')
-        state_collector_check = Process(target=state_collector, args=(case, agents_dict, buffer, stats_dir,
+        state_collector_check = Process(target=state_collector, args=(case, agents_dict, configuration, stats_dir,
                                                                       attempts_info,))
         state_collector_check.start()
         for daemon in tested_daemons:
-            filename = os.path.join(stats_dir, f"stats-{daemon}_case{case}_{buffer}.csv")
-            stats_checker.append(Process(target=stats_collector, args=(filename, daemon, agents_dict, attempts_info,)))
+            filename = os.path.join(os.path.join(stats_dir, f"case{case}_stats-{daemon}.csv"))
+            stats_checker.append(Process(target=stats_collector, args=(filename, daemon, agents_dict, attempts_info,
+                                                                       configuration,)))
             stats_checker[-1].start()
         while True:
+            if check_all_n_completions(agents_dict.keys()) > 0:
+                attempts_info['finish'] = True
             if not any([writer_.is_alive() for writer_ in stats_checker]) and \
                     not any([check_agent.is_alive() for check_agent in agents_checker]) and \
                     not state_collector_check.is_alive():
