@@ -8,7 +8,6 @@ from datetime import timedelta
 
 import pytest
 
-from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -30,7 +29,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 
 # Configuration with frequency values
 
-frequencies = ['5', '3600', '10000']
+frequencies = ['8', '3600', '10000']
 
 p, m = generate_params(extra_params={'TEST_DIRECTORIES': directory_str},
                        apply_to_all=({'FREQUENCY': frequency} for frequency in frequencies),
@@ -53,7 +52,6 @@ configurations2 = load_wazuh_configurations(configurations_path, __name__,
 
 # Merge both list of configurations into the final one to avoid skips and configuration issues
 configurations = configurations1 + configurations2
-
 
 # fixtures
 
@@ -88,14 +86,14 @@ def test_frequency(folder, tags_to_apply, get_configuration, configure_environme
 
         # Dont expect any event
         regular_file_cud(folder, wazuh_log_monitor, file_list=['regular'],
-                         min_timeout=5, triggers_event=False)
+                         min_timeout=2, triggers_event=False)
 
         # Travel in time as many seconds as frequency is set to
         TimeMachine.travel_to_future(timedelta(seconds=int(frequency)))
 
         # Expect events now
         regular_file_cud(folder, wazuh_log_monitor, file_list=['regular'],
-                         min_timeout=global_parameters.default_timeout, triggers_event=True)
+                         min_timeout=5, triggers_event=True)
     finally:
         # Remove directory since it is not included in fixture
         shutil.rmtree(directory_str, ignore_errors=True)
