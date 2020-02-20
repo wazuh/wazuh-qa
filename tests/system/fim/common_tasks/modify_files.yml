@@ -17,3 +17,19 @@
     chdir: "{{ agents_windows_output_path }}"
   when:
     - inventory_hostname in groups['windowsagents']
+
+- name: Copy the output files from Windows Agents to Ansible Controller host
+  fetch:
+    src: "{{ agents_windows_output_path }}/{{ files_generated_output_path }}"
+    dest: "agents_outputs/{{ event }}/{{ files_generated_output_path }}-{{ inventory_hostname }}"
+    flat: yes
+  when:
+  - inventory_hostname in groups['windowsagents'] 
+
+- name: Copy the output files from Ansible Controller to the Managers
+  become: true
+  synchronize:
+    src: "agents_outputs/added/"
+    dest: "{{ agents_results_manager_path }}/{{ event }}/"
+  when:
+    - inventory_hostname in groups['masters']

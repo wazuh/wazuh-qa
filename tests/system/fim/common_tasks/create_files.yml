@@ -40,7 +40,7 @@
     become: true
     synchronize:
       src: "agents_outputs/added/"
-      dest: "{{ agents_results_manager_path }}/added/"
+      dest: "{{ agents_results_manager_path }}/{{ event }}/"
     when:
       - inventory_hostname in groups['masters']
   
