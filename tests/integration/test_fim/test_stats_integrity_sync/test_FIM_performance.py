@@ -148,6 +148,10 @@ def calculate_stats(old_stats, current_stats):
 
     Parameters
     ----------
+    old_stats : dict
+        Dict with the previous daemon stats.
+    current_stats : dict
+        Dict with the current daemon stats.
 
     Returns
     -------
