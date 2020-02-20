@@ -17,20 +17,14 @@
     with_items: 
       - "{{ find_result.files }}"
 
-  - name: Find input files for elasticsearch
-    find:
-      paths: "{{ agents_results_elastic_path }}/{{ event }}"
-    register: find_result
-    when: 
-    - inventory_hostname in groups['elasticsearch'][0]
-
   - name: "Verify elastic alerts"
     script: >
       verify_alerts_elasticsearch.py -i {{ item.path }} -e {{ event }} 
-      -a {{ private_ip }} -o {{ missing_alerts_elasticsearch_path }}
+      -a {{ hostvars[groups["elasticsearch"][0]]["private_ip"] }}
+      -o {{ missing_alerts_elasticsearch_path }}
     args:
       executable: python3
     when: 
-      - inventory_hostname in groups['elasticsearch'][0]
+      - inventory_hostname in groups['masters']
     with_items: 
       - "{{ find_result.files }}"

@@ -2,7 +2,11 @@
   - hosts: all
     vars_files:
       - ../../vars/main.yml
-    tasks:
+
+    handlers:
+      - import_tasks: ./handlers/main.yml
+
+    tasks:    
       - block:
         - name: Launching prepare tasks 
           import_tasks: "../../common_tasks/prepare.yml"
@@ -11,10 +15,15 @@
           - name: Configure syscheck event.
             set_fact:
               event: "added"
+            notify: Stop Wazuh agent Linux
 
           - name: Generating files to trigger FIM alerts
+            notify: 
+              - Restart Wazuh agent Linux
+              - Restart Wazuh agent Windows 
             import_tasks: "../../common_tasks/create_files.yml"
-        
+            changed_when: true
+                    
           - name: Verify generated alerts
             import_tasks: "../../common_tasks/verify_alerts.yml"
           become: yes

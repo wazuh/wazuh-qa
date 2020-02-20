@@ -119,6 +119,7 @@ def main():
 
     except Exception:
         print("An error has ocurred. Exiting")
+        raise Exception
 
 
 if __name__ == "__main__":
