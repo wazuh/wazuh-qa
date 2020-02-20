@@ -4,6 +4,7 @@
 
 import os
 import re
+import socket
 import subprocess
 import time
 from copy import deepcopy
@@ -11,7 +12,7 @@ from enum import Enum
 from multiprocessing import Process, Manager
 from random import randrange
 from shutil import rmtree
-from socket import socket, AF_UNIX, SOCK_STREAM, MSG_WAITALL
+from socket import socket
 from struct import pack, unpack
 
 import pandas as pd
@@ -77,14 +78,14 @@ def db_query(agent, query):
     str
         Return the wazuh-db's socket response.
     """
-    with socket(AF_UNIX, SOCK_STREAM) as sock:
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
         sock.connect(db_path)
 
         msg = f'agent {agent} sql {query}'.encode()
         sock.sendall(pack(f"<I{len(msg)}s", len(msg), msg))
 
-        length = unpack("<I", sock.recv(4, MSG_WAITALL))[0]
-        return sock.recv(length, MSG_WAITALL).decode(errors='ignore')
+        length = unpack("<I", sock.recv(4, socket.MSG_WAITALL))[0]
+        return sock.recv(length, socket.MSG_WAITALL).decode(errors='ignore')
 
 
 def get_total_disk_info(daemon):

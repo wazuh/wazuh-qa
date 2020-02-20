@@ -59,7 +59,7 @@ def get_configuration(request):
                                                                                 pytest.mark.sunos5)),
     pytest.param('نصبسيط', 'cp720', {CHECK_ALL}, {'ossec_conf'}, marks=(pytest.mark.linux,
                                                                         pytest.mark.darwin, pytest.mark.sunos5)),
-    pytest.param('Ξ³ΞµΞΉΞ±', None, {CHECK_ALL}, {'ossec_conf'}, marks=pytest.mark.win32)
+    pytest.param('Ξ³ΞµΞΉΞ±', None, {CHECK_ALL}, {'ossec_conf'}, marks=(pytest.mark.win32, pytest.mark.xfail))
 
 ])
 def test_regular_file_changes(folder, name, encoding, checkers, tags_to_apply,
