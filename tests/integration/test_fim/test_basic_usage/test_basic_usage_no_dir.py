@@ -6,6 +6,7 @@ import os
 
 import pytest
 
+from wazuh_testing.tools import PREFIX
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_empty_directories
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -18,6 +19,7 @@ pytestmark = pytest.mark.tier(level=0)
 # Variables
 
 test_directories = []
+testdir = os.path.join(PREFIX, 'testdir1')
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -27,7 +29,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 p, m = generate_params(extra_params={'TEST_DIRECTORIES': '', 'MODULE_NAME': __name__})
 configuration1 = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
-p, m = generate_params(extra_params={'TEST_DIRECTORIES': '/testdir', 'MODULE_NAME': __name__})
+p, m = generate_params(extra_params={'TEST_DIRECTORIES': testdir, 'MODULE_NAME': __name__})
 configuration2 = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 # Merge both list of configurations into the final one to avoid skips and configuration issues

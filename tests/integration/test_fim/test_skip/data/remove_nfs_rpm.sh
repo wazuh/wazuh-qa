@@ -2,4 +2,4 @@
 
 umount -f -l /nfs-mount-point
 service nfs restart
-rmdir /nfs-mount-point
+rm -rf /nfs-mount-point

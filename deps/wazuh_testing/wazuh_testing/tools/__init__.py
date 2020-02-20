@@ -19,7 +19,7 @@ elif sys.platform == 'darwin':
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
-    PREFIX = os.sep
+    PREFIX = os.path.join('/', 'private', 'var', 'root')
     GEN_OSSEC = None
 
 else:

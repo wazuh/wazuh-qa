@@ -7,10 +7,10 @@
   elements:
   - disabled:
       value: 'no'
-  - inventory:
+  - synchronization:
       elements:
-      - sync_interval:
-          value: RESPONSE_TIMEOUT
+      - interval:
+          value: INTERVAL
       - response_timeout:
           value: RESPONSE_TIMEOUT
   - directories:

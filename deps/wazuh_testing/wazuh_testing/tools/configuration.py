@@ -9,10 +9,10 @@ from copy import deepcopy
 from subprocess import check_call, DEVNULL, check_output
 from typing import List, Any, Set
 
+import pytest
 import yaml
-from _pytest.outcomes import skip
 
-from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF
+from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
@@ -371,10 +371,86 @@ def load_wazuh_configurations(yaml_file_path: str, test_name: str, params: list 
     with open(yaml_file_path) as stream:
         configurations = yaml.safe_load(stream)
 
+    if sys.platform == 'darwin':
+        configurations = set_correct_prefix(configurations, PREFIX)
+
     return [process_configuration(configuration, placeholders=replacement, metadata=meta)
             for replacement, meta in zip(params, metadata)
             for configuration in configurations
             if test_name in expand_placeholders(configuration.get('apply_to_modules'), placeholders=replacement)]
+
+
+def set_correct_prefix(configurations, new_prefix):
+    """Insert the correct prefix in the paths of each configuration.
+
+    In Mac OS X it is not possible to create files in the / directory.
+    Therefore, it is necessary to replace those paths that do not contain a
+    suitable prefix.
+
+    This function checks if the path inside directories, ignore, nodiff and restrict sections
+    contains a certain prefix, and if it does not contain it, it inserts it.
+
+    Parameters
+    ----------
+    configurations : list
+        List of configurations loaded from the YAML.
+    new_prefix : str
+        Prefix to be inserted before every path.
+
+    Returns
+    -------
+    configurations : list
+        List of configurations with the correct prefix
+        added in the directories and ignore sections.
+
+    """
+    def inserter(path):
+        """Insert new_prefix inside path, right before the first '/'."""
+        result = path
+        index = path.find(os.sep)
+
+        if new_prefix not in path and index >= 0:
+            result = path[0:index] + new_prefix + path[index:]
+
+        return result
+
+    for config in configurations:
+        for element in config['elements']:
+            if isinstance(element, dict):
+                # ADD HERE all fields with format sub_element: - value
+                for sub_element in (element.get('directories'), element.get('ignore'), element.get('nodiff')):
+                    if sub_element:
+                        # Get restrict, directories, ignore and nodiff fields and split them into paths lists
+                        restrict_dict = {}
+                        attributes = sub_element.get('attributes', [])
+                        if isinstance(attributes, dict):
+                            restrict_dict = attributes.get('restrict', {})
+                        restrict_list = restrict_dict['restrict'].split('|') if restrict_dict != {} else []
+                        paths_list = sub_element['value'].split(',')
+                        modified_restricts = ''
+                        modified_paths = ''
+
+                        # Insert the prefix in every path/regex and add a comma if directories.
+                        for path in paths_list:
+                            modified_paths += inserter(path)
+                            modified_paths += ',' if (element.get('directories') and modified_paths != '') else ''
+                        modified_paths = modified_paths.rstrip(',')
+
+                        # Insert the prefix in every path inside restrict
+                        for restrict in restrict_list:
+                            modified_restricts += inserter(restrict)
+                            modified_restricts += '|'
+                        modified_restricts = modified_restricts.rstrip('|')
+
+                        # Replace the previous values with the new ones.
+                        if modified_paths:
+                            sub_element['value'] = modified_paths
+                        if modified_restricts:
+                            for i, sub_sub_element in enumerate(sub_element['attributes']):
+                                if sub_sub_element == restrict_dict:
+                                    sub_element['attributes'][i] = {'restrict': modified_restricts}
+
+    return configurations
 
 
 def check_apply_test(apply_to_tags: Set, tags: List):
@@ -390,7 +466,7 @@ def check_apply_test(apply_to_tags: Set, tags: List):
     """
     if not (apply_to_tags.intersection(tags) or
             'all' in apply_to_tags):
-        skip("Does not apply to this config file")
+        pytest.skip("Does not apply to this config file")
 
 
 def generate_syscheck_config():

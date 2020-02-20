@@ -19,10 +19,11 @@ from datetime import timedelta
 from json import JSONDecodeError
 from stat import ST_ATIME, ST_MTIME
 from typing import Sequence, Union, Generator, Any
-from wazuh_testing import logger
 
+import pytest
 from jsonschema import validate
 
+from wazuh_testing import logger
 from wazuh_testing.tools.time import TimeMachine
 
 if sys.platform == 'win32':
@@ -186,16 +187,20 @@ def create_file(type_, path, name, **kwargs):
         Path where the link will be pointing to.
     """
 
-    logger.info("Creating file " + os.path.join(path, name) + " of " + str(type_) + " type")
-    os.makedirs(path, exist_ok=True, mode=0o777)
-    if type_ != REGULAR:
-        try:
-            kwargs.pop('content')
-        except KeyError:
-            pass
-    if type_ in (SYMLINK, HARDLINK) and 'target' not in kwargs:
-        raise ValueError(f"'target' param is mandatory for type {type_}")
-    getattr(sys.modules[__name__], f'_create_{type_}')(path, name, **kwargs)
+    try:
+        logger.info("Creating file " + str(os.path.join(path, name)) + " of " + str(type_) + " type")
+        os.makedirs(path, exist_ok=True, mode=0o777)
+        if type_ != REGULAR:
+            try:
+                kwargs.pop('content')
+            except KeyError:
+                pass
+        if type_ in (SYMLINK, HARDLINK) and 'target' not in kwargs:
+            raise ValueError(f"'target' param is mandatory for type {type_}")
+        getattr(sys.modules[__name__], f'_create_{type_}')(path, name, **kwargs)
+    except OSError:
+        logger.info("File could not be created.")
+        pytest.skip("OS does not allow creating this file.")
 
 
 def create_registry(key, subkey, arch):
@@ -327,7 +332,7 @@ def delete_file(path, name):
     name : str
         Name of the file to be deleted
     """
-    logger.info(f"Removing file {os.path.join(path, name)}")
+    logger.info(f"Removing file {str(os.path.join(path, name))}")
     regular_path = os.path.join(path, name)
     if os.path.exists(regular_path):
         os.remove(regular_path)
@@ -380,7 +385,7 @@ def modify_file_content(path, name, new_content=None, is_binary=False):
         True if the file's content is in binary format. False otherwise. Default `False`
     """
     path_to_file = os.path.join(path, name)
-    logger.info("- Changing content of " + path_to_file)
+    logger.info("- Changing content of " + str(path_to_file))
     content = "1234567890qwertyu" if new_content is None else new_content
     with open(path_to_file, 'ab' if is_binary else 'a') as f:
         f.write(content.encode() if is_binary else content)
@@ -398,7 +403,7 @@ def modify_file_mtime(path, name):
         Name of the file to be modified.
     """
     path_to_file = os.path.join(path, name)
-    logger.info("- Changing mtime of " + path_to_file)
+    logger.info("- Changing mtime of " + str(path_to_file))
     stat = os.stat(path_to_file)
     access_time = stat[ST_ATIME]
     modification_time = stat[ST_MTIME]
@@ -427,7 +432,7 @@ def modify_file_owner(path, name):
         os.chown(path_to_file, 1, -1)
 
     path_to_file = os.path.join(path, name)
-    logger.info("- Changing owner of " + path_to_file)
+    logger.info("- Changing owner of " + str(path_to_file))
 
     if sys.platform == 'win32':
         modify_file_owner_windows()
@@ -452,7 +457,7 @@ def modify_file_group(path, name):
         return
 
     path_to_file = os.path.join(path, name)
-    logger.info("- Changing group of " + path_to_file)
+    logger.info("- Changing group of " + str(path_to_file))
     os.chown(path_to_file, -1, 1)
 
 
@@ -487,7 +492,7 @@ def modify_file_permission(path, name):
 
     path_to_file = os.path.join(path, name)
 
-    logger.info("- Changing permission of " + path_to_file)
+    logger.info("- Changing permission of " + str(path_to_file))
 
     if sys.platform == 'win32':
         modify_file_permission_windows()
@@ -509,7 +514,7 @@ def modify_file_inode(path, name):
     if sys.platform == 'win32':
         return
 
-    logger.info("- Changing inode of " + os.path.join(path, name))
+    logger.info("- Changing inode of " + str(os.path.join(path, name)))
     inode_file = 'inodetmp'
     path_to_file = os.path.join(path, name)
 
@@ -521,7 +526,7 @@ def modify_file_win_attributes(path, name):
     if sys.platform != 'win32':
         return
 
-    logger.info("- Changing win attributes of " + os.path.join(path, name))
+    logger.info("- Changing win attributes of " + str(os.path.join(path, name)))
     path_to_file = os.path.join(path, name)
     win32api.SetFileAttributes(path_to_file, win32con.FILE_ATTRIBUTE_HIDDEN)
 
@@ -541,7 +546,7 @@ def modify_file(path, name, new_content=None, is_binary=False):
     is_binary : boolean, optional
         True if the file is binary. False otherwise. Default `False`
     """
-    logger.info("Modiying file " + os.path.join(path, name))
+    logger.info("Modifying file " + str(os.path.join(path, name)))
     modify_file_inode(path, name)
     modify_file_content(path, name, new_content, is_binary)
     modify_file_mtime(path, name)
@@ -644,7 +649,7 @@ def callback_detect_integrity_state(line):
 
 
 def callback_detect_synchronization(line):
-    if 'Performing synchronization check' in line:
+    if 'Initializing FIM Integrity Synchronization check' in line:
         return line
     return None
 
@@ -934,12 +939,16 @@ class EventChecker:
                 expected_file_path = expected_file_path[:1].lower() + expected_file_path[1:]
                 if self.encoding is not None:
                     for index, item in enumerate(file_paths):
-                        file_paths[index] = item.encode(self.encoding)
-                assert (expected_file_path in file_paths), f'{expected_file_path} does not exist in {file_paths}'
+                        file_paths[index] = item.encode(encoding=self.encoding)
+                if sys.platform == 'darwin' and self.encoding != 'utf-8':
+                    logger.info(f'Not asserting {expected_file_path} in event.data.path. '
+                                 f'Reason: using non-utf-8 encoding in darwin.')
+                else:
+                    assert (expected_file_path in file_paths), f'{expected_file_path} does not exist in {file_paths}'
 
         def filter_events(events, mask):
             """Returns a list of elements matching a specified mask in the events list using jq module."""
-            if sys.platform in ("win32", 'sunos5'):
+            if sys.platform in ("win32", 'sunos5', 'darwin'):
                 stdout = subprocess.check_output(["jq", "-r", mask], input=json.dumps(events).encode())
                 return stdout.decode("utf8").strip().split(os.linesep)
             else:
