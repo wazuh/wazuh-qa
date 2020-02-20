@@ -5,49 +5,32 @@
     tasks:
       - block:
         - name: Launching prepare tasks 
+          become: yes
           import_tasks: "../../common_tasks/prepare.yml"
 
         - name: Generating files to trigger FIM alerts
           import_tasks: "../../common_tasks/create_files.yml"
 
-        - name: Find input files for added event
-          find:
-            paths: "{{ agents_results_manager_path }}/added"
-          register: added_find_result
-
         - block:
           - name: Configure syscheck event.
             set_fact:
               event: "added"
-              input_list: "{{ item }}"
         
           - name: Verify generated alerts
-            import_tasks: "../../common_tasks/verify_alerts.yml"
-            become: yes 
-  
-          with_items:
-            - added_find_result.files
+            include_tasks: "../../common_tasks/verify_alerts.yml"
+          become: yes
 
         - name: Modifiying files to trigger FIM alerts
           import_tasks: "../../common_tasks/modify_files.yml"
-
-        - name: Find input files for modified event
-          find:
-            paths: "{{ agents_results_manager_path }}/modified"
-          register: modified_find_result
 
         - block:
           - name: Configure syscheck event.
             set_fact:
               event: "modified"
-              input_list: "{{ item }}"
         
           - name: Verify generated alerts
-            import_tasks: "../../common_tasks/verify_alerts.yml"
-            become: yes 
-  
-          with_items:
-            - modified_find_result.files
+            include_tasks: "../../common_tasks/verify_alerts.yml"
+          become: yes
 
         - name: Deleting files to trigger FIM alerts
           import_tasks: "../../common_tasks/delete_files.yml"
@@ -61,14 +44,7 @@
           - name: Configure syscheck event.
             set_fact:
               event: "deleted"
-              input_list: "{{ item }}"
         
           - name: Verify generated alerts
-            import_tasks: "../../common_tasks/verify_alerts.yml"
-            become: yes 
-  
-          with_items:
-            - deleted_find_result.files
-          when:
-            - inventory_hostname in groups['masters']
-            - inventory_hostname in groups['elasticsearch'][0]      
+            include_tasks: "../../common_tasks/verify_alerts.yml"
+          become: yes   
