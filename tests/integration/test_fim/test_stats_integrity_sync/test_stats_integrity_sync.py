@@ -5,11 +5,12 @@
 import os
 import re
 import subprocess
+import sys
 import time
 from enum import Enum
 from multiprocessing import Process, Manager
 from random import randrange
-from socket import socket, AF_UNIX, SOCK_STREAM, MSG_WAITALL
+from socket import socket, SOCK_STREAM, MSG_WAITALL
 from struct import pack, unpack
 
 import pytest
@@ -19,6 +20,9 @@ from wazuh_testing import logger
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_CONF, ALERT_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
+
+if sys.platform != 'win32':
+    from socket import AF_UNIX
 
 # Marks
 
