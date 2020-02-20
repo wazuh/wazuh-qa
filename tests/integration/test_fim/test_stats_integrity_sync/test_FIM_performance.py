@@ -7,15 +7,18 @@ import re
 import shutil
 import subprocess
 import time
-from multiprocessing import Process
+from copy import deepcopy
 from enum import Enum
+from multiprocessing import Process
 
 import pandas as pd
 import pytest
 
 from wazuh_testing import logger
+from wazuh_testing.fim import callback_realtime_added_directory
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_CONF, LOG_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service, check_daemon_status
 
 root_dir = '/test'
@@ -116,72 +119,51 @@ def get_stats(daemon):
     ----------
     daemon : str
         Daemon for whom we will get the stats.
-
     Returns
     -------
     list of str
         Return CPU, RAM, Disk reading, Disk writing, Total disk reading, total disk writing.
     """
     io_stats = get_total_disk_info(daemon)
-
-    return {
-        'cpu': str(get_total_cpu_info(daemon)),
-        'rchar': str(io_stats['rchar']),
-        'wchar': str(io_stats['wchar']),
-        'syscr': str(io_stats['syscr']),
-        'syscw': str(io_stats['syscw']),
-        'read_bytes': str(io_stats['read_bytes']),
-        'write_bytes': str(io_stats['write_bytes']),
-        'cancelled_write_bytes': str(io_stats['cancelled_write_bytes'])
-    }
-
-
-def calculate_stats(daemon, cpu=0, rchar=0, wchar=0, syscr=0, syscw=0, read_bytes=0, write_bytes=0,
-                    cancelled_write_bytes=0):
-    """Get CPU, RAM, disk read and disk write stats using ps and pidstat.
-
-    Parameters
-    ----------
-    daemon : str
-        Daemon for whom we will get the stats.
-    cpu : str or float
-        Previous CPU value.
-    rchar : str or float
-        Previous rchar value.
-    wchar : str or float
-        Previous wchar value.
-    syscr : str or float
-        Previous syscr value.
-    syscw : str or float
-        Previous syscw value.
-    read_bytes : str or float
-        Previous read_bytes value.
-    write_bytes : str or float
-        Previous write_bytes value.
-    cancelled_write_bytes : str or float
-        Previous cancelled_write_bytes value.
-
-    Returns
-    -------
-    list of str
-        Return CPU, RAM, Disk reading, Disk writing, Total disk reading, total disk writing.
-    """
     regex_mem = rf"{daemon} *([0-9]+)"
     ps = subprocess.Popen(["ps", "-axo", "comm,rss"], stdout=subprocess.PIPE)
     grep = subprocess.Popen(["grep", daemon], stdin=ps.stdout, stdout=subprocess.PIPE)
     head = subprocess.check_output(["head", "-n1"], stdin=grep.stdout).decode().strip()
-    io_stats = get_total_disk_info(daemon)
 
     return {
-        'cpu': str(float(get_total_cpu_info(daemon)) - float(cpu)),
+        'cpu': get_total_cpu_info(daemon),
         'mem': re.match(regex_mem, head).group(1),
-        'rchar': str(float(io_stats['rchar']) - float(rchar)),
-        'wchar': str(float(io_stats['wchar']) - float(wchar)),
-        'syscr': str(float(io_stats['syscr']) - float(syscr)),
-        'syscw': str(float(io_stats['syscw']) - float(syscw)),
-        'read_bytes': str(float(io_stats['read_bytes']) - float(read_bytes)),
-        'write_bytes': str(float(io_stats['write_bytes']) - float(write_bytes)),
-        'cancelled_write_bytes': str(float(io_stats['cancelled_write_bytes']) - float(cancelled_write_bytes))
+        'rchar': io_stats['rchar'],
+        'wchar': io_stats['wchar'],
+        'syscr': io_stats['syscr'],
+        'syscw': io_stats['syscw'],
+        'read_bytes': io_stats['read_bytes'],
+        'write_bytes': io_stats['write_bytes'],
+        'cancelled_write_bytes': io_stats['cancelled_write_bytes']
+    }
+
+
+def calculate_stats(old_stats, current_stats):
+    """Get CPU, RAM, disk read and disk write stats using ps and pidstat.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    list of str
+        Return CPU, RAM, Disk reading, Disk writing, Total disk reading, total disk writing.
+    """
+    return {
+        'cpu': str(current_stats['cpu'] - old_stats['cpu']),
+        'mem': str(current_stats['mem']),
+        'rchar': str(current_stats['rchar'] - old_stats['rchar']),
+        'wchar': str(current_stats['wchar'] - old_stats['wchar']),
+        'syscr': str(current_stats['syscr'] - old_stats['syscr']),
+        'syscw': str(current_stats['syscw'] - old_stats['syscw']),
+        'read_bytes': str(current_stats['read_bytes'] - old_stats['read_bytes']),
+        'write_bytes': str(current_stats['write_bytes'] - old_stats['write_bytes']),
+        'cancelled_write_bytes': str(current_stats['cancelled_write_bytes'] - old_stats['cancelled_write_bytes'])
     }
 
 
@@ -246,58 +228,39 @@ def clean_environment(stats=False):
     shutil.rmtree(root_dir, ignore_errors=True)
 
 
-def scan_test(scan_df, length, n_files, file_size):
-    time_printing, pause = 0, 0
+def scan_integrity_test(fim_df, length, n_files, file_size, integrity_df=None, fim_type='scan'):
+    time_printing, pause, time_fim = 0, 0, None
+    stats = get_stats(tested_daemon)
+    old_stats = deepcopy(stats)
     logger.info(
-        f"[SCAN] Test scan with {str(length)} path length, {str(n_files)} files and {str(file_size)} KB file size")
-    previous_stats = get_stats(daemon=tested_daemon)
+        f"[SCAN] Test {fim_type} with {str(length)} path length, {str(n_files)} files and {str(file_size)} KB file size")
 
-    while True:
-        stats = calculate_stats(daemon=tested_daemon, **previous_stats)
-        logger.info(stats)
-        time_fim = find_ossec_log(r".*during: ([0-9]+\.[0-9]+) sec", "fim_print_info")
-        if time_fim:
-            scan_df.loc[len(scan_df)] = [str(time_printing), *list(stats.values()), time_fim, 'scan']
-            break
+    while time_fim is None:
+        diff = calculate_stats(old_stats, stats)
+        old_stats = deepcopy(stats)
+        logger.info(diff)
+        if fim_type == 'scan':
+            time_fim = find_ossec_log(r".*during: ([0-9]+\.[0-9]+) sec", "fim_print_info")
+        elif fim_type == 'integrity':
+            time_fim = find_ossec_log(r".*Time: ([0-9]+\.[0-9]+) seconds.", "Finished calculating FIM integrity")
+            if integrity_df is not None:
+                integrity_df.loc[len(integrity_df)] = [str(n_files), str(length), str(file_size), str(time_fim)]
+                break
+            else:
+                raise AttributeError(f'Integrity dataframe not found: {integrity_df}')
+        else:
+            raise AttributeError(f'Invalid type detected: {fim_type}')
 
-        if any(float(stat) != 0 for stat in stats.values()):
-            scan_df.loc[len(scan_df)] = [str(time_printing), *list(stats.values()), str(0.0), 'scan']
-
-        previous_stats = get_stats(daemon=tested_daemon)
+        fim_df.loc[len(fim_df)] = [str(time_printing), *list(diff.values()), str(0.0), fim_type]
         time_printing += 1
         time.sleep(1)
-
-
-def integrity_test(data_df, integrity_df, length, n_files, file_size):
-    time_printing = 0
-    logger.info(
-        f"[INTEGRITY] Test integrity with {str(length)} path length, {str(n_files)} files and {str(file_size)} KB file "
-        f"size")
-    previous_stats = get_stats(daemon=tested_daemon)
-
-    while True:
-        stats = calculate_stats(daemon=tested_daemon, **previous_stats)
-        logger.info(stats)
-
-        time_integrity = find_ossec_log(r".*Time: ([0-9]+\.[0-9]+) seconds.", "Finished calculating FIM integrity")
-        if time_integrity is not False:
-            integrity_df.loc[len(integrity_df)] = [str(n_files), str(length), str(file_size), str(time_integrity)]
-            break
-
-        if any(float(stat) != 0 for stat in stats.values()):
-            data_df.loc[len(data_df)] = [str(time_printing), *list(stats.values()), str(time_integrity), 'integrity']
-
-        previous_stats = get_stats(daemon=tested_daemon)
-        time_printing += 1
-        time.sleep(1)
+        stats = get_stats(tested_daemon)
 
 
 def process_manager(test_name, path_name, n_files, file_size=0):
     if test_name == Types.added:
-        if find_ossec_log(r".*Directory added for real time monitoring: '(/test/real)'", "realtime_adddir") != None:
-            process = Process(target=create_n_files, args=(path_name, n_files, file_size,))
-        else:
-            return
+        FileMonitor(LOG_FILE_PATH).start(callback=callback_realtime_added_directory)
+        process = Process(target=create_n_files, args=(path_name, n_files, file_size,))
     elif test_name == Types.modified:
         process = Process(target=modify_n_files, args=(path_name, n_files,))
     elif test_name == Types.deleted:
@@ -328,17 +291,19 @@ def time_manager(events, last_count, time_start, time_out, n_files):
 def real_test(test_name, real_df, length, n_files, file_size=0):
     started = False
     process, grep_name = None, None
-    time_printing, time_start, time_fim, last_count = 0, 0, 0, 0
+    time_printing, time_start, time_fim, count, last_count = 0, 0, 0, 0, 0
     time_out = 5
     grep_name = f'"mode":"real-time","type":"{test_name.value}"'
-    previous_stats = get_stats(daemon=tested_daemon)
+    stats = get_stats(tested_daemon)
+    old_stats = deepcopy(stats)
     logger.info(
         f"[REAL] Test {test_name.value} with {str(length)} path length, {str(n_files)} files and {str(file_size)} KB "
         f"file size")
 
     while True:
-        stats = calculate_stats(daemon=tested_daemon, **previous_stats)
-        logger.info(stats)
+        diff = calculate_stats(old_stats, stats)
+        old_stats = deepcopy(stats)
+        logger.info(diff)
         if not started:
             last_count = 0
             started = True
@@ -350,19 +315,16 @@ def real_test(test_name, real_df, length, n_files, file_size=0):
             grep = subprocess.Popen(["grep", grep_name], stdin=head.stdout, stdout=subprocess.PIPE)
             events = subprocess.check_output(["wc", "-l"], stdin=grep.stdout).decode().strip()
             count, last_count, time_fim, time_out = time_manager(events=events, last_count=last_count,
-                                                                 time_out=time_out,  time_start=time_start,
+                                                                 time_out=time_out, time_start=time_start,
                                                                  n_files=n_files)
 
-            if time_out == 0:
-                logger.warning(f"Timeout: Event read {str(count)} last: {str(last_count)}")
-                break
+        real_df.loc[len(real_df)] = [str(time_printing), *list(diff.values()), time_fim, test_name.value]
+        if time_out == 0:
+            logger.warning(f"Timeout: Event read {str(count)} last: {str(last_count)}")
+            break
+        logger.info(f"[{test_name.value}] Writing info {str(time_printing)} Events: {str(count)}/{str(n_files)}")
 
-            logger.info(f"[{test_name.value}] Writing info {str(time_printing)} Events: {str(count)}/{str(n_files)}")
-
-        if any(float(stat) != 0 for stat in stats.values()):
-            real_df.loc[len(real_df)] = [str(time_printing), *list(stats.values()), time_fim, test_name.value]
-
-        previous_stats = get_stats(daemon=tested_daemon)
+        stats = get_stats(tested_daemon)
         time_printing += 1
         time.sleep(1)
     logger.info(f'[REAL] Time FIM: {time_fim}')
@@ -411,11 +373,11 @@ def test_performance(mode, file_size, path_length, number_files, initial_clean, 
     check_daemon_status(daemon=tested_daemon, running=True)
 
     # Test Scan
-    scan_test(scan_df=data_df, length=path_length, n_files=number_files, file_size=file_size)
+    scan_integrity_test(fim_df=data_df, length=path_length, n_files=number_files, file_size=file_size, fim_type='scan')
 
     # Test Integrity
-    integrity_test(data_df=data_df, integrity_df=integrity_df, length=path_length, n_files=number_files,
-                   file_size=file_size)
+    scan_integrity_test(fim_df=data_df, integrity_df=integrity_df, length=path_length, n_files=number_files,
+                        file_size=file_size, fim_type='integrity')
     integrity_df.to_csv(integrity_filename, index=False)
 
     # Test real-time (added, modified, deleted)
