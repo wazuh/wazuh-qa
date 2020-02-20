@@ -128,7 +128,8 @@ class FileMonitor:
                 if self._abort and not self.extra_timer_is_running:
                     self.stop()
                     if type(self._result) != list or accum_results != len(self._result):
-                        logger.error(error_message)
+                        if error_message:
+                            logger.error(error_message)
                         raise TimeoutError()
                 self._position = f.tell()
                 line = f.readline()
