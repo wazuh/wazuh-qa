@@ -297,18 +297,15 @@ def replace_conf(eps, directory, buffer):
     buffer : str
         Can be yes or no, <disabled>yes|no</disabled>.
     """
-    new_config = str()
     directory_regex = r'.*<directories check_all=\"yes\">(.+)</directories>'
     eps_regex = r'.*<max_eps>([0-9]+)</max_eps>'
     buffer_regex = r'<client_buffer><disabled>(yes|no)</disabled></client_buffer>'
 
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'template_agent.conf'), 'r') as f:
-        lines = f.readlines()
-        for line in lines:
-            line = re.sub(directory_regex, '<directories check_all="yes">' + directory + '</directories>', line)
-            line = re.sub(eps_regex, '<max_eps>' + eps + '</max_eps>', line)
-            line = re.sub(buffer_regex, '<client_buffer><disabled>' + buffer + '</disabled></client_buffer>', line)
-            new_config += line
+        content = f.read()
+        new_config = re.sub(re.search(directory_regex, content).group(1), directory, content)
+        new_config = re.sub(re.search(eps_regex, content).group(1), eps, new_config)
+        new_config = re.sub(re.search(buffer_regex, content).group(1), buffer, new_config)
 
         with open(agent_conf, 'w') as conf:
             conf.write(new_config)
