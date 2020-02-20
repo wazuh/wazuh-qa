@@ -113,7 +113,7 @@ def main():
                 with open(args.output_file, 'w') as f:
                     for item in sub_paths:
                         f.write("%s\n" % item)
-                    f.write("%s missing alerts.\n" % len(sub_paths))
+                logging.warning("%s missing alerts.\n" % len(sub_paths))
                 return 1
 
             if prev_lenght == len(sub_paths):
