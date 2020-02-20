@@ -1,5 +1,6 @@
 - block:
   - name: Creates directories to store agents' outputs in Managers hosts
+    become: yes
     file:
       path: "{{ item }}"
       state: directory
@@ -10,6 +11,7 @@
       - "{{ agents_results_manager_path }}/deleted"
   
   - name: Stop wazuh-manager service
+    become: yes
     service:
       name: wazuh-manager
       state: stopped
@@ -20,6 +22,7 @@
       dest: "{{ linux_ossec_folder_path }}/ossec.conf" 
   
   - name: Start wazuh-manager service
+    become: yes
     service:
       name: wazuh-manager
       state: started
@@ -43,16 +46,19 @@
       dest: "{{ files_config_linux_destination_path }}" 
 
   - name: Stop wazuh-agent service | Linux
+    become: yes
     service:
       name: wazuh-agent
       state: stopped
 
   - name: Copy {{ files_config_agent_linux_ossec_conf }} to the Agents hosts | Linux
+    become: yes
     copy:
       src: "config/{{ files_config_agent_linux_ossec_conf }}"
       dest: "{{ linux_ossec_folder_path }}/ossec.conf" 
 
   - name: Start wazuh-agent service | Linux
+    become: yes
     service:
       name: wazuh-agent
       state: started     

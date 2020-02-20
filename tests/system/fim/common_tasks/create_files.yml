@@ -8,31 +8,31 @@
     when:
      - inventory_hostname in groups['linuxagents']
 
-  - name: Copy the output files from Agents to Ansible Controller host
-    fetch:
-      src: "{{ agents_linux_output_path }}/{{ files_generated_output_path }}"
-      dest: "agents_outputs/{{ event }}/{{ files_generated_output_path }}-{{ inventory_hostname }}"
-      flat: yes
-    when:
-     - inventory_hostname in groups['linuxagents']
-
-  - name: Copy the output files from Ansible Controller to the Managers' hosts
-    synchronize:
-      src: "agents_outputs/added/"
-      dest: "{{ agents_results_manager_path }}/added/"
-    when:
-      - inventory_hostname in groups['masters']
-  when:
-    - inventory_hostname in groups['linuxagents'] or inventory_hostname in groups['masters']
-  become: yes
-
-
-- block:
   - name: Run script generate_files.py on agents | Windows
     script: "generate_files.py -c {{ files_config_windows_destination_path }} -o {{ files_generated_output_path }}"
     args:
       executable: "python"
       chdir: "{{ agents_windows_output_path }}"
-  when:
-    - inventory_hostname in groups['windowsagents']
+    when:
+      - inventory_hostname in groups['windowsagents']
+
+  - name: Copy the output files from Agents to Ansible Controller host
+    fetch:
+      src: "{{ item }}/{{ files_generated_output_path }}"
+      dest: "agents_outputs/{{ event }}/{{ files_generated_output_path }}-{{ inventory_hostname }}"
+      flat: yes
+    when:
+     - inventory_hostname in groups['linuxagents'] or inventory_hostname in groups['windowsagents']
+    with_items:
+      - "{{ agents_linux_output_path }}"
+      - "{{ agents_windows_output_path }}"
+
+  - name: Copy the output files from Ansible Controller to the Managers' and Elastic hosts
+    synchronize:
+      src: "agents_outputs/added/"
+      dest: "{{ agents_results_manager_path }}/added/"
+    when:
+      - inventory_hostname in groups['masters'] or inventory_hostname in groups['elasticsearch'][0]
+  become: yes
+
 
