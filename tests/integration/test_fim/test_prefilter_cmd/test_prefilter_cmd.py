@@ -51,13 +51,8 @@ def check_prelink():
     # Call script to install prelink if it is not installed
     path = os.path.dirname(os.path.abspath(__file__))
     dist_list = ['centos', 'fedora', 'rhel']
-    if distro.id() in dist_list:
-        dist = 'rpm -qa'
-        installer = 'yum -y install'
-    else:
-        dist = 'dpkg -l'
-        installer = 'apt-get install'
-    subprocess.call([f'{path}/data/install_prelink.sh', dist, installer])
+    dist = 'ubuntu' if distro.id() not in dist_list else 'fedora'
+    subprocess.call([f'{path}/data/install_prelink.sh', dist])
 
 
 # tests
