@@ -1,38 +1,36 @@
 ---
-- hosts: all
-  tasks:
-    - name: Find input files for manager
-      find:
-        paths: "{{ agents_results_manager_path }}/{{ event }}"
-      register: added_find_result
-      when: 
-        - inventory_hostname in groups['masters']
-
-    - name: "Verify alert json log"
-      script: >
-        verify_alerts_json.py -i {{ item }} -e {{ event }} 
-        -o {{ json_output_list }} -t {{ alert_timeout }} -r {{ missing_alerts_json_path }}
-      args:
-        executable: "python3"
-      when: 
-        - inventory_hostname in groups['masters']
-      with_items: 
-        - added_find_result.files
-
-    - name: Find input files for manager
-      find:
-        paths: "{{ agents_results_elastic_path }}/{{ event }}"
-      register: added_find_result
-      when: 
+  - name: Find input files for manager
+    find:
+      paths: "{{ agents_results_manager_path }}/{{ event }}"
+    register: find_result
+    when: 
       - inventory_hostname in groups['masters']
 
-    - name: "Verify elastic alerts"
-      script: >
-        verify_alerts_elasticsearch.py -i {{ item }} -e {{ event }} 
-        -a {{ private_ip }} -o {{ missing_alerts_elasticsearch_path }}
-      args:
-        executable: python3
-      when: 
-        - inventory_hostname in groups['elasticsearch'][0]
-      with_items: 
-        - added_find_result.files
+  - name: "Verify alert json log"
+    script: >
+      verify_alerts_json.py -i {{ item.path }} -e {{ event }} 
+      -o {{ missing_alerts_json_path }}
+    args:
+      executable: "python3"
+    when: 
+      - inventory_hostname in groups['masters']
+    with_items: 
+      - "{{ find_result.files }}"
+
+  - name: Find input files for elasticsearch
+    find:
+      paths: "{{ agents_results_elastic_path }}/{{ event }}"
+    register: find_result
+    when: 
+    - inventory_hostname in groups['elasticsearch'][0]
+
+  - name: "Verify elastic alerts"
+    script: >
+      verify_alerts_elasticsearch.py -i {{ item.path }} -e {{ event }} 
+      -a {{ private_ip }} -o {{ missing_alerts_elasticsearch_path }}
+    args:
+      executable: python3
+    when: 
+      - inventory_hostname in groups['elasticsearch'][0]
+    with_items: 
+      - "{{ find_result.files }}"
