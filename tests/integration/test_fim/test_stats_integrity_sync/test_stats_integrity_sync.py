@@ -31,11 +31,10 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=3)]
 agent_conf = os.path.join(WAZUH_PATH, 'etc', 'shared', 'default', 'agent.conf')
 state_path = os.path.join(WAZUH_PATH, 'var', 'run')
 db_path = '/var/ossec/queue/db/wdb'
-manager_ip = '172.19.0.100'
 setup_environment_time = 1  # Seconds
-state_collector_time = 5  # Seconds
+state_collector_time = 1  # Seconds
 max_time_for_agent_setup = 180  # Seconds
-max_n_attempts = 20
+max_n_attempts = 50
 tested_daemons = ["wazuh-db", "ossec-analysisd", "ossec-remoted"]
 stats_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stats', 'metrics')
 
@@ -183,24 +182,10 @@ def calculate_stats(old_stats, current_stats):
 
     Parameters
     ----------
-    daemon : str
-        Daemon for whom we will get the stats.
-    cpu : str or float
-        Previous CPU value.
-    rchar : str or float
-        Previous rchar value.
-    wchar : str or float
-        Previous wchar value.
-    syscr : str or float
-        Previous syscr value.
-    syscw : str or float
-        Previous syscw value.
-    read_bytes : str or float
-        Previous read_bytes value.
-    write_bytes : str or float
-        Previous write_bytes value.
-    cancelled_write_bytes : str or float
-        Previous cancelled_write_bytes value.
+    old_stats : dict
+        Dict with the previous daemon stats.
+    current_stats : dict
+        Dict with the current daemon stats.
 
     Returns
     -------
@@ -312,7 +297,6 @@ def replace_conf(eps, directory, buffer):
         Can be yes or no, <disabled>yes|no</disabled>.
     """
     new_config = str()
-    address_regex = r".*<address>([0-9.]+)</address>"
     directory_regex = r'.*<directories check_all=\"yes\">(.+)</directories>'
     eps_regex = r'.*<max_eps>([0-9]+)</max_eps>'
     buffer_regex = r'<client_buffer><disabled>(yes|no)</disabled></client_buffer>'
@@ -320,7 +304,6 @@ def replace_conf(eps, directory, buffer):
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'template_agent.conf'), 'r') as f:
         lines = f.readlines()
         for line in lines:
-            line = re.sub(address_regex, '<address>' + manager_ip + '</address>', line)
             line = re.sub(directory_regex, '<directories check_all="yes">' + directory + '</directories>', line)
             line = re.sub(eps_regex, '<max_eps>' + eps + '</max_eps>', line)
             line = re.sub(buffer_regex, '<client_buffer><disabled>' + buffer + '</disabled></client_buffer>', line)
@@ -330,26 +313,6 @@ def replace_conf(eps, directory, buffer):
             conf.write(new_config)
     # Set Read/Write permissions to agent.conf
     os.chmod(agent_conf, 0o666)
-
-
-# def check_all_n_attempts(agents_list):
-#     """Return max value of n_attempts between all agents.
-#
-#     Parameters
-#     ----------
-#     agents_list : list
-#         List of agent ids.
-#
-#     Returns
-#     -------
-#     int
-#         Maximum number of attempts of the tested agents.
-#     """
-#     all_n_attempts = list()
-#     for agent_id in list(agents_list):
-#         all_n_attempts.append(n_attempts(agent_id))
-#
-#     return max(all_n_attempts)
 
 
 def check_all_n_completions(agents_list):
