@@ -185,7 +185,8 @@ def pytest_runtest_makereport(item, call):
                 content = f.read()
                 extra.append(pytest_html.extras.text(content, name=os.path.split(filepath)[-1]))
 
-        report.extra = extra
+        if not report.passed and not report.skipped:
+            report.extra = extra
 
 
 @pytest.fixture(scope='module')

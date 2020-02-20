@@ -1,0 +1,131 @@
+---
+- name: Added0
+  test_case:
+  - input: 8:syscheck:{"type":"event","data":{"path":"/testdir0/��嚣�","mode":"real-time","type":"added","timestamp":1581438201,"attributes":{"type":"file","size":0,"perm":"rw-r--r--","uid":"0","gid":"0","user_name":"��嚣�","group_name":"��嚣�","inode":1185139,"mtime":1581438201,"hash_md5":"d41d8cd98f00b204e9800998ecf8427e","hash_sha1":"da39a3ee5e6b4b0d3255bfef95601890afd80709","hash_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","checksum":"��嚣�1234"},"tags":"Sample"}}
+    output: 'agent 000 syscheck save2 {"path": "/testdir0/��嚣�", "timestamp": 1581438201,
+      "attributes": {"type": "file", "size": 0, "perm": "rw-r--r--", "uid": "0", "gid":
+      "0", "user_name": "��嚣�", "group_name": "��嚣�", "inode": 1185139, "mtime": 1581438201,
+      "hash_md5": "d41d8cd98f00b204e9800998ecf8427e", "hash_sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+      "hash_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "checksum": "��嚣�1234"}}'
+    stage: Added
+- name: Modified0
+  test_case:
+  - input: 8:syscheck:{"type":"event","data":{"path":"/testdir0/��嚣�","mode":"real-time","type":"modified","timestamp":1581438247,"attributes":{"type":"file","size":8,"perm":"rw-rw-rw-","uid":"1","gid":"1","user_name":"bin","group_name":"bin","inode":1184275,"mtime":1581439247,"hash_md5":"35e0c8c0b180c95d4e122e55ed62cc64","hash_sha1":"19a532c8bc61c311f583455c80ffe37067bbc9bb","hash_sha256":"e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37","checksum":"fca7b920a5b48e38f8b2424ffb8f53d4b4f49dc6"},"changed_attributes":["size","permission","uid","user_name","gid","group_name","mtime","inode","md5","sha1","sha256"],"old_attributes":{"type":"file","size":0,"perm":"rw-r--r--","uid":"0","gid":"0","user_name":"root","group_name":"root","inode":1185139,"mtime":1581438201,"hash_md5":"d41d8cd98f00b204e9800998ecf8427e","hash_sha1":"da39a3ee5e6b4b0d3255bfef95601890afd80709","hash_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","checksum":"0cae53db223561d1a96bba22e0600a178f6aaeba"},"content_changes":"0a1\n>
+      Modified\n\\ No newline at end of file\n","tags":"Sample"}}
+    output: 'agent 000 syscheck save2 {"path": "/testdir0/��嚣�", "timestamp": 1581438247,
+      "attributes": {"type": "file", "size": 8, "perm": "rw-rw-rw-", "uid": "1", "gid":
+      "1", "user_name": "bin", "group_name": "bin", "inode": 1184275, "mtime": 1581439247,
+      "hash_md5": "35e0c8c0b180c95d4e122e55ed62cc64", "hash_sha1": "19a532c8bc61c311f583455c80ffe37067bbc9bb",
+      "hash_sha256": "e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37",
+      "checksum": "fca7b920a5b48e38f8b2424ffb8f53d4b4f49dc6"}}'
+    stage: Modified
+- name: Deleted0
+  test_case:
+  - input: 8:syscheck:{"type":"event","data":{"path":"/testdir0/��嚣�","mode":"real-time","type":"deleted","timestamp":1581438247,"attributes":{"type":"file","size":8,"perm":"rw-rw-rw-","uid":"1","gid":"1","user_name":"bin","group_name":"bin","inode":1184275,"mtime":1581439247,"hash_md5":"35e0c8c0b180c95d4e122e55ed62cc64","hash_sha1":"19a532c8bc61c311f583455c80ffe37067bbc9bb","hash_sha256":"e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37","checksum":"fca7b920a5b48e38f8b2424ffb8f53d4b4f49dc6"},"tags":"Sample"}}
+    output: agent 000 syscheck delete /testdir0/��嚣�
+    stage: Deleted
+- name: Added1
+  test_case:
+  - input: 8:syscheck:{"type":"event","data":{"path":"/testdir1/��� �� ������","mode":"real-time","type":"added","timestamp":1581438201,"attributes":{"type":"file","size":0,"perm":"rw-r--r--","uid":"0","gid":"0","user_name":"root","group_name":"root","inode":1185139,"mtime":1581438201,"hash_md5":"d41d8cd98f00b204e9800998ecf8427e","hash_sha1":"da39a3ee5e6b4b0d3255bfef95601890afd80709","hash_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","checksum":"0cae53db223561d1a96bba22e0600a178f6aaeba"},"tags":"Sample"}}
+    output: 'agent 000 syscheck save2 {"path": "/testdir1/��� �� ������", "timestamp": 1581438201,
+      "attributes": {"type": "file", "size": 0, "perm": "rw-r--r--", "uid": "0", "gid":
+      "0", "user_name": "root", "group_name": "root", "inode": 1185139, "mtime": 1581438201,
+      "hash_md5": "d41d8cd98f00b204e9800998ecf8427e", "hash_sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+      "hash_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "checksum": "0cae53db223561d1a96bba22e0600a178f6aaeba"}}'
+    stage: Added
+- name: Modified1
+  test_case:
+  - input: 8:syscheck:{"type":"event","data":{"path":"/testdir1/��� �� ������","mode":"real-time","type":"modified","timestamp":1581438247,"attributes":{"type":"file","size":8,"perm":"rw-rw-rw-","uid":"1","gid":"1","user_name":"bin","group_name":"bin","inode":1184275,"mtime":1581439247,"hash_md5":"35e0c8c0b180c95d4e122e55ed62cc64","hash_sha1":"19a532c8bc61c311f583455c80ffe37067bbc9bb","hash_sha256":"e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37","checksum":"fca7b920a5b48e38f8b2424ffb8f53d4b4f49dc6"},"changed_attributes":["size","permission","uid","user_name","gid","group_name","mtime","inode","md5","sha1","sha256"],"old_attributes":{"type":"file","size":0,"perm":"rw-r--r--","uid":"0","gid":"0","user_name":"root","group_name":"root","inode":1185139,"mtime":1581438201,"hash_md5":"d41d8cd98f00b204e9800998ecf8427e","hash_sha1":"da39a3ee5e6b4b0d3255bfef95601890afd80709","hash_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","checksum":"0cae53db223561d1a96bba22e0600a178f6aaeba"},"content_changes":"0a1\n>
+      Modified\n\\ No newline at end of file\n","tags":"Sample"}}
+    output: 'agent 000 syscheck save2 {"path": "/testdir1/��� �� ������", "timestamp": 1581438247,
+      "attributes": {"type": "file", "size": 8, "perm": "rw-rw-rw-", "uid": "1", "gid":
+      "1", "user_name": "bin", "group_name": "bin", "inode": 1184275, "mtime": 1581439247,
+      "hash_md5": "35e0c8c0b180c95d4e122e55ed62cc64", "hash_sha1": "19a532c8bc61c311f583455c80ffe37067bbc9bb",
+      "hash_sha256": "e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37",
+      "checksum": "fca7b920a5b48e38f8b2424ffb8f53d4b4f49dc6"}}'
+    stage: Modified
+- name: Deleted1
+  test_case:
+  - input: 8:syscheck:{"type":"event","data":{"path":"/testdir1/��� �� ������","mode":"real-time","type":"deleted","timestamp":1581438247,"attributes":{"type":"file","size":8,"perm":"rw-rw-rw-","uid":"1","gid":"1","user_name":"bin","group_name":"bin","inode":1184275,"mtime":1581439247,"hash_md5":"35e0c8c0b180c95d4e122e55ed62cc64","hash_sha1":"19a532c8bc61c311f583455c80ffe37067bbc9bb","hash_sha256":"e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37","checksum":"fca7b920a5b48e38f8b2424ffb8f53d4b4f49dc6"},"tags":"Sample"}}
+    output: agent 000 syscheck delete /testdir1/��� �� ������
+    stage: Deleted
+- name: Added2
+  test_case:
+  - input: 8:syscheck:{"type":"event","data":{"path":"/testdir2/ñaña","mode":"real-time","type":"added","timestamp":1581438201,"attributes":{"type":"file","size":0,"perm":"rw-r--r--","uid":"0","gid":"0","user_name":"root","group_name":"root","inode":1185139,"mtime":1581438201,"hash_md5":"d41d8cd98f00b204e9800998ecf8427e","hash_sha1":"da39a3ee5e6b4b0d3255bfef95601890afd80709","hash_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","checksum":"0cae53db223561d1a96bba22e0600a178f6aaeba"},"tags":"Sample"}}
+    output: 'agent 000 syscheck save2 {"path": "/testdir2/ñaña", "timestamp": 1581438201,
+      "attributes": {"type": "file", "size": 0, "perm": "rw-r--r--", "uid": "0", "gid":
+      "0", "user_name": "root", "group_name": "root", "inode": 1185139, "mtime": 1581438201,
+      "hash_md5": "d41d8cd98f00b204e9800998ecf8427e", "hash_sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+      "hash_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "checksum": "0cae53db223561d1a96bba22e0600a178f6aaeba"}}'
+    stage: Added
+- name: Modified2
+  test_case:
+  - input: 8:syscheck:{"type":"event","data":{"path":"/testdir2/ñaña","mode":"real-time","type":"modified","timestamp":1581438247,"attributes":{"type":"file","size":8,"perm":"rw-rw-rw-","uid":"1","gid":"1","user_name":"bin","group_name":"bin","inode":1184275,"mtime":1581439247,"hash_md5":"35e0c8c0b180c95d4e122e55ed62cc64","hash_sha1":"19a532c8bc61c311f583455c80ffe37067bbc9bb","hash_sha256":"e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37","checksum":"fca7b920a5b48e38f8b2424ffb8f53d4b4f49dc6"},"changed_attributes":["size","permission","uid","user_name","gid","group_name","mtime","inode","md5","sha1","sha256"],"old_attributes":{"type":"file","size":0,"perm":"rw-r--r--","uid":"0","gid":"0","user_name":"root","group_name":"root","inode":1185139,"mtime":1581438201,"hash_md5":"d41d8cd98f00b204e9800998ecf8427e","hash_sha1":"da39a3ee5e6b4b0d3255bfef95601890afd80709","hash_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","checksum":"0cae53db223561d1a96bba22e0600a178f6aaeba"},"content_changes":"0a1\n>
+      Modified\n\\ No newline at end of file\n","tags":"Sample"}}
+    output: 'agent 000 syscheck save2 {"path": "/testdir2/ñaña", "timestamp": 1581438247,
+      "attributes": {"type": "file", "size": 8, "perm": "rw-rw-rw-", "uid": "1", "gid":
+      "1", "user_name": "bin", "group_name": "bin", "inode": 1184275, "mtime": 1581439247,
+      "hash_md5": "35e0c8c0b180c95d4e122e55ed62cc64", "hash_sha1": "19a532c8bc61c311f583455c80ffe37067bbc9bb",
+      "hash_sha256": "e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37",
+      "checksum": "fca7b920a5b48e38f8b2424ffb8f53d4b4f49dc6"}}'
+    stage: Modified
+- name: Deleted2
+  test_case:
+  - input: 8:syscheck:{"type":"event","data":{"path":"/testdir2/ñaña","mode":"real-time","type":"deleted","timestamp":1581438247,"attributes":{"type":"file","size":8,"perm":"rw-rw-rw-","uid":"1","gid":"1","user_name":"bin","group_name":"bin","inode":1184275,"mtime":1581439247,"hash_md5":"35e0c8c0b180c95d4e122e55ed62cc64","hash_sha1":"19a532c8bc61c311f583455c80ffe37067bbc9bb","hash_sha256":"e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37","checksum":"fca7b920a5b48e38f8b2424ffb8f53d4b4f49dc6"},"tags":"Sample"}}
+    output: agent 000 syscheck delete /testdir2/ñaña
+    stage: Deleted
+- name: Added3
+  test_case:
+  - input: 8:syscheck:{"type":"event","data":{"path":"/testdir3/�˫~","mode":"real-time","type":"added","timestamp":1581438201,"attributes":{"type":"file","size":0,"perm":"rw-r--r--","uid":"0","gid":"0","user_name":"root","group_name":"root","inode":1185139,"mtime":1581438201,"hash_md5":"d41d8cd98f00b204e9800998ecf8427e","hash_sha1":"da39a3ee5e6b4b0d3255bfef95601890afd80709","hash_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","checksum":"0cae53db223561d1a96bba22e0600a178f6aaeba"},"tags":"Sample"}}
+    output: 'agent 000 syscheck save2 {"path": "/testdir3/�˫~", "timestamp": 1581438201,
+      "attributes": {"type": "file", "size": 0, "perm": "rw-r--r--", "uid": "0", "gid":
+      "0", "user_name": "root", "group_name": "root", "inode": 1185139, "mtime": 1581438201,
+      "hash_md5": "d41d8cd98f00b204e9800998ecf8427e", "hash_sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+      "hash_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "checksum": "0cae53db223561d1a96bba22e0600a178f6aaeba"}}'
+    stage: Added
+- name: Modified3
+  test_case:
+  - input: 8:syscheck:{"type":"event","data":{"path":"/testdir3/�˫~","mode":"real-time","type":"modified","timestamp":1581438247,"attributes":{"type":"file","size":8,"perm":"rw-rw-rw-","uid":"1","gid":"1","user_name":"bin","group_name":"bin","inode":1184275,"mtime":1581439247,"hash_md5":"35e0c8c0b180c95d4e122e55ed62cc64","hash_sha1":"19a532c8bc61c311f583455c80ffe37067bbc9bb","hash_sha256":"e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37","checksum":"fca7b920a5b48e38f8b2424ffb8f53d4b4f49dc6"},"changed_attributes":["size","permission","uid","user_name","gid","group_name","mtime","inode","md5","sha1","sha256"],"old_attributes":{"type":"file","size":0,"perm":"rw-r--r--","uid":"0","gid":"0","user_name":"root","group_name":"root","inode":1185139,"mtime":1581438201,"hash_md5":"d41d8cd98f00b204e9800998ecf8427e","hash_sha1":"da39a3ee5e6b4b0d3255bfef95601890afd80709","hash_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","checksum":"0cae53db223561d1a96bba22e0600a178f6aaeba"},"content_changes":"0a1\n>
+      Modified\n\\ No newline at end of file\n","tags":"Sample"}}
+    output: 'agent 000 syscheck save2 {"path": "/testdir3/�˫~", "timestamp": 1581438247,
+      "attributes": {"type": "file", "size": 8, "perm": "rw-rw-rw-", "uid": "1", "gid":
+      "1", "user_name": "bin", "group_name": "bin", "inode": 1184275, "mtime": 1581439247,
+      "hash_md5": "35e0c8c0b180c95d4e122e55ed62cc64", "hash_sha1": "19a532c8bc61c311f583455c80ffe37067bbc9bb",
+      "hash_sha256": "e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37",
+      "checksum": "fca7b920a5b48e38f8b2424ffb8f53d4b4f49dc6"}}'
+    stage: Modified
+- name: Deleted3
+  test_case:
+  - input: 8:syscheck:{"type":"event","data":{"path":"/testdir3/�˫~","mode":"real-time","type":"deleted","timestamp":1581438247,"attributes":{"type":"file","size":8,"perm":"rw-rw-rw-","uid":"1","gid":"1","user_name":"bin","group_name":"bin","inode":1184275,"mtime":1581439247,"hash_md5":"35e0c8c0b180c95d4e122e55ed62cc64","hash_sha1":"19a532c8bc61c311f583455c80ffe37067bbc9bb","hash_sha256":"e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37","checksum":"fca7b920a5b48e38f8b2424ffb8f53d4b4f49dc6"},"tags":"Sample"}}
+    output: agent 000 syscheck delete /testdir3/�˫~
+    stage: Deleted
+- name: Added4
+  test_case:
+  - input: 8:syscheck:{"type":"event","data":{"path":"/testdir4/count","mode":"real-time","type":"added","timestamp":1581438201,"attributes":{"type":"file","size":0,"perm":"rw-r--r--","uid":"0","gid":"0","user_name":"root","group_name":"root","inode":1185139,"mtime":1581438201,"hash_md5":"d41d8cd98f00b204e9800998ecf8427e","hash_sha1":"da39a3ee5e6b4b0d3255bfef95601890afd80709","hash_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","checksum":"0cae53db223561d1a96bba22e0600a178f6aaeba"},"tags":"Sample"}}
+    output: 'agent 000 syscheck save2 {"path": "/testdir4/count", "timestamp": 1581438201,
+      "attributes": {"type": "file", "size": 0, "perm": "rw-r--r--", "uid": "0", "gid":
+      "0", "user_name": "root", "group_name": "root", "inode": 1185139, "mtime": 1581438201,
+      "hash_md5": "d41d8cd98f00b204e9800998ecf8427e", "hash_sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+      "hash_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "checksum": "0cae53db223561d1a96bba22e0600a178f6aaeba"}}'
+    stage: Added
+- name: Modified4
+  test_case:
+  - input: 8:syscheck:{"type":"event","data":{"path":"/testdir4/count","mode":"real-time","type":"modified","timestamp":1581438247,"attributes":{"type":"file","size":8,"perm":"rw-rw-rw-","uid":"1","gid":"1","user_name":"bin","group_name":"bin","inode":1184275,"mtime":1581439247,"hash_md5":"35e0c8c0b180c95d4e122e55ed62cc64","hash_sha1":"19a532c8bc61c311f583455c80ffe37067bbc9bb","hash_sha256":"e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37","checksum":"fca7b920a5b48e38f8b2424ffb8f53d4b4f49dc6"},"changed_attributes":["size","permission","uid","user_name","gid","group_name","mtime","inode","md5","sha1","sha256"],"old_attributes":{"type":"file","size":0,"perm":"rw-r--r--","uid":"0","gid":"0","user_name":"root","group_name":"root","inode":1185139,"mtime":1581438201,"hash_md5":"d41d8cd98f00b204e9800998ecf8427e","hash_sha1":"da39a3ee5e6b4b0d3255bfef95601890afd80709","hash_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","checksum":"0cae53db223561d1a96bba22e0600a178f6aaeba"},"content_changes":"0a1\n>
+      Modified\n\\ No newline at end of file\n","tags":"Sample"}}
+    output: 'agent 000 syscheck save2 {"path": "/testdir4/count", "timestamp": 1581438247,
+      "attributes": {"type": "file", "size": 8, "perm": "rw-rw-rw-", "uid": "1", "gid":
+      "1", "user_name": "bin", "group_name": "bin", "inode": 1184275, "mtime": 1581439247,
+      "hash_md5": "35e0c8c0b180c95d4e122e55ed62cc64", "hash_sha1": "19a532c8bc61c311f583455c80ffe37067bbc9bb",
+      "hash_sha256": "e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37",
+      "checksum": "fca7b920a5b48e38f8b2424ffb8f53d4b4f49dc6"}}'
+    stage: Modified
+- name: Deleted4
+  test_case:
+  - input: 8:syscheck:{"type":"event","data":{"path":"/testdir4/count","mode":"real-time","type":"deleted","timestamp":1581438247,"attributes":{"type":"file","size":8,"perm":"rw-rw-rw-","uid":"1","gid":"1","user_name":"bin","group_name":"bin","inode":1184275,"mtime":1581439247,"hash_md5":"35e0c8c0b180c95d4e122e55ed62cc64","hash_sha1":"19a532c8bc61c311f583455c80ffe37067bbc9bb","hash_sha256":"e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37","checksum":"fca7b920a5b48e38f8b2424ffb8f53d4b4f49dc6"},"tags":"Sample"}}
+    output: agent 000 syscheck delete /testdir4/count
+    stage: Deleted
