@@ -39,6 +39,29 @@ class Parameters:
         """
         self._default_timeout = value
 
+    @property
+    def current_configuration(self):
+        """
+        Getter method for the current configuration property
+
+        Returns
+        -------
+        dict
+            A dictionary containing the current configuration.
+        """
+        return self._current_configuration
+
+    @current_configuration.setter
+    def current_configuration(self, value):
+        """
+        Setter method for the current configuration property
+
+        Parameters
+        ----------
+        value : dict
+            New value for the currenct configuration.
+        """
+        self._current_configuration = value
 
 global_parameters = Parameters()
 logger = logging.getLogger('wazuh_testing')
