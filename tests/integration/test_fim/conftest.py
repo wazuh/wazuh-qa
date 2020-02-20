@@ -33,6 +33,12 @@ def wait_for_initial_scan(get_configuration, request):
     detect_initial_scan(file_monitor)
 
 
+@pytest.fixture(scope='function', autouse=True)
+def skip_scheduled(get_configuration):
+    if get_configuration['metadata']['fim_mode'] == 'scheduled':
+        pytest.skip('Skipping Scheduled test')
+
+
 @pytest.fixture(scope='module')
 def configure_environment(get_configuration, request):
     """Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration."""
@@ -43,9 +49,6 @@ def configure_environment(get_configuration, request):
     # configuration for testing
     test_config = set_section_wazuh_conf(get_configuration.get('section'),
                                          get_configuration.get('elements'))
-
-    if get_configuration['metadata']['fim_mode'] == 'scheduled':
-        pytest.skip('Skipping Scheduled test')
 
     # create test directories
     if hasattr(request.module, 'test_directories'):
