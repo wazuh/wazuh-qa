@@ -39,5 +39,3 @@ wazuh_apt_development_repo: https://s3-us-west-1.amazonaws.com/packages-dev.wazu
 wazuh_apt_staging_repo: https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/apt/
 wazuh_apt_production_repo: https://packages.wazuh.com/3.x/apt/ stable main
 
-
-

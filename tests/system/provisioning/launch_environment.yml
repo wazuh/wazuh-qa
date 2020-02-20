@@ -77,7 +77,7 @@
         register: jobs_agents
         until: jobs_agents.finished
         retries: 1000
-        delay: 10      
+        delay: 10
 
       - name: Launching post installation tasks
         shell: "ansible-playbook -i {{ ansible_hosts_destination }} {{ item }}"

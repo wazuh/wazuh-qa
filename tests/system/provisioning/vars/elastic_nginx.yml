@@ -9,17 +9,17 @@ elasticsearch_port: 9200
 
 ### Elastic cluster configuration
 
-elastic_user: wazuh
+elastic_user: elastic
 elastic_password: T3stP4ssw0rd--
 
 ### Kibana API configuration
 
 # Privileged user is created with "elastic_user" and "elastic_password" credentials. ToDo: Add Kibana user with limited privileges
 # kibana_user: wazuh
-# kibana_password: 
+# kibana_password:
 kibana_api_protocol: https
 kibana_port: 5601
 
-### Nginx 
+### Nginx
 
 nginx_listen_port: 443

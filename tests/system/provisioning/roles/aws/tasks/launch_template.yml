@@ -26,13 +26,15 @@
   - name: Verify there is no Stack with the same name
     command: >-
       aws
-      --profile {{ aws_cli_profile }}
+      --region {{ aws_region }}
       cloudformation describe-stacks
       --stack-name {{ stack_name }}
     register: check_stack_exists
     changed_when: False
-    no_log: True
     failed_when: check_stack_exists.rc == 0
+    environment:
+      AWS_ACCESS_KEY_ID: "{{ aws_access_key }}"
+      AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key }}"
 
   - name: Verify the stack_name is no longer than 17
     fail:
@@ -42,17 +44,20 @@
   - name: Upload CloudFormation template to S3
     command: >-
       aws
-      --profile {{ aws_cli_profile }}
+      --region {{ aws_region }}
       s3 cp {{ cloudformation_template_path }}{{ cloudformation_template_name }}
       s3://{{ bucket_name }}
     register: upload_s3_result
     changed_when: upload_s3_result.rc == 0
+    environment:
+      AWS_ACCESS_KEY_ID: "{{ aws_access_key }}"
+      AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key }}"
 
   - name: Creating AWS Stack
     command: >-
       aws
+      --region {{ aws_region }}
       cloudformation create-stack
-      --profile {{ aws_cli_profile }}
       --stack-name {{ stack_name }}
       --template-url {{ template_url }}{{ cloudformation_template_name }}
       --parameters file://{{ parameters_file_path }}
@@ -60,11 +65,14 @@
       --tags Key=service_name,Value={{ service_name_tag }} Key=team,Value={{ team_tag }}
     register: create_stack_call_result
     changed_when: create_stack_call_result.rc == 0
+    environment:
+      AWS_ACCESS_KEY_ID: "{{ aws_access_key }}"
+      AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key }}"
 
   - name: Awaiting for the AWS stack to finish, this could take a while...
     command: >-
       aws
-      --profile {{ aws_cli_profile }}
+      --region {{ aws_region }}
       cloudformation wait stack-create-complete
       --stack-name {{ stack_name }}
     register: aws_stack_sleeper
@@ -72,6 +80,9 @@
     poll: 0
     tags:
       - skip_ansible_lint # Disabled linting due to errors with polling
+    environment:
+      AWS_ACCESS_KEY_ID: "{{ aws_access_key }}"
+      AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key }}"
 
   - name: AWS Stack not ready yet, awaiting...
     async_status:
