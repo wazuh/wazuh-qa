@@ -23,6 +23,7 @@ from wazuh_testing.tools.services import control_service, check_daemon_status
 
 root_dir = '/test'
 tested_daemon = 'ossec-syscheckd'
+eps = 600
 performance_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stats', 'performance')
 
 
@@ -44,10 +45,12 @@ def initial_clean():
 def replace_conf():
     """Configure syscheck in realtime=yes."""
     directories_regex = r"<directories realtime=\"yes\">[\n\t ]*(TESTING_DIRECTORY)[\n\t ]*</directories>"
+    eps_regex = r"<max_eps>[\n\t ]*([0-9]+)[\n\t ]*</max_eps>"
 
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'template_wazuh_conf.conf'), 'r') as f:
         content = f.read()
         new_config = re.sub(re.search(directories_regex, content).group(1), root_dir, content)
+        new_config = re.sub(re.search(eps_regex, content).group(1), str(eps), new_config)
 
         with open(WAZUH_CONF, 'w') as conf:
             conf.write(new_config)
@@ -337,7 +340,7 @@ def scan_integrity_test(fim_df, length, n_files, file_size, integrity_df=None, f
         else:
             raise AttributeError(f'Invalid type detected: {fim_type}')
 
-        fim_df.loc[len(fim_df)] = [str(time_printing), *list(diff.values()), str(0.0), fim_type]
+        fim_df.loc[len(fim_df)] = [str(time_printing), *list(diff.values()), time_fim, fim_type]
         time_printing += 1
         time.sleep(1)
         stats = get_stats(tested_daemon)
