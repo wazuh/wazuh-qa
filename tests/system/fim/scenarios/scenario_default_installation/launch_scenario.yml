@@ -15,18 +15,13 @@
           - name: Configure syscheck event.
             set_fact:
               event: "added"
-            notify: Stop Wazuh agent Linux
 
           - name: Generating files to trigger FIM alerts
-            notify: 
-              - Restart Wazuh agent Linux
-              - Restart Wazuh agent Windows 
             import_tasks: "../../common_tasks/create_files.yml"
-            changed_when: true
                     
           - name: Verify generated alerts
+            become: true
             import_tasks: "../../common_tasks/verify_alerts.yml"
-          become: yes
 
         - block:
           - name: Configure syscheck event.
@@ -37,8 +32,8 @@
             import_tasks: "../../common_tasks/modify_files.yml"
         
           - name: Verify generated alerts
+            become: true
             import_tasks: "../../common_tasks/verify_alerts.yml"
-          become: yes
 
         - block:
           - name: Configure syscheck event.
@@ -49,5 +44,5 @@
             import_tasks: "../../common_tasks/delete_files.yml"
         
           - name: Verify generated alerts
+            become: true
             import_tasks: "../../common_tasks/verify_alerts.yml"
-          become: yes   

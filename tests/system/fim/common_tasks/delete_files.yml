@@ -1,5 +1,6 @@
 ---
 - name: "Delete FIM test files at Wazuh Managers | Linux"
+  notify: Restart Wazuh agent Linux
   script: "delete_files.py -i {{ files_generated_output_path }} -o {{ files_deleted_output_path }}"
   args:
     executable: "python3"
@@ -9,6 +10,7 @@
   become: yes
 
 - name: "Delete FIM test files at Wazuh Managers | Windows"
+  notify: Restart Wazuh agent Windows
   script: "modify_files.py -i {{ files_generated_output_path }} -o {{ files_deleted_output_path }}"
   args:
     executable: "python"
