@@ -1,6 +1,9 @@
 ---
-- apply_to_modules:
-  - test_hard_link
+# conf 1
+- tags:
+  - ossec_conf
+  apply_to_modules:
+  - test_basic_usage_new_dirs
   section: syscheck
   elements:
   - disabled:
@@ -8,7 +11,7 @@
   - frequency:
       value: FREQUENCY
   - directories:
-      value: "/testdir1"
+      value: TEST_DIRECTORIES
       attributes:
+      - check_all: 'yes'
       - FIM_MODE
-      - INODE

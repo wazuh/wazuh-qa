@@ -23,12 +23,13 @@ pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0)]
 test_directories = []
 directory_str = os.path.join(PREFIX, 'testdir1')
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf_frequency.yaml')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # Configurations
 
-conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
+conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__,
+               'FREQUENCY': str(global_parameters.default_timeout * 3 + 2)}
 p, m = generate_params(extra_params=conf_params, modes=['realtime', 'whodata'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 

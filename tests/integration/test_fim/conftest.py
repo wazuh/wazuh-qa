@@ -44,6 +44,9 @@ def configure_environment(get_configuration, request):
     test_config = set_section_wazuh_conf(get_configuration.get('section'),
                                          get_configuration.get('elements'))
 
+    if get_configuration['metadata']['fim_mode'] == 'scheduled':
+        pytest.skip('Skipping Scheduled test')
+
     # create test directories
     if hasattr(request.module, 'test_directories'):
         test_directories = getattr(request.module, 'test_directories')

@@ -9,6 +9,8 @@ import threading
 import time
 from datetime import datetime, timedelta
 
+import pytest
+
 
 class TimeMachine:
     """Context manager that goes forward/back in time and comes back to real time once it finishes its instance."""
@@ -99,6 +101,7 @@ class TimeMachine:
         back_in_time : bool, optional
             Go back in time the same time_delta interval. Default value is False.
         """
+        pytest.skip('Skipping Scheduled test')
         # Save timedelta to be able to  travel back in time after the tests
         TimeMachine.total_time_spent += time_delta.seconds
         now = datetime.utcnow() if sys.platform == 'darwin' else datetime.now()

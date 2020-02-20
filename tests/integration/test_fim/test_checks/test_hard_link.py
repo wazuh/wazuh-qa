@@ -30,7 +30,8 @@ test_directories = [testdir1, unmonitored_dir]
 
 # configurations
 
-p, m = generate_params(apply_to_all=({'INODE': {'check_inode': inode}} for inode in ['yes', 'no']))
+p, m = generate_params(extra_params={'FREQUENCY': str(global_parameters.default_timeout * 3 + 2)},
+                       apply_to_all=({'INODE': {'check_inode': inode}} for inode in ['yes', 'no']))
 
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=p,
