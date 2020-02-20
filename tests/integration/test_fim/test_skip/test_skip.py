@@ -9,6 +9,7 @@ from datetime import timedelta
 
 import distro
 import pytest
+from wazuh_testing.tools.file import truncate_file
 
 from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, detect_initial_scan, callback_detect_event,
                                generate_params, callback_detect_integrity_state)
@@ -17,6 +18,8 @@ from wazuh_testing.tools.configuration import set_section_wazuh_conf, load_wazuh
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import restart_wazuh_with_new_conf
 from wazuh_testing.tools.time import TimeMachine
+
+from unittest.mock import patch
 
 # Marks
 
@@ -78,18 +81,100 @@ def configure_nfs():
     shutil.rmtree(os.path.join('/', 'media', 'nfs-folder'), ignore_errors=True)
 
 
+def extra_configuration_before_yield():
+    # Load isofs module in kernel just in case
+    subprocess.call(['modprobe', 'isofs'])
+
+
 # tests
 
-@pytest.mark.parametrize('directory,  tags_to_apply', [
-    (os.path.join('/', 'proc'), {'skip_proc'}),
-    (os.path.join('/', 'sys', 'video'), {'skip_sys'}),
-    (os.path.join('/', 'dev'), {'skip_dev'}),
-    (os.path.join('/', 'nfs-mount-point'), {'skip_nfs'})
+def test_skip_proc(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
+    """Check if syscheckd skips /proc when setting 'skip_proc="yes"'."""
+    check_apply_test({'skip_proc'}, get_configuration['tags'])
+    trigger = get_configuration['metadata']['skip'] == 'no'
+
+    if trigger:
+        proc = subprocess.Popen(["python3", f"{os.path.dirname(os.path.abspath(__file__))}/data/proc.py"])
+
+        # Change configuration, monitoring the PID path in /proc
+        # Monitor only /proc/PID to expect only these events. Otherwise, it will fail due to Timeouts since
+        # integrity scans will take too long
+        new_conf = change_conf(f'/proc/{proc.pid}')
+        new_ossec_conf = []
+
+        # Get new skip_proc configuration
+        for conf in new_conf:
+            if conf['metadata']['skip'] == 'no' and conf['tags'] == ['skip_proc']:
+                new_ossec_conf = set_section_wazuh_conf(conf.get('section'),
+                                                        conf.get('elements'))
+        restart_wazuh_with_new_conf(new_ossec_conf)
+        proc_monitor = FileMonitor(LOG_FILE_PATH)
+        detect_initial_scan(proc_monitor)
+
+        # Do not expect any 'Sending event'
+        with pytest.raises(TimeoutError):
+            proc_monitor.start(timeout=3, callback=callback_detect_event,
+                               error_message='Did not receive expected "Sending FIM event: ..." event')
+
+        TimeMachine.travel_to_future(timedelta(hours=13))
+
+        found_event = False
+        while not found_event:
+            event = proc_monitor.start(timeout=5, callback=callback_detect_event,
+                                       error_message='Did not receive expected '
+                                                     '"Sending FIM event: ..." event').result()
+            if f'/proc/{proc.pid}/' in event['data'].get('path'):
+                found_event = True
+
+        # Kill the process
+        subprocess.Popen(["kill", "-9", str(proc.pid)])
+
+    else:
+        with pytest.raises(TimeoutError):
+            event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_integrity_state)
+            raise AttributeError(f'Unexpected event {event}')
+
+
+def test_skip_sys(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
+    """Check if syscheckd skips /sys when setting 'skip_sys="yes"'."""
+    check_apply_test({'skip_sys'}, get_configuration['tags'])
+    trigger = get_configuration['metadata']['skip'] == 'no'
+
+    if trigger:
+        # If /sys/module/isofs does not exist, use 'modprobe isofs'
+        assert os.path.exists('/sys/module/isofs'), f'/sys/module/isofs does not exist'
+
+        # Do not expect any 'Sending event'
+        with pytest.raises(TimeoutError):
+            event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+            raise AttributeError(f'Unexpected event {event}')
+
+        # Remove module isofs and travel to future to check alerts
+        subprocess.Popen(["modprobe", "-r", "isofs"])
+        TimeMachine.travel_to_future(timedelta(hours=13))
+
+        # Detect at least one 'delete' event in /sys/module/isofs path
+        event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event,
+                                        error_message='Did not receive expected '
+                                                      '"Sending FIM event: ..." event').result()
+        assert event['data'].get('type') == 'deleted' and '/sys/module/isofs' in event['data'].get('path'), \
+            f'Sys event not detected'
+
+        # Restore module isofs
+        subprocess.Popen(["modprobe", "isofs"])
+    else:
+        with pytest.raises(TimeoutError):
+            event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_integrity_state)
+            raise AttributeError(f'Unexpected event {event}')
+
+
+@pytest.mark.parametrize('directory, tags_to_apply', [
+    (os.path.join('/', 'dev'), {'skip_dev'})
 ])
-def test_skip(directory, tags_to_apply,
-              get_configuration, configure_environment, configure_nfs,
-              restart_syscheckd, wait_for_initial_scan):
-    """Check if syscheck is skipping the directory based on its skip configuration
+@patch('wazuh_testing.fim.modify_file_inode')
+def test_skip_dev(modify_inode_mock, directory, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
+                  wait_for_initial_scan):
+    """Check if syscheckd skips /dev when setting 'skip_dev="yes"'.
 
     /proc, /sys, /dev and nfs directories are special directories. Unless it is specified with skip_*='no', syscheck
     will skip these directories. If not, they will be monitored like a normal directory.
@@ -97,85 +182,31 @@ def test_skip(directory, tags_to_apply,
     Parameters
     ----------
     directory : str
-        Directory that will be monitored. We only use it on skip_dev and skip_nfs.
+        Directory that will be monitored.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
+    trigger = get_configuration['metadata']['skip'] == 'no'
 
-    if get_configuration['metadata']['skip'] == 'yes':
-        trigger = False
-    else:
-        trigger = True
+    regular_file_cud(directory, wazuh_log_monitor, time_travel=True, min_timeout=3, triggers_event=trigger)
 
-    if tags_to_apply == {'skip_proc'}:
-        if trigger:
-            proc = subprocess.Popen(["python3", f"{os.path.dirname(os.path.abspath(__file__))}/data/proc.py"])
 
-            # Change configuration, monitoring the PID path in /proc
-            # Monitor only /proc/PID to expect only these events. Otherwise, it will fail due to Timeouts since
-            # integrity scans will take too long
-            new_conf = change_conf(f'/proc/{proc.pid}')
-            new_ossec_conf = []
+@pytest.mark.parametrize('directory,  tags_to_apply', [
+    (os.path.join('/', 'nfs-mount-point'), {'skip_nfs'})
+])
+@patch('wazuh_testing.fim.modify_file_inode')
+def test_skip_nfs(modify_inode_mock, directory, tags_to_apply, get_configuration, configure_environment, configure_nfs, restart_syscheckd,
+                  wait_for_initial_scan):
+    """Check if syscheckd skips nfs directories when setting 'skip_nfs="yes"'.
 
-            # Get new skip_proc configuration
-            for conf in new_conf:
-                if conf['metadata']['skip'] == 'no' and conf['tags'] == ['skip_proc']:
-                    new_ossec_conf = set_section_wazuh_conf(conf.get('section'),
-                                                            conf.get('elements'))
-            restart_wazuh_with_new_conf(new_ossec_conf)
-            proc_monitor = FileMonitor(LOG_FILE_PATH)
-            detect_initial_scan(proc_monitor)
+    /proc, /sys, /dev and nfs directories are special directories. Unless it is specified with skip_*='no', syscheck
+    will skip these directories. If not, they will be monitored like a normal directory.
 
-            # Do not expect any 'Sending event'
-            with pytest.raises(TimeoutError):
-                proc_monitor.start(timeout=3, callback=callback_detect_event,
-                                   error_message='Did not receive expected "Sending FIM event: ..." event')
+    Parameters
+    ----------
+    directory : str
+        Directory that will be monitored.
+    """
+    check_apply_test(tags_to_apply, get_configuration['tags'])
+    trigger = get_configuration['metadata']['skip'] == 'no'
 
-            TimeMachine.travel_to_future(timedelta(hours=13))
-
-            found_event = False
-            while not found_event:
-                event = proc_monitor.start(timeout=5, callback=callback_detect_event,
-                                           error_message='Did not receive expected '
-                                                         '"Sending FIM event: ..." event').result()
-                if f'/proc/{proc.pid}/' in event['data'].get('path'):
-                    found_event = True
-
-            # Kill the process
-            subprocess.Popen(["kill", "-9", str(proc.pid)])
-
-        else:
-            with pytest.raises(TimeoutError):
-                event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_integrity_state)
-                raise AttributeError(f'Unexpected event {event}')
-
-    elif tags_to_apply == {'skip_sys'}:
-        if trigger:
-            # If /sys/module/video does not exist, use 'modprobe video'
-            assert os.path.exists('/sys/module/video'), f'/sys/module/video does not exist'
-
-            # Do not expect any 'Sending event'
-            with pytest.raises(TimeoutError):
-                event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
-                raise AttributeError(f'Unexpected event {event}')
-
-            # Remove module video and travel to future to check alerts
-            subprocess.Popen(["modprobe", "-r", "video"])
-            TimeMachine.travel_to_future(timedelta(hours=13))
-
-            # Detect at least one 'delete' event in /sys/module/video path
-            event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event,
-                                            error_message='Did not receive expected '
-                                                          '"Sending FIM event: ..." event').result()
-            assert event['data'].get('type') == 'deleted' and '/sys/module/video' in event['data'].get('path'), \
-                f'Sys event not detected'
-
-            # Restore module video
-            subprocess.Popen(["modprobe", "video"])
-        else:
-            with pytest.raises(TimeoutError):
-                event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_integrity_state)
-                raise AttributeError(f'Unexpected event {event}')
-    else:
-        regular_file_cud(directory, wazuh_log_monitor,
-                         time_travel=True,
-                         min_timeout=3, triggers_event=trigger)
+    regular_file_cud(directory, wazuh_log_monitor, time_travel=True, min_timeout=3, triggers_event=trigger)

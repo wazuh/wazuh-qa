@@ -325,7 +325,7 @@
               "examples": [
                 "/testdir1/example"
               ],
-              "pattern": "^(?:\\/[^\\/]+)*$"
+              "pattern": "^/\\w*(/|\\w+)*$"
             },
             "audit_uid": {
               "$id": "#/properties/data/properties/audit/properties/audit_uid",

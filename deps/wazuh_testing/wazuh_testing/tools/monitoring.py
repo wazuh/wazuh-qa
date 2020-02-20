@@ -2,19 +2,65 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+# Unix only modules
+try:
+    import grp
+    import pwd
+except ModuleNotFoundError:
+    pass
+
 import os
+import queue
 import socket
+import socketserver
 import sys
+import threading
 import time
+from copy import deepcopy
 from struct import pack, unpack
 
 from wazuh_testing import logger
 from wazuh_testing.tools.time import Timer
 
 
-def wait_for_condition(condition_checker, args=None, kwargs=None, timeout=-1):
+def wazuh_unpack(data, format_: str = "<I"):
+    """Unpack data with a given header. Using Wazuh header by default.
+
+    Parameters
+    ----------
+    data : bytes
+        Binary data to unpack
+    format_ : str, optional
+        Format used to unpack data. Default "<I"
+
+    Returns
+    -------
+    int
+        Unpacked value
     """
-    Wait for a given condition to check.
+    return unpack(format_, data)[0]
+
+
+def wazuh_pack(data, format_: str = "<I"):
+    """Pack data with a given header. Using Wazuh header by default.
+
+    Parameters
+    ----------
+    data : int
+        Int number to pack
+    format_ : str, optional
+        Format used to pack data. Default "<I"
+
+    Returns
+    -------
+    bytes
+        Packed value
+    """
+    return pack(format_, data)
+
+
+def wait_for_condition(condition_checker, args=None, kwargs=None, timeout=-1):
+    """Wait for a given condition to check.
 
     Parameters
     ----------
@@ -76,7 +122,7 @@ class FileMonitor:
             encoding = 'utf-8'
         self.extra_timer_is_running = False
         self._result = [] if accum_results > 1 or timeout_extra > 0 else None
-        with open(self.file_path, encoding=encoding) as f:
+        with open(self.file_path, encoding=encoding, errors='backslashreplace') as f:
             f.seek(self._position)
             while self._continue:
                 if self._abort and not self.extra_timer_is_running:
@@ -150,7 +196,7 @@ class SocketController:
         ----------
         path : str
             Path where the file will be created.
-        timeout : int
+        timeout : int, optional
             Socket's timeout, 0 for non-blocking mode.
         connection_protocol : str
             Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM).
@@ -204,9 +250,9 @@ class SocketController:
             msg_bytes = message_.encode()
             try:
                 if size:
-                    output.append(self.sock.send(pack("<I", len(msg_bytes)) + msg_bytes))
+                    output.append(self.sock.sendall(wazuh_pack(len(msg_bytes)) + msg_bytes))
                 else:
-                    output.append(self.sock.send(msg_bytes))
+                    output.append(self.sock.sendto(msg_bytes, self.path))
             except OSError as e:
                 raise e
 
@@ -228,13 +274,13 @@ class SocketController:
         output = list()
         for _ in range(0, total_messages):
             try:
-                size = unpack("<I", self.sock.recv(4, socket.MSG_WAITALL))[0]
+                size = wazuh_unpack(self.sock.recv(4, socket.MSG_WAITALL))
                 output.append(self.sock.recv(size, socket.MSG_WAITALL).decode().rstrip('\x00'))
             except OSError:
                 try:
                     self.sock.listen(1)
                     conn, addr = self.sock.accept()
-                    size = unpack("<I", conn.recv(4, socket.MSG_WAITALL))[0]
+                    size = wazuh_unpack(conn.recv(4, socket.MSG_WAITALL))
                     output.append(conn.recv(size, socket.MSG_WAITALL).decode().rstrip('\x00'))
                 except OSError as e:
                     raise e
@@ -348,3 +394,254 @@ class SocketMonitor:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
+
+
+class QueueMonitor:
+    def __init__(self, queue_item, time_step=0.5):
+        """Create a new instance to monitor any given queue.
+
+        Parameters
+        ----------
+        queue_item : Queue
+            Queue to monitor.
+        time_step : float, optional
+            Fraction of time to wait in every get. Default `0.5`
+        """
+        self._queue = queue_item
+        self._continue = False
+        self._abort = False
+        self._result = None
+        self._time_step = time_step
+
+    def get_results(self, callback=_callback_default, accum_results=1, timeout=-1, update_position=True):
+        """Get as many matched results as `accum_results`.
+
+        Parameters
+        ----------
+        callback : callable, optional
+            Callback function to filter results.
+        accum_results : int, optional
+            Number of results to get. Default `1`
+        timeout : int, optional
+            Maximum timeout. Default `-1`
+        update_position : bool, optional
+            True if we pop items from the queue once they are read. False otherwise. Default `True`
+
+        Returns
+        -------
+        list of any or any
+            It can return either a list of any type or simply any type. If `accum_results > 1`, it will be a list.
+        """
+        result_list = []
+        timer = 0.0
+        time_wait = 0.1
+        position = 0
+        while len(result_list) != accum_results:
+            if timer >= timeout:
+                self.abort()
+                break
+            try:
+                if update_position:
+                    item = callback(self._queue.get(block=True, timeout=self._time_step))
+                else:
+                    item = callback(self._queue.peek(position=position, block=True, timeout=self._time_step))
+                    position += 1
+                if item is not None:
+                    result_list.append(item)
+            except queue.Empty:
+                time.sleep(time_wait)
+                timer += self._time_step + time_wait
+
+        if len(result_list) == 1:
+            return result_list[0]
+        else:
+            return result_list
+
+    def start(self, timeout=-1, callback=_callback_default, accum_results=1, update_position=True):
+        """Start the queue monitoring until the stop method is called."""
+        if not self._continue:
+            self._continue = True
+            self._abort = False
+
+            while self._continue:
+                if self._abort:
+                    raise TimeoutError()
+                result = self.get_results(callback=callback, accum_results=accum_results, timeout=timeout,
+                                          update_position=update_position)
+                if result and not self._abort:
+                    self._result = result
+                    if self._result:
+                        self.stop()
+
+        return self
+
+    def stop(self):
+        """Stop the queue monitoring. It can be restart calling the start method."""
+        self._continue = False
+        return self
+
+    def abort(self):
+        """Abort because of timeout."""
+        self._abort = True
+        return self
+
+    def result(self):
+        """Return the current result."""
+        return self._result
+
+    def get_queue(self):
+        """Return the monitored queue."""
+        return self._queue
+
+
+class Queue(queue.Queue):
+    def peek(self, *args, position=0, **kwargs):
+        """Peek any given position without modifying the queue status.
+
+        The difference between `peek` and `get` is `peek` pops the item and `get` does not.
+
+        Parameters
+        ----------
+        position : int, optional
+            Element of the queue to return. Default `0`
+
+        Returns
+        -------
+        any
+            Any item in the given position.
+        """
+        aux_queue = queue.Queue()
+        aux_queue.queue = deepcopy(self.queue)
+        for _ in range(position):
+            aux_queue.get(*args, **kwargs)
+        return aux_queue.get(*args, **kwargs)
+
+
+if hasattr(socketserver, 'ThreadingUnixStreamServer'):
+    class StreamServer(socketserver.ThreadingUnixStreamServer):
+
+        def shutdown_request(self, request):
+            pass
+
+
+    class StreamHandler(socketserver.BaseRequestHandler):
+
+        def forward(self, data):
+            # Create a socket (SOCK_STREAM means a TCP socket)
+            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as forwarded_sock:
+                # Connect to server and send data
+                forwarded_sock.connect(self.server.mitm.forwarded_socket_path)
+                forwarded_sock.sendall(wazuh_pack(len(data)) + data)
+
+                # Receive data from the server and shut down
+                size = wazuh_unpack(self.recvall(forwarded_sock, 4, socket.MSG_WAITALL))
+                response = self.recvall(forwarded_sock, size, socket.MSG_WAITALL)
+
+                return response
+
+        def recvall(self, sock: socket.socket, size: int, mask: int):
+            buffer = bytearray()
+            while len(buffer) < size:
+                try:
+                    data = sock.recv(size - len(buffer), mask)
+                    if not data:
+                        break
+                    buffer.extend(data)
+                except socket.timeout:
+                    if self.server.mitm.event.is_set():
+                        break
+            return bytes(buffer)
+
+        def handle(self):
+            self.request.settimeout(1)
+            while not self.server.mitm.event.is_set():
+                header = self.recvall(self.request, 4, socket.MSG_WAITALL)
+                if not header:
+                    break
+                size = wazuh_unpack(header)
+                data = self.recvall(self.request, size, socket.MSG_WAITALL)
+                if not data:
+                    break
+
+                response = self.server.mitm.handler_func(data) if self.server.mitm.handler_func else self.forward(data)
+
+                self.server.mitm.put_queue((data.rstrip(b'\x00'), response.rstrip(b'\x00')))
+
+                self.request.sendall(wazuh_pack(len(response)) + response)
+
+
+    class DatagramHandler(socketserver.BaseRequestHandler):
+
+        def forward(self, data):
+            with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as forwarded_sock:
+                forwarded_sock.sendto(data, self.server.mitm.forwarded_socket_path)
+
+        def handle(self):
+            data = self.request[0]
+
+            self.server.mitm.handler_func(data) if self.server.mitm.handler_func else self.forward(data)
+
+            self.server.mitm.put_queue(data.rstrip(b'\x00'))
+
+
+    class DatagramServer(socketserver.UnixDatagramServer):
+
+        def shutdown_request(self, request):
+            pass
+
+
+    class ManInTheMiddle:
+
+        def __init__(self, socket_path, mode='TCP', func: callable = None):
+            """Create a MITM for the socket `socket_path`.
+
+            Parameters
+            ----------
+            socket_path : str
+                Path of the socket to be replaced.
+            mode : str
+                It can be either 'TCP' or 'UDP'. Default `'TCP'`
+            func : callable
+                Function to be applied to every data before sending it.
+            """
+            self.listener_socket_path = socket_path
+            self.forwarded_socket_path = f'{socket_path}.original'
+            os.rename(self.listener_socket_path, self.forwarded_socket_path)
+            self.listener_class = StreamServer if mode == 'TCP' else socketserver.UnixDatagramServer
+            self.handler_class = StreamHandler if mode == 'TCP' else DatagramHandler
+            self.handler_func = func
+            self.mode = mode
+            self.listener = None
+            self.thread = None
+            self.event = threading.Event()
+            self._queue = Queue()
+
+        def run(self, *args):
+            self.listener = self.listener_class(self.listener_socket_path, self.handler_class)
+            self.listener.mitm = self
+
+            # set proper socket permissions
+            uid = pwd.getpwnam('ossec').pw_uid
+            gid = grp.getgrnam('ossec').gr_gid
+            os.chown(self.listener_socket_path, uid, gid)
+            os.chmod(self.listener_socket_path, 0o660)
+
+            self.thread = threading.Thread(target=self.listener.serve_forever)
+            self.thread.start()
+
+        def start(self):
+            self.run()
+
+        def shutdown(self):
+            self.listener.shutdown()
+            self.listener.socket.close()
+            self.event.set()
+            os.remove(self.listener_socket_path)
+            os.rename(self.forwarded_socket_path, self.listener_socket_path)
+
+        @property
+        def queue(self):
+            return self._queue
+
+        def put_queue(self, item):
+            self._queue.put(item)

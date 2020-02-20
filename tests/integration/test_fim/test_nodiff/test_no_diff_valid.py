@@ -107,7 +107,8 @@ def test_no_diff_subdirectory(folder, filename, content, hidden_content,
             if sys.platform == 'win32':
                 diff_file = os.path.join(diff_file, 'c')
 
-            diff_file = os.path.join(diff_file, folder.strip(PREFIX), file)
+            striped = folder.strip(os.sep) if sys.platform == 'darwin' else folder.strip(PREFIX)
+            diff_file = os.path.join(diff_file, striped, file)
 
             assert os.path.exists(diff_file), f'{diff_file} does not exist'
             assert event['data'].get('content_changes') is not None, f'content_changes is empty'

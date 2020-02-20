@@ -10,7 +10,7 @@ from subprocess import check_call
 
 import psutil
 
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_SERVICE
+from wazuh_testing.tools import WAZUH_PATH, WAZUH_SERVICE, WAZUH_SOCKETS
 from wazuh_testing.tools.configuration import write_wazuh_conf
 
 
@@ -46,6 +46,27 @@ def restart_wazuh_with_new_conf(new_conf, daemon='ossec-syscheckd'):
     """
     write_wazuh_conf(new_conf)
     control_service('restart', daemon=daemon)
+
+
+def delete_sockets(path=None):
+    """Delete a list of Wazuh socket files or all of them if None is specified.
+
+    Parameters
+    ----------
+    path : list, optional
+        Absolute socket path. Default `None`
+    """
+    try:
+        if path is None:
+            path = os.path.join(WAZUH_PATH, 'queue', 'ossec')
+            for file in os.listdir(path):
+                os.remove(os.path.join(path, file))
+            os.remove(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
+        else:
+            for item in path:
+                os.remove(item)
+    except FileNotFoundError:
+        pass
 
 
 def control_service(action, daemon=None, debug_mode=False):
@@ -87,6 +108,7 @@ def control_service(action, daemon=None, debug_mode=False):
                 result = subprocess.run([f'{WAZUH_PATH}/bin/ossec-control', action]).returncode
             else:
                 result = subprocess.run(['service', WAZUH_SERVICE, action]).returncode
+            action == 'stop' and delete_sockets()
         else:
             if action == 'restart':
                 control_service('stop', daemon=daemon)
@@ -94,9 +116,10 @@ def control_service(action, daemon=None, debug_mode=False):
             elif action == 'stop':
                 for proc in psutil.process_iter(attrs=['name']):
                     proc.name() == daemon and proc.terminate()
+                delete_sockets(WAZUH_SOCKETS[daemon])
             else:
                 daemon_path = os.path.join(WAZUH_PATH, 'bin')
-                check_call([f'{daemon_path}/{daemon}', '' if not debug_mode else '-d'])
+                check_call([f'{daemon_path}/{daemon}', '' if not debug_mode else '-dd'])
             result = 0
 
     if result != 0:
@@ -142,31 +165,24 @@ def check_daemon_status(daemon=None, running=True, timeout=10):
         If the daemon status is wrong after timeout seconds.
     """
     for _ in range(3):
-        daemon_status = subprocess.run(['service', 'wazuh-manager', 'status'],
-                                       stdout=subprocess.PIPE).stdout.decode()
+
+        # Check specified daemon/s status
+        daemon_status = subprocess.run(['service', 'wazuh-manager', 'status'], stdout=subprocess.PIPE).stdout.decode()
         if f"{daemon if daemon is not None else ''} {'not' if running is True else 'is'} running" not in daemon_status:
-            break
+            # Construct list of socket paths to check
+            if daemon is None:
+                socket_list = [path for array in WAZUH_SOCKETS.values() for path in array]
+            else:
+                socket_list = [path for path in WAZUH_SOCKETS[daemon]]
+            # Check specified socket/s status
+            for socket in socket_list:
+                if os.path.exists(socket) is not running:
+                    break
+            else:
+                # Finish main for loop if both daemon and socket checks are ok
+                break
+
         time.sleep(timeout/3)
     else:
         raise TimeoutError(f"{'wazuh-service' if daemon is None else daemon} "
                            f"{'is not' if running is True else 'is'} running")
-
-
-def delete_sockets(path=None):
-    """Delete a Wazuh socket file or all of them if None is specified.
-
-    Parameters
-    ----------
-    path : str, optional
-        Socket path relative to WAZUH_PATH. Default `None`
-    """
-    try:
-        if path is None:
-            path = os.path.join(WAZUH_PATH, 'queue', 'ossec')
-            for file in os.listdir(path):
-                os.remove(os.path.join(path, file))
-            os.remove(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
-        else:
-            os.remove(os.path.join(WAZUH_PATH, path))
-    except FileNotFoundError:
-        pass
