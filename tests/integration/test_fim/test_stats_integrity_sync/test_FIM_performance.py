@@ -42,6 +42,7 @@ def initial_clean():
 
 @pytest.fixture(scope='module')
 def replace_conf():
+    """Configure syscheck in realtime=yes."""
     directories_regex = r"<directories realtime=\"yes\">[\n\t ]*(TESTING_DIRECTORY)[\n\t ]*</directories>"
 
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'template_wazuh_conf.conf'), 'r') as f:
@@ -65,7 +66,7 @@ def get_total_disk_info(daemon):
     Returns
     -------
     tuple of str
-        Total read value and total write value
+        Total read value and total write value.
     """
     regex_rchar = r"rchar: ([0-9]+)"
     regex_wchar = r"wchar: ([0-9]+)"
@@ -172,6 +173,20 @@ def calculate_stats(old_stats, current_stats):
 
 
 def create_long_path(length, path_name):
+    """Create the specified tree of directories.
+
+    Parameters
+    ----------
+    length : int
+        Length of the entire path.
+    path_name : str
+        Root directory.
+
+    Returns
+    -------
+    path_name : str
+        Created path.
+    """
     path_name = os.path.join("/", "test", path_name)
 
     if length == 20:
@@ -190,6 +205,20 @@ def create_long_path(length, path_name):
 
 
 def find_ossec_log(regex=None, strlog=None):
+    """Find in the ossec.log the specified strlog and return the first group if match with the regex.
+
+    Parameters
+    ----------
+    regex : str
+        Regular expression to be matched.
+    strlog : str
+        String to be found in the ossec.log.
+
+    Returns
+    -------
+    str or None
+        First group of match or None.
+    """
     try:
         head = subprocess.Popen(["cat", LOG_FILE_PATH], stdout=subprocess.PIPE)
         grep = subprocess.check_output(["grep", strlog], stdin=head.stdout).decode().strip()
@@ -199,18 +228,47 @@ def find_ossec_log(regex=None, strlog=None):
 
 
 def create_n_files(path_name, num_files=1000, file_size=1024):
+    """Create the specified number of files with the custom size in the specified path.
+
+    Parameters
+    ----------
+    path_name : str
+        Parent dir of the new files.
+    num_files : int
+        Number of new files.
+    file_size :
+        Size of the new files.
+    """
     for i in range(0, num_files):
         with open(os.path.join(path_name, f"file_{str(i)}"), 'w+') as fd:
             fd.write('\0' * file_size * 1024)
 
 
 def modify_n_files(path_name, num_files=1000):
+    """Modify the specified number of files in the specified path.
+
+    Parameters
+    ----------
+    path_name : str
+        Parent dir of the modified files.
+    num_files : int
+        Number of modified files.
+    """
     for i in range(0, num_files):
         with open(os.path.join(path_name, f"file_{str(i)}"), 'w+') as fd:
             fd.write('')
 
 
 def delete_n_files(path_name, num_files=1000):
+    """Delete the specified number of files in the specified path.
+
+    Parameters
+    ----------
+    path_name : str
+        Parent dir of the deleted file.
+    num_files : int
+        Number of deleted files.
+    """
     for i in range(0, num_files):
         subprocess.call(["rm", os.path.join(path_name, f"file_{str(i)}")])
 
@@ -227,12 +285,36 @@ def detect_syscheck_version():
 
 
 def clean_environment(stats=False):
+    """Remove the stats files and remove the testing dir.
+
+    Parameters
+    ----------
+    stats : bool
+        If True, the stats files must be deleted.
+    """
     if stats:
         shutil.rmtree(performance_dir, ignore_errors=True)
     shutil.rmtree(root_dir, ignore_errors=True)
 
 
 def scan_integrity_test(fim_df, length, n_files, file_size, integrity_df=None, fim_type='scan'):
+    """Get the stats when the scan and integrity is running.
+
+    Parameters
+    ----------
+    fim_df : Pandas DataFrame
+        DataFrame that contains the stats.
+    length : int
+        Path length for this test.
+    n_files :
+        Number of files for this test.
+    file_size : int
+        File size for this test.
+    integrity_df : Pandas DataFrame, optional
+        DataFrame that contains the integrity stats.
+    fim_type : str, optional
+        scan or integrity.
+    """
     time_printing, pause, time_fim = 0, 0, None
     stats = get_stats(tested_daemon)
     old_stats = deepcopy(stats)
@@ -262,6 +344,24 @@ def scan_integrity_test(fim_df, length, n_files, file_size, integrity_df=None, f
 
 
 def process_manager(test_name, path_name, n_files, file_size=0):
+    """Create the correct process for the current test.
+
+    Parameters
+    ----------
+    test_name : Types
+        Current test_name (Types).
+    path_name : str
+        Root directory.
+    n_files : int
+        Number of files for this test.
+    file_size : int, optional
+        File size for this test.
+
+    Returns
+    -------
+    Process
+        Created process for join it.
+    """
     if test_name == Types.added:
         FileMonitor(LOG_FILE_PATH).start(callback=callback_realtime_added_directory)
         process = Process(target=create_n_files, args=(path_name, n_files, file_size,))
@@ -277,6 +377,28 @@ def process_manager(test_name, path_name, n_files, file_size=0):
 
 
 def time_manager(events, last_count, time_start, time_out, n_files):
+    """Control the timer for realtime tests.
+
+    Parameters
+    ----------
+    events : int
+        Number of events already caught.
+    last_count : int
+        Number of events previously caught.
+    time_start : float
+        Start timestamp.
+    time_out : int
+        Current time_out.
+    n_files : int
+        Number of files for this test.
+
+    Returns
+    -------
+    list
+        List wìth the current count of events, with the last (previous count), with the final time and the current
+        time_out.
+
+    """
     count = int(events)
     if count - last_count > 0:
         time_out = 5
@@ -292,16 +414,31 @@ def time_manager(events, last_count, time_start, time_out, n_files):
     return count, last_count, time_fim, time_out
 
 
-def real_test(test_name, real_df, length, n_files, file_size=0):
+def real_test(test_type, real_df, length, n_files, file_size=0):
+    """Get the stats when realtime tests are running.
+
+    Parameters
+    ----------
+    test_type : Types
+        Specify the type of the test.
+    real_df : Pandas DataFrame
+        DataFrame that contains the stats.
+    length : int
+        Path length for this test.
+    n_files :
+        Number of files for this test.
+    file_size : int, optional
+        File size for this test.
+    """
     started = False
     process, grep_name = None, None
     time_printing, time_start, time_fim, count, last_count = 0, 0, 0, 0, 0
     time_out = 5
-    grep_name = f'"mode":"real-time","type":"{test_name.value}"'
+    grep_name = f'"mode":"real-time","type":"{test_type.value}"'
     stats = get_stats(tested_daemon)
     old_stats = deepcopy(stats)
     logger.info(
-        f"[REAL] Test {test_name.value} with {str(length)} path length, {str(n_files)} files and {str(file_size)} KB "
+        f"[REAL] Test {test_type.value} with {str(length)} path length, {str(n_files)} files and {str(file_size)} KB "
         f"file size")
 
     while True:
@@ -313,20 +450,20 @@ def real_test(test_name, real_df, length, n_files, file_size=0):
             started = True
             path_name = create_long_path(length, "real")
             time_start = time.time()
-            process = process_manager(test_name, path_name, n_files, file_size)
+            process = process_manager(test_type, path_name, n_files, file_size)
         else:
             head = subprocess.Popen(["cat", LOG_FILE_PATH], stdout=subprocess.PIPE)
             grep = subprocess.Popen(["grep", grep_name], stdin=head.stdout, stdout=subprocess.PIPE)
-            events = subprocess.check_output(["wc", "-l"], stdin=grep.stdout).decode().strip()
+            events = int(subprocess.check_output(["wc", "-l"], stdin=grep.stdout).decode().strip())
             count, last_count, time_fim, time_out = time_manager(events=events, last_count=last_count,
                                                                  time_out=time_out, time_start=time_start,
                                                                  n_files=n_files)
 
-        real_df.loc[len(real_df)] = [str(time_printing), *list(diff.values()), time_fim, test_name.value]
+        real_df.loc[len(real_df)] = [str(time_printing), *list(diff.values()), time_fim, test_type.value]
         if time_out == 0:
             logger.warning(f"Timeout: Event read {str(count)} last: {str(last_count)}")
             break
-        logger.info(f"[{test_name.value}] Writing info {str(time_printing)} Events: {str(count)}/{str(n_files)}")
+        logger.info(f"[{test_type.value}] Writing info {str(time_printing)} Events: {str(count)}/{str(n_files)}")
 
         stats = get_stats(tested_daemon)
         time_printing += 1
