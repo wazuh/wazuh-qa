@@ -80,8 +80,8 @@ def main():
                             default="debug_missing_file_alerts.log")
 
         parser.add_argument("-t", "--timeout", type=int, required=False, dest='time_gap',
-                            help="time gap between alerts.json alerts acquisitions. default: 30s",
-                            default="30")
+                            help="time gap between alerts.json alerts acquisitions. default: 60s",
+                            default="60")
 
         parser.add_argument("-r", "--retry", type=int, required=False, dest='retry_count',
                             help="reading attempts on stopped alerts. default: 4 attemps",
