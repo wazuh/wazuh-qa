@@ -56,7 +56,7 @@ def main():
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=[
-            logging.FileHandler("verify_alerts.log"),
+            logging.FileHandler("verify_alerts_json.log"),
             logging.StreamHandler()
         ]
     )
