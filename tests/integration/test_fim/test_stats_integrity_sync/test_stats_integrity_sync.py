@@ -12,7 +12,6 @@ from enum import Enum
 from multiprocessing import Process, Manager
 from random import randrange
 from shutil import rmtree
-from socket import socket
 from struct import pack, unpack
 
 import pandas as pd
@@ -38,6 +37,10 @@ max_time_for_agent_setup = 180  # Seconds
 max_n_attempts = 50
 tested_daemons = ["wazuh-db", "ossec-analysisd", "ossec-remoted"]
 stats_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stats', 'metrics')
+state_configuration = {
+    "analysisd.state_interval": state_collector_time,
+    "remoted.state_interval": state_collector_time
+}
 
 
 class Cases(Enum):
@@ -61,6 +64,17 @@ def initial_clean():
     """Clean the environment."""
     rmtree(stats_dir, ignore_errors=True)
     os.makedirs(stats_dir, exist_ok=True)
+
+
+@pytest.fixture(scope='module')
+def modify_local_internal_options():
+    """Replace the local_internal_options file"""
+    with open(os.path.join(WAZUH_PATH, 'etc', 'local_internal_options.conf'), 'w') as f:
+        for conf, value in state_configuration.items():
+            f.write(f'{conf}={value}\n')
+
+
+# Functions
 
 
 def db_query(agent, query):
@@ -287,7 +301,6 @@ def get_agents(client_keys='/var/ossec/etc/client.keys'):
 
 def replace_conf(eps, directory, buffer):
     """Function that sets up the configuration for the current test.
-
     Parameters
     ----------
     eps : str
@@ -297,15 +310,18 @@ def replace_conf(eps, directory, buffer):
     buffer : str
         Can be yes or no, <disabled>yes|no</disabled>.
     """
-    directory_regex = r'.*<directories check_all=\"yes\">(.+)</directories>'
-    eps_regex = r'.*<max_eps>([0-9]+)</max_eps>'
-    buffer_regex = r'<client_buffer><disabled>(yes|no)</disabled></client_buffer>'
+    new_config = str()
+    directory_regex = r'.*<directories check_all=\"yes\">[\n\t ]*(.+)[\n\t ]*</directories>'
+    eps_regex = r'.*<max_eps>[\n\t ]*([0-9]+)[\n\t ]*</max_eps>'
+    buffer_regex = r'<client_buffer>[\n\t ]*<disabled>[\n\t ]*(yes|no)[\n\t ]*</disabled>[\n\t ]*</client_buffer>'
 
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'template_agent.conf'), 'r') as f:
-        content = f.read()
-        new_config = re.sub(re.search(directory_regex, content).group(1), directory, content)
-        new_config = re.sub(re.search(eps_regex, content).group(1), eps, new_config)
-        new_config = re.sub(re.search(buffer_regex, content).group(1), buffer, new_config)
+        lines = f.readlines()
+        for line in lines:
+            line = re.sub(directory_regex, '<directories check_all="yes">' + directory + '</directories>', line)
+            line = re.sub(eps_regex, '<max_eps>' + eps + '</max_eps>', line)
+            line = re.sub(buffer_regex, '<client_buffer><disabled>' + buffer + '</disabled></client_buffer>', line)
+            new_config += line
 
         with open(agent_conf, 'w') as conf:
             conf.write(new_config)
@@ -412,13 +428,12 @@ def agent_checker(case, agent_id, agents_dict, filename, attempts_info, database
     while True:
         actual_n_attempts = n_attempts(agent_id)
         actual_n_completions = n_completions(agent_id)
-        if agents_dict[agent_id]['start'] == 0.0 and actual_n_attempts > 0:
+        if not agents_dict[agent_id]['start'] and actual_n_attempts > 0:
             agents_dict[agent_id]['start'] = time.time()
             attempts_info['start'] = True
             logger.info(f'Agent {agent_id} started at {agents_dict[agent_id]["start"]}')
 
-        if agents_dict[agent_id]['start'] != 0.0 and \
-                (actual_n_attempts > max_n_attempts or actual_n_completions > 0):
+        if agents_dict[agent_id]['start'] and (actual_n_attempts > max_n_attempts or actual_n_completions > 0):
             state = 'complete' if actual_n_attempts < max_n_attempts else 'except_max_attempts'
             info_collector(agents_dict[agent_id], agent_id, filename, attempts_info, configuration, actual_n_attempts,
                            actual_n_completions, state=state)
@@ -614,7 +629,7 @@ def clean_environment():
     ('1000000', '1000000', '/test1M', 'yes'),
 ])
 def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_file, modify_all, restore_all,
-                                    initial_clean):
+                                    initial_clean, modify_local_internal_options):
     """Execute and launch all the necessary processes to check all the cases with all the specified configurations."""
     agents_dict = get_agents()
     attempts_info = Manager().dict({
