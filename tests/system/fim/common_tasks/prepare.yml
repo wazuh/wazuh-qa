@@ -98,6 +98,6 @@
       - "{{ agents_results_elastic_path }}/added"
       - "{{ agents_results_elastic_path }}/modified"
       - "{{ agents_results_elastic_path }}/deleted"
-
   when:
     - inventory_hostname in groups['elasticsearch']
+  become: yes
