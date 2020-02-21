@@ -9,6 +9,7 @@ import sys
 
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, detect_initial_scan
 from wazuh_testing.tools.configuration import get_wazuh_conf, write_wazuh_conf, set_section_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
@@ -62,6 +63,9 @@ def configure_environment(get_configuration, request):
     if hasattr(request.module, 'extra_configuration_before_yield'):
         func = getattr(request.module, 'extra_configuration_before_yield')
         func()
+
+    # Set current configuration
+    global_parameters.current_configuration = get_configuration
 
     yield
 

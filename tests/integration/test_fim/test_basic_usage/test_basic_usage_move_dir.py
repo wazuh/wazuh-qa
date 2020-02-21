@@ -57,6 +57,7 @@ def extra_configuration_before_yield():
 def extra_configuration_after_yield():
     """Delete subdir directory after finishing the module execution since it's not monitored."""
     shutil.rmtree(os.path.join(PREFIX, 'subdir'), ignore_errors=True)
+    shutil.rmtree(testdir4, ignore_errors=True)
 
 
 @pytest.mark.parametrize('source_folder, target_folder, subdir, tags_to_apply, \

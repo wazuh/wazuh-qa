@@ -1,4 +1,14 @@
 #!/bin/bash
 
-# Check if prelink is installed and if not, install it
-$1 | grep -E "prelink.*" || $2 prelink
+dist=$1
+
+if [ "$dist" == "ubuntu" ]; then
+  if [ ! "$(dpkg -l | grep -E "prelink.*")" ]; then
+    apt-get update
+    apt-get install prelink
+  fi
+else
+  if [ ! "$(rpm -qa | grep -E "prelink.*")" ]; then
+    yum -y install prelink
+  fi
+fi
