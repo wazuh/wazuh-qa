@@ -423,8 +423,10 @@ def set_correct_prefix(configurations, new_prefix):
                         # Get restrict, directories, ignore and nodiff fields and split them into paths lists
                         restrict_dict = {}
                         attributes = sub_element.get('attributes', [])
-                        if isinstance(attributes, dict):
-                            restrict_dict = attributes.get('restrict', {})
+                        for attr in attributes:
+                            if isinstance(attr, dict):
+                                if attr.get('restrict'):
+                                    restrict_dict = attr
                         restrict_list = restrict_dict['restrict'].split('|') if restrict_dict != {} else []
                         paths_list = sub_element['value'].split(',')
                         modified_restricts = ''
