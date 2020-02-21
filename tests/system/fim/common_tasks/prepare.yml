@@ -17,9 +17,10 @@
       state: stopped
 
   - name: Copy {{ files_config_manager_ossec_conf }} to the Managers hosts
+    force: yes  
     copy:
-      src: "config/{{ files_config_manager_ossec_conf }}"
-      dest: "{{ linux_ossec_folder_path }}/ossec.conf" 
+        src: "config/{{ files_config_manager_ossec_conf }}"
+        dest: "{{ linux_ossec_folder_path }}/ossec.conf" 
   
   - name: Start wazuh-manager service
     become: yes
@@ -41,9 +42,10 @@
     become: yes      
 
   - name: Copy {{ files_config_linux_source_path }} to the Agents hosts | Linux
+    force: yes  
     copy:
-      src: "../../common_tasks/{{ files_config_linux_source_path }}"
-      dest: "{{ files_config_linux_destination_path }}" 
+        src: "../../common_tasks/{{ files_config_linux_source_path }}"
+        dest: "{{ files_config_linux_destination_path }}" 
 
   - name: Stop wazuh-agent service | Linux
     become: yes
@@ -53,6 +55,7 @@
 
   - name: Copy {{ files_config_agent_linux_ossec_conf }} to the Agents hosts | Linux
     become: yes
+    force: yes
     copy:
       src: "config/{{ files_config_agent_linux_ossec_conf }}"
       dest: "{{ linux_ossec_folder_path }}/ossec.conf" 
@@ -75,8 +78,8 @@
 
   - name: Copy {{ files_config_windows_source_path }} to the agents | Windows
     win_copy:
-      src: "../../common_tasks/{{ files_config_windows_source_path }}"
-      dest: "{{ files_config_windows_destination_path }}"
+        src: "../../common_tasks/{{ files_config_windows_source_path }}"
+        dest: "{{ files_config_windows_destination_path }}"
     when:
       - inventory_hostname in groups['windowsagents']
 
@@ -85,8 +88,8 @@
 
   - name: Copy {{ files_config_agent_windows_ossec_conf }} to the agents hosts | Windows
     win_copy:
-      src: "config/{{ files_config_agent_windows_ossec_conf }}"
-      dest: "{{ windows_ossec_folder_path }}/ossec.conf" 
+        src: "config/{{ files_config_agent_windows_ossec_conf }}"
+        dest: "{{ windows_ossec_folder_path }}/ossec.conf" 
 
   - name: Start wazuh-agent service | Windows
     win_service: name=OssecSvc start_mode=auto state=started
