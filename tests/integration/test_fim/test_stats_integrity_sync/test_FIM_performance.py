@@ -9,7 +9,7 @@ import subprocess
 import time
 from copy import deepcopy
 from enum import Enum
-from multiprocessing import Process
+from multiprocessing import Process, Manager
 
 import pandas as pd
 import pytest
@@ -24,7 +24,13 @@ from wazuh_testing.tools.services import control_service, check_daemon_status
 root_dir = '/test'
 tested_daemon = 'ossec-syscheckd'
 eps = 600
+state_collector_time = 1
+state_path = os.path.join(WAZUH_PATH, 'var', 'run', 'ossec-agentd.state')
 performance_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stats', 'performance')
+state_configuration = {
+    "agentd.state_interval": state_collector_time,
+    "syscheck.debug": 2
+}
 
 
 class Types(Enum):
@@ -39,6 +45,17 @@ class Types(Enum):
 def initial_clean():
     """Clean the environment."""
     clean_environment(stats=True)
+
+
+@pytest.fixture(scope='module')
+def modify_local_internal_options():
+    """Replace the local_internal_options file"""
+    with open(os.path.join(WAZUH_PATH, 'etc', 'local_internal_options.conf'), 'w') as f:
+        for conf, value in state_configuration.items():
+            f.write(f'{conf}={value}\n')
+
+
+# Functions
 
 
 @pytest.fixture(scope='module')
@@ -180,7 +197,7 @@ def create_long_path(length, path_name):
 
     Parameters
     ----------
-    length : int
+    length : int or str
         Length of the entire path.
     path_name : str
         Root directory.
@@ -191,6 +208,7 @@ def create_long_path(length, path_name):
         Created path.
     """
     path_name = os.path.join("/", "test", path_name)
+    length = int(length)
 
     if length == 20:
         os.makedirs(os.path.join(path_name, "a" * (length - len(path_name) - 1)), exist_ok=True)
@@ -237,11 +255,12 @@ def create_n_files(path_name, num_files=1000, file_size=1024):
     ----------
     path_name : str
         Parent dir of the new files.
-    num_files : int
+    num_files : int or str
         Number of new files.
-    file_size :
+    file_size : int or str
         Size of the new files.
     """
+    num_files, file_size = int(num_files), int(file_size)
     for i in range(0, num_files):
         with open(os.path.join(path_name, f"file_{str(i)}"), 'w+') as fd:
             fd.write('\0' * file_size * 1024)
@@ -257,7 +276,7 @@ def modify_n_files(path_name, num_files=1000):
     num_files : int
         Number of modified files.
     """
-    for i in range(0, num_files):
+    for i in range(0, int(num_files)):
         with open(os.path.join(path_name, f"file_{str(i)}"), 'w+') as fd:
             fd.write('')
 
@@ -272,7 +291,7 @@ def delete_n_files(path_name, num_files=1000):
     num_files : int
         Number of deleted files.
     """
-    for i in range(0, num_files):
+    for i in range(0, int(num_files)):
         subprocess.call(["rm", os.path.join(path_name, f"file_{str(i)}")])
 
 
@@ -300,19 +319,40 @@ def clean_environment(stats=False):
     shutil.rmtree(root_dir, ignore_errors=True)
 
 
-def scan_integrity_test(fim_df, length, n_files, file_size, integrity_df=None, fim_type='scan'):
+def state_collector(state_filename, configuration, state_status):
+    try:
+        state_df = pd.read_csv(state_filename)
+    except FileNotFoundError:
+        state_df = pd.DataFrame(columns=['configuration', 'seconds', 'last_keepalive', 'msg_count', 'msg_sent',
+                                         'control_count', 'state'])
+    last_keep_regex = r"last_keepalive='([0-9 -:]+)'"
+    msg_count_regex = r"msg_count='([0-9]+)'"
+    msg_sent_regex = r"msg_sent='([0-9]+)'"
+
+    while not state_status['stop']:
+        with open(state_path, 'r') as state_file:
+            content = state_file.read()
+            last_keep = re.search(last_keep_regex, content).group(1)
+            msg_count = re.search(msg_count_regex, content).group(1)
+            msg_sent = re.search(msg_sent_regex, content).group(1)
+            state_df.loc[len(state_df)] = [configuration, time.time(), last_keep, msg_count, msg_sent,
+                                           str(int(msg_count) - int(msg_sent)), state_status['state']]
+        time.sleep(state_collector_time)
+    state_df.to_csv(state_filename, index=False)
+    state_status['finish'] = True
+
+
+def scan_integrity_test(fim_df, format, configuration, integrity_df, fim_type='scan'):
     """Get the stats when the scan and integrity is running.
 
     Parameters
     ----------
     fim_df : Pandas DataFrame
         DataFrame that contains the stats.
-    length : int
-        Path length for this test.
-    n_files :
-        Number of files for this test.
-    file_size : int
-        File size for this test.
+    format: str
+        String with the current configuration
+    configuration : dict
+        Dict with the current configuration
     integrity_df : Pandas DataFrame, optional
         DataFrame that contains the integrity stats.
     fim_type : str, optional
@@ -322,7 +362,8 @@ def scan_integrity_test(fim_df, length, n_files, file_size, integrity_df=None, f
     stats = get_stats(tested_daemon)
     old_stats = deepcopy(stats)
     logger.info(
-        f"[SCAN] Test {fim_type} with {str(length)} path length, {str(n_files)} files and {str(file_size)} KB file size")
+        f"[SCAN] Test {fim_type} with {str(configuration['path_length'])} path length, {configuration['number_files']}"
+        f" files and {configuration['file_size']} KB file size")
 
     while time_fim is None:
         diff = calculate_stats(old_stats, stats)
@@ -332,15 +373,13 @@ def scan_integrity_test(fim_df, length, n_files, file_size, integrity_df=None, f
             time_fim = find_ossec_log(r".*during: ([0-9]+\.[0-9]+) sec", "fim_print_info")
         elif fim_type == 'integrity':
             time_fim = find_ossec_log(r".*Time: ([0-9]+\.[0-9]+) seconds.", "Finished calculating FIM integrity")
-            if integrity_df is not None:
-                integrity_df.loc[len(integrity_df)] = [str(n_files), str(length), str(file_size), str(time_fim)]
-                break
-            else:
-                raise AttributeError(f'Integrity dataframe not found: {integrity_df}')
         else:
             raise AttributeError(f'Invalid type detected: {fim_type}')
 
-        fim_df.loc[len(fim_df)] = [str(time_printing), *list(diff.values()), time_fim, fim_type]
+        fim_df.loc[len(fim_df)] = [format, str(time_printing), *list(diff.values()), fim_type]
+        if time_fim is not None:
+            integrity_df.loc[len(integrity_df)] = [format, fim_type, str(time_fim)]
+            break
         time_printing += 1
         time.sleep(1)
         stats = get_stats(tested_daemon)
@@ -351,7 +390,7 @@ def process_manager(test_name, path_name, n_files, file_size=0):
 
     Parameters
     ----------
-    test_name : Types
+    test_name : str
         Current test_name (Types).
     path_name : str
         Root directory.
@@ -365,12 +404,12 @@ def process_manager(test_name, path_name, n_files, file_size=0):
     Process
         Created process for join it.
     """
-    if test_name == Types.added:
+    if test_name == Types.added.value:
         FileMonitor(LOG_FILE_PATH).start(callback=callback_realtime_added_directory)
         process = Process(target=create_n_files, args=(path_name, n_files, file_size,))
-    elif test_name == Types.modified:
+    elif test_name == Types.modified.value:
         process = Process(target=modify_n_files, args=(path_name, n_files,))
-    elif test_name == Types.deleted:
+    elif test_name == Types.deleted.value:
         process = Process(target=delete_n_files, args=(path_name, n_files,))
     else:
         raise AttributeError(f'Invalid type detected: {test_name}')
@@ -410,39 +449,39 @@ def time_manager(events, last_count, time_start, time_out, n_files):
     last_count = count
 
     time_fim = 0
-    if count >= n_files and time_out == 0:
+    if count >= int(n_files) and int(time_out) == 0:
         time_finish = time.time()
         time_fim = time_finish - time_start
 
     return count, last_count, time_fim, time_out
 
 
-def real_test(test_type, real_df, length, n_files, file_size=0):
+def real_test(test_type, real_df, integrity_df, format, configuration):
     """Get the stats when realtime tests are running.
 
     Parameters
     ----------
-    test_type : Types
+    test_type : str
         Specify the type of the test.
     real_df : Pandas DataFrame
         DataFrame that contains the stats.
-    length : int
-        Path length for this test.
-    n_files :
-        Number of files for this test.
-    file_size : int, optional
-        File size for this test.
+    integrity_df : Pandas DataFrame, optional
+        DataFrame that contains the integrity stats.
+    format: str
+        String with the current configuration.
+    configuration : dict
+        Dict with the current configuration.
     """
     started = False
     process, grep_name = None, None
     time_printing, time_start, time_fim, count, last_count = 0, 0, 0, 0, 0
     time_out = 5
-    grep_name = f'"mode":"real-time","type":"{test_type.value}"'
+    grep_name = f'"mode":"real-time","type":"{test_type}"'
     stats = get_stats(tested_daemon)
     old_stats = deepcopy(stats)
     logger.info(
-        f"[REAL] Test {test_type.value} with {str(length)} path length, {str(n_files)} files and {str(file_size)} KB "
-        f"file size")
+        f"[REAL] Test {test_type} with {configuration['path_length']} path length, {configuration['real_number_files']} "
+        f"files and {configuration['file_size']} KB file size")
 
     while True:
         diff = calculate_stats(old_stats, stats)
@@ -451,22 +490,26 @@ def real_test(test_type, real_df, length, n_files, file_size=0):
         if not started:
             last_count = 0
             started = True
-            path_name = create_long_path(length, "real")
+            path_name = create_long_path(configuration['path_length'], "real")
             time_start = time.time()
-            process = process_manager(test_type, path_name, n_files, file_size)
+            process = process_manager(test_type, path_name, configuration['real_number_files'],
+                                      configuration['file_size'])
         else:
             head = subprocess.Popen(["cat", LOG_FILE_PATH], stdout=subprocess.PIPE)
             grep = subprocess.Popen(["grep", grep_name], stdin=head.stdout, stdout=subprocess.PIPE)
             events = int(subprocess.check_output(["wc", "-l"], stdin=grep.stdout).decode().strip())
             count, last_count, time_fim, time_out = time_manager(events=events, last_count=last_count,
                                                                  time_out=time_out, time_start=time_start,
-                                                                 n_files=n_files)
+                                                                 n_files=configuration['real_number_files'])
 
-        real_df.loc[len(real_df)] = [str(time_printing), *list(diff.values()), time_fim, test_type.value]
+        real_df.loc[len(real_df)] = [format, str(time_printing), *list(diff.values()), test_type]
+        if time_fim:
+            integrity_df.loc[len(integrity_df)] = [format, test_type, str(time_fim)]
         if time_out == 0:
             logger.warning(f"Timeout: Event read {str(count)} last: {str(last_count)}")
             break
-        logger.info(f"[{test_type.value}] Writing info {str(time_printing)} Events: {str(count)}/{str(n_files)}")
+        logger.info(f"[{test_type}] Writing info {str(time_printing)} Events: {str(count)}/"
+                    f"{configuration['real_number_files']}")
 
         stats = get_stats(tested_daemon)
         time_printing += 1
@@ -477,31 +520,41 @@ def real_test(test_type, real_df, length, n_files, file_size=0):
 
 
 @pytest.mark.parametrize('number_files', [
-    1, 1000, 100000
+    '1', '1000', '100000'
 ])
 @pytest.mark.parametrize('path_length', [
-    20, 128, 2048
+    '20', '128', '2048'
 ])
 @pytest.mark.parametrize('file_size', [
-    1, 10, 100
+    '1', '10', '100'
 ])
 @pytest.mark.parametrize('mode', [
     'real-time'
 ])
-def test_performance(mode, file_size, path_length, number_files, initial_clean, replace_conf):
+def test_performance(mode, file_size, path_length, number_files, initial_clean, replace_conf,
+                     modify_local_internal_options):
     """Execute and launch all the necessary processes to check all the cases with all the specified configurations."""
     branch = detect_syscheck_version()
     os.makedirs(performance_dir, exist_ok=True)
+    fconfiguration = f'{number_files}files_{path_length}length_{file_size}size'
+    configuration = {
+        'file_size': file_size,
+        'path_length': path_length,
+        'number_files': number_files,
+        'real_number_files': 6000,
+        'mode': mode
+    }
+    state_status = Manager().dict({'stop': False, 'finish': False, 'state': 'scan'})
+    state_filename = os.path.join(performance_dir, "agentd_state.csv")
     integrity_filename = os.path.join(performance_dir, "time_checksum_integrity.csv")
-    data_filename = os.path.join(performance_dir, f'{branch}-{mode}-{str(number_files)}-files_{str(path_length)}'
-                                                  f'-lenpath_{str(file_size)}-Kbsize.csv')
+    data_filename = os.path.join(performance_dir, 'stats.csv')
     try:
         integrity_df = pd.read_csv(integrity_filename)
     except FileNotFoundError:
-        integrity_df = pd.DataFrame(columns=['files', 'length', 'size', 'time'])
-    data_df = pd.DataFrame(columns=['seconds', 'cpu(%)', 'mem(KB)', 'rchar(KB/s)', 'wchar(KB/s)', 'syscr(Input/s)',
-                                    'syscw(Output/s)', 'read_bytes(KB/s)', 'write_bytes(KB/s)',
-                                    'cancelled_write_bytes(KB)', 'duration(s)', 'stage'])
+        integrity_df = pd.DataFrame(columns=['configuration', 'stage', 'duration(s)'])
+    data_df = pd.DataFrame(columns=['configuration', 'seconds', 'cpu(%)', 'mem(KB)', 'rchar(KB/s)', 'wchar(KB/s)',
+                                    'syscr(Input/s)', 'syscw(Output/s)', 'read_bytes(KB/s)', 'write_bytes(KB/s)',
+                                    'cancelled_write_bytes(KB)', 'stage'])
 
     # Stop Wazuh
     control_service(daemon=tested_daemon, action='stop')
@@ -516,21 +569,39 @@ def test_performance(mode, file_size, path_length, number_files, initial_clean, 
     control_service(daemon=tested_daemon, action='start')
     check_daemon_status(daemon=tested_daemon, running=True)
 
+    # Start state collector
+    state_process = Process(target=state_collector, args=(state_filename, fconfiguration, state_status,))
+    state_process.start()
+
     # Test Scan
-    scan_integrity_test(fim_df=data_df, length=path_length, n_files=number_files, file_size=file_size, fim_type='scan')
+    scan_integrity_test(fim_df=data_df, format=fconfiguration, configuration=configuration, integrity_df=integrity_df,
+                        fim_type=state_status['state'])
 
     # Test Integrity
-    scan_integrity_test(fim_df=data_df, integrity_df=integrity_df, length=path_length, n_files=number_files,
-                        file_size=file_size, fim_type='integrity')
-    integrity_df.to_csv(integrity_filename, index=False)
+    state_status['state'] = 'integrity'
+    scan_integrity_test(fim_df=data_df, format=fconfiguration, integrity_df=integrity_df, configuration=configuration,
+                        fim_type=state_status['state'])
 
     # Test real-time (added, modified, deleted)
     truncate_file(LOG_FILE_PATH)
-    real_test(Types.added, real_df=data_df, length=path_length, n_files=6000, file_size=file_size)
+    state_status['state'] = Types.added.value
+    real_test(state_status['state'], format=fconfiguration, real_df=data_df, integrity_df=integrity_df,
+              configuration=configuration)
     truncate_file(LOG_FILE_PATH)
-    real_test(Types.modified, real_df=data_df, length=path_length, n_files=6000)
+    state_status['state'] = Types.modified.value
+    real_test(state_status['state'], format=fconfiguration, real_df=data_df, integrity_df=integrity_df,
+              configuration=configuration)
     truncate_file(LOG_FILE_PATH)
-    real_test(Types.deleted, real_df=data_df, length=path_length, n_files=6000)
+    state_status['state'] = Types.deleted.value
+    real_test(state_status['state'], format=fconfiguration, real_df=data_df, integrity_df=integrity_df,
+              configuration=configuration)
+
+    # Finishing
+    state_status['stop'] = True
+    while not state_status['finish']:
+        time.sleep(0.1)
+    state_process.join()
+    integrity_df.to_csv(integrity_filename, index=False)
     data_df.to_csv(data_filename, index=False)
 
     # Clean environment
