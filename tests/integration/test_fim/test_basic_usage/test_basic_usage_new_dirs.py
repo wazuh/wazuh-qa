@@ -4,6 +4,7 @@
 
 import os
 import shutil
+import time
 
 import pytest
 
@@ -83,6 +84,7 @@ def test_new_directory(tags_to_apply, get_configuration, configure_environment, 
 
     # Travel to the future to start next scheduled scan
     check_time_travel(True)
+    time.sleep(global_parameters.default_timeout * 3 + 2)
 
     # Assert that events of new CUD actions are raised after next scheduled scan
     regular_file_cud(directory_str, wazuh_log_monitor, file_list=['file4', 'file5', 'file6'],
