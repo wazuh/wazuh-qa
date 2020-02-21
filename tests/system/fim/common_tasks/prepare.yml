@@ -16,9 +16,9 @@
       name: wazuh-manager
       state: stopped
 
-  - name: Copy {{ files_config_manager_ossec_conf }} to the Managers hosts
-    force: yes  
+  - name: Copy {{ files_config_manager_ossec_conf }} to the Managers hosts  
     copy:
+        force: yes
         src: "config/{{ files_config_manager_ossec_conf }}"
         dest: "{{ linux_ossec_folder_path }}/ossec.conf" 
   
@@ -42,8 +42,8 @@
     become: yes      
 
   - name: Copy {{ files_config_linux_source_path }} to the Agents hosts | Linux
-    force: yes  
     copy:
+        force: yes  
         src: "../../common_tasks/{{ files_config_linux_source_path }}"
         dest: "{{ files_config_linux_destination_path }}" 
 
@@ -55,8 +55,8 @@
 
   - name: Copy {{ files_config_agent_linux_ossec_conf }} to the Agents hosts | Linux
     become: yes
-    force: yes
     copy:
+      force: yes
       src: "config/{{ files_config_agent_linux_ossec_conf }}"
       dest: "{{ linux_ossec_folder_path }}/ossec.conf" 
 
