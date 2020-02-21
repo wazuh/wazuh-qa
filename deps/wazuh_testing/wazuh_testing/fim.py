@@ -24,6 +24,7 @@ import pytest
 from jsonschema import validate
 
 from wazuh_testing import global_parameters, logger
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.time import TimeMachine
 
 if sys.platform == 'win32':
@@ -36,17 +37,9 @@ elif sys.platform == 'linux2' or sys.platform == 'linux':
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 if sys.platform == 'win32':
-    WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
-    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'ossec.log')
     _REQUIRED_AUDIT = {"path", "process_id", "process_name", "user_id", "user_name"}
 
-elif sys.platform == 'darwin':
-    WAZUH_PATH = os.path.join('/', 'Library', 'Ossec')
-    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
-
 else:
-    WAZUH_PATH = os.path.join('/', 'var', 'ossec')
-    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     _REQUIRED_AUDIT = {'user_id', 'user_name', 'group_id', 'group_name', 'process_name', 'path', 'audit_uid',
                        'audit_name', 'effective_uid', 'effective_name', 'ppid', 'process_id'
                        }

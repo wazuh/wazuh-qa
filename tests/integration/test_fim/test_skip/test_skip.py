@@ -6,10 +6,10 @@ import os
 import shutil
 import subprocess
 from datetime import timedelta
+from unittest.mock import patch
 
 import distro
 import pytest
-from wazuh_testing.tools.file import truncate_file
 
 from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, detect_initial_scan, callback_detect_event,
                                generate_params, callback_detect_integrity_state)
@@ -18,8 +18,6 @@ from wazuh_testing.tools.configuration import set_section_wazuh_conf, load_wazuh
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import restart_wazuh_with_new_conf
 from wazuh_testing.tools.time import TimeMachine
-
-from unittest.mock import patch
 
 # Marks
 
