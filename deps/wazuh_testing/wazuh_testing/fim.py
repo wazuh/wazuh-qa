@@ -1131,8 +1131,6 @@ def detect_initial_scan(file_monitor):
     """
     file_monitor.start(timeout=60, callback=callback_detect_end_scan,
                        error_message='Did not receive expected "File integrity monitoring scan ended" event')
-    # Add additional sleep to avoid changing system clock issues (TO BE REMOVED when syscheck has not sleeps anymore)
-    time.sleep(2)
 
 
 def generate_params(extra_params: dict = None, apply_to_all: Union[Sequence[Any], Generator[dict, None, None]] = None,
