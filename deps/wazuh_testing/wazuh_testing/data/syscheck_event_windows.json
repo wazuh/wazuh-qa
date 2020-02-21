@@ -46,7 +46,7 @@
             "/testdir1/example",
             "c:/testdir1/example"
           ],
-          "pattern": "^(\\w:)(\\\\\\\\\\w+)*\\\\?\\\\?$"
+          "pattern": "^(?:([a-zA-Z]\\:|\\/)[^\\/]+)*$"
         },
         "mode": {
           "$id": "#/properties/data/properties/mode",

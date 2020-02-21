@@ -945,7 +945,7 @@ class EventChecker:
                 if self.encoding is not None:
                     for index, item in enumerate(file_paths):
                         file_paths[index] = item.encode(encoding=self.encoding)
-                if sys.platform == 'darwin' and self.encoding != 'utf-8':
+                if sys.platform == 'darwin' and self.encoding and self.encoding != 'utf-8':
                     logger.info(f'Not asserting {expected_file_path} in event.data.path. '
                                  f'Reason: using non-utf-8 encoding in darwin.')
                 else:
