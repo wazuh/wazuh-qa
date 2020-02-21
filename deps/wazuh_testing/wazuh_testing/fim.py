@@ -733,7 +733,6 @@ def callback_audit_reloading_rules(line):
     match = re.match(r'.*Reloading Audit rules', line)
     if match:
         return True
-    return None
 
 
 def callback_audit_reloaded_rule(line):
