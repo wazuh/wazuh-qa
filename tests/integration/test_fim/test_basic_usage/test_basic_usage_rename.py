@@ -4,7 +4,7 @@
 
 import os
 import shutil
-from datetime import timedelta
+import time
 
 import pytest
 
@@ -14,7 +14,6 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGUL
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.time import TimeMachine
 
 # Marks
 
@@ -29,14 +28,15 @@ for direc in list(test_directories):
     test_directories.append(os.path.join(direc, 'subdir'))
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf_rename.yaml')
 testdir1, testdir2 = test_directories[2:]
 new_name = 'this_is_a_new_name'
 old_name = 'old_name'
 
 # configurations
-
-conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
+frequency = global_parameters.default_timeout * 3 + 2
+conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__,
+               'FREQUENCY': str(frequency)}
 p, m = generate_params(extra_params=conf_params)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
@@ -132,5 +132,6 @@ def test_rename(folder, tags_to_apply,
         expect_events(new_name)
         # Travel in time to force delete event in realtime/whodata
         if get_configuration['metadata']['fim_mode'] != 'scheduled':
-            TimeMachine.travel_to_future(timedelta(hours=13))
+            # TimeMachine.travel_to_future(timedelta(hours=13))
+            time.sleep(frequency*2+5)
         expect_events(folder)

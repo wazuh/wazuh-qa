@@ -1132,7 +1132,7 @@ def detect_initial_scan(file_monitor):
     file_monitor.start(timeout=60, callback=callback_detect_end_scan,
                        error_message='Did not receive expected "File integrity monitoring scan ended" event')
     # Add additional sleep to avoid changing system clock issues (TO BE REMOVED when syscheck has not sleeps anymore)
-    time.sleep(11)
+    time.sleep(2)
 
 
 def generate_params(extra_params: dict = None, apply_to_all: Union[Sequence[Any], Generator[dict, None, None]] = None,
@@ -1276,7 +1276,7 @@ def get_fim_mode_param(mode, key='FIM_MODE'):
     """
     metadata = {key.lower(): mode}
     if mode == 'scheduled':
-        return {key: ''}, metadata
+        return None, None
     elif mode == 'realtime' and sys.platform != 'darwin':
         return {key: {'realtime': 'yes'}}, metadata
     elif mode == 'whodata' and sys.platform != 'darwin':

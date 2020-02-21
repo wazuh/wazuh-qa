@@ -56,7 +56,7 @@ def test_disabled(folder, get_configuration, configure_environment, restart_sysc
     """
     # Expect a timeout when checking for syscheckd initial scan
     with pytest.raises(TimeoutError):
-        event = wazuh_log_monitor.start(timeout=20, callback=callback_detect_end_scan)
+        event = wazuh_log_monitor.start(timeout=10, callback=callback_detect_end_scan)
         raise AttributeError(f'Unexpected event {event}')
 
     # Use `regular_file_cud` and don't expect any event

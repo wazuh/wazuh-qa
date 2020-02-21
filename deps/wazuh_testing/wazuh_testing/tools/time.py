@@ -101,7 +101,8 @@ class TimeMachine:
         back_in_time : bool, optional
             Go back in time the same time_delta interval. Default value is False.
         """
-        pytest.skip('Skipping Scheduled test')
+        # pytest.skip('Skipping Scheduled test')
+        raise ValueError("Time travel is not allowed.")
         # Save timedelta to be able to  travel back in time after the tests
         TimeMachine.total_time_spent += time_delta.seconds
         now = datetime.utcnow() if sys.platform == 'darwin' else datetime.now()
