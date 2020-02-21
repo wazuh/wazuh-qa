@@ -1,7 +1,6 @@
 ---
 - block:
   - name: Run script generate_files.py on agents | Linux
-    notify: Restart Wazuh agent Linux
     script: "generate_files.py -c {{ files_config_linux_destination_path }} -o {{ files_generated_output_path }}"
     args:
       executable: "python3"
@@ -20,7 +19,6 @@
 
 - block:
   - name: Run script generate_files.py on agents | Windows
-    notify: Restart Wazuh agent Windows
     script: "generate_files.py -c {{ files_config_windows_destination_path }} -o {{ files_generated_output_path }}"
     args:
       executable: "python"

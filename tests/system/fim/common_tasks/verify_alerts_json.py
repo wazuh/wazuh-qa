@@ -46,6 +46,7 @@ def alerts_prune(path, target_event):
                 data = json.loads(line)
                 if data.get('syscheck') and data['syscheck']['event'] == target_event:
                     alerts_list.append(data)
+                    
             except ValueError:
                 continue
     return set([alerts['syscheck']['path'] for alerts in alerts_list])

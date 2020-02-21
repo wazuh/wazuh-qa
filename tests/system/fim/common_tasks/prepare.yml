@@ -76,26 +76,22 @@
       agents_fim_testing_path: "{{ files_fim_testing_windows }}"
 
   - name: Stop wazuh-agent service | Windows
-    win_service: name=OssecSvc start_mode=auto state=stopped
+    win_service: 
+      name: OssecSvc 
+      start_mode: auto 
+      state: stopped
 
   - name: Copy {{ files_config_agent_windows_ossec_conf }} to the agents hosts | Windows
     win_copy:
         src: "config/{{ files_config_agent_windows_ossec_conf }}"
         dest: "{{ windows_ossec_folder_path }}/ossec.conf"
+      
+  - name: Start wazuh-agent service | Windows
+    win_service: 
+      name: OssecSvc 
+      start_mode: auto 
+      state: started
+       
 
   when:
     - inventory_hostname in groups['windowsagents']
-
-- block:
-  - name: Creates directories to store agents' outputs in Elasticsearch hosts
-    file:
-      path: "{{ item }}"
-      state: directory
-    with_items:
-      - "{{ agents_results_elastic_path }}"
-      - "{{ agents_results_elastic_path }}/added"
-      - "{{ agents_results_elastic_path }}/modified"
-      - "{{ agents_results_elastic_path }}/deleted"
-  when:
-    - inventory_hostname in groups['elasticsearch']
-  become: yes
