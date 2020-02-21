@@ -18,6 +18,9 @@
 
           - name: Generating files to trigger FIM alerts
             import_tasks: "../../common_tasks/create_files.yml"
+          
+          - name: Run handlers
+            meta: flush_handlers
                     
           - name: Verify generated alerts
             become: true
@@ -30,6 +33,9 @@
               
           - name: Modifiying files to trigger FIM alerts
             import_tasks: "../../common_tasks/modify_files.yml"
+
+          - name: Run handlers
+            meta: flush_handlers
         
           - name: Verify generated alerts
             become: true
@@ -42,6 +48,9 @@
               
           - name: Deleting files to trigger FIM alerts
             import_tasks: "../../common_tasks/delete_files.yml"
+
+          - name: Run handlers
+            meta: flush_handlers
         
           - name: Verify generated alerts
             become: true
