@@ -11,9 +11,9 @@ import sys
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, ALERT_JSON_PATH, REGULAR, create_file, \
-    generate_params, callback_audit_unable_dir, callback_audit_added_rule, callback_detect_anything
-from wazuh_testing.tools import PREFIX
+from wazuh_testing.fim import REGULAR, create_file, generate_params, callback_audit_unable_dir, \
+    callback_audit_added_rule, callback_detect_anything
+from wazuh_testing.tools import PREFIX, LOG_FILE_PATH, ALERT_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -31,7 +31,7 @@ filename = 'testfile'
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-wazuh_alert_monitor = FileMonitor(ALERT_JSON_PATH)
+wazuh_alert_monitor = FileMonitor(ALERT_FILE_PATH)
 
 
 # Configurations
@@ -95,9 +95,9 @@ def test_audit_no_dir(tags_to_apply, get_configuration, configure_environment, r
     assert result == testdir, f'{testdir} not in "Added audit rule for monitoring directory: {result}" message'
 
     # Create file inside and verify that it generates alert in alerts.json.
-    truncate_file(ALERT_JSON_PATH)
+    truncate_file(ALERT_FILE_PATH)
     create_file(REGULAR, testdir, filename, content='testcontent')
     result = json.loads(wazuh_alert_monitor.start(timeout=global_parameters.default_timeout,
                                                   callback=callback_detect_anything,
                                                   error_message='No alert found').result())
-    assert result['syscheck']['path'] == os.path.join(testdir, filename), 'Not correct event.'
+    assert result['syscheck']['path'] == os.path.join(testdir, filename), f'Not correct alert. {result}.'
