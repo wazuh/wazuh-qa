@@ -10,7 +10,6 @@
       value: 'no'
   - directories:
       value: DIRECTORY
-      attributes:
   - skip_proc:
       value: SKIP
 # conf 2
@@ -24,7 +23,6 @@
       value: 'no'
   - directories:
       value: "/sys/module/isofs"
-      attributes:
   - skip_sys:
       value: SKIP
 # conf 3
@@ -38,7 +36,6 @@
       value: 'no'
   - directories:
       value: "/dev"
-      attributes:
   - skip_dev:
       value: SKIP
 # conf 4
@@ -52,6 +49,5 @@
       value: 'no'
   - directories:
       value: "/nfs-mount-point"
-      attributes:
   - skip_nfs:
       value: SKIP
