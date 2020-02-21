@@ -6,9 +6,9 @@
     handlers:
       - import_tasks: ../../handlers/main.yml
 
-    tasks:    
+    tasks:
       - block:
-        - name: Launching prepare tasks 
+        - name: Launching prepare tasks
           import_tasks: "../../common_tasks/prepare.yml"
 
         - block:
@@ -18,7 +18,10 @@
 
           - name: Generating files to trigger FIM alerts
             import_tasks: "../../common_tasks/create_files.yml"
-                    
+
+          - name: Run handlers
+            meta: flush_handlers
+
           - name: Verify generated alerts
             become: true
             import_tasks: "../../common_tasks/verify_alerts.yml"
@@ -27,10 +30,13 @@
           - name: Configure syscheck event.
             set_fact:
               event: "modified"
-              
+
           - name: Modifiying files to trigger FIM alerts
             import_tasks: "../../common_tasks/modify_files.yml"
-        
+
+          - name: Run handlers
+            meta: flush_handlers
+
           - name: Verify generated alerts
             become: true
             import_tasks: "../../common_tasks/verify_alerts.yml"
@@ -39,10 +45,13 @@
           - name: Configure syscheck event.
             set_fact:
               event: "deleted"
-              
+
           - name: Deleting files to trigger FIM alerts
             import_tasks: "../../common_tasks/delete_files.yml"
-        
+
+          - name: Run handlers
+            meta: flush_handlers
+
           - name: Verify generated alerts
             become: true
             import_tasks: "../../common_tasks/verify_alerts.yml"
