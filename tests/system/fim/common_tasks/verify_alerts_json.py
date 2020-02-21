@@ -40,7 +40,7 @@ def alerts_prune(path, target_event):
         :return: Returns a set containing the alerts files path
     """
     alerts_list = []
-    with open(path) as json_file:
+    with open(path,errors='replace') as json_file:
         for line in json_file:
             try:
                 data = json.loads(line)
