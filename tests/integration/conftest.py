@@ -4,11 +4,9 @@
 
 import json
 import os
-import re
 import sys
-from datetime import datetime
-from time import time
 import uuid
+from datetime import datetime
 
 import pytest
 from numpydoc.docscrape import FunctionDoc

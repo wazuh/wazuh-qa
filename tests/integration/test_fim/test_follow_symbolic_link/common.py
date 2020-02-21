@@ -64,7 +64,7 @@ def delete_f(path, file=None):
 def wait_for_symlink_check(monitor):
     """Wait for symlink thread to finish its scan"""
     monitor.start(timeout=(symlink_interval + 2), callback=callback_symlink_scan_ended,
-                  error_message='Did not receive expected "Sending FIM event: ..." event')
+                  error_message='Did not receive expected "Links check finalized" event')
 
 
 def extra_configuration_before_yield():

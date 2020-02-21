@@ -51,3 +51,17 @@
       value: "/testdir1"
       attributes:
       - whodata: 'yes'
+- tags:
+  - audit_no_dir
+  apply_to_modules:
+  - test_audit_no_dir
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: TEST_DIRECTORIES
+      attributes:
+      - FIM_MODE
+
+
