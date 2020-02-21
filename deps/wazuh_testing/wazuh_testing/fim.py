@@ -47,6 +47,7 @@ elif sys.platform == 'darwin':
 else:
     WAZUH_PATH = os.path.join('/', 'var', 'ossec')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+    ALERT_JSON_PATH = os.path.join(WAZUH_PATH, 'logs', 'alerts', 'alerts.json')
     _REQUIRED_AUDIT = {'user_id', 'user_name', 'group_id', 'group_name', 'process_name', 'path', 'audit_uid',
                        'audit_name', 'effective_uid', 'effective_name', 'ppid', 'process_id'
                        }
@@ -654,6 +655,13 @@ def callback_detect_synchronization(line):
     return None
 
 
+def callback_detect_anything(line):
+    match = re.match(r'.*', line)
+    if match:
+        return line
+    return None
+
+
 def callback_ignore(line):
     match = re.match(r".*Ignoring '.*?' '(.*?)' due to( sregex)? '.*?'", line)
     if match:
@@ -744,6 +752,13 @@ def callback_audit_reloaded_rule(line):
 def callback_audit_key(line):
     if 'Match audit_key' in line and 'key="wazuh_hc"' not in line and 'key="wazuh_fim"' not in line:
         return line
+    return None
+
+
+def callback_audit_unable_dir(line):
+    match = re.match(r'.*Unable to add audit rule for \'(.+)\'', line)
+    if match:
+        return match.group(1)
     return None
 
 
