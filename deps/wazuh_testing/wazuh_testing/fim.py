@@ -653,6 +653,13 @@ def callback_detect_synchronization(line):
     return None
 
 
+def callback_detect_anything(line):
+    match = re.match(r'.*', line)
+    if match:
+        return line
+    return None
+
+
 def callback_ignore(line):
     match = re.match(r".*Ignoring '.*?' '(.*?)' due to( sregex)? '.*?'", line)
     if match:
@@ -743,6 +750,13 @@ def callback_audit_reloaded_rule(line):
 def callback_audit_key(line):
     if 'Match audit_key' in line and 'key="wazuh_hc"' not in line and 'key="wazuh_fim"' not in line:
         return line
+    return None
+
+
+def callback_audit_unable_dir(line):
+    match = re.match(r'.*Unable to add audit rule for \'(.+)\'', line)
+    if match:
+        return match.group(1)
     return None
 
 
