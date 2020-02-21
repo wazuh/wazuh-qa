@@ -274,4 +274,4 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
                                      callback=callback_detect_event,
                                      error_message=f'Did not receive expected "Sending FIM event:" '
                                                    f'event for file {os.path.join(testdir1, file)}').result()
-    validate_event(event3, [CHECK_PERM, CHECK_SIZE])
+    validate_event(event3, [CHECK_PERM, CHECK_SIZE], mode=mode2)
