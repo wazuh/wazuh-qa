@@ -479,7 +479,7 @@ def info_collector(agent, agent_id, filename, attempts_info, configuration, actu
     agent_df.to_csv(filename, index=False)
 
 
-def state_collector(case, agents_dict, configuration, stats_dir, attempts_info):
+def state_collector(agents_dict, configuration, stats_dir, attempts_info):
     """Get the stats of the .state files in the WAZUH_PATH/var/run folder.
     We can define the stats to get from each daemon in the daemons_dict.
 
@@ -648,7 +648,7 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
         'prefix': 'file_'
     }
     protocol = protocol_detection()
-    configuration = f'case{case}_{protocol}_{eps}_eps_{files}files_client-buffer-' \
+    configuration = f'{str(len(agents_dict.keys()))}agents_case{case}_{protocol}_{eps}eps_{files}files_client-buffer-' \
                     f'{"enabled" if buffer == "no" else "disabled"}'
 
     # If we are in case 1 or in case 2 and the number of files is 0, we will not execute the test since we cannot
@@ -679,7 +679,7 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
 
         # We started the stats collector as the agents are ready
         logger.info(f'Started test for case{case}_{protocol}-{eps}eps-{files}files')
-        state_collector_check = Process(target=state_collector, args=(case, agents_dict, configuration, stats_dir,
+        state_collector_check = Process(target=state_collector, args=(agents_dict, configuration, stats_dir,
                                                                       attempts_info,))
         state_collector_check.start()
         for daemon in tested_daemons:
