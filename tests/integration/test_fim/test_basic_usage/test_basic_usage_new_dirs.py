@@ -9,9 +9,9 @@ import time
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, \
-    regular_file_cud, check_time_travel
-from wazuh_testing.tools import PREFIX
+from wazuh_testing.fim import detect_initial_scan
+from wazuh_testing.fim import generate_params, regular_file_cud, check_time_travel
+from wazuh_testing.tools import PREFIX, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -84,7 +84,7 @@ def test_new_directory(tags_to_apply, get_configuration, configure_environment, 
 
     # Travel to the future to start next scheduled scan
     check_time_travel(True)
-    time.sleep(global_parameters.default_timeout * 3 + 2)
+    detect_initial_scan(wazuh_log_monitor)
 
     # Assert that events of new CUD actions are raised after next scheduled scan
     regular_file_cud(directory_str, wazuh_log_monitor, file_list=['file4', 'file5', 'file6'],

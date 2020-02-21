@@ -45,8 +45,8 @@ def get_configuration(request):
 
 
 def extra_configuration_before_yield():
-    # Create 1000 files before starting syscheck
-    for i in range(1000):
+    # Create 1500 files before starting syscheck, not all will be expected
+    for i in range(1500):
         create_file(REGULAR, testdir1, f'test{i}', content='')
 
 
