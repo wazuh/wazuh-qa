@@ -795,6 +795,7 @@ def check_time_travel(time_travel):
         True if we need to update time. False otherwise.
     """
     if time_travel:
+        return
         before = str(datetime.now())
         TimeMachine.travel_to_future(timedelta(hours=13))
         logger.info(f"Changing the system clock from {before} to {str(datetime.now())}")
