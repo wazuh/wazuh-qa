@@ -7,7 +7,7 @@ import os
 import pytest
 import yaml
 from wazuh_testing import global_parameters
-from wazuh_testing.analysis import callback_fim_event_alert, callback_analysisd_message, validate_analysis_alert
+from wazuh_testing.analysis import callback_fim_alert, callback_analysisd_message, validate_analysis_alert
 from wazuh_testing.tools import WAZUH_LOGS_PATH, WAZUH_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -54,5 +54,5 @@ def test_event_messages(configure_environment_standalone_daemons, create_unix_so
                                               callback=callback_analysisd_message).result()
         assert response == expected, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1, stage['stage'])
         event = wazuh_log_monitor.start(timeout=2*global_parameters.default_timeout,
-                                        callback=callback_fim_event_alert).result()
+                                        callback=callback_fim_alert).result()
         validate_analysis_alert(event)

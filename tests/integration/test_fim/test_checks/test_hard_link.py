@@ -10,7 +10,6 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (HARDLINK, LOG_FILE_PATH, REGULAR, EventChecker,
                                check_time_travel, create_file, delete_file, modify_file_content, generate_params)
-from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
