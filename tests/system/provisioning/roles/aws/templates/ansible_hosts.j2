@@ -343,8 +343,8 @@ windowsagents:
         ansible_connection: winrm
         ansible_winrm_transport: basic
         ansible_winrm_server_cert_validation: ignore
-        wazuh_winagent_config_url: https://s3-us-wes-1.amazonaws.com/packages-dev.wazuh.com/warehouse/branches/3.12/windows/wazuh-agent-3.12.0-0.3319fimreworksqlite.msi
-        wazuh_winagent_package_name: wazuh-agent-3.12.0-0.3319fimreworksqlite.msi
+        wazuh_winagent_config_url: {{ wazuh_winagent_config_url }}
+        wazuh_winagent_package_name: {{ wazuh_winagent_package_name }}
         wazuh_managers:
             - address: {{ groups['masters'][0] }}
               protocol: tcp
