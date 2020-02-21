@@ -10,16 +10,19 @@ files_generated_output_path: "files_generated.txt"
 files_modified_output_path: "files_modified.txt"
 files_deleted_output_path: "files_deleted.txt"
 
+# FIM testing folder
+files_fim_testing_linux: "/opt/fim_testing"
+files_fim_testing_windows: C:\\fim_testing
+
 ### Config files
-files_config_linux_source_path: "files_configuration_linux.json"
-files_config_windows_source_path: "files_configuration_windows.json"
-files_config_linux_destination_path: "/tmp/{{ files_config_linux_source_path }}"
-files_config_windows_destination_path: "C:\\{{ files_config_windows_source_path }}"
+files_config_source_path: "files_configuration.json"
+files_config_linux_destination_path: "/tmp/{{ files_config_source_path }}"
+files_config_windows_destination_path: "C:\\{{ files_config_source_path }}"
 files_config_manager_ossec_conf: "manager_ossec.conf"
 files_config_agent_linux_ossec_conf: "agent_linux_ossec.conf"
 files_config_agent_windows_ossec_conf: "agent_windows_ossec.conf"
 
-### Tests 
+### Tests
 
 syscheck_event: "created"
 alerts_json_path: "/var/ossec/logs/alerts/alerts.json"
