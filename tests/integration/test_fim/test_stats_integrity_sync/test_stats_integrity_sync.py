@@ -33,7 +33,7 @@ state_path = os.path.join(WAZUH_PATH, 'var', 'run')
 db_path = '/var/ossec/queue/db/wdb'
 setup_environment_time = 1  # Seconds
 state_collector_time = 1  # Seconds
-max_time_for_agent_setup = 180  # Seconds
+max_time_for_agent_setup = 300  # Seconds
 max_n_attempts = 50
 tested_daemons = ["wazuh-db", "ossec-analysisd", "ossec-remoted"]
 stats_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stats', 'metrics')
@@ -498,7 +498,7 @@ def state_collector(case, agents_dict, configuration, stats_dir, attempts_info):
     """
 
     def get_csv(daemon_df='ossec-analysisd'):
-        filename_df = os.path.join(os.path.join(stats_dir, f"case{case}_state-{daemon_df}.csv"))
+        filename_df = os.path.join(os.path.join(stats_dir, f"state-{daemon_df}.csv"))
         try:
             return pd.read_csv(filename_df)
         except FileNotFoundError:
@@ -537,7 +537,7 @@ def state_collector(case, agents_dict, configuration, stats_dir, attempts_info):
 
     if states_exists:
         for daemon, df in daemons_dict.items():
-            filename = os.path.join(os.path.join(stats_dir, f"case{case}_state-{daemon}.csv"))
+            filename = os.path.join(os.path.join(stats_dir, f"state-{daemon}.csv"))
             df.to_csv(filename, index=False)
         logger.info(f'Finished state collector')
 
@@ -648,7 +648,8 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
         'prefix': 'file_'
     }
     protocol = protocol_detection()
-    configuration = f'{protocol}_{eps}_eps_{files}files_client-buffer-{buffer}'
+    configuration = f'case{case}_{protocol}_{eps}_eps_{files}files_client-buffer-' \
+                    f'{"enabled" if buffer == "no" else "disabled"}'
 
     # If we are in case 1 or in case 2 and the number of files is 0, we will not execute the test since we cannot
     # modify the checksums because they do not exist
@@ -661,7 +662,7 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
 
         # Launch one process for agent due to FileMonitor restriction (block the execution)
         for agent_id in agents_dict.keys():
-            filename = os.path.join(stats_dir, f"case{case}_info.csv")
+            filename = os.path.join(stats_dir, f"info.csv")
             agents_checker.append(Process(target=agent_checker, args=(case, agent_id, agents_dict, filename,
                                                                       attempts_info, database_params, configuration,)))
             agents_checker[-1].start()
@@ -682,7 +683,7 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
                                                                       attempts_info,))
         state_collector_check.start()
         for daemon in tested_daemons:
-            filename = os.path.join(os.path.join(stats_dir, f"case{case}_stats-{daemon}.csv"))
+            filename = os.path.join(os.path.join(stats_dir, f"stats-{daemon}.csv"))
             stats_checker.append(Process(target=stats_collector, args=(filename, daemon, agents_dict, attempts_info,
                                                                        configuration,)))
             stats_checker[-1].start()
