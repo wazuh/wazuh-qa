@@ -928,7 +928,7 @@ class EventChecker:
                 raise
             logger.info("TimeoutError was expected and correctly caught.")
 
-    def check_events(self, event_type):
+    def check_events(self, event_type, mode=None):
         """Check and validate all events in the 'events' list.
 
         Parameters
@@ -936,7 +936,7 @@ class EventChecker:
         event_type : {'added', 'modified', 'deleted'}
             Expected type of the raised event.
         """
-        def validate_checkers_per_event(events, options):
+        def validate_checkers_per_event(events, options, mode):
             """Check if each event is properly formatted according to some checks.
 
             Parameters
@@ -947,7 +947,7 @@ class EventChecker:
                 Set of XML CHECK_* options. Default `{CHECK_ALL}`
             """
             for ev in events:
-                validate_event(ev, options)
+                validate_event(ev, options, mode)
 
         def check_events_type(events, ev_type, file_list=['testfile0']):
             event_types = Counter(filter_events(events, ".[].data.type"))
@@ -976,7 +976,7 @@ class EventChecker:
                 return jq(mask).transform(events, multiple_output=True)
 
         if self.events is not None:
-            validate_checkers_per_event(self.events, self.options)
+            validate_checkers_per_event(self.events, self.options, mode)
             check_events_type(self.events, event_type, self.file_list)
             check_files_in_event(self.events, self.folder, self.file_list)
 
@@ -988,6 +988,7 @@ class EventChecker:
                     self.custom_validator.validate_after_update(self.events)
                 elif event_type == "deleted":
                     self.custom_validator.validate_after_delete(self.events)
+
     def _get_file_list(self):
         result_list = []
         for file_name in self.file_list:
