@@ -11,6 +11,10 @@
         - name: Launching prepare tasks
           import_tasks: "../../common_tasks/prepare.yml"
 
+        - name: Check for disabled auditd. Check for realtime running instead.
+          become: true
+          import_tasks: "tests/tests.yml"
+
         - block:
           - name: Configure syscheck event.
             set_fact:
@@ -18,10 +22,6 @@
 
           - name: Generating files to trigger FIM alerts
             import_tasks: "../../common_tasks/create_files.yml"
-
-          - name: Check for disabled auditd. Check for realtime running instead.
-            become: true
-            import_tasks: "tests/tests.yml"
 
           - name: Verify generated alerts
             become: true

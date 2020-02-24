@@ -3,7 +3,6 @@
   lineinfile:
     path: "{{ linux_ossec_folder_path }}/logs/ossec.log"
     line: "Who-data engine cannot start because Auditd is not running"
-    line: "Who-data engine could not start. Switching who-data to real-time."
   when:
     - inventory_hostname in groups['linuxagents']
 
