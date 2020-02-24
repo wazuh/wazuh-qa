@@ -5,7 +5,7 @@ windows_ossec_folder_path: "C:\\Program Files (x86)\\ossec-agent"
 
 # Create/Modify/Delete files
 agents_linux_output_path: "/opt/fim_files_output"
-agents_windows_output_path: C:\fim_files_output
+agents_windows_output_path: c:\fim_files_output
 files_generated_output_path: "files_generated.txt"
 files_modified_output_path: "files_modified.txt"
 files_deleted_output_path: "files_deleted.txt"
