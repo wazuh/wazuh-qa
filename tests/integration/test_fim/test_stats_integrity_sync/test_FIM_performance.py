@@ -26,6 +26,7 @@ tested_daemon = 'ossec-syscheckd'
 state_collector_time = 1
 state_path = os.path.join(WAZUH_PATH, 'var', 'run', 'ossec-agentd.state')
 performance_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stats', 'performance')
+fim_db_path = os.path.join(WAZUH_PATH, 'queue', 'fim', 'db')
 state_configuration = {
     "agentd.state_interval": state_collector_time,
     "syscheck.debug": 2
@@ -57,18 +58,18 @@ def modify_local_internal_options():
 # Functions
 
 
-def replace_conf(syncro_eps, fim_eps):
+def replace_conf(sync_eps, fim_eps):
     """Configure syscheck in realtime=yes."""
     directories_regex = r"<directories realtime=\"yes\">[\n\t ]*(TESTING_DIRECTORY)[\n\t ]*</directories>"
     fim_eps_regex = r"<syscheck>[\s\S\w]*<max_eps>[\n\t ]*([0-9]+)[\n\t ]*</max_eps>[\s\S\w]*<synchronization>"
-    syncro_eps_regex = \
+    sync_eps_regex = \
         r"<synchronization>[\s\S\w]*<max_eps>[\n\t ]*([0-9]+)[\n\t ]*</max_eps>[\s\S\w]*</synchronization>"
 
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'template_wazuh_conf.conf'), 'r') as f:
         content = f.read()
         new_config = re.sub(re.search(directories_regex, content).group(1), root_dir, content)
         new_config = re.sub(re.search(fim_eps_regex, content).group(1), str(fim_eps), new_config)
-        new_config = re.sub(re.search(syncro_eps_regex, content).group(1), str(syncro_eps), new_config)
+        new_config = re.sub(re.search(sync_eps_regex, content).group(1), str(sync_eps), new_config)
 
         with open(WAZUH_CONF, 'w') as conf:
             conf.write(new_config)
@@ -343,6 +344,20 @@ def state_collector(state_filename, configuration, state_status):
     state_status['finish'] = True
 
 
+def get_db_size():
+    try:
+        db_size = subprocess.check_output(["du", '-sh', os.path.join(fim_db_path, 'fim.db')]).decode().strip().split('\t')[0]
+    except subprocess.CalledProcessError:
+        db_size = None
+    try:
+        journal_size = subprocess.check_output(["du", '-sh', os.path.join(fim_db_path, 'fim.db-journal')]
+                                               ).decode().strip().split('\t')[0]
+    except subprocess.CalledProcessError:
+        journal_size = None
+
+    return db_size, journal_size
+
+
 def scan_integrity_test(fim_df, format, configuration, integrity_df, fim_type='scan'):
     """Get the stats when the scan and integrity is running.
 
@@ -379,7 +394,8 @@ def scan_integrity_test(fim_df, format, configuration, integrity_df, fim_type='s
 
         fim_df.loc[len(fim_df)] = [format, str(time_printing), *list(diff.values()), fim_type]
         if time_fim is not None:
-            integrity_df.loc[len(integrity_df)] = [format, fim_type, str(time_fim)]
+            db_size, journal_size = get_db_size()
+            integrity_df.loc[len(integrity_df)] = [format, fim_type, db_size, journal_size, str(time_fim)]
             break
         time_printing += 1
         time.sleep(1)
@@ -505,7 +521,8 @@ def real_test(test_type, real_df, integrity_df, format, configuration):
 
         real_df.loc[len(real_df)] = [format, str(time_printing), *list(diff.values()), test_type]
         if time_fim:
-            integrity_df.loc[len(integrity_df)] = [format, test_type, str(time_fim)]
+            db_size, journal_size = get_db_size()
+            integrity_df.loc[len(integrity_df)] = [format, test_type, db_size, journal_size, str(time_fim)]
         if time_out == 0:
             logger.warning(f"Timeout: Event read {str(count)} last: {str(last_count)}")
             break
@@ -530,14 +547,14 @@ def real_test(test_type, real_df, integrity_df, format, configuration):
     '1', '10', '100'
 ])
 @pytest.mark.parametrize('eps', [
-    {'syncro_eps': '10', 'fim_eps': '200'}
+    {'sync_eps': '10', 'fim_eps': '200'}
 ])
 @pytest.mark.parametrize('mode', [
     'real-time'
 ])
 def test_performance(mode, file_size, eps, path_length, number_files, initial_clean, modify_local_internal_options):
     """Execute and launch all the necessary processes to check all the cases with all the specified configurations."""
-    replace_conf(eps['syncro_eps'], eps['fim_eps'])
+    replace_conf(eps['sync_eps'], eps['fim_eps'])
     branch = detect_syscheck_version()
     os.makedirs(performance_dir, exist_ok=True)
     fconfiguration = f'{number_files}files_{path_length}length_{file_size}size'
@@ -555,7 +572,7 @@ def test_performance(mode, file_size, eps, path_length, number_files, initial_cl
     try:
         integrity_df = pd.read_csv(integrity_filename)
     except FileNotFoundError:
-        integrity_df = pd.DataFrame(columns=['configuration', 'stage', 'duration(s)'])
+        integrity_df = pd.DataFrame(columns=['configuration', 'stage', 'db_size', 'journal_db_size', 'duration(s)'])
     data_df = pd.DataFrame(columns=['configuration', 'seconds', 'cpu(%)', 'mem(KB)', 'rchar(KB/s)', 'wchar(KB/s)',
                                     'syscr(Input/s)', 'syscw(Output/s)', 'read_bytes(KB/s)', 'write_bytes(KB/s)',
                                     'cancelled_write_bytes(KB)', 'stage'])
