@@ -33,7 +33,7 @@ systemctl disable firewalld
 yum install make gcc policycoreutils-python automake autoconf libtool epel-release git which sudo wget -y
 
 # Install development dependencies for jq library
-yum groupinstall "Development Tools"
+yum groupinstall "Development Tools" -y
 
 # Install Python3
 yum install python36 python36-pip python36-devel -y

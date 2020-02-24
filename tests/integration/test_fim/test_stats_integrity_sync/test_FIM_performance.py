@@ -23,7 +23,6 @@ from wazuh_testing.tools.services import control_service, check_daemon_status
 
 root_dir = '/test'
 tested_daemon = 'ossec-syscheckd'
-eps = 600
 state_collector_time = 1
 state_path = os.path.join(WAZUH_PATH, 'var', 'run', 'ossec-agentd.state')
 performance_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stats', 'performance')
@@ -58,16 +57,18 @@ def modify_local_internal_options():
 # Functions
 
 
-@pytest.fixture(scope='module')
-def replace_conf():
+def replace_conf(syncro_eps, fim_eps):
     """Configure syscheck in realtime=yes."""
     directories_regex = r"<directories realtime=\"yes\">[\n\t ]*(TESTING_DIRECTORY)[\n\t ]*</directories>"
-    eps_regex = r"<max_eps>[\n\t ]*([0-9]+)[\n\t ]*</max_eps>"
+    fim_eps_regex = r"<syscheck>[\s\S\w]*<max_eps>[\n\t ]*([0-9]+)[\n\t ]*</max_eps>[\s\S\w]*<synchronization>"
+    syncro_eps_regex = \
+        r"<synchronization>[\s\S\w]*<max_eps>[\n\t ]*([0-9]+)[\n\t ]*</max_eps>[\s\S\w]*</synchronization>"
 
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'template_wazuh_conf.conf'), 'r') as f:
         content = f.read()
         new_config = re.sub(re.search(directories_regex, content).group(1), root_dir, content)
-        new_config = re.sub(re.search(eps_regex, content).group(1), str(eps), new_config)
+        new_config = re.sub(re.search(fim_eps_regex, content).group(1), str(fim_eps), new_config)
+        new_config = re.sub(re.search(syncro_eps_regex, content).group(1), str(syncro_eps), new_config)
 
         with open(WAZUH_CONF, 'w') as conf:
             conf.write(new_config)
@@ -528,12 +529,15 @@ def real_test(test_type, real_df, integrity_df, format, configuration):
 @pytest.mark.parametrize('file_size', [
     '1', '10', '100'
 ])
+@pytest.mark.parametrize('eps', [
+    {'syncro_eps': '10', 'fim_eps': '200'}
+])
 @pytest.mark.parametrize('mode', [
     'real-time'
 ])
-def test_performance(mode, file_size, path_length, number_files, initial_clean, replace_conf,
-                     modify_local_internal_options):
+def test_performance(mode, file_size, eps, path_length, number_files, initial_clean, modify_local_internal_options):
     """Execute and launch all the necessary processes to check all the cases with all the specified configurations."""
+    replace_conf(eps['syncro_eps'], eps['fim_eps'])
     branch = detect_syscheck_version()
     os.makedirs(performance_dir, exist_ok=True)
     fconfiguration = f'{number_files}files_{path_length}length_{file_size}size'
@@ -545,9 +549,9 @@ def test_performance(mode, file_size, path_length, number_files, initial_clean, 
         'mode': mode
     }
     state_status = Manager().dict({'stop': False, 'finish': False, 'state': 'scan'})
-    state_filename = os.path.join(performance_dir, "agentd_state.csv")
-    integrity_filename = os.path.join(performance_dir, "time_checksum_integrity.csv")
-    data_filename = os.path.join(performance_dir, 'stats.csv')
+    state_filename = os.path.join(performance_dir, f"{branch}_agentd_state.csv")
+    integrity_filename = os.path.join(performance_dir, f"{branch}_time_checksum_integrity.csv")
+    data_filename = os.path.join(performance_dir, f'{branch}_stats.csv')
     try:
         integrity_df = pd.read_csv(integrity_filename)
     except FileNotFoundError:
