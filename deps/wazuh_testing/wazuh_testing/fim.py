@@ -896,8 +896,11 @@ class EventChecker:
                 if current_event['data']['type'] == "modified":
                     if not previous_event:
                         previous_event = current_event
-                    elif (previous_event['data']['path'] == current_event['data']['path'] and
-                          previous_event['data']['timestamp'] == current_event['data']['timestamp']):
+                    elif (previous_event['data']['path'] == current_event['data']['path']
+                          and current_event['data']['timestamp'] in [previous_event['data']['timestamp'],
+                                                                     previous_event['data']['timestamp'] + 1]
+                          and set(current_event['data']['changed_attributes']).intersection(
+                              set(previous_event['data']['changed_attributes'])) == set()):
                         previous_event['data']['changed_attributes'] += current_event['data']['changed_attributes']
                         previous_event['data']['attributes'] = current_event['data']['attributes']
                     else:
