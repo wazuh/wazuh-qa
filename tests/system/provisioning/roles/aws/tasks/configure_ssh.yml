@@ -8,7 +8,6 @@
     user:
       name: "{{ ssh_username }}"
       group: "{{ ssh_username }}"
-      password: "{{ ssh_password | password_hash('sha512') }}" # "user" module requires password hashing
 
   - name: Ensure new user permissions on it's home folder
     file:
@@ -40,10 +39,4 @@
       user: "{{ ssh_username }}"
       key: "{{ custom_ssh_key }}"
       state: present
-  
-  - name: Enable Password Authentication on SSH configuration
-    lineinfile:
-      path: "/etc/ssh/sshd_config"
-      regexp: "PasswordAuthentication no"
-      line: "PasswordAuthentication yes"
-    notify: "restart sshd service"
+

@@ -10,9 +10,9 @@
 
 import sys
 import json
+
 import logging
 import argparse
-
 
 if sys.version_info.major < 3:
     print('ERROR: Python 2 is not supported.')

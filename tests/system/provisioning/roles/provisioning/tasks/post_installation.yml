@@ -1,6 +1,6 @@
 ---
   - name: Configure Wazuh API SSL
-    shell: >- 
+    shell: >-
       openssl req -x509 -batch
       -nodes -days 3650 -newkey
       rsa:2048
@@ -15,15 +15,10 @@
     register: rhel_id
     when:
       - inventory_hostname in groups['masters']
-  
+
   - name: Obtain Windows Agent ID
     shell: /var/ossec/bin/manage_agents -l | grep Windows | cut -d':' -f2 | cut -d ',' -f1
-    register: windows_id  
-    when:
-      - inventory_hostname in groups['masters']
-
-  - name: Add Windows Agent to Windows group 
-    shell: /var/ossec/bin/agent_groups -a -g windows -i {{ windows_id.stdout }} -q    
+    register: windows_id
     when:
       - inventory_hostname in groups['masters']
 
@@ -36,7 +31,7 @@
   #   with_items:
   #     - "/usr/share/kibana/src/core/ui/public/chrome/directives/global_nav/global_nav.html"
   #     - "/usr/share/kibana/src/core/ui/public/chrome/directives/header_global_nav/header_global_nav.js"
-  #   notify: restart kibana  
+  #   notify: restart kibana
   #   when:
   #     - inventory_hostname in groups['kibana']
 
@@ -82,8 +77,8 @@
     shell: echo $(($(date +%s%N)/1000000))
     register: api_time
     when:
-      - inventory_hostname in groups['kibana'] 
-    
+      - inventory_hostname in groups['kibana']
+
   - name: Configure Wazuh APP API
     shell: >- # Using curl due to inconsistencies with uri module
       curl -XPUT "{{ elastic_api_protocol }}://{{ hostvars[groups['elasticsearch'][0]]['private_ip'] }}:{{ elasticsearch_port }}/.wazuh/_doc/{{ api_time.stdout }}"
@@ -142,7 +137,7 @@
     when:
       - inventory_hostname in groups['kibana']
     tags:
-      - welcome_screen      
+      - welcome_screen
 
   - name: Unarchive custom-welcome.tar.gz
     unarchive:
@@ -152,7 +147,7 @@
     when:
       - inventory_hostname in groups['kibana']
     tags:
-      - welcome_screen      
+      - welcome_screen
 
   - name: Copy .svg files from custom-welcome folder to Kibana
     copy:
@@ -185,7 +180,7 @@
         kibana02:
           regex_string: Your window into the Elastic Stack
           line_string: The Open Source Security Platform
-          path_string: /usr/share/kibana/optimize/bundles/kibana.bundle.js      
+          path_string: /usr/share/kibana/optimize/bundles/kibana.bundle.js
         login02:
           regex_string: Your window into the Elastic Stack
           line_string: The Open Source Security Platform
@@ -204,7 +199,7 @@
     when:
       - inventory_hostname in groups['kibana']
     tags:
-      - welcome_screen      
+      - welcome_screen
 
   - name: Override login.style.css in /optimize/bundles
     copy:
