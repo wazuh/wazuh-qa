@@ -8,7 +8,7 @@ import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
-    callback_detect_event
+    callback_detect_event, callback_real_time_whodata_started
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -61,6 +61,11 @@ def callback_integrity_synchronization_check(line):
     return None
 
 
+def callback_integrity_and_whodata(line):
+    if callback_integrity_synchronization_check(line) or callback_real_time_whodata_started(line):
+        return True
+
+
 # tests
 @pytest.mark.parametrize('tags_to_apply', [
     {'synchronize_events_conf'}
@@ -69,10 +74,24 @@ def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure
     """Check that events are being generated while a synchronization is being performed simultaneously.
     """
     folder = testdir1 if get_configuration['metadata']['fim_mode'] == 'realtime' else testdir2
-    # Check the integrity scan has begun
-    wazuh_log_monitor.start(timeout=15, callback=callback_integrity_synchronization_check,
-                            error_message='Did not receive expected '
-                                          '"Initializing FIM Integrity Synchronization check" event')
+
+    # Wait for whodata to start and the synchronization check. Since they are different threads, we cannot expect
+    # them to come in order every time
+    if get_configuration['metadata']['fim_mode'] == 'whodata':
+        wazuh_log_monitor.start(timeout=10, callback=callback_integrity_and_whodata,
+                                error_message='Did not receive expected "File integrity monitoring real-time Whodata '
+                                              'engine started" or "Initializing FIM Integrity Synchronization check"')
+
+        wazuh_log_monitor.start(timeout=10, callback=callback_integrity_and_whodata,
+                                error_message='Did not receive expected "File integrity monitoring real-time Whodata '
+                                              'engine started" or "Initializing FIM Integrity Synchronization check"')
+
+    else:
+
+        # Check the integrity scan has begun
+        wazuh_log_monitor.start(timeout=15, callback=callback_integrity_synchronization_check,
+                                error_message='Did not receive expected '
+                                              '"Initializing FIM Integrity Synchronization check" event')
 
     # Create a file and assert syscheckd detects it while doing the integrity scan
     file_name = 'file'
