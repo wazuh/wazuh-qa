@@ -31,7 +31,7 @@ def paths_acquisition(filenames_list_path):
     return set([i[:-1] for i in filenames_list])
 
 
-def alerts_prune(path, target_event):
+def alerts_prune(path, target_event, diff_statement):
     """
         Prunes desired syscheck events from the alert.json file.
         Extracts all events path to a set.
@@ -40,12 +40,18 @@ def alerts_prune(path, target_event):
         :return: Returns a set containing the alerts files path
     """
     alerts_list = []
+    add_path = True
     with open(path,errors='replace') as json_file:
         for line in json_file:
             try:
                 data = json.loads(line)
-                if data.get('syscheck') and data['syscheck']['event'] == target_event:
-                    alerts_list.append(data)
+                if data.get('syscheck') and \
+                   data['syscheck']['event'] == target_event:
+                    if ((diff_statement is not None) and \
+                        (diff_statement not in data['syscheck']['diff'])):
+                        add_path = False
+                    if add_path:
+                        alerts_list.append(data)
                     
             except ValueError:
                 continue
@@ -87,6 +93,8 @@ def main():
         parser.add_argument("-r", "--retry", type=int, required=False, dest='retry_count',
                             help="reading attempts on stopped alerts. default: 4 attemps",
                             default="4")
+        parser.add_argument("-d", "--diff", type=str, required=False, dest='diff_string',
+                            help="When syscheck:report_changes enabled, represents the diff text")
         args = parser.parse_args()
 
         import time
@@ -94,7 +102,7 @@ def main():
         stuck_alerts = 0
 
         paths_list_set = paths_acquisition(args.input_file)
-        pruned_alerts_set = alerts_prune(args.log_json_path, args.event)
+        pruned_alerts_set = alerts_prune(args.log_json_path, args.event, args.diff_string)
         sub_paths = paths_list_set - pruned_alerts_set
         prev_lenght = len(sub_paths)
         start = time.time()
