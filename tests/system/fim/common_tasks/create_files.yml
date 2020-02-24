@@ -1,7 +1,7 @@
 ---
 - block:
   - name: Run script generate_files.py on agents | Linux
-    script: "generate_files.py -c {{ files_config_linux_destination_path }} -o {{ files_generated_output_path }}"
+    script: "generate_files.py -c {{ files_config_linux_destination_path }} -o {{ files_generated_output_path }} {{ create_script_extra_params }}"
     args:
       executable: "python3"
       chdir: "{{ agents_linux_output_path }}"
@@ -19,7 +19,7 @@
 
 - block:
   - name: Run script generate_files.py on agents | Windows
-    script: "generate_files.py -c {{ files_config_windows_destination_path }} -o {{ files_generated_output_path }}"
+    script: "generate_files.py -c {{ files_config_windows_destination_path }} -o {{ files_generated_output_path }} {{ create_script_extra_params }}"
     args:
       executable: "python"
       chdir: "{{ agents_windows_output_path }}"

@@ -1,7 +1,8 @@
 ---
 - block:
-  - name: "Modify FIM test files at Wazuh Agents | Linux"
-    script: "modify_files.py -i {{ files_generated_output_path }} -o {{ files_modified_output_path }}"
+
+  - name: "Modify FIM test files at Wazuh Managers | Linux"
+    script: "modify_files.py -i {{ files_generated_output_path }} -o {{ files_modified_output_path }} {{ modify_script_extra_params }}"
     args:
       executable: "python3"
       chdir: "{{ agents_linux_output_path }}"
@@ -18,8 +19,9 @@
 
 
 - block:
-  - name: "Modify FIM test files at Wazuh Agents | Windows"
-    script: "modify_files.py -i {{ files_generated_output_path }} -o {{ files_modified_output_path }}"
+
+  - name: "Modify FIM test files at Wazuh Managers | Windows"
+    script: "modify_files.py -i {{ files_generated_output_path }} -o {{ files_modified_output_path }} {{ modify_script_extra_params }}"
     args:
       executable: "python"
       chdir: "{{ agents_windows_output_path }}"
