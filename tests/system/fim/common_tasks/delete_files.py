@@ -12,7 +12,6 @@ import random
 import logging
 import os
 
-
 def delete_files(input_file_path, n, output_file_path):
     """
     Delete files, given a file with complete list of files where each line
@@ -45,11 +44,33 @@ def delete_files(input_file_path, n, output_file_path):
         to_delete = data
 
     # Delete the selected files
-    try:
-        for path in to_delete:
+    failed_deletions = []
+    for path in to_delete:
+        try:
             os.remove(path)
-    except Exception:
-        logging.error('Failed when deleting the selected files: ', exc_info=True)
+        except FileNotFoundError as e:
+            logging.error("File " + path + " not found.", exc_info=True)
+            raise e
+        except PermissionError:
+            logging.error("File " + path + " used by another process.", exc_info=True)
+            failed_deletions.append(path)
+            pass
+        except Exception:
+            raise Exception("Failed when deleting selected files")
+
+    # Retrying deletion on failed paths
+    for path in failed_deletions:
+        try:
+            os.remove(path)
+        except FileNotFoundError:
+            logging.error("File " + path + " not found.(2nd attempt)", exc_info=True)
+        except PermissionError:
+            logging.error("File " + path + " used by another process.(2nd attempt)", exc_info=True)
+            try:
+                os.remove(path)
+            except Exception:
+                logging.error("File " + path + " used by another process.(3rd attempt)", exc_info=True)
+                raise Exception
 
     # Write the list of the deleted files into output_file_path
     try:
