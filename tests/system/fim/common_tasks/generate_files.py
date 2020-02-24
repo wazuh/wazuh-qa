@@ -111,21 +111,33 @@ def associate_files_size(files_paths, files_size_specifications):
     return files_with_associated_size
 
 
-def create_files(files_path):
+def create_files(files_path, text_mode=False):
     """
     Takes the files paths and creates a file of specified size
 
     :param dict files_path: Contains the list of files and it's associated path
+    :param dict text_mode: Create text files instead of binary
     """
+    if text_mode:
+        file_mode = "w"
+        one_char = '0'
+        chunk = (one_char * 1048576) + '\n'
+        unique = generate_random_name
+    else:
+        file_mode = "wb"
+        one_char = b'0'
+        chunk = one_char * 1048577
+        unique = secrets.token_bytes
+
     for key, value in files_path.items():
-        with open(key, "wb") as f:
+        with open(key, file_mode) as f:
             if value > 1048576:
                 nval = value // 1048576
                 for val in range(nval):
-                    f.write(b'0' * 1048576)
+                    f.write(chunk)
             else:
-                f.write(b'0' * value)
-            f.write(secrets.token_bytes(32))
+                f.write(one_char * value)
+            f.write(unique(16))
 
 
 def create_file_summary(files_path, logfile):
@@ -148,9 +160,13 @@ def main():
                         dest="config", help="Configuration file")
     parser.add_argument("-o", '--output-list', type=str, required=True,
                         dest="output_list", help="List of generated files")
+    parser.add_argument("-t", '--text-mode', default=False, action="store_true",
+                        dest="text_mode", help="Create text files instead of binary"
+                             " (default is False)")
     args = parser.parse_args()
     config_file = args.config
     output_file = args.output_list
+    text_mode = args.text_mode
     config = parse_files_configuration(config_file)
     folders = generate_folders_paths(
         config["root_folder"],
@@ -161,7 +177,7 @@ def main():
     n_files = sum(x['amount'] for x in config['file_size_specifications'])
     files = generate_files_paths(folders, n_files, config["file_length"])
     associated_files = associate_files_size(files, config["file_size_specifications"])
-    create_files(associated_files)
+    create_files(associated_files, text_mode=text_mode)
     create_file_summary(files, output_file)
 
 
