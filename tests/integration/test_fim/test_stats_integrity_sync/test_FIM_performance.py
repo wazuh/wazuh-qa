@@ -346,7 +346,8 @@ def state_collector(state_filename, configuration, state_status):
 
 def get_db_size():
     try:
-        db_size = subprocess.check_output(["du", '-sh', os.path.join(fim_db_path, 'fim.db')]).decode().strip().split('\t')[0]
+        db_size = subprocess.check_output(["du", '-sh', os.path.join(fim_db_path, 'fim.db')]
+                                          ).decode().strip().split('\t')[0]
     except subprocess.CalledProcessError:
         db_size = None
     try:
@@ -358,14 +359,14 @@ def get_db_size():
     return db_size, journal_size
 
 
-def scan_integrity_test(fim_df, format, configuration, integrity_df, fim_type='scan'):
+def scan_integrity_test(fim_df, string_configuration, configuration, integrity_df, fim_type='scan'):
     """Get the stats when the scan and integrity is running.
 
     Parameters
     ----------
     fim_df : Pandas DataFrame
         DataFrame that contains the stats.
-    format: str
+    string_configuration: str
         String with the current configuration
     configuration : dict
         Dict with the current configuration
@@ -392,10 +393,10 @@ def scan_integrity_test(fim_df, format, configuration, integrity_df, fim_type='s
         else:
             raise AttributeError(f'Invalid type detected: {fim_type}')
 
-        fim_df.loc[len(fim_df)] = [format, str(time_printing), *list(diff.values()), fim_type]
+        fim_df.loc[len(fim_df)] = [string_configuration, str(time_printing), *list(diff.values()), fim_type]
         if time_fim is not None:
             db_size, journal_size = get_db_size()
-            integrity_df.loc[len(integrity_df)] = [format, fim_type, db_size, journal_size, str(time_fim)]
+            integrity_df.loc[len(integrity_df)] = [string_configuration, fim_type, db_size, journal_size, str(time_fim)]
             break
         time_printing += 1
         time.sleep(1)
@@ -473,7 +474,7 @@ def time_manager(events, last_count, time_start, time_out, n_files):
     return count, last_count, time_fim, time_out
 
 
-def real_test(test_type, real_df, integrity_df, format, configuration):
+def real_test(test_type, real_df, integrity_df, string_configuration, configuration):
     """Get the stats when realtime tests are running.
 
     Parameters
@@ -484,7 +485,7 @@ def real_test(test_type, real_df, integrity_df, format, configuration):
         DataFrame that contains the stats.
     integrity_df : Pandas DataFrame, optional
         DataFrame that contains the integrity stats.
-    format: str
+    string_configuration: str
         String with the current configuration.
     configuration : dict
         Dict with the current configuration.
@@ -497,8 +498,8 @@ def real_test(test_type, real_df, integrity_df, format, configuration):
     stats = get_stats(tested_daemon)
     old_stats = deepcopy(stats)
     logger.info(
-        f"[REAL] Test {test_type} with {configuration['path_length']} path length, {configuration['real_number_files']} "
-        f"files and {configuration['file_size']} KB file size")
+        f"[REAL] Test {test_type} with {configuration['path_length']} path length, "
+        f"{configuration['real_number_files']} files and {configuration['file_size']} KB file size")
 
     while True:
         diff = calculate_stats(old_stats, stats)
@@ -519,10 +520,11 @@ def real_test(test_type, real_df, integrity_df, format, configuration):
                                                                  time_out=time_out, time_start=time_start,
                                                                  n_files=configuration['real_number_files'])
 
-        real_df.loc[len(real_df)] = [format, str(time_printing), *list(diff.values()), test_type]
+        real_df.loc[len(real_df)] = [string_configuration, str(time_printing), *list(diff.values()), test_type]
         if time_fim:
             db_size, journal_size = get_db_size()
-            integrity_df.loc[len(integrity_df)] = [format, test_type, db_size, journal_size, str(time_fim)]
+            integrity_df.loc[len(integrity_df)] = [string_configuration, test_type, db_size, journal_size,
+                                                   str(time_fim)]
         if time_out == 0:
             logger.warning(f"Timeout: Event read {str(count)} last: {str(last_count)}")
             break
@@ -547,7 +549,7 @@ def real_test(test_type, real_df, integrity_df, format, configuration):
     '1', '10', '100'
 ])
 @pytest.mark.parametrize('eps', [
-    {'sync_eps': '10', 'fim_eps': '200'}
+    {'sync_eps': '10', 'fim_eps': '600'}
 ])
 @pytest.mark.parametrize('mode', [
     'real-time'
@@ -595,26 +597,26 @@ def test_performance(mode, file_size, eps, path_length, number_files, initial_cl
     state_process.start()
 
     # Test Scan
-    scan_integrity_test(fim_df=data_df, format=fconfiguration, configuration=configuration, integrity_df=integrity_df,
-                        fim_type=state_status['state'])
+    scan_integrity_test(fim_df=data_df, string_configuration=fconfiguration, configuration=configuration,
+                        integrity_df=integrity_df, fim_type=state_status['state'])
 
     # Test Integrity
     state_status['state'] = 'integrity'
-    scan_integrity_test(fim_df=data_df, format=fconfiguration, integrity_df=integrity_df, configuration=configuration,
-                        fim_type=state_status['state'])
+    scan_integrity_test(fim_df=data_df, string_configuration=fconfiguration, integrity_df=integrity_df,
+                        configuration=configuration, fim_type=state_status['state'])
 
     # Test real-time (added, modified, deleted)
     truncate_file(LOG_FILE_PATH)
     state_status['state'] = Types.added.value
-    real_test(state_status['state'], format=fconfiguration, real_df=data_df, integrity_df=integrity_df,
+    real_test(state_status['state'], string_configuration=fconfiguration, real_df=data_df, integrity_df=integrity_df,
               configuration=configuration)
     truncate_file(LOG_FILE_PATH)
     state_status['state'] = Types.modified.value
-    real_test(state_status['state'], format=fconfiguration, real_df=data_df, integrity_df=integrity_df,
+    real_test(state_status['state'], string_configuration=fconfiguration, real_df=data_df, integrity_df=integrity_df,
               configuration=configuration)
     truncate_file(LOG_FILE_PATH)
     state_status['state'] = Types.deleted.value
-    real_test(state_status['state'], format=fconfiguration, real_df=data_df, integrity_df=integrity_df,
+    real_test(state_status['state'], string_configuration=fconfiguration, real_df=data_df, integrity_df=integrity_df,
               configuration=configuration)
 
     # Finishing
