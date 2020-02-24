@@ -1,7 +1,16 @@
 #!/usr/bin/python3
+# Copyright (C) 2015-2020, Wazuh Inc.
+# All rights reserved.
+#
+# This program is free software; you can redistribute it
+# and/or modify it under the terms of the GNU General Public
+# License (version 2) as published by the FSF - Free Software
+# Foundation.
 
 import argparse
 from elasticsearch import Elasticsearch
+from time import sleep, time
+import logging
 
 
 def setElasticsearch(ElasticIP):
@@ -30,7 +39,14 @@ def makeQuery(query, Elastic, index_name):
 
 
 if __name__ == "__main__":
-
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[
+            logging.FileHandler("verify_alerts_elastic.log"),
+            logging.StreamHandler()
+        ]
+    )
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-i", "--input-list", type=str, required=True, dest='files',
@@ -50,6 +66,15 @@ if __name__ == "__main__":
         dest='output', help="Output path for missing files alerts.",
         default="debug_missing_file_alerts.log"
     )
+    parser.add_argument(
+        "-r", "--retry", type=int, required=False, dest='max_retry',
+        help="reading attempts on stopped alerts. default: 4 attemps",
+        default="4"
+    )
+    parser.add_argument(
+        "-s", "--sleep", type=int, required=False, dest='sleep_time',
+        help="Sleep time between retries", default="60"
+    )
     args = parser.parse_args()
 
     query = {
@@ -65,24 +90,45 @@ if __name__ == "__main__":
 
     es = setElasticsearch(args.ip)
     index_name = "wazuh-alerts-3.x*"
-    success = 0
-    failure = 0
-    failure_list = []
-
+    retry_count = 0
+    logging.info("Elasticsearch alerts verification started")
+    start = time()
     with open(args.files, 'r') as file_list:
-        for line in file_list:
-            query['query']['bool']['filter'][0]['term']['syscheck.path'] = \
-                line.rstrip()
-            query_result = makeQuery(query, es, index_name)
-            if query_result['hits']['total']['value'] == 1:
-                success += 1
-            else:
-                failure_list.append(line)
-                failure += 1
+        while retry_count < args.max_retry:
+            success = 0
+            failure = 0
+            failure_list = []
+            for line in file_list:
+                query['query']['bool']['filter'][0]['term']['syscheck.path'] =\
+                    line.rstrip()
 
+                query_result = makeQuery(query, es, index_name)
+                if query_result['hits']['total']['value'] == 1:
+                    success += 1
+                else:
+                    failure_list.append(line)
+                    failure += 1
+            if failure == 0:
+                break
+            else:
+                elapsed = start - time()
+                logging.info("Missing alerts {}.\n".format(failure))
+                logging.info("Number of retries {}.\n".format(retry_count))
+                logging.info("Elapsed time: ~ {} seconds. \n".format(elapsed))
+                retry_count += 1
+                sleep(args.sleep_time)
+
+    elapsed = start - time()
     with open(args.output, 'w+') as output:
         output.writelines(failure_list)
 
-    assert failure == 0, "number of failed files: {}\n".format(failure)
+    assert failure == 0, "number of failed files: {}\n \
+            Elapsed time: ~ {} seconds.".format(
+            success, elapsed
+        )
 
-    print("number of succeded files: {}\n".format(success))
+    print(
+        "Number of succeded files: {}\n Elapsed time: ~ {} seconds.".format(
+            success, elapsed
+        )
+    )

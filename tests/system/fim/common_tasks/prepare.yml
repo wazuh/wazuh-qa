@@ -1,0 +1,97 @@
+- block:
+  - name: Creates directories to store agents' outputs in Managers hosts
+    file:
+      path: "{{ item }}"
+      state: directory
+    with_items:
+      - "{{ agents_results_manager_path }}"
+      - "{{ agents_results_manager_path }}/added"
+      - "{{ agents_results_manager_path }}/modified"
+      - "{{ agents_results_manager_path }}/deleted"
+
+  - name: Stop wazuh-manager service
+    service:
+      name: wazuh-manager
+      state: stopped
+
+  - name: Copy {{ files_config_manager_ossec_conf }} to the Managers hosts
+    copy:
+        src: "config/{{ files_config_manager_ossec_conf }}"
+        dest: "{{ linux_ossec_folder_path }}/etc/ossec.conf"
+
+  - name: Start wazuh-manager service
+    service:
+      name: wazuh-manager
+      state: started
+
+  when:
+    - inventory_hostname in groups['masters']
+  become: yes
+
+- block:
+  - name: Create {{ agents_linux_output_path }} to store outputs in Agents hosts | Linux
+    file:
+      path: "{{ agents_linux_output_path }}"
+      state: directory
+    when:
+      - inventory_hostname in groups['linuxagents']
+
+  - name: Copy {{ files_config_source_path }} to the Agents hosts | Linux
+    template:
+        src: "../../common_tasks/files_configuration.json.j2"
+        dest: "{{ files_config_linux_destination_path }}"
+    vars:
+      agents_fim_testing_path: "{{ files_fim_testing_linux }}"
+
+  - name: Stop wazuh-agent service | Linux
+    service:
+      name: wazuh-agent
+      state: stopped
+
+  - name: Copy {{ files_config_agent_linux_ossec_conf }} to the Agents hosts | Linux
+    copy:
+      src: "./config/{{ files_config_agent_linux_ossec_conf }}"
+      dest: "{{ linux_ossec_folder_path }}/etc/ossec.conf"
+
+  - name: Start wazuh-agent service | Linux
+    service:
+      name: wazuh-agent
+      state: started
+
+  when:
+    - inventory_hostname in groups['linuxagents']
+  become: yes
+
+- block:
+  - name: Create {{ agents_windows_output_path }} to store outputs in agents hosts | Windows
+    win_file:
+      path: "{{ agents_windows_output_path }}"
+      state: directory
+
+  - name: Copy {{ files_config_source_path }} to the Agents hosts | Windows
+    template:
+        src: "../../common_tasks/files_configuration.json.j2"
+        dest: "{{ files_config_windows_destination_path }}"
+    vars:
+      agents_fim_testing_path: "{{ files_fim_testing_windows }}"
+
+  - name: Stop wazuh-agent service | Windows
+    win_service:
+      name: OssecSvc
+      start_mode: auto
+      state: stopped
+
+  - name: Copy {{ files_config_agent_windows_ossec_conf }} to the agents hosts | Windows
+    win_copy:
+        src: "config/{{ files_config_agent_windows_ossec_conf }}"
+        dest: "{{ windows_ossec_folder_path }}/ossec.conf"
+
+  - name: Start wazuh-agent service | Windows
+    win_service:
+      name: OssecSvc
+      start_mode: auto
+      state: started
+
+
+  when:
+    - inventory_hostname in groups['windowsagents']

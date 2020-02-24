@@ -1,0 +1,72 @@
+
+  - name: Stop Wazuh agent Linux
+    become: true
+    service:
+      name: wazuh-agent
+      state: stopp
+
+  - name: Stop Wazuh agent Windows
+    win_service: 
+      name: OssecSvc
+      start_mode: auto
+      state: stopped
+
+  - name: Start Wazuh agent Linux
+    become: true
+    service:
+      name: wazuh-agent
+      state: started
+
+  - name: Start Wazuh agent Windows
+    win_service: 
+      name: OssecSvc
+      start_mode: auto
+      state: started
+
+  - name: Restart Wazuh agent Linux
+    become: true
+    service:
+      name: wazuh-agent
+      state: restarted
+
+  - name: Restart Wazuh agent Windows
+    win_service: 
+      name: OssecSvc
+      start_mode: auto
+      state: restarted
+
+  - name: Stop Wazuh manager
+    become: true
+    service:
+      name: wazuh-manager
+      state: stopped
+
+  - name: Start Wazuh manager
+    become: true
+    service:
+      name: wazuh-manager
+      state: started
+  
+  - name: Restart Wazuh manager
+    become: true
+    service:
+      name: wazuh-manager
+      state: restarted
+
+  - name: Stop Wazuh api
+    become: true
+    service:
+      name: wazuh-api
+      state: stopped
+
+  - name: Start Wazuh api
+    become: true
+    service:
+      name: wazuh-api
+      state: started
+  
+  - name: Restart Wazuh api
+    become: true
+    service:
+      name: wazuh-api
+      state: restarted

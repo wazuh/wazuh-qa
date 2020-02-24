@@ -15,14 +15,18 @@ import os
 
 def delete_files(input_file_path, n, output_file_path):
     """
-    Delete files, given a file with complete list of files where each line 
+    Delete files, given a file with complete list of files where each line
     represents a file path, we will randomly delete n files of them.
 
     :param str input_file_path: path of the input file which contains the list of files.
     :param int n: number of file to delete.
     :return: Returns a file with the list of the deleted files.
     """
-    logger = logging.getLogger()
+    log_filename = 'delete_files.log'
+    logging.basicConfig(
+        filename=log_filename,
+        level=logging.DEBUG,
+    )
     data = []
     # Read data into the variable 'data'
     try:
@@ -31,22 +35,21 @@ def delete_files(input_file_path, n, output_file_path):
                 data_ = f.readlines()
             # remove whitespace characters like `\n` at the end of each line
             data = [x.strip() for x in data_]
-            f.close() # close f
-    except Exception as e:
-        logger.error('Failed when reading the input file: ', exc_info=True)
+            f.close()  # close f
+    except Exception:
+        logging.error('Failed when reading the input file: ', exc_info=True)
 
-
-    if n is not None: # Randomly select n paths from data
-        to_delete = random.sample(data,n)
-    else: # Delete all files
+    if n is not None:  # Randomly select n paths from data
+        to_delete = random.sample(data, n)
+    else:  # Delete all files
         to_delete = data
 
     # Delete the selected files
     try:
         for path in to_delete:
             os.remove(path)
-    except Exception as e:
-        logger.error('Failed when deleting the selected files: ', exc_info=True)
+    except Exception:
+        logging.error('Failed when deleting the selected files: ', exc_info=True)
 
     # Write the list of the deleted files into output_file_path
     try:
@@ -54,8 +57,9 @@ def delete_files(input_file_path, n, output_file_path):
             for item in to_delete:
                 f.write("%s\n" % item)
         f.close()
-    except Exception as e:
-        logger.error('Failed when writing to the output file: ', exc_info=True)
+    except Exception:
+        logging.error('Failed when writing to the output file: ', exc_info=True)
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -71,6 +75,7 @@ def main():
     args = parser.parse_args()
 
     delete_files(args.input_file, args.n_files, args.output_file)
+
 
 if __name__ == '__main__':
     main()

@@ -1,14 +1,30 @@
----  
-  - name: "Verify alert log"
-    script: "verify_alerts_json.py -i {{ file_list_path }} -e {{ syscheck_event }}"
+---
+  - name: Find input files for manager
+    find:
+      paths: "{{ agents_results_manager_path }}/{{ event }}"
+    register: find_result
+    when: 
+      - inventory_hostname in groups['masters']
+
+  - name: "Verify alert json log | {{ event }}"
+    script: >
+      verify_alerts_json.py -i {{ item.path }} -e {{ event }} 
+      -o {{ missing_alerts_json_path }}
     args:
       executable: "python3"
     when: 
       - inventory_hostname in groups['masters']
+    with_items: 
+      - "{{ find_result.files }}"
 
-  - name: "Verify elastic alerts"
-    script: "verify_alerts_elasticsearch.py -i {{ file_list_path }} -e {{ syscheck_event }} -a {{ private_ip }}"
+  - name: "Verify elastic alerts | {{ event }}"
+    script: >
+      verify_alerts_elasticsearch.py -i {{ item.path }} -e {{ event }} 
+      -a {{ hostvars[groups["elasticsearch"][0]]["private_ip"] }}
+      -o {{ missing_alerts_elasticsearch_path }}
     args:
       executable: python3
     when: 
-      - inventory_hostname in groups['elasticsearch'][0]
+      - inventory_hostname in groups['masters']
+    with_items: 
+      - "{{ find_result.files }}"
