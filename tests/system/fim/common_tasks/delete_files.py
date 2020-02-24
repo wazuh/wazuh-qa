@@ -11,6 +11,7 @@ import argparse
 import random
 import logging
 import os
+import time
 
 def delete_files(input_file_path, n, output_file_path):
     """
@@ -58,7 +59,8 @@ def delete_files(input_file_path, n, output_file_path):
         except Exception:
             raise Exception("Failed when deleting selected files")
 
-    # Retrying deletion on failed paths
+    # Retrying deletion on failed paths after sleeping for 3 seconds
+    time.sleep(3)
     for path in failed_deletions:
         try:
             os.remove(path)
