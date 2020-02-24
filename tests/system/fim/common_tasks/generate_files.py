@@ -50,13 +50,14 @@ def create_folders(folders_path):
         os.makedirs(folder, exist_ok=True)
 
 
-def generate_files_paths(folders_paths, n_files, file_name_length):
+def generate_files_paths(folders_paths, n_files, file_name_length, prefix=""):
     """
     Generates files paths distributed among the folders paths
 
     :param str folders_paths: Folders where files will be stored
     :param int n_files: Number of file's paths to generate
     :param str file_name_length: File name length for every file created
+    :param str prefix: Add a prefix to the filename
     :return: Returns a list of paths
     """
     files_paths = []
@@ -68,7 +69,8 @@ def generate_files_paths(folders_paths, n_files, file_name_length):
         else:
             n_files_to_generate = random.randint(1, remaining_files)
         for _ in range(n_files_to_generate):
-            current_file = os.path.join(path, generate_random_name(8))
+            full_name = prefix + generate_random_name(8)
+            current_file = os.path.join(path, full_name)
             files_paths.append(current_file)
         remaining_files = remaining_files - n_files_to_generate
     return files_paths
@@ -163,10 +165,13 @@ def main():
     parser.add_argument("-t", '--text-mode', default=False, action="store_true",
                         dest="text_mode", help="Create text files instead of binary"
                              " (default is False)")
+    parser.add_argument("-p", '--prefix', type=str, default="",
+                        dest="file_prefix", help="Add a common prefix to all filenames")
     args = parser.parse_args()
     config_file = args.config
     output_file = args.output_list
     text_mode = args.text_mode
+    prefix = args.file_prefix
     config = parse_files_configuration(config_file)
     folders = generate_folders_paths(
         config["root_folder"],
@@ -175,7 +180,7 @@ def main():
     )
     create_folders(folders)
     n_files = sum(x['amount'] for x in config['file_size_specifications'])
-    files = generate_files_paths(folders, n_files, config["file_length"])
+    files = generate_files_paths(folders, n_files, config["file_length"], prefix=prefix)
     associated_files = associate_files_size(files, config["file_size_specifications"])
     create_files(associated_files, text_mode=text_mode)
     create_file_summary(files, output_file)
