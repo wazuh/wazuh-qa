@@ -21,10 +21,11 @@ from wazuh_testing.tools.time import TimeMachine
 @pytest.fixture(scope='module')
 def restart_syscheckd(get_configuration, request):
     # Reset ossec.log and start a new monitor
+    control_service('stop', daemon='ossec-syscheckd')
     truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
-    control_service('restart', daemon='ossec-syscheckd')
+    control_service('start', daemon='ossec-syscheckd')
 
 
 @pytest.fixture(scope='module')
