@@ -58,11 +58,11 @@ def test_max_eps_on_start(get_configuration, configure_environment, restart_sysc
     After that, syscheck is launched and starts generating as much events as files created.
     """
     check_apply_test({'max_eps'}, get_configuration['tags'])
-
+    n_results = 1000
     result = wazuh_log_monitor.start(timeout=150,
-                                     accum_results=1000,
+                                     accum_results=n_results,
                                      callback=callback_syscheck_message,
-                                     error_message='Did not receive expected any integrity event').result()
+                                     error_message=f'Received less results than expected ({n_results})').result()
 
     max_eps = int(get_configuration['metadata']['max_eps'])
     counter = Counter([date_time for date_time, _ in result])
