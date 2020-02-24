@@ -299,32 +299,35 @@ def get_agents(client_keys='/var/ossec/etc/client.keys'):
     return agent_dict
 
 
-def replace_conf(eps, directory, buffer):
+def replace_conf(sync_eps, fim_eps, directory, buffer):
     """Function that sets up the configuration for the current test.
     Parameters
     ----------
-    eps : str
-        Events per second.
+    sync_eps : str
+        Events per second (synchronization)
+    fim_eps : str
+        Events per second (fim)
     directory : str
         Directory to be monitored.
     buffer : str
         Can be yes or no, <disabled>yes|no</disabled>.
     """
-    new_config = str()
-    directory_regex = r'.*<directories check_all=\"yes\">[\n\t ]*(.+)[\n\t ]*</directories>'
-    eps_regex = r'.*<max_eps>[\n\t ]*([0-9]+)[\n\t ]*</max_eps>'
-    buffer_regex = r'<client_buffer>[\n\t ]*<disabled>[\n\t ]*(yes|no)[\n\t ]*</disabled>[\n\t ]*</client_buffer>'
+    directories_regex = r"[\s\S]*<directories check_all=\"yes\">[\n\t ]*(.*)[\n\t ]*</directories>[\s\S]*"
+    fim_eps_regex = r"[\s\S]*<syscheck>[\s\S]*<max_eps>[\n\t ]*(200)[\n\t ]*</max_eps>[\s\S]*<synchronization>[\s\S]*"
+    sync_eps_regex = \
+        r"[\s\S]*<synchronization>[\s\S]*<max_eps>[\n\t ]*(10)[\n\t ]*</max_eps>[\s\S]*</synchronization>[\s\S]*"
+    buffer_regex = r'[\s\S]*<client_buffer><disabled>(yes|no)</disabled></client_buffer>[\s\S]*'
 
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'template_agent.conf'), 'r') as f:
-        lines = f.readlines()
-        for line in lines:
-            line = re.sub(directory_regex, '<directories check_all="yes">' + directory + '</directories>', line)
-            line = re.sub(eps_regex, '<max_eps>' + eps + '</max_eps>', line)
-            line = re.sub(buffer_regex, '<client_buffer><disabled>' + buffer + '</disabled></client_buffer>', line)
-            new_config += line
+        content = f.read()
+        new_config = re.sub(re.search(directories_regex, content).group(1), directory, content)
+        new_config = re.sub(re.search(sync_eps_regex, content).group(1), str(sync_eps), new_config)
+        new_config = re.sub(re.search(fim_eps_regex, content).group(1), str(fim_eps), new_config)
+        new_config = re.sub(re.search(buffer_regex, content).group(1), buffer, new_config)
 
         with open(agent_conf, 'w') as conf:
             conf.write(new_config)
+
     # Set Read/Write permissions to agent.conf
     os.chmod(agent_conf, 0o666)
 
@@ -618,18 +621,18 @@ def clean_environment():
     (Cases.case1.value, True, False, False),
     (Cases.case2.value, False, True, False)
 ])
-@pytest.mark.parametrize('eps, files, directory, buffer', [
-    ('200', '0', '/test0k', 'no'),
-    ('200', '5000', '/test5k', 'no'),
-    ('5000', '5000', '/test5k', 'no'),
-    ('200', '50000', '/test50k', 'no'),
-    ('5000', '50000', '/test50k', 'yes'),
-    ('200', '1000000', '/test1M', 'yes'),
-    ('5000', '1000000', '/test1M', 'yes'),
-    ('1000000', '1000000', '/test1M', 'yes'),
+@pytest.mark.parametrize('sync_eps, fim_eps, files, directory, buffer', [
+    ('200', '200', '0', '/test0k', 'no'),
+    ('200', '200', '5000', '/test5k', 'no'),
+    ('5000', '200', '5000', '/test5k', 'no'),
+    ('200', '200', '50000', '/test50k', 'no'),
+    ('5000', '200', '50000', '/test50k', 'yes'),
+    ('200', '200', '1000000', '/test1M', 'yes'),
+    ('5000', '200', '1000000', '/test1M', 'yes'),
+    ('1000000', '200', '1000000', '/test1M', 'yes'),
 ])
-def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_file, modify_all, restore_all,
-                                    initial_clean, modify_local_internal_options):
+def test_initialize_stats_collector(fim_eps, sync_eps, files, directory, buffer, case, modify_file, modify_all,
+                                    restore_all, initial_clean, modify_local_internal_options):
     """Execute and launch all the necessary processes to check all the cases with all the specified configurations."""
     agents_dict = get_agents()
     attempts_info = Manager().dict({
@@ -648,17 +651,19 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
         'prefix': 'file_'
     }
     protocol = protocol_detection()
-    configuration = f'{str(len(agents_dict.keys()))}agents_case{case}_{protocol}_{eps}eps_{files}files_client-buffer-' \
+    configuration = f'{str(len(agents_dict.keys()))}agents_case{case}_{protocol}_{sync_eps}' \
+                    f'sync_eps_{fim_eps}fim_eps_{files}files_client-buffer-' \
                     f'{"enabled" if buffer == "no" else "disabled"}'
 
     # If we are in case 1 or in case 2 and the number of files is 0, we will not execute the test since we cannot
     # modify the checksums because they do not exist
     if not (case == 1 and files == '0') and not (case == 2 and files == '0'):
-        logger.info(f'Setting up the environment for for case{case}_{protocol}-{eps}eps-{files}files')
+        logger.info(f'Setting up the environment for for case{case}_{protocol}-{sync_eps}sync_eps_{fim_eps}fim_eps-'
+                    f'{files}files')
         truncate_file(ALERT_FILE_PATH)
         # Only modify the configuration if case 0 is executing
         if case == Cases.case0.value:
-            replace_conf(eps, directory, buffer)
+            replace_conf(sync_eps, fim_eps, directory, buffer)
 
         # Launch one process for agent due to FileMonitor restriction (block the execution)
         for agent_id in agents_dict.keys():
@@ -678,7 +683,7 @@ def test_initialize_stats_collector(eps, files, directory, buffer, case, modify_
             seconds += setup_environment_time
 
         # We started the stats collector as the agents are ready
-        logger.info(f'Started test for case{case}_{protocol}-{eps}eps-{files}files')
+        logger.info(f'Started test for case{case}_{protocol}-{sync_eps}sync_eps_{fim_eps}fim_eps-{files}files')
         state_collector_check = Process(target=state_collector, args=(agents_dict, configuration, stats_dir,
                                                                       attempts_info,))
         state_collector_check.start()
