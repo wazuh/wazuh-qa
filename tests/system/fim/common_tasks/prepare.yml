@@ -38,7 +38,7 @@
 
   - name: Copy {{ files_config_source_path }} to the Agents hosts | Linux
     template:
-        src: "../../common_tasks/files_configuration.json.jinja"
+        src: "../../common_tasks/files_configuration.json.j2"
         dest: "{{ files_config_linux_destination_path }}"
     vars:
       agents_fim_testing_path: "{{ files_fim_testing_linux }}"
@@ -70,28 +70,28 @@
 
   - name: Copy {{ files_config_source_path }} to the Agents hosts | Windows
     template:
-        src: "../../common_tasks/files_configuration.json.jinja"
+        src: "../../common_tasks/files_configuration.json.j2"
         dest: "{{ files_config_windows_destination_path }}"
     vars:
       agents_fim_testing_path: "{{ files_fim_testing_windows }}"
 
   - name: Stop wazuh-agent service | Windows
-    win_service: 
-      name: OssecSvc 
-      start_mode: auto 
+    win_service:
+      name: OssecSvc
+      start_mode: auto
       state: stopped
 
   - name: Copy {{ files_config_agent_windows_ossec_conf }} to the agents hosts | Windows
     win_copy:
         src: "config/{{ files_config_agent_windows_ossec_conf }}"
         dest: "{{ windows_ossec_folder_path }}/ossec.conf"
-      
+
   - name: Start wazuh-agent service | Windows
-    win_service: 
-      name: OssecSvc 
-      start_mode: auto 
+    win_service:
+      name: OssecSvc
+      start_mode: auto
       state: started
-       
+
 
   when:
     - inventory_hostname in groups['windowsagents']
