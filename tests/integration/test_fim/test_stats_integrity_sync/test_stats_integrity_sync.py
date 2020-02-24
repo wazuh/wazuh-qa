@@ -482,26 +482,24 @@ def info_collector(agent, agent_id, filename, attempts_info, configuration, actu
     agent_df.to_csv(filename, index=False)
 
 
-def state_collector(agents_dict, configuration, stats_dir, attempts_info):
+def state_collector(agents_dict, configuration, stats_path, attempts_info):
     """Get the stats of the .state files in the WAZUH_PATH/var/run folder.
     We can define the stats to get from each daemon in the daemons_dict.
 
     Parameters
     ----------
-    case : int
-        Case number.
     agents_dict : dict of shared dict
         Dictionary with the start time of every agent.
     configuration : str
         Test configuration
-    stats_dir : str
+    stats_path : str
         Stats folder.
     attempts_info : shared dict
         Dictionary with a flag that indicates if the stats collector must start.
     """
 
     def get_csv(daemon_df='ossec-analysisd'):
-        filename_df = os.path.join(os.path.join(stats_dir, f"state-{daemon_df}.csv"))
+        filename_df = os.path.join(os.path.join(stats_path, f"state-{daemon_df}.csv"))
         try:
             return pd.read_csv(filename_df)
         except FileNotFoundError:
@@ -540,7 +538,7 @@ def state_collector(agents_dict, configuration, stats_dir, attempts_info):
 
     if states_exists:
         for daemon, df in daemons_dict.items():
-            filename = os.path.join(os.path.join(stats_dir, f"state-{daemon}.csv"))
+            filename = os.path.join(os.path.join(stats_path, f"state-{daemon}.csv"))
             df.to_csv(filename, index=False)
         logger.info(f'Finished state collector')
 
@@ -624,12 +622,20 @@ def clean_environment():
 @pytest.mark.parametrize('sync_eps, fim_eps, files, directory, buffer', [
     ('200', '200', '0', '/test0k', 'no'),
     ('200', '200', '5000', '/test5k', 'no'),
-    ('5000', '200', '5000', '/test5k', 'no'),
+    ('1000', '200', '5000', '/test5k', 'no'),
+    ('5000', '200', '5000', '/test5k', 'yes'),
+    ('200', '200', '10000', '/test10k', 'no'),
+    ('1000', '200', '10000', '/test10k', 'no'),
+    ('5000', '200', '10000', '/test10k', 'yes'),
+    ('200', '200', '25000', '/test25k', 'no'),
+    ('1000', '200', '25000', '/test25k', 'no'),
+    ('5000', '200', '25000', '/test25k', 'yes'),
     ('200', '200', '50000', '/test50k', 'no'),
+    ('1000', '200', '50000', '/test50k', 'no'),
     ('5000', '200', '50000', '/test50k', 'yes'),
-    ('200', '200', '1000000', '/test1M', 'yes'),
-    ('5000', '200', '1000000', '/test1M', 'yes'),
-    ('1000000', '200', '1000000', '/test1M', 'yes'),
+    ('200', '200', '100000', '/test100k', 'no'),
+    ('1000', '200', '100000', '/test100k', 'no'),
+    ('5000', '200', '100000', '/test100k', 'yes'),
 ])
 def test_initialize_stats_collector(fim_eps, sync_eps, files, directory, buffer, case, modify_file, modify_all,
                                     restore_all, initial_clean, modify_local_internal_options):
