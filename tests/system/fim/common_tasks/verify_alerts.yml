@@ -6,7 +6,7 @@
     when: 
       - inventory_hostname in groups['masters']
 
-  - name: "Verify alert json log"
+  - name: "Verify alert json log | {{ event }}"
     script: >
       verify_alerts_json.py -i {{ item.path }} -e {{ event }} 
       -o {{ missing_alerts_json_path }}
@@ -17,7 +17,7 @@
     with_items: 
       - "{{ find_result.files }}"
 
-  - name: "Verify elastic alerts"
+  - name: "Verify elastic alerts | {{ event }}"
     script: >
       verify_alerts_elasticsearch.py -i {{ item.path }} -e {{ event }} 
       -a {{ hostvars[groups["elasticsearch"][0]]["private_ip"] }}

@@ -12,7 +12,7 @@ files_deleted_output_path: "files_deleted.txt"
 
 # FIM testing folder
 files_fim_testing_linux: "/opt/fim_testing"
-files_fim_testing_windows: C:\\fim_testing
+files_fim_testing_windows: c:\\fim_testing
 
 ### Config files
 files_config_source_path: "files_configuration.json"
