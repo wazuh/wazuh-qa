@@ -31,12 +31,12 @@
       flat: yes
 
   when:
-  - inventory_hostname in groups['windowsagents']
+   - inventory_hostname in groups['windowsagents']
 
 - name: Copy the output files from Ansible Controller to the Managers
   become: true
   synchronize:
-    src: "agents_outputs/added/"
+    src: "agents_outputs/modified/"
     dest: "{{ agents_results_manager_path }}/{{ event }}/"
   when:
     - inventory_hostname in groups['masters']
