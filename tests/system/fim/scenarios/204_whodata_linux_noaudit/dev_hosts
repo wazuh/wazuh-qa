@@ -1,0 +1,167 @@
+
+elasticsearch:
+    hosts:
+        172.16.0.161:
+            private_ip: 172.16.0.161
+            elasticsearch_network_host: 172.16.0.161
+            elasticsearch_reachable_host: 172.16.0.161
+            elasticsearch_cluster_nodes:
+                - "172.16.0.161"
+            elasticsearch_node_name: node-1
+            elasticsearch_bootstrap_node: true
+            node_certs_generator: true
+            instances:
+                node1:
+                    name: node-1
+                    ip: 172.16.0.161
+    vars:
+        ansible_ssh_user: vagrant
+        ansible_ssh_private_key_file: ~/.ssh/id_rsa
+        ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+        elastic_stack_version: 7.5.2
+        single_node: false
+        elasticsearch_node_master: true
+        elasticsearch_xpack_security: false
+        elasticsearch_xpack_security_user: wazuh
+        elasticsearch_xpack_security_password: AMMFy5ZgUyGhkRwa
+
+masters:
+    hosts:
+        172.16.0.111:
+            wazuh_api_user:
+                - 'wazuh:AMMFy5ZgUyGhkRwa'
+            private_ip: 172.16.0.111
+            filebeat_node_name: node-1
+    vars:
+        ansible_ssh_user: vagrant
+        ansible_ssh_private_key_file: ~/.ssh/id_rsa
+        ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+        wazuh_manager_version: 3.11.3-1
+        wazuh_custom_packages_installation_manager_enabled: true
+        wazuh_custom_packages_installation_manager_deb_url: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/warehouse/branches/3.12/deb/var/wazuh-manager_3.12.0-0.3319fimreworksqlite_amd64.deb"
+        wazuh_custom_packages_installation_manager_rpm_url: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/warehouse/branches/3.12/rpm/var/wazuh-manager-3.12.0-0.3319fimreworksqlite.x86_64.rpm"
+        wazuh_custom_packages_installation_api_enabled: true
+        wazuh_custom_packages_installation_api_deb_url: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/warehouse/branches/3.12/deb/var/wazuh-api_3.12.0-0.3319fimreworksqlite_amd64.deb"
+        wazuh_custom_packages_installation_api_rpm_url: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/warehouse/branches/3.12/rpm/var/wazuh-api-3.12.0-0.3319fimreworksqlite.x86_64.rpm"
+
+        # wazuh_manager_sources_installation:
+        #   enabled: true
+        #   branch: 3319-fim-rework-sqlite
+        # wazuh_api_sources_installation:
+        #   enabled: true
+        #   branch: 3319-fim-rework-sqlite
+        wazuh_manager_config:
+          connection:
+            - type: 'secure'
+              port: '1514'
+              protocol: 'tcp'
+              queue_size: 131072
+          api:
+            port: "55000"
+            https: 'yes'
+          cluster:
+            disable: 'no'
+            name: 'wazuh'
+            node_name: 'master'
+            node_type: 'master'
+            key: '3ab980499de48d0998a39b338b7b750a'
+            port: '1516'
+            bind_addr: '0.0.0.0'
+            nodes:
+              - '172.16.0.111'
+            hidden: 'no'
+        filebeat_version: 7.5.2
+        filebeat_xpack_security: false
+        elasticsearch_xpack_security_user: wazuh
+        elasticsearch_xpack_security_password: AMMFy5ZgUyGhkRwa
+        filebeat_output_elasticsearch_hosts:
+          - "172.16.0.161"
+
+workers:
+
+
+kibana:
+    hosts:
+        172.16.0.161:
+            private_ip: 172.16.0.161
+            elasticsearch_network_host: 172.16.0.161
+            elasticsearch_reachable_host: 172.16.0.161
+            elasticsearch_node_name: node-1
+            single_node: false
+            elasticsearch_xpack_security: false
+            elasticsearch_xpack_security_user: elastic
+            elasticsearch_xpack_security_password: AMMFy5ZgUyGhkRwa
+            elasticsearch_node_master: false
+            elasticsearch_node_ingest: false
+            elasticsearch_node_data: false
+            elasticsearch_discovery_nodes:
+                - "172.16.0.161"
+            kibana_node_name: node-1
+
+    vars:
+        ansible_ssh_user: vagrant
+        ansible_ssh_private_key_file: ~/.ssh/id_rsa
+        ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+        elastic_stack_version: 7.5.2
+        wazuh_version: 3.11.3
+        kibana_xpack_security: false
+        wazuh_api_credentials:
+            - id: default
+              url: https://172.16.0.111
+              port: 55000
+              user: wazuh
+              password: AMMFy5ZgUyGhkRwa
+        build_from_sources: false
+        wazuh_plugin_branch: 3.11.3_7.5.2
+
+linuxagents:
+    hosts:
+        172.16.0.131:
+            private_ip: 172.16.0.131
+            wazuh_agent_authd:
+                enable: true
+                port: 1515
+                ssl_agent_ca: null
+                ssl_auto_negotiate: 'no'
+                agent_name: Centos
+    vars:
+        ansible_ssh_user: vagrant
+        ansible_ssh_private_key_file: ~/.ssh/id_rsa
+        ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+        wazuh_agent_version: 3.11.3-1
+        wazuh_custom_packages_installation_agent_enabled: true
+        wazuh_custom_packages_installation_agent_deb_url: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/warehouse/branches/3.12/deb/var/wazuh-agent_3.12.0-0.3319fimreworksqlite_amd64.deb"
+        wazuh_custom_packages_installation_agent_rpm_url: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/warehouse/branches/3.12/rpm/var/wazuh-agent-3.12.0-0.3319fimreworksqlite.x86_64.rpm"
+        # wazuh_agent_sources_installation:
+        #     enabled: true
+        #     branch: 3319-fim-rework-sqlite
+        wazuh_managers:
+            - address: 172.16.0.111
+              protocol: tcp
+
+
+windowsagents:
+    hosts:
+        172.16.0.141:
+            python_interpreter: "C:\\Python38"
+            private_ip: 172.16.0.141
+            wazuh_agent_authd:
+                enable: true
+                port: 1515
+                ssl_agent_ca: null
+                ssl_auto_negotiate: 'no'
+                agent_name: Windows
+    vars:
+        ansible_ssh_user: Administrator
+        ansible_ssh_pass: vagrant
+        ansible_ssh_port: 5986
+        ansible_connection: winrm
+        ansible_winrm_server_cert_validation: ignore
+        wazuh_winagent_config_url: https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/warehouse/branches/3.12/windows/wazuh-agent-3.12.0-0.3319fimreworksqlite.msi
+        wazuh_winagent_package_name: wazuh-agent-3.12.0-0.3319fimreworksqlite.msi
+        wazuh_winagent_config:
+             md5: b2629b5eebdb799e21333ae2656f206a
+        wazuh_managers:
+            - address: 172.16.0.111
+              protocol: tcp
+
