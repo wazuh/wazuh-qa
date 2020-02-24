@@ -78,7 +78,7 @@ def modify_file_text_content(filepath, sentence):
     :param str sentence: A setnence of 1 or more words.
     """
     with open(filepath, 'a') as file:
-        file.write(sentence)
+        file.write('\n'+sentence)
 
 def log_modified_files(files_path, logfile):
     """
