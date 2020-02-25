@@ -264,6 +264,29 @@ def n_completions(agent):
         raise AttributeError(f'[ERROR] Bad response (n_completions) from wazuh-db: {response}')
 
 
+def get_files_with_checksum(agent, checksum, total_files=5000):
+    """Get the number of files with the specified checksum in the agent database.
+
+    Parameters
+    ----------
+    agent : str
+        Agent id.
+    checksum : str
+        Specified checksum.
+    total_files : int
+        Total files of this test.
+
+    Returns
+    -------
+    str
+        Percentage of the remaining files with the custom checksum.
+    """
+    count_regex = r'ok \[{\"count\(file\)\":([0-9]+)\}\]'
+    completions = db_query(agent, f'SELECT count(file) FROM fim_entry WHERE checksum="{checksum}"')
+
+    return str((int(re.search(count_regex, completions).group(1)) / total_files) * 100)
+
+
 def get_agents(client_keys='/var/ossec/etc/client.keys'):
     """These function extract all agent ids in the client.keys file. It will not extract the ids that are removed (!)
 
@@ -312,18 +335,16 @@ def replace_conf(sync_eps, fim_eps, directory, buffer):
     buffer : str
         Can be yes or no, <disabled>yes|no</disabled>.
     """
-    directories_regex = r"[\s\S]*<directories check_all=\"yes\">[\n\t ]*(.*)[\n\t ]*</directories>[\s\S]*"
-    fim_eps_regex = r"[\s\S]*<syscheck>[\s\S]*<max_eps>[\n\t ]*(200)[\n\t ]*</max_eps>[\s\S]*<synchronization>[\s\S]*"
-    sync_eps_regex = \
-        r"[\s\S]*<synchronization>[\s\S]*<max_eps>[\n\t ]*(10)[\n\t ]*</max_eps>[\s\S]*</synchronization>[\s\S]*"
-    buffer_regex = r'[\s\S]*<client_buffer><disabled>(yes|no)</disabled></client_buffer>[\s\S]*'
-
+    directories_regex = r"<directories check_all=\"yes\">(TESTING_DIRECTORY)</directories>"
+    fim_eps_regex = r"<max_eps>(FIM_EPS)</max_eps>"
+    sync_eps_regex = r"<max_eps>(SYNC_EPS)</max_eps>"
+    buffer_regex = r'<client_buffer><disabled>(CLIENT)</disabled></client_buffer>'
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'template_agent.conf'), 'r') as f:
         content = f.read()
         new_config = re.sub(re.search(directories_regex, content).group(1), directory, content)
-        new_config = re.sub(re.search(sync_eps_regex, content).group(1), str(sync_eps), new_config)
-        new_config = re.sub(re.search(fim_eps_regex, content).group(1), str(fim_eps), new_config)
-        new_config = re.sub(re.search(buffer_regex, content).group(1), buffer, new_config)
+        new_config = re.sub(re.search(sync_eps_regex, new_config).group(1), str(sync_eps), new_config)
+        new_config = re.sub(re.search(fim_eps_regex, new_config).group(1), str(fim_eps), new_config)
+        new_config = re.sub(re.search(buffer_regex, new_config).group(1), buffer, new_config)
 
         with open(agent_conf, 'w') as conf:
             conf.write(new_config)
@@ -372,6 +393,7 @@ def modify_database(agent_id, directory, prefix, total_files, modify_file, modif
     restore_all
         Flag that indicate if all entries in the fim_entry table should be deleted.
     """
+    checksum = None
     if modify_file:
         total_files = int(total_files)
         if total_files == 0:
@@ -390,8 +412,10 @@ def modify_database(agent_id, directory, prefix, total_files, modify_file, modif
     db_query(agent_id, 'UPDATE sync_info SET n_attempts=0')
     db_query(agent_id, 'UPDATE sync_info SET n_completions=0')
 
+    return checksum
 
-def agent_checker(case, agent_id, agents_dict, filename, attempts_info, database_params, configuration):
+
+def agent_checker(case, agent_id, agents_dict, filename, attempts_info, database_params, configuration, num_files):
     """Check that the current agent is restarted. When it has been restarted, marks the start time of the agent.
     If n_completions of the agent_id is greater than 0, the info_collector must be called.
 
@@ -411,6 +435,8 @@ def agent_checker(case, agent_id, agents_dict, filename, attempts_info, database
         Database params to be applied for the current test.
     configuration : str
         Test configuration
+    num_files : str
+        Number of files of this test
     """
     if case == Cases.case0.value:
         alerts = open(ALERT_FILE_PATH, 'w')
@@ -426,7 +452,7 @@ def agent_checker(case, agent_id, agents_dict, filename, attempts_info, database
         FileMonitor(ALERT_FILE_PATH).start(timeout=max_time_for_agent_setup,
                                            callback=callback_detect_agent_restart).result()
 
-    modify_database(agent_id, **database_params)
+    checksum = modify_database(agent_id, **database_params)
 
     while True:
         actual_n_attempts = n_attempts(agent_id)
@@ -439,13 +465,13 @@ def agent_checker(case, agent_id, agents_dict, filename, attempts_info, database
         if agents_dict[agent_id]['start'] and (actual_n_attempts > max_n_attempts or actual_n_completions > 0):
             state = 'complete' if actual_n_attempts < max_n_attempts else 'except_max_attempts'
             info_collector(agents_dict[agent_id], agent_id, filename, attempts_info, configuration, actual_n_attempts,
-                           actual_n_completions, state=state)
+                           actual_n_completions, state=state, checksum=checksum, num_files=num_files)
             break
         time.sleep(setup_environment_time)
 
 
 def info_collector(agent, agent_id, filename, attempts_info, configuration, actual_n_attempts,
-                   actual_n_completions, state='complete'):
+                   actual_n_completions, num_files, state='complete', checksum=None):
     """Write the stats of the agent during the test.
 
     This stats will be written when the agent finish its test process (n_completions(agent_id) > 0).
@@ -460,16 +486,20 @@ def info_collector(agent, agent_id, filename, attempts_info, configuration, actu
         Path of the agent's info file.
     attempts_info : shared dict
         Dictionary with a flag that indicates if the stats collector must start.
+    num_files : str
+        Number of files of this test
     state : str
         complete of except_max_attempts: Indicates if the agent took less attempts than the defined limits or not.
     configuration : str
         Test configuration
+    checksum : str or None
+        New checksum for files or None if there is no modifications
     """
     try:
         agent_df = pd.read_csv(filename)
     except FileNotFoundError:
         agent_df = pd.DataFrame(columns=["configuration", "agent_id", "n_attempts", "n_completions", "start_time",
-                                         "end_time", "total_time", "state"])
+                                         "end_time", "total_time", "state", "complete(%)"])
     if state != 'complete':
         attempts_info['except_max_attempts'] = True
         attempts_info['agents_failed'] += 1
@@ -477,8 +507,14 @@ def info_collector(agent, agent_id, filename, attempts_info, configuration, actu
         f"Info {agent_id} writing: "
         f"{agent_id},{actual_n_attempts},{actual_n_completions},{agent['start']},"
         f"{time.time()},{time.time() - agent['start']},{state}")
+    if state != 'complete' and checksum:
+        completion = get_files_with_checksum(agent_id, checksum, int(num_files))
+    elif state != 'complete' and not checksum:
+        completion = 'Case0: no checksums modified'
+    else:
+        completion = None
     agent_df.loc[len(agent_df)] = [configuration, agent_id, actual_n_attempts, actual_n_completions,
-                                   agent['start'], time.time(), time.time() - agent['start'], state]
+                                   agent['start'], time.time(), time.time() - agent['start'], state, completion]
     agent_df.to_csv(filename, index=False)
 
 
@@ -675,7 +711,8 @@ def test_initialize_stats_collector(fim_eps, sync_eps, files, directory, buffer,
         for agent_id in agents_dict.keys():
             filename = os.path.join(stats_dir, f"info.csv")
             agents_checker.append(Process(target=agent_checker, args=(case, agent_id, agents_dict, filename,
-                                                                      attempts_info, database_params, configuration,)))
+                                                                      attempts_info, database_params, configuration,
+                                                                      files)))
             agents_checker[-1].start()
 
         # Block the test until one agent starts
