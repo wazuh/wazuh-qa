@@ -15,7 +15,7 @@
       - FIM_MODE
   - max_eps:
       value: MAX_EPS
-#  - synchronization:
-#      elements:
-#      - enabled:
-#          value: 'no'
+  - synchronization:
+      elements:
+      - enabled:
+          value: 'no'

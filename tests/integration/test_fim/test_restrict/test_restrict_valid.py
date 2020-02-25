@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import sys
 from datetime import timedelta
 
 import pytest
@@ -63,9 +64,12 @@ def get_configuration(request):
     ("restricted", "w", "Test", False, {'valid_regex'}),
     ("myfilerestricted", "w", "", True, {'valid_regex_3'}),
     ("myother_restricted", "wb", b"", True, {'valid_regex_3'}),
-    ('fileinfolder', 'w', "Sample content", True, {'valid_regex_incomplete'}),
-    ('fileinfolder1', 'wb', b"Sample content", True, {'valid_regex_incomplete'}),
-    ('testing_regex', 'w', "", False, {'valid_regex_incomplete'}),
+    ('fileinfolder', 'w', "Sample content", True,
+     {f'valid_regex_incomplete_{"win" if sys.platform == "win32" else "unix"}'}),
+    ('fileinfolder1', 'wb', b"Sample content", True,
+     {f'valid_regex_incomplete_{"win" if sys.platform == "win32" else "unix"}'}),
+    ('testing_regex', 'w', "", False,
+     {f'valid_regex_incomplete_{"win" if sys.platform == "win32" else "unix"}'}),
 ])
 def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply,
                   get_configuration, configure_environment, restart_syscheckd,

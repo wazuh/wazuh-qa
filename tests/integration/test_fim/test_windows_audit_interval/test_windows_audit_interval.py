@@ -58,7 +58,8 @@ def extra_configuration_before_yield():
     """Get list of SACL before Wazuh applies its own rules based on whodata monitoring."""
     with Privilege('SeSecurityPrivilege'):
         lfss = get_file_security_descriptor(testdir_restore)
-        setattr(sys.modules[__name__], 'previous_rules', get_sacl(lfss))
+        sacl = get_sacl(lfss) if get_sacl(lfss) is not None else set()
+        setattr(sys.modules[__name__], 'previous_rules', sacl)
 
 
 def callback_sacl_changed(line):
