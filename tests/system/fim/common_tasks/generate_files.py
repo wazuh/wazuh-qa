@@ -140,6 +140,8 @@ def create_files(files_path, text_mode=False):
             else:
                 f.write(one_char * value)
             f.write(unique(16))
+            if text_mode:
+                f.write("\n")
 
 
 def create_file_summary(files_path, logfile):
