@@ -56,8 +56,7 @@ def test_invalid(tags_to_apply, get_configuration, configure_environment):
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     # Configuration error -> ValueError raised
-    with pytest.raises(ValueError):
-        control_service('restart')
+    control_service('restart')
     wazuh_log_monitor.start(timeout=3, callback=callback_configuration_error,
                             error_message='Did not receive expected '
                                           '"CRITICAL: ...: Configuration error at" event')
