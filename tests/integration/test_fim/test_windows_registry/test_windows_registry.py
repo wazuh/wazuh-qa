@@ -61,7 +61,7 @@ def get_configuration(request):
 def extra_configuration_before_yield():
     # It makes sure to delete the registry if it already exists.
     try:
-        delete_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 32)
+        delete_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, winreg.KEY_WOW64_32KEY)
     except OSError:
         pass
 
@@ -91,12 +91,12 @@ def test_windows_registry(arch_list, tag, tags_to_apply,
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Check that configuration is applying to the correct test
-    if (tag and 'tags' not in get_configuration['metadata']['attribute'].keys() or
-            len(arch_list) > 1 and 'arch' not in get_configuration['metadata']['attribute'].keys()):
+    if ((tag and 'tags' not in get_configuration['metadata']['attribute'].keys()) or
+            (len(arch_list) > 1 and 'arch' not in get_configuration['metadata']['attribute'].keys())):
         pytest.skip("Does not apply to this config file")
 
     # Check that windows_registry does not trigger alerts for new keys
-    create_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 32)
+    create_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, winreg.KEY_WOW64_32KEY | winreg.KEY_WRITE)
     TimeMachine.travel_to_future(timedelta(seconds=frequency))
     with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
@@ -131,7 +131,7 @@ def test_windows_registry(arch_list, tag, tags_to_apply,
             assert event[i]['data']['tags'] == tag, f'{tag} not found in event'
 
     # Check that windows_registry trigger alerts when deleting a key
-    delete_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 32)
+    delete_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, winreg.KEY_WOW64_32KEY)
     TimeMachine.travel_to_future(timedelta(seconds=frequency))
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                     error_message='Did not receive expected "Sending FIM event: ..." event',
