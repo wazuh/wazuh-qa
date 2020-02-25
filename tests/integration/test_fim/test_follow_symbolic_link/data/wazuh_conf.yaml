@@ -12,6 +12,7 @@
       value: '/testdir_link'
       attributes:
       - FIM_MODE
+      - follow_symbolic_link: 'yes'
 # conf 2
 - tags:
   - monitored_file
@@ -30,10 +31,12 @@
       value: '/testdir_link/symlink'
       attributes:
       - FIM_MODE
+      - follow_symbolic_link: 'yes'
   - directories:
       value: '/testdir2'
       attributes:
       - FIM_MODE
+      - follow_symbolic_link: 'yes'
 # conf 3
 - tags:
     - monitored_dir
@@ -51,3 +54,4 @@
       value: '/testdir_link/symlink2'
       attributes:
         - FIM_MODE
+        - follow_symbolic_link: 'yes'
