@@ -46,7 +46,7 @@ def alerts_prune(path, target_event):
                 data = json.loads(line)
                 if data.get('syscheck') and data['syscheck']['event'] == target_event:
                     alerts_list.append(data)
-                    
+
             except ValueError:
                 continue
     return set([alerts['syscheck']['path'] for alerts in alerts_list])
@@ -57,7 +57,7 @@ def main():
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=[
-            logging.FileHandler("verify_alerts_json.log"),
+            logging.FileHandler("verify_alerts_json.log", mode='a'),
             logging.StreamHandler()
         ]
     )
