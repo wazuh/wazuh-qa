@@ -3,12 +3,12 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import shutil
 from collections import Counter
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, create_file, generate_params, callback_event_message, \
-    check_time_travel
+from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, create_file, generate_params, callback_integrity_message
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -18,20 +18,20 @@ from wazuh_testing.tools.monitoring import FileMonitor
 pytestmark = pytest.mark.tier(level=1)
 
 # Variables
-test_directories = [os.path.join(PREFIX, 'testdir1')]
+test_directories_no_delete = [os.path.join(PREFIX, 'testdir1')]
 
-directory_str = ','.join(test_directories)
+directory_str = ','.join(test_directories_no_delete)
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf_synchro.yaml')
 testdir1 = os.path.join(PREFIX, 'testdir1')
 
 # Configurations
 conf_params = {'TEST_DIRECTORIES': directory_str,
                'MODULE_NAME': __name__}
 
-eps_values = ['200', '500', '1000', '2000']
+eps_values = ['1000', '500', '100', '10']
 
 p, m = generate_params(extra_params=conf_params, apply_to_all=({'MAX_EPS': eps_value} for eps_value in eps_values))
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
@@ -45,25 +45,34 @@ def get_configuration(request):
     return request.param
 
 
-def test_max_eps(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
-    """
-    Check that max_eps is respected when a big quantity of syscheck events are generated.
-
-    During the test, a big quantity of files are created and the max number of event occurrences per second is measured
-    to ensure it never exceeds max_eps
-    """
-    check_apply_test({'max_eps'}, get_configuration['tags'])
-
-    max_eps = int(get_configuration['metadata']['max_eps'])
+@pytest.fixture(scope='module')
+def create_files(get_configuration):
+    max_eps = get_configuration['metadata']['max_eps']
     mode = get_configuration['metadata']['fim_mode']
     for i in range(int(max_eps) * 5):
         create_file(REGULAR, testdir1, f'test{i}_{mode}_{max_eps}', content='')
 
-    check_time_travel(mode == "scheduled")
-    n_results = max_eps * 4
+
+@pytest.fixture(scope='module')
+def delete_files():
+    yield
+    for test_dir in test_directories_no_delete:
+        shutil.rmtree(test_dir, ignore_errors=True)
+
+
+def test_max_eps_on_start(get_configuration, create_files, configure_environment, restart_syscheckd, delete_files):
+    """
+    Check that max_eps is respected when a big quantity of synchronization events are generated
+
+    Before starting the service, a number of files is created thanks to fixture create_files.
+    After that, syscheck is launched and starts generating synchronization events.
+    """
+    check_apply_test({'max_eps_synchronization'}, get_configuration['tags'])
+    max_eps = int(get_configuration['metadata']['max_eps'])
+    n_results = max_eps * 5
     result = wazuh_log_monitor.start(timeout=(n_results/max_eps)*3,
                                      accum_results=n_results,
-                                     callback=callback_event_message,
+                                     callback=callback_integrity_message,
                                      error_message=f'Received less results than expected ({n_results})').result()
 
     counter = Counter([date_time for date_time, _ in result])
