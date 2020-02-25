@@ -213,7 +213,7 @@ def create_registry(key, subkey, arch):
     subkey : str
         The subkey (name) of the registry.
     """
-    sys.platform == 'win32' and winreg.CreateKey(key, subkey)
+    sys.platform == 'win32' and winreg.CreateKeyEx(key, subkey, access=arch)
 
 
 def _create_fifo(path, name):
@@ -810,6 +810,11 @@ def callback_empty_directories(line):
         return True
     else:
         return None
+
+
+def callback_real_time_whodata_started(line):
+    if 'File integrity monitoring real-time Whodata engine started' in line:
+        return True
 
 
 def check_time_travel(time_travel):
