@@ -31,7 +31,7 @@ def paths_acquisition(filenames_list_path):
     return set([i[:-1] for i in filenames_list])
 
 
-def alerts_prune(path, target_event, diff_statement):
+def alerts_prune(path, target_event, diff_statement=None):
     """
         Prunes desired syscheck events from the alert.json file.
         Extracts all events path to a set.
@@ -47,11 +47,13 @@ def alerts_prune(path, target_event, diff_statement):
                 data = json.loads(line)
                 if data.get('syscheck') and \
                    data['syscheck']['event'] == target_event:
-                    if ((diff_statement is not None) and \
-                        (diff_statement not in data['syscheck']['diff'])):
-                        add_path = False
+                    if (diff_statement is not None) and \
+                       ('diff' in data['syscheck']) and \
+                       (diff_statement not in data['syscheck']['diff']):
+                            add_path = False
                     if add_path:
                         alerts_list.append(data)
+                    add_path = True
                     
             except ValueError:
                 continue
@@ -102,6 +104,7 @@ def main():
         stuck_alerts = 0
 
         paths_list_set = paths_acquisition(args.input_file)
+        print(args.diff_string)
         pruned_alerts_set = alerts_prune(args.log_json_path, args.event, args.diff_string)
         sub_paths = paths_list_set - pruned_alerts_set
         prev_lenght = len(sub_paths)
