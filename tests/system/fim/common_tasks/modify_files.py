@@ -77,8 +77,10 @@ def modify_file_text_content(filepath, sentence):
     :param str filepath: The path of the file to modify
     :param str sentence: A setnence of 1 or more words.
     """
-    with open(filepath, 'a') as file:
-        file.write('\n'+sentence)
+    with open(filepath, 'r+') as file:
+        content = file.read()
+        file.seek(0, 0)
+        file.write(sentence.rstrip('\r\n') + '\n' + content)
 
 def log_modified_files(files_path, logfile):
     """
