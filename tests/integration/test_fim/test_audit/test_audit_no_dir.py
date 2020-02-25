@@ -3,7 +3,6 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 
-import json
 import os
 import shutil
 import sys
@@ -11,11 +10,9 @@ import sys
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import REGULAR, create_file, generate_params, callback_audit_unable_dir, \
-    callback_audit_added_rule, callback_detect_anything
+from wazuh_testing.fim import generate_params, callback_audit_unable_dir, callback_audit_added_rule
 from wazuh_testing.tools import PREFIX, LOG_FILE_PATH, ALERT_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
-from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
@@ -88,16 +85,8 @@ def test_audit_no_dir(tags_to_apply, get_configuration, configure_environment, r
                                      ).result()
     assert result == testdir, f'{testdir} not in "Unable to add audit rule for {result}" message'
 
-    # Create non-existent directory and verify that it is added to the audit rules. It is checked every 30 seconds.
+    # Create the directory and verify that it is added to the audit rules. It is checked every 30 seconds.
     os.makedirs(testdir)
     result = wazuh_log_monitor.start(timeout=30, callback=callback_audit_added_rule,
                                      error_message='Folders were not added to Audit rules list').result()
     assert result == testdir, f'{testdir} not in "Added audit rule for monitoring directory: {result}" message'
-
-    # Create file inside and verify that it generates alert in alerts.json.
-    truncate_file(ALERT_FILE_PATH)
-    create_file(REGULAR, testdir, filename, content='testcontent')
-    result = json.loads(wazuh_alert_monitor.start(timeout=global_parameters.default_timeout,
-                                                  callback=callback_detect_anything,
-                                                  error_message='No alert found').result())
-    assert result['syscheck']['path'] == os.path.join(testdir, filename), f'Not correct alert. {result}.'
