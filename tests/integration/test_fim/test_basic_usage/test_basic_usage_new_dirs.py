@@ -4,6 +4,8 @@
 
 import os
 import shutil
+import sys
+import time
 
 import pytest
 
@@ -76,13 +78,17 @@ def test_new_directory(tags_to_apply, get_configuration, configure_environment, 
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    # Create the monitored directory with files and check that events are not raised
-    regular_file_cud(directory_str, wazuh_log_monitor, file_list=['file1', 'file2', 'file3'],
-                     min_timeout=global_parameters.default_timeout, triggers_event=False)
+    if sys.platform != 'win32':
+        # Create the monitored directory with files and check that events are not raised
+        regular_file_cud(directory_str, wazuh_log_monitor, file_list=['file1', 'file2', 'file3'],
+                         min_timeout=global_parameters.default_timeout, triggers_event=False)
 
-    # Travel to the future to start next scheduled scan
-    check_time_travel(True)
-    detect_initial_scan(wazuh_log_monitor)
+        # Travel to the future to start next scheduled scan
+        check_time_travel(True)
+        detect_initial_scan(wazuh_log_monitor)
+    else:
+        os.makedirs(directory_str, exist_ok=True, mode=0o777)
+        time.sleep(1)
 
     # Assert that events of new CUD actions are raised after next scheduled scan
     regular_file_cud(directory_str, wazuh_log_monitor, file_list=['file4', 'file5', 'file6'],
