@@ -213,7 +213,7 @@ def create_registry(key, subkey, arch):
     subkey : str
         The subkey (name) of the registry.
     """
-    sys.platform == 'win32' and winreg.CreateKey(key, subkey)
+    sys.platform == 'win32' and winreg.CreateKeyEx(key, subkey, access=arch)
 
 
 def _create_fifo(path, name):
@@ -804,6 +804,11 @@ def callback_empty_directories(line):
         return None
 
 
+def callback_real_time_whodata_started(line):
+    if 'File integrity monitoring real-time Whodata engine started' in line:
+        return True
+
+
 def check_time_travel(time_travel):
     """
     Change date and time of the system.
@@ -888,29 +893,32 @@ class EventChecker:
             Message to explain a possible timeout error
         """
         def clean_results(event_list):
+            """Iterate the event_list provided and check if the 'modified' events contained should be merged to fix
+            whodata's bug that raise more than one modification event when a file is modified. If some 'modified' event
+            shares 'path' and 'timestamp' we assume that belongs to the same modification.
+            """
             if not isinstance(event_list, list):
                 return event_list
-            result_list = []
-            previous_event = None
+            result_list = list()
+            previous = None
             while(len(event_list) > 0):
-                current_event = event_list.pop(0)
-                if current_event['data']['type'] == "modified":
-                    if not previous_event:
-                        previous_event = current_event
-                    elif (previous_event['data']['path'] == current_event['data']['path']
-                          and current_event['data']['timestamp'] in [previous_event['data']['timestamp'],
-                                                                     previous_event['data']['timestamp'] + 1]
-                          and set(current_event['data']['changed_attributes']).intersection(
-                              set(previous_event['data']['changed_attributes'])) == set()):
-                        previous_event['data']['changed_attributes'] += current_event['data']['changed_attributes']
-                        previous_event['data']['attributes'] = current_event['data']['attributes']
+                current = event_list.pop(0)
+                if current['data']['type'] == "modified":
+                    if not previous:
+                        previous = current
+                    elif (previous['data']['path'] == current['data']['path'] and
+                          current['data']['timestamp'] in [previous['data']['timestamp'],
+                                                           previous['data']['timestamp'] + 1]):
+                        previous['data']['changed_attributes'] = list(set(previous['data']['changed_attributes']
+                                                                          + current['data']['changed_attributes']))
+                        previous['data']['attributes'] = current['data']['attributes']
                     else:
-                        result_list.append(previous_event)
-                        previous_event = current_event
+                        result_list.append(previous)
+                        previous = current
                 else:
-                    result_list.append(current_event)
-            if previous_event:
-                result_list.append(previous_event)
+                    result_list.append(current)
+            if previous:
+                result_list.append(previous)
             return result_list
 
         try:
