@@ -1,3 +1,4 @@
+
 ---
 # conf 1
 - tags:
@@ -14,3 +15,7 @@
       - FIM_MODE
   - max_eps:
       value: MAX_EPS
+  - synchronization:
+      elements:
+      - enabled:
+          value: 'no'

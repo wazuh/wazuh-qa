@@ -2,15 +2,17 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
+import re
 import shutil
 import sys
+import time
 from datetime import timedelta
 
 import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, WAZUH_PATH, callback_detect_event,
-                               REGULAR, create_file, detect_initial_scan, generate_params)
+                               REGULAR, create_file, generate_params, detect_initial_scan)
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -63,6 +65,20 @@ def get_configuration(request):
 
 # functions
 
+def detect_fim_scan(file_monitor):
+    """
+    Detect initial scan when restarting Wazuh.
+
+    Parameters
+    ----------
+    file_monitor : FileMonitor
+        File log monitor to detect events
+    """
+    detect_initial_scan(file_monitor)
+    if sys.platform == 'win32':
+        time.sleep(5)
+
+
 def wait_for_event(fim_mode):
     """Wait for the event to be scanned.
 
@@ -101,7 +117,7 @@ def create_and_check_diff(name, path, fim_mode):
     diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
     if sys.platform == 'win32':
         diff_file = os.path.join(diff_file, 'c')
-        diff_file = os.path.join(diff_file, path.strip('C:\\'), name)
+        diff_file = os.path.join(diff_file, re.match(r'^[a-zA-Z]:(\\){1,2}(\w+)(\\){0,2}$', path).group(2), name)
     else:
         diff_file = os.path.join(diff_file, path.strip('/'), name)
     assert os.path.exists(diff_file), f'{diff_file} does not exist'
@@ -114,7 +130,7 @@ def disable_report_changes():
     new_ossec_conf = set_section_wazuh_conf(new_conf[0].get('section'), new_conf[0].get('elements'))
     restart_wazuh_with_new_conf(new_ossec_conf)
     # Wait for FIM scan to finish
-    detect_initial_scan(wazuh_log_monitor)
+    detect_fim_scan(wazuh_log_monitor)
 
 
 # tests
@@ -134,7 +150,7 @@ def test_report_when_deleted_directories(path, get_configuration, configure_envi
 
     if sys.platform == 'win32':
         diff_dir = os.path.join(diff_dir, 'c')
-        diff_dir = os.path.join(diff_dir, path.strip('C:\\'), FILE_NAME)
+        diff_dir = os.path.join(diff_dir, re.match(r'^[a-zA-Z]:(\\){1,2}(\w+)(\\){0,2}$', path).group(2), FILE_NAME)
     else:
         diff_dir = os.path.join(diff_dir, path.strip('/'), FILE_NAME)
     create_and_check_diff(FILE_NAME, path, fim_mode)
@@ -164,7 +180,7 @@ def test_no_report_changes(path, get_configuration, configure_environment,
     finally:
         # Restore the original conf file so as not to interfere with other tests
         restart_wazuh_with_new_conf(backup_conf)
-        detect_initial_scan(wazuh_log_monitor)
+        detect_fim_scan(wazuh_log_monitor)
 
 
 def test_report_changes_after_restart(get_configuration, configure_environment, restart_syscheckd,
@@ -187,4 +203,4 @@ def test_report_changes_after_restart(get_configuration, configure_environment, 
     finally:
         # Restore the original conf file so as not to interfere with other tests
         restart_wazuh_with_new_conf(backup_conf)
-        detect_initial_scan(wazuh_log_monitor)
+        detect_fim_scan(wazuh_log_monitor)
