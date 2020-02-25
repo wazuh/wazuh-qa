@@ -75,6 +75,8 @@ if __name__ == "__main__":
         "-s", "--sleep", type=int, required=False, dest='sleep_time',
         help="Sleep time between retries", default="60"
     )
+    parser.add_argument("-d", "--diff", type=str, required=False, 
+        dest='diff_string',help="When syscheck:report_changes enabled, represents the diff text")
     args = parser.parse_args()
 
     query = {
@@ -92,7 +94,10 @@ if __name__ == "__main__":
     index_name = "wazuh-alerts-3.x*"
     retry_count = 0
     logging.info("Elasticsearch alerts verification started")
+    success_ = True
     start = time()
+    diff_statement = args.diff_string
+
     with open(args.files, 'r') as file_list:
         while retry_count < args.max_retry:
             success = 0
@@ -103,8 +108,17 @@ if __name__ == "__main__":
                     line.rstrip()
 
                 query_result = makeQuery(query, es, index_name)
+
                 if query_result['hits']['total']['value'] == 1:
-                    success += 1
+
+                    if (diff_statement is not None) and \
+                       ('diff' in query_result['syscheck']) and \
+                       (diff_statement not in query_result['syscheck']['diff']):
+                        success_ = False
+
+                    if success_:
+                        success += 1
+                    success_ = True
                 else:
                     failure_list.append(line)
                     failure += 1
