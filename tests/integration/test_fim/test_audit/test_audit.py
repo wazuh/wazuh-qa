@@ -13,7 +13,6 @@ from wazuh_testing import logger
 from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_added_rule,
                                callback_audit_connection,
                                callback_audit_health_check,
-                               callback_audit_loaded_rule,
                                callback_audit_reloaded_rule,
                                callback_audit_rules_manipulation,
                                callback_realtime_added_directory,
@@ -133,7 +132,7 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
                                           f'{" ".join(restart_command)}')
 
     events = wazuh_log_monitor.start(timeout=30,
-                                     callback=callback_audit_loaded_rule,
+                                     callback=callback_audit_reloaded_rule,
                                      accum_results=3,
                                      error_message=f'Did not receive expected "load" event with the command '
                                                    f'{" ".join(restart_command)}').result()
