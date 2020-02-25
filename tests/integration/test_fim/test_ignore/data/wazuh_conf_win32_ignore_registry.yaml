@@ -6,6 +6,8 @@
   - test_ignore_registry
   section: syscheck
   elements:
+  - frequency:
+      value: FREQUENCY
   - disabled:
       value: 'no'
   - registry_ignore:
@@ -41,6 +43,8 @@
   - test_ignore_registry
   section: syscheck
   elements:
+  - frequency:
+      value: FREQUENCY
   - disabled:
       value: 'no'
   - registry_ignore:

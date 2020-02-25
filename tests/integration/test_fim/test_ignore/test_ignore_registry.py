@@ -5,6 +5,7 @@
 import os
 import sys
 from datetime import timedelta
+import time
 
 import pytest
 
@@ -43,21 +44,21 @@ sub_keys = [os.path.join(regs[0], 'testreg32'), os.path.join(regs[0], 'testreg64
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
-
-configurations = load_wazuh_configurations(configurations_path, __name__)
+frequency = 10
+configurations = load_wazuh_configurations(configurations_path, __name__, params=[{'FREQUENCY': frequency}])
 
 
 def extra_configuration_before_yield():
     """ Initialize registries for this test """
     reg_handlers = list()
     for reg in regs:
-        create_registry(keys_objects[0], reg, winreg.KEY_WOW64_32KEY | winreg.KEY_WRITE)
-        create_registry(keys_objects[0], reg, winreg.KEY_WOW64_64KEY | winreg.KEY_WRITE)
+        create_registry(keys_objects[0], reg, winreg.KEY_WOW64_32KEY|winreg.KEY_WRITE)
+        create_registry(keys_objects[0], reg, winreg.KEY_WOW64_64KEY|winreg.KEY_WRITE)
 
-    create_registry(keys_objects[0], sub_keys[0], winreg.KEY_WOW64_32KEY | winreg.KEY_WRITE)
-    create_registry(keys_objects[0], sub_keys[1], winreg.KEY_WOW64_64KEY | winreg.KEY_WRITE)
-    create_registry(keys_objects[0], sub_keys[2], winreg.KEY_WOW64_32KEY | winreg.KEY_WRITE)
-    create_registry(keys_objects[0], sub_keys[3], winreg.KEY_WOW64_64KEY | winreg.KEY_WRITE)
+    create_registry(keys_objects[0], sub_keys[0], winreg.KEY_WOW64_32KEY|winreg.KEY_WRITE)
+    create_registry(keys_objects[0], sub_keys[1], winreg.KEY_WOW64_64KEY|winreg.KEY_WRITE)
+    create_registry(keys_objects[0], sub_keys[2], winreg.KEY_WOW64_32KEY|winreg.KEY_WRITE)
+    create_registry(keys_objects[0], sub_keys[3], winreg.KEY_WOW64_64KEY|winreg.KEY_WRITE)
 
 
 def extra_configuration_after_yield():
@@ -99,7 +100,7 @@ def test_ignore_registry(key_string, key_object, tags_to_apply, get_configuratio
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    TimeMachine.travel_to_future(timedelta(hours=13))
+    time.sleep(frequency+1)
 
     ignored_registry = wazuh_log_monitor.start(timeout=10, callback=callback_ignore,
                                                accum_results=len(sub_keys),
