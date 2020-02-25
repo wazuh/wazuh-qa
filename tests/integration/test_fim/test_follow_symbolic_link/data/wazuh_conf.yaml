@@ -12,7 +12,7 @@
       value: '/testdir_link'
       attributes:
       - FIM_MODE
-      - follow_symbolic_link: 'yes'
+      - follow_symbolic_link: FOLLOW_MODE
 # conf 2
 - tags:
   - monitored_file
@@ -23,6 +23,7 @@
     - test_delete_target
     - test_monitor_symlink
     - test_revert_symlink
+    - test_follow_symbolic_disabled
   section: syscheck
   elements:
   - disabled:
@@ -31,12 +32,12 @@
       value: '/testdir_link/symlink'
       attributes:
       - FIM_MODE
-      - follow_symbolic_link: 'yes'
+      - follow_symbolic_link: FOLLOW_MODE
   - directories:
       value: '/testdir2'
       attributes:
       - FIM_MODE
-      - follow_symbolic_link: 'yes'
+      - follow_symbolic_link: FOLLOW_MODE
 # conf 3
 - tags:
     - monitored_dir
@@ -46,6 +47,7 @@
     - test_delete_symlink
     - test_delete_target
     - test_monitor_symlink
+    - test_follow_symbolic_disabled
   section: syscheck
   elements:
   - disabled:
@@ -54,4 +56,4 @@
       value: '/testdir_link/symlink2'
       attributes:
         - FIM_MODE
-        - follow_symbolic_link: 'yes'
+        - follow_symbolic_link: FOLLOW_MODE
