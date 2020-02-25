@@ -61,9 +61,11 @@ def callback_integrity_synchronization_check(line):
     return None
 
 
-def callback_integrity_and_whodata(line):
-    if callback_integrity_synchronization_check(line) or callback_real_time_whodata_started(line):
-        return True
+def callback_integrity_or_whodata(line):
+    if callback_integrity_synchronization_check(line):
+        return 1
+    elif callback_real_time_whodata_started(line):
+        return 2
 
 
 # tests
@@ -78,13 +80,16 @@ def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure
     # Wait for whodata to start and the synchronization check. Since they are different threads, we cannot expect
     # them to come in order every time
     if get_configuration['metadata']['fim_mode'] == 'whodata':
-        wazuh_log_monitor.start(timeout=10, callback=callback_integrity_and_whodata,
-                                error_message='Did not receive expected "File integrity monitoring real-time Whodata '
-                                              'engine started" or "Initializing FIM Integrity Synchronization check"')
+        value_1 = wazuh_log_monitor.start(timeout=10, callback=callback_integrity_or_whodata,
+                                          error_message='Did not receive expected "File integrity monitoring '
+                                                        'real-time Whodata engine started" or "Initializing '
+                                                        'FIM Integrity Synchronization check"').result()
 
-        wazuh_log_monitor.start(timeout=10, callback=callback_integrity_and_whodata,
-                                error_message='Did not receive expected "File integrity monitoring real-time Whodata '
-                                              'engine started" or "Initializing FIM Integrity Synchronization check"')
+        value_2 = wazuh_log_monitor.start(timeout=10, callback=callback_integrity_or_whodata,
+                                          error_message='Did not receive expected "File integrity monitoring '
+                                                        'real-time Whodata engine started" or "Initializing FIM '
+                                                        'Integrity Synchronization check"').result()
+        assert value_1 != value_2, "callback_integrity_or_whodata detected the same message twice"
 
     else:
 
