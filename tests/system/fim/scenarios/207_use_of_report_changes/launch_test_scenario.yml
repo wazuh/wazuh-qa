@@ -10,11 +10,11 @@
       - block:
         - name: Launching prepare tasks
           import_tasks: "../../common_tasks/prepare.yml"
-
         - block:
           - name: Configure syscheck event.
             set_fact:
               event: "added"
+              create_script_extra_params: "-t"
 
           - name: Generating files to trigger FIM alerts
             import_tasks: "../../common_tasks/create_files.yml"
@@ -22,11 +22,14 @@
           - name: Verify generated alerts
             become: true
             import_tasks: "../../common_tasks/verify_alerts.yml"
-
+            
         - block:
           - name: Configure syscheck event.
             set_fact:
               event: "modified"
+              modify_script_extra_params: "-t"
+              verify_json_script_extra_params: "-d 'Hello World'"
+              verify_ES_script_extra_params: "-d 'Hello World'"
 
           - name: Modifiying files to trigger FIM alerts
             import_tasks: "../../common_tasks/modify_files.yml"
