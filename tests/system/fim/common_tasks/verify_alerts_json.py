@@ -112,9 +112,9 @@ def main():
         parser.add_argument("-r", "--retry", type=int, required=False, dest='retry_count',
                             help="reading attempts on stopped alerts. default: 4 attemps",
                             default="4")
-        parser.add_argument("-w", "--whodata", type=bool, required=False, dest='whodata_check',
-                            help="Enable Whodata alert's parsing.",
-                            default="false")
+        parser.add_argument("-w", "--whodata", required=False, dest='whodata_check',
+                            help="Enable Whodata alert's parsing.", action='store_true')
+
         args = parser.parse_args()
 
         import time

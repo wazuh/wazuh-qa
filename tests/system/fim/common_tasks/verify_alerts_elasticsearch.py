@@ -76,8 +76,8 @@ if __name__ == "__main__":
         help="Sleep time between retries", default="60"
     )
     parser.add_argument(
-        "-w", "--whodata", type=bool, required=False, dest='whodata_query',
-        help="Enable whodata queries", default="False"
+        "-w", "--whodata", required=False, dest='whodata_query',
+        help="Enable whodata queries", action='store_true'
     )
     args = parser.parse_args()
 
