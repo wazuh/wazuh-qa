@@ -316,7 +316,8 @@ def get_agents(client_keys='/var/ossec/etc/client.keys'):
 
     for agent_id in agent_ids:
         agent_dict[agent_id.zfill(3)] = Manager().dict({
-            'start': 0.0
+            'start': 0.0,
+            'dataframe': None
         })
 
     return agent_dict
@@ -415,7 +416,7 @@ def modify_database(agent_id, directory, prefix, total_files, modify_file, modif
     return checksum
 
 
-def agent_checker(case, agent_id, agents_dict, filename, attempts_info, database_params, configuration, num_files):
+def agent_checker(case, agent_id, agents_dict, attempts_info, database_params, configuration, num_files):
     """Check that the current agent is restarted. When it has been restarted, marks the start time of the agent.
     If n_completions of the agent_id is greater than 0, the info_collector must be called.
 
@@ -427,8 +428,6 @@ def agent_checker(case, agent_id, agents_dict, filename, attempts_info, database
         Agent id.
     agents_dict : dict of multi processes shared dict
         Dictionary with the start time of every agent.
-    filename : str
-        Path of the agent's info file.
     attempts_info : shared dict
         Dictionary with a flag that indicates if the stats collector must start.
     database_params : dict
@@ -464,13 +463,13 @@ def agent_checker(case, agent_id, agents_dict, filename, attempts_info, database
 
         if agents_dict[agent_id]['start'] and (actual_n_attempts > max_n_attempts or actual_n_completions > 0):
             state = 'complete' if actual_n_attempts < max_n_attempts else 'except_max_attempts'
-            info_collector(agents_dict[agent_id], agent_id, filename, attempts_info, configuration, actual_n_attempts,
+            info_collector(agents_dict, agent_id, attempts_info, configuration, actual_n_attempts,
                            actual_n_completions, state=state, checksum=checksum, num_files=num_files)
             break
         time.sleep(setup_environment_time)
 
 
-def info_collector(agent, agent_id, filename, attempts_info, configuration, actual_n_attempts,
+def info_collector(agents_dict, agent_id, attempts_info, configuration, actual_n_attempts,
                    actual_n_completions, num_files, state='complete', checksum=None):
     """Write the stats of the agent during the test.
 
@@ -478,12 +477,10 @@ def info_collector(agent, agent_id, filename, attempts_info, configuration, actu
 
     Parameters
     ----------
-    agent : dict
-        Individual dictionary with the start time of an agent.
+    agents_dict : dict of multi processes shared dict
+        Dictionary with the start time of every agent.
     agent_id : str
         Agent id.
-    filename : str
-        Path of the agent's info file.
     attempts_info : shared dict
         Dictionary with a flag that indicates if the stats collector must start.
     num_files : str
@@ -495,27 +492,22 @@ def info_collector(agent, agent_id, filename, attempts_info, configuration, actu
     checksum : str or None
         New checksum for files or None if there is no modifications
     """
-    try:
-        agent_df = pd.read_csv(filename)
-    except FileNotFoundError:
-        agent_df = pd.DataFrame(columns=["configuration", "agent_id", "n_attempts", "n_completions", "start_time",
-                                         "end_time", "total_time", "state", "complete(%)"])
     if state != 'complete':
         attempts_info['except_max_attempts'] = True
         attempts_info['agents_failed'] += 1
-    logger.info(
-        f"Info {agent_id} writing: "
-        f"{agent_id},{actual_n_attempts},{actual_n_completions},{agent['start']},"
-        f"{time.time()},{time.time() - agent['start']},{state}")
     if state != 'complete' and checksum:
         completion = get_files_with_checksum(agent_id, checksum, int(num_files))
     elif state != 'complete' and not checksum:
         completion = 'Case0: no checksums modified'
     else:
         completion = None
-    agent_df.loc[len(agent_df)] = [configuration, agent_id, actual_n_attempts, actual_n_completions,
-                                   agent['start'], time.time(), time.time() - agent['start'], state, completion]
-    agent_df.to_csv(filename, index=False)
+    logger.info(
+        f"Info {agent_id} writing: "
+        f"{agent_id},{actual_n_attempts},{actual_n_completions},{agents_dict[agent_id]['start']},"
+        f"{time.time()},{time.time() - agents_dict[agent_id]['start']},{state},{completion}")
+    agents_dict[agent_id]['dataframe'] = [configuration, agent_id, actual_n_attempts, actual_n_completions,
+                                          agents_dict[agent_id]['start'], time.time(),
+                                          time.time() - agents_dict[agent_id]['start'], state, completion]
 
 
 def state_collector(agents_dict, configuration, stats_path, attempts_info):
@@ -692,6 +684,7 @@ def test_initialize_stats_collector(fim_eps, sync_eps, files, directory, buffer,
         'total_files': files,
         'prefix': 'file_'
     }
+    processes = list()
     protocol = protocol_detection()
     configuration = f'{str(len(agents_dict.keys()))}agents_case{case}_{protocol}_{sync_eps}' \
                     f'sync_eps_{fim_eps}fim_eps_{files}files_client-buffer-' \
@@ -709,11 +702,9 @@ def test_initialize_stats_collector(fim_eps, sync_eps, files, directory, buffer,
 
         # Launch one process for agent due to FileMonitor restriction (block the execution)
         for agent_id in agents_dict.keys():
-            filename = os.path.join(stats_dir, f"info.csv")
-            agents_checker.append(Process(target=agent_checker, args=(case, agent_id, agents_dict, filename,
-                                                                      attempts_info, database_params, configuration,
-                                                                      files)))
-            agents_checker[-1].start()
+            processes.append(Process(target=agent_checker, args=(case, agent_id, agents_dict, attempts_info,
+                                                                 database_params, configuration, files)))
+            processes[-1].start()
 
         # Block the test until one agent starts
         seconds = 0
@@ -727,21 +718,28 @@ def test_initialize_stats_collector(fim_eps, sync_eps, files, directory, buffer,
 
         # We started the stats collector as the agents are ready
         logger.info(f'Started test for case{case}_{protocol}-{sync_eps}sync_eps_{fim_eps}fim_eps-{files}files')
-        state_collector_check = Process(target=state_collector, args=(agents_dict, configuration, stats_dir,
-                                                                      attempts_info,))
-        state_collector_check.start()
+        processes.append(Process(target=state_collector, args=(agents_dict, configuration, stats_dir, attempts_info,)))
+        processes[-1].start()
         for daemon in tested_daemons:
             filename = os.path.join(os.path.join(stats_dir, f"stats-{daemon}.csv"))
-            stats_checker.append(Process(target=stats_collector, args=(filename, daemon, agents_dict, attempts_info,
-                                                                       configuration,)))
-            stats_checker[-1].start()
+            processes.append(Process(target=stats_collector, args=(filename, daemon, agents_dict, attempts_info,
+                                                                   configuration,)))
+            processes[-1].start()
         while True:
             if check_all_n_completions(agents_dict.keys()) > 0:
                 attempts_info['finish'] = True
-            if not any([writer_.is_alive() for writer_ in stats_checker]) and \
-                    not any([check_agent.is_alive() for check_agent in agents_checker]) and \
-                    not state_collector_check.is_alive():
+                agent_filename = os.path.join(stats_dir, f"info.csv")
+                merge_agent_df = pd.DataFrame(columns=["configuration", "agent_id", "n_attempts", "n_completions",
+                                                       "start_time", "end_time", "total_time", "state", "complete(%)"])
+                for agent in agents_dict.values():
+                    print(agent['dataframe'])
+                    merge_agent_df.loc[len(merge_agent_df)] = agent['dataframe']
+                merge_agent_df.to_csv(agent_filename, index=False)
+            if not any([proc.is_alive() for proc in processes]):
                 logger.info('All processes are finished')
                 break
             time.sleep(setup_environment_time)
+
+    for process in processes:
+        process.join()
     clean_environment()
