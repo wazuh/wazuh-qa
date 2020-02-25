@@ -59,7 +59,6 @@ def alerts_prune_whodata(path, target_event):
         :param str target_event: target event kind (deleted|added|modified)
         :return: Returns a set containing the alerts files path
     """
-    print("Whodata block activated")
     alerts_list = []
     with open(path,errors='replace') as json_file:
         for line in json_file:
