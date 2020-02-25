@@ -804,6 +804,11 @@ def callback_empty_directories(line):
         return None
 
 
+def callback_real_time_whodata_started(line):
+    if 'File integrity monitoring real-time Whodata engine started' in line:
+        return True
+
+
 def check_time_travel(time_travel):
     """
     Change date and time of the system.
