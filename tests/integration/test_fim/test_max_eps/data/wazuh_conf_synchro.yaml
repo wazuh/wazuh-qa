@@ -1,8 +1,7 @@
-
 ---
 # conf 1
 - tags:
-  - max_eps
+  - max_eps_synchronization
   apply_to_modules:
   - MODULE_NAME
   section: syscheck
@@ -13,9 +12,7 @@
       value: TEST_DIRECTORIES
       attributes:
       - FIM_MODE
-  - max_eps:
-      value: MAX_EPS
   - synchronization:
       elements:
-      - enabled:
-          value: 'no'
+      - max_eps:
+          value: MAX_EPS
