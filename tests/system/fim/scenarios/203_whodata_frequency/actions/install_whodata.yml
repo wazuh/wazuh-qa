@@ -1,0 +1,7 @@
+---
+  - name: Install Audit | Linux
+    package:
+      name: audit
+      state: present
+    when:
+      - inventory_hostname in groups['linuxagents']
