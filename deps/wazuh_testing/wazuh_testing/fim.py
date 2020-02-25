@@ -213,7 +213,7 @@ def create_registry(key, subkey, arch):
     subkey : str
         The subkey (name) of the registry.
     """
-    sys.platform == 'win32' and winreg.CreateKey(key, subkey)
+    sys.platform == 'win32' and winreg.CreateKeyEx(key, subkey, access=arch)
 
 
 def _create_fifo(path, name):
