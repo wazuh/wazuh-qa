@@ -75,6 +75,10 @@ if __name__ == "__main__":
         "-s", "--sleep", type=int, required=False, dest='sleep_time',
         help="Sleep time between retries", default="60"
     )
+    parser.add_argument(
+        "-w", "--whodata", type=bool, required=False, dest='whodata_query',
+        help="Enable whodata queries", default="False"
+    )
     args = parser.parse_args()
 
     query = {
@@ -101,13 +105,33 @@ if __name__ == "__main__":
             for line in file_list:
                 query['query']['bool']['filter'][0]['term']['syscheck.path'] =\
                     line.rstrip()
+                try:
+                    query_result = makeQuery(query, es, index_name)
+                    print(query_result)
+                except Exception as e:
+                    logging.info("Error when making the  Query of " + str(args.whodata_query))
+                    raise e
 
-                query_result = makeQuery(query, es, index_name)
-                if query_result['hits']['total']['value'] == 1:
-                    success += 1
+                if (args.whodata_query):
+                    try:
+                        if (query_result['hits']['hits'][0]['_source']['syscheck']['audit']['process']['name'] in query_result):
+                            success +=1
+                    except IndexError:
+                        failure_list.append(line)
+                        failure += 1
+                    except Exception as e:
+                        logging.info("Error when filtering audit fields in alert " + line.rstrip())
+                        raise e
                 else:
-                    failure_list.append(line)
-                    failure += 1
+                    try:
+                        if query_result['hits']['total']['value'] == 1:
+                            success += 1
+                    except IndexError:
+                        failure_list.append(line)
+                        failure += 1
+                    except Exception as e:
+                        logging.info("Error when filtering syscheck alerts hits of " + line.rstrip())
+                        raise e
             if failure == 0:
                 break
             else:
