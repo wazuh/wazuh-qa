@@ -91,9 +91,9 @@ def test_symbolic_delete_target(tags_to_apply, main_folder, aux_folder, get_conf
         wazuh_log_monitor.start(timeout=3, callback=callback_audit_removed_rule,
                                 error_message='Did not receive expected "Monitored directory \'{main_folder}\' was'
                                 'removed: Audit rule removed')
-        wazuh_log_monitor.start(timeout=symlink_interval, callback=callback_audit_reloading_rules,
+        wazuh_log_monitor.start(timeout=30, callback=callback_audit_reloading_rules,
                                 error_message='Did not receive expected "Reloading Audit rules" event')
-        wazuh_log_monitor.start(timeout=symlink_interval, callback=callback_audit_reloaded_rule,
+        wazuh_log_monitor.start(timeout=30, callback=callback_audit_reloaded_rule,
                                 error_message='Did not receive expected "Reloaded audit rule for monitoring directory: '
                                 '\'{main_folder}\'" event')
     else:
