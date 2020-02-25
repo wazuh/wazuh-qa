@@ -2,12 +2,15 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
+import re
 import sys
+import time
 
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH, regular_file_cud, WAZUH_PATH, generate_params)
+from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH, regular_file_cud, WAZUH_PATH, generate_params,
+                               callback_detect_end_scan)
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -87,7 +90,8 @@ def test_reports_file_and_nodiff(folder, checkers, tags_to_apply,
             diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
             if sys.platform == 'win32':
                 diff_file = os.path.join(diff_file, 'c')
-                diff_file = os.path.join(diff_file, folder.strip('C:\\'), file)
+                diff_file = os.path.join(diff_file, re.match(r'^[a-zA-Z]:(\\){1,2}(\w+)(\\){0,2}$', folder).group(2),
+                                         file)
             else:
                 diff_file = os.path.join(diff_file, folder.strip('/'), file)
             assert os.path.exists(diff_file), f'{diff_file} does not exist'
