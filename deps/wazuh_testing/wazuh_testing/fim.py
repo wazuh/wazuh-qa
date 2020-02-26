@@ -965,7 +965,8 @@ class EventChecker:
                     logger.info(f'Not asserting {expected_file_path} in event.data.path. '
                                  f'Reason: using non-utf-8 encoding in darwin.')
                 else:
-                    assert (expected_file_path in file_paths), f'{expected_file_path} does not exist in {file_paths}'
+                    error_msg = f"Expected path was '{expected_file_path}' but event path is '{file_paths}'"
+                    assert (expected_file_path in file_paths), error_msg
 
         def filter_events(events, mask):
             """Returns a list of elements matching a specified mask in the events list using jq module."""
