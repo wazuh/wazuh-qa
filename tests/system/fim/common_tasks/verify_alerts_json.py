@@ -10,7 +10,9 @@
 
 import sys
 import json
-import traceback
+
+import logging
+import argparse
 
 if sys.version_info.major < 3:
     print('ERROR: Python 2 is not supported.')
@@ -44,17 +46,22 @@ def alerts_prune(path, target_event):
                 data = json.loads(line)
                 if data.get('syscheck') and data['syscheck']['event'] == target_event:
                     alerts_list.append(data)
+
             except ValueError:
                 continue
     return set([alerts['syscheck']['path'] for alerts in alerts_list])
 
 
 def main():
-
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[
+            logging.FileHandler("verify_alerts_json.log"),
+            logging.StreamHandler()
+        ]
+    )
     try:
-
-        import argparse
-
         parser = argparse.ArgumentParser(description='Compares paths list and alerts.json paths')
 
         parser.add_argument("-i", "--input-list", type=str, required=True, dest='input_file',
@@ -65,7 +72,8 @@ def main():
                             help="Type of alert's event that we expect: added, modified, deleted")
 
         parser.add_argument("-l", "--log_json", type=str, required=False, dest='log_json_path',
-                            help="alerts.json path. default value '/var/ossec/logs/alerts/alerts.json'",
+                            help="alerts.json path. default value "
+                            "'/var/ossec/logs/alerts/alerts.json'",
                             default="/var/ossec/logs/alerts/alerts.json")
 
         parser.add_argument("-o", "--output-list", type=str, required=False, dest='output_file',
@@ -73,8 +81,8 @@ def main():
                             default="debug_missing_file_alerts.log")
 
         parser.add_argument("-t", "--timeout", type=int, required=False, dest='time_gap',
-                            help="time gap between alerts.json alerts acquisitions. default: 30s",
-                            default="30")
+                            help="time gap between alerts.json alerts acquisitions. default: 60s",
+                            default="60")
 
         parser.add_argument("-r", "--retry", type=int, required=False, dest='retry_count',
                             help="reading attempts on stopped alerts. default: 4 attemps",
@@ -91,24 +99,26 @@ def main():
         prev_lenght = len(sub_paths)
         start = time.time()
 
-        print("alerts.json verification started")
+        logging.info("alerts.json verification started")
         while True:
             pruned_alerts_set = alerts_prune(args.log_json_path, args.event)
             sub_paths = paths_list_set - pruned_alerts_set
 
             if len(sub_paths) == 0:
-                print("Verify alerts test - OK.")
+                logging.info("Verify alerts test - OK.")
                 return 0
             if stuck_alerts > args.retry_count:
-                print("Verify alerts test - NOT OK. %s alerts are missing.\n" % len(sub_paths))
+                logging.warning(
+                    "Verify alerts test - NOT OK. %s alerts are missing.\n" % len(sub_paths)
+                )
                 with open(args.output_file, 'w') as f:
                     for item in sub_paths:
                         f.write("%s\n" % item)
-                    f.write("%s missing alerts.\n" % len(sub_paths))
+                logging.warning("%s missing alerts.\n" % len(sub_paths))
                 return 1
 
             if prev_lenght == len(sub_paths):
-                print("Filelist related alerts aren't growing (%s) ..." % stuck_alerts)
+                logging.info("Filelist related alerts aren't growing (%s) ..." % stuck_alerts)
                 stuck_alerts += 1
             else:
                 stuck_alerts = 0
@@ -116,14 +126,12 @@ def main():
             time.sleep(args.time_gap)
             prev_lenght = len(sub_paths)
             elapsed = time.time() - start
-            print("Elapsed time: ~ %s seconds \n" % int(elapsed))
+            logging.info("Elapsed time: ~ %s seconds \n" % int(elapsed))
 
     except Exception:
-        print("An error has ocurred. Exiting")
-        traceback.print_exc()
+        logging.critical("An error has ocurred. Exiting")
         raise Exception
 
 
-
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

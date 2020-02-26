@@ -1,30 +1,38 @@
 ---
-- name: "Delete FIM test files at Wazuh Managers | Linux"
-  notify: Restart Wazuh agent Linux
-  script: "delete_files.py -i {{ files_generated_output_path }} -o {{ files_deleted_output_path }}"
-  args:
-    executable: "python3"
-    chdir: "{{ agents_linux_output_path }}"
+- block:
+  - name: "Delete FIM test files at Wazuh Agents | Linux"
+    script: "delete_files.py -i {{ files_generated_output_path }} -o {{ files_deleted_output_path }} {{ delete_script_extra_params }}"
+    args:
+      executable: "python3"
+      chdir: "{{ agents_linux_output_path }}"
+
+  - name: Copy list of deleted files from Agents to Ansible Controller host | Linux
+    fetch:
+      src: "{{ agents_linux_output_path }}/{{ files_deleted_output_path }}"
+      dest: "agents_outputs/{{ event }}/{{ files_deleted_output_path }}-{{ inventory_hostname }}"
+      flat: yes
+
+  become: yes
   when:
     - inventory_hostname in groups['linuxagents']
-  become: yes
 
-- name: "Delete FIM test files at Wazuh Managers | Windows"
-  notify: Restart Wazuh agent Windows
-  script: "modify_files.py -i {{ files_generated_output_path }} -o {{ files_deleted_output_path }}"
-  args:
-    executable: "python"
-    chdir: "{{ agents_windows_output_path }}"
+
+- block:
+  - name: "Delete FIM test files at Wazuh Agents | Windows"
+    script: "delete_files.py -i {{ files_generated_output_path }} -o {{ files_deleted_output_path }} {{ delete_script_extra_params }}"
+    args:
+      executable: "python"
+      chdir: "{{ agents_windows_output_path }}"
+
+  - name: Copy list of deleted files from Windows Agents to Ansible Controller host
+    fetch:
+      src: "{{ agents_windows_output_path }}/{{ files_deleted_output_path }}"
+      dest: "agents_outputs/{{ event }}/{{ files_deleted_output_path }}-{{ inventory_hostname }}"
+      flat: yes
+
   when:
     - inventory_hostname in groups['windowsagents']
 
-- name: Copy the output files from Windows Agents to Ansible Controller host
-  fetch:
-    src: "{{ agents_windows_output_path }}/{{ files_generated_output_path }}"
-    dest: "agents_outputs/{{ event }}/{{ files_generated_output_path }}-{{ inventory_hostname }}"
-    flat: yes
-  when:
-  - inventory_hostname in groups['windowsagents'] 
 
 - name: Copy the output files from Ansible Controller to the Managers
   become: true
