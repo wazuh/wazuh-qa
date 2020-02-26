@@ -10,7 +10,7 @@ import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
-    callback_detect_event, check_time_travel
+    callback_detect_event, check_time_travel, validate_event
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -93,12 +93,14 @@ def test_rename(folder, tags_to_apply,
                 raise AssertionError(f'Wrong event when renaming a non empty directory')
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
-
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
+    mode = get_configuration['metadata']['fim_mode']
+
     create_file(REGULAR, folder, old_name, content='')
     check_time_travel(scheduled)
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                            error_message='Did not receive expected "Sending FIM event: ..." event')
+    event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                                    error_message='Did not receive expected "Sending FIM event: ..." event').result()
+    validate_event(event, mode=mode)
 
     # testdir1 will have renamed files within. testdir2 will be renamed with files within
     if folder == testdir1:
@@ -116,6 +118,7 @@ def test_rename(folder, tags_to_apply,
         except AssertionError:
             if 'added' not in deleted['data']['type'] and os.path.join(folder, old_name) not in deleted['data']['path']:
                 raise AssertionError(f'Wrong event when renaming a file')
+        validate_event(deleted, mode=mode)
 
         added = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_detect_event,
@@ -126,6 +129,7 @@ def test_rename(folder, tags_to_apply,
         except AssertionError:
             if 'deleted' not in added['data']['type'] and os.path.join(folder, new_name) not in added['data']['path']:
                 raise AssertionError(f'Wrong event when renaming a file')
+        validate_event(added, mode=mode)
     else:
         os.rename(folder, os.path.join(os.path.dirname(folder), new_name))
         check_time_travel(scheduled)

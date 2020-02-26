@@ -10,6 +10,7 @@ from test_fim.test_follow_symbolic_link.common import configurations_path, testd
 from test_fim.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
     extra_configuration_after_yield
 
+from wazuh_testing import logger
 from wazuh_testing.fim import (generate_params, callback_detect_event,
                                check_time_travel, modify_file_content, LOG_FILE_PATH)
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -23,7 +24,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-conf_params, conf_metadata = generate_params()
+conf_params, conf_metadata = generate_params(extra_params={'FOLLOW_MODE': 'yes'})
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=conf_params,
                                            metadata=conf_metadata
@@ -71,7 +72,8 @@ def test_symbolic_revert_symlink(tags_to_apply, get_configuration, configure_env
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
-        raise AttributeError(f'Unexpected event {event}')
+        logger.error(f'Unexpected event {event.result()}')
+        raise AttributeError(f'Unexpected event {event.result()}')
 
     # Change the target to the folder and now expect an event
     modify_symlink(testdir1, os.path.join(testdir_link, 'symlink'))
@@ -79,12 +81,13 @@ def test_symbolic_revert_symlink(tags_to_apply, get_configuration, configure_env
     wait_for_audit(whodata, wazuh_log_monitor)
     modify_and_assert(file2)
 
-    # Modify symlink target, wait for sym_check to update it 
+    # Modify symlink target, wait for sym_check to update it
     modify_symlink(os.path.join(testdir1, file1), os.path.join(testdir_link, 'symlink'))
     wait_for_symlink_check(wazuh_log_monitor)
     modify_file_content(testdir1, file2, new_content='Sample modification2')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
-        raise AttributeError(f'Unexpected event {event}')
+        logger.error(f'Unexpected event {event.result()}')
+        raise AttributeError(f'Unexpected event {event.result()}')
     modify_and_assert(file1)
