@@ -8,7 +8,7 @@ from time import time
 import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH, REGULAR, callback_detect_event, callback_detect_end_scan, create_file,
-                               generate_params, validate_event)
+                               generate_params)
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -72,11 +72,9 @@ def test_wait_until_baseline(get_configuration, configure_environment, restart_s
     if this event has generated.
     """
     check_apply_test({'ossec_conf'}, get_configuration['tags'])
-    mode = get_configuration['metadata']['fim_mode']
 
     # Create a file during initial scan to check if the event is logged after the 'scan ended' message
     create_file(REGULAR, testdir1, f'test_{int(round(time() * 10 ** 6))}', content='')
 
-    ev = wazuh_log_monitor.start(timeout=120, callback=callback_detect_event_before_end_scan,
-                                 error_message='Did not receive expected event before end the scan').result()
-    validate_event(ev, mode=mode)
+    wazuh_log_monitor.start(timeout=120, callback=callback_detect_event_before_end_scan,
+                            error_message='Did not receive expected event before end the scan')
