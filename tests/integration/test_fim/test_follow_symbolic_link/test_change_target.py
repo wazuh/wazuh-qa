@@ -10,6 +10,7 @@ from test_fim.test_follow_symbolic_link.common import configurations_path, testd
 from test_fim.test_follow_symbolic_link.common import test_directories, extra_configuration_after_yield, \
     extra_configuration_before_yield
 
+from wazuh_testing import logger
 from wazuh_testing.fim import (generate_params, create_file, REGULAR, callback_detect_event,
                                check_time_travel, modify_file_content, LOG_FILE_PATH)
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -74,7 +75,8 @@ def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_conf
             f"'modified' event not matching for {file1}"
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
-            raise AttributeError(f'Unexpected event {event}')
+            logger.error(f'Unexpected event {event.result()}')
+            raise AttributeError(f'Unexpected event {event.result()}')
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
@@ -94,12 +96,14 @@ def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_conf
             f"'added' event not matching for {file1}"
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
-            raise AttributeError(f'Unexpected event {event}')
+            logger.error(f'Unexpected event {event.result()}')
+            raise AttributeError(f'Unexpected event {event.result()}')
     else:
         create_file(REGULAR, aux_folder, file1, content='')
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
-            raise AttributeError(f'Unexpected event {event}')
+            logger.error(f'Unexpected event {event.result()}')
+            raise AttributeError(f'Unexpected event {event.result()}')
 
     # Change the target of the symlink and expect events while there's no syscheck scan
     # Don't expect events from the new target

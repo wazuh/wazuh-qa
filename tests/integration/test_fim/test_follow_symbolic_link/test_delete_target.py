@@ -11,6 +11,7 @@ from test_fim.test_follow_symbolic_link.common import configurations_path, testd
 from test_fim.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
     extra_configuration_after_yield
 
+from wazuh_testing import logger
 from wazuh_testing.fim import generate_params, create_file, REGULAR, callback_detect_event, \
     callback_audit_removed_rule, callback_audit_reloaded_rule, callback_audit_reloading_rules, check_time_travel, \
     modify_file_content, LOG_FILE_PATH
@@ -68,6 +69,7 @@ def test_symbolic_delete_target(tags_to_apply, main_folder, aux_folder, get_conf
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     whodata = get_configuration['metadata']['fim_mode'] == 'whodata'
     file1 = 'regular1'
+    RELOAD_RULES_INTERVAL = 30
 
     # If symlink is pointing to a directory, we need to add files and expect their 'added' event (only if the file
     # is being created withing the pointed directory. Then, delete the pointed file or directory
@@ -91,9 +93,9 @@ def test_symbolic_delete_target(tags_to_apply, main_folder, aux_folder, get_conf
         wazuh_log_monitor.start(timeout=3, callback=callback_audit_removed_rule,
                                 error_message='Did not receive expected "Monitored directory \'{main_folder}\' was'
                                 'removed: Audit rule removed')
-        wazuh_log_monitor.start(timeout=30, callback=callback_audit_reloading_rules,
+        wazuh_log_monitor.start(timeout=RELOAD_RULES_INTERVAL, callback=callback_audit_reloading_rules,
                                 error_message='Did not receive expected "Reloading Audit rules" event')
-        wazuh_log_monitor.start(timeout=30, callback=callback_audit_reloaded_rule,
+        wazuh_log_monitor.start(timeout=RELOAD_RULES_INTERVAL, callback=callback_audit_reloaded_rule,
                                 error_message='Did not receive expected "Reloaded audit rule for monitoring directory: '
                                 '\'{main_folder}\'" event')
     else:
@@ -112,7 +114,10 @@ def test_symbolic_delete_target(tags_to_apply, main_folder, aux_folder, get_conf
         # We don't expect any event since symlink hasn't updated the link information
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
-            raise AttributeError(f'Unexpected event {event}')
+            logger.error('A "Sending FIM event: ..." event has been detected. No event should be detected as symlink '
+                         'has not updated the link information yet.')
+            logger.error(f'Unexpected event {event.result()}')
+            raise AttributeError(f'Unexpected event {event.result()}')
 
     wait_for_symlink_check(wazuh_log_monitor)
     wait_for_audit(whodata, wazuh_log_monitor)

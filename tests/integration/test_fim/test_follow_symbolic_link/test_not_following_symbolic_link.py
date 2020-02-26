@@ -7,7 +7,7 @@ import os
 import pytest
 from test_fim.test_follow_symbolic_link.common import modify_symlink
 
-from wazuh_testing import global_parameters
+from wazuh_testing import global_parameters, logger
 from wazuh_testing.fim import (LOG_FILE_PATH,
                                generate_params, create_file, REGULAR, SYMLINK, callback_detect_event,
                                modify_file, delete_file, check_time_travel)
@@ -109,7 +109,8 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
-        raise AttributeError(f'Unexpected event {event}')
+        logger.error(f'Unexpected event {event.result()}')
+        raise AttributeError(f'Unexpected event {event.result()}')
 
     # Modify the target of the symlink and expect the modify event
     modify_symlink(target=b_path, path=sl_path)
@@ -125,4 +126,5 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
-        raise AttributeError(f'Unexpected event {event}')
+        logger.error(f'Unexpected event {event.result()}')
+        raise AttributeError(f'Unexpected event {event.result()}')

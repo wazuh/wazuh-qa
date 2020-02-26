@@ -10,6 +10,7 @@ from test_fim.test_follow_symbolic_link.common import configurations_path, testd
 from test_fim.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
     extra_configuration_after_yield
 
+from wazuh_testing import logger
 from wazuh_testing.fim import (generate_params, create_file, REGULAR, SYMLINK, callback_detect_event,
                                check_time_travel, modify_file_content, LOG_FILE_PATH)
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -77,7 +78,8 @@ def test_symbolic_delete_symlink(tags_to_apply, main_folder, aux_folder, get_con
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
-        raise AttributeError(f'Unexpected event {event}')
+        logger.error(f'Unexpected event {event.result()}')
+        raise AttributeError(f'Unexpected event {event.result()}')
 
     # Restore symlink and modify the target again. Expect events now
     create_file(SYMLINK, testdir_link, symlink, target=os.path.join(main_folder, file1))
