@@ -53,19 +53,43 @@ def alerts_prune(path, target_event, diff_statement=None):
                             add_path = False
                     if add_path:
                         alerts_list.append(data)
-                    add_path = True
-                    
+                    add_path = True   
             except ValueError:
                 continue
     return set([alerts['syscheck']['path'] for alerts in alerts_list])
 
+def alerts_prune_whodata(path, target_event):
+    """
+        Prunes desired whodata events from the alert.json file.
+        Extracts all events path to a set.
+        :param str path: path to alerts.json file
+        :param str target_event: target event kind (deleted|added|modified)
+        :return: Returns a set containing the alerts files path
+    """
+    alerts_list = []
+    with open(path,errors='replace') as json_file:
+        for line in json_file:
+            try:
+                data = json.loads(line)
+                if (data['syscheck']['audit'] is not None and data['syscheck']['event'] == target_event):
+                    if (data['syscheck']['audit']['user']['id'] != ""
+                        and data['syscheck']['audit']['user']['name'] != ""
+                        and data['syscheck']['audit']['process']['id'] != ""
+                        and data['syscheck']['audit']['process']['name'] != ""
+                        ):
+                        alerts_list.append(data)
+            except ValueError:
+                continue
+            except KeyError:
+                continue
+    return set([alerts['syscheck']['path'] for alerts in alerts_list])
 
 def main():
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=[
-            logging.FileHandler("verify_alerts_json.log"),
+            logging.FileHandler("verify_alerts_json.log", mode='a'),
             logging.StreamHandler()
         ]
     )
@@ -97,6 +121,9 @@ def main():
                             default="4")
         parser.add_argument("-d", "--diff", type=str, required=False, dest='diff_string',
                             help="When syscheck:report_changes enabled, represents the diff text")
+        parser.add_argument("-w", "--whodata", type=bool, required=False, dest='whodata_check',
+                            help="Enable Whodata alert's parsing.",
+                            default="false")
         args = parser.parse_args()
 
         import time
@@ -104,8 +131,13 @@ def main():
         stuck_alerts = 0
 
         paths_list_set = paths_acquisition(args.input_file)
-        print(args.diff_string)
         pruned_alerts_set = alerts_prune(args.log_json_path, args.event, args.diff_string)
+
+        if (args.whodata_check is not None and args.whodata_check):
+            pruned_alerts_set = alerts_prune_whodata(args.log_json_path, args.event)
+        else:
+            pruned_alerts_set = alerts_prune(args.log_json_path, args.event)
+
         sub_paths = paths_list_set - pruned_alerts_set
         prev_lenght = len(sub_paths)
         start = time.time()

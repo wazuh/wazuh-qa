@@ -143,7 +143,6 @@ def create_files(files_path, text_mode=False):
             if text_mode:
                 f.write("\n")
 
-
 def create_file_summary(files_path, logfile):
     """
     Creates a file that summarizes all the created files

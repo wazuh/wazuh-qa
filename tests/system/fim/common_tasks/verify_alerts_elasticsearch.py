@@ -43,7 +43,7 @@ if __name__ == "__main__":
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=[
-            logging.FileHandler("verify_alerts_elastic.log"),
+            logging.FileHandler("verify_alerts_elastic.log", mode="a"),
             logging.StreamHandler()
         ]
     )
@@ -77,6 +77,10 @@ if __name__ == "__main__":
     )
     parser.add_argument("-d", "--diff", type=str, required=False, 
         dest='diff_string',help="When syscheck:report_changes enabled, represents the diff text")
+    parser.add_argument(
+        "-w", "--whodata", type=bool, required=False, dest='whodata_query',
+        help="Enable whodata queries", default="False"
+    )
     args = parser.parse_args()
 
     query = {
@@ -106,22 +110,40 @@ if __name__ == "__main__":
             for line in file_list:
                 query['query']['bool']['filter'][0]['term']['syscheck.path'] =\
                     line.rstrip()
+                try:
+                    query_result = makeQuery(query, es, index_name)
+                    print(query_result)
+                except Exception as e:
+                    logging.info("Error when making the  Query of " + str(args.whodata_query))
+                    raise e
 
-                query_result = makeQuery(query, es, index_name)
-
-                if query_result['hits']['total']['value'] == 1:
-
-                    if (diff_statement is not None) and \
-                       ('diff' in query_result['hits']['hits'][0]['_source']['syscheck']) and \
-                       (diff_statement not in query_result['hits']['hits'][0]['_source']['syscheck']['diff']):
-                        success_ = False
-
-                    if success_:
-                        success += 1
-                    success_ = True
+                if (args.whodata_query):
+                    try:
+                        if (query_result['hits']['hits'][0]['_source']['syscheck']['audit']['process']['name'] in query_result):
+                            success +=1
+                    except IndexError:
+                        failure_list.append(line)
+                        failure += 1
+                    except Exception as e:
+                        logging.info("Error when filtering audit fields in alert " + line.rstrip())
+                        raise e
                 else:
-                    failure_list.append(line)
-                    failure += 1
+                    try:
+                        if query_result['hits']['total']['value'] == 1:
+
+                            if (diff_statement is not None) and \
+                               ('diff' in query_result['hits']['hits'][0]['_source']['syscheck']) and \
+                               (diff_statement not in query_result['hits']['hits'][0]['_source']['syscheck']['diff']):
+                                success_ = False
+                            if success_:
+                                success += 1
+                            success_ = True
+                    except IndexError:
+                        failure_list.append(line)
+                        failure += 1
+                    except Exception as e:
+                        logging.info("Error when filtering syscheck alerts hits of " + line.rstrip())
+                        raise e
             if failure == 0:
                 break
             else:

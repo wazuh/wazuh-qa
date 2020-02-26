@@ -1,6 +1,5 @@
 ---
 - block:
-
   - name: "Modify FIM test files at Wazuh Agents | Linux"
     script: "modify_files.py -i {{ files_generated_output_path }} -o {{ files_modified_output_path }} {{ modify_script_extra_params }}"
     args:
@@ -19,7 +18,6 @@
 
 
 - block:
-
   - name: "Modify FIM test files at Wazuh Agents | Windows"
     script: "modify_files.py -i {{ files_generated_output_path }} -o {{ files_modified_output_path }} {{ modify_script_extra_params }}"
     args:
