@@ -120,12 +120,12 @@ masters:
             gpg: 'https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH'
 {% endif %}
 {% endif %}
-{% if wazuh_custom_packages_installation_manager_enabled == 'enabled' %}
+{% if wazuh_custom_packages_installation_manager_enabled %}
         wazuh_custom_packages_installation_manager_enabled: {{ wazuh_custom_packages_installation_manager_enabled }}
         wazuh_custom_packages_installation_manager_deb_url: {{ wazuh_custom_packages_installation_manager_deb_url }}
         wazuh_custom_packages_installation_manager_rpm_url: {{ wazuh_custom_packages_installation_manager_rpm_url }}
 {% endif %}
-{% if wazuh_custom_packages_installation_api_enabled == "enabled" %}
+{% if wazuh_custom_packages_installation_api_enabled %}
         wazuh_custom_packages_installation_api_enabled: {{ wazuh_custom_packages_installation_api_enabled }}
         wazuh_custom_packages_installation_api_deb_url: {{ wazuh_custom_packages_installation_api_deb_url }}
         wazuh_custom_packages_installation_api_rpm_url: {{ wazuh_custom_packages_installation_api_rpm_url }}
@@ -184,12 +184,12 @@ workers:
         ansible_ssh_private_key_file: {{ ssh_key_path_private }}
         ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
         wazuh_manager_version: {{ wazuh_version }}
-{% if wazuh_custom_packages_installation_manager_enabled == 'enabled' %}
+{% if wazuh_custom_packages_installation_manager_enabled %}
         wazuh_custom_packages_installation_manager_enabled: {{ wazuh_custom_packages_installation_manager_enabled }}
         wazuh_custom_packages_installation_manager_deb_url: {{ wazuh_custom_packages_installation_manager_deb_url }}
         wazuh_custom_packages_installation_manager_rpm_url: {{ wazuh_custom_packages_installation_manager_rpm_url }}
 {% endif %}
-{% if wazuh_custom_packages_installation_api_enabled == "enabled" %}
+{% if wazuh_custom_packages_installation_api_enabled %}
         wazuh_custom_packages_installation_api_enabled: {{ wazuh_custom_packages_installation_api_enabled }}
         wazuh_custom_packages_installation_api_deb_url: {{ wazuh_custom_packages_installation_api_deb_url }}
         wazuh_custom_packages_installation_api_rpm_url: {{ wazuh_custom_packages_installation_api_rpm_url }}
@@ -319,7 +319,7 @@ linuxagents:
             gpg: 'https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH'
 {% endif %}
 {% endif %}
-{% if wazuh_custom_packages_installation_agent_enabled == 'enabled' %}
+{% if wazuh_custom_packages_installation_agent_enabled %}
         wazuh_custom_packages_installation_agent_enabled: {{ wazuh_custom_packages_installation_agent_enabled }}
         wazuh_custom_packages_installation_agent_deb_url: {{ wazuh_custom_packages_installation_agent_deb_url }}
         wazuh_custom_packages_installation_agent_rpm_url: {{ wazuh_custom_packages_installation_agent_rpm_url }}
