@@ -9,7 +9,7 @@ import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
-    callback_detect_event, check_time_travel
+    callback_detect_event, check_time_travel, validate_event
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -90,6 +90,7 @@ def test_move_file(source_folder, target_folder, subdir, tags_to_apply,
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
+    mode = get_configuration['metadata']['fim_mode']
 
     # Move folder to target directory
     os.rename(os.path.join(source_folder, subdir), os.path.join(target_folder, subdir))
@@ -119,3 +120,7 @@ def test_move_file(source_folder, target_folder, subdir, tags_to_apply,
         if triggers_add_event:
             assert 'added' in events['data']['type'] and os.path.join(target_folder, subdir) \
                    in os.path.dirname(events['data']['path'])
+
+    events = [events] if not isinstance(events, list) else events
+    for ev in events:
+        validate_event(ev, mode=mode)
