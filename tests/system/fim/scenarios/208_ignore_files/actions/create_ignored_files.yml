@@ -19,7 +19,7 @@
 
 - block:
   - name: Create ignored files on agents | Windows
-    script: "generate_files.py -c {{ files_config_windows_destination_path }} -o {{ files_generated_output_path }}-missing {{ create_script_extra_params }}"
+    script: "../../../common_tasks/generate_files.py -c {{ files_config_windows_destination_path }} -o {{ files_generated_output_path }}-missing {{ create_script_extra_params }}"
     args:
       executable: "python"
       chdir: "{{ agents_windows_output_path }}"
