@@ -8,6 +8,7 @@ import pytest
 from test_fim.test_follow_symbolic_link.common import test_directories, testdir_target, testdir1,\
     extra_configuration_before_yield, extra_configuration_after_yield
 
+from wazuh_testing import logger
 from wazuh_testing.fim import (LOG_FILE_PATH,
                                generate_params, create_file, REGULAR, callback_detect_event,
                                modify_file, delete_file, check_time_travel)
@@ -62,25 +63,28 @@ def test_follow_symbolic_disabled(path, tags_to_apply, get_configuration, config
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     regular_file = 'regular1'
+    error_msg = 'A "Sending FIM event: ..." event has been detected. No events should be detected at this time.'
 
     # If the symlink targets to a directory, create a file in it and ensure no event is raised.
     if tags_to_apply == {'monitored_dir'}:
         create_file(REGULAR, path, regular_file)
         check_time_travel(scheduled)
         with pytest.raises(TimeoutError):
-            event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
-            raise AttributeError(f'Unexpected event {event}')
+            logger.error(error_msg)
+            raise AttributeError(error_msg)
 
     # Modify the target file and don't expect any events
     modify_file(path, regular_file, new_content='Modify sample')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
-        raise AttributeError(f'Unexpected event {event}')
+        logger.error(error_msg)
+        raise AttributeError(error_msg)
 
     # Delete the target file and don't expect any events
     delete_file(path, regular_file)
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
-        raise AttributeError(f'Unexpected event {event}')
+        logger.error(error_msg)
+        raise AttributeError(error_msg)
