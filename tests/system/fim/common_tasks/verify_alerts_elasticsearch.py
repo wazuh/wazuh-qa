@@ -112,8 +112,8 @@ if __name__ == "__main__":
                 if query_result['hits']['total']['value'] == 1:
 
                     if (diff_statement is not None) and \
-                       ('diff' in query_result['syscheck']) and \
-                       (diff_statement not in query_result['syscheck']['diff']):
+                       ('diff' in query_result['hits']['hits'][0]['_source']['syscheck']) and \
+                       (diff_statement not in query_result['hits']['hits'][0]['_source']['syscheck']['diff']):
                         success_ = False
 
                     if success_:
