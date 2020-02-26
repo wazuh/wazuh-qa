@@ -70,6 +70,7 @@ def test_follow_symbolic_disabled(path, tags_to_apply, get_configuration, config
         create_file(REGULAR, path, regular_file)
         check_time_travel(scheduled)
         with pytest.raises(TimeoutError):
+            wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
             logger.error(error_msg)
             raise AttributeError(error_msg)
 
@@ -77,7 +78,7 @@ def test_follow_symbolic_disabled(path, tags_to_apply, get_configuration, config
     modify_file(path, regular_file, new_content='Modify sample')
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
-        event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+        wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
         logger.error(error_msg)
         raise AttributeError(error_msg)
 
@@ -85,6 +86,6 @@ def test_follow_symbolic_disabled(path, tags_to_apply, get_configuration, config
     delete_file(path, regular_file)
     check_time_travel(scheduled)
     with pytest.raises(TimeoutError):
-        event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
+        wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
         logger.error(error_msg)
         raise AttributeError(error_msg)
