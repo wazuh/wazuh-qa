@@ -28,8 +28,8 @@
             set_fact:
               event: "modified"
               modify_script_extra_params: "-t"
-              verify_json_script_extra_params: "-d 'Hello World'"
-              verify_ES_script_extra_params: "-d 'Hello World'"
+              json_verification_extra_arguments: "-d 'Hello World'"
+              elastic_verification_extra_argument: "-d 'Hello World'"
 
           - name: Modifiying files to trigger FIM alerts
             import_tasks: "../../common_tasks/modify_files.yml"
