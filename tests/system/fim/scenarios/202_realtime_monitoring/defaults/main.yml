@@ -1,0 +1,2 @@
+elastic_verification_extra_arguments: "-r 5"
+alert_verification_extra_arguments: "-r 5"
