@@ -1,0 +1,86 @@
+---
+  - hosts: all
+    vars_files:
+      - ../../vars/main.yml
+
+    handlers:
+      - import_tasks: ../../handlers/main.yml
+
+    tasks:
+      - block:
+        - name: Launching prepare tasks
+          import_tasks: "../../common_tasks/prepare.yml"
+
+        - name: Set variables
+          set_fact:
+            syscheck_frequency: 43200
+            linux_ossec_log_path: "{{ linux_ossec_folder_path }}/logs/ossec.log"
+            windows_ossec_log_path: "{{ windows_ossec_folder_path }}\\ossec.log"
+          changed_when: True
+          notify:
+            - Stop Wazuh agent Linux
+            - Stop Wazuh agent Windows
+            - Clear ossec.log Linux Agent
+            - Clear ossec.log Windows Agent
+            - Start Wazuh agent Linux
+            - Start Wazuh agent Windows
+
+        - meta: flush_handlers
+
+        - name: Pause playbook during the frequency time
+          pause:
+            seconds: "{{ syscheck_frequency }}"
+
+        - name: Check if the scan started after the wait 
+          script: >
+           files/check_scheduled_scan.py -f {{ syscheck_frequency }} 
+           -l {{ linux_ossec_log_path }}
+          args:
+            executable: python3
+          when: 
+            - inventory_hostname in groups['linuxagents']
+
+        - name: Check if the scan started after the wait 
+          script: >
+           files/check_scheduled_scan.py -f {{ syscheck_frequency }} 
+           -l \"{{ windows_ossec_log_path }}\"
+          args:
+            executable: python3
+          when: 
+            - inventory_hostname in groups['windowsagents']
+
+        - block:
+          - name: Configure syscheck event.
+            set_fact:
+              event: "added"
+
+          - name: Generating files to trigger FIM alerts
+            import_tasks: "../../common_tasks/create_files.yml"
+
+          - name: Verify generated alerts
+            become: true
+            import_tasks: "../../common_tasks/verify_alerts.yml"
+
+        - block:
+          - name: Configure syscheck event.
+            set_fact:
+              event: "modified"
+
+          - name: Modifiying files to trigger FIM alerts
+            import_tasks: "../../common_tasks/modify_files.yml"
+
+          - name: Verify generated alerts
+            become: true
+            import_tasks: "../../common_tasks/verify_alerts.yml"
+
+        - block:
+          - name: Configure syscheck event.
+            set_fact:
+              event: "deleted"
+
+          - name: Deleting files to trigger FIM alerts
+            import_tasks: "../../common_tasks/delete_files.yml"
+
+          - name: Verify generated alerts
+            become: true
+            import_tasks: "../../common_tasks/verify_alerts.yml"
