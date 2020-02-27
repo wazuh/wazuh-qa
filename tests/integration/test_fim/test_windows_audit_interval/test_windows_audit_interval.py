@@ -58,7 +58,8 @@ def extra_configuration_before_yield():
     """Get list of SACL before Wazuh applies its own rules based on whodata monitoring."""
     with Privilege('SeSecurityPrivilege'):
         lfss = get_file_security_descriptor(testdir_restore)
-        setattr(sys.modules[__name__], 'previous_rules', get_sacl(lfss))
+        sacl = get_sacl(lfss) if get_sacl(lfss) is not None else set()
+        setattr(sys.modules[__name__], 'previous_rules', sacl)
 
 
 def callback_sacl_changed(line):
@@ -87,6 +88,7 @@ def test_windows_audit_modify_sacl(tags_to_apply, get_configuration, configure_e
         # Assert that Wazuh rules are added
         lfss = get_file_security_descriptor(testdir_modify)
         dir_rules = get_sacl(lfss)
+        assert dir_rules is not None, 'No SACL rules were applied to the monitored directory.'
         for rule in WAZUH_RULES:
             assert rule in dir_rules, f'{rule} not found in {dir_rules}'
 

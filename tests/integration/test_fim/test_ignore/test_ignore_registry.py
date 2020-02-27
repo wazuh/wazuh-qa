@@ -26,7 +26,7 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 # variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf_win32.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf_win32_ignore_registry.yaml')
 
 keys_objects = list()
 keys_strings = list()
@@ -51,13 +51,13 @@ def extra_configuration_before_yield():
     """ Initialize registries for this test """
     reg_handlers = list()
     for reg in regs:
-        create_registry(keys_objects[0], reg, winreg.KEY_WOW64_32KEY)
-        create_registry(keys_objects[0], reg, winreg.KEY_WOW64_64KEY)
+        create_registry(keys_objects[0], reg, winreg.KEY_WOW64_32KEY | winreg.KEY_WRITE)
+        create_registry(keys_objects[0], reg, winreg.KEY_WOW64_64KEY | winreg.KEY_WRITE)
 
-    create_registry(keys_objects[0], sub_keys[0], winreg.KEY_WOW64_32KEY)
-    create_registry(keys_objects[0], sub_keys[1], winreg.KEY_WOW64_64KEY)
-    create_registry(keys_objects[0], sub_keys[2], winreg.KEY_WOW64_32KEY)
-    create_registry(keys_objects[0], sub_keys[3], winreg.KEY_WOW64_64KEY)
+    create_registry(keys_objects[0], sub_keys[0], winreg.KEY_WOW64_32KEY | winreg.KEY_WRITE)
+    create_registry(keys_objects[0], sub_keys[1], winreg.KEY_WOW64_64KEY | winreg.KEY_WRITE)
+    create_registry(keys_objects[0], sub_keys[2], winreg.KEY_WOW64_32KEY | winreg.KEY_WRITE)
+    create_registry(keys_objects[0], sub_keys[3], winreg.KEY_WOW64_64KEY | winreg.KEY_WRITE)
 
 
 def extra_configuration_after_yield():

@@ -1,16 +1,18 @@
 ---
 # conf 1
 - tags:
-  - ossec_conf
+  - max_eps_synchronization
   apply_to_modules:
-  - test_frequency
+  - MODULE_NAME
   section: syscheck
   elements:
   - disabled:
       value: 'no'
-  - frequency:
-      value: FREQUENCY
   - directories:
       value: TEST_DIRECTORIES
       attributes:
       - FIM_MODE
+  - synchronization:
+      elements:
+      - max_eps:
+          value: MAX_EPS

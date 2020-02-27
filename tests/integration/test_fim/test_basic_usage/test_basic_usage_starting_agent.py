@@ -8,7 +8,7 @@ import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_detect_event, \
-    create_file, generate_params, modify_file_content, check_time_travel, delete_file
+    create_file, generate_params, modify_file_content, check_time_travel, delete_file, validate_event
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -69,6 +69,7 @@ def test_events_from_existing_files(filename, tags_to_apply, get_configuration,
     """Check if syscheck generates modified alerts for files that exists when starting the agent"""
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
+    mode = get_configuration['metadata']['fim_mode']
 
     # Modify file
     modify_file_content(testdir1, filename, new_content='Sample content')
@@ -80,6 +81,7 @@ def test_events_from_existing_files(filename, tags_to_apply, get_configuration,
                                                            '"Sending FIM event: ..." event').result()
     assert 'modified' in modified_event['data']['type'] and \
            os.path.join(testdir1, filename) in modified_event['data']['path']
+    validate_event(modified_event, mode=mode)
 
     # Delete file
     delete_file(testdir1, filename)
@@ -91,3 +93,4 @@ def test_events_from_existing_files(filename, tags_to_apply, get_configuration,
                                                           '"Sending FIM event: ..." event').result()
     assert 'deleted' in deleted_event['data']['type'] and \
            os.path.join(testdir1, filename) in deleted_event['data']['path']
+    validate_event(deleted_event, mode=mode)

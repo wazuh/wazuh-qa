@@ -127,9 +127,12 @@ class FileMonitor:
             while self._continue:
                 if self._abort and not self.extra_timer_is_running:
                     self.stop()
-                    if type(self._result) != list or accum_results != len(self._result):
+                    if not isinstance(self._result, list) or accum_results != len(self._result):
                         if error_message:
                             logger.error(error_message)
+                            logger.error(f"Results accumulated: "
+                                         f"{len(self._result) if isinstance(self._result, list) else 0}")
+                            logger.error(f"Results expected: {accum_results}")
                         raise TimeoutError()
                 self._position = f.tell()
                 line = f.readline()
