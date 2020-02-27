@@ -5,6 +5,22 @@
       - inventory_hostname in groups['linuxagents']
       - ansible_os_family == "Debian"
 
+  - name: Install selinux python on Debian's families instances
+    apt:
+      name: python-selinux
+      state: present
+    when:
+      - inventory_hostname in groups['linuxagents']
+      - ansible_os_family == "Debian"
+
+  - name: Install selinux python on RedHat's families instances
+    apt:
+      name: libselinux-python
+      state: present
+    when:
+      - inventory_hostname in groups['linuxagents']
+      - ansible_os_family == "RedHat"
+
   - name: Configuring Windows Agents
     block:
       - name: Installing Google Chrome
