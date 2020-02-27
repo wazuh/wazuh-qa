@@ -4,6 +4,7 @@
 
 import os
 import sys
+import time
 
 import pytest
 
@@ -26,10 +27,11 @@ configurations_path = os.path.join(test_data_path, 'wazuh_hard_link.yaml')
 testdir1 = os.path.join(PREFIX, 'testdir1')
 unmonitored_dir = os.path.join(PREFIX, 'test_unmonitorized')
 test_directories = [testdir1, unmonitored_dir]
+frequency = global_parameters.default_timeout * 3 + 2
 
 # configurations
 
-p, m = generate_params(extra_params={'FREQUENCY': str(global_parameters.default_timeout * 3 + 2)},
+p, m = generate_params(extra_params={'FREQUENCY': str(frequency)},
                        apply_to_all=({'INODE': {'check_inode': inode}} for inode in ['yes', 'no']))
 
 configurations = load_wazuh_configurations(configurations_path, __name__,
@@ -126,7 +128,8 @@ def test_hard_link(path_file, file_name, path_link, link_name, num_links, get_co
 
     # Create the regular file
     create_file(REGULAR, path_file, file_name, content='test content')
-    check_time_travel(is_scheduled)
+    if is_scheduled:
+        time.sleep(frequency+1)
     event_checker.fetch_and_check('added', min_timeout=global_parameters.default_timeout)
 
     # Create as many links pointing to the regular file as num_links
@@ -137,13 +140,15 @@ def test_hard_link(path_file, file_name, path_link, link_name, num_links, get_co
 
     # Detect the 'added' events for all the created links
     if path_file == path_link:
-        check_time_travel(is_scheduled)
+        if is_scheduled:
+            time.sleep(frequency+1)
         event_checker.file_list = hardlinks_list
         event_checker.fetch_and_check('added', min_timeout=global_parameters.default_timeout)
 
     # Modify the regular file
     modify_file_content(path_file, file_name, new_content="modified testregularfile")
-    check_time_travel(is_scheduled)
+    if is_scheduled:
+        time.sleep(frequency+1)
 
     # Only events for the regular file are expected
     event_checker.file_list = file_list
@@ -161,7 +166,7 @@ def test_hard_link(path_file, file_name, path_link, link_name, num_links, get_co
     else:
         # If the link is not inside the monitored dir Scheduled run should detect the modification of the file
         # even if we are using Real-time or Whodata.
-        check_time_travel(True)
+        time.sleep(frequency+1)
         detect_and_validate_event(expected_file=[file_name] + hardlinks_list,
                                   mode="scheduled",
                                   expected_hard_links=hardlinks_list)
