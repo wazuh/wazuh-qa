@@ -13,6 +13,7 @@ import json
 
 import logging
 import argparse
+from datetime import datetime
 
 if sys.version_info.major < 3:
     print('ERROR: Python 2 is not supported.')
@@ -105,9 +106,9 @@ def main():
                             help="Output path for missing files alerts.",
                             default="debug_missing_file_alerts.log")
 
-        parser.add_argument("-t", "--timeout", type=int, required=False, dest='time_gap',
-                            help="time gap between alerts.json alerts acquisitions. default: 60s",
-                            default="60")
+        parser.add_argument("-s", "--sleep", type=int, required=False, dest='sleep_time',
+          help="Sleep time between retries", default="60"
+        )
 
         parser.add_argument("-r", "--retry", type=int, required=False, dest='retry_count',
                             help="reading attempts on stopped alerts. default: 4 attemps",
@@ -154,7 +155,7 @@ def main():
             else:
                 stuck_alerts = 0
 
-            time.sleep(args.time_gap)
+            time.sleep(args.sleep_time)
             prev_lenght = len(sub_paths)
             elapsed = time.time() - start
             logging.info("Elapsed time: ~ %s seconds \n" % int(elapsed))
