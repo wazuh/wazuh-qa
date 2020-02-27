@@ -9,7 +9,7 @@
   - name: "Verify alert json log | {{ event }}"
     script: >
       verify_alerts_json.py -i {{ item.path }} -e {{ event }} 
-      -o {{ missing_alerts_json_path }}
+      -o {{ missing_alerts_json_path }} {{ verify_json_script_extra_params }}
     args:
       executable: "python3"
     when: 
@@ -21,7 +21,8 @@
     script: >
       verify_alerts_elasticsearch.py -i {{ item.path }} -e {{ event }} 
       -a {{ hostvars[groups["elasticsearch"][0]]["private_ip"] }}
-      -o {{ missing_alerts_elasticsearch_path }}
+      -o {{ missing_alerts_elasticsearch_path }} 
+      {{ verify_elastic_script_extra_params }}
     args:
       executable: python3
     when: 
