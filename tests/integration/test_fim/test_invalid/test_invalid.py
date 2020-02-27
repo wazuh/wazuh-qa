@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import sys
 
 import pytest
 
@@ -56,8 +57,12 @@ def test_invalid(tags_to_apply, get_configuration, configure_environment):
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     # Configuration error -> ValueError raised
-    with pytest.raises(ValueError):
+    try:
         control_service('restart')
+    except ValueError:
+        assert sys.platform != 'win32', 'Restarting ossec with invalid configuration should ' \
+                                        'not raise an exception in win32'
+
     wazuh_log_monitor.start(timeout=3, callback=callback_configuration_error,
                             error_message='Did not receive expected '
                                           '"CRITICAL: ...: Configuration error at" event')

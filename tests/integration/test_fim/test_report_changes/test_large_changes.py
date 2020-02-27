@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import re
 import sys
 import subprocess
 import gzip
@@ -133,7 +134,8 @@ def test_large_changes(filename, folder, original_size, modified_size, tags_to_a
     diff_file_path = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
     if sys.platform == 'win32':
         diff_file_path = os.path.join(diff_file_path, 'c')
-        diff_file_path = os.path.join(diff_file_path, folder.strip('c:\\'), filename, 'last-entry.gz')
+        diff_file_path = os.path.join(diff_file_path, re.match(r'^[a-zA-Z]:(\\){1,2}(\w+)(\\){0,2}$', folder).group(2),
+                                      filename, 'last-entry.gz')
     else:
         diff_file_path = os.path.join(diff_file_path, folder.strip('/'), filename, 'last-entry.gz')
 
