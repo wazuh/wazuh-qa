@@ -88,6 +88,7 @@ def test_windows_audit_modify_sacl(tags_to_apply, get_configuration, configure_e
         # Assert that Wazuh rules are added
         lfss = get_file_security_descriptor(testdir_modify)
         dir_rules = get_sacl(lfss)
+        assert dir_rules is not None, 'No SACL rules were applied to the monitored directory.'
         for rule in WAZUH_RULES:
             assert rule in dir_rules, f'{rule} not found in {dir_rules}'
 
