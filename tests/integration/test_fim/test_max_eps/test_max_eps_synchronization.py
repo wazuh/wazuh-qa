@@ -31,7 +31,7 @@ testdir1 = os.path.join(PREFIX, 'testdir1')
 conf_params = {'TEST_DIRECTORIES': directory_str,
                'MODULE_NAME': __name__}
 
-eps_values = ['1000', '500', '100', '10']
+eps_values = ['50', '10']
 
 p, m = generate_params(extra_params=conf_params, apply_to_all=({'MAX_EPS': eps_value} for eps_value in eps_values))
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
@@ -69,8 +69,14 @@ def test_max_eps_on_start(get_configuration, create_files, configure_environment
     """
     check_apply_test({'max_eps_synchronization'}, get_configuration['tags'])
     max_eps = int(get_configuration['metadata']['max_eps'])
+
+    #  Find integrity start before attempting to read max_eps
+    wazuh_log_monitor.start(timeout=15,
+                            callback=callback_integrity_message,
+                            error_message="Didn't receive integrity_check_global").result()
+
     n_results = max_eps * 5
-    result = wazuh_log_monitor.start(timeout=(n_results/max_eps)*3,
+    result = wazuh_log_monitor.start(timeout=(n_results/max_eps)*6,
                                      accum_results=n_results,
                                      callback=callback_integrity_message,
                                      error_message=f'Received less results than expected ({n_results})').result()
