@@ -36,7 +36,7 @@
 - name: Copy the output files from Ansible Controller to the Managers
   become: true
   synchronize:
-    src: "agents_outputs/{{ event }}/missing"
+    src: "agents_outputs/{{ event }}/missing/"
     dest: "{{ agents_results_manager_path }}/{{ event }}/missing/"
     recursive: yes
     delete: yes
