@@ -50,7 +50,7 @@ def create_folders(folders_path):
         os.makedirs(folder, exist_ok=True)
 
 
-def generate_files_paths(folders_paths, n_files, file_name_length, prefix=""):
+def generate_files_paths(folders_paths, n_files, file_name_length, prefix="", ext_list=""):
     """
     Generates files paths distributed among the folders paths
 
@@ -58,10 +58,12 @@ def generate_files_paths(folders_paths, n_files, file_name_length, prefix=""):
     :param int n_files: Number of file's paths to generate
     :param str file_name_length: File name length for every file created
     :param str prefix: Add a prefix to the filename
+    :param str ext_list: List of extensions
     :return: Returns a list of paths
     """
     files_paths = []
     remaining_files = n_files
+    ext_list = ext_list.split()
 
     for path in folders_paths:
         if (path == folders_paths[-1]):
@@ -73,6 +75,8 @@ def generate_files_paths(folders_paths, n_files, file_name_length, prefix=""):
             current_file = os.path.join(path, full_name)
             files_paths.append(current_file)
         remaining_files = remaining_files - n_files_to_generate
+    if ext_list:
+        files_paths = [fpath + ".{}".format(random.choice(ext_list)) for fpath in files_paths]
     return files_paths
 
 
@@ -113,13 +117,12 @@ def associate_files_size(files_paths, files_size_specifications):
     return files_with_associated_size
 
 
-def create_files(files_path, text_mode=False, ext_list=""):
+def create_files(files_path, text_mode=False):
     """
     Takes the files paths and creates a file of specified size
 
     :param dict files_path: Contains the list of files and it's associated path
     :param bool text_mode: Create text files instead of binary
-    :param str ext_list: Choose random extension from list
     """
     if text_mode:
         file_mode = "w"
@@ -131,10 +134,7 @@ def create_files(files_path, text_mode=False, ext_list=""):
         one_char = b'0'
         chunk = one_char * 1048577
         unique = secrets.token_bytes
-    ext_list = ext_list.split()
     for key, value in files_path.items():
-        if ext_list:
-            key = "{}.{}".format(key, random.choice(ext_list))
         with open(key, file_mode) as f:
             if value > 1048576:
                 nval = value // 1048576
@@ -186,9 +186,12 @@ def main():
     )
     create_folders(folders)
     n_files = sum(x['amount'] for x in config['file_size_specifications'])
-    files = generate_files_paths(folders, n_files, config["file_length"], prefix=prefix)
+    files = generate_files_paths(
+        folders, n_files, config["file_length"],
+        prefix=prefix, ext_list=ext_list
+    )
     associated_files = associate_files_size(files, config["file_size_specifications"])
-    create_files(associated_files, text_mode=text_mode, ext_list=ext_list)
+    create_files(associated_files, text_mode=text_mode)
     create_file_summary(files, output_file)
 
 
