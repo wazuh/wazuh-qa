@@ -50,7 +50,7 @@ def create_folders(folders_path):
         os.makedirs(folder, exist_ok=True)
 
 
-def generate_files_paths(folders_paths, n_files, file_name_length, prefix=""):
+def generate_files_paths(folders_paths, n_files, file_name_length, prefix="", ext_list=""):
     """
     Generates files paths distributed among the folders paths
 
@@ -58,10 +58,12 @@ def generate_files_paths(folders_paths, n_files, file_name_length, prefix=""):
     :param int n_files: Number of file's paths to generate
     :param str file_name_length: File name length for every file created
     :param str prefix: Add a prefix to the filename
+    :param str ext_list: List of extensions
     :return: Returns a list of paths
     """
     files_paths = []
     remaining_files = n_files
+    ext_list = ext_list.split()
 
     for path in folders_paths:
         if (path == folders_paths[-1]):
@@ -73,6 +75,8 @@ def generate_files_paths(folders_paths, n_files, file_name_length, prefix=""):
             current_file = os.path.join(path, full_name)
             files_paths.append(current_file)
         remaining_files = remaining_files - n_files_to_generate
+    if ext_list:
+        files_paths = [fpath + ".{}".format(random.choice(ext_list)) for fpath in files_paths]
     return files_paths
 
 
@@ -118,7 +122,7 @@ def create_files(files_path, text_mode=False):
     Takes the files paths and creates a file of specified size
 
     :param dict files_path: Contains the list of files and it's associated path
-    :param dict text_mode: Create text files instead of binary
+    :param bool text_mode: Create text files instead of binary
     """
     if text_mode:
         file_mode = "w"
@@ -130,7 +134,6 @@ def create_files(files_path, text_mode=False):
         one_char = b'0'
         chunk = one_char * 1048577
         unique = secrets.token_bytes
-
     for key, value in files_path.items():
         with open(key, file_mode) as f:
             if value > 1048576:
@@ -167,11 +170,14 @@ def main():
                              " (default is False)")
     parser.add_argument("-p", '--prefix', type=str, default="",
                         dest="file_prefix", help="Add a common prefix to all filenames")
+    parser.add_argument("--ext-list", type=str, default="",
+                        dest="ext_list", help="Create files with these extensions")
     args = parser.parse_args()
     config_file = args.config
     output_file = args.output_list
     text_mode = args.text_mode
     prefix = args.file_prefix
+    ext_list = args.ext_list
     config = parse_files_configuration(config_file)
     folders = generate_folders_paths(
         config["root_folder"],
@@ -180,7 +186,10 @@ def main():
     )
     create_folders(folders)
     n_files = sum(x['amount'] for x in config['file_size_specifications'])
-    files = generate_files_paths(folders, n_files, config["file_length"], prefix=prefix)
+    files = generate_files_paths(
+        folders, n_files, config["file_length"],
+        prefix=prefix, ext_list=ext_list
+    )
     associated_files = associate_files_size(files, config["file_size_specifications"])
     create_files(associated_files, text_mode=text_mode)
     create_file_summary(files, output_file)
