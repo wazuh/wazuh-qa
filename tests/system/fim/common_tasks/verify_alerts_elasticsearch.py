@@ -169,9 +169,7 @@ if __name__ == "__main__":
         output.writelines(failure_list)
 
     assert failure == 0, "number of failed files: {}\n \
-            Elapsed time: ~ {} seconds.".format(
-            success, elapsed
-        )
+            Elapsed time: ~ {} seconds.".format(success, elapsed)
 
     print(
         "Number of succeded files: {}\n Elapsed time: ~ {} seconds.".format(
