@@ -27,6 +27,7 @@ state_collector_time = 1
 state_path = os.path.join(WAZUH_PATH, 'var', 'run', 'ossec-agentd.state')
 performance_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stats', 'performance')
 fim_db_path = os.path.join(WAZUH_PATH, 'queue', 'fim', 'db')
+# local_internal_options configuration
 state_configuration = {
     "agentd.state_interval": state_collector_time,
     "syscheck.debug": 2
@@ -61,9 +62,9 @@ def modify_local_internal_options():
 def replace_conf(sync_eps, fim_eps):
     """Configure syscheck in realtime=yes."""
     directories_regex = r"<directories realtime=\"yes\">[\n\t ]*(TESTING_DIRECTORY)[\n\t ]*</directories>"
-    fim_eps_regex = r"<syscheck>[\s\S\w]*<max_eps>[\n\t ]*([0-9]+)[\n\t ]*</max_eps>[\s\S\w]*<synchronization>"
+    fim_eps_regex = r"<syscheck>[\s\S\w]*<max_eps>[\n\t ]*(FIM_EPS)[\n\t ]*</max_eps>[\s\S\w]*<synchronization>"
     sync_eps_regex = \
-        r"<synchronization>[\s\S\w]*<max_eps>[\n\t ]*([0-9]+)[\n\t ]*</max_eps>[\s\S\w]*</synchronization>"
+        r"<synchronization>[\s\S\w]*<max_eps>[\n\t ]*(SYNC_EPS)[\n\t ]*</max_eps>[\s\S\w]*</synchronization>"
 
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'template_wazuh_conf.conf'), 'r') as f:
         content = f.read()
