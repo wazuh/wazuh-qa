@@ -13,7 +13,6 @@ import json
 
 import logging
 import argparse
-from datetime import datetime
 
 if sys.version_info.major < 3:
     print('ERROR: Python 2 is not supported.')
