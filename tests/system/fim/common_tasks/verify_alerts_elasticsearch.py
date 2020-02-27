@@ -120,11 +120,10 @@ if __name__ == "__main__":
                     line.rstrip()
                 try:
                     query_result = makeQuery(query, es, index_name)
-                    print(query_result)
                 except Exception as e:
                     logging.info(
                         "Error when making the Query"
-                        )
+                    )
                     raise e
 
                 if (args.whodata_query):

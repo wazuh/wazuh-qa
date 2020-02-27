@@ -94,8 +94,9 @@ def alerts_prune_tag(path, target_event, tags):
                 data = json.loads(line)
                 if data.get('syscheck') \
                     and data['syscheck']['event'] == target_event \
-                        and data['syscheck']['tags'] == tags:
-                    alerts_list.append(data)
+                        and 'tags' in data['syscheck']:
+                    if data['syscheck']['tags'] == tags:
+                        alerts_list.append(data)
 
             except ValueError:
                 continue
@@ -139,7 +140,7 @@ def main():
                             default="4")
         parser.add_argument("-w", "--whodata", type=bool, required=False, dest='whodata_check',
                             help="Enable Whodata alert's parsing.",
-                            default="false")
+                            default=False)
         parser.add_argument(
             "-tg", "--tag", type=str, required=False, dest='tag_query',
             nargs='+', help="Enable tag queries for the indicated tags",
@@ -153,17 +154,22 @@ def main():
 
         paths_list_set = paths_acquisition(args.input_file)
         if (args.whodata_check is not None and args.whodata_check):
+            logging.info(
+                "Pruning whodata alerts."
+            )
             pruned_alerts_set = alerts_prune_whodata(args.log_json_path, args.event)
         elif args.tag_query is not None:
             logging.info(
-                "Pruning tag alerts"
+                "Pruning tag alerts."
             )
             pruned_alerts_set = alerts_prune_tag(
                  args.log_json_path, args.event, args.tag_query
             )
-        else:
+        if not args.whodata_check and args.tag_query is None:
+            logging.info(
+                "Pruning alerts."
+            )
             pruned_alerts_set = alerts_prune(args.log_json_path, args.event)
-
         sub_paths = paths_list_set - pruned_alerts_set
         prev_lenght = len(sub_paths)
         start = time.time()
