@@ -26,6 +26,8 @@ from jsonschema import validate
 from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.tools.monitoring import FileMonitor
+
 
 if sys.platform == 'win32':
     import win32con
@@ -816,19 +818,36 @@ def callback_real_time_whodata_started(line):
         return True
 
 
-def check_time_travel(time_travel):
+def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None):
     """
-    Change date and time of the system.
+    Change date and time of the system depending on a boolean condition. Optionally, a monitor may be used to check
+    if a scheduled scan has been performed.
+
+    This function is specially useful to deal with scheduled scans that are triggered on a time interval basis.
 
     Parameters
     ----------
     time_travel : boolean
         True if we need to update time. False otherwise.
+    interval : timedelta, optional
+        Time interval that will be added to system clock. Default: 13 hours.
+    monitor : FileMonitor, optional
+        If passed, after changing system clock it will check for the end of the scheduled scan. The `monitor` will not
+        consume any log line. Default `None`.
+
+    Raises
+    ------
+    TimeoutError
+        If `monitor` is not `None` and the scan has not ended in the default timeout specified in `global_parameters`.
     """
     if time_travel:
         before = str(datetime.now())
-        TimeMachine.travel_to_future(timedelta(hours=13))
+        TimeMachine.travel_to_future(interval)
         logger.info(f"Changing the system clock from {before} to {str(datetime.now())}")
+
+        if monitor:
+            monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+                          update_position=False)
 
 
 def callback_configuration_warning(line):
