@@ -14,6 +14,7 @@ import random
 import string
 import secrets
 import argparse
+import time
 
 
 def generate_random_name(length):
@@ -113,7 +114,7 @@ def associate_files_size(files_paths, files_size_specifications):
     return files_with_associated_size
 
 
-def create_files(files_path, text_mode=False):
+def create_files(files_path, text_mode=False, bunch_size=100, wait_time=1):
     """
     Takes the files paths and creates a file of specified size
 
@@ -130,16 +131,20 @@ def create_files(files_path, text_mode=False):
         one_char = b'0'
         chunk = one_char * 1048577
         unique = secrets.token_bytes
-
+    count = 0
     for key, value in files_path.items():
-        with open(key, file_mode) as f:
-            if value > 1048576:
-                nval = value // 1048576
-                for val in range(nval):
-                    f.write(chunk)
-            else:
-                f.write(one_char * value)
-            f.write(unique(16))
+      if count >= bunch_size:
+        time.sleep(wait_time)
+        count = 0
+      with open(key, file_mode) as f:
+          count += 1
+          if value > 1048576:
+              nval = value // 1048576
+              for val in range(nval):
+                  f.write(chunk)
+          else:
+              f.write(one_char * value)
+          f.write(unique(16))
 
 
 def create_file_summary(files_path, logfile):
@@ -167,6 +172,10 @@ def main():
                              " (default is False)")
     parser.add_argument("-p", '--prefix', type=str, default="",
                         dest="file_prefix", help="Add a common prefix to all filenames")
+    parser.add_argument("-b", '--bunch-size', type=int, default=100,
+                        dest="bunch_size", help="File generation bunch size")
+    parser.add_argument("-w", '--wait-time', type=int, default=100,
+                        dest="wait_time", help="Time interval between bunch generation (to avoid queue overflow)")
     args = parser.parse_args()
     config_file = args.config
     output_file = args.output_list
@@ -182,7 +191,7 @@ def main():
     n_files = sum(x['amount'] for x in config['file_size_specifications'])
     files = generate_files_paths(folders, n_files, config["file_length"], prefix=prefix)
     associated_files = associate_files_size(files, config["file_size_specifications"])
-    create_files(associated_files, text_mode=text_mode)
+    create_files(associated_files, text_mode=text_mode, bunch_size=args.bunch_size, wait_time=args.wait_time)
     create_file_summary(files, output_file)
 
 

@@ -13,7 +13,7 @@ import logging
 import os
 import time
 
-def delete_files(input_file_path, n, output_file_path):
+def delete_files(input_file_path, n, output_file_path, bunch_size=100, wait_time=100):
     """
     Delete files, given a file with complete list of files where each line
     represents a file path, we will randomly delete n files of them.
@@ -46,7 +46,11 @@ def delete_files(input_file_path, n, output_file_path):
 
     # Delete the selected files
     failed_deletions = []
+    count = 0
     for path in to_delete:
+        if count >= bunch_size:
+              time.sleep(wait_time)
+              count = 0
         try:
             os.remove(path)
         except FileNotFoundError as e:
@@ -95,9 +99,13 @@ def main():
                         help="Number of files to be randomly selected and deleted")
     parser.add_argument("-o", "--output-list", type=str, required=True, dest='output_file',
                         help="File containing the list of the deleted files, one per line")
+    parser.add_argument("-b", '--bunch-size', type=int, default=100,
+                        dest="bunch_size", help="File generation bunch size")
+    parser.add_argument("-w", '--wait-time', type=int, default=100,
+                        dest="wait_time", help="Time interval between bunch generation (to avoid queue overflow)")
     args = parser.parse_args()
 
-    delete_files(args.input_file, args.n_files, args.output_file)
+    delete_files(args.input_file, args.n_files, args.output_file, bunch_size=args.bunch_size, wait_time=args.wait_time)
 
 
 if __name__ == '__main__':

@@ -13,6 +13,7 @@ import sys
 import random
 import platform
 import argparse
+import time
 import logging
 if platform.system() == 'Linux':
     import pwd
@@ -97,6 +98,10 @@ def main():
     parser.add_argument("-o", "--output-list", type=str,
                         required=True, dest='output_file',
                         help="File containing the list of modified files")
+    parser.add_argument("-b", '--bunch-size', type=int, default=100,
+                        dest="bunch_size", help="File generation bunch size")
+    parser.add_argument("-w", '--wait-time', type=int, default=100,
+                        dest="wait_time", help="Time interval between bunch generation (to avoid queue overflow)")
     args = parser.parse_args()
 
     input_file = args.input_file
@@ -105,7 +110,11 @@ def main():
     changed_files = []
 
     with open(input_file) as flist:
+        count = 0
         for path in flist:
+            if count >= args.bunch_size:
+              time.sleep(args.wait_time)
+              count = 0
             try:
                 modify_file_content(path[:-1])
                 changed_files.append(path[:-1])
