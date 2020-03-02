@@ -56,7 +56,7 @@ def test_symbolic_revert_symlink(tags_to_apply, get_configuration, configure_env
 
     def modify_and_assert(file):
         modify_file_content(testdir1, file, new_content='Sample modification')
-        check_time_travel(scheduled)
+        check_time_travel(scheduled, monitor=wazuh_log_monitor)
         ev = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
         assert 'modified' in ev['data']['type'] and os.path.join(testdir1, file) in ev['data']['path'], \
             f"'modified' event not matching for {testdir1} {file}"
@@ -69,7 +69,7 @@ def test_symbolic_revert_symlink(tags_to_apply, get_configuration, configure_env
 
     # Don't expect an event since it is not being monitored yet
     modify_file_content(testdir1, file2, new_content='Sample modification')
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
         logger.error(f'Unexpected event {event.result()}')
@@ -85,7 +85,7 @@ def test_symbolic_revert_symlink(tags_to_apply, get_configuration, configure_env
     modify_symlink(os.path.join(testdir1, file1), os.path.join(testdir_link, 'symlink'))
     wait_for_symlink_check(wazuh_log_monitor)
     modify_file_content(testdir1, file2, new_content='Sample modification2')
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
         logger.error(f'Unexpected event {event.result()}')
