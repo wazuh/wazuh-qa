@@ -68,7 +68,7 @@ def test_follow_symbolic_disabled(path, tags_to_apply, get_configuration, config
     # If the symlink targets to a directory, create a file in it and ensure no event is raised.
     if tags_to_apply == {'monitored_dir'}:
         create_file(REGULAR, path, regular_file)
-        check_time_travel(scheduled)
+        check_time_travel(scheduled, monitor=wazuh_log_monitor)
         with pytest.raises(TimeoutError):
             wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
             logger.error(error_msg)
@@ -76,7 +76,7 @@ def test_follow_symbolic_disabled(path, tags_to_apply, get_configuration, config
 
     # Modify the target file and don't expect any events
     modify_file(path, regular_file, new_content='Modify sample')
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
         logger.error(error_msg)
@@ -84,7 +84,7 @@ def test_follow_symbolic_disabled(path, tags_to_apply, get_configuration, config
 
     # Delete the target file and don't expect any events
     delete_file(path, regular_file)
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
         logger.error(error_msg)
