@@ -161,7 +161,7 @@ def test_check_all_no(path, checkers, get_configuration, configure_environment, 
     # Create regular file and dont expect any check
     file = 'regular'
     create_file(REGULAR, path, file)
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     create_event = wazuh_log_monitor.start(callback=callback_detect_event, timeout=15,
                                            error_message='Did not receive expected '
                                                          '"Sending FIM event: ..." event').result()
@@ -176,7 +176,7 @@ def test_check_all_no(path, checkers, get_configuration, configure_environment, 
         raise AttributeError(f'Unexpected event {event}')
 
     delete_file(path, file)
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     delete_event = wazuh_log_monitor.start(callback=callback_detect_event, timeout=15,
                                            error_message='Did not receive expected '
                                                          '"Sending FIM event: ..." event').result()

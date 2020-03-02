@@ -67,7 +67,7 @@ def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_conf
         """
         modify_file_content(f1, file1, text)
         modify_file_content(f2, file1, text)
-        check_time_travel(scheduled)
+        check_time_travel(scheduled, monitor=wazuh_log_monitor)
         modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
                                          error_message='Did not receive expected "Sending FIM event: ..." event'
                                          ).result()
@@ -88,7 +88,7 @@ def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_conf
     if main_folder == testdir_target:
         create_file(REGULAR, main_folder, file1, content='')
         create_file(REGULAR, aux_folder, file1, content='')
-        check_time_travel(scheduled)
+        check_time_travel(scheduled, monitor=wazuh_log_monitor)
         add = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
                                       error_message='Did not receive expected "Sending FIM event: ..." event'
                                       ).result()

@@ -82,7 +82,7 @@ def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_ap
 
     # Go ahead in time to let syscheck perform a new scan if mode is scheduled
     logger.info(f'Time travel: {scheduled}')
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
 
     if triggers_event:
         logger.info('Checking the event...')

@@ -79,7 +79,7 @@ def test_delete_folder(folder, file_list, filetype, tags_to_apply,
     for file in file_list:
         create_file(filetype, folder, file, content='')
 
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                             accum_results=len(file_list), error_message='Did not receive expected '
                                                                         '"Sending FIM event: ..." event').result()
@@ -88,7 +88,7 @@ def test_delete_folder(folder, file_list, filetype, tags_to_apply,
 
     # Remove folder
     shutil.rmtree(folder, ignore_errors=True)
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
 
     # Expect deleted events
     event_list = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,

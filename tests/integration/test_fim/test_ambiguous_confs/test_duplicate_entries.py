@@ -156,7 +156,7 @@ def test_duplicate_entries_sregex(get_configuration, configure_environment,
     logger.info(f'Adding file {os.path.join(testdir1, file)}, content: " "')
     create_file(REGULAR, testdir1, file, content=' ')
     logger.info(f'Time travel: {scheduled}')
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         logger.info('Checking the event...')
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
@@ -167,7 +167,7 @@ def test_duplicate_entries_sregex(get_configuration, configure_environment,
     logger.info(f'Modifying {os.path.join(testdir1, file)} content')
     modify_file_content(testdir1, file)
     logger.info(f'Time travel: {scheduled}')
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         logger.info('Checking the event...')
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
@@ -192,7 +192,7 @@ def test_duplicate_entries_report(get_configuration, configure_environment, rest
     logger.info(f'Adding file {os.path.join(testdir1, file)}, content: " "')
     create_file(REGULAR, testdir1, file, content=' ')
     logger.info(f'Time travel: {scheduled}')
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                             error_message=f'Did not receive expected event for file '
                                           f'{os.path.join(testdir1, file)}').result()
@@ -201,7 +201,7 @@ def test_duplicate_entries_report(get_configuration, configure_environment, rest
     logger.info(f'Modifying {os.path.join(testdir1, file)} content')
     modify_file_content(testdir1, file)
     logger.info(f'Time travel: {scheduled}')
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                             error_message=f'Did not receive expected event for file '
                                           f'{os.path.join(testdir1, file)}').result()
@@ -238,7 +238,7 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
     file_path = os.path.join(testdir1, file)
 
     logger.info(f'Time travel: {scheduled}')
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     logger.info('Checking the event...')
     event1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                      callback=callback_detect_event,
@@ -257,7 +257,7 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
     Path(file_path).touch()
 
     logger.info(f'Time travel: {scheduled}')
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     event2 = check_event(previous_mode=mode2, previous_event=event1, file=file)
     assert event2 is None, "Multiple events created"
 
@@ -268,7 +268,7 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
     modify_file_content(testdir1, file)
 
     logger.info(f'Time travel: {scheduled}')
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     logger.info('Checking the event...')
     event3 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                      callback=callback_detect_event,

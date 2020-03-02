@@ -86,14 +86,14 @@ def test_move_file(file, file_content, tags_to_apply, source_folder, target_fold
     create_file(REGULAR, source_folder, file, content=file_content)
 
     if source_folder in test_directories:
-        check_time_travel(scheduled)
+        check_time_travel(scheduled, monitor=wazuh_log_monitor)
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                         error_message='Did not receive expected "Sending FIM event: .." event').result()
         validate_event(event, mode=mode)
 
     # Move file to target directory
     os.rename(os.path.join(source_folder, file), os.path.join(target_folder, file))
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
 
     # Monitor expected events
     events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
@@ -125,7 +125,7 @@ def test_move_file(file, file_content, tags_to_apply, source_folder, target_fold
     # Remove file
     delete_file(target_folder, file)
     if target_folder in test_directories:
-        check_time_travel(scheduled)
+        check_time_travel(scheduled, monitor=wazuh_log_monitor)
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                         error_message='Did not receive expected "Sending FIM event: .." event').result()
         validate_event(event, mode=mode)

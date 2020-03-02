@@ -193,9 +193,10 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
     os.system(add_rule_command)
 
     # Restart and for wazuh
+    control_service('stop')
     truncate_file(LOG_FILE_PATH)
-    control_service('restart')
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    control_service('start')
     detect_initial_scan(wazuh_log_monitor)
 
     # Look for audit_key word

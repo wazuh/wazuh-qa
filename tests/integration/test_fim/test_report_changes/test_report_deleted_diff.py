@@ -6,18 +6,16 @@ import re
 import shutil
 import sys
 import time
-from datetime import timedelta
 
 import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, WAZUH_PATH, callback_detect_event,
-                               REGULAR, create_file, generate_params, detect_initial_scan)
+                               REGULAR, create_file, generate_params, detect_initial_scan, check_time_travel)
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import restart_wazuh_with_new_conf
-from wazuh_testing.tools.time import TimeMachine
 
 # Marks
 
@@ -87,8 +85,7 @@ def wait_for_event(fim_mode):
     fim_mode : str
         FIM mode (scheduled, realtime, whodata)
     """
-    if fim_mode == 'scheduled':
-        TimeMachine.travel_to_future(timedelta(hours=13))
+    check_time_travel(time_travel=fim_mode == 'scheduled', monitor=wazuh_log_monitor)
 
     # Wait until event is detected
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,

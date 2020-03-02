@@ -26,6 +26,8 @@ from jsonschema import validate
 from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.tools.monitoring import FileMonitor
+
 
 if sys.platform == 'win32':
     import win32con
@@ -80,6 +82,7 @@ REQUIRED_ATTRIBUTES = {
 }
 
 _last_log_line = 0
+_os_excluded_from_rt_wd = ['darwin', 'sunos5']
 
 
 def validate_event(event, checks=None, mode=None):
@@ -648,7 +651,7 @@ def callback_detect_integrity_state(line):
 
 
 def callback_detect_synchronization(line):
-    if 'Performing synchronization check' in line:
+    if 'Initializing FIM Integrity Synchronization check' in line:
         return line
     return None
 
@@ -816,19 +819,38 @@ def callback_real_time_whodata_started(line):
         return True
 
 
-def check_time_travel(time_travel):
+def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None):
     """
-    Change date and time of the system.
+    Change date and time of the system depending on a boolean condition. Optionally, a monitor may be used to check
+    if a scheduled scan has been performed.
+
+    This function is specially useful to deal with scheduled scans that are triggered on a time interval basis.
 
     Parameters
     ----------
     time_travel : boolean
         True if we need to update time. False otherwise.
+    interval : timedelta, optional
+        Time interval that will be added to system clock. Default: 13 hours.
+    monitor : FileMonitor, optional
+        If passed, after changing system clock it will check for the end of the scheduled scan. The `monitor` will not
+        consume any log line. Default `None`.
+
+    Raises
+    ------
+    TimeoutError
+        If `monitor` is not `None` and the scan has not ended in the default timeout specified in `global_parameters`.
     """
     if time_travel:
         before = str(datetime.now())
-        TimeMachine.travel_to_future(timedelta(hours=13))
+        TimeMachine.travel_to_future(interval)
         logger.info(f"Changing the system clock from {before} to {str(datetime.now())}")
+
+        if monitor:
+            monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+                          update_position=False,
+                          error_message=f'End of scheduled scan not detected after '
+                                        f'{global_parameters.default_timeout} seconds')
 
 
 def callback_configuration_warning(line):
@@ -968,20 +990,28 @@ class EventChecker:
             event_types = Counter(filter_events(events, ".[].data.type"))
             assert (event_types[ev_type] == len(file_list)), f'Non expected number of events. {event_types[ev_type]} != {len(file_list)}'
 
-        def check_files_in_event(events, folder, file_list=['testfile0']):
-            file_paths = filter_events(events, ".[].data.path")
+        def check_events_path(events, folder, file_list=['testfile0'], mode=None):
+            mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
+            audit_path = filter_events(events, ".[].data.audit.path") if mode == "whodata" else None
+            data_path = filter_events(events, ".[].data.path")
             for file_name in file_list:
-                expected_file_path = os.path.join(folder, file_name)
-                expected_file_path = expected_file_path[:1].lower() + expected_file_path[1:]
+                expected_path = os.path.join(folder, file_name)
+                expected_path = expected_path[:1].lower() + expected_path[1:]
                 if self.encoding is not None:
-                    for index, item in enumerate(file_paths):
-                        file_paths[index] = item.encode(encoding=self.encoding)
+                    for index, item in enumerate(data_path):
+                        data_path[index] = item.encode(encoding=self.encoding)
+                    if audit_path:
+                        for index, item in enumerate(audit_path):
+                            audit_path[index] = item.encode(encoding=self.encoding)
                 if sys.platform == 'darwin' and self.encoding and self.encoding != 'utf-8':
-                    logger.info(f'Not asserting {expected_file_path} in event.data.path. '
+                    logger.info(f'Not asserting {expected_path} in event.data.path. '
                                  f'Reason: using non-utf-8 encoding in darwin.')
                 else:
-                    error_msg = f"Expected path was '{expected_file_path}' but event path is '{file_paths}'"
-                    assert (expected_file_path in file_paths), error_msg
+                    error_msg = f"Expected data path was '{expected_path}' but event data path is '{data_path}'"
+                    assert (expected_path in data_path), error_msg
+                    if audit_path:
+                        error_msg = f"Expected audit path was '{expected_path}' but event audit path is '{audit_path}'"
+                        assert (expected_path in audit_path), error_msg
 
         def filter_events(events, mask):
             """Returns a list of elements matching a specified mask in the events list using jq module."""
@@ -994,7 +1024,7 @@ class EventChecker:
         if self.events is not None:
             validate_checkers_per_event(self.events, self.options, mode)
             check_events_type(self.events, event_type, self.file_list)
-            check_files_in_event(self.events, self.folder, self.file_list)
+            check_events_path(self.events, self.folder, file_list=self.file_list, mode=mode)
 
             if self.custom_validator is not None:
                 self.custom_validator.validate_after_cud(self.events)
@@ -1134,7 +1164,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
     for name, content in file_list.items():
         create_file(REGULAR, folder, name, content=content)
 
-    check_time_travel(time_travel)
+    check_time_travel(time_travel, monitor=log_monitor)
     event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event)
     if triggers_event:
         logger.info("'added' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
@@ -1143,7 +1173,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
     for name, content in file_list.items():
         modify_file(folder, name, is_binary=isinstance(content, bytes))
 
-    check_time_travel(time_travel)
+    check_time_travel(time_travel, monitor=log_monitor)
     event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
     if triggers_event:
         logger.info("'modified' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
@@ -1152,7 +1182,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
     for name in file_list:
         delete_file(folder, name)
 
-    check_time_travel(time_travel)
+    check_time_travel(time_travel, monitor=log_monitor)
     event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
     if triggers_event:
         logger.info("'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
@@ -1313,9 +1343,9 @@ def get_fim_mode_param(mode, key='FIM_MODE'):
     metadata = {key.lower(): mode}
     if mode == 'scheduled':
         return {key: ''}, metadata
-    elif mode == 'realtime' and sys.platform != 'darwin':
+    elif mode == 'realtime' and sys.platform not in _os_excluded_from_rt_wd:
         return {key: {'realtime': 'yes'}}, metadata
-    elif mode == 'whodata' and sys.platform != 'darwin':
+    elif mode == 'whodata' and sys.platform not in _os_excluded_from_rt_wd:
         return {key: {'whodata': 'yes'}}, metadata
     else:
         return None, None

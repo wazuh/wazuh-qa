@@ -7,11 +7,10 @@ from datetime import datetime, timedelta
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, generate_params
+from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, generate_params, check_time_travel
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.time import TimeMachine
 
 # Marks
 
@@ -78,12 +77,12 @@ def test_scan_day(tags_to_apply,
         return
 
     if day_diff > 1:
-        TimeMachine.travel_to_future(timedelta(days=day_diff - 1))
+        check_time_travel(time_travel=True, interval=timedelta(days=day_diff - 1))
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                             callback=callback_detect_end_scan)
             raise AttributeError(f'Unexpected event {event}')
-    TimeMachine.travel_to_future(timedelta(days=1))
+    check_time_travel(time_travel=True, interval=timedelta(days=1))
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
                             error_message='Did not receive expected '
                                           '"File integrity monitoring scan ended" event')
