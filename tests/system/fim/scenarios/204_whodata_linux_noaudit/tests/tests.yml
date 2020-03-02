@@ -1,14 +1,6 @@
 ---
-- name: Whodata missing auditd error. Switching to realtime.
-  lineinfile:
-    path: "{{ linux_ossec_folder_path }}/logs/ossec.log"
-    line: "Who-data engine cannot start because Auditd is not running"
-  when:
-    - inventory_hostname in groups['linuxagents']
-
-- name: Switching to realtime mode on ossec.log
-  lineinfile:
-    path: "{{ linux_ossec_folder_path }}/logs/ossec.log"
-    line: "Who-data engine could not start. Switching who-data to real-time."
+- name: Check whether ossec.log contains switching to realtime message.
+  command: grep "Who-data engine could not start. Switching who-data to real-time." {{ linux_ossec_folder_path }}/logs/ossec.log
+  changed_when: false
   when:
     - inventory_hostname in groups['linuxagents']
