@@ -51,6 +51,11 @@
       name: wazuh-agent
       state: stopped
 
+  - name: Clean logs wazuh-agent
+    become: True
+    shell: "echo '' > {{ linux_ossec_folder_path }}/logs/ossec.log"
+    when: clean_logs
+
   - name: Copy {{ files_config_agent_linux_ossec_conf }} to the Agents hosts | Linux
     copy:
       src: "./config/{{ files_config_agent_linux_ossec_conf }}"
@@ -83,6 +88,12 @@
       name: OssecSvc
       start_mode: auto
       state: stopped
+
+  - name: "Clean win logs"
+    win_command: powershell.exe -
+    args:
+      stdin: "Clear-Content 'C:\\Program Files (x86)\\ossec-agent\\ossec.log'"
+    when: clean_logs
 
   - name: Copy {{ files_config_agent_windows_ossec_conf }} to the agents hosts | Windows
     win_copy:

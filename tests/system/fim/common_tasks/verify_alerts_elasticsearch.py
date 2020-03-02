@@ -48,6 +48,12 @@ if __name__ == "__main__":
             logging.StreamHandler()
         ]
     )
+
+    logging.getLogger("elasticsearch").setLevel(logging.ERROR)
+    logging.getLogger("urllib3").setLevel(logging.ERROR)
+    logging.getLogger("requests").setLevel(logging.ERROR)
+    logging.getLogger("requests.urllib3").setLevel(logging.ERROR)
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-i", "--input-list", type=str, required=True, dest='files',
@@ -77,8 +83,8 @@ if __name__ == "__main__":
         help="Sleep time between retries", default="60"
     )
     parser.add_argument(
-        "-w", "--whodata", type=bool, required=False, dest='whodata_query',
-        help="Enable whodata queries", default=False
+        "-w", "--whodata", required=False, dest='whodata_query',
+        help="Enable whodata queries", action='store_true'
     )
     parser.add_argument(
         "-tg", "--tag", type=str, required=False, dest='tag_query', nargs='+',
