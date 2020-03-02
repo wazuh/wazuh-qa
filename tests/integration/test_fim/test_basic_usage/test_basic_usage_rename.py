@@ -97,7 +97,7 @@ def test_rename(folder, tags_to_apply,
     mode = get_configuration['metadata']['fim_mode']
 
     create_file(REGULAR, folder, old_name, content='')
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                     error_message='Did not receive expected "Sending FIM event: ..." event').result()
     validate_event(event, mode=mode)
@@ -106,7 +106,7 @@ def test_rename(folder, tags_to_apply,
     if folder == testdir1:
         # Change the file name
         os.rename(os.path.join(folder, old_name), os.path.join(folder, new_name))
-        check_time_travel(scheduled)
+        check_time_travel(scheduled, monitor=wazuh_log_monitor)
         # Expect deleted and created events
         deleted = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                           callback=callback_detect_event,
@@ -132,9 +132,8 @@ def test_rename(folder, tags_to_apply,
         validate_event(added, mode=mode)
     else:
         os.rename(folder, os.path.join(os.path.dirname(folder), new_name))
-        check_time_travel(scheduled)
+        check_time_travel(scheduled, monitor=wazuh_log_monitor)
         expect_events(new_name)
         # Travel in time to force delete event in realtime/whodata
-        if get_configuration['metadata']['fim_mode'] != 'scheduled':
-            TimeMachine.travel_to_future(timedelta(hours=13))
+        check_time_travel(not scheduled, monitor=wazuh_log_monitor)
         expect_events(folder)
