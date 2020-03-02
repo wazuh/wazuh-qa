@@ -12,7 +12,20 @@ from elasticsearch import Elasticsearch
 from time import sleep, time
 import logging
 
-
+def read_file(file_path):
+    data = []
+    # Read data into the variable 'data'
+    try:
+        if file_path:
+            with open(file_path) as f:
+                data_ = f.readlines()
+            # remove whitespace characters like `\n` at the end of each line
+            data = [x.strip() for x in data_]
+            f.close()  # close f
+    except Exception:
+        logging.error('Failed when reading the input file: ', exc_info=True)
+    
+    return data
 def setElasticsearch(ElasticIP):
     """
         Sets the Elasticsearch instance that we want to connect.
