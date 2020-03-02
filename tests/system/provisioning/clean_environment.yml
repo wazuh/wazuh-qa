@@ -1,8 +1,8 @@
 ---
   - hosts: all
     vars_files:
-      - ../../provisioning/vars/elastic_nginx.yml
-      - ../../provisioning/vars/wazuh_agent.yml
+      - ./vars/elastic_nginx.yml
+      - ./vars/wazuh_agent.yml
     strategy: free
     tasks:
     # Wazuh Agents cleanup
@@ -17,12 +17,12 @@
             state: stopped
           when: agent_service_status.stat.exists
 
-        - name: Uninstall wazuh-agent service
+        - name: Uninstall wazuh-agent
           package:
             name: wazuh-agent
             state: absent
 
-        - name: Ensure /var/ossec is deleted
+        - name: Delete /var/ossec
           file:
             path: /var/ossec
             state: absent
@@ -102,7 +102,7 @@
         when:
           - inventory_hostname in groups['masters'] or inventory_hostname in groups['workers']
         become: yes
-      
+
     # Elasticsearch cleanup
 
       - block:
@@ -147,7 +147,7 @@
 
         when:
           - inventory_hostname in groups['elasticsearch']
-        become: yes          
+        become: yes
 
     # Kibana cleanup
 
@@ -164,5 +164,5 @@
 
         when:
           - inventory_hostname in groups['kibana']
-        become: yes          
+        become: yes
 
