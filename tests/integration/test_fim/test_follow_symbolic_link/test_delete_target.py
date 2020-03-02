@@ -75,14 +75,14 @@ def test_symbolic_delete_target(tags_to_apply, main_folder, aux_folder, get_conf
     # is being created withing the pointed directory. Then, delete the pointed file or directory
     if tags_to_apply == {'monitored_dir'}:
         create_file(REGULAR, main_folder, file1, content='')
-        check_time_travel(scheduled)
+        check_time_travel(scheduled, monitor=wazuh_log_monitor)
         wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
                                 error_message='Did not receive expected "Sending FIM event: ..." event')
         delete_f(main_folder)
     else:
         delete_f(main_folder, file1)
 
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     delete = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
                                      error_message='Did not receive expected "Sending FIM event: ..." event').result()
     assert 'deleted' in delete['data']['type'] and file1 in delete['data']['path'], \
@@ -105,7 +105,7 @@ def test_symbolic_delete_target(tags_to_apply, main_folder, aux_folder, get_conf
 
     # Restore the target
     create_file(REGULAR, main_folder, file1, content='')
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
 
     if tags_to_apply == {'monitored_dir'} and whodata:
         wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
@@ -124,7 +124,7 @@ def test_symbolic_delete_target(tags_to_apply, main_folder, aux_folder, get_conf
 
     # Modify the files and expect events since symcheck has updated now
     modify_file_content(main_folder, file1, 'Sample modification')
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
                                      error_message='Did not receive expected "Sending FIM event: ..." event').result()
     assert 'modified' in modify['data']['type'] and file1 in modify['data']['path'], \
