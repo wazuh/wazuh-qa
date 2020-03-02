@@ -1313,9 +1313,9 @@ def get_fim_mode_param(mode, key='FIM_MODE'):
     metadata = {key.lower(): mode}
     if mode == 'scheduled':
         return {key: ''}, metadata
-    elif mode == 'realtime' and sys.platform != 'darwin':
+    elif mode == 'realtime' and sys.platform != 'darwin' and sys.platform != 'sunos5':
         return {key: {'realtime': 'yes'}}, metadata
-    elif mode == 'whodata' and sys.platform != 'darwin':
+    elif mode == 'whodata' and sys.platform != 'darwin' and sys.platform != 'sunos5':
         return {key: {'whodata': 'yes'}}, metadata
     else:
         return None, None
