@@ -26,6 +26,19 @@ def read_file(file_path):
         logging.error('Failed when reading the input file: ', exc_info=True)
     
     return data
+
+def ensure_growing_list(last_num_alerts, query, es, index):
+    query_result = makeQuery(query, es, index)
+    num_alerts = query_result['hits']['total']['value']
+
+    # if alerts list is not growing then return False, else True
+    if not (query_result['hits']['total']['value'] > last_num_alerts):
+        res = False
+    else:
+        res = True
+    return res, num_alerts
+
+
 def setElasticsearch(ElasticIP):
     """
         Sets the Elasticsearch instance that we want to connect.
