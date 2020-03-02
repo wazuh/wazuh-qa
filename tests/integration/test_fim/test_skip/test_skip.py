@@ -12,7 +12,7 @@ import distro
 import pytest
 
 from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, detect_initial_scan, callback_detect_event,
-                               generate_params, callback_detect_integrity_state)
+                               generate_params, callback_detect_integrity_state, check_time_travel)
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import set_section_wazuh_conf, load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -114,7 +114,7 @@ def test_skip_proc(get_configuration, configure_environment, restart_syscheckd, 
             proc_monitor.start(timeout=3, callback=callback_detect_event,
                                error_message='Did not receive expected "Sending FIM event: ..." event')
 
-        TimeMachine.travel_to_future(timedelta(hours=13))
+        check_time_travel(time_travel=True, monitor=wazuh_log_monitor)
 
         found_event = False
         while not found_event:
