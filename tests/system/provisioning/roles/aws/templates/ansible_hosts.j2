@@ -289,7 +289,7 @@ linuxagents:
 {% if hostvars[instance]['ansible_ssh_user'] is defined %}
             ansible_ssh_user: {{ hostvars[instance]['ansible_ssh_user'] }}
 {% endif %}
-{% if ansible_os_family == "RedHat" and ansible_distribution_major_version < "8" %}
+{% if 'Centos' in hostvars[groups['linux-agents'][loop.index-1]]['agent_name'] %}
             ansible_python_interpreter: /usr/bin/python
 {% else %}
             ansible_python_interpreter: /usr/bin/python3
