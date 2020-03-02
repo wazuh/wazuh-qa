@@ -70,7 +70,7 @@ def test_symbolic_change_target_inside_folder(tags_to_apply, previous_target, ne
     # Check create event if it's pointing to a directory
     if tags_to_apply == {'monitored_dir'}:
         create_file(REGULAR, previous_target, file1, content='')
-        check_time_travel(scheduled)
+        check_time_travel(scheduled, monitor=wazuh_log_monitor)
         wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
                                 error_message='Did not receive expected "Sending FIM event: ..." event')
 
@@ -81,14 +81,14 @@ def test_symbolic_change_target_inside_folder(tags_to_apply, previous_target, ne
 
     # Modify the content of the previous target and don't expect events. Modify the new target and expect an event
     modify_file_content(previous_target, file1, new_content='Sample modification')
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event)
         logger.error(f'Unexpected event {event.result()}')
         raise AttributeError(f'Unexpected event {event.result()}')
 
     modify_file_content(testdir2, file1, new_content='Sample modification')
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
                                      error_message='Did not receive expected '
                                                    '"Sending FIM event: ..." event').result()
