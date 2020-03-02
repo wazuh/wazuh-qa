@@ -989,20 +989,28 @@ class EventChecker:
             event_types = Counter(filter_events(events, ".[].data.type"))
             assert (event_types[ev_type] == len(file_list)), f'Non expected number of events. {event_types[ev_type]} != {len(file_list)}'
 
-        def check_files_in_event(events, folder, file_list=['testfile0']):
-            file_paths = filter_events(events, ".[].data.path")
+        def check_events_path(events, folder, file_list=['testfile0'], mode=None):
+            mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
+            audit_path = filter_events(events, ".[].data.audit.path") if mode == "whodata" else None
+            data_path = filter_events(events, ".[].data.path")
             for file_name in file_list:
-                expected_file_path = os.path.join(folder, file_name)
-                expected_file_path = expected_file_path[:1].lower() + expected_file_path[1:]
+                expected_path = os.path.join(folder, file_name)
+                expected_path = expected_path[:1].lower() + expected_path[1:]
                 if self.encoding is not None:
-                    for index, item in enumerate(file_paths):
-                        file_paths[index] = item.encode(encoding=self.encoding)
+                    for index, item in enumerate(data_path):
+                        data_path[index] = item.encode(encoding=self.encoding)
+                    if audit_path:
+                        for index, item in enumerate(audit_path):
+                            audit_path[index] = item.encode(encoding=self.encoding)
                 if sys.platform == 'darwin' and self.encoding and self.encoding != 'utf-8':
-                    logger.info(f'Not asserting {expected_file_path} in event.data.path. '
+                    logger.info(f'Not asserting {expected_path} in event.data.path. '
                                  f'Reason: using non-utf-8 encoding in darwin.')
                 else:
-                    error_msg = f"Expected path was '{expected_file_path}' but event path is '{file_paths}'"
-                    assert (expected_file_path in file_paths), error_msg
+                    error_msg = f"Expected data path was '{expected_path}' but event data path is '{data_path}'"
+                    assert (expected_path in data_path), error_msg
+                    if audit_path:
+                        error_msg = f"Expected audit path was '{expected_path}' but event audit path is '{audit_path}'"
+                        assert (expected_path in audit_path), error_msg
 
         def filter_events(events, mask):
             """Returns a list of elements matching a specified mask in the events list using jq module."""
@@ -1015,7 +1023,7 @@ class EventChecker:
         if self.events is not None:
             validate_checkers_per_event(self.events, self.options, mode)
             check_events_type(self.events, event_type, self.file_list)
-            check_files_in_event(self.events, self.folder, self.file_list)
+            check_events_path(self.events, self.folder, file_list=self.file_list, mode=mode)
 
             if self.custom_validator is not None:
                 self.custom_validator.validate_after_cud(self.events)
