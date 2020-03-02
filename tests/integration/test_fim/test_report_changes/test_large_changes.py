@@ -145,7 +145,7 @@ def test_large_changes(filename, folder, original_size, modified_size, tags_to_a
     # Create the file and and capture the event.
     original_string = generateString(original_size, '0')
     create_file(REGULAR, folder, filename, content=original_string)
-    check_time_travel(fim_mode == 'scheduled')
+    check_time_travel(fim_mode == 'scheduled', monitor=wazuh_log_monitor)
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
     # Store uncompressed diff file in backup folder
@@ -156,7 +156,7 @@ def test_large_changes(filename, folder, original_size, modified_size, tags_to_a
     # Modify the file with new content
     modified_string = generateString(modified_size, '1')
     create_file(REGULAR, folder, filename, content=modified_string)
-    check_time_travel(fim_mode == 'scheduled')
+    check_time_travel(fim_mode == 'scheduled', monitor=wazuh_log_monitor)
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
     # Run the diff/fc command and get the output length
