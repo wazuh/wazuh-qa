@@ -114,7 +114,7 @@ def main():
                             default="4")
         parser.add_argument("-w", "--whodata", type=bool, required=False, dest='whodata_check',
                             help="Enable Whodata alert's parsing.",
-                            default="false")
+                            default=False)
         args = parser.parse_args()
 
         import time

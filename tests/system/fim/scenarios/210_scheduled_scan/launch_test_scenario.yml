@@ -16,71 +16,80 @@
             syscheck_frequency: 43200
             linux_ossec_log_path: "{{ linux_ossec_folder_path }}/logs/ossec.log"
             windows_ossec_log_path: "{{ windows_ossec_folder_path }}\\ossec.log"
-          changed_when: True
-          notify:
-            - Stop Wazuh agent Linux
-            - Stop Wazuh agent Windows
-            - Clear ossec.log Linux Agent
-            - Clear ossec.log Windows Agent
-            - Start Wazuh agent Linux
-            - Start Wazuh agent Windows
-
-        - meta: flush_handlers
-
-        - name: Pause playbook during the frequency time
-          pause:
-            seconds: "{{ syscheck_frequency }}"
-
-        - name: Check if the scan started after the wait 
-          script: >
-           files/check_scheduled_scan.py -f {{ syscheck_frequency }} 
-           -l {{ linux_ossec_log_path }}
-          args:
-            executable: python3
-          when: 
-            - inventory_hostname in groups['linuxagents']
-
-        - name: Check if the scan started after the wait 
-          script: >
-           files/check_scheduled_scan.py -f {{ syscheck_frequency }} 
-           -l \"{{ windows_ossec_log_path }}\"
-          args:
-            executable: python3
-          when: 
-            - inventory_hostname in groups['windowsagents']
-
+          
         - block:
           - name: Configure syscheck event.
             set_fact:
               event: "added"
+              expected_scans: 1
+            changed_when: True
+            notify:
+              - Stop Wazuh agent Linux
+              - Stop Wazuh agent Windows
+              - Clear ossec.log Linux Agent
+              - Clear ossec.log Windows Agent
+              - Start Wazuh agent Linux
+              - Start Wazuh agent Windows
+  
+          - meta: flush_handlers
+
+          - name: Wait until the first FIM scan end (Linux)
+            become: True
+            wait_for:
+              path: "{{ linux_ossec_folder_path }}/logs/ossec.log"
+              search_regex: 'File integrity monitoring scan ended.'
+            when:
+              - inventory_hostname in groups['linuxagents']
+
+          - name: Wait until the first FIM scan end (Windows)
+            win_wait_for:
+              path: 'C:\\Program Files (x86)\\ossec-agent\\ossec.log'
+              regex: 'File integrity monitoring scan ended.'
+            when:
+              - inventory_hostname in groups['windowsagents']
 
           - name: Generating files to trigger FIM alerts
             import_tasks: "../../common_tasks/create_files.yml"
 
+          - name: Wait for scheduled scan
+            import_tasks: "tasks/wait_scheduled_scan.yml"
+
           - name: Verify generated alerts
             become: true
             import_tasks: "../../common_tasks/verify_alerts.yml"
+          any_errors_fatal: true
 
         - block:
           - name: Configure syscheck event.
             set_fact:
               event: "modified"
+              expected_scans: 2
 
           - name: Modifiying files to trigger FIM alerts
             import_tasks: "../../common_tasks/modify_files.yml"
+          
+          - name: Wait for scheduled scan
+            import_tasks: "tasks/wait_scheduled_scan.yml"
 
           - name: Verify generated alerts
             become: true
             import_tasks: "../../common_tasks/verify_alerts.yml"
+          any_errors_fatal: true
 
         - block:
           - name: Configure syscheck event.
             set_fact:
               event: "deleted"
+              expected_scans: 3
 
           - name: Deleting files to trigger FIM alerts
             import_tasks: "../../common_tasks/delete_files.yml"
 
+          - name: Wait for scheduled scan
+            import_tasks: "tasks/wait_scheduled_scan.yml"
+
           - name: Verify generated alerts
             become: true
             import_tasks: "../../common_tasks/verify_alerts.yml"
+          any_errors_fatal: true
+

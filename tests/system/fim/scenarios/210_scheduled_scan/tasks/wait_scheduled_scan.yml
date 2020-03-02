@@ -1,0 +1,23 @@
+---
+  - name: Pause playbook during the frequency time
+    pause:
+      seconds: "{{ syscheck_frequency }}"
+
+  - name: Check if the scan started after the wait | Linux
+    become: True
+    script: >
+      files/check_scheduled_scan.py -f {{ syscheck_frequency }} 
+      -l {{ linux_ossec_log_path }} -e {{ expected_scans}}
+    args:
+      executable: python3
+    when: 
+      - inventory_hostname in groups['linuxagents']
+
+  - name: Check if the scan started after the wait | Windows 
+    script: >
+      files/check_scheduled_scan.py -f {{ syscheck_frequency }} 
+      -l '{{ windows_ossec_log_path }}' -e {{ expected_scans}}
+    args:
+      executable: python
+    when: 
+      - inventory_hostname in groups['windowsagents']
