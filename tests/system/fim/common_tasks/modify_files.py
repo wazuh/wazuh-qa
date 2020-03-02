@@ -88,6 +88,8 @@ def log_modified_files(files_path, logfile):
 def main():
     log_filename = 'modify_files.log'
     logging.basicConfig(
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        datefmt="%Y-%m-%d %H:%M:%S",
         filename=log_filename,
         level=logging.DEBUG,
     )
@@ -111,10 +113,13 @@ def main():
 
     with open(input_file) as flist:
         count = 0
+        logging.info("Bunch start")
         for path in flist:
             if count >= args.bunch_size:
+              logging.info(f"Bunch end, sleeping {args.wait_time} seconds")
               time.sleep(args.wait_time)
               count = 0
+              logging.info("Bunch start")
             try:
                 modify_file_content(path[:-1])
                 changed_files.append(path[:-1])
