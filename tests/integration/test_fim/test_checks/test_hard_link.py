@@ -9,10 +9,9 @@ import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (HARDLINK, LOG_FILE_PATH, REGULAR, EventChecker,
-                               check_time_travel, create_file, delete_file, modify_file_content, generate_params)
+                               check_time_travel, create_file, modify_file_content, generate_params)
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
@@ -26,6 +25,8 @@ configurations_path = os.path.join(test_data_path, 'wazuh_hard_link.yaml')
 testdir1 = os.path.join(PREFIX, 'testdir1')
 unmonitored_dir = os.path.join(PREFIX, 'test_unmonitorized')
 test_directories = [testdir1, unmonitored_dir]
+
+wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
@@ -45,9 +46,6 @@ def get_configuration(request):
     return request.param
 
 
-from wazuh_testing.fim import LOG_FILE_PATH, detect_initial_scan
-from wazuh_testing.tools.services import control_service
-
 @pytest.fixture(scope='function')
 def clean_directories(request):
 
@@ -60,6 +58,8 @@ def clean_directories(request):
                     os.unlink(file_path)
             except Exception as e:
                 print(e)
+
+
 # tests
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Hard links.")
@@ -125,7 +125,7 @@ def test_hard_link(path_file, file_name, path_link, link_name, num_links, get_co
 
     # Create the regular file
     create_file(REGULAR, path_file, file_name, content='test content')
-    check_time_travel(is_scheduled)
+    check_time_travel(is_scheduled, monitor=wazuh_log_monitor)
     event_checker.fetch_and_check('added', min_timeout=global_parameters.default_timeout)
 
     # Create as many links pointing to the regular file as num_links
@@ -136,13 +136,13 @@ def test_hard_link(path_file, file_name, path_link, link_name, num_links, get_co
 
     # Detect the 'added' events for all the created links
     if path_file == path_link:
-        check_time_travel(is_scheduled)
+        check_time_travel(is_scheduled, monitor=wazuh_log_monitor)
         event_checker.file_list = hardlinks_list
         event_checker.fetch_and_check('added', min_timeout=global_parameters.default_timeout)
 
     # Modify the regular file
     modify_file_content(path_file, file_name, new_content="modified testregularfile")
-    check_time_travel(is_scheduled)
+    check_time_travel(is_scheduled, monitor=wazuh_log_monitor)
 
     # Only events for the regular file are expected
     event_checker.file_list = file_list
@@ -160,7 +160,7 @@ def test_hard_link(path_file, file_name, path_link, link_name, num_links, get_co
     else:
         # If the link is not inside the monitored dir Scheduled run should detect the modification of the file
         # even if we are using Real-time or Whodata.
-        check_time_travel(True)
+        check_time_travel(True, monitor=wazuh_log_monitor)
         detect_and_validate_event(expected_file=[file_name] + hardlinks_list,
                                   mode="scheduled",
                                   expected_hard_links=hardlinks_list)

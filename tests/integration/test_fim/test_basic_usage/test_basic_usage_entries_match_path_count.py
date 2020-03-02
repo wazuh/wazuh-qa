@@ -65,7 +65,7 @@ def test_entries_match_path_count(get_configuration, configure_environment, rest
                                                   error_message='Did not receive expected '
                                                                 '"Fim inode entries: ..., path count: ..." event'
                                                   ).result()
-    check_time_travel(True)
+    check_time_travel(True, monitor=wazuh_log_monitor)
 
     if entries and path_count:
         assert entries == '3' and path_count == '4', 'Wrong number of inodes and path count'

@@ -51,6 +51,7 @@ def extra_configuration_before_yield():
     """Create subdirs before restarting Wazuh."""
     create_file(REGULAR, os.path.join(testdir1, 'subdir'), 'regular1', content='')
     create_file(REGULAR, os.path.join(testdir3, 'subdir2'), 'regular2', content='')
+    create_file(REGULAR, os.path.join(testdir3, 'subdir3'), 'regular3', content='')
     create_file(REGULAR, os.path.join(testdir4, 'subdir'), 'regular1', content='')
 
 
@@ -65,6 +66,7 @@ def extra_configuration_after_yield():
     (testdir4, testdir2, 'subdir', {'ossec_conf'}, False, True),
     (testdir1, PREFIX, 'subdir', {'ossec_conf'}, True, False),
     (testdir3, testdir2, 'subdir2', {'ossec_conf'}, True, True),
+    (testdir3, testdir2, f'subdir3{os.path.sep}', {'ossec_conf'}, True, True)
 ])
 def test_move_file(source_folder, target_folder, subdir, tags_to_apply,
                    triggers_delete_event, triggers_add_event,
@@ -94,7 +96,7 @@ def test_move_file(source_folder, target_folder, subdir, tags_to_apply,
 
     # Move folder to target directory
     os.rename(os.path.join(source_folder, subdir), os.path.join(target_folder, subdir))
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
 
     # Monitor expected events
     events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
@@ -112,7 +114,7 @@ def test_move_file(source_folder, target_folder, subdir, tags_to_apply,
                        for event in events]
         assert set([event[0] for event in events_data]) == {'deleted', 'added'}
         for _, path, expected_path in events_data:
-            assert path == expected_path
+            assert path == expected_path.rstrip(os.path.sep)
     else:
         if triggers_delete_event:
             assert 'deleted' in events['data']['type'] and os.path.join(source_folder, subdir) \

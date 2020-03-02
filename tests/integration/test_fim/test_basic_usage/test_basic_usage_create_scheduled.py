@@ -10,7 +10,7 @@ import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import CHECK_ALL, FIFO, LOG_FILE_PATH, REGULAR, SOCKET, callback_detect_event, \
-    create_file, validate_event, generate_params
+    create_file, validate_event, generate_params, check_time_travel
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -106,7 +106,7 @@ def test_create_file_scheduled(folder, name, filetype, content, checkers, tags_t
     create_file(filetype, folder, name, content=content)
 
     # Go ahead in time to let syscheck perform a new scan
-    TimeMachine.travel_to_future(timedelta(hours=13))
+    check_time_travel(True, monitor=wazuh_log_monitor)
 
     if filetype == REGULAR:
         # Wait until event is detected

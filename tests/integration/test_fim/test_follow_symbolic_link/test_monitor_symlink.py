@@ -63,14 +63,14 @@ def test_symbolic_monitor_symlink(tags_to_apply, main_folder, get_configuration,
     # Add creation if symlink is pointing to a folder
     if tags_to_apply == {'monitored_dir'}:
         create_file(REGULAR, main_folder, file1, content='')
-        check_time_travel(scheduled)
+        check_time_travel(scheduled, monitor=wazuh_log_monitor)
         add = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
         assert 'added' in add['data']['type'] and file1 in add['data']['path'], \
             f"'added' event not matching"
 
     # Modify the linked file and expect an event
     modify_file_content(main_folder, file1, 'Sample modification')
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
                                      error_message='Did not receive expected '
                                                    '"Sending FIM event: ..." event').result()
@@ -79,7 +79,7 @@ def test_symbolic_monitor_symlink(tags_to_apply, main_folder, get_configuration,
 
     # Delete the linked file and expect an event
     delete_f(main_folder, file1)
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     delete = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event,
                                      error_message='Did not receive expected '
                                                    '"Sending FIM event: ..." event').result()

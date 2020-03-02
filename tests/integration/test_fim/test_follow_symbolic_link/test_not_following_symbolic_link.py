@@ -100,13 +100,13 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
     create_file(SYMLINK, monitored_dir, sl_name, target=target)
 
     # Create the syslink and expect its event, since it's withing the monitored directory
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                             error_message='Did not receive expected "Sending FIM event: ..." event')
 
     # Modify the target file and don't expect any event
     modify_file(non_monitored_dir1, name1, new_content='Modify sample')
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
         logger.error(f'Unexpected event {event.result()}')
@@ -114,7 +114,7 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
 
     # Modify the target of the symlink and expect the modify event
     modify_symlink(target=b_path, path=sl_path)
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     result = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                      error_message='Did not receive expected '
                                                    '"Sending FIM event: ..." event').result()
@@ -123,7 +123,7 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
     # Remove and restore the target file. Don't expect any events
     delete_file(b_path, name2)
     create_file(REGULAR, non_monitored_dir1, name2, content='')
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=5, callback=callback_detect_event)
         logger.error(f'Unexpected event {event.result()}')

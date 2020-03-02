@@ -4,17 +4,15 @@
 
 import os
 import sys
-from datetime import timedelta
 
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, create_file, WAZUH_PATH,
-                               callback_restricted, REGULAR, generate_params)
+from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, create_file, WAZUH_PATH, callback_restricted, REGULAR, \
+    generate_params, check_time_travel
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.time import TimeMachine
 
 # Marks
 
@@ -157,8 +155,7 @@ def check_default(directory, trigger, check_list, file_list, timeout, scheduled)
 def check_restrict(directory, trigger, check_list, file_list, timeout, scheduled):
     """Standard restrict attribute test"""
     create_file(REGULAR, directory, file_list[0], content='')
-    if scheduled:
-        TimeMachine.travel_to_future(timedelta(hours=13))
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
     while True:
         ignored_file = wazuh_log_monitor.start(timeout=timeout,
                                                callback=callback_restricted,
