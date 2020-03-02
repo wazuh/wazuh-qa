@@ -1002,7 +1002,7 @@ class EventChecker:
         if self.events is not None:
             validate_checkers_per_event(self.events, self.options, mode)
             check_events_type(self.events, event_type, self.file_list)
-            check_events_path(self.events, self.folder, self.file_list, mode)
+            check_events_path(self.events, self.folder, file_list=self.file_list, mode=mode)
 
             if self.custom_validator is not None:
                 self.custom_validator.validate_after_cud(self.events)
