@@ -39,6 +39,7 @@ def makeQuery(query, Elastic, index_name):
 
 
 if __name__ == "__main__":
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(message)s",
@@ -77,7 +78,11 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-w", "--whodata", type=bool, required=False, dest='whodata_query',
-        help="Enable whodata queries", default="False"
+        help="Enable whodata queries", default=False
+    )
+    parser.add_argument(
+        "-tg", "--tag", type=str, required=False, dest='tag_query', nargs='+',
+        help="Enable tag queries for the indicated tags", default=None
     )
     args = parser.parse_args()
 
@@ -91,6 +96,14 @@ if __name__ == "__main__":
             }
         }
     }
+
+    if args.tag_query is not None:
+        logging.info(
+            "Setting tag query"
+        )
+        query["query"]["bool"]["filter"].append(
+            {"terms": {"syscheck.tags": args.tag_query}}
+        )
 
     es = setElasticsearch(args.ip)
     index_name = "wazuh-alerts-3.x*"
@@ -107,20 +120,26 @@ if __name__ == "__main__":
                     line.rstrip()
                 try:
                     query_result = makeQuery(query, es, index_name)
-                    print(query_result)
                 except Exception as e:
-                    logging.info("Error when making the  Query of " + str(args.whodata_query))
+                    logging.info(
+                        "Error when making the Query"
+                    )
                     raise e
 
                 if (args.whodata_query):
                     try:
-                        if (query_result['hits']['hits'][0]['_source']['syscheck']['audit']['process']['name'] in query_result):
-                            success +=1
+                        if (
+                            query_result['hits']['hits'][0]['_source']
+                            ['syscheck']['audit']['process']['name'] in
+                            query_result
+                        ):
+                            success += 1
                     except IndexError:
                         failure_list.append(line)
                         failure += 1
                     except Exception as e:
-                        logging.info("Error when filtering audit fields in alert " + line.rstrip())
+                        logging.info("Error when filtering audit fields in \
+                            alert " + line.rstrip())
                         raise e
                 else:
                     try:
@@ -130,7 +149,10 @@ if __name__ == "__main__":
                         failure_list.append(line)
                         failure += 1
                     except Exception as e:
-                        logging.info("Error when filtering syscheck alerts hits of " + line.rstrip())
+                        logging.info(
+                            "Error when filtering syscheck \
+                            alerts hits of " + line.rstrip()
+                        )
                         raise e
             if failure == 0:
                 break
