@@ -29,7 +29,6 @@ analysis_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'queue')
 monitored_sockets, receiver_sockets = None, None  # These variables will be set in the fixture create_unix_sockets
 monitored_sockets_params = [(wdb_path, 'TCP')]
 receiver_sockets_params = [(analysis_path, 'UDP')]
-used_daemons = ['ossec-analysisd']
 analysis_monitor = None
 wdb_monitor = None
 wazuh_log_monitor = FileMonitor(alerts_json)
