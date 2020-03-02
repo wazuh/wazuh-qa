@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import sys
 import time
 
 import pytest
@@ -16,7 +17,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
-pytestmark = pytest.mark.tier(level=0)
+pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0)]
 
 # variables
 
@@ -65,6 +66,9 @@ def test_regular_file_changes(sleep, tags_to_apply, get_configuration, configure
     sleep : float
         Delay in seconds between every action.
     """
+    threshold = 1.5 if sys.platform == 'win32' else 1.25
+    if sleep < threshold and get_configuration['metadata']['fim_mode'] == 'whodata':
+        pytest.xfail('Xfailing due to whodata threshold.')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     file = 'regular'
