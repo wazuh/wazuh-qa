@@ -121,9 +121,9 @@ def main():
                             default="4")
         parser.add_argument("-d", "--diff", type=str, required=False, dest='diff_string',
                             help="When syscheck:report_changes enabled, represents the diff text")
-        parser.add_argument("-w", "--whodata", type=bool, required=False, dest='whodata_check',
-                            help="Enable Whodata alert's parsing.",
-                            default="false")
+        parser.add_argument("-w", "--whodata", required=False, dest='whodata_check',
+                            action="store_true", help="Enable Whodata alert's parsing.",
+                            default=False)
         args = parser.parse_args()
 
         import time

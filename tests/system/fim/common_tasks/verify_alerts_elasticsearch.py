@@ -78,8 +78,8 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--diff", type=str, required=False, 
         dest='diff_string',help="When syscheck:report_changes enabled, represents the diff text")
     parser.add_argument(
-        "-w", "--whodata", type=bool, required=False, dest='whodata_query',
-        help="Enable whodata queries", default="False"
+        "-w", "--whodata", required=False, dest='whodata_query',
+        action="store_true", help="Enable whodata queries", default=False
     )
     args = parser.parse_args()
 
