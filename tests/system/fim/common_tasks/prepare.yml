@@ -48,10 +48,19 @@
       name: wazuh-agent
       state: stopped
 
-  - name: Copy {{ files_config_agent_linux_ossec_conf }} to the Agents hosts | Linux
+  - name: Copy {{ files_config_agent_linux_ossec_conf_rpm }} to the Agents hosts | rpm | Linux
     copy:
-      src: "./config/{{ files_config_agent_linux_ossec_conf }}"
+      src: "./config/{{ files_config_agent_linux_ossec_conf_rpm }}"
       dest: "{{ linux_ossec_folder_path }}/etc/ossec.conf"
+    when:
+      - ansible_distribution == "Redhat" or ansible_distribution == "CentOS"
+
+  - name: Copy {{ files_config_agent_linux_ossec_conf_deb }} to the Agents hosts | deb | Linux
+    copy:
+      src: "./config/{{ files_config_agent_linux_ossec_conf_deb }}"
+      dest: "{{ linux_ossec_folder_path }}/etc/ossec.conf"
+    when:
+      -  ansible_distribution == "Debian"
 
   - name: Start wazuh-agent service | Linux
     service:

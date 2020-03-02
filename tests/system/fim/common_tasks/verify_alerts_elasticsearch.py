@@ -77,7 +77,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-w", "--whodata", type=bool, required=False, dest='whodata_query',
-        help="Enable whodata queries", default="False"
+        help="Enable whodata queries", default=False
     )
     args = parser.parse_args()
 
