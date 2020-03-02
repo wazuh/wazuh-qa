@@ -1,6 +1,1 @@
-elastic_verification_extra_arguments: "-r 10"
-json_verification_extra_arguments: "-r 10"
-create_script_extra_params: "-b 90 -w 2"
-delete_script_extra_params: "-b 90 -w 2"
-modify_script_extra_params: "-b 90 -w 2"
 clean_logs: true

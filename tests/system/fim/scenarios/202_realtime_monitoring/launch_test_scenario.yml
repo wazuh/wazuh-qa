@@ -8,6 +8,14 @@
       - import_tasks: ../../handlers/main.yml
 
     tasks:
+      - name: Set extra arguments for scripts.
+        set_fact:
+          elastic_verification_extra_arguments: "-r 10"
+          json_verification_extra_arguments: "-r 10"
+          create_script_extra_params: "-b 90 -w 1"
+          delete_script_extra_params: "-b 90 -w 1"
+          modify_script_extra_params: "-b 90 -w 1"
+
       - block:
         - name: Launching prepare tasks
           import_tasks: "../../common_tasks/prepare.yml"
