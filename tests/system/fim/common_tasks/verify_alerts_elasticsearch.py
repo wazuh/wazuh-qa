@@ -11,6 +11,7 @@ import argparse
 from elasticsearch import Elasticsearch
 from time import sleep, time
 import logging
+import copy
 
 def read_file(file_path):
     data = []
@@ -154,7 +155,7 @@ def run_line_query(line, query, es, index_name):
 
     return query_result
 
-def verify_es_alerts_report_changes(line, query_result, diff_statement, success, failure, failure_list):
+def verify_es_alerts_report_changes(line, query_result, diff_statement, success, failure):
     """
     Verify alerts for report_changes query case.
 
@@ -167,28 +168,29 @@ def verify_es_alerts_report_changes(line, query_result, diff_statement, success,
                            alert.
     :param int success: A counter variable used to count the the successful queries.
     :param int failure: A  counter variable used to count the failed queries checks.
-    :param list failure_list: A list to store the failed-query lines, to retry the process
-                              again on them.
 
     :return success: An updated value of the argument success.
     :return failure: An updated value of the argument failure.
-    :return failure_list: An updated value of the argument failure_list
     """
+    success_bool = False
     try:
-        if ('diff' in query_result['hits']['hits'][0]['_source']['syscheck']) and \
-              (diff_statement not in \
-               query_result['hits']['hits'][0]['_source']['syscheck']['diff']):
+        if query_result['hits']['total']['value'] == 1 and \
+           ('diff' in query_result['hits']['hits'][0]['_source']['syscheck']) and \
+           (diff_statement in \
+                query_result['hits']['hits'][0]['_source']['syscheck']['diff']):
             success += 1
+            success_bool = True
+        else:
+            failure += 1
     except IndexError:
-        failure_list.append(line)
         failure += 1
     except Exception as e:
-        logging.info("Error when filtering audit fields in alert " + line.rstrip())
+        logging.info("Error when filtering report_changes fields in alert " + line.rstrip())
         raise e
 
-    return success, failure, failure_list
+    return success, success_bool, failure
 
-def verify_es_alerts_whodata(line, query_result, success, failure, failure_list):
+def verify_es_alerts_whodata(line, query_result, success, failure):
     """
     Verify alerts for Whodata query case.
 
@@ -198,12 +200,9 @@ def verify_es_alerts_whodata(line, query_result, success, failure, failure_list)
                              list of Syscheck's fields.
     :param int success: A counter variable used to count the the successful queries.
     :param int failure: A  counter variable used to count the failed queries checks.
-    :param list failure_list: A list to store the failed-query lines, to retry the process
-                              again on them.
 
     :return success: An updated value of the argument success.
     :return failure: An updated value of the argument failure.
-    :return failure_list: An updated value of the argument failure_list
     """
 
     try:
@@ -211,20 +210,18 @@ def verify_es_alerts_whodata(line, query_result, success, failure, failure_list)
                         ['audit']['process']['name'] in query_result):
             success +=1
     except IndexError:
-        failure_list.append(line)
         failure += 1
     except Exception as e:
         logging.info("Error when filtering audit fields in alert " + line.rstrip())
         raise e
 
-    return success, failure, failure_list
+    return success, failure
 
-def verify_es_alerts(files, max_retry, query, es, index_name, start, sleep_time, scenario, scenario_arg):
+def verify_es_alerts(files_list, max_retry, query, es, index_name, start, sleep_time, scenario, scenario_arg):
     """
     Verify Elasticsearch alerts for a specefic scenario.
 
-    :param str files: The path to the file which contain the list of paths
-                      of files to be validate their alerts.
+    :param list files_list: A list with the files paths to verify their related alerts.
     :param int max_retry: Number of retries to repeat as long as there are still paths
                           to be validated.
     :param Elasticsearch es: Elasticsearch class instance.
@@ -237,43 +234,51 @@ def verify_es_alerts(files, max_retry, query, es, index_name, start, sleep_time,
 
     :return int success: A counter variable used to count the the successful queries.
     :return int failure: A  counter variable used to count the failed queries checks.
-    :return list failure_list: A list to store the failed-query lines, to retry the process
-                              again on them.
     """
     retry_count = 0
+    alerts_num = 0
+    success = 0
+    failure = 0
+
     logging.info("Elasticsearch alerts verification started")
 
-    query = build_query(query, scenario)
+    query_scenario = copy.deepcopy(query)
+    query_scenario = build_query(query_scenario, scenario)
+    
+    while retry_count <= max_retry:
+        print("Attempt {}".format(retry_count))
 
-    with open(files, 'r') as file_list:
-        while retry_count < max_retry:
-            # Initialize auxiliary variables
-            success = 0
-            failure = 0
-            failure_list = []
+        alerts_growing = False
+        alerts_growing, alerts_num = ensure_growing_list(alerts_num, query, es, index_name)
+        
+        print("alerts_growing and alerts_num are {}, {}".format(alerts_growing, alerts_num))
 
-            for line in file_list: # for each line (path) in file_list
+        if retry_count == 0:
+            alerts_growing = True
+
+        if alerts_growing:
+            for line in files_list[::-1]: # for each line (path) in files_list
                 # Get the corresponding query for line
-                query_result = run_line_query(line, query, es, index_name)
-
+                query_result = run_line_query(line, query_scenario, es, index_name)
                 try:
                     if(scenario == "whodata"): # whodata scenarior case
-                        success, failure, failure_list = \
+                        success, failure = \
                             verify_es_alerts_whodata(line, query_result, success,
-                                failure, failure_list)
+                                failure)
                     elif(scenario == "diff"): # report_changes scenarior case
-                        success, failure, failure_list = \
+                        success, success_bool, failure = \
                             verify_es_alerts_report_changes(line, query_result,
-                                scenario_arg, success, failure, failure_list)
+                                scenario_arg, success, failure)
+                    if success_bool:
+                        files_list.pop()    
                 except Exception as e:
-                    logging.info("Error when filtering audit fields in alert " + line.rstrip())
+                    logging.info("Error when verifying alerts for " + line.rstrip())
                     raise e
-            if failure == 0:
-                break
-            else:
-                retry_count = report_failure(start, failure, retry_count, sleep_time)
-
-            return success, failure, failure_list
+        if failure == 0:
+            break
+        else:
+            retry_count = report_failure(start, failure, retry_count, sleep_time)
+    return success, failure, files_list
 
 if __name__ == "__main__":
     logging.basicConfig(
@@ -343,9 +348,12 @@ if __name__ == "__main__":
     # select the scenario
     scenario = select_scenario(scenario_arg)
 
+    # read the list of paths from a file into a list
+    files_list = read_file(args.files)
+
     # alerts verification
     success, failure, failure_list = \
-        verify_es_alerts(args.files, args.max_retry, query,
+        verify_es_alerts(files_list, args.max_retry, query,
                          es, index_name, start, args.sleep_time,
                          scenario, scenario_arg[scenario])
 
@@ -355,7 +363,7 @@ if __name__ == "__main__":
 
     assert failure == 0, "number of failed files: {}\n \
             Elapsed time: ~ {} seconds.".format(
-            success, elapsed
+            failure, elapsed
         )
 
     print(
