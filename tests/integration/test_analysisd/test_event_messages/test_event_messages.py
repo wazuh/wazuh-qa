@@ -7,8 +7,9 @@ import os
 import pytest
 import yaml
 from wazuh_testing import global_parameters
-from wazuh_testing.analysis import callback_fim_alert, callback_analysisd_message, validate_analysis_alert
-from wazuh_testing.tools import WAZUH_LOGS_PATH, WAZUH_PATH
+from wazuh_testing.analysis import callback_fim_alert, callback_analysisd_message, validate_analysis_alert, \
+    callback_wazuh_db_message
+from wazuh_testing.tools import WAZUH_LOGS_PATH, WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 
 # marks
@@ -29,6 +30,9 @@ monitored_sockets, receiver_sockets = None, None  # These variables will be set 
 monitored_sockets_params = [(wdb_path, 'TCP')]
 receiver_sockets_params = [(analysis_path, 'UDP')]
 used_daemons = ['ossec-analysisd']
+analysis_monitor = None
+wdb_monitor = None
+wazuh_log_monitor = FileMonitor(alerts_json)
 
 
 # tests
@@ -36,7 +40,8 @@ used_daemons = ['ossec-analysisd']
 @pytest.mark.parametrize('test_case',
                          [test_case['test_case'] for test_case in test_cases],
                          ids=[test_case['name'] for test_case in test_cases])
-def test_event_messages(configure_environment_standalone_daemons, create_unix_sockets, test_case: list):
+def test_event_messages(configure_mitm_environment_analysisd, create_unix_sockets, wait_for_analysisd_startup,
+                        test_case: list):
     """Check that every input message in analysisd socket generates the adequate output to wazuh-db socket.
 
     The function validate_analysis_integrity_state is a function responsible for checking that the output follows a
@@ -50,9 +55,9 @@ def test_event_messages(configure_environment_standalone_daemons, create_unix_so
     for stage in test_case:
         expected = callback_analysisd_message(stage['output'])
         receiver_sockets[0].send([stage['input']])
-        response = monitored_sockets[0].start(timeout=global_parameters.default_timeout,
-                                              callback=callback_analysisd_message).result()
+        response = wdb_monitor.start(timeout=global_parameters.default_timeout,
+                                     callback=callback_wazuh_db_message).result()
         assert response == expected, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1, stage['stage'])
-        event = wazuh_log_monitor.start(timeout=2*global_parameters.default_timeout,
+        alert = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_fim_alert).result()
-        validate_analysis_alert(event)
+        validate_analysis_alert(alert)
