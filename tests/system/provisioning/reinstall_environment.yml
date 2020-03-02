@@ -1,0 +1,26 @@
+---
+  - name: Launching environments
+    hosts: localhost
+    serial: 25
+    vars_files:
+      - ./vars/credentials.yml
+    tasks:
+      - name: Deploy Wazuh Manager
+        shell: "ansible-playbook provision_playbook.yml -i {{ ansible_hosts_destination }} -l masters"
+
+      - name: Installing and registering agents
+        shell: "ansible-playbook -i {{ ansible_hosts_destination }} {{ item }}"
+        async: 10000
+        poll: 0
+        with_items:
+          - provision_playbook.yml -l linuxagents
+          - provision_playbook.yml -l windowsagents
+        register: register_agents
+
+      - async_status:
+          jid: "{{ item.ansible_job_id }}"
+        loop: "{{ register_agents.results }}"
+        register: jobs_agents
+        until: jobs_agents.finished
+        retries: 1000
+        delay: 10
