@@ -13,6 +13,7 @@ import sys
 import random
 import platform
 import argparse
+import time
 import logging
 if platform.system() == 'Linux':
     import pwd
@@ -112,6 +113,10 @@ def main():
     parser.add_argument("-t", '--text-mode', default=False, action="store_true",
                         dest="text_mode", help="Modify text files instead of binary"
                              " (default is False)")
+    parser.add_argument("-b", '--bunch-size', type=int, default=90,
+                        dest="bunch_size", help="File generation bunch size")
+    parser.add_argument("-w", '--wait-time', type=int, default=1,
+                        dest="wait_time", help="Time interval between bunch generation (to avoid queue overflow)")
     args = parser.parse_args()
 
     input_file = args.input_file
@@ -122,7 +127,11 @@ def main():
     sentence = "Hello World"
 
     with open(input_file) as flist:
+        count = 0
         for path in flist:
+            if count >= args.bunch_size:
+              time.sleep(args.wait_time)
+              count = 0
             try:
                 if text_mode: # if text_mode, then add 'setence' at the end of 'path' 
                     modify_file_text_content(path[:-1], sentence)

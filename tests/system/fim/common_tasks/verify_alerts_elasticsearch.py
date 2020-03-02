@@ -48,6 +48,12 @@ if __name__ == "__main__":
             logging.StreamHandler()
         ]
     )
+
+    logging.getLogger("elasticsearch").setLevel(logging.ERROR)
+    logging.getLogger("urllib3").setLevel(logging.ERROR)
+    logging.getLogger("requests").setLevel(logging.ERROR)
+    logging.getLogger("requests.urllib3").setLevel(logging.ERROR)
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-i", "--input-list", type=str, required=True, dest='files',
@@ -181,9 +187,7 @@ if __name__ == "__main__":
         output.writelines(failure_list)
 
     assert failure == 0, "number of failed files: {}\n \
-            Elapsed time: ~ {} seconds.".format(
-            success, elapsed
-        )
+            Elapsed time: ~ {} seconds.".format(success, elapsed)
 
     print(
         "Number of succeded files: {}\n Elapsed time: ~ {} seconds.".format(
