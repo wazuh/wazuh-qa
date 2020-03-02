@@ -53,12 +53,12 @@ def test_sync_interval(get_configuration, configure_environment, restart_syschec
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_synchronization,
                             error_message='Did not receive expected '
-                                          '"Performing synchronization check" event')
+                                          '"Initializing FIM Integrity Synchronization check" event')
 
     TimeMachine.travel_to_future(interval)
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_synchronization,
                             error_message='Did not receive expected '
-                                          '"Performing synchronization check" event')
+                                          '"Initializing FIM Integrity Synchronization check" event')
 
     # This should fail as we are only advancing half the time needed for synchronization to occur
     TimeMachine.travel_to_future(interval / 2)
@@ -66,8 +66,8 @@ def test_sync_interval(get_configuration, configure_environment, restart_syschec
         result = wazuh_log_monitor.start(timeout=1 if interval.total_seconds() == 10.0 else 3,
                                          callback=callback_detect_synchronization,
                                          accum_results=1,
-                                         error_message='Did not receive expected '
-                                                       '"Performing synchronization check" event').result()
+                                         error_message='Did not receive expected "Initializing FIM Integrity '
+                                                       'Synchronization check" event').result()
         if result is not None:
             pytest.fail("Synchronization shouldn't happen at this point")
     except TimeoutError:
