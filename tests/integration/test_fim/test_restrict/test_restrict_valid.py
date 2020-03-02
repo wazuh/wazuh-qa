@@ -4,17 +4,15 @@
 
 import os
 import sys
-from datetime import timedelta
 
 import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, callback_restricted, create_file, \
-    REGULAR, generate_params
+    REGULAR, generate_params, check_time_travel
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.time import TimeMachine
 
 # Marks
 
@@ -97,9 +95,9 @@ def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply
     # Create text files
     create_file(REGULAR, folder, filename, content=content)
 
-    if get_configuration['metadata']['fim_mode'] == 'scheduled':
-        # Go ahead in time to let syscheck perform a new scan
-        TimeMachine.travel_to_future(timedelta(hours=13))
+    scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
+    # Go ahead in time to let syscheck perform a new scan
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
 
     if triggers_event:
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
