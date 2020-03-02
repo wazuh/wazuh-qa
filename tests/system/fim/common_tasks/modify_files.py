@@ -100,7 +100,7 @@ def main():
                         help="File containing the list of modified files")
     parser.add_argument("-b", '--bunch-size', type=int, default=90,
                         dest="bunch_size", help="File generation bunch size")
-    parser.add_argument("-w", '--wait-time', type=int, default=2,
+    parser.add_argument("-w", '--wait-time', type=int, default=1,
                         dest="wait_time", help="Time interval between bunch generation (to avoid queue overflow)")
     args = parser.parse_args()
 
