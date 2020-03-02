@@ -48,6 +48,12 @@ if __name__ == "__main__":
             logging.StreamHandler()
         ]
     )
+
+    logging.getLogger("elasticsearch").setLevel(logging.ERROR)
+    logging.getLogger("urllib3").setLevel(logging.ERROR)
+    logging.getLogger("requests").setLevel(logging.ERROR)
+    logging.getLogger("requests.urllib3").setLevel(logging.ERROR)
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-i", "--input-list", type=str, required=True, dest='files',
