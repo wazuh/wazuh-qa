@@ -13,6 +13,15 @@
     become: yes
     become_user: root
 
+  - hosts: kibana
+    strategy: free
+    roles:
+      - role: "{{ wazuh_ansible_repository_path }}/roles/elastic-stack/ansible-kibana"
+    become: yes
+    become_user: root
+    when:
+      - provide_kibana_hosts is defined
+
   - hosts: masters
     strategy: free
     roles:
