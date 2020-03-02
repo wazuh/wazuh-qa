@@ -50,15 +50,15 @@ def report_failure(start, failure, retry_count, sleep_time):
     :return int failure: failure +1
     :return int sleep_time:  Time to sleep between each retry  of max_retry
 
-    """ 
+    """
     elapsed = start - time()
 
     logging.info("Missing alerts {}.\n".format(failure))
     logging.info("Number of retries {}.\n".format(retry_count))
     logging.info("Elapsed time: ~ {} seconds. \n".format(elapsed))
-    
+
     retry_count += 1
-    
+
     sleep(sleep_time)
 
     return retry_count
@@ -69,11 +69,11 @@ def select_scenario(scenarios_dict):
 
     :param dic scenarios_dict: A dictionary of scenario:argument pairs
 
-    :return str scenario_key[0]: the key of the selected scenario. 
-    """ 
+    :return str scenario_key[0]: the key of the selected scenario.
+    """
 
     # Get the valid scenario.
-    scenario_key = [k for k,v in scenarios_dict.iteritems() if v != None or v != False]
+    scenario_key = [k for k,v in scenarios_dict.items() if (v != None and v != False)]
 
     if len(scenario_key) == 1: # if only 1 scenario is enabled, then pass
         return scenario_key[0]
@@ -82,13 +82,13 @@ def select_scenario(scenarios_dict):
 
 def build_query(query, scenario):
     """
-    Build or form the query depending on 'scenario' 
+    Build or form the query depending on 'scenario'
 
     :param dic query: A dictionary which represents the query to run on es.
-    :param str scenario: The scenario key to be tested 
+    :param str scenario: The scenario key to be tested
 
     :return dic query: query after appending the corresponding term to it.
-    """ 
+    """
 
     scenario_queryterm = {
         'whodata': 'syscheck.path',
@@ -96,18 +96,17 @@ def build_query(query, scenario):
     }
     if scenario in scenario_queryterm:
         term = scenario_queryterm[scenario]
-
         query["query"]["bool"]["filter"].append(
-            {"terms": {term}}
+            {"term": {term : ''}}
         )
     else:
-        logging.error("The selected scenario is not a valid one" + str(args.whodata_query))
+        logging.error("The selected scenario is not a valid one")
 
     return query
 
 def run_line_query(line, query, es, index_name):
     """
-    Run query for line on es's index_name 
+    Run query for line on es's index_name
 
     :param str line: An entry of the original query output which refers to
                      a Syscheck entry.
@@ -119,14 +118,14 @@ def run_line_query(line, query, es, index_name):
     :return dic query_result: Represents the query result, which contains the complete
                              list of Syscheck's fields.
     """
-    query = line.rstrip()
-        
+    query['query']['bool']['filter'][1]['term']['syscheck.path'] =\
+         line.rstrip()
     try:
         query_result = makeQuery(query, es, index_name)
     except Exception as e:
-        logging.info("Error when making the  Query of " + str(args.whodata_query))
+        logging.info("Error when making the  Query: " + str(query))
         raise e
-    
+
     return query_result
 
 def verify_es_alerts_report_changes(line, query_result, diff_statement, success, failure, failure_list):
@@ -198,7 +197,7 @@ def verify_es_alerts(files, max_retry, query, es, index_name, start, sleep_time,
     """
     Verify Elasticsearch alerts for a specefic scenario.
 
-    :param str files: The path to the file which contain the list of paths 
+    :param str files: The path to the file which contain the list of paths
                       of files to be validate their alerts.
     :param int max_retry: Number of retries to repeat as long as there are still paths
                           to be validated.
@@ -207,7 +206,7 @@ def verify_es_alerts(files, max_retry, query, es, index_name, start, sleep_time,
     :param time start: time() value at the moment of starting the verification.
     :param int sleep_time: Time to sleep between each retry  of max_retry
     :param bool whodata_query: To check or not a whodata query.
-    :param str scenario: The scenario key to be tested 
+    :param str scenario: The scenario key to be tested
     :param scenario_arg: This variable depends on each scenario.
 
     :return int success: A counter variable used to count the the successful queries.
@@ -217,7 +216,7 @@ def verify_es_alerts(files, max_retry, query, es, index_name, start, sleep_time,
     """
     retry_count = 0
     logging.info("Elasticsearch alerts verification started")
-    
+
     query = build_query(query, scenario)
 
     with open(files, 'r') as file_list:
@@ -228,9 +227,8 @@ def verify_es_alerts(files, max_retry, query, es, index_name, start, sleep_time,
             failure_list = []
 
             for line in file_list: # for each line (path) in file_list
-
                 # Get the corresponding query for line
-                query_result = run_line_query(line, query, es, index_name) 
+                query_result = run_line_query(line, query, es, index_name)
 
                 try:
                     if(scenario == "whodata"): # whodata scenarior case
@@ -239,7 +237,7 @@ def verify_es_alerts(files, max_retry, query, es, index_name, start, sleep_time,
                                 failure, failure_list)
                     elif(scenario == "diff"): # report_changes scenarior case
                         success, failure, failure_list = \
-                            verify_es_alerts_report_changes(line, query_result, 
+                            verify_es_alerts_report_changes(line, query_result,
                                 scenario_arg, success, failure, failure_list)
                 except Exception as e:
                     logging.info("Error when filtering audit fields in alert " + line.rstrip())
@@ -288,12 +286,13 @@ if __name__ == "__main__":
         "-s", "--sleep", type=int, required=False, dest='sleep_time',
         help="Sleep time between retries", default="60"
     )
-    parser.add_argument("-d", "--diff", type=str, required=False, 
-        dest='diff_string',help="When syscheck:report_changes enabled, represents the diff text")
     parser.add_argument(
-        "-w", "--whodata", type=bool, required=False, dest='whodata_query',
-        help="Enable whodata queries", default="False"
+        "-w", "--whodata", required=False, dest='whodata_query',
+        action="store_true", help="Enable whodata queries", default=False
     )
+    parser.add_argument("-d", "--diff", type=str, required=False,
+        dest='diff_string',help="When syscheck:report_changes enabled, represents the diff text")
+
     args = parser.parse_args()
 
     # Global query for Syscheck
@@ -301,13 +300,11 @@ if __name__ == "__main__":
         "query": {
             "bool": {
                 "filter": [
-                    {"term": {"syscheck.path": ""}},
                     {"term": {"syscheck.event": args.alert}}
                 ]
             }
         }
     }
-
     es = setElasticsearch(args.ip)
     index_name = "wazuh-alerts-3.x*"
     start = time()
@@ -315,17 +312,16 @@ if __name__ == "__main__":
     # a dictionary for each scenario key name and its argument
     scenario_arg = {
         'whodata': args.whodata_query,
-        'diff': args.whodata_query
+        'diff': args.diff_string
     }
-
     # select the scenario
     scenario = select_scenario(scenario_arg)
 
     # alerts verification
     success, failure, failure_list = \
         verify_es_alerts(args.files, args.max_retry, query,
-                         es, index_name, start, args.sleep_time, 
-                         scenario, scenario_arg[scenario_arg])
+                         es, index_name, start, args.sleep_time,
+                         scenario, scenario_arg[scenario])
 
     elapsed = start - time()
     with open(args.output, 'w+') as output:
@@ -341,3 +337,4 @@ if __name__ == "__main__":
             success, elapsed
         )
     )
+
