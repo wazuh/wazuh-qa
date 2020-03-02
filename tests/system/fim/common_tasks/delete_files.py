@@ -13,7 +13,7 @@ import logging
 import os
 import time
 
-def delete_files(input_file_path, n, output_file_path, bunch_size=100, wait_time=100):
+def delete_files(input_file_path, n, output_file_path, bunch_size=90, wait_time=1):
     """
     Delete files, given a file with complete list of files where each line
     represents a file path, we will randomly delete n files of them.
@@ -24,6 +24,8 @@ def delete_files(input_file_path, n, output_file_path, bunch_size=100, wait_time
     """
     log_filename = 'delete_files.log'
     logging.basicConfig(
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        datefmt="%Y-%m-%d %H:%M:%S",
         filename=log_filename,
         level=logging.DEBUG,
     )
@@ -47,9 +49,13 @@ def delete_files(input_file_path, n, output_file_path, bunch_size=100, wait_time
     # Delete the selected files
     failed_deletions = []
     count = 0
+    logging.info("Bunch start")
     for path in to_delete:
+        count += 1
         if count >= bunch_size:
+              logging.info(f"Bunch end, sleeping {wait_time} seconds")
               time.sleep(wait_time)
+              logging.info("Bunch start")
               count = 0
         try:
             os.remove(path)
@@ -62,15 +68,17 @@ def delete_files(input_file_path, n, output_file_path, bunch_size=100, wait_time
             pass
         except Exception:
             raise Exception("Failed when deleting selected files")
-        count += 1
 
-    # Retrying deletion on failed paths after sleeping for 3 seconds
     time.sleep(3)
     count = 0
+    logging.info("Retrying deletion on failed paths after sleeping for 3 seconds")
     for path in failed_deletions:
+        count += 1
         if count >= bunch_size:
+              logging.info(f"Bunch end, sleeping {wait_time} seconds")
               time.sleep(wait_time)
               count = 0
+              logging.info("Bunch start")
         try:
             os.remove(path)
         except FileNotFoundError:
@@ -82,7 +90,6 @@ def delete_files(input_file_path, n, output_file_path, bunch_size=100, wait_time
             except Exception:
                 logging.error("File " + path + " used by another process.(3rd attempt)", exc_info=True)
                 raise Exception
-        count += 1
 
     # Write the list of the deleted files into output_file_path
     try:
