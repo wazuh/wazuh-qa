@@ -15,7 +15,7 @@ import string
 import secrets
 import argparse
 import time
-
+import logging
 
 def generate_random_name(length):
     """ Generates random string of specified length (integer) """
@@ -125,6 +125,13 @@ def create_files(files_path, text_mode=False, bunch_size=100, wait_time=1):
     :param dict files_path: Contains the list of files and it's associated path
     :param bool text_mode: Create text files instead of binary
     """
+    log_filename = 'create_files.log'
+    logging.basicConfig(
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        datefmt="%Y-%m-%d %H:%M:%S",
+        filename=log_filename,
+        level=logging.DEBUG,
+    )
     if text_mode:
         file_mode = "w"
         one_char = '0'
@@ -136,10 +143,13 @@ def create_files(files_path, text_mode=False, bunch_size=100, wait_time=1):
         chunk = one_char * 1048577
         unique = secrets.token_bytes
     count = 0
+    logging.info("Bunch start")
     for key, value in files_path.items():
       if count >= bunch_size:
+        logging.info(f"Bunch end, sleeping {wait_time} seconds")
         time.sleep(wait_time)
         count = 0
+        logging.info("Bunch start")
       with open(key, file_mode) as f:
           count += 1
           if value > 1048576:
