@@ -1,0 +1,69 @@
+---
+  - hosts: all
+    vars_files:
+      - ../../vars/main.yml
+      - defaults/main.yml
+
+    handlers:
+      - import_tasks: ../../handlers/main.yml
+
+    tasks:
+      - name: Set extra arguments for scripts.
+        set_fact:
+          elastic_verification_extra_arguments: "-r 3 -s 300"
+          json_verification_extra_arguments: "-r 5 -s 300"
+
+      - block:
+        - name: Launching prepare tasks
+          import_tasks: "../../common_tasks/prepare.yml"
+
+        - name: Wait until the first FIM scan end (Linux)
+          become: True
+          wait_for:
+            path: "{{ linux_ossec_folder_path }}/logs/ossec.log"
+            search_regex: 'Real-time file integrity monitoring started'
+          when:
+            - inventory_hostname in groups['linuxagents']
+
+        - name: Wait until the first FIM scan end (Windows)
+          win_wait_for:
+            path: 'C:\\Program Files (x86)\\ossec-agent\\ossec.log'
+            regex: 'Real-time file integrity monitoring started'
+          when:
+            - inventory_hostname in groups['windowsagents']
+
+        - block:
+          - name: Configure syscheck event.
+            set_fact:
+              event: "added"
+
+          - name: Generating files to trigger FIM alerts
+            import_tasks: "../../common_tasks/create_files.yml"
+
+          - name: Verify generated alerts
+            become: true
+            import_tasks: "../../common_tasks/verify_alerts.yml"
+
+        - block:
+          - name: Configure syscheck event.
+            set_fact:
+              event: "modified"
+
+          - name: Modifiying files to trigger FIM alerts
+            import_tasks: "../../common_tasks/modify_files.yml"
+
+          - name: Verify generated alerts
+            become: true
+            import_tasks: "../../common_tasks/verify_alerts.yml"
+
+        - block:
+          - name: Configure syscheck event.
+            set_fact:
+              event: "deleted"
+
+          - name: Deleting files to trigger FIM alerts
+            import_tasks: "../../common_tasks/delete_files.yml"
+
+          - name: Verify generated alerts
+            become: true
+            import_tasks: "../../common_tasks/verify_alerts.yml"
