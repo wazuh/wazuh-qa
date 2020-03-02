@@ -43,40 +43,31 @@ def get_configuration(request):
 
 # Tests
 
-def test_sync_interval(get_configuration, configure_environment, restart_syscheckd):
+def test_sync_interval(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
     """
     Verify that synchronization checks take place at the expected time given SYNC_INTERVAL variable.
     """
-
-    def truncate_log():
-        truncate_file(LOG_FILE_PATH)
-        return FileMonitor(LOG_FILE_PATH)
-
     # Check if the test should be skipped
     check_apply_test({'sync_interval'}, get_configuration['tags'])
     interval = time_to_timedelta(get_configuration['metadata']['interval'])
 
-    wazuh_log_monitor = truncate_log()
-    detect_initial_scan(wazuh_log_monitor)
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_synchronization,
                             error_message='Did not receive expected '
-                                          '"Performing synchronization check" event')
+                                          '"Initializing FIM Integrity Synchronization check" event')
 
-    wazuh_log_monitor = truncate_log()
     TimeMachine.travel_to_future(interval)
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_synchronization,
                             error_message='Did not receive expected '
-                                          '"Performing synchronization check" event')
+                                          '"Initializing FIM Integrity Synchronization check" event')
 
     # This should fail as we are only advancing half the time needed for synchronization to occur
-    wazuh_log_monitor = truncate_log()
     TimeMachine.travel_to_future(interval / 2)
     try:
         result = wazuh_log_monitor.start(timeout=1 if interval.total_seconds() == 10.0 else 3,
                                          callback=callback_detect_synchronization,
                                          accum_results=1,
-                                         error_message='Did not receive expected '
-                                                       '"Performing synchronization check" event').result()
+                                         error_message='Did not receive expected "Initializing FIM Integrity '
+                                                       'Synchronization check" event').result()
         if result is not None:
             pytest.fail("Synchronization shouldn't happen at this point")
     except TimeoutError:
