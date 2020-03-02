@@ -91,6 +91,18 @@ def callback_wazuh_db_message(item):
             return match.group(1), match.group(2), body
 
 
+def callback_wazuh_db_integrity(item):
+    data, response = item
+    match = re.match(r'^agent (\d{3,}) \w+ (\w+) (.+)$', data.decode())
+    if match and 'integrity' in match.group(2):
+        try:
+            body = json.loads(match.group(3))
+        except json.decoder.JSONDecodeError:
+            body = match.group(3)
+
+        return match.group(1), match.group(2), body
+
+
 def callback_fim_alert(line):
     try:
         alert = json.loads(line)
