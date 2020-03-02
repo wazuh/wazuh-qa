@@ -6,7 +6,6 @@ import re
 import shutil
 import sys
 import time
-from datetime import timedelta
 
 import pytest
 
@@ -17,7 +16,6 @@ from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import restart_wazuh_with_new_conf
-from wazuh_testing.tools.time import TimeMachine
 
 # Marks
 
