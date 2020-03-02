@@ -80,6 +80,7 @@ REQUIRED_ATTRIBUTES = {
 }
 
 _last_log_line = 0
+_os_excluded_from_rt_wd = ['darwin', 'sunos5']
 
 
 def validate_event(event, checks=None, mode=None):
@@ -1313,9 +1314,9 @@ def get_fim_mode_param(mode, key='FIM_MODE'):
     metadata = {key.lower(): mode}
     if mode == 'scheduled':
         return {key: ''}, metadata
-    elif mode == 'realtime' and sys.platform != 'darwin' and sys.platform != 'sunos5':
+    elif mode == 'realtime' and sys.platform not in _os_excluded_from_rt_wd:
         return {key: {'realtime': 'yes'}}, metadata
-    elif mode == 'whodata' and sys.platform != 'darwin' and sys.platform != 'sunos5':
+    elif mode == 'whodata' and sys.platform not in _os_excluded_from_rt_wd:
         return {key: {'whodata': 'yes'}}, metadata
     else:
         return None, None
