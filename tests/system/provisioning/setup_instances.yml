@@ -17,8 +17,8 @@
     vars_files:
       - ./vars/credentials.yml
     tasks:
-      - import_tasks: ../provisioning/roles/aws/tasks/configure_ssh.yml
       - import_tasks: ../provisioning/roles/aws/tasks/setup_instances.yml
+      - import_tasks: ../provisioning/roles/aws/tasks/configure_ssh.yml
     handlers:
       - include: ../provisioning/roles/aws/handlers/main.yml
     become: yes
@@ -31,4 +31,3 @@
     tasks:
       - import_tasks: ../provisioning/roles/aws/tasks/setup_instances.yml
 
-      
