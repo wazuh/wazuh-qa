@@ -96,7 +96,7 @@ def test_move_file(source_folder, target_folder, subdir, tags_to_apply,
 
     # Move folder to target directory
     os.rename(os.path.join(source_folder, subdir), os.path.join(target_folder, subdir))
-    check_time_travel(scheduled)
+    check_time_travel(scheduled, monitor=wazuh_log_monitor)
 
     # Monitor expected events
     events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
