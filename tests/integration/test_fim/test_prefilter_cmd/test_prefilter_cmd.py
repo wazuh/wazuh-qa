@@ -8,11 +8,9 @@ import subprocess
 import distro
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, detect_initial_scan, generate_params
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
-from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.services import restart_wazuh_daemon
 
 # Marks
 
@@ -61,7 +59,8 @@ def check_prelink():
 @pytest.mark.parametrize('tags_to_apply', [
     ({'prefilter_cmd'})
 ])
-def test_prefilter_cmd(tags_to_apply, get_configuration, configure_environment, check_prelink):
+def test_prefilter_cmd(tags_to_apply, get_configuration, configure_environment, check_prelink, restart_syscheckd,
+                       wait_for_initial_scan):
     """
     Check if prelink is installed and syscheck works
 
@@ -74,6 +73,3 @@ def test_prefilter_cmd(tags_to_apply, get_configuration, configure_environment, 
     if get_configuration['metadata']['prefilter_cmd'] == '/usr/sbin/prelink -y':
         prelink = get_configuration['metadata']['prefilter_cmd'].split(' ')[0]
         assert os.path.exists(prelink), f'Prelink is not installed'
-        truncate_file(LOG_FILE_PATH)
-        restart_wazuh_daemon('ossec-syscheckd')
-        detect_initial_scan(wazuh_log_monitor)
