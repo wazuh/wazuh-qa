@@ -43,13 +43,16 @@ def pytest_runtest_setup(item):
 
 @pytest.fixture(scope='module')
 def restart_wazuh(get_configuration, request):
+    # Stop Wazuh
+    control_service('stop')
+
     # Reset ossec.log and start a new monitor
     truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
 
-    # Restart Wazuh and wait for the command to end
-    control_service('restart')
+    # Start Wazuh
+    control_service('start')
 
 
 def pytest_addoption(parser):
