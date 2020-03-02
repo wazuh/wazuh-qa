@@ -1,4 +1,5 @@
 import argparse
+import os
 from datetime import datetime
 import sys
 
@@ -53,10 +54,10 @@ def scan_log(file, frequency, n_scans):
             if first_start is None:
                 first_start = callback_detect_start_scan(line)
             else:
-                if callback_detect_end_scan(line) is not None:
-                    time_end = get_timemstamp_from_line(line)
-                if callback_detect_start_scan(line) is not None:
-                    time_start = get_timemstamp_from_line(line)
+                if time_end is None:
+                    time_end = callback_detect_end_scan(line)
+                if time_start is None:
+                    time_start = callback_detect_start_scan(line)
                 if time_end is not None and time_start is not None:
                     scan_finished = True
                     scan_count += 1
@@ -71,6 +72,37 @@ def scan_log(file, frequency, n_scans):
                         )
                     time_start = None
                     time_end = None
+        if time_end is not None and time_start is None:
+            print("waiting to finish scan")
+            size = os.stat(file).st_size
+            while time_start is None:
+                size_new = os.stat(file).st_size
+                if size < size_new:
+                    size = size_new
+                    log.seek(0)
+                    time_start = callback_detect_start_scan(
+                        log.readlines()[-1]
+                    )
+                    assert (datetime.now() - time_end).total_seconds()\
+                        < frequency, "\
+                            Scan not finished in time.\n\
+                            Frequency: {}\n\
+                            Last scan end: {}\n\
+                            Current scan start: {}".format(
+                                frequency, time_end, time_start
+                            )
+
+            if time_start is not None:
+                time_diff = (time_start - time_end).total_seconds()
+                assert (lower_bound <= time_diff <= upper_bound), "\
+                    Scan not finished in time.\n\
+                    Frequency: {}\n\
+                    Last scan end: {}\n\
+                    Current scan start: {}\n\
+                    Time difference: {}".format(
+                        frequency, time_end, time_start, time_diff
+                    )
+
     assert scan_finished, "\
         No scan finished\n\
         Last scan end: {}\n\
