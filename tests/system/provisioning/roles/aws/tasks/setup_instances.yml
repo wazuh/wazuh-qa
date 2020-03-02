@@ -12,6 +12,7 @@
     when:
       - inventory_hostname in groups['linuxagents']
       - ansible_os_family == "RedHat"
+      - ansible_distribution_major_version < "8"
 
   - name: Configuring Windows Agents
     block:
