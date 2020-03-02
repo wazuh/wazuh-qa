@@ -224,7 +224,7 @@ def test_report_changes_big(file_size, n_files, tags_to_apply, get_configuration
     create_files(file_list, folder, b'0'*file_size)
 
     # Get events generated when creating files
-    check_time_travel(fim_mode == 'scheduled')
+    check_time_travel(fim_mode == 'scheduled', monitor=wazuh_log_monitor)
     event_list = wazuh_log_monitor.start(timeout=timeout, callback=callback_detect_event,
                                          accum_results=len(file_list)).result()
 
@@ -243,7 +243,7 @@ def test_report_changes_big(file_size, n_files, tags_to_apply, get_configuration
     create_files(file_list, folder, b'1'*file_size)
 
     # Get events generated when modifying files
-    check_time_travel(fim_mode == 'scheduled')
+    check_time_travel(fim_mode == 'scheduled', monitor=wazuh_log_monitor)
     event_list = wazuh_log_monitor.start(timeout=timeout, callback=callback_detect_event,
                                          accum_results=len(file_list)).result()
 
