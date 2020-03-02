@@ -1102,6 +1102,13 @@ class CustomValidator:
 def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=False, min_timeout=1, options=None,
                      triggers_event=True, encoding=None, validators_after_create=None, validators_after_update=None,
                      validators_after_delete=None, validators_after_cud=None):
+    def check_scan_ended(file_monitor, scheduled=False):
+        if scheduled:
+            file_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+                               error_message='Did not receive "FIM scan ended" after travelling in time',
+                               update_position=False)
+            logger.info("'File integrity monitoring scan ended' detected.")
+
     """
     Check if creation, update and delete events are detected by syscheck.
 
@@ -1154,6 +1161,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         create_file(REGULAR, folder, name, content=content)
 
     check_time_travel(time_travel)
+    check_scan_ended(log_monitor, time_travel)
     event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event)
     if triggers_event:
         logger.info("'added' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
@@ -1163,6 +1171,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         modify_file(folder, name, is_binary=isinstance(content, bytes))
 
     check_time_travel(time_travel)
+    check_scan_ended(log_monitor, time_travel)
     event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
     if triggers_event:
         logger.info("'modified' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
@@ -1172,6 +1181,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         delete_file(folder, name)
 
     check_time_travel(time_travel)
+    check_scan_ended(log_monitor, time_travel)
     event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
     if triggers_event:
         logger.info("'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))

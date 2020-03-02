@@ -3,7 +3,7 @@
 - tags:
   - disabled_conf
   apply_to_modules:
-  - test_basic_disabled
+  - test_basic_usage_disabled
   section: syscheck
   elements:
   - disabled:

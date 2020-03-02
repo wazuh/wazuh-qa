@@ -18,14 +18,14 @@ pytestmark = pytest.mark.tier(level=0)
 
 # variables
 
-test_directories = [os.path.join(PREFIX, 'testdir'), os.path.join(PREFIX, 'not_exists')]
+test_directories = [os.path.join(PREFIX, 'testdir')]
 
 directory_str = test_directories[0]
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_disabled.yaml')
-testdir, testdir_not_exists = test_directories
+testdir = test_directories[0]
 
 # configurations
 
@@ -45,8 +45,7 @@ def get_configuration(request):
 
 # tests
 
-@pytest.mark.parametrize('folder', [testdir, testdir_not_exists])
-def test_disabled(folder, get_configuration, configure_environment, restart_syscheckd):
+def test_disabled(get_configuration, configure_environment, restart_syscheckd):
     """Check if syscheckd sends events when disabled="yes".
 
     Parameters
@@ -61,5 +60,9 @@ def test_disabled(folder, get_configuration, configure_environment, restart_sysc
 
     # Use `regular_file_cud` and don't expect any event
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
-    regular_file_cud(folder, wazuh_log_monitor, time_travel=scheduled, min_timeout=global_parameters.default_timeout,
-                     triggers_event=False)
+    if scheduled:
+        with pytest.raises(TimeoutError):
+            wazuh_log_monitor.start(timeout=10, callback=callback_detect_end_scan)
+    else:
+        regular_file_cud(testdir, wazuh_log_monitor, time_travel=scheduled, min_timeout=global_parameters.default_timeout,
+                         triggers_event=False)
