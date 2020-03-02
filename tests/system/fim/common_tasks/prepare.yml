@@ -8,6 +8,9 @@
       - "{{ agents_results_manager_path }}/added"
       - "{{ agents_results_manager_path }}/modified"
       - "{{ agents_results_manager_path }}/deleted"
+      - "{{ agents_results_manager_path }}/added/missing"
+      - "{{ agents_results_manager_path }}/modified/missing"
+      - "{{ agents_results_manager_path }}/deleted/missing"
 
   - name: Stop wazuh-manager service
     service:
