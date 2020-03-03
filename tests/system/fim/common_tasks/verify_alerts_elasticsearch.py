@@ -14,6 +14,14 @@ import logging
 import copy
 
 def read_file(file_path):
+    """
+    read the paths from file_path into a list.
+
+    :param str file_path: The path of the file which contains the paths.
+    
+    :retrun list data: A list object with the files' paths as elements.
+    """
+
     data = []
     # Read data into the variable 'data'
     try:
