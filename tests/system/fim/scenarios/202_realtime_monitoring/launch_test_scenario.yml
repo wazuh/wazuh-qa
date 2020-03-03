@@ -13,7 +13,7 @@
           elastic_verification_extra_arguments: "-r 3"
           json_verification_extra_arguments: "-r 3"
           create_script_extra_params: "-b 100 -w 1"
-          delete_script_extra_params: "-b 100  -w 1"
+          delete_script_extra_params: "-b 100 -w 1"
           modify_script_extra_params: "-b 100 -w 1"
 
       - block:

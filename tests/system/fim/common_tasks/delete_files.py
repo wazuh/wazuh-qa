@@ -115,9 +115,9 @@ def main():
                         help="Number of files to be randomly selected and deleted")
     parser.add_argument("-o", "--output-list", type=str, required=True, dest='output_file',
                         help="File containing the list of the deleted files, one per line")
-    parser.add_argument("-b", '--bunch-size', type=int, default=90,
+    parser.add_argument("-b", '--bunch-size', type=int, default=500,
                         dest="bunch_size", help="File generation bunch size")
-    parser.add_argument("-w", '--wait-time', type=int, default=1,
+    parser.add_argument("-w", '--wait-time', type=int, default=0,
                         dest="wait_time", help="Time interval between bunch generation (to avoid queue overflow)")
     parser.add_argument("-d", "--rt-delay", type=float, default=0,
                         dest="rt_delay", help="Sleep betwen each file generated")
