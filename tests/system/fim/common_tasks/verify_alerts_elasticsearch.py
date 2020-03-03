@@ -13,6 +13,32 @@ from time import sleep, time
 import logging
 import copy
 
+
+
+def setElasticsearch(ElasticIP):
+    """
+        Sets the Elasticsearch instance that we want to connect.
+        :param str ElasticIP: IP adress of the Elasticsearch node.
+        :return: Object of the Elasticsearch class.
+    """
+    es = Elasticsearch("http://{}:9200".format(ElasticIP))
+    return es
+
+
+def makeQuery(query, Elastic, index_name):
+    """
+        Make a query to a Elasticsearch instance.
+        :param Dict query: Dictionary containing the query we want to make,
+        must follow Query DSL.
+        :param Elasticsearch Elastic: Elasticsearch class instance we want
+        to query.
+        :param str index_name: Index  of the Elasticsearch instance we want
+        to query.
+        :return: Dictionary containing the result of the query.
+    """
+    result = Elastic.search(index=index_name, body=query)
+    return result
+
 def read_file(file_path):
     """
     read the paths from file_path into a list.
