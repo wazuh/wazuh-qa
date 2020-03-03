@@ -136,7 +136,7 @@ def main():
             time.sleep(args.rt_delay)
             count += 1
             if count >= args.bunch_size:
-              logging.info(f"Bunch end, sleeping {args.wait_time} seconds")
+              logging.info(f"Bunch end: {count} sleeping {args.wait_time} seconds")
               time.sleep(args.wait_time)
               count = 0
             try:

@@ -12,24 +12,27 @@ import random
 import logging
 import os
 import time
-def delete_file(path, attempt=0, sleep_time=5):
+
+
+def delete_file(path, attempt=0, sleep_time=5.0):
     success = True
     try:
         if attempt > 0:
           time.sleep(sleep_time)
           logging.info(f"Failed to delete {path}, retry: {attempt}")
         if attempt > 10:
-          success = False
+          return False
         open(path, 'a').close() # (To update mtime_after)
         os.remove(path)
     except FileNotFoundError as e:
         logging.error("File " + path + " not found.", exc_info=True)
         raise e
     except PermissionError:
-        logging.error("File " + path + " used by another process.", exc_info=True)
+        logging.info("File " + path + " used by another process.", exc_info=True)
         success = delete_file(path, attempt+1)
         pass
     return success
+
 def delete_files(input_file_path, n, output_file_path, bunch_size=500, wait_time=0, rt_delay=0):
     """
     Delete files, given a file with complete list of files where each line
@@ -66,12 +69,13 @@ def delete_files(input_file_path, n, output_file_path, bunch_size=500, wait_time
     count = 0
     for path in to_delete:
         if count >= bunch_size:
-              logging.info(f"Bunch end, sleeping {wait_time} seconds")
+              logging.info(f"Bunch end: {count} sleeping {wait_time} seconds")
               time.sleep(wait_time)
               count = 0
         if delete_file(path):
           deleted_files.append(path)
           count += 1
+        time.sleep(rt_delay)
 
     # Write the list of the deleted files into output_file_path
     try:

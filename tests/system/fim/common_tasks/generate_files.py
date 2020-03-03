@@ -145,7 +145,7 @@ def create_files(files_path, text_mode=False, bunch_size=100, wait_time=1, rt_de
     count = 0
     for key, value in files_path.items():
       if count >= bunch_size:
-        logging.info(f"Bunch end, sleeping {wait_time} seconds")
+        logging.info(f"Bunch end: {count} sleeping {wait_time} seconds")
         time.sleep(wait_time)
         count = 0
       with open(key, file_mode) as f:
