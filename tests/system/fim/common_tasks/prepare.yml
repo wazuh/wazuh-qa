@@ -61,7 +61,7 @@
   - name: Clean logs wazuh-agent
     become: True
     shell: "echo '' > {{ linux_ossec_folder_path }}/logs/ossec.log"
-    when: clean_logs
+    when: clean_logs is defined and clean_logs
 
   - name: Copy {{ files_config_agent_linux_ossec_conf_rpm }} to the Agents hosts | rpm
     copy:
@@ -114,7 +114,7 @@
     win_command: powershell.exe -
     args:
       stdin: "Clear-Content 'C:\\Program Files (x86)\\ossec-agent\\ossec.log'"
-    when: clean_logs
+    when: clean_logs is defined and clean_logs
 
   - name: Copy {{ files_config_agent_windows_ossec_conf }} to the agents hosts | Windows
     win_copy:
