@@ -76,7 +76,7 @@ def delete_files(input_file_path, n, output_file_path, bunch_size=500, wait_time
     # Write the list of the deleted files into output_file_path
     try:
         with open(output_file_path, 'w') as f:
-            for item in to_delete:
+            for item in deleted_files:
                 f.write("%s\n" % item)
         f.close()
     except Exception:
