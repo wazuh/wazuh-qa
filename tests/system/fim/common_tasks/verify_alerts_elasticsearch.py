@@ -270,7 +270,7 @@ def verify_es_alerts(files_list, max_retry, query, es, index_name, start, sleep_
                             verify_es_alerts_report_changes(line, query_result,
                                 scenario_arg, success, failure)
                     if success_bool:
-                        files_list.pop()    
+                        files_list.remove(line)    
                 except Exception as e:
                     logging.info("Error when verifying alerts for " + line.rstrip())
                     raise e
