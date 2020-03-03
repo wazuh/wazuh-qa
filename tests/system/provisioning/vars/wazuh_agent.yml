@@ -13,5 +13,6 @@ windows_install_dir_x86: C:\Program Files (x86)\ossec-agent\
 
 wazuh_winagent_config_url: https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/warehouse/branches/3.12/windows/wazuh-agent-3.12.0-0.3319fimreworksqlite.msi
 wazuh_winagent_package_name: wazuh-agent-3.12.0-0.3319fimreworksqlite.msi
-wazuh_winagent_config_md5: a1e30defaddb919bb692ad73e1935889
 
+wazuh_winagent_config:
+  md5: 4e844257435c5af70be69e3ad9a8040f
