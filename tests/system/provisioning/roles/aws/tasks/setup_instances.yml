@@ -9,7 +9,7 @@
     command: apt install -y python3-apt
     when:
       - inventory_hostname in groups['linuxagents']
-      - ansible_os_family == 'Debian"
+      - ansible_os_family == "Debian"
 
   - name: Configuring Windows Agents
     block:
