@@ -1,0 +1,7 @@
+---
+  - name: Uninstall Audit | Linux
+    package:
+      name: audit
+      state: absent
+    when:
+      - inventory_hostname in groups['linuxagents']

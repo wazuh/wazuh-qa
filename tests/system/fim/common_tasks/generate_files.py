@@ -163,7 +163,6 @@ def create_files(files_path, text_mode=False, bunch_size=100, wait_time=1):
               f.write(one_char * value)
           f.write(unique(16))
 
-
 def create_file_summary(files_path, logfile):
     """
     Creates a file that summarizes all the created files

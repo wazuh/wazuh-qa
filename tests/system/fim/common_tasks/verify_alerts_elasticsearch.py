@@ -82,9 +82,11 @@ if __name__ == "__main__":
         "-s", "--sleep", type=int, required=False, dest='sleep_time',
         help="Sleep time between retries", default="60"
     )
+    parser.add_argument("-d", "--diff", type=str, required=False, 
+        dest='diff_string',help="When syscheck:report_changes enabled, represents the diff text")
     parser.add_argument(
         "-w", "--whodata", required=False, dest='whodata_query',
-        help="Enable whodata queries", action='store_true'
+        action="store_true", help="Enable whodata queries", default=False
     )
     parser.add_argument(
         "-tg", "--tag", type=str, required=False, dest='tag_query', nargs='+',
@@ -115,7 +117,10 @@ if __name__ == "__main__":
     index_name = "wazuh-alerts-3.x*"
     retry_count = 0
     logging.info("Elasticsearch alerts verification started")
+    success_ = True
     start = time()
+    diff_statement = args.diff_string
+
     with open(args.files, 'r') as file_list:
         while retry_count < args.max_retry:
             success = 0
@@ -150,7 +155,14 @@ if __name__ == "__main__":
                 else:
                     try:
                         if query_result['hits']['total']['value'] == 1:
-                            success += 1
+
+                            if (diff_statement is not None) and \
+                               ('diff' in query_result['hits']['hits'][0]['_source']['syscheck']) and \
+                               (diff_statement not in query_result['hits']['hits'][0]['_source']['syscheck']['diff']):
+                                success_ = False
+                            if success_:
+                                success += 1
+                            success_ = True
                     except IndexError:
                         failure_list.append(line)
                         failure += 1
@@ -175,9 +187,7 @@ if __name__ == "__main__":
         output.writelines(failure_list)
 
     assert failure == 0, "number of failed files: {}\n \
-            Elapsed time: ~ {} seconds.".format(
-            success, elapsed
-        )
+            Elapsed time: ~ {} seconds.".format(success, elapsed)
 
     print(
         "Number of succeded files: {}\n Elapsed time: ~ {} seconds.".format(

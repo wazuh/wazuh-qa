@@ -72,6 +72,18 @@ def modify_file_content(filepath):
     with open(filepath, 'ab') as f:
         f.write(bytes(content, 'utf8'))
 
+def modify_file_text_content(filepath, sentence):
+    """
+    Modify file content by adding sentence at the end of filepath
+    in a new line.
+
+    :param str filepath: The path of the file to modify
+    :param str sentence: A setnence of 1 or more words.
+    """
+    with open(filepath, 'r+') as file:
+        content = file.read()
+        file.seek(0, 0)
+        file.write(sentence.rstrip('\r\n') + '\n' + content)
 
 def log_modified_files(files_path, logfile):
     """
@@ -102,6 +114,9 @@ def main():
     parser.add_argument("-o", "--output-list", type=str,
                         required=True, dest='output_file',
                         help="File containing the list of modified files")
+    parser.add_argument("-t", '--text-mode', default=False, action="store_true",
+                        dest="text_mode", help="Modify text files instead of binary"
+                             " (default is False)")
     parser.add_argument("-b", '--bunch-size', type=int, default=90,
                         dest="bunch_size", help="File generation bunch size")
     parser.add_argument("-w", '--wait-time', type=int, default=1,
@@ -110,8 +125,10 @@ def main():
 
     input_file = args.input_file
     output_file = args.output_file
+    text_mode = args.text_mode
 
     changed_files = []
+    sentence = "Hello World"
 
     with open(input_file) as flist:
         count = 0
@@ -125,7 +142,10 @@ def main():
               count = 0
               logging.info("Bunch start")
             try:
-                modify_file_content(path[:-1])
+                if text_mode: # if text_mode, then add 'setence' at the end of 'path' 
+                    modify_file_text_content(path[:-1], sentence)
+                else:
+                    modify_file_content(path[:-1])
                 changed_files.append(path[:-1])
             except PermissionError:
                 logging.error("Not enough permissions to modify: {}".format(path[:-1]))
