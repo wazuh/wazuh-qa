@@ -67,11 +67,13 @@ def delete_files(input_file_path, n, output_file_path, bunch_size=500, wait_time
     # Delete the selected files
     deleted_files = []
     count = 0
+    nbunch = 0
     for path in to_delete:
         if count >= bunch_size:
-              logging.info(f"Bunch end: {count} sleeping {wait_time} seconds")
+              logging.info(f"Bunch end: {nbunch} sleeping {wait_time} seconds")
               time.sleep(wait_time)
               count = 0
+              nbunch += 1
         if delete_file(path):
           deleted_files.append(path)
           count += 1

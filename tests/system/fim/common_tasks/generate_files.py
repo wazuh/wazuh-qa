@@ -143,11 +143,13 @@ def create_files(files_path, text_mode=False, bunch_size=100, wait_time=1, rt_de
         chunk = one_char * 1048577
         unique = secrets.token_bytes
     count = 0
+    nbunch = 0
     for key, value in files_path.items():
       if count >= bunch_size:
-        logging.info(f"Bunch end: {count} sleeping {wait_time} seconds")
+        logging.info(f"Bunch end: {nbunch}, sleeping {wait_time} seconds")
         time.sleep(wait_time)
         count = 0
+        nbunch +=1
       with open(key, file_mode) as f:
           count += 1
           time.sleep(rt_delay)
