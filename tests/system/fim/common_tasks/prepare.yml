@@ -36,6 +36,13 @@
     when:
       - inventory_hostname in groups['linuxagents']
 
+  - name: Create {{ files_fim_testing_linux }} to store outputs in Agents hosts | Linux
+    file:
+      path: "{{ files_fim_testing_linux }}"
+      state: directory
+    when:
+      - inventory_hostname in groups['linuxagents']
+
   - name: Copy {{ files_config_source_path }} to the Agents hosts | Linux
     template:
         src: "../../common_tasks/files_configuration.json.j2"
@@ -53,14 +60,14 @@
       src: "./config/{{ files_config_agent_linux_ossec_conf_rpm }}"
       dest: "{{ linux_ossec_folder_path }}/etc/ossec.conf"
     when:
-      - ansible_distribution == "Redhat" or ansible_distribution == "CentOS"
+      - ansible_os_family == "RedHat"
 
   - name: Copy {{ files_config_agent_linux_ossec_conf_deb }} to the Agents hosts | deb | Linux
     copy:
       src: "./config/{{ files_config_agent_linux_ossec_conf_deb }}"
       dest: "{{ linux_ossec_folder_path }}/etc/ossec.conf"
     when:
-      -  ansible_distribution == "Debian"
+      -  ansible_os_family == "Debian"
 
   - name: Start wazuh-agent service | Linux
     service:
