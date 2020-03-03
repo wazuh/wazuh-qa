@@ -77,6 +77,7 @@ def ensure_growing_list(last_num_alerts, query, es, index):
     :return bool res: True if the list has grwon, False in other case.
     :return int num_alerts: The current number of detected alerts.
     """
+
     query_result = makeQuery(query, es, index)
     num_alerts = query_result['hits']['total']['value']
 
@@ -101,6 +102,7 @@ def report_failure(start, failure, retry_count, sleep_time):
     :return int sleep_time:  Time to sleep between each retry  of max_retry
 
     """
+
     elapsed = start - time()
 
     logging.info("Missing alerts {}.\n".format(failure))
@@ -168,6 +170,7 @@ def run_line_query(line, query, es, index_name):
     :return dic query_result: Represents the query result, which contains the complete
                              list of Syscheck's fields.
     """
+
     query['query']['bool']['filter'][1]['term']['syscheck.path'] =\
          line.rstrip()
     try:
@@ -195,6 +198,7 @@ def verify_es_alerts_report_changes(line, query_result, diff_statement, success,
     :return success: An updated value of the argument success.
     :return failure: An updated value of the argument failure.
     """
+
     success_bool = False
     try:
         if query_result['hits']['total']['value'] == 1 and \
@@ -242,7 +246,8 @@ def verify_es_alerts_whodata(line, query_result, success, failure):
 
     return success, success_bool, failure
 
-def verify_es_alerts(files_list, max_retry, query, es, index_name, start, sleep_time, scenario, scenario_arg):
+def verify_es_alerts(files_list, max_retry, query, es, index_name,\
+     start, sleep_time, scenario, scenario_arg):
     """
     Verify Elasticsearch alerts for a specefic scenario.
 
@@ -257,32 +262,36 @@ def verify_es_alerts(files_list, max_retry, query, es, index_name, start, sleep_
     :param str scenario: The scenario key to be tested
     :param scenario_arg: This variable depends on each scenario.
 
-    :return int success: A counter variable used to count the the successful queries.
-    :return int failure: A  counter variable used to count the failed queries checks.
+    :return int success: Counter variable used to count the the successful queries.
+    :return int failure:  Counter variable used to count the failed queries checks.
+    :return list files_list: List of the files' paths with no related alerts detected.
     """
+
     retry_count = 0
     alerts_num = 0
     success = 0
     failure = 0
+    query_scenario = copy.deepcopy(query) #  a copy of query
+    query_scenario = build_query(query_scenario, scenario)
 
     logging.info("Elasticsearch alerts verification started")
-
-    query_scenario = copy.deepcopy(query)
-    query_scenario = build_query(query_scenario, scenario)
     
     while retry_count <= max_retry:
-        print("Attempt {}".format(retry_count))
+        logging.info("Attempt {}".format(retry_count))
 
         alerts_growing = False
-        alerts_growing, alerts_num = ensure_growing_list(alerts_num, query, es, index_name)
+        alerts_growing, alerts_num = \
+            ensure_growing_list(alerts_num, query, es, index_name)
         
-        print("alerts_growing and alerts_num are {}, {}".format(alerts_growing, alerts_num))
+        logging.info("alerts_growing state is {} and alerts_num are {}"\
+            .format(alerts_growing, alerts_num))
 
-        if retry_count == 0:
+        if retry_count == 0: # if this is the first loop over files_list
             alerts_growing = True
 
         if alerts_growing:
             for line in files_list[::-1]: # for each line (path) in files_list
+
                 # Get the corresponding query for line
                 query_result = run_line_query(line, query_scenario, es, index_name)
                 try:
@@ -295,15 +304,16 @@ def verify_es_alerts(files_list, max_retry, query, es, index_name, start, sleep_
                             verify_es_alerts_report_changes(line, query_result,
                                 scenario_arg, success, failure)
 
-                    if success_bool:
+                    if success_bool: # In case of a success alert verification, then remove line.
                         files_list.remove(line)    
                 except Exception as e:
                     logging.info("Error when verifying alerts for " + line.rstrip())
                     raise e
-        if failure == 0:
+        if failure == 0: # if no failures detected, then break; it's done.
             break
-        else:
+        else: # Retry ...
             retry_count = report_failure(start, failure, retry_count, sleep_time)
+    
     return success, failure, files_list
 
 if __name__ == "__main__":
