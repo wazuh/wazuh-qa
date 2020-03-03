@@ -19,8 +19,6 @@ if platform.system() == 'Linux':
     import pwd
     import grp
 
-rt_delay = 0.01
-
 
 if sys.version_info.major < 3:
     print('ERROR: Python 2 is not supported.')
@@ -121,6 +119,8 @@ def main():
                         dest="bunch_size", help="File generation bunch size")
     parser.add_argument("-w", '--wait-time', type=int, default=1,
                         dest="wait_time", help="Time interval between bunch generation (to avoid queue overflow)")
+    parser.add_argument("-d", "--rt-delay", type=float, default=0,
+                        dest="rt_delay", help="Sleep betwen each file generated")
     args = parser.parse_args()
 
     input_file = args.input_file
@@ -134,7 +134,7 @@ def main():
         count = 0
         logging.info("Bunch start")
         for path in flist:
-            time.sleep(rt_delay)
+            time.sleep(args.rt_delay)
             count += 1
             if count >= args.bunch_size:
               logging.info(f"Bunch end, sleeping {args.wait_time} seconds")
@@ -142,7 +142,7 @@ def main():
               count = 0
               logging.info("Bunch start")
             try:
-                if text_mode: # if text_mode, then add 'setence' at the end of 'path' 
+                if text_mode: # if text_mode, then add 'setence' at the end of 'path'
                     modify_file_text_content(path[:-1], sentence)
                 else:
                     modify_file_content(path[:-1])

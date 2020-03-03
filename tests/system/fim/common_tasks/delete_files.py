@@ -13,7 +13,7 @@ import logging
 import os
 import time
 
-def delete_files(input_file_path, n, output_file_path, bunch_size=90, wait_time=1):
+def delete_files(input_file_path, n, output_file_path, bunch_size=90, wait_time=1, rt_delay=0):
     """
     Delete files, given a file with complete list of files where each line
     represents a file path, we will randomly delete n files of them.
@@ -59,6 +59,7 @@ def delete_files(input_file_path, n, output_file_path, bunch_size=90, wait_time=
               count = 0
         try:
             os.remove(path)
+            time.sleep(rt_delay)
         except FileNotFoundError as e:
             logging.error("File " + path + " not found.", exc_info=True)
             raise e
@@ -67,7 +68,7 @@ def delete_files(input_file_path, n, output_file_path, bunch_size=90, wait_time=
             failed_deletions.append(path)
             pass
         except Exception:
-            logging.error("---- Failed when deleting selected files ----", exc_info=True)
+            logging.error("---- Failed when deleting selected files ---", exc_info=True)
             raise Exception("Failed when deleting selected files")
 
     time.sleep(3)
@@ -82,6 +83,7 @@ def delete_files(input_file_path, n, output_file_path, bunch_size=90, wait_time=
               logging.info("Bunch start")
         try:
             os.remove(path)
+            time.sleep(rt_delay)
         except FileNotFoundError:
             logging.error("File " + path + " not found.(2nd attempt)", exc_info=True)
         except PermissionError:
@@ -117,9 +119,11 @@ def main():
                         dest="bunch_size", help="File generation bunch size")
     parser.add_argument("-w", '--wait-time', type=int, default=1,
                         dest="wait_time", help="Time interval between bunch generation (to avoid queue overflow)")
+    parser.add_argument("-d", "--rt-delay", type=float, default=0,
+                        dest="rt_delay", help="Sleep betwen each file generated")
     args = parser.parse_args()
 
-    delete_files(args.input_file, args.n_files, args.output_file, bunch_size=args.bunch_size, wait_time=args.wait_time)
+    delete_files(args.input_file, args.n_files, args.output_file, bunch_size=args.bunch_size, wait_time=args.wait_time, rt_delay=args.rt_delay)
 
 
 if __name__ == '__main__':

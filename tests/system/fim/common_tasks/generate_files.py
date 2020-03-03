@@ -17,8 +17,6 @@ import argparse
 import time
 import logging
 
-rt_delay = 0.01
-
 def generate_random_name(length):
     """ Generates random string of specified length (integer) """
     letters = string.ascii_lowercase
@@ -120,7 +118,7 @@ def associate_files_size(files_paths, files_size_specifications):
     return files_with_associated_size
 
 
-def create_files(files_path, text_mode=False, bunch_size=100, wait_time=1):
+def create_files(files_path, text_mode=False, bunch_size=100, wait_time=1, rt_delay=0):
     """
     Takes the files paths and creates a file of specified size
 
@@ -194,6 +192,10 @@ def main():
                         dest="wait_time", help="Time interval between bunch generation (to avoid queue overflow)")
     parser.add_argument("--ext-list", type=str, default="",
                         dest="ext_list", help="Create files with these extensions")
+    parser.add_argument("-d", "--rt-delay", type=float, default=0,
+                        dest="rt_delay", help="Sleep betwen each file generated")
+
+
     args = parser.parse_args()
     config_file = args.config
     output_file = args.output_list
@@ -213,7 +215,7 @@ def main():
         prefix=prefix, ext_list=ext_list
     )
     associated_files = associate_files_size(files, config["file_size_specifications"])
-    create_files(associated_files, text_mode=text_mode, bunch_size=args.bunch_size, wait_time=args.wait_time)
+    create_files(associated_files, text_mode=text_mode, bunch_size=args.bunch_size, wait_time=args.wait_time, rt_delay=args.rt_delay)
     create_file_summary(files, output_file)
 
 
