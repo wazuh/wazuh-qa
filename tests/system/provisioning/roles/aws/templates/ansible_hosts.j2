@@ -53,6 +53,7 @@ elasticsearch:
 {% endif %}
 {% endfor %}
     vars:
+        ansible_python_interpreter: /usr/bin/python3
         ansible_ssh_user: ec2-user
         ansible_ssh_private_key_file: {{ ssh_key_path_private }}
         ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
@@ -73,6 +74,7 @@ masters:
             filebeat_node_name: node-{{ (groups['elasticsearch'] | length) + 1 }}
 {% endfor %}
     vars:
+        ansible_python_interpreter: /usr/bin/python3
         ansible_ssh_user: ec2-user
         ansible_ssh_private_key_file: {{ ssh_key_path_private }}
         ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
@@ -180,6 +182,7 @@ workers:
 {% endif %}
 {% endfor %}
     vars:
+        ansible_python_interpreter: /usr/bin/python3
         ansible_ssh_user: ec2-user
         ansible_ssh_private_key_file: {{ ssh_key_path_private }}
         ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
@@ -251,6 +254,7 @@ kibana:
 
 {% endfor %}
     vars:
+        ansible_python_interpreter: /usr/bin/python3
         ansible_ssh_user: ec2-user
         ansible_ssh_private_key_file: {{ ssh_key_path_private }}
         ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
