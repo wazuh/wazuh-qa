@@ -2,6 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import uuid
 import os
 import shutil
 import subprocess
@@ -192,19 +193,20 @@ def test_skip_dev(modify_inode_mock, directory, tags_to_apply, get_configuration
     (os.path.join('/', 'nfs-mount-point'), {'skip_nfs'})
 ])
 @patch('wazuh_testing.fim.modify_file_inode')
-def test_skip_nfs(modify_inode_mock, directory, tags_to_apply, get_configuration, configure_environment, configure_nfs, restart_syscheckd,
-                  wait_for_initial_scan):
+def test_skip_nfs(modify_inode_mock, directory, tags_to_apply, get_configuration, configure_environment,
+                  restart_syscheckd, wait_for_initial_scan):
     """Check if syscheckd skips nfs directories when setting 'skip_nfs="yes"'.
 
-    /proc, /sys, /dev and nfs directories are special directories. Unless it is specified with skip_*='no', syscheck
-    will skip these directories. If not, they will be monitored like a normal directory.
+    This test assumes you have a nfs directory mounted on '/nfs-mount-point'. If you do not have one, use the fixture
+    `configure_nfs`.
 
     Parameters
     ----------
     directory : str
         Directory that will be monitored.
     """
+    file = str(uuid.uuid1())
     check_apply_test(tags_to_apply, get_configuration['tags'])
     trigger = get_configuration['metadata']['skip'] == 'no'
 
-    regular_file_cud(directory, wazuh_log_monitor, time_travel=True, min_timeout=3, triggers_event=trigger)
+    regular_file_cud(directory, wazuh_log_monitor, file_list=[file], time_travel=True, min_timeout=3, triggers_event=trigger)
