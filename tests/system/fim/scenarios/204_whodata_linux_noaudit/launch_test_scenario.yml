@@ -18,6 +18,7 @@
         - name: Wait until whodata switch to realtime message.
           become: True
           wait_for:
+            timeout: 60
             path: "{{ linux_ossec_folder_path }}/logs/ossec.log"
             search_regex: 'Who-data engine could not start. Switching who-data to real-time.'
           when:
@@ -26,6 +27,7 @@
         - name: Wait until the first FIM scan end (Linux)
           become: True
           wait_for:
+            timeout: 60
             path: "{{ linux_ossec_folder_path }}/logs/ossec.log"
             search_regex: 'Real-time file integrity monitoring started'
           when:

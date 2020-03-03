@@ -36,7 +36,7 @@
     when:
       - inventory_hostname in groups['linuxagents']
 
-  - name: Create {{ files_fim_testing_linux }} to store outputs in Agents hosts | Linux
+  - name: Create {{ files_fim_testing_linux }} to store test files in Agents hosts | Linux
     file:
       path: "{{ files_fim_testing_linux }}"
       state: directory
@@ -55,14 +55,14 @@
       name: wazuh-agent
       state: stopped
 
-  - name: Copy {{ files_config_agent_linux_ossec_conf_rpm }} to the Agents hosts | rpm | Linux
+  - name: Copy {{ files_config_agent_linux_ossec_conf_rpm }} to the Agents hosts | rpm
     copy:
       src: "./config/{{ files_config_agent_linux_ossec_conf_rpm }}"
       dest: "{{ linux_ossec_folder_path }}/etc/ossec.conf"
     when:
       - ansible_os_family == "RedHat"
 
-  - name: Copy {{ files_config_agent_linux_ossec_conf_deb }} to the Agents hosts | deb | Linux
+  - name: Copy {{ files_config_agent_linux_ossec_conf_deb }} to the Agents hosts | deb
     copy:
       src: "./config/{{ files_config_agent_linux_ossec_conf_deb }}"
       dest: "{{ linux_ossec_folder_path }}/etc/ossec.conf"
@@ -82,6 +82,11 @@
   - name: Create {{ agents_windows_output_path }} to store outputs in agents hosts | Windows
     win_file:
       path: "{{ agents_windows_output_path }}"
+      state: directory
+
+  - name: Create {{ files_fim_testing_windows }} to store test files in agents hosts | Windows
+    win_file:
+      path: "{{ files_fim_testing_windows }}"
       state: directory
 
   - name: Copy {{ files_config_source_path }} to the Agents hosts | Windows
