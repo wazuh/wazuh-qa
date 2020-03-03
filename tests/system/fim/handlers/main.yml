@@ -1,4 +1,3 @@
-
   - name: Stop Wazuh agent Linux
     become: true
     service:
@@ -14,6 +13,22 @@
       state: stopped
     when: 
       - inventory_hostname in groups['windowsagents']
+
+  - name: Stop Wazuh manager
+    become: true
+    service:
+      name: wazuh-manager
+      state: stopped
+    when: 
+      - inventory_hostname in groups['masters']
+
+  - name: Stop Wazuh api
+    become: true
+    service:
+      name: wazuh-api
+      state: stopped
+    when: 
+      - inventory_hostname in groups['masters']
 
   - name: Clear ossec.log Linux Agent
     become: true
@@ -57,6 +72,22 @@
     when: 
       - inventory_hostname in groups['windowsagents']
 
+  - name: Start Wazuh manager
+    become: true
+    service:
+      name: wazuh-manager
+      state: started
+    when: 
+      - inventory_hostname in groups['masters']
+
+  - name: Start Wazuh api
+    become: true
+    service:
+      name: wazuh-api
+      state: started
+    when: 
+      - inventory_hostname in groups['masters']
+
   - name: Restart Wazuh agent Linux
     become: true
     service:
@@ -72,45 +103,12 @@
       state: restarted
     when: 
       - inventory_hostname in groups['windowsagents']
-
-  - name: Stop Wazuh manager
-    become: true
-    service:
-      name: wazuh-manager
-      state: stopped
-    when: 
-      - inventory_hostname in groups['masters']
-
-  - name: Start Wazuh manager
-    become: true
-    service:
-      name: wazuh-manager
-      state: started
-    when: 
-      - inventory_hostname in groups['masters']
   
   - name: Restart Wazuh manager
     become: true
     service:
       name: wazuh-manager
       state: restarted
-    when: 
-      - inventory_hostname in groups['masters']
-
-  - name: Stop Wazuh api
-    become: true
-    service:
-      name: wazuh-api
-      state: stopped
-    when: 
-      - inventory_hostname in groups['masters']
-
-
-  - name: Start Wazuh api
-    become: true
-    service:
-      name: wazuh-api
-      state: started
     when: 
       - inventory_hostname in groups['masters']
   
@@ -121,7 +119,3 @@
       state: restarted
     when: 
       - inventory_hostname in groups['masters']
-
-
-
-  
