@@ -51,6 +51,7 @@ def test_integrity_messages(configure_mitm_environment_analysisd, create_unix_so
     for stage in test_case:
         expected = callback_analysisd_message(stage['output'])
         receiver_sockets[0].send([stage['input']])
-        response = wdb_monitor.start(timeout=15, callback=callback_wazuh_db_integrity).result()
+        response = wdb_monitor.start(timeout=3 * global_parameters.default_timeout,
+                                     callback=callback_wazuh_db_integrity).result()
         assert response == expected, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1, stage['stage'])
         stage['validate'] and validate_analysis_integrity_state(response[2])

@@ -79,40 +79,31 @@ def callback_wazuh_db_message_deleted(item):
         return match.group(1), match.group(2), match.group(3)
 
 
+def get_wazuh_db_message(item, keyword: str = None):
+    data, response = item
+    match = re.match(r'^agent (\d{3,}) \w+ (\w+) (.+)$', data.decode())
+    if match:
+        if keyword is not None and keyword not in match.group(2):
+            return None
+        try:
+            body = json.loads(match.group(3))
+        except json.decoder.JSONDecodeError:
+            body = match.group(3)
+
+        return match.group(1), match.group(2), body
+
+
 def callback_wazuh_db_message(item):
     if callback_wazuhdb_message_added_and_modified(item) or callback_wazuh_db_message_deleted(item):
-        data, response = item
-        match = re.match(r'^agent (\d{3,}) \w+ (\w+) (.+)$', data.decode())
-        if match:
-            try:
-                body = json.loads(match.group(3))
-            except json.decoder.JSONDecodeError:
-                body = match.group(3)
-            return match.group(1), match.group(2), body
+        return get_wazuh_db_message(item)
 
 
 def callback_wazuh_db_integrity(item):
-    data, response = item
-    match = re.match(r'^agent (\d{3,}) \w+ (\w+) (.+)$', data.decode())
-    if match and 'integrity' in match.group(2):
-        try:
-            body = json.loads(match.group(3))
-        except json.decoder.JSONDecodeError:
-            body = match.group(3)
-
-        return match.group(1), match.group(2), body
+    return get_wazuh_db_message(item, keyword='integrity')
 
 
 def callback_wazuh_db_scan(item):
-    data, response = item
-    match = re.match(r'^agent (\d{3,}) \w+ (\w+) (.+)$', data.decode())
-    if match and 'scan' in match.group(2):
-        try:
-            body = json.loads(match.group(3))
-        except json.decoder.JSONDecodeError:
-            body = match.group(3)
-
-        return match.group(1), match.group(2), body
+    return get_wazuh_db_message(item, keyword='scan')
 
 
 def callback_fim_alert(line):
