@@ -132,7 +132,6 @@ def main():
 
     with open(input_file) as flist:
         count = 0
-        logging.info("Bunch start")
         for path in flist:
             time.sleep(args.rt_delay)
             count += 1
@@ -140,7 +139,6 @@ def main():
               logging.info(f"Bunch end, sleeping {args.wait_time} seconds")
               time.sleep(args.wait_time)
               count = 0
-              logging.info("Bunch start")
             try:
                 if text_mode: # if text_mode, then add 'setence' at the end of 'path'
                     modify_file_text_content(path[:-1], sentence)

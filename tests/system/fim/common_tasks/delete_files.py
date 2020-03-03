@@ -12,8 +12,25 @@ import random
 import logging
 import os
 import time
-
-def delete_files(input_file_path, n, output_file_path, bunch_size=90, wait_time=1, rt_delay=0):
+def delete_file(path, attempt=0, sleep_time=5):
+    success = True
+    try:
+        if attempt > 0:
+          time.sleep(sleep_time)
+          logging.info(f"Failed to delete {path}, retry: {attempt}")
+        if attempt > 10:
+          success = False
+        open(path, 'a').close() # (To update mtime_after)
+        os.remove(path)
+    except FileNotFoundError as e:
+        logging.error("File " + path + " not found.", exc_info=True)
+        raise e
+    except PermissionError:
+        logging.error("File " + path + " used by another process.", exc_info=True)
+        success = delete_file(path, attempt+1)
+        pass
+    return success
+def delete_files(input_file_path, n, output_file_path, bunch_size=500, wait_time=0, rt_delay=0):
     """
     Delete files, given a file with complete list of files where each line
     represents a file path, we will randomly delete n files of them.
@@ -40,59 +57,21 @@ def delete_files(input_file_path, n, output_file_path, bunch_size=90, wait_time=
             f.close()  # close f
     except Exception:
         logging.error('Failed when reading the input file: ', exc_info=True)
-
     if n is not None:  # Randomly select n paths from data
         to_delete = random.sample(data, n)
     else:  # Delete all files
         to_delete = data
-
     # Delete the selected files
-    failed_deletions = []
+    deleted_files = []
     count = 0
-    logging.info("Bunch start")
     for path in to_delete:
-        count += 1
-        if count >= bunch_size:
-              logging.info(f"Bunch end, sleeping {wait_time} seconds")
-              time.sleep(wait_time)
-              logging.info("Bunch start")
-              count = 0
-        try:
-            os.remove(path)
-            time.sleep(rt_delay)
-        except FileNotFoundError as e:
-            logging.error("File " + path + " not found.", exc_info=True)
-            raise e
-        except PermissionError:
-            logging.error("File " + path + " used by another process.", exc_info=True)
-            failed_deletions.append(path)
-            pass
-        except Exception:
-            logging.error("---- Failed when deleting selected files ---", exc_info=True)
-            raise Exception("Failed when deleting selected files")
-
-    time.sleep(3)
-    count = 0
-    logging.info("Retrying deletion on failed paths after sleeping for 3 seconds")
-    for path in failed_deletions:
-        count += 1
         if count >= bunch_size:
               logging.info(f"Bunch end, sleeping {wait_time} seconds")
               time.sleep(wait_time)
               count = 0
-              logging.info("Bunch start")
-        try:
-            os.remove(path)
-            time.sleep(rt_delay)
-        except FileNotFoundError:
-            logging.error("File " + path + " not found.(2nd attempt)", exc_info=True)
-        except PermissionError:
-            logging.error("File " + path + " used by another process.(2nd attempt)", exc_info=True)
-            try:
-                os.remove(path)
-            except Exception:
-                logging.error("File " + path + " used by another process.(3rd attempt)", exc_info=True)
-                raise Exception
+        if delete_file(path):
+          deleted_files.append(path)
+          count += 1
 
     # Write the list of the deleted files into output_file_path
     try:
