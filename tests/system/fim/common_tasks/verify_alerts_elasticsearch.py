@@ -87,31 +87,6 @@ def ensure_growing_list(last_num_alerts, query, es, index):
         res = True
     return res, num_alerts
 
-
-def setElasticsearch(ElasticIP):
-    """
-        Sets the Elasticsearch instance that we want to connect.
-        :param str ElasticIP: IP adress of the Elasticsearch node.
-        :return: Object of the Elasticsearch class.
-    """
-    es = Elasticsearch("http://{}:9200".format(ElasticIP))
-    return es
-
-
-def makeQuery(query, Elastic, index_name):
-    """
-        Make a query to a Elasticsearch instance.
-        :param Dict query: Dictionary containing the query we want to make,
-        must follow Query DSL.
-        :param Elasticsearch Elastic: Elasticsearch class instance we want
-        to query.
-        :param str index_name: Index  of the Elasticsearch instance we want
-        to query.
-        :return: Dictionary containing the result of the query.
-    """
-    result = Elastic.search(index=index_name, body=query)
-    return result
-
 def report_failure(start, failure, retry_count, sleep_time):
     """
     Report failures after each retry.
@@ -252,6 +227,8 @@ def verify_es_alerts_whodata(line, query_result, success, failure):
     :return success: An updated value of the argument success.
     :return failure: An updated value of the argument failure.
     """
+    
+    success_bool = False
 
     try:
         if (query_result['hits']['hits'][0]['_source']['syscheck']\
@@ -263,7 +240,7 @@ def verify_es_alerts_whodata(line, query_result, success, failure):
         logging.info("Error when filtering audit fields in alert " + line.rstrip())
         raise e
 
-    return success, failure
+    return success, success_bool, failure
 
 def verify_es_alerts(files_list, max_retry, query, es, index_name, start, sleep_time, scenario, scenario_arg):
     """
@@ -310,13 +287,14 @@ def verify_es_alerts(files_list, max_retry, query, es, index_name, start, sleep_
                 query_result = run_line_query(line, query_scenario, es, index_name)
                 try:
                     if(scenario == "whodata"): # whodata scenarior case
-                        success, failure = \
+                        success, success_bool, failure = \
                             verify_es_alerts_whodata(line, query_result, success,
                                 failure)
                     elif(scenario == "diff"): # report_changes scenarior case
                         success, success_bool, failure = \
                             verify_es_alerts_report_changes(line, query_result,
                                 scenario_arg, success, failure)
+
                     if success_bool:
                         files_list.remove(line)    
                 except Exception as e:
