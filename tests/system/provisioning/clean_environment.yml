@@ -3,6 +3,7 @@
     vars_files:
       - ./vars/elastic_nginx.yml
       - ./vars/wazuh_agent.yml
+      - ../fim/vars/main.yml
     strategy: free
     tasks:
     # Wazuh Agents cleanup
@@ -48,21 +49,33 @@
           when:
             - not check_path.stat.exists
 
+        - name: Use custom variables for Windows package
+          set_fact:
+            windows_agent_url: "{{ wazuh_winagent_config_url }}"
+            windows_agent_filename: "{{ wazuh_winagent_package_name }}"
+          when: wazuh_custom_packages_installation_agent_enabled
+
+        - name: Use default variables for Windows package
+          set_fact:
+            windows_agent_url: "{{ windows_repo }}wazuh-agent-{{ windows_agent_version }}-{{ windows_agent_revision }}.msi"
+            windows_agent_filename: "wazuh-agent-{{ windows_agent_version }}-{{ windows_agent_revision }}.msi"
+          when: not wazuh_custom_packages_installation_agent_enabled
+
         - name: Windows | Check if Wazuh installer is already downloaded
           win_stat:
-            path: "C:\\wazuh-agent-{{ windows_agent_version }}-{{ windows_agent_revision }}.msi"
+            path: "C:\\{{ windows_agent_filename }}"
           register: wazuh_package_downloaded
 
         - name: Windows | Download Wazuh Agent package
           win_get_url:
-            url: "{{ windows_repo }}wazuh-agent-{{ windows_agent_version }}-{{ windows_agent_revision }}.msi"
-            dest: C:\
+            url: "{{ windows_agent_url }}"
+            dest: "C:\\{{ windows_agent_filename }}"
           when:
             - not wazuh_package_downloaded.stat.exists
 
         - name: Uninstall Wazuh Agent
           win_package:
-            path: "C:\\wazuh-agent-{{ windows_agent_version }}-{{ windows_agent_revision }}.msi"
+            path: "C:\\{{ windows_agent_filename }}"
             state: absent
 
         - name: Delete Wazuh installation folder
