@@ -13,7 +13,7 @@
 
         - name: Set variables
           set_fact:
-            syscheck_frequency: 43200
+            syscheck_frequency: 10
             linux_ossec_log_path: "{{ linux_ossec_folder_path }}/logs/ossec.log"
             windows_ossec_log_path: "{{ windows_ossec_folder_path }}\\ossec.log"
           
