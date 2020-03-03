@@ -67,6 +67,7 @@ def delete_files(input_file_path, n, output_file_path, bunch_size=90, wait_time=
             failed_deletions.append(path)
             pass
         except Exception:
+            logging.error("---- Failed when deleting selected files ----", exc_info=True)
             raise Exception("Failed when deleting selected files")
 
     time.sleep(3)
