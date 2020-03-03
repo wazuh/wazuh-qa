@@ -5,3 +5,9 @@
 
 def callback_fim_query(line):
     return line
+
+
+def callback_wazuhdb_response(item):
+    if isinstance(item, tuple):
+        data, response = item
+        return response.decode()
