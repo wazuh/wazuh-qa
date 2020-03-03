@@ -37,6 +37,20 @@ def read_file(file_path):
     return data
 
 def ensure_growing_list(last_num_alerts, query, es, index):
+    """
+    Ensure the growth of the alerts number in 'index'
+
+    :param int last_num_alerts: The last checked number of alerts
+        from the previous run.
+    :param dic query: A query to check the number of Syscheck alerts
+        with a determined event as filter.
+    :param Elasticsearch es: Elasticsearch instance.
+    :param str index: The corresponding Elasticsearch index name to
+        search in.
+    
+    :return bool res: True if the list has grwon, False in other case.
+    :return int num_alerts: The current number of detected alerts.
+    """
     query_result = makeQuery(query, es, index)
     num_alerts = query_result['hits']['total']['value']
 
