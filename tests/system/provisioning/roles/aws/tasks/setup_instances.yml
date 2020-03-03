@@ -5,6 +5,12 @@
       - inventory_hostname in groups['linuxagents']
       - ansible_os_family == "Debian"
 
+  - name: Install python3-apt package on Debian based OS.
+    command: apt install -y python3-apt
+    when:
+      - inventory_hostname in groups['linuxagents']
+      - ansible_os_family == 'Debian"
+
   - name: Configuring Windows Agents
     block:
       - name: Installing Google Chrome
