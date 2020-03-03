@@ -106,7 +106,6 @@
     # Elasticsearch cleanup
 
       - block:
-
         - name: List and delete elasticsearch indexes + stop elasticsearch service
           block:
             - name: List Elasticsearch indexes
@@ -116,13 +115,13 @@
                 url_password: "{{ elastic_password }}"
                 method: GET
                 validate_certs: no
+                return_content: yes
               register: elasticsearch_indexes_get
               delegate_to: "{{ inventory_hostname }}"
 
             - name: Print elasticsearch indexes
               debug:
-                msg: "{{ item.std }}"
-              with_items: elasticsearch_indexes_get.stdout_lines
+                var: elasticsearch_indexes_get.content
 
             - name: Delete Elasticsearch indexes (HTTP)
               uri:
@@ -131,19 +130,23 @@
                 url_password: "{{ elastic_password }}"
                 method: DELETE
                 validate_certs: no
-              register: elasticsearch_indexes_get
+                status_code: 200
+              delegate_to: "{{ inventory_hostname }}"
+
+            - name: List Elasticsearch indexes after deletion
+              uri:
+                url: "{{ elastic_api_protocol }}://{{ inventory_hostname }}:{{ elasticsearch_port }}/_cat/indices/*?v&s=index&pretty"
+                url_username: "{{ elastic_user }}"
+                url_password: "{{ elastic_password }}"
+                method: GET
+                validate_certs: no
+                return_content: yes
+              register: elasticsearch_indexes_delete
               delegate_to: "{{ inventory_hostname }}"
 
             - name: Print elasticsearch indexes after deletion
-              debug: var={{ item }}
-              with_items: elasticsearch_indexes_delete.stdout_lines
-
-            - name: Stop elasticsearch service
-              service:
-                name: "{{ item }}"
-                state: stopped
-              with_items:
-                - elasticsearch
+              debug:
+                var: elasticsearch_indexes_delete.content
 
         when:
           - inventory_hostname in groups['elasticsearch']
