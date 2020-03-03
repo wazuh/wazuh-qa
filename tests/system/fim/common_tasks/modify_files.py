@@ -133,7 +133,7 @@ def main():
     with open(input_file) as flist:
         count = 0
         nbunch = 0
-        for ipath in flist:
+        for path in flist:
             time.sleep(args.rt_delay)
             count += 1
             if count >= args.bunch_size:
