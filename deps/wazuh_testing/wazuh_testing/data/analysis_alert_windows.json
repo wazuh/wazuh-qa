@@ -10,7 +10,6 @@
     "agent",
     "manager",
     "id",
-    "cluster",
     "full_log",
     "syscheck",
     "decoder",
