@@ -309,10 +309,9 @@ def get_agents(client_keys='/var/ossec/etc/client.keys'):
     agent_ids = list()
     with open(client_keys, 'r') as keys:
         for line in keys.readlines():
-            try:
-                agent_ids.append(str(re.match(agent_regex, line).group(1)))
-            except AttributeError:
-                pass
+            agent_info = line.split(" ")
+            if len(agent_info) >= 1 and not agent_info[1].startswith('!'):
+                agent_ids.append(agent_info[0])
 
     for agent_id in agent_ids:
         agent_dict[agent_id.lstrip('0')] = Manager().dict({
@@ -346,7 +345,7 @@ def replace_conf(sync_eps, fim_eps, directory, buffer):
         new_config = re.sub(re.search(sync_eps_regex, new_config).group(1), str(sync_eps), new_config)
         new_config = re.sub(re.search(fim_eps_regex, new_config).group(1), str(fim_eps), new_config)
         new_config = re.sub(re.search(buffer_regex, new_config).group(1), buffer, new_config)
-
+        new_config += "<!-- {0}  -->".format(randrange(1000))
         with open(agent_conf, 'w') as conf:
             conf.write(new_config)
 
