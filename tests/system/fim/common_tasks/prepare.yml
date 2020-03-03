@@ -8,6 +8,9 @@
       - "{{ agents_results_manager_path }}/added"
       - "{{ agents_results_manager_path }}/modified"
       - "{{ agents_results_manager_path }}/deleted"
+      - "{{ agents_results_manager_path }}/added/missing"
+      - "{{ agents_results_manager_path }}/modified/missing"
+      - "{{ agents_results_manager_path }}/deleted/missing"
 
   - name: Stop wazuh-manager service
     service:
@@ -54,7 +57,12 @@
     service:
       name: wazuh-agent
       state: stopped
-
+      
+  - name: Clean logs wazuh-agent
+    become: True
+    shell: "echo '' > {{ linux_ossec_folder_path }}/logs/ossec.log"
+    when: clean_logs      
+  
   - name: Copy {{ files_config_agent_linux_ossec_conf_rpm }} to the Agents hosts | rpm | Linux
     copy:
       src: "./config/{{ files_config_agent_linux_ossec_conf_rpm }}"
@@ -96,6 +104,12 @@
       name: OssecSvc
       start_mode: auto
       state: stopped
+
+  - name: "Clean win logs"
+    win_command: powershell.exe -
+    args:
+      stdin: "Clear-Content 'C:\\Program Files (x86)\\ossec-agent\\ossec.log'"
+    when: clean_logs
 
   - name: Copy {{ files_config_agent_windows_ossec_conf }} to the agents hosts | Windows
     win_copy:
