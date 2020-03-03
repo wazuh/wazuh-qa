@@ -17,6 +17,8 @@ import argparse
 import time
 import logging
 
+rt_delay = 0.01
+
 def generate_random_name(length):
     """ Generates random string of specified length (integer) """
     letters = string.ascii_lowercase
@@ -152,6 +154,7 @@ def create_files(files_path, text_mode=False, bunch_size=100, wait_time=1):
         logging.info("Bunch start")
       with open(key, file_mode) as f:
           count += 1
+          time.sleep(rt_delay)
           if value > 1048576:
               nval = value // 1048576
               for val in range(nval):

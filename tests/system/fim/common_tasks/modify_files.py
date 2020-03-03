@@ -19,6 +19,8 @@ if platform.system() == 'Linux':
     import pwd
     import grp
 
+rt_delay = 0.01
+
 
 if sys.version_info.major < 3:
     print('ERROR: Python 2 is not supported.')
@@ -115,6 +117,8 @@ def main():
         count = 0
         logging.info("Bunch start")
         for path in flist:
+            time.sleep(rt_delay)
+            count += 1
             if count >= args.bunch_size:
               logging.info(f"Bunch end, sleeping {args.wait_time} seconds")
               time.sleep(args.wait_time)
