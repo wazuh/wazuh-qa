@@ -164,21 +164,3 @@
         when:
           - inventory_hostname in groups['elasticsearch']
         become: yes
-
-    # Kibana cleanup
-
-      - block:
-        - name: Check if kibana service exists
-          stat: path=/etc/init.d/kibana
-          register: kibana_service_status
-
-        - name: Stop kibana service
-          service:
-            name: kibana
-            state: stopped
-          when: kibana_service_status.stat.exists
-
-        when:
-          - inventory_hostname in groups['kibana']
-        become: yes
-
