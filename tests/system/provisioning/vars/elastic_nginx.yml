@@ -4,7 +4,7 @@ elastic_version: 7.5.2
 
 ### Elastic API configuration
 
-elastic_api_protocol: https
+elastic_api_protocol: http
 elasticsearch_port: 9200
 
 ### Elastic cluster configuration
