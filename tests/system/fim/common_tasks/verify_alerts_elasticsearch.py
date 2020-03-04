@@ -303,6 +303,9 @@ def verify_es_alerts(files_list, max_retry, query, es, index_name,\
             alerts_growing = True
 
         if alerts_growing:
+            # setting failure counter to 0 at each new retry.
+            failure = 0
+
             for line in files_list[::-1]: # for each line (path) in files_list
 
                 # Get the corresponding query for line
