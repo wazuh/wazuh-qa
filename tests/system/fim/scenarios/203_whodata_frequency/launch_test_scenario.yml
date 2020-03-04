@@ -24,7 +24,8 @@
           - name: Configure syscheck event.
             set_fact:
               event: "added"
-
+              elastic_verification_extra_arguments: "-w -r 10"
+              json_verification_extra_arguments: "-r 10"
 
           - name: Generating files to trigger FIM alerts
             import_tasks: "../../common_tasks/create_files.yml"
@@ -37,6 +38,8 @@
           - name: Configure syscheck event.
             set_fact:
               event: "modified"
+              elastic_verification_extra_arguments: "-w -r 10"
+              json_verification_extra_arguments: "-r 10"
 
           - name: Modifiying files to trigger FIM alerts
             import_tasks: "../../common_tasks/modify_files.yml"
