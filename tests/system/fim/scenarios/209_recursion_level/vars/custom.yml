@@ -1,0 +1,7 @@
+
+files_missing_config_source: "files_configuration_missing.json"
+files_missing_config_linux_destination_path: "/tmp/{{ files_missing_config_source }}"
+files_missing_config_windows_destination_path: "C:\\{{ files_missing_config_source }}"
+agents_fim_missing_testing_path_linux: "{{ files_fim_testing_linux }}/recursion/test/increased/level"
+custom_files_fim_testing_windows: "C\\\\fim_testing"
+agents_fim_missing_testing_path_windows: "{{ custom_files_fim_testing_windows }}\\\\recursion\\\\test\\\\increased\\\\level"
