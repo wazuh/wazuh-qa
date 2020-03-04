@@ -1,19 +1,53 @@
 ---
-  - name: Check if the scan started after the wait | Linux
+  - name: Copy script | Linux
     become: True
-    script: >
-      files/check_scheduled_scan.py -f {{ syscheck_frequency }} 
+    copy:
+      src: files/check_scheduled_scan.py
+      dest: /opt/check_scheduled_scan.py
+    when: 
+      - inventory_hostname in groups['linuxagents']
+  
+  - name: Copy script | Windows
+    win_copy:
+      src: "files/check_scheduled_scan.py"
+      dest: "c:\\check_scheduled_scan.py"
+    when: 
+      - inventory_hostname in groups['windowsagents']
+
+  - name: Check scan | Linux
+    become: True
+    async: "{{ syscheck_frequency }}"
+    poll: 0
+    command: >
+      python3 /opt/check_scheduled_scan.py -f {{ syscheck_frequency }} 
       -l {{ linux_ossec_log_path }} -e {{ expected_scans}}
-    args:
-      executable: python3
+    register: script_status
     when: 
       - inventory_hostname in groups['linuxagents']
 
-  - name: Check if the scan started after the wait | Windows 
-    script: >
-      files/check_scheduled_scan.py -f {{ syscheck_frequency }} 
-      -l '{{ windows_ossec_log_path }}' -e {{ expected_scans}}
+  - name: Check scan | Windows 
+    async: "{{ syscheck_frequency }}"
+    poll: 0
+    win_shell: >
+        python c:\\check_scheduled_scan.py 
+        -f {{ syscheck_frequency }} -l '{{ windows_ossec_log_path }}' 
+        -e {{ expected_scans}}
     args:
-      executable: python
+      executable: powershell.exe 
+    register: script_status
     when: 
       - inventory_hostname in groups['windowsagents']
+
+  - debug:
+      msg: "{{ hostvars| json_query('groups')  }}"   
+      
+  # - name: Wait for asynchronous tasks
+  #   async_status:
+  #     jid: "{{ item.ansible_job_id }}"
+  #   register: job_result
+  #   with_items:
+  #     - "{{ hostvars[groups['linuxagents'][*]] Linux_script }}"
+  #     - "{{ Windows_script }}"
+  #   until: 
+  #     - job_result.results[0].finished and job_result.results[1].finished
+  #   retries: 100

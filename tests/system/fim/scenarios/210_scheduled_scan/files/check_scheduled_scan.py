@@ -4,6 +4,7 @@ import sys
 import argparse
 import logging
 from datetime import datetime
+from time import sleep
 
 
 def get_timemstamp_from_line(line):
