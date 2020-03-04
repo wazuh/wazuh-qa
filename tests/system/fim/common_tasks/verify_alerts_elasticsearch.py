@@ -247,11 +247,15 @@ def verify_es_alerts_whodata(line, query_result, success, failure):
            query_result['hits']['hits'][0]['_source']['syscheck']\
                ['audit']['user']['id']:
             success +=1
+            success_bool = True
+        else:
+            failure += 1
     except IndexError:
         failure += 1
-    except Exception as e:
+    except Exception:
+        failure += 1
         logging.info("Error when filtering audit fields in alert " + line.rstrip())
-        raise e
+        
 
     return success, success_bool, failure
 
