@@ -1,0 +1,42 @@
+---
+- block:
+  - name: Run script generate_files.py on agents | Linux
+    script: "generate_files.py -c {{ files_config_linux_destination_path }} -o {{ files_generated_output_path }} {{ create_script_extra_params }}"
+    args:
+      executable: "python3"
+      chdir: "{{ agents_linux_output_path }}"
+
+  - name: Copy list of created files from Agents to Ansible Controller host | Linux
+    fetch:
+      src: "{{ agents_linux_output_path }}/{{ files_generated_output_path }}"
+      dest: "agents_outputs/{{ event }}/{{ files_generated_output_path }}-{{ inventory_hostname }}"
+      flat: yes
+
+  become: yes
+  when:
+    - inventory_hostname in groups['linuxagents']
+
+
+- block:
+  - name: Run script generate_files.py on agents | Windows
+    script: "generate_files.py -c {{ files_config_windows_destination_path }} -o {{ files_generated_output_path }} {{ create_script_extra_params }}"
+    args:
+      executable: "python"
+      chdir: "{{ agents_windows_output_path }}"
+
+  - name: Copy list of created files from Windows Agents to Ansible Controller host | Windows
+    fetch:
+      src: "{{ agents_windows_output_path }}/{{ files_generated_output_path }}"
+      dest: "agents_outputs/{{ event }}/{{ files_generated_output_path }}-{{ inventory_hostname }}"
+      flat: yes
+
+  when:
+  - inventory_hostname in groups['windowsagents']
+
+- name: Copy the output files from Ansible Controller to the Managers
+  become: true
+  synchronize:
+    src: "agents_outputs/added/"
+    dest: "{{ agents_results_manager_path }}/{{ event }}/"
+  when:
+    - inventory_hostname in groups['masters']
