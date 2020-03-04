@@ -212,7 +212,8 @@ def verify_es_alerts_report_changes(line, query_result, diff_statement, success,
             failure += 1
     except IndexError:
         failure += 1
-    except Exception as e:
+    except Exception:
+        failure += 1
         logging.info("Error when filtering report_changes fields in alert " + line.rstrip())
         raise e
 
