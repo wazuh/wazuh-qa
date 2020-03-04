@@ -204,9 +204,8 @@ def verify_es_alerts_report_changes(line, query_result, diff_statement, success,
     success_bool = False
     try:
         if query_result['hits']['total']['value'] == 1 and \
-           ('diff' in query_result['hits']['hits'][0]['_source']['syscheck']) and \
-           (diff_statement in \
-                query_result['hits']['hits'][0]['_source']['syscheck']['diff']):
+           query_result['hits']['hits'][0]['_source']['syscheck']\
+               ['diff']['diff_statement']:
             success += 1
             success_bool = True
         else:
