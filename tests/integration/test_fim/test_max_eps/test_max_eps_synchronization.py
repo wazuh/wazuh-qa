@@ -76,7 +76,7 @@ def test_max_eps_on_start(get_configuration, create_files, configure_environment
                             error_message="Didn't receive integrity_check_global").result()
 
     n_results = max_eps * 5
-    result = wazuh_log_monitor.start(timeout=(n_results/max_eps)*6,
+    result = wazuh_log_monitor.start(timeout=120,
                                      accum_results=n_results,
                                      callback=callback_integrity_message,
                                      error_message=f'Received less results than expected ({n_results})').result()
