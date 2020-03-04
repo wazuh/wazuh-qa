@@ -15,4 +15,4 @@ wazuh_winagent_config_url: https://s3-us-west-1.amazonaws.com/packages-dev.wazuh
 wazuh_winagent_package_name: wazuh-agent-3.12.0-0.3319fimreworksqlite.msi
 
 wazuh_winagent_config:
-  md5: 4e844257435c5af70be69e3ad9a8040f
+  md5: 2421fa49448b32e028581fe5bf40ea50
