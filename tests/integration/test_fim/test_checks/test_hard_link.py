@@ -46,20 +46,6 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope='function')
-def clean_directories(request):
-
-    directories = getattr(request.module, 'test_directories')
-    for folder in directories:
-        for the_file in os.listdir(folder):
-            file_path = os.path.join(folder, the_file)
-            try:
-                if os.path.isfile(file_path):
-                    os.unlink(file_path)
-            except Exception as e:
-                print(e)
-
-
 # tests
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Hard links.")
