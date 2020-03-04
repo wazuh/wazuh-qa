@@ -5,7 +5,7 @@ environment_type: devel
 
 # Number of instances
 
-n_wazuh_workers: 1 # A Master Manager will always be deployed
+n_wazuh_workers: 0 # A Master Manager will always be deployed
 
 # Configuration
 
