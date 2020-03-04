@@ -130,7 +130,7 @@ def select_scenario(scenarios_dict):
     if len(scenario_key) == 1: # if only 1 scenario is enabled, then pass
         return scenario_key[0]
     else: # Check if more than 1 scenario is valid, then fail.
-        logging.error("More than 1 scenario is enabled! Please select only 1")
+        logging.error("More than 1 scenario or none is selected! Please select only 1")
 
 def build_query(query, scenario):
     """
@@ -200,7 +200,6 @@ def verify_es_alerts_report_changes(line, query_result, diff_statement, success,
     :return success: An updated value of the argument success.
     :return failure: An updated value of the argument failure.
     """
-
     success_bool = False
     try:
         if query_result['hits']['total']['value'] == 1 and \
@@ -215,7 +214,6 @@ def verify_es_alerts_report_changes(line, query_result, diff_statement, success,
     except Exception:
         failure += 1
         logging.info("Error when filtering report_changes fields in alert " + line.rstrip())
-        raise e
 
     return success, success_bool, failure
 
@@ -233,7 +231,6 @@ def verify_es_alerts_whodata(line, query_result, success, failure):
     :return success: An updated value of the argument success.
     :return failure: An updated value of the argument failure.
     """
-    
     success_bool = False
 
     try:
@@ -260,7 +257,7 @@ def verify_es_alerts_whodata(line, query_result, success, failure):
     return success, success_bool, failure
 
 def verify_es_alerts(files_list, max_retry, query, es, index_name,\
-     start, sleep_time, scenario, scenario_arg):
+     start, sleep_time, scenario = "", scenario_arg = ""):
     """
     Verify Elasticsearch alerts for a specefic scenario.
 
@@ -283,10 +280,10 @@ def verify_es_alerts(files_list, max_retry, query, es, index_name,\
     retry_count = 0
     alerts_num = 0
     success = 0
-    failure = 0
+    
     query_scenario = copy.deepcopy(query) #  a copy of query
-    query_scenario = build_query(query_scenario, scenario)
 
+    query_scenario = build_query(query_scenario, scenario) 
     logging.info("Elasticsearch alerts verification started")
     
     while retry_count <= max_retry:
@@ -307,9 +304,9 @@ def verify_es_alerts(files_list, max_retry, query, es, index_name,\
             failure = 0
 
             for line in files_list[::-1]: # for each line (path) in files_list
-
                 # Get the corresponding query for line
                 query_result = run_line_query(line, query_scenario, es, index_name)
+
                 try:
                     if(scenario == "whodata"): # whodata scenarior case
                         success, success_bool, failure = \
@@ -392,13 +389,18 @@ if __name__ == "__main__":
     index_name = "wazuh-alerts-3.x*"
     start = time()
 
+
+
     # a dictionary for each scenario key name and its argument
-    scenario_arg = {
+    scenario_arg_dic = {
         'whodata': args.whodata_query,
         'diff': args.diff_string
     }
+
     # select the scenario
-    scenario = select_scenario(scenario_arg)
+    scenario = select_scenario(scenario_arg_dic)
+    scenario_arg = scenario_arg_dic[scenario]
+    print("The selected scenario is {}, and scenario arg is {}".format(scenario,scenario_arg))
 
     # read the list of paths from a file into a list
     files_list = read_file(args.files)
@@ -407,7 +409,7 @@ if __name__ == "__main__":
     success, failure, failure_list = \
         verify_es_alerts(files_list, args.max_retry, query,
                          es, index_name, start, args.sleep_time,
-                         scenario, scenario_arg[scenario])
+                         scenario, scenario_arg)
 
     elapsed = start - time()
     with open(args.output, 'w+') as output:
