@@ -94,6 +94,8 @@ def test_move_file(source_folder, target_folder, subdir, tags_to_apply,
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     mode = get_configuration['metadata']['fim_mode']
 
+    if mode == 'whodata' and subdir[-1] == '/':
+        pytest.xfail('Xfailing due to whodata threshold.')
     # Move folder to target directory
     os.rename(os.path.join(source_folder, subdir), os.path.join(target_folder, subdir))
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
