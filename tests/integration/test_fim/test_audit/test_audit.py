@@ -243,7 +243,10 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
 
     time_before_restart = get_audit_creation_time()
     control_service('restart')
-    check_daemon_status(timeout=30, raise_timeout=False)
+    try:
+        check_daemon_status(timeout=30)
+    except TimeoutError:
+        pass
     time_after_restart = get_audit_creation_time()
 
     if should_restart:
