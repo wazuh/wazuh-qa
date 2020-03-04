@@ -22,13 +22,12 @@ def delete_file(path, attempt=0, sleep_time=5.0):
           logging.info(f"Failed to delete {path}, retry: {attempt}")
         if attempt > 10:
           return False
-        open(path, 'a').close() # (To update mtime_after)
         os.remove(path)
     except FileNotFoundError as e:
-        logging.error("File " + path + " not found.", exc_info=True)
+        logging.error("File " + path + " not found.", exc_info=False)
         raise e
     except PermissionError:
-        logging.info("File " + path + " used by another process.", exc_info=True)
+        logging.info("File " + path + " used by another process.", exc_info=False)
         success = delete_file(path, attempt+1)
         pass
     return success
@@ -100,9 +99,9 @@ def main():
                         help="Number of files to be randomly selected and deleted")
     parser.add_argument("-o", "--output-list", type=str, required=True, dest='output_file',
                         help="File containing the list of the deleted files, one per line")
-    parser.add_argument("-b", '--bunch-size', type=int, default=500,
+    parser.add_argument("-b", '--bunch-size', type=int, default=90,
                         dest="bunch_size", help="File generation bunch size")
-    parser.add_argument("-w", '--wait-time', type=int, default=0,
+    parser.add_argument("-w", '--wait-time', type=int, default=1,
                         dest="wait_time", help="Time interval between bunch generation (to avoid queue overflow)")
     parser.add_argument("-d", "--rt-delay", type=float, default=0,
                         dest="rt_delay", help="Sleep betwen each file generated")

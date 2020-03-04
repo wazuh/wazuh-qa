@@ -186,9 +186,9 @@ def main():
                              " (default is False)")
     parser.add_argument("-p", '--prefix', type=str, default="",
                         dest="file_prefix", help="Add a common prefix to all filenames")
-    parser.add_argument("-b", '--bunch-size', type=int, default=500,
+    parser.add_argument("-b", '--bunch-size', type=int, default=90,
                         dest="bunch_size", help="File generation bunch size")
-    parser.add_argument("-w", '--wait-time', type=int, default=0,
+    parser.add_argument("-w", '--wait-time', type=int, default=1,
                         dest="wait_time", help="Time interval between bunch generation (to avoid queue overflow)")
     parser.add_argument("--ext-list", type=str, default="",
                         dest="ext_list", help="Create files with these extensions")
