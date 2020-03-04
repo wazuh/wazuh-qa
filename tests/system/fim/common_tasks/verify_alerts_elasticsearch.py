@@ -181,6 +181,8 @@ def run_line_query(line, query, es, index_name):
 
     return query_result
 
+    return success, failure
+
 def verify_es_alerts_report_changes(line, query_result, diff_statement, success, failure):
     """
     Verify alerts for report_changes query case.
