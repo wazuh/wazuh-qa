@@ -100,6 +100,8 @@ def log_modified_files(files_path, logfile):
 def main():
     log_filename = 'modify_files.log'
     logging.basicConfig(
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        datefmt="%Y-%m-%d %H:%M:%S",
         filename=log_filename,
         level=logging.DEBUG,
     )
@@ -117,6 +119,8 @@ def main():
                         dest="bunch_size", help="File generation bunch size")
     parser.add_argument("-w", '--wait-time', type=int, default=1,
                         dest="wait_time", help="Time interval between bunch generation (to avoid queue overflow)")
+    parser.add_argument("-d", "--rt-delay", type=float, default=0,
+                        dest="rt_delay", help="Sleep betwen each file generated")
     args = parser.parse_args()
 
     input_file = args.input_file
@@ -128,12 +132,17 @@ def main():
 
     with open(input_file) as flist:
         count = 0
+        nbunch = 0
         for path in flist:
+            time.sleep(args.rt_delay)
+            count += 1
             if count >= args.bunch_size:
+              logging.info(f"Bunch end: {nbunch} sleeping {args.wait_time} seconds")
               time.sleep(args.wait_time)
               count = 0
+              nbunch += 1
             try:
-                if text_mode: # if text_mode, then add 'setence' at the end of 'path' 
+                if text_mode: # if text_mode, then add 'setence' at the end of 'path'
                     modify_file_text_content(path[:-1], sentence)
                 else:
                     modify_file_content(path[:-1])
