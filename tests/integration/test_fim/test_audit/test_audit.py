@@ -22,7 +22,7 @@ from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_added_rule,
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.services import control_service, check_daemon_status
 
 # Marks
 
@@ -243,8 +243,7 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
 
     time_before_restart = get_audit_creation_time()
     control_service('restart')
-    time.sleep(10)
-
+    check_daemon_status(timeout=30, raise_timeout=False)
     time_after_restart = get_audit_creation_time()
 
     if should_restart:

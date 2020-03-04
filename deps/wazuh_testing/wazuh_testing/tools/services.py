@@ -147,7 +147,7 @@ def get_process(search_name):
     return None
 
 
-def check_daemon_status(daemon=None, running=True, timeout=10):
+def check_daemon_status(daemon=None, running=True, timeout=10, raise_timeout=True):
     """Check Wazuh daemon status.
 
     Parameters
@@ -184,5 +184,8 @@ def check_daemon_status(daemon=None, running=True, timeout=10):
 
         time.sleep(timeout/3)
     else:
-        raise TimeoutError(f"{'wazuh-service' if daemon is None else daemon} "
-                           f"{'is not' if running is True else 'is'} running")
+        if raise_timeout:
+            raise TimeoutError(f"{'wazuh-service' if daemon is None else daemon} "
+                               f"{'is not' if running is True else 'is'} running")
+        else:
+            return
