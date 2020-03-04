@@ -237,8 +237,15 @@ def verify_es_alerts_whodata(line, query_result, success, failure):
     success_bool = False
 
     try:
-        if (query_result['hits']['hits'][0]['_source']['syscheck']\
-                        ['audit']['process']['name'] in query_result):
+        if query_result['hits']['total']['value'] == 1 and \
+           query_result['hits']['hits'][0]['_source']['syscheck']\
+               ['audit']['process']['name'] and \
+           query_result['hits']['hits'][0]['_source']['syscheck']\
+               ['audit']['process']['id'] and \
+           query_result['hits']['hits'][0]['_source']['syscheck']\
+               ['audit']['user']['name'] and \
+           query_result['hits']['hits'][0]['_source']['syscheck']\
+               ['audit']['user']['id']:
             success +=1
     except IndexError:
         failure += 1
