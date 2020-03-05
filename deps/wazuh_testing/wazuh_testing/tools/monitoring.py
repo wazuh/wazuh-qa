@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 # Unix only modules
+
 try:
     import grp
     import pwd
@@ -16,7 +17,7 @@ import socketserver
 import sys
 import threading
 import time
-from copy import deepcopy
+from copy import copy
 from struct import pack, unpack
 
 from wazuh_testing import logger
@@ -109,6 +110,19 @@ class FileTailer:
         elif encoding is None:
             self.encoding = 'utf-8'
 
+    def __copy__(self):
+        new_tailer = FileTailer(self.file_path)
+        for attr, value in vars(self).items():
+            if attr == 'file_path':
+                continue
+            elif attr != '_queue':
+                setattr(new_tailer, attr, value)
+            else:
+                new_queue = Queue()
+                new_queue.queue = copy(getattr(self, attr).queue)
+                setattr(new_tailer, attr, new_queue)
+        return new_tailer
+
     @property
     def queue(self):
         return self._queue
@@ -120,24 +134,26 @@ class FileTailer:
         self.run()
 
     def run(self):
+        self.event = threading.Event()
         self.thread = threading.Thread(target=self._tail_forever)
         self.thread.start()
 
     def shutdown(self):
         self.event.set()
+        self.thread.join()
 
     def _tail_forever(self):
         """Wait for new lines to be appended to the file."""
         with open(self.file_path, encoding=self.encoding, errors='backslashreplace') as f:
             f.seek(self._position)
             while not self.event.is_set():
-                self._position = f.tell()
                 line = f.readline()
                 if not line:
                     f.seek(self._position)
                     time.sleep(self.time_step)
                 else:
                     self.add_item(line)
+                self._position = f.tell()
 
 
 class FileMonitor:
@@ -151,15 +167,18 @@ class FileMonitor:
               error_message='', encoding=None):
         """Start the file monitoring until the stop method is called."""
         try:
-            self.tailer.encoding = encoding
-            self.tailer.start()
+            tailer = self.tailer if update_position else copy(self.tailer)
 
-            monitor = QueueMonitor(self.tailer.queue, time_step=self._time_step)
+            if encoding is not None:
+                tailer.encoding = encoding
+            tailer.start()
+
+            monitor = QueueMonitor(tailer.queue, time_step=self._time_step)
             self._result = monitor.start(timeout=timeout, callback=callback, accum_results=accum_results,
                                          update_position=update_position, timeout_extra=timeout_extra,
                                          error_message=error_message).result()
         finally:
-            self.tailer.shutdown()
+            tailer.shutdown()
 
         return self
 
@@ -510,7 +529,7 @@ class Queue(queue.Queue):
             Any item in the given position.
         """
         aux_queue = queue.Queue()
-        aux_queue.queue = deepcopy(self.queue)
+        aux_queue.queue = copy(self.queue)
         for _ in range(position):
             aux_queue.get(*args, **kwargs)
         return aux_queue.get(*args, **kwargs)

@@ -9,7 +9,7 @@ import yaml
 from wazuh_testing import global_parameters
 from wazuh_testing.analysis import callback_fim_alert, callback_analysisd_message, validate_analysis_alert, \
     callback_wazuh_db_message
-from wazuh_testing.tools import WAZUH_LOGS_PATH, WAZUH_PATH, LOG_FILE_PATH
+from wazuh_testing.tools import WAZUH_LOGS_PATH, WAZUH_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 
 # marks
@@ -31,7 +31,6 @@ monitored_sockets_params = [(wdb_path, 'TCP')]
 receiver_sockets_params = [(analysis_path, 'UDP')]
 analysis_monitor = None
 wdb_monitor = None
-wazuh_log_monitor = FileMonitor(alerts_json)
 
 
 # tests

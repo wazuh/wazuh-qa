@@ -15,6 +15,7 @@ from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, detect_initial_s
                                generate_params, callback_detect_integrity_state, check_time_travel)
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import set_section_wazuh_conf, load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import restart_wazuh_with_new_conf
 from wazuh_testing.tools.time import TimeMachine
@@ -106,6 +107,7 @@ def test_skip_proc(get_configuration, configure_environment, restart_syscheckd, 
                 new_ossec_conf = set_section_wazuh_conf(conf.get('section'),
                                                         conf.get('elements'))
         restart_wazuh_with_new_conf(new_ossec_conf)
+        truncate_file(LOG_FILE_PATH)
         proc_monitor = FileMonitor(LOG_FILE_PATH)
         detect_initial_scan(proc_monitor)
 
