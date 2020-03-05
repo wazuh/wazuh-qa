@@ -1,5 +1,6 @@
 ---
-  - hosts: all
+  - hosts:
+      - 'all:!elasticsearch'
     vars_files:
       - ./vars/elastic_nginx.yml
       - ./vars/wazuh_agent.yml
@@ -92,25 +93,15 @@
         become: yes
 
     # Elasticsearch cleanup
-
+  - hosts:
+      - 'elasticsearch'
+    vars_files:
+      - ./vars/elastic_nginx.yml
+      # - ./vars/wazuh_agent.yml
+      # - ../fim/vars/main.yml
+    strategy: free
+    tasks:
       - block:
-        - name: Accept local queries
-          iptables:
-            chain: INPUT
-            protocol: tcp
-            source: "{{ item }}"
-            jump: ACCEPT
-          with_items:
-            - "{{ inventory_hostname }}"
-            - 127.0.0.1
-
-        - name: Stop accepting external queries
-          iptables:
-            chain: INPUT
-            protocol: tcp
-            destination_port: "9200"
-            jump: DROP
-
         - name: Stop Kibana
           service:
             name: kibana
@@ -160,11 +151,6 @@
           service:
             name: elasticsearch
             state: stopped
-
-        - name: iptables flush filter
-          iptables:
-            chain: "INPUT"
-            flush: yes
 
         when:
           - inventory_hostname in groups['elasticsearch']
