@@ -14,10 +14,16 @@
             name: wazuh-agent
             state: absent
 
-        - name: Delete /var/ossec
+        - name: Delete /var/ossec and testing folders
           file:
-            path: /var/ossec
+            path: "{{ item }}"
             state: absent
+          with_items:
+            - /var/ossec
+            - "{{ agents_linux_output_path }}"
+            - "{{ files_fim_testing_linux }}"
+            - "/tmp/{{ files_config_source_path }}"
+
         when:
           - inventory_hostname in groups['linuxagents']
         become: yes
@@ -62,19 +68,21 @@
             path: "C:\\{{ wazuh_winagent_package_name }}"
             state: absent
 
-        - name: Delete Wazuh installation folder
+        - name: Delete Wazuh installation folder and test folders
           win_file:
-            path: "{{ wazuh_agent_win_path }}"
+            path: "{{ item }}"
             state: absent
+          with_items:
+            - "{{ wazuh_agent_win_path }}"
+            - "{{ agents_windows_output_path }}"
+            - "{{ files_fim_testing_windows }}"
+            - "C:\\{{ files_config_source_path }}
 
         when:
           - inventory_hostname in groups['windowsagents']
 
-
     # Wazuh Managers cleanup
-
       - block:
-
         - name: Uninstall wazuh-manager service
           package:
             name:
@@ -83,20 +91,25 @@
               - filebeat
             state: absent
 
-        - name: Ensure /var/ossec is deleted
+        - name: Ensure /var/ossec and agents output is deleted
           file:
-            path: /var/ossec
+            path: "{{ item }}"
             state: absent
+          with_items:
+            - /var/ossec
+            - "{{ agents_results_manager_path }}"
 
         when:
           - inventory_hostname in groups['masters'] or inventory_hostname in groups['workers']
         become: yes
+
 
     # Elasticsearch cleanup
   - hosts:
       - 'elasticsearch'
     vars_files:
       - ./vars/elastic_nginx.yml
+      - ../fim/vars/main.yml
     strategy: free
     tasks:
       - block:
@@ -149,6 +162,11 @@
           service:
             name: elasticsearch
             state: stopped
+
+        - name: Delete agents output
+          file:
+            path: "{{ agents_results_elastic_path }}"
+            state: absent
 
         when:
           - inventory_hostname in groups['elasticsearch']
