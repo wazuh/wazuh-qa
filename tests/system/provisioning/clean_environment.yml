@@ -76,7 +76,7 @@
             - "{{ wazuh_agent_win_path }}"
             - "{{ agents_windows_output_path }}"
             - "{{ files_fim_testing_windows }}"
-            - "C:\\{{ files_config_source_path }}
+            - "C:\\{{ files_config_source_path }}"
 
         when:
           - inventory_hostname in groups['windowsagents']
