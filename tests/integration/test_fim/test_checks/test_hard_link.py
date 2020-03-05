@@ -46,20 +46,6 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope='function')
-def clean_directories(request):
-
-    directories = getattr(request.module, 'test_directories')
-    for folder in directories:
-        for the_file in os.listdir(folder):
-            file_path = os.path.join(folder, the_file)
-            try:
-                if os.path.isfile(file_path):
-                    os.unlink(file_path)
-            except Exception as e:
-                print(e)
-
-
 # tests
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Hard links.")
@@ -114,8 +100,8 @@ def test_hard_link(path_file, file_name, path_link, link_name, num_links, get_co
         # Validate 'Hard_links' field
         if path_file == path_link:
             expected_hard_links = set(expected_hard_links)
-            assert (set(event['data']['hard_links']).intersection(expected_hard_links) == set()), f"The event's hard_links "
-            f"field was '{event['data']['hard_links']}' when was expected to be '{expected_hard_links}'"
+            assert (set(event['data']['hard_links']).intersection(expected_hard_links) == set()), f"The event's "
+            f"'hard_links' field was '{event['data']['hard_links']}' when was expected to be '{expected_hard_links}'"
 
     is_scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     file_list = [file_name]
@@ -144,9 +130,11 @@ def test_hard_link(path_file, file_name, path_link, link_name, num_links, get_co
     modify_file_content(path_file, file_name, new_content="modified testregularfile")
     check_time_travel(is_scheduled, monitor=wazuh_log_monitor)
 
-    # Only events for the regular file are expected
+    # Expect an event for the regular file or one of the hard links if the links are in the monitored dir and mode
+    # is scheduled. Expect an event for the regular file only otherwise.
     event_checker.file_list = file_list
-    detect_and_validate_event(expected_file=file_name,
+    expected_file = [file_name] + hardlinks_list if path_file == path_link and is_scheduled else file_name
+    detect_and_validate_event(expected_file=expected_file,
                               mode=get_configuration['metadata']['fim_mode'],
                               expected_hard_links=hardlinks_list)
 
