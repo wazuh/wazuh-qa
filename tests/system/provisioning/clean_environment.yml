@@ -97,8 +97,6 @@
       - 'elasticsearch'
     vars_files:
       - ./vars/elastic_nginx.yml
-      # - ./vars/wazuh_agent.yml
-      # - ../fim/vars/main.yml
     strategy: free
     tasks:
       - block:
