@@ -777,7 +777,7 @@ def callback_realtime_added_directory(line):
 
 
 def callback_configuration_error(line):
-    match = re.match(r'.*CRITICAL: \(\d+\): Configuration error at', line)
+    match = re.match(r'.* \(\d+\): Configuration error at', line)
     if match:
         return True
     return None
