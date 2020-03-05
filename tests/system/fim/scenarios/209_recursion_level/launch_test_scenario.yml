@@ -25,10 +25,6 @@
         when:
           - inventory_hostname in groups['windowsagents']
 
-      - name: Pause for 10 seconds
-        pause:
-          seconds: 10
-
       - name: Configure syscheck event
         set_fact:
           event: "added"
@@ -39,13 +35,13 @@
       - name: Generating missing files
         import_tasks: "actions/create_missing_files.yml"
 
-      - name: Verify there are no alerts for missing files
-        become: true
-        import_tasks: "actions/verify_missing_files.yml"
-
       - name: Verify generated alerts
         become: true
         import_tasks: "../../common_tasks/verify_alerts.yml"
+
+      - name: Verify there are no alerts for missing files
+        become: true
+        import_tasks: "actions/verify_missing_files.yml"
 
       - name: Configure syscheck event
         set_fact:
@@ -57,13 +53,13 @@
       - name: Modify missing files
         import_tasks: "actions/modify_missing_files.yml"
 
-      - name: Verify there are no modified alerts for missing files
-        become: true
-        import_tasks: "actions/verify_missing_files.yml"
-
       - name: Verify generated alerts
         become: true
         import_tasks: "../../common_tasks/verify_alerts.yml"
+
+      - name: Verify there are no modified alerts for missing files
+        become: true
+        import_tasks: "actions/verify_missing_files.yml"
 
       - name: Configure syscheck event
         set_fact:
@@ -75,10 +71,10 @@
       - name: Delete missing files
         import_tasks: "actions/delete_missing_files.yml"
 
-      - name: Verify there are no alerts for missing files
-        become: true
-        import_tasks: "actions/verify_missing_files.yml"
-
       - name: Verify generated alerts
         become: true
         import_tasks: "../../common_tasks/verify_alerts.yml"
+
+      - name: Verify there are no alerts for missing files
+        become: true
+        import_tasks: "actions/verify_missing_files.yml"
