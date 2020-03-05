@@ -94,47 +94,77 @@
     # Elasticsearch cleanup
 
       - block:
-        - name: List and delete elasticsearch indexes + stop elasticsearch service
-          block:
-            - name: List Elasticsearch indexes
-              uri:
-                url: "{{ elastic_api_protocol }}://{{ inventory_hostname }}:{{ elasticsearch_port }}/_cat/indices/*?v&s=index&pretty"
-                url_username: "{{ elastic_user }}"
-                url_password: "{{ elastic_password }}"
-                method: GET
-                validate_certs: no
-                return_content: yes
-              register: elasticsearch_indexes_get
-              delegate_to: "{{ inventory_hostname }}"
+        - name: Accept local queries
+          iptables:
+            chain: INPUT
+            protocol: tcp
+            source: "{{ item }}"
+            jump: ACCEPT
+          with_items:
+            - "{{ inventory_hostname }}"
+            - 127.0.0.1
 
-            - name: Print elasticsearch indexes
-              debug:
-                var: elasticsearch_indexes_get.content
+        - name: Stop accepting external queries
+          iptables:
+            chain: INPUT
+            protocol: tcp
+            destination_port: "9200"
+            jump: DROP
 
-            - name: Delete Elasticsearch indexes (HTTP)
-              uri:
-                url: "{{ elastic_api_protocol }}://{{ inventory_hostname }}:{{ elasticsearch_port }}/*"
-                url_username: "{{ elastic_user }}"
-                url_password: "{{ elastic_password }}"
-                method: DELETE
-                validate_certs: no
-                status_code: 200
-              delegate_to: "{{ inventory_hostname }}"
+        - name: Stop Kibana
+          service:
+            name: kibana
+            state: stopped
 
-            - name: List Elasticsearch indexes after deletion
-              uri:
-                url: "{{ elastic_api_protocol }}://{{ inventory_hostname }}:{{ elasticsearch_port }}/_cat/indices/*?v&s=index&pretty"
-                url_username: "{{ elastic_user }}"
-                url_password: "{{ elastic_password }}"
-                method: GET
-                validate_certs: no
-                return_content: yes
-              register: elasticsearch_indexes_delete
-              delegate_to: "{{ inventory_hostname }}"
+        - name: List Elasticsearch indexes
+          uri:
+            url: "{{ elastic_api_protocol }}://{{ inventory_hostname }}:{{ elasticsearch_port }}/_cat/indices/*?v&s=index&pretty"
+            url_username: "{{ elastic_user }}"
+            url_password: "{{ elastic_password }}"
+            method: GET
+            validate_certs: no
+            return_content: yes
+          register: elasticsearch_indexes_get
+          delegate_to: "{{ inventory_hostname }}"
 
-            - name: Print elasticsearch indexes after deletion
-              debug:
-                var: elasticsearch_indexes_delete.content
+        - name: Print elasticsearch indexes
+          debug:
+            var: elasticsearch_indexes_get.content
+
+        - name: Delete Elasticsearch indexes (HTTP)
+          uri:
+            url: "{{ elastic_api_protocol }}://{{ inventory_hostname }}:{{ elasticsearch_port }}/*"
+            url_username: "{{ elastic_user }}"
+            url_password: "{{ elastic_password }}"
+            method: DELETE
+            validate_certs: no
+            status_code: 200
+          delegate_to: "{{ inventory_hostname }}"
+
+        - name: List Elasticsearch indexes after deletion
+          uri:
+            url: "{{ elastic_api_protocol }}://{{ inventory_hostname }}:{{ elasticsearch_port }}/_cat/indices/*?v&s=index&pretty"
+            url_username: "{{ elastic_user }}"
+            url_password: "{{ elastic_password }}"
+            method: GET
+            validate_certs: no
+            return_content: yes
+          register: elasticsearch_indexes_delete
+          delegate_to: "{{ inventory_hostname }}"
+
+        - name: Print elasticsearch indexes after deletion
+          debug:
+            var: elasticsearch_indexes_delete.content
+
+        - name: Stop Elasticsearch
+          service:
+            name: elasticsearch
+            state: stopped
+
+        - name: iptables flush filter
+          iptables:
+            chain: "INPUT"
+            flush: yes
 
         when:
           - inventory_hostname in groups['elasticsearch']
