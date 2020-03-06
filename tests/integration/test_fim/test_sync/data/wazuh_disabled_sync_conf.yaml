@@ -1,0 +1,16 @@
+- tags:
+  - sync_interval
+  apply_to_modules:
+  - test_sync_interval
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - synchronization:
+      elements:
+      - enabled:
+          value: 'no'
+  - directories:
+      value: "/testdir1"
+      attributes:
+      - check_all: 'yes'
