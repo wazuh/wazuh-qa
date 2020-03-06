@@ -143,6 +143,7 @@ def build_query(query, scenario):
     """
 
     scenario_queryterm = {
+        'no_style': 'syscheck.path',
         'whodata': 'syscheck.path',
         'diff': 'syscheck.path'
     }
@@ -182,6 +183,37 @@ def run_line_query(line, query, es, index_name):
     return query_result
 
     return success, failure
+
+def verify_no_style_alerts(line, query_result, success, failure):
+    """
+    Verify alerts for no-style alerts query case.
+
+    :param str line: An entry of the original query output which refers to
+                     a Syscheck entry.
+    :param dic query_result: Represents the query result, which contains the complete
+                             list of Syscheck's fields.
+    :param int success: A counter variable used to count the the successful queries.
+    :param int failure: A  counter variable used to count the failed queries checks.
+
+    :return success: An updated value of the argument success.
+    :return failure: An updated value of the argument failure.
+    """
+    success_bool = False
+
+    try:
+        if query_result['hits']['total']['value'] == 1:
+            success +=1
+            success_bool = True
+        else:
+            failure += 1
+    except IndexError:
+        failure += 1
+    except Exception:
+        failure += 1
+        logging.info("Error when filtering fields in alert " + line.rstrip())
+
+
+    return success, success_bool, failure
 
 def verify_es_alerts_report_changes(line, query_result, diff_statement, success, failure):
     """
@@ -256,7 +288,7 @@ def verify_es_alerts_whodata(line, query_result, success, failure):
 
     return success, success_bool, failure
 
-def verify_es_alerts(files_list, max_retry, query, es, index_name,\
+def verify_es_alerts(files_list, max_retry, query, no_alert_style, es, index_name,\
      start, sleep_time, scenario = "", scenario_arg = ""):
     """
     Verify Elasticsearch alerts for a specefic scenario.
@@ -282,8 +314,8 @@ def verify_es_alerts(files_list, max_retry, query, es, index_name,\
     success = 0
     
     query_scenario = copy.deepcopy(query) #  a copy of query
-
     query_scenario = build_query(query_scenario, scenario) 
+    
     logging.info("Elasticsearch alerts verification started")
     
     while retry_count <= max_retry:
@@ -308,6 +340,10 @@ def verify_es_alerts(files_list, max_retry, query, es, index_name,\
                 query_result = run_line_query(line, query_scenario, es, index_name)
 
                 try:
+                    if(scenario == "no_style"):
+                        success, success_bool, failure = \
+                            verify_no_style_alerts(line, query_result, success,
+                                failure)
                     if(scenario == "whodata"): # whodata scenarior case
                         success, success_bool, failure = \
                             verify_es_alerts_whodata(line, query_result, success,
@@ -372,6 +408,10 @@ if __name__ == "__main__":
     )
     parser.add_argument("-d", "--diff", type=str, required=False,
         dest='diff_string',help="When syscheck:report_changes enabled, represents the diff text")
+    parser.add_argument(
+        "-n", "--no-style", required=False, dest='no_alert_style',
+        action="store_true", help="No Alerts Style", default=False
+    )
 
     args = parser.parse_args()
 
@@ -397,19 +437,22 @@ if __name__ == "__main__":
         'diff': args.diff_string
     }
 
-    # select the scenario
-    scenario = select_scenario(scenario_arg_dic)
-    scenario_arg = scenario_arg_dic[scenario]
-    print("The selected scenario is {}, and scenario arg is {}".format(scenario,scenario_arg))
+    scenario = "no_style"
+    scenario_arg = "" 
+
+    if not args.no_alert_style:
+        # select the scenario
+        scenario = select_scenario(scenario_arg_dic)
+        scenario_arg = scenario_arg_dic[scenario]
+        print("The selected scenario is {}, and scenario arg is {}".format(scenario,scenario_arg))
 
     # read the list of paths from a file into a list
     files_list = read_file(args.files)
 
     # alerts verification
     success, failure, failure_list = \
-        verify_es_alerts(files_list, args.max_retry, query,
-                         es, index_name, start, args.sleep_time,
-                         scenario, scenario_arg)
+        verify_es_alerts(files_list, args.max_retry, query, args.no_alert_style,
+                         es, index_name, start, args.sleep_time,scenario, scenario_arg)
 
     elapsed = start - time()
     with open(args.output, 'w+') as output:
@@ -425,4 +468,3 @@ if __name__ == "__main__":
             success, elapsed
         )
     )
-
