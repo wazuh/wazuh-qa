@@ -279,19 +279,18 @@ def expand_placeholders(mutable_obj, placeholders=None):
     """
     placeholders = {} if placeholders is None else placeholders
     if isinstance(mutable_obj, list):
-        for criterion, placeholder in placeholders.items():
-            for index, value in enumerate(mutable_obj):
-                if value == criterion:
-                    mutable_obj[index] = placeholder
-                elif isinstance(value, (dict, list)):
-                    expand_placeholders(mutable_obj[index], placeholders=placeholders)
+        for index, value in enumerate(mutable_obj):
+            if isinstance(value, (dict, list)):
+                expand_placeholders(mutable_obj[index], placeholders=placeholders)
+            elif value in placeholders:
+                mutable_obj[index] = placeholders[value]
+
     elif isinstance(mutable_obj, dict):
-        for criterion, placeholder in placeholders.items():
-            for key, value in mutable_obj.items():
-                if criterion == value:
-                    mutable_obj[key] = placeholder
-                elif isinstance(value, (dict, list)):
-                    expand_placeholders(mutable_obj[key], placeholders=placeholders)
+        for key, value in mutable_obj.items():
+            if isinstance(value, (dict, list)):
+                expand_placeholders(mutable_obj[key], placeholders=placeholders)
+            elif value in placeholders:
+                mutable_obj[key] = placeholders[value]
 
     return mutable_obj
 
