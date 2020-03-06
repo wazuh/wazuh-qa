@@ -2,6 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
+import time
 
 from wazuh_testing.fim import REGULAR, check_time_travel, validate_event, create_file, modify_file, delete_file, \
     callback_detect_event
@@ -31,6 +32,7 @@ def multiple_dirs_test(dir_list=None, file=None, scheduled=None, log_monitor=Non
         for directory in dir_list:
             args = [REGULAR, directory, file] if func.__name__ == 'create_file' else [directory, file]
             func(*args, **kwargs)
+            time.sleep(0.01)
 
         check_time_travel(time_travel=scheduled)
         events = log_monitor.start(timeout=timeout,
@@ -38,6 +40,7 @@ def multiple_dirs_test(dir_list=None, file=None, scheduled=None, log_monitor=Non
                                    accum_results=len(dir_list),
                                    error_message='Did not receive expected "Sending FIM event: ..." '
                                                  'event').result()
+        time.sleep(1)
 
         for ev in events:
             validate_event(ev)

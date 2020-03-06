@@ -60,7 +60,6 @@ p, m = generate_params(extra_params=conf_params)
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
-
 # fixtures
 
 @pytest.fixture(scope='module', params=configurations)
