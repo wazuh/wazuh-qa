@@ -46,7 +46,7 @@ def test_sync_disabled(get_configuration, configure_environment, restart_syschec
     Verify that synchronization is disabled when enabled is set to no in the configuration.
     """
     # Check if the test should be skipped
-    check_apply_test({'sync_interval'}, get_configuration['tags'])
+    check_apply_test({'sync_disabled'}, get_configuration['tags'])
 
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,

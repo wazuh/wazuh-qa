@@ -1,7 +1,7 @@
 - tags:
-  - sync_interval
+  - sync_disabled
   apply_to_modules:
-  - test_sync_interval
+  - test_sync_disabled
   section: syscheck
   elements:
   - disabled:
