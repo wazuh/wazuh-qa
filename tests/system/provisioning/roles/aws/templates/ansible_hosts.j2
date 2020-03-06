@@ -292,6 +292,9 @@ linuxagents:
 {% if 'RHEL' in hostvars[groups['linux-agents'][loop.index-1]]['agent_name'] %}
             ansible_python_interpreter: /usr/bin/python3
 {% endif %}
+{% if 'Ubuntu' in hostvars[groups['linux-agents'][loop.index-1]]['agent_name'] %}
+            ansible_python_interpreter: /usr/bin/python3
+{% endif %}
 {% endfor %}
     vars:
         ansible_ssh_user: ec2-user
