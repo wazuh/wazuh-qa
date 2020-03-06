@@ -6,16 +6,14 @@ import os
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_synchronization, detect_initial_scan, generate_params
+from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_synchronization, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
-from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.time import TimeMachine, time_to_timedelta
 
 # Marks
 
-pytestmark = [pytest.mark.tier(level=2)]
+pytestmark = [pytest.mark.tier(level=1)]
 
 # variables
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')

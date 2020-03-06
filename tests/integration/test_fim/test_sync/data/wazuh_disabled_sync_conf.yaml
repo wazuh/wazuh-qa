@@ -14,3 +14,4 @@
       value: "/testdir1"
       attributes:
       - check_all: 'yes'
+      - FIM_MODE
