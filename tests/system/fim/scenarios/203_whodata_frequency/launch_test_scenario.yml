@@ -9,9 +9,8 @@
     tasks:
       - name: Set extra arguments for scripts.
         set_fact:
-          create_script_extra_params: "-b 10 -w 1"
-          delete_script_extra_params: "-b 10 -w 1"
-          modify_script_extra_params: "-b 10 -w 1"
+          create_script_extra_params: "-b 8 -w 1"
+          modify_script_extra_params: "-b 8 -w 1"
 
       - block:
         - name: Install audit
