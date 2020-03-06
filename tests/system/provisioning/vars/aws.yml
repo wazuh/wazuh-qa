@@ -20,7 +20,7 @@ sources_api_branch: v3.11.3
 
 n_agents_ubuntu18: 1
 n_agents_ubuntu16: 1
-n_agents_ubuntu14: 1
+n_agents_ubuntu14: 0
 n_agents_centos7: 1
 n_agents_rhel8: 1
 n_agents_amazonlinux2: 1
