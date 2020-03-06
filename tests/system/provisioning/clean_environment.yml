@@ -11,7 +11,10 @@
       - block:
         - name: Uninstall wazuh-agent
           package:
-            name: wazuh-agent
+            name:
+              - wazuh-agent
+              - audit
+              - audit-libs
             state: absent
 
         - name: Delete /var/ossec and testing folders
@@ -89,6 +92,8 @@
               - wazuh-manager
               - wazuh-api
               - filebeat
+              - audit
+              - audit-libs
             state: absent
 
         - name: Ensure /var/ossec and agents output is deleted
