@@ -13,10 +13,19 @@
 
   - name: Configuring Windows Agents
     block:
-      - name: install Chocolatey
-        win_chocolatey:
-          name: chocolatey
+      - name: Download hotfix for Windows2012
+        win_get_url: https://download.microsoft.com/download/B/2/4/B24FB08A-DEA8-4B4C-8EE4-B9F0FB180200/Windows8.1-KB3035131-x64.msu
+        dest: c:\temp\KB3035131.msu
+        when:
+          - "'Windows2012' in {{ hostvars[inventory_hostname]['agent_name'] }}"
+
+      - name: Installing required hotfix on Windows2012
+        win_hotfix:
+          hotfix_kb: KB3035131
+          source: c:\temp\KB3035131
           state: present
+        when:
+          - "'Windows2012' in {{ hostvars[inventory_hostname]['agent_name'] }}"
 
       - name: Installing Google Chrome
         win_chocolatey:
@@ -33,6 +42,5 @@
           pinned: yes
           state: present
           ignore_checksums: yes
-    become: yes
     when:
       - ansible_os_family == "Windows"
