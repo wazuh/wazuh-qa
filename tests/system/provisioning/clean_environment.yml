@@ -85,7 +85,18 @@
 
     # Wazuh Managers cleanup
       - block:
-        - name: Uninstall wazuh-manager service
+        - name: Detect if filebeat is installed
+          stat:
+            path: /usr/share/filebeat/bin/filebeat
+          register: filebeat_bin
+
+        - name: Stop filebeat service
+          service:
+            name: filebeat
+            state: stopped
+          when: filebeat_bin.stat.exists
+
+        - name: Remove Wazuh and related services
           package:
             name:
               - wazuh-manager
