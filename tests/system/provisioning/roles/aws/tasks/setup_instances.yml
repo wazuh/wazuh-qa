@@ -33,5 +33,6 @@
           pinned: yes
           state: present
           ignore_checksums: yes
+    become: yes
     when:
       - ansible_os_family == "Windows"
