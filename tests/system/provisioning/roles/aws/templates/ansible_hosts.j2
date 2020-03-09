@@ -351,7 +351,8 @@ windowsagents:
         ansible_winrm_server_cert_validation: ignore
         wazuh_winagent_config_url: {{ wazuh_winagent_config_url }}
         wazuh_winagent_package_name: {{ wazuh_winagent_package_name }}
-        wazuh_winagent_config.check_md5: False
+        wazuh_winagent_config:
+            check_md5: False
         wazuh_managers:
             - address: {{ groups['masters'][0] }}
               protocol: tcp
