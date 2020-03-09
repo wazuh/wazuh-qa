@@ -20,5 +20,12 @@
           pinned: yes
           state: present
           ignore_checksums: yes
+      - name: Installing Python on Windows hosts
+          win_chocolatey:
+            name: python
+            version: 3.8.2
+            pinned: yes
+            state: present
+            ignore_checksums: yes
     when:
       - ansible_os_family == "Windows"
