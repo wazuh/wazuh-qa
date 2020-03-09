@@ -412,6 +412,10 @@ if __name__ == "__main__":
         "-n", "--no-style", required=False, dest='no_alert_style',
         action="store_true", help="No Alerts Style", default=False
     )
+    parser.add_argument(
+        "-tg", "--tag", type=str, required=False, dest='tag_query', nargs='+',
+        help="Enable tag queries for the indicated tags", default=None
+    )
 
     args = parser.parse_args()
 
@@ -425,6 +429,15 @@ if __name__ == "__main__":
             }
         }
     }
+
+    if args.tag_query is not None:
+        logging.info(
+            "Setting tag query"
+        )
+        query["query"]["bool"]["filter"].append(
+            {"terms": {"syscheck.tags": args.tag_query}}
+        )
+
     es = setElasticsearch(args.ip)
     index_name = "wazuh-alerts-3.x*"
     start = time()
