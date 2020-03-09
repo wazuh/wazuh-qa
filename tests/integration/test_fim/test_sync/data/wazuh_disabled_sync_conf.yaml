@@ -11,7 +11,6 @@
       - enabled:
           value: 'no'
   - directories:
-      value: "/testdir1"
+      value: TEST_DIRECTORIES
       attributes:
-      - check_all: 'yes'
       - FIM_MODE

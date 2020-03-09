@@ -24,7 +24,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-p, m = generate_params(modes=['scheduled'])
+p, m = generate_params(extra_params={"TEST_DIRECTORIES": test_directories[0]})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
