@@ -1,0 +1,95 @@
+---
+  - hosts: all
+    vars_files:
+      - ../../vars/main.yml
+
+    handlers:
+      - import_tasks: ../../handlers/main.yml
+
+    tasks:
+      - block:
+        - name: Launching prepare tasks
+          import_tasks: "../../common_tasks/prepare.yml"
+
+        - name: Set variables
+          set_fact:
+            syscheck_frequency: 10800
+            linux_ossec_log_path: "{{ linux_ossec_folder_path }}/logs/ossec.log"
+            windows_ossec_log_path: "{{ windows_ossec_folder_path }}\\ossec.log"
+          
+        - block:
+          - name: Configure syscheck event.
+            set_fact:
+              event: "added"
+              expected_scans: 1
+            changed_when: True
+            notify:
+              - Stop Wazuh agent Linux
+              - Stop Wazuh agent Windows
+              - Clear ossec.log Linux Agent
+              - Clear ossec.log Windows Agent
+              - Start Wazuh agent Linux
+              - Start Wazuh agent Windows
+  
+          - meta: flush_handlers
+
+          - name: Wait until the first FIM scan end (Linux)
+            become: True
+            wait_for:
+              path: "{{ linux_ossec_folder_path }}/logs/ossec.log"
+              search_regex: 'File integrity monitoring scan ended.'
+            when:
+              - inventory_hostname in groups['linuxagents']
+
+          - name: Wait until the first FIM scan end (Windows)
+            win_wait_for:
+              path: 'C:\\Program Files (x86)\\ossec-agent\\ossec.log'
+              regex: 'File integrity monitoring scan ended.'
+            when:
+              - inventory_hostname in groups['windowsagents']
+
+          - name: Generating files to trigger FIM alerts
+            import_tasks: "../../common_tasks/create_files.yml"
+
+          - name: Wait for scheduled scan
+            import_tasks: "tasks/wait_scheduled_scan.yml"
+
+          - name: Verify generated alerts
+            become: true
+            import_tasks: "../../common_tasks/verify_alerts.yml"
+          any_errors_fatal: true
+
+        - block:
+          - name: Configure syscheck event.
+            set_fact:
+              event: "modified"
+              expected_scans: 2
+
+          - name: Modifiying files to trigger FIM alerts
+            import_tasks: "../../common_tasks/modify_files.yml"
+          
+          - name: Wait for scheduled scan
+            import_tasks: "tasks/wait_scheduled_scan.yml"
+
+          - name: Verify generated alerts
+            become: true
+            import_tasks: "../../common_tasks/verify_alerts.yml"
+          any_errors_fatal: true
+
+        - block:
+          - name: Configure syscheck event.
+            set_fact:
+              event: "deleted"
+              expected_scans: 3
+
+          - name: Deleting files to trigger FIM alerts
+            import_tasks: "../../common_tasks/delete_files.yml"
+
+          - name: Wait for scheduled scan
+            import_tasks: "tasks/wait_scheduled_scan.yml"
+
+          - name: Verify generated alerts
+            become: true
+            import_tasks: "../../common_tasks/verify_alerts.yml"
+          any_errors_fatal: true
+
