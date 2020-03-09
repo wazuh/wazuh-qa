@@ -13,6 +13,11 @@
 
   - name: Configuring Windows Agents
     block:
+      - name: install Chocolatey
+        win_chocolatey:
+          name: chocolatey
+          state: present
+
       - name: Installing Google Chrome
         win_chocolatey:
           name: googlechrome
@@ -20,6 +25,7 @@
           pinned: yes
           state: present
           ignore_checksums: yes
+
       - name: Installing Python on Windows hosts
         win_chocolatey:
           name: python
