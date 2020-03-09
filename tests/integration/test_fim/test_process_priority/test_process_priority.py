@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import sys
 
 import pytest
 
@@ -20,6 +21,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 force_restart_after_restoring = True
 test_directories = []
+priority_delta = -20 if sys.platform == 'sunos5' else 0  # Psutil library returns incorrect priority in SunOS
 
 # configurations
 
@@ -50,4 +52,5 @@ def test_process_priority(get_configuration, configure_environment, restart_sysc
     syscheckd_process = get_process(process_name)
 
     assert syscheckd_process is not None, f'Process {process_name} not found'
-    assert syscheckd_process.nice() == priority, f'Process {process_name} has not updated its priority.'
+    assert (syscheckd_process.nice() + priority_delta) == priority, \
+        f'Process {process_name} has not updated its priority.'
