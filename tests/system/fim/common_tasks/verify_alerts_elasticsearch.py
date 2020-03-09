@@ -132,31 +132,6 @@ def select_scenario(scenarios_dict):
     else: # Check if more than 1 scenario is valid, then fail.
         logging.error("More than 1 scenario or none is selected! Please select only 1")
 
-def build_query(query, scenario):
-    """
-    Build or form the query depending on 'scenario'
-
-    :param dic query: A dictionary which represents the query to run on es.
-    :param str scenario: The scenario key to be tested
-
-    :return dic query: query after appending the corresponding term to it.
-    """
-
-    scenario_queryterm = {
-        'no_style': 'syscheck.path',
-        'whodata': 'syscheck.path',
-        'diff': 'syscheck.path'
-    }
-    if scenario in scenario_queryterm:
-        term = scenario_queryterm[scenario]
-        query["query"]["bool"]["filter"].append(
-            {"term": {term : ''}}
-        )
-    else:
-        logging.error("The selected scenario is not a valid one")
-
-    return query
-
 def run_line_query(line, query, es, index_name):
     """
     Run query for line on es's index_name
@@ -171,7 +146,6 @@ def run_line_query(line, query, es, index_name):
     :return dic query_result: Represents the query result, which contains the complete
                              list of Syscheck's fields.
     """
-
     query['query']['bool']['filter'][1]['term']['syscheck.path'] =\
          line.rstrip()
     try:
@@ -184,7 +158,7 @@ def run_line_query(line, query, es, index_name):
 
     return success, failure
 
-def verify_no_style_alerts(line, query_result, success, failure):
+def verify_general_alerts(line, query_result, success, failure):
     """
     Verify alerts for no-style alerts query case.
 
@@ -212,40 +186,6 @@ def verify_no_style_alerts(line, query_result, success, failure):
         failure += 1
         logging.info("Error when filtering fields in alert " + line.rstrip())
 
-
-    return success, success_bool, failure
-
-def verify_es_alerts_report_changes(line, query_result, diff_statement, success, failure):
-    """
-    Verify alerts for report_changes query case.
-
-    :param str line: An entry of the original query output which refers to
-                     a Syscheck entry.
-    :param dic query_result: Represents the query result, which contains the complete
-                             list of Syscheck's fields.
-    :param diff_statmente: In case of 'report_changes' scenario, diff_statement
-                           represents the text added to a file to cause the expected
-                           alert.
-    :param int success: A counter variable used to count the the successful queries.
-    :param int failure: A  counter variable used to count the failed queries checks.
-
-    :return success: An updated value of the argument success.
-    :return failure: An updated value of the argument failure.
-    """
-    success_bool = False
-    try:
-        if query_result['hits']['total']['value'] == 1 and \
-           query_result['hits']['hits'][0]['_source']['syscheck']\
-               ['diff']['diff_statement']:
-            success += 1
-            success_bool = True
-        else:
-            failure += 1
-    except IndexError:
-        failure += 1
-    except Exception:
-        failure += 1
-        logging.info("Error when filtering report_changes fields in alert " + line.rstrip())
 
     return success, success_bool, failure
 
@@ -288,6 +228,40 @@ def verify_es_alerts_whodata(line, query_result, success, failure):
 
     return success, success_bool, failure
 
+def verify_es_alerts_report_changes(line, query_result, diff_statement, success, failure):
+    """
+    Verify alerts for report_changes query case.
+
+    :param str line: An entry of the original query output which refers to
+                     a Syscheck entry.
+    :param dic query_result: Represents the query result, which contains the complete
+                             list of Syscheck's fields.
+    :param diff_statmente: In case of 'report_changes' scenario, diff_statement
+                           represents the text added to a file to cause the expected
+                           alert.
+    :param int success: A counter variable used to count the the successful queries.
+    :param int failure: A  counter variable used to count the failed queries checks.
+
+    :return success: An updated value of the argument success.
+    :return failure: An updated value of the argument failure.
+    """
+    success_bool = False
+    try:
+        if query_result['hits']['total']['value'] == 1 and \
+           query_result['hits']['hits'][0]['_source']['syscheck']\
+               ['diff']['diff_statement']:
+            success += 1
+            success_bool = True
+        else:
+            failure += 1
+    except IndexError:
+        failure += 1
+    except Exception:
+        failure += 1
+        logging.info("Error when filtering report_changes fields in alert " + line.rstrip())
+
+    return success, success_bool, failure
+
 def verify_es_alerts(files_list, max_retry, query, no_alert_style, es, index_name,\
      start, sleep_time, scenario = "", scenario_arg = ""):
     """
@@ -312,10 +286,7 @@ def verify_es_alerts(files_list, max_retry, query, no_alert_style, es, index_nam
     retry_count = 0
     alerts_num = 0
     success = 0
-    
-    query_scenario = copy.deepcopy(query) #  a copy of query
-    query_scenario = build_query(query_scenario, scenario) 
-    
+        
     logging.info("Elasticsearch alerts verification started")
     
     while retry_count <= max_retry:
@@ -337,12 +308,12 @@ def verify_es_alerts(files_list, max_retry, query, no_alert_style, es, index_nam
 
             for line in files_list[::-1]: # for each line (path) in files_list
                 # Get the corresponding query for line
-                query_result = run_line_query(line, query_scenario, es, index_name)
+                query_result = run_line_query(line, query, es, index_name)
 
                 try:
-                    if(scenario == "no_style"):
+                    if(scenario == "general"):
                         success, success_bool, failure = \
-                            verify_no_style_alerts(line, query_result, success,
+                            verify_general_alerts(line, query_result, success,
                                 failure)
                     if(scenario == "whodata"): # whodata scenarior case
                         success, success_bool, failure = \
@@ -352,6 +323,7 @@ def verify_es_alerts(files_list, max_retry, query, no_alert_style, es, index_nam
                         success, success_bool, failure = \
                             verify_es_alerts_report_changes(line, query_result,
                                 scenario_arg, success, failure)
+
 
                     if success_bool: # In case of a success alert verification, then remove line.
                         files_list.remove(line)    
@@ -424,7 +396,8 @@ if __name__ == "__main__":
         "query": {
             "bool": {
                 "filter": [
-                    {"term": {"syscheck.event": args.alert}}
+                    {"term": {"syscheck.event": args.alert}},
+                    {"term": {"syscheck.path": ""}}
                 ]
             }
         }
@@ -450,7 +423,7 @@ if __name__ == "__main__":
         'diff': args.diff_string
     }
 
-    scenario = "no_style"
+    scenario = "general"
     scenario_arg = "" 
 
     if not args.no_alert_style:
