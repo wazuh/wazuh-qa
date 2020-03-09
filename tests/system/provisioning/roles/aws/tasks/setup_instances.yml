@@ -14,8 +14,9 @@
   - name: Configuring Windows Agents
     block:
       - name: Download hotfix for Windows2012
-        win_get_url: https://download.microsoft.com/download/B/2/4/B24FB08A-DEA8-4B4C-8EE4-B9F0FB180200/Windows8.1-KB3035131-x64.msu
-        dest: c:\temp\KB3035131.msu
+        win_get_url:
+          url: https://download.microsoft.com/download/B/2/4/B24FB08A-DEA8-4B4C-8EE4-B9F0FB180200/Windows8.1-KB3035131-x64.msu
+          dest: c:\temp\KB3035131.msu
         when:
           - "'Windows2012' in {{ hostvars[inventory_hostname]['agent_name'] }}"
 
