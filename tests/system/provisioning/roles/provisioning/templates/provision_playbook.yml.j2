@@ -44,6 +44,8 @@
     become_user: root
 
   - hosts: windowsagents
+    vars_files:
+      ./vars/wazuh_agent.yml
     strategy: free
     roles:
       - {{ wazuh_ansible_repository_path }}/roles/wazuh/ansible-wazuh-agent

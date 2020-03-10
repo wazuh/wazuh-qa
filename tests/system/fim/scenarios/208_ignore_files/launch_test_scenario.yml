@@ -1,0 +1,78 @@
+---
+  - hosts: all
+    vars_files:
+      - ../../vars/main.yml
+
+    handlers:
+      - import_tasks: ../../handlers/main.yml
+
+    tasks:
+      - name: Launching prepare tasks
+        import_tasks: "../../common_tasks/prepare.yml"
+
+      - name: Pause for 10 seconds
+        pause:
+          seconds: 10
+
+      - name: Configure syscheck event | added
+        set_fact:
+          event: "added"
+
+      - name: Set monitored extension | File creation
+        set_fact:
+          create_script_extra_params: "--ext-list 'pdf doc ppt xls'"
+
+      - name: Generating files to trigger FIM alerts
+        import_tasks: "../../common_tasks/create_files.yml"
+
+      - name: Set ignored extension | File creation
+        set_fact:
+          create_script_extra_params: "--ext-list 'mp3 avi mpg'"
+
+      - name: Generating ignored files
+        import_tasks: "actions/create_ignored_files.yml"
+
+      - name: Verify there are no alerts for ignored files
+        become: true
+        import_tasks: "actions/verify_ignored_files.yml"
+
+      - name: Verify generated alerts
+        become: true
+        import_tasks: "../../common_tasks/verify_alerts.yml"
+
+      - name: Configure syscheck event | modified
+        set_fact:
+          event: "modified"
+
+      - name: Modifiying files to trigger FIM alerts
+        import_tasks: "../../common_tasks/modify_files.yml"
+
+      - name: Modify ignored files
+        import_tasks: "actions/modify_ignored_files.yml"
+
+      - name: Verify there are no modified alerts for ignored files
+        become: true
+        import_tasks: "actions/verify_ignored_files.yml"
+
+      - name: Verify generated alerts
+        become: true
+        import_tasks: "../../common_tasks/verify_alerts.yml"
+
+      - name: Configure syscheck event | deleted
+        set_fact:
+          event: "deleted"
+
+      - name: Deleting files to trigger FIM alerts
+        import_tasks: "../../common_tasks/delete_files.yml"
+
+      - name: Delete ignored files
+        import_tasks: "actions/delete_ignored_files.yml"
+
+      - name: Verify there are no alerts for ignored files
+        become: true
+        import_tasks: "actions/verify_ignored_files.yml"
+
+      - name: Verify generated alerts
+        become: true
+        import_tasks: "../../common_tasks/verify_alerts.yml"
+

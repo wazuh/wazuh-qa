@@ -338,6 +338,7 @@ def verify_es_alerts(files_list, max_retry, query, no_alert_style, es, index_nam
     return success, failure, files_list
 
 if __name__ == "__main__":
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(message)s",
@@ -346,6 +347,12 @@ if __name__ == "__main__":
             logging.StreamHandler()
         ]
     )
+
+    logging.getLogger("elasticsearch").setLevel(logging.ERROR)
+    logging.getLogger("urllib3").setLevel(logging.ERROR)
+    logging.getLogger("requests").setLevel(logging.ERROR)
+    logging.getLogger("requests.urllib3").setLevel(logging.ERROR)
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-i", "--input-list", type=str, required=True, dest='files',
@@ -383,6 +390,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-n", "--no-style", required=False, dest='no_alert_style',
         action="store_true", help="No Alerts Style", default=False
+
     )
     parser.add_argument(
         "-tg", "--tag", type=str, required=False, dest='tag_query', nargs='+',
