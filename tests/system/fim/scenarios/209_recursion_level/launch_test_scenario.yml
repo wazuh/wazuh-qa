@@ -1,0 +1,80 @@
+---
+  - hosts: all
+    vars_files:
+      - ../../vars/main.yml
+      - vars/custom.yml
+
+    handlers:
+      - import_tasks: ../../handlers/main.yml
+
+    tasks:
+      - name: Launching prepare tasks
+        import_tasks: "../../common_tasks/prepare.yml"
+
+      - name: Copy {{ files_missing_config_source }} to the Agents hosts | Linux
+        template:
+            src: "files/files_configuration_missing_linux.json.j2"
+            dest: "{{ files_missing_config_linux_destination_path }}"
+        when:
+          - inventory_hostname in groups['linuxagents']
+
+      - name: Copy {{ files_missing_config_source }} to the Agents hosts | Windows
+        template:
+            src: "files/files_configuration_missing_windows.json.j2"
+            dest: "{{ files_missing_config_windows_destination_path }}"
+        when:
+          - inventory_hostname in groups['windowsagents']
+
+      - name: Configure syscheck event
+        set_fact:
+          event: "added"
+
+      - name: Generating files to trigger FIM alerts
+        import_tasks: "../../common_tasks/create_files.yml"
+
+      - name: Generating missing files
+        import_tasks: "actions/create_missing_files.yml"
+
+      - name: Verify generated alerts
+        become: true
+        import_tasks: "../../common_tasks/verify_alerts.yml"
+
+      - name: Verify there are no alerts for missing files
+        become: true
+        import_tasks: "actions/verify_missing_files.yml"
+
+      - name: Configure syscheck event
+        set_fact:
+          event: "modified"
+
+      - name: Modifiying files to trigger FIM alerts
+        import_tasks: "../../common_tasks/modify_files.yml"
+
+      - name: Modify missing files
+        import_tasks: "actions/modify_missing_files.yml"
+
+      - name: Verify generated alerts
+        become: true
+        import_tasks: "../../common_tasks/verify_alerts.yml"
+
+      - name: Verify there are no modified alerts for missing files
+        become: true
+        import_tasks: "actions/verify_missing_files.yml"
+
+      - name: Configure syscheck event
+        set_fact:
+          event: "deleted"
+
+      - name: Deleting files to trigger FIM alerts
+        import_tasks: "../../common_tasks/delete_files.yml"
+
+      - name: Delete missing files
+        import_tasks: "actions/delete_missing_files.yml"
+
+      - name: Verify generated alerts
+        become: true
+        import_tasks: "../../common_tasks/verify_alerts.yml"
+
+      - name: Verify there are no alerts for missing files
+        become: true
+        import_tasks: "actions/verify_missing_files.yml"

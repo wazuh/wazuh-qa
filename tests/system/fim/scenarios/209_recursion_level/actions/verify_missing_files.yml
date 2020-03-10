@@ -1,0 +1,18 @@
+---
+  - name: Find input files for missing events | manager
+    find:
+      paths: "{{ agents_results_manager_path }}/{{ event }}/missing/"
+    register: find_result
+    when:
+      - inventory_hostname in groups['masters']
+
+  - name: "Verify there are no alerts for missing files (json) | {{ event }}"
+    script: >
+      ../../../common_tasks/verify_missing_alerts_json.py -i {{ item.path }} -e {{ event }}
+      -o {{ missing_alerts_json_path }}
+    args:
+      executable: "python3"
+    when:
+      - inventory_hostname in groups['masters']
+    with_items:
+      - "{{ find_result.files }}"

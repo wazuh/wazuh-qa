@@ -14,7 +14,8 @@ import random
 import string
 import secrets
 import argparse
-
+import time
+import logging
 
 def generate_random_name(length):
     """ Generates random string of specified length (integer) """
@@ -117,13 +118,20 @@ def associate_files_size(files_paths, files_size_specifications):
     return files_with_associated_size
 
 
-def create_files(files_path, text_mode=False):
+def create_files(files_path, text_mode=False, bunch_size=100, wait_time=1, rt_delay=0):
     """
     Takes the files paths and creates a file of specified size
 
     :param dict files_path: Contains the list of files and it's associated path
     :param bool text_mode: Create text files instead of binary
     """
+    log_filename = 'create_files.log'
+    logging.basicConfig(
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        datefmt="%Y-%m-%d %H:%M:%S",
+        filename=log_filename,
+        level=logging.DEBUG,
+    )
     if text_mode:
         file_mode = "w"
         one_char = '0'
@@ -134,16 +142,24 @@ def create_files(files_path, text_mode=False):
         one_char = b'0'
         chunk = one_char * 1048577
         unique = secrets.token_bytes
+    count = 0
+    nbunch = 0
     for key, value in files_path.items():
-        with open(key, file_mode) as f:
-            if value > 1048576:
-                nval = value // 1048576
-                for val in range(nval):
-                    f.write(chunk)
-            else:
-                f.write(one_char * value)
-            f.write(unique(16))
-
+      if count >= bunch_size:
+        logging.info(f"Bunch end: {nbunch}, sleeping {wait_time} seconds")
+        time.sleep(wait_time)
+        count = 0
+        nbunch +=1
+      with open(key, file_mode) as f:
+          count += 1
+          time.sleep(rt_delay)
+          if value > 1048576:
+              nval = value // 1048576
+              for val in range(nval):
+                  f.write(chunk)
+          else:
+              f.write(one_char * value)
+          f.write(unique(16))
 
 def create_file_summary(files_path, logfile):
     """
@@ -170,8 +186,16 @@ def main():
                              " (default is False)")
     parser.add_argument("-p", '--prefix', type=str, default="",
                         dest="file_prefix", help="Add a common prefix to all filenames")
+    parser.add_argument("-b", '--bunch-size', type=int, default=90,
+                        dest="bunch_size", help="File generation bunch size")
+    parser.add_argument("-w", '--wait-time', type=int, default=1,
+                        dest="wait_time", help="Time interval between bunch generation (to avoid queue overflow)")
     parser.add_argument("--ext-list", type=str, default="",
                         dest="ext_list", help="Create files with these extensions")
+    parser.add_argument("-d", "--rt-delay", type=float, default=0,
+                        dest="rt_delay", help="Sleep betwen each file generated")
+
+
     args = parser.parse_args()
     config_file = args.config
     output_file = args.output_list
@@ -191,7 +215,7 @@ def main():
         prefix=prefix, ext_list=ext_list
     )
     associated_files = associate_files_size(files, config["file_size_specifications"])
-    create_files(associated_files, text_mode=text_mode)
+    create_files(associated_files, text_mode=text_mode, bunch_size=args.bunch_size, wait_time=args.wait_time, rt_delay=args.rt_delay)
     create_file_summary(files, output_file)
 
 
