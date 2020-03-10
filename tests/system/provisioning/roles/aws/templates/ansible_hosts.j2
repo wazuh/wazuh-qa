@@ -105,19 +105,19 @@ masters:
                 port: "1516"
                 bind_addr: "0.0.0.0"
                 nodes:
-                  - "{{ hostvars[groups["masters"][0]]["private_ip"] }}"
+                    - "{{ hostvars[groups["masters"][0]]["private_ip"] }}"
                 hidden: "no"
 {% if packages_repository != "production" %}
 {% if packages_repository == "staging" %}
           repo:
-            apt: "deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/apt/ unstable main"
-            yum: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/yum/"
-            gpg: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH"
+              apt: "deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/apt/ unstable main"
+              yum: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/yum/"
+              gpg: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH"
 {% elif packages_repository == "devel" %}
           repo:
-            apt: "deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/apt/ unstable main"
-            yum: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/yum/"
-            gpg: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH"
+              apt: "deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/apt/ unstable main"
+              yum: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/yum/"
+              gpg: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH"
 {% endif %}
 {% endif %}
 {% if wazuh_custom_packages_installation_manager_enabled %}
@@ -136,7 +136,7 @@ masters:
         elasticsearch_xpack_security_password: {{ elastic_password }}
         filebeat_output_elasticsearch_hosts:
 {% for host in groups["elasticsearch"] %}
-                - "{{ hostvars[host]["private_ip"] }}"
+            - "{{ hostvars[host]["private_ip"] }}"
 {% endfor %}
 
 workers:
