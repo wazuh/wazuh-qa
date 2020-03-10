@@ -21,6 +21,9 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service, check_daemon_status
 
+# Marks
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=3)]
+
 root_dir = '/test'
 tested_daemon = 'ossec-syscheckd'
 state_collector_time = 1
