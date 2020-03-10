@@ -31,6 +31,14 @@
         become: yes
 
       - block:
+        - name: Stop Windows Agent
+          win_service:
+            name: OssecSvc
+            start_mode: auto
+            state: stopped
+          when:
+            - inventory_hostname in groups['windowsagents']
+
         - name: Windows | Check if Program Files (x86) exists
           win_stat:
             path: C:\Program Files (x86)
@@ -127,11 +135,6 @@
     strategy: free
     tasks:
       - block:
-        - name: Stop Kibana
-          service:
-            name: kibana
-            state: stopped
-
         - name: List Elasticsearch indexes
           uri:
             url: "{{ elastic_api_protocol }}://{{ inventory_hostname }}:{{ elasticsearch_port }}/_cat/indices/*?v&s=index&pretty"
@@ -171,11 +174,6 @@
         - name: Print elasticsearch indexes after deletion
           debug:
             var: elasticsearch_indexes_delete.content
-
-        - name: Stop Elasticsearch
-          service:
-            name: elasticsearch
-            state: stopped
 
         - name: Delete agents output
           file:
