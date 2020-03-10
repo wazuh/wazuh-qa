@@ -1,0 +1,187 @@
+---
+  - hosts:
+      - 'all:!elasticsearch'
+    vars_files:
+      - ./vars/elastic_nginx.yml
+      - ./vars/wazuh_agent.yml
+      - ../fim/vars/main.yml
+    strategy: free
+    tasks:
+    # Wazuh Agents cleanup
+      - block:
+        - name: Uninstall wazuh-agent
+          package:
+            name:
+              - wazuh-agent
+              - audit
+            state: absent
+
+        - name: Delete /var/ossec and testing folders
+          file:
+            path: "{{ item }}"
+            state: absent
+          with_items:
+            - /var/ossec
+            - "{{ agents_linux_output_path }}"
+            - "{{ files_fim_testing_linux }}"
+            - "/tmp/{{ files_config_source_path }}"
+
+        when:
+          - inventory_hostname in groups['linuxagents']
+        become: yes
+
+      - block:
+        - name: Windows | Check if Program Files (x86) exists
+          win_stat:
+            path: C:\Program Files (x86)
+          register: check_path
+
+        - name: Windows | Set Win Path (x86)
+          set_fact:
+            wazuh_agent_win_path: "{{ windows_install_dir_x86 }}"
+          when:
+           - check_path.stat.exists
+
+        - name: Windows | Set Win Path (x64)
+          set_fact:
+            wazuh_agent_win_path: "{{ windows_install_dir }}"
+          when:
+            - not check_path.stat.exists
+
+        - name: Windows | Check if Wazuh installer is already downloaded
+          win_stat:
+            path: "C:\\{{ wazuh_winagent_package_name }}"
+          register: wazuh_package_downloaded
+
+        - name: Windows | Download Wazuh Agent package
+          win_get_url:
+            url: "{{ wazuh_winagent_config_url }}"
+            dest: "C:\\{{ wazuh_winagent_package_name }}"
+          when:
+            - not wazuh_package_downloaded.stat.exists
+
+        - name: Uninstall Wazuh Agent
+          win_package:
+            path: "C:\\{{ wazuh_winagent_package_name }}"
+            state: absent
+
+        - name: Delete Wazuh Agent
+          win_file:
+            path: "C:\\{{ wazuh_winagent_package_name }}"
+            state: absent
+
+        - name: Delete Wazuh installation folder and test folders
+          win_file:
+            path: "{{ item }}"
+            state: absent
+          with_items:
+            - "{{ wazuh_agent_win_path }}"
+            - "{{ agents_windows_output_path }}"
+            - "{{ files_fim_testing_windows }}"
+            - "C:\\{{ files_config_source_path }}"
+
+        when:
+          - inventory_hostname in groups['windowsagents']
+
+    # Wazuh Managers cleanup
+      - block:
+        - name: Detect if filebeat is installed
+          stat:
+            path: /usr/share/filebeat/bin/filebeat
+          register: filebeat_bin
+
+        - name: Stop filebeat service
+          service:
+            name: filebeat
+            state: stopped
+          when: filebeat_bin.stat.exists
+
+        - name: Remove Wazuh and related services
+          package:
+            name:
+              - wazuh-manager
+              - wazuh-api
+              - filebeat
+              - audit
+            state: absent
+
+        - name: Ensure /var/ossec and agents output is deleted
+          file:
+            path: "{{ item }}"
+            state: absent
+          with_items:
+            - /var/ossec
+            - "{{ agents_results_manager_path }}"
+
+        when:
+          - inventory_hostname in groups['masters'] or inventory_hostname in groups['workers']
+        become: yes
+
+
+    # Elasticsearch cleanup
+  - hosts:
+      - 'elasticsearch'
+    vars_files:
+      - ./vars/elastic_nginx.yml
+      - ../fim/vars/main.yml
+    strategy: free
+    tasks:
+      - block:
+        - name: Stop Kibana
+          service:
+            name: kibana
+            state: stopped
+
+        - name: List Elasticsearch indexes
+          uri:
+            url: "{{ elastic_api_protocol }}://{{ inventory_hostname }}:{{ elasticsearch_port }}/_cat/indices/*?v&s=index&pretty"
+            url_username: "{{ elastic_user }}"
+            url_password: "{{ elastic_password }}"
+            method: GET
+            validate_certs: no
+            return_content: yes
+          register: elasticsearch_indexes_get
+          delegate_to: "{{ inventory_hostname }}"
+
+        - name: Print elasticsearch indexes
+          debug:
+            var: elasticsearch_indexes_get.content
+
+        - name: Delete Elasticsearch indexes (HTTP)
+          uri:
+            url: "{{ elastic_api_protocol }}://{{ inventory_hostname }}:{{ elasticsearch_port }}/*"
+            url_username: "{{ elastic_user }}"
+            url_password: "{{ elastic_password }}"
+            method: DELETE
+            validate_certs: no
+            status_code: 200
+          delegate_to: "{{ inventory_hostname }}"
+
+        - name: List Elasticsearch indexes after deletion
+          uri:
+            url: "{{ elastic_api_protocol }}://{{ inventory_hostname }}:{{ elasticsearch_port }}/_cat/indices/*?v&s=index&pretty"
+            url_username: "{{ elastic_user }}"
+            url_password: "{{ elastic_password }}"
+            method: GET
+            validate_certs: no
+            return_content: yes
+          register: elasticsearch_indexes_delete
+          delegate_to: "{{ inventory_hostname }}"
+
+        - name: Print elasticsearch indexes after deletion
+          debug:
+            var: elasticsearch_indexes_delete.content
+
+        - name: Stop Elasticsearch
+          service:
+            name: elasticsearch
+            state: stopped
+
+        - name: Delete agents output
+          file:
+            path: "{{ agents_results_elastic_path }}"
+            state: absent
+
+        when:
+          - inventory_hostname in groups['elasticsearch']
+        become: yes
