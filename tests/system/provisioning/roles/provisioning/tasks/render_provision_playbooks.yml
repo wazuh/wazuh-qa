@@ -6,7 +6,3 @@
       mode: '664'
     delegate_to: localhost
     run_once: true
-
-  - name: Debug the generated provision playbook
-    debug:
-      msg: "{{ lookup('file', './provision_playbook') }}"
