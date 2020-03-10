@@ -1,2 +1,10 @@
+# Python cache
 __pycache__
+
+# Python bytecode files
 *.pyc
+
+# Wazuh tools installation files
+deps/wazuh_testing/build/
+deps/wazuh_testing/dist/
+deps/wazuh_testing/wazuh_testing.egg-info/
