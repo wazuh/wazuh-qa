@@ -64,14 +64,20 @@ def test_max_eps(get_configuration, configure_environment, restart_syscheckd, wa
     check_time_travel(mode == "scheduled")
     n_results = max_eps * 4
 
-    result = wazuh_log_monitor.start(timeout=(n_results/max_eps)*6,
-                                     accum_results=n_results,
-                                     callback=callback_event_message,
-                                     error_message=f'Received less results than expected ({n_results})').result()
+    try:
+        result = wazuh_log_monitor.start(timeout=(n_results/max_eps)*6,
+                                         accum_results=n_results,
+                                         callback=callback_event_message,
+                                         error_message=f'Received less results than expected ({n_results})').result()
 
-    counter = Counter([date_time for date_time, _ in result])
-    error_margin = (max_eps * 0.1)
+        counter = Counter([date_time for date_time, _ in result])
+        error_margin = (max_eps * 0.1)
 
-    for date_time, n_occurrences in counter.items():
-        assert n_occurrences <= round(
-            max_eps + error_margin), f'Sent {n_occurrences} but a maximum of {max_eps} was set'
+        for date_time, n_occurrences in counter.items():
+            assert n_occurrences <= round(
+                max_eps + error_margin), f'Sent {n_occurrences} but a maximum of {max_eps} was set'
+    except TimeoutError as e:
+        if mode == 'whodata':
+            pytest.xfail(reason='Xfailing due to issue: https://github.com/wazuh/wazuh/issues/4660')
+        else:
+            raise e

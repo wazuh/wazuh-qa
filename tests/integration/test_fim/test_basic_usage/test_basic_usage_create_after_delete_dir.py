@@ -4,6 +4,7 @@
 
 import os
 import shutil
+import sys
 import time
 
 import pytest
@@ -23,12 +24,14 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=0)]
 directory_str = os.path.join(PREFIX, 'testdir1')
 test_directories = [directory_str]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path,
+                                   'wazuh_conf.yaml' if sys.platform != 'win32' else 'wazuh_conf_win32.yaml')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # Configurations
-
-conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
+windows_audit_interval = 1
+conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__,
+               'WINDOWS_AUDIT_INTERVAL': str(windows_audit_interval)}
 p, m = generate_params(extra_params=conf_params, modes=['realtime', 'whodata'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 

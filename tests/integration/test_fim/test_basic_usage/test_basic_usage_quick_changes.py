@@ -3,7 +3,6 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import sys
 import time
 
 import pytest
@@ -35,8 +34,8 @@ conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
 p, m = generate_params(extra_params=conf_params, modes=['realtime', 'whodata'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
-# fixtures
 
+# fixtures
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -66,9 +65,6 @@ def test_regular_file_changes(sleep, tags_to_apply, get_configuration, configure
     sleep : float
         Delay in seconds between every action.
     """
-    threshold = 1.5 if sys.platform == 'win32' else 1.25
-    if sleep < threshold and get_configuration['metadata']['fim_mode'] == 'whodata':
-        pytest.xfail('Xfailing due to whodata threshold.')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     file = 'regular'
@@ -78,8 +74,15 @@ def test_regular_file_changes(sleep, tags_to_apply, get_configuration, configure
     time.sleep(sleep)
     delete_file(path=testdir1, name=file)
 
-    events = wazuh_log_monitor.start(timeout=max(sleep * 3, global_parameters.default_timeout), callback=callback_detect_event, accum_results=3,
-                                     error_message='Did not receive expected "Sending FIM event: ..." event').result()
-
-    for ev in events:
-        validate_event(ev)
+    try:
+        events = wazuh_log_monitor.start(timeout=max(sleep * 3, global_parameters.default_timeout),
+                                         callback=callback_detect_event, accum_results=3,
+                                         error_message='Did not receive expected '
+                                                       '"Sending FIM event: ..." event').result()
+        for ev in events:
+            validate_event(ev)
+    except TimeoutError as e:
+        if get_configuration['metadata']['fim_mode'] == 'whodata':
+            pytest.xfail(reason='Xfailing due to issue: https://github.com/wazuh/wazuh/issues/4710')
+        else:
+            raise e

@@ -60,7 +60,7 @@ def delete_files():
         shutil.rmtree(test_dir, ignore_errors=True)
 
 
-def test_max_eps_on_start(get_configuration, create_files, configure_environment, restart_syscheckd, delete_files):
+def test_max_eps_on_start(get_configuration, create_files, configure_environment, restart_wazuh, delete_files):
     """
     Check that max_eps is respected when a big quantity of synchronization events are generated
 

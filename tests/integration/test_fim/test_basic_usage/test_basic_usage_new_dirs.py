@@ -25,12 +25,14 @@ pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0)]
 test_directories = []
 directory_str = os.path.join(PREFIX, 'testdir1')
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path,
+                                   'wazuh_conf.yaml' if sys.platform != 'win32' else 'wazuh_conf_win32.yaml')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # Configurations
-
-conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
+windows_audit_interval = 1
+conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__,
+               'WINDOWS_AUDIT_INTERVAL': str(windows_audit_interval)}
 p, m = generate_params(extra_params=conf_params, modes=['realtime', 'whodata'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
@@ -88,7 +90,7 @@ def test_new_directory(tags_to_apply, get_configuration, configure_environment, 
         detect_initial_scan(wazuh_log_monitor)
     else:
         os.makedirs(directory_str, exist_ok=True, mode=0o777)
-        time.sleep(1)
+        time.sleep(windows_audit_interval+0.5)
 
     # Assert that events of new CUD actions are raised after next scheduled scan
     regular_file_cud(directory_str, wazuh_log_monitor, file_list=['file4', 'file5', 'file6'],
