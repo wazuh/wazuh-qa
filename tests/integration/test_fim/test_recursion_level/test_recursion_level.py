@@ -2,13 +2,13 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
-import sys
-
 import pytest
+import sys
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_event_too_long, regular_file_cud,
                                generate_params)
+from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -18,18 +18,16 @@ pytestmark = pytest.mark.tier(level=2)
 
 # Variables
 
-prefix = os.path.join('C:', os.sep) if sys.platform == 'win32' else os.sep
-
-dir_no_recursion = os.path.join(prefix, 'test_no_recursion')
-dir_recursion_1 = os.path.join(prefix, 'test_recursion_1')
-dir_recursion_5 = os.path.join(prefix, 'test_recursion_5')
-dir_recursion_320 = os.path.join(prefix, 'test_recursion_320')
+dir_no_recursion = os.path.join(PREFIX, 'test_no_recursion')
+dir_recursion_1 = os.path.join(PREFIX, 'test_recursion_1')
+dir_recursion_5 = os.path.join(PREFIX, 'test_recursion_5')
+dir_recursion_320 = os.path.join(PREFIX, 'test_recursion_320')
 subdir = "dir"
 
-dir_no_recursion_space = os.path.join(prefix, 'test no recursion')
-dir_recursion_1_space = os.path.join(prefix, 'test recursion 1')
-dir_recursion_5_space = os.path.join(prefix, 'test recursion 5')
-dir_recursion_320_space = os.path.join(prefix, 'test recursion 320')
+dir_no_recursion_space = os.path.join(PREFIX, 'test no recursion')
+dir_recursion_1_space = os.path.join(PREFIX, 'test recursion 1')
+dir_recursion_5_space = os.path.join(PREFIX, 'test recursion 5')
+dir_recursion_320_space = os.path.join(PREFIX, 'test recursion 320')
 subdir_space = "dir "
 
 test_directories = [dir_no_recursion, dir_recursion_1, dir_recursion_5, dir_recursion_320, dir_no_recursion_space,
