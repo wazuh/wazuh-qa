@@ -442,7 +442,7 @@ if __name__ == "__main__":
 
     elapsed = start - time()
     with open(args.output, 'w+') as output:
-        output.writelines(failure_list)
+        output.writelines('\n'.join(failure_list))
 
     assert failure == 0, "number of failed files: {}\n \
             Elapsed time: ~ {} seconds.".format(
