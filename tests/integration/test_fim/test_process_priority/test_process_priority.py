@@ -50,4 +50,5 @@ def test_process_priority(get_configuration, configure_environment, restart_sysc
     syscheckd_process = get_process(process_name)
 
     assert syscheckd_process is not None, f'Process {process_name} not found'
-    assert syscheckd_process.nice() == priority, f'Process {process_name} has not updated its priority.'
+    assert (os.getpriority(os.PRIO_PROCESS, syscheckd_process.pid)) == priority, \
+        f'Process {process_name} has not updated its priority.'
