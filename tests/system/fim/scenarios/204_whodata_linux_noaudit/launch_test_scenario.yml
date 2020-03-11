@@ -7,6 +7,14 @@
       - import_tasks: ../../handlers/main.yml
 
     tasks:
+      - name: Set extra arguments for scripts.
+        set_fact:
+          create_script_extra_params: "-b 100 -w 1 -d 0.01"
+          modify_script_extra_params: "-b 100 -w 1 -d 0.01"
+          elastic_verification_extra_arguments: "-n -r 3"
+          json_verification_extra_arguments: "-r 3"
+
+
       - block:
         - name: Auditd Uninstall
           become: true
