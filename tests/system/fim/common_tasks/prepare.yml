@@ -110,20 +110,40 @@
   - name: "Clean win logs"
     win_command: powershell.exe -
     args:
-      stdin: "Clear-Content 'C:\\Program Files (x86)\\ossec-agent\\ossec.log'"
+      stdin: "Clear-Content '{{ windows_ossec_folder_path }}\\ossec.log'"
     when: clean_logs is defined and clean_logs
 
-  - name: Copy {{ files_config_agent_windows_ossec_conf }} to the agents hosts | Windows
+  - name: Slurp ossec.conf file | Windows
+    slurp:
+      src: "{{ windows_ossec_folder_path }}\\ossec.conf"
+    register: windows_conf_b64
+
+  - name: Decoding ossec.conf file | Windows
+    set_fact:
+      windows_conf: "{{ windows_conf_b64['content'] | b64decode }}"
+
+  - name: Removing default <syscheck> from ossec.conf | Windows
+    set_fact:
+      windows_conf_without_syscheck: "{{ windows_conf | regex_replace('((\\S*)(\\t*)<syscheck>)[\\S\\s*]*?<\\/syscheck>', '') }}"
+
+  - name: Load custom <syscheck> configuration into a variable | Windows
+    set_fact:
+      custom_syscheck_conf: "{{ lookup('file', 'config/agent_windows_ossec.conf') }}"
+
+  - name: Inserting custom <syscheck> configuration | Windows
+    set_fact:
+      windows_conf_custom_syscheck: "{{ windows_conf_without_syscheck }}{{ custom_syscheck_conf }}"
+
+  - name: Overwrite ossec.conf file with new Syscheck configuration | Windows
     win_copy:
-        src: "config/{{ files_config_agent_windows_ossec_conf }}"
-        dest: "{{ windows_ossec_folder_path }}/ossec.conf"
+      dest: "{{ windows_ossec_folder_path }}\\ossec.conf"
+      content: "{{ windows_conf_custom_syscheck }}"
 
   - name: Start wazuh-agent service | Windows
     win_service:
       name: OssecSvc
       start_mode: auto
       state: started
-
 
   when:
     - inventory_hostname in groups['windowsagents']
