@@ -1021,8 +1021,12 @@ class EventChecker:
                     error_msg = f"Expected data path was '{expected_path}' but event data path is '{data_path}'"
                     assert (expected_path in data_path), error_msg
                     if audit_path:
-                        error_msg = f"Expected audit path was '{expected_path}' but event audit path is '{audit_path}'"
-                        assert (expected_path in audit_path), error_msg
+                        try:
+                            error_msg = f"Expected audit path was '{expected_path}' " \
+                                        f"but event audit path is '{audit_path}'"
+                            assert (expected_path in audit_path), error_msg
+                        except AssertionError:
+                            pytest.xfail(reason='Xfailed due to issue: https://github.com/wazuh/wazuh/issues/4729')
 
         def filter_events(events, mask):
             """Returns a list of elements matching a specified mask in the events list using jq module."""
