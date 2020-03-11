@@ -12,20 +12,7 @@
       - "{{ agents_results_manager_path }}/modified/missing"
       - "{{ agents_results_manager_path }}/deleted/missing"
 
-  - name: Stop wazuh-manager service
-    service:
-      name: wazuh-manager
-      state: stopped
 
-  - name: Copy {{ files_config_manager_ossec_conf }} to the Managers hosts
-    copy:
-        src: "config/{{ files_config_manager_ossec_conf }}"
-        dest: "{{ linux_ossec_folder_path }}/etc/ossec.conf"
-
-  - name: Start wazuh-manager service
-    service:
-      name: wazuh-manager
-      state: started
 
   when:
     - inventory_hostname in groups['masters']
