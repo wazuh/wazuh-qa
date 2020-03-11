@@ -1,72 +1,121 @@
-
   - name: Stop Wazuh agent Linux
     become: true
     service:
       name: wazuh-agent
-      state: stopp
+      state: stopped
+    when: 
+      - inventory_hostname in groups['linuxagents']
 
   - name: Stop Wazuh agent Windows
     win_service: 
       name: OssecSvc
       start_mode: auto
       state: stopped
-
-  - name: Start Wazuh agent Linux
-    become: true
-    service:
-      name: wazuh-agent
-      state: started
-
-  - name: Start Wazuh agent Windows
-    win_service: 
-      name: OssecSvc
-      start_mode: auto
-      state: started
-
-  - name: Restart Wazuh agent Linux
-    become: true
-    service:
-      name: wazuh-agent
-      state: restarted
-
-  - name: Restart Wazuh agent Windows
-    win_service: 
-      name: OssecSvc
-      start_mode: auto
-      state: restarted
+    when: 
+      - inventory_hostname in groups['windowsagents']
 
   - name: Stop Wazuh manager
     become: true
     service:
       name: wazuh-manager
       state: stopped
-
-  - name: Start Wazuh manager
-    become: true
-    service:
-      name: wazuh-manager
-      state: started
-  
-  - name: Restart Wazuh manager
-    become: true
-    service:
-      name: wazuh-manager
-      state: restarted
+    when: 
+      - inventory_hostname in groups['masters']
 
   - name: Stop Wazuh api
     become: true
     service:
       name: wazuh-api
       state: stopped
+    when: 
+      - inventory_hostname in groups['masters']
+
+  - name: Clear ossec.log Linux Agent
+    become: true
+    copy:
+      dest: "{{ linux_ossec_folder_path }}/logs/ossec.log"
+      content: ""
+      force: yes
+    when: 
+      - inventory_hostname in groups['linuxagents']
+  
+  - name: Clear ossec.log Manager
+    become: true
+    copy:
+      dest: "{{ linux_ossec_folder_path }}/logs/ossec.log"
+      content: ""
+      force: yes
+    when: 
+      - inventory_hostname in groups['masters']
+
+  - name: Clear ossec.log Windows Agent
+    win_copy:
+      dest: "{{ windows_ossec_folder_path }}\\ossec.log"
+      content: ""
+      force: yes
+    when: 
+      - inventory_hostname in groups['windowsagents']
+    
+  - name: Start Wazuh agent Linux
+    become: true
+    service:
+      name: wazuh-agent
+      state: started
+    when: 
+      - inventory_hostname in groups['linuxagents']
+
+  - name: Start Wazuh agent Windows
+    win_service: 
+      name: OssecSvc
+      start_mode: auto
+      state: started
+    when: 
+      - inventory_hostname in groups['windowsagents']
+
+  - name: Start Wazuh manager
+    become: true
+    service:
+      name: wazuh-manager
+      state: started
+    when: 
+      - inventory_hostname in groups['masters']
 
   - name: Start Wazuh api
     become: true
     service:
       name: wazuh-api
       state: started
+    when: 
+      - inventory_hostname in groups['masters']
+
+  - name: Restart Wazuh agent Linux
+    become: true
+    service:
+      name: wazuh-agent
+      state: restarted
+    when: 
+      - inventory_hostname in groups['linuxagents']
+
+  - name: Restart Wazuh agent Windows
+    win_service: 
+      name: OssecSvc
+      start_mode: auto
+      state: restarted
+    when: 
+      - inventory_hostname in groups['windowsagents']
+  
+  - name: Restart Wazuh manager
+    become: true
+    service:
+      name: wazuh-manager
+      state: restarted
+    when: 
+      - inventory_hostname in groups['masters']
   
   - name: Restart Wazuh api
     become: true
     service:
       name: wazuh-api
       state: restarted
+    when: 
+      - inventory_hostname in groups['masters']
