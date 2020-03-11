@@ -8,7 +8,8 @@ from collections import Counter
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, create_file, generate_params, callback_integrity_message
+from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, create_file, generate_params, callback_integrity_message, \
+    callback_connection_message
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -70,8 +71,13 @@ def test_max_eps_on_start(get_configuration, create_files, configure_environment
     check_apply_test({'max_eps_synchronization'}, get_configuration['tags'])
     max_eps = int(get_configuration['metadata']['max_eps'])
 
+    # Wait until the agent connects to the manager.
+    wazuh_log_monitor.start(timeout=90,
+                            callback=callback_connection_message,
+                            error_message="Agent couldn't connect to server.").result()
+
     #  Find integrity start before attempting to read max_eps
-    wazuh_log_monitor.start(timeout=15,
+    wazuh_log_monitor.start(timeout=30,
                             callback=callback_integrity_message,
                             error_message="Didn't receive integrity_check_global").result()
 
