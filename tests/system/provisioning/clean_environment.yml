@@ -36,8 +36,7 @@
             name: OssecSvc
             start_mode: auto
             state: stopped
-          when:
-            - inventory_hostname in groups['windowsagents']
+          failed_when: False
 
         - name: Windows | Check if Program Files (x86) exists
           win_stat:
