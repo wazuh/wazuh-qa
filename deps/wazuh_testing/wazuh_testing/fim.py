@@ -797,6 +797,12 @@ def callback_integrity_message(line):
             return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S'), json.dumps(match.group(2))
 
 
+def callback_connection_message(line):
+    match = re.match(r'.* Connected to the server .*', line)
+    if match:
+        return True
+
+
 def callback_event_message(line):
     if callback_detect_event(line):
         match = re.match(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*({.*?})$", line)
