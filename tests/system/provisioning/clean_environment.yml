@@ -136,7 +136,7 @@
       - block:
         - name: List Elasticsearch indexes
           uri:
-            url: "{{ elastic_api_protocol }}://{{ inventory_hostname }}:{{ elasticsearch_port }}/_cat/indices/*?v&s=index&pretty"
+            url: "{{ elastic_api_protocol }}://{{ hostvars[inventory_hostname]['private_ip'] }}:{{ elasticsearch_port }}/_cat/indices/*?v&s=index&pretty"
             url_username: "{{ elastic_user }}"
             url_password: "{{ elastic_password }}"
             method: GET
@@ -151,7 +151,7 @@
 
         - name: Delete Elasticsearch indexes (HTTP)
           uri:
-            url: "{{ elastic_api_protocol }}://{{ inventory_hostname }}:{{ elasticsearch_port }}/*"
+            url: "{{ elastic_api_protocol }}://{{ hostvars[inventory_hostname]['private_ip'] }}:{{ elasticsearch_port }}/*"
             url_username: "{{ elastic_user }}"
             url_password: "{{ elastic_password }}"
             method: DELETE
@@ -161,7 +161,7 @@
 
         - name: List Elasticsearch indexes after deletion
           uri:
-            url: "{{ elastic_api_protocol }}://{{ inventory_hostname }}:{{ elasticsearch_port }}/_cat/indices/*?v&s=index&pretty"
+            url: "{{ elastic_api_protocol }}://{{ hostvars[inventory_hostname]['private_ip']  }}:{{ elasticsearch_port }}/_cat/indices/*?v&s=index&pretty"
             url_username: "{{ elastic_user }}"
             url_password: "{{ elastic_password }}"
             method: GET
