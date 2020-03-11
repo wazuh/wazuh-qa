@@ -7,6 +7,11 @@
       - import_tasks: ../../handlers/main.yml
 
     tasks:
+      - name: Set extra arguments for scripts.
+        set_fact:
+          create_script_extra_params: "-t"
+          modify_script_extra_params: "-t"
+
       - block:
         - name: Launching prepare tasks
           import_tasks: "../../common_tasks/prepare.yml"
@@ -14,7 +19,9 @@
           - name: Configure syscheck event.
             set_fact:
               event: "added"
-              create_script_extra_params: "-t"
+              
+              json_verification_extra_arguments: "-r 3"
+              elastic_verification_extra_arguments: "-n -r 3"
 
           - name: Generating files to trigger FIM alerts
             import_tasks: "../../common_tasks/create_files.yml"
@@ -27,9 +34,8 @@
           - name: Configure syscheck event.
             set_fact:
               event: "modified"
-              modify_script_extra_params: "-t"
-              json_verification_extra_arguments: "-d 'test_diff_prefix'"
-              elastic_verification_extra_arguments: "-d 'test_diff_prefix'"
+              json_verification_extra_arguments: "-d 'test_diff_prefix' -r 3"
+              elastic_verification_extra_arguments: "-d 'test_diff_prefix' -r 3"
 
           - name: Modifiying files to trigger FIM alerts
             import_tasks: "../../common_tasks/modify_files.yml"
@@ -42,6 +48,8 @@
           - name: Configure syscheck event.
             set_fact:
               event: "deleted"
+              json_verification_extra_arguments: "-r 3"
+              elastic_verification_extra_arguments: "-n -r 3"
 
           - name: Deleting files to trigger FIM alerts
             import_tasks: "../../common_tasks/delete_files.yml"
