@@ -819,6 +819,11 @@ def callback_real_time_whodata_started(line):
         return True
 
 
+def callback_non_existing_monitored_dir(line):
+    if 'Unable to add directory to real time monitoring:' in line or 'does not exist. Monitoring discarded.' in line:
+        return True
+
+
 def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None):
     """
     Change date and time of the system depending on a boolean condition. Optionally, a monitor may be used to check

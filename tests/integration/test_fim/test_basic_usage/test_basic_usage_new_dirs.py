@@ -11,7 +11,7 @@ import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import detect_initial_scan
-from wazuh_testing.fim import generate_params, regular_file_cud, check_time_travel
+from wazuh_testing.fim import generate_params, regular_file_cud, check_time_travel, callback_non_existing_monitored_dir
 from wazuh_testing.tools import PREFIX, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -89,6 +89,9 @@ def test_new_directory(tags_to_apply, get_configuration, configure_environment, 
         check_time_travel(True)
         detect_initial_scan(wazuh_log_monitor)
     else:
+        # Wait for syscheck to realize the directories don't exist
+        wazuh_log_monitor.start(timeout=10, callback=callback_non_existing_monitored_dir,
+                                error_message='Monitoring discarded message not found')
         os.makedirs(directory_str, exist_ok=True, mode=0o777)
         time.sleep(windows_audit_interval+0.5)
 
