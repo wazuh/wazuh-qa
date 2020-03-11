@@ -13,8 +13,8 @@
       - name: Configure syscheck event
         set_fact:
           event: "added"
-          elastic_verification_extra_arguments: "-n -r 10"
-          json_verification_extra_arguments: "-r 10"
+          elastic_verification_extra_arguments: "-n -r 3"
+          json_verification_extra_arguments: "-r 3"
 
       - name: Add common prefix | File creation
         set_fact:
@@ -30,8 +30,6 @@
       - name: Configure syscheck event
         set_fact:
           event: "modified"
-          elastic_verification_extra_arguments: "-n -r 10"
-          json_verification_extra_arguments: "-r 10"
 
       - name: Modifiying files to trigger FIM alerts
         import_tasks: "../../common_tasks/modify_files.yml"
@@ -43,8 +41,6 @@
       - name: Configure syscheck event
         set_fact:
           event: "deleted"
-          elastic_verification_extra_arguments: "-n -r 10"
-          json_verification_extra_arguments: "-r 10"
 
       - name: Deleting files to trigger FIM alerts
         import_tasks: "../../common_tasks/delete_files.yml"
