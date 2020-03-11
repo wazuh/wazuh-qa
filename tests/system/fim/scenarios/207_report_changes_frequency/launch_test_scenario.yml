@@ -18,8 +18,7 @@
         - block:
           - name: Configure syscheck event.
             set_fact:
-              event: "added"
-              
+              event: "added"      
               json_verification_extra_arguments: "-r 3"
               elastic_verification_extra_arguments: "-n -r 3"
 
