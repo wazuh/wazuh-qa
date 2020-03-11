@@ -24,7 +24,7 @@ wazuh_installation_path_windows: C:\Program Files (x86)\
 ### Wazuh Ansible repository
 
 wazuh_ansible_repository_path: "/tmp/wazuh-ansible"
-wazuh_ansible_branch: add_conditional_md5_check
+wazuh_ansible_branch: devel
 
 ### Repositories
 
