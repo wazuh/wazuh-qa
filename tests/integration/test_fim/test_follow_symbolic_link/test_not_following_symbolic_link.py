@@ -105,7 +105,16 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
     result = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                      error_message='Did not receive expected '
                                                    '"Sending FIM event: ..." event').result()
-    assert 'modified' in result['data']['type'], f"No 'modified' event when modifying symlink"
+    if 'modified' in result['data']['type']:
+        logger.info("Received modified event. No more events will be expected.")
+    elif 'deleted' in result['data']['type']:
+        logger.info("Received deleted event. Now an added event will be expected.")
+        result = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                                         error_message='Did not receive expected '
+                                                       '"Sending FIM event: ..." event').result()
+        assert 'added' in result['data']['type'], f"The event {result} should be of type 'added'"
+    else:
+        assert False, f"Detected event {result} should be of type 'modified' or 'deleted'"
 
     # Remove and restore the target file. Don't expect any events
     delete_file(b_path, name2)
