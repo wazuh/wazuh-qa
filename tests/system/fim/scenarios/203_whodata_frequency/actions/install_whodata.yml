@@ -5,3 +5,4 @@
       state: present
     when:
       - inventory_hostname in groups['linuxagents']
+    become: yes
