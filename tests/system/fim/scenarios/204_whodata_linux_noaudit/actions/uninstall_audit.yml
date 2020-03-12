@@ -1,0 +1,17 @@
+---
+  - block:
+    - name: Check if Audit service exists
+      stat: path=/etc/init.d/auditd
+      register: auditd_service_status
+  
+  
+    - name: Stop Audit service, if started
+      command: service auditd stop
+      when: auditd_service_status.stat.exists
+  
+    - name: Uninstall Audit | Linux
+      package:
+        name: audit
+        state: absent
+    when:
+      - inventory_hostname in groups['linuxagents']

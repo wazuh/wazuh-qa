@@ -31,9 +31,37 @@ def paths_acquisition(filenames_list_path):
     return set([i[:-1] for i in filenames_list])
 
 
-def alerts_prune(path, target_event):
+def alerts_prune(path, target_event, diff_statement=None):
     """
         Prunes desired syscheck events from the alert.json file.
+        Extracts all events path to a set.
+        :param str path: path to alerts.json file
+        :param str target_event: target event kind (deleted|added|modified)
+        :return: Returns a set containing the alerts files path
+    """
+    alerts_list = []
+    add_path = True
+    with open(path,errors='replace') as json_file:
+        for line in json_file:
+            try:
+                data = json.loads(line)
+                if data.get('syscheck') and \
+                   data['syscheck']['event'] == target_event:
+                    if (diff_statement is not None) and \
+                       ('diff' in data['syscheck']) and \
+                       (diff_statement not in data['syscheck']['diff']):
+                            add_path = False
+                    if add_path:
+                        alerts_list.append(data)
+                    add_path = True   
+            except ValueError:
+                continue
+    return set([alerts['syscheck']['path'] for alerts in alerts_list])
+
+
+def alerts_prune_whodata(path, target_event):
+    """
+        Prunes desired whodata events from the alert.json file.
         Extracts all events path to a set.
         :param str path: path to alerts.json file
         :param str target_event: target event kind (deleted|added|modified)
@@ -44,9 +72,39 @@ def alerts_prune(path, target_event):
         for line in json_file:
             try:
                 data = json.loads(line)
-                if data.get('syscheck') and data['syscheck']['event'] == target_event:
-                    alerts_list.append(data)
-                    
+                if (data['syscheck']['audit'] is not None and data['syscheck']['event'] == target_event):
+                    if (data['syscheck']['audit']['user']['id'] != ""
+                        and data['syscheck']['audit']['user']['name'] != ""
+                        and data['syscheck']['audit']['process']['id'] != ""
+                        and data['syscheck']['audit']['process']['name'] != ""
+                        ):
+                        alerts_list.append(data)
+            except ValueError:
+                continue
+            except KeyError:
+                continue
+    return set([alerts['syscheck']['path'] for alerts in alerts_list])
+
+
+def alerts_prune_tag(path, target_event, tags):
+    """
+        Prunes desired syscheck events from the alert.json file.
+        Extracts all events path to a set.
+        :param str path: path to alerts.json file
+        :param str target_event: target event kind (deleted|added|modified)
+        :return: Returns a set containing the alerts files path
+    """
+    alerts_list = []
+    with open(path, 'r', errors='replace') as json_file:
+        for line in json_file:
+            try:
+                data = json.loads(line)
+                if data.get('syscheck') \
+                    and data['syscheck']['event'] == target_event \
+                        and 'tags' in data['syscheck']:
+                    if data['syscheck']['tags'] == tags:
+                        alerts_list.append(data)
+
             except ValueError:
                 continue
     return set([alerts['syscheck']['path'] for alerts in alerts_list])
@@ -57,7 +115,7 @@ def main():
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=[
-            logging.FileHandler("verify_alerts_json.log"),
+            logging.FileHandler("verify_alerts_json.log", mode='a'),
             logging.StreamHandler()
         ]
     )
@@ -80,13 +138,23 @@ def main():
                             help="Output path for missing files alerts.",
                             default="debug_missing_file_alerts.log")
 
-        parser.add_argument("-t", "--timeout", type=int, required=False, dest='time_gap',
-                            help="time gap between alerts.json alerts acquisitions. default: 60s",
-                            default="60")
+        parser.add_argument("-s", "--sleep", type=int, required=False, dest='sleep_time',
+          help="Sleep time between retries", default="60"
+        )
 
         parser.add_argument("-r", "--retry", type=int, required=False, dest='retry_count',
                             help="reading attempts on stopped alerts. default: 4 attemps",
                             default="4")
+        parser.add_argument("-d", "--diff", type=str, required=False, dest='diff_string',
+                            help="When syscheck:report_changes enabled, represents the diff text")
+        parser.add_argument("-w", "--whodata", required=False, dest='whodata_check',
+                            action="store_true", help="Enable Whodata alert's parsing.",
+                            default=False)
+        parser.add_argument(
+            "-tg", "--tag", type=str, required=False, dest='tag_query',
+            nargs='+', help="Enable tag queries for the indicated tags",
+            default=None
+        )
         args = parser.parse_args()
 
         import time
@@ -94,7 +162,26 @@ def main():
         stuck_alerts = 0
 
         paths_list_set = paths_acquisition(args.input_file)
-        pruned_alerts_set = alerts_prune(args.log_json_path, args.event)
+        pruned_alerts_set = alerts_prune(args.log_json_path, args.event, args.diff_string)
+
+        if (args.whodata_check is not None and args.whodata_check):
+            logging.info(
+                "Pruning whodata alerts."
+            )
+            pruned_alerts_set = alerts_prune_whodata(args.log_json_path, args.event)
+        elif args.tag_query is not None:
+            logging.info(
+                "Pruning tag alerts."
+            )
+            pruned_alerts_set = alerts_prune_tag(
+                 args.log_json_path, args.event, args.tag_query
+            )
+        if not args.whodata_check and args.tag_query is None:
+            logging.info(
+                "Pruning alerts."
+            )
+            pruned_alerts_set = alerts_prune(args.log_json_path, args.event)
+
         sub_paths = paths_list_set - pruned_alerts_set
         prev_lenght = len(sub_paths)
         start = time.time()
@@ -123,7 +210,7 @@ def main():
             else:
                 stuck_alerts = 0
 
-            time.sleep(args.time_gap)
+            time.sleep(args.sleep_time)
             prev_lenght = len(sub_paths)
             elapsed = time.time() - start
             logging.info("Elapsed time: ~ %s seconds \n" % int(elapsed))

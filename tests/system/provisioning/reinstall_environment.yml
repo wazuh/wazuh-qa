@@ -1,0 +1,46 @@
+---
+  - name: Launching environments
+    hosts: localhost
+    serial: 25
+    vars_files:
+      - ./vars/credentials.yml
+    tasks:
+      - name: Setup provision playbook
+        shell: ansible-playbook setup_provisioning.yml
+
+      - name: Deploy Elasticsearch Master
+        shell: "ansible-playbook provision_playbook.yml -i {{ ansible_hosts_destination }} -l elasticsearch"
+
+      - name: Deploy Wazuh Manager | Elasticsearch Workers | Kibana
+        shell: "ansible-playbook provision_playbook.yml -i {{ ansible_hosts_destination }} {{ item }}"
+        async: 10000
+        poll: 0
+        with_items:
+          - -l masters
+          - -l kibana
+        register: deploy_manager
+
+      - async_status:
+          jid: "{{ item.ansible_job_id }}"
+        loop: "{{ deploy_manager.results }}"
+        register: jobs_manager
+        until: jobs_manager.finished
+        retries: 1000
+        delay: 10
+
+      - name: Installing and registering agents
+        shell: "ansible-playbook -i {{ ansible_hosts_destination }} provision_playbook.yml {{ item }}"
+        async: 10000
+        poll: 0
+        with_items:
+          - -l linuxagents
+          - -l windowsagents
+        register: register_agents
+
+      - async_status:
+          jid: "{{ item.ansible_job_id }}"
+        loop: "{{ register_agents.results }}"
+        register: jobs_agents
+        until: jobs_agents.finished
+        retries: 1000
+        delay: 10

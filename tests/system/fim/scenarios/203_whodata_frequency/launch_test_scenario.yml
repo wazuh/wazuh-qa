@@ -1,0 +1,58 @@
+---
+  - hosts: all
+    vars_files:
+      - ../../vars/main.yml
+
+    handlers:
+      - import_tasks: ../../handlers/main.yml
+
+    tasks:
+      - name: Set extra arguments for scripts.
+        set_fact:
+          create_script_extra_params: "-b 100 -w 1 -d 0.01"
+          modify_script_extra_params: "-b 100 -w 1 -d 0.01"
+          elastic_verification_extra_arguments: "-n -r 3"
+          json_verification_extra_arguments: "-r 3"
+
+      - block:
+        - name: Install audit
+          import_tasks: "actions/install_whodata.yml"
+
+        - name: Launching prepare tasks
+          import_tasks: "../../common_tasks/prepare.yml"
+
+        - block:
+          - name: Configure syscheck event.
+            set_fact:
+              event: "added"
+
+          - name: Generating files to trigger FIM alerts
+            import_tasks: "../../common_tasks/create_files.yml"
+
+          - name: Verify generated alerts
+            become: true
+            import_tasks: "../../common_tasks/verify_alerts.yml"
+
+        - block:
+          - name: Configure syscheck event.
+            set_fact:
+              event: "modified"
+
+          - name: Modifiying files to trigger FIM alerts
+            import_tasks: "../../common_tasks/modify_files.yml"
+
+          - name: Verify generated alerts
+            become: true
+            import_tasks: "../../common_tasks/verify_alerts.yml"
+
+        - block:
+          - name: Configure syscheck event.
+            set_fact:
+              event: "deleted"
+
+          - name: Deleting files to trigger FIM alerts
+            import_tasks: "../../common_tasks/delete_files.yml"
+
+          - name: Verify generated alerts
+            become: true
+            import_tasks: "../../common_tasks/verify_alerts.yml"

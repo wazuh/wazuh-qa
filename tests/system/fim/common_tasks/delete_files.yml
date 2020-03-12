@@ -37,7 +37,7 @@
 - name: Copy the output files from Ansible Controller to the Managers
   become: true
   synchronize:
-    src: "agents_outputs/added/"
+    src: "agents_outputs/deleted/"
     dest: "{{ agents_results_manager_path }}/{{ event }}/"
   when:
     - inventory_hostname in groups['masters']
