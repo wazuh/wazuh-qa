@@ -11,7 +11,6 @@ import socket
 import subprocess
 import sys
 import tempfile
-import time
 from collections import Counter
 from copy import deepcopy
 from datetime import datetime
@@ -25,9 +24,8 @@ from jsonschema import validate
 
 from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
-from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing.tools.monitoring import FileMonitor
-
+from wazuh_testing.tools.time import TimeMachine
 
 if sys.platform == 'win32':
     import win32con
