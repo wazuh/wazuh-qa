@@ -16,3 +16,4 @@ wazuh_winagent_package_name: wazuh-agent-3.12.0-0.3319fimreworksqlite.msi
 
 wazuh_winagent_config:
   md5: 598ae7999f9dfec77f960e994c218d52
+  check_md5: False
