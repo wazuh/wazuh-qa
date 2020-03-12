@@ -2,7 +2,7 @@
   - hosts: all
     vars_files:
       - ../../vars/main.yml
-
+      - ../../../provisioning/vars/elastic_nginx.yml
     handlers:
       - import_tasks: ../../handlers/main.yml
 

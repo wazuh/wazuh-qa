@@ -2,6 +2,7 @@
   - hosts: all
     vars_files:
       - ../../vars/main.yml
+      - ../../../provisioning/vars/elastic_nginx.yml
 
     handlers:
       - import_tasks: ../../handlers/main.yml
@@ -18,7 +19,7 @@
         - block:
           - name: Configure syscheck event.
             set_fact:
-              event: "added"      
+              event: "added"
               json_verification_extra_arguments: "-r 3"
               elastic_verification_extra_arguments: "-n -r 3"
 
