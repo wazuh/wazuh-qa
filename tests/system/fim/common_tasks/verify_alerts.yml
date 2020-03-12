@@ -22,6 +22,8 @@
       verify_alerts_elasticsearch.py -i {{ item.path }} -e {{ event }}
       -a {{ hostvars[groups["elasticsearch"][0]]["private_ip"] }}
       -o {{ missing_alerts_elasticsearch_path }}
+      -eu {{ elastic_user }}
+      -ex {{ elastic_password }}
       {{ elastic_verification_extra_arguments }}
     args:
       executable: python3
