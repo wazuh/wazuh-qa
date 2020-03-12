@@ -10,10 +10,9 @@
       - block:
         - name: Set extra arguments for scripts.
           set_fact:
-            elastic_verification_extra_arguments: "-r 5"
-            json_verification_extra_arguments: "-r 5"
+            elastic_verification_extra_arguments: "-n -r 3"
+            json_verification_extra_arguments: "-r 3"
             create_script_extra_params: "-b 500 -w 0"
-            delete_script_extra_params: "-b 500 -w 0"
             modify_script_extra_params: "-b 500 -w 0"
 
         - name: Launching prepare tasks

@@ -11,11 +11,13 @@
         - name: Launching prepare tasks
           import_tasks: "../../common_tasks/prepare.yml"
 
-        - name: Set variables
+        - name: Set extra arguments for scripts.
           set_fact:
             syscheck_frequency: 10800
             linux_ossec_log_path: "{{ linux_ossec_folder_path }}/logs/ossec.log"
             windows_ossec_log_path: "{{ windows_ossec_folder_path }}\\ossec.log"
+            json_verification_extra_arguments: "-r 3"
+            elastic_verification_extra_arguments: "-n -r 3"
           
         - block:
           - name: Configure syscheck event.

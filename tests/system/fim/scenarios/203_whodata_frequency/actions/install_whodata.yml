@@ -1,8 +1,13 @@
 ---
-  - name: Install Audit | Linux
-    package:
-      name: audit
-      state: present
+  - block:
+    - name: Install Audit | Linux
+      package:
+        name: audit
+        state: present
+  
+    - name: start Audit service | Linux
+      command: service auditd start
+    become: yes
     when:
       - inventory_hostname in groups['linuxagents']
     become: yes
