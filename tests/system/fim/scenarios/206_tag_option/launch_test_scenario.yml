@@ -10,8 +10,8 @@
 
       - name: Set extra arguments for scripts.
         set_fact:
-          json_verification_extra_arguments: "-tg test_tag"
-          elastic_verification_extra_arguments: "-tg test_tag"
+          json_verification_extra_arguments: "-tg test_tag -r 3"
+          elastic_verification_extra_arguments: "-tg test_tag -n -r 3"
 
       - block:
         - name: Launching prepare tasks
