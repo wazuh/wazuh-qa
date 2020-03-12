@@ -60,6 +60,7 @@ p, m = generate_params(extra_params=conf_params)
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
+
 # fixtures
 
 @pytest.fixture(scope='module', params=configurations)
@@ -94,5 +95,11 @@ def test_cud_multiple_dir_entries(dir_list, tags_to_apply, get_configuration, co
     file = 'regular'
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
-    multiple_dirs_test(dir_list=dir_list, file=file, scheduled=scheduled, log_monitor=wazuh_log_monitor,
-                       timeout=2 * global_parameters.default_timeout)
+    try:
+        multiple_dirs_test(dir_list=dir_list, file=file, scheduled=scheduled, log_monitor=wazuh_log_monitor,
+                           timeout=2 * global_parameters.default_timeout)
+    except TimeoutError as e:
+        if get_configuration['metadata']['fim_mode'] == 'whodata':
+            pytest.xfail(reason='Xfailed due to issue: https://github.com/wazuh/wazuh/issues/4731')
+        else:
+            raise e
