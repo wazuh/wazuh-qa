@@ -13,17 +13,20 @@ from time import sleep, time
 import logging
 
 
-def set_elasticsearch(elastic_ip, elastic_protocol, elastic_username, elastic_password):
+def set_elasticsearch(elastic_ip, elastic_port, elastic_protocol, elastic_username,
+                      elastic_password):
     """
         Sets the Elasticsearch instance that we want to connect.
         :param str elastic_ip: IP adress of the Elasticsearch node.
         :return: Object of the Elasticsearch class.
     """
     es = Elasticsearch(
-         [elastic_ip],
+         [elastic_ip + ":" + elastic_port],
          scheme=elastic_protocol,
          http_auth=(elastic_username, elastic_password),
-         port=443
+         port=443,
+         use_ssl=True,
+         verify_certs=False
         )
     return es
 
@@ -382,6 +385,26 @@ if __name__ == "__main__":
         default="debug_missing_file_alerts.log"
     )
     parser.add_argument(
+        "-eh", "--elastic_protocol", type=str, required=False,
+        dest='elastic_protocol', help="Elasticsearch protocol: http or https",
+        default="https"
+    )
+    parser.add_argument(
+        "-ep", "--elastic_port", type=str, required=False,
+        dest='elastic_port', help="Elasticsearch API port",
+        default="9200"
+    )
+    parser.add_argument(
+        "-eu", "--elastic_user", type=str, required=True,
+        dest='elastic_username', help="Elasticsearch API username",
+        default="elastic"
+    )
+    parser.add_argument(
+        "-ex", "--elastic_password", type=str, required=True,
+        dest='elastic_password', help="Elasticsearch API password",
+        default="bar"
+    )
+    parser.add_argument(
         "-r", "--retry", type=int, required=False, dest='max_retry',
         help="reading attempts on stopped alerts. default: 4 attemps",
         default="4"
@@ -429,7 +452,7 @@ if __name__ == "__main__":
             {"terms": {"syscheck.tags": args.tag_query}}
         )
 
-    es = set_elasticsearch(args.ip, args.elastic_protocol, args.elastic_username,
+    es = set_elasticsearch(args.ip, args.elastic_port, args.elastic_protocol, args.elastic_username,
                            args.elastic_password)
     index_name = "wazuh-alerts-3.x*"
     start = time()
