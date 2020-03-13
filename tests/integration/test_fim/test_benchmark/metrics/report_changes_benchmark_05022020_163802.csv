@@ -1,0 +1,11 @@
+FIM mode	Event type	N of files	Size/file (B)	Folder size (B)	Size RSS (MB)	Sieze VMS (MB)	Time to create files (s)	Mean time to show logs (s)	Median time to show logs (s)	Min time to show a log (s)	Max time to show a log (s)
+scheduled	Add	10	0	0	56.35546875	410.91796875	0	0	0.0	0	0
+scheduled	Modify	10	0	0	56.4296875	410.91796875	0	0	0.0	0	0
+scheduled	Add	10	60416	604160	69.43359375	423.58203125	0	0	0.0	0	0
+scheduled	Modify	10	60416	604160	69.43359375	423.58203125	0	0	0.0	0	0
+realtime	Add	10	0	0	58.33984375	423.3203125	0	0	0.0	0	0
+realtime	Modify	10	0	0	58.35546875	423.3203125	0	0	0.0	0	0
+realtime	Add	10	60416	604160	68.07421875	432.0703125	0	0	0.0	0	0
+realtime	Modify	10	60416	604160	68.07421875	432.0703125	0	0	0.0	0	0
+whodata	Add	10	0	0	78.71875	444.1640625	0	0.1	0.0	0	1
+whodata	Modify	10	0	0	78.73828125	444.1640625	0	0.1	0.0	0	1

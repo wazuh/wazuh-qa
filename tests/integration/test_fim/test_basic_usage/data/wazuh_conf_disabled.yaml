@@ -4,11 +4,12 @@
   - disabled_conf
   apply_to_modules:
   - test_basic_usage_disabled
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'yes'
-  - directories:
-      value: TEST_DIRECTORIES
-      attributes:
-      - FIM_MODE
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'yes'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - FIM_MODE

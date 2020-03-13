@@ -124,7 +124,7 @@ def create_and_check_diff(name, path, fim_mode):
 def disable_report_changes():
     """Change the `report_changes` value in the `ossec.conf` file and then restart `Syscheck` to apply the changes."""
     new_conf = change_conf(report_value='no')
-    new_ossec_conf = set_section_wazuh_conf(new_conf[0].get('section'), new_conf[0].get('elements'))
+    new_ossec_conf = set_section_wazuh_conf(new_conf[0].get('sections'))
     restart_wazuh_with_new_conf(new_ossec_conf)
     # Wait for FIM scan to finish
     detect_fim_scan(wazuh_log_monitor)

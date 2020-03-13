@@ -4,12 +4,13 @@
   - ossec_conf
   apply_to_modules:
   - MODULE_NAME
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: TEST_DIRECTORIES
-      attributes:
-      - check_all: 'yes'
-      - FIM_MODE
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - check_all: 'yes'
+        - FIM_MODE
