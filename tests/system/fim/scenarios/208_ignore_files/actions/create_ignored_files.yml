@@ -3,7 +3,7 @@
   - name: Create ignored files on agents | Linux
     script: "../../../common_tasks/generate_files.py -c {{ files_config_linux_destination_path }} -o {{ files_generated_output_path }}-missing {{ create_script_extra_params }}"
     args:
-      executable: "python3"
+      executable: "python3.6"
       chdir: "{{ agents_linux_output_path }}"
 
   - name: Copy list of ignored files from Agents to Ansible Controller host | Linux

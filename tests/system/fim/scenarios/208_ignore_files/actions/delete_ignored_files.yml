@@ -5,7 +5,7 @@
       ../../../common_tasks/delete_files.py -i {{ files_generated_output_path }}-missing
       -o {{ files_deleted_output_path }}-missing {{ delete_script_extra_params }}
     args:
-      executable: "python3"
+      executable: "python3.6"
       chdir: "{{ agents_linux_output_path }}"
 
   - name: Copy list of ignored deleted files from Agents to Ansible Controller host | Linux
