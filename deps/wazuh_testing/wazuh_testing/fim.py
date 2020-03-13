@@ -11,7 +11,6 @@ import socket
 import subprocess
 import sys
 import tempfile
-import time
 from collections import Counter
 from copy import deepcopy
 from datetime import datetime
@@ -25,9 +24,8 @@ from jsonschema import validate
 
 from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
-from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing.tools.monitoring import FileMonitor
-
+from wazuh_testing.tools.time import TimeMachine
 
 if sys.platform == 'win32':
     import win32con
@@ -777,7 +775,7 @@ def callback_realtime_added_directory(line):
 
 
 def callback_configuration_error(line):
-    match = re.match(r'.*CRITICAL: \(\d+\): Configuration error at', line)
+    match = re.match(r'.* \(\d+\): Configuration error at', line)
     if match:
         return True
     return None
@@ -795,6 +793,12 @@ def callback_integrity_message(line):
         match = re.match(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*({.*?})$", line)
         if match:
             return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S'), json.dumps(match.group(2))
+
+
+def callback_connection_message(line):
+    match = re.match(r'.* Connected to the server .*', line)
+    if match:
+        return True
 
 
 def callback_event_message(line):
@@ -816,6 +820,11 @@ def callback_empty_directories(line):
 
 def callback_real_time_whodata_started(line):
     if 'File integrity monitoring real-time Whodata engine started' in line:
+        return True
+
+
+def callback_non_existing_monitored_dir(line):
+    if 'Unable to add directory to real time monitoring:' in line or 'does not exist. Monitoring discarded.' in line:
         return True
 
 
@@ -1010,8 +1019,12 @@ class EventChecker:
                     error_msg = f"Expected data path was '{expected_path}' but event data path is '{data_path}'"
                     assert (expected_path in data_path), error_msg
                     if audit_path:
-                        error_msg = f"Expected audit path was '{expected_path}' but event audit path is '{audit_path}'"
-                        assert (expected_path in audit_path), error_msg
+                        try:
+                            error_msg = f"Expected audit path was '{expected_path}' " \
+                                        f"but event audit path is '{audit_path}'"
+                            assert (expected_path in audit_path), error_msg
+                        except AssertionError:
+                            pytest.xfail(reason='Xfailed due to issue: https://github.com/wazuh/wazuh/issues/4729')
 
         def filter_events(events, mask):
             """Returns a list of elements matching a specified mask in the events list using jq module."""

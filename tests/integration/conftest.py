@@ -15,12 +15,12 @@ from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_LOGS_PATH, WAZUH_CONF, ALERT_FILE_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_LOGS_PATH, WAZUH_CONF
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor
 from wazuh_testing.tools.monitoring import SocketController
-from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
+from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs, remove_logs
 from wazuh_testing.tools.services import delete_sockets
 from wazuh_testing.tools.time import TimeMachine
 
@@ -358,10 +358,6 @@ def configure_mitm_environment(request):
     mitm_list = list()
     log_monitors = list()
 
-    def remove_logs():
-        for root, dirs, files in os.walk(WAZUH_LOGS_PATH):
-            for file in files:
-                os.remove(os.path.join(root, file))
     remove_logs()
 
     # Truncate logs and create FileMonitors

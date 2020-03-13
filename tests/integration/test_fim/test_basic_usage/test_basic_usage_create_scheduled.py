@@ -74,8 +74,9 @@ def get_configuration(request):
     pytest.param('نصبسيط', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, 'cp720', marks=(pytest.mark.linux,
                                                                                      pytest.mark.darwin,
                                                                                      pytest.mark.sunos5)),
-    pytest.param('Ξ³ΞµΞΉΞ±', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, None, marks=(pytest.mark.win32,
-                                                                                    pytest.mark.xfail))
+    pytest.param('Ξ³ΞµΞΉΞ±', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, None,
+                 marks=(pytest.mark.win32,
+                        pytest.mark.xfail(reason='Xfail due to issue: https://github.com/wazuh/wazuh/issues/4612')))
 ])
 def test_create_file_scheduled(folder, name, filetype, content, checkers, tags_to_apply, encoding, get_configuration,
                                configure_environment, restart_syscheckd, wait_for_initial_scan):

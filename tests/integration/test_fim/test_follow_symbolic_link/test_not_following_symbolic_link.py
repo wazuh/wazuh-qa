@@ -46,19 +46,6 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope='function')
-def clean_directories(request):
-    directories = getattr(request.module, 'test_directories')
-    for folder in directories:
-        for the_file in os.listdir(folder):
-            file_path = os.path.join(folder, the_file)
-            try:
-                if os.path.isfile(file_path):
-                    os.unlink(file_path)
-            except Exception as e:
-                print(e)
-
-
 # tests
 
 @pytest.mark.parametrize('monitored_dir, non_monitored_dir1, non_monitored_dir2, sym_target, tags_to_apply', [
@@ -67,7 +54,7 @@ def clean_directories(request):
 ])
 def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_dir1, non_monitored_dir2,
                                                  sym_target, tags_to_apply, get_configuration, configure_environment,
-                                                 clean_directories, restart_syscheckd, wait_for_initial_scan):
+                                                 restart_syscheckd, wait_for_initial_scan):
     """
     Check what happens with a symlink and its target when syscheck monitors a directory with a symlink
     and not the symlink itself.
@@ -85,9 +72,9 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
         Non-monitored directory.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    name1 = 'regular1'
-    name2 = 'regular2'
-    sl_name = 'symlink'
+    name1 = f'{sym_target}regular1'
+    name2 = f'{sym_target}regular2'
+    sl_name = f'{sym_target}symlink'
     a_path = os.path.join(non_monitored_dir1, name1)
     b_path = os.path.join(non_monitored_dir1, name2) if sym_target == 'file' else non_monitored_dir2
     sl_path = os.path.join(monitored_dir, sl_name)
@@ -118,7 +105,16 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
     result = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                      error_message='Did not receive expected '
                                                    '"Sending FIM event: ..." event').result()
-    assert 'modified' in result['data']['type'], f"No 'modified' event when modifying symlink"
+    if 'modified' in result['data']['type']:
+        logger.info("Received modified event. No more events will be expected.")
+    elif 'deleted' in result['data']['type']:
+        logger.info("Received deleted event. Now an added event will be expected.")
+        result = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                                         error_message='Did not receive expected '
+                                                       '"Sending FIM event: ..." event').result()
+        assert 'added' in result['data']['type'], f"The event {result} should be of type 'added'"
+    else:
+        assert False, f"Detected event {result} should be of type 'modified' or 'deleted'"
 
     # Remove and restore the target file. Don't expect any events
     delete_file(b_path, name2)

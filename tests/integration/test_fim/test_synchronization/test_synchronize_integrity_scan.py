@@ -23,7 +23,7 @@ test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'test
 
 directory_str = ','.join(test_directories)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf_integrity_scan.yaml')
 testdir1, testdir2 = test_directories
 
 file_list = []

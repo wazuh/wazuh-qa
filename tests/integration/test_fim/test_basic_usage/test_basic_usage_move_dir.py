@@ -69,7 +69,7 @@ def extra_configuration_after_yield():
     (testdir3, testdir2, 'subdir2', {'ossec_conf'}, True, True),
     (testdir3, testdir2, f'subdir3{os.path.sep}', {'ossec_conf'}, True, True)
 ])
-def test_move_file(source_folder, target_folder, subdir, tags_to_apply,
+def test_move_dir(source_folder, target_folder, subdir, tags_to_apply,
                    triggers_delete_event, triggers_add_event,
                    get_configuration, configure_environment,
                    restart_syscheckd, wait_for_initial_scan):
@@ -96,7 +96,11 @@ def test_move_file(source_folder, target_folder, subdir, tags_to_apply,
     mode = get_configuration['metadata']['fim_mode']
 
     if mode == 'whodata' and subdir[-1] == os.path.sep and sys.platform == 'linux':
-        pytest.xfail('Xfailing due to audit bug with path ending in / shown as null.')
+        pytest.xfail('Xfailing due to issue: https://github.com/wazuh/wazuh/issues/4720')
+
+    if mode == 'whodata' and sys.platform == 'win32' and triggers_add_event:
+        pytest.xfail('Xfailing due to issue: https://github.com/wazuh/wazuh/issues/4596')
+
     # Move folder to target directory
     os.rename(os.path.join(source_folder, subdir), os.path.join(target_folder, subdir))
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
