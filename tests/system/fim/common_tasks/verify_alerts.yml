@@ -27,6 +27,8 @@
       {{ elastic_verification_extra_arguments }}
     args:
       executable: python3
+    environment:
+      PYTHONWARNINGS: "ignore:Unverified HTTPS request"
     when:
       - inventory_hostname in groups['masters']
     with_items:
