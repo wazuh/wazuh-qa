@@ -133,16 +133,18 @@ def write_wazuh_conf(wazuh_conf: List[str]):
         f.writelines(wazuh_conf)
 
 
-def set_section_wazuh_conf(section: str = 'syscheck', new_elements: List = None):
+def set_section_wazuh_conf(sections):
     """
     Set a configuration in a section of Wazuh. It replaces the content if it exists.
 
     Parameters
     ----------
-    section : str, optional
-        Section of Wazuh configuration to replace. Default `'syscheck'`
-    new_elements : list, optional
-        List with dictionaries for settings elements in the section. Default `None`
+    sections : list
+        list of dicts with section and new elements
+        section : str, optional
+            Section of Wazuh configuration to replace. Default `'syscheck'`
+        new_elements : list, optional
+            List with dictionaries for settings elements in the section. Default `None`
 
     Returns
     -------
@@ -245,19 +247,31 @@ def set_section_wazuh_conf(section: str = 'syscheck', new_elements: List = None)
         """
         return ET.tostringlist(elementTree.getroot(), encoding="unicode")
 
-    # get Wazuh configuration as a list of str
+    # Get Wazuh configuration as a list of str
     raw_wazuh_conf = get_wazuh_conf()
-    # generate a ElementTree representation of the previous list to work with its sections
+    # Generate a ElementTree representation of the previous list to work with its sections
     wazuh_conf = to_elementTree(purge_multiple_root_elements(raw_wazuh_conf))
-    section_conf = wazuh_conf.find(section)
-    # create section if it does not exist, clean otherwise
-    if not section_conf:
-        section_conf = ET.SubElement(wazuh_conf.getroot(), section)
-    else:
-        section_conf.clear()
-    # insert elements
-    if new_elements:
-        create_elements(section_conf, new_elements)
+    for section in sections:
+        section_conf = wazuh_conf.find(section['section'])
+        # Create section if it does not exist, clean otherwise
+        if not section_conf:
+            section_conf = ET.SubElement(wazuh_conf.getroot(), section)
+        else:
+            section_conf.clear()
+
+        # Insert section attributes
+        attributes = section.get('attributes')
+        if attributes:
+            for attribute in attributes:
+                if attribute is not None and isinstance(attribute, dict):  # noqa: E501
+                    for attr_name, attr_value in attribute.items():
+                        section_conf.attrib[attr_name] = str(attr_value)
+
+        # Insert elements
+        new_elements = section.get('elements')
+        if new_elements:
+            create_elements(section_conf, new_elements)
+
     return to_str_list(wazuh_conf)
 
 
