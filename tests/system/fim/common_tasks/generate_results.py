@@ -1,11 +1,13 @@
 import json
 import os
 
-def generate_result(scenario, host, action, passed, expected_alerts_num, 
-                    received_alerts_num, missing_paths, output_path, host_os, host_arch):
+
+def generate_result(scenario, host, action, passed, expected_alerts_num,
+                    received_alerts_num, missing_paths, output_path,
+                    host_os, host_arch):
 
     """
-    Generates a JSON file with the related testing info for each scenario 
+    Generates a JSON file with the related testing info for each scenario
     and for each agent host. If the file already exists, then it load it
     into a dictionary, modify it and re-write it. If not, then it creates it.
 
@@ -26,16 +28,16 @@ def generate_result(scenario, host, action, passed, expected_alerts_num,
     scenario_passed = True
     action_passed = True
 
-    if not passed: # In case of negative 'passed'
+    if not passed:  # In case of negative 'passed'
         global_passed = False
         scenario_passed = False
         action_passed = False
 
-    data = {} # Initialize data as empty dictionary.
+    data = {}  # Initialize data as empty dictionary.
 
     scenario_vars = {
             'passed': scenario_passed,
-            action: { 
+            action: {
                 'passed': action_passed,
                 'hosts': {},
             }
@@ -54,35 +56,43 @@ def generate_result(scenario, host, action, passed, expected_alerts_num,
     # file_exists registers if output_path exists or not
     file_exists = os.path.exists(output_path)
 
-    if file_exists: # In case output_path exists, then load it in a dic.
+    if file_exists:  # In case output_path exists, then load it in a dic.
         with open(output_path) as f:
             data = json.load(f)
 
-    else: # output_path does not exist.
+    else:  # output_path does not exist.
         data['json_verification'] = {
             'passed': global_passed,
             'scenarios': {}
         }
-    
-    data['json_verification']['passed'] = global_passed # setting the global 'passed' result
 
-    if scenario in data['json_verification']['scenarios']: # In case 'scenario' already exists
+    # setting the global 'passed' result
+    data['json_verification']['passed'] = global_passed
+
+    # In case 'scenario' already exists
+    if scenario in data['json_verification']['scenarios']:
 
         if not passed:
             data['json_verification']['scenarios'][scenario]['passed'] = False
 
         if data['json_verification']['scenarios'][scenario][action]:
             if not passed:
-                data['json_verification']['scenarios'][scenario][action]['passed'] = False
+                (data['json_verification']['scenarios']
+                    [scenario][action]['passed']) = False
         else:
-            data['json_verification']['scenarios'][scenario][action]['passed'] = action_passed
+            (data['json_verification']['scenarios']
+                [scenario][action]['passed']) = action_passed
 
-        data['json_verification']['scenarios'][scenario][action]['hosts'][host] = host_vars
+        (data['json_verification']['scenarios']
+            [scenario][action]['hosts'][host]) = host_vars
 
-    else: # In case the scenario does not exist.
-        data['json_verification']['scenarios'][scenario] = scenario_vars
-        data['json_verification']['scenarios'][scenario][action]['passed'] = action_passed
-        data['json_verification']['scenarios'][scenario][action]['hosts'][host] = host_vars
-        
-    with open(output_path, 'w') as outfile: # save data to 'output_path'
+    else:  # In case the scenario does not exist.
+        (data['json_verification']['scenarios']
+            [scenario]) = scenario_vars
+        (data['json_verification']['scenarios']
+            [scenario][action]['passed']) = action_passed
+        (data['json_verification']['scenarios']
+            [scenario][action]['hosts'][host]) = host_vars
+
+    with open(output_path, 'w') as outfile:  # save data to 'output_path'
         json.dump(data, outfile)
