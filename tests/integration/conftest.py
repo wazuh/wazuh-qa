@@ -20,7 +20,7 @@ from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor
 from wazuh_testing.tools.monitoring import SocketController
-from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs, remove_logs
+from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.services import delete_sockets
 from wazuh_testing.tools.time import TimeMachine
 
@@ -194,51 +194,6 @@ def pytest_runtest_makereport(item, call):
             report.extra = extra
 
 
-@pytest.fixture(scope='module')
-def configure_environment_standalone_daemons(request):
-    """Configure a custom environment for testing with specific Wazuh daemons only. Stopping wazuh-service is needed."""
-
-    def remove_logs():
-        """Remove all Wazuh logs"""
-        for root, dirs, files in os.walk(WAZUH_LOGS_PATH):
-            for file in files:
-                os.remove(os.path.join(root, file))
-
-    # Stop wazuh-service and ensure all daemons are stopped
-    control_service('stop')
-    check_daemon_status(running=False)
-
-    # Start selected daemons in debug mode and ensure they are running
-    for daemon in getattr(request.module, 'used_daemons'):
-        control_service('start', daemon=daemon, debug_mode=True)
-        check_daemon_status(running=True, daemon=daemon)
-
-    # Clear all Wazuh logs
-    truncate_file(LOG_FILE_PATH)
-
-    # Call extra functions before yield
-    if hasattr(request.module, 'extra_configuration_before_yield'):
-        func = getattr(request.module, 'extra_configuration_before_yield')
-        func()
-
-    yield
-
-    # Call extra functions after yield
-    if hasattr(request.module, 'extra_configuration_after_yield'):
-        func = getattr(request.module, 'extra_configuration_after_yield')
-        func()
-
-    # Stop selected daemons
-    for daemon in getattr(request.module, 'used_daemons'):
-        control_service('stop', daemon=daemon)
-
-    # Remove all remaining Wazuh sockets
-    delete_sockets()
-
-    # Remove all Wazuh logs
-    remove_logs()
-
-
 def connect_to_sockets(request):
     """Connect to the specified sockets for the test."""
     receiver_sockets_params = getattr(request.module, 'receiver_sockets_params')
@@ -357,8 +312,6 @@ def configure_mitm_environment(request):
     monitored_sockets = list()
     mitm_list = list()
     log_monitors = list()
-
-    remove_logs()
 
     # Truncate logs and create FileMonitors
     for log in log_monitor_paths:

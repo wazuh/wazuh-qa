@@ -10,7 +10,7 @@ import yaml
 from wazuh_testing import global_parameters
 from wazuh_testing.analysis import callback_analysisd_message, callback_wazuh_db_message, callback_fim_alert, \
     validate_analysis_alert
-from wazuh_testing.tools import ALERT_FILE_PATH, WAZUH_PATH
+from wazuh_testing.tools import ALERT_FILE_PATH, WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import ManInTheMiddle
 
 # Marks
@@ -26,7 +26,7 @@ with open(messages_path) as f:
 
 # Variables
 
-log_monitor_paths = [ALERT_FILE_PATH]
+log_monitor_paths = [LOG_FILE_PATH, ALERT_FILE_PATH]
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
 analysis_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'queue'))
 
@@ -68,6 +68,6 @@ def test_event_messages(configure_mitm_environment, connect_to_sockets_module, w
         response = monitored_sockets[0].start(timeout=global_parameters.default_timeout,
                                               callback=callback_wazuh_db_message).result()
         assert response == expected, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1, stage['stage'])
-        alert = log_monitors[0].start(timeout=global_parameters.default_timeout,
+        alert = log_monitors[1].start(timeout=global_parameters.default_timeout,
                                       callback=callback_fim_alert).result()
         validate_analysis_alert(alert)

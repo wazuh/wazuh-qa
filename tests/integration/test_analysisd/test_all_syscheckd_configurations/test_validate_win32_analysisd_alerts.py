@@ -8,7 +8,7 @@ import pytest
 import yaml
 
 from wazuh_testing.analysis import validate_analysis_alert_complex
-from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, ALERT_FILE_PATH
 from wazuh_testing.tools.monitoring import ManInTheMiddle
 
 # Marks
@@ -24,7 +24,7 @@ with open(messages_path) as f:
 
 # Variables
 
-log_monitor_paths = []
+log_monitor_paths = [LOG_FILE_PATH, ALERT_FILE_PATH]
 analysis_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'queue'))
 
 receiver_sockets_params = [(analysis_path, 'AF_UNIX', 'UDP')]

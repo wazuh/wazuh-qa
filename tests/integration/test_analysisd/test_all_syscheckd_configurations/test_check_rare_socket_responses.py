@@ -9,7 +9,7 @@ import yaml
 
 from wazuh_testing import global_parameters
 from wazuh_testing.analysis import callback_analysisd_message, callback_wazuh_db_message
-from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import ManInTheMiddle
 
 # Marks
@@ -25,7 +25,7 @@ with open(messages_path) as f:
 
 # Variables
 
-log_monitor_paths = []
+log_monitor_paths = [LOG_FILE_PATH]
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
 analysis_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'queue'))
 

@@ -191,15 +191,6 @@ def check_daemon_status(daemon=None, running=True, timeout=10):
                            f"{'is not' if running is True else 'is'} running")
 
 
-def remove_logs():
-    try:
-        for root, dirs, files in os.walk(WAZUH_LOGS_PATH):
-            for file in files:
-                os.remove(os.path.join(root, file))
-    except:
-        pass
-
-
 def delete_dbs():
     for root, dirs, files in os.walk(QUEUE_DB_PATH):
         for file in files:
