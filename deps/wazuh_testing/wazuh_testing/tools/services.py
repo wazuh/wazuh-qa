@@ -10,7 +10,7 @@ from subprocess import check_call
 
 import psutil
 
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_SERVICE, WAZUH_SOCKETS
+from wazuh_testing.tools import WAZUH_PATH, WAZUH_SERVICE, WAZUH_SOCKETS, WAZUH_LOGS_PATH, QUEUE_DB_PATH
 from wazuh_testing.tools.configuration import write_wazuh_conf
 
 
@@ -61,7 +61,10 @@ def delete_sockets(path=None):
             path = os.path.join(WAZUH_PATH, 'queue', 'ossec')
             for file in os.listdir(path):
                 os.remove(os.path.join(path, file))
-            os.remove(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
+            if os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb')):
+                os.remove(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
+            if os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'cluster', 'c-internal.sock')):
+                os.remove(os.path.join(WAZUH_PATH, 'queue', 'cluster', 'c-internal.sock'))
         else:
             for item in path:
                 os.remove(item)
@@ -114,8 +117,8 @@ def control_service(action, daemon=None, debug_mode=False):
                 control_service('stop', daemon=daemon)
                 control_service('start', daemon=daemon)
             elif action == 'stop':
-                for proc in psutil.process_iter(attrs=['name']):
-                    proc.name() == daemon and proc.terminate()
+                for proc in psutil.process_iter():
+                    any(daemon in cmd for cmd in proc.cmdline()) and proc.terminate()
                 delete_sockets(WAZUH_SOCKETS[daemon])
             else:
                 daemon_path = os.path.join(WAZUH_PATH, 'bin')
@@ -186,3 +189,18 @@ def check_daemon_status(daemon=None, running=True, timeout=10):
     else:
         raise TimeoutError(f"{'wazuh-service' if daemon is None else daemon} "
                            f"{'is not' if running is True else 'is'} running")
+
+
+def remove_logs():
+    try:
+        for root, dirs, files in os.walk(WAZUH_LOGS_PATH):
+            for file in files:
+                os.remove(os.path.join(root, file))
+    except:
+        pass
+
+
+def delete_dbs():
+    for root, dirs, files in os.walk(QUEUE_DB_PATH):
+        for file in files:
+            os.remove(os.path.join(root, file))
