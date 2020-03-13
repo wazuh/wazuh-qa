@@ -12,19 +12,17 @@
       - "{{ agents_results_manager_path }}/modified/missing"
       - "{{ agents_results_manager_path }}/deleted/missing"
 
-
-
   when:
     - inventory_hostname in groups['masters']
   become: yes
 
-- block:
-  - name: Remove old agents_output
-    file:
-      path: "./agents_output"
-      state: absent
-    run_once: True
+- name: Remove old agents_output
+  file:
+    path: "./agents_output"
+    state: absent
+  run_once: True
 
+- block:
   - name: Create {{ agents_linux_output_path }} to store outputs in Agents hosts | Linux
     file:
       path: "{{ agents_linux_output_path }}"
