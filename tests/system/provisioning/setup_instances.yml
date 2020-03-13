@@ -1,16 +1,16 @@
 ---
- - hosts: all
-   # Disabling gather_facts phase, not required for this task and could cause incompatibilities
-   gather_facts: no
-   tasks:
-     - name: Verifying connection with the hosts
-       wait_for_connection:
-         delay: 5
-         sleep: 5
-         # Centos instance takes a while to initialize
-         timeout: 180
-   # Stopping the playbook if one of the hosts fails
-   any_errors_fatal: true
+  - hosts: all
+    # Disabling gather_facts phase, not required for this task and could cause incompatibilities
+    gather_facts: no
+    tasks:
+      - name: Verifying connection with the hosts
+        wait_for_connection:
+          delay: 5
+          sleep: 5
+          # Centos instance takes a while to initialize
+          timeout: 180
+    # Stopping the playbook if one of the hosts fails
+    any_errors_fatal: true
 
   - hosts: all, !windowsagents # "!" ignores groups. "windows" do not apply to this
     strategy: free
