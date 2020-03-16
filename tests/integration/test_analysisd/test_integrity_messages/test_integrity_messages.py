@@ -14,7 +14,7 @@ from wazuh_testing.tools import WAZUH_PATH
 
 # marks
 
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 # variables
 

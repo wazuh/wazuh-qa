@@ -16,7 +16,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
-pytestmark = pytest.mark.tier(level=1)
+pytestmark = [pytest.mark.tier(level=1), pytest.mark.agent]
 
 # Variables
 test_directories_no_delete = [os.path.join(PREFIX, 'testdir1')]
