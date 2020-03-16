@@ -49,7 +49,7 @@ class Parameters:
         -------
         boolean representing if fim_database_memory is activated
         """
-        return self._default_timeout
+        return self._fim_database_memory
 
     @fim_database_memory.setter
     def fim_database_memory(self, value):
@@ -61,7 +61,7 @@ class Parameters:
         value : bool
             New value for the fim_database_memory.
         """
-        self._default_timeout = value
+        self._fim_database_memory = value
 
     @property
     def current_configuration(self):
