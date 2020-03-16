@@ -411,7 +411,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-s", "--sleep", type=int, required=False, dest='sleep_time',
-        help="Sleep time between retries", default="30"
+        help="Sleep time between retries", default="15"
     )
     parser.add_argument(
         "-w", "--whodata", required=False, dest='whodata_query',

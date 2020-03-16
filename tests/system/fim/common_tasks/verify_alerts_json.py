@@ -139,7 +139,7 @@ def main():
                             default="debug_missing_file_alerts.log")
 
         parser.add_argument("-s", "--sleep", type=int, required=False, dest='sleep_time',
-          help="Sleep time between retries", default="30"
+          help="Sleep time between retries", default="15"
         )
 
         parser.add_argument("-r", "--retry", type=int, required=False, dest='retry_count',
