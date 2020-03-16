@@ -8,7 +8,7 @@
       -o "json-{{ missing_alerts_json_path }}-{{ event }}-{{ item }}"
       -sn {{ scenario_name }}
       -ho {{ item }}
-      -ro {{ fim_test_results }}/result_es.json
+      -ro {{ fim_test_results }}/result_json.json
       {{ json_verification_extra_arguments }}
     args:
       executable: "python3"
