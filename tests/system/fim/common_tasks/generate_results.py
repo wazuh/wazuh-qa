@@ -28,6 +28,7 @@ def generate_result(scenario, host, action, passed, expected_alerts_num,
     action_passed = True
 
     if not passed:  # In case of negative 'passed'
+        print("sdasda")
         scenario_passed = False
         action_passed = False
 
@@ -42,8 +43,6 @@ def generate_result(scenario, host, action, passed, expected_alerts_num,
     }
 
     host_vars = {
-            #'host_os': host_os,
-            #'host_arch': host_arch,
             'passed': passed,
             'expected_alerts': expected_alerts_num,
             'received_alerts': received_alerts_num,
