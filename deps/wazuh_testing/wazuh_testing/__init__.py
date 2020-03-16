@@ -15,6 +15,7 @@ class Parameters:
         timeouts['linux'] = 5
         timeouts['darwin'] = 5
         self._default_timeout = timeouts[sys.platform]
+        self._fim_database_memory = False
 
     @property
     def default_timeout(self):
@@ -36,6 +37,29 @@ class Parameters:
         ----------
         value : int
             New value for the default timeout. Must be in seconds.
+        """
+        self._default_timeout = value
+
+    @property
+    def fim_database_memory(self):
+        """
+        Getter method for the fim_database_memory property
+
+        Returns
+        -------
+        boolean representing if fim_database_memory is activated
+        """
+        return self._default_timeout
+
+    @fim_database_memory.setter
+    def fim_database_memory(self, value):
+        """
+        Setter method for the fim_database_memory property
+
+        Parameters
+        ----------
+        value : bool
+            New value for the fim_database_memory.
         """
         self._default_timeout = value
 

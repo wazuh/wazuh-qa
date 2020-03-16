@@ -90,6 +90,11 @@ def pytest_addoption(parser):
              "those with a hardcoded timeout not depending on global_parameters.default_timeout "
              "variable from wazuh_testing package"
     )
+    parser.addoption(
+        "--fim-database-memory",
+        action="store_true",
+        help="run tests activating database memory in the syscheck configuration"
+    )
 
 
 def pytest_configure(config):
@@ -102,6 +107,11 @@ def pytest_configure(config):
     default_timeout = config.getoption("--default-timeout")
     if default_timeout:
         global_parameters.default_timeout = default_timeout
+
+    # Set default timeout only if it is passed through command line args
+    fim_database_memory = config.getoption("--fim-database-memory")
+    if fim_database_memory:
+        global_parameters.fim_database_memory = True
 
 
 def pytest_html_results_table_header(cells):
