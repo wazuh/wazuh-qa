@@ -44,8 +44,8 @@ def generate_result(scenario, host, action, passed, expected_alerts_num,
     }
 
     host_vars = {
-            'host_os': host_os,
-            'host_arch': host_arch,
+            #'host_os': host_os,
+            #'host_arch': host_arch,
             'passed': passed,
             'expected_alerts': expected_alerts_num,
             'received_alerts': received_alerts_num,
