@@ -3,7 +3,7 @@
   - name: "Verify alert json log | {{ event }}"
     script: >
       verify_alerts_json.py 
-      -i "{{ agents_results_manager_path }}/{{ event }}/files_{{ event }}.txt-{{ item }}" 
+      -i "{{ agents_results_manager_path }}/{{ event }}/files_{{ event }}-{{ item }}.txt" 
       -e {{ event }}
       -o "{{ missing_alerts_json_path }}-{{ event }}-{{ item }}" 
       {{ json_verification_extra_arguments }}
@@ -18,7 +18,7 @@
   - name: "Verify elastic alerts | {{ event }}"
     script: >
       verify_alerts_elasticsearch.py 
-      -i "{{ agents_results_manager_path }}/{{ event }}/files_{{ event }}.txt-{{ item }}" 
+      -i "{{ agents_results_manager_path }}/{{ event }}/files_{{ event }}-{{ item }}.txt" 
       -e {{ event }}
       -a {{ hostvars[groups["elasticsearch"][0]]["private_ip"] }}
       -o "{{ missing_alerts_elasticsearch_path }}-{{ event }}-{{ item }}"
