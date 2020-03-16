@@ -227,15 +227,16 @@ This is a sample yaml used for `FIM`:
   - sample_tag
   apply_to_modules:
   - sample_module
-  section: syscheck
-  elements:
-  - disabled:
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
       value: 'no'
-  - directories:
+    - directories:
       value: '/sample_directory'
       attributes:
       - check_all: 'yes'
-  - nodiff:
+    - nodiff:
       value: '/sample_directory/nodiff_file'
 ```
 
