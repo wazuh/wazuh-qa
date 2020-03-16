@@ -4,6 +4,7 @@
 
 import json
 import os
+import re
 import sys
 import uuid
 from datetime import datetime
@@ -13,22 +14,31 @@ from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_LOGS_PATH, WAZUH_CONF, QUEUE_DB_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_LOGS_PATH, WAZUH_CONF, WAZUH_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, SocketController, SocketMonitor
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_sockets
 
-ALL = set("darwin linux win32 sunos5".split())
-
+PLATFORMS = set("darwin linux win32 sunos5".split())
+TYPES = set("server agent".split())
 
 catalog = list()
 
 
 def pytest_runtest_setup(item):
-    supported_platforms = ALL.intersection(mark.name for mark in item.iter_markers())
+    # Find if platform applies
+    supported_platforms = PLATFORMS.intersection(mark.name for mark in item.iter_markers())
     plat = sys.platform
     if supported_platforms and plat not in supported_platforms:
         pytest.skip("Cannot run on platform {}".format(plat))
+
+    # Find if host type applies (agent or server)
+    with open(os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')) as f:
+        reg = r'TYPE=\"(.*)\"$'
+        host_type = re.findall(reg, f.read())[0]
+        if host_type not in TYPES.intersection(mark.name for mark in item.iter_markers()):
+            pytest.skip("Cannot run on wazuh {}".format(host_type))
+
     # Consider only first mark
     levels = [mark.kwargs['level'] for mark in item.iter_markers(name="tier")]
     if levels and len(levels) > 0:
