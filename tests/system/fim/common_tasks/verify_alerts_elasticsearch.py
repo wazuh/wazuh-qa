@@ -407,11 +407,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "-r", "--retry", type=int, required=False, dest='max_retry',
         help="reading attempts on stopped alerts. default: 4 attemps",
-        default="4"
+        default="3"
     )
     parser.add_argument(
         "-s", "--sleep", type=int, required=False, dest='sleep_time',
-        help="Sleep time between retries", default="60"
+        help="Sleep time between retries", default="30"
     )
     parser.add_argument(
         "-w", "--whodata", required=False, dest='whodata_query',

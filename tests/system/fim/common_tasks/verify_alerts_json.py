@@ -53,7 +53,7 @@ def alerts_prune(path, target_event, diff_statement=None):
                             add_path = False
                     if add_path:
                         alerts_list.append(data)
-                    add_path = True   
+                    add_path = True
             except ValueError:
                 continue
     return set([alerts['syscheck']['path'] for alerts in alerts_list])
@@ -139,12 +139,12 @@ def main():
                             default="debug_missing_file_alerts.log")
 
         parser.add_argument("-s", "--sleep", type=int, required=False, dest='sleep_time',
-          help="Sleep time between retries", default="60"
+          help="Sleep time between retries", default="30"
         )
 
         parser.add_argument("-r", "--retry", type=int, required=False, dest='retry_count',
                             help="reading attempts on stopped alerts. default: 4 attemps",
-                            default="4")
+                            default="3")
         parser.add_argument("-d", "--diff", type=str, required=False, dest='diff_string',
                             help="When syscheck:report_changes enabled, represents the diff text")
         parser.add_argument("-w", "--whodata", required=False, dest='whodata_check',
