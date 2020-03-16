@@ -12,7 +12,10 @@ from elasticsearch import Elasticsearch
 from time import sleep, time
 import logging
 import copy
+import sys
 
+sys.path.append('/home/vagrant')
+from generate_results import generate_result
 
 
 def setElasticsearch(ElasticIP):

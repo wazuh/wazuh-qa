@@ -14,6 +14,12 @@ import json
 import logging
 import argparse
 
+import sys
+sys.path.append('/home/vagrant')
+
+from generate_results import generate_result
+
+
 if sys.version_info.major < 3:
     print('ERROR: Python 2 is not supported.')
     sys.exit(1)
