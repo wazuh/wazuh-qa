@@ -24,6 +24,6 @@ def detect_initial_master_serving(request):
 @pytest.fixture(scope='module')
 def send_initial_worker_hello(connect_to_sockets_module):
     """Send initial hello to master"""
-    message = cluster_msg_build(b'hello', 0, b'worker1 wazuh worker 3.12', encrypt=True)
+    message = cluster_msg_build(cmd=b'hello', counter=0, payload=b'worker1 wazuh worker 3.12', encrypt=True)
     connect_to_sockets_module[0].send(message)
     connect_to_sockets_module[0].receive()

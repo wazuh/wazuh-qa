@@ -11,7 +11,8 @@ import struct
 from cryptography.fernet import Fernet
 
 CLUSTER_DATA_HEADER_SIZE = 20
-CLUSTER_HEADER_FORMAT = '!2I{}s'.format(12)
+CLUSTER_CMD_HEADER_SIZE = 12
+CLUSTER_HEADER_FORMAT = '!2I{}s'.format(CLUSTER_CMD_HEADER_SIZE)
 FERNET_KEY = ''.join(random.choices(string.ascii_lowercase + string.digits, k=32))
 _my_fernet = Fernet(base64.b64encode(FERNET_KEY.encode()))
 
@@ -29,7 +30,7 @@ def callback_detect_worker_connected(line):
 
 
 def callback_clusterd_keypoll(item):
-    return process_clusterd_message(item, command=b'run_keypoll ')
+    return _process_clusterd_message(item, command=b'run_keypoll')
 
 
 def detect_initial_worker_connected(file_monitor):
@@ -66,17 +67,17 @@ def detect_initial_master_serving(file_monitor):
     file_monitor.start(timeout=5, callback=callback_detect_master_serving)
 
 
-def cluster_msg_build(command: bytes, counter: int, data: bytes, encrypt=True) -> bytes:
+def cluster_msg_build(cmd: bytes = None, counter: int = None, payload: bytes = None, encrypt=True) -> bytes:
     """
     Build a message using cluster protocol.
 
     Parameters
     ----------
-    command : bytes
+    cmd : bytes
         command to send
     counter : int
         message id
-    data : bytes
+    payload : bytes
         data to send
     encrypt : bool
         whether to use fernet encryption or not
@@ -86,40 +87,40 @@ def cluster_msg_build(command: bytes, counter: int, data: bytes, encrypt=True) -
     bytes
         built message
     """
-    cmd_len = len(command)
-    if cmd_len > 12:
-        raise Exception("Length of command '{}' exceeds limit ({}/{}).".format(command, cmd_len, 12))
+    cmd_len = len(cmd)
+    if cmd_len > CLUSTER_CMD_HEADER_SIZE:
+        raise Exception("Length of command '{}' exceeds limit ({}/{}).".format(cmd, cmd_len,
+                                                                               CLUSTER_CMD_HEADER_SIZE))
 
-    encrypted_data = _my_fernet.encrypt(data) if encrypt else data
-    out_msg = bytearray(20 + len(encrypted_data))
-    header_format = '!2I{}s'.format(12)
+    encrypted_data = _my_fernet.encrypt(payload) if encrypt else payload
+    out_msg = bytearray(CLUSTER_DATA_HEADER_SIZE + len(encrypted_data))
 
     # Add - to command until it reaches cmd length
-    command = command + b' ' + b'-' * (12 - cmd_len - 1)
+    cmd = cmd + b' ' + b'-' * (CLUSTER_CMD_HEADER_SIZE - cmd_len - 1)
 
-    out_msg[:20] = struct.pack(header_format, counter, len(encrypted_data), command)
-    out_msg[20:20 + len(encrypted_data)] = encrypted_data
+    out_msg[:CLUSTER_DATA_HEADER_SIZE] = struct.pack(CLUSTER_HEADER_FORMAT, counter, len(encrypted_data), cmd)
+    out_msg[CLUSTER_DATA_HEADER_SIZE:CLUSTER_DATA_HEADER_SIZE + len(encrypted_data)] = encrypted_data
 
-    return bytes(out_msg[:20 + len(encrypted_data)])
+    return bytes(out_msg[:CLUSTER_DATA_HEADER_SIZE + len(encrypted_data)])
 
 
-def master_action(counter, cmd, payload):
+def _master_action(counter: int = None, cmd: bytes = None, payload: bytes = None, **kwargs):
     """
     Define and handle master related actions.
 
     Parameters
     ----------
-    counter
+    counter : int
         message id
-    cmd
+    cmd : bytes
         received command
-    payload
+    payload : bytes
         received payload
 
     Returns
     -------
-    list
-        list with cmd, counter and payload to respond
+    dict
+        cmd, counter and payload to respond
     """
     # Available commands to handle from master side
     if cmd == b'hello':
@@ -136,31 +137,50 @@ def master_action(counter, cmd, payload):
 
     response_counter = counter
 
-    return response_cmd, response_counter, response_payload
+    return {'cmd': response_cmd, 'counter': response_counter, 'payload': response_payload}
 
 
-def get_info_from_header(header: bytes):
+def _get_info_from_header(data: bytes):
     """
     Get information contained in the message's header.
 
     Parameters
     ----------
-    header
-        raw header to process
+    data
+        raw data to process
 
     Returns
     -------
-    list
-        counter, cmd, payload extracted from header
+    dict
+        counter, cmd, total extracted from header
     """
-    counter, total, cmd = struct.unpack(CLUSTER_HEADER_FORMAT, header)
-
+    counter, total, cmd = struct.unpack(CLUSTER_HEADER_FORMAT, data[0:CLUSTER_DATA_HEADER_SIZE])
     cmd = cmd.split(b' ')[0]
 
-    return counter, total, cmd
+    return {'counter': counter, 'total': total, 'cmd': cmd}
 
 
-def master_simulator(data: bytes = None):
+def _cluster_message_decompose(data: bytes):
+    """
+    Get all information contained in the cluster message.
+
+    Parameters
+    ----------
+    data
+        raw cluster data to process
+
+    Returns
+    -------
+    dict
+        header + decrypted payload from data
+    """
+    decomposed_message = _get_info_from_header(data)
+    decomposed_message['payload'] = _my_fernet.decrypt(data[CLUSTER_DATA_HEADER_SIZE:])
+
+    return decomposed_message
+
+
+def master_simulator(data: bytes):
     """
     Handler to simulate a wazuh master node behaviour.
 
@@ -176,15 +196,12 @@ def master_simulator(data: bytes = None):
     """
     header = data[0:CLUSTER_DATA_HEADER_SIZE]
     if header != b'':
-        counter, total, cmd = get_info_from_header(header)
-        payload = _my_fernet.decrypt(data[CLUSTER_DATA_HEADER_SIZE:])
-
-        return cluster_msg_build(*master_action(counter, cmd, payload))
+        return cluster_msg_build(**_master_action(**_cluster_message_decompose(data)))
     else:
         return b''
 
 
-def process_clusterd_message(tup, command: bytes = None):
+def _process_clusterd_message(tup, command: bytes = None):
     """
     Process a clusterd message that matches the given command.
 
@@ -201,8 +218,6 @@ def process_clusterd_message(tup, command: bytes = None):
         dictionary with counter, total, cmd and payload data
     """
     if isinstance(tup, tuple):
-        header = tup[0][0:CLUSTER_DATA_HEADER_SIZE]
-        counter, total, cmd = struct.unpack(CLUSTER_HEADER_FORMAT, header)
-        if cmd == command:
-            payload = _my_fernet.decrypt(tup[0][CLUSTER_DATA_HEADER_SIZE:])
-            return {'counter': counter, 'total': total, 'cmd': cmd, 'payload': payload}
+        decomposed_data = _cluster_message_decompose(tup[0])
+        if decomposed_data['cmd'] == command:
+            return decomposed_data

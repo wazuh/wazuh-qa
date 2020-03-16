@@ -43,6 +43,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 
 def callback_krequest(item):
+    # Regex to match krequest socket received message being id:AGENT_VALID_ID or ip:AGENT_VALID_IP
     reg = r'^(id:[\d]{3}|ip:((\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.){3}(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5]))'
     match = re.match(reg, item.decode())
     if match:
@@ -68,6 +69,11 @@ def test_key_polling_master(cmd, counter, payload, expected, configure_environme
     """
     Test master behaviour with agent key-polling.
 
+    This test uses a fictional worker node to test wazuh master behaviour against agent-key-polling messages. After
+    connecting the fictional worker to the master and sending the initial hello, the test sends another worker simulated
+    message representing a key-polling request. Then, we ensure that the master completed his duty by checking the
+    received message in the other end, in this case, krequest socket handled by modulesd.
+
     Parameters
     ----------
     cmd : bytes
@@ -80,7 +86,7 @@ def test_key_polling_master(cmd, counter, payload, expected, configure_environme
         Expected message in krequest socket
     """
     # Build message and send it to the master
-    message = cluster_msg_build(cmd, counter, payload, encrypt=True)
+    message = cluster_msg_build(cmd=cmd, counter=counter, payload=payload, encrypt=True)
     receiver_sockets[0].send(message)
 
     # Ensure krequest socket (modulesd socket for key-polling) receives the appropriate data

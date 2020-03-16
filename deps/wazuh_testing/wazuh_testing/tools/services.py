@@ -192,6 +192,7 @@ def check_daemon_status(daemon=None, running=True, timeout=10):
 
 
 def delete_dbs():
+    """Delete all wazuh-db databases"""
     for root, dirs, files in os.walk(QUEUE_DB_PATH):
         for file in files:
             os.remove(os.path.join(root, file))

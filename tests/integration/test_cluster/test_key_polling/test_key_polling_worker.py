@@ -64,6 +64,11 @@ def test_key_polling_worker(cmd, counter, payload, configure_environment, config
     """
     Test worker behaviour with agent key-polling.
 
+    This test uses a fictional master node to test wazuh worker behaviour against agent-key-polling messages. After
+    connecting the worker to the simulated master, the test simulates a key-polling request message from remoted by
+    sending a message to the worker local socket. Then, we ensure that the worker completed his duty by checking the
+    received message in the other end, in this case, the fictional master node.
+
     Parameters
     ----------
     cmd : bytes
@@ -73,8 +78,8 @@ def test_key_polling_worker(cmd, counter, payload, configure_environment, config
     payload : bytes
         Cluster message payload data
     """
-    # Build message to send to c-internal.sock in the worker, send it and consume the response
-    message = cluster_msg_build(cmd, counter, payload, encrypt=False)
+    # Build message to send to c-internal.sock in the worker and send it
+    message = cluster_msg_build(cmd=cmd, counter=counter, payload=payload, encrypt=False)
     receiver_sockets[0].send(message)
 
     try:

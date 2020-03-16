@@ -432,6 +432,14 @@ class Queue(queue.Queue):
         return aux_queue.get(*args, **kwargs)
 
 
+class StreamServerPort(socketserver.ThreadingTCPServer):
+    pass
+
+
+class DatagramServerPort(socketserver.ThreadingUDPServer):
+    pass
+
+
 if hasattr(socketserver, 'ThreadingUnixStreamServer'):
 
     class StreamServerUnix(socketserver.ThreadingUnixStreamServer):
@@ -444,11 +452,6 @@ if hasattr(socketserver, 'ThreadingUnixStreamServer'):
         def shutdown_request(self, request):
             pass
 
-    class StreamServerPort(socketserver.ThreadingTCPServer):
-        pass
-
-    class DatagramServerPort(socketserver.ThreadingUDPServer):
-        pass
 
     class StreamHandler(socketserver.BaseRequestHandler):
 
