@@ -1,0 +1,91 @@
+- name : Create results directory
+  file:
+    path: "test_results/{{ item }}"
+    state: directory
+  with_items:
+    - "json"
+    - "actions"
+    - "agent_state"
+  delegate_to: 127.0.0.1
+
+- name: Fetch json result files
+  synchronize:
+    mode: pull
+    src: /opt/fim_tests_results/
+    dest: test_results/json/
+  when:
+    - inventory_hostname in groups['masters']
+
+
+- block:
+  - name: Create Linux state directory
+    file:
+      path: "/opt/fim_test_results/{{ ansible_host }}"
+      state: directory
+
+  - name: Save Linux agent state
+    copy:
+      src: "{{ item }}"
+      dest: "/opt/fim_test_results/{{ ansible_host }}/"
+      remote_src: yes
+    with_items:
+      - "/var/ossec/etc/ossec.conf"
+      - "/var/ossec/logs/ossec.log"
+      - "/etc/ossec-init.conf"
+      - "/var/ossec/etc/internal_options.conf"
+      - "/var/ossec/var/run/ossec-agentd.state"
+
+  - name: Fetch Linux agent state
+    synchronize:
+      mode: pull
+      src: "/opt/fim_test_results/{{ ansible_host }}/"
+      dest: "test_results/agent_state/{{ ansible_host }}/"
+      recursive: yes
+      delete: yes
+  when:
+    - inventory_hostname in groups['linuxagents']
+
+- block:
+  - name: Create Windows state directory
+    win_file:
+      path: "c:/fim_test_results/{{ ansible_host }}"
+      state: directory
+
+  - name: Save Windows agent state
+    win_copy:
+      src: "{{ windows_ossec_folder_path }}\\{{ item }}"
+      dest: "c:\\fim_test_results\\{{ ansible_host }}\\"
+      remote_src: yes
+    with_items:
+      - "ossec.conf"
+      - "ossec.log"
+      - "internal_options.conf"
+      - "ossec-agent.state"
+
+  - name: Gather Windows state file
+    win_find:
+      paths: "c:\\fim_test_results\\{{ ansible_host }}\\"
+    register: windows_state
+
+  - name: Fetch Windows agent state
+    fetch:
+      src: "{{ item.path }}"
+      dest: "test_results/agent_state/{{ ansible_host }}/"
+      flat: yes
+    with_items: "{{ windows_state.files }}"
+  when:
+    - inventory_hostname in groups['windowsagents']
+
+- name: Get added files in agents output
+  find:
+    paths: agents_output/added/
+    recurse: no
+    file_type: file
+  register: added_files
+  delegate_to: 127.0.0.1
+
+- name: Summarize added files
+  script: "summarize_action.py --action added --action-results {{ item }}"
+  with_items:
+    - "{{ added_files.files }}"
+  delegate_to: 127.0.0.1
