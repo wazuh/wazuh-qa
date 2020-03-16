@@ -20,7 +20,7 @@ from wazuh_testing.tools.monitoring import FileMonitor, SocketController, Socket
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_sockets
 
 PLATFORMS = set("darwin linux win32 sunos5".split())
-TYPES = set("server agent".split())
+HOST_TYPES = set("server agent".split())
 
 catalog = list()
 
@@ -36,7 +36,8 @@ def pytest_runtest_setup(item):
     with open(os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')) as f:
         reg = r'TYPE=\"(.*)\"$'
         host_type = re.findall(reg, f.read())[0]
-        if host_type not in TYPES.intersection(mark.name for mark in item.iter_markers()):
+        supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())
+        if supported_types and host_type not in supported_types:
             pytest.skip("Cannot run on wazuh {}".format(host_type))
 
     # Consider only first mark
