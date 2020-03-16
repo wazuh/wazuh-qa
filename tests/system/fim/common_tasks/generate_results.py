@@ -73,16 +73,16 @@ def generate_result(scenario, host, action, passed, expected_alerts_num,
         if not passed:
             data['json_verification']['scenarios'][scenario]['passed'] = False
 
-        if data['json_verification']['scenarios'][scenario][action]:
+        if action in data['json_verification']['scenarios'][scenario] :
             if not passed:
                 (data['json_verification']['scenarios']
                     [scenario][action]['passed']) = False
         else:
             (data['json_verification']['scenarios']
-                [scenario][action]['passed']) = action_passed
+                [scenario][action]) = { 'passed' : action_passed }
 
         (data['json_verification']['scenarios']
-            [scenario][action]['hosts'][host]) = host_vars
+            [scenario][action]['hosts']) = { host: host_vars }
 
     else:  # In case the scenario does not exist.
         (data['json_verification']['scenarios']
