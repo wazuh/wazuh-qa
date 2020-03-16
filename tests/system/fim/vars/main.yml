@@ -1,6 +1,6 @@
 # scenario related
 scenario_name: ""
-
+fim_test_results: "/opt/fim_test_results"
 # ossec folder path
 linux_ossec_folder_path: "/var/ossec"
 windows_ossec_folder_path: "C:\\Program Files (x86)\\ossec-agent"
