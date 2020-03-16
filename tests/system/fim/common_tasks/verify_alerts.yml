@@ -5,7 +5,10 @@
       verify_alerts_json.py 
       -i "{{ agents_results_manager_path }}/{{ event }}/files_{{ event }}-{{ item }}.txt" 
       -e {{ event }}
-      -o "{{ missing_alerts_json_path }}-{{ event }}-{{ item }}.txt" 
+      -o "json-{{ missing_alerts_json_path }}-{{ event }}-{{ item }}"
+      -sn {{ scenario_name }}
+      -ho {{ item }}
+      -ro {{ fim_test_results }}/result_es.json
       {{ json_verification_extra_arguments }}
     args:
       executable: "python3"
@@ -13,7 +16,6 @@
       - inventory_hostname in groups['masters']
     with_items:
       - "{{ groups['linuxagents'] + groups['windowsagents'] }}"
-    
 
   - name: "Verify elastic alerts | {{ event }}"
     script: >
@@ -21,7 +23,10 @@
       -i "{{ agents_results_manager_path }}/{{ event }}/files_{{ event }}-{{ item }}.txt" 
       -e {{ event }}
       -a {{ hostvars[groups["elasticsearch"][0]]["private_ip"] }}
-      -o "{{ missing_alerts_elasticsearch_path }}-{{ event }}-{{ item }}.txt"
+      -o "es-{{ missing_alerts_elasticsearch_path }}-{{ event }}-{{ item }}.txt"
+      -sn {{ scenario_name }}
+      -ho {{ item }}
+      -ro {{ fim_test_results }}/result_es.json
       {{ elastic_verification_extra_arguments }}
     args:
       executable: python3
