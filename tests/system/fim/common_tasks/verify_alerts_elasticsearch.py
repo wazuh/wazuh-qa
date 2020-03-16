@@ -187,7 +187,7 @@ def verify_general_alerts(line, query_result, success, failure):
     success_bool = False
 
     try:
-        if query_result['hits']['total']['value'] == 1:
+        if query_result['hits']['total']['value'] >= 1:
             success += 1
             success_bool = True
         else:
@@ -218,7 +218,7 @@ def verify_es_alerts_whodata(line, query_result, success, failure):
 
     try:
         if (
-           query_result['hits']['total']['value'] == 1 and
+           query_result['hits']['total']['value'] >= 1 and
            (query_result['hits']['hits'][0]['_source']['syscheck']
                ['audit']['process']['name']) and
            (query_result['hits']['hits'][0]['_source']['syscheck']
@@ -259,7 +259,7 @@ def verify_es_alerts_report_changes(line, query_result, diff_statement, success,
     success_bool = False
     try:
         if (
-           query_result['hits']['total']['value'] == 1 and
+           query_result['hits']['total']['value'] >= 1 and
            (query_result['hits']['hits'][0]['_source']['syscheck']
                ['diff']['diff_statement'])):
             success += 1
