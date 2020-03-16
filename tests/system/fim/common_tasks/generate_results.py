@@ -3,8 +3,8 @@ import os
 
 
 def generate_result(scenario, host, action, passed, expected_alerts_num,
-                    received_alerts_num, missing_paths, output_path,
-                    host_os, host_arch):
+                    received_alerts_num, missing_paths, output_path):
+                    # host_os, host_arch):
 
     """
     Generates a JSON file with the related testing info for each scenario
@@ -24,12 +24,10 @@ def generate_result(scenario, host, action, passed, expected_alerts_num,
 
     """
     # Setting passed variables to True by default.
-    global_passed = True
     scenario_passed = True
     action_passed = True
 
     if not passed:  # In case of negative 'passed'
-        global_passed = False
         scenario_passed = False
         action_passed = False
 
@@ -60,14 +58,15 @@ def generate_result(scenario, host, action, passed, expected_alerts_num,
         with open(output_path) as f:
             data = json.load(f)
 
+        # setting the global 'passed' result
+        if not passed:
+            data['json_verification']['passed'] = False
+
     else:  # output_path does not exist.
         data['json_verification'] = {
-            'passed': global_passed,
+            'passed': passed,
             'scenarios': {}
         }
-
-    # setting the global 'passed' result
-    data['json_verification']['passed'] = global_passed
 
     # In case 'scenario' already exists
     if scenario in data['json_verification']['scenarios']:
