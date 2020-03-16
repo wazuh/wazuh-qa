@@ -10,6 +10,7 @@
 
       - name: Set extra arguments for scripts.
         set_fact:
+          scenario_name: "206_tag_option"
           json_verification_extra_arguments: "-tg test_tag -r 3"
           elastic_verification_extra_arguments: "-tg test_tag -n -r 3"
 
