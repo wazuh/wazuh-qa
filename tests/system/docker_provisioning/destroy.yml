@@ -4,3 +4,18 @@
   - docker_container:
     name: wazuh-master
     state: absent
+  - docker_container:
+    name: wazuh-worker1
+    state: absent
+  - docker_container:
+    name: wazuh-worker2
+    state: absent
+  - docker_container:
+    name: wazuh-agent1
+    state: absent
+  - docker_container:
+    name: wazuh-agent2
+    state: absent
+  - docker_container:
+    name: wazuh-agent3
+    state: absent

@@ -15,6 +15,13 @@ inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os
 
 # Configuration
 def configure_environment(host_manager):
+    """Configure the environment to perform the test.
+
+    Parameters
+    ----------
+    host_manager : system.HostManager
+        Instance of HostManager
+    """
     fetch_key_path = '/tmp/fetch_keys.py'
     host_manager.move_file(host='wazuh-master', src_path='files/fetch_keys.py', dest_path=fetch_key_path)
     host_manager.apply_config('data/config.yml', clear_files=[os.path.join(WAZUH_LOGS_PATH, 'ossec.log')],
