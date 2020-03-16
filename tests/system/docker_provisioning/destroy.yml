@@ -1,0 +1,6 @@
+---
+- hosts: localhost
+  tasks:
+  - docker_container:
+    name: wazuh-master
+    state: absent
