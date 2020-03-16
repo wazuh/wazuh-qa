@@ -575,7 +575,7 @@ if hasattr(socketserver, 'ThreadingUnixStreamServer'):
                 raise TypeError(f'Invalid connection protocol detected: {connection_protocol.lower()}. '
                                 f'Valid ones are TCP or UDP')
 
-            if family == 'AF_UNIX' or family == 'AF_INET':
+            if family in ('AF_UNIX', 'AF_INET'):
                 self.family = family
             else:
                 raise TypeError('Invalid family type detected. Valid ones are AF_UNIX or AF_INET')
