@@ -11,6 +11,7 @@
       - "{{ agents_results_manager_path }}/added/missing"
       - "{{ agents_results_manager_path }}/modified/missing"
       - "{{ agents_results_manager_path }}/deleted/missing"
+      - "{{ fim_test_results }}"
 
   - name: Copy generate_results to the manager host
     copy:
