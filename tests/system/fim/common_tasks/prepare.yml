@@ -12,6 +12,11 @@
       - "{{ agents_results_manager_path }}/modified/missing"
       - "{{ agents_results_manager_path }}/deleted/missing"
 
+  - name: Copy generate_results to the manager host
+    copy:
+      src: generate_results.py
+      dest: /home/vagrant/
+
   - name: Stop wazuh-manager service
     service:
       name: wazuh-manager
