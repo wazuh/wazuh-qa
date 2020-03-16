@@ -161,6 +161,18 @@ def main():
             nargs='+', help="Enable tag queries for the indicated tags",
             default=None
         )
+        parser.add_argument(
+            "-sn", "--scenario_name", type=str, required=True, dest='scenario_name',
+            help="Scenario complete name", default=None
+        )
+        parser.add_argument(
+            "-ho", "--host", type=str, required=True, dest='host',
+            help="Agent host IP", default=None
+        )
+        parser.add_argument(
+            "-ro", "--result_output", type=str, required=True, dest='result_output_path',
+            help="Result output file path", default=None
+        )
         args = parser.parse_args()
 
         import time
@@ -199,7 +211,8 @@ def main():
 
             if len(sub_paths) == 0:
                 logging.info("Verify alerts test - OK.")
-                return 0
+                returb_code = 0
+                break
             if stuck_alerts > args.retry_count:
                 logging.warning(
                     "Verify alerts test - NOT OK. %s alerts are missing.\n" % len(sub_paths)
@@ -208,7 +221,8 @@ def main():
                     for item in sub_paths:
                         f.write("%s\n" % item)
                 logging.warning("%s missing alerts.\n" % len(sub_paths))
-                return 1
+                returb_code = 1
+                break
 
             if prev_lenght == len(sub_paths):
                 logging.info("Filelist related alerts aren't growing (%s) ..." % stuck_alerts)
@@ -220,7 +234,16 @@ def main():
             prev_lenght = len(sub_paths)
             elapsed = time.time() - start
             logging.info("Elapsed time: ~ %s seconds \n" % int(elapsed))
-
+        
+            
+        print("Write the result to the global result file")
+    
+        passed = prev_lenght == 0
+        expected_alerts_num = len(paths_list_set)
+        received_alerts_num = expected_alerts_num - len(sub_paths)
+        generate_result(args.scenario_name, args.host, args.event, passed, expected_alerts_num, 
+                        received_alerts_num, list(sub_paths), args.result_output_path)
+        return returb_code
     except Exception:
         logging.critical("An error has ocurred. Exiting")
         raise Exception

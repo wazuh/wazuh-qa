@@ -399,6 +399,18 @@ if __name__ == "__main__":
         "-tg", "--tag", type=str, required=False, dest='tag_query', nargs='+',
         help="Enable tag queries for the indicated tags", default=None
     )
+    parser.add_argument(
+        "-sn", "--scenario_name", type=str, required=True, dest='scenario_name',
+        help="Scenario complete name", default=None
+    )
+    parser.add_argument(
+        "-ho", "--host", type=str, required=True, dest='host',
+        help="Agent host IP", default=None
+    )
+    parser.add_argument(
+        "-ro", "--result_output", type=str, required=True, dest='result_output_path',
+        help="Result output file path", default=None
+    )
 
     args = parser.parse_args()
 
@@ -445,7 +457,7 @@ if __name__ == "__main__":
 
     # read the list of paths from a file into a list
     files_list = read_file(args.files)
-
+    expected_alerts_num = len(files_list)
     # alerts verification
     success, failure, failure_list = \
         verify_es_alerts(files_list, args.max_retry, query, args.no_alert_style,
@@ -455,13 +467,27 @@ if __name__ == "__main__":
     with open(args.output, 'w+') as output:
         output.writelines('\n'.join(failure_list))
 
-    assert failure == 0, "number of failed files: {}\n \
-            Elapsed time: ~ {} seconds.".format(
-            failure, elapsed
-        )
+    print("Write the result to the global result file")
+
+    passed = len(failure_list) == 0    
+    received_alerts_num = expected_alerts_num - len(failure_list)
 
     print(
         "Number of succeded files: {}\n Elapsed time: ~ {} seconds.".format(
             success, elapsed
         )
     )
+
+    try:
+        assert failure == 0
+    except:
+        print("Failed when asserting the number of failures paths\n \
+            number of failed files: {}\n \
+            Elapsed time: ~ {} seconds.".format(
+            failure, elapsed))
+    finally:
+        generate_result(args.scenario_name, args.host, args.alert, passed, expected_alerts_num, 
+                        received_alerts_num, failure_list, args.result_output_path)
+
+
+    
