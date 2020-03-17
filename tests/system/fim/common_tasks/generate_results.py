@@ -54,8 +54,11 @@ def generate_result(scenario, host, action, passed, expected_alerts_num,
     file_exists = os.path.exists(output_path)
 
     if file_exists:  # In case output_path exists, then load it in a dic.
-        with open(output_path) as f:
-            data = json.load(f)
+        try:
+            with open(output_path) as f:
+                data = json.load(f)
+        except:
+            logging.error("Failed when reading the result file.")
 
         # setting the global 'passed' result
         if not passed:
@@ -92,5 +95,11 @@ def generate_result(scenario, host, action, passed, expected_alerts_num,
         (data['json_verification']['scenarios']
             [scenario][action]['hosts'][host]) = host_vars
 
-    with open(output_path, 'w') as outfile:  # save data to 'output_path'
-        json.dump(data, outfile)
+    try:
+        with open(output_path, 'w') as outfile:  # save data to 'output_path'
+            json.dump(data, outfile)
+
+        
+        logging.info("Done! The result file is generated correctly. Path: {}".format(output_path))
+    except:
+        logging.error("Failed when generating the result file in {}".format(output_path))
