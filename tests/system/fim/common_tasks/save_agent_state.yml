@@ -1,4 +1,4 @@
-- name : Create results directory
+- name : Create local results directory
   file:
     path: "test_results/{{ item }}"
     state: directory
@@ -7,15 +7,6 @@
     - "actions"
     - "agent_state"
   delegate_to: 127.0.0.1
-
-- name: Fetch json result files
-  synchronize:
-    mode: pull
-    src: /opt/fim_tests_results/
-    dest: test_results/json/
-  when:
-    - inventory_hostname in groups['masters']
-
 
 - block:
   - name: Create Linux state directory
