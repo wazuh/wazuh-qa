@@ -1,5 +1,7 @@
 import json
 import os
+import logging
+
 
 
 def generate_result(scenario, host, action, passed, expected_alerts_num,
@@ -28,7 +30,6 @@ def generate_result(scenario, host, action, passed, expected_alerts_num,
     action_passed = True
 
     if not passed:  # In case of negative 'passed'
-        print("sdasda")
         scenario_passed = False
         action_passed = False
 
@@ -82,10 +83,14 @@ def generate_result(scenario, host, action, passed, expected_alerts_num,
                     [scenario][action]['passed']) = False
         else:
             (data['json_verification']['scenarios']
-                [scenario][action]) = { 'passed' : action_passed }
+                [scenario][action]) = { 
+                    'passed' : action_passed,
+                    'hosts': {}
+            }
 
         (data['json_verification']['scenarios']
-            [scenario][action]['hosts']) = { host: host_vars }
+            [scenario][action]['hosts'][host]) = host_vars
+            
 
     else:  # In case the scenario does not exist.
         (data['json_verification']['scenarios']
@@ -98,7 +103,6 @@ def generate_result(scenario, host, action, passed, expected_alerts_num,
     try:
         with open(output_path, 'w') as outfile:  # save data to 'output_path'
             json.dump(data, outfile)
-
         
         logging.info("Done! The result file is generated correctly. Path: {}".format(output_path))
     except:
