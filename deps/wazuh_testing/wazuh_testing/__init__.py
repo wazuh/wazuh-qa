@@ -47,7 +47,7 @@ class Parameters:
 
         Returns
         -------
-        boolean representing if fim_database_memory is activated
+        boolean representing if `fim_database_memory` is activated
         """
         return self._fim_database_memory
 
