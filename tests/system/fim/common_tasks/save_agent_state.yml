@@ -1,11 +1,7 @@
 - name : Create local results directory
   file:
-    path: "test_results/{{ item }}"
+    path: "test_results/agent_state"
     state: directory
-  with_items:
-    - "json"
-    - "actions"
-    - "agent_state"
   delegate_to: 127.0.0.1
 
 - block:
@@ -67,16 +63,23 @@
   when:
     - inventory_hostname in groups['windowsagents']
 
-- name: Get added files in agents output
-  find:
-    paths: agents_output/added/
-    recurse: no
-    file_type: file
-  register: added_files
-  delegate_to: 127.0.0.1
+- name: Summarize generate action (set_fact)
+  set_fact:
+    event: "added"
 
-- name: Summarize added files
-  script: "summarize_action.py --action added --action-results {{ item }}"
-  with_items:
-    - "{{ added_files.files }}"
-  delegate_to: 127.0.0.1
+- name: Summarize generate action (run script)
+  import_tasks: "../../common_tasks/summarize_action.yml"
+
+- name: Summarize modify action (set_fact)
+  set_fact:
+    event: "modified"
+
+- name: Summarize modify action (run script)
+  import_tasks: "../../common_tasks/summarize_action.yml"
+
+- name: Summarize delete action (set_fact)
+  set_fact:
+    event: "deleted"
+
+- name: Summarize deleted action (run script)
+  import_tasks: "../../common_tasks/summarize_action.yml"
