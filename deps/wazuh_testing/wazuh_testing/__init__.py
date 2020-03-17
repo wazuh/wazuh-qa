@@ -54,7 +54,7 @@ class Parameters:
     @fim_database_memory.setter
     def fim_database_memory(self, value):
         """
-        Setter method for the fim_database_memory property
+        Setter method for the `fim_database_memory` property
 
         Parameters
         ----------
