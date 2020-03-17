@@ -120,6 +120,7 @@ def main():
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(message)s",
+        datefmt='%Y-%m-%d %H:%M:%S',
         handlers=[
             logging.FileHandler("verify_alerts_json.log", mode='a'),
             logging.StreamHandler()
@@ -205,6 +206,7 @@ def main():
         start = time.time()
 
         logging.info("alerts.json verification started")
+
         while True:
             pruned_alerts_set = alerts_prune(args.log_json_path, args.event)
             sub_paths = paths_list_set - pruned_alerts_set
@@ -213,8 +215,9 @@ def main():
                 logging.info("Verify alerts test - OK.")
                 returb_code = 0
                 break
+
             if stuck_alerts > args.retry_count:
-                logging.warning(
+                logging.error(
                     "Verify alerts test - NOT OK. %s alerts are missing.\n" % len(sub_paths)
                 )
                 with open(args.output_file, 'w') as f:
@@ -225,7 +228,7 @@ def main():
                 break
 
             if prev_lenght == len(sub_paths):
-                logging.info("Filelist related alerts aren't growing (%s) ..." % stuck_alerts)
+                logging.warning("Filelist related alerts aren't growing (%s) ..." % stuck_alerts)
                 stuck_alerts += 1
             else:
                 stuck_alerts = 0
@@ -235,14 +238,15 @@ def main():
             elapsed = time.time() - start
             logging.info("Elapsed time: ~ %s seconds \n" % int(elapsed))
         
-            
-        print("Write the result to the global result file")
     
-        passed = prev_lenght == 0
+        passed = stuck_alerts == 0
         expected_alerts_num = len(paths_list_set)
         received_alerts_num = expected_alerts_num - len(sub_paths)
+
+        logging.info("Write the result to the global result file")
         generate_result(args.scenario_name, args.host, args.event, passed, expected_alerts_num, 
                         received_alerts_num, list(sub_paths), args.result_output_path)
+
         return returb_code
     except Exception:
         logging.critical("An error has ocurred. Exiting")

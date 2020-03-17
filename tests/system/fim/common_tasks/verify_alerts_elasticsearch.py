@@ -108,7 +108,7 @@ def report_failure(start, failure, retry_count, sleep_time):
 
     elapsed = start - time()
 
-    logging.info("Missing alerts {}.\n".format(failure))
+    logging.warning("Missing alerts {}.\n".format(failure))
     logging.info("Number of retries {}.\n".format(retry_count))
     logging.info("Elapsed time: ~ {} seconds. \n".format(elapsed))
 
@@ -154,7 +154,7 @@ def run_line_query(line, query, es, index_name):
     try:
         query_result = makeQuery(query, es, index_name)
     except Exception as e:
-        logging.info("Error when making the  Query: " + str(query))
+        logging.error("Error when making the  Query: " + str(query))
         raise e
 
     return query_result
@@ -187,7 +187,7 @@ def verify_general_alerts(line, query_result, success, failure):
         failure += 1
     except Exception:
         failure += 1
-        logging.info("Error when filtering fields in alert " + line.rstrip())
+        logging.error("Error when filtering fields in alert " + line.rstrip())
 
 
     return success, success_bool, failure
@@ -226,7 +226,7 @@ def verify_es_alerts_whodata(line, query_result, success, failure):
         failure += 1
     except Exception:
         failure += 1
-        logging.info("Error when filtering audit fields in alert " + line.rstrip())
+        logging.error("Error when filtering audit fields in alert " + line.rstrip())
         
 
     return success, success_bool, failure
@@ -261,7 +261,7 @@ def verify_es_alerts_report_changes(line, query_result, diff_statement, success,
         failure += 1
     except Exception:
         failure += 1
-        logging.info("Error when filtering report_changes fields in alert " + line.rstrip())
+        logging.error("Error when filtering report_changes fields in alert " + line.rstrip())
 
     return success, success_bool, failure
 
@@ -293,14 +293,20 @@ def verify_es_alerts(files_list, max_retry, query, no_alert_style, es, index_nam
     logging.info("Elasticsearch alerts verification started")
     
     while retry_count <= max_retry:
-        logging.info("Attempt {}".format(retry_count))
+        logging.info("Attempt {}/{}".format(retry_count, max_retry))
 
         alerts_growing = False
         alerts_growing, alerts_num = \
             ensure_growing_list(alerts_num, query, es, index_name)
-        
-        logging.info("alerts_growing state is {} and alerts_num are {}"\
-            .format(alerts_growing, alerts_num))
+
+        if alerts_growing:
+            logging.warning("Alerts list is growing.\n \
+                Pending alerts to verify are {}"\
+                .format(len(files_list)))
+        else:
+            logging.warning("Alerts list is NOT growing.\n \
+                Pending alerts to verify are {}"\
+                .format(len(files_list)))
 
         if retry_count == 0: # if this is the first loop over files_list
             alerts_growing = True
@@ -331,7 +337,7 @@ def verify_es_alerts(files_list, max_retry, query, no_alert_style, es, index_nam
                     if success_bool: # In case of a success alert verification, then remove line.
                         files_list.remove(line)    
                 except Exception as e:
-                    logging.info("Error when verifying alerts for " + line.rstrip())
+                    logging.error("Error when verifying alerts for " + line.rstrip())
                     raise e
         if failure == 0: # if no failures detected, then break; it's done.
             break
@@ -344,17 +350,21 @@ if __name__ == "__main__":
 
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(message)s",
+
+        format="%(asctime)s;%(levelname)s;%(message)s",
+        datefmt='%Y-%m-%d %H:%M:%S',
         handlers=[
             logging.FileHandler("verify_alerts_elastic.log", mode="a"),
             logging.StreamHandler()
         ]
     )
 
+
     logging.getLogger("elasticsearch").setLevel(logging.ERROR)
     logging.getLogger("urllib3").setLevel(logging.ERROR)
     logging.getLogger("requests").setLevel(logging.ERROR)
     logging.getLogger("requests.urllib3").setLevel(logging.ERROR)
+
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -453,7 +463,7 @@ if __name__ == "__main__":
         # select the scenario
         scenario = select_scenario(scenario_arg_dic)
         scenario_arg = scenario_arg_dic[scenario]
-        print("The selected scenario is {}, and scenario arg is {}".format(scenario,scenario_arg))
+        logging.info("The selected scenario is {}, and scenario arg is {}".format(scenario,scenario_arg))
 
     # read the list of paths from a file into a list
     files_list = read_file(args.files)
@@ -463,16 +473,15 @@ if __name__ == "__main__":
         verify_es_alerts(files_list, args.max_retry, query, args.no_alert_style,
                          es, index_name, start, args.sleep_time,scenario, scenario_arg)
 
-    elapsed = start - time()
+    elapsed = time() - start
+
     with open(args.output, 'w+') as output:
         output.writelines('\n'.join(failure_list))
-
-    print("Write the result to the global result file")
 
     passed = len(failure_list) == 0    
     received_alerts_num = expected_alerts_num - len(failure_list)
 
-    print(
+    logging.info(
         "Number of succeded files: {}\n Elapsed time: ~ {} seconds.".format(
             success, elapsed
         )
@@ -481,13 +490,15 @@ if __name__ == "__main__":
     try:
         assert failure == 0
     except:
-        print("Failed when asserting the number of failures paths\n \
-            number of failed files: {}\n \
-            Elapsed time: ~ {} seconds.".format(
-            failure, elapsed))
+        logging.error("Verification result is FAILED.\n\
+            Number of failed paths: {}".format(failure))
     finally:
+        logging.info("Writing the result to the global result file")
         generate_result(args.scenario_name, args.host, args.alert, passed, expected_alerts_num, 
                         received_alerts_num, failure_list, args.result_output_path)
+        
+        logging.info("Verification process is finished \n\
+            Elapsed time: ~ {} seconds.".format(elapsed))
 
 
     
