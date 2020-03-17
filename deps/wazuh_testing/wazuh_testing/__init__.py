@@ -43,7 +43,7 @@ class Parameters:
     @property
     def fim_database_memory(self):
         """
-        Getter method for the fim_database_memory property
+        Getter method for the `fim_database_memory` property
 
         Returns
         -------
