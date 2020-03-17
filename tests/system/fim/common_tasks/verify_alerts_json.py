@@ -117,15 +117,7 @@ def alerts_prune_tag(path, target_event, tags):
 
 
 def main():
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        datefmt='%Y-%m-%d %H:%M:%S',
-        handlers=[
-            logging.FileHandler("verify_alerts_json.log", mode='a'),
-            logging.StreamHandler()
-        ]
-    )
+
     try:
         parser = argparse.ArgumentParser(description='Compares paths list and alerts.json paths')
 
@@ -176,6 +168,19 @@ def main():
         )
         args = parser.parse_args()
 
+        log_name = "verify_alerts_json_" + args.scenario_name + "_" \
+            + args.event + "_" + args.host + ".log"
+
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s [%(levelname)s] %(message)s",
+            datefmt='%Y-%m-%d %H:%M:%S',
+            handlers=[
+                logging.FileHandler(log_name, mode='a'),
+                logging.StreamHandler()
+            ]
+        )
+
         import time
 
         stuck_alerts = 0
@@ -218,12 +223,12 @@ def main():
 
             if stuck_alerts > args.retry_count:
                 logging.error(
-                    "Verify alerts test - NOT OK. %s alerts are missing.\n" % len(sub_paths)
+                    "Verify alerts test - NOT OK. %s alerts are missing." % len(sub_paths)
                 )
                 with open(args.output_file, 'w') as f:
                     for item in sub_paths:
                         f.write("%s\n" % item)
-                logging.warning("%s missing alerts.\n" % len(sub_paths))
+                logging.warning("%s missing alerts." % len(sub_paths))
                 returb_code = 1
                 break
 

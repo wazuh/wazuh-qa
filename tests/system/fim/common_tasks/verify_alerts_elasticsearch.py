@@ -346,24 +346,6 @@ def verify_es_alerts(files_list, max_retry, query, no_alert_style, es, index_nam
 
 if __name__ == "__main__":
 
-    logging.basicConfig(
-        level=logging.INFO,
-
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        datefmt='%Y-%m-%d %H:%M:%S',
-        handlers=[
-            logging.FileHandler("verify_alerts_elastic.log", mode="a"),
-            logging.StreamHandler()
-        ]
-    )
-
-
-    logging.getLogger("elasticsearch").setLevel(logging.ERROR)
-    logging.getLogger("urllib3").setLevel(logging.ERROR)
-    logging.getLogger("requests").setLevel(logging.ERROR)
-    logging.getLogger("requests.urllib3").setLevel(logging.ERROR)
-
-
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-i", "--input-list", type=str, required=True, dest='files',
@@ -421,6 +403,27 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+
+    log_name = "verify_alerts_elastic_" + args.scenario_name + "_" \
+        + args.alert + "_" + args.host + ".log"
+
+    logging.basicConfig(
+        level=logging.INFO,
+
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        datefmt='%Y-%m-%d %H:%M:%S',
+        handlers=[
+            logging.FileHandler(log_name, mode="a"),
+            logging.StreamHandler()
+        ]
+    )
+
+
+    logging.getLogger("elasticsearch").setLevel(logging.ERROR)
+    logging.getLogger("urllib3").setLevel(logging.ERROR)
+    logging.getLogger("requests").setLevel(logging.ERROR)
+    logging.getLogger("requests.urllib3").setLevel(logging.ERROR)
+
 
     # Global query for Syscheck
     query = {
