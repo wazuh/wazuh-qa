@@ -59,7 +59,7 @@ class Parameters:
         Parameters
         ----------
         value : bool
-            New value for the fim_database_memory.
+            New value for the `fim_database_memory`.
         """
         self._fim_database_memory = value
 
