@@ -11,7 +11,7 @@ from wazuh_testing.analysis import callback_analysisd_message, callback_wazuh_db
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, WAZUH_LOGS_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2)]
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2), pytest.mark.server]
 
 # variables
 
