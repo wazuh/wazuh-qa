@@ -72,7 +72,7 @@ def main():
     scenario_directory = "/opt/fim_tests_results/{}".format(args.scenario)
     if not os.path.exists(scenario_directory):
         os.makedirs(scenario_directory, exist_ok=True)
-    json_path = "{}/action_summary.json".format(scenario_directory)
+    json_path = "{}/actions_summary.json".format(scenario_directory)
     save_summary(host, args.action, args.results_file, json_path)
 
 
