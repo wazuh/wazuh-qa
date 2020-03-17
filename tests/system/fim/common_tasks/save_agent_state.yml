@@ -63,17 +63,20 @@
   when:
     - inventory_hostname in groups['windowsagents']
 
-- name: Create scenario state directory on manager
-  file:
-    path: "/opt/fim_tests_results/{{ scenario_id }}"
-    state: directory
+- block:
+  - name: Create scenario state directory on manager
+    file:
+      path: "/opt/fim_tests_results/{{ scenario_id }}"
+      state: directory
 
-- name: Copy scenario state to manager
-  synchronize:
-    src: "test_results/agent_state/"
-    dest: "/opt/fim_tests_results/{{ scenario_id }}/agent_state/"
-    recursive: yes
-    delete: yes
+  - name: Copy scenario state to manager
+    synchronize:
+      src: "test_results/agent_state/"
+      dest: "/opt/fim_tests_results/{{ scenario_id }}/agent_state/"
+      recursive: yes
+      delete: yes
+  when:
+    - inventory_hostname in groups['masters']
 
 - name: Summarize generate action (set_fact)
   set_fact:
