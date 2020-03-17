@@ -210,9 +210,10 @@ def main():
 
         prev_lenght = len(sub_paths)
         start = (datetime.datetime.now().replace(microsecond=0))
+        elapsed = 0
+
         passed = True
         logging.info("alerts.json verification started")
-
         while True:
             logging.info("Attempt {}/{}".format(current_retries_count, args.retry_count))
             pruned_alerts_set = alerts_prune(args.log_json_path, args.event)
