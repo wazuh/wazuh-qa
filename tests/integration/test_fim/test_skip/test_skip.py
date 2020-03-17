@@ -105,7 +105,7 @@ def test_skip_proc(get_configuration, configure_environment, restart_syscheckd, 
         # Get new skip_proc configuration
         for conf in new_conf:
             if conf['metadata']['skip'] == 'no' and conf['tags'] == ['skip_proc']:
-                elements = get_configuration.get('elements')
+                elements = conf.get('elements')
                 if global_parameters.fim_database_memory:
                     elements.append({'database': {'value': 'memory'}})
                 new_ossec_conf = set_section_wazuh_conf(conf.get('section'), new_elements=elements)
