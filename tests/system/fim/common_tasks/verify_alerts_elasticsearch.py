@@ -187,7 +187,7 @@ def verify_general_alerts(line, query_result, success, failure):
     success_bool = False
 
     try:
-        if query_result['hits']['total']['value'] == 1:
+        if query_result['hits']['total']['value'] >= 1:
             success += 1
             success_bool = True
         else:
@@ -218,7 +218,7 @@ def verify_es_alerts_whodata(line, query_result, success, failure):
 
     try:
         if (
-           query_result['hits']['total']['value'] == 1 and
+           query_result['hits']['total']['value'] >= 1 and
            (query_result['hits']['hits'][0]['_source']['syscheck']
                ['audit']['process']['name']) and
            (query_result['hits']['hits'][0]['_source']['syscheck']
@@ -259,7 +259,7 @@ def verify_es_alerts_report_changes(line, query_result, diff_statement, success,
     success_bool = False
     try:
         if (
-           query_result['hits']['total']['value'] == 1 and
+           query_result['hits']['total']['value'] >= 1 and
            (query_result['hits']['hits'][0]['_source']['syscheck']
                ['diff']['diff_statement'])):
             success += 1
@@ -407,11 +407,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "-r", "--retry", type=int, required=False, dest='max_retry',
         help="reading attempts on stopped alerts. default: 4 attemps",
-        default="4"
+        default="3"
     )
     parser.add_argument(
         "-s", "--sleep", type=int, required=False, dest='sleep_time',
-        help="Sleep time between retries", default="60"
+        help="Sleep time between retries", default="15"
     )
     parser.add_argument(
         "-w", "--whodata", required=False, dest='whodata_query',
