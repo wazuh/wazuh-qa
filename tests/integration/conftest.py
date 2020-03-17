@@ -33,12 +33,16 @@ def pytest_runtest_setup(item):
         pytest.skip("Cannot run on platform {}".format(plat))
 
     # Find if host type applies (agent or server)
-    with open(os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')) as f:
-        reg = r'TYPE=\"(.*)\"$'
-        host_type = re.findall(reg, f.read())[0]
-        supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())
-        if supported_types and host_type not in supported_types:
-            pytest.skip("Cannot run on wazuh {}".format(host_type))
+    if sys.platform != 'win32':
+        with open(os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')) as f:
+            reg = r'TYPE=\"(.*)\"$'
+            host_type = re.findall(reg, f.read())[0]
+    else:
+        host_type = 'agent'
+
+    supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())
+    if supported_types and host_type not in supported_types:
+        pytest.skip("Cannot run on wazuh {}".format(host_type))
 
     # Consider only first mark
     levels = [mark.kwargs['level'] for mark in item.iter_markers(name="tier")]
