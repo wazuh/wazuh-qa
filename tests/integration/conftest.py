@@ -108,7 +108,7 @@ def pytest_configure(config):
     if default_timeout:
         global_parameters.default_timeout = default_timeout
 
-    # Set default timeout only if it is passed through command line args
+    # Set fim_database_memory only if it is passed through command line args
     fim_database_memory = config.getoption("--fim-database-memory")
     if fim_database_memory:
         global_parameters.fim_database_memory = True
