@@ -44,11 +44,10 @@ def save_summary(host, action, filepath, json_path):
     :param str json_path: Path to store json db
     """
     file_number = simplecount(filepath)
-    pre_tpl = {action: file_number}
-    tpl = {host: pre_tpl}
+    tpl = {action: file_number}
     json_dict = read_database(json_path)
     if host in json_dict:
-        json_dict[host].update(pre_tpl)
+        json_dict[host].update(tpl)
     else:
         json_dict[host] = tpl
     save_database(json_dict, json_path)
