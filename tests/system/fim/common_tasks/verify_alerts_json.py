@@ -10,7 +10,7 @@
 
 import sys
 import json
-
+import datetime
 import logging
 import argparse
 
@@ -203,7 +203,7 @@ def main():
 
         sub_paths = paths_list_set - pruned_alerts_set
         prev_lenght = len(sub_paths)
-        start = time.time()
+        start = (datetime.datetime.now().replace(microsecond=0))
 
         logging.info("alerts.json verification started")
 
@@ -235,8 +235,8 @@ def main():
 
             time.sleep(args.sleep_time)
             prev_lenght = len(sub_paths)
-            elapsed = time.time() - start
-            logging.info("Elapsed time: ~ %s seconds \n" % int(elapsed))
+            elapsed = (datetime.datetime.now().replace(microsecond=0)) - start
+            logging.info("Elapsed time: %s" % (elapsed))
         
     
         passed = stuck_alerts == 0

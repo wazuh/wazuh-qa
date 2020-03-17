@@ -104,6 +104,6 @@ def generate_result(scenario, host, action, passed, expected_alerts_num,
         with open(output_path, 'w') as outfile:  # save data to 'output_path'
             json.dump(data, outfile)
         
-        logging.info("Done! The result file is generated correctly. Path: {}".format(output_path))
+        logging.info("The result file is generated correctly. Path: {}".format(output_path))
     except:
         logging.error("Failed when generating the result file in {}".format(output_path))

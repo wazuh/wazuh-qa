@@ -10,6 +10,7 @@
 import argparse
 from elasticsearch import Elasticsearch
 from time import sleep, time
+import datetime
 import logging
 import copy
 import sys
@@ -106,11 +107,10 @@ def report_failure(start, failure, retry_count, sleep_time):
 
     """
 
-    elapsed = start - time()
+    elapsed = (datetime.datetime.now().replace(microsecond=0)) - start
 
-    logging.warning("Missing alerts {}.\n".format(failure))
-    logging.info("Number of retries {}.\n".format(retry_count))
-    logging.info("Elapsed time: ~ {} seconds. \n".format(elapsed))
+    logging.warning("Missing alerts {}.".format(failure))
+    logging.info("Elapsed time: {}".format(elapsed))
 
     retry_count += 1
 
@@ -300,12 +300,10 @@ def verify_es_alerts(files_list, max_retry, query, no_alert_style, es, index_nam
             ensure_growing_list(alerts_num, query, es, index_name)
 
         if alerts_growing:
-            logging.warning("Alerts list is growing.\n \
-                Pending alerts to verify are {}"\
+            logging.warning("Alerts list is growing. Pending alerts to verify are {}"\
                 .format(len(files_list)))
         else:
-            logging.warning("Alerts list is NOT growing.\n \
-                Pending alerts to verify are {}"\
+            logging.warning("Alerts list is NOT growing. Pending alerts to verify are {}"\
                 .format(len(files_list)))
 
         if retry_count == 0: # if this is the first loop over files_list
@@ -351,7 +349,7 @@ if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
 
-        format="%(asctime)s;%(levelname)s;%(message)s",
+        format="%(asctime)s [%(levelname)s] %(message)s",
         datefmt='%Y-%m-%d %H:%M:%S',
         handlers=[
             logging.FileHandler("verify_alerts_elastic.log", mode="a"),
@@ -446,8 +444,7 @@ if __name__ == "__main__":
 
     es = setElasticsearch(args.ip)
     index_name = "wazuh-alerts-3.x*"
-    start = time()
-
+    start = datetime.datetime.now().replace(microsecond=0)
 
 
     # a dictionary for each scenario key name and its argument
@@ -473,7 +470,7 @@ if __name__ == "__main__":
         verify_es_alerts(files_list, args.max_retry, query, args.no_alert_style,
                          es, index_name, start, args.sleep_time,scenario, scenario_arg)
 
-    elapsed = time() - start
+    elapsed = (datetime.datetime.now().replace(microsecond=0)) - start
 
     with open(args.output, 'w+') as output:
         output.writelines('\n'.join(failure_list))
@@ -482,23 +479,22 @@ if __name__ == "__main__":
     received_alerts_num = expected_alerts_num - len(failure_list)
 
     logging.info(
-        "Number of succeded files: {}\n Elapsed time: ~ {} seconds.".format(
-            success, elapsed
+        "Number of succeeded files: {}/{}. Elapsed time: {}".format(
+            success, expected_alerts_num, elapsed
         )
     )
 
     try:
         assert failure == 0
     except:
-        logging.error("Verification result is FAILED.\n\
-            Number of failed paths: {}".format(failure))
+        logging.error("Verification result is FAILED. Number of failed paths: {}/{}"\
+            .format(failure, expected_alerts_num))
     finally:
         logging.info("Writing the result to the global result file")
         generate_result(args.scenario_name, args.host, args.alert, passed, expected_alerts_num, 
                         received_alerts_num, failure_list, args.result_output_path)
         
-        logging.info("Verification process is finished \n\
-            Elapsed time: ~ {} seconds.".format(elapsed))
+        logging.info("Verification process is finished. Elapsed time: {}".format(elapsed))
 
 
     
