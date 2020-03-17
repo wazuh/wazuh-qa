@@ -615,9 +615,14 @@ def change_conf_param(param, value):
 
 
 def callback_detect_end_scan(line):
-    if 'File integrity monitoring scan ended.' in line:
-        return line
-    return None
+    msg = r'.*Sending FIM event: (.+)$'
+    match = re.match(msg, line)
+
+    try:
+        if json.loads(match.group(1))['type'] == 'scan_end':
+            return True
+    except (AttributeError, JSONDecodeError, KeyError):
+        pass
 
 
 def callback_detect_event(line):
