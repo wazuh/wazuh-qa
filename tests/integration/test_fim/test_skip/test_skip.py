@@ -62,23 +62,26 @@ def get_configuration(request):
 @pytest.fixture(scope='session')
 def configure_nfs():
     """Call NFS scripts to create and configure a NFS mount point"""
-    path = os.path.dirname(os.path.abspath(__file__))
-    rpms = ['centos', 'fedora', 'rhel']
-    debs = ['ubuntu', 'debian', 'linuxmint']
-    if distro.id() in rpms:
-        conf_script = 'configure_nfs_rpm.sh'
-        remove_script = 'remove_nfs_rpm.sh'
-    elif distro.id() in debs:
-        conf_script = 'configure_nfs_deb.sh'
-        remove_script = 'remove_nfs_deb.sh'
-    else:
-        pytest.fail('The OS is not supported for this test')
-    subprocess.call([f'{path}/data/{conf_script}'])
-    yield
+    if not os.path.exists('/nfs-mount-point'):
+        path = os.path.dirname(os.path.abspath(__file__))
+        rpms = ['centos', 'fedora', 'rhel']
+        debs = ['ubuntu', 'debian', 'linuxmint']
+        if distro.id() in rpms:
+            conf_script = 'configure_nfs_rpm.sh'
+            remove_script = 'remove_nfs_rpm.sh'
+        elif distro.id() in debs:
+            conf_script = 'configure_nfs_deb.sh'
+            remove_script = 'remove_nfs_deb.sh'
+        else:
+            pytest.fail('The OS is not supported for this test')
+        subprocess.call([f'{path}/data/{conf_script}'])
+        yield
 
-    # remove nfs
-    subprocess.call([f'{path}/data/{remove_script}'])
-    shutil.rmtree(os.path.join('/', 'media', 'nfs-folder'), ignore_errors=True)
+        # remove nfs
+        subprocess.call([f'{path}/data/{remove_script}'])
+        shutil.rmtree(os.path.join('/', 'media', 'nfs-folder'), ignore_errors=True)
+    else:
+        yield
 
 
 def extra_configuration_before_yield():
@@ -196,7 +199,7 @@ def test_skip_dev(modify_inode_mock, directory, tags_to_apply, get_configuration
     (os.path.join('/', 'nfs-mount-point'), {'skip_nfs'})
 ])
 @patch('wazuh_testing.fim.modify_file_inode')
-def test_skip_nfs(modify_inode_mock, directory, tags_to_apply, get_configuration, configure_environment,
+def test_skip_nfs(modify_inode_mock, directory, tags_to_apply, configure_nfs, get_configuration, configure_environment,
                   restart_syscheckd, wait_for_initial_scan):
     """Check if syscheckd skips nfs directories when setting 'skip_nfs="yes"'.
 
