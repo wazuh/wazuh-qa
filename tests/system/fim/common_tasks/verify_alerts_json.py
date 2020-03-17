@@ -183,7 +183,7 @@ def main():
 
         import time
 
-        stuck_alerts = 0
+        current_retries_count = 0
 
         paths_list_set = paths_acquisition(args.input_file)
         pruned_alerts_set = alerts_prune(args.log_json_path, args.event, args.diff_string)
@@ -207,55 +207,65 @@ def main():
             pruned_alerts_set = alerts_prune(args.log_json_path, args.event)
 
         sub_paths = paths_list_set - pruned_alerts_set
+
         prev_lenght = len(sub_paths)
         start = (datetime.datetime.now().replace(microsecond=0))
-
+        passed = True
         logging.info("alerts.json verification started")
 
         while True:
+            logging.info("Attempt {}/{}".format(current_retries_count, args.retry_count))
             pruned_alerts_set = alerts_prune(args.log_json_path, args.event)
             sub_paths = paths_list_set - pruned_alerts_set
 
             if len(sub_paths) == 0:
-                logging.info("Verify alerts test - OK.")
+                logging.info("Verification result is SUCCESS.")
+                elapsed = (datetime.datetime.now().replace(microsecond=0)) - start
                 returb_code = 0
                 break
 
-            if stuck_alerts > args.retry_count:
+            if current_retries_count > args.retry_count:
                 logging.error(
-                    "Verify alerts test - NOT OK. %s alerts are missing." % len(sub_paths)
+                    "Verification result is FAILED. Number of failed paths: {}/{}".format(len(sub_paths), len(paths_list_set))
                 )
                 with open(args.output_file, 'w') as f:
                     for item in sub_paths:
                         f.write("%s\n" % item)
-                logging.warning("%s missing alerts." % len(sub_paths))
                 returb_code = 1
+                passed = False
                 break
 
             if prev_lenght == len(sub_paths):
-                logging.warning("Filelist related alerts aren't growing (%s) ..." % stuck_alerts)
-                stuck_alerts += 1
-            else:
-                stuck_alerts = 0
+                logging.warning("Alerts list is NOT growing. Pending alerts to verify are {}".format(len(sub_paths)))
+                current_retries_count += 1
+                elapsed = (datetime.datetime.now().replace(microsecond=0)) - start
 
             time.sleep(args.sleep_time)
             prev_lenght = len(sub_paths)
-            elapsed = (datetime.datetime.now().replace(microsecond=0)) - start
+            
             logging.info("Elapsed time: %s" % (elapsed))
         
-    
-        passed = stuck_alerts == 0
+
         expected_alerts_num = len(paths_list_set)
         received_alerts_num = expected_alerts_num - len(sub_paths)
-
-        logging.info("Write the result to the global result file")
-        generate_result(args.scenario_name, args.host, args.event, passed, expected_alerts_num, 
-                        received_alerts_num, list(sub_paths), args.result_output_path)
 
         return returb_code
     except Exception:
         logging.critical("An error has ocurred. Exiting")
         raise Exception
+    finally:
+        logging.info(
+            "Number of succeeded files: {}/{}. Elapsed time: {}".format(
+                len(paths_list_set) - len(sub_paths), len(paths_list_set), elapsed
+            )
+        )
+        
+        logging.info("Write the result to the global result file")
+        generate_result(args.scenario_name, args.host, args.event, passed, expected_alerts_num, 
+                        received_alerts_num, list(sub_paths), args.result_output_path)
+
+        logging.info("Verification process is finished. Elapsed time: {}".format(elapsed))
+
 
 
 if __name__ == "__main__":
