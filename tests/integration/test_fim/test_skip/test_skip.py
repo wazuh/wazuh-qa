@@ -12,6 +12,7 @@ from unittest.mock import patch
 import distro
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, detect_initial_scan, callback_detect_event,
                                generate_params, callback_detect_integrity_state, check_time_travel)
 from wazuh_testing.tools import PREFIX
@@ -104,8 +105,10 @@ def test_skip_proc(get_configuration, configure_environment, restart_syscheckd, 
         # Get new skip_proc configuration
         for conf in new_conf:
             if conf['metadata']['skip'] == 'no' and conf['tags'] == ['skip_proc']:
-                new_ossec_conf = set_section_wazuh_conf(conf.get('section'),
-                                                        conf.get('elements'))
+                elements = get_configuration.get('elements')
+                if global_parameters.fim_database_memory:
+                    elements.append({'database': {'value': 'memory'}})
+                new_ossec_conf = set_section_wazuh_conf(conf.get('section'), new_elements=elements)
         restart_wazuh_with_new_conf(new_ossec_conf)
         proc_monitor = FileMonitor(LOG_FILE_PATH)
         detect_initial_scan(proc_monitor)

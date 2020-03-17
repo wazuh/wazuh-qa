@@ -43,8 +43,11 @@ def configure_environment(get_configuration, request):
     backup_config = get_wazuh_conf()
 
     # configuration for testing
+    elements = get_configuration.get('elements')
+    if global_parameters.fim_database_memory:
+        elements.append({'database': {'value': 'memory'}})
     test_config = set_section_wazuh_conf(get_configuration.get('section'),
-                                         get_configuration.get('elements'))
+                                         new_elements=elements)
 
     # create test directories
     if hasattr(request.module, 'test_directories'):
