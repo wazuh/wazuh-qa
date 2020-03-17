@@ -41,6 +41,9 @@ def main():
     parser = argparse.ArgumentParser()
 
     # Parse arguments
+    parser.add_argument("--scenario", type=str, required=True,
+                        dest="scenario",
+                        help="Scenario to summarize")
     parser.add_argument("--action", type=str, required=True,
                         dest="action",
                         help="Action to summarize")
@@ -51,7 +54,11 @@ def main():
     basename = os.path.basename(args.results_file)
     host = basename.split(".txt-")[-1]
     summary = summarize_action(host, args.action, args.results_file)
-    with open("test_results/action/{}".format(basename), "w") as sum_file:
+    scenario_directory = "/opt/fim_tests_results/{}".format(args.scenario)
+    if not os.path.exists(scenario_directory):
+        os.makedirs(scenario_directory, exist_ok=True)
+    action_summary = "{}/{}".format(scenario_directory, basename)
+    with open(action_summary, "w") as sum_file:
         json.dump(summary, sum_file)
 
 
