@@ -22,19 +22,36 @@ def simplecount(filepath):
     return lines
 
 
-def summarize_action(host, action, filepath):
+def read_database(db_path):
+    if not os.path.exists(db_path):
+        return {}
+    with open(db_path, 'r') as json_file:
+        return json.load(json_file)
+
+
+def save_database(json_dict, db_path):
+    with open(db_path, 'w') as json_file:
+        json.dump(json_dict, json_file)
+
+
+def save_summary(host, action, filepath, json_path):
     """
-    Create action summary
-    :param str host: Testing Host
+    Save action summary
+
+    :param str host: Current host to summarize
     :param str action: Action to summarize
     :param str filepath: File path of action results
+    :param str json_path: Path to store json db
     """
     file_number = simplecount(filepath)
-    return {
-        "host": host,
-        "action": action,
-        "count": file_number
-        }
+    pre_tpl = {action: file_number}
+    tpl = {host: pre_tpl}
+    json_dict = read_database(json_path)
+    if host in json_dict:
+        json_dict[host].update(pre_tpl)
+    else:
+        json_dict[host] = tpl
+    save_database(json_dict, json_path)
 
 
 def main():
@@ -53,13 +70,11 @@ def main():
     args = parser.parse_args()
     basename = os.path.basename(args.results_file)
     host = basename.split(".txt-")[-1]
-    summary = summarize_action(host, args.action, args.results_file)
     scenario_directory = "/opt/fim_tests_results/{}".format(args.scenario)
     if not os.path.exists(scenario_directory):
         os.makedirs(scenario_directory, exist_ok=True)
-    action_summary = "{}/{}".format(scenario_directory, basename)
-    with open(action_summary, "w") as sum_file:
-        json.dump(summary, sum_file)
+    json_path = "{}/action_summary.json".format(scenario_directory)
+    save_summary(host, args.action, args.results_file, json_path)
 
 
 if __name__ == '__main__':
