@@ -7,13 +7,13 @@
 - block:
   - name: Create Linux state directory
     file:
-      path: "/opt/fim_test_results/{{ ansible_host }}"
+      path: "/opt/fim_test_results/{{ ansible_hostname }}"
       state: directory
 
   - name: Save Linux agent state
     copy:
       src: "{{ item }}"
-      dest: "/opt/fim_test_results/{{ ansible_host }}/"
+      dest: "/opt/fim_test_results/{{ ansible_hostname }}/"
       remote_src: yes
     with_items:
       - "/var/ossec/etc/ossec.conf"
@@ -25,8 +25,8 @@
   - name: Fetch Linux agent state
     synchronize:
       mode: pull
-      src: "/opt/fim_test_results/{{ ansible_host }}/"
-      dest: "test_results/agent_state/{{ ansible_host }}/"
+      src: "/opt/fim_test_results/{{ ansible_hostname }}/"
+      dest: "test_results/agent_state/{{ ansible_hostname }}/"
       recursive: yes
       delete: yes
   become: yes
@@ -36,13 +36,13 @@
 - block:
   - name: Create Windows state directory
     win_file:
-      path: "c:/fim_test_results/{{ ansible_host }}"
+      path: "c:/fim_test_results/{{ ansible_hostname }}"
       state: directory
 
   - name: Save Windows agent state
     win_copy:
       src: "{{ windows_ossec_folder_path }}\\{{ item }}"
-      dest: "c:\\fim_test_results\\{{ ansible_host }}\\"
+      dest: "c:/fim_test_results/{{ ansible_hostname }}/"
       remote_src: yes
     with_items:
       - "ossec.conf"
@@ -52,13 +52,13 @@
 
   - name: Gather Windows state file
     win_find:
-      paths: "c:\\fim_test_results\\{{ ansible_host }}\\"
+      paths: "c:\\fim_test_results\\{{ ansible_hostname }}\\"
     register: windows_state
 
   - name: Fetch Windows agent state
     fetch:
       src: "{{ item.path }}"
-      dest: "test_results/agent_state/{{ ansible_host }}/"
+      dest: "test_results/agent_state/{{ ansible_hostname }}/"
       flat: yes
     with_items: "{{ windows_state.files }}"
   when:
