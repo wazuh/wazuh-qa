@@ -214,8 +214,9 @@ def main():
 
         passed = True
         logging.info("alerts.json verification started")
+        logging.info("Attempt 0/{}".format(args.retry_count))
+
         while True:
-            logging.info("Attempt {}/{}".format(current_retries_count, args.retry_count))
             pruned_alerts_set = alerts_prune(args.log_json_path, args.event)
             sub_paths = paths_list_set - pruned_alerts_set
 
@@ -238,8 +239,12 @@ def main():
 
             if prev_lenght == len(sub_paths):
                 logging.warning("Alerts list is NOT growing. Pending alerts to verify are {}".format(len(sub_paths)))
-                current_retries_count += 1
                 elapsed = (datetime.datetime.now().replace(microsecond=0)) - start
+                current_retries_count += 1
+
+            if current_retries_count <= args.retry_count:    
+                logging.info("Attempt {}/{}".format(current_retries_count, args.retry_count))
+
 
             time.sleep(args.sleep_time)
             prev_lenght = len(sub_paths)
