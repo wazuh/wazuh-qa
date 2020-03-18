@@ -4,7 +4,6 @@
 
 import json
 import os
-import re
 import sys
 import uuid
 from datetime import datetime
@@ -14,7 +13,7 @@ from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_LOGS_PATH, WAZUH_CONF, WAZUH_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_LOGS_PATH, WAZUH_CONF, WAZUH_SERVICE
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, SocketController, SocketMonitor
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_sockets
@@ -32,14 +31,7 @@ def pytest_runtest_setup(item):
     if supported_platforms and plat not in supported_platforms:
         pytest.skip("Cannot run on platform {}".format(plat))
 
-    # Find if host type applies (agent or server)
-    if sys.platform != 'win32':
-        with open(os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')) as f:
-            reg = r'TYPE=\"(.*)\"$'
-            host_type = re.findall(reg, f.read())[0]
-    else:
-        host_type = 'agent'
-
+    host_type = 'agent' if 'agent' in WAZUH_SERVICE else 'server'
     supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())
     if supported_types and host_type not in supported_types:
         pytest.skip("Cannot run on wazuh {}".format(host_type))
