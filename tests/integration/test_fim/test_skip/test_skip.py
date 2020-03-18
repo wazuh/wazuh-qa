@@ -2,10 +2,10 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import uuid
 import os
 import shutil
 import subprocess
+import uuid
 from datetime import timedelta
 from unittest.mock import patch
 
@@ -14,7 +14,7 @@ import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, detect_initial_scan, callback_detect_event,
-                               generate_params, callback_detect_integrity_state, check_time_travel)
+                               generate_params, callback_detect_integrity_state, check_time_travel, delete_file)
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import set_section_wazuh_conf, load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -211,8 +211,21 @@ def test_skip_nfs(modify_inode_mock, directory, tags_to_apply, configure_nfs, ge
     directory : str
         Directory that will be monitored.
     """
+    def custom_callback(filename):
+        def callback(line):
+            match = callback_detect_event(line)
+            if match and filename in match['data']['path']:
+                return match
+
+        return callback
+
     file = str(uuid.uuid1())
     check_apply_test(tags_to_apply, get_configuration['tags'])
     trigger = get_configuration['metadata']['skip'] == 'no'
 
-    regular_file_cud(directory, wazuh_log_monitor, file_list=[file], time_travel=True, min_timeout=3, triggers_event=trigger)
+    try:
+        regular_file_cud(directory, wazuh_log_monitor, file_list=[file], time_travel=True, min_timeout=3,
+                         triggers_event=trigger, callback=custom_callback(file))
+
+    finally:
+        delete_file(directory, file)
