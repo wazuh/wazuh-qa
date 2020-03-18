@@ -231,6 +231,7 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
     def get_audit_creation_time():
         for proc in psutil.process_iter(attrs=['name']):
             if proc.name() == "auditd":
+                logger.info(f"auditd detected. PID: {proc.pid}")
                 return proc.create_time()
         pytest.fail("Auditd is not running")
 

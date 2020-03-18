@@ -2,18 +2,19 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import uuid
 import os
 import shutil
 import subprocess
+import uuid
 from datetime import timedelta
 from unittest.mock import patch
 
 import distro
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, detect_initial_scan, callback_detect_event,
-                               generate_params, callback_detect_integrity_state, check_time_travel)
+                               generate_params, callback_detect_integrity_state, check_time_travel, delete_file)
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import set_section_wazuh_conf, load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -61,23 +62,26 @@ def get_configuration(request):
 @pytest.fixture(scope='session')
 def configure_nfs():
     """Call NFS scripts to create and configure a NFS mount point"""
-    path = os.path.dirname(os.path.abspath(__file__))
-    rpms = ['centos', 'fedora', 'rhel']
-    debs = ['ubuntu', 'debian', 'linuxmint']
-    if distro.id() in rpms:
-        conf_script = 'configure_nfs_rpm.sh'
-        remove_script = 'remove_nfs_rpm.sh'
-    elif distro.id() in debs:
-        conf_script = 'configure_nfs_deb.sh'
-        remove_script = 'remove_nfs_deb.sh'
-    else:
-        pytest.fail('The OS is not supported for this test')
-    subprocess.call([f'{path}/data/{conf_script}'])
-    yield
+    if not os.path.exists('/nfs-mount-point'):
+        path = os.path.dirname(os.path.abspath(__file__))
+        rpms = ['centos', 'fedora', 'rhel']
+        debs = ['ubuntu', 'debian', 'linuxmint']
+        if distro.id() in rpms:
+            conf_script = 'configure_nfs_rpm.sh'
+            remove_script = 'remove_nfs_rpm.sh'
+        elif distro.id() in debs:
+            conf_script = 'configure_nfs_deb.sh'
+            remove_script = 'remove_nfs_deb.sh'
+        else:
+            pytest.fail('The OS is not supported for this test')
+        subprocess.call([f'{path}/data/{conf_script}'])
+        yield
 
-    # remove nfs
-    subprocess.call([f'{path}/data/{remove_script}'])
-    shutil.rmtree(os.path.join('/', 'media', 'nfs-folder'), ignore_errors=True)
+        # remove nfs
+        subprocess.call([f'{path}/data/{remove_script}'])
+        shutil.rmtree(os.path.join('/', 'media', 'nfs-folder'), ignore_errors=True)
+    else:
+        yield
 
 
 def extra_configuration_before_yield():
@@ -104,8 +108,10 @@ def test_skip_proc(get_configuration, configure_environment, restart_syscheckd, 
         # Get new skip_proc configuration
         for conf in new_conf:
             if conf['metadata']['skip'] == 'no' and conf['tags'] == ['skip_proc']:
-                new_ossec_conf = set_section_wazuh_conf(conf.get('section'),
-                                                        conf.get('elements'))
+                elements = conf.get('elements')
+                if global_parameters.fim_database_memory:
+                    elements.append({'database': {'value': 'memory'}})
+                new_ossec_conf = set_section_wazuh_conf(conf.get('section'), new_elements=elements)
         restart_wazuh_with_new_conf(new_ossec_conf)
         proc_monitor = FileMonitor(LOG_FILE_PATH)
         detect_initial_scan(proc_monitor)
@@ -193,7 +199,7 @@ def test_skip_dev(modify_inode_mock, directory, tags_to_apply, get_configuration
     (os.path.join('/', 'nfs-mount-point'), {'skip_nfs'})
 ])
 @patch('wazuh_testing.fim.modify_file_inode')
-def test_skip_nfs(modify_inode_mock, directory, tags_to_apply, get_configuration, configure_environment,
+def test_skip_nfs(modify_inode_mock, directory, tags_to_apply, configure_nfs, get_configuration, configure_environment,
                   restart_syscheckd, wait_for_initial_scan):
     """Check if syscheckd skips nfs directories when setting 'skip_nfs="yes"'.
 
@@ -205,8 +211,21 @@ def test_skip_nfs(modify_inode_mock, directory, tags_to_apply, get_configuration
     directory : str
         Directory that will be monitored.
     """
+    def custom_callback(filename):
+        def callback(line):
+            match = callback_detect_event(line)
+            if match and filename in match['data']['path']:
+                return match
+
+        return callback
+
     file = str(uuid.uuid1())
     check_apply_test(tags_to_apply, get_configuration['tags'])
     trigger = get_configuration['metadata']['skip'] == 'no'
 
-    regular_file_cud(directory, wazuh_log_monitor, file_list=[file], time_travel=True, min_timeout=3, triggers_event=trigger)
+    try:
+        regular_file_cud(directory, wazuh_log_monitor, file_list=[file], time_travel=True, min_timeout=3,
+                         triggers_event=trigger, callback=custom_callback(file))
+
+    finally:
+        delete_file(directory, file)

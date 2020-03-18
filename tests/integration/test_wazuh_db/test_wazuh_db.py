@@ -13,7 +13,7 @@ from wazuh_testing.wazuh_db import callback_wazuhdb_response
 
 # marks
 
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 # variables
 

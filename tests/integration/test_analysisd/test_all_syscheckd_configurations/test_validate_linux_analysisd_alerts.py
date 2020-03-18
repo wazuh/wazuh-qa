@@ -10,7 +10,7 @@ from wazuh_testing.analysis import validate_analysis_alert_complex
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2)]
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2), pytest.mark.server]
 
 # variables
 
