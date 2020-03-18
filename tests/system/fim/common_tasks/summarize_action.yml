@@ -9,7 +9,7 @@
   - name: Summarize added files
     script: >
       summarize_action.py
-      --scenario {{ scenario_id }}
+      --scenario {{ scenario_name }}
       --action {{ event }}
       --action-results {{ item.path }}
     with_items:
