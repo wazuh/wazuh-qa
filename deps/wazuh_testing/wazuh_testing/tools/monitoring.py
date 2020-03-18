@@ -23,6 +23,7 @@ from multiprocessing import Process, Manager
 from struct import pack, unpack
 
 import yaml
+from lockfile import FileLock
 
 from wazuh_testing import logger
 from wazuh_testing.tools.file import truncate_file
@@ -781,16 +782,18 @@ class HostMonitor:
             pass
         logger.debug(f'Starting file composer for {host} and path: {path}. '
                      f'Composite file in {os.path.join(self._tmp_path, output_path)}')
+        tmp_file = os.path.join(self._tmp_path, output_path)
         while True:
-            with open(os.path.join(self._tmp_path, output_path), "r+") as file:
-                content = self.host_manager.get_file_content(host, path).split('\n')
-                file_content = file.read().split('\n')
-                for new_line in content:
-                    if new_line == '':
-                        continue
-                    if new_line not in file_content:
-                        file.write(f'{new_line}\n')
-            time.sleep(self._time_step)
+            with FileLock(tmp_file):
+                with open(tmp_file, "r+") as file:
+                    content = self.host_manager.get_file_content(host, path).split('\n')
+                    file_content = file.read().split('\n')
+                    for new_line in content:
+                        if new_line == '':
+                            continue
+                        if new_line not in file_content:
+                            file.write(f'{new_line}\n')
+                time.sleep(self._time_step)
 
     @threaded
     def _start(self, host, payload, path, encoding=None):
