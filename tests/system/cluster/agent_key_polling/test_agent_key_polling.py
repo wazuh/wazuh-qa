@@ -4,7 +4,8 @@
 
 import os
 
-import wazuh_testing.system as system
+from wazuh_testing.tools.system import HostManager
+from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools import WAZUH_LOGS_PATH
 
 # Hosts
@@ -29,10 +30,9 @@ def configure_environment(host_manager):
 
 
 def test_agent_key_polling(inventory_path):
-    host_manager = system.HostManager(inventory_path=inventory_path)
-    host_monitor = system.HostMonitor(inventory_path=inventory_path,
-                                      file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
-
+    host_manager = HostManager(inventory_path=inventory_path)
     configure_environment(host_manager)
 
-    host_monitor.run(messages_path='data/messages.yml')
+    host_monitor = HostMonitor(inventory_path=inventory_path, messages_path='data/messages.yml',
+                               tmp_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tmp'))
+    host_monitor.run()

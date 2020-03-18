@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 # Unix only modules
+
 try:
     import grp
     import pwd
@@ -10,16 +11,21 @@ except ModuleNotFoundError:
     pass
 
 import os
-import queue
 import socket
 import socketserver
 import sys
 import threading
+import queue
 import time
-from copy import deepcopy
+from copy import copy
+from multiprocessing import Process, Manager
 from struct import pack, unpack
 
+import yaml
+
 from wazuh_testing import logger
+from wazuh_testing.tools.system import HostManager
+from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.time import Timer
 
 
@@ -95,96 +101,90 @@ def _callback_default(line):
     return None
 
 
-class FileMonitor:
+class FileTailer:
 
-    def __init__(self, file_path, time_step=0.5):
+    def __init__(self, file_path, encoding=None, time_step=0.5):
         self.file_path = file_path
         self._position = 0
         self.time_step = time_step
-        self._continue = False
-        self._abort = False
-        self._previous_event = None
-        self._result = None
-        self.timeout_timer = None
-        self.extra_timer = None
-        self.extra_timer_is_running = False
-
-    def _monitor(self, callback=_callback_default, accum_results=1, update_position=True, timeout_extra=0,
-                 encoding=None, error_message=''):
-        """Wait for new lines to be appended to the file.
-        A callback function will be called every time a new line is detected. This function must receive two
-        positional parameters: a references to the FileMonitor object and the line detected.
-        """
-        previous_position = self._position
+        self._queue = Queue()
+        self.event = threading.Event()
+        self.thread = None
         if sys.platform == 'win32':
-            encoding = None if encoding is None else encoding
+            self.encoding = None if encoding is None else encoding
         elif encoding is None:
-            encoding = 'utf-8'
-        self.extra_timer_is_running = False
-        self._result = [] if accum_results > 1 or timeout_extra > 0 else None
-        with open(self.file_path, encoding=encoding, errors='backslashreplace') as f:
+            self.encoding = 'utf-8'
+
+    def __copy__(self):
+        new_tailer = FileTailer(self.file_path)
+        for attr, value in vars(self).items():
+            if attr == 'file_path':
+                continue
+            elif attr != '_queue':
+                setattr(new_tailer, attr, value)
+            else:
+                new_queue = Queue()
+                new_queue.queue = copy(getattr(self, attr).queue)
+                setattr(new_tailer, attr, new_queue)
+        return new_tailer
+
+    @property
+    def queue(self):
+        return self._queue
+
+    def add_item(self, item):
+        self._queue.put(item)
+
+    def start(self):
+        self.run()
+
+    def run(self):
+        self.event = threading.Event()
+        self.thread = threading.Thread(target=self._tail_forever)
+        self.thread.start()
+
+    def shutdown(self):
+        self.event.set()
+        self.thread.join()
+
+    def _tail_forever(self):
+        """Wait for new lines to be appended to the file."""
+        with open(self.file_path, encoding=self.encoding, errors='backslashreplace') as f:
             f.seek(self._position)
-            while self._continue:
-                if self._abort and not self.extra_timer_is_running:
-                    self.stop()
-                    if not isinstance(self._result, list) or accum_results != len(self._result):
-                        if error_message:
-                            logger.error(error_message)
-                            logger.error(f"Results accumulated: "
-                                         f"{len(self._result) if isinstance(self._result, list) else 0}")
-                            logger.error(f"Results expected: {accum_results}")
-                        raise TimeoutError()
-                self._position = f.tell()
+            while not self.event.is_set():
                 line = f.readline()
                 if not line:
                     f.seek(self._position)
                     time.sleep(self.time_step)
                 else:
-                    result = callback(line)
-                    if result:
-                        if type(self._result) == list:
-                            self._result.append(result)
-                            if accum_results == len(self._result):
-                                if timeout_extra > 0 and not self.extra_timer_is_running:
-                                    self.extra_timer = Timer(timeout_extra, self.stop)
-                                    self.extra_timer.start()
-                                    self.extra_timer_is_running = True
-                                elif timeout_extra == 0:
-                                    self.stop()
-                        else:
-                            self._result = result
-                            if self._result:
-                                self.stop()
-            self._position = f.tell() if update_position else previous_position
+                    self.add_item(line)
+                self._position = f.tell()
+
+
+class FileMonitor:
+
+    def __init__(self, file_path, time_step=0.5):
+        self.tailer = FileTailer(file_path, time_step=time_step)
+        self._result = None
+        self._time_step = time_step
 
     def start(self, timeout=-1, callback=_callback_default, accum_results=1, update_position=True, timeout_extra=0,
-              encoding=None, error_message=''):
+              error_message='', encoding=None):
         """Start the file monitoring until the stop method is called."""
-        if not self._continue:
-            self._continue = True
-            self._abort = False
-            if timeout > 0:
-                self.timeout_timer = Timer(timeout, self.abort)
-                self.timeout_timer.start()
-            self._monitor(callback=callback, accum_results=accum_results, update_position=update_position,
-                          timeout_extra=timeout_extra, encoding=encoding, error_message=error_message)
+        try:
+            tailer = self.tailer if update_position else copy(self.tailer)
 
-        return self
+            if encoding is not None:
+                tailer.encoding = encoding
+            tailer.start()
 
-    def stop(self):
-        """Stop the file monitoring. It can be restart calling the start method."""
-        self._continue = False
-        if self.timeout_timer:
-            self.timeout_timer.cancel()
-            self.timeout_timer.join()
-        if self.extra_timer and self.extra_timer_is_running:
-            self.extra_timer.cancel()
-            self.extra_timer_is_running = False
-        return self
+            monitor = QueueMonitor(tailer.queue, time_step=self._time_step)
+            self._result = monitor.start(timeout=timeout, callback=callback, accum_results=accum_results,
+                                         update_position=update_position, timeout_extra=timeout_extra,
+                                         error_message=error_message).result()
+        finally:
+            tailer.shutdown()
 
-    def abort(self):
-        """Abort because of timeout."""
-        self._abort = True
         return self
 
     def result(self):
@@ -417,7 +417,8 @@ class QueueMonitor:
         self._result = None
         self._time_step = time_step
 
-    def get_results(self, callback=_callback_default, accum_results=1, timeout=-1, update_position=True):
+    def get_results(self, callback=_callback_default, accum_results=1, timeout=-1, update_position=True,
+                    timeout_extra=0):
         """Get as many matched results as `accum_results`.
 
         Parameters
@@ -430,6 +431,8 @@ class QueueMonitor:
             Maximum timeout. Default `-1`
         update_position : bool, optional
             True if we pop items from the queue once they are read. False otherwise. Default `True`
+        timeout_extra : int, optional
+            Grace period to fetch more events than specified in `accum_results`. Default: 0.
 
         Returns
         -------
@@ -440,9 +443,14 @@ class QueueMonitor:
         timer = 0.0
         time_wait = 0.1
         position = 0
-        while len(result_list) != accum_results:
-            if timer >= timeout:
+        extra_timer_is_running = False
+        extra_timer = 0.0
+        while len(result_list) != accum_results or extra_timer_is_running:
+            if timer >= timeout and not extra_timer_is_running:
                 self.abort()
+                break
+            if extra_timer >= timeout_extra > 0:
+                self.stop()
                 break
             try:
                 if update_position:
@@ -452,16 +460,21 @@ class QueueMonitor:
                     position += 1
                 if item is not None:
                     result_list.append(item)
+                    if len(result_list) == accum_results and timeout_extra > 0 and not extra_timer_is_running:
+                        extra_timer_is_running = True
             except queue.Empty:
                 time.sleep(time_wait)
                 timer += self._time_step + time_wait
+                if extra_timer_is_running:
+                    extra_timer += self._time_step + time_wait
 
         if len(result_list) == 1:
             return result_list[0]
         else:
             return result_list
 
-    def start(self, timeout=-1, callback=_callback_default, accum_results=1, update_position=True):
+    def start(self, timeout=-1, callback=_callback_default, accum_results=1, update_position=True, timeout_extra=0,
+              error_message=''):
         """Start the queue monitoring until the stop method is called."""
         if not self._continue:
             self._continue = True
@@ -469,9 +482,15 @@ class QueueMonitor:
 
             while self._continue:
                 if self._abort:
+                    self.stop()
+                    if error_message:
+                        logger.error(error_message)
+                        logger.error(f"Results accumulated: "
+                                     f"{len(self._result) if isinstance(self._result, list) else 0}")
+                        logger.error(f"Results expected: {accum_results}")
                     raise TimeoutError()
                 result = self.get_results(callback=callback, accum_results=accum_results, timeout=timeout,
-                                          update_position=update_position)
+                                          update_position=update_position, timeout_extra=timeout_extra)
                 if result and not self._abort:
                     self._result = result
                     if self._result:
@@ -515,7 +534,7 @@ class Queue(queue.Queue):
             Any item in the given position.
         """
         aux_queue = queue.Queue()
-        aux_queue.queue = deepcopy(self.queue)
+        aux_queue.queue = copy(self.queue)
         for _ in range(position):
             aux_queue.get(*args, **kwargs)
         return aux_queue.get(*args, **kwargs)
@@ -649,3 +668,134 @@ if hasattr(socketserver, 'ThreadingUnixStreamServer'):
 
         def put_queue(self, item):
             self._queue.put(item)
+
+
+def threaded(fn):
+    """Wrapper for enable multiprocessing inside a class
+
+    Parameters
+    ----------
+    fn : callable
+        Function to be executed in a new thread
+
+    Returns
+    -------
+    wrapper
+    """
+
+    def wrapper(*args, **kwargs):
+        thread = Process(target=fn, args=args, kwargs=kwargs)
+        thread.start()
+        return thread
+
+    return wrapper
+
+
+def callback_generator(regex):
+    import re
+
+    def new_callback(line):
+        match = re.match(rf'{regex}', line)
+        if match:
+            return line
+        return None
+
+    return new_callback
+
+
+class HostMonitor:
+
+    def __init__(self, inventory_path, messages_path, tmp_path, time_step=0.5):
+        self.host_manager = HostManager(inventory_path=inventory_path)
+        self._result = Manager().Queue()
+        self._time_step = time_step
+        self._file_monitors = list()
+        self._monitored_files = set()
+        self._file_content_collectors = list()
+        self._tmp_path = tmp_path
+        with open(messages_path, 'r') as f:
+            self.test_cases = yaml.safe_load(f)
+
+    def run(self):
+        """This method creates and destroy the needed processes for the messages founded in messages_path."""
+        for host, payload in self.test_cases.items():
+            self._monitored_files.update({case['path'] for case in payload})
+            if len(self._monitored_files) == 0:
+                raise AttributeError('There is no path to monitor. Exiting...')
+            for path in self._monitored_files:
+                output_path = f'{host}_{path.split("/")[-1]}.tmp'
+                self._file_content_collectors.append(self.file_composer(host=host, path=path, output_path=output_path))
+                logger.debug(f'Add new file composer process for {host} and path: {path}')
+                self._file_monitors.append(self._start(host=host, payload=payload, path=output_path))
+                logger.debug(f'Add new file monitor process for {host} and path: {path}')
+
+        while True:
+            if not any([handler.is_alive() for handler in self._file_monitors]):
+                for handler in self._file_monitors:
+                    handler.join()
+                for file_collector in self._file_content_collectors:
+                    file_collector.terminate()
+                    file_collector.join()
+                self.clean_tmp_files()
+                break
+            time.sleep(self._time_step)
+        self.check_result()
+
+    @threaded
+    def file_composer(self, host, path, output_path):
+        try:
+            truncate_file(os.path.join(self._tmp_path, output_path))
+        except FileNotFoundError:
+            pass
+        logger.debug(f'Starting file composer for {host} and path: {path}. '
+                     f'Composite file in {os.path.join(self._tmp_path, output_path)}')
+        while True:
+            with open(os.path.join(self._tmp_path, output_path), "r+") as file:
+                content = self.host_manager.get_file_content(host, path).split('\n')
+                file_content = file.read().split('\n')
+                for new_line in content:
+                    if new_line == '':
+                        continue
+                    if new_line not in file_content:
+                        file.write(f'{new_line}\n')
+            time.sleep(self._time_step)
+
+    @threaded
+    def _start(self, host, payload, path, encoding=None):
+        """Start the file monitoring until the stop method is called."""
+        tailer = FileTailer(os.path.join(self._tmp_path, path), time_step=self._time_step)
+        try:
+            if encoding is not None:
+                tailer.encoding = encoding
+            tailer.start()
+            for case in payload:
+                logger.debug(f'Starting QueueMonitor for {host} and message: {case["regex"]}')
+                monitor = QueueMonitor(tailer.queue, time_step=self._time_step)
+                try:
+                    self._result.put({host: monitor.start(timeout=case['timeout'],
+                                                          callback=callback_generator(case['regex'])).result()})
+                except TimeoutError:
+                    self._result.put({
+                        host: TimeoutError(f'Did not found the expected callback in {host}: {case["regex"]}')})
+                logger.debug(f'Finishing QueueMonitor for {host} and message: {case["regex"]}')
+        finally:
+            tailer.shutdown()
+
+        return self
+
+    def result(self):
+        return self._result
+
+    def check_result(self):
+        logger.debug(f'Checking results...')
+        while not self._result.empty():
+            result = self._result.get(block=True)
+            for msg in result.values():
+                if isinstance(msg, TimeoutError):
+                    raise msg
+
+    def clean_tmp_files(self):
+        """Close all opened processes and remove tmp files."""
+        logger.debug(f'Cleaning temporal files...')
+        for file in os.listdir(self._tmp_path):
+            os.remove(os.path.join(self._tmp_path, file))
