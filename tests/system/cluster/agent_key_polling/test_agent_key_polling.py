@@ -30,6 +30,14 @@ def configure_environment(host_manager):
 
 
 def test_agent_key_polling(inventory_path):
+    """Check that the agent key polling cycle works correctly. To do this, we use the messages and the hosts defined
+    in data/messages.yml and the hosts inventory.
+
+    Parameters
+    ----------
+    inventory_path : str
+        Path to the Ansible hosts inventory
+    """
     host_manager = HostManager(inventory_path=inventory_path)
     configure_environment(host_manager)
 

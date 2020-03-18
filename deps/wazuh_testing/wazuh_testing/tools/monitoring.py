@@ -11,12 +11,13 @@ except ModuleNotFoundError:
     pass
 
 import os
+import queue
 import socket
 import socketserver
 import sys
 import threading
-import queue
 import time
+from collections import defaultdict
 from copy import copy
 from multiprocessing import Process, Manager
 from struct import pack, unpack
@@ -24,8 +25,8 @@ from struct import pack, unpack
 import yaml
 
 from wazuh_testing import logger
-from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools.time import Timer
 
 
@@ -706,18 +707,37 @@ def callback_generator(regex):
 class HostMonitor:
 
     def __init__(self, inventory_path, messages_path, tmp_path, time_step=0.5):
+        """Create a new instance to monitor any given file in any specified host.
+
+        Parameters
+        ----------
+        inventory_path : str
+            Path to the hosts's inventory file.
+        messages_path : str
+            Path to the file where the callbacks, paths and hosts to be monitored are specified.
+        tmp_path : str
+            Path to the temporal files.
+        time_step : float, optional
+            Fraction of time to wait in every get. Default `0.5`.
+        """
         self.host_manager = HostManager(inventory_path=inventory_path)
-        self._result = Manager().Queue()
+        self._queue = Manager().Queue()
+        self._result = defaultdict(list)
         self._time_step = time_step
         self._file_monitors = list()
         self._monitored_files = set()
         self._file_content_collectors = list()
         self._tmp_path = tmp_path
+        try:
+            os.mkdir(self._tmp_path)
+        except OSError:
+            pass
         with open(messages_path, 'r') as f:
             self.test_cases = yaml.safe_load(f)
 
     def run(self):
-        """This method creates and destroy the needed processes for the messages founded in messages_path."""
+        """This method creates and destroy the needed processes for the messages founded in messages_path.
+        It creates one file composer (process) for every file to be monitored in every host."""
         for host, payload in self.test_cases.items():
             self._monitored_files.update({case['path'] for case in payload})
             if len(self._monitored_files) == 0:
@@ -743,6 +763,18 @@ class HostMonitor:
 
     @threaded
     def file_composer(self, host, path, output_path):
+        """Collects the file content of the specified path in the desired host and append it to the output_path file.
+        Simulates the behavior of tail -f and redirect the output to output_path.
+
+        Parameters
+        ----------
+        host : str
+            Hostname.
+        path : str
+            Host file path to be collect.
+        output_path : str
+            Output path of the content collected from the remote host path.
+        """
         try:
             truncate_file(os.path.join(self._tmp_path, output_path))
         except FileNotFoundError:
@@ -762,7 +794,23 @@ class HostMonitor:
 
     @threaded
     def _start(self, host, payload, path, encoding=None):
-        """Start the file monitoring until the stop method is called."""
+        """Start the file monitoring until the QueueMonitor returns an string or TimeoutError.
+
+        Parameters
+        ----------
+        host : str
+            Hostname
+        payload : list of dict
+            Contains the message to be found and the timeout for it.
+        path : str
+            Path where it must search for the message.
+        encoding : str
+            Encoding of the file.
+
+        Returns
+        -------
+        instance of HostMonitor
+        """
         tailer = FileTailer(os.path.join(self._tmp_path, path), time_step=self._time_step)
         try:
             if encoding is not None:
@@ -772,10 +820,11 @@ class HostMonitor:
                 logger.debug(f'Starting QueueMonitor for {host} and message: {case["regex"]}')
                 monitor = QueueMonitor(tailer.queue, time_step=self._time_step)
                 try:
-                    self._result.put({host: monitor.start(timeout=case['timeout'],
-                                                          callback=callback_generator(case['regex'])).result()})
+                    self._queue.put({host: monitor.start(timeout=case['timeout'],
+                                                         callback=callback_generator(case['regex'])
+                                                         ).result().strip('\n')})
                 except TimeoutError:
-                    self._result.put({
+                    self._queue.put({
                         host: TimeoutError(f'Did not found the expected callback in {host}: {case["regex"]}')})
                 logger.debug(f'Finishing QueueMonitor for {host} and message: {case["regex"]}')
         finally:
@@ -784,18 +833,28 @@ class HostMonitor:
         return self
 
     def result(self):
+        """Get the result of HostMonitor
+
+        Returns
+        -------
+        dict
+            Dict that contains the host as the key and a list of messages as the values
+        """
         return self._result
 
     def check_result(self):
+        """Check if a TimeoutError occurred."""
         logger.debug(f'Checking results...')
-        while not self._result.empty():
-            result = self._result.get(block=True)
-            for msg in result.values():
+        while not self._queue.empty():
+            result = self._queue.get(block=True)
+            for host, msg in result.items():
                 if isinstance(msg, TimeoutError):
                     raise msg
+                logger.debug(f'Received from {host} the expected message: {msg}')
+                self._result[host].append(msg)
 
     def clean_tmp_files(self):
-        """Close all opened processes and remove tmp files."""
+        """Remove tmp files."""
         logger.debug(f'Cleaning temporal files...')
         for file in os.listdir(self._tmp_path):
             os.remove(os.path.join(self._tmp_path, file))
