@@ -4,9 +4,7 @@ import logging
 
 
 
-def generate_result(scenario, host, action, passed, expected_alerts_num,
-                    received_alerts_num, missing_paths, output_path):
-                    # host_os, host_arch):
+                    received_alerts_num, missing_paths, output_path, os_arg, dist, major_dist):
 
     """
     Generates a JSON file with the related testing info for each scenario
@@ -45,6 +43,9 @@ def generate_result(scenario, host, action, passed, expected_alerts_num,
 
     host_vars = {
             'passed': passed,
+            'os': os_arg,
+            'distribution': dist,
+            'major_distribution': major_dist,
             'expected_alerts': expected_alerts_num,
             'received_alerts': received_alerts_num,
             'missing_alerts': (expected_alerts_num - received_alerts_num),
