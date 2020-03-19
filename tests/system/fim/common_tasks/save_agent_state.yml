@@ -67,13 +67,13 @@
 - block:
   - name: Create scenario state directory on manager
     file:
-      path: "/opt/fim_tests_results/{{ scenario_name }}"
+      path: "/opt/fim_test_results/{{ scenario_name }}"
       state: directory
 
   - name: Copy scenario state to manager
     synchronize:
       src: "test_results/agent_state/"
-      dest: "/opt/fim_tests_results/{{ scenario_name }}/agent_state/"
+      dest: "/opt/fim_test_results/{{ scenario_name }}/agent_state/"
       recursive: yes
       delete: yes
   become: yes
