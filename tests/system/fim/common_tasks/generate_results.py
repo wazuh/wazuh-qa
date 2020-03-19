@@ -4,6 +4,7 @@ import logging
 
 
 
+def generate_result(global_name, scenario, host, action, passed, expected_alerts_num,
                     received_alerts_num, missing_paths, output_path, os_arg, dist, major_dist):
 
     """
@@ -64,41 +65,41 @@ import logging
 
         # setting the global 'passed' result
         if not passed:
-            data['json_verification']['passed'] = False
+            data[global_name]['passed'] = False
 
     else:  # output_path does not exist.
-        data['json_verification'] = {
+        data[global_name] = {
             'passed': passed,
             'scenarios': {}
         }
 
     # In case 'scenario' already exists
-    if scenario in data['json_verification']['scenarios']:
+    if scenario in data[global_name]['scenarios']:
 
         if not passed:
-            data['json_verification']['scenarios'][scenario]['passed'] = False
+            data[global_name]['scenarios'][scenario]['passed'] = False
 
-        if action in data['json_verification']['scenarios'][scenario] :
+        if action in data[global_name]['scenarios'][scenario] :
             if not passed:
-                (data['json_verification']['scenarios']
+                (data[global_name]['scenarios']
                     [scenario][action]['passed']) = False
         else:
-            (data['json_verification']['scenarios']
+            (data[global_name]['scenarios']
                 [scenario][action]) = { 
                     'passed' : action_passed,
                     'hosts': {}
             }
 
-        (data['json_verification']['scenarios']
+        (data[global_name]['scenarios']
             [scenario][action]['hosts'][host]) = host_vars
             
 
     else:  # In case the scenario does not exist.
-        (data['json_verification']['scenarios']
+        (data[global_name]['scenarios']
             [scenario]) = scenario_vars
-        (data['json_verification']['scenarios']
+        (data[global_name]['scenarios']
             [scenario][action]['passed']) = action_passed
-        (data['json_verification']['scenarios']
+        (data[global_name]['scenarios']
             [scenario][action]['hosts'][host]) = host_vars
 
     try:
