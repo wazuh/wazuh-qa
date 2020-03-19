@@ -15,7 +15,8 @@ import logging
 import copy
 import sys
 
-sys.path.append('/home/vagrant')
+sys.path.append("/tmp/auxiliary")
+
 from generate_results import generate_result
 
 

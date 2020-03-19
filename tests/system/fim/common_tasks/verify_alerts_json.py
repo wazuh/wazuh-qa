@@ -13,9 +13,9 @@ import json
 import datetime
 import logging
 import argparse
-
 import sys
-sys.path.append('/home/vagrant')
+
+sys.path.append("/tmp/auxiliary")
 
 from generate_results import generate_result
 
