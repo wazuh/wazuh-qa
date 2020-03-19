@@ -8,6 +8,9 @@
 # License (version 2) as published by the FSF - Free Software
 # Foundation.
 
+import json
+from copy import deepcopy
+
 
 def get_ossec_log_errors(scenario_name, hostname):
     ossec_path = "/opt/fim_test_results/{}/agent_state/{}/ossec.log".format(scenario_name, hostname)
@@ -20,4 +23,74 @@ def get_ossec_log_errors(scenario_name, hostname):
     return results
 
 
+def read_verify_json():
+    path = "/opt/fim_test_results/result_json.json"
+    with open(path, "r") as f:
+        return json.load(f)['alert_json_verification']
 
+
+def read_verify_elastic():
+    path = "/opt/fim_test_results/result_es.json"
+    with open(path, "r") as f:
+        return json.load(f)['alert_elasticsearch_verification']
+
+
+def update_scenario(scenario, verification, content, results_dict):
+    current_dict = deepcopy(results_dict)
+    if content['passed']:
+        # scenario SUCCESS
+        if scenario in current_dict:
+            # no need to update scenario results
+            return current_dict
+        else:
+            # create new entry for scenario
+            current_dict[scenario] = {'state': 'SUCCESS'}
+    else:
+        # scenario FAILED
+        if scenario in current_dict:
+            if current_dict[scenario]['state'] == 'SUCCESS':
+                # overwrite with FAILED
+                current_dict[scenario]['state'] = 'FAILED'
+                current_dict[scenario]['errors'] = {verification: content}
+            else:
+                # add more FAILED
+                current_dict[scenario]['errors'][verification] = content
+        else:
+            # create new entry with FAILED
+            current_dict[scenario] = {'state': 'FAILED'}
+            current_dict[scenario]['errors'] = {verification: content}
+    return current_dict
+
+
+def summarize_result(test_dict, verification, prebuilt_dict=None):
+    """
+    Summarize a test_dict and dump results into results_dict
+    Use prebuilt_dict as a base if provided.
+    """
+    results_dict = prebuilt_dict or {}
+    for k, v in test_dict['scenarios'].items():
+        results_dict = update_scenario(k, verification, v, results_dict)
+
+
+def final_summarize():
+    json_dict = read_verify_json()
+    elastic_dict = read_verify_elastic()
+    print(json_dict)
+    # print(elastic_dict)
+    json_sum = summarize_result(json_dict, "json")
+    final_result = summarize_result(elastic_dict, "elasticsearch", json_sum)
+    return final_result
+
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-o", "--output", type=str, required=False,
+                        dest='output_file',
+                        default='/opt/fim_test_results/summary.json',
+                        help="Output file to save summary")
+    args = parser.parse_args()
+    out_path = args.output_file
+    summarize = final_summarize()
+    with open(out_path, "w") as f:
+        json.dump(summarize, f)
