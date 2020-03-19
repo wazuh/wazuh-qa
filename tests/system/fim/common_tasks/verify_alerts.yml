@@ -9,6 +9,10 @@
       -sn {{ scenario_name }}
       -ho {{ item }}
       -ro {{ fim_test_results }}/result_json.json
+      -an "{{ hostvars[item]['wazuh_agent_authd']['agent_name'] }}"
+      -os "{{ hostvars[item].ansible_distribution }}"
+      -dt "{{ hostvars[item].ansible_distribution_version }}"
+      -md "{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
       {{ json_verification_extra_arguments }}
     args:
       executable: "python3"
@@ -27,6 +31,10 @@
       -sn {{ scenario_name }}
       -ho {{ item }}
       -ro {{ fim_test_results }}/result_es.json
+      -an "{{ hostvars[item]['wazuh_agent_authd']['agent_name'] }}"
+      -os "{{ hostvars[item].ansible_distribution }}"
+      -dt "{{ hostvars[item].ansible_distribution_version }}"
+      -md "{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
       {{ elastic_verification_extra_arguments }}
     args:
       executable: python3

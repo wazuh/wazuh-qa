@@ -402,6 +402,22 @@ if __name__ == "__main__":
         "-ro", "--result_output", type=str, required=True, dest='result_output_path',
         help="Result output file path", default=None
     )
+    parser.add_argument(
+        "-an", "--agent_name", type=str, required=True, dest='agent_name',
+        help="Agent name", default=None
+    )
+    parser.add_argument(
+        "-os", "--operating_system", type=str, required=True, dest='operating_system',
+        help="Operating System Name", default=None
+    )
+    parser.add_argument(
+        "-dt", "--distribution", type=str, required=True, dest='distribution',
+        help="Distribution Version", default=None
+    )
+    parser.add_argument(
+        "-md", "--major_distribution", type=str, required=True, dest='major_distribution',
+        help="Major Distribution Version", default=None
+    )
 
     args = parser.parse_args()
 
@@ -495,8 +511,10 @@ if __name__ == "__main__":
             .format(failure, expected_alerts_num))
     finally:
         logging.info("Writing the result to the global result file")
-        generate_result(args.scenario_name, args.host, args.alert, passed, expected_alerts_num, 
-                        received_alerts_num, failure_list, args.result_output_path)
+        generate_result("alerts_elastic_verification", args.scenario_name, args.agent_name, 
+                        args.alert, passed, expected_alerts_num, received_alerts_num, failure_list, 
+                        args.result_output_path, args.operating_system, args.distribution, 
+                        args.major_distribution)
         
         logging.info("Verification process is finished. Elapsed time: {}".format(elapsed))
 
