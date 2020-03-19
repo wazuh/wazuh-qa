@@ -69,7 +69,7 @@ def main():
     args = parser.parse_args()
     basename = os.path.basename(args.results_file)
     host = basename.split(".txt-")[-1]
-    scenario_directory = "/opt/fim_tests_results/{}".format(args.scenario)
+    scenario_directory = "/opt/fim_test_results/{}".format(args.scenario)
     if not os.path.exists(scenario_directory):
         os.makedirs(scenario_directory, exist_ok=True)
     json_path = "{}/actions_summary.json".format(scenario_directory)
