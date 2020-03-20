@@ -9,6 +9,7 @@
     tasks:
       - name: Set extra arguments for scripts.
         set_fact:
+          scenario_name: "203_whodata_frequency"
           create_script_extra_params: "-b 100 -w 1 -d 0.01"
           modify_script_extra_params: "-b 100 -w 1 -d 0.01"
           elastic_verification_extra_arguments: "-n -r 3"

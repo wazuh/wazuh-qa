@@ -1,31 +1,44 @@
 ---
-  - name: Find input files for manager
-    find:
-      paths: "{{ agents_results_manager_path }}/{{ event }}"
-    register: find_result
-    when:
-      - inventory_hostname in groups['masters']
 
   - name: "Verify alert json log | {{ event }}"
     script: >
-      verify_alerts_json.py -i {{ item.path }} -e {{ event }}
-      -o {{ missing_alerts_json_path }} {{ json_verification_extra_arguments }}
+      verify_alerts_json.py 
+      -i "{{ agents_results_manager_path }}/{{ event }}/files_{{ event }}-{{ item }}.txt" 
+      -e {{ event }}
+      -o "json-{{ missing_alerts_json_path }}-{{ event }}-{{ item }}"
+      -sn {{ scenario_name }}
+      -ho {{ item }}
+      -ro {{ fim_test_results }}/result_json.json
+      -an "{{ hostvars[item]['wazuh_agent_authd']['agent_name'] }}"
+      -os "{{ hostvars[item].ansible_distribution }}"
+      -dt "{{ hostvars[item].ansible_distribution_version }}"
+      -md "{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
+      {{ json_verification_extra_arguments }}
     args:
       executable: "python3"
     when:
       - inventory_hostname in groups['masters']
     with_items:
-      - "{{ find_result.files }}"
+      - "{{ groups['linuxagents'] + groups['windowsagents'] }}"
 
   - name: "Verify elastic alerts | {{ event }}"
     script: >
-      verify_alerts_elasticsearch.py -i {{ item.path }} -e {{ event }}
+      verify_alerts_elasticsearch.py 
+      -i "{{ agents_results_manager_path }}/{{ event }}/files_{{ event }}-{{ item }}.txt" 
+      -e {{ event }}
       -a {{ hostvars[groups["elasticsearch"][0]]["private_ip"] }}
-      -o {{ missing_alerts_elasticsearch_path }}
+      -o "es-{{ missing_alerts_elasticsearch_path }}-{{ event }}-{{ item }}.txt"
+      -sn {{ scenario_name }}
+      -ho {{ item }}
+      -ro {{ fim_test_results }}/result_es.json
+      -an "{{ hostvars[item]['wazuh_agent_authd']['agent_name'] }}"
+      -os "{{ hostvars[item].ansible_distribution }}"
+      -dt "{{ hostvars[item].ansible_distribution_version }}"
+      -md "{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
       {{ elastic_verification_extra_arguments }}
     args:
       executable: python3
     when:
       - inventory_hostname in groups['masters']
     with_items:
-      - "{{ find_result.files }}"
+      - "{{ groups['linuxagents'] + groups['windowsagents'] }}"

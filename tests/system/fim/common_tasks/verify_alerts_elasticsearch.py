@@ -10,9 +10,14 @@
 import argparse
 from elasticsearch import Elasticsearch
 from time import sleep, time
+import datetime
 import logging
 import copy
+import sys
 
+sys.path.append("/tmp/auxiliary")
+
+from generate_results import generate_result
 
 
 def setElasticsearch(ElasticIP):
@@ -103,11 +108,10 @@ def report_failure(start, failure, retry_count, sleep_time):
 
     """
 
-    elapsed = start - time()
+    elapsed = (datetime.datetime.now().replace(microsecond=0)) - start
 
-    logging.info("Missing alerts {}.\n".format(failure))
-    logging.info("Number of retries {}.\n".format(retry_count))
-    logging.info("Elapsed time: ~ {} seconds. \n".format(elapsed))
+    logging.warning("Missing alerts {}.".format(failure))
+    logging.info("Elapsed time: {}".format(elapsed))
 
     retry_count += 1
 
@@ -151,7 +155,7 @@ def run_line_query(line, query, es, index_name):
     try:
         query_result = makeQuery(query, es, index_name)
     except Exception as e:
-        logging.info("Error when making the  Query: " + str(query))
+        logging.error("Error when making the  Query: " + str(query))
         raise e
 
     return query_result
@@ -184,7 +188,7 @@ def verify_general_alerts(line, query_result, success, failure):
         failure += 1
     except Exception:
         failure += 1
-        logging.info("Error when filtering fields in alert " + line.rstrip())
+        logging.error("Error when filtering fields in alert " + line.rstrip())
 
 
     return success, success_bool, failure
@@ -223,7 +227,7 @@ def verify_es_alerts_whodata(line, query_result, success, failure):
         failure += 1
     except Exception:
         failure += 1
-        logging.info("Error when filtering audit fields in alert " + line.rstrip())
+        logging.error("Error when filtering audit fields in alert " + line.rstrip())
         
 
     return success, success_bool, failure
@@ -258,7 +262,7 @@ def verify_es_alerts_report_changes(line, query_result, diff_statement, success,
         failure += 1
     except Exception:
         failure += 1
-        logging.info("Error when filtering report_changes fields in alert " + line.rstrip())
+        logging.error("Error when filtering report_changes fields in alert " + line.rstrip())
 
     return success, success_bool, failure
 
@@ -290,14 +294,18 @@ def verify_es_alerts(files_list, max_retry, query, no_alert_style, es, index_nam
     logging.info("Elasticsearch alerts verification started")
     
     while retry_count <= max_retry:
-        logging.info("Attempt {}".format(retry_count))
+        logging.info("Attempt {}/{}".format(retry_count, max_retry))
 
         alerts_growing = False
         alerts_growing, alerts_num = \
             ensure_growing_list(alerts_num, query, es, index_name)
-        
-        logging.info("alerts_growing state is {} and alerts_num are {}"\
-            .format(alerts_growing, alerts_num))
+
+        if alerts_growing:
+            logging.warning("Alerts list is growing. Pending alerts to verify are {}"\
+                .format(len(files_list)))
+        else:
+            logging.warning("Alerts list is NOT growing. Pending alerts to verify are {}"\
+                .format(len(files_list)))
 
         if retry_count == 0: # if this is the first loop over files_list
             alerts_growing = True
@@ -328,7 +336,7 @@ def verify_es_alerts(files_list, max_retry, query, no_alert_style, es, index_nam
                     if success_bool: # In case of a success alert verification, then remove line.
                         files_list.remove(line)    
                 except Exception as e:
-                    logging.info("Error when verifying alerts for " + line.rstrip())
+                    logging.error("Error when verifying alerts for " + line.rstrip())
                     raise e
         if failure == 0: # if no failures detected, then break; it's done.
             break
@@ -338,20 +346,6 @@ def verify_es_alerts(files_list, max_retry, query, no_alert_style, es, index_nam
     return success, failure, files_list
 
 if __name__ == "__main__":
-
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        handlers=[
-            logging.FileHandler("verify_alerts_elastic.log", mode="a"),
-            logging.StreamHandler()
-        ]
-    )
-
-    logging.getLogger("elasticsearch").setLevel(logging.ERROR)
-    logging.getLogger("urllib3").setLevel(logging.ERROR)
-    logging.getLogger("requests").setLevel(logging.ERROR)
-    logging.getLogger("requests.urllib3").setLevel(logging.ERROR)
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -396,8 +390,57 @@ if __name__ == "__main__":
         "-tg", "--tag", type=str, required=False, dest='tag_query', nargs='+',
         help="Enable tag queries for the indicated tags", default=None
     )
+    parser.add_argument(
+        "-sn", "--scenario_name", type=str, required=True, dest='scenario_name',
+        help="Scenario complete name", default=None
+    )
+    parser.add_argument(
+        "-ho", "--host", type=str, required=True, dest='host',
+        help="Agent host IP", default=None
+    )
+    parser.add_argument(
+        "-ro", "--result_output", type=str, required=True, dest='result_output_path',
+        help="Result output file path", default=None
+    )
+    parser.add_argument(
+        "-an", "--agent_name", type=str, required=True, dest='agent_name',
+        help="Agent name", default=None
+    )
+    parser.add_argument(
+        "-os", "--operating_system", type=str, required=True, dest='operating_system',
+        help="Operating System Name", default=None
+    )
+    parser.add_argument(
+        "-dt", "--distribution", type=str, required=True, dest='distribution',
+        help="Distribution Version", default=None
+    )
+    parser.add_argument(
+        "-md", "--major_distribution", type=str, required=True, dest='major_distribution',
+        help="Major Distribution Version", default=None
+    )
 
     args = parser.parse_args()
+
+    log_name = "verify_alerts_elastic_" + args.scenario_name + "_" \
+        + args.alert + "_" + args.host + ".log"
+
+    logging.basicConfig(
+        level=logging.INFO,
+
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        datefmt='%Y-%m-%d %H:%M:%S',
+        handlers=[
+            logging.FileHandler(log_name, mode="a"),
+            logging.StreamHandler()
+        ]
+    )
+
+
+    logging.getLogger("elasticsearch").setLevel(logging.ERROR)
+    logging.getLogger("urllib3").setLevel(logging.ERROR)
+    logging.getLogger("requests").setLevel(logging.ERROR)
+    logging.getLogger("requests.urllib3").setLevel(logging.ERROR)
+
 
     # Global query for Syscheck
     query = {
@@ -421,8 +464,7 @@ if __name__ == "__main__":
 
     es = setElasticsearch(args.ip)
     index_name = "wazuh-alerts-3.x*"
-    start = time()
-
+    start = datetime.datetime.now().replace(microsecond=0)
 
 
     # a dictionary for each scenario key name and its argument
@@ -438,27 +480,43 @@ if __name__ == "__main__":
         # select the scenario
         scenario = select_scenario(scenario_arg_dic)
         scenario_arg = scenario_arg_dic[scenario]
-        print("The selected scenario is {}, and scenario arg is {}".format(scenario,scenario_arg))
+        logging.info("The selected scenario is {}, and scenario arg is {}".format(scenario,scenario_arg))
 
     # read the list of paths from a file into a list
     files_list = read_file(args.files)
-
+    expected_alerts_num = len(files_list)
     # alerts verification
     success, failure, failure_list = \
         verify_es_alerts(files_list, args.max_retry, query, args.no_alert_style,
                          es, index_name, start, args.sleep_time,scenario, scenario_arg)
 
-    elapsed = start - time()
+    elapsed = (datetime.datetime.now().replace(microsecond=0)) - start
+
     with open(args.output, 'w+') as output:
         output.writelines('\n'.join(failure_list))
 
-    assert failure == 0, "number of failed files: {}\n \
-            Elapsed time: ~ {} seconds.".format(
-            failure, elapsed
-        )
+    passed = len(failure_list) == 0    
+    received_alerts_num = expected_alerts_num - len(failure_list)
 
-    print(
-        "Number of succeded files: {}\n Elapsed time: ~ {} seconds.".format(
-            success, elapsed
+    logging.info(
+        "Number of succeeded files: {}/{}. Elapsed time: {}".format(
+            success, expected_alerts_num, elapsed
         )
     )
+
+    try:
+        assert failure == 0
+    except:
+        logging.error("Verification result is FAILED. Number of failed paths: {}/{}"\
+            .format(failure, expected_alerts_num))
+    finally:
+        logging.info("Writing the result to the global result file")
+        generate_result("alerts_elastic_verification", args.scenario_name, args.agent_name, 
+                        args.alert, passed, expected_alerts_num, received_alerts_num, failure_list, 
+                        args.result_output_path, args.operating_system, args.distribution, 
+                        args.major_distribution)
+        
+        logging.info("Verification process is finished. Elapsed time: {}".format(elapsed))
+
+
+    
