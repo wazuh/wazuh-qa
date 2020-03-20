@@ -56,6 +56,11 @@ def update_scenario(scenario, verification, content, results_dict):
             # create new entry for scenario
             current_dict[scenario] = {'state': 'SUCCESS'}
     else:
+        # inject extra data ossec.log
+        for event in ["added", "modified", "deleted"]:
+            if event in content:
+                for hostname, data in content[event]['hosts'].items():
+                    data['ossec_log'] = get_ossec_log_errors(scenario, hostname)
         # scenario FAILED
         if scenario in current_dict:
             if current_dict[scenario]['state'] == 'SUCCESS':
