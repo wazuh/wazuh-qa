@@ -1,7 +1,7 @@
 ---
 - block:
   - name: "Delete FIM test files at Wazuh Agents | Linux"
-    script: "delete_files.py -i {{ files_generated_output_path }} -o {{ files_deleted_output_path }} {{ delete_script_extra_params }}"
+    script: "delete_files.py -i {{ files_added_output_path }} -o {{ files_deleted_output_path }} {{ delete_script_extra_params }}"
     args:
       executable: "python3"
       chdir: "{{ agents_linux_output_path }}"
@@ -9,7 +9,7 @@
   - name: Copy list of deleted files from Agents to Ansible Controller host | Linux
     fetch:
       src: "{{ agents_linux_output_path }}/{{ files_deleted_output_path }}"
-      dest: "agents_outputs/{{ event }}/{{ files_deleted_output_path }}-{{ inventory_hostname }}"
+      dest: "agents_outputs/{{ event }}/{{ files_deleted_output_path }}-{{ inventory_hostname }}.txt"
       flat: yes
 
   become: yes
@@ -19,7 +19,7 @@
 
 - block:
   - name: "Delete FIM test files at Wazuh Agents | Windows"
-    script: "delete_files.py -i {{ files_generated_output_path }} -o {{ files_deleted_output_path }} {{ delete_script_extra_params }}"
+    script: "delete_files.py -i {{ files_added_output_path }} -o {{ files_deleted_output_path }} {{ delete_script_extra_params }}"
     args:
       executable: "python"
       chdir: "{{ agents_windows_output_path }}"
@@ -27,7 +27,7 @@
   - name: Copy list of deleted files from Windows Agents to Ansible Controller host
     fetch:
       src: "{{ agents_windows_output_path }}/{{ files_deleted_output_path }}"
-      dest: "agents_outputs/{{ event }}/{{ files_deleted_output_path }}-{{ inventory_hostname }}"
+      dest: "agents_outputs/{{ event }}/{{ files_deleted_output_path }}-{{ inventory_hostname }}.txt"
       flat: yes
 
   when:

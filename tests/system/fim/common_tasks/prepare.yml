@@ -1,3 +1,4 @@
+    
 - block:
   - name: Creates directories to store agents' outputs in Managers hosts
     file:
@@ -11,6 +12,13 @@
       - "{{ agents_results_manager_path }}/added/missing"
       - "{{ agents_results_manager_path }}/modified/missing"
       - "{{ agents_results_manager_path }}/deleted/missing"
+      - "{{ fim_test_results }}"
+      - "{{ auxilary_folder }}"
+
+  - name: Copy generate_results to the manager host
+    copy:
+      src: generate_results.py
+      dest: "{{ auxilary_folder }}/"
 
   - name: Stop wazuh-manager service
     service:

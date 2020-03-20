@@ -9,6 +9,7 @@
     tasks:
       - name: Set extra arguments for scripts.
         set_fact:
+          scenario_name: "207_report_changes_frequency"
           create_script_extra_params: "-t"
           modify_script_extra_params: "-t"
 

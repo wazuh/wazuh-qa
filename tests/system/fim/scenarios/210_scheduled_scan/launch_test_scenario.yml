@@ -13,6 +13,7 @@
 
         - name: Set extra arguments for scripts.
           set_fact:
+            scenario_name: "210_scheduled_scan"
             syscheck_frequency: 10800
             linux_ossec_log_path: "{{ linux_ossec_folder_path }}/logs/ossec.log"
             windows_ossec_log_path: "{{ windows_ossec_folder_path }}\\ossec.log"
