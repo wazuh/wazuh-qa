@@ -33,8 +33,8 @@ def read_verify_json():
     path = "/opt/fim_test_results/result_json.json"
     with open(path, "r") as f:
         json_dict = json.load(f)
-    assert('alert_json_verification' in json_dict)
-    return json_dict['alert_json_verification']
+    assert('alerts_json_verification' in json_dict)
+    return json_dict['alerts_json_verification']
 
 
 def read_verify_elastic():
