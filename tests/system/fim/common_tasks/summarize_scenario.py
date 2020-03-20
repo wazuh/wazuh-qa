@@ -16,7 +16,10 @@ def get_ossec_log_errors(scenario_name, hostname):
     """
     Return relevant lines from ossec.log
     """
-    ossec_path = "/opt/fim_test_results/{}/agent_state/{}/ossec.log".format(scenario_name, hostname)
+    ossec_path = "/opt/fim_test_results/{}/agent_state/{}/ossec.log".format(
+        scenario_name,
+        hostname
+    )
     watch_list = "syscheck warning error".split()
     results = []
     with open(ossec_path, "r") as ossec_log:
@@ -84,7 +87,6 @@ def final_summarize():
     json_dict = read_verify_json()
     elastic_dict = read_verify_elastic()
     json_sum = summarize_result(json_dict, "json")
-    # pprint(json_sum)
     final_result = summarize_result(elastic_dict, "elasticsearch", json_sum)
     return final_result
 
