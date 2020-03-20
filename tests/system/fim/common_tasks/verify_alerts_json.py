@@ -240,7 +240,7 @@ def main():
             if len(sub_paths) == 0:
                 logging.info("Verification result is SUCCESS.")
                 elapsed = (datetime.datetime.now().replace(microsecond=0)) - start
-                returb_code = 0
+                return_code = 0
                 break
 
             if current_retries_count > args.retry_count:
@@ -250,7 +250,7 @@ def main():
                 with open(args.output_file, 'w') as f:
                     for item in sub_paths:
                         f.write("%s\n" % item)
-                returb_code = 1
+                return_code = 1
                 passed = False
                 break
 
@@ -272,7 +272,7 @@ def main():
         expected_alerts_num = len(paths_list_set)
         received_alerts_num = expected_alerts_num - len(sub_paths)
 
-        return returb_code
+        return return_code
     except Exception:
         logging.critical("An error has ocurred. Exiting")
         raise Exception
