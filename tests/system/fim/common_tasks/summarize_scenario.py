@@ -9,10 +9,13 @@
 # Foundation.
 
 import json
-from copy import deepcopy
+import copy
 
 
 def get_ossec_log_errors(scenario_name, hostname):
+    """
+    Return relevant lines from ossec.log
+    """
     ossec_path = "/opt/fim_test_results/{}/agent_state/{}/ossec.log".format(scenario_name, hostname)
     watch_list = "syscheck warning error".split()
     results = []
@@ -26,17 +29,21 @@ def get_ossec_log_errors(scenario_name, hostname):
 def read_verify_json():
     path = "/opt/fim_test_results/result_json.json"
     with open(path, "r") as f:
-        return json.load(f)['alert_json_verification']
+        json_dict = json.load(f)
+    assert('alert_json_verification' in json_dict)
+    return json_dict['alert_json_verification']
 
 
 def read_verify_elastic():
     path = "/opt/fim_test_results/result_es.json"
     with open(path, "r") as f:
-        return json.load(f)['alert_elasticsearch_verification']
+        json_dict = json.load(f)
+    assert('alert_elasticsearch_verification' in json_dict)
+    return json_dict['alert_elasticsearch_verification']
 
 
 def update_scenario(scenario, verification, content, results_dict):
-    current_dict = deepcopy(results_dict)
+    current_dict = copy.deepcopy(results_dict)
     if content['passed']:
         # scenario SUCCESS
         if scenario in current_dict:
@@ -70,14 +77,14 @@ def summarize_result(test_dict, verification, prebuilt_dict=None):
     results_dict = prebuilt_dict or {}
     for k, v in test_dict['scenarios'].items():
         results_dict = update_scenario(k, verification, v, results_dict)
+    return results_dict
 
 
 def final_summarize():
     json_dict = read_verify_json()
     elastic_dict = read_verify_elastic()
-    print(json_dict)
-    # print(elastic_dict)
     json_sum = summarize_result(json_dict, "json")
+    # pprint(json_sum)
     final_result = summarize_result(elastic_dict, "elasticsearch", json_sum)
     return final_result
 
