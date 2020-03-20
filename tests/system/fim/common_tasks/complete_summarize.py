@@ -41,8 +41,8 @@ def read_verify_elastic():
     path = "/opt/fim_test_results/result_es.json"
     with open(path, "r") as f:
         json_dict = json.load(f)
-    assert('alert_elasticsearch_verification' in json_dict)
-    return json_dict['alert_elasticsearch_verification']
+    assert('alerts_elastic_verification' in json_dict)
+    return json_dict['alerts_elastic_verification']
 
 
 def update_scenario(scenario, verification, content, results_dict):
