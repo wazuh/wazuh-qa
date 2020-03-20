@@ -12,6 +12,9 @@ def generate_result(global_name, scenario, host, action, passed, expected_alerts
     and for each agent host. If the file already exists, then it load it
     into a dictionary, modify it and re-write it. If not, then it creates it.
 
+
+    :param str global_name:  Refers to the dictionary head field
+                        It's different from ES alerts testing to JSON alerts testing.
     :param str scenario: Scenario name.
     :param str host: Agent target host.
     :param str action: Action name. 'added', 'deleted' or 'modified'
@@ -20,8 +23,9 @@ def generate_result(global_name, scenario, host, action, passed, expected_alerts
     :param int received_alerts_num: Number of the received alerts.
     :param list missing_paths: List of the missing paths.
     :param str output_path: Path of the output file.
-    :param str host_os: Agent host operating system.
-    :param str host_arch: Agent host architecture.
+    :param str os_arg: Agent host OS.
+    :param str dist: Agent host distribution.
+    :param str major_dist: Agent host major distribution.
 
     """
     # Setting passed variables to True by default.
