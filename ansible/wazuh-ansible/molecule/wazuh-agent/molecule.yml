@@ -73,15 +73,15 @@ provisioner:
     group_vars:
       agent:
         api_pass: password
-        wazuh_manager:
-          address: "{{ wazuh_manager_ip }}"
-          port: 1514
-          protocol: udp
-          api_port: 55000
-          api_proto: 'http'
-          api_user: null
+        wazuh_managers:
+          - address: "{{ wazuh_manager_ip }}"
+            port: 1514
+            protocol: udp
+            api_port: 55000
+            api_proto: 'http'
+            api_user: null
         wazuh_agent_authd:
-          authd_address: "{{ wazuh_manager_ip }}"
+          registration_address: "{{ wazuh_manager_ip }}"
           enable: true
           port: 1515
           ssl_agent_ca: null
