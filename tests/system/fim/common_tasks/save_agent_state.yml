@@ -1,0 +1,102 @@
+- name : Create local results directory
+  file:
+    path: "test_results/agent_state"
+    state: directory
+  delegate_to: 127.0.0.1
+
+- block:
+  - name: Create Linux state directory
+    file:
+      path: "/opt/fim_test_results/{{ ansible_hostname }}"
+      state: directory
+
+  - name: Save Linux agent state
+    copy:
+      src: "{{ item }}"
+      dest: "/opt/fim_test_results/{{ ansible_hostname }}/"
+      remote_src: yes
+    with_items:
+      - "/var/ossec/etc/ossec.conf"
+      - "/var/ossec/logs/ossec.log"
+      - "/etc/ossec-init.conf"
+      - "/var/ossec/etc/internal_options.conf"
+      - "/var/ossec/var/run/ossec-agentd.state"
+
+  - name: Fetch Linux agent state
+    synchronize:
+      mode: pull
+      src: "/opt/fim_test_results/{{ ansible_hostname }}/"
+      dest: "test_results/agent_state/{{ ansible_hostname }}/"
+      recursive: yes
+      delete: yes
+  become: yes
+  when:
+    - inventory_hostname in groups['linuxagents']
+
+- block:
+  - name: Create Windows state directory
+    win_file:
+      path: "c:/fim_test_results/{{ ansible_hostname }}"
+      state: directory
+
+  - name: Save Windows agent state
+    win_copy:
+      src: "{{ windows_ossec_folder_path }}\\{{ item }}"
+      dest: "c:/fim_test_results/{{ ansible_hostname }}/"
+      remote_src: yes
+    with_items:
+      - "ossec.conf"
+      - "ossec.log"
+      - "internal_options.conf"
+      - "ossec-agent.state"
+
+  - name: Gather Windows state file
+    win_find:
+      paths: "c:\\fim_test_results\\{{ ansible_hostname }}\\"
+    register: windows_state
+
+  - name: Fetch Windows agent state
+    fetch:
+      src: "{{ item.path }}"
+      dest: "test_results/agent_state/{{ ansible_hostname }}/"
+      flat: yes
+    with_items: "{{ windows_state.files }}"
+  when:
+    - inventory_hostname in groups['windowsagents']
+
+- block:
+  - name: Create scenario state directory on manager
+    file:
+      path: "/opt/fim_test_results/{{ scenario_name }}"
+      state: directory
+
+  - name: Copy scenario state to manager
+    synchronize:
+      src: "test_results/agent_state/"
+      dest: "/opt/fim_test_results/{{ scenario_name }}/agent_state/"
+      recursive: yes
+      delete: yes
+  become: yes
+  when:
+    - inventory_hostname in groups['masters']
+
+- name: Summarize generate action (set_fact)
+  set_fact:
+    event: "added"
+
+- name: Summarize generate action (run script)
+  import_tasks: "../../common_tasks/summarize_action.yml"
+
+- name: Summarize modify action (set_fact)
+  set_fact:
+    event: "modified"
+
+- name: Summarize modify action (run script)
+  import_tasks: "../../common_tasks/summarize_action.yml"
+
+- name: Summarize delete action (set_fact)
+  set_fact:
+    event: "deleted"
+
+- name: Summarize deleted action (run script)
+  import_tasks: "../../common_tasks/summarize_action.yml"

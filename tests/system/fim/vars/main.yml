@@ -1,3 +1,8 @@
+# scenario related
+scenario_name: ""
+fim_test_results: "/opt/fim_test_results"
+auxilary_folder: "/tmp/auxiliary"
+
 # ossec folder path
 linux_ossec_folder_path: "/var/ossec"
 windows_ossec_folder_path: "C:\\Program Files (x86)\\ossec-agent"
@@ -6,9 +11,9 @@ windows_ossec_folder_path: "C:\\Program Files (x86)\\ossec-agent"
 # Create/Modify/Delete files
 agents_linux_output_path: "/opt/fim_files_output"
 agents_windows_output_path: c:\fim_files_output
-files_generated_output_path: "files_generated.txt"
-files_modified_output_path: "files_modified.txt"
-files_deleted_output_path: "files_deleted.txt"
+files_added_output_path: "files_added"
+files_modified_output_path: "files_modified"
+files_deleted_output_path: "files_deleted"
 
 # FIM testing folder
 files_fim_testing_linux: "/opt/fim_testing"
@@ -31,8 +36,8 @@ alerts_json_path: "/var/ossec/logs/alerts/alerts.json"
 # Results
 agents_results_manager_path: "/opt/agents_files_output"
 agents_results_elastic_path: "/opt/agents_files_output"   # Path on Manager of the imported results from Agents
-missing_alerts_json_path: "missing_alerts_json.txt"
-missing_alerts_elasticsearch_path: "missing_alerts_elasticsearch.txt"
+missing_alerts_json_path: "missing_alerts_json"
+missing_alerts_elasticsearch_path: "missing_alerts_elasticsearch"
 
 create_script_extra_params: ""
 modify_script_extra_params: ""

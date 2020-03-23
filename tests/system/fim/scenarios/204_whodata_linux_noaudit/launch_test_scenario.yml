@@ -9,6 +9,7 @@
     tasks:
       - name: Set extra arguments for scripts.
         set_fact:
+          scenario_name: "204_whodata_linux_noaudit"
           create_script_extra_params: "-b 100 -w 1 -d 0.01"
           modify_script_extra_params: "-b 100 -w 1 -d 0.01"
           elastic_verification_extra_arguments: "-n -r 3"
@@ -76,3 +77,6 @@
         - name: Verify generated alerts
           become: true
           import_tasks: "../../common_tasks/verify_alerts.yml"
+
+      - name: Import tasks from save_agent_state
+        import_tasks: "../../common_tasks/save_agent_state.yml"
