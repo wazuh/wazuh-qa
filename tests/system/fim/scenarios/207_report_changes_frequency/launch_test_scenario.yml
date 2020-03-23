@@ -19,7 +19,7 @@
         - block:
           - name: Configure syscheck event.
             set_fact:
-              event: "added"      
+              event: "added"
               json_verification_extra_arguments: "-r 3"
               elastic_verification_extra_arguments: "-n -r 3"
 
@@ -57,3 +57,6 @@
           - name: Verify generated alerts
             become: true
             import_tasks: "../../common_tasks/verify_alerts.yml"
+
+        - name: Import tasks from save_agent_state
+          import_tasks: "../../common_tasks/save_agent_state.yml"
