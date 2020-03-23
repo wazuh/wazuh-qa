@@ -281,6 +281,7 @@ linuxagents:
         {{ groups["linux-agents"][loop.index-1]}}:
             private_ip: {{ hostvars[groups["linux-agents"][loop.index-1]]["private_ip"] }}
             wazuh_agent_authd:
+                registration_address: {{ groups["masters"][0] }}
                 enable: true
                 port: 1515
                 ssl_agent_ca: null
@@ -337,6 +338,7 @@ windowsagents:
         {{ groups["windows-agents"][loop.index-1]}}:
             private_ip: {{ hostvars[groups["windows-agents"][loop.index-1]]["private_ip"] }}
             wazuh_agent_authd:
+                registration_address: {{ groups["masters"][0] }}
                 enable: true
                 port: 1515
                 ssl_agent_ca: null
