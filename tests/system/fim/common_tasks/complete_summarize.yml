@@ -1,8 +1,8 @@
 ---
   - hosts: all
-      tasks:
-        - name: Complete Summarize
-          script: "complete_summarize.py -o {{ fim_test_results }}/summary.json"
-          become: yes
-          when:
-            - inventory_hostname in groups['masters']
+    tasks:
+      - name: Complete Summarize
+        script: "complete_summarize.py -o {{ fim_test_results }}/summary.json"
+        become: yes
+        when:
+          - inventory_hostname in groups['masters']
