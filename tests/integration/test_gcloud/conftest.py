@@ -16,7 +16,7 @@ from wazuh_testing.tools.services import control_service
 
 @pytest.fixture(scope='module')
 def wait_for_gcp_start(get_configuration, request):
-    # Wait for initial FIM scan to end
+    # Wait for module gpc-pubsub starts
     file_monitor = getattr(request.module, 'wazuh_log_monitor')
     detect_gcp_start(file_monitor)
 

@@ -83,7 +83,3 @@ def test_pull_on_start(get_configuration, configure_environment,
                                 accum_results=1,
                                 error_message='Did not receive expected '
                                                    '"Starting fetching of logs" event').result()
-
-
-
-
