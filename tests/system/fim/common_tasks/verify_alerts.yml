@@ -35,6 +35,8 @@
       -os "{{ hostvars[item].ansible_distribution }}"
       -dt "{{ hostvars[item].ansible_distribution_version }}"
       -md "{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
+      -eu {{ elastic_user }}
+      -ex {{ elastic_password }}
       {{ elastic_verification_extra_arguments }}
     args:
       executable: python3
