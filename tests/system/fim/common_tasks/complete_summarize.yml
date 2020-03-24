@@ -1,5 +1,7 @@
 ---
   - hosts: all
+    vars_files:
+      - ../vars/main.yml
     tasks:
       - name: Complete Summarize
         script: "complete_summarize.py -o {{ fim_test_results }}/summary.json"
