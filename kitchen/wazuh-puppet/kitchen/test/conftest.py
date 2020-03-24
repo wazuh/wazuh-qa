@@ -17,4 +17,4 @@ def get_wazuh_version():
     wazuh_version = wazuh_version.replace('"', '') # Remove double quote.
     wazuh_version = wazuh_version.split("v",1)[1] # Get string after 'v' : X.XX.X 
     
-    return wazuh_version
+    return wazuh_version.rstrip()
