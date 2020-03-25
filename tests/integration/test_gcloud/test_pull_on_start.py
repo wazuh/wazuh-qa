@@ -24,6 +24,8 @@ subscription_name = 'wazuh-integration'
 credentials_file = 'credentials.json'
 interval = '30s'
 pull_on_start = ['yes', 'no']
+max_messages = 100
+logging = "info"
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
@@ -32,7 +34,8 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': project_id, 'SUBSCRIPTION_NAME': subscription_name,
-               'CREDENTIALS_FILE': credentials_file, 'INTERVAL': interval, 'MODULE_NAME': __name__}
+               'CREDENTIALS_FILE': credentials_file, 'INTERVAL': interval, 
+               'MAX_MESSAGES': max_messages, 'LOGGING': logging, 'MODULE_NAME': __name__}
 
 p, m = generate_params(extra_params=conf_params, 
                        apply_to_all=({'PULL_ON_START': pull_on_start_value} for  pull_on_start_value in pull_on_start),
