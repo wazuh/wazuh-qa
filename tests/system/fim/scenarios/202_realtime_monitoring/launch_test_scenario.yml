@@ -71,13 +71,8 @@
             become: true
             import_tasks: "../../common_tasks/verify_alerts.yml"
 
-  - hosts: all
-    vars_files:
-      - ../../vars/main.yml
-      - defaults/main.yml
-      - ../../../provisioning/vars/elastic_nginx.yml
-    handlers:
-      - import_tasks: ../../handlers/main.yml
-    tasks:
+      - name: Clear failed hosts
+        meta: clear_host_errors
+
       - name: Import tasks from save_agent_state
         import_tasks: "../../common_tasks/save_agent_state.yml"
