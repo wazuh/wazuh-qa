@@ -14,7 +14,13 @@ import os
 
 
 def simplecount(filepath):
-    """ Count lines in file """
+    """ 
+    Count lines in file 'filepath' 
+    
+    :param str filepath: Path of the file to count its lines.
+
+    :return: An integer, the lines number. 
+    """
     lines = 0
     with open(filepath) as f:
         for line in f:
@@ -23,6 +29,13 @@ def simplecount(filepath):
 
 
 def read_database(db_path):
+    """
+    Read a databas with path 'db_path'.
+
+    :param str db_path: Path of the target database.
+
+    :return: In case if db_path exists it returns the database as a json file.
+    """
     if not os.path.exists(db_path):
         return {}
     with open(db_path, 'r') as json_file:
@@ -36,7 +49,7 @@ def save_database(json_dict, db_path):
 
 def save_summary(host, action, filepath, json_path):
     """
-    Save action summary
+    Save action summary.
 
     :param str host: Current host to summarize
     :param str action: Action to summarize
