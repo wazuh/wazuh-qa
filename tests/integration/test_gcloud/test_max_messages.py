@@ -25,7 +25,7 @@ project_id = 'sinuous-voice-271711'
 subscription_name = 'wazuh-integration'
 topic_name = 'wazuh-pubsub'
 credentials_file = 'credentials.json'
-interval = '30s'
+interval = '20s'
 pull_on_start = 'no'
 max_messages = 100
 logging = 'info'
@@ -89,7 +89,7 @@ def test_max_messages(nmessages, get_configuration, configure_environment,
     publish(project_id, topic_name, credentials_file, nmessages)
 
     if nmessages <= max_messages:
-        n = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + interval,
+        n = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + interval + 5,
                                     callback=callback_received_messages_number,
                                     accum_results=1,
                                     error_message='Did not receive expected '
@@ -100,13 +100,13 @@ def test_max_messages(nmessages, get_configuration, configure_environment,
         remainder = int(nmessages % max_messages)
 
         for i in range(ntimes):
-            n = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + interval,
+            n = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + interval + 5,
                                         callback=callback_received_messages_number,
                                         accum_results=1,
                                         error_message='Did not receive expected '
                                                       '- INFO - Received and acknowledged x messages').result()
             assert int(n) == max_messages
-        n = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + interval,
+        n = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + interval + 5,
                                         callback=callback_received_messages_number,
                                         accum_results=1,
                                         error_message='Did not receive expected '
