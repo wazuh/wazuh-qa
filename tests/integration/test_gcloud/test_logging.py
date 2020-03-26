@@ -28,7 +28,7 @@ credentials_file = 'credentials.json'
 interval = '20s'
 pull_on_start = 'yes'
 max_messages = 100
-logging = ['info', 'debug', 'warning', 'error']
+logging = ['info', 'debug', 'warning', 'error', 'critical']
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
@@ -65,7 +65,7 @@ def publish(project_id, topic_name, credentials, n=5):
     topic_path = publisher.topic_path(project_id, topic_name)
 
     for n in range(0, n):
-        data = u"- DEBUG - Message number {}".format(n)
+        data = u"Message number {}".format(n)
         # Data must be a bytestring
         data = data.encode("utf-8")
         # Add two attributes, origin and username, to the message
@@ -84,13 +84,15 @@ def test_logging(get_configuration, configure_environment,
     interval = int(''.join(filter(str.isdigit, sinterval)))
 
     if logging_opt == 'info':
-        filt = ['- DEBUG -', '- WARNING -', '- ERROR -']
+        filt = ['- DEBUG -', '- WARNING -', '- ERROR -', '- CRITICAL -']
     elif logging_opt == 'debug':
-        filt = ['- INFO -', '- WARNING -', '- ERROR -']
+        filt = ['- INFO -', '- WARNING -', '- ERROR -', '- CRITICAL -']
     elif logging_opt == 'warning':
-        filt = ['- INFO -', '- DEBUG -', '- ERROR -']
+        filt = ['- INFO -', '- DEBUG -', '- ERROR -', '- CRITICAL -']
+    elif logging_opt == 'warning':
+        filt = ['- INFO -', '- DEBUG -', '- WARNING -', '- CRITICAL -']
     else:
-        filt = ['- INFO -', '- DEBUG -', '- WARNING -']
+        filt = ['- INFO -', '- DEBUG -', '- WARNING -', '- ERROR -']
 
     # Publish messages to pull them later
     publish(project_id, topic_name, credentials_file)
