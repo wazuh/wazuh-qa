@@ -1,7 +1,5 @@
 ---
   - hosts: all
-    vars_files:
-      - ../vars/main.yml
     tasks:
       - name: Debug var
         debug:
