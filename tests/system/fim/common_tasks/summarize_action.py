@@ -14,12 +14,12 @@ import os
 
 
 def simplecount(filepath):
-    """ 
-    Count lines in file 'filepath' 
-    
+    """
+    Count lines in file 'filepath'
+
     :param str filepath: Path of the file to count its lines.
 
-    :return: An integer, the lines number. 
+    :return: An integer, the lines number.
     """
     lines = 0
     with open(filepath) as f:
