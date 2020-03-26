@@ -84,3 +84,6 @@
       - name: Verify there are no alerts for missing files
         become: true
         import_tasks: "actions/verify_missing_files.yml"
+
+      - name: Import tasks from save_agent_state
+        import_tasks: "../../common_tasks/save_agent_state.yml"

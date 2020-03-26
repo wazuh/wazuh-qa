@@ -33,16 +33,16 @@ def read_verify_json():
     path = "/opt/fim_test_results/result_json.json"
     with open(path, "r") as f:
         json_dict = json.load(f)
-    assert('alert_json_verification' in json_dict)
-    return json_dict['alert_json_verification']
+    assert('alerts_json_verification' in json_dict)
+    return json_dict['alerts_json_verification']
 
 
 def read_verify_elastic():
     path = "/opt/fim_test_results/result_es.json"
     with open(path, "r") as f:
         json_dict = json.load(f)
-    assert('alert_elasticsearch_verification' in json_dict)
-    return json_dict['alert_elasticsearch_verification']
+    assert('alerts_elastic_verification' in json_dict)
+    return json_dict['alerts_elastic_verification']
 
 
 def update_scenario(scenario, verification, content, results_dict):
@@ -56,6 +56,11 @@ def update_scenario(scenario, verification, content, results_dict):
             # create new entry for scenario
             current_dict[scenario] = {'state': 'SUCCESS'}
     else:
+        # inject extra data ossec.log
+        for event in ["added", "modified", "deleted"]:
+            if event in content:
+                for hostname, data in content[event]['hosts'].items():
+                    data['ossec_log'] = get_ossec_log_errors(scenario, hostname)
         # scenario FAILED
         if scenario in current_dict:
             if current_dict[scenario]['state'] == 'SUCCESS':
