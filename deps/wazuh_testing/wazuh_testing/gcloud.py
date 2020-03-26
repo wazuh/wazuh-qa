@@ -42,3 +42,10 @@ def callback_received_messages_number(line):
     if match:
         return match.group(1)
     return None
+
+
+def callback_detect_all_gcp(line):
+    match = re.match(r'.*wazuh-modulesd:gcp-pubsub\[\d+\].*', line)
+    if match:
+        return line
+    return None
