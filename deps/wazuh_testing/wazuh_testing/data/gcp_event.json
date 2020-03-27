@@ -337,14 +337,7 @@
                               }
                           ],
                           "required": [
-                              "authAnswer",
-                              "protocol",
-                              "queryName",
-                              "queryType",
-                              "responseCode",
-                              "sourceIP",
-                              "vmInstanceId",
-                              "vmInstanceName"
+                              "responseCode"
                           ],
                           "properties": {
                               "authAnswer": {
@@ -488,8 +481,7 @@
                                   "required": [
                                       "location",
                                       "project_id",
-                                      "source_type",
-                                      "target_type"
+                                      "source_type"
                                   ],
                                   "properties": {
                                       "location": {
