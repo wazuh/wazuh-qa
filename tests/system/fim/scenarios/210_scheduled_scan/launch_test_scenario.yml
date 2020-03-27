@@ -19,7 +19,7 @@
             windows_ossec_log_path: "{{ windows_ossec_folder_path }}\\ossec.log"
             json_verification_extra_arguments: "-r 3"
             elastic_verification_extra_arguments: "-n -r 3"
-          
+
         - block:
           - name: Configure syscheck event.
             set_fact:
@@ -33,7 +33,7 @@
               - Clear ossec.log Windows Agent
               - Start Wazuh agent Linux
               - Start Wazuh agent Windows
-  
+
           - meta: flush_handlers
 
           - name: Wait until the first FIM scan end (Linux)
@@ -70,7 +70,7 @@
 
           - name: Modifiying files to trigger FIM alerts
             import_tasks: "../../common_tasks/modify_files.yml"
-          
+
           - name: Wait for scheduled scan
             import_tasks: "tasks/wait_scheduled_scan.yml"
 
@@ -96,3 +96,5 @@
             import_tasks: "../../common_tasks/verify_alerts.yml"
           any_errors_fatal: true
 
+        - name: Import tasks from save_agent_state
+          import_tasks: "../../common_tasks/save_agent_state.yml"

@@ -82,3 +82,6 @@
         become: true
         import_tasks: "../../common_tasks/verify_alerts.yml"
 
+      - name: Import tasks from save_agent_state
+        import_tasks: "../../common_tasks/save_agent_state.yml"
+

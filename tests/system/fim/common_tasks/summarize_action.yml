@@ -1,0 +1,19 @@
+- block:
+  - name: Get added files in agents output
+    find:
+      paths: "/opt/agents_files_output/{{ event }}/"
+      recurse: no
+      file_type: file
+    register: event_files
+
+  - name: Summarize added files
+    script: >
+      summarize_action.py
+      --scenario {{ scenario_name }}
+      --action {{ event }}
+      --action-results {{ item.path }}
+    with_items:
+      - "{{ event_files.files }}"
+  become: yes
+  when:
+    - inventory_hostname in groups['masters']
