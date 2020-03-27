@@ -9,21 +9,50 @@
 # Foundation.
 
 import json
-import copy
 
 
 def read_summary_json():
-    path = "../provisioning/agents_status/fim_test_results/summary.json"
+    # path = "../provisioning/agents_status/fim_test_results/summary.json"
+    path = "summary.json"
     with open(path, "r") as f:
         json_dict = json.load(f)
     return json_dict
 
+
 def host2markdown(name, jsonObject):
     line = '#### ' + name + '\n'
-    for key in jsonObject:
-        value = jsonObject[key]
+    for key, value in jsonObject.items():
         line += ' - ' + key + ': ' + str(value) + '\n'
     return repr(line)
+
+
+def event2markdown(event, hosts):
+    result = "**Event: {}**\n".format(event)
+    for host, json_dict in hosts.items():
+        result += host2markdown(host, json_dict)
+    return result
+
+
+def scenario2markdown(scenario_name, scenario_content):
+    """
+    Convert a scenario to markdown syntax
+    """
+    if scenario_content['state'] == 'SUCCESS':
+        return "### {} :heavy_check_mark:".format(scenario_name)
+    result = '### {} :x:\n'.format(scenario_name)
+    for verification, test_results in scenario_content['errors'].items():
+        result += '### {}\n'.format(verification)
+        del test_results['passed']
+        for event, event_content in test_results.items():
+            result += event2markdown(event, event_content['hosts'])
+    return result + '***'
+
+
+def json2markdown(summary_json):
+    result = ''
+    for scenario, content in summary_json.items():
+        result += scenario2markdown(scenario, content)
+    return result
 
 
 if __name__ == '__main__':
@@ -35,6 +64,7 @@ if __name__ == '__main__':
                         help="Output file to save the printable summary")
     args = parser.parse_args()
     out_path = args.output_file
-    printable_summary = read_summary_json()
+    summary_json = read_summary_json()
+    printable_summary = json2markdown(summary_json)
     with open(out_path, "w") as f:
         json.dump(printable_summary, f)
