@@ -18,6 +18,12 @@ def read_summary_json():
         json_dict = json.load(f)
     return json_dict
 
+def host2markdown(name, jsonObject):
+    line = '#### ' + name + '\n'
+    for key in jsonObject:
+        value = jsonObject[key]
+        line += ' - ' + key + ': ' + str(value) + '\n'
+    return repr(line)
 
 
 if __name__ == '__main__':
