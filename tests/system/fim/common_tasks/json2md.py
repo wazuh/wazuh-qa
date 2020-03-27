@@ -38,14 +38,14 @@ def scenario2markdown(scenario_name, scenario_content):
     Convert a scenario to markdown syntax
     """
     if scenario_content['state'] == 'SUCCESS':
-        return "### {} :heavy_check_mark:".format(scenario_name)
+        return "### {} :heavy_check_mark:\n***\n".format(scenario_name)
     result = '### {} :x:\n'.format(scenario_name)
     for verification, test_results in scenario_content['errors'].items():
         result += '### {}\n'.format(verification)
         del test_results['passed']
         for event, event_content in test_results.items():
             result += event2markdown(event, event_content['hosts'])
-    return result + '***'
+    return result + '***\n'
 
 
 def json2markdown(summary_json):
@@ -67,4 +67,4 @@ if __name__ == '__main__':
     summary_json = read_summary_json()
     printable_summary = json2markdown(summary_json)
     with open(out_path, "w") as f:
-        json.dump(printable_summary, f)
+        f.write(printable_summary)
