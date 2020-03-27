@@ -250,7 +250,7 @@ def main():
                 with open(args.output_file, 'w') as f:
                     for item in sub_paths:
                         f.write("%s\n" % item)
-                return_code = 1
+                return_code = 3
                 passed = False
                 break
 
@@ -259,15 +259,15 @@ def main():
                 elapsed = (datetime.datetime.now().replace(microsecond=0)) - start
                 current_retries_count += 1
 
-                if current_retries_count <= args.retry_count:    
+                if current_retries_count <= args.retry_count:
                     logging.info("Attempt {}/{}".format(current_retries_count, args.retry_count))
 
 
             time.sleep(args.sleep_time)
             prev_lenght = len(sub_paths)
-            
+
             logging.info("Elapsed time: %s" % (elapsed))
-        
+
 
         expected_alerts_num = len(paths_list_set)
         received_alerts_num = expected_alerts_num - len(sub_paths)
@@ -282,10 +282,10 @@ def main():
                 len(paths_list_set) - len(sub_paths), len(paths_list_set), elapsed
             )
         )
-        
+
         logging.info("Write the result to the global result file")
         generate_result("alerts_json_verification", args.scenario_name, args.agent_name,
-                        args.event, passed, expected_alerts_num, received_alerts_num, 
+                        args.event, passed, expected_alerts_num, received_alerts_num,
                         list(sub_paths), args.result_output_path, args.operating_system,
                         args.distribution, args.major_distribution)
 

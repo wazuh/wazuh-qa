@@ -546,12 +546,11 @@ if __name__ == "__main__":
         )
     )
 
-    try:
-        assert failure == 0
-    except:
+    if (failure == 0):
+        sys.exit(0)
+    else:
         logging.error("Verification result is FAILED. Number of failed paths: {}/{}"\
             .format(failure, expected_alerts_num))
-    finally:
         logging.info("Writing the result to the global result file")
         generate_result("alerts_elastic_verification", args.scenario_name, args.agent_name,
                         args.alert, passed, expected_alerts_num, received_alerts_num, failure_list,
@@ -559,3 +558,4 @@ if __name__ == "__main__":
                         args.major_distribution)
 
         logging.info("Verification process is finished. Elapsed time: {}".format(elapsed))
+        sys.exit(3)

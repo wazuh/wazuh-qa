@@ -20,6 +20,11 @@
       - inventory_hostname in groups['masters']
     with_items:
       - "{{ groups['linuxagents'] + groups['windowsagents'] }}"
+    register: verify_json_result
+    failed_when:
+      - verify_json_result.rc != 0
+      - verify_json_result.rc != 3
+    changed_when: False
 
   - name: "Verify elastic alerts | {{ event }}"
     script: >
@@ -46,3 +51,8 @@
       - inventory_hostname in groups['masters']
     with_items:
       - "{{ groups['linuxagents'] + groups['windowsagents'] }}"
+    register: verify_elastic_result
+    failed_when:
+      - verify_elastic_result.rc != 0
+      - verify_elastic_result.rc != 3
+    changed_when: False
