@@ -36,14 +36,6 @@ elif sys.platform == 'linux2' or sys.platform == 'linux':
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
-if sys.platform == 'win32':
-    _REQUIRED_AUDIT = {"path", "process_id", "process_name", "user_id", "user_name"}
-
-else:
-    _REQUIRED_AUDIT = {'user_id', 'user_name', 'group_id', 'group_name', 'process_name', 'path', 'audit_uid',
-                       'audit_name', 'effective_uid', 'effective_name', 'ppid', 'process_id'
-                       }
-
 FIFO = 'fifo'
 SYMLINK = 'sym_link'
 HARDLINK = 'hard_link'
@@ -131,12 +123,6 @@ but was expected to be '{mode}'"
         intersection_debug += "\nRequired Attributes are: " + str(required_attributes)
         intersection_debug += "\nIntersection is: " + str(intersection)
         assert (intersection == set()), f'Attributes and required_attributes are not the same. ' + intersection_debug
-
-        # Check audit
-        if event['data']['mode'] == 'whodata':
-            assert ('audit' in event['data']), f'audit no detected in event'
-            assert (event['data']['audit'].keys() ^ _REQUIRED_AUDIT == set()), \
-                f'audit keys and required_audit are no the same'
 
         # Check add file event
         if event['data']['type'] == 'added':
