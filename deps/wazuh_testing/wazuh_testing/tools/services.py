@@ -175,14 +175,16 @@ def check_daemon_status(daemon=None, running=True, timeout=10, extra_sockets=Non
         # Check specified daemon/s status
         daemon_status = subprocess.run(['service', 'wazuh-manager', 'status'], stdout=subprocess.PIPE).stdout.decode()
         if f"{daemon if daemon is not None else ''} {'not' if running is True else 'is'} running" not in daemon_status:
-            # Construct list of socket paths to check
+            # Construct set of socket paths to check
             if daemon is None:
-                socket_list = {path for array in WAZUH_SOCKETS.values() for path in array}
+                socket_set = {path for array in WAZUH_SOCKETS.values() for path in array}
             else:
-                socket_list = {path for path in WAZUH_SOCKETS[daemon]}
-            socket_list.update(extra_sockets)
+                socket_set = {path for path in WAZUH_SOCKETS[daemon]}
+            # We remove optional sockets and add extra sockets to the set to check
+            socket_set.difference_update(WAZUH_OPTIONAL_SOCKETS)
+            socket_set.update(extra_sockets)
             # Check specified socket/s status
-            for socket in socket_list:
+            for socket in socket_set:
                 if os.path.exists(socket) is not running:
                     break
             else:

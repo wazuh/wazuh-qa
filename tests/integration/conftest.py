@@ -15,13 +15,12 @@ from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_LOGS_PATH, WAZUH_CONF
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor
 from wazuh_testing.tools.monitoring import SocketController
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
-from wazuh_testing.tools.services import delete_sockets
 from wazuh_testing.tools.time import TimeMachine
 
 ALL = set("darwin linux win32 sunos5".split())
@@ -322,8 +321,11 @@ def configure_mitm_environment(request):
     for daemon, mitm, daemon_first in monitored_sockets_params:
         not daemon_first and mitm is not None and mitm.start()
         control_service('start', daemon=daemon, debug_mode=True)
-        check_daemon_status(running=True, daemon=daemon,
-                            extra_sockets=[mitm.address] if mitm.family == 'AF_UNIX' else None)
+        check_daemon_status(
+            running=True,
+            daemon=daemon,
+            extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else None
+        )
         daemon_first and mitm is not None and mitm.start()
         if mitm is not None:
             monitored_sockets.append(QueueMonitor(queue_item=mitm.queue))
@@ -338,8 +340,11 @@ def configure_mitm_environment(request):
     for daemon, mitm, _ in monitored_sockets_params:
         mitm is not None and mitm.shutdown()
         control_service('stop', daemon=daemon)
-        check_daemon_status(running=False, daemon=daemon,
-                            extra_sockets=[mitm.address] if mitm.family == 'AF_UNIX' else None)
+        check_daemon_status(
+            running=False,
+            daemon=daemon,
+            extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else None
+        )
 
     # Delete all db
     delete_dbs()
