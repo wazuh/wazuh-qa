@@ -22,7 +22,7 @@
           - inventory_hostname in groups['masters']
 
       - name: Format summary to Markdown syntax
-        script: "json2md.py -o ../provisioning/agents_status/printable_summary.md"
+        script: "json2md.py -o {{ fim_test_results }}/printable_summary.md"
         become: yes
         when:
           - inventory_hostname in groups['masters']
