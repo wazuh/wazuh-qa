@@ -61,7 +61,6 @@ WAZUH_SOCKETS = {
     'wazuh-db': [os.path.join(QUEUE_DB_PATH, 'wdb')],
     'wazuh-modulesd': [os.path.join(QUEUE_OSSEC_PATH, 'wmodules'),
                        os.path.join(QUEUE_OSSEC_PATH, 'download'),
-                       os.path.join(QUEUE_OSSEC_PATH, 'control'),
-                       os.path.join(QUEUE_OSSEC_PATH, 'krequest')],
+                       os.path.join(QUEUE_OSSEC_PATH, 'control')],
     'wazuh-clusterd': [os.path.join(CLUSTER_SOCKET_PATH, 'c-internal.sock')]
 }

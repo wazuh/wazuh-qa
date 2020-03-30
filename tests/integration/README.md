@@ -142,6 +142,7 @@ Finally, copy your `wazuh-qa` repository within your testing environment and you
 Our newest integration tests are located in `wazuh-qa/tests/integration/`. They are organized by capabilities:
 
 - _test_analysisd_
+- _test_cluster_
 - _test_fim_
 - _test_mitre_
 - _test_wazuh_db_
@@ -274,6 +275,7 @@ wazuh_testing
     └── wazuh_testing
         ├── __init__.py
         ├── analysis.py
+        ├── cluster.py            
         ├── data
         │   ├── event_analysis_schema.json
         │   ├── mitre_event.json

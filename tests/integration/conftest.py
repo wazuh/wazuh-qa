@@ -322,7 +322,8 @@ def configure_mitm_environment(request):
     for daemon, mitm, daemon_first in monitored_sockets_params:
         not daemon_first and mitm is not None and mitm.start()
         control_service('start', daemon=daemon, debug_mode=True)
-        check_daemon_status(running=True, daemon=daemon)
+        check_daemon_status(running=True, daemon=daemon,
+                            extra_sockets=[mitm.address] if mitm.family == 'AF_UNIX' else None)
         daemon_first and mitm is not None and mitm.start()
         if mitm is not None:
             monitored_sockets.append(QueueMonitor(queue_item=mitm.queue))
@@ -337,7 +338,8 @@ def configure_mitm_environment(request):
     for daemon, mitm, _ in monitored_sockets_params:
         mitm is not None and mitm.shutdown()
         control_service('stop', daemon=daemon)
-        check_daemon_status(running=False, daemon=daemon)
+        check_daemon_status(running=False, daemon=daemon,
+                            extra_sockets=[mitm.address] if mitm.family == 'AF_UNIX' else None)
 
     # Delete all db
     delete_dbs()

@@ -10,7 +10,7 @@ from subprocess import check_call
 
 import psutil
 
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_SERVICE, WAZUH_SOCKETS, WAZUH_LOGS_PATH, QUEUE_DB_PATH
+from wazuh_testing.tools import WAZUH_PATH, WAZUH_SERVICE, WAZUH_SOCKETS, QUEUE_DB_PATH, WAZUH_OPTIONAL_SOCKETS
 from wazuh_testing.tools.configuration import write_wazuh_conf
 
 
@@ -150,7 +150,7 @@ def get_process(search_name):
     return None
 
 
-def check_daemon_status(daemon=None, running=True, timeout=10):
+def check_daemon_status(daemon=None, running=True, timeout=10, extra_sockets=None):
     """Check Wazuh daemon status.
 
     Parameters
@@ -161,22 +161,26 @@ def check_daemon_status(daemon=None, running=True, timeout=10):
         True if the daemon is expected to be running False if it is expected to be stopped. Default `True`
     timeout : int, optional
         Timeout value for the check. Default `10`
+    extra_sockets: list, optional
+        Additional sockets to check. They may not be present in default configuration
 
     Raises
     ------
     TimeoutError
         If the daemon status is wrong after timeout seconds.
     """
+    if extra_sockets is None:
+        extra_sockets = []
     for _ in range(3):
-
         # Check specified daemon/s status
         daemon_status = subprocess.run(['service', 'wazuh-manager', 'status'], stdout=subprocess.PIPE).stdout.decode()
         if f"{daemon if daemon is not None else ''} {'not' if running is True else 'is'} running" not in daemon_status:
             # Construct list of socket paths to check
             if daemon is None:
-                socket_list = [path for array in WAZUH_SOCKETS.values() for path in array]
+                socket_list = {path for array in WAZUH_SOCKETS.values() for path in array}
             else:
-                socket_list = [path for path in WAZUH_SOCKETS[daemon]]
+                socket_list = {path for path in WAZUH_SOCKETS[daemon]}
+            socket_list.update(extra_sockets)
             # Check specified socket/s status
             for socket in socket_list:
                 if os.path.exists(socket) is not running:
