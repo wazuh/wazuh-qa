@@ -26,3 +26,9 @@
         become: yes
         when:
           - inventory_hostname in groups['masters']
+
+      - name: Format agents list to Markdown syntax
+        script: "hosts2md.py -o {{ fim_test_results }}/agents_summary.md"
+        become: yes
+        when:
+          - inventory_hostname in groups['masters']
