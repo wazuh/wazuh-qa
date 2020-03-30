@@ -31,7 +31,7 @@ def endpoints_set(dict):
                 del value3['passed']
                 for key4, value4 in value3.items():
                     for key5, value5 in value4.items():
-                        line = key5 + ' - ' + value5['os'] + ' ' + value5['distribution']
+                        line = key5 + ' (' + value5['os'] + ' ' + value5['distribution'] + ')'
                         endpoints_list.append(line)
     return set(endpoints_list)
 
@@ -39,8 +39,8 @@ def endpoints_set(dict):
 def set_to_md(agents):
     md_output = ''
     for element in agents:
-        md_output += ' - **' + element + '** \n'
-    return repr(md_output)
+        md_output += " - " + element + " \n"
+    return md_output
 
 def final_summarize():
     json_dict = read_verify_json()
