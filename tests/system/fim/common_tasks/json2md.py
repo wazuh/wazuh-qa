@@ -12,8 +12,7 @@ import json
 
 
 def read_summary_json():
-    # path = "../provisioning/agents_status/fim_test_results/summary.json"
-    path = "summary.json"
+    path = "../provisioning/agents_status/fim_test_results/summary.json"
     with open(path, "r") as f:
         json_dict = json.load(f)
     return json_dict
