@@ -49,13 +49,10 @@ RUN gem install rake \
     gem install bundler \
       --no-document \
       --quiet && \
-    gem install kitchen-ansible \
-      --no-document \
-      --quiet && \
-    gem install kitchen-docker \
-      --no-document \
-      --quiet && \
     gem install kitchen-docker_cli \
+      --no-document \
+      --quiet && \
+    gem install kitchen-docker -v 2.9.0 \
       --no-document \
       --quiet && \
     gem install kitchen-puppet \
@@ -73,6 +70,18 @@ RUN gem install rake \
     gem install kitchen-goss \
       --no-document \
       --quiet
+
+# Clone wazuh-qa
+RUN cd $HOME && \
+    git clone https://github.com/wazuh/wazuh-qa.git && \
+    cd $HOME/wazuh-qa && \
+    git checkout devel && \
+    git pull origin devel
+
+# Copy our custom kitchen-docker to the gem folder.
+RUN rm -rf /var/lib/gems/2.5.0/gems/kitchen-docker-2.9.0/* && \
+    cp -rf $HOME/wazuh-qa/kitchen/kitchen-docker/* /var/lib/gems/2.5.0/gems/kitchen-docker-2.9.0/
+
 
 # Python Dependencies and Libraries
 RUN apt install python3-venv python3-pip -y && \

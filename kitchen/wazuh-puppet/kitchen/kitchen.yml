@@ -3,6 +3,7 @@ driver:
   name: docker
   use_sudo: false
   use_internal_docker_network: true
+  remove_images: true
 
 provisioner:
   name: puppet_apply
