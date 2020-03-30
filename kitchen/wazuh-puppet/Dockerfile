@@ -75,7 +75,6 @@ RUN gem install rake \
 RUN cd $HOME && \
     git clone https://github.com/wazuh/wazuh-qa.git && \
     cd $HOME/wazuh-qa && \
-    git fetch --all && \
     git checkout devel && \
     git pull origin devel
 
