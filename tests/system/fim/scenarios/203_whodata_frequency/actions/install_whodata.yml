@@ -2,12 +2,30 @@
   - block:
     - name: Install Audit | Linux
       package:
+        name: audit
+        state: present
+      when:
+        - ansible_os_family == 'RedHat'
+
+    - name: Install Audit | Linux
+      package:
         name: auditd
         state: present
+      when:
+        - ansible_os_family == 'Debian'
+
+    - name: start Audit service | Linux
+      command: service audit start
+    become: yes
+    when:
+      - inventory_hostname in groups['linuxagents']
+      - ansible_os_family == 'RedHat'
+    become: yes
 
     - name: start Audit service | Linux
       command: service auditd start
     become: yes
     when:
       - inventory_hostname in groups['linuxagents']
+      - ansible_os_family == 'Debian'
     become: yes
