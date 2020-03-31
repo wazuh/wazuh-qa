@@ -287,6 +287,7 @@ wazuh_testing
         │   ├── file.py
         │   ├── monitoring.py
         │   ├── services.py
+        │   ├── system.py
         │   └── time.py
         └── wazuh_db.py
 ```

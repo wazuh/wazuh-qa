@@ -21,8 +21,11 @@ def configure_environment(host_manager):
     host_manager : system.HostManager
         Instance of HostManager
     """
-    host_manager.move_file(host='wazuh-master', src_path='files/fetch_keys.py', dest_path='/tmp/fetch_keys.py')
-    host_manager.apply_config('data/config.yml', clear_files=[os.path.join(WAZUH_LOGS_PATH, 'ossec.log')],
+    host_manager.move_file(host='wazuh-master',
+                           src_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files/fetch_keys.py'),
+                           dest_path='/tmp/fetch_keys.py')
+    host_manager.apply_config(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/config.yml'),
+                              clear_files=[os.path.join(WAZUH_LOGS_PATH, 'ossec.log')],
                               restart_services=['wazuh'])
     host_manager.add_block_to_file(host='wazuh-master', path='/var/ossec/etc/client.keys', replace='NOTVALIDKEY',
                                    after='wazuh-agent2 any ', before='2\n')
@@ -38,9 +41,11 @@ def test_agent_key_polling(inventory_path):
     inventory_path : str
         Path to the Ansible hosts inventory
     """
+    actual_path = os.path.dirname(os.path.abspath(__file__))
     host_manager = HostManager(inventory_path=inventory_path)
     configure_environment(host_manager)
 
-    host_monitor = HostMonitor(inventory_path=inventory_path, messages_path='data/messages.yml',
-                               tmp_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tmp'))
+    host_monitor = HostMonitor(inventory_path=inventory_path,
+                               messages_path=os.path.join(actual_path, 'data/messages.yml'),
+                               tmp_path=os.path.join(actual_path, 'tmp'))
     host_monitor.run()
