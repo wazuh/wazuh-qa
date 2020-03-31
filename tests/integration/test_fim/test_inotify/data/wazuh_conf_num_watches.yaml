@@ -3,7 +3,7 @@
 - tags:
   - num_watches_realtime_enabled
   apply_to_modules:
-  - test_num_wactches
+  - test_num_watches
   section: syscheck
   elements:
   - disabled:
@@ -16,7 +16,7 @@
 - tags:
   - num_watches_realtime_disabled
   apply_to_modules:
-  - test_num_wactches
+  - test_num_watches
   section: syscheck
   elements:
   - disabled:

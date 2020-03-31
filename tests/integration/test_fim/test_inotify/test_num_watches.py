@@ -28,7 +28,7 @@ testdir1 = test_directories[0]
 
 # Configurations
 
-p, m = generate_params(extra_params={"TEST_DIRECTORIES": test_directories[0]})
+p, m = generate_params(extra_params={"TEST_DIRECTORIES": testdir1})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
@@ -44,20 +44,15 @@ def get_configuration(request):
 
 
 def extra_configuration_before_yield():
-    os.mkdir(testdir1)
     os.mkdir(os.path.join(testdir1, 'sub1'))
     os.mkdir(os.path.join(testdir1, 'sub2'))
 
 
-def extra_configuration_after_yield():
-    sh.rmtree(testdir1, ignore_errors=True)
-
-
 @pytest.mark.parametrize('realtime_enabled, decreases_num_watches, rename_folder, tags_to_apply', [
-    (True, True, False, 'num_watches_realtime_enabled'),
-    (True, True, True, 'num_watches_realtime_enabled'),
-    (True, False, False, 'num_watches_realtime_enabled'),
-    (False, False, False, 'num_watches_realtime_disabled')
+    (True, True, False, {'num_watches_realtime_enabled'}),
+    (True, True, True, {'num_watches_realtime_enabled'}),
+    (True, False, False, {'num_watches_realtime_enabled'}),
+    (False, False, False, {'num_watches_realtime_disabled'})
 ])
 def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, tags_to_apply, get_configuration,
                      configure_environment, restart_syscheckd, wait_for_initial_scan):
