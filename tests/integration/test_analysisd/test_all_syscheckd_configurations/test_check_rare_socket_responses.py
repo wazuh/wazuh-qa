@@ -14,7 +14,7 @@ from wazuh_testing.tools.monitoring import ManInTheMiddle
 
 # Marks
 
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2)]
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2), pytest.mark.server]
 
 # Configurations
 

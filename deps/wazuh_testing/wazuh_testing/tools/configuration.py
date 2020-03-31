@@ -12,6 +12,7 @@ from typing import List, Any, Set
 import pytest
 import yaml
 
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX
 
 
@@ -268,7 +269,9 @@ def set_section_wazuh_conf(sections):
                         section_conf.attrib[attr_name] = str(attr_value)
 
         # Insert elements
-        new_elements = section.get('elements')
+        new_elements = section.get('elements', list())
+        if global_parameters.fim_database_memory and section['section'] == 'syscheck':
+            new_elements.append({'database': {'value': 'memory'}})
         if new_elements:
             create_elements(section_conf, new_elements)
 

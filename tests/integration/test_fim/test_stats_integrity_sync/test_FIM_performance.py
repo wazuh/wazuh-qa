@@ -22,7 +22,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service, check_daemon_status
 
 # Marks
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=3)]
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=3), pytest.mark.server]
 
 root_dir = '/test'
 tested_daemon = 'ossec-syscheckd'

@@ -15,23 +15,31 @@ from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, WAZUH_SERVICE
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor
-from wazuh_testing.tools.monitoring import SocketController
+from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
 
-ALL = set("darwin linux win32 sunos5".split())
+PLATFORMS = set("darwin linux win32 sunos5".split())
+HOST_TYPES = set("server agent".split())
+
 catalog = list()
 
 
 def pytest_runtest_setup(item):
-    supported_platforms = ALL.intersection(mark.name for mark in item.iter_markers())
+    # Find if platform applies
+    supported_platforms = PLATFORMS.intersection(mark.name for mark in item.iter_markers())
     plat = sys.platform
     if supported_platforms and plat not in supported_platforms:
         pytest.skip("Cannot run on platform {}".format(plat))
+
+    host_type = 'agent' if 'agent' in WAZUH_SERVICE else 'server'
+    supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())
+    if supported_types and host_type not in supported_types:
+        pytest.skip("Cannot run on wazuh {}".format(host_type))
+
     # Consider only first mark
     levels = [mark.kwargs['level'] for mark in item.iter_markers(name="tier")]
     if levels and len(levels) > 0:
@@ -93,6 +101,11 @@ def pytest_addoption(parser):
              "those with a hardcoded timeout not depending on global_parameters.default_timeout "
              "variable from wazuh_testing package"
     )
+    parser.addoption(
+        "--fim-database-memory",
+        action="store_true",
+        help="run tests activating database memory in the syscheck configuration"
+    )
 
 
 def pytest_configure(config):
@@ -105,6 +118,11 @@ def pytest_configure(config):
     default_timeout = config.getoption("--default-timeout")
     if default_timeout:
         global_parameters.default_timeout = default_timeout
+
+    # Set fim_database_memory only if it is passed through command line args
+    fim_database_memory = config.getoption("--fim-database-memory")
+    if fim_database_memory:
+        global_parameters.fim_database_memory = True
 
 
 def pytest_html_results_table_header(cells):

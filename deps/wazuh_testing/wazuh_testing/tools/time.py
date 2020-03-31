@@ -84,8 +84,8 @@ class TimeMachine:
         datetime_ : datetime
             New date and time to set.
         """
-        # {month}{day}{hour}{minute}{year}
-        os.system('date ' + '-u ' + datetime_.strftime("%m%d%H%M%Y"))
+        # {month}{day}{hour}{minute}{year}.{seconds}
+        os.system('date ' + '-u ' + datetime_.strftime("%m%d%H%M%Y.%S"))
 
     @staticmethod
     def travel_to_future(time_delta, back_in_time=False):

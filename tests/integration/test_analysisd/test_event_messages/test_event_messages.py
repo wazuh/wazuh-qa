@@ -8,14 +8,14 @@ import pytest
 import yaml
 
 from wazuh_testing import global_parameters
-from wazuh_testing.analysis import callback_analysisd_message, callback_wazuh_db_message, callback_fim_alert, \
-    validate_analysis_alert
-from wazuh_testing.tools import ALERT_FILE_PATH, WAZUH_PATH, LOG_FILE_PATH
+from wazuh_testing.analysis import callback_fim_alert, callback_analysisd_message, validate_analysis_alert, \
+    callback_wazuh_db_message
+from wazuh_testing.tools import ALERT_FILE_PATH, LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.monitoring import ManInTheMiddle
 
 # Marks
 
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 # Configurations
 
