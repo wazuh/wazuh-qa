@@ -16,16 +16,13 @@
 
     - name: start Audit service | Linux
       command: service audit start
-    become: yes
-    when:
-      - inventory_hostname in groups['linuxagents']
-      - ansible_os_family == 'RedHat'
-    become: yes
+      when:
+        - ansible_os_family == 'RedHat'
 
     - name: start Audit service | Linux
       command: service auditd start
+      when:
+        - ansible_os_family == 'Debian'
     become: yes
     when:
       - inventory_hostname in groups['linuxagents']
-      - ansible_os_family == 'Debian'
-    become: yes
