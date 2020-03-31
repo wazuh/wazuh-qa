@@ -10,7 +10,7 @@
       -ho {{ item }}
       -ro {{ fim_test_results }}/result_json.json
       -an "{{ hostvars[item]['wazuh_agent_authd']['agent_name'] }}"
-      -os "{{ hostvars[item]ansible_distribution }}"
+      -os "{{ hostvars[item].ansible_distribution }}"
       -dt "{{ hostvars[item].ansible_distribution_version }}"
       -md "{{ hostvars[item].ansible_distribution_major_version }}"
       {{ json_verification_extra_arguments }}
