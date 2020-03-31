@@ -105,6 +105,7 @@ Every group will have the following structure:
 
 ```bash
 <functionality>
+├── conftest.py
 ├── data
 │   ├── config.yml
 │   └── messages.yml
@@ -132,7 +133,7 @@ node_name:
     timeout: 60
 ```
 
-- **node_name**: Name of the node where we are going to look for the message.
+- **node_name**: Name of the node where we are going to look for the message that matches with the regex.
 - **regex**: Regular expression we will look for in the file.
 - **path**: Path to the file to be checked.
 - **timeout**: Deadline for message to be shown.

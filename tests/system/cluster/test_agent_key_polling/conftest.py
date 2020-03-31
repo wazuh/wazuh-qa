@@ -9,5 +9,5 @@ import pytest
 
 @pytest.fixture(scope='module')
 def inventory_path():
-    return os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    return os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                         'docker_provisioning', 'inventory.yml')

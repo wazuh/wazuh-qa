@@ -12,6 +12,7 @@ except ModuleNotFoundError:
 
 import os
 import queue
+import re
 import socket
 import socketserver
 import sys
@@ -672,7 +673,7 @@ if hasattr(socketserver, 'ThreadingUnixStreamServer'):
             self._queue.put(item)
 
 
-def threaded(fn):
+def new_process(fn):
     """Wrapper for enable multiprocessing inside a class
 
     Parameters
@@ -694,13 +695,10 @@ def threaded(fn):
 
 
 def callback_generator(regex):
-    import re
-
     def new_callback(line):
-        match = re.match(rf'{regex}', line)
+        match = re.match(regex, line)
         if match:
             return line
-        return None
 
     return new_callback
 
@@ -762,7 +760,7 @@ class HostMonitor:
             time.sleep(self._time_step)
         self.check_result()
 
-    @threaded
+    @new_process
     def file_composer(self, host, path, output_path):
         """Collects the file content of the specified path in the desired host and append it to the output_path file.
         Simulates the behavior of tail -f and redirect the output to output_path.
@@ -795,8 +793,8 @@ class HostMonitor:
                             file.write(f'{new_line}\n')
                 time.sleep(self._time_step)
 
-    @threaded
-    def _start(self, host, payload, path, encoding=None):
+    @new_process
+    def _start(self, host, payload, path, encoding=None, error_messages_per_host=None):
         """Start the file monitoring until the QueueMonitor returns an string or TimeoutError.
 
         Parameters
@@ -809,6 +807,8 @@ class HostMonitor:
             Path where it must search for the message.
         encoding : str
             Encoding of the file.
+        error_messages_per_host : dict
+            Dictionary with hostnames as keys and desired error messages as values
 
         Returns
         -------
@@ -827,8 +827,11 @@ class HostMonitor:
                                                          callback=callback_generator(case['regex'])
                                                          ).result().strip('\n')})
                 except TimeoutError:
-                    self._queue.put({
-                        host: TimeoutError(f'Did not found the expected callback in {host}: {case["regex"]}')})
+                    try:
+                        self._queue.put({host: error_messages_per_host[host]})
+                    except (KeyError, TypeError):
+                        self._queue.put({
+                            host: TimeoutError(f'Did not found the expected callback in {host}: {case["regex"]}')})
                 logger.debug(f'Finishing QueueMonitor for {host} and message: {case["regex"]}')
         finally:
             tailer.shutdown()
