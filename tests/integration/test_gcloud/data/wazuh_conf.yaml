@@ -20,5 +20,3 @@
       value: 'MAX_MESSAGES'
   - logging:
       value: 'LOGGING'
-
-
