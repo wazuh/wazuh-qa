@@ -1,0 +1,27 @@
+---
+# conf 1
+- tags:
+  - num_watches_realtime_enabled
+  apply_to_modules:
+  - test_num_wactches
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: TEST_DIRECTORIES
+      attributes:
+      - realtime: 'yes'
+# conf 2
+- tags:
+  - num_watches_realtime_disabled
+  apply_to_modules:
+  - test_num_wactches
+  section: syscheck
+  elements:
+  - disabled:
+      value: 'no'
+  - directories:
+      value: TEST_DIRECTORIES
+      attributes:
+      - realtime: 'no'
