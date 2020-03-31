@@ -3,15 +3,16 @@
   - sync_interval
   apply_to_modules:
   - test_sync_interval
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - synchronization:
-      elements:
-      - interval:
-          value: INTERVAL
-  - directories:
-      value: "/testdir1"
-      attributes:
-      - check_all: 'yes'
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - synchronization:
+        elements:
+        - interval:
+            value: INTERVAL
+    - directories:
+        value: "/testdir1"
+        attributes:
+        - check_all: 'yes'

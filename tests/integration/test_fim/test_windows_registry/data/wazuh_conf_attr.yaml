@@ -4,13 +4,14 @@
   - ossec_conf_2
   apply_to_modules:
   - test_windows_registry
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - frequency:
-      value: FREQUENCY
-  - windows_registry:
-      value: WINDOWS_REGISTRY
-      attributes:
-        - ATTRIBUTE
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - frequency:
+        value: FREQUENCY
+    - windows_registry:
+        value: WINDOWS_REGISTRY
+        attributes:
+          - ATTRIBUTE
