@@ -3,11 +3,9 @@
 - tags:
   - schedule_day
   apply_to_modules:
-  - test_schedule
+  - 'MODULE_NAME'
   section: gcp-pubsub
   elements:
-  - pull_on_start:
-      value: 'PULL_ON_START'
   - project_id:
       value: 'PROJECT_ID'
   - subscription_name:
@@ -16,21 +14,15 @@
       value: 'CREDENTIALS_FILE'
   - interval:
       value: 'INTERVAL'
-  - max_messages:
-      value: 'MAX_MESSAGES'
-  - logging:
-      value: 'LOGGING'
   - day:
       value: 1
 # conf 2
 - tags:
   - schedule_wday
   apply_to_modules:
-  - test_schedule
+  - 'MODULE_NAME'
   section: gcp-pubsub
   elements:
-  - pull_on_start:
-      value: 'PULL_ON_START'
   - project_id:
       value: 'PROJECT_ID'
   - subscription_name:
@@ -39,21 +31,15 @@
       value: 'CREDENTIALS_FILE'
   - interval:
       value: 'INTERVAL'
-  - max_messages:
-      value: 'MAX_MESSAGES'
-  - logging:
-      value: 'LOGGING'
   - wday:
       value: 'monday'
 # conf 3
 - tags:
   - schedule_time
   apply_to_modules:
-  - test_schedule
+  - 'MODULE_NAME'
   section: gcp-pubsub
   elements:
-  - pull_on_start:
-      value: 'PULL_ON_START'
   - project_id:
       value: 'PROJECT_ID'
   - subscription_name:
@@ -62,9 +48,5 @@
       value: 'CREDENTIALS_FILE'
   - interval:
       value: 'INTERVAL'
-  - max_messages:
-      value: 'MAX_MESSAGES'
-  - logging:
-      value: 'LOGGING'
   - time:
       value: 08:00

@@ -21,12 +21,8 @@ pytestmark = pytest.mark.tier(level=0)
 
 project_id = 'sinuous-voice-271711'
 subscription_name = 'wazuh-integration'
-topic_name = 'wazuh-pubsub'
 credentials_file = 'credentials.json'
 interval = ['1d', '1w', '1M']
-pull_on_start = 'yes'
-max_messages = 100
-logging = 'info'
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'schedule_conf.yaml')
@@ -35,8 +31,7 @@ configurations_path = os.path.join(test_data_path, 'schedule_conf.yaml')
 
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': project_id, 'SUBSCRIPTION_NAME': subscription_name,
-               'CREDENTIALS_FILE': credentials_file, 'PULL_ON_START': pull_on_start, 
-               'MAX_MESSAGES': max_messages, 'LOGGING': logging, 'MODULE_NAME': __name__}
+               'CREDENTIALS_FILE': credentials_file, 'MODULE_NAME': __name__}
 p, m = generate_params(extra_params=conf_params,
                        apply_to_all=({'INTERVAL': interval_value} for  interval_value in interval),
                        modes=monitoring_modes)
@@ -56,7 +51,7 @@ def test_schedule_day(get_configuration, configure_environment, restart_wazuh):
     When day option is used, interval has to be a multiple of one month.
     """
     check_apply_test({'schedule_day'}, get_configuration['tags'])
-    sinterval = get_configuration['elements'][4]['interval']['value']
+    sinterval = get_configuration['elements'][3]['interval']['value']
     interval = int(''.join(filter(str.isdigit, sinterval)))
 
     if 'M' not in sinterval:
@@ -76,7 +71,7 @@ def test_schedule_wday(get_configuration, configure_environment, restart_wazuh):
     When wday option is used, interval has to be a multiple of one week.
     """
     check_apply_test({'schedule_wday'}, get_configuration['tags'])
-    sinterval = get_configuration['elements'][4]['interval']['value']
+    sinterval = get_configuration['elements'][3]['interval']['value']
     interval = int(''.join(filter(str.isdigit, sinterval)))
 
     if 'w' not in sinterval:
@@ -96,7 +91,7 @@ def test_schedule_time(get_configuration, configure_environment, restart_wazuh):
     When time option is used, interval has to be a multiple of one week or day.
     """
     check_apply_test({'schedule_time'}, get_configuration['tags'])
-    sinterval = get_configuration['elements'][4]['interval']['value']
+    sinterval = get_configuration['elements'][3]['interval']['value']
     interval = int(''.join(filter(str.isdigit, sinterval)))
 
     if 'd' not in sinterval and 'w' not in sinterval:
