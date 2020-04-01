@@ -32,9 +32,6 @@ def main():
     """This file regenerate the agent key after a manipulation of it
     Print the legacy key of the agent, this way the agent key polling module can set the correct key again.
 
-    Returns
-    -------
-    None
     """
     if len(sys.argv) < 3:
         print(json.dumps({"error": 1, "message": "Too few arguments"}))

@@ -1,39 +1,56 @@
 ---
 wazuh-master:
-  - description: Enable remoted agent_key_polling at master side
-    after: <remote>
-    before: </remote>
-    content: |
-      <connection>secure</connection>
-      <port>1514</port>
-      <protocol>tcp</protocol>
-      <queue_size>131072</queue_size>
-      <key_polling enabled="yes">
-        <mode>local</mode>
-      </key_polling>
-
-  - description: Enable agent_key_polling wodle at master side
-    after: </logging>
-    before: <remote>
-    content: |
-      <wodle name="agent-key-polling">
-        <enabled>yes</enabled>
-        <timeout>60</timeout>
-        <exec_path>/var/ossec/framework/python/bin/python3 /tmp/fetch_keys.py</exec_path>
-        <threads>1</threads>
-        <queue_size>1024</queue_size>
-        <force_insert>yes</force_insert>
-      </wodle>
+  description: Enable remoted agent_key_polling at master side
+  sections:
+  - section: remote
+    elements:
+      - connection:
+          value: secure
+      - port:
+          value: 1514
+      - protocol:
+          value: tcp
+      - queue_size:
+          value: 131072
+      - key_polling:
+          attributes:
+            - enabled: 'yes'
+          elements:
+            - mode:
+                value: local
+  - section: wodle
+    attributes:
+      - name: 'agent-key-polling'
+    elements:
+      - enabled:
+          value: 'yes'
+      - timeout:
+          value: 60
+      - exec_path:
+          value: '/var/ossec/framework/python/bin/python3 /tmp/fetch_keys.py'
+      - threads:
+          value: 1
+      - queue_size:
+          value: 1024
+      - force_insert:
+          value: 'yes'
 
 wazuh-worker1:
-  - description: Enable remoted agent_key_polling at worker side
-    after: <remote>
-    before: </remote>
-    content: |
-      <connection>secure</connection>
-      <port>1514</port>
-      <protocol>tcp</protocol>
-      <queue_size>131072</queue_size>
-      <key_polling enabled="yes">
-        <mode>master</mode>
-      </key_polling>
+  description: Enable remoted agent_key_polling at worker side
+  sections:
+  - section: remote
+    elements:
+      - connection:
+          value: secure
+      - port:
+          value: 1514
+      - protocol:
+          value: tcp
+      - queue_size:
+          value: 131072
+      - key_polling:
+          attributes:
+            - enabled: 'yes'
+          elements:
+            - mode:
+                value: master

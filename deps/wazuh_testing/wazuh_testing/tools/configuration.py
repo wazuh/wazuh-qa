@@ -107,7 +107,7 @@ def generate_wazuh_conf(args: List = None) -> ET.ElementTree:
     return ET.ElementTree(ET.fromstring(wazuh_config))
 
 
-def get_wazuh_conf() -> List[str]:
+def get_wazuh_conf(conf_path=None) -> List[str]:
     """
     Get current `ossec.conf` file content.
 
@@ -116,7 +116,7 @@ def get_wazuh_conf() -> List[str]:
     List of str
         A list containing all the lines of the `ossec.conf` file.
     """
-    with open(WAZUH_CONF) as f:
+    with open(conf_path) as f:
         lines = f.readlines()
     return lines
 
@@ -134,7 +134,7 @@ def write_wazuh_conf(wazuh_conf: List[str]):
         f.writelines(wazuh_conf)
 
 
-def set_section_wazuh_conf(sections):
+def set_section_wazuh_conf(sections, template=None):
     """
     Set a configuration in a section of Wazuh. It replaces the content if it exists.
 
@@ -146,6 +146,8 @@ def set_section_wazuh_conf(sections):
             Section of Wazuh configuration to replace. Default `'syscheck'`
         new_elements : list, optional
             List with dictionaries for settings elements in the section. Default `None`
+    template : list of string, optional
+        File content template
 
     Returns
     -------
@@ -249,7 +251,7 @@ def set_section_wazuh_conf(sections):
         return ET.tostringlist(elementTree.getroot(), encoding="unicode")
 
     # Get Wazuh configuration as a list of str
-    raw_wazuh_conf = get_wazuh_conf()
+    raw_wazuh_conf = get_wazuh_conf(template) if template is None else template
     # Generate a ElementTree representation of the previous list to work with its sections
     wazuh_conf = to_elementTree(purge_multiple_root_elements(raw_wazuh_conf))
     for section in sections:

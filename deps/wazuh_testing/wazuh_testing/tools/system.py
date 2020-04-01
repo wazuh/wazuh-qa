@@ -2,10 +2,14 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import tempfile
+import xml.dom.minidom as minidom
+
 import testinfra
 import yaml
 
 from wazuh_testing.tools import WAZUH_CONF
+from wazuh_testing.tools.configuration import set_section_wazuh_conf
 
 
 class HostManager:
@@ -35,7 +39,7 @@ class HostManager:
         """
         return testinfra.get_host(f"ansible://{host}?ansible_inventory={self.inventory_path}")
 
-    def move_file(self, host: str, src_path: str, dest_path: str, check: bool = False):
+    def move_file(self, host: str, src_path: str, dest_path: str = '/var/ossec/etc/ossec.conf', check: bool = False):
         """Move from src_path to the desired location dest_path for the specified host.
 
         Parameters
@@ -122,8 +126,8 @@ class HostManager:
         """
         return self.get_host(host).file(file_path).content_string
 
-    def apply_config(self, config_yml_path: str, dest_path: str = WAZUH_CONF, clear_files: list = None,
-                     restart_services: list = None):
+    def apply_config(self, config_yml_path: str, dest_path: str = WAZUH_CONF,
+                     clear_files: list = None, restart_services: list = None):
         """Apply the configuration describe in the config_yml_path to the environment.
 
         Parameters
@@ -139,10 +143,22 @@ class HostManager:
         """
         with open(config_yml_path, mode='r') as config_yml:
             config = yaml.safe_load(config_yml)
+
+        parse_configurations = dict()
         for host, payload in config.items():
-            for block in payload:
-                self.add_block_to_file(host=host, path=dest_path, after=block['after'],
-                                       before=block['before'], replace=block['content'])
+            template_ossec_conf = self.get_file_content(host, dest_path).split('\n')
+            parse_configurations[host] = set_section_wazuh_conf(sections=payload['sections'],
+                                                                template=template_ossec_conf)
+
+        for host, configuration in parse_configurations.items():
+            configuration = ''.join(configuration)
+            dom = minidom.parseString(configuration)
+            configuration = dom.toprettyxml().split('\n', 1)[1]
+            tmp_file = tempfile.NamedTemporaryFile()
+            tmp_file.write(configuration.encode())
+            tmp_file.seek(0)
+            self.move_file(host, tmp_file.name, dest_path)
+            tmp_file.close()
 
             if restart_services:
                 for service in restart_services:
