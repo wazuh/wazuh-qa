@@ -371,3 +371,23 @@
       value: 'SUBSCRIPTION_NAME'
   - credentials_file:
       value: 'CREDENTIALS_FILE'
+# conf 26
+- tags:
+  - invalid_gcp_wmodule
+  apply_to_modules:
+  - 'MODULE_NAME'
+  section: gcp-pub
+  elements:
+  - project_id:
+      value: 'PROJECT_ID'
+  - subscription_name:
+      value: 'SUBSCRIPTION_NAME'
+  - credentials_file:
+      value: 'CREDENTIALS_FILE'
+# conf 27
+- tags:
+  - invalid_gcp_wmodule
+  apply_to_modules:
+  - 'MODULE_NAME'
+  section: gcp-pubsub
+  elements:

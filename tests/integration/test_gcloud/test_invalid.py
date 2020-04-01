@@ -7,7 +7,7 @@ import sys
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.gcloud import callback_detect_schedule_validate_parameters_err, callback_detect_gcp_read_err
+from wazuh_testing.gcloud import callback_detect_schedule_validate_parameters_err, callback_detect_gcp_read_err, callback_detect_gcp_wmodule_err
 from wazuh_testing.fim import generate_params
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -46,13 +46,7 @@ def get_configuration(request):
 
 # tests
 
-@pytest.mark.parametrize('tags_to_apply', [
-    ({'invalid_enabled', 'invalid_pullonstart, invalid_projectid',
-      'invalid_subsname', 'invalid_credfile, invalid_maxmessages',
-      'invalid_interval', 'invalid_logging, invalid_day',
-      'invalid_wday', 'invalid_time', 'invalid_day_wday'})
-])
-def test_invalid(tags_to_apply, get_configuration, configure_environment, reset_ossec_log):
+def test_invalid(get_configuration, configure_environment, reset_ossec_log):
     """
     Checks if an invalid configuration is detected
 
@@ -65,16 +59,23 @@ def test_invalid(tags_to_apply, get_configuration, configure_environment, reset_
     except ValueError:
         assert sys.platform != 'win32', 'Restarting ossec with invalid configuration should ' \
                                         'not raise an exception in win32'
-    if tags_to_apply != 'invalid_day_wday':
-        line = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                        callback=callback_detect_gcp_read_err,
-                                        accum_results=1,
-                                        error_message='Did not receive expected '
-                                                        'wm_gcp_read(): ERROR:').result()
-    else:
-        line = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                        callback=callback_detect_schedule_validate_parameters_err,
-                                        accum_results=1,
-                                        error_message='Did not receive expected '
-                                                        'wm_gcp_read(): ERROR:').result()
+    tags_to_apply = get_configuration['tags'][0]
 
+    if tags_to_apply == 'invalid_gcp_wmodule':
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 10,
+                                callback=callback_detect_gcp_wmodule_err,
+                                accum_results=1,
+                                error_message='Did not receive expected '
+                                              'Invalid element in the configuration').result()
+    elif tags_to_apply == 'invalid_day_wday':
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 10,
+                                callback=callback_detect_schedule_validate_parameters_err,
+                                accum_results=1,
+                                error_message='Did not receive expected '
+                                              'sched_scan_validate_parameters(): ERROR').result()
+    else:
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                callback=callback_detect_gcp_read_err,
+                                accum_results=1,
+                                error_message='Did not receive expected '
+                                              'wm_gcp_read(): ERROR:').result()

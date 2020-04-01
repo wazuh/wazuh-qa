@@ -104,3 +104,14 @@ def callback_detect_gcp_read_err(line):
     elif match_warn:
         return line
     return None
+
+
+def callback_detect_gcp_wmodule_err(line):
+    match_err = re.match(r'.*read_main_elements\(\): ERROR: \(\d+\): Invalid element in the configuration.*', line)
+    match_deb = re.match(r'.*Read_GCP\(\): DEBUG: Empty configuration for module \'gcp-pubsub\'', line)
+
+    if match_err:
+        return line
+    elif match_deb:
+        return line
+    return None
