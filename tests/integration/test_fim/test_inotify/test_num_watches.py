@@ -8,10 +8,13 @@ import shutil as sh
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, callback_num_inotify_watches, generate_params, check_time_travel
+from wazuh_testing.fim import LOG_FILE_PATH, callback_num_inotify_watches, generate_params, check_time_travel, \
+                                detect_initial_scan
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.file import truncate_file
 
 # Marks
 
@@ -48,6 +51,16 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
+
+@pytest.fixture(scope='function')
+def restart_syscheckd_each_time(request):
+    control_service('stop', daemon='ossec-syscheckd')
+    truncate_file(LOG_FILE_PATH)
+    file_monitor = FileMonitor(LOG_FILE_PATH)
+    setattr(request.module, 'wazuh_log_monitor', file_monitor)
+    control_service('start', daemon='ossec-syscheckd')
+    detect_initial_scan(file_monitor)
+
 # Tests
 
 
@@ -58,7 +71,7 @@ def get_configuration(request):
     (False, False, False)
 ])
 def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get_configuration, configure_environment,
-                     restart_syscheckd, wait_for_initial_scan):
+                     restart_syscheckd_each_time):
     """
     Check if the number of inotify watches is correct when renaming and deleting a directory.
 
