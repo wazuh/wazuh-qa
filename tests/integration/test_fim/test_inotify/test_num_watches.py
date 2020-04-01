@@ -18,7 +18,9 @@ from wazuh_testing.tools.monitoring import FileMonitor
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
 # Variables
-test_directories = [os.path.join(PREFIX, 'testdir1')]
+test_directories = [os.path.join(PREFIX, 'testdir1'),
+                    os.path.join(PREFIX, 'testdir1', 'sub1'),
+                    os.path.join(PREFIX, 'testdir1', 'sub2')]
 
 directory_str = ','.join(test_directories)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -28,9 +30,15 @@ testdir1 = test_directories[0]
 
 # Configurations
 
-p, m = generate_params(extra_params={"TEST_DIRECTORIES": testdir1})
+p, m = generate_params(extra_params={"TEST_DIRECTORIES": testdir1}, modes=['realtime'])
 
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+configurations1 = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+
+p, m = generate_params(extra_params={"TEST_DIRECTORIES": testdir1}, modes=['scheduled'])
+
+configurations2 = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+
+configurations = configurations1 + configurations2
 
 # Fixtures
 
@@ -43,35 +51,30 @@ def get_configuration(request):
 # Tests
 
 
-def extra_configuration_before_yield():
-    os.mkdir(os.path.join(testdir1, 'sub1'))
-    os.mkdir(os.path.join(testdir1, 'sub2'))
-
-
-@pytest.mark.parametrize('realtime_enabled, decreases_num_watches, rename_folder, tags_to_apply', [
-    (True, True, False, {'num_watches_realtime_enabled'}),
-    (True, True, True, {'num_watches_realtime_enabled'}),
-    (True, False, False, {'num_watches_realtime_enabled'}),
-    (False, False, False, {'num_watches_realtime_disabled'})
+@pytest.mark.parametrize('realtime_enabled, decreases_num_watches, rename_folder', [
+    (True, True, False),
+    (True, True, True),
+    (True, False, False),
+    (False, False, False)
 ])
-def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, tags_to_apply, get_configuration,
-                     configure_environment, restart_syscheckd, wait_for_initial_scan):
+def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get_configuration, configure_environment,
+                     restart_syscheckd, wait_for_initial_scan):
     """
-        Check if the number of inotify watches is correct when renaming and deleting a directory.
+    Check if the number of inotify watches is correct when renaming and deleting a directory.
 
-        It creates a folder with two subdirectories and checks that there are three watches. If the number is correct,
-        deletes, renames or does nothing to the folder and checks that the number of watches is correct.
+    It creates a folder with two subdirectories and checks that there are three watches. If the number is correct,
+    deletes, renames or does nothing to the folder and checks that the number of watches is correct.
 
-        Parameters
-        ----------
-        realtime_enabled : Boolean
-            Tells if realtime is enabled
-        decreases_num_watches : Boolean
-            Tells if the number of watches must decrease
-        rename_folder : Boolean
-            Tells if the folder must be renamed
+    Parameters
+    ----------
+    realtime_enabled : Boolean
+        Tells if realtime is enabled
+    decreases_num_watches : Boolean
+        Tells if the number of watches must decrease
+    rename_folder : Boolean
+        Tells if the folder must be renamed
     """
-    check_apply_test(tags_to_apply, get_configuration['tags'])
+    check_apply_test({'num_watches_conf'}, get_configuration['tags'])
 
     num_watches = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                           callback=callback_num_inotify_watches,
