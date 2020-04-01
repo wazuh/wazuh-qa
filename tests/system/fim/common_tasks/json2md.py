@@ -38,7 +38,7 @@ def scenario2markdown(scenario_name, scenario_content):
     """
     if scenario_content['state'] == 'SUCCESS':
         return "### {} :heavy_check_mark:\n***\n".format(scenario_name)
-    result = "0### {} :x:\n".format(scenario_name)
+    result = "### {} :x:\n".format(scenario_name)
     for verification, test_results in scenario_content['errors'].items():
         result += "### {}\n".format(verification)
         del test_results['passed']
