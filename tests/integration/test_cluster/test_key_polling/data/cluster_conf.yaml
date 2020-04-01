@@ -1,0 +1,71 @@
+---
+- tags:
+  - worker
+  apply_to_modules:
+  - test_key_polling_worker
+  sections:
+  - section: cluster
+    elements:
+    - name:
+        value: wazuh
+    - node_name:
+        value: worker1
+    - node_type:
+        value: worker
+    - key:
+        value: FERNET_KEY
+    - port:
+        value: 1516
+    - bind_addr:
+        value: 0.0.0.0
+    - nodes:
+        elements:
+          - node:
+              value: 127.0.0.1
+    - hidden:
+        value: 'no'
+    - disabled:
+        value: 'no'
+- tags:
+  - master
+  apply_to_modules:
+  - test_key_polling_master
+  sections:
+  - section: cluster
+    elements:
+    - name:
+        value: wazuh
+    - node_name:
+        value: master1
+    - node_type:
+        value: master
+    - key:
+        value: FERNET_KEY
+    - port:
+        value: 1516
+    - bind_addr:
+        value: 0.0.0.0
+    - nodes:
+        elements:
+          - node:
+              value: 127.0.0.1
+    - hidden:
+        value: 'no'
+    - disabled:
+        value: 'no'
+  - section: wodle
+    attributes:
+      - name: 'agent-key-polling'
+    elements:
+      - enabled:
+          value: 'yes'
+      - timeout:
+          value: 60
+      - exec_path:
+          value: '/var/ossec/framework/python/bin/python3 /keys/fetch_keys.py'
+      - threads:
+          value: 1
+      - queue_size:
+          value: 1024
+      - force_insert:
+          value: 'yes'
