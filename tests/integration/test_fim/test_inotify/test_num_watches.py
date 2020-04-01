@@ -66,6 +66,13 @@ def restart_syscheckd_each_time(request):
     control_service('start', daemon='ossec-syscheckd')
     detect_initial_scan(file_monitor)
 
+# Functions
+
+
+def extra_configuration_after_yield():
+    """Make sure to delete the directory after performing the test"""
+    sh.rmtree('changed_name', ignore_errors=True)
+
 # Tests
 
 
