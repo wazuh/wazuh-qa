@@ -84,13 +84,13 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
 
     if num_watches:
         if not realtime_enabled:
-            assert num_watches == '0', 'Wrong number of inotify watches'
+            assert num_watches == '0', 'Wrong number of inotify watches when realtime is disabled'
         elif decreases_num_watches and not rename_folder:
-            assert num_watches == '3', 'Wrong number of inotify watches'
+            assert num_watches == '3', 'Wrong number of inotify watches before deleting folder'
         elif decreases_num_watches and rename_folder:
-            assert num_watches == '3', 'Wrong number of inotify watches'
+            assert num_watches == '3', 'Wrong number of inotify watches before renaming folder '
         elif not decreases_num_watches and not rename_folder:
-            assert num_watches == '3', 'Wrong number of inotify watches'
+            assert num_watches == '3', 'Wrong number of inotify watches when not modifying the folder'
     else:
         raise AssertionError('Wrong number of inotify watches')
 
@@ -110,12 +110,12 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
 
     if num_watches:
         if not realtime_enabled:
-            assert num_watches == '0', 'Wrong number of inotify watches'
+            assert num_watches == '0', 'Wrong number of inotify watches when realtime is disabled'
         elif decreases_num_watches and not rename_folder:
-            assert num_watches == '0', 'Wrong number of inotify watches'
+            assert num_watches == '0', 'Wrong number of inotify watches after deleting folder'
         elif decreases_num_watches and rename_folder:
-            assert num_watches == '0', 'Wrong number of inotify watches'
+            assert num_watches == '0', 'Wrong number of inotify watches after renaming folder'
         elif not decreases_num_watches and not rename_folder:
-            assert num_watches == '3', 'Wrong number of inotify watches'
+            assert num_watches == '3', 'Wrong number of inotify watches when not modifying the folder'
     else:
         raise AssertionError('Wrong number of inotify watches')
