@@ -58,6 +58,11 @@ def restart_syscheckd_each_time(request):
     truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
+
+    if not os.path.exists(testdir1):
+        for directory in test_directories:
+            os.mkdir(directory)
+
     control_service('start', daemon='ossec-syscheckd')
     detect_initial_scan(file_monitor)
 
@@ -89,6 +94,11 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
     """
     check_apply_test({'num_watches_conf'}, get_configuration['tags'])
 
+    if ((get_configuration['metadata']['fim_mode'] == "scheduled" and realtime_enabled) or
+            (get_configuration['metadata']['fim_mode'] == "realtime" and not realtime_enabled)):
+        pytest.skip("Does not apply to this config file")
+
+    # Check that the number of inotify watches is correct before modifying the folder
     num_watches = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                           callback=callback_num_inotify_watches,
                                           error_message='Did not receive expected '
@@ -96,13 +106,13 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
                                           ).result()
 
     if num_watches:
-        if not realtime_enabled:
+        if not realtime_enabled:    # Realtime disabled
             assert num_watches == '0', 'Wrong number of inotify watches when realtime is disabled'
-        elif decreases_num_watches and not rename_folder:
+        elif decreases_num_watches and not rename_folder:   # Delete folder
             assert num_watches == '3', 'Wrong number of inotify watches before deleting folder'
-        elif decreases_num_watches and rename_folder:
+        elif decreases_num_watches and rename_folder:   # Rename folder
             assert num_watches == '3', 'Wrong number of inotify watches before renaming folder '
-        elif not decreases_num_watches and not rename_folder:
+        elif not decreases_num_watches and not rename_folder:   # Not modifying the folder
             assert num_watches == '3', 'Wrong number of inotify watches when not modifying the folder'
     else:
         raise AssertionError('Wrong number of inotify watches')
@@ -115,6 +125,7 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
 
     check_time_travel(True)
 
+    # Check that the number of inotify watches is correct after modifying the folder
     num_watches = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                           callback=callback_num_inotify_watches,
                                           error_message='Did not receive expected '
@@ -122,13 +133,13 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
                                           ).result()
 
     if num_watches:
-        if not realtime_enabled:
+        if not realtime_enabled:    # Realtime disabled
             assert num_watches == '0', 'Wrong number of inotify watches when realtime is disabled'
-        elif decreases_num_watches and not rename_folder:
+        elif decreases_num_watches and not rename_folder:   # Delete folder
             assert num_watches == '0', 'Wrong number of inotify watches after deleting folder'
-        elif decreases_num_watches and rename_folder:
+        elif decreases_num_watches and rename_folder:   # Rename folder
             assert num_watches == '0', 'Wrong number of inotify watches after renaming folder'
-        elif not decreases_num_watches and not rename_folder:
+        elif not decreases_num_watches and not rename_folder:   # Not modifying the folder
             assert num_watches == '3', 'Wrong number of inotify watches when not modifying the folder'
     else:
         raise AssertionError('Wrong number of inotify watches')
