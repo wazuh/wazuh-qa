@@ -19,10 +19,10 @@ def read_summary_json():
 
 
 def host2markdown(name, jsonObject):
-    line = '#### ' + name + '\n'
+    line = "#### {} \n".format(name)
     for key, value in jsonObject.items():
-        line += ' - ' + key + ': ' + str(value) + '\n'
-    return repr(line)
+        line += " - {} : {} \n".format(key, str(value))
+    return line
 
 
 def event2markdown(event, hosts):
@@ -38,17 +38,17 @@ def scenario2markdown(scenario_name, scenario_content):
     """
     if scenario_content['state'] == 'SUCCESS':
         return "### {} :heavy_check_mark:\n***\n".format(scenario_name)
-    result = '### {} :x:\n'.format(scenario_name)
+    result = "0### {} :x:\n".format(scenario_name)
     for verification, test_results in scenario_content['errors'].items():
-        result += '### {}\n'.format(verification)
+        result += "### {}\n".format(verification)
         del test_results['passed']
         for event, event_content in test_results.items():
             result += event2markdown(event, event_content['hosts'])
-    return result + '***\n'
+    return result + "***\n"
 
 
 def json2markdown(summary_json):
-    result = ''
+    result = ""
     for scenario, content in summary_json.items():
         result += scenario2markdown(scenario, content)
     return result
@@ -58,8 +58,8 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("-o", "--output", type=str, required=False,
-                        dest='output_file',
-                        default='./printable_summary.md',
+                        dest="output_file",
+                        default="./printable_summary.md",
                         help="Output file to save the printable summary")
     args = parser.parse_args()
     out_path = args.output_file
