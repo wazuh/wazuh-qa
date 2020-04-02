@@ -7,6 +7,7 @@ import re
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
+
 def callback_detect_start_gcp(line):
     if 'wm_gcp_main(): INFO: Module started.' in line:
         return line
