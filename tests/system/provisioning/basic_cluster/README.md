@@ -1,5 +1,5 @@
 # wazuh-qa
-Wazuh - Docker provisioning templates
+Wazuh - Basic cluster provisioning
 
 ## Setting up the provisioning
 
@@ -11,7 +11,7 @@ To run this provisioning we need to use a **Linux** machine and install the foll
 ## Structure
 
 ```bash
-docker_provisioning
+basic_cluster
 ├── ansible.cfg
 ├── destroy.yml
 ├── inventory.yml

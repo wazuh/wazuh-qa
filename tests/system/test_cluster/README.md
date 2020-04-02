@@ -110,8 +110,7 @@ Every group will have the following structure:
 │   ├── config.yml
 │   └── messages.yml
 ├── files
-│   └── fetch_keys.py
-├── test_agent_key_polling.py
+├── test_<functionality>.py
 └── tmp
 ```
 
@@ -164,7 +163,7 @@ node_name:
 
 ### Pytest
 
-First, we need to start our Ansible environment. To do this, we must execute this command in `system/docker_provisioning` path:
+First, we need to start our Ansible environment. To do this, we must execute this command in `system/provisioning/<specified_cluster_environment>` path:
 
 ```shell script
 ansible-playbook -i inventory.yml playbook.yml
