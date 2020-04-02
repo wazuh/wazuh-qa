@@ -40,8 +40,10 @@ def callback_detect_start_fetching_logs(line):
 
 
 def callback_detect_start_gcp_sleep(line):
-    if 'wm_gcp_main(): DEBUG: Sleeping for ' in line:
-        return line
+    match = re.match(r'.*wm_gcp_main\(\): DEBUG: Sleeping for (\d+).*', line)
+
+    if match:
+        return match.group(1)
     return None
 
 
