@@ -133,10 +133,13 @@ def pytest_html_results_table_header(cells):
 
 
 def pytest_html_results_table_row(report, cells):
-    cells.insert(4, html.td(report.tier))
-    cells.insert(3, html.td(report.markers))
-    cells.insert(2, html.td(report.description))
-    cells.insert(1, html.td(datetime.utcnow(), class_='col-time'))
+    try:
+        cells.insert(4, html.td(report.tier))
+        cells.insert(3, html.td(report.markers))
+        cells.insert(2, html.td(report.description))
+        cells.insert(1, html.td(datetime.utcnow(), class_='col-time'))
+    except AttributeError:
+        pass
 
 
 # HARDCODE: pytest-html generates too long file names. This temp fix is to reduce the name of
