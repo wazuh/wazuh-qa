@@ -2,23 +2,20 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import os
-
 import pytest
-from numpydoc.docscrape import FunctionDoc
-from py.xml import html
 
 from wazuh_testing import global_parameters
 from wazuh_testing.gcloud import detect_gcp_start
 from wazuh_testing.tools.configuration import get_wazuh_conf, write_wazuh_conf, set_section_wazuh_conf
-from wazuh_testing.tools import WAZUH_CONF
 from wazuh_testing.tools.services import control_service
+
 
 @pytest.fixture(scope='module')
 def wait_for_gcp_start(get_configuration, request):
     # Wait for module gpc-pubsub starts
     file_monitor = getattr(request.module, 'wazuh_log_monitor')
     detect_gcp_start(file_monitor)
+
 
 @pytest.fixture(scope='module')
 def configure_environment(get_configuration, request):
