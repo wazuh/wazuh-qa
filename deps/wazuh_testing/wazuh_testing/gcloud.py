@@ -116,3 +116,11 @@ def callback_detect_gcp_wmodule_err(line):
     elif match_deb:
         return line
     return None
+
+
+def callback_detect_schedule_read_err(line):
+    match = re.match(r'.*at sched_scan_read\(\): ERROR:.*', line)
+
+    if match:
+        return line
+    return None

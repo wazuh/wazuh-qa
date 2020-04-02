@@ -204,30 +204,15 @@
       value: 'SUBSCRIPTION_NAME'
   - credentials_file:
       value: 'CREDENTIALS_FILE'
-# conf 15
+# conf 16
 - tags:
-  - invalid_interval
+  - invalid_schedule
   apply_to_modules:
   - 'MODULE_NAME'
   section: gcp-pubsub
   elements:
   - interval:
       value: 'aaaaa'
-  - project_id:
-      value: 'PROJECT_ID'
-  - subscription_name:
-      value: 'SUBSCRIPTION_NAME'
-  - credentials_file:
-      value: 'CREDENTIALS_FILE'
-# conf 16
-- tags:
-  - invalid_interval
-  apply_to_modules:
-  - 'MODULE_NAME'
-  section: gcp-pubsub
-  elements:
-  - interval:
-      value: ''
   - project_id:
       value: 'PROJECT_ID'
   - subscription_name:
@@ -236,13 +221,13 @@
       value: 'CREDENTIALS_FILE'
 # conf 17
 - tags:
-  - invalid_logging
+  - invalid_schedule
   apply_to_modules:
   - 'MODULE_NAME'
   section: gcp-pubsub
   elements:
-  - logging:
-      value: 'aaaaa'
+  - interval:
+      value: ''
   - project_id:
       value: 'PROJECT_ID'
   - subscription_name:
@@ -257,7 +242,7 @@
   section: gcp-pubsub
   elements:
   - logging:
-      value: ''
+      value: 'aaaaa'
   - project_id:
       value: 'PROJECT_ID'
   - subscription_name:
@@ -266,13 +251,13 @@
       value: 'CREDENTIALS_FILE'
 # conf 19
 - tags:
-  - invalid_day
+  - invalid_logging
   apply_to_modules:
   - 'MODULE_NAME'
   section: gcp-pubsub
   elements:
-  - day:
-      value: 'aaaaa'
+  - logging:
+      value: ''
   - project_id:
       value: 'PROJECT_ID'
   - subscription_name:
@@ -281,7 +266,22 @@
       value: 'CREDENTIALS_FILE'
 # conf 20
 - tags:
-  - invalid_day
+  - invalid_schedule
+  apply_to_modules:
+  - 'MODULE_NAME'
+  section: gcp-pubsub
+  elements:
+  - day:
+      value: 'aaaaa'
+  - project_id:
+      value: 'PROJECT_ID'
+  - subscription_name:
+      value: 'SUBSCRIPTION_NAME'
+  - credentials_file:
+      value: 'CREDENTIALS_FILE'
+# conf 21
+- tags:
+  - invalid_schedule
   apply_to_modules:
   - 'MODULE_NAME'
   section: gcp-pubsub
@@ -294,30 +294,15 @@
       value: 'SUBSCRIPTION_NAME'
   - credentials_file:
       value: 'CREDENTIALS_FILE'
-# conf 21
+# conf 22
 - tags:
-  - invalid_wday
+  - invalid_schedule
   apply_to_modules:
   - 'MODULE_NAME'
   section: gcp-pubsub
   elements:
   - wday:
       value: 'aaaaa'
-  - project_id:
-      value: 'PROJECT_ID'
-  - subscription_name:
-      value: 'SUBSCRIPTION_NAME'
-  - credentials_file:
-      value: 'CREDENTIALS_FILE'
-# conf 22
-- tags:
-  - invalid_wday
-  apply_to_modules:
-  - 'MODULE_NAME'
-  section: gcp-pubsub
-  elements:
-  - wday:
-      value: ''
   - project_id:
       value: 'PROJECT_ID'
   - subscription_name:
@@ -326,7 +311,22 @@
       value: 'CREDENTIALS_FILE'
 # conf 23
 - tags:
-  - invalid_time
+  - invalid_schedule
+  apply_to_modules:
+  - 'MODULE_NAME'
+  section: gcp-pubsub
+  elements:
+  - wday:
+      value: ''
+  - project_id:
+      value: 'PROJECT_ID'
+  - subscription_name:
+      value: 'SUBSCRIPTION_NAME'
+  - credentials_file:
+      value: 'CREDENTIALS_FILE'
+# conf 24
+- tags:
+  - invalid_schedule
   apply_to_modules:
   - 'MODULE_NAME'
   section: gcp-pubsub
@@ -339,9 +339,9 @@
       value: 'SUBSCRIPTION_NAME'
   - credentials_file:
       value: 'CREDENTIALS_FILE'
-# conf 24
+# conf 25
 - tags:
-  - invalid_time
+  - invalid_schedule
   apply_to_modules:
   - 'MODULE_NAME'
   section: gcp-pubsub
@@ -354,7 +354,7 @@
       value: 'SUBSCRIPTION_NAME'
   - credentials_file:
       value: 'CREDENTIALS_FILE'
-# conf 25
+# conf 26
 - tags:
   - invalid_day_wday
   apply_to_modules:
@@ -371,7 +371,7 @@
       value: 'SUBSCRIPTION_NAME'
   - credentials_file:
       value: 'CREDENTIALS_FILE'
-# conf 26
+# conf 27
 - tags:
   - invalid_gcp_wmodule
   apply_to_modules:
@@ -384,7 +384,7 @@
       value: 'SUBSCRIPTION_NAME'
   - credentials_file:
       value: 'CREDENTIALS_FILE'
-# conf 27
+# conf 28
 - tags:
   - invalid_gcp_wmodule
   apply_to_modules:

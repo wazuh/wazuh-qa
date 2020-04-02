@@ -7,7 +7,8 @@ import sys
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.gcloud import callback_detect_schedule_validate_parameters_err, callback_detect_gcp_read_err, callback_detect_gcp_wmodule_err
+from wazuh_testing.gcloud import callback_detect_schedule_validate_parameters_err, callback_detect_gcp_read_err, \
+    callback_detect_gcp_wmodule_err, callback_detect_schedule_read_err
 from wazuh_testing.fim import generate_params
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -37,12 +38,14 @@ p, m = generate_params(extra_params=conf_params,
                        modes=monitoring_modes)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
+
 # fixtures
 
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
+
 
 # tests
 
@@ -62,14 +65,20 @@ def test_invalid(get_configuration, configure_environment, reset_ossec_log):
     tags_to_apply = get_configuration['tags'][0]
 
     if tags_to_apply == 'invalid_gcp_wmodule':
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 10,
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                 callback=callback_detect_gcp_wmodule_err,
                                 accum_results=1,
                                 error_message='Did not receive expected '
                                               'Invalid element in the configuration').result()
     elif tags_to_apply == 'invalid_day_wday':
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 10,
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                 callback=callback_detect_schedule_validate_parameters_err,
+                                accum_results=1,
+                                error_message='Did not receive expected '
+                                              'sched_scan_validate_parameters(): ERROR').result()
+    elif tags_to_apply == 'invalid_schedule':
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                callback=callback_detect_schedule_read_err,
                                 accum_results=1,
                                 error_message='Did not receive expected '
                                               'sched_scan_validate_parameters(): ERROR').result()
