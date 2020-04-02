@@ -10,6 +10,7 @@ from jsonschema import validate
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
+
 def validate_gcp_event(event):
     """
     Check if event is properly formatted according to some checks.
