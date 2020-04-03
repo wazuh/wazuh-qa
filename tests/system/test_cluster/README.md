@@ -10,10 +10,10 @@ To run these tests we need to use a **Linux** machine and install the following 
 
 ### Dependencies
 
-In addition, we need the Wazuh-testing package. So first, we need to install all these Python dependencies:
+In addition, we need the Wazuh-testing package. So first, we need to install all these Python dependencies, we can use this command:
 
 ```shell script
-pip3 install distro freezegun jq jsonschema paramiko psutil pytest pyyaml==5.3 pandas pytest-html==2.0.1 numpydoc==0.9.2
+pip3 install -r requirements.txt
 ```
 
 _**NOTE:** `jq` library can only be installed with `pip` on **Linux**_
@@ -97,7 +97,7 @@ pip3 uninstall -y wazuh_testing && pip3 install .
 
 **DISCLAIMER:** this guide assumes you have a proper testing environment. If you do not, please check our [testing environment guide](#setting-up-a-test-environment).
 
-Our cluster system tests are located in `wazuh-qa/tests/system/cluster`. They are organized by functionalities:
+Our cluster system tests are located in `wazuh-qa/tests/system/test_cluster`. They are organized by functionalities:
 
 - _agent_key_polling_
 

@@ -1,10 +1,10 @@
-### Version to be tested
-wazuh_branch: "4442-Agent-Key--Polling-capability-to-wazuh-clusterd"
-
 cluster_key: "00000000000000000000000000000000"
+
 master_hostname: "wazuh-master"
+
 worker1_hostname: "wazuh-worker1"
 worker2_hostname: "wazuh-worker2"
+
 agent1_id: "001"
 agent2_id: "002"
 agent3_id: "003"

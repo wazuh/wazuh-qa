@@ -61,6 +61,9 @@ Folder with all the general roles that could be used for start our environment. 
 - **files**: Configuration files to be applied when the environment is setting up.
 - **tasks**: Main tasks to be performed for each role
 
+#### Vars
+This folder contains the variables used to configure our environment. Variables like the cluster key or the agent key.
+
 ## Environment
 
 The base environment defined for Docker provisioning is
@@ -69,12 +72,12 @@ The base environment defined for Docker provisioning is
 - Two workers nodes
 - Three agents, each connected to a different manager.
 
-## Management of the environment
+## Environment management
 
 For running the docker provisioning we must execute the following command:
 
 ```shell script
-ansible-playbook -i inventory.yml playbook.yml
+ansible-playbook -i inventory.yml playbook.yml --extra-vars='{"wazuh_branch": "PUT YOUT wazuh/wazuh BRANCH HERE"}'
 ```
 
 To destroy it, the command is:
