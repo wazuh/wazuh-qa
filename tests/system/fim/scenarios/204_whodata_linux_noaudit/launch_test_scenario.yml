@@ -1,5 +1,5 @@
 ---
-  - hosts: all, !windowsagents
+  - hosts: all
     vars_files:
       - ../../vars/main.yml
       - ../../../provisioning/vars/elastic_nginx.yml
@@ -20,6 +20,8 @@
         - name: Auditd Uninstall
           become: true
           import_tasks: "actions/uninstall_audit.yml"
+          when:
+            - inventory_hostname in groups['linuxagents']
 
         - name: Launching prepare tasks
           import_tasks: "../../common_tasks/prepare.yml"
