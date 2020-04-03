@@ -702,6 +702,15 @@ def callback_generator(regex):
 
 
 class HostMonitor:
+    """This class has the capability to monitor remote host. This monitoring consists of reading the specified files to
+    check that the expected message arrives to them.
+
+    If the goals are achieved, no exceptions will be raised and therefore the test will end properly and without
+    failures.
+
+    In contrast, if one or more of the goals is not covered, a timeout exception will be raised with a generic or a
+    custom error message.
+    """
 
     def __init__(self, inventory_path, messages_path, tmp_path, time_step=0.5):
         """Create a new instance to monitor any given file in any specified host.

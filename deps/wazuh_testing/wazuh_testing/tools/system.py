@@ -13,6 +13,9 @@ from wazuh_testing.tools.configuration import set_section_wazuh_conf
 
 
 class HostManager:
+    """This class is an extensible remote host management interface. Within this we have multiple functions to modify
+    the remote hosts depending on what our tests need.
+    """
 
     def __init__(self, inventory_path: str):
         """Constructor of host manager class.
