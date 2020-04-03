@@ -81,7 +81,7 @@ def test_max_messages(nmessages, get_configuration, configure_environment,
     If the number of messages is greater than max_messages, the module will only pull max_messages
     and the rest will be pulled in the next iteration. 
     """
-    str_interval = get_configuration['elements'][4]['interval']['value']
+    str_interval = get_configuration['sections'][0]['elements'][4]['interval']['value']
     time_interval = int(''.join(filter(str.isdigit, str_interval)))
 
     # Publish messages to pull them later
