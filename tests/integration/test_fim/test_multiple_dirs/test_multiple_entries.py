@@ -38,16 +38,19 @@ def create_yaml(n_dirs=0):
             {
                 'tags': ['multiple_dir_entries'],
                 'apply_to_modules': ['test_multiple_entries'],
-                'section': 'syscheck',
-                'elements':
-                    [
-                        {'disabled': {'value': 'no'}},
-                    ]
+                'sections': [
+                    {'section': 'syscheck',
+                     'elements':
+                        [
+                            {'disabled': {'value': 'no'}},
+                        ]
+                     }
+                ]
             }
         ]
 
         for new_dir in ({'directories': {'value': f'DIR{i}', 'attributes': ['FIM_MODE']}} for i in range(n_dirs)):
-            dikt[0]['elements'].append(new_dir)
+            dikt[0]['sections'][0]['elements'].append(new_dir)
         f.write(yaml.safe_dump(dikt, sort_keys=False))
 
 
