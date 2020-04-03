@@ -3,10 +3,8 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import time
 import pytest
 from google.cloud import pubsub_v1
-from google.cloud import storage
 
 from wazuh_testing import global_parameters
 from wazuh_testing.gcloud import callback_detect_gcp_alert, validate_gcp_event
@@ -58,13 +56,13 @@ def get_configuration(request):
 
 # tests
 
-def publish(project_id, topic_name, credentials, n=1, msg=None):
+def publish(id_project, name_topic, credentials, repetitions=1, msg=None):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/var/ossec/{}".format(credentials)
 
     publisher = pubsub_v1.PublisherClient()
-    topic_path = publisher.topic_path(project_id, topic_name)
+    topic_path = publisher.topic_path(id_project, name_topic)
 
-    for n in range(n):
+    for number in range(repetitions):
         data = u"{}".format(msg)
         # Data must be a bytestring
         data = data.encode("utf-8")
@@ -73,33 +71,34 @@ def publish(project_id, topic_name, credentials, n=1, msg=None):
             topic_path, data, origin="python-sample", username="gcp"
         )
 
+
 def test_rules(get_configuration, configure_environment,
-                 restart_wazuh, wait_for_gcp_start):
+               restart_wazuh, wait_for_gcp_start):
     """
     Verify the module gcp-pubsub pulls messages that matches with GCP rules.
     Alerts are generated and compared with expected rule ID.
     """
-    sinterval = get_configuration['elements'][4]['interval']['value']
-    interval = int(''.join(filter(str.isdigit, sinterval)))
+    str_interval = get_configuration['elements'][4]['interval']['value']
+    time_interval = int(''.join(filter(str.isdigit, str_interval)))
     rules_id = []
     file_ind = 0
 
-    for i in range(65004, 65037):
-        rules_id.append(i)
+    for number in range(65004, 65037):
+        rules_id.append(number)
 
-    for i in range(65039, 65045):
-        rules_id.append(i)
+    for number in range(65039, 65045):
+        rules_id.append(number)
 
-    f = open(file_path, 'r')
-    for line in f:
+    events_file = open(file_path, 'r')
+    for line in events_file:
         # Publish messages to pull them later
         publish(project_id, topic_name, credentials_file, 1, line)
-        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + interval,
-                                    callback=callback_detect_gcp_alert,
-                                    accum_results=1,
-                                    error_message='Did not receive expected '
-                                                  'Sending gcp event').result()
+        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + time_interval,
+                                        callback=callback_detect_gcp_alert,
+                                        accum_results=1,
+                                        error_message='Did not receive expected '
+                                                      'Sending gcp event').result()
         validate_gcp_event(event)
         assert int(event['rule']['id']) == rules_id[file_ind]
         file_ind += 1
-    f.close()
+    events_file.close()
