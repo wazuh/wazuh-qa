@@ -78,7 +78,7 @@ def test_rules(get_configuration, configure_environment,
     Verify the module gcp-pubsub pulls messages that matches with GCP rules.
     Alerts are generated and compared with expected rule ID.
     """
-    str_interval = get_configuration['elements'][4]['interval']['value']
+    str_interval = get_configuration['sections'][0]['elements'][4]['interval']['value']
     time_interval = int(''.join(filter(str.isdigit, str_interval)))
     rules_id = []
     file_ind = 0
