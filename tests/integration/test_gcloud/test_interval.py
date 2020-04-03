@@ -60,7 +60,7 @@ def test_pull_on_start(get_configuration, configure_environment,
     These tests verify the module starts to pull after the time interval
     that has to match the value of the 'interval' parameter.
     """
-    str_interval = get_configuration['elements'][4]['interval']['value']
+    str_interval = get_configuration['sections'][0]['elements'][4]['interval']['value']
     time_interval = int(''.join(filter(str.isdigit, str_interval)))
     if 'm' in str_interval:
         time_interval *= 60
