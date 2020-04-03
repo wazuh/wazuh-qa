@@ -53,7 +53,7 @@ def test_schedule(get_configuration, configure_environment, restart_wazuh):
     When wday option is used, interval has to be a multiple of one week.
     When time option is used, interval has to be a multiple of one week or day.
     """
-    str_interval = get_configuration['elements'][3]['interval']['value']
+    str_interval = get_configuration['sections'][0]['elements'][3]['interval']['value']
     time_interval = int(''.join(filter(str.isdigit, str_interval)))
     tags_to_apply = get_configuration['tags'][0]
 
