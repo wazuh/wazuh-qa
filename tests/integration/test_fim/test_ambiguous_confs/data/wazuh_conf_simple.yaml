@@ -4,167 +4,175 @@
   - ambiguous_restrict
   apply_to_modules:
   - test_ambiguous_simple
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/testdir"
-      attributes:
-      - restrict: ".txt$"
-      - FIM_MODE
-  - directories:
-      value: "/testdir/subdir"
-      attributes:
-      - FIM_MODE
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: "/testdir"
+        attributes:
+        - restrict: ".txt$"
+        - FIM_MODE
+    - directories:
+        value: "/testdir/subdir"
+        attributes:
+        - FIM_MODE
 # conf 2
 - tags:
   - ambiguous_report_changes
   apply_to_modules:
   - test_ambiguous_simple
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/testdir"
-      attributes:
-      - report_changes: 'no'
-      - FIM_MODE
-  - directories:
-      value: "/testdir/subdir"
-      attributes:
-      - report_changes: 'yes'
-      - FIM_MODE
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: "/testdir"
+        attributes:
+        - report_changes: 'no'
+        - FIM_MODE
+    - directories:
+        value: "/testdir/subdir"
+        attributes:
+        - report_changes: 'yes'
+        - FIM_MODE
 # conf 3
 - tags:
   - ambiguous_tags
   apply_to_modules:
   - test_ambiguous_simple
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/testdir"
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: "/testdir/subdir"
-      attributes:
-      - tags: TAGS
-      - FIM_MODE
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: "/testdir"
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: "/testdir/subdir"
+        attributes:
+        - tags: TAGS
+        - FIM_MODE
 # conf 4
 - tags:
   - ambiguous_recursion_over
   apply_to_modules:
   - test_ambiguous_simple
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/recursiondir"
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: "/recursiondir"
-      attributes:
-        - recursion_level: "1"
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: "/recursiondir"
+        attributes:
         - FIM_MODE
+    - directories:
+        value: "/recursiondir"
+        attributes:
+          - recursion_level: "1"
+          - FIM_MODE
 # conf 5
 - tags:
   - ambiguous_recursion
   apply_to_modules:
   - test_ambiguous_simple
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/recursiondir"
-      attributes:
-      - recursion_level: "1"
-      - FIM_MODE
-  - directories:
-      value: "/recursiondir"
-      attributes:
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: "/recursiondir"
+        attributes:
+        - recursion_level: "1"
         - FIM_MODE
+    - directories:
+        value: "/recursiondir"
+        attributes:
+          - FIM_MODE
 # conf 6
 - tags:
   - ambiguous_recursion_tag
   apply_to_modules:
   - test_ambiguous_simple
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/recursiondir_tag"
-      attributes:
-        - recursion_level: "2"
-        - tags: TAGS
-        - FIM_MODE
-  - directories:
-      value: "/recursiondir_no_tag"
-      attributes:
-        - recursion_level: "2"
-        - FIM_MODE
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: "/recursiondir_tag"
+        attributes:
+          - recursion_level: "2"
+          - tags: TAGS
+          - FIM_MODE
+    - directories:
+        value: "/recursiondir_no_tag"
+        attributes:
+          - recursion_level: "2"
+          - FIM_MODE
 # conf 7
 - tags:
   - ambiguous_no_recursion_tag
   apply_to_modules:
   - test_ambiguous_simple
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/recursiondir_tag"
-      attributes:
-        - recursion_level: "0"
-        - tags: TAGS
-        - FIM_MODE
-  - directories:
-      value: "/recursiondir_no_tag"
-      attributes:
-        - recursion_level: "0"
-        - FIM_MODE
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: "/recursiondir_tag"
+        attributes:
+          - recursion_level: "0"
+          - tags: TAGS
+          - FIM_MODE
+    - directories:
+        value: "/recursiondir_no_tag"
+        attributes:
+          - recursion_level: "0"
+          - FIM_MODE
 # conf 8
 - tags:
   - ambiguous_check
   apply_to_modules:
   - test_ambiguous_simple
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/checkdir_default"
-      attributes:
-      - check_all: 'no'
-      - check_size: 'yes'
-      - check_perm: 'yes'
-      - check_owner: 'yes'
-      - check_group: 'yes'
-      - check_sha256sum: 'yes'
-      - check_mtime: 'yes'
-      - check_inode: 'yes'
-      - FIM_MODE
-  - directories:
-      value: "/checkdir_default/checkdir_checkall"
-      attributes:
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: "/checkdir_default"
+        attributes:
+        - check_all: 'no'
+        - check_size: 'yes'
+        - check_perm: 'yes'
+        - check_owner: 'yes'
+        - check_group: 'yes'
+        - check_sha256sum: 'yes'
+        - check_mtime: 'yes'
+        - check_inode: 'yes'
         - FIM_MODE
-        - check_all: 'yes'
-  - directories:
-      value: "/checkdir_default/checkdir_checkall/checkdir_no_inode"
-      attributes:
-        - FIM_MODE
-        - check_all: 'yes'
-        - check_inode: 'no'
-  - directories:
-      value: "/checkdir_default/checkdir_checkall/checkdir_no_inode/checkdir_no_checksum"
-      attributes:
-        - FIM_MODE
-        - check_all: 'yes'
-        - check_sum: 'no'
+    - directories:
+        value: "/checkdir_default/checkdir_checkall"
+        attributes:
+          - FIM_MODE
+          - check_all: 'yes'
+    - directories:
+        value: "/checkdir_default/checkdir_checkall/checkdir_no_inode"
+        attributes:
+          - FIM_MODE
+          - check_all: 'yes'
+          - check_inode: 'no'
+    - directories:
+        value: "/checkdir_default/checkdir_checkall/checkdir_no_inode/checkdir_no_checksum"
+        attributes:
+          - FIM_MODE
+          - check_all: 'yes'
+          - check_sum: 'no'

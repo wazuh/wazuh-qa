@@ -218,12 +218,13 @@ def test_ambiguous_complex(tags_to_apply,
     min_timeout = global_parameters.default_timeout
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
-    conf_list, check_list = get_dir_and_attributes(get_configuration['elements'])
-    param = (file_list, min_timeout, scheduled)
-    # For every directory, apply each test depending of its attributes.
-    # We assume we've set restrict attribute so it should not expect events
-    # For further functionality with restrict, run ../test_restrict tests
-    for directory, checkers in zip(conf_list, check_list):
-        for path, attributes in directory.items():
-            trigger = False if 'restrict' in attributes else True
-            apply_test(path, attributes, trigger, checkers, param)
+    for section in get_configuration['sections']:
+        conf_list, check_list = get_dir_and_attributes(section['elements'])
+        param = (file_list, min_timeout, scheduled)
+        # For every directory, apply each test depending of its attributes.
+        # We assume we've set restrict attribute so it should not expect events
+        # For further functionality with restrict, run ../test_restrict tests
+        for directory, checkers in zip(conf_list, check_list):
+            for path, attributes in directory.items():
+                trigger = False if 'restrict' in attributes else True
+                apply_test(path, attributes, trigger, checkers, param)

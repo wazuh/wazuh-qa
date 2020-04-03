@@ -4,11 +4,12 @@
   - synchronize_events_conf
   apply_to_modules:
   - test_synchronize_integrity_scan
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: TEST_DIRECTORIES
-      attributes:
-      - FIM_MODE
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - FIM_MODE
