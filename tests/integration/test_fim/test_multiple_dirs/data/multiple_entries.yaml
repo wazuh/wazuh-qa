@@ -2,263 +2,264 @@
   - multiple_dir_entries
   apply_to_modules:
   - test_multiple_entries
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: DIR0
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR1
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR2
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR3
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR4
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR5
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR6
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR7
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR8
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR9
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR10
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR11
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR12
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR13
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR14
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR15
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR16
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR17
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR18
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR19
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR20
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR21
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR22
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR23
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR24
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR25
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR26
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR27
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR28
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR29
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR30
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR31
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR32
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR33
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR34
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR35
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR36
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR37
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR38
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR39
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR40
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR41
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR42
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR43
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR44
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR45
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR46
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR47
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR48
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR49
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR50
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR51
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR52
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR53
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR54
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR55
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR56
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR57
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR58
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR59
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR60
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR61
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR62
-      attributes:
-      - FIM_MODE
-  - directories:
-      value: DIR63
-      attributes:
-      - FIM_MODE
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: DIR0
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR1
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR2
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR3
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR4
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR5
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR6
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR7
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR8
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR9
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR10
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR11
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR12
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR13
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR14
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR15
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR16
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR17
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR18
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR19
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR20
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR21
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR22
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR23
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR24
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR25
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR26
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR27
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR28
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR29
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR30
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR31
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR32
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR33
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR34
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR35
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR36
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR37
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR38
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR39
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR40
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR41
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR42
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR43
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR44
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR45
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR46
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR47
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR48
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR49
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR50
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR51
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR52
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR53
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR54
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR55
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR56
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR57
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR58
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR59
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR60
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR61
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR62
+        attributes:
+        - FIM_MODE
+    - directories:
+        value: DIR63
+        attributes:
+        - FIM_MODE

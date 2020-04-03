@@ -13,159 +13,162 @@
   - complex_1
   apply_to_modules:
   - test_ambiguous_complex
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/testdir"
-      attributes:
-      - restrict: ".txt$"
-      - FIM_MODE
-      - report_changes: 'yes'
-  - directories:
-      value: "/testdir/subdir1"
-      attributes:
-      - report_changes: 'yes'
-      - tags: TAGS
-      - FIM_MODE
-  - directories:
-      value: "/testdir/subdir1/subdir2"
-      attributes:
-        - tags: TAGS
-        - FIM_MODE
-        - check_all: 'no'
-        - check_inode: 'yes'
-  - directories:
-      value: "/testdir/subdir1/subdir2/subdir3"
-      attributes:
-        - FIM_MODE
-        - check_all: 'no'
-        - check_size: 'yes'
-        - check_owner: 'yes'
-        - report_changes: 'yes'
-  - directories:
-      value: "/testdir/subdir1/subdir2/subdir3/subdir4"
-      attributes:
-        - FIM_MODE
-        - check_all: 'no'
-        - check_size: 'yes'
-        - report_changes: 'yes'
-        - tags: TAGS
-  - directories:
-      value: "/testdir/subdir1/subdir2/subdir3/subdir4/subdir5"
-      attributes:
-        - FIM_MODE
-        - check_all: 'no'
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: "/testdir"
+        attributes:
         - restrict: ".txt$"
-        - check_size: 'yes'
-        - check_owner: 'yes'
+        - FIM_MODE
         - report_changes: 'yes'
+    - directories:
+        value: "/testdir/subdir1"
+        attributes:
+        - report_changes: 'yes'
+        - tags: TAGS
+        - FIM_MODE
+    - directories:
+        value: "/testdir/subdir1/subdir2"
+        attributes:
+          - tags: TAGS
+          - FIM_MODE
+          - check_all: 'no'
+          - check_inode: 'yes'
+    - directories:
+        value: "/testdir/subdir1/subdir2/subdir3"
+        attributes:
+          - FIM_MODE
+          - check_all: 'no'
+          - check_size: 'yes'
+          - check_owner: 'yes'
+          - report_changes: 'yes'
+    - directories:
+        value: "/testdir/subdir1/subdir2/subdir3/subdir4"
+        attributes:
+          - FIM_MODE
+          - check_all: 'no'
+          - check_size: 'yes'
+          - report_changes: 'yes'
+          - tags: TAGS
+    - directories:
+        value: "/testdir/subdir1/subdir2/subdir3/subdir4/subdir5"
+        attributes:
+          - FIM_MODE
+          - check_all: 'no'
+          - restrict: ".txt$"
+          - check_size: 'yes'
+          - check_owner: 'yes'
+          - report_changes: 'yes'
  #conf 2
 - tags:
   - complex
   - complex_2
   apply_to_modules:
   - test_ambiguous_complex
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/testdir"
-      attributes:
-      - FIM_MODE
-      - tags: TAGS
-  - directories:
-      value: "/testdir/subdir1"
-      attributes:
-      - report_changes: 'yes'
-      - restrict: ".txt$"
-      - FIM_MODE
-  - directories:
-      value: "/testdir/subdir1/subdir2"
-      attributes:
-        - report_changes: 'yes'
-        - check_all: 'no'
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: "/testdir"
+        attributes:
         - FIM_MODE
-        - check_inode: 'yes'
-        - check_size: 'yes'
-  - directories:
-      value: "/testdir/subdir1/subdir2/subdir3"
-      attributes:
-        - FIM_MODE
-        - check_all: 'no'
-        - check_perm: 'yes'
-        - check_owner: 'yes'
-        - check_mtime: 'yes'
         - tags: TAGS
-  - directories:
-      value: "/testdir/subdir1/subdir2/subdir3/subdir4"
-      attributes:
-        - FIM_MODE
-        - check_all: 'no'
-        - check_size: 'yes'
+    - directories:
+        value: "/testdir/subdir1"
+        attributes:
+        - report_changes: 'yes'
         - restrict: ".txt$"
-        - tags: TAGS
-  - directories:
-      value: "/testdir/subdir1/subdir2/subdir3/subdir4/subdir5"
-      attributes:
         - FIM_MODE
-        - check_all: 'no'
-        - check_group: 'yes'
-        - check_perm: 'yes'
-        - check_sha256sum: 'yes'
-        - report_changes: 'yes'
+    - directories:
+        value: "/testdir/subdir1/subdir2"
+        attributes:
+          - report_changes: 'yes'
+          - check_all: 'no'
+          - FIM_MODE
+          - check_inode: 'yes'
+          - check_size: 'yes'
+    - directories:
+        value: "/testdir/subdir1/subdir2/subdir3"
+        attributes:
+          - FIM_MODE
+          - check_all: 'no'
+          - check_perm: 'yes'
+          - check_owner: 'yes'
+          - check_mtime: 'yes'
+          - tags: TAGS
+    - directories:
+        value: "/testdir/subdir1/subdir2/subdir3/subdir4"
+        attributes:
+          - FIM_MODE
+          - check_all: 'no'
+          - check_size: 'yes'
+          - restrict: ".txt$"
+          - tags: TAGS
+    - directories:
+        value: "/testdir/subdir1/subdir2/subdir3/subdir4/subdir5"
+        attributes:
+          - FIM_MODE
+          - check_all: 'no'
+          - check_group: 'yes'
+          - check_perm: 'yes'
+          - check_sha256sum: 'yes'
+          - report_changes: 'yes'
 #conf 3
 - tags:
   - complex
   - complex_3
   apply_to_modules:
   - test_ambiguous_complex
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/testdir/subdir1"
-      attributes:
-      - report_changes: 'yes'
-      - tags: TAGS
-      - FIM_MODE
-  - directories:
-      value: "/testdir/subdir1/subdir2/subdir3/subdir4/subdir5"
-      attributes:
-        - FIM_MODE
-        - check_all: 'no'
-        - restrict: ".txt$"
-        - check_size: 'yes'
-        - check_owner: 'yes'
-        - report_changes: 'yes'
-  - directories:
-      value: "/testdir/subdir1/subdir2"
-      attributes:
-        - tags: TAGS
-        - FIM_MODE
-        - check_all: 'no'
-        - check_inode: 'yes'
-  - directories:
-      value: "/testdir/subdir1/subdir2/subdir3/subdir4"
-      attributes:
-        - FIM_MODE
-        - check_all: 'no'
-        - check_size: 'yes'
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: "/testdir/subdir1"
+        attributes:
         - report_changes: 'yes'
         - tags: TAGS
-  - directories:
-      value: "/testdir/subdir1/subdir2/subdir3"
-      attributes:
         - FIM_MODE
-        - check_all: 'no'
-        - check_size: 'yes'
-        - check_owner: 'yes'
-  - directories:
-      value: "/testdir"
-      attributes:
-        - restrict: ".txt$"
-        - FIM_MODE
-        - report_changes: 'yes'
+    - directories:
+        value: "/testdir/subdir1/subdir2/subdir3/subdir4/subdir5"
+        attributes:
+          - FIM_MODE
+          - check_all: 'no'
+          - restrict: ".txt$"
+          - check_size: 'yes'
+          - check_owner: 'yes'
+          - report_changes: 'yes'
+    - directories:
+        value: "/testdir/subdir1/subdir2"
+        attributes:
+          - tags: TAGS
+          - FIM_MODE
+          - check_all: 'no'
+          - check_inode: 'yes'
+    - directories:
+        value: "/testdir/subdir1/subdir2/subdir3/subdir4"
+        attributes:
+          - FIM_MODE
+          - check_all: 'no'
+          - check_size: 'yes'
+          - report_changes: 'yes'
+          - tags: TAGS
+    - directories:
+        value: "/testdir/subdir1/subdir2/subdir3"
+        attributes:
+          - FIM_MODE
+          - check_all: 'no'
+          - check_size: 'yes'
+          - check_owner: 'yes'
+    - directories:
+        value: "/testdir"
+        attributes:
+          - restrict: ".txt$"
+          - FIM_MODE
+          - report_changes: 'yes'

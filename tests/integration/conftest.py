@@ -4,6 +4,8 @@
 
 import json
 import os
+import shutil
+import subprocess
 import sys
 import uuid
 from datetime import datetime
@@ -13,10 +15,12 @@ from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_LOGS_PATH, WAZUH_CONF, WAZUH_SERVICE
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, WAZUH_SERVICE
+from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor, SocketController, SocketMonitor
-from wazuh_testing.tools.services import control_service, check_daemon_status, delete_sockets
+from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController
+from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
+from wazuh_testing.tools.time import TimeMachine
 
 PLATFORMS = set("darwin linux win32 sunos5".split())
 HOST_TYPES = set("server agent".split())
@@ -129,10 +133,13 @@ def pytest_html_results_table_header(cells):
 
 
 def pytest_html_results_table_row(report, cells):
-    cells.insert(4, html.td(report.tier))
-    cells.insert(3, html.td(report.markers))
-    cells.insert(2, html.td(report.description))
-    cells.insert(1, html.td(datetime.utcnow(), class_='col-time'))
+    try:
+        cells.insert(4, html.td(report.tier))
+        cells.insert(3, html.td(report.markers))
+        cells.insert(2, html.td(report.description))
+        cells.insert(1, html.td(datetime.utcnow(), class_='col-time'))
+    except AttributeError:
+        pass
 
 
 # HARDCODE: pytest-html generates too long file names. This temp fix is to reduce the name of
@@ -207,83 +214,160 @@ def pytest_runtest_makereport(item, call):
             report.extra = extra
 
 
+def connect_to_sockets(request):
+    """Connect to the specified sockets for the test."""
+    receiver_sockets_params = getattr(request.module, 'receiver_sockets_params')
+
+    # Create the SocketControllers
+    receiver_sockets = list()
+    for address, family, protocol in receiver_sockets_params:
+        receiver_sockets.append(SocketController(address=address, family=family, connection_protocol=protocol))
+
+    setattr(request.module, 'receiver_sockets', receiver_sockets)
+
+    return receiver_sockets
+
+
+def close_sockets(receiver_sockets):
+    """Close the sockets connection gracefully."""
+    for socket in receiver_sockets:
+        try:
+            # We flush the buffer before closing connection if connection is TCP
+            if socket.protocol == 1:
+                socket.sock.settimeout(5)
+                socket.receive()  # Flush buffer before closing connection
+            socket.close()
+        except OSError as e:
+            if e.errno == 9:
+                # Do not try to close the socket again if it was reused or closed already
+                pass
+
+
 @pytest.fixture(scope='module')
-def configure_environment_standalone_daemons(request):
-    """Configure a custom environment for testing with specific Wazuh daemons only. Stopping wazuh-service is needed."""
+def connect_to_sockets_module(request):
+    """Module scope version of connect_to_sockets."""
+    receiver_sockets = connect_to_sockets(request)
+    yield receiver_sockets
+    close_sockets(receiver_sockets)
 
-    def remove_logs():
-        """Remove all Wazuh logs"""
-        for root, dirs, files in os.walk(WAZUH_LOGS_PATH):
-            for file in files:
-                os.remove(os.path.join(root, file))
 
-    # Stop wazuh-service and ensure all daemons are stopped
-    control_service('stop')
-    check_daemon_status(running=False)
+@pytest.fixture(scope='function')
+def connect_to_sockets_function(request):
+    """Function scope version of connect_to_sockets."""
+    receiver_sockets = connect_to_sockets(request)
+    yield receiver_sockets
+    close_sockets(receiver_sockets)
 
-    # Remove all remaining Wazuh sockets
-    delete_sockets()
 
-    # Start selected daemons in debug mode and ensure they are running
-    for daemon in getattr(request.module, 'used_daemons'):
-        control_service('start', daemon=daemon, debug_mode=True)
-        check_daemon_status(running=True, daemon=daemon)
+@pytest.fixture(scope='module')
+def configure_environment(get_configuration, request):
+    """Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration."""
 
-    # Clear all Wazuh logs
-    truncate_file(LOG_FILE_PATH)
+    # Save current configuration
+    backup_config = get_wazuh_conf()
+
+    # Configuration for testing
+    test_config = set_section_wazuh_conf(get_configuration.get('sections'))
+
+    # Create test directories
+    if hasattr(request.module, 'test_directories'):
+        test_directories = getattr(request.module, 'test_directories')
+        for test_dir in test_directories:
+            os.makedirs(test_dir, exist_ok=True, mode=0o777)
+
+    # Set new configuration
+    write_wazuh_conf(test_config)
+
+    # Change Windows Date format to ensure TimeMachine will work properly
+    if sys.platform == 'win32':
+        subprocess.call('reg add "HKCU\\Control Panel\\International" /f /v sShortDate /t REG_SZ /d "dd/MM/yyyy" >nul',
+                        shell=True)
 
     # Call extra functions before yield
     if hasattr(request.module, 'extra_configuration_before_yield'):
         func = getattr(request.module, 'extra_configuration_before_yield')
         func()
 
+    # Set current configuration
+    global_parameters.current_configuration = get_configuration
+
     yield
+
+    TimeMachine.time_rollback()
+
+    # Remove created folders (parents)
+    if sys.platform == 'win32':
+        control_service('stop')
+
+    if hasattr(request.module, 'test_directories'):
+        for test_dir in test_directories:
+            shutil.rmtree(test_dir, ignore_errors=True)
+
+    if sys.platform == 'win32':
+        control_service('start')
+
+    # Restore previous configuration
+    write_wazuh_conf(backup_config)
 
     # Call extra functions after yield
     if hasattr(request.module, 'extra_configuration_after_yield'):
         func = getattr(request.module, 'extra_configuration_after_yield')
         func()
 
-    # Stop selected daemons
-    for daemon in getattr(request.module, 'used_daemons'):
-        control_service('stop', daemon=daemon)
-
-    # Remove all remaining Wazuh sockets
-    delete_sockets()
-
-    # Remove all Wazuh logs
-    remove_logs()
+    if hasattr(request.module, 'force_restart_after_restoring'):
+        if getattr(request.module, 'force_restart_after_restoring'):
+            control_service('restart')
 
 
 @pytest.fixture(scope='module')
-def create_unix_sockets(request):
-    """Create the specified unix sockets for the tests."""
+def configure_mitm_environment(request):
+    """Configure environment for sockets and MITM"""
     monitored_sockets_params = getattr(request.module, 'monitored_sockets_params')
-    receiver_sockets_params = getattr(request.module, 'receiver_sockets_params')
+    log_monitor_paths = getattr(request.module, 'log_monitor_paths')
 
-    # Create the unix sockets
-    monitored_sockets, receiver_sockets = list(), list()
-    for path_, protocol in receiver_sockets_params:
-        receiver_sockets.append(SocketController(path=path_, connection_protocol=protocol))
-    for path_, protocol in monitored_sockets_params:
-        if (path_, protocol) in receiver_sockets_params:
-            monitored_sockets.append(
-                SocketMonitor(path=path_, connection_protocol=protocol,
-                              controller=receiver_sockets[receiver_sockets_params.index((path_, protocol))]))
-        else:
-            monitored_sockets.append(SocketMonitor(path=path_, connection_protocol=protocol))
+    # Stop wazuh-service and ensure all daemons are stopped
+    control_service('stop')
+    check_daemon_status(running=False)
+
+    monitored_sockets = list()
+    mitm_list = list()
+    log_monitors = list()
+
+    # Truncate logs and create FileMonitors
+    for log in log_monitor_paths:
+        truncate_file(log)
+        log_monitors.append(FileMonitor(log))
+
+    # Start selected daemons and monitored sockets MITM
+    for daemon, mitm, daemon_first in monitored_sockets_params:
+        not daemon_first and mitm is not None and mitm.start()
+        control_service('start', daemon=daemon, debug_mode=True)
+        check_daemon_status(
+            running=True,
+            daemon=daemon,
+            extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else None
+        )
+        daemon_first and mitm is not None and mitm.start()
+        if mitm is not None:
+            monitored_sockets.append(QueueMonitor(queue_item=mitm.queue))
+            mitm_list.append(mitm)
 
     setattr(request.module, 'monitored_sockets', monitored_sockets)
-    setattr(request.module, 'receiver_sockets', receiver_sockets)
+    setattr(request.module, 'log_monitors', log_monitors)
 
     yield
 
-    # Close the sockets gracefully
-    for monitored_socket, receiver_socket in zip(monitored_sockets, receiver_sockets):
-        try:
-            monitored_socket.close()
-            receiver_socket.close()
-        except OSError as e:
-            if e.errno == 9:
-                # Do not try to close the socket again if it was reused
-                pass
+    # Stop daemons and monitored sockets MITM
+    for daemon, mitm, _ in monitored_sockets_params:
+        mitm is not None and mitm.shutdown()
+        control_service('stop', daemon=daemon)
+        check_daemon_status(
+            running=False,
+            daemon=daemon,
+            extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else None
+        )
+
+    # Delete all db
+    delete_dbs()
+
+    control_service('start')
