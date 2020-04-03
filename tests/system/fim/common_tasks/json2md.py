@@ -96,11 +96,11 @@ def scenario2markdown(scenario_name, scenario_content):
     """
     result = ""
     if scenario_content['state'] == 'SUCCESS':
-        result += "\n### [:heavy_check_mark:] {} \n".format(scenario_switcher(scenario_name),'[✓]')
+        result += "\n### :heavy_check_mark: {} \n".format(scenario_switcher(scenario_name),'[✓]')
         result += "<details><summary><i>Advanced details</i></summary>\n<br>\n"
         result += "\n\nApplicable Syscheck configuration: \n  ```xml \n {} \n ``` \n".format(get_config(scenario_name))
         return result + "\n</details>\n"
-    result += "\n\n### [:x:] {} \n".format(scenario_switcher(scenario_name),'[ERROR]')
+    result += "\n\n### :x: {} \n".format(scenario_switcher(scenario_name),'[ERROR]')
     result += "<details><summary><i>Advanced details</i></summary>\n<br>\n"
     result += "\n\nApplicable Syscheck configuration: \n  ```xml \n {} \n ``` \n".format(get_config(scenario_name))
     for verification, test_results in scenario_content['errors'].items():
