@@ -60,8 +60,8 @@ def test_pull_on_start(get_configuration, configure_environment,
     the module sleeps if pull_on_start is set to no.
     In the second case, the module will start to pull messages after time interval.  
     """
-    pull_start = get_configuration['elements'][0]['pull_on_start']['value'] == 'yes'
-    str_interval = get_configuration['elements'][4]['interval']['value']
+    pull_start = get_configuration['sections'][0]['elements'][3]['pull_on_start']['value'] == 'yes'
+    str_interval = get_configuration['sections'][0]['elements'][4]['interval']['value']
     time_interval = int(''.join(filter(str.isdigit, str_interval)))
 
     if pull_start:
