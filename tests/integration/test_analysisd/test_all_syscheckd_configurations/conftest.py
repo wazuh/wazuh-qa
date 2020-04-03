@@ -1,6 +1,7 @@
 # Copyright (C) 2015-2020, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import json
 import os
 import re
@@ -41,7 +42,7 @@ def generate_events_and_alerts(request):
         case = test_case['test_case'][0]
         event = (json.loads(re.match(r'(.*)syscheck:(.+)$', case['input']).group(2)))
         events[event['data']['path']].update({case['stage']: event})
-        socket_controller.send([case['input']])
+        socket_controller.send(case['input'])
         time.sleep(1 / ips)
 
     n_alerts = len(test_cases)

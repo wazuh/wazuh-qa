@@ -4,11 +4,12 @@
   - multiple_dirs
   apply_to_modules:
   - test_multiple_dirs
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: TEST_DIRECTORIES
-      attributes:
-        - FIM_MODE
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+          - FIM_MODE

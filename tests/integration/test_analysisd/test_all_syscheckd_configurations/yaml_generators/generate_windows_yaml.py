@@ -86,7 +86,7 @@ def generate_analysisd_yaml(n_events, modify_events):
     control_service('start', daemon='ossec-analysisd', debug_mode=True)
     check_daemon_status(running=True, daemon='ossec-analysisd')
 
-    mitm_analysisd = ManInTheMiddle(analysis_path, mode='UDP')
+    mitm_analysisd = ManInTheMiddle(address=analysis_path, family='AF_UNIX', connection_protocol='UDP')
     analysis_queue = mitm_analysisd.queue
     mitm_analysisd.start()
 
