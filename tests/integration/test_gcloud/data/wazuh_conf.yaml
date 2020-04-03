@@ -4,21 +4,22 @@
   - ossec_conf
   apply_to_modules:
   - MODULE_NAME
-  section: gcp-pubsub
-  elements:
-  - pull_on_start:
-      value: 'PULL_ON_START'
-  - project_id:
-      value: 'PROJECT_ID'
-  - subscription_name:
-      value: 'SUBSCRIPTION_NAME'
-  - credentials_file:
-      value: 'CREDENTIALS_FILE'
-  - interval:
-      value: 'INTERVAL'
-  - max_messages:
-      value: 'MAX_MESSAGES'
-  - logging:
-      value: 'LOGGING'
+  sections:
+  - section: gcp-pubsub
+    elements:
+    - project_id:
+        value: 'PROJECT_ID'
+    - subscription_name:
+        value: 'SUBSCRIPTION_NAME'
+    - credentials_file:
+        value: 'CREDENTIALS_FILE'
+    - pull_on_start:
+        value: 'PULL_ON_START'
+    - interval:
+        value: 'INTERVAL'
+    - max_messages:
+        value: 'MAX_MESSAGES'
+    - logging:
+        value: 'LOGGING'
 
 
