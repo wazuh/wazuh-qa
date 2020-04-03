@@ -78,8 +78,8 @@ def test_logging(get_configuration, configure_environment,
     When a logging option is used, it cannot be an event that has another logging option.
     For example, events from gcp-pubusb will only have '- INFO -' if logging = info.
     """
-    str_interval = get_configuration['elements'][4]['interval']['value']
-    logging_opt = get_configuration['elements'][6]['logging']['value']
+    str_interval = get_configuration['sections'][0]['elements'][4]['interval']['value']
+    logging_opt = get_configuration['sections'][0]['elements'][6]['logging']['value']
     time_interval = int(''.join(filter(str.isdigit, str_interval)))
 
     if logging_opt == 'info':
