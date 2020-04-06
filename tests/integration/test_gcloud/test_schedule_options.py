@@ -72,8 +72,8 @@ def get_configuration(request):
 def test_schedule_options(get_configuration, configure_environment,
                           restart_wazuh, wait_for_gcp_start):
     """
-    These tests verify the module starts to pull after the time interval
-    that has to match the value of the 'interval' parameter.
+    These tests verify the module starts to pull according to the day of the week 
+    or month and time.
     """
     tags_to_apply = get_configuration['tags'][0]
     check_apply_test({'ossec_day_conf', 'ossec_wday_conf', 'ossec_time_conf'}, get_configuration['tags'])
