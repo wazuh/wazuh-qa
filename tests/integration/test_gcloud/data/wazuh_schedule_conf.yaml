@@ -1,0 +1,77 @@
+---
+# conf 1
+- tags:
+  - ossec_day_conf
+  apply_to_modules:
+  - MODULE_NAME
+  sections:
+  - section: gcp-pubsub
+    elements:
+    - project_id:
+        value: 'PROJECT_ID'
+    - subscription_name:
+        value: 'SUBSCRIPTION_NAME'
+    - credentials_file:
+        value: 'CREDENTIALS_FILE'
+    - pull_on_start:
+        value: 'PULL_ON_START'
+    - day:
+        value: 'DAY'
+    - interval:
+        value: 'INTERVAL'
+    - time:
+        value: 'TIME'
+    - max_messages:
+        value: 'MAX_MESSAGES'
+    - logging:
+        value: 'LOGGING'
+# conf 2
+- tags:
+  - ossec_wday_conf
+  apply_to_modules:
+  - MODULE_NAME
+  sections:
+  - section: gcp-pubsub
+    elements:
+    - project_id:
+        value: 'PROJECT_ID'
+    - subscription_name:
+        value: 'SUBSCRIPTION_NAME'
+    - credentials_file:
+        value: 'CREDENTIALS_FILE'
+    - pull_on_start:
+        value: 'PULL_ON_START'
+    - wday:
+        value: 'WDAY'
+    - interval:
+        value: 'INTERVAL'
+    - time:
+        value: 'TIME'
+    - max_messages:
+        value: 'MAX_MESSAGES'
+    - logging:
+        value: 'LOGGING'
+# conf 3
+- tags:
+  - ossec_time_conf
+  apply_to_modules:
+  - MODULE_NAME
+  sections:
+  - section: gcp-pubsub
+    elements:
+    - project_id:
+        value: 'PROJECT_ID'
+    - subscription_name:
+        value: 'SUBSCRIPTION_NAME'
+    - credentials_file:
+        value: 'CREDENTIALS_FILE'
+    - pull_on_start:
+        value: 'PULL_ON_START'
+    - time:
+        value: 'TIME'
+    - interval:
+        value: 'INTERVAL'
+    - max_messages:
+        value: 'MAX_MESSAGES'
+    - logging:
+        value: 'LOGGING'
