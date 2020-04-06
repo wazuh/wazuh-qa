@@ -195,7 +195,6 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
     # Check that if the path is too long, it is displayed correctly.
     if len(event['data']['path']) > 756:
         full_log = alert['full_log']
-        full_log_path = full_log[6:762]
         file_name = event['data']['path'].rsplit('/', 1)[1]
         # Separation token that marks the part of the path that is lost
         assert '[...]' in full_log
