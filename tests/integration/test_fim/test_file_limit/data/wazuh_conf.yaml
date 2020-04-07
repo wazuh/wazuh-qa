@@ -4,75 +4,80 @@
   - minus_ten_file_limit
   apply_to_modules:
   - test_file_limit_positive_value
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: TEST_DIRECTORIES
-      attributes:
-      - FIM_MODE
-  - file_limit:
-      value: '-10'
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - FIM_MODE
+    - file_limit:
+        value: '-10'
 
 # conf 2
 - tags:
   - positive_ten_file_limit
   apply_to_modules:
   - test_file_limit_positive_value
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: TEST_DIRECTORIES
-      attributes:
-      - FIM_MODE
-  - file_limit:
-      value: '10'
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - FIM_MODE
+    - file_limit:
+        value: '10'
 
 # conf 3
 - tags:
   - no_file_limit
   apply_to_modules:
   - test_file_limit_no_limit
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: TEST_DIRECTORIES
-      attributes:
-      - FIM_MODE
-  - file_limit:
-      value: '0'
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - FIM_MODE
+    - file_limit:
+        value: '0'
 
 # conf 4
 - tags:
   - file_limit_default
   apply_to_modules:
   - test_file_limit_default
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: TEST_DIRECTORIES
-      attributes:
-      - FIM_MODE
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - FIM_MODE
 
 # conf 5
 - tags:
   - file_limit_values
   apply_to_modules:
   - test_file_limit_values
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: TEST_DIRECTORIES
-      attributes:
-      - FIM_MODE
-  - file_limit:
-      value: FILE_LIMIT
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - FIM_MODE
+    - file_limit:
+        value: FILE_LIMIT
