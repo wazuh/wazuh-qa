@@ -47,7 +47,7 @@ def get_configuration(request):
 ])
 def test_file_limit_no_limit(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
     """
-    Check that a negative value in file_limit will cause an error and syscheckd won't start.
+    Check that a 0 in file_limit disables the limit.
 
     Parameters
     ----------

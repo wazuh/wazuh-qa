@@ -47,7 +47,8 @@ def get_configuration(request):
 ])
 def test_file_limit_default(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
     """
-    Check that a negative value in file_limit will cause an error and syscheckd won't start.
+    Check that if the file_limit option is missing, the maximum number of files monitored is set to the default
+    value: 100000.
 
     Parameters
     ----------
