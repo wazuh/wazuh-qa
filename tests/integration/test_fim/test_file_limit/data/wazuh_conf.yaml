@@ -35,7 +35,7 @@
 - tags:
   - no_file_limit
   apply_to_modules:
-  - test_file_limit_positive_value
+  - test_file_limit_no_limit
   section: syscheck
   elements:
   - disabled:
@@ -49,9 +49,9 @@
 
 # conf 4
 - tags:
-  - no_file_limit
+  - file_limit_default
   apply_to_modules:
-  - test_file_limit_positive_value
+  - test_file_limit_default
   section: syscheck
   elements:
   - disabled:
@@ -65,7 +65,7 @@
 - tags:
   - file_limit_values
   apply_to_modules:
-  - test_file_limit_positive_value
+  - test_file_limit_values
   section: syscheck
   elements:
   - disabled:
