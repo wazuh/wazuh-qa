@@ -874,6 +874,24 @@ def callback_configuration_warning(line):
     return None
 
 
+def callback_invalid_value_file_limit(line):
+    match = re.match(r'.*Invalid value for element \'file_limit\'.*', line)
+
+    if match:
+        return True
+
+    return None
+
+
+def callback_value_file_limit(line):
+    match = re.match(r'.*Maximum number of files to be monitored: \'(\d+)\'', line)
+
+    if match:
+        match.group(1)
+
+    return None    
+
+
 def callback_entries_path_count(line):
     match = re.match(r'.*Fim inode entries: (\d+), path count: (\d+)', line)
 
