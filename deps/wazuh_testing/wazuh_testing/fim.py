@@ -889,7 +889,16 @@ def callback_value_file_limit(line):
     if match:
         match.group(1)
 
-    return None    
+    return None
+
+
+def callback_file_limit_zero(line):
+    match = re.match(r'.*No limit set to maximum number of files to be monitored', line)
+
+    if match:
+        return True
+
+    return None
 
 
 def callback_entries_path_count(line):
