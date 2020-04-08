@@ -47,3 +47,16 @@
         - FIM_MODE
     - file_limit:
         value: FILE_LIMIT
+
+# conf 4
+- tags:
+  - file_limit_capacity_alerts
+  apply_to_modules:
+  - test_file_limit_capacity_alerts
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
