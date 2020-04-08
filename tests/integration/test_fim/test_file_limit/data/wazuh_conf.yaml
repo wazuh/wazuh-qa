@@ -1,40 +1,6 @@
 ---
 # conf 1
 - tags:
-  - minus_ten_file_limit
-  apply_to_modules:
-  - test_file_limit_positive_value
-  sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-        - FIM_MODE
-    - file_limit:
-        value: '-10'
-
-# conf 2
-- tags:
-  - positive_ten_file_limit
-  apply_to_modules:
-  - test_file_limit_positive_value
-  sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-        - FIM_MODE
-    - file_limit:
-        value: '10'
-
-# conf 3
-- tags:
   - no_file_limit
   apply_to_modules:
   - test_file_limit_no_limit
@@ -50,7 +16,7 @@
     - file_limit:
         value: '0'
 
-# conf 4
+# conf 2
 - tags:
   - file_limit_default
   apply_to_modules:
@@ -65,7 +31,7 @@
         attributes:
         - FIM_MODE
 
-# conf 5
+# conf 3
 - tags:
   - file_limit_values
   apply_to_modules:
