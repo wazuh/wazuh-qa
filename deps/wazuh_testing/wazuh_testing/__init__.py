@@ -19,6 +19,7 @@ class Parameters:
         self._gcp_project_id = None
         self._gcp_subscription_name = None
         self._gcp_credentials_file = None
+        self._gcp_topic_name = None
 
     @property
     def default_timeout(self):
@@ -158,6 +159,29 @@ class Parameters:
             New value for the `gcp_credentials_file`.
         """
         self._gcp_credentials_file = value
+
+    @property
+    def gcp_topic_name(self):
+        """
+        Getter method for the `gcp_topic_name` property
+
+        Returns
+        -------
+        str Google Cloud topic name `gcp_topic_name`.
+        """
+        return self._gcp_topic_name
+
+    @gcp_topic_name.setter
+    def gcp_topic_name(self, value):
+        """
+        Setter method for the `gcp_topic_name` property
+
+        Parameters
+        ----------
+        value : string
+            New value for the `gcp_topic_name`.
+        """
+        self._gcp_topic_name = value
 
 
 global_parameters = Parameters()
