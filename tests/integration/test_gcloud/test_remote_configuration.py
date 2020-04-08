@@ -7,9 +7,10 @@ import pytest
 import json
 import socket
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import generate_params
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, SocketController
 
 # Marks
@@ -18,9 +19,20 @@ pytestmark = pytest.mark.tier(level=1)
 
 # variables
 
-project_id = 'sinuous-voice-271711'
-subscription_name = 'wazuh-integration'
-credentials_file = '/var/ossec/credentials.json'
+if global_parameters.gcp_project_id is not None:
+    project_id = global_parameters.gcp_project_id
+else:
+    raise ValueError(f"Google Cloud project id not found. Please use --gcp-project-id")
+
+if global_parameters.gcp_subscription_name is not None:
+    subscription_name = global_parameters.gcp_subscription_name
+else:
+    raise ValueError(f"Google Cloud subscription name not found. Please use --gcp-subscription-name")
+
+if global_parameters.gcp_credentials_file is not None:
+    credentials_file = global_parameters.gcp_credentials_file
+else:
+    raise ValueError(f"Credentials json file not found. Please enter a valid path using --gcp-credentials-file")
 enabled = 'yes'
 pull_on_start = 'yes'
 max_messages = 200
