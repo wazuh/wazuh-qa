@@ -62,3 +62,18 @@
         value: TEST_DIRECTORIES
         attributes:
         - FIM_MODE
+
+# conf 5
+- tags:
+  - file_limit_full
+  apply_to_modules:
+  - test_file_limit_full
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+    - file_limit:
+        value: '10'

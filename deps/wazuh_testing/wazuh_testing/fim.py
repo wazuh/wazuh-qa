@@ -910,6 +910,16 @@ def callback_file_limit_back_to_normal(line):
     return None
 
 
+def callback_file_limit_full_database(line):
+    match = re.match(r'.*Couldn\t insert \'.*\' entry into DB\. The DB is full, please check your configuration\.',
+                     line)
+
+    if match:
+        return True
+
+    return None
+
+
 def callback_entries_path_count(line):
     match = re.match(r'.*Fim inode entries: (\d+), path count: (\d+)', line)
 
