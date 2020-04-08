@@ -892,6 +892,24 @@ def callback_file_limit_zero(line):
     return None
 
 
+def callback_file_limit_capacity(line):
+    match = re.match(r'.*Sending DB (\d+)% full alert.', line)
+
+    if match:
+        match.group(1)
+
+    return None
+
+
+def callback_file_limit_back_to_normal(line):
+    match = re.match(r'.*Sending DB back to normal alert.', line)
+
+    if match:
+        match.group(1)
+
+    return None
+
+
 def callback_entries_path_count(line):
     match = re.match(r'.*Fim inode entries: (\d+), path count: (\d+)', line)
 
