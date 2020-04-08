@@ -106,6 +106,30 @@ def pytest_addoption(parser):
         action="store_true",
         help="run tests activating database memory in the syscheck configuration"
     )
+    parser.addoption(
+        "--gcp-project-id",
+        action="store",
+        metavar="gcp_project_id",
+        default=None,
+        type=str,
+        help="run tests using Google Cloud project id"
+    )
+    parser.addoption(
+        "--gcp-subscription-name",
+        action="store",
+        metavar="gcp_subscription_name",
+        default=None,
+        type=str,
+        help="run tests using Google Cloud subscription name"
+    )
+    parser.addoption(
+        "--gcp-credentials-file",
+        action="store",
+        metavar="gcp_credentials_file",
+        default=None,
+        type=str,
+        help="run tests using json file that contains Google Cloud credentials. Introduce the path."
+    )
 
 
 def pytest_configure(config):
@@ -123,6 +147,21 @@ def pytest_configure(config):
     fim_database_memory = config.getoption("--fim-database-memory")
     if fim_database_memory:
         global_parameters.fim_database_memory = True
+
+    # Set gcp_project_id only if it is passed through command line args
+    gcp_project_id = config.getoption("--gcp-project-id")
+    if gcp_project_id:
+        global_parameters.gcp_project_id = gcp_project_id
+
+    # Set gcp_subscription_name only if it is passed through command line args
+    gcp_subscription_name = config.getoption("--gcp-subscription-name")
+    if gcp_subscription_name:
+        global_parameters.gcp_subscription_name = gcp_subscription_name
+
+    # Set gcp_credentials_file only if it is passed through command line args
+    gcp_credentials_file = config.getoption("--gcp-credentials-file")
+    if gcp_credentials_file:
+        global_parameters.gcp_credentials_file = gcp_credentials_file
 
 
 def pytest_html_results_table_header(cells):
