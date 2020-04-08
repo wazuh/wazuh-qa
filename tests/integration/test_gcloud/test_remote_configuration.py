@@ -120,14 +120,19 @@ def test_remote_configuration(get_configuration, configure_environment,
             xml_list.append(ele)
         ind_xml += 1
 
-    # get remote configuration
-    gcp_remote = gcp_remote_configuration(component, configuration)
-
+    # default path of credentials file
+    if WAZUH_PATH not in gcp_xml[xml_list.index('credentials_file')]['credentials_file']['value']:
+        credentials_path = gcp_xml[xml_list.index('credentials_file')]['credentials_file']['value']
+        gcp_xml[xml_list.index('credentials_file')]['credentials_file']['value'] = os.path.join(WAZUH_PATH,
+                                                                                                credentials_path)
     # default interval for 'wday' and 'time' to seconds
     if 'day' in xml_list and 'interval' in xml_list:
         gcp_xml[xml_list.index('interval')]['interval']['value'] = 1
     if 'wday' in xml_list and 'interval' in xml_list:
         gcp_xml[xml_list.index('interval')]['interval']['value'] = 604800
+
+    # get remote configuration
+    gcp_remote = gcp_remote_configuration(component, configuration)
 
     # compare gcp_json with gcp_xml
     for remote_option in gcp_remote:
