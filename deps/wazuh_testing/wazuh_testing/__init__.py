@@ -16,6 +16,9 @@ class Parameters:
         timeouts['darwin'] = 5
         self._default_timeout = timeouts[sys.platform]
         self._fim_database_memory = False
+        self._gcp_project_id = None
+        self._gcp_subscription_name = None
+        self._gcp_credentials_file = None
 
     @property
     def default_timeout(self):
@@ -86,6 +89,76 @@ class Parameters:
             New value for the currenct configuration.
         """
         self._current_configuration = value
+
+    @property
+    def gcp_project_id(self):
+        """
+        Getter method for the `gcp_project_id` property
+
+        Returns
+        -------
+        str Google Cloud project id `gcp_project_id`.
+        """
+        return self._gcp_project_id
+
+    @gcp_project_id.setter
+    def gcp_project_id(self, value):
+        """
+        Setter method for the `gcp_project_id` property
+
+        Parameters
+        ----------
+        value : string
+            New value for the `gcp_project_id`.
+        """
+        self._gcp_project_id = value
+
+    @property
+    def gcp_subscription_name(self):
+        """
+        Getter method for the `gcp_subscription_name` property
+
+        Returns
+        -------
+        str Google Cloud subscription name `gcp_subscription_name`.
+        """
+        return self._gcp_subscription_name
+
+    @gcp_subscription_name.setter
+    def gcp_subscription_name(self, value):
+        """
+        Setter method for the `gcp_subscription_name` property
+
+        Parameters
+        ----------
+        value : string
+            New value for the `gcp_subscription_name`.
+        """
+        self._gcp_subscription_name = value
+
+    @property
+    def gcp_credentials_file(self):
+        """
+        Getter method for the `gcp_credentials_file` property
+
+        Returns
+        -------
+        str path of `gcp_credentials_file`.
+        """
+        return self._gcp_credentials_file
+
+    @gcp_credentials_file.setter
+    def gcp_credentials_file(self, value):
+        """
+        Setter method for the `gcp_credentials_file` property
+
+        Parameters
+        ----------
+        value : string
+            New value for the `gcp_credentials_file`.
+        """
+        self._gcp_credentials_file = value
+
 
 global_parameters = Parameters()
 logger = logging.getLogger('wazuh_testing')
