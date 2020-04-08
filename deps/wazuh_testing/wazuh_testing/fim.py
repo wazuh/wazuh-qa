@@ -911,7 +911,7 @@ def callback_file_limit_back_to_normal(line):
 
 
 def callback_file_limit_full_database(line):
-    match = re.match(r'.*Couldn\t insert \'.*\' entry into DB\. The DB is full, please check your configuration\.',
+    match = re.match(r'.*Couldn\'t insert \'.*\' entry into DB\. The DB is full, please check your configuration\.',
                      line)
 
     if match:
