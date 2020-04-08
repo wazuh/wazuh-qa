@@ -19,14 +19,21 @@ sys.path.append("/tmp/auxiliary")
 
 from generate_results import generate_result
 
-
-def setElasticsearch(ElasticIP):
+def set_elasticsearch(elastic_ip, elastic_port, elastic_protocol, elastic_username,
+                      elastic_password):
     """
         Sets the Elasticsearch instance that we want to connect.
-        :param str ElasticIP: IP adress of the Elasticsearch node.
+        :param str elastic_ip: IP adress of the Elasticsearch node.
         :return: Object of the Elasticsearch class.
     """
-    es = Elasticsearch("http://{}:9200".format(ElasticIP))
+    es = Elasticsearch(
+         [elastic_ip + ":" + elastic_port],
+         scheme=elastic_protocol,
+         http_auth=(elastic_username, elastic_password),
+         port=443,
+         use_ssl=True,
+         verify_certs=False
+        )
     return es
 
 
@@ -44,12 +51,13 @@ def makeQuery(query, Elastic, index_name):
     result = Elastic.search(index=index_name, body=query)
     return result
 
+
 def read_file(file_path):
     """
     read the paths from file_path into a list.
 
     :param str file_path: The path of the file which contains the paths.
-    
+
     :retrun list data: A list object with the files' paths as elements.
     """
 
@@ -64,8 +72,9 @@ def read_file(file_path):
             f.close()  # close f
     except Exception:
         logging.error('Failed when reading the input file: ', exc_info=True)
-    
+
     return data
+
 
 def ensure_growing_list(last_num_alerts, query, es, index):
     """
@@ -78,7 +87,7 @@ def ensure_growing_list(last_num_alerts, query, es, index):
     :param Elasticsearch es: Elasticsearch instance.
     :param str index: The corresponding Elasticsearch index name to
         search in.
-    
+
     :return bool res: True if the list has grwon, False in other case.
     :return int num_alerts: The current number of detected alerts.
     """
@@ -92,6 +101,7 @@ def ensure_growing_list(last_num_alerts, query, es, index):
     else:
         res = True
     return res, num_alerts
+
 
 def report_failure(start, failure, retry_count, sleep_time):
     """
@@ -119,6 +129,7 @@ def report_failure(start, failure, retry_count, sleep_time):
 
     return retry_count
 
+
 def select_scenario(scenarios_dict):
     """
     Select the enabled scenario depending on the scenarios' arguments.
@@ -129,12 +140,13 @@ def select_scenario(scenarios_dict):
     """
 
     # Get the valid scenario.
-    scenario_key = [k for k,v in scenarios_dict.items() if (v != None and v != False)]
+    scenario_key = [k for k, v in scenarios_dict.items() if (v is not None and v is not False)]
 
-    if len(scenario_key) == 1: # if only 1 scenario is enabled, then pass
+    if len(scenario_key) == 1:  # if only 1 scenario is enabled, then pass
         return scenario_key[0]
-    else: # Check if more than 1 scenario is valid, then fail.
+    else:  # Check if more than 1 scenario is valid, then fail.
         logging.error("More than 1 scenario or none is selected! Please select only 1")
+
 
 def run_line_query(line, query, es, index_name):
     """
@@ -151,7 +163,7 @@ def run_line_query(line, query, es, index_name):
                              list of Syscheck's fields.
     """
     query['query']['bool']['filter'][1]['term']['syscheck.path'] =\
-         line.rstrip()
+        line.rstrip()
     try:
         query_result = makeQuery(query, es, index_name)
     except Exception as e:
@@ -161,6 +173,7 @@ def run_line_query(line, query, es, index_name):
     return query_result
 
     return success, failure
+
 
 def verify_general_alerts(line, query_result, success, failure):
     """
@@ -179,8 +192,8 @@ def verify_general_alerts(line, query_result, success, failure):
     success_bool = False
 
     try:
-        if query_result['hits']['total']['value'] == 1:
-            success +=1
+        if query_result['hits']['total']['value'] >= 1:
+            success += 1
             success_bool = True
         else:
             failure += 1
@@ -192,6 +205,7 @@ def verify_general_alerts(line, query_result, success, failure):
 
 
     return success, success_bool, failure
+
 
 def verify_es_alerts_whodata(line, query_result, success, failure):
     """
@@ -210,16 +224,17 @@ def verify_es_alerts_whodata(line, query_result, success, failure):
     success_bool = False
 
     try:
-        if query_result['hits']['total']['value'] == 1 and \
-           query_result['hits']['hits'][0]['_source']['syscheck']\
-               ['audit']['process']['name'] and \
-           query_result['hits']['hits'][0]['_source']['syscheck']\
-               ['audit']['process']['id'] and \
-           query_result['hits']['hits'][0]['_source']['syscheck']\
-               ['audit']['user']['name'] and \
-           query_result['hits']['hits'][0]['_source']['syscheck']\
-               ['audit']['user']['id']:
-            success +=1
+        if (
+           query_result['hits']['total']['value'] >= 1 and
+           (query_result['hits']['hits'][0]['_source']['syscheck']
+               ['audit']['process']['name']) and
+           (query_result['hits']['hits'][0]['_source']['syscheck']
+               ['audit']['process']['id']) and
+           (query_result['hits']['hits'][0]['_source']['syscheck']
+               ['audit']['user']['name']) and
+           (query_result['hits']['hits'][0]['_source']['syscheck']
+               ['audit']['user']['id'])):
+            success += 1
             success_bool = True
         else:
             failure += 1
@@ -228,9 +243,10 @@ def verify_es_alerts_whodata(line, query_result, success, failure):
     except Exception:
         failure += 1
         logging.error("Error when filtering audit fields in alert " + line.rstrip())
-        
+
 
     return success, success_bool, failure
+
 
 def verify_es_alerts_report_changes(line, query_result, diff_statement, success, failure):
     """
@@ -251,9 +267,10 @@ def verify_es_alerts_report_changes(line, query_result, diff_statement, success,
     """
     success_bool = False
     try:
-        if query_result['hits']['total']['value'] == 1 and \
-           query_result['hits']['hits'][0]['_source']['syscheck']\
-               ['diff']['diff_statement']:
+        if (
+           query_result['hits']['total']['value'] >= 1 and
+           (query_result['hits']['hits'][0]['_source']['syscheck']
+               ['diff']['diff_statement'])):
             success += 1
             success_bool = True
         else:
@@ -266,8 +283,9 @@ def verify_es_alerts_report_changes(line, query_result, diff_statement, success,
 
     return success, success_bool, failure
 
-def verify_es_alerts(files_list, max_retry, query, no_alert_style, es, index_name,\
-     start, sleep_time, scenario = "", scenario_arg = ""):
+
+def verify_es_alerts(files_list, max_retry, query, no_alert_style, es, index_name,
+                     start, sleep_time, scenario="", scenario_arg=""):
     """
     Verify Elasticsearch alerts for a specefic scenario.
 
@@ -290,9 +308,9 @@ def verify_es_alerts(files_list, max_retry, query, no_alert_style, es, index_nam
     retry_count = 0
     alerts_num = 0
     success = 0
-        
+
     logging.info("Elasticsearch alerts verification started")
-    
+
     while retry_count <= max_retry:
         logging.info("Attempt {}/{}".format(retry_count, max_retry))
 
@@ -307,14 +325,17 @@ def verify_es_alerts(files_list, max_retry, query, no_alert_style, es, index_nam
             logging.warning("Alerts list is NOT growing. Pending alerts to verify are {}"\
                 .format(len(files_list)))
 
-        if retry_count == 0: # if this is the first loop over files_list
+        logging.info("alerts_growing state is {} and alerts_num are {}"
+                     .format(alerts_growing, alerts_num))
+
+        if retry_count == 0:  # if this is the first loop over files_list
             alerts_growing = True
 
         if alerts_growing:
             # setting failure counter to 0 at each new retry.
             failure = 0
 
-            for line in files_list[::-1]: # for each line (path) in files_list
+            for line in files_list[::-1]:  # for each line (path) in files_list
                 # Get the corresponding query for line
                 query_result = run_line_query(line, query, es, index_name)
 
@@ -322,28 +343,27 @@ def verify_es_alerts(files_list, max_retry, query, no_alert_style, es, index_nam
                     if(scenario == "general"):
                         success, success_bool, failure = \
                             verify_general_alerts(line, query_result, success,
-                                failure)
-                    if(scenario == "whodata"): # whodata scenarior case
+                                                  failure)
+                    if(scenario == "whodata"):  # whodata scenarior case
                         success, success_bool, failure = \
                             verify_es_alerts_whodata(line, query_result, success,
-                                failure)
-                    elif(scenario == "diff"): # report_changes scenarior case
+                                                     failure)
+                    elif(scenario == "diff"):  # report_changes scenarior case
                         success, success_bool, failure = \
                             verify_es_alerts_report_changes(line, query_result,
-                                scenario_arg, success, failure)
-
-
-                    if success_bool: # In case of a success alert verification, then remove line.
-                        files_list.remove(line)    
+                                                            scenario_arg, success, failure)
+                    if success_bool:  # In case of a success alert verification, then remove line.
+                        files_list.remove(line)
                 except Exception as e:
                     logging.error("Error when verifying alerts for " + line.rstrip())
                     raise e
-        if failure == 0: # if no failures detected, then break; it's done.
+        if failure == 0:  # if no failures detected, then break; it's done.
             break
-        else: # Retry ...
+        else:  # Retry ...
             retry_count = report_failure(start, failure, retry_count, sleep_time)
-    
+
     return success, failure, files_list
+
 
 if __name__ == "__main__":
 
@@ -367,20 +387,41 @@ if __name__ == "__main__":
         default="debug_missing_file_alerts.log"
     )
     parser.add_argument(
+        "-eh", "--elastic_protocol", type=str, required=False,
+        dest='elastic_protocol', help="Elasticsearch protocol: http or https",
+        default="https"
+    )
+    parser.add_argument(
+        "-ep", "--elastic_port", type=str, required=False,
+        dest='elastic_port', help="Elasticsearch API port",
+        default="9200"
+    )
+    parser.add_argument(
+        "-eu", "--elastic_user", type=str, required=True,
+        dest='elastic_username', help="Elasticsearch API username",
+        default="elastic"
+    )
+    parser.add_argument(
+        "-ex", "--elastic_password", type=str, required=True,
+        dest='elastic_password', help="Elasticsearch API password",
+        default="bar"
+    )
+    parser.add_argument(
         "-r", "--retry", type=int, required=False, dest='max_retry',
         help="reading attempts on stopped alerts. default: 4 attemps",
-        default="4"
+        default="3"
     )
     parser.add_argument(
         "-s", "--sleep", type=int, required=False, dest='sleep_time',
-        help="Sleep time between retries", default="60"
+        help="Sleep time between retries", default="15"
     )
     parser.add_argument(
         "-w", "--whodata", required=False, dest='whodata_query',
         action="store_true", help="Enable whodata queries", default=False
     )
     parser.add_argument("-d", "--diff", type=str, required=False,
-        dest='diff_string',help="When syscheck:report_changes enabled, represents the diff text")
+                        dest='diff_string',
+                        help="When syscheck:report_changes enabled, represents the diff text")
     parser.add_argument(
         "-n", "--no-style", required=False, dest='no_alert_style',
         action="store_true", help="No Alerts Style", default=False
@@ -462,7 +503,8 @@ if __name__ == "__main__":
             {"terms": {"syscheck.tags": args.tag_query}}
         )
 
-    es = setElasticsearch(args.ip)
+    es = set_elasticsearch(args.ip, args.elastic_port, args.elastic_protocol, args.elastic_username,
+                           args.elastic_password)
     index_name = "wazuh-alerts-3.x*"
     start = datetime.datetime.now().replace(microsecond=0)
 
@@ -474,7 +516,7 @@ if __name__ == "__main__":
     }
 
     scenario = "general"
-    scenario_arg = "" 
+    scenario_arg = ""
 
     if not args.no_alert_style:
         # select the scenario
@@ -488,14 +530,14 @@ if __name__ == "__main__":
     # alerts verification
     success, failure, failure_list = \
         verify_es_alerts(files_list, args.max_retry, query, args.no_alert_style,
-                         es, index_name, start, args.sleep_time,scenario, scenario_arg)
+                         es, index_name, start, args.sleep_time, scenario, scenario_arg)
 
     elapsed = (datetime.datetime.now().replace(microsecond=0)) - start
 
     with open(args.output, 'w+') as output:
         output.writelines('\n'.join(failure_list))
 
-    passed = len(failure_list) == 0    
+    passed = len(failure_list) == 0
     received_alerts_num = expected_alerts_num - len(failure_list)
 
     logging.info(
@@ -504,19 +546,17 @@ if __name__ == "__main__":
         )
     )
 
-    try:
-        assert failure == 0
-    except:
+    logging.info("Writing the result to the global result file")
+    generate_result("alerts_elastic_verification", args.scenario_name, args.agent_name,
+                    args.alert, passed, expected_alerts_num, received_alerts_num, failure_list,
+                    args.result_output_path, args.operating_system, args.distribution,
+                    args.major_distribution)
+
+    logging.info("Verification process is finished. Elapsed time: {}".format(elapsed))
+
+    if (failure == 0):
+        sys.exit(0)
+    else:
         logging.error("Verification result is FAILED. Number of failed paths: {}/{}"\
             .format(failure, expected_alerts_num))
-    finally:
-        logging.info("Writing the result to the global result file")
-        generate_result("alerts_elastic_verification", args.scenario_name, args.agent_name, 
-                        args.alert, passed, expected_alerts_num, received_alerts_num, failure_list, 
-                        args.result_output_path, args.operating_system, args.distribution, 
-                        args.major_distribution)
-        
-        logging.info("Verification process is finished. Elapsed time: {}".format(elapsed))
-
-
-    
+        sys.exit(3)

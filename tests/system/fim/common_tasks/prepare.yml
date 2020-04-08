@@ -20,21 +20,6 @@
       src: generate_results.py
       dest: "{{ auxilary_folder }}/"
 
-  - name: Stop wazuh-manager service
-    service:
-      name: wazuh-manager
-      state: stopped
-
-  - name: Copy {{ files_config_manager_ossec_conf }} to the Managers hosts
-    copy:
-        src: "config/{{ files_config_manager_ossec_conf }}"
-        dest: "{{ linux_ossec_folder_path }}/etc/ossec.conf"
-
-  - name: Start wazuh-manager service
-    service:
-      name: wazuh-manager
-      state: started
-
   when:
     - inventory_hostname in groups['masters']
   become: yes
@@ -71,19 +56,29 @@
     shell: "echo '' > {{ linux_ossec_folder_path }}/logs/ossec.log"
     when: clean_logs is defined and clean_logs
 
-  - name: Copy {{ files_config_agent_linux_ossec_conf_rpm }} to the Agents hosts | rpm
-    copy:
-      src: "./config/{{ files_config_agent_linux_ossec_conf_rpm }}"
-      dest: "{{ linux_ossec_folder_path }}/etc/ossec.conf"
+  - name: Remove old <syscheck> configuration
+    replace:
+      path: "{{ linux_ossec_folder_path }}/etc/ossec.conf"
+      regexp: '((\S*)(\t*)<syscheck>)[\S\s*]*?<\/syscheck>'
+      replace: ""
+
+  - name: Insert <syscheck> configuration | rpm
+    blockinfile:
+      path: "{{ linux_ossec_folder_path }}/etc/ossec.conf"
+      block: "{{ lookup('file', './config/{{ files_config_agent_linux_ossec_conf_rpm }}') }}"
+      marker: "<!-- Custom Syscheck configuration (Managed by Ansible) -->"
+      state: present
     when:
       - ansible_os_family == "RedHat"
 
-  - name: Copy {{ files_config_agent_linux_ossec_conf_deb }} to the Agents hosts | deb
-    copy:
-      src: "./config/{{ files_config_agent_linux_ossec_conf_deb }}"
-      dest: "{{ linux_ossec_folder_path }}/etc/ossec.conf"
+  - name: Insert <syscheck> configuration | deb
+    blockinfile:
+      path: "{{ linux_ossec_folder_path }}/etc/ossec.conf"
+      block: "{{ lookup('file', './config/{{ files_config_agent_linux_ossec_conf_deb }}') }}"
+      marker: "<!-- Custom Syscheck configuration (Managed by Ansible) -->"
+      state: present
     when:
-      -  ansible_os_family == "Debian"
+      - ansible_os_family == "Debian"
 
   - name: Start wazuh-agent service | Linux
     service:
@@ -121,20 +116,40 @@
   - name: "Clean win logs"
     win_command: powershell.exe -
     args:
-      stdin: "Clear-Content 'C:\\Program Files (x86)\\ossec-agent\\ossec.log'"
+      stdin: "Clear-Content '{{ windows_ossec_folder_path }}\\ossec.log'"
     when: clean_logs is defined and clean_logs
 
-  - name: Copy {{ files_config_agent_windows_ossec_conf }} to the agents hosts | Windows
+  - name: Slurp ossec.conf file | Windows
+    slurp:
+      src: "{{ windows_ossec_folder_path }}\\ossec.conf"
+    register: windows_conf_b64
+
+  - name: Decoding ossec.conf file | Windows
+    set_fact:
+      windows_conf: "{{ windows_conf_b64['content'] | b64decode }}"
+
+  - name: Removing default <syscheck> from ossec.conf | Windows
+    set_fact:
+      windows_conf_without_syscheck: "{{ windows_conf | regex_replace('((\\S*)(\\t*)<syscheck>)[\\S\\s*]*?<\\/syscheck>', '') }}"
+
+  - name: Load custom <syscheck> configuration into a variable | Windows
+    set_fact:
+      custom_syscheck_conf: "{{ lookup('file', 'config/agent_windows_ossec.conf') }}"
+
+  - name: Inserting custom <syscheck> configuration | Windows
+    set_fact:
+      windows_conf_custom_syscheck: "{{ windows_conf_without_syscheck }}{{ custom_syscheck_conf }}"
+
+  - name: Overwrite ossec.conf file with new Syscheck configuration | Windows
     win_copy:
-        src: "config/{{ files_config_agent_windows_ossec_conf }}"
-        dest: "{{ windows_ossec_folder_path }}/ossec.conf"
+      dest: "{{ windows_ossec_folder_path }}\\ossec.conf"
+      content: "{{ windows_conf_custom_syscheck }}"
 
   - name: Start wazuh-agent service | Windows
     win_service:
       name: OssecSvc
       start_mode: auto
       state: started
-
 
   when:
     - inventory_hostname in groups['windowsagents']

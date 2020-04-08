@@ -25,7 +25,7 @@ def get_ossec_log_errors(scenario_name, hostname):
         scenario_name,
         hostname
     )
-    watch_list = "syscheck warning error".split()
+    watch_list = "warning error".split()
     results = []
     with open(ossec_path, "r") as ossec_log:
         for line in ossec_log:
@@ -81,10 +81,10 @@ def update_scenario(scenario, verification, content, results_dict):
             # create new entry for scenario
             current_dict[scenario] = {'state': 'SUCCESS'}
     else:
-        # inject extra data ossec.log
         for event in ["added", "modified", "deleted"]:
             if event in content:
                 for hostname, data in content[event]['hosts'].items():
+                    del data['missing_paths']  # remove missing paths
                     data['ossec_log'] = get_ossec_log_errors(scenario, hostname)
         # scenario FAILED
         if scenario in current_dict:

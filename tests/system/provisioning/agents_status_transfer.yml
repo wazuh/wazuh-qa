@@ -1,0 +1,11 @@
+---
+  - hosts: all
+    tasks:
+      - name: Get agents status from manager node
+        become: true
+        synchronize:
+          mode: pull
+          src: /opt/fim_test_results
+          dest: ./agents_status
+        when:
+          - inventory_hostname in groups['masters']

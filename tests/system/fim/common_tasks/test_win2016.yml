@@ -1,0 +1,50 @@
+---
+  - hosts: windowsagents
+    tasks:
+     # - name: Stop wazuh-agent service | Windows
+     #   win_service:
+     #     name: OssecSvc
+     #     start_mode: auto
+     #     state: stopped
+     #     username: LocalSystem
+
+     # - name: Start wazuh-agent service | Windows
+     #   win_service:
+     #     name: OssecSvc
+     #     start_mode: auto
+     #     state: started
+     #     username: LocalSystem
+    - name: Slurp ossec.conf file | Windows
+      slurp:
+        src: "C:\\Program Files (x86)\\ossec-agent\\ossec.conf"
+      register: windows_conf_b64
+
+    - name: Print ossec.conf
+      set_fact:
+        windows_conf: "{{ windows_conf_b64['content'] | b64decode }}"
+
+    - name: Removing default <syscheck> from ossec.conf | Windows
+      set_fact:
+        windows_conf_without_syscheck: "{{ windows_conf | regex_replace('((\\S*)(\\t*)<syscheck>)[\\S\\s*]*?<\\/syscheck>', '') }}"
+
+    - name: Load custom <syscheck> configuration into a variable | Windows
+      set_fact:
+        custom_syscheck_conf: "{{ lookup('file', '../scenarios/201_default_configuration_frequency/config/agent_windows_ossec.conf') }}"
+
+    - name: Inserting custom <syscheck> configuration | Windows
+      set_fact:
+        windows_conf_custom_syscheck: "{{ windows_conf_without_syscheck }}"
+#    - name: Remove old <syscheck> configuration
+#      win_lineinfile:
+#        path: "C:\\Program Files (x86)\\ossec-agent\\ossec.conf"
+#        regexp: '((\S*)(\t*)<syscheck>)[\S\s*]*?<\/syscheck>'
+#        line: "<!-- Removed syscheck config -->"
+#        state: present
+#
+#    - name: Insert <syscheck> configuration | deb
+#      blockinfile:
+#        path: "C:\\Program Files (x86)\\ossec-agent\\ossec.conf"
+#        block: A
+##        block: "{{ lookup('file', '../scenarios/201_default_configuration_frequency/config/agent_windows_ossec.conf') }}"
+#        marker: "<!-- Custom Syscheck configuration (Managed by Ansible) -->"
+#        state: present

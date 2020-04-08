@@ -1,5 +1,28 @@
-- name: Complete Summarize
-  script: "complete_summarize.py -o {{ fim_test_results }}/summary.json"
-  become: yes
-  when:
-    - inventory_hostname in groups['masters']
+---
+  - hosts: all
+    vars_files:
+      - ../vars/main.yml
+    tasks:
+      - name: Find files on {{ fim_test_results }}
+        find:
+          paths: "{{ fim_test_results }}"
+          recurse: yes
+          file_type: file
+        register: event_files
+
+      - name: Show found files on {{ fim_test_results }}
+        debug:
+          var: item.path
+        with_items: "{{ event_files.files }}"
+
+      - name: Complete Summarize
+        script: "complete_summarize.py -o {{ fim_test_results }}/summary.json"
+        become: yes
+        when:
+          - inventory_hostname in groups['masters']
+
+      - name: Format summary to Markdown syntax
+        script: "json2md.py -o {{ fim_test_results }}/printable_summary.md"
+        become: yes
+        when:
+          - inventory_hostname in groups['masters']

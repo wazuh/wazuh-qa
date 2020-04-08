@@ -1,9 +1,28 @@
 ---
   - name: Unlock python-apt package on Debian's families instances
-    shell: "apt-mark unhold python-apt"
+    shell: "apt-mark unhold python-apt apt-transport-https"
     when:
       - inventory_hostname in groups['linuxagents']
       - ansible_os_family == "Debian"
+
+  - name: Install python3-apt package on Debian based OS.
+    command: apt install -y python3-apt
+    when:
+      - inventory_hostname in groups['linuxagents']
+      - ansible_os_family == "Debian"
+
+  - block:
+    - name: Install python3-pip
+      package:
+        name: python3-pip
+        state: present
+
+    - name: Install elasticsearch pip module
+      pip:
+        name: elasticsearch
+        executable: pip3
+
+    when: inventory_hostname in groups['masters']
 
   - name: Configuring Windows Agents
     block:

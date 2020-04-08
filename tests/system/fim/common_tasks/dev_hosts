@@ -1,0 +1,229 @@
+elasticsearch:
+      hosts:
+          52.91.19.12:
+              private_ip: 172.21.2.6
+              elasticsearch_network_host: 172.21.2.6
+              elasticsearch_reachable_host: 172.21.2.6
+              elasticsearch_cluster_nodes:
+                  - "172.21.2.6"
+              elasticsearch_node_name: node-1
+              elasticsearch_bootstrap_node: true
+              node_certs_generator: true
+              instances:
+                  node1:
+                      name: node-1
+                      ip: 172.21.2.6
+                  node2:
+                      name: node-2
+                      ip: 172.21.0.35
+                  node3:
+                      name: node-3
+                      ip: 172.21.2.125
+      vars:
+          ansible_ssh_user: ec2-user
+          ansible_ssh_private_key_file: /home/anonymous/pem/system_tests.pem
+          ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+          elastic_stack_version: 7.6.0
+          single_node: false
+          elasticsearch_node_master: true
+          elasticsearch_xpack_security: true
+          elasticsearch_xpack_security_user: elastic
+          elasticsearch_xpack_security_password: T3stP4ssw0rd--
+
+masters:
+  hosts:
+      54.225.56.224:
+          private_ip: 172.21.0.35
+          wazuh_api_user:
+              - "wazuh:T3stP4ssw0rd--"
+          filebeat_node_name: node-2
+  vars:
+      ansible_ssh_user: ec2-user
+      ansible_ssh_private_key_file: /home/anonymous/pem/system_tests.pem
+      ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+      wazuh_manager_version: 3.12.0-0.commit32c8973
+      wazuh_manager_config:
+        connection:
+          - type: 'secure'
+            port: '1514'
+            protocol: 'tcp'
+            queue_size: 131072
+        api:
+          port: "55000"
+          https: 'yes'
+        cluster:
+          disable: 'no'
+          name: 'wazuh'
+          node_name: 'master'
+          node_type: 'master'
+          key: '3ab980499de48d0998a39b338b7b750a'
+          port: '1516'
+          bind_addr: '0.0.0.0'
+          nodes:
+            - '172.21.0.35'
+          hidden: 'no'
+      wazuh_custom_packages_installation_manager_enabled: true
+      wazuh_custom_packages_installation_manager_deb_url: https://packages-dev.wazuh.com/warehouse/branches/3.12/deb/var/wazuh-manager_3.12.0-0.commit32c8973_amd64.deb
+      wazuh_custom_packages_installation_manager_rpm_url: https://packages-dev.wazuh.com/warehouse/branches/3.12/rpm/var/wazuh-manager-3.12.0-0.commit32c8973.x86_64.rpm
+      wazuh_custom_packages_installation_api_enabled: true
+      wazuh_custom_packages_installation_api_deb_url: https://packages-dev.wazuh.com/warehouse/branches/3.12/deb/var/wazuh-api_3.12.0-0.commit44235d2_amd64.deb
+      wazuh_custom_packages_installation_api_rpm_url: https://packages-dev.wazuh.com/warehouse/branches/3.12/rpm/var/wazuh-api-3.12.0-0.commit44235d2.x86_64.rpm
+      filebeat_version: 7.6.0
+      filebeat_xpack_security: true
+      elasticsearch_xpack_security_user: elastic
+      elasticsearch_xpack_security_password: T3stP4ssw0rd--
+      filebeat_output_elasticsearch_hosts:
+              - "172.21.2.6"
+
+workers:
+  hosts:
+  vars:
+      ansible_ssh_user: ec2-user
+      ansible_ssh_private_key_file: /home/anonymous/pem/system_tests.pem
+      ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+      wazuh_manager_version: 3.12.0-0.commit32c8973
+      wazuh_custom_packages_installation_manager_enabled: true
+      wazuh_custom_packages_installation_manager_deb_url: https://packages-dev.wazuh.com/warehouse/branches/3.12/deb/var/wazuh-manager_3.12.0-0.commit32c8973_amd64.deb
+      wazuh_custom_packages_installation_manager_rpm_url: https://packages-dev.wazuh.com/warehouse/branches/3.12/rpm/var/wazuh-manager-3.12.0-0.commit32c8973.x86_64.rpm
+      wazuh_custom_packages_installation_api_enabled: true
+      wazuh_custom_packages_installation_api_deb_url: https://packages-dev.wazuh.com/warehouse/branches/3.12/deb/var/wazuh-api_3.12.0-0.commit44235d2_amd64.deb
+      wazuh_custom_packages_installation_api_rpm_url: https://packages-dev.wazuh.com/warehouse/branches/3.12/rpm/var/wazuh-api-3.12.0-0.commit44235d2.x86_64.rpm
+      filebeat_version: 7.6.0
+      filebeat_xpack_security: true
+      elasticsearch_xpack_security_user: elastic
+      elasticsearch_xpack_security_password: T3stP4ssw0rd--
+      filebeat_output_elasticsearch_hosts:
+              - "172.21.2.6"
+
+kibana:
+  hosts:
+      54.235.227.120:
+          private_ip: 172.21.2.125
+          elasticsearch_network_host: 172.21.2.6
+          elasticsearch_reachable_host: 172.21.2.125
+          elasticsearch_node_name: node-3
+          single_node: false
+          elasticsearch_xpack_security: true
+          elasticsearch_xpack_security_user: elastic
+          elasticsearch_xpack_security_password: T3stP4ssw0rd--
+          elasticsearch_node_master: false
+          elasticsearch_node_ingest: false
+          elasticsearch_node_data: false
+          elasticsearch_discovery_nodes:
+              - "172.21.2.6"
+          kibana_node_name: node-3
+
+  vars:
+      ansible_ssh_user: ec2-user
+      ansible_ssh_private_key_file: /home/anonymous/pem/system_tests.pem
+      ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+      elastic_stack_version: 7.6.0
+      wazuh_version: 3.12.0
+      kibana_xpack_security: true
+      wazuh_api_credentials:
+          - id: default
+            url: https://172.21.0.35
+            port: 55000
+            user: wazuh
+            password: T3stP4ssw0rd--
+
+linuxagents:
+  hosts:
+      3.83.240.149:
+          private_ip: 172.21.1.4
+          wazuh_agent_authd:
+              enable: true
+              port: 1515
+              ssl_agent_ca: null
+              ssl_auto_negotiate: 'no'
+              agent_name: Ubuntu18_00
+          ansible_ssh_user: ubuntu
+          ansible_python_interpreter: /usr/bin/python3
+      3.86.229.188:
+          private_ip: 172.21.1.103
+          wazuh_agent_authd:
+              enable: true
+              port: 1515
+              ssl_agent_ca: null
+              ssl_auto_negotiate: 'no'
+              agent_name: Ubuntu16_00
+          ansible_ssh_user: ubuntu
+          ansible_python_interpreter: /usr/bin/python3
+      34.238.235.80:
+          private_ip: 172.21.1.182
+          wazuh_agent_authd:
+              enable: true
+              port: 1515
+              ssl_agent_ca: null
+              ssl_auto_negotiate: 'no'
+              agent_name: Amazon_00
+      3.83.89.178:
+          private_ip: 172.21.1.146
+          wazuh_agent_authd:
+              enable: true
+              port: 1515
+              ssl_agent_ca: null
+              ssl_auto_negotiate: 'no'
+              agent_name: Centos_00
+          ansible_ssh_user: centos
+      34.238.115.215:
+          private_ip: 172.21.1.243
+          wazuh_agent_authd:
+              enable: true
+              port: 1515
+              ssl_agent_ca: null
+              ssl_auto_negotiate: 'no'
+              agent_name: RHEL8_00
+          ansible_python_interpreter: /usr/bin/python3
+  vars:
+      ansible_ssh_user: ec2-user
+      ansible_ssh_private_key_file: /home/anonymous/pem/system_tests.pem
+      ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+      wazuh_agent_version: 3.12.0-0.commit32c8973
+      wazuh_managers:
+          - address: 54.225.56.224
+            protocol: tcp
+
+      wazuh_custom_packages_installation_agent_enabled: true
+      wazuh_custom_packages_installation_agent_deb_url: https://packages-dev.wazuh.com/warehouse/branches/3.12/deb/var/wazuh-agent_3.12.0-0.commit32c8973_amd64.deb
+      wazuh_custom_packages_installation_agent_rpm_url: https://packages-dev.wazuh.com/warehouse/branches/3.12/rpm/var/wazuh-agent-3.12.0-0.commit32c8973.x86_64.rpm
+
+windowsagents:
+  hosts:
+      3.88.217.231:
+          private_ip: 172.21.1.178
+          wazuh_agent_authd:
+              enable: true
+              port: 1515
+              ssl_agent_ca: null
+              ssl_auto_negotiate: 'no'
+              agent_name: Windows2019_00
+      18.206.120.251:
+          private_ip: 172.21.1.52
+          wazuh_agent_authd:
+              enable: true
+              port: 1515
+              ssl_agent_ca: null
+              ssl_auto_negotiate: 'no'
+              agent_name: Windows2012_00
+      35.171.16.116:
+          private_ip: 172.21.1.225
+          wazuh_agent_authd:
+              enable: true
+              port: 1515
+              ssl_agent_ca: null
+              ssl_auto_negotiate: 'no'
+              agent_name: Windows2016_00
+  vars:
+      ansible_user: Administrator
+      ansible_password: wyxyNyafKPZru3UT!
+      ansible_connection: winrm
+      ansible_winrm_transport: basic
+      ansible_winrm_server_cert_validation: ignore
+      wazuh_winagent_config_url: https://packages-dev.wazuh.com/warehouse/branches/3.12/windows/wazuh-agent-3.12.0-0.commit32c8973.msi
+      wazuh_winagent_package_name: wazuh-agent-3.12.0-0.commit32c8973.msi
+      wazuh_winagent_config:
+          check_md5: False
+      wazuh_managers:
+          - address: 54.225.56.224
+            protocol: tcp

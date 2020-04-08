@@ -59,7 +59,7 @@ def alerts_prune(path, target_event, diff_statement=None):
                             add_path = False
                     if add_path:
                         alerts_list.append(data)
-                    add_path = True   
+                    add_path = True
             except ValueError:
                 continue
     return set([alerts['syscheck']['path'] for alerts in alerts_list])
@@ -138,12 +138,12 @@ def main():
                             default="debug_missing_file_alerts.log")
 
         parser.add_argument("-s", "--sleep", type=int, required=False, dest='sleep_time',
-          help="Sleep time between retries", default="60"
+          help="Sleep time between retries", default="15"
         )
 
         parser.add_argument("-r", "--retry", type=int, required=False, dest='retry_count',
                             help="reading attempts on stopped alerts. default: 4 attemps",
-                            default="4")
+                            default="3")
         parser.add_argument("-d", "--diff", type=str, required=False, dest='diff_string',
                             help="When syscheck:report_changes enabled, represents the diff text")
         parser.add_argument("-w", "--whodata", required=False, dest='whodata_check',
@@ -250,7 +250,7 @@ def main():
                 with open(args.output_file, 'w') as f:
                     for item in sub_paths:
                         f.write("%s\n" % item)
-                return_code = 1
+                return_code = 3
                 passed = False
                 break
 
@@ -259,15 +259,15 @@ def main():
                 elapsed = (datetime.datetime.now().replace(microsecond=0)) - start
                 current_retries_count += 1
 
-                if current_retries_count <= args.retry_count:    
+                if current_retries_count <= args.retry_count:
                     logging.info("Attempt {}/{}".format(current_retries_count, args.retry_count))
 
 
             time.sleep(args.sleep_time)
             prev_lenght = len(sub_paths)
-            
+
             logging.info("Elapsed time: %s" % (elapsed))
-        
+
 
         expected_alerts_num = len(paths_list_set)
         received_alerts_num = expected_alerts_num - len(sub_paths)
@@ -282,10 +282,10 @@ def main():
                 len(paths_list_set) - len(sub_paths), len(paths_list_set), elapsed
             )
         )
-        
+
         logging.info("Write the result to the global result file")
         generate_result("alerts_json_verification", args.scenario_name, args.agent_name,
-                        args.event, passed, expected_alerts_num, received_alerts_num, 
+                        args.event, passed, expected_alerts_num, received_alerts_num,
                         list(sub_paths), args.result_output_path, args.operating_system,
                         args.distribution, args.major_distribution)
 

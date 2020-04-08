@@ -9,6 +9,11 @@
     tasks:
     # Wazuh Agents cleanup
       - block:
+        - name: Stop Linux agent
+          service:
+            name: wazuh-agent
+            state: stopped
+
         - name: Uninstall wazuh-agent
           package:
             name:
@@ -31,6 +36,13 @@
         become: yes
 
       - block:
+        - name: Stop Windows Agent
+          win_service:
+            name: OssecSvc
+            start_mode: auto
+            state: stopped
+          failed_when: False
+
         - name: Windows | Check if Program Files (x86) exists
           win_stat:
             path: C:\Program Files (x86)
@@ -127,14 +139,9 @@
     strategy: free
     tasks:
       - block:
-        - name: Stop Kibana
-          service:
-            name: kibana
-            state: stopped
-
         - name: List Elasticsearch indexes
           uri:
-            url: "{{ elastic_api_protocol }}://{{ inventory_hostname }}:{{ elasticsearch_port }}/_cat/indices/*?v&s=index&pretty"
+            url: "{{ elastic_api_protocol }}://{{ hostvars[inventory_hostname]['private_ip'] }}:{{ elasticsearch_port }}/_cat/indices/*?v&s=index&pretty"
             url_username: "{{ elastic_user }}"
             url_password: "{{ elastic_password }}"
             method: GET
@@ -149,7 +156,7 @@
 
         - name: Delete Elasticsearch indexes (HTTP)
           uri:
-            url: "{{ elastic_api_protocol }}://{{ inventory_hostname }}:{{ elasticsearch_port }}/*"
+            url: "{{ elastic_api_protocol }}://{{ hostvars[inventory_hostname]['private_ip'] }}:{{ elasticsearch_port }}/*"
             url_username: "{{ elastic_user }}"
             url_password: "{{ elastic_password }}"
             method: DELETE
@@ -159,7 +166,7 @@
 
         - name: List Elasticsearch indexes after deletion
           uri:
-            url: "{{ elastic_api_protocol }}://{{ inventory_hostname }}:{{ elasticsearch_port }}/_cat/indices/*?v&s=index&pretty"
+            url: "{{ elastic_api_protocol }}://{{ hostvars[inventory_hostname]['private_ip']  }}:{{ elasticsearch_port }}/_cat/indices/*?v&s=index&pretty"
             url_username: "{{ elastic_user }}"
             url_password: "{{ elastic_password }}"
             method: GET
@@ -171,11 +178,6 @@
         - name: Print elasticsearch indexes after deletion
           debug:
             var: elasticsearch_indexes_delete.content
-
-        - name: Stop Elasticsearch
-          service:
-            name: elasticsearch
-            state: stopped
 
         - name: Delete agents output
           file:

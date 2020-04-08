@@ -1,61 +1,61 @@
 
 elasticsearch:
     hosts:
-{% for instance in groups['elasticsearch'] %}
+{% for instance in groups["elasticsearch"] %}
 {% if loop.index == 1 %}
-        {{ groups['elasticsearch'][loop.index-1]}}:
-            private_ip: {{ hostvars[instance]['private_ip'] }}
-            elasticsearch_network_host: {{ hostvars[groups['elasticsearch'][0]]['private_ip'] }}
-            elasticsearch_reachable_host: {{ hostvars[groups['elasticsearch'][0]]['private_ip'] }}
+        {{ groups["elasticsearch"][loop.index-1]}}:
+            private_ip: {{ hostvars[instance]["private_ip"] }}
+            elasticsearch_network_host: {{ hostvars[groups["elasticsearch"][0]]["private_ip"] }}
+            elasticsearch_reachable_host: {{ hostvars[groups["elasticsearch"][0]]["private_ip"] }}
             elasticsearch_cluster_nodes:
-{% for instance in groups['elasticsearch'] %}
-                - "{{ hostvars[instance]['private_ip'] }}"
+{% for instance in groups["elasticsearch"] %}
+                - "{{ hostvars[instance]["private_ip"] }}"
 {% endfor %}
             elasticsearch_node_name: node-1
             elasticsearch_bootstrap_node: true
             node_certs_generator: true
             instances:
-{% for host in groups['elasticsearch'] %}
+{% for host in groups["elasticsearch"] %}
                 node{{ loop.index }}:
                     name: node-{{ loop.index }}
-                    ip: {{ hostvars[groups['elasticsearch'][loop.index-1]]['private_ip'] }}
+                    ip: {{ hostvars[groups["elasticsearch"][loop.index-1]]["private_ip"] }}
 {% endfor %}
-                node{{ (groups['elasticsearch'] | length) + 1 }}:
-                    name: node-{{ (groups['elasticsearch'] | length) + 1 }}
-                    ip: {{ hostvars[groups['masters'][0]]['private_ip'] }}
-{% for host in groups['workers'] %}
-                node{{ loop.index+(groups['elasticsearch'] | length) + 1 }}:
-                    name: node-{{ loop.index+(groups['elasticsearch'] | length) + 1 }}
-                    ip: {{ hostvars[groups['workers'][loop.index-1]]['private_ip'] }}
+                node{{ (groups["elasticsearch"] | length) + 1 }}:
+                    name: node-{{ (groups["elasticsearch"] | length) + 1 }}
+                    ip: {{ hostvars[groups["masters"][0]]["private_ip"] }}
+{% for host in groups["workers"] %}
+                node{{ loop.index+(groups["elasticsearch"] | length) + 1 }}:
+                    name: node-{{ loop.index+(groups["elasticsearch"] | length) + 1 }}
+                    ip: {{ hostvars[groups["workers"][loop.index-1]]["private_ip"] }}
 {% endfor %}
-{% for host in groups['kibana'] %}
-                node{{ loop.index+(groups['elasticsearch'] | length) + (groups['workers'] | length) + 1 }}:
-                    name: node-{{ loop.index+(groups['elasticsearch'] | length) + (groups['workers'] | length) + 1 }}
-                    ip: {{ hostvars[groups['kibana'][loop.index-1]]['private_ip'] }}
+{% for host in groups["kibana"] %}
+                node{{ loop.index+(groups["elasticsearch"] | length) + (groups["workers"] | length) + 1 }}:
+                    name: node-{{ loop.index+(groups["elasticsearch"] | length) + (groups["workers"] | length) + 1 }}
+                    ip: {{ hostvars[groups["kibana"][loop.index-1]]["private_ip"] }}
 {% endfor %}
 {% else %}
-        {{ groups['elasticsearch'][loop.index-1]}}:
-            private_ip: {{ hostvars[instance]['private_ip'] }}
-            elasticsearch_network_host: {{ hostvars[instance]['private_ip'] }}
-            elasticsearch_reachable_host: {{ hostvars[instance]['private_ip'] }}
+        {{ groups["elasticsearch"][loop.index-1]}}:
+            private_ip: {{ hostvars[instance]["private_ip"] }}
+            elasticsearch_network_host: {{ hostvars[instance]["private_ip"] }}
+            elasticsearch_reachable_host: {{ hostvars[instance]["private_ip"] }}
             elasticsearch_node_name: node-{{ loop.index }}
             elasticsearch_discovery_nodes:
-{% for host in groups['elasticsearch'] %}
-                - "{{ hostvars[host]['private_ip'] }}"
+{% for host in groups["elasticsearch"] %}
+                - "{{ hostvars[host]["private_ip"] }}"
 {% endfor %}
-{% if loop.index == (groups['elasticsearch'] | length) %}
-            node_certs_generator_ip: {{ hostvars[groups['elasticsearch'][0]]['private_ip'] }}
+{% if loop.index == (groups["elasticsearch"] | length) %}
+            node_certs_generator_ip: {{ hostvars[groups["elasticsearch"][0]]["private_ip"] }}
             elasticsearch_xpack_users:
                 {{ elastic_user }}:
-                    password: '{{ elastic_password }}'
-                    roles: '["superuser"]'
+                    password: "{{ elastic_password }}"
+                    roles: "["superuser"]"
 {% endif %}
 {% endif %}
 {% endfor %}
     vars:
         ansible_ssh_user: ec2-user
         ansible_ssh_private_key_file: {{ ssh_key_path_private }}
-        ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+        ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
         elastic_stack_version: {{ elastic_version }}
         single_node: false
         elasticsearch_node_master: true
@@ -65,67 +65,67 @@ elasticsearch:
 
 masters:
     hosts:
-{% for instance in groups['masters'] %}
-        {{ groups['masters'][loop.index-1]}}:
-            private_ip: {{ hostvars[groups['masters'][loop.index-1]]['private_ip'] }}
+{% for instance in groups["masters"] %}
+        {{ groups["masters"][loop.index-1]}}:
+            private_ip: {{ hostvars[groups["masters"][loop.index-1]]["private_ip"] }}
             wazuh_api_user:
                 - "{{ wazuh_api_admin_username }}:{{ wazuh_api_password }}"
-            filebeat_node_name: node-{{ (groups['elasticsearch'] | length) + 1 }}
+            filebeat_node_name: node-{{ (groups["elasticsearch"] | length) + 1 }}
 {% endfor %}
     vars:
         ansible_ssh_user: ec2-user
         ansible_ssh_private_key_file: {{ ssh_key_path_private }}
-        ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+        ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
         wazuh_manager_version: {{ wazuh_version }}
-{% if manager_installation_type == 'sources' %}
+{% if manager_installation_type == "sources" %}
         wazuh_manager_sources_installation:
-          enabled: true
-          branch: {{ sources_manager_branch }}
+            enabled: true
+            branch: {{ sources_manager_branch }}
 {% endif %}
-{% if api_installation_type == 'sources' %}
+{% if api_installation_type == "sources" %}
         wazuh_api_sources_installation:
-          enabled: true
-          branch: {{ sources_api_branch }}
+            enabled: true
+            branch: {{ sources_api_branch }}
 {% endif %}
         wazuh_manager_config:
-          connection:
-            - type: 'secure'
-              port: '1514'
-              protocol: 'tcp'
-              queue_size: 131072
-          api:
-            port: "{{ wazuh_api_port }}"
-            https: 'yes'
-          cluster:
-            disable: 'no'
-            name: 'wazuh'
-            node_name: 'master'
-            node_type: 'master'
-            key: '{{ wazuh_cluster_key }}'
-            port: '1516'
-            bind_addr: '0.0.0.0'
-            nodes:
-              - '{{ hostvars[groups['masters'][0]]['private_ip'] }}'
-            hidden: 'no'
-{% if packages_repository != 'production' %}
-{% if packages_repository == 'staging' %}
+            connection:
+                - type: "secure"
+                  port: "1514"
+                  protocol: "tcp"
+                  queue_size: 131072
+            api:
+                port: "{{ wazuh_api_port }}"
+                https: "yes"
+            cluster:
+                disable: "no"
+                name: "wazuh"
+                node_name: "master"
+                node_type: "master"
+                key: "{{ wazuh_cluster_key }}"
+                port: "1516"
+                bind_addr: "0.0.0.0"
+                nodes:
+                    - "{{ hostvars[groups["masters"][0]]["private_ip"] }}"
+                hidden: "no"
+{% if packages_repository != "production" %}
+{% if packages_repository == "staging" %}
           repo:
-            apt: 'deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/apt/ unstable main'
-            yum: 'https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/yum/'
-            gpg: 'https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH'
-{% elif packages_repository == 'devel' %}
+              apt: "deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/apt/ unstable main"
+              yum: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/yum/"
+              gpg: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH"
+{% elif packages_repository == "devel" %}
           repo:
-            apt: 'deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/apt/ unstable main'
-            yum: 'https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/yum/'
-            gpg: 'https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH'
+              apt: "deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/apt/ unstable main"
+              yum: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/yum/"
+              gpg: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH"
 {% endif %}
 {% endif %}
-{% if wazuh_custom_packages_installation_manager_enabled == 'enabled' %}
+{% if wazuh_custom_packages_installation_manager_enabled %}
         wazuh_custom_packages_installation_manager_enabled: {{ wazuh_custom_packages_installation_manager_enabled }}
         wazuh_custom_packages_installation_manager_deb_url: {{ wazuh_custom_packages_installation_manager_deb_url }}
         wazuh_custom_packages_installation_manager_rpm_url: {{ wazuh_custom_packages_installation_manager_rpm_url }}
 {% endif %}
-{% if wazuh_custom_packages_installation_api_enabled == "enabled" %}
+{% if wazuh_custom_packages_installation_api_enabled %}
         wazuh_custom_packages_installation_api_enabled: {{ wazuh_custom_packages_installation_api_enabled }}
         wazuh_custom_packages_installation_api_deb_url: {{ wazuh_custom_packages_installation_api_deb_url }}
         wazuh_custom_packages_installation_api_rpm_url: {{ wazuh_custom_packages_installation_api_rpm_url }}
@@ -135,88 +135,88 @@ masters:
         elasticsearch_xpack_security_user: {{ elastic_user }}
         elasticsearch_xpack_security_password: {{ elastic_password }}
         filebeat_output_elasticsearch_hosts:
-{% for host in groups['elasticsearch'] %}
-                - "{{ hostvars[host]['private_ip'] }}"
+{% for host in groups["elasticsearch"] %}
+            - "{{ hostvars[host]["private_ip"] }}"
 {% endfor %}
 
 workers:
     hosts:
-{% for instance in groups['workers'] %}
-        {{ groups['workers'][loop.index-1]}}:
-            private_ip: {{ hostvars[groups['workers'][loop.index-1]]['private_ip'] }}
-            filebeat_node_name : node-{{ loop.index+(groups['elasticsearch'] | length) + 1 }}
+{% for instance in groups["workers"] %}
+        {{ groups["workers"][loop.index-1]}}:
+            private_ip: {{ hostvars[groups["workers"][loop.index-1]]["private_ip"] }}
+            filebeat_node_name : node-{{ loop.index+(groups["elasticsearch"] | length) + 1 }}
             wazuh_manager_config:
                 connection:
-                    - type: 'secure'
-                      port: '1514'
-                      protocol: 'tcp'
+                    - type: "secure"
+                      port: "1514"
+                      protocol: "tcp"
                       queue_size: 131072
                 api:
                     port: "{{ wazuh_api_port }}"
-                    https: 'yes'
+                    https: "yes"
                 cluster:
-                    disable: 'no'
-                    name: 'wazuh'
-                    node_name: 'worker_0{{ loop.index }}'
-                    node_type: 'worker'
-                    key: '{{ wazuh_cluster_key }}'
-                    port: '1516'
-                    bind_addr: '0.0.0.0'
+                    disable: "no"
+                    name: "wazuh"
+                    node_name: "worker_0{{ loop.index }}"
+                    node_type: "worker"
+                    key: "{{ wazuh_cluster_key }}"
+                    port: "1516"
+                    bind_addr: "0.0.0.0"
                     nodes:
-                        - '{{ hostvars[groups['masters'][0]]['private_ip'] }}'
-                    hidden: 'no'
-{% if packages_repository != 'production' %}
-{% if packages_repository == 'staging' %}
+                        - "{{ hostvars[groups["masters"][0]]["private_ip"] }}"
+                    hidden: "no"
+{% if packages_repository != "production" %}
+{% if packages_repository == "staging" %}
                 repo:
-                    apt: 'deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/apt/ unstable main'
-                    yum: 'https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/yum/'
-                    gpg: 'https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH'
-{% elif packages_repository == 'devel' %}
+                    apt: "deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/apt/ unstable main"
+                    yum: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/yum/"
+                    gpg: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH"
+{% elif packages_repository == "devel" %}
                 repo:
-                    apt: 'deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/apt/ unstable main'
-                    yum: 'https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/yum/'
-                    gpg: 'https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH'
+                    apt: "deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/apt/ unstable main"
+                    yum: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/yum/"
+                    gpg: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH"
 {% endif %}
 {% endif %}
 {% endfor %}
     vars:
         ansible_ssh_user: ec2-user
         ansible_ssh_private_key_file: {{ ssh_key_path_private }}
-        ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+        ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
         wazuh_manager_version: {{ wazuh_version }}
-{% if wazuh_custom_packages_installation_manager_enabled == 'enabled' %}
+{% if wazuh_custom_packages_installation_manager_enabled %}
         wazuh_custom_packages_installation_manager_enabled: {{ wazuh_custom_packages_installation_manager_enabled }}
         wazuh_custom_packages_installation_manager_deb_url: {{ wazuh_custom_packages_installation_manager_deb_url }}
         wazuh_custom_packages_installation_manager_rpm_url: {{ wazuh_custom_packages_installation_manager_rpm_url }}
 {% endif %}
-{% if wazuh_custom_packages_installation_api_enabled == "enabled" %}
+{% if wazuh_custom_packages_installation_api_enabled %}
         wazuh_custom_packages_installation_api_enabled: {{ wazuh_custom_packages_installation_api_enabled }}
         wazuh_custom_packages_installation_api_deb_url: {{ wazuh_custom_packages_installation_api_deb_url }}
         wazuh_custom_packages_installation_api_rpm_url: {{ wazuh_custom_packages_installation_api_rpm_url }}
 {% endif %}
-{% if manager_installation_type == 'sources' %}
+{% if manager_installation_type == "sources" %}
         wazuh_manager_sources_installation:
           enabled: true
           branch: {{ sources_manager_branch }}
 {% endif %}
-{% if api_installation_type == 'sources' %}
+{% if api_installation_type == "sources" %}
         wazuh_api_sources_installation:
           enabled: true
           branch: {{ sources_api_branch }}
 {% endif %}
-{% if packages_repository != 'production' %}
-{% if packages_repository == 'staging' %}
+{% if packages_repository != "production" %}
+{% if packages_repository == "staging" %}
         wazuh_manager_config:
           repo:
-            apt: 'deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/apt/ unstable main'
-            yum: 'https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/yum/'
-            gpg: 'https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH'
-{% elif packages_repository == 'devel' %}
+            apt: "deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/apt/ unstable main"
+            yum: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/yum/"
+            gpg: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH"
+{% elif packages_repository == "devel" %}
         wazuh_manager_config:
           repo:
-            apt: 'deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/apt/ unstable main'
-            yum: 'https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/yum/'
-            gpg: 'https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH'
+            apt: "deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/apt/ unstable main"
+            yum: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/yum/"
+            gpg: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH"
 {% endif %}
 {% endif %}
         filebeat_version: {{ elastic_version }}
@@ -224,18 +224,18 @@ workers:
         elasticsearch_xpack_security_user: {{ elastic_user }}
         elasticsearch_xpack_security_password: {{ elastic_password }}
         filebeat_output_elasticsearch_hosts:
-{% for host in groups['elasticsearch'] %}
-                - "{{ hostvars[host]['private_ip'] }}"
+{% for host in groups["elasticsearch"] %}
+                - "{{ hostvars[host]["private_ip"] }}"
 {% endfor %}
 
 kibana:
     hosts:
-{% for instance in groups['kibana'] %}
-        {{ groups['kibana'][loop.index-1]}}:
-            private_ip: {{ hostvars[instance]['private_ip'] }}
-            elasticsearch_network_host: {{ hostvars[groups['elasticsearch'][0]]['private_ip'] }}
-            elasticsearch_reachable_host: {{ hostvars[groups['kibana'][0]]['private_ip'] }}
-            elasticsearch_node_name: node-{{ (groups['elasticsearch'] | length) + (groups['workers'] | length) + 2 }}
+{% for instance in groups["kibana"] %}
+        {{ groups["kibana"][loop.index-1]}}:
+            private_ip: {{ hostvars[instance]["private_ip"] }}
+            elasticsearch_network_host: {{ hostvars[groups["elasticsearch"][0]]["private_ip"] }}
+            elasticsearch_reachable_host: {{ hostvars[groups["kibana"][0]]["private_ip"] }}
+            elasticsearch_node_name: node-{{ (groups["elasticsearch"] | length) + (groups["workers"] | length) + 2 }}
             single_node: false
             elasticsearch_xpack_security: true
             elasticsearch_xpack_security_user: {{ elastic_user }}
@@ -244,82 +244,89 @@ kibana:
             elasticsearch_node_ingest: false
             elasticsearch_node_data: false
             elasticsearch_discovery_nodes:
-{% for host in groups['elasticsearch'] %}
-                - "{{ hostvars[host]['private_ip'] }}"
+{% for host in groups["elasticsearch"] %}
+                - "{{ hostvars[host]["private_ip"] }}"
 {% endfor %}
-            kibana_node_name: node-{{ (groups['elasticsearch'] | length) + (groups['workers'] | length) + 2 }}
+            kibana_node_name: node-{{ (groups["elasticsearch"] | length) + (groups["workers"] | length) + 2 }}
 
 {% endfor %}
     vars:
         ansible_ssh_user: ec2-user
         ansible_ssh_private_key_file: {{ ssh_key_path_private }}
-        ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+        ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
         elastic_stack_version: {{ elastic_version }}
-        wazuh_version: {{ wazuh_version[:-2] }}
+        wazuh_version: {{ wazuh_version.split("-")[0] }}
         kibana_xpack_security: true
         wazuh_api_credentials:
             - id: default
-              url: {{ wazuh_api_protocol }}://{{ hostvars[groups['masters'][0]]['private_ip'] }}
+              url: {{ wazuh_api_protocol }}://{{ hostvars[groups["masters"][0]]["private_ip"] }}
               port: {{ wazuh_api_port }}
               user: {{ wazuh_api_admin_username }}
               password: {{ wazuh_api_password }}
-{% if packages_repository != 'production' %}
-{% if packages_repository == 'staging' %}
+{% if packages_repository != "production" %}
+{% if packages_repository == "staging" %}
         wazuh_app_url: https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/app/kibana/wazuhapp
-{% elif packages_repository == 'devel' %}
+{% elif packages_repository == "devel" %}
         wazuh_app_url: https://packages-dev.wazuh.com/staging/app/kibana/wazuhapp
 {% endif %}
 {% endif %}
-{% if wazuh_kibana_plugin_installation == 'sources' %}
+{% if wazuh_kibana_plugin_installation == "sources" %}
         build_from_sources: true
         wazuh_plugin_branch: {{ wazuh_kibana_plugin_branch }}
 {% endif %}
 
 linuxagents:
     hosts:
-{% for instance in groups['linux-agents'] %}
-        {{ groups['linux-agents'][loop.index-1]}}:
-            private_ip: {{ hostvars[groups['linux-agents'][loop.index-1]]['private_ip'] }}
+{% for instance in groups["linux-agents"] %}
+        {{ groups["linux-agents"][loop.index-1]}}:
+            private_ip: {{ hostvars[groups["linux-agents"][loop.index-1]]["private_ip"] }}
             wazuh_agent_authd:
+                registration_address: {{ groups["masters"][0] }}
                 enable: true
                 port: 1515
                 ssl_agent_ca: null
-                ssl_auto_negotiate: 'no'
-                agent_name: {{ hostvars[groups['linux-agents'][loop.index-1]]['agent_name'] }}
-{% if hostvars[instance]['ansible_ssh_user'] is defined %}
-            ansible_ssh_user: {{ hostvars[instance]['ansible_ssh_user'] }}
+                ssl_auto_negotiate: "no"
+                agent_name: {{ hostvars[groups["linux-agents"][loop.index-1]]["agent_name"] }}
+{% if hostvars[instance]["ansible_ssh_user"] is defined %}
+            ansible_ssh_user: {{ hostvars[instance]["ansible_ssh_user"] }}
+{% endif %}
+{% if "RHEL" in hostvars[groups["linux-agents"][loop.index-1]]["agent_name"] %}
+            ansible_python_interpreter: /usr/bin/python3
+{% endif %}
+{% if "Ubuntu" in hostvars[groups["linux-agents"][loop.index-1]]["agent_name"] %}
+            ansible_python_interpreter: /usr/bin/python3
 {% endif %}
 {% endfor %}
     vars:
         ansible_ssh_user: ec2-user
         ansible_ssh_private_key_file: {{ ssh_key_path_private }}
-        ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+        ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
         wazuh_agent_version: {{ linux_agents_version }}
-{% if agent_installation_type == 'sources' %}
+{% if agent_installation_type == "sources" %}
         wazuh_agent_sources_installation:
             enabled: true
             branch: {{ sources_agent_branch }}
 {% endif %}
         wazuh_managers:
-            - address: {{ groups['masters'][0] }}
+            - address: {{ groups["masters"][0] }}
               protocol: tcp
 
-{% if packages_repository != 'production' %}
-{% if packages_repository == 'staging' %}
+{% if packages_repository != "production" %}
+{% if packages_repository == "staging" %}
         wazuh_agent_config:
           repo:
-            apt: 'deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/apt/ unstable main'
-            yum: 'https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/yum/'
-            gpg: 'https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH'
-{% elif packages_repository == 'devel' %}
+            apt: "deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/apt/ unstable main"
+            yum: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/yum/"
+            gpg: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH"
+{% elif packages_repository == "devel" %}
         wazuh_agent_config:
           repo:
-            apt: 'deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/apt/ unstable main'
-            yum: 'https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/yum/'
-            gpg: 'https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH'
+            apt: "deb https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/pre-release/apt/ unstable main"
+            yum: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/staging/yum/"
+            gpg: "https://s3-us-west-1.amazonaws.com/packages-dev.wazuh.com/key/GPG-KEY-WAZUH"
 {% endif %}
 {% endif %}
-{% if wazuh_custom_packages_installation_agent_enabled == 'enabled' %}
+{% if wazuh_custom_packages_installation_agent_enabled %}
         wazuh_custom_packages_installation_agent_enabled: {{ wazuh_custom_packages_installation_agent_enabled }}
         wazuh_custom_packages_installation_agent_deb_url: {{ wazuh_custom_packages_installation_agent_deb_url }}
         wazuh_custom_packages_installation_agent_rpm_url: {{ wazuh_custom_packages_installation_agent_rpm_url }}
@@ -327,15 +334,16 @@ linuxagents:
 
 windowsagents:
     hosts:
-{% for instance in groups['windows-agents'] %}
-        {{ groups['windows-agents'][loop.index-1]}}:
-            private_ip: {{ hostvars[groups['windows-agents'][loop.index-1]]['private_ip'] }}
+{% for instance in groups["windows-agents"] %}
+        {{ groups["windows-agents"][loop.index-1]}}:
+            private_ip: {{ hostvars[groups["windows-agents"][loop.index-1]]["private_ip"] }}
             wazuh_agent_authd:
+                registration_address: {{ groups["masters"][0] }}
                 enable: true
                 port: 1515
                 ssl_agent_ca: null
-                ssl_auto_negotiate: 'no'
-                agent_name: {{ hostvars[groups['windows-agents'][loop.index-1]]['agent_name'] }}
+                ssl_auto_negotiate: "no"
+                agent_name: {{ hostvars[groups["windows-agents"][loop.index-1]]["agent_name"] }}
 {% endfor %}
     vars:
         ansible_user: {{ windows_user }}
@@ -345,6 +353,8 @@ windowsagents:
         ansible_winrm_server_cert_validation: ignore
         wazuh_winagent_config_url: {{ wazuh_winagent_config_url }}
         wazuh_winagent_package_name: {{ wazuh_winagent_package_name }}
+        wazuh_winagent_config:
+            check_md5: False
         wazuh_managers:
-            - address: {{ groups['masters'][0] }}
+            - address: {{ groups["masters"][0] }}
               protocol: tcp

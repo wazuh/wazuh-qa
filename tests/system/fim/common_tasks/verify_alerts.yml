@@ -2,8 +2,8 @@
 
   - name: "Verify alert json log | {{ event }}"
     script: >
-      verify_alerts_json.py 
-      -i "{{ agents_results_manager_path }}/{{ event }}/files_{{ event }}-{{ item }}.txt" 
+      verify_alerts_json.py
+      -i "{{ agents_results_manager_path }}/{{ event }}/files_{{ event }}-{{ item }}.txt"
       -e {{ event }}
       -o "json-{{ missing_alerts_json_path }}-{{ event }}-{{ item }}"
       -sn {{ scenario_name }}
@@ -12,19 +12,24 @@
       -an "{{ hostvars[item]['wazuh_agent_authd']['agent_name'] }}"
       -os "{{ hostvars[item].ansible_distribution }}"
       -dt "{{ hostvars[item].ansible_distribution_version }}"
-      -md "{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
+      -md "{{ hostvars[item].ansible_distribution_major_version }}"
       {{ json_verification_extra_arguments }}
     args:
-      executable: "python3"
+      executable: "python3.6"
     when:
       - inventory_hostname in groups['masters']
     with_items:
       - "{{ groups['linuxagents'] + groups['windowsagents'] }}"
+    register: verify_json_result
+    failed_when:
+      - verify_json_result.rc != 0
+      - verify_json_result.rc != 3
+    changed_when: False
 
   - name: "Verify elastic alerts | {{ event }}"
     script: >
-      verify_alerts_elasticsearch.py 
-      -i "{{ agents_results_manager_path }}/{{ event }}/files_{{ event }}-{{ item }}.txt" 
+      verify_alerts_elasticsearch.py
+      -i "{{ agents_results_manager_path }}/{{ event }}/files_{{ event }}-{{ item }}.txt"
       -e {{ event }}
       -a {{ hostvars[groups["elasticsearch"][0]]["private_ip"] }}
       -o "es-{{ missing_alerts_elasticsearch_path }}-{{ event }}-{{ item }}.txt"
@@ -34,11 +39,20 @@
       -an "{{ hostvars[item]['wazuh_agent_authd']['agent_name'] }}"
       -os "{{ hostvars[item].ansible_distribution }}"
       -dt "{{ hostvars[item].ansible_distribution_version }}"
-      -md "{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
+      -md "{{ hostvars[item].ansible_distribution_major_version }}"
+      -eu {{ elastic_user }}
+      -ex {{ elastic_password }}
       {{ elastic_verification_extra_arguments }}
     args:
       executable: python3
+    environment:
+      PYTHONWARNINGS: "ignore:Unverified HTTPS request"
     when:
       - inventory_hostname in groups['masters']
     with_items:
       - "{{ groups['linuxagents'] + groups['windowsagents'] }}"
+    register: verify_elastic_result
+    failed_when:
+      - verify_elastic_result.rc != 0
+      - verify_elastic_result.rc != 3
+    changed_when: False
