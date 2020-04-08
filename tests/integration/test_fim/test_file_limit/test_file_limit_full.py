@@ -65,9 +65,18 @@ def test_file_limit_full(tags_to_apply, get_configuration, configure_environment
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_file_limit_capacity,
-                            error_message='Did not receive expected '
-                                          '"DEBUG: ...: Sending DB 100%% full alert." event')
+    database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                             callback=callback_file_limit_capacity,
+                                             error_message='Did not receive expected '
+                                             '"DEBUG: ...: Sending DB 100%% full alert." event').result()
+
+    if database_state:
+        assert database_state == '100', 'Wrong value for full database alert'
 
     if get_configuration['metadata']['fim_mode'] != 'scheduled':
-        regular_file_cud(testdir1, wazuh_log_monitor, ['file_full'], callback=callback_file_limit_full_database)
+        create_file(REGULAR, testdir1, 'file_full', content='content')
+
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                callback=callback_file_limit_full_database,
+                                error_message='Did not receive expected '
+                                '"DEBUG: ...: Couldn\'t insert \'...\' entry into DB. The DB is full, ..." event')
