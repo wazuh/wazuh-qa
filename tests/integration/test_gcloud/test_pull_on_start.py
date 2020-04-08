@@ -31,7 +31,7 @@ else:
 if global_parameters.gcp_credentials_file is not None:
     credentials_file = global_parameters.gcp_credentials_file
 else:
-    raise ValueError(f"Credentials json file not found. Please introduce a correct path using --gcp-credentials-file")
+    raise ValueError(f"Credentials json file not found. Please enter a valid path using --gcp-credentials-file")
 
 interval = '30s'
 pull_on_start = ['yes', 'no']
