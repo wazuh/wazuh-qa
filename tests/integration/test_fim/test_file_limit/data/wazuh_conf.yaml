@@ -62,6 +62,8 @@
         value: TEST_DIRECTORIES
         attributes:
         - FIM_MODE
+    - file_limit:
+        value: '100'
 
 # conf 5
 - tags:
