@@ -902,7 +902,10 @@ def callback_file_limit_capacity(line):
 
 
 def callback_file_limit_back_to_normal(line):
-    re.match(r'.*Sending DB back to normal alert.', line)
+    match = re.match(r'.*Sending DB back to normal alert.', line)
+
+    if match:
+        return True
 
     return None
 
