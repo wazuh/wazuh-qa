@@ -9,7 +9,7 @@ from google.cloud import pubsub_v1
 from wazuh_testing import global_parameters
 from wazuh_testing.gcloud import callback_detect_gcp_alert, validate_gcp_event
 from wazuh_testing.fim import generate_params
-from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -19,10 +19,25 @@ pytestmark = pytest.mark.tier(level=0)
 
 # variables
 
-project_id = 'sinuous-voice-271711'
-subscription_name = 'wazuh-integration'
-topic_name = 'wazuh-pubsub'
-credentials_file = 'credentials.json'
+if global_parameters.gcp_project_id is not None:
+    project_id = global_parameters.gcp_project_id
+else:
+    raise ValueError(f"Google Cloud project id not found. Please use --gcp-project-id")
+
+if global_parameters.gcp_subscription_name is not None:
+    subscription_name = global_parameters.gcp_subscription_name
+else:
+    raise ValueError(f"Google Cloud subscription name not found. Please use --gcp-subscription-name")
+
+if global_parameters.gcp_credentials_file is not None:
+    credentials_file = global_parameters.gcp_credentials_file
+else:
+    raise ValueError(f"Credentials json file not found. Please enter a valid path using --gcp-credentials-file")
+
+if global_parameters.gcp_topic_name is not None:
+    topic_name = global_parameters.gcp_topic_name
+else:
+    topic_name = 'wazuh-pubsub'
 interval = '10s'
 pull_on_start = 'no'
 max_messages = 100
@@ -57,7 +72,10 @@ def get_configuration(request):
 # tests
 
 def publish(id_project, name_topic, credentials, repetitions=1, msg=None):
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/var/ossec/{}".format(credentials)
+    if WAZUH_PATH in credentials:
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "{}".format(credentials)
+    else:
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "{}/{}".format(WAZUH_PATH, credentials)
 
     publisher = pubsub_v1.PublisherClient()
     topic_path = publisher.topic_path(id_project, name_topic)
