@@ -896,7 +896,7 @@ def callback_file_limit_capacity(line):
     match = re.match(r'.*Sending DB (\d+)% full alert.', line)
 
     if match:
-        match.group(1)
+        return match.group(1)
 
     return None
 
@@ -905,7 +905,7 @@ def callback_file_limit_back_to_normal(line):
     match = re.match(r'.*Sending DB back to normal alert.', line)
 
     if match:
-        match.group(1)
+        return match.group(1)
 
     return None
 
