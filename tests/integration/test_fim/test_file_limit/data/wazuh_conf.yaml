@@ -60,3 +60,5 @@
         value: 'no'
     - directories:
         value: TEST_DIRECTORIES
+        attributes:
+        - FIM_MODE
