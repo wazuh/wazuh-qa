@@ -136,7 +136,15 @@ def pytest_addoption(parser):
         metavar="gcp_credentials_file",
         default=None,
         type=str,
-        help="run tests using json file that contains Google Cloud credentials. Introduce the path."
+        help="run tests using json file that contains Google Cloud credentials. Introduce the path"
+    )
+    parser.addoption(
+        "--gcp-topic-name",
+        action="store",
+        metavar="gcp_topic_name",
+        default=None,
+        type=str,
+        help="run tests using Google Cloud topic name"
     )
 
 
@@ -170,6 +178,11 @@ def pytest_configure(config):
     gcp_credentials_file = config.getoption("--gcp-credentials-file")
     if gcp_credentials_file:
         global_parameters.gcp_credentials_file = gcp_credentials_file
+
+    # Set gcp_topic_name only if it is passed through command line args
+    gcp_topic_name = config.getoption("--gcp-topic-name")
+    if gcp_topic_name:
+        global_parameters.gcp_topic_name = gcp_topic_name
 
 
 def pytest_html_results_table_header(cells):
