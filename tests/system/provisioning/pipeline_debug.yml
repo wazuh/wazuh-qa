@@ -1,0 +1,8 @@
+---
+  - hosts: all
+    tasks:
+      - name: Debug var
+        debug:
+          var: hostvars[inventory_hostname]['wazuh_agent_authd']['agent_name']
+        when:
+          - inventory_hostname in groups['linuxagents'] or inventory_hostname in groups['windowsagents']

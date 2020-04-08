@@ -11,6 +11,7 @@
 
       - name: Set extra arguments for scripts.
         set_fact:
+          scenario_name: "206_tag_option"
           json_verification_extra_arguments: "-tg test_tag -r 3"
           elastic_verification_extra_arguments: "-tg test_tag -n -r 3"
 
@@ -53,3 +54,6 @@
           - name: Verify generated alerts.
             become: true
             import_tasks: "../../common_tasks/verify_alerts.yml"
+
+        - name: Import tasks from save_agent_state
+          import_tasks: "../../common_tasks/save_agent_state.yml"

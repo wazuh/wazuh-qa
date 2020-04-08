@@ -9,6 +9,11 @@
     tasks:
     # Wazuh Agents cleanup
       - block:
+        - name: Stop Linux agent
+          service:
+            name: wazuh-agent
+            state: stopped
+
         - name: Uninstall wazuh-agent
           package:
             name:

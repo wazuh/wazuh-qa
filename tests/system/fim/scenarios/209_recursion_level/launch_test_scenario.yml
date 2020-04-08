@@ -11,6 +11,7 @@
     tasks:
       - name: Set extra arguments for scripts.
         set_fact:
+          scenario_name: "209_recursion_level"
           json_verification_extra_arguments: "-r 3"
           elastic_verification_extra_arguments: "-n -r 3"
 
@@ -84,3 +85,6 @@
       - name: Verify there are no alerts for missing files
         become: true
         import_tasks: "actions/verify_missing_files.yml"
+
+      - name: Import tasks from save_agent_state
+        import_tasks: "../../common_tasks/save_agent_state.yml"
