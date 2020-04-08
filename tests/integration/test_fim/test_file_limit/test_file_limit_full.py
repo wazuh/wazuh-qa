@@ -8,7 +8,7 @@ import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_file_limit_capacity, generate_params, create_file, REGULAR, \
-                                regular_file_cud, callback_file_limit_full_database
+                                callback_file_limit_full_database, check_time_travel
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -73,10 +73,11 @@ def test_file_limit_full(tags_to_apply, get_configuration, configure_environment
     if database_state:
         assert database_state == '100', 'Wrong value for full database alert'
 
-    if get_configuration['metadata']['fim_mode'] != 'scheduled':
-        create_file(REGULAR, testdir1, 'file_full', content='content')
+    create_file(REGULAR, testdir1, 'file_full', content='content')
 
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                callback=callback_file_limit_full_database,
-                                error_message='Did not receive expected '
-                                '"DEBUG: ...: Couldn\'t insert \'...\' entry into DB. The DB is full, ..." event')
+    check_time_travel(True)
+
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                            callback=callback_file_limit_full_database,
+                            error_message='Did not receive expected '
+                            '"DEBUG: ...: Couldn\'t insert \'...\' entry into DB. The DB is full, ..." event')
