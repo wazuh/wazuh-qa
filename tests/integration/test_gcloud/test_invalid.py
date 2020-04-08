@@ -21,9 +21,20 @@ pytestmark = pytest.mark.tier(level=1)
 
 # variables
 
-project_id = 'sinuous-voice-271711'
-subscription_name = 'wazuh-integration'
-credentials_file = 'credentials.json'
+if global_parameters.gcp_project_id is not None:
+    project_id = global_parameters.gcp_project_id
+else:
+    raise ValueError(f"Google Cloud project id not found. Please use --gcp-project-id")
+
+if global_parameters.gcp_subscription_name is not None:
+    subscription_name = global_parameters.gcp_subscription_name
+else:
+    raise ValueError(f"Google Cloud subscription name not found. Please use --gcp-subscription-name")
+
+if global_parameters.gcp_credentials_file is not None:
+    credentials_file = global_parameters.gcp_credentials_file
+else:
+    raise ValueError(f"Credentials json file not found. Please enter a valid path using --gcp-credentials-file")
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'invalid_conf.yaml')
