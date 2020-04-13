@@ -21,7 +21,7 @@ RUN cd $HOME/wazuh-qa/kitchen/wazuh-chef/ && \
     bundle install
 
 RUN rm -rf /usr/local/bundle/gems/kitchen-docker-*/* || true && \
-    cp -rf $HOME/wazuh-qa/kitchen/kitchen-docker/* /usr/local/bundle/gems/kitchen-docker-2.9.0/
+    cp -rf $HOME/wazuh-qa/kitchen/kitchen-docker/* /usr/local/bundle/gems/kitchen-docker-*/
 
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py
 
