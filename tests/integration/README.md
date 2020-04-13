@@ -144,6 +144,7 @@ Our newest integration tests are located in `wazuh-qa/tests/integration/`. They 
 - _test_analysisd_
 - _test_cluster_
 - _test_fim_
+- _test_gcloud_
 - _test_mitre_
 - _test_wazuh_db_
 - _test_sca_
@@ -283,6 +284,7 @@ wazuh_testing
         │   ├── syscheck_event.json
         │   └── syscheck_event_windows.json
         ├── fim.py
+        ├── gcloud.py
         ├── mitre.py
         ├── tools
         │   ├── __init__.py
