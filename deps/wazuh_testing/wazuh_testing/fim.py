@@ -834,7 +834,7 @@ def callback_non_existing_monitored_dir(line):
 
 
 def callback_num_inotify_watches(line):
-    match = re.match(r'.*Folders monitored with inotify engine: (\d+)', line)
+    match = re.match(r'.*Folders monitored with real-time engine: (\d+)', line)
 
     if match:
         return match.group(1)

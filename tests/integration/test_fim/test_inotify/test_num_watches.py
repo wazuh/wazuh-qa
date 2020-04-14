@@ -4,6 +4,7 @@
 
 import os
 import shutil as sh
+import sys
 
 import pytest
 
@@ -18,7 +19,7 @@ from wazuh_testing.tools.file import truncate_file
 
 # Marks
 
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
+pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # Variables
 test_directories = [os.path.join(PREFIX, 'testdir1'),
@@ -30,6 +31,11 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_num_watches.yaml')
 testdir1 = test_directories[0]
+NO_WATCHES = 0
+EXPECTED_WATCHES = 3
+
+if sys.platform == 'win32':
+    EXPECTED_WATCHES = 1
 
 # Configurations
 
@@ -71,7 +77,7 @@ def restart_syscheckd_each_time(request):
 
 def extra_configuration_after_yield():
     """Make sure to delete the directory after performing the test"""
-    sh.rmtree('changed_name', ignore_errors=True)
+    sh.rmtree(os.path.join(PREFIX, 'changed_name'), ignore_errors=True)
 
 # Tests
 
@@ -114,13 +120,13 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
 
     if num_watches:
         if not realtime_enabled:    # Realtime disabled
-            assert num_watches == '0', 'Wrong number of inotify watches when realtime is disabled'
+            assert num_watches == str(NO_WATCHES), 'Wrong number of inotify watches when realtime is disabled'
         elif decreases_num_watches and not rename_folder:   # Delete folder
-            assert num_watches == '3', 'Wrong number of inotify watches before deleting folder'
+            assert num_watches == str(EXPECTED_WATCHES), 'Wrong number of inotify watches before deleting folder'
         elif decreases_num_watches and rename_folder:   # Rename folder
-            assert num_watches == '3', 'Wrong number of inotify watches before renaming folder '
+            assert num_watches == str(EXPECTED_WATCHES), 'Wrong number of inotify watches before renaming folder '
         elif not decreases_num_watches and not rename_folder:   # Not modifying the folder
-            assert num_watches == '3', 'Wrong number of inotify watches when not modifying the folder'
+            assert num_watches == str(EXPECTED_WATCHES), 'Wrong number of inotify watches when not modifying the folder'
     else:
         raise AssertionError('Wrong number of inotify watches')
 
@@ -128,7 +134,7 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
         if decreases_num_watches and not rename_folder:
             sh.rmtree(testdir1, ignore_errors=True)
         elif decreases_num_watches and rename_folder:
-            os.rename(testdir1, 'changed_name')
+            os.rename(testdir1, os.path.join(PREFIX, 'changed_name'))
 
     check_time_travel(True)
 
@@ -141,12 +147,12 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
 
     if num_watches:
         if not realtime_enabled:    # Realtime disabled
-            assert num_watches == '0', 'Wrong number of inotify watches when realtime is disabled'
+            assert num_watches == str(NO_WATCHES), 'Wrong number of inotify watches when realtime is disabled'
         elif decreases_num_watches and not rename_folder:   # Delete folder
-            assert num_watches == '0', 'Wrong number of inotify watches after deleting folder'
+            assert num_watches == str(NO_WATCHES), 'Wrong number of inotify watches after deleting folder'
         elif decreases_num_watches and rename_folder:   # Rename folder
-            assert num_watches == '0', 'Wrong number of inotify watches after renaming folder'
+            assert num_watches == str(NO_WATCHES), 'Wrong number of inotify watches after renaming folder'
         elif not decreases_num_watches and not rename_folder:   # Not modifying the folder
-            assert num_watches == '3', 'Wrong number of inotify watches when not modifying the folder'
+            assert num_watches == str(EXPECTED_WATCHES), 'Wrong number of inotify watches when not modifying the folder'
     else:
         raise AssertionError('Wrong number of inotify watches')
