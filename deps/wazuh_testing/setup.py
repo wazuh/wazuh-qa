@@ -23,5 +23,8 @@ setup(name='wazuh_testing',
                                       ]
                     },
       include_package_data=True,
+      install_requires=[
+            'lockfile==0.12.2',
+      ],
       zip_safe=False
       )
