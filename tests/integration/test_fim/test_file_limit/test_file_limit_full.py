@@ -3,12 +3,14 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import sys
 
 import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_file_limit_capacity, generate_params, create_file, REGULAR, \
-                                callback_file_limit_full_database, check_time_travel
+                                callback_file_limit_full_database, check_time_travel, callback_entries_path_count, \
+                                callback_entries_path_count_win32
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -25,6 +27,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories[0]
+NUM_FILES = 10
 
 # Configurations
 
@@ -45,8 +48,8 @@ def get_configuration(request):
 
 def extra_configuration_before_yield():
     """Generate files to fill database"""
-    for i in range(0, 10):
-        create_file(REGULAR, testdir1, 'file_' + str(i), content='content')
+    for i in range(0, NUM_FILES):
+        create_file(REGULAR, testdir1, f'test{i}', content='content')
 
 # Tests
 
@@ -81,3 +84,30 @@ def test_file_limit_full(tags_to_apply, get_configuration, configure_environment
                             callback=callback_file_limit_full_database,
                             error_message='Did not receive expected '
                             '"DEBUG: ...: Couldn\'t insert \'...\' entry into DB. The DB is full, ..." event')
+
+    if sys.platform != 'win32':
+        entries, path_count = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                                      callback=callback_entries_path_count,
+                                                      error_message='Did not receive expected '
+                                                                    '"Fim inode entries: ..., path count: ..." event'
+                                                      ).result()
+
+        check_time_travel(True, monitor=wazuh_log_monitor)
+
+        if entries and path_count:
+            assert entries == str(NUM_FILES) and path_count == str(NUM_FILES), 'Wrong number of inodes and path count'
+        else:
+            raise AssertionError('Wrong number of inodes and path count')
+    else:
+        entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                          callback=callback_entries_path_count_win32,
+                                          error_message='Did not receive expected '
+                                                        '"Fim inode entries: ..., path count: ..." event'
+                                          ).result()
+
+        check_time_travel(True, monitor=wazuh_log_monitor)
+
+        if entries and path_count:
+            assert entries == str(NUM_FILES), 'Wrong number of entries count'
+        else:
+            raise AssertionError('Wrong number of entries count')

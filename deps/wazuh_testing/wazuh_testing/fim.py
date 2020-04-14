@@ -927,6 +927,13 @@ def callback_entries_path_count(line):
         return match.group(1), match.group(2)
 
 
+def callback_entries_path_count_win32(line):
+    match = re.match(r'.*Fim entries: (\d+)', line)
+
+    if match:
+        return match.group(1)
+
+
 class EventChecker:
     """Utility to allow fetch events and validate them."""
 

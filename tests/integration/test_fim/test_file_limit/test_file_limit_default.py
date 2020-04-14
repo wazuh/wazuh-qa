@@ -24,6 +24,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories[0]
+NUM_FILES = 100000
 
 # Configurations
 
@@ -64,6 +65,6 @@ def test_file_limit_default(tags_to_apply, get_configuration, configure_environm
                                                ).result()
 
     if file_limit_value:
-        assert file_limit_value == '100000', 'Wrong value for file_limit'
+        assert file_limit_value == str(NUM_FILES), 'Wrong value for file_limit'
     else:
         raise AssertionError('Wrong value for file_limit')
