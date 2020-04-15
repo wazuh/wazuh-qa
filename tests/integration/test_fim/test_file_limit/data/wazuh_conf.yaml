@@ -14,7 +14,11 @@
         attributes:
         - FIM_MODE
     - file_limit:
-        value: '0'
+        elements:
+        - enabled:
+            value: 'no'
+        - entries:
+            value: '10'
 
 # conf 2
 - tags:
@@ -46,7 +50,11 @@
         attributes:
         - FIM_MODE
     - file_limit:
-        value: FILE_LIMIT
+        elements:
+        - enabled:
+            value: 'yes'
+        - entries:
+            value: FILE_LIMIT
 
 # conf 4
 - tags:
@@ -63,7 +71,11 @@
         attributes:
         - FIM_MODE
     - file_limit:
-        value: '100'
+        elements:
+        - enabled:
+            value: 'yes'
+        - entries:
+            value: '100'
 
 # conf 5
 - tags:
@@ -78,4 +90,8 @@
     - directories:
         value: TEST_DIRECTORIES
     - file_limit:
-        value: '10'
+        elements:
+        - enabled:
+            value: 'yes'
+        - entries:
+            value: '10'

@@ -89,4 +89,8 @@
         value: TEST_DIRECTORIES
         attributes:
     - file_limit:
-        value: '-10'
+        elements:
+        - enabled:
+            value: 'yes'
+        - entries:
+            value: '-10'
