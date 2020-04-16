@@ -1,0 +1,22 @@
+---
+-
+  name: "AgentName"
+  description: "Check default enrollment"
+  test_case:
+  -
+    input: "OSSEC A:'user1'"
+    output: "OSSEC K:'"
+    stage: "default | user1 enrollment"  
+  -
+    input: "OSSEC A:'user1'"
+    output: "OSSEC K:'"
+    stage: "default | user1 enrollment"  
+-
+  name: "AgentName|Group"
+  description: "Check default enrollment"
+  test_case:
+  -
+    input: "OSSEC A:'user2' G:Group1"
+    output: "ERROR"
+    stage: "default | user2 enrollment"
+    
