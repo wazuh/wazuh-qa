@@ -919,7 +919,7 @@ def callback_entries_path_count(line):
         if sys.platform != 'win32':
             return match.group(1), match.group(2)
         else:
-            return match.group(1)
+            return match.group(1), None
 
 
 class EventChecker:
