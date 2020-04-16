@@ -875,63 +875,48 @@ def callback_configuration_warning(line):
 
 
 def callback_value_file_limit(line):
-    match = re.match(r'.*Maximum number of files to be monitored: \'(\d+)\'', line)
+    match = re.match(r".*Maximum number of files to be monitored: '(\d+)'", line)
 
     if match:
         return match.group(1)
-
-    return None
 
 
 def callback_file_limit_zero(line):
-    match = re.match(r'.*No limit set to maximum number of files to be monitored', line)
+    match = re.match(r".*No limit set to maximum number of files to be monitored", line)
 
     if match:
         return True
-
-    return None
 
 
 def callback_file_limit_capacity(line):
-    match = re.match(r'.*Sending DB (\d+)% full alert.', line)
+    match = re.match(r".*Sending DB (\d+)% full alert.", line)
 
     if match:
         return match.group(1)
-
-    return None
 
 
 def callback_file_limit_back_to_normal(line):
-    match = re.match(r'.*Sending DB back to normal alert.', line)
+    match = re.match(r".*Sending DB back to normal alert.", line)
 
     if match:
         return True
-
-    return None
 
 
 def callback_file_limit_full_database(line):
-    match = re.match(r'.*Couldn\'t insert \'.*\' entry into DB\. The DB is full, please check your configuration\.',
-                     line)
+    match = re.match(r".*Couldn't insert '.*' entry into DB\. The DB is full, please check your configuration\.", line)
 
     if match:
         return True
 
-    return None
-
 
 def callback_entries_path_count(line):
-    match = re.match(r'.*Fim inode entries: (\d+), path count: (\d+)', line)
+    if sys.platform != 'win32':
+        match = re.match(r".*Fim inode entries: (\d+), path count: (\d+)", line)
+    else:
+        match = re.match(r".*Fim entries: (\d+)", line)
 
     if match:
         return match.group(1), match.group(2)
-
-
-def callback_entries_path_count_win32(line):
-    match = re.match(r'.*Fim entries: (\d+)', line)
-
-    if match:
-        return match.group(1)
 
 
 class EventChecker:
