@@ -916,7 +916,10 @@ def callback_entries_path_count(line):
         match = re.match(r".*Fim entries: (\d+)", line)
 
     if match:
-        return match.group(1), match.group(2)
+        if sys.platform != 'win32':
+            return match.group(1), match.group(2)
+        else:
+            return match.group(1)
 
 
 class EventChecker:
