@@ -115,7 +115,7 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
     num_watches = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                           callback=callback_num_inotify_watches,
                                           error_message='Did not receive expected '
-                                          '"Folders monitored with inotify engine: ..." event'
+                                          '"Folders monitored with real-time engine: ..." event'
                                           ).result()
 
     if num_watches:
@@ -142,7 +142,7 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
     num_watches = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                           callback=callback_num_inotify_watches,
                                           error_message='Did not receive expected '
-                                          '"Folders monitored with inotify engine: ..." event'
+                                          '"Folders monitored with real-time engine: ..." event'
                                           ).result()
 
     if num_watches:
