@@ -12,15 +12,23 @@ except ModuleNotFoundError:
 
 import os
 import queue
+import re
 import socket
 import socketserver
 import sys
 import threading
 import time
+from collections import defaultdict
 from copy import copy
+from multiprocessing import Process, Manager
 from struct import pack, unpack
 
+import yaml
+from lockfile import FileLock
+
 from wazuh_testing import logger
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools.time import Timer
 
 
@@ -188,205 +196,116 @@ class FileMonitor:
 
 class SocketController:
 
-    def __init__(self, path, timeout=30, connection_protocol='TCP'):
+    def __init__(self, address, family='AF_UNIX', connection_protocol='TCP', timeout=30):
         """Create a new unix socket or connect to a existing one.
 
         Parameters
         ----------
-        path : str
-            Path where the file will be created.
-        timeout : int, optional
-            Socket's timeout, 0 for non-blocking mode.
+        address : str or Tuple(str, int)
+            Address of the socket, the format of the address depends on the type. A regular file path for AF_UNIX or a
+            Tuple(HOST, PORT) for AF_INET
+        family : str
+            Family type of socket to connect to, AF_UNIX for unix sockets or AF_INET for port sockets.
         connection_protocol : str
             Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM).
+        timeout : int, optional
+            Socket's timeout, 0 for non-blocking mode.
 
         Raises
         ------
         Exception
             If the socket connection failed.
         """
-        self.path = path
-        if connection_protocol.lower() == 'tcp':
-            self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        elif connection_protocol.lower() == 'udp':
-            self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-            wait_for_condition(os.path.exists, args=[self.path], timeout=3)
-        else:
-            raise TypeError('Invalid connection protocol detected. Valid ones are TCP or UDP')
+        self.address = address
 
-        try:
-            self.sock.settimeout(timeout)
-            self.sock.connect(self.path)
-        except OSError as e:
-            if os.path.exists(path):
-                os.unlink(path)
-            self.sock.bind(self.path)
-            os.chmod(self.path, 0o666)
+        # Set socket family
+        if family == 'AF_UNIX':
+            self.family = socket.AF_UNIX
+        elif family == 'AF_INET':
+            self.family = socket.AF_INET
+        else:
+            raise TypeError(f'Invalid family type detected: {family}. Valid ones are AF_UNIX or AF_INET')
+
+        # Set socket protocol
+        if connection_protocol.lower() == 'tcp':
+            self.protocol = socket.SOCK_STREAM
+        elif connection_protocol.lower() == 'udp':
+            self.protocol = socket.SOCK_DGRAM
+        else:
+            raise TypeError(f'Invalid connection protocol detected: {connection_protocol.lower()}. '
+                            f'Valid ones are TCP or UDP')
+
+        # Create socket object
+        self.sock = socket.socket(family=self.family, type=self.protocol)
+
+        # Connect only if protocol is TCP
+        if self.protocol == socket.SOCK_STREAM:
+            try:
+                self.sock.settimeout(timeout)
+                self.sock.connect(self.address)
+            except socket.timeout as e:
+                raise TimeoutError(f'Could not connect to socket {self.address} of family {self.family}')
 
     def close(self):
         """Close the socket gracefully."""
         self.sock.shutdown(socket.SHUT_RDWR)
         self.sock.close()
 
-    def send(self, messages, size=False):
-        """Send a list of messages to the socket.
+    def send(self, message, size=False):
+        """Send a message to the socket.
 
         Parameters
         ----------
-        messages : list
-            List of messages to be sent.
+        message : str or bytes
+            Message to be sent.
         size : bool, optional
             Flag that indicates if the header of the message includes the size of the message.
-            (Analysis doesn't need the size, wazuh-db does). Default `False`
+            (For example, Analysis doesn't need the size, wazuh-db does). Default `False`
 
         Returns
         -------
-        list
-            List of sizes of the sent messages.
+        int
+            Size of the sent message
         """
-        output = list()
-        for message_ in messages:
-            msg_bytes = message_.encode()
-            try:
-                if size:
-                    output.append(self.sock.sendall(wazuh_pack(len(msg_bytes)) + msg_bytes))
-                else:
-                    output.append(self.sock.sendto(msg_bytes, self.path))
-            except OSError as e:
-                raise e
+        msg_bytes = message.encode() if isinstance(message, str) else message
+        try:
+            msg_bytes = wazuh_pack(len(msg_bytes)) + msg_bytes if size is True else msg_bytes
+            if self.protocol == socket.SOCK_STREAM:  # TCP
+                output = self.sock.sendall(msg_bytes)
+            else:  # UDP
+                output = self.sock.sendto(msg_bytes, self.address)
+        except OSError as e:
+            raise e
 
         return output
 
-    def receive(self, total_messages=1):
-        """Receive a specified number of messages from the socket.
+    def receive(self, size=False):
+        """Receive a message from the socket.
 
         Parameters
         ----------
-        total_messages : int, optional
-            Total messages to be received. Default `1`
+        size : bool, optional
+            Flag that indicates if the header of the message includes the size of the message.
+            (For example, Analysis doesn't need the size, wazuh-db does). Default `False`
 
         Returns
         -------
-        list
-            Socket messages.
+        bytes
+            Socket message.
         """
-        output = list()
-        for _ in range(0, total_messages):
-            try:
-                size = wazuh_unpack(self.sock.recv(4, socket.MSG_WAITALL))
-                output.append(self.sock.recv(size, socket.MSG_WAITALL).decode().rstrip('\x00'))
-            except OSError:
-                try:
-                    self.sock.listen(1)
-                    conn, addr = self.sock.accept()
-                    size = wazuh_unpack(conn.recv(4, socket.MSG_WAITALL))
-                    output.append(conn.recv(size, socket.MSG_WAITALL).decode().rstrip('\x00'))
-                except OSError as e:
-                    raise e
+        if size is True:
+            size = wazuh_unpack(self.sock.recv(4, socket.MSG_WAITALL))
+            output = self.sock.recv(size, socket.MSG_WAITALL)
+        else:
+            output = self.sock.recv(4096)
+            if len(output) == 4096:
+                while 1:
+                    try:  # error means no more data
+                        output += self.sock.recv(4096, socket.MSG_DONTWAIT)
+                    except:
+                        break
 
         return output
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
-
-
-class SocketMonitor:
-
-    def __init__(self, path, connection_protocol='TCP', controller=None, socket_timeout=30):
-        """Create a new unix socket or connect to a existing one.
-
-        Parameters
-        ----------
-        path : str
-            Path where the file will be created.
-        connection_protocol : str, optional
-            Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM).
-        controller : SocketController, optional
-            Already initialized SocketController to avoid creating a new one. Useful in case of monitoring
-            the same socket where messages are being sent.
-        socket_timeout : int, optional
-            Timeout in seconds to abort a recv operation from the socket.
-
-        Raises
-        ------
-        Exception
-            If the socket connection failed.
-        """
-        self._continue = False
-        self._abort = False
-        self._result = None
-        self.timeout_timer = None
-        self.path = path
-        if not controller:
-            self.controller = SocketController(path=path, connection_protocol=connection_protocol,
-                                               timeout=socket_timeout)
-        else:
-            self.controller = controller
-
-    def start(self, timeout=-1, callback=_callback_default, accum_results=1):
-        """Start the socket monitoring with specified callback.
-
-        Parameters
-        ----------
-        timeout : int, optional
-            Timeout of the operation. Default `-1`
-        callback : callable, optional
-            Callable function that accepts a specified param. Default ``_callback_default``
-        accum_results : int, optional
-            Expected number of messages. Default `1`
-
-        Returns
-        -------
-        list
-            Socket messages.
-        """
-        if not self._continue:
-            self._continue = True
-            self._abort = False
-            if timeout > 0:
-                self.timeout_timer = Timer(timeout, self.abort)
-                self.timeout_timer.start()
-            while self._continue:
-                if self._abort:
-                    self.stop()
-                    raise TimeoutError()
-                for message in self.controller.receive(accum_results):
-                    result = callback(message)
-                    if result:
-                        self._add_results(result, accum_results)
-        return self
-
-    def _add_results(self, result, accum_results):
-        if accum_results > 1:
-            self._result.append(result)
-            accum_results == len(self._result) and self.stop()
-        else:
-            self._result = result
-            self._result and self.stop()
-
-    def result(self):
-        """Return the monitored socket messages."""
-        return self._result
-
-    def close(self):
-        """Close the socket gracefully."""
-        self.controller.close()
-
-    def stop(self):
-        """Stop the socket monitoring. It can be restarted calling the start method."""
-        self._continue = False
-        if self.timeout_timer:
-            self.timeout_timer.cancel()
-            self.timeout_timer.join()
-        return self
-
-    def abort(self):
-        """Raise a timeout exception if the operation takes more time that the specified timeout."""
-        self._abort = True
-        return self
 
     def __enter__(self):
         return self
@@ -535,8 +454,22 @@ class Queue(queue.Queue):
         return aux_queue.get(*args, **kwargs)
 
 
+class StreamServerPort(socketserver.ThreadingTCPServer):
+    pass
+
+
+class DatagramServerPort(socketserver.ThreadingUDPServer):
+    pass
+
+
 if hasattr(socketserver, 'ThreadingUnixStreamServer'):
-    class StreamServer(socketserver.ThreadingUnixStreamServer):
+
+    class StreamServerUnix(socketserver.ThreadingUnixStreamServer):
+
+        def shutdown_request(self, request):
+            pass
+
+    class DatagramServerUnix(socketserver.ThreadingUnixDatagramServer):
 
         def shutdown_request(self, request):
             pass
@@ -544,20 +477,22 @@ if hasattr(socketserver, 'ThreadingUnixStreamServer'):
 
     class StreamHandler(socketserver.BaseRequestHandler):
 
-        def forward(self, data):
-            # Create a socket (SOCK_STREAM means a TCP socket)
+        def unix_forward(self, data):
+            """Default TCP unix socket forwarder for MITM servers."""
+            # Create a socket context
             with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as forwarded_sock:
                 # Connect to server and send data
                 forwarded_sock.connect(self.server.mitm.forwarded_socket_path)
                 forwarded_sock.sendall(wazuh_pack(len(data)) + data)
 
                 # Receive data from the server and shut down
-                size = wazuh_unpack(self.recvall(forwarded_sock, 4, socket.MSG_WAITALL))
-                response = self.recvall(forwarded_sock, size, socket.MSG_WAITALL)
+                size = wazuh_unpack(self.recvall_size(forwarded_sock, 4, socket.MSG_WAITALL))
+                response = self.recvall_size(forwarded_sock, size, socket.MSG_WAITALL)
 
                 return response
 
-        def recvall(self, sock: socket.socket, size: int, mask: int):
+        def recvall_size(self, sock: socket.socket, size: int, mask: int):
+            """Recvall with known size of the message."""
             buffer = bytearray()
             while len(buffer) < size:
                 try:
@@ -570,79 +505,147 @@ if hasattr(socketserver, 'ThreadingUnixStreamServer'):
                         break
             return bytes(buffer)
 
-        def handle(self):
+        def recvall(self, chunk_size: int = 4096):
+            """Recvall without known size of the message."""
+            received = self.request.recv(chunk_size)
+            if len(received) == chunk_size:
+                while 1:
+                    try:  # error means no more data
+                        received += self.request.recv(chunk_size, socket.MSG_DONTWAIT)
+                    except:
+                        break
+            return received
+
+        def default_wazuh_handler(self):
+            """Default wazuh daemons TCP handler method for MITM server."""
             self.request.settimeout(1)
             while not self.server.mitm.event.is_set():
-                header = self.recvall(self.request, 4, socket.MSG_WAITALL)
+                header = self.recvall_size(self.request, 4, socket.MSG_WAITALL)
                 if not header:
                     break
                 size = wazuh_unpack(header)
-                data = self.recvall(self.request, size, socket.MSG_WAITALL)
+                data = self.recvall_size(self.request, size, socket.MSG_WAITALL)
                 if not data:
                     break
 
-                response = self.server.mitm.handler_func(data) if self.server.mitm.handler_func else self.forward(data)
+                response = self.unix_forward(data)
 
                 self.server.mitm.put_queue((data.rstrip(b'\x00'), response.rstrip(b'\x00')))
 
                 self.request.sendall(wazuh_pack(len(response)) + response)
 
+        def handle(self):
+            """Overriden handle method for TCP MITM server."""
+            if self.server.mitm.handler_func is None:
+                self.default_wazuh_handler()
+            else:
+                while not self.server.mitm.event.is_set():
+                    received = self.recvall()
+                    response = self.server.mitm.handler_func(received)
+                    self.server.mitm.put_queue((received, response))
+                    self.request.sendall(response)
 
     class DatagramHandler(socketserver.BaseRequestHandler):
 
-        def forward(self, data):
+        def unix_forward(self, data):
+            """Default UDP unix socket forwarder for MITM servers."""
             with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as forwarded_sock:
                 forwarded_sock.sendto(data, self.server.mitm.forwarded_socket_path)
 
-        def handle(self):
+        def default_wazuh_handler(self):
+            """Default wazuh daemons UDP handler method for MITM server."""
             data = self.request[0]
-
-            self.server.mitm.handler_func(data) if self.server.mitm.handler_func else self.forward(data)
-
+            self.unix_forward(data)
             self.server.mitm.put_queue(data.rstrip(b'\x00'))
 
-
-    class DatagramServer(socketserver.UnixDatagramServer):
-
-        def shutdown_request(self, request):
-            pass
-
+        def handle(self):
+            """Overriden handle method for UDP MITM server."""
+            if self.server.mitm.handler_func is None:
+                self.default_wazuh_handler()
+            else:
+                data = self.request[0]
+                self.server.mitm.handler_func(data)
+                self.server.mitm.put_queue(data)
 
     class ManInTheMiddle:
 
-        def __init__(self, socket_path, mode='TCP', func: callable = None):
-            """Create a MITM for the socket `socket_path`.
+        def __init__(self, address, family='AF_UNIX', connection_protocol='TCP', func: callable = None):
+            """Create a MITM server for the socket `socket_address`.
 
             Parameters
             ----------
-            socket_path : str
-                Path of the socket to be replaced.
-            mode : str
+            address : str or Tuple(str, int)
+                Address of the socket, the format of the address depends on the type. A regular file path for AF_UNIX or
+                a Tuple(HOST, PORT) for AF_INET
+            family : str
+                Family type of socket to connect to, AF_UNIX for unix sockets or AF_INET for port sockets.
+                Default `'AF_UNIX'`
+            connection_protocol : str
                 It can be either 'TCP' or 'UDP'. Default `'TCP'`
             func : callable
-                Function to be applied to every data before sending it.
+                Function to be applied to every received data before sending it.
             """
-            self.listener_socket_path = socket_path
-            self.forwarded_socket_path = f'{socket_path}.original'
-            os.rename(self.listener_socket_path, self.forwarded_socket_path)
-            self.listener_class = StreamServer if mode == 'TCP' else socketserver.UnixDatagramServer
-            self.handler_class = StreamHandler if mode == 'TCP' else DatagramHandler
+            if isinstance(address, str) or (isinstance(address, tuple) and len(address) == 2
+                                            and isinstance(address[0], str) and isinstance(address[1], int)):
+                self.listener_socket_address = address
+            else:
+                raise TypeError(f"Invalid address type: {type(address)}. Valid types are str or Tuple(str, int)")
+
+            if connection_protocol.lower() == 'tcp' or connection_protocol.lower() == 'udp':
+                self.mode = connection_protocol.lower()
+            else:
+                raise TypeError(f'Invalid connection protocol detected: {connection_protocol.lower()}. '
+                                f'Valid ones are TCP or UDP')
+
+            if family in ('AF_UNIX', 'AF_INET'):
+                self.family = family
+            else:
+                raise TypeError('Invalid family type detected. Valid ones are AF_UNIX or AF_INET')
+
+            self.forwarded_socket_path = None
+
+            class_tree = {
+                'listener': {
+                    'tcp': {
+                        'AF_UNIX': StreamServerUnix,
+                        'AF_INET': StreamServerPort
+                    },
+                    'udp': {
+                        'AF_UNIX': DatagramServerUnix,
+                        'AF_INET': DatagramServerPort
+                    }
+                },
+                'handler': {
+                    'tcp': StreamHandler,
+                    'udp': DatagramHandler
+                }
+            }
+
+            self.listener_class = class_tree['listener'][self.mode][self.family]
+            self.handler_class = class_tree['handler'][self.mode]
             self.handler_func = func
-            self.mode = mode
             self.listener = None
             self.thread = None
             self.event = threading.Event()
             self._queue = Queue()
 
         def run(self, *args):
-            self.listener = self.listener_class(self.listener_socket_path, self.handler_class)
+            """Run a MITM server."""
+            # Rename socket if it is a file (AF_UNIX)
+            if isinstance(self.listener_socket_address, str):
+                self.forwarded_socket_path = f'{self.listener_socket_address}.original'
+                os.rename(self.listener_socket_address, self.forwarded_socket_path)
+
+            self.listener_class.allow_reuse_address = True
+            self.listener = self.listener_class(self.listener_socket_address, self.handler_class)
             self.listener.mitm = self
 
-            # set proper socket permissions
-            uid = pwd.getpwnam('ossec').pw_uid
-            gid = grp.getgrnam('ossec').gr_gid
-            os.chown(self.listener_socket_path, uid, gid)
-            os.chmod(self.listener_socket_path, 0o660)
+            # Give proper permissions to socket
+            if isinstance(self.listener_socket_address, str):
+                uid = pwd.getpwnam('ossec').pw_uid
+                gid = grp.getgrnam('ossec').gr_gid
+                os.chown(self.listener_socket_address, uid, gid)
+                os.chmod(self.listener_socket_address, 0o660)
 
             self.thread = threading.Thread(target=self.listener.serve_forever)
             self.thread.start()
@@ -651,11 +654,14 @@ if hasattr(socketserver, 'ThreadingUnixStreamServer'):
             self.run()
 
         def shutdown(self):
+            """Gracefully shutdown a MITM server."""
             self.listener.shutdown()
             self.listener.socket.close()
             self.event.set()
-            os.remove(self.listener_socket_path)
-            os.rename(self.forwarded_socket_path, self.listener_socket_path)
+            # Remove created unix socket and restore original
+            if isinstance(self.listener_socket_address, str):
+                os.remove(self.listener_socket_address)
+                os.rename(self.forwarded_socket_path, self.listener_socket_address)
 
         @property
         def queue(self):
@@ -663,3 +669,205 @@ if hasattr(socketserver, 'ThreadingUnixStreamServer'):
 
         def put_queue(self, item):
             self._queue.put(item)
+
+
+def new_process(fn):
+    """Wrapper for enable multiprocessing inside a class
+
+    Parameters
+    ----------
+    fn : callable
+        Function to be executed in a new thread
+
+    Returns
+    -------
+    wrapper
+    """
+
+    def wrapper(*args, **kwargs):
+        thread = Process(target=fn, args=args, kwargs=kwargs)
+        thread.start()
+        return thread
+
+    return wrapper
+
+
+def callback_generator(regex):
+    def new_callback(line):
+        match = re.match(regex, line)
+        if match:
+            return line
+
+    return new_callback
+
+
+class HostMonitor:
+    """This class has the capability to monitor remote host. This monitoring consists of reading the specified files to
+    check that the expected message arrives to them.
+
+    If the goals are achieved, no exceptions will be raised and therefore the test will end properly and without
+    failures.
+
+    In contrast, if one or more of the goals is not covered, a timeout exception will be raised with a generic or a
+    custom error message.
+    """
+
+    def __init__(self, inventory_path, messages_path, tmp_path, time_step=0.5):
+        """Create a new instance to monitor any given file in any specified host.
+
+        Parameters
+        ----------
+        inventory_path : str
+            Path to the hosts's inventory file.
+        messages_path : str
+            Path to the file where the callbacks, paths and hosts to be monitored are specified.
+        tmp_path : str
+            Path to the temporal files.
+        time_step : float, optional
+            Fraction of time to wait in every get. Default `0.5`.
+        """
+        self.host_manager = HostManager(inventory_path=inventory_path)
+        self._queue = Manager().Queue()
+        self._result = defaultdict(list)
+        self._time_step = time_step
+        self._file_monitors = list()
+        self._monitored_files = set()
+        self._file_content_collectors = list()
+        self._tmp_path = tmp_path
+        try:
+            os.mkdir(self._tmp_path)
+        except OSError:
+            pass
+        with open(messages_path, 'r') as f:
+            self.test_cases = yaml.safe_load(f)
+
+    def run(self):
+        """This method creates and destroy the needed processes for the messages founded in messages_path.
+        It creates one file composer (process) for every file to be monitored in every host."""
+        for host, payload in self.test_cases.items():
+            self._monitored_files.update({case['path'] for case in payload})
+            if len(self._monitored_files) == 0:
+                raise AttributeError('There is no path to monitor. Exiting...')
+            for path in self._monitored_files:
+                output_path = f'{host}_{path.split("/")[-1]}.tmp'
+                self._file_content_collectors.append(self.file_composer(host=host, path=path, output_path=output_path))
+                logger.debug(f'Add new file composer process for {host} and path: {path}')
+                self._file_monitors.append(self._start(host=host, payload=payload, path=output_path))
+                logger.debug(f'Add new file monitor process for {host} and path: {path}')
+
+        while True:
+            if not any([handler.is_alive() for handler in self._file_monitors]):
+                for handler in self._file_monitors:
+                    handler.join()
+                for file_collector in self._file_content_collectors:
+                    file_collector.terminate()
+                    file_collector.join()
+                self.clean_tmp_files()
+                break
+            time.sleep(self._time_step)
+        self.check_result()
+
+    @new_process
+    def file_composer(self, host, path, output_path):
+        """Collects the file content of the specified path in the desired host and append it to the output_path file.
+        Simulates the behavior of tail -f and redirect the output to output_path.
+
+        Parameters
+        ----------
+        host : str
+            Hostname.
+        path : str
+            Host file path to be collect.
+        output_path : str
+            Output path of the content collected from the remote host path.
+        """
+        try:
+            truncate_file(os.path.join(self._tmp_path, output_path))
+        except FileNotFoundError:
+            pass
+        logger.debug(f'Starting file composer for {host} and path: {path}. '
+                     f'Composite file in {os.path.join(self._tmp_path, output_path)}')
+        tmp_file = os.path.join(self._tmp_path, output_path)
+        while True:
+            with FileLock(tmp_file):
+                with open(tmp_file, "r+") as file:
+                    content = self.host_manager.get_file_content(host, path).split('\n')
+                    file_content = file.read().split('\n')
+                    for new_line in content:
+                        if new_line == '':
+                            continue
+                        if new_line not in file_content:
+                            file.write(f'{new_line}\n')
+                time.sleep(self._time_step)
+
+    @new_process
+    def _start(self, host, payload, path, encoding=None, error_messages_per_host=None):
+        """Start the file monitoring until the QueueMonitor returns an string or TimeoutError.
+
+        Parameters
+        ----------
+        host : str
+            Hostname
+        payload : list of dict
+            Contains the message to be found and the timeout for it.
+        path : str
+            Path where it must search for the message.
+        encoding : str
+            Encoding of the file.
+        error_messages_per_host : dict
+            Dictionary with hostnames as keys and desired error messages as values
+
+        Returns
+        -------
+        instance of HostMonitor
+        """
+        tailer = FileTailer(os.path.join(self._tmp_path, path), time_step=self._time_step)
+        try:
+            if encoding is not None:
+                tailer.encoding = encoding
+            tailer.start()
+            for case in payload:
+                logger.debug(f'Starting QueueMonitor for {host} and message: {case["regex"]}')
+                monitor = QueueMonitor(tailer.queue, time_step=self._time_step)
+                try:
+                    self._queue.put({host: monitor.start(timeout=case['timeout'],
+                                                         callback=callback_generator(case['regex'])
+                                                         ).result().strip('\n')})
+                except TimeoutError:
+                    try:
+                        self._queue.put({host: error_messages_per_host[host]})
+                    except (KeyError, TypeError):
+                        self._queue.put({
+                            host: TimeoutError(f'Did not found the expected callback in {host}: {case["regex"]}')})
+                logger.debug(f'Finishing QueueMonitor for {host} and message: {case["regex"]}')
+        finally:
+            tailer.shutdown()
+
+        return self
+
+    def result(self):
+        """Get the result of HostMonitor
+
+        Returns
+        -------
+        dict
+            Dict that contains the host as the key and a list of messages as the values
+        """
+        return self._result
+
+    def check_result(self):
+        """Check if a TimeoutError occurred."""
+        logger.debug(f'Checking results...')
+        while not self._queue.empty():
+            result = self._queue.get(block=True)
+            for host, msg in result.items():
+                if isinstance(msg, TimeoutError):
+                    raise msg
+                logger.debug(f'Received from {host} the expected message: {msg}')
+                self._result[host].append(msg)
+
+    def clean_tmp_files(self):
+        """Remove tmp files."""
+        logger.debug(f'Cleaning temporal files...')
+        for file in os.listdir(self._tmp_path):
+            os.remove(os.path.join(self._tmp_path, file))

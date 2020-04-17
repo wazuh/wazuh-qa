@@ -6,39 +6,51 @@ import os
 
 import pytest
 import yaml
+
 from wazuh_testing import global_parameters
 from wazuh_testing.analysis import callback_fim_alert, callback_analysisd_message, validate_analysis_alert, \
     callback_wazuh_db_message
-from wazuh_testing.tools import WAZUH_LOGS_PATH, WAZUH_PATH
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools import ALERT_FILE_PATH, LOG_FILE_PATH, WAZUH_PATH
+from wazuh_testing.tools.monitoring import ManInTheMiddle
 
-# marks
+# Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
-# variables
+# Configurations
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-alerts_json = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.json')
-wazuh_log_monitor = FileMonitor(alerts_json)
 messages_path = os.path.join(test_data_path, 'event_messages.yaml')
 with open(messages_path) as f:
     test_cases = yaml.safe_load(f)
+
+# Variables
+
+log_monitor_paths = [LOG_FILE_PATH, ALERT_FILE_PATH]
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
 analysis_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'queue'))
-monitored_sockets, receiver_sockets = None, None  # These variables will be set in the fixture create_unix_sockets
-monitored_sockets_params = [(wdb_path, 'TCP')]
-receiver_sockets_params = [(analysis_path, 'UDP')]
-analysis_monitor = None
-wdb_monitor = None
+
+receiver_sockets_params = [(analysis_path, 'AF_UNIX', 'UDP')]
+
+mitm_wdb = ManInTheMiddle(address=wdb_path, family='AF_UNIX', connection_protocol='TCP')
+mitm_analysisd = ManInTheMiddle(address=analysis_path, family='AF_UNIX', connection_protocol='UDP')
+# monitored_sockets_params is a List of daemons to start with optional ManInTheMiddle to monitor
+# List items -> (wazuh_daemon: str,(
+#                mitm: ManInTheMiddle
+#                daemon_first: bool))
+# Example1 -> ('wazuh-clusterd', None)              Only start wazuh-clusterd with no MITM
+# Example2 -> ('wazuh-clusterd', (my_mitm, True))   Start MITM and then wazuh-clusterd
+monitored_sockets_params = [('wazuh-db', mitm_wdb, True), ('ossec-analysisd', mitm_analysisd, True)]
+
+receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
 
-# tests
+# Tests
 
 @pytest.mark.parametrize('test_case',
                          [test_case['test_case'] for test_case in test_cases],
                          ids=[test_case['name'] for test_case in test_cases])
-def test_event_messages(configure_mitm_environment_analysisd, create_unix_sockets, wait_for_analysisd_startup,
+def test_event_messages(configure_mitm_environment, connect_to_sockets_module, wait_for_analysisd_startup,
                         test_case: list):
     """Check that every input message in analysisd socket generates the adequate output to wazuh-db socket.
 
@@ -52,10 +64,10 @@ def test_event_messages(configure_mitm_environment_analysisd, create_unix_socket
     """
     for stage in test_case:
         expected = callback_analysisd_message(stage['output'])
-        receiver_sockets[0].send([stage['input']])
-        response = wdb_monitor.start(timeout=global_parameters.default_timeout,
-                                     callback=callback_wazuh_db_message).result()
+        receiver_sockets[0].send(stage['input'])
+        response = monitored_sockets[0].start(timeout=global_parameters.default_timeout,
+                                              callback=callback_wazuh_db_message).result()
         assert response == expected, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1, stage['stage'])
-        alert = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                        callback=callback_fim_alert).result()
+        alert = log_monitors[1].start(timeout=global_parameters.default_timeout,
+                                      callback=callback_fim_alert).result()
         validate_analysis_alert(alert)

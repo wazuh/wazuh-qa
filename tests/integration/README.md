@@ -142,6 +142,7 @@ Finally, copy your `wazuh-qa` repository within your testing environment and you
 Our newest integration tests are located in `wazuh-qa/tests/integration/`. They are organized by capabilities:
 
 - _test_analysisd_
+- _test_cluster_
 - _test_fim_
 - _test_mitre_
 - _test_wazuh_db_
@@ -227,15 +228,16 @@ This is a sample yaml used for `FIM`:
   - sample_tag
   apply_to_modules:
   - sample_module
-  section: syscheck
-  elements:
-  - disabled:
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
       value: 'no'
-  - directories:
+    - directories:
       value: '/sample_directory'
       attributes:
       - check_all: 'yes'
-  - nodiff:
+    - nodiff:
       value: '/sample_directory/nodiff_file'
 ```
 
@@ -273,6 +275,7 @@ wazuh_testing
     └── wazuh_testing
         ├── __init__.py
         ├── analysis.py
+        ├── cluster.py            
         ├── data
         │   ├── event_analysis_schema.json
         │   ├── mitre_event.json
@@ -287,6 +290,7 @@ wazuh_testing
         │   ├── file.py
         │   ├── monitoring.py
         │   ├── services.py
+        │   ├── system.py
         │   └── time.py
         └── wazuh_db.py
 ```

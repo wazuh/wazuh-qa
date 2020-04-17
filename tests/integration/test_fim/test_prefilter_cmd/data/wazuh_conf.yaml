@@ -4,13 +4,14 @@
   - prefilter_cmd
   apply_to_modules:
   - test_prefilter_cmd
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/testdir1"
-      attributes:
-      - FIM_MODE
-  - prefilter_cmd:
-      value: PREFILTER_CMD
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: "/testdir1"
+        attributes:
+        - FIM_MODE
+    - prefilter_cmd:
+        value: PREFILTER_CMD

@@ -1,12 +1,13 @@
 ---
 - apply_to_modules:
   - test_hard_link
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: "/testdir1"
-      attributes:
-      - FIM_MODE
-      - INODE
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: "/testdir1"
+        attributes:
+        - FIM_MODE
+        - INODE
