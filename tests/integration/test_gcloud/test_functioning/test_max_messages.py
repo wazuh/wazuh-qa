@@ -4,10 +4,9 @@
 
 import os
 import pytest
-from google.cloud import pubsub_v1
 
 from wazuh_testing import global_parameters
-from wazuh_testing.gcloud import callback_received_messages_number
+from wazuh_testing.gcloud import callback_received_messages_number, publish
 from wazuh_testing.fim import generate_params
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -70,25 +69,6 @@ def get_configuration(request):
 
 # tests
 
-def publish(id_project, name_topic, credentials, repetitions):
-    if WAZUH_PATH in credentials:
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "{}".format(credentials)
-    else:
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "{}/{}".format(WAZUH_PATH, credentials)
-
-    publisher = pubsub_v1.PublisherClient()
-    topic_path = publisher.topic_path(id_project, name_topic)
-
-    for number in range(0, repetitions):
-        data = u"- DEBUG - Message number {}".format(number)
-        # Data must be a bytestring
-        data = data.encode("utf-8")
-        # Add two attributes, origin and username, to the message
-        future = publisher.publish(
-            topic_path, data, origin="python-sample", username="gcp"
-        )
-
-
 @pytest.mark.parametrize('nmessages', [
     30, 100, 120
 ])
@@ -103,7 +83,7 @@ def test_max_messages(nmessages, get_configuration, configure_environment,
     time_interval = int(''.join(filter(str.isdigit, str_interval)))
 
     # Publish messages to pull them later
-    publish(project_id, topic_name, credentials_file, nmessages)
+    publish(project_id, topic_name, credentials_file, nmessages, "- DEBUG - GCP message")
 
     if nmessages <= max_messages:
         number_pulled = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + time_interval + 5,
