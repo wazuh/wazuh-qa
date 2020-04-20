@@ -74,7 +74,7 @@ def test_file_limit_full(tags_to_apply, get_configuration, configure_environment
     database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                              callback=callback_file_limit_capacity,
                                              error_message='Did not receive expected '
-                                             '"DEBUG: ...: Sending DB 100%% full alert." event').result()
+                                             '"DEBUG: ...: Sending DB 100% full alert." event').result()
 
     if database_state:
         assert database_state == '100', 'Wrong value for full database alert'

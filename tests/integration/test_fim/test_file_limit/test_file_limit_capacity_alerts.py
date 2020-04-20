@@ -86,7 +86,7 @@ def test_file_limit_capacity_alert(percentage, tags_to_apply, get_configuration,
         file_limit_capacity = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                       callback=callback_file_limit_capacity,
                                                       error_message='Did not receive expected '
-                                                      '"DEBUG: ...: Sending DB ...%% full alert." event'
+                                                      '"DEBUG: ...: Sending DB ...% full alert." event'
                                                       ).result()
 
         if file_limit_capacity:
