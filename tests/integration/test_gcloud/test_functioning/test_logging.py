@@ -4,10 +4,9 @@
 
 import os
 import pytest
-from google.cloud import pubsub_v1
 
 from wazuh_testing import global_parameters
-from wazuh_testing.gcloud import callback_detect_all_gcp
+from wazuh_testing.gcloud import callback_detect_all_gcp, publish
 from wazuh_testing.fim import generate_params
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -71,25 +70,6 @@ def get_configuration(request):
 
 # tests
 
-def publish(id_project, name_topic, credentials, repetitions=5):
-    if WAZUH_PATH in credentials:
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "{}".format(credentials)
-    else:
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "{}/{}".format(WAZUH_PATH, credentials)
-
-    publisher = pubsub_v1.PublisherClient()
-    topic_path = publisher.topic_path(id_project, name_topic)
-
-    for number in range(0, repetitions):
-        data = u"- DEBUG - Message number {}".format(number)
-        # Data must be a bytestring
-        data = data.encode("utf-8")
-        # Add two attributes, origin and username, to the message
-        future = publisher.publish(
-            topic_path, data, origin="python-sample", username="gcp"
-        )
-
-
 def test_logging(get_configuration, configure_environment,
                  restart_wazuh, wait_for_gcp_start):
     """
@@ -112,7 +92,7 @@ def test_logging(get_configuration, configure_environment,
         key_words = ['- INFO -', '- DEBUG -', '- WARNING -', '- ERROR -']
 
     # Publish messages to pull them later
-    publish(project_id, topic_name, credentials_file)
+    publish(project_id, topic_name, credentials_file, 5, "- DEBUG - GCP message")
 
     found = 0
     for nevents in range(0, 12):
