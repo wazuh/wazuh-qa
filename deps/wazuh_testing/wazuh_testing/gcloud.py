@@ -7,6 +7,8 @@ import re
 import json
 
 from jsonschema import validate
+from wazuh_testing.tools import WAZUH_PATH
+from google.cloud import pubsub_v1
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
@@ -126,3 +128,20 @@ def callback_detect_schedule_read_err(line):
     if match:
         return line
     return None
+
+
+def publish(id_project, name_topic, credentials, repetitions=1, msg=None):
+    if WAZUH_PATH in credentials:
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "{}".format(credentials)
+    else:
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "{}/{}".format(WAZUH_PATH, credentials)
+
+    publisher = pubsub_v1.PublisherClient()
+    topic_path = publisher.topic_path(id_project, name_topic)
+
+    for number in range(repetitions):
+        data = u"{}".format(msg)
+        # Data must be a bytestring
+        data = data.encode("utf-8")
+        # Add two attributes, origin and username, to the message
+        future = publisher.publish(topic_path, data, origin="python-sample", username="gcp")
