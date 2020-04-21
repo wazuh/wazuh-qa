@@ -202,7 +202,6 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
         assert file_name in full_log
 
 
-
 def validate_analysis_integrity_state(event):
     """Check if an Analysis integrity message is properly formatted.
 
