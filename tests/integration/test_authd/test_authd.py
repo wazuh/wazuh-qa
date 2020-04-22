@@ -7,10 +7,11 @@ import os
 import pytest
 import socket
 import ssl
+import yaml
 
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import WAZUH_PATH
-from conftest import load_tests
+
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -18,9 +19,17 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 # Configurations
 
+def load_tests(path):
+    """ Loads a yaml file from a path 
+    Retrun 
+    ----------
+    yaml structure
+    """
+    with open(path) as f:
+        return yaml.safe_load(f)
+
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 message_tests = load_tests(os.path.join(test_data_path, 'enroll_messages.yaml'))
-
 
 
 # Variables
