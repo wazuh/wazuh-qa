@@ -1,18 +1,8 @@
 import pytest
-import yaml
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 
-def load_tests(path):
-    """ Loads a yaml file from a path 
-    Retrun 
-    ----------
-    yaml structure
-    """
-    with open(path) as f:
-        return yaml.safe_load(f)
-
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def wait_for_agentd_startup(request):
     """Wait until agentd has begun"""
     def callback_agentd_startup(line):

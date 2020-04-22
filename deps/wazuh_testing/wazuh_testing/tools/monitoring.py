@@ -221,6 +221,7 @@ class SocketController:
         self.ssl = False
         self.connection_protocol = connection_protocol
         self.timeout = timeout
+        self.ciphers = None
 
         # Set socket family
         if family == 'AF_UNIX':
@@ -231,13 +232,13 @@ class SocketController:
             raise TypeError(f'Invalid family type detected: {family}. Valid ones are AF_UNIX or AF_INET')
 
         # Set socket protocol
-        if connection_protocol.lower() == 'tcp' or connection_protocol.lower() == 'ssl_tlsv1_2':
+        if connection_protocol.lower() == 'tcp' or 'ssl' in connection_protocol.lower():
             self.protocol = socket.SOCK_STREAM
         elif connection_protocol.lower() == 'udp':
             self.protocol = socket.SOCK_DGRAM
         else:
             raise TypeError(f'Invalid connection protocol detected: {connection_protocol.lower()}. '
-                            f'Valid ones are TCP or UDP')
+                            f'Valid ones are TCP, UDP or SSL versions')
 
         self.open()
 
@@ -247,9 +248,18 @@ class SocketController:
         # Create socket object
         self.sock = socket.socket(family=self.family, type=self.protocol)
 
-        if self.connection_protocol.lower() == 'ssl_tlsv1_2':
+        if 'ssl' in self.connection_protocol.lower():
+            versions_maps = {
+                "ssl_v2_3"    : ssl.PROTOCOL_SSLv23,
+                "ssl_tls"     : ssl.PROTOCOL_TLS,
+                "ssl_tlsv1_1" : ssl.PROTOCOL_TLSv1,
+                "ssl_tlsv1_2" : ssl.PROTOCOL_TLSv1_2,
+            }
+            ssl_version = versions_maps.get(self.connection_protocol.lower(), None)
+            if ssl_version is None:
+                raise TypeError(f'Invalid or unsupported SSL version specified, valid versions are: {list(versions_maps.keys())}')
             # Wrap socket into ssl
-            self.sock = ssl.wrap_socket(self.sock, ssl_version=ssl.PROTOCOL_TLSv1_2, ciphers="HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH")
+            self.sock = ssl.wrap_socket(self.sock, ssl_version=ssl_version, ciphers=self.ciphers)
             self.ssl = True
 
         # Connect only if protocol is TCP
@@ -320,6 +330,20 @@ class SocketController:
                         break
         
         return output
+
+    def set_ssl_configuration(self, ciphers="HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH",
+        connection_protocol="SSL_TLSv1_2"):
+        """Set SSL configurations (use on SSL socket only). Should be set before opening the socket
+
+        Parameters
+        ----------
+        ciphers: string
+            String with supported ciphers
+
+        """
+        self.ciphers = ciphers
+        self.connection_protocol = connection_protocol
+        return
 
     def __enter__(self):
         return self
