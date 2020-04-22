@@ -18,6 +18,7 @@ import socketserver
 import sys
 import threading
 import time
+import ssl
 from collections import defaultdict
 from copy import copy
 from multiprocessing import Process, Manager
@@ -207,7 +208,7 @@ class SocketController:
         family : str
             Family type of socket to connect to, AF_UNIX for unix sockets or AF_INET for port sockets.
         connection_protocol : str
-            Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM).
+            Flag that indicates if the connection is TCP (SOCK_STREAM), UDP (SOCK_DGRAM) or SSL_TLSv1_2.
         timeout : int, optional
             Socket's timeout, 0 for non-blocking mode.
 
@@ -217,6 +218,9 @@ class SocketController:
             If the socket connection failed.
         """
         self.address = address
+        self.ssl = False
+        self.connection_protocol = connection_protocol
+        self.timeout = timeout
 
         # Set socket family
         if family == 'AF_UNIX':
@@ -227,7 +231,7 @@ class SocketController:
             raise TypeError(f'Invalid family type detected: {family}. Valid ones are AF_UNIX or AF_INET')
 
         # Set socket protocol
-        if connection_protocol.lower() == 'tcp':
+        if connection_protocol.lower() == 'tcp' or connection_protocol.lower() == 'ssl_tlsv1_2':
             self.protocol = socket.SOCK_STREAM
         elif connection_protocol.lower() == 'udp':
             self.protocol = socket.SOCK_DGRAM
@@ -235,13 +239,23 @@ class SocketController:
             raise TypeError(f'Invalid connection protocol detected: {connection_protocol.lower()}. '
                             f'Valid ones are TCP or UDP')
 
+        self.open()
+
+
+    def open(self):
+        """Opens sokcet """
         # Create socket object
         self.sock = socket.socket(family=self.family, type=self.protocol)
+
+        if self.connection_protocol.lower() == 'ssl_tlsv1_2':
+            # Wrap socket into ssl
+            self.sock = ssl.wrap_socket(self.sock, ssl_version=ssl.PROTOCOL_TLSv1_2, ciphers="HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH")
+            self.ssl = True
 
         # Connect only if protocol is TCP
         if self.protocol == socket.SOCK_STREAM:
             try:
-                self.sock.settimeout(timeout)
+                self.sock.settimeout(self.timeout)
                 self.sock.connect(self.address)
             except socket.timeout as e:
                 raise TimeoutError(f'Could not connect to socket {self.address} of family {self.family}')
@@ -304,7 +318,7 @@ class SocketController:
                         output += self.sock.recv(4096, socket.MSG_DONTWAIT)
                     except:
                         break
-
+        
         return output
 
     def __enter__(self):
