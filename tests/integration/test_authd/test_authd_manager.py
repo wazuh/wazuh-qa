@@ -21,7 +21,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'manager_conf.yaml')
-params = [{'force_insert': 'yes'}]
+params = [{'force_insert':'yes'}]
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params)
 
 
@@ -48,16 +48,14 @@ def get_configuration(request):
 # Tests
 
 @pytest.mark.parametrize('message, output, stage', [
-    ("OSSEC A:'user1'", 'any' , 'user1 auth default'),
+    ("OSSEC A:'user1'", 'any' , 'user1 auth default with name'),
 ])
 def test_ossec_auth_manager_create_key(message, output, stage, get_configuration, configure_environment, configure_mitm_environment, 
                                         connect_to_sockets_module, wait_for_agentd_startup):
-    """Check that every input message in authd port generates the adequate output
+    """Check that manager generate a key for agent with name request
 
     Parameters
     ----------
-    test_case : list
-        List of test_case stages (dicts with input, output and stage keys).
     """    
     
     # Reopen socket (socket is closed by maanger after sending message with client key)
@@ -75,15 +73,11 @@ def test_ossec_auth_manager_create_key(message, output, stage, get_configuration
 ])
 def test_ossec_auth_manager_create_key_with_IP(message, output, stage, get_configuration, configure_environment, configure_mitm_environment, 
                                                         connect_to_sockets_module, wait_for_agentd_startup):
-    """Check that every input message in authd port generates the adequate output
+    """Check that manager generate a key for agent with IP request
 
     Parameters
     ----------
-    test_case : list
-        List of test_case stages (dicts with input, output and stage keys).
     """    
-    
-    
     # Reopen socket (socket is closed by maanger after sending message with client key)
     receiver_sockets[0].open()     
     receiver_sockets[0].send(message, size=False)

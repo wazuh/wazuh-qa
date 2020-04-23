@@ -32,3 +32,30 @@
         value: '/var/ossec/etc/sslmanager.key'
     - ssl_auto_negotiate:
         value: 'no'
+- tags:
+  - master
+  apply_to_modules:
+  - test_auth_master
+  sections:
+  - section: cluster
+    elements:
+    - name:
+        value: wazuh
+    - node_name:
+        value: master1
+    - node_type:
+        value: master
+    - key:
+        value: FERNET_KEY
+    - port:
+        value: 1516
+    - bind_addr:
+        value: 0.0.0.0
+    - nodes:
+        elements:
+          - node:
+              value: 127.0.0.1
+    - hidden:
+        value: 'no'
+    - disabled:
+        value: 'no'
