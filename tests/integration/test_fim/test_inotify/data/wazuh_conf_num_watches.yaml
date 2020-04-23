@@ -4,11 +4,12 @@
   - num_watches_conf
   apply_to_modules:
   - test_num_watches
-  section: syscheck
-  elements:
-  - disabled:
-      value: 'no'
-  - directories:
-      value: TEST_DIRECTORIES
-      attributes:
-      - FIM_MODE
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - FIM_MODE
