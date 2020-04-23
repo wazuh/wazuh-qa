@@ -7,10 +7,10 @@ import pytest
 import datetime
 
 from wazuh_testing import global_parameters
-from wazuh_testing.gcloud import callback_detect_start_fetching_logs
+from wazuh_testing.gcloud import callback_detect_start_fetching_logs, callback_detect_start_gcp_sleep
 from wazuh_testing.fim import generate_params
 from wazuh_testing.tools import LOG_FILE_PATH
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.time import TimeMachine
 from datetime import timedelta
@@ -47,7 +47,7 @@ weekDays = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", 
 wday = weekDays[today.weekday()]
 
 now = datetime.datetime.now()
-now_2m = now + datetime.timedelta(minutes=1, seconds=30)
+now_2m = now + datetime.timedelta(minutes=2, seconds=00)
 time = now_2m.strftime("%H:%M")
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -87,25 +87,34 @@ def test_schedule_options(get_configuration, configure_environment,
     or month and time.
     """
     tags_to_apply = get_configuration['tags'][0]
-    check_apply_test({'ossec_day_conf', 'ossec_wday_conf', 'ossec_time_conf'}, get_configuration['tags'])
 
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_detect_start_fetching_logs).result()
         raise AttributeError(f'Unexpected event {event}')
 
+    test_today = datetime.date.today()
+    if tags_to_apply == 'ossec_day_conf':
+        if day <= 28:
+            assert day == test_today.day
+    if tags_to_apply == 'ossec_wday_conf':
+        assert wday == weekDays[test_today.weekday()]
+
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 120,
                             callback=callback_detect_start_fetching_logs,
                             accum_results=1,
                             error_message='Did not receive expected '
                                           '"Starting fetching of logs" event').result()
-    passed_seconds = (datetime.datetime.now() - now).seconds
-    TimeMachine.travel_to_future(timedelta(seconds=passed_seconds / 2), back_in_time=True)
-
-    if tags_to_apply == "ossec_time_conf":
-        TimeMachine.travel_to_future(timedelta(hours=23, minutes=59, seconds=30))
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 120,
-                                callback=callback_detect_start_fetching_logs,
-                                accum_results=1,
-                                error_message='Did not receive expected '
-                                              '"Starting fetching of logs" event').result()
+    seconds_log = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 60,
+                                          callback=callback_detect_start_gcp_sleep,
+                                          accum_results=1,
+                                          error_message='Did not receive expected '
+                                                        '"Sleeping for x seconds" event').result()
+    seconds = (int(seconds_log)-20)
+    TimeMachine.travel_to_future(timedelta(seconds=seconds))
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 60,
+                            callback=callback_detect_start_fetching_logs,
+                            accum_results=1,
+                            error_message='Did not receive expected '
+                                          '"Starting fetching of logs" event').result()
+    TimeMachine.travel_to_future(timedelta(seconds=seconds+80-86400), back_in_time=True)
