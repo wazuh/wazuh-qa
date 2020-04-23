@@ -45,6 +45,14 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
+# Functions
+
+
+def extra_configuration_before_yield():
+    """Generate files to fill database"""
+    for i in range(0, int(file_limit_list[-1]) + 10):
+        create_file(REGULAR, testdir1, f'test{i}')
+
 # Tests
 
 
@@ -61,9 +69,6 @@ def test_file_limit_values(tags_to_apply, get_configuration, configure_environme
         Run test if matches with a configuration identifier, skip otherwise.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-
-    for i in range(0, int(get_configuration['metadata']['file_limit']) + 10):
-        create_file(REGULAR, testdir1, f'test{i}')
 
     file_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                callback=callback_value_file_limit,
