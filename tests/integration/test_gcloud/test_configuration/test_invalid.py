@@ -60,6 +60,7 @@ def get_configuration(request):
 
 # tests
 
+@pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
 def test_invalid(get_configuration, configure_environment, reset_ossec_log):
     """
     Checks if an invalid configuration is detected
