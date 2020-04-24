@@ -46,11 +46,13 @@ Also, there are optional parameters related to schedule:
 ## Configuration example
 To use this integration, it is necessary to add the configuration to ossec.conf:
 ```shell script
+<gcp-pubsub>
   <project_id>wazuh-project-123</project_id>
   <subscription_name>wazuh-integration</subscription_name>
   <credentials_file>credentials.json</credentials_file>
   <max_messages>150</max_messages>
   <interval>2h</interval>
+</gcp-pubsub>
 ```
 _credentials_file_ option accepts relative and absolute path.
 ## Setting up a test environment
@@ -91,14 +93,14 @@ yum groupinstall "Development Tools" -y
 yum install python36 python36-pip python36-devel -y
 
 # Install Python libraries
-pip3 install google-cloud-pubsub pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro pandas pytest-html==2.0.1 numpydoc==0.9.2
+pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro pandas pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 - Add some internal options and restart
 
 ```shell script
-# Enable debug
-echo 'wazuh_modules.debug=1' >> $wazuh_path/etc/local_internal_options.conf
+# Enable debug 2
+echo 'wazuh_modules.debug=2' >> $wazuh_path/etc/local_internal_options.conf
 echo 'analysisd.debug=2' >> $wazuh_path/etc/local_internal_options.conf
 
 # Avoid agent disconnections when travelling in time (only for agents)
@@ -125,15 +127,15 @@ brew install python3
 brew install autoconf automake libtool
 
 # Install Python libraries
-pip3 install google-cloud-pubsub pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro pandas pytest-html==2.0.1 numpydoc==0.9.2
+pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro pandas pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 - Add some internal options and restart
 
 ```shell script
 
-# Enable debug
-echo 'wazuh_modules.debug=1' >> /Library/Ossec/etc/local_internal_options.conf
+# Enable debug 2
+echo 'wazuh_modules.debug=2' >> /Library/Ossec/etc/local_internal_options.conf
 echo 'analysisd.debug=2' >> /Library/Ossec/etc/local_internal_options.conf
 
 # Avoid agent disconnections when travelling in time
@@ -190,7 +192,7 @@ Also, these integration tests are heavily based on [fixtures](https://docs.pytes
 #### gcp-pubsub integration tests example
 
 ```shell script
-python3 -m pytest -vvx --gcp-project-id=wazuh-project-123 --gcp-subscription-name=wazuh-integration --gcp-credentials-file=credentials.json test_gcloud/test_pull_on_start.py
+python3 -m pytest -vvx --gcp-project-id=wazuh-project-123 --gcp-subscription-name=wazuh-integration --gcp-credentials-file=credentials.json test_gcloud/test_functioning/test_pull_on_start.py
 
 ======================================== test session starts =========================================
 platform linux -- Python 3.6.9, pytest-5.3.5, py-1.5.2, pluggy-0.13.1 -- /usr/bin/python3
@@ -200,9 +202,8 @@ rootdir: /home/daniel/Wazuh/wazuh-qa/tests/integration, inifile: pytest.ini
 plugins: metadata-1.8.0, html-2.0.1
 collected 2 items                                                                                    
 
-test_gcloud/test_pull_on_start.py::test_pull_on_start[get_configuration0] PASSED               [ 50%]
-test_gcloud/test_pull_on_start.py::test_pull_on_start[get_configuration1] PASSED               [100%]
+test_gcloud/test_functioning/test_pull_on_start.py::test_pull_on_start[get_configuration0] PASSED               [ 50%]
+test_gcloud/test_functioning/test_pull_on_start.py::test_pull_on_start[get_configuration1] PASSED               [100%]
 
 ========================================= 2 passed in 50.45s =========================================
-
 ```
