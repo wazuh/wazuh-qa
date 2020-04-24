@@ -5,6 +5,7 @@
 import os
 import pytest
 import time
+import datetime
 
 from wazuh_testing import global_parameters
 from wazuh_testing.gcloud import callback_detect_start_fetching_logs, callback_detect_start_gcp_sleep
@@ -76,12 +77,21 @@ def test_pull_on_start(get_configuration, configure_environment,
     if 'm' in str_interval:
         time_interval *= 60
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            callback=callback_detect_start_gcp_sleep,
-                            accum_results=1,
-                            error_message='Did not receive expected '
-                                          '"Sleeping until ..." event').result()
+    next_scan_time_log = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                                 callback=callback_detect_start_gcp_sleep,
+                                                 accum_results=1,
+                                                 error_message='Did not receive expected '
+                                                               '"Sleeping until ..." event').result()
     start_time = time.time()
+
+    test_now = datetime.datetime.now()
+    next_scan_time_spl = next_scan_time_log.split(" ")
+    date = next_scan_time_spl[0].split("/")
+    hour = next_scan_time_spl[1].split(":")
+    next_scan_time = datetime.datetime(int(date[0]), int(date[1]), int(date[2]), int(hour[0]), int(hour[1]),
+                                       int(hour[2]))
+    diff_time_log = int((next_scan_time - test_now).total_seconds())
+    assert time_interval - diff_time_log <= 10
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout + time_interval,
                             callback=callback_detect_start_fetching_logs,
