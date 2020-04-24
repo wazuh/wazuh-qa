@@ -6,6 +6,7 @@ import os
 import pytest
 import json
 import socket
+import sys
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import generate_params
@@ -69,7 +70,8 @@ def get_configuration(request):
 
 
 # tests
-def gcp_remote_configuration(component_name, config):
+
+def get_remote_configuration(component_name, config):
     socket_path = os.path.join(WAZUH_PATH, 'queue', 'ossec')
     dest_socket = os.path.join(socket_path, component_name)
     command = f"getconfig {config}"
@@ -100,6 +102,7 @@ def gcp_remote_configuration(component_name, config):
     return remote_configuration_gcp
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
 def test_remote_configuration(get_configuration, configure_environment,
                               restart_wazuh, wait_for_gcp_start):
     """
@@ -132,7 +135,7 @@ def test_remote_configuration(get_configuration, configure_environment,
         gcp_xml[xml_list.index('interval')]['interval']['value'] = 604800
 
     # get remote configuration
-    gcp_remote = gcp_remote_configuration(component, configuration)
+    gcp_remote = get_remote_configuration(component, configuration)
 
     # compare gcp_json with gcp_xml
     for remote_option in gcp_remote:
