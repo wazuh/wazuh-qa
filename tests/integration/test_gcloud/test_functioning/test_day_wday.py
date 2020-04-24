@@ -48,7 +48,11 @@ wday = weekDays[today.weekday()]
 
 now = datetime.datetime.now()
 now_2m = now + datetime.timedelta(minutes=2, seconds=00)
-time = now_2m.strftime("%H:%M")
+now_3m = now + datetime.timedelta(minutes=3, seconds=00)
+now_4m = now + datetime.timedelta(minutes=4, seconds=00)
+day_time = now_2m.strftime("%H:%M")
+wday_time = now_3m.strftime("%H:%M")
+time = now_4m.strftime("%H:%M")
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -60,8 +64,8 @@ monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': project_id, 'SUBSCRIPTION_NAME': subscription_name,
                'CREDENTIALS_FILE': credentials_file, 'INTERVAL': interval,
                'PULL_ON_START': pull_on_start, 'MAX_MESSAGES': max_messages,
-               'LOGGING': logging, 'DAY': day, 'WDAY': wday, 'TIME': time,
-               'MODULE_NAME': __name__}
+               'LOGGING': logging, 'DAY': day, 'WDAY': wday, 'DAY_TIME': day_time,
+               'WDAY_TIME': wday_time, 'TIME': time,'MODULE_NAME': __name__}
 
 p, m = generate_params(extra_params=conf_params,
                        modes=monitoring_modes)
@@ -105,16 +109,25 @@ def test_schedule_options(get_configuration, configure_environment,
                             accum_results=1,
                             error_message='Did not receive expected '
                                           '"Starting fetching of logs" event').result()
-    seconds_log = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 60,
-                                          callback=callback_detect_start_gcp_sleep,
-                                          accum_results=1,
-                                          error_message='Did not receive expected '
-                                                        '"Sleeping for x seconds" event').result()
-    seconds = (int(seconds_log)-20)
+    next_scan_time_log = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 60,
+                                                 callback=callback_detect_start_gcp_sleep,
+                                                 accum_results=1,
+                                                 error_message='Did not receive expected '
+                                                               '"Sleeping until ..." event').result()
+    next_scan_time_spl = next_scan_time_log.split(" ")
+    date = next_scan_time_spl[0].split("/")
+    hour = next_scan_time_spl[1].split(":")
+
+    test_now = datetime.datetime.now()
+    next_scan_time = datetime.datetime(int(date[0]), int(date[1]), int(date[2]), int(hour[0]), int(hour[1]),
+                                       int(hour[2]))
+    diff_time = (next_scan_time - test_now).total_seconds()
+    seconds = (int(diff_time - 20))
+
     TimeMachine.travel_to_future(timedelta(seconds=seconds))
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 60,
                             callback=callback_detect_start_fetching_logs,
                             accum_results=1,
                             error_message='Did not receive expected '
                                           '"Starting fetching of logs" event').result()
-    TimeMachine.travel_to_future(timedelta(seconds=seconds+80-86400), back_in_time=True)
+    TimeMachine.travel_to_future(timedelta(seconds=seconds + 20 - 172800), back_in_time=True)
