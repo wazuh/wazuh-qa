@@ -20,7 +20,7 @@
     - interval:
         value: 'INTERVAL'
     - time:
-        value: 'TIME'
+        value: 'DAY_TIME'
     - max_messages:
         value: 'MAX_MESSAGES'
     - logging:
@@ -46,7 +46,7 @@
     - interval:
         value: 'INTERVAL'
     - time:
-        value: 'TIME'
+        value: 'WDAY_TIME'
     - max_messages:
         value: 'MAX_MESSAGES'
     - logging:
