@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import re
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
@@ -20,8 +21,10 @@ def callback_detect_start_fetching_logs(line):
 
 
 def callback_detect_start_gcp_sleep(line):
-    if 'wm_gcp_main(): DEBUG: Sleeping for ' in line:
-        return line
+    match = re.match(r'.*wm_gcp_main\(\): DEBUG: Sleeping until: (\S+ \S+)', line)
+
+    if match:
+        return match.group(1)
     return None
 
 
