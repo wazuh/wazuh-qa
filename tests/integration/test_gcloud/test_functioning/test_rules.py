@@ -4,6 +4,7 @@
 
 import os
 import pytest
+import sys
 
 from wazuh_testing import global_parameters
 from wazuh_testing.gcloud import callback_detect_gcp_alert, validate_gcp_event, publish
@@ -70,6 +71,7 @@ def get_configuration(request):
 
 # tests
 
+@pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
 def test_rules(get_configuration, configure_environment,
                restart_wazuh, wait_for_gcp_start):
     """
