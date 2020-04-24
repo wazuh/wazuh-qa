@@ -87,7 +87,6 @@
         value: 'no'
     - directories:
         value: TEST_DIRECTORIES
-        attributes:
     - file_limit:
         elements:
         - enabled:
