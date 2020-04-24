@@ -6,6 +6,7 @@ import os
 import pytest
 import time
 import datetime
+import sys
 
 from wazuh_testing import global_parameters
 from wazuh_testing.gcloud import callback_detect_start_fetching_logs, callback_detect_start_gcp_sleep
@@ -66,6 +67,7 @@ def get_configuration(request):
 
 # tests
 
+@pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
 def test_pull_on_start(get_configuration, configure_environment,
                        restart_wazuh, wait_for_gcp_start):
     """
