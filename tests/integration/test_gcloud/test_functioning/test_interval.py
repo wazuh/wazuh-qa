@@ -75,14 +75,13 @@ def test_pull_on_start(get_configuration, configure_environment,
     time_interval = int(''.join(filter(str.isdigit, str_interval)))
     if 'm' in str_interval:
         time_interval *= 60
-    seconds_log = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                          callback=callback_detect_start_gcp_sleep,
-                                          accum_results=1,
-                                          error_message='Did not receive expected '
-                                                        '"Sleeping for x seconds" event').result()
-    start_time = time.time()
 
-    assert time_interval - int(seconds_log) <= 10
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                            callback=callback_detect_start_gcp_sleep,
+                            accum_results=1,
+                            error_message='Did not receive expected '
+                                          '"Sleeping until ..." event').result()
+    start_time = time.time()
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout + time_interval,
                             callback=callback_detect_start_fetching_logs,
