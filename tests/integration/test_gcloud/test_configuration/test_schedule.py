@@ -4,6 +4,7 @@
 
 import os
 import pytest
+import sys
 
 from wazuh_testing import global_parameters
 from wazuh_testing.gcloud import callback_detect_schedule_validate_parameters_warn
@@ -58,6 +59,7 @@ def get_configuration(request):
 
 # tests
 
+@pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
 def test_schedule(get_configuration, configure_environment, restart_wazuh):
     """
     When day option is used, interval has to be a multiple of one month.
