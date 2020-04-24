@@ -9,8 +9,7 @@ import sys
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, callback_num_inotify_watches, generate_params, check_time_travel, \
-                                detect_initial_scan
+from wazuh_testing.fim import LOG_FILE_PATH, callback_num_inotify_watches, generate_params, detect_initial_scan
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -136,10 +135,8 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
         elif decreases_num_watches and rename_folder:
             os.rename(testdir1, os.path.join(PREFIX, 'changed_name'))
 
-    check_time_travel(True)
-
     # Check that the number of inotify watches is correct after modifying the folder
-    num_watches = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+    num_watches = wazuh_log_monitor.start(timeout=40,
                                           callback=callback_num_inotify_watches,
                                           error_message='Did not receive expected '
                                           '"Folders monitored with real-time engine: ..." event'
