@@ -86,7 +86,7 @@ def test_pull_on_start(get_configuration, configure_environment,
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                 callback=callback_detect_start_gcp_sleep,
                                 error_message='Did not receive expected '
-                                              '"Sleeping for x seconds" event')
+                                              '"Sleeping until ..." event')
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                             callback=callback_detect_start_fetching_logs)
