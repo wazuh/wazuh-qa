@@ -81,20 +81,14 @@ def test_file_limit_full(tags_to_apply, get_configuration, configure_environment
 
     create_file(REGULAR, testdir1, 'file_full', content='content')
 
-    check_time_travel(True)
-
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            callback=callback_file_limit_full_database,
+    wazuh_log_monitor.start(timeout=40, callback=callback_file_limit_full_database,
                             error_message='Did not receive expected '
                             '"DEBUG: ...: Couldn\'t insert \'...\' entry into DB. The DB is full, ..." event')
 
-    entries, path_count = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                  callback=callback_entries_path_count,
+    entries, path_count = wazuh_log_monitor.start(timeout=40, callback=callback_entries_path_count,
                                                   error_message='Did not receive expected '
                                                                 '"Fim inode entries: ..., path count: ..." event'
                                                   ).result()
-
-    check_time_travel(True, monitor=wazuh_log_monitor)
 
     if sys.platform != 'win32':
         if entries and path_count:
