@@ -197,7 +197,7 @@ class FileMonitor:
 
 class SocketController:
 
-    def __init__(self, address, family='AF_UNIX', connection_protocol='TCP', timeout=30):
+    def __init__(self, address, family='AF_UNIX', connection_protocol='TCP', timeout=30, open_at_start=True):
         """Create a new unix socket or connect to a existing one.
 
         Parameters
@@ -211,6 +211,8 @@ class SocketController:
             Flag that indicates if the connection is TCP (SOCK_STREAM), UDP (SOCK_DGRAM) or SSL_TLSv1_2.
         timeout : int, optional
             Socket's timeout, 0 for non-blocking mode.
+        open_at_start : boolean
+            Defines if the socket is opened at start or not. Default True
 
         Raises
         ------
@@ -221,7 +223,10 @@ class SocketController:
         self.ssl = False
         self.connection_protocol = connection_protocol
         self.timeout = timeout
+        # SSL options
         self.ciphers = None
+        self.certificate = None
+        self.keyfile = None
 
         # Set socket family
         if family == 'AF_UNIX':
@@ -240,7 +245,8 @@ class SocketController:
             raise TypeError(f'Invalid connection protocol detected: {connection_protocol.lower()}. '
                             f'Valid ones are TCP, UDP or SSL versions')
 
-        self.open()
+        if(open_at_start):
+            self.open()
 
 
     def open(self):
@@ -259,7 +265,8 @@ class SocketController:
             if ssl_version is None:
                 raise TypeError(f'Invalid or unsupported SSL version specified, valid versions are: {list(versions_maps.keys())}')
             # Wrap socket into ssl
-            self.sock = ssl.wrap_socket(self.sock, ssl_version=ssl_version, ciphers=self.ciphers)
+            self.sock = ssl.wrap_socket(self.sock, ssl_version=ssl_version, ciphers=self.ciphers,
+                    certfile=self.certificate, keyfile=self.keyfile)
             self.ssl = True
 
         # Connect only if protocol is TCP
@@ -332,17 +339,24 @@ class SocketController:
         return output
 
     def set_ssl_configuration(self, ciphers="HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH",
-        connection_protocol="SSL_TLSv1_2"):
+        connection_protocol="SSL_TLSv1_2", certificate=None, keyfile=None):
         """Set SSL configurations (use on SSL socket only). Should be set before opening the socket
 
         Parameters
         ----------
         ciphers: string
             String with supported ciphers
-
+        connection_protocol: string
+            ssl version to be used
+        certificate (optional): path
+            Path to the ssl certificate
+        keyfile (optional): path
+            Path to the ssl key
         """
         self.ciphers = ciphers
         self.connection_protocol = connection_protocol
+        self.certificate = certificate
+        self.keyfile = keyfile
         return
 
     def __enter__(self):

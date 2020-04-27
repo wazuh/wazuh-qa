@@ -15,4 +15,4 @@
     input: "OSSEC A:'user2' G:Group1"
     output: "ERROR: Invalid group name"
     stage: "default | user2 enrollment"
-    
+
