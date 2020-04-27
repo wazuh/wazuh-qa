@@ -98,13 +98,6 @@ def test_schedule_options(get_configuration, configure_environment,
                                         callback=callback_detect_start_fetching_logs).result()
         raise AttributeError(f'Unexpected event {event}')
 
-    test_today = datetime.date.today()
-    if tags_to_apply == 'ossec_day_conf':
-        if day <= 28:
-            assert day == test_today.day
-    if tags_to_apply == 'ossec_wday_conf':
-        assert wday == weekDays[test_today.weekday()]
-
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 120,
                             callback=callback_detect_start_fetching_logs,
                             accum_results=1,
@@ -126,6 +119,14 @@ def test_schedule_options(get_configuration, configure_environment,
     seconds = (int(diff_time - 20))
 
     TimeMachine.travel_to_future(timedelta(seconds=seconds))
+
+    test_today = datetime.date.today()
+    if tags_to_apply == 'ossec_day_conf':
+        if day <= 28:
+            assert day == test_today.day
+    if tags_to_apply == 'ossec_wday_conf':
+        assert wday == weekDays[test_today.weekday()]
+
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 60,
                             callback=callback_detect_start_fetching_logs,
                             accum_results=1,
