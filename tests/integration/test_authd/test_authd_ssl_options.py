@@ -35,11 +35,11 @@ def load_tests(path):
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-ssl_configuration_tests = load_tests(os.path.join(test_data_path, 'enroll_ssl_tests.yaml'))
+ssl_configuration_tests = load_tests(os.path.join(test_data_path, 'enroll_ssl_options_tests.yaml'))
 
+# Ossec.conf configurations
 DEFAULT_CIPHERS = "HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH"
 DEFAULT_AUTO_NEGOTIATE = 'no'
-
 conf_params = {'CIPHERS' : [], 'SSL_AUTO_NEGOTIATE' : []}
 
 for case in ssl_configuration_tests:
@@ -47,8 +47,10 @@ for case in ssl_configuration_tests:
     conf_params['SSL_AUTO_NEGOTIATE'].append(case.get('SSL_AUTO_NEGOTIATE', DEFAULT_AUTO_NEGOTIATE))
 
 p, m = generate_params(extra_params=conf_params, modes=['scheduled']*len(ssl_configuration_tests))
-
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+
+# Certifcates configurations
+
 
 # Variables
 log_monitor_paths = []
@@ -88,7 +90,6 @@ def override_wazuh_conf(configuration):
     log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=30, callback=callback_agentd_startup)
     
-#@pytest.mark.parametrize('test_case', [case['test_case'] for case in ssl_configuration_tests])
 def test_ossec_auth_configurations(get_configuration, configure_environment, configure_mitm_environment):
     """Check that every input message in authd port generates the adequate output
 
@@ -108,7 +109,7 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
     override_wazuh_conf(get_configuration)
     for config in test_case:
         address, family, connection_protocol = receiver_sockets_params[0]
-        SSL_socket = SocketController(address, family=family, connection_protocol=connection_protocol)
+        SSL_socket = SocketController(address, family=family, connection_protocol=connection_protocol, open_at_start=False)
         ciphers = config['ciphers']
         protocol = config['protocol']
         SSL_socket.set_ssl_configuration(ciphers=ciphers, connection_protocol=protocol)
