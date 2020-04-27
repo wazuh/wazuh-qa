@@ -11,15 +11,15 @@
     - port:
         value: 1515
     - use_source_ip:
-        value: 'no'
+        value: USE_SOURCE_IP
     - force_insert:
-        value: force_insert
+        value: FORCE_INSERT
     - force_time:
         value: 0
     - purge:
         value: 'yes'
     - use_password:
-        value: 'no'
+        value: USE_PASSWORD
     - limit_maxagents:
         value: 'yes'
     - ciphers:
@@ -31,31 +31,4 @@
     - ssl_manager_key:
         value: '/var/ossec/etc/sslmanager.key'
     - ssl_auto_negotiate:
-        value: 'no'
-- tags:
-  - master
-  apply_to_modules:
-  - test_auth_master
-  sections:
-  - section: cluster
-    elements:
-    - name:
-        value: wazuh
-    - node_name:
-        value: master1
-    - node_type:
-        value: master
-    - key:
-        value: FERNET_KEY
-    - port:
-        value: 1516
-    - bind_addr:
-        value: 0.0.0.0
-    - nodes:
-        elements:
-          - node:
-              value: 127.0.0.1
-    - hidden:
-        value: 'no'
-    - disabled:
         value: 'no'

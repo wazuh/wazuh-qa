@@ -1,0 +1,224 @@
+---
+  -
+    name: "Register with Default config"
+    description: "Default manager configuration"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1'"
+      output: "OSSEC K:'"
+      clean_client_keys: "yes"
+      insert_prev_agent_same_name: "no"
+
+  -
+    name: "Try register duplicated agent name"
+    description: "Check for register an agent with repeated name and force_insert disabled: rejected"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1'"
+      output: "ERROR: Duplicated agent name: "
+      clean_client_keys: "yes"
+      insert_prev_agent_same_name: "yes"
+
+    FORCE_INSERT: "no"
+  -
+    name: "Overwrite agent name"
+    description: "Check for register an agent with repeated name and force_insert enabled: registered"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1'"
+      output: "OSSEC K:'"
+      clean_client_keys: "yes"
+      insert_prev_agent_same_name: "yes"
+      
+    FORCE_INSERT: "yes"
+  -
+    name: "Short agent name"
+    description: "Agent name too short < 2: rejected"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'n'"
+      output: "ERROR: Invalid agent name: "
+      clean_client_keys: "no"
+      insert_prev_agent_same_name: "no"
+  -
+    name: "Min len agent name"
+    description: "Agent name = 2: registered"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'nn'"
+      output: "OSSEC K:'"
+      clean_client_keys: "yes"
+      insert_prev_agent_same_name: "no"
+      
+  -
+    name: "Max len agent name"
+    description: "Agent name = 128: registered"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'userxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'"
+      output: "OSSEC K:'"
+      clean_client_keys: "yes"
+      insert_prev_agent_same_name: "yes"
+  -  
+    name: "Long agent name"
+    description: "Agent name = 129: rejected"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'userxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'"
+      output: "ERROR: Invalid agent name: "
+      clean_client_keys: "no"
+      insert_prev_agent_same_name: "no"
+  -  
+    name: "Check non-alphanumeric"
+    description: "Agent name with '*': rejected"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user*1'"
+      output: "ERROR: Invalid agent name: "
+      clean_client_keys: "no"
+      insert_prev_agent_same_name: "no"
+  -  
+    name: "Check non-alphanumeric"
+    description: "Agent name with '-': registered"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user-1'"
+      output: "OSSEC K:'"
+      clean_client_keys: "no"
+      insert_prev_agent_same_name: "no"
+  -  
+    name: "Check non-alphanumeric"
+    description: "Agent name with '_': registered"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user_1'"
+      output: "OSSEC K:'"
+      clean_client_keys: "no"
+      insert_prev_agent_same_name: "no"
+  -  
+    name: "Check non-alphanumeric"
+    description: "Agent name with '.': registered"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user.1'"
+      output: "OSSEC K:'"
+      clean_client_keys: "no"
+      insert_prev_agent_same_name: "no"
+
+  #IP tests
+  -  
+    name: "Invalid IP"
+    description: "Try register an agent with invalid IP: rejected"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'10.10.10'"
+      output: "ERROR: Invalid IP: "
+      clean_client_keys: "no"
+      insert_prev_agent_same_name: "no"
+  -  
+    name: "Invalid IP"
+    description: "Try register an agent with invalid IP: rejected"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'10.10.10.nn'"
+      output: "ERROR: Invalid IP: "
+      clean_client_keys: "no"
+      insert_prev_agent_same_name: "no"
+  -  
+    name: "Invalid IP"
+    description: "Try register an agent with invalid IP: rejected"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'10.10.10.257'"
+      output: "ERROR: Invalid IP: "
+      clean_client_keys: "no"
+      insert_prev_agent_same_name: "no"
+  -  
+    name: "Invalid IP"
+    description: "Try register an agent with invalid IP: rejected"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'10.10.10.'"
+      output: "ERROR: Invalid IP: "
+      clean_client_keys: "no"
+      insert_prev_agent_same_name: "no"
+  -  
+    name: "Valid IP"
+    description: "Try register an agent with valid IP: register"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'10.10.10.10'"
+      output: "OSSEC K:'"
+      clean_client_keys: "yes"
+      insert_prev_agent_same_name: "no"
+  -  
+    name: "Valid and duplicated IP"
+    description: "Try register an agent with existing IP in client.keys and force_insert enabled: register"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'10.10.10.10'"
+      output: "OSSEC K:'"
+      clean_client_keys: "yes"
+      insert_prev_agent_same_name: "yes"
+    FORCE_INSERT: "yes"
+  -  
+    name: "Valid and duplicated IP - force_insert disabled"
+    description: "Try register an agent with existing IP in client.keys and force_insert disabled: rejected"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'10.10.10.10'"
+      output: "ERROR: Duplicated IP: "
+      clean_client_keys: "yes"
+      insert_prev_agent_same_name: "yes"
+    FORCE_INSERT: "no"
+  -  
+    name: "Invalid IP"
+    description: "Try register an agent with invalid IP: rejected"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'257.257.257.257'"
+      output: "ERROR: Invalid IP: "
+      clean_client_keys: "no"
+      insert_prev_agent_same_name: "no"
+  -  
+    name: "Invalid IP"
+    description: "Try register an agent with invalid IP: rejected"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'999.999.999.999'"
+      output: "ERROR: Invalid IP: "
+      clean_client_keys: "no"
+      insert_prev_agent_same_name: "no"
+  -  
+    name: "Invalid IP"
+    description: "Try register an agent with invalid IP: rejected"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'999.9999.999.999'"
+      output: "ERROR: Invalid IP: "
+      clean_client_keys: "no"
+      insert_prev_agent_same_name: "no"
+      
+    
+    

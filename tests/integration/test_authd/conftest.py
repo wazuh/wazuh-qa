@@ -2,6 +2,7 @@ import pytest
 import yaml
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.cluster import callback_detect_worker_connected, callback_detect_master_serving, cluster_msg_build
 
 def load_tests(path):
     """ Loads a yaml file from a path 
@@ -22,3 +23,5 @@ def wait_for_agentd_startup(request):
 
     log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=30, callback=callback_agentd_startup)
+    
+
