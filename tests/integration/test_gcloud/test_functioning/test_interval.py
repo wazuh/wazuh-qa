@@ -68,8 +68,8 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_pull_on_start(get_configuration, configure_environment,
-                       restart_wazuh, wait_for_gcp_start):
+def test_interval(get_configuration, configure_environment,
+                  restart_wazuh, wait_for_gcp_start):
     """
     These tests verify the module starts to pull after the time interval
     that has to match the value of the 'interval' parameter.
