@@ -93,7 +93,7 @@ yum groupinstall "Development Tools" -y
 yum install python36 python36-pip python36-devel -y
 
 # Install Python libraries
-pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro pandas pytest-html==2.0.1 numpydoc==0.9.2
+pip3 install google-cloud-pubsub pytest freezegun jq jsonschema pyyaml==5.3 psutil pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 - Add some internal options and restart
@@ -127,7 +127,7 @@ brew install python3
 brew install autoconf automake libtool
 
 # Install Python libraries
-pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro pandas pytest-html==2.0.1 numpydoc==0.9.2
+pip3 install google-cloud-pubsub pytest freezegun jq jsonschema pyyaml==5.3 psutil pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 - Add some internal options and restart
