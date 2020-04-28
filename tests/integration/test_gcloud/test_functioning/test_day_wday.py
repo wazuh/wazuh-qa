@@ -85,8 +85,8 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_schedule_options(get_configuration, configure_environment,
-                          restart_wazuh, wait_for_gcp_start):
+def test_day_wday(get_configuration, configure_environment,
+                  restart_wazuh, wait_for_gcp_start):
     """
     These tests verify the module starts to pull according to the day of the week 
     or month and time.
