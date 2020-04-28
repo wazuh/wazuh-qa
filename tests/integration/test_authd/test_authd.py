@@ -8,6 +8,7 @@ import pytest
 import socket
 import ssl
 import subprocess
+import time
 import yaml
 
 from wazuh_testing import global_parameters
@@ -73,5 +74,10 @@ def test_ossec_auth_messages( get_configuration, set_up_groups, configure_enviro
         expected = stage['output']       
         message = stage['input']
         receiver_sockets[0].send(stage['input'], size=False)
-        response = receiver_sockets[0].receive().decode()
-        assert response[:len(expected)] == expected, 'Failed test case {}: Response was: {} instead of: {}'.format(test_case.index(stage) + 1, response, expected)
+        timeout = time.time() + 10
+        response = ''
+        while response == '':
+            response = receiver_sockets[0].receive().decode()
+            if time.time() > timeout: 
+                raise ConnectionResetError('Manager did not respond to sent message!')
+        assert response[:len(expected)] == expected, 'Failed test case {}: Response was: {} instead of: {}'.format(set_up_groups['name'], response, expected)
