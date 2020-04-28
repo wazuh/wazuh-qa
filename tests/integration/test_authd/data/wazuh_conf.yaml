@@ -13,7 +13,7 @@
         - use_source_ip:
             value: 'no'
         - force_insert:
-            value: 'no'
+            value: 'yes'
         - force_time:
             value: 0
         - purge:
@@ -46,7 +46,7 @@
         - use_source_ip:
             value: 'no'
         - force_insert:
-            value: 'no'
+            value: 'yes'
         - force_time:
             value: 0
         - purge:
@@ -80,7 +80,7 @@
         - use_source_ip:
             value: 'no'
         - force_insert:
-            value: 'no'
+            value: 'yes'
         - force_time:
             value: 0
         - purge:

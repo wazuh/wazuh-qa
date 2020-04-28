@@ -128,13 +128,18 @@ def test_authd_ssl_certs(get_configuration, generate_ca_certificate):
     SSL_socket.send(INPUT_MESSAGE, size=False)
     try:
         response = ''
+        timeout = time.time() + 10
         while response == '':
             response = SSL_socket.receive().decode()
+            if time.time() > timeout: 
+                raise ConnectionResetError('Manager did not respond to sent message!')
         if option in ['INCORRECT HOST'] and verify_host:
             raise AssertionError(f'An incorrect host was able to register using the verify_host option')
     except ConnectionResetError as exception:
         if option in ['INCORRECT HOST'] and verify_host:
             # Expected
             return
+        else:
+            raise
     assert response[:len(OUPUT_MESSAGE)] == OUPUT_MESSAGE, (f'Option {option} response from manager did not match expected')
     return
