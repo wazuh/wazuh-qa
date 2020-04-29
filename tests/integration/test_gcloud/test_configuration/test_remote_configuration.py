@@ -59,6 +59,7 @@ conf_params = {'PROJECT_ID': project_id, 'SUBSCRIPTION_NAME': subscription_name,
 p, m = generate_params(extra_params=conf_params,
                        modes=monitoring_modes)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+force_restart_after_restoring = True
 
 
 # fixtures
