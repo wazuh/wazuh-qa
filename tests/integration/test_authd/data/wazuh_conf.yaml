@@ -101,3 +101,16 @@
             value: 'no'
         - ssl_agent_ca:
             value: SSL_AGENT_CA
+    #local-server
+    - tags:
+      - all
+      apply_to_modules:
+      - test_authd_local
+      sections:
+      - section: auth
+        elements:
+        - disabled:
+            value: 'no'        
+        - purge:
+            value: 'no'
+        
