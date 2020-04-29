@@ -32,10 +32,9 @@
       output: "OSSEC K:'"
       clean_client_keys: "yes"
       insert_prev_agent_same_name: "yes"
-      
     FORCE_INSERT: "yes"
   -
-    name: "Short agent name"
+    name: "Too short agent name"
     description: "Agent name too short < 2: rejected"
     test_case:
     -
@@ -64,9 +63,9 @@
       input: "OSSEC A:'userxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'"
       output: "OSSEC K:'"
       clean_client_keys: "yes"
-      insert_prev_agent_same_name: "yes"
+      insert_prev_agent_same_name: "no"
   -  
-    name: "Long agent name"
+    name: "Too long agent name"
     description: "Agent name = 129: rejected"
     test_case:
     -
@@ -76,7 +75,7 @@
       clean_client_keys: "no"
       insert_prev_agent_same_name: "no"
   -  
-    name: "Check non-alphanumeric"
+    name: "Check non-alphanumeric '*'"
     description: "Agent name with '*': rejected"
     test_case:
     -
@@ -86,7 +85,7 @@
       clean_client_keys: "no"
       insert_prev_agent_same_name: "no"
   -  
-    name: "Check non-alphanumeric"
+    name: "Check non-alphanumeric '-'"
     description: "Agent name with '-': registered"
     test_case:
     -
@@ -96,7 +95,7 @@
       clean_client_keys: "no"
       insert_prev_agent_same_name: "no"
   -  
-    name: "Check non-alphanumeric"
+    name: "Check non-alphanumeric '_'"
     description: "Agent name with '_': registered"
     test_case:
     -
@@ -106,7 +105,7 @@
       clean_client_keys: "no"
       insert_prev_agent_same_name: "no"
   -  
-    name: "Check non-alphanumeric"
+    name: "Check non-alphanumeric '.'"
     description: "Agent name with '.': registered"
     test_case:
     -
@@ -115,8 +114,7 @@
       output: "OSSEC K:'"
       clean_client_keys: "no"
       insert_prev_agent_same_name: "no"
-
-  #IP tests
+#IP tests
   -  
     name: "Invalid IP"
     description: "Try register an agent with invalid IP: rejected"
@@ -168,17 +166,6 @@
       clean_client_keys: "yes"
       insert_prev_agent_same_name: "no"
   -  
-    name: "Valid and duplicated IP"
-    description: "Try register an agent with existing IP in client.keys and force_insert enabled: register"
-    test_case:
-    -
-      expect: "output"
-      input: "OSSEC A:'user1' IP:'10.10.10.10'"
-      output: "OSSEC K:'"
-      clean_client_keys: "yes"
-      insert_prev_agent_same_name: "yes"
-    FORCE_INSERT: "yes"
-  -  
     name: "Valid and duplicated IP - force_insert disabled"
     description: "Try register an agent with existing IP in client.keys and force_insert disabled: rejected"
     test_case:
@@ -188,6 +175,7 @@
       output: "ERROR: Duplicated IP: "
       clean_client_keys: "yes"
       insert_prev_agent_same_name: "yes"
+      insert_prev_agent: "OSSEC A:'user0' IP:'10.10.10.10'"
     FORCE_INSERT: "no"
   -  
     name: "Invalid IP"
@@ -219,6 +207,95 @@
       output: "ERROR: Invalid IP: "
       clean_client_keys: "no"
       insert_prev_agent_same_name: "no"
+  #PASSWORD test
+  -  
+    name: "Default USE_PASSWORD request with password use_password enabled"
+    description: "Try register an agent with password and use_password enabled: register"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC PASS: TopSecret OSSEC A:'user1'"
+      output: "OSSEC K:'"
+      clean_client_keys: "yes"
+      insert_prev_agent_same_name: "no"
+    USE_PASSWORD: "yes"
+  -  
+    name: "Manager without password"
+    description: "Try register an agent without password and use_password disabled: register"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1'"
+      output: "OSSEC K:'"
+      clean_client_keys: "yes"
+      insert_prev_agent_same_name: "no"
+    USE_PASSWORD: "no"
+  -  
+    name: "Manager without password, request with password"
+    description: "Try register an agent with password and use_password disabled: rejected"
+    test_case:
+    -
+      expect: "open_error"
+      input: "OSSEC PASS: TopSecret OSSEC A:'user1'"
+      clean_client_keys: "yes"
+      insert_prev_agent_same_name: "no"
+    USE_PASSWORD: "no"
+  -  
+    name: "Manager with password, request with correct password"
+    description: "Try register an agent with correct password and use_password enabled: register"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC PASS: TopSecret OSSEC A:'user1'"
+      output: "OSSEC K:'"
+      clean_client_keys: "yes"
+      insert_prev_agent_same_name: "no"
+    USE_PASSWORD: "yes"
+  -  
+    name: "Manager with password, request with wrong password"
+    description: "Try register an agent with password and use_password enabled: rejected"
+    test_case:
+    -
+      expect: "open_error"
+      input: "OSSEC PASS: wrongPass OSSEC A:'user1'"
+      clean_client_keys: "no"
+      insert_prev_agent_same_name: "no"
+    USE_PASSWORD: "yes"
+  -  
+    name: "Random password, request with correct password"
+    description: "Try register an agent with correct password and use_password enabled, random password created: register"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC PASS: {} OSSEC A:'user1'"
+      output: "OSSEC K:'"
+      clean_client_keys: "no"
+      insert_prev_agent_same_name: "no"
+      insert_random_pass_in_query: "yes"
       
-    
-    
+    USE_PASSWORD: "yes"
+    random_pass: "yes"
+  -  
+    name: "Random password, request with wrong password"
+    description: "Try register an agent with wrong password and use_password enabled, random password created: rejected"
+    test_case:
+    -
+      expect: "open_error"
+      input: "OSSEC PASS: wrongPass OSSEC A:'user1'"
+      clean_client_keys: "no"
+      insert_prev_agent_same_name: "no"
+    USE_PASSWORD: "yes"
+    random_pass: "yes"
+  -  
+    name: "Random password, request without password"
+    description: "Try register an agent without password and use_password enabled, random password created: rejected"
+    test_case:
+    -
+      expect: "open_error"
+      input: "OSSEC A:'user1'"
+      clean_client_keys: "no"
+      insert_prev_agent_same_name: "no"
+    USE_PASSWORD: "yes"
+    random_pass: "yes"
+  
+  
