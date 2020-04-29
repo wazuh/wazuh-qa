@@ -11,8 +11,7 @@ from json import JSONDecodeError
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
-    callback_detect_event, check_time_travel, validate_event
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, callback_detect_event
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -24,13 +23,11 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=0)]
 # variables
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-test_directories = [os.path.join(
-    PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')]
+test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')]
 directory_str = ','.join(test_directories)
 for direc in list(test_directories):
     test_directories.append(os.path.join(direc, 'subdir'))
-test_data_path = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), 'data')
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2 = test_directories[2:]
 
@@ -38,8 +35,7 @@ testdir1, testdir2 = test_directories[2:]
 
 conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
 p, m = generate_params(extra_params=conf_params, modes=['whodata'])
-configurations = load_wazuh_configurations(
-    configurations_path, __name__, params=p, metadata=m)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
 # callback
@@ -49,7 +45,9 @@ def callback_detect_delete_event(line):
 
     try:
         event = json.loads(match.group(1))
-        if event['type'] == 'event' and event['data']['type'] == 'deleted' and 'process_name' not in event['data']['audit']:
+        if (event['type'] == 'event' and
+                event['data']['type'] == 'deleted' and
+                'process_name' not in event['data']['audit']):
             return event
     except (AttributeError, JSONDecodeError, KeyError):
         pass
@@ -99,13 +97,13 @@ def test_deferred_delete_file(folder, file_list, filetype, tags_to_apply,
         create_file(filetype, folder, file, content='')
 
     # Wait for the added events
-    events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                                     accum_results=len(file_list), error_message='Did not receive expected '
-                                     '"Sending FIM event: ..." event').result()
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                            accum_results=len(file_list), error_message='Did not receive expected '
+                            '"Sending FIM event: ..." event')
 
     # Delete the files under 'folder'
     command = 'del "{}"\n'.format(folder)
-    # assert command == None
+
     cmd = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=DEVNULL, universal_newlines=True)
     try:
         stdout = cmd.communicate(timeout=global_parameters.default_timeout)
@@ -124,6 +122,6 @@ def test_deferred_delete_file(folder, file_list, filetype, tags_to_apply,
         pass
 
     # Start monitoring
-    events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_delete_event,
-                                     accum_results=len(file_list), error_message='Did not receive expected '
-                                     '"Sending FIM event: ..." event').result()
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_delete_event,
+                            accum_results=len(file_list), error_message='Did not receive expected '
+                            '"Sending FIM event: ..." event')
