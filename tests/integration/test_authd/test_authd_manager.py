@@ -139,7 +139,6 @@ def override_wazuh_conf(configuration, set_password):
 
 
 
-
 def check_client_keys_file(response):
     try:
         with open(client_keys_path) as client_file:
@@ -185,7 +184,7 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
         address, family, connection_protocol = receiver_sockets_params[0]
         expect = config['expect']
 
-        #insert prev agent to force repeated case
+        #insert previous agent to force repeated case
         insert_prev = config['insert_prev_agent_same_name']
         if insert_prev == "yes":
             SSL_socket_prev = SocketController(address, family=family, connection_protocol=connection_protocol)
@@ -209,11 +208,11 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
                 expected = "OSSEC K:'"
                 if expected:
                     response = SSL_socket_prev.receive().decode()
-                    assert response, 'Failed connection prev insert for {}: {}'.format(ip_name_configuration_tests[test_index]['name'], config['input'])
-                    assert response[:len(expected)] == expected, 'Failed response prev {}: {}'.format(config['input'], config['output'])
+                    assert response, 'Failed connection previous insert for {}: {}'.format(ip_name_configuration_tests[test_index]['name'], config['input'])
+                    assert response[:len(expected)] == expected, "Failed response previous '{}': Input: {}".format(ip_name_configuration_tests[test_index]['name'], config['input'])
                     if expected == "OSSEC K:'":
                         time.sleep(0.1)
-                        assert check_client_keys_file(response) == True, 'Failed test case checking client.keys in prev insert {}: {}'.format(config['input'], config['output'])
+                        assert check_client_keys_file(response) == True, "Failed test case '{}' checking previous client.keys : Input: {}".format(ip_name_configuration_tests[test_index]['name'], config['input'])
             SSL_socket_prev.close()
 
 
@@ -248,8 +247,8 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
             if expected:
                 response = SSL_socket.receive().decode()
                 assert response, "Failed connection stage '{}'': '{}'".format(ip_name_configuration_tests[test_index]['name'], config['input'])
-                assert response[:len(expected)] == expected, 'Failed test case {}: {}'.format(config['input'], config['output'])
+                assert response[:len(expected)] == expected, "Failed test case '{}': Input: {}".format(ip_name_configuration_tests[test_index]['name'], config['input'])
                 if expected == "OSSEC K:'":
                     time.sleep(0.1)
-                    assert check_client_keys_file(response) == True, 'Failed test case checking client.keys {}: {}'.format(config['input'], config['output'])
+                    assert check_client_keys_file(response) == True, "Failed test case '{}' checking client.keys : Input: {}".format(ip_name_configuration_tests[test_index]['name'], config['input'])
     return
