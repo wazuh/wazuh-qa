@@ -27,6 +27,8 @@ HOST_TYPES = set("server agent".split())
 
 catalog = list()
 
+results = dict()
+
 
 def pytest_runtest_setup(item):
     # Find if platform applies
@@ -212,6 +214,39 @@ def pytest_runtest_makereport(item, call):
 
         if not report.passed and not report.skipped:
             report.extra = extra
+
+        if report.location[0] not in results:
+            results[report.location[0]] = {'passed': 0, 'failed': 0, 'skipped': 0}
+        results[report.location[0]][report.outcome] += 1
+
+
+class SummaryTable(html):
+    class table(html.table):
+        style = html.Style(border='1px solid #e6e6e6', color='#999', font_size='12px')
+
+    class td(html.td):
+        style = html.Style(padding='5px', border='1px solid #E6E6E6',text_align='left')
+
+    class th(td):
+        style = html.Style(font_weight='bold')
+
+
+def pytest_html_results_summary(prefix, summary, postfix):
+    postfix.extend([SummaryTable.table(
+        html.thead(
+            html.tr([
+                SummaryTable.th("Tests"),
+                SummaryTable.th("Passed"),
+                SummaryTable.th("Failed")]
+            ),
+        ),
+        [html.tbody(
+            html.tr([
+                SummaryTable.td(k),
+                SummaryTable.td(v['passed']),
+                SummaryTable.td(v['failed']),
+            ])
+        ) for k, v in results.items()])])
 
 
 def connect_to_sockets(request):
