@@ -191,6 +191,15 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
             validate_attributes(deepcopy(alert['syscheck']), deepcopy(event), 'old_attributes', 'before')
     except KeyError:
         raise KeyError('Alert does not have the same keys as the event.')
+    # Full log validation:
+    # Check that if the path is too long, it is displayed correctly.
+    if len(event['data']['path']) > 756:
+        full_log = alert['full_log']
+        file_name = event['data']['path'].rsplit('/', 1)[1]
+        # Separation token that marks the part of the path that is lost
+        assert '[...]' in full_log
+        # File name is displayed correctly.
+        assert file_name in full_log
 
 
 def validate_analysis_integrity_state(event):
