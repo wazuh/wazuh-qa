@@ -216,19 +216,23 @@ def pytest_runtest_makereport(item, call):
             report.extra = extra
 
         if report.location[0] not in results:
-            results[report.location[0]] = {'passed': 0, 'failed': 0, 'skipped': 0}
-        results[report.location[0]][report.outcome] += 1
+            results[report.location[0]] = {'passed': 0, 'failed': 0, 'skipped': 0, 'xfailed': 0, 'error': 0}
+
+        if report.longrepr is not None and report.longreprtext.split()[-1] == 'XFailed':
+            results[report.location[0]]['xfailed'] += 1
+        else:
+            results[report.location[0]][report.outcome] += 1
 
 
 class SummaryTable(html):
     class table(html.table):
-        style = html.Style(border='1px solid #e6e6e6', color='#999', font_size='12px')
+        style = html.Style(border='1px solid #e6e6e6', margin='16px 0px', color='#999', font_size='12px')
 
     class td(html.td):
-        style = html.Style(padding='5px', border='1px solid #E6E6E6',text_align='left')
+        style = html.Style(padding='5px', border='1px solid #E6E6E6', text_align='left')
 
     class th(td):
-        style = html.Style(font_weight='bold')
+        style = html.Style(padding='5px', border='1px solid #E6E6E6', text_align='left', font_weight='bold')
 
 
 def pytest_html_results_summary(prefix, summary, postfix):
@@ -236,15 +240,19 @@ def pytest_html_results_summary(prefix, summary, postfix):
         html.thead(
             html.tr([
                 SummaryTable.th("Tests"),
-                SummaryTable.th("Passed"),
-                SummaryTable.th("Failed")]
+                SummaryTable.th("Failed"),
+                SummaryTable.th("Success"),
+                SummaryTable.th("XFail"),
+                SummaryTable.th("Error")]
             ),
         ),
         [html.tbody(
             html.tr([
                 SummaryTable.td(k),
-                SummaryTable.td(v['passed']),
                 SummaryTable.td(v['failed']),
+                SummaryTable.td(v['passed']),
+                SummaryTable.td(v['xfailed']),
+                SummaryTable.td(v['error']),
             ])
         ) for k, v in results.items()])])
 
