@@ -97,7 +97,10 @@ def get_remote_configuration(component_name, config):
             if host_type == 'server':
                 remote_configuration_gcp = remote_configuration['wmodules'][6]['gcp-pubsub']
             else:
-                remote_configuration_gcp = remote_configuration['wmodules'][5]['gcp-pubsub']
+                if sys.platform == 'darwin':
+                    remote_configuration_gcp = remote_configuration['wmodules'][3]['gcp-pubsub']
+                else:
+                    remote_configuration_gcp = remote_configuration['wmodules'][5]['gcp-pubsub']
         else:
             s.close()
             raise ValueError(rec_msg_ok)
