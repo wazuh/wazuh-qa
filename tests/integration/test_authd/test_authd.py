@@ -14,6 +14,8 @@ import yaml
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+#TODO Move to utils
+from wazuh_testing.tools.services import control_service
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -59,7 +61,23 @@ def get_configuration(request):
     """Get configurations from the module"""
     yield request.param
     
-def test_ossec_auth_messages( get_configuration, set_up_groups, configure_environment, configure_mitm_environment, connect_to_sockets_module, wait_for_agentd_startup):
+@pytest.fixture(scope="module")
+def clean_client_keys_file():
+    client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
+    # Stop Wazuh
+    control_service('stop')
+
+    # Clean client.keys
+    try:
+        with open(client_keys_path, 'w') as client_file:
+            client_file.close()        
+    except IOError as exception:
+        raise
+
+    # Start Wazuh
+    control_service('start')
+
+def test_ossec_auth_messages( clean_client_keys_file, get_configuration, set_up_groups, configure_environment, configure_mitm_environment, connect_to_sockets_module, wait_for_agentd_startup):
     """Check that every input message in authd port generates the adequate output
 
     Parameters
@@ -68,7 +86,7 @@ def test_ossec_auth_messages( get_configuration, set_up_groups, configure_enviro
         List of test_case stages (dicts with input, output and stage keys).
     """    
     test_case = set_up_groups['test_case']
-    for stage in test_case:
+   for stage in test_case:
         # Reopen socket (socket is closed by maanger after sending message with client key)
         receiver_sockets[0].open()
         expected = stage['output']       
