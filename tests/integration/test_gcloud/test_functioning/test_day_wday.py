@@ -95,7 +95,7 @@ def test_day_wday(get_configuration, configure_environment,
     tags_to_apply = get_configuration['tags'][0]
 
     with pytest.raises(TimeoutError):
-        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+        event = wazuh_log_monitor.start(timeout=3,
                                         callback=callback_detect_start_fetching_logs).result()
         raise AttributeError(f'Unexpected event {event}')
 
