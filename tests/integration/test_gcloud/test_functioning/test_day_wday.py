@@ -49,11 +49,11 @@ wday = weekDays[today.weekday()]
 
 now = datetime.datetime.now()
 now_2m = now + datetime.timedelta(minutes=2, seconds=00)
-now_3m = now + datetime.timedelta(minutes=3, seconds=00)
 now_4m = now + datetime.timedelta(minutes=4, seconds=00)
+now_6m = now + datetime.timedelta(minutes=6, seconds=00)
 day_time = now_2m.strftime("%H:%M")
-wday_time = now_3m.strftime("%H:%M")
-time = now_4m.strftime("%H:%M")
+wday_time = now_4m.strftime("%H:%M")
+time = now_6m.strftime("%H:%M")
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
