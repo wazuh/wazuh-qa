@@ -7,6 +7,7 @@ name = "pypi"
 docker-py = "*"
 ansible = "==2.7.16"
 molecule = "==2.22"
+sh == "==1.12.14"
 
 [dev-packages]
 
