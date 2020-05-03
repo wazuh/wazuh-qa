@@ -1,12 +1,22 @@
 ---
   -
+    name: "Agent name same as Manager"
+    description: "Check for register an agent with name same as manager: rejected"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'{}'"
+      output: "ERROR: Invalid agent name: {}"
+      insert_hostname_in_query: "yes"
+    FORCE_INSERT: "no"
+  -
     name: "Register with Default config"
-    description: "Default manager configuration"
+    description: "Default manager configuration: registered"
     test_case:
     -
       expect: "output"
       input: "OSSEC A:'user1'"
-      output: "OSSEC K:'"
+      output: "OSSEC K:'001 user1 any "
       insert_prev_agent_same_name: "no"
 
   -
@@ -126,7 +136,7 @@
     FORCE_INSERT: "no"
   -  
     name: "Valid and duplicated IP - force_insert enabled"
-    description: "Try register an agent with existing IP in client.keys and force_insert disabled: rejected"
+    description: "Try register an agent with existing IP in client.keys and force_insert disabled: register"
     test_case:
     -
       expect: "output"
@@ -142,15 +152,6 @@
     -
       expect: "output"
       input: "OSSEC A:'user1' IP:'10.10.10'"
-      output: "ERROR: Invalid IP: "
-      insert_prev_agent_same_name: "no"
-  -  
-    name: "Invalid IP: incomplete"
-    description: "Try register an agent with invalid IP: rejected"
-    test_case:
-    -
-      expect: "output"
-      input: "OSSEC A:'user1' IP:'10.10.10.'"
       output: "ERROR: Invalid IP: "
       insert_prev_agent_same_name: "no"
   -  
@@ -190,8 +191,8 @@
       output: "ERROR: Invalid IP: "
       insert_prev_agent_same_name: "no"
   -  
-    name: "Not specific IP USE_SOURCE yes"
-    description: "Try register an agent with invalid IP: rejected"
+    name: "Not specific IP, USE_SOURCE yes"
+    description: "Not specific IP, USE_SOURCE yes: register"
     test_case:
     -
       expect: "output"
@@ -200,8 +201,8 @@
       insert_prev_agent_same_name: "no"
     USE_SOURCE_IP: "yes"
   -  
-    name: "Not specific IP USE_SOURCE no"
-    description: "Try register an agent with invalid IP: register"
+    name: "Not specific IP, USE_SOURCE no"
+    description: "Not specific IP, USE_SOURCE no: register"
     test_case:
     -
       expect: "output"
@@ -210,8 +211,8 @@
       insert_prev_agent_same_name: "no"
     USE_SOURCE_IP: "no"
   -  
-    name: "Let manager decide USE_SOURCE no"
-    description: "Try register an agent with invalid IP: register"
+    name: "Let manager decide, USE_SOURCE no"
+    description: "Let manager decide, USE_SOURCE no: register"
     test_case:
     -
       expect: "output"
@@ -220,13 +221,123 @@
       insert_prev_agent_same_name: "no"
     USE_SOURCE_IP: "no"
   -  
-    name: "Let manager decide USE_SOURCE yes"
-    description: "Try register an agent with invalid IP: register"
+    name: "Let manager decide, use_source_ip enabled"
+    description: "Let manager decide, use_source_ip enabled: register"
     test_case:
     -
       expect: "output"
       input: "OSSEC A:'user1' IP:'src'"
       output: "OSSEC K:'001 user1 127.0.0.1 "
+      insert_prev_agent_same_name: "no"
+    USE_SOURCE_IP: "yes"
+  -  
+    name: "Ip with mask/24, use_source_ip enabled"
+    description: "Ip with mask, use_source_ip enabled: register"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'10.10.10.1/24'"
+      output: "OSSEC K:'001 user1 10.10.10.1/24 "
+      insert_prev_agent_same_name: "no"
+    USE_SOURCE_IP: "yes"
+  -  
+    name: "Ip with mask/32, use_source_ip enabled"
+    description: "Ip with mask, use_source_ip enabled: register"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'10.10.10.1/32'"
+      output: "OSSEC K:'001 user1 10.10.10.1/32 "
+      insert_prev_agent_same_name: "no"
+    USE_SOURCE_IP: "yes"
+  -  
+    name: "Ip with mask/0, use_source_ip enabled"
+    description: "Ip with mask, use_source_ip disabled: register"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'10.10.10.1/0'"
+      output: "OSSEC K:'001 user1 10.10.10.1/0 "
+      insert_prev_agent_same_name: "no"
+    USE_SOURCE_IP: "yes"
+  -  
+    name: "Ip with mask/0, use_source_ip disabled"
+    description: "Ip with mask, use_source_ip disabled: register"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'10.10.10.10/0'"
+      output: "OSSEC K:'001 user1 10.10.10.10/0 "
+      insert_prev_agent_same_name: "no"
+    USE_SOURCE_IP: "no"
+  -  
+    name: "Ip with mask/0, use_source_ip disabled"
+    description: "Ip with mask, use_source_ip disabled: register"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'0.0.0.0/0'"
+      output: "OSSEC K:'001 user1 0.0.0.0/0 "
+      insert_prev_agent_same_name: "no"
+    USE_SOURCE_IP: "no"
+  -  
+    name: "Ip with mask /24 force_insert disabled"
+    description: "Ip with mask /24 force_insert disabled"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'10.10.10.1/24'"
+      output: "OSSEC K:'001 user1 10.10.10.1/24 "
+      insert_prev_agent_same_name: "no"
+    USE_SOURCE_IP: "no"
+  -  
+    name: "Ip with mask /32 force_insert disabled"
+    description: "Ip with mask /32 force_insert disabled"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'10.10.10.1/32'"
+      output: "OSSEC K:'001 user1 10.10.10.1/32 "
+      insert_prev_agent_same_name: "no"
+    USE_SOURCE_IP: "no"
+  -  
+    name: "Invalid mask, use_source_ip disabled"
+    description: "Invalid mask, use_source_ip disabled: rejected"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'10.10.10.1/55'"
+      output: "ERROR: Invalid IP: 10.10.10.1"
+      insert_prev_agent_same_name: "no"
+    USE_SOURCE_IP: "no"
+  -  
+    name: "Invalid mask, use_source_ip enabled"
+    description: "Invalid mask, use_source_ip enabled: rejected"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'10.10.10.1/55'"
+      output: "ERROR: Invalid IP: 10.10.10.1"
+      insert_prev_agent_same_name: "no"
+    USE_SOURCE_IP: "yes"
+  -  
+    name: "Invalid mask, wrong character"
+    description: "Invalid mask, wrong character, use_source_ip enabled: rejected"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'10.10.10.1/2{'"
+      output: "ERROR: Invalid IP: 10.10.10.1"
+      insert_prev_agent_same_name: "no"
+    USE_SOURCE_IP: "yes"
+  -  
+    name: "Invalid mask, wrong charact"
+    description: "Invalid mask, wrong charact, use_source_ip enabled: rejected"
+    test_case:
+    -
+      expect: "output"
+      input: "OSSEC A:'user1' IP:'10.10.10.1/<'"
+      output: "ERROR: Invalid IP: 10.10.10.1"
       insert_prev_agent_same_name: "no"
     USE_SOURCE_IP: "yes"
     

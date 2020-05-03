@@ -67,6 +67,8 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 test_index = 0
 
+
+
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
     """Get configurations from the module"""
@@ -76,20 +78,32 @@ def get_configuration(request):
 
 
    
-def clean_client_keys_file():
-    # Clean client.keys
+def clean_client_keys_file(): 
     try:
-        with open(client_keys_path, 'w') as client_file:
-            client_file.close()        
+        client_file = open(client_keys_path, 'w')
+        client_file.close()        
     except IOError as exception:
         raise
 
+    
+
 def read_random_pass():
-    grep = subprocess.check_output(["/bin/grep \"Random password\" /var/ossec/logs/ossec.log"], shell=True)
-    if grep:
-        parse_line = grep.split()
-        return parse_line[-1].decode("utf-8")
-    return grep
+    osseclog_path = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+    passw = None
+    try:
+        with open(osseclog_path, 'r') as log_file:
+            lines = log_file.readlines()
+            for line in lines:
+                if "Random password" in line:
+                    passw = line.split()[-1]
+            log_file.close()        
+    except IOError as exception:
+        raise
+    return passw
+
+def read_hostname():
+    return socket.gethostname()
+    
 
 def reset_password(set_password):
     #in case of random pass, remove /etc/authd.pass
@@ -152,7 +166,23 @@ def check_client_keys_file(response):
         raise
     return False
 
+# Stop Wazuh
+control_service('stop')
+ 
+#reset_client_keys
+clean_client_keys_file()
 
+# Start Wazuh
+control_service('start')
+
+"""Wait until agentd has begun"""
+def callback_agentd_startup(line):
+    if 'Accepting connections on port 1515' in line:
+        return line
+    return None
+
+log_monitor = FileMonitor(LOG_FILE_PATH)
+log_monitor.start(timeout=30, callback=callback_agentd_startup)
     
 #@pytest.mark.parametrize('test_case', [case['test_case'] for case in ssl_configuration_tests])
 def test_ossec_auth_configurations(get_configuration, configure_environment, configure_mitm_environment):
@@ -181,40 +211,43 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
     
     override_wazuh_conf(get_configuration, set_password)
     for config in test_case:
+        #clean_client_keys_file()
         address, family, connection_protocol = receiver_sockets_params[0]
         expect = config['expect']
 
         #insert previous agent to force repeated case
-        insert_prev = config['insert_prev_agent_same_name']
-        if insert_prev == "yes":
-            SSL_socket_prev = SocketController(address, family=family, connection_protocol=connection_protocol)
-            try:
-                SSL_socket_prev.open()
-            except ssl.SSLError as exception:
-                if expect == 'open_error':
-                    # We expected the error here, check message
-                    assert config['error'] in str(exception), 'Expected message does not match!'
-                    continue
-                else:
-                    # We did not expect this error, fail test
-                    raise
-            try:
-                SSL_socket_prev.send(config['insert_prev_agent'], size=False)
-            except KeyError:
-                SSL_socket_prev.send(config['input'], size=False)
-            
-            if expect == 'output':
-                # Prev output is expected
-                expected = "OSSEC K:'"
-                if expected:
-                    response = SSL_socket_prev.receive().decode()
-                    assert response, 'Failed connection previous insert for {}: {}'.format(ip_name_configuration_tests[test_index]['name'], config['input'])
-                    assert response[:len(expected)] == expected, "Failed response previous '{}': Input: {}".format(ip_name_configuration_tests[test_index]['name'], config['input'])
-                    if expected == "OSSEC K:'":
-                        time.sleep(0.1)
-                        assert check_client_keys_file(response) == True, "Failed test case '{}' checking previous client.keys : Input: {}".format(ip_name_configuration_tests[test_index]['name'], config['input'])
-            SSL_socket_prev.close()
-
+        try:
+            if config['insert_prev_agent_same_name'] == "yes":
+                SSL_socket_prev = SocketController(address, family=family, connection_protocol=connection_protocol)
+                try:
+                    SSL_socket_prev.open()
+                except ssl.SSLError as exception:
+                    if expect == 'open_error':
+                        # We expected the error here, check message
+                        assert config['error'] in str(exception), 'Expected message does not match!'
+                        continue
+                    else:
+                        # We did not expect this error, fail test
+                        raise
+                try:
+                    SSL_socket_prev.send(config['insert_prev_agent'], size=False)
+                except KeyError:
+                    SSL_socket_prev.send(config['input'], size=False)
+                
+                if expect == 'output':
+                    # Prev output is expected
+                    expected = "OSSEC K:'"
+                    if expected:
+                        response = SSL_socket_prev.receive().decode()
+                        assert response, 'Failed connection previous insert for {}: {}'.format(ip_name_configuration_tests[test_index]['name'], config['input'])
+                        assert response[:len(expected)] == expected, "Failed response previous '{}': Input: {}".format(ip_name_configuration_tests[test_index]['name'], config['input'])
+                        if expected == "OSSEC K:'":
+                            time.sleep(0.5)
+                            assert check_client_keys_file(response) == True, "Failed test case '{}' checking previous client.keys : Input: {}".format(ip_name_configuration_tests[test_index]['name'], config['input'])
+                SSL_socket_prev.close()
+        except KeyError:
+            pass
+        
 
         SSL_socket = SocketController(address, family=family, connection_protocol=connection_protocol)
         try:
@@ -232,12 +265,21 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
         #in case of test random and wrong password keep the password of the original query
         if set_password and set_password == 'random':
             try:
-                if config['insert_random_pass_in_query']:
+                if config['insert_random_pass_in_query'] == 'yes':
                     config['input'] = config['input'].format(read_random_pass())
             except KeyError:
                 pass
             except IndexError:
-                pass
+                raise
+
+        try:
+            if config['insert_hostname_in_query'] == 'yes':
+                config['input'] = config['input'].format(read_hostname())
+                config['output'] = config['output'].format(read_hostname())
+        except KeyError:
+            pass
+        except IndexError:
+            raise
             
 
         SSL_socket.send(config['input'], size=False)
@@ -249,6 +291,6 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
                 assert response, "Failed connection stage '{}'': '{}'".format(ip_name_configuration_tests[test_index]['name'], config['input'])
                 assert response[:len(expected)] == expected, "Failed test case '{}': Input: {}".format(ip_name_configuration_tests[test_index]['name'], config['input'])
                 if expected == "OSSEC K:'":
-                    time.sleep(0.1)
+                    time.sleep(0.5)
                     assert check_client_keys_file(response) == True, "Failed test case '{}' checking client.keys : Input: {}".format(ip_name_configuration_tests[test_index]['name'], config['input'])
     return
