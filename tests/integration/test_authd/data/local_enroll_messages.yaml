@@ -61,6 +61,31 @@
   -    
     input: '{"arguments":{"force":1,"id":"001","name":"user11","ip":"any"},"function":"add"}'
     output: '{"error":0,"data":{"id":"001","name":"user11","ip":"any","key":'
+-
+  name: "Single Group"
+  description: "Try to add an agent with group"
+  groups: 
+    - 'Group1'
+  test_case:
+  -
+    input: '{"arguments":{"name":"user21","ip":"any","groups":"Group1"},"function":"add"}'
+    output: '{"error":0,"data":{"id":"007","name":"user21","ip":"any","key":'
+  -
+    input: '{"arguments":{"name":"user_","ip":"any","groups":"Group2"},"function":"add"}'
+    output: '{"error":9014,"message":"Invalid Group(s) Name(s)"}'
+-
+  name: "Multi Group"
+  description: "Try to add an agent with multiplegroup"
+  groups: 
+    - 'Group1'
+    - 'Group2'
+  test_case:
+  -
+    input: '{"arguments":{"name":"user22","ip":"any","groups":"Group1,Group2"},"function":"add"}'
+    output: '{"error":0,"data":{"id":"008","name":"user22","ip":"any","key":'
+  -
+    input: '{"arguments":{"name":"user_","ip":"any","groups":"Group1,Group2,Group3"},"function":"add"}'
+    output: '{"error":9014,"message":"Invalid Group(s) Name(s)"}'
 
 - #REMOVE
   name: "Remove agent"
