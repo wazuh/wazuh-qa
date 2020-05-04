@@ -2,7 +2,7 @@
 - tags:
   - manager
   apply_to_modules:
-  - test_authd_manager
+  - test_authd_name_ip_pass
   sections:
   - section: auth
     elements:
