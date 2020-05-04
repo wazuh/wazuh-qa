@@ -182,6 +182,9 @@ def pytest_runtest_makereport(item, call):
     report.markers = ', '.join(mark.name for mark in item.iter_markers() if
                                mark.name != 'tier' and mark.name != 'parametrize')
 
+    if report.location[0] not in results:
+        results[report.location[0]] = {'passed': 0, 'failed': 0, 'skipped': 0, 'xfailed': 0, 'error': 0}
+
     extra = getattr(report, 'extra', [])
     if report.when == 'call':
         # Apply hack to fix length filename problem
@@ -215,13 +218,13 @@ def pytest_runtest_makereport(item, call):
         if not report.passed and not report.skipped:
             report.extra = extra
 
-        if report.location[0] not in results:
-            results[report.location[0]] = {'passed': 0, 'failed': 0, 'skipped': 0, 'xfailed': 0, 'error': 0}
-
         if report.longrepr is not None and report.longreprtext.split()[-1] == 'XFailed':
             results[report.location[0]]['xfailed'] += 1
         else:
             results[report.location[0]][report.outcome] += 1
+
+    elif report.outcome == 'failed':
+        results[report.location[0]]['error'] += 1
 
 
 class SummaryTable(html):
@@ -231,7 +234,7 @@ class SummaryTable(html):
     class td(html.td):
         style = html.Style(padding='5px', border='1px solid #E6E6E6', text_align='left')
 
-    class th(td):
+    class th(html.th):
         style = html.Style(padding='5px', border='1px solid #E6E6E6', text_align='left', font_weight='bold')
 
 
