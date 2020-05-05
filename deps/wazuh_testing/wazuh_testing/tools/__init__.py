@@ -70,4 +70,7 @@ WAZUH_SOCKETS = {
 }
 
 # These sockets do not exist with default Wazuh configuration
-WAZUH_OPTIONAL_SOCKETS = [os.path.join(QUEUE_OSSEC_PATH, 'krequest')]
+WAZUH_OPTIONAL_SOCKETS = [
+    os.path.join(QUEUE_OSSEC_PATH, 'krequest'),
+    os.path.join(QUEUE_OSSEC_PATH, 'auth')
+]
