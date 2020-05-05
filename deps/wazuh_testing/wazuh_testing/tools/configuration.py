@@ -175,16 +175,16 @@ def set_section_wazuh_conf(sections, template=None):
             for tag_name, properties in element.items():
                 tag = ET.SubElement(section, tag_name)
                 new_elements = properties.get('elements')
+                attributes = properties.get('attributes')
+                if attributes:
+                    for attribute in attributes:
+                        if attribute is not None and isinstance(attribute, dict):  # noqa: E501
+                            for attr_name, attr_value in attribute.items():
+                                tag.attrib[attr_name] = str(attr_value)
                 if new_elements:
                     create_elements(tag, new_elements)
                 else:
                     tag.text = str(properties.get('value'))
-                    attributes = properties.get('attributes')
-                    if attributes:
-                        for attribute in attributes:
-                            if attribute is not None and isinstance(attribute, dict):  # noqa: E501
-                                for attr_name, attr_value in attribute.items():
-                                    tag.attrib[attr_name] = str(attr_value)
 
     def purge_multiple_root_elements(str_list: List[str], root_delimeter: str = "</ossec_config>") -> List[str]:
         """
