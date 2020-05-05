@@ -201,3 +201,64 @@ def time_to_timedelta(time_):
         return timedelta(days=time_value)
     elif time_unit == "w":
         return timedelta(weeks=time_value)
+
+
+def time_to_human_readable(time_):
+    """
+    Convert a time string like 5s or 2d into a human-readable string such as 5 seconds or 2 days
+
+    Parameters
+    ----------
+    time_ : str
+      String with the time and the measurement unit
+
+    Returns
+    -------
+    human_readable_time
+      String in the new format, for example: 5 seconds
+    """
+
+    time_unit = time_[-1]
+
+    human_readable_string = {
+      's': ' seconds',
+      'm': ' minutes',
+      'h': ' houres',
+      'd': ' days'
+    }
+
+    human_readable_time = time_.replace(time_unit, human_readable_string[time_unit])
+
+    return human_readable_time
+
+
+def unit_to_seconds(time_):
+    """
+    Convert a time string like 9m or 2d into another similar string in seconds
+
+    Parameters
+    ----------
+    time_ : str
+      String with the time and the measurement unit
+
+    Returns
+    -------
+    seconds_time
+      String in the same format with units converted to seconds
+    """
+
+    seconds_equivalent = {
+      's': 1,
+      'm': 60,
+      'h': 3600,
+      'd': 86400
+    }
+
+    time_unit = time_[-1]
+    time_value = time_[:-1]
+
+    new_value = int(time_value) * seconds_equivalent[time_unit]
+
+    seconds_time = f'{new_value}s'
+
+    return seconds_time
