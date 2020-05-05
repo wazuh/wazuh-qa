@@ -176,9 +176,9 @@ def set_section_wazuh_conf(sections, template=None):
                 tag = ET.SubElement(section, tag_name)
                 new_elements = properties.get('elements')
                 attributes = properties.get('attributes')
-                if attributes:
+                if attributes is not None:
                     for attribute in attributes:
-                        if attribute is not None and isinstance(attribute, dict):  # noqa: E501
+                        if isinstance(attribute, dict):  # noqa: E501
                             for attr_name, attr_value in attribute.items():
                                 tag.attrib[attr_name] = str(attr_value)
                 if new_elements:
