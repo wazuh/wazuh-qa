@@ -1,0 +1,10 @@
+---
+    -
+      name: "AgentName"
+      description: "Check default enrollment"
+      test_case:
+      -
+        port_input: "OSSEC A:'user1'"
+        cluster_input: '{"arguments":{"daemon_name":"authd","message":{"arguments":{"name":"user1","ip":"any","force":0},"function":"add"}},"function":"send_sync"}'
+        cluster_output: '{"error":0,"data":{"id":"002","name":"user1","ip":"any","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c915"}}'
+        port_output: "OSSEC K:'"

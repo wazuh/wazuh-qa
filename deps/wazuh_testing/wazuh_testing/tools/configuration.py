@@ -171,6 +171,7 @@ def set_section_wazuh_conf(sections, template=None):
         ET.ElementTree
             Modified Wazuh configuration.
         """
+        tag = None
         for element in elements:
             for tag_name, properties in element.items():
                 tag = ET.SubElement(section, tag_name)
@@ -185,6 +186,8 @@ def set_section_wazuh_conf(sections, template=None):
                             if attribute is not None and isinstance(attribute, dict):  # noqa: E501
                                 for attr_name, attr_value in attribute.items():
                                     tag.attrib[attr_name] = str(attr_value)
+                tag.tail = "\n    "
+        tag.tail = "\n  "
 
     def purge_multiple_root_elements(str_list: List[str], root_delimeter: str = "</ossec_config>") -> List[str]:
         """
@@ -259,8 +262,14 @@ def set_section_wazuh_conf(sections, template=None):
         # Create section if it does not exist, clean otherwise
         if not section_conf:
             section_conf = ET.SubElement(wazuh_conf.getroot(), section)
+            section_conf.text = '\n    '
+            section_conf.tail = '\n\n  '
         else:
+            prev_text = section_conf.text
+            prev_tail = section_conf.tail
             section_conf.clear()
+            section_conf.text = prev_text
+            section_conf.tail = prev_tail
 
         # Insert section attributes
         attributes = section.get('attributes')
