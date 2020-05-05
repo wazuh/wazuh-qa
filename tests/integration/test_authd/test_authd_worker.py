@@ -11,7 +11,7 @@ import subprocess
 import time
 import yaml
 
-from wazuh_testing.cluster import FERNET_KEY, CLUSTER_DATA_HEADER_SIZE
+from wazuh_testing.cluster import FERNET_KEY, CLUSTER_DATA_HEADER_SIZE, cluster_msg_build
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import WAZUH_PATH, CLUSTER_LOGS_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -48,10 +48,11 @@ class WorkerMID(ManInTheMiddle):
             message = data[CLUSTER_DATA_HEADER_SIZE:]
             message_input = self.cluster_input
             assert message.decode() == message_input, 'Expected clusterd input message does not match'
-            message_output = self.cluster_output
-            return bytes(message_output.encode())
+            response = cluster_msg_build(cmd=b'send_sync', counter=2, payload=bytes(self.cluster_output.encode()), encrypt=False)
+            self.event.set()
+            return response
         else:
-             return b''
+            assert message.decode() == message_input, 'Received invalid message for clusterd input'
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 message_tests = load_tests(os.path.join(test_data_path, 'worker_messages.yaml'))
@@ -64,11 +65,11 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 log_monitor_paths = [CLUSTER_LOGS_PATH]
 cluster_socket_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'cluster', 'c-internal.sock'))
 ossec_authd_socket_path = ("localhost", 1515)
-receiver_sockets_params = [(ossec_authd_socket_path , 'AF_INET', 'SSL_TLSv1_2'), (cluster_socket_path, 'AF_UNIX', 'TCP')]
+receiver_sockets_params = [(ossec_authd_socket_path , 'AF_INET', 'SSL_TLSv1_2')]
 
 mitm_master = WorkerMID(address=cluster_socket_path, family='AF_UNIX', connection_protocol='TCP')
 
-monitored_sockets_params = [('wazuh-db', None, True), ('ossec-authd', None, True), ('wazuh-clusterd', mitm_master, True)]
+monitored_sockets_params = [('wazuh-clusterd', mitm_master, True), ('ossec-authd', None, True)]
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 # Tests
