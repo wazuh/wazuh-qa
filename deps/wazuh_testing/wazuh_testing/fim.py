@@ -833,6 +833,13 @@ def callback_non_existing_monitored_dir(line):
         return True
 
 
+def callback_num_inotify_watches(line):
+    match = re.match(r'.*Folders monitored with real-time engine: (\d+)', line)
+
+    if match:
+        return match.group(1)
+
+
 def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None):
     """
     Change date and time of the system depending on a boolean condition. Optionally, a monitor may be used to check
