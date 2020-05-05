@@ -1,0 +1,13 @@
+---
+- tags:
+  - logs_info
+  configuration:
+    logs:
+      path: /test_logs/test.log
+      level: info
+- tags:
+  - logs_debug
+  configuration:
+    logs:
+      path: /test_logs/test.log
+      level: debug

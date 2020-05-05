@@ -1,0 +1,9 @@
+---
+- tags:
+  - only_authd_enabled
+  configuration:
+    use_only_authd: yes
+- tags:
+  - only_authd_disabled
+  configuration:
+    use_only_authd: no

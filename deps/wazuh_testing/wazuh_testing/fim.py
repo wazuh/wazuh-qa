@@ -833,6 +833,20 @@ def callback_non_existing_monitored_dir(line):
         return True
 
 
+def callback_detect_api_start(line):
+    match = re.match(r'.*INFO: Listening on (.+)..', line)
+    if match:
+        return match.group(1)
+    return None
+
+
+def callback_detect_api_debug(line):
+    match = re.match(r'.*DEBUG: (.*)', line)
+    if match:
+        return match.group(1)
+    return None
+
+
 def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None):
     """
     Change date and time of the system depending on a boolean condition. Optionally, a monitor may be used to check

@@ -121,6 +121,29 @@ def get_wazuh_conf() -> List[str]:
     return lines
 
 
+def get_api_conf(path) -> dict:
+    """Get current `api.yaml` file content.
+
+    Parameters
+    ----------
+    path : str
+        Path of config file.
+
+    Returns
+    -------
+    current_conf : dict
+        A dict containing all content of the `api.yaml` file.
+    """
+    current_conf = {}
+
+    if sys.platform == 'linux':
+        if os.path.isfile(path):
+            with open(path) as f:
+                current_conf = yaml.full_load(f)
+
+    return current_conf
+
+
 def write_wazuh_conf(wazuh_conf: List[str]):
     """
     Write a new configuration in 'ossec.conf' file.
@@ -132,6 +155,22 @@ def write_wazuh_conf(wazuh_conf: List[str]):
     """
     with open(WAZUH_CONF, 'w') as f:
         f.writelines(wazuh_conf)
+
+
+def write_api_conf(path: str, api_conf: dict):
+    """
+    Write a new configuration in 'api.yaml' file.
+
+    Parameters
+    ----------
+    path : str
+        Path of config file.
+    api_conf : dict
+        Dictionary to be written in the api.yaml file.
+    """
+    if sys.platform == 'linux':
+        with open(path, 'w+') as f:
+            yaml.dump(api_conf, f)
 
 
 def set_section_wazuh_conf(sections, template=None):
