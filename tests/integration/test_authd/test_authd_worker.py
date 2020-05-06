@@ -49,10 +49,16 @@ class WorkerMID(ManInTheMiddle):
             message_input = self.cluster_input
             assert message.decode() == message_input, 'Expected clusterd input message does not match'
             response = cluster_msg_build(cmd=b'send_sync', counter=2, payload=bytes(self.cluster_output.encode()), encrypt=False)
-            self.event.set()
+            self.pause()            
             return response
         else:
-            assert message.decode() == message_input, 'Received invalid message for clusterd input'
+            raise ConnectionResetError('Invalid cluster message!')
+
+    def pause(self):
+        self.event.set()    
+
+    def restart(self):
+        self.event.clear()
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 message_tests = load_tests(os.path.join(test_data_path, 'worker_messages.yaml'))
@@ -98,10 +104,11 @@ def test_ossec_auth_messages( get_configuration, set_up_groups, configure_enviro
         List of test_case stages (dicts with input, output and stage keys).
     """    
     test_case = set_up_groups['test_case']
-    for stage in test_case:
+    for stage in test_case:        
         # Push expected info to mitm queue
         mitm_master.set_cluster_messages(stage['cluster_input'], stage['cluster_output'])
         # Reopen socket (socket is closed by maanger after sending message with client key)
+        mitm_master.restart()
         receiver_sockets[0].open()
         expected = stage['port_output']       
         message = stage['port_input']
@@ -113,3 +120,4 @@ def test_ossec_auth_messages( get_configuration, set_up_groups, configure_enviro
             if time.time() > timeout: 
                 raise ConnectionResetError('Manager did not respond to sent message!')
         assert response[:len(expected)] == expected, 'Failed test case {}: Response was: {} instead of: {}'.format(set_up_groups['name'], response, expected)
+        
