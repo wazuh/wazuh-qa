@@ -1,0 +1,15 @@
+---
+# conf 1
+- tags:
+  - disabled_conf
+  apply_to_modules:
+  - test_basic_usage_disabled
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'yes'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - FIM_MODE

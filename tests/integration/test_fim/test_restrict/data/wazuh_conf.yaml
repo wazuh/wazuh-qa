@@ -1,0 +1,100 @@
+---
+# conf 1
+- tags:
+  - valid_empty
+  apply_to_modules:
+  - test_restrict_valid
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - check_all: 'yes'
+        - FIM_MODE
+        - restrict: ""
+# conf 2
+- tags:
+  - valid_regex
+  - valid_regex1
+  apply_to_modules:
+  - test_restrict_valid
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - check_all: 'yes'
+        - FIM_MODE
+        - restrict: ".restricted$"
+# conf 3
+- tags:
+  - valid_regex
+  - valid_regex2
+  apply_to_modules:
+  - test_restrict_valid
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - check_all: 'yes'
+        - FIM_MODE
+        - restrict: "^restricted"
+# conf 4
+- tags:
+  - valid_regex
+  - valid_regex3
+  apply_to_modules:
+  - test_restrict_valid
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - check_all: 'yes'
+        - FIM_MODE
+        - restrict: "filerestricted|other_restricted$"
+# conf 5
+- tags:
+  - valid_regex_incomplete_unix
+  apply_to_modules:
+  - test_restrict_valid
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - check_all: 'yes'
+        - FIM_MODE
+        - restrict: "^/testdir1/f|^/testdir1/subdir/f|^/testdir2/f|^/testdir2/subdir/f"
+# conf 6
+- tags:
+  - valid_regex_incomplete_win
+  apply_to_modules:
+  - test_restrict_valid
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - check_all: 'yes'
+        - FIM_MODE
+        - restrict: "^c:\\testdir1\\f|^c:\\testdir1\\subdir\\f|^c:\\testdir2\\f|^c:\\testdir2\\subdir\\f"

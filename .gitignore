@@ -1,4 +1,7 @@
+# Python cache
 __pycache__
+
+# Python bytecode files
 *.pyc
 
 ### macOS ###
@@ -40,3 +43,8 @@ Temporary Items
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
 .history
+
+# Wazuh tools installation files
+deps/wazuh_testing/build/
+deps/wazuh_testing/dist/
+deps/wazuh_testing/wazuh_testing.egg-info/

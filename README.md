@@ -1,2 +1,3 @@
 # wazuh-qa
-Wazuh - Quality assurance automation templates
+Wazuh - Quality assurance automated tests
+
