@@ -46,9 +46,9 @@ class WorkerMID(ManInTheMiddle):
     def verify_message(self, data: bytes):
         if len(data) > CLUSTER_DATA_HEADER_SIZE:
             message = data[CLUSTER_DATA_HEADER_SIZE:]
-            message_input = self.cluster_input
-            assert message.decode() == message_input, 'Expected clusterd input message does not match'
             response = cluster_msg_build(cmd=b'send_sync', counter=2, payload=bytes(self.cluster_output.encode()), encrypt=False)
+            print(f'Received message from ossec-authd: {message}')
+            print(f'Response to send: {self.cluster_output}')
             self.pause()            
             return response
         else:
@@ -119,5 +119,10 @@ def test_ossec_auth_messages( get_configuration, set_up_groups, configure_enviro
             response = receiver_sockets[0].receive().decode()
             if time.time() > timeout: 
                 raise ConnectionResetError('Manager did not respond to sent message!')
+        clusterd_queue = monitored_sockets[0]
+        # callback lambda function takes out tcp header and decodes binary to string
+        results = clusterd_queue.get_results(callback=(lambda y: [x[CLUSTER_DATA_HEADER_SIZE:].decode() for x in y]), timeout=1, accum_results=1)
         assert response[:len(expected)] == expected, 'Failed test case {}: Response was: {} instead of: {}'.format(set_up_groups['name'], response, expected)
-        
+        # Assert monitored sockets
+        assert results[0] == stage['cluster_input'], 'Expected clusterd input message does not match'
+        assert results[1] == stage['cluster_output'], 'Expected clusterd output message does not match'
