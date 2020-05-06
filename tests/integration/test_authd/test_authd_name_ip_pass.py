@@ -36,7 +36,7 @@ def load_tests(path):
         return yaml.safe_load(f)
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'manager_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 authd_default_password_path = os.path.join(WAZUH_PATH, 'etc', 'authd.pass')
 ip_name_configuration_tests = load_tests(os.path.join(test_data_path, 'name_ip_pass_tests.yaml'))

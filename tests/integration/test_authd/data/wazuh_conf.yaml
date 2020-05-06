@@ -32,6 +32,10 @@
             value: '/var/ossec/etc/sslmanager.key'
         - ssl_auto_negotiate:
             value: 'no'
+      - section: cluster
+        elements:
+        - disabled:
+            value: 'yes'
     - tags:
       - all
       apply_to_modules:
@@ -65,6 +69,10 @@
             value: '/var/ossec/etc/sslmanager.key'
         - ssl_auto_negotiate:
             value: SSL_AUTO_NEGOTIATE
+      - section: cluster
+        elements:
+        - disabled:
+            value: 'yes'
     # conf 2
     - tags:
       - all
@@ -101,6 +109,10 @@
             value: 'no'
         - ssl_agent_ca:
             value: SSL_AGENT_CA
+      - section: cluster
+        elements:
+        - disabled:
+            value: 'yes'
     #local-server
     - tags:
       - all
@@ -113,6 +125,10 @@
             value: 'no'        
         - purge:
             value: 'no'
+      - section: cluster
+        elements:
+        - disabled:
+            value: 'yes'
     # conf 3
     - tags:
       - all
@@ -169,3 +185,40 @@
             value: 'no'
         - disabled:
             value: 'no'
+    - tags:
+      - manager
+      apply_to_modules:
+      - test_authd_name_ip_pass
+      sections:
+      - section: auth
+        elements:
+          - disabled:
+              value: 'no'
+          - port:
+              value: 1515
+          - use_source_ip:
+              value: USE_SOURCE_IP
+          - force_insert:
+              value: FORCE_INSERT
+          - force_time:
+              value: 0
+          - purge:
+              value: 'yes'
+          - use_password:
+              value: USE_PASSWORD
+          - limit_maxagents:
+              value: 'yes'
+          - ciphers:
+              value: 'HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH'
+          - ssl_verify_host:
+              value: 'no'
+          - ssl_manager_cert:
+              value: '/var/ossec/etc/sslmanager.cert'
+          - ssl_manager_key:
+              value: '/var/ossec/etc/sslmanager.key'
+          - ssl_auto_negotiate:
+              value: 'no'
+      - section: cluster
+        elements:
+        - disabled:
+            value: 'yes'

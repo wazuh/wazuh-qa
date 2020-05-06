@@ -14,7 +14,6 @@ import yaml
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-#TODO Move to utils
 from wazuh_testing.tools.services import control_service
 # Marks
 
@@ -86,7 +85,7 @@ def test_ossec_auth_messages( clean_client_keys_file, get_configuration, set_up_
         List of test_case stages (dicts with input, output and stage keys).
     """    
     test_case = set_up_groups['test_case']
-   for stage in test_case:
+    for stage in test_case:
         # Reopen socket (socket is closed by maanger after sending message with client key)
         receiver_sockets[0].open()
         expected = stage['output']       
