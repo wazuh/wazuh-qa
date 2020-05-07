@@ -259,7 +259,7 @@ def set_section_wazuh_conf(sections, template=None):
         # Create section if it does not exist, clean otherwise
         if not section_conf:
             for s in section:
-            section_conf = ET.SubElement(wazuh_conf.getroot(), section['section'])
+              section_conf = ET.SubElement(wazuh_conf.getroot(), section['section'])
         else:
             section_conf.clear()
 
