@@ -100,7 +100,7 @@ class TimeMachine:
             Go back in time the same time_delta interval. Default value is False.
         """
         # Save timedelta to be able to  travel back in time after the tests
-        TimeMachine.total_time_spent += time_delta.seconds
+        TimeMachine.total_time_spent += time_delta.total_seconds()
         now = datetime.utcnow() if sys.platform == 'darwin' else datetime.now()
         future = now + time_delta if not back_in_time else now - time_delta
         if sys.platform == 'linux':
