@@ -9,7 +9,7 @@ import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_value_file_limit, generate_params, create_file, REGULAR, \
-                                check_time_travel, callback_entries_path_count
+    callback_entries_path_count
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -81,13 +81,11 @@ def test_file_limit_values(tags_to_apply, get_configuration, configure_environme
     else:
         raise AssertionError('Wrong value for file_limit')
 
-    entries, path_count = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+    entries, path_count = wazuh_log_monitor.start(timeout=40,
                                                   callback=callback_entries_path_count,
                                                   error_message='Did not receive expected '
                                                                 '"Fim inode entries: ..., path count: ..." event'
                                                   ).result()
-
-    check_time_travel(True, monitor=wazuh_log_monitor)
 
     if sys.platform != 'win32':
         if entries and path_count:
