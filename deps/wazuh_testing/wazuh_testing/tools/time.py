@@ -262,3 +262,33 @@ def unit_to_seconds(time_):
     seconds_time = f'{new_value}s'
 
     return seconds_time
+
+
+def time_to_seconds(time_):
+    """
+    Convert a string with format (1s, 1m, 1h, 1d, 1w) in number of seconds.
+
+    Parameters
+    ----------
+    time_ : str
+        String (1s, 1m, 1h, 1d, 1w).
+
+    Returns
+    -------
+    time_value: int
+        Number of seconds.
+    """
+    time_unit = time_[len(time_) - 1:]
+
+    time_value = int(time_[:len(time_) - 1])
+
+    if time_unit == "s":
+        return time_value
+    elif time_unit == "m":
+        return time_value * 60
+    elif time_unit == "h":
+        return time_value * 3600
+    elif time_unit == "d":
+        return time_value * 86400
+    elif time_unit == "w":
+        return time_value * 604800
