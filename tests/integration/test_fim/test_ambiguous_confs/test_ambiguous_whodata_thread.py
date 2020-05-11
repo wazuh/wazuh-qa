@@ -44,11 +44,12 @@ def get_configuration(request):
 # Tests
 
 
-@pytest.mark.parametrize('tags_to_apply', [
-    {'whodata_disabled_conf'},
-    {'whodata_enabled_conf'}
+@pytest.mark.parametrize('whodata_enabled, tags_to_apply', [
+    (False, {'whodata_disabled_conf'}),
+    (True, {'whodata_enabled_conf'})
 ])
-def test_ambiguous_whodata_thread(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
+def test_ambiguous_whodata_thread(whodata_enabled, tags_to_apply, get_configuration, configure_environment,
+                                  restart_syscheckd):
     """
     Check if the whodata thread is started when the configuration is ambiguous.
 
@@ -57,12 +58,12 @@ def test_ambiguous_whodata_thread(tags_to_apply, get_configuration, configure_en
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    if tags_to_apply == 'whodata_enabled_conf':
+    if whodata_enabled:
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_real_time_whodata_started,
                                 error_message='Did not receive expected '
                                               '"File integrity monitoring real-time Whodata engine started" event')
     else:
         with pytest.raises(TimeoutError):
-            event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                            callback=callback_real_time_whodata_started).result()
-            raise AttributeError(f'Unexpected event {event}')
+            wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                    callback=callback_real_time_whodata_started)
+            raise AttributeError(f'Unexpected event "File integrity monitoring real-time Whodata engine started"')
