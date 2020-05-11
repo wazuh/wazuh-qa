@@ -15,7 +15,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 # Marks
 
 
-pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=2)]
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2)]
 
 # Variables
 test_directories = [os.path.join(PREFIX, 'testdir1')]
@@ -64,5 +64,5 @@ def test_ambiguous_whodata_thread(tags_to_apply, get_configuration, configure_en
     else:
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                            callback=callback_real_time_whodata_started)
+                                            callback=callback_real_time_whodata_started).result()
             raise AttributeError(f'Unexpected event {event}')
