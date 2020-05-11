@@ -282,13 +282,6 @@ def time_to_seconds(time_):
 
     time_value = int(time_[:len(time_) - 1])
 
-    if time_unit == "s":
-        return time_value
-    elif time_unit == "m":
-        return time_value * 60
-    elif time_unit == "h":
-        return time_value * 3600
-    elif time_unit == "d":
-        return time_value * 86400
-    elif time_unit == "w":
-        return time_value * 604800
+    units = {'s': 1, 'm': 60, 'h': 3600, 'd': 86400, 'w': 604800}
+
+    return time_value * units[time_unit]
