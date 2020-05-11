@@ -11,7 +11,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.gcloud import callback_detect_start_fetching_logs, callback_detect_start_gcp_sleep
 from wazuh_testing.fim import generate_params
 from wazuh_testing.tools import LOG_FILE_PATH
-from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.time import TimeMachine
 from datetime import timedelta
@@ -67,7 +67,7 @@ conf_params = {'PROJECT_ID': project_id, 'SUBSCRIPTION_NAME': subscription_name,
                'CREDENTIALS_FILE': credentials_file, 'INTERVAL': interval,
                'PULL_ON_START': pull_on_start, 'MAX_MESSAGES': max_messages,
                'LOGGING': logging, 'DAY': day, 'WDAY': wday, 'DAY_TIME': day_time,
-               'WDAY_TIME': wday_time, 'TIME': time,'MODULE_NAME': __name__}
+               'WDAY_TIME': wday_time, 'TIME': time, 'MODULE_NAME': __name__}
 
 p, m = generate_params(extra_params=conf_params,
                        modes=monitoring_modes)
@@ -85,14 +85,19 @@ def get_configuration(request):
 
 # tests
 
+@pytest.mark.parametrize('tags_to_apply', [
+    ({'ossec_day_conf'}),
+    ({'ossec_wday_conf'}),
+    ({'ossec_time_conf'})
+])
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_day_wday(get_configuration, configure_environment,
+def test_day_wday(tags_to_apply, get_configuration, configure_environment,
                   restart_wazuh, wait_for_gcp_start):
     """
     These tests verify the module starts to pull according to the day of the week 
     or month and time.
     """
-    tags_to_apply = get_configuration['tags'][0]
+    check_apply_test(tags_to_apply, get_configuration['tags'])
 
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=3,
@@ -123,10 +128,15 @@ def test_day_wday(get_configuration, configure_environment,
 
     test_today = datetime.date.today()
     if tags_to_apply == 'ossec_day_conf':
-        if day <= 28:
-            assert day == test_today.day
+        if today.month < 12:
+            assert test_today.month == today.month + 1
+        else:
+            assert test_today.month == 1
     if tags_to_apply == 'ossec_wday_conf':
-        assert wday == weekDays[test_today.weekday()]
+        assert weekDays[test_today.weekday()] == wday
+        assert test_today.day == day + datetime.timedelta(weeks=1)
+    if tags_to_apply == 'ossec_time_conf':
+        assert test_today.day == day + datetime.timedelta(days=1)
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 60,
                             callback=callback_detect_start_fetching_logs,
@@ -134,3 +144,48 @@ def test_day_wday(get_configuration, configure_environment,
                             error_message='Did not receive expected '
                                           '"Starting fetching of logs" event').result()
     TimeMachine.travel_to_future(timedelta(seconds=seconds + 20 - 172800), back_in_time=True)
+
+
+@pytest.mark.parametrize('tags_to_apply', [
+    ({'ossec_day_multiple_conf'}),
+    ({'ossec_wday_multiple_conf'}),
+    ({'ossec_time_multiple_conf'})
+])
+@pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
+def test_day_wday_multiple(tags_to_apply, get_configuration, configure_environment,
+                           restart_wazuh, wait_for_gcp_start):
+    """
+    These tests verify the module calculates correctly the next scan using
+    time intervals greater than one month, one week or one day.
+    """
+    check_apply_test(tags_to_apply, get_configuration['tags'])
+
+    str_interval = get_configuration['sections'][0]['elements'][4]['interval']['value']
+    time_interval = int(''.join(filter(str.isdigit, str_interval)))
+
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 120,
+                            callback=callback_detect_start_fetching_logs,
+                            accum_results=1,
+                            error_message='Did not receive expected '
+                                          '"Starting fetching of logs" event').result()
+    next_scan_time_log = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 60,
+                                                 callback=callback_detect_start_gcp_sleep,
+                                                 accum_results=1,
+                                                 error_message='Did not receive expected '
+                                                               '"Sleeping until ..." event').result()
+    next_scan_time_spl = next_scan_time_log.split(" ")
+    date = next_scan_time_spl[0].split("/")
+    hour = next_scan_time_spl[1].split(":")
+    next_scan_time = datetime.datetime(int(date[0]), int(date[1]), int(date[2]), int(hour[0]), int(hour[1]),
+                                       int(hour[2]))
+
+    if tags_to_apply == 'ossec_day_multiple_conf':
+        if today.month < 12:
+            assert date[1] == today.month + 1
+        else:
+            assert date[1] == 1
+    if tags_to_apply == 'ossec_wday_multiple_conf':
+        assert weekDays[next_scan_time.weekday()] == wday
+        assert next_scan_time.day == day + datetime.timedelta(weeks=time_interval)
+    if tags_to_apply == 'ossec_time_multiple_conf':
+        assert date[1] == day + datetime.timedelta(days=interval)
