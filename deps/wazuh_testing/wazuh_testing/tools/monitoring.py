@@ -366,21 +366,23 @@ class QueueMonitor:
             if extra_timer >= timeout_extra > 0:
                 self.stop()
                 break
+            tic = time.time()
             try:
                 if update_position:
                     item = callback(self._queue.get(block=True, timeout=self._time_step))
                 else:
                     item = callback(self._queue.peek(position=position, block=True, timeout=self._time_step))
                     position += 1
-                if item is not None:
+                if item is not None and item is not False:
                     result_list.append(item)
                     if len(result_list) == accum_results and timeout_extra > 0 and not extra_timer_is_running:
                         extra_timer_is_running = True
             except queue.Empty:
-                time.sleep(time_wait)
-                timer += self._time_step + time_wait
+                pass
+            finally:
+                timer += time.time() - tic
                 if extra_timer_is_running:
-                    extra_timer += self._time_step + time_wait
+                    extra_timer += time.time() - tic
 
         if len(result_list) == 1:
             return result_list[0]
