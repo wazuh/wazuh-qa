@@ -380,9 +380,10 @@ class QueueMonitor:
             except queue.Empty:
                 pass
             finally:
-                timer += time.time() - tic
+                time_count = time.time() - tic
+                timer += time_count
                 if extra_timer_is_running:
-                    extra_timer += time.time() - tic
+                    extra_timer += time_count
 
         if len(result_list) == 1:
             return result_list[0]
