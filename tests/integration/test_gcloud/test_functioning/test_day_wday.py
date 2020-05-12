@@ -127,16 +127,16 @@ def test_day_wday(tags_to_apply, get_configuration, configure_environment,
     TimeMachine.travel_to_future(timedelta(seconds=seconds))
 
     test_today = datetime.date.today()
-    if tags_to_apply == 'ossec_day_conf':
+    if tags_to_apply == {'ossec_day_conf'}:
         if today.month < 12:
             assert test_today.month == today.month + 1
         else:
             assert test_today.month == 1
-    if tags_to_apply == 'ossec_wday_conf':
+    if tags_to_apply == {'ossec_wday_conf'}:
         assert weekDays[test_today.weekday()] == wday
-        assert test_today.day == day + datetime.timedelta(weeks=1)
-    if tags_to_apply == 'ossec_time_conf':
-        assert test_today.day == day + datetime.timedelta(days=1)
+        assert test_today.day == (today + datetime.timedelta(weeks=1)).day
+    if tags_to_apply == {'ossec_time_conf'}:
+        assert test_today.day == (today + datetime.timedelta(days=1)).day
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 60,
                             callback=callback_detect_start_fetching_logs,
@@ -179,13 +179,13 @@ def test_day_wday_multiple(tags_to_apply, get_configuration, configure_environme
     next_scan_time = datetime.datetime(int(date[0]), int(date[1]), int(date[2]), int(hour[0]), int(hour[1]),
                                        int(hour[2]))
 
-    if tags_to_apply == 'ossec_day_multiple_conf':
-        if today.month < 12:
-            assert date[1] == today.month + 1
+    if tags_to_apply == {'ossec_day_multiple_conf'}:
+        if today.month + time_interval <= 12:
+            assert next_scan_time.month == today.month + time_interval
         else:
-            assert date[1] == 1
-    if tags_to_apply == 'ossec_wday_multiple_conf':
+            assert next_scan_time.month == (today.month + time_interval) % 12
+    if tags_to_apply == {'ossec_wday_multiple_conf'}:
         assert weekDays[next_scan_time.weekday()] == wday
-        assert next_scan_time.day == day + datetime.timedelta(weeks=time_interval)
-    if tags_to_apply == 'ossec_time_multiple_conf':
-        assert date[1] == day + datetime.timedelta(days=interval)
+        assert next_scan_time.day == (today + datetime.timedelta(weeks=time_interval)).day
+    if tags_to_apply == {'ossec_time_multiple_conf'}:
+        assert next_scan_time.day == (today + datetime.timedelta(days=time_interval)).day
