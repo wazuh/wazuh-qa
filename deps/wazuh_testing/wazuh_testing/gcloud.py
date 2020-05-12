@@ -144,4 +144,4 @@ def publish(id_project, name_topic, credentials, repetitions=1, msg=None):
         # Data must be a bytestring
         data = data.encode("utf-8")
         # Add two attributes, origin and username, to the message
-        future = publisher.publish(topic_path, data, origin="python-sample", username="gcp")
+        publisher.publish(topic_path, data, origin="python-sample", username="gcp")
