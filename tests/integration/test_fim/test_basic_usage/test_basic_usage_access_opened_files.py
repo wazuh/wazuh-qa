@@ -3,6 +3,8 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import random
+import string
 
 import pytest
 
@@ -50,6 +52,8 @@ def create_and_restore_large_file(request):
     if not os.path.exists(testdir1):
         os.mkdir(testdir1)
 
+    file_size = 1024 * 1024 * 768   # 805 MB
+    chunksize = 1024 * 768
     file_path = os.path.join(testdir1, 'large_file')
     changed_path = os.path.join(testdir1, 'changed_name')
 
@@ -57,7 +61,8 @@ def create_and_restore_large_file(request):
         os.rename(changed_path, file_path)
     elif not os.path.exists(file_path):
         with open(file_path, "a") as f:
-            f.write('a' * 1024 * 1024 * 768)    # 805 MB
+            while os.stat(file_path).st_size < file_size:
+                f.write(random.choice(string.printable) * chunksize)
 
 # Tests
 
