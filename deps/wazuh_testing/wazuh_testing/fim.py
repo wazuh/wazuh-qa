@@ -833,20 +833,6 @@ def callback_non_existing_monitored_dir(line):
         return True
 
 
-def callback_detect_api_start(line):
-    match = re.match(r'.*INFO: Listening on (.+)..', line)
-    if match:
-        return match.group(1)
-    return None
-
-
-def callback_detect_api_debug(line):
-    match = re.match(r'.*DEBUG: (.*)', line)
-    if match:
-        return match.group(1)
-    return None
-
-
 def callback_num_inotify_watches(line):
     match = re.match(r'.*Folders monitored with real-time engine: (\d+)', line)
 

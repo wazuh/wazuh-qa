@@ -8,10 +8,9 @@ from pwd import getpwnam
 
 import pytest
 
-from wazuh_testing.fim import callback_detect_api_debug
+from wazuh_testing.api import callback_detect_api_debug
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import check_apply_test
-from wazuh_testing.tools.configuration import get_api_conf
+from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks

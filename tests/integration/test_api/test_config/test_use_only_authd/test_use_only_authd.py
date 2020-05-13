@@ -12,8 +12,7 @@ from secrets import token_hex
 import pytest
 import requests
 
-from wazuh_testing.tools.configuration import check_apply_test
-from wazuh_testing.tools.configuration import get_api_conf
+from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 from wazuh_testing.tools.services import control_service
 
 # Marks

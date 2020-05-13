@@ -5,12 +5,14 @@
 import os
 import time
 from secrets import token_hex
+import random
+from ipaddress import IPv4Address
+from requests.packages.urllib3.util.retry import Retry
 
 import pytest
 import requests
 
-from wazuh_testing.tools.configuration import check_apply_test
-from wazuh_testing.tools.configuration import get_api_conf
+from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 
 # Marks
 
@@ -65,12 +67,12 @@ def test_behind_proxy_server(insert_agent, tags_to_apply, get_configuration, con
     api_details = get_api_details()
 
     # Generate random IP and name.
-    proxy_ip = '12.3.45.67'
-    data = {'name': 'test_agent'}
+    proxy_ip = str(IPv4Address(random.getrandbits(32)))
+    data = {'name': token_hex(16)}
 
     # Extra data is needed when the endpoint /insert is used
     if insert_agent:
-        data['id'] = '200'
+        data['id'] = str(random.randint(200, 2000))
         data['key'] = token_hex(32)
 
     # Add X-Forwarded-For.
@@ -92,9 +94,14 @@ def test_behind_proxy_server(insert_agent, tags_to_apply, get_configuration, con
         api_details['base_url'] += f"?list_agents={agent_id}"
 
         # It is necessary to wait a bit after adding the agent before querying it.
-        time.sleep(1)
-        get_response = requests.get(api_details['base_url'], headers=api_details['auth_headers'], verify=False)
-        register_ip = get_response.json()['data']['affected_items'][0]['registerIP']
+        retries = 0
+        response_code = None
+        while retries < 3 and response_code != 200:
+            time.sleep(1)
+            get_response = requests.get(api_details['base_url'], headers=api_details['auth_headers'], verify=False)
+            response_code = get_response.status_code
+            register_ip = get_response.json()['data']['affected_items'][0]['registerIP']
+            retries += 1
 
         # Check if new agent has X-Forwarded-For IP or a different one.
         if behind_proxy_server:

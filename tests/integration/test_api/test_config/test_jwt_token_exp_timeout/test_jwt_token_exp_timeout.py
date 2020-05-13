@@ -8,8 +8,7 @@ import time
 import pytest
 import requests
 
-from wazuh_testing.tools.configuration import check_apply_test
-from wazuh_testing.tools.configuration import get_api_conf
+from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 
 # Marks
 
@@ -37,9 +36,9 @@ def get_configuration(request):
     {'short_exp_time'},
     {'long_exp_time'}
 ])
-def test_rbac_exp_timeout(tags_to_apply, get_configuration, configure_api_environment, restart_api,
-                          wait_for_start, get_api_details):
-    """
+def test_jwt_token_exp_timeout(tags_to_apply, get_configuration, configure_api_environment, restart_api,
+                               wait_for_start, get_api_details):
+    """Verify that the JWT token expires after defined time.
 
     Parameters
     ----------
@@ -60,7 +59,7 @@ def test_rbac_exp_timeout(tags_to_apply, get_configuration, configure_api_enviro
     time.sleep(10)
     get_response = requests.get(api_details['base_url'], headers=api_details['auth_headers'], verify=False)
 
-    # If white mode, user can't access that information.
+    # If token has expired, user can't access that information.
     if short_exp:
         assert get_response.status_code == 401, f'Expected status code was 401, ' \
             f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'

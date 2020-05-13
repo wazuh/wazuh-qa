@@ -169,8 +169,6 @@ def get_process_cmd(search_cmd):
         if command:
             return proc
 
-    return None
-
 
 def check_daemon_status(daemon=None, running=True, timeout=10, extra_sockets=None):
     """Check Wazuh daemon status.

@@ -8,8 +8,7 @@ import pytest
 import requests
 
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import check_apply_test
-from wazuh_testing.tools.configuration import get_api_conf
+from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 
 # Marks
 

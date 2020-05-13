@@ -136,10 +136,9 @@ def get_api_conf(path) -> dict:
     """
     current_conf = {}
 
-    if sys.platform == 'linux':
-        if os.path.isfile(path):
-            with open(path) as f:
-                current_conf = yaml.full_load(f)
+    if os.path.isfile(path):
+        with open(path) as f:
+            current_conf = yaml.full_load(f)
 
     return current_conf
 
@@ -168,9 +167,8 @@ def write_api_conf(path: str, api_conf: dict):
     api_conf : dict
         Dictionary to be written in the api.yaml file.
     """
-    if sys.platform == 'linux':
-        with open(path, 'w+') as f:
-            yaml.dump(api_conf, f)
+    with open(path, 'w+') as f:
+        yaml.dump(api_conf, f)
 
 
 def set_section_wazuh_conf(sections, template=None):

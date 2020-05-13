@@ -2,25 +2,17 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import json
 import os
 import shutil
-import sys
-from base64 import b64encode
 import subprocess
 
 import pytest
-import requests
-import yaml
 
-from wazuh_testing.fim import callback_detect_api_start
+from wazuh_testing.api import callback_detect_api_start, get_base_url, get_token_login_api
+from wazuh_testing.tools import API_LOG_FILE_PATH, WAZUH_PATH, WAZUH_API_CONF
 from wazuh_testing.tools.configuration import get_api_conf, write_api_conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.services import control_service
-
-if sys.platform == 'linux':
-    from wazuh_testing.tools import API_LOG_FILE_PATH, WAZUH_PATH, WAZUH_API_CONF
 
 
 @pytest.fixture(scope='module')
@@ -84,39 +76,15 @@ def wait_for_start(get_configuration, request):
                        error_message='Did not receive expected "INFO: Listening on ..." event')
 
 
-with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'common.yaml'), 'r') as stream:
-    common = yaml.safe_load(stream)['variables']
-
-
-def get_base_url(protocol, host, port, version):
-    return f"{protocol}://{host}:{port}/{version}"
-
-
-def get_login_headers(user, password):
-    basic_auth = f"{user}:{password}".encode()
-    return {'Content-Type': 'application/json',
-                     'Authorization': f'Basic {b64encode(basic_auth).decode()}'}
-
-
-def get_token_login_api(protocol, host, port, version, user, password, timeout):
-    login_url = f"{get_base_url(protocol, host, port, version)}{common['login_endpoint']}"
-    response = requests.get(login_url, headers=get_login_headers(user, password), verify=False, timeout=timeout)
-
-    if response.status_code == 200:
-        return json.loads(response.content.decode())['token']
-    else:
-        raise Exception(f"Error obtaining login token: {response.json()}")
-
-
 @pytest.fixture(scope='module')
 def get_api_details():
-    def _get_api_details(protocol=common['protocol'], host=common['host'], port=common['port'],
-                         version=common['version'], user=common['user'], password=common['pass'], timeout=10):
+    def _get_api_details(protocol=None, host=None, port=None, version=None, user=None, password=None,
+                         login_endpoint=None, timeout=None):
         return {
             'base_url': get_base_url(protocol, host, port, version),
             'auth_headers': {
                 'Content-Type': 'application/json',
-                'Authorization': f'Bearer {get_token_login_api(protocol, host, port, version, user, password, timeout)}'
+                'Authorization': f'Bearer {get_token_login_api(protocol, host, port, version, user, password, login_endpoint, timeout)}'
             }
         }
     return _get_api_details

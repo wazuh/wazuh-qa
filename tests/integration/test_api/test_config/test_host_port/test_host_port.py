@@ -8,10 +8,9 @@ import pytest
 import requests
 
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import callback_detect_api_start
+from wazuh_testing.api import callback_detect_api_start
 from wazuh_testing.tools import API_LOG_FILE_PATH
-from wazuh_testing.tools.configuration import check_apply_test
-from wazuh_testing.tools.configuration import get_api_conf
+from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
