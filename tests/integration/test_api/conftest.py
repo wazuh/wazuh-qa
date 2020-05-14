@@ -79,8 +79,8 @@ def wait_for_start(get_configuration, request):
 
 @pytest.fixture(scope='module')
 def get_api_details():
-    def _get_api_details(protocol=API_PROTOCOL, host=API_HOST, port=API_PORT, version=API_VERSION, user=API_USER, password=API_PASS,
-                         login_endpoint=API_LOGIN_ENDPOINT, timeout=10):
+    def _get_api_details(protocol=API_PROTOCOL, host=API_HOST, port=API_PORT, version=API_VERSION, user=API_USER,
+                         password=API_PASS, login_endpoint=API_LOGIN_ENDPOINT, timeout=10):
         return {
             'base_url': get_base_url(protocol, host, port, version),
             'auth_headers': {
