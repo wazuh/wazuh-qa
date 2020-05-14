@@ -8,7 +8,8 @@ import subprocess
 
 import pytest
 
-from wazuh_testing.api import callback_detect_api_start, get_base_url, get_token_login_api
+from wazuh_testing.api import callback_detect_api_start, get_base_url, get_token_login_api, API_HOST, \
+    API_LOGIN_ENDPOINT, API_PASS, API_PORT, API_USER, API_PROTOCOL, API_VERSION
 from wazuh_testing.tools import API_LOG_FILE_PATH, WAZUH_PATH, WAZUH_API_CONF
 from wazuh_testing.tools.configuration import get_api_conf, write_api_conf
 from wazuh_testing.tools.file import truncate_file
@@ -78,8 +79,8 @@ def wait_for_start(get_configuration, request):
 
 @pytest.fixture(scope='module')
 def get_api_details():
-    def _get_api_details(protocol=None, host=None, port=None, version=None, user=None, password=None,
-                         login_endpoint=None, timeout=None):
+    def _get_api_details(protocol=API_PROTOCOL, host=API_HOST, port=API_PORT, version=API_VERSION, user=API_USER, password=API_PASS,
+                         login_endpoint=API_LOGIN_ENDPOINT, timeout=10):
         return {
             'base_url': get_base_url(protocol, host, port, version),
             'auth_headers': {
@@ -88,4 +89,3 @@ def get_api_details():
             }
         }
     return _get_api_details
-

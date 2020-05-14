@@ -9,13 +9,13 @@ import json
 
 # Variables
 
-api_protocol = 'https'
-api_host = 'localhost'
-api_port = '55000'
-api_user = 'wazuh'
-api_password = 'wazuh'
-api_version = 'v4'
-api_login_endpoint = '/security/user/authenticate'
+API_PROTOCOL = 'https'
+API_HOST = 'localhost'
+API_PORT = '55000'
+API_USER = 'wazuh'
+API_PASS = 'wazuh'
+API_VERSION = 'v4'
+API_LOGIN_ENDPOINT = '/security/user/authenticate'
 
 
 # Callbacks
@@ -36,14 +36,6 @@ def callback_detect_api_debug(line):
 
 def get_base_url(protocol, host, port, version):
     """Get complete url of api"""
-    if not protocol:
-        protocol = api_protocol
-    if not host:
-        host = api_host
-    if not port:
-        port = api_port
-    if not version:
-        version = api_version
 
     return f"{protocol}://{host}:{port}/{version}"
 
@@ -56,21 +48,6 @@ def get_login_headers(user, password):
 
 def get_token_login_api(protocol, host, port, version, user, password, login_endpoint, timeout):
     """Get API login token"""
-
-    if not protocol:
-        protocol = api_protocol
-    if not host:
-        host = api_host
-    if not port:
-        port = api_port
-    if not version:
-        version = api_version
-    if not user:
-        user = api_user
-    if not password:
-        password = api_password
-    if not login_endpoint:
-        login_endpoint = api_login_endpoint
 
     login_url = f"{get_base_url(protocol, host, port, version)}{login_endpoint}"
     response = requests.get(login_url, headers=get_login_headers(user, password), verify=False, timeout=timeout)
