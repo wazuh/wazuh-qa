@@ -25,7 +25,8 @@ setup(name='wazuh_testing',
       include_package_data=True,
       install_requires=[
             'lockfile==0.12.2',
-            'testinfra==5.0.0'
+            'testinfra==5.0.0',
+            'requests==2.21.0'
       ],
       zip_safe=False
       )
