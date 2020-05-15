@@ -1,0 +1,17 @@
+---
+# conf 1
+- tags:
+  - num_watches_conf
+  apply_to_modules:
+  - test_num_watches
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - frequency:
+        value: 30
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - FIM_MODE

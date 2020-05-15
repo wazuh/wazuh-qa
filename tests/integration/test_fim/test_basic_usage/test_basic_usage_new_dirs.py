@@ -11,7 +11,7 @@ import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import detect_initial_scan
-from wazuh_testing.fim import generate_params, regular_file_cud, check_time_travel, callback_non_existing_monitored_dir
+from wazuh_testing.fim import generate_params, regular_file_cud, callback_non_existing_monitored_dir
 from wazuh_testing.tools import PREFIX, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -26,7 +26,8 @@ test_directories = []
 directory_str = os.path.join(PREFIX, 'testdir1')
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path,
-                                   'wazuh_conf.yaml' if sys.platform != 'win32' else 'wazuh_conf_win32.yaml')
+                                   'wazuh_conf_new_dirs.yaml' if sys.platform != 'win32'
+                                   else 'wazuh_conf_new_dirs_win32.yaml')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # Configurations
@@ -85,8 +86,6 @@ def test_new_directory(tags_to_apply, get_configuration, configure_environment, 
         regular_file_cud(directory_str, wazuh_log_monitor, file_list=['file1', 'file2', 'file3'],
                          min_timeout=global_parameters.default_timeout, triggers_event=False)
 
-        # Travel to the future to start next scheduled scan
-        check_time_travel(True)
         detect_initial_scan(wazuh_log_monitor)
     else:
         # Wait for syscheck to realize the directories don't exist
@@ -97,4 +96,4 @@ def test_new_directory(tags_to_apply, get_configuration, configure_environment, 
 
     # Assert that events of new CUD actions are raised after next scheduled scan
     regular_file_cud(directory_str, wazuh_log_monitor, file_list=['file4', 'file5', 'file6'],
-                     min_timeout=global_parameters.default_timeout, triggers_event=True)
+                     min_timeout=40, triggers_event=True)

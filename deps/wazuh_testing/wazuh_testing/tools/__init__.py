@@ -25,20 +25,25 @@ elif sys.platform == 'darwin':
 else:
     WAZUH_PATH = os.path.join('/', 'var', 'ossec')
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
+    WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+    API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
     GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
     PREFIX = os.sep
 
 if sys.platform == 'darwin' or sys.platform == 'win32' or sys.platform == 'sunos5':
     WAZUH_SERVICE = 'wazuh.agent'
 else:
-    with open(os.path.join(WAZUH_PATH, 'etc/ossec-init.conf'), 'r') as f:
-        type_ = None
-        for line in f.readlines():
-            if 'TYPE' in line:
-                type_ = line.split('"')[1]
-        WAZUH_SERVICE = 'wazuh-manager' if type_ == 'server' else 'wazuh-agent'
+    try:
+        with open(os.path.join(WAZUH_PATH, 'etc/ossec-init.conf'), 'r') as f:
+            type_ = None
+            for line in f.readlines():
+                if 'TYPE' in line:
+                    type_ = line.split('"')[1]
+            WAZUH_SERVICE = 'wazuh-manager' if type_ == 'server' else 'wazuh-agent'
+    except FileNotFoundError:
+        pass
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
