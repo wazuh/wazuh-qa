@@ -118,7 +118,7 @@ def test_duplicate_entries(get_configuration, configure_environment, restart_sys
     mode2 = get_configuration['metadata']['fim_mode2']
 
     scheduled = mode2 == 'scheduled'
-    mode2 = "real-time" if mode2 == "realtime" else mode2
+    mode2 = "realtime" if mode2 == "real-time" else mode2
 
     logger.info(f'Adding file {os.path.join(testdir1, file)}, content: " "')
     create_file(REGULAR, testdir1, file, content=' ')
@@ -231,7 +231,7 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
     mode2 = get_configuration['metadata']['fim_mode2']
 
     scheduled = mode2 == 'scheduled'
-    mode2 = "real-time" if mode2 == "realtime" else mode2
+    mode2 = "realtime" if mode2 == "real-time" else mode2
 
     logger.info(f'Adding file {os.path.join(testdir1, file)}, content: "testing"')
     create_file(REGULAR, testdir1, file, content='testing')

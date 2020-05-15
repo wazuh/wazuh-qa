@@ -47,7 +47,7 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.parametrize('tags_to_apply', [
-    ({'invalid_no_regex', 'invalid_scan'})
+    ({'invalid_no_regex', 'invalid_scan', 'invalid_file_limit'})
 ])
 def test_invalid(tags_to_apply, get_configuration, configure_environment):
     """
