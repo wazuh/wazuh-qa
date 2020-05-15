@@ -66,6 +66,14 @@ def restart_wazuh(get_configuration, request):
     control_service('start')
 
 
+@pytest.fixture(scope='module')
+def reset_ossec_log(get_configuration, request):
+    # Reset ossec.log and start a new monitor
+    truncate_file(LOG_FILE_PATH)
+    file_monitor = FileMonitor(LOG_FILE_PATH)
+    setattr(request.module, 'wazuh_log_monitor', file_monitor)
+
+
 def pytest_addoption(parser):
     parser.addoption(
         "--tier",

@@ -83,8 +83,47 @@ def callback_detect_gcp_alert(line):
         return json.loads(str(match.group(1)))
     return None
 
+
 def callback_detect_schedule_validate_parameters_warn(line):
     match = re.match(r'.*at _sched_scan_validate_parameters\(\): WARNING:.*', line)
+
+    if match:
+        return line
+    return None
+
+
+def callback_detect_schedule_validate_parameters_err(line):
+    match = re.match(r'.*at _sched_scan_validate_parameters\(\): ERROR:.*', line)
+
+    if match:
+        return line
+    return None
+
+
+def callback_detect_gcp_read_err(line):
+    match_err = re.match(r'.*wm_gcp_read\(\): ERROR:.*', line)
+    match_warn = re.match(r'.*wm_gcp_read\(\): WARNING: File \'\S+\' not found.*', line)
+
+    if match_err:
+        return line
+    elif match_warn:
+        return line
+    return None
+
+
+def callback_detect_gcp_wmodule_err(line):
+    match_err = re.match(r'.*read_main_elements\(\): ERROR: \(\d+\): Invalid element in the configuration.*', line)
+    match_deb = re.match(r'.*Read_GCP\(\): DEBUG: Empty configuration for module \'gcp-pubsub\'', line)
+
+    if match_err:
+        return line
+    elif match_deb:
+        return line
+    return None
+
+
+def callback_detect_schedule_read_err(line):
+    match = re.match(r'.*at sched_scan_read\(\): ERROR:.*', line)
 
     if match:
         return line
