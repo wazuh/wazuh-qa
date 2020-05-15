@@ -121,6 +121,28 @@ def get_wazuh_conf() -> List[str]:
     return lines
 
 
+def get_api_conf(path) -> dict:
+    """Get current `api.yaml` file content.
+
+    Parameters
+    ----------
+    path : str
+        Path of config file.
+
+    Returns
+    -------
+    current_conf : dict
+        A dict containing all content of the `api.yaml` file.
+    """
+    current_conf = {}
+
+    if os.path.isfile(path):
+        with open(path) as f:
+            current_conf = yaml.full_load(f)
+
+    return current_conf
+
+
 def write_wazuh_conf(wazuh_conf: List[str]):
     """
     Write a new configuration in 'ossec.conf' file.
@@ -134,7 +156,22 @@ def write_wazuh_conf(wazuh_conf: List[str]):
         f.writelines(wazuh_conf)
 
 
-def set_section_wazuh_conf(sections):
+def write_api_conf(path: str, api_conf: dict):
+    """
+    Write a new configuration in 'api.yaml' file.
+
+    Parameters
+    ----------
+    path : str
+        Path of config file.
+    api_conf : dict
+        Dictionary to be written in the api.yaml file.
+    """
+    with open(path, 'w+') as f:
+        yaml.dump(api_conf, f)
+
+
+def set_section_wazuh_conf(sections, template=None):
     """
     Set a configuration in a section of Wazuh. It replaces the content if it exists.
 
@@ -146,6 +183,8 @@ def set_section_wazuh_conf(sections):
             Section of Wazuh configuration to replace. Default `'syscheck'`
         new_elements : list, optional
             List with dictionaries for settings elements in the section. Default `None`
+    template : list of string, optional
+        File content template
 
     Returns
     -------
@@ -173,16 +212,16 @@ def set_section_wazuh_conf(sections):
             for tag_name, properties in element.items():
                 tag = ET.SubElement(section, tag_name)
                 new_elements = properties.get('elements')
+                attributes = properties.get('attributes')
+                if attributes is not None:
+                    for attribute in attributes:
+                        if isinstance(attribute, dict):  # noqa: E501
+                            for attr_name, attr_value in attribute.items():
+                                tag.attrib[attr_name] = str(attr_value)
                 if new_elements:
                     create_elements(tag, new_elements)
                 else:
                     tag.text = str(properties.get('value'))
-                    attributes = properties.get('attributes')
-                    if attributes:
-                        for attribute in attributes:
-                            if attribute is not None and isinstance(attribute, dict):  # noqa: E501
-                                for attr_name, attr_value in attribute.items():
-                                    tag.attrib[attr_name] = str(attr_value)
 
     def purge_multiple_root_elements(str_list: List[str], root_delimeter: str = "</ossec_config>") -> List[str]:
         """
@@ -249,7 +288,7 @@ def set_section_wazuh_conf(sections):
         return ET.tostringlist(elementTree.getroot(), encoding="unicode")
 
     # Get Wazuh configuration as a list of str
-    raw_wazuh_conf = get_wazuh_conf()
+    raw_wazuh_conf = get_wazuh_conf() if template is None else template
     # Generate a ElementTree representation of the previous list to work with its sections
     wazuh_conf = to_elementTree(purge_multiple_root_elements(raw_wazuh_conf))
     for section in sections:
