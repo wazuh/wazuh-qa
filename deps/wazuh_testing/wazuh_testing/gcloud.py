@@ -83,6 +83,13 @@ def callback_detect_gcp_alert(line):
         return json.loads(str(match.group(1)))
     return None
 
+def callback_detect_schedule_validate_parameters_warn(line):
+    match = re.match(r'.*at _sched_scan_validate_parameters\(\): WARNING:.*', line)
+
+    if match:
+        return line
+    return None
+
 
 def publish(id_project, name_topic, credentials, repetitions=1, msg=None):
     if WAZUH_PATH in credentials:
