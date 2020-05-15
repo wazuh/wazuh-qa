@@ -63,7 +63,7 @@ def get_configuration(request):
 
 # functions
 
-def detect_fim_scan(file_monitor):
+def detect_fim_scan(file_monitor, fim_mode):
     """
     Detect initial scan when restarting Wazuh.
 
@@ -75,6 +75,8 @@ def detect_fim_scan(file_monitor):
     detect_initial_scan(file_monitor)
     if sys.platform == 'win32':
         time.sleep(5)
+    elif fim_mode == 'scheduled':
+        time.sleep(1)
 
 
 def wait_for_event(fim_mode):
@@ -121,13 +123,13 @@ def create_and_check_diff(name, path, fim_mode):
     return diff_file
 
 
-def disable_report_changes():
+def disable_report_changes(fim_mode):
     """Change the `report_changes` value in the `ossec.conf` file and then restart `Syscheck` to apply the changes."""
     new_conf = change_conf(report_value='no')
     new_ossec_conf = set_section_wazuh_conf(new_conf[0].get('sections'))
     restart_wazuh_with_new_conf(new_ossec_conf)
     # Wait for FIM scan to finish
-    detect_fim_scan(wazuh_log_monitor)
+    detect_fim_scan(wazuh_log_monitor, fim_mode)
 
 
 # tests
@@ -172,12 +174,12 @@ def test_no_report_changes(path, get_configuration, configure_environment,
     backup_conf = get_wazuh_conf()
 
     try:
-        disable_report_changes()
+        disable_report_changes(fim_mode)
         assert not os.path.exists(diff_file), f'{diff_file} exists'
     finally:
         # Restore the original conf file so as not to interfere with other tests
         restart_wazuh_with_new_conf(backup_conf)
-        detect_fim_scan(wazuh_log_monitor)
+        detect_fim_scan(wazuh_log_monitor, fim_mode)
 
 
 def test_report_changes_after_restart(get_configuration, configure_environment, restart_syscheckd,
@@ -195,9 +197,9 @@ def test_report_changes_after_restart(get_configuration, configure_environment, 
 
     backup_conf = get_wazuh_conf()
     try:
-        disable_report_changes()
+        disable_report_changes(fim_mode)
         assert not os.path.exists(diff_file_path), f'{diff_file_path} exists'
     finally:
         # Restore the original conf file so as not to interfere with other tests
         restart_wazuh_with_new_conf(backup_conf)
-        detect_fim_scan(wazuh_log_monitor)
+        detect_fim_scan(wazuh_log_monitor, fim_mode)
