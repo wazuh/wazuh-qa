@@ -50,6 +50,13 @@ def callback_received_messages_number(line):
     return None
 
 
+def callback_detect_all_gcp(line):
+    match = re.match(r'.*wazuh-modulesd:gcp-pubsub\[\d+\].*', line)
+    if match:
+        return line
+    return None
+
+
 def publish(id_project, name_topic, credentials, repetitions=1, msg=None):
     if WAZUH_PATH in credentials:
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "{}".format(credentials)
