@@ -618,6 +618,17 @@
             "pattern": "^(.*)$"
           }
         },
+        "mode": {
+          "$id": "#/properties/syscheck/properties/mode",
+          "type": "string",
+          "enum": ["realtime", "whodata", "scheduled"],
+          "title": "The Mode Schema",
+          "default": "",
+          "examples": [
+            "realtime"
+          ],
+          "pattern": "^(.*)$"
+        },
         "changed_attributes": {
           "$id": "#/properties/syscheck/properties/changed_attributes",
           "type": "array",
