@@ -5,6 +5,9 @@
 import os
 import re
 
+from wazuh_testing.tools import WAZUH_PATH
+from google.cloud import pubsub_v1
+
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 
@@ -38,3 +41,27 @@ def detect_gcp_start(file_monitor):
         File log monitor to detect events
     """
     file_monitor.start(timeout=60, callback=callback_detect_start_gcp)
+
+
+def callback_received_messages_number(line):
+    match = re.match(r'.*wm_gcp_run\(\): INFO: - INFO - Received and acknowledged (\d+) messages', line)
+    if match:
+        return match.group(1)
+    return None
+
+
+def publish(id_project, name_topic, credentials, repetitions=1, msg=None):
+    if WAZUH_PATH in credentials:
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "{}".format(credentials)
+    else:
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "{}/{}".format(WAZUH_PATH, credentials)
+
+    publisher = pubsub_v1.PublisherClient()
+    topic_path = publisher.topic_path(id_project, name_topic)
+
+    for number in range(repetitions):
+        data = u"{}".format(msg)
+        # Data must be a bytestring
+        data = data.encode("utf-8")
+        # Add two attributes, origin and username, to the message
+        future = publisher.publish(topic_path, data, origin="python-sample", username="gcp")
