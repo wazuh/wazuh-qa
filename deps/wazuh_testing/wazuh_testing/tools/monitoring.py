@@ -510,6 +510,57 @@ class StreamServerPort(socketserver.ThreadingTCPServer):
     pass
 
 
+class SSLStreamServerPort(socketserver.ThreadingTCPServer):
+    
+    ciphers = "HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH"
+    ssl_version = ssl.PROTOCOL_TLSv1_2
+    certfile = None 
+    keyfile = None 
+
+    def set_ssl_configuration(self, ciphers=None,
+        connection_protocol=None, certificate=None, keyfile=None):
+        """Overrides SSL  default configurations.
+
+        Parameters
+        ----------
+        ciphers: string
+            String with supported ciphers
+        connection_protocol: string
+            ssl version to be used
+        certificate (optional): path
+            Path to the ssl certificate
+        keyfile (optional): path
+            Path to the ssl key
+        """
+        if ciphers:
+            self.ciphers = ciphers
+        if connection_protocol:
+            self.ssl_version = connection_protocol
+        if certificate:
+            self.certfile = certificate
+        if keyfile:
+            self.keyfile = keyfile
+        return
+    
+    def get_request(self):
+        """
+        overrides get_request
+        """
+        newsocket, fromaddr = self.socket.accept()
+
+        if not self.cerfile or not self.keyfile or not self.ssl_version:
+            raise Exception('SSL configuration needs to be set in SSLStreamServer')
+
+        connstream = ssl.wrap_socket(newsocket,
+                                 server_side=True,
+                                 certfile = self.certfile,
+                                 keyfile = self.keyfile,
+                                 ssl_version = self.ssl_version,
+                                 ciphers= self.ciphers)
+        return connstream, fromaddr
+
+
+
 class DatagramServerPort(socketserver.ThreadingUDPServer):
     pass
 
@@ -633,7 +684,7 @@ if hasattr(socketserver, 'ThreadingUnixStreamServer'):
                 Family type of socket to connect to, AF_UNIX for unix sockets or AF_INET for port sockets.
                 Default `'AF_UNIX'`
             connection_protocol : str
-                It can be either 'TCP' or 'UDP'. Default `'TCP'`
+                It can be either 'TCP', 'UDP' or SSL. Default `'TCP'`
             func : callable
                 Function to be applied to every received data before sending it.
             """
@@ -643,7 +694,7 @@ if hasattr(socketserver, 'ThreadingUnixStreamServer'):
             else:
                 raise TypeError(f"Invalid address type: {type(address)}. Valid types are str or Tuple(str, int)")
 
-            if connection_protocol.lower() == 'tcp' or connection_protocol.lower() == 'udp':
+            if connection_protocol.lower() == 'tcp' or connection_protocol.lower() == 'udp' or connection_protocol.lower() == 'ssl':
                 self.mode = connection_protocol.lower()
             else:
                 raise TypeError(f'Invalid connection protocol detected: {connection_protocol.lower()}. '
@@ -665,11 +716,15 @@ if hasattr(socketserver, 'ThreadingUnixStreamServer'):
                     'udp': {
                         'AF_UNIX': DatagramServerUnix,
                         'AF_INET': DatagramServerPort
+                    },
+                    'ssl' : {
+                        'AF_INET': SSLStreamServerPort
                     }
                 },
                 'handler': {
                     'tcp': StreamHandler,
-                    'udp': DatagramHandler
+                    'udp': DatagramHandler,
+                    'ssl': StreamHandler
                 }
             }
 
