@@ -1,0 +1,9 @@
+---
+- tags:
+  - bps_enabled
+  configuration:
+    behind_proxy_server: yes
+- tags:
+  - bps_disabled
+  configuration:
+    behind_proxy_server: no
