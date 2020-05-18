@@ -98,9 +98,6 @@ def test_move_dir(source_folder, target_folder, subdir, tags_to_apply,
     if mode == 'whodata' and subdir[-1] == os.path.sep and sys.platform == 'linux':
         pytest.xfail('Xfailing due to issue: https://github.com/wazuh/wazuh/issues/4720')
 
-    if mode == 'whodata' and sys.platform == 'win32' and triggers_add_event:
-        pytest.xfail('Xfailing due to issue: https://github.com/wazuh/wazuh/issues/4596')
-
     # Move folder to target directory
     os.rename(os.path.join(source_folder, subdir), os.path.join(target_folder, subdir))
     check_time_travel(scheduled, monitor=wazuh_log_monitor)

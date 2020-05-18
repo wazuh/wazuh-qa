@@ -128,7 +128,7 @@ def test_large_changes(filename, folder, original_size, modified_size, tags_to_a
     """
 
     limit = 59391
-    output_size = 0
+    has_more_changes = False
     original_file = os.path.join(folder, filename)
     unzip_diff_file = os.path.join(unzip_diff_dir, filename + '-old')
     diff_file_path = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
@@ -168,10 +168,14 @@ def test_large_changes(filename, folder, original_size, modified_size, tags_to_a
     except subprocess.CalledProcessError as e:
         # Inputs are different
         if e.returncode == 1:
-            output_size = len(e.output)
+            if sys.platform == 'win32' and b'*' not in e.output.split(b'\r\n')[1]:
+                has_more_changes = True
+            else:
+                if len(e.output) > limit:
+                    has_more_changes = True
 
     # Assert 'More changes' is shown when the command returns more than 'limit' characters
-    if output_size > limit:
+    if has_more_changes:
         assert 'More changes' in event['data']['content_changes'], '"More changes" not found within content_changes.'
     else:
         assert 'More changes' not in event['data']['content_changes'], '"More changes" found within content_changes.'
