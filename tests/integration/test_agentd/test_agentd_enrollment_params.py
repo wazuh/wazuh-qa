@@ -4,11 +4,9 @@
 
 import pytest
 import os
-import ssl
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import ManInTheMiddle
-from wazuh_testing.tools.security import CertificateController
+from wazuh_testing.tools.enrollment import EnrollmentSimulator
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
@@ -40,12 +38,11 @@ log_monitor_paths = []
 
 receiver_sockets_params = []
 
-mitm = ManInTheMiddle(address=(SERVER_ADDRESS, 1515), family='AF_INET', connection_protocol='SSL')
-
-
-monitored_sockets_params = [('ossec-agentd', mitm, True)]
+monitored_sockets_params = [('ossec-agentd', None,True)]
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
+
+enrollment_server = EnrollmentSimulator(server_address=SERVER_ADDRESS, remoted_port=REMOTED_PORT, key_path=SERVER_KEY_PATH, cert_path=SERVER_CERT_PATH)
 
 # fixtures
 @pytest.fixture(scope="module", params=configurations)
@@ -54,14 +51,13 @@ def get_configuration(request):
     return request.param
 
 @pytest.fixture(scope="module")
-def generate_manager_certificate(get_configuration):
-    # Generate root key and certificate
-    controller = CertificateController()
-    controller.store_private_key(controller.get_root_key(), SERVER_KEY_PATH)
-    controller.store_ca_certificate(controller.get_root_ca_cert(), SERVER_CERT_PATH)
-    
+def configure_enrollment_server(request):
+    enrollment_server.start()
+
+    yield
+
+    enrollment_server.shutdown()
 
 # Tests
-def test_agentd_enrollment_params(generate_manager_certificate, configure_environment, configure_mitm_environment):
-    mitm.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2)
+def test_agentd_enrollment_params(configure_enrollment_server, configure_environment, configure_mitm_environment):
     return

@@ -548,15 +548,18 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
         """
         newsocket, fromaddr = self.socket.accept()
 
-        if not self.cerfile or not self.keyfile or not self.ssl_version:
+        if not self.certfile or not self.keyfile or not self.ssl_version:
             raise Exception('SSL configuration needs to be set in SSLStreamServer')
 
         connstream = ssl.wrap_socket(newsocket,
-                                 server_side=True,
-                                 certfile = self.certfile,
-                                 keyfile = self.keyfile,
-                                 ssl_version = self.ssl_version,
-                                 ciphers= self.ciphers)
+                                server_side=True,
+                                certfile = self.certfile,
+                                keyfile = self.keyfile,
+                                ssl_version = self.ssl_version,
+                                ciphers= self.ciphers)
+        
+        # Save last_adress
+        self.last_address = fromaddr
         return connstream, fromaddr
 
 
