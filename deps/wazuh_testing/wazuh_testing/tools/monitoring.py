@@ -557,7 +557,6 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
                                 keyfile = self.keyfile,
                                 ssl_version = self.ssl_version,
                                 ciphers= self.ciphers)
-        
         # Save last_adress
         self.last_address = fromaddr
         return connstream, fromaddr

@@ -1,0 +1,8 @@
+-
+  name: "SSL - Default"
+  description: "Default ssl configuration"
+  enrollment:
+    expected_request: "OSSEC A:'test_agent'\n"
+    response: "OSSEC K:'0 test_agent 127.0.0.1 TopSecret'\n"
+  configuration:
+    agent_name: "test_agent"

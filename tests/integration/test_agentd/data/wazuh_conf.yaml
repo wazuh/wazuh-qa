@@ -34,3 +34,28 @@
                         value: GROUPS
                     - ssl_cipher: 
                         value: SSL_CIPHER
+    - tags:
+      - all
+      apply_to_modules:
+      - test_agent_auth_enrollment
+      sections:
+      - section: client
+        elements:
+            - notify_time: 
+                value: 10
+            - time-reconnect: 
+                value: 60
+            - auto_restart:
+                value: 'yes'
+            - crypto_method:
+                value: 'aes'
+            - server:
+                elements:
+                - address: 
+                    value: SERVER_ADDRESS
+                - protocol:
+                    value: 'udp'
+            - auto_enrollment:
+                elements:
+                    - enabled: 
+                        value: 'no'
