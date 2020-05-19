@@ -42,7 +42,7 @@
     port_input: "OSSEC A:'user1'"
     cluster_input: '{"arguments":{"daemon_name":"authd","message":{"arguments":{"name":"user1","ip":"any","force":0},"function":"add"}},"function":"send_sync"}'
     cluster_output: '{"error":9008,"message":"Duplicated name"}'
-    port_output: "ERROR: Unsuccessful request to master"    
+    port_output: "ERROR: Duplicated name"    
 -
   name: "Error Group - Invalid group"
   description: "Try to add an agent with unexistent group"
@@ -51,7 +51,7 @@
     port_input: "OSSEC A:'user_' G:'GroupA'"
     cluster_input: '{"arguments":{"daemon_name":"authd","message":{"arguments":{"name":"user_","ip":"any","groups":"GroupA","force":0},"function":"add"}},"function":"send_sync"}'
     cluster_output: '{"error":9014,"message":"Invalid Group(s) Name(s)"}'
-    port_output: "ERROR: Unsuccessful request to master"
+    port_output: "ERROR: Invalid Group(s) Name(s)"
 -
   name: "Error IP - Duplicated IP"
   description: "Try to add an agent with unexistent group"
@@ -60,4 +60,4 @@
     port_input: "OSSEC A:'user_' IP:'192.0.0.0'"
     cluster_input: '{"arguments":{"daemon_name":"authd","message":{"arguments":{"name":"user_","ip":"192.0.0.0","force":0},"function":"add"}},"function":"send_sync"}'
     cluster_output: '{"error":9007,"Duplicated IP"}'
-    port_output: "ERROR: Unsuccessful request to master"
+    port_output: "ERROR: Duplicated IP"
