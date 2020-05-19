@@ -4,6 +4,7 @@
 
 import os
 import time
+import sys
 
 import pytest
 
@@ -82,7 +83,7 @@ def test_regular_file_changes(sleep, tags_to_apply, get_configuration, configure
         for ev in events:
             validate_event(ev)
     except TimeoutError as e:
-        if get_configuration['metadata']['fim_mode'] == 'whodata':
+        if get_configuration['metadata']['fim_mode'] == 'whodata' and sys.platform == 'win32':
             pytest.xfail(reason='Xfailing due to issue: https://github.com/wazuh/wazuh/issues/4710')
         else:
             raise e
