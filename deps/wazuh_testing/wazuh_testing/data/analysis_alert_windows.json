@@ -73,6 +73,47 @@
           ],
           "pattern": "^(.*)$"
         },
+        "mitre": {
+          "$id": "#/properties/rule/properties/mitre",
+          "type": "object",
+          "title": "The Mitre Schema",
+          "required": [
+            "id",
+            "tactics"
+          ],
+          "properties": {
+            "id": {
+              "$id": "#/properties/rule/properties/mitre/properties/id",
+              "type": "array",
+              "title": "The Id Schema",
+              "items": {
+                "$id": "#/properties/rule/properties/mitre/properties/id/items",
+                "type": "string",
+                "title": "The Items Schema",
+                "default": "",
+                "examples": [
+                  "T1120"
+                ],
+                "pattern": "^(.*)$"
+              }
+            },
+            "tactics": {
+              "$id": "#/properties/rule/properties/mitre/properties/tactics",
+              "type": "array",
+              "title": "The Tactics Schema",
+              "items": {
+                "$id": "#/properties/rule/properties/mitre/properties/tactics/items",
+                "type": "string",
+                "title": "The Items Schema",
+                "default": "",
+                "examples": [
+                  "Discovery"
+                ],
+                "pattern": "^(.*)$"
+              }
+            }
+          }
+        },
         "firedtimes": {
           "$id": "#/properties/rule/properties/firedtimes",
           "type": "integer",
