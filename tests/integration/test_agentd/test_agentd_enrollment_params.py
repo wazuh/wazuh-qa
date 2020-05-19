@@ -15,6 +15,7 @@ from wazuh_testing.tools.monitoring import QueueMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.fim import generate_params
+from conftest import DEFAULT_VALUES
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
@@ -34,10 +35,6 @@ def load_tests(path):
     """
     with open(path) as f:
         return yaml.safe_load(f)
-
-
-
-DEFAULT_VALUES = {'enabled' : 'yes', 'manager_address' : None, 'port' : 1515, 'agent_name' : socket.gethostname(), 'groups' : None, 'agent_address' : '127.0.0.1', 'use_source_ip' : 'no'}
 
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')

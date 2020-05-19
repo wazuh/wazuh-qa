@@ -516,9 +516,10 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
     ssl_version = ssl.PROTOCOL_TLSv1_2
     certfile = None 
     keyfile = None 
+    cert_reqs = ssl.CERT_OPTIONAL
 
     def set_ssl_configuration(self, ciphers=None,
-        connection_protocol=None, certificate=None, keyfile=None):
+        connection_protocol=None, certificate=None, keyfile=None, cert_reqs=None):
         """Overrides SSL  default configurations.
 
         Parameters
@@ -531,6 +532,8 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
             Path to the ssl certificate
         keyfile (optional): path
             Path to the ssl key
+        cert_reqs (optional): ssl.CERT_NONE, ssl.CERT_OPTIONAL, ssl.CERT_REQUIRED
+            Whetever or not a cert is required
         """
         if ciphers:
             self.ciphers = ciphers
@@ -540,6 +543,9 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
             self.certfile = certificate
         if keyfile:
             self.keyfile = keyfile
+        if cert_reqs:
+            self.cert_reqs = cert_reqs
+
         return
     
     def get_request(self):
@@ -556,7 +562,9 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
                                 certfile = self.certfile,
                                 keyfile = self.keyfile,
                                 ssl_version = self.ssl_version,
-                                ciphers= self.ciphers)
+                                ciphers= self.ciphers, 
+                                cert_reqs=self.cert_reqs,
+                                ca_certs=self.certfile)
         # Save last_adress
         self.last_address = fromaddr
         return connstream, fromaddr

@@ -6,61 +6,125 @@
     response: "OSSEC K:'0 ubuntu-bionic 127.0.0.1 TopSecret'\n"
   configuration:
     enabled: "yes"
+# -
+#   name: "Valid agent address"
+#   description: "Check a valid agent_address configurations"
+#   enrollment:
+#     expected_request: "yes"
+#     response: "OSSEC K:'1 ubuntu-bionic 192.168.0.10 TopSecret'\n"
+#   configuration:
+#     agent_address: "192.168.0.10"
+# -
+#   name: "Groups"
+#   description: "Agent groups in auto enrollment configuration"
+#   enrollment:
+#     expected_request: "yes"
+#     response: "OSSEC K:'2 ubuntu-bionic 127.0.0.1 TopSecret'\n"
+#   configuration:
+#     groups: "group_1"
+# -
+#   name: "Multi Groups"
+#   description: "Agent multi groups in auto enrollment configuration"
+#   enrollment:
+#     expected_request: "yes"
+#     response: "OSSEC K:'3 ubuntu-bionic 127.0.0.1 TopSecret'\n"
+#   configuration:
+#     groups: "group_1,group_2,"
 
--
-  name: "Valid agent address"
-  description: "Check a valid agent_address configurations"
-  enrollment:
-    expected_request: "yes"
-    response: "OSSEC K:'1 ubuntu-bionic 192.168.0.10 TopSecret'\n"
-  configuration:
-    agent_address: "192.168.0.10"
-
--
-  name: "Groups"
-  description: "Agent groups in auto enrollment configuration"
-  enrollment:
-    expected_request: "yes"
-    response: "OSSEC K:'2 ubuntu-bionic 127.0.0.1 TopSecret'\n"
-  configuration:
-    groups: "group_1"
--
-  name: "Multi Groups"
-  description: "Agent multi groups in auto enrollment configuration"
-  enrollment:
-    expected_request: "yes"
-    response: "OSSEC K:'3 ubuntu-bionic 127.0.0.1 TopSecret'\n"
-  configuration:
-    groups: "group_1,group_2,"
-
--
-  name: "Invalid Agent address"
-  description: "Check a invalid agent_address in auto enrollment configuration"
-  enrollment:
-    expected_request: "error"
-  configuration:
-    agent_address: "192.168.0.1000"
--
-  name: "Invalid enabled"
-  description: "Check a invalid enabled in auto enrollment configuration"
-  enrollment:
-    expected_request: "error"
-  configuration:
-    enabled: "nn"
--
-  name: "Valid agent name config"
-  description: "Check a valid agent_name configurations"
-  enrollment:
-    expected_request: "yes"
-    response: "OSSEC K:'4 test_agent 127.0.0.1 TopSecret'\n"
-  configuration:
-    agent_name: "test_agent"
--
-  name: "Invalid agent name config"
-  description: "Check a invalid agent_name configurations"
-  enrollment:
-    expected_request: "error"
-  configuration:
-    agent_name: "test_agent/+bad"
+# -
+#   name: "Invalid Agent address"
+#   description: "Check a invalid agent_address in auto enrollment configuration"
+#   enrollment:
+#     expected_request: "error"
+#   configuration:
+#     agent_address: "192.168.0.1000"
+# -
+#   name: "Invalid enabled"
+#   description: "Check a invalid enabled in auto enrollment configuration"
+#   enrollment:
+#     expected_request: "error"
+#   configuration:
+#     enabled: "nn"
+# -
+#   name: "Valid agent name config"
+#   description: "Check a valid agent_name configurations"
+#   enrollment:
+#     expected_request: "yes"
+#     response: "OSSEC K:'4 test_agent 127.0.0.1 TopSecret'\n"
+#   configuration:
+#     agent_name: "test_agent"
+# -
+#   name: "Invalid agent name config"
+#   description: "Check a invalid agent_name configurations"
+#   enrollment:
+#     expected_request: "error"
+#   configuration:
+#     agent_name: "test_agent/+bad"
 
   
+# -
+#   name: "SSL - Auto Negotiation"
+#   description: "Try auto negotiation option"
+#   enrollment:
+#     expected_request: "OSSEC A:'test_agent_1'\n"
+#     response: "OSSEC K:'1 test_agent_1 127.0.0.1 TopSecret'\n"
+#   configuration:
+#     agent_name: "test_agent_1"
+#     auto_negotiation: "yes"
+#     protocol: "TLSv1_1"
+# -
+#   name: "SSL - Auto Negotiation Negative"
+#   description: "Try TLSv1_1 without auto_negotiation"
+#   configuration:
+#     agent_name: "test_agent_1"
+#     auto_negotiation: "no"
+#     protocol: "TLSv1_1"
+# -
+#   name: "SSL - Compatible Ciphers"
+#   description: "Try connecting with Compatible ciphers"
+#   enrollment:
+#     expected_request: "OSSEC A:'test_agent_2'\n"
+#     response: "OSSEC K:'2 test_agent_2 127.0.0.1 TopSecret'\n"
+#   configuration:
+#     agent_name: "test_agent_2"
+#     ciphers: "SHA256"
+# -
+#   name: "SSL - Incompatible Ciphers"
+#   description: "Try connecting with Incompatible ciphers"
+#   configuration:
+#     agent_name: "test_agent_3"
+#     ciphers: "CAMELLIA"
+# -
+#   name: "Manager Verification - Valid Cert"
+#   description: "Try validating server with a valid certificate"
+#   enrollment:
+#     expected_request: "OSSEC A:'test_agent_3'\n"
+#     response: "OSSEC K:'3 test_agent_3 127.0.0.1 TopSecret'\n"
+#   configuration:
+#     agent_name: "test_agent_3"
+#     check_certificate: 
+#       valid: "yes"
+# -
+#   name: "Manager Verification - Invalid Cert"
+#   description: "Try validating server with an invalid certificate"
+#   configuration:
+#     agent_name: "test_agent_3"
+#     check_certificate: 
+#       valid: "no"
+# -
+#   name: "Agent Verification - Valid Cert"
+#   description: "Try validating agent with an invalid certificate"
+#   enrollment:
+#     expected_request: "OSSEC A:'test_agent_4'\n"
+#     response: "OSSEC K:'4 test_agent_4 127.0.0.1 TopSecret'\n"
+#   configuration:
+#     agent_name: "test_agent_4"
+#     agent_certificate: 
+#       valid: "yes"
+# -
+#   name: "Agent Verification - Invalid Cert"
+#   description: "Try validating agent with an invalid certificate"
+#   configuration:
+#     agent_name: "test_agent_5"
+#     agent_certificate: 
+#       valid: "no"

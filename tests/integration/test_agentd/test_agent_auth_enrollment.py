@@ -4,9 +4,11 @@
 
 import os
 import pytest
+import ssl
 import subprocess
 import yaml 
 
+from OpenSSL import crypto, SSL
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.enrollment import EnrollmentSimulator
 from wazuh_testing.tools.monitoring import QueueMonitor
@@ -18,6 +20,10 @@ SERVER_ADDRESS = '127.0.0.1'
 REMOTED_PORT = 1514
 SERVER_KEY_PATH = '/etc/manager.key'
 SERVER_CERT_PATH = '/etc/manager.cert'
+SERVER_PEM_PATH = '/etc/manager.pem'
+AGENT_KEY_PATH = '/etc/agent.key'
+AGENT_CERT_PATH = '/etc/agent.cert'
+AGENT_PEM_PATH = '/etc/agent.pem'
 INSTALLATION_FOLDER = '/var/ossec/bin/'
 
 
@@ -58,6 +64,7 @@ def configure_enrollment_server(request):
 
     enrollment_server.shutdown()
 
+
 @pytest.mark.parametrize('test_case', [case for case in tests])
 def test_agent_auth_enrollment(configure_enrollment_server, configure_environment, test_case: list):
     print(f'Test: {test_case["name"]}')
@@ -69,10 +76,44 @@ def test_agent_auth_enrollment(configure_enrollment_server, configure_environmen
     if configuration.get('agent_name'):
         run_command.append('-A')
         run_command.append(f'{configuration.get("agent_name")}')
+    if configuration.get('auto_negotiation') == 'yes':
+        run_command.append('-a')
+    if configuration.get('protocol') == 'TLSv1_1':
+        enrollment_server.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_1)
+    else:
+        enrollment_server.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2)
+    if configuration.get('ciphers'):
+        run_command.append('-c')
+        run_command.append(configuration.get('ciphers'))
+    if configuration.get('check_certificate'):
+        if configuration['check_certificate']['valid'] == 'yes':
+            # Store valid certificate
+            enrollment_server.cert_controller.store_ca_certificate(enrollment_server.cert_controller.get_root_ca_cert(), SERVER_PEM_PATH)
+        else:
+            # Create another certificate
+            enrollment_server.cert_controller.generate_agent_certificates(AGENT_KEY_PATH, SERVER_PEM_PATH, configuration.get('agent_name'))
+        run_command.append('-v')
+        run_command.append(SERVER_PEM_PATH)
+    if configuration.get('agent_certificate'):
+        enrollment_server.mitm_enrollment.listener.set_ssl_configuration(cert_reqs=ssl.CERT_REQUIRED)
+        enrollment_server.cert_controller.generate_agent_certificates(AGENT_KEY_PATH, AGENT_CERT_PATH, configuration.get('agent_name'), 
+            signed=(configuration['agent_certificate']['valid'] == 'yes')
+        )
+            
+        run_command.append('-k')
+        run_command.append(AGENT_KEY_PATH)
+        run_command.append('-x')
+        run_command.append(AGENT_CERT_PATH)
+    else:
+        enrollment_server.mitm_enrollment.listener.set_ssl_configuration(cert_reqs=ssl.CERT_OPTIONAL)
+
     out = subprocess.Popen(run_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout,stderr = out.communicate()
-    print(stdout)
+    print(stdout.decode())
     results = monitored_sockets[0].get_results(callback=(lambda y: [x.decode() for x in y]), timeout=1, accum_results=1)
-    assert results[0] == test_case['enrollment']['expected_request'], 'Expected enrollment request message does not match'
-    assert results[1] == test_case['enrollment']['response'], 'Expected response message does not match'
+    if test_case.get('enrollment'):
+        assert results[0] == test_case['enrollment']['expected_request'], 'Expected enrollment request message does not match'
+        assert results[1] == test_case['enrollment']['response'], 'Expected response message does not match'
+    else:
+        assert len(results) == 0
     return
