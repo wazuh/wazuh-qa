@@ -20,20 +20,11 @@
                     value: SERVER_ADDRESS
                 - port:
                     value: REMOTED_PORT
-                - protocol:
-                    value: PROTOCOL
             - auto_enrollment:
                 elements:
-                    - enabled: 
-                        value: ENABLED
-                    - agent_name: 
-                        value: AGENT_NAME
-                    - agent_address: 
-                        value: AGENT_ADDRESS
-                    - groups: 
-                        value: GROUPS
-                    - ssl_cipher: 
-                        value: SSL_CIPHER
+                - agent_name: 
+                    value: AGENT_NAME
+            
     - tags:
       - all
       apply_to_modules:
