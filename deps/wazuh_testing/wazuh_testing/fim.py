@@ -915,6 +915,13 @@ def callback_entries_path_count(line):
             return match.group(1), None
 
 
+def callback_warn_max_dir_monitored(line):
+    match = re.match(r".*Maximum number of directories to be monitored.", line)
+
+    if match:
+        return True
+
+
 class EventChecker:
     """Utility to allow fetch events and validate them."""
 

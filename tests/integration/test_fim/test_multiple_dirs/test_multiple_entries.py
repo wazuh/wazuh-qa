@@ -8,10 +8,11 @@ import pytest
 import yaml
 from wazuh_testing import global_parameters
 
-from test_fim.test_multiple_dirs.common import multiple_dirs_test, test_directories
+from test_fim.test_multiple_dirs.common import multiple_dirs_test
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools import PREFIX
 
 # Marks
 
@@ -19,6 +20,8 @@ pytestmark = pytest.mark.tier(level=1)
 
 # variables
 
+n_dirs = 64
+test_directories = [os.path.join(PREFIX, f'testdir{i}') for i in range(n_dirs)]
 directory_str = ','.join(test_directories)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -97,12 +100,13 @@ def test_cud_multiple_dir_entries(dir_list, tags_to_apply, get_configuration, co
 
     file = 'regular'
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
+    whodata = get_configuration['metadata']['fim_mode'] == 'whodata'
 
     try:
-        multiple_dirs_test(dir_list=dir_list, file=file, scheduled=scheduled, log_monitor=wazuh_log_monitor,
-                           timeout=2 * global_parameters.default_timeout)
+        multiple_dirs_test(mode="entries", dir_list=dir_list, file=file, scheduled=scheduled, whodata=whodata,
+                           log_monitor=wazuh_log_monitor, timeout=2 * global_parameters.default_timeout)
     except TimeoutError as e:
-        if get_configuration['metadata']['fim_mode'] == 'whodata':
+        if whodata:
             pytest.xfail(reason='Xfailed due to issue: https://github.com/wazuh/wazuh/issues/4731')
         else:
             raise e
