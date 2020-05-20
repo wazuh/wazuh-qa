@@ -128,3 +128,44 @@
     agent_name: "test_agent_5"
     agent_certificate: 
       valid: "no"
+-
+  name: "Use source IP"
+  description: "Check that source IP is sent by agent"
+  enrollment:
+    expected_request: "OSSEC A:'test_agent_5' IP:'src'\n"
+    response: "OSSEC K:'15 test_agent_5 127.0.0.1 TopSecret'\n"
+  configuration:
+    agent_name: "test_agent_5"
+    use_source_ip: "yes"
+    id: 15
+-
+  name: "Incompatible - Use source IP"
+  description: "Use source IP option while trying to set an IP"
+  configuration:
+    agent_name: "test_agent_6"
+    use_source_ip: "yes"
+    agent_address: "127.0.0.1"
+-
+  name: "Password from string"
+  description: "Check that configured password is sent on string"
+  enrollment:
+    expected_request: "OSSEC PASS: pass123 OSSEC A:'test_agent_pass'\n"
+    response: "OSSEC K:'11 test_agent_pass any TopSecret'\n"
+  configuration:
+    agent_name: "test_agent_pass"
+    id: 11
+    password:
+      type: "string"
+      value: "pass123"
+-
+  name: "Password from file"
+  description: "Check that password file is open and read successfully"
+  enrollment:
+    expected_request: "OSSEC PASS: passFile OSSEC A:'test_agent_pass_file'\n"
+    response: "OSSEC K:'12 test_agent_pass_file any TopSecret'\n"
+  configuration:
+    agent_name: "test_agent_pass_file"
+    id: 12
+    password:
+      type: "file"
+      value: "passFile"

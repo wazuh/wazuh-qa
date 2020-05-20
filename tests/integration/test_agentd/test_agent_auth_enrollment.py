@@ -12,6 +12,7 @@ from OpenSSL import crypto, SSL
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.enrollment import EnrollmentSimulator
 from wazuh_testing.tools.monitoring import QueueMonitor
+from conftest import AgentAuthParser
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
@@ -24,8 +25,8 @@ SERVER_PEM_PATH = '/etc/manager.pem'
 AGENT_KEY_PATH = '/etc/agent.key'
 AGENT_CERT_PATH = '/etc/agent.cert'
 AGENT_PEM_PATH = '/etc/agent.pem'
-INSTALLATION_FOLDER = '/var/ossec/bin/'
-
+AGENT_AUTH_BINARY_PATH = '/var/ossec/bin/agent-auth'
+AUTHDPASS_PATH = '/var/ossec/etc/authd.pass'
 
 def load_tests(path):
     """ Loads a yaml file from a path 
@@ -69,27 +70,22 @@ def configure_enrollment_server(request):
 def test_agent_auth_enrollment(configure_enrollment_server, configure_environment, test_case: list):
     print(f'Test: {test_case["name"]}')
     enrollment_server.clear()
+    parser = AgentAuthParser(server_address=SERVER_ADDRESS, BINARY_PATH=AGENT_AUTH_BINARY_PATH, sudo=True)
     configuration = test_case.get('configuration', {})
-    run_command = ['sudo', f'{INSTALLATION_FOLDER}agent-auth']
-    run_command.append('-m')
-    run_command.append(f'{SERVER_ADDRESS}')
     if configuration.get('id'):
         enrollment_server.agent_id = configuration.get('id')
     if configuration.get('agent_name'):
-        run_command.append('-A')
-        run_command.append(f'{configuration.get("agent_name")}')
+        parser.add_agent_name(configuration.get("agent_name"))
     if configuration.get('agent_address'):
-        run_command.append('-I')
-        run_command.append(f'{configuration.get("agent_address")}')
+        parser.add_agent_adress(configuration.get("agent_address"))
     if configuration.get('auto_negotiation') == 'yes':
-        run_command.append('-a')
+        parser.add_auto_negotiation()
     if configuration.get('protocol') == 'TLSv1_1':
         enrollment_server.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_1)
     else:
         enrollment_server.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2)
     if configuration.get('ciphers'):
-        run_command.append('-c')
-        run_command.append(configuration.get('ciphers'))
+        parser.add_ciphers(configuration.get('ciphers'))
     if configuration.get('check_certificate'):
         if configuration['check_certificate']['valid'] == 'yes':
             # Store valid certificate
@@ -97,24 +93,24 @@ def test_agent_auth_enrollment(configure_enrollment_server, configure_environmen
         else:
             # Create another certificate
             enrollment_server.cert_controller.generate_agent_certificates(AGENT_KEY_PATH, SERVER_PEM_PATH, configuration.get('agent_name'))
-        run_command.append('-v')
-        run_command.append(SERVER_PEM_PATH)
+        parser.add_manager_ca(SERVER_PEM_PATH)
     if configuration.get('agent_certificate'):
         enrollment_server.mitm_enrollment.listener.set_ssl_configuration(cert_reqs=ssl.CERT_REQUIRED)
         enrollment_server.cert_controller.generate_agent_certificates(AGENT_KEY_PATH, AGENT_CERT_PATH, configuration.get('agent_name'), 
             signed=(configuration['agent_certificate']['valid'] == 'yes')
         )
-            
-        run_command.append('-k')
-        run_command.append(AGENT_KEY_PATH)
-        run_command.append('-x')
-        run_command.append(AGENT_CERT_PATH)
+        parser.add_agent_certificates(AGENT_KEY_PATH, AGENT_CERT_PATH)
     else:
         enrollment_server.mitm_enrollment.listener.set_ssl_configuration(cert_reqs=ssl.CERT_OPTIONAL)
     if configuration.get('use_source_ip'):
-        run_command.append('-i')
+        parser.use_source_ip()
+    if configuration.get('password'):
+        parser.add_password(configuration['password']['value'], isFile=(configuration['password']['type'] == 'file'), path=AUTHDPASS_PATH)
+    else:
+        # Clears password file
+        parser.add_password(None, isFile=True, path=AUTHDPASS_PATH)
 
-    out = subprocess.Popen(run_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    out = subprocess.Popen(parser.get_command(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout,stderr = out.communicate()
     print(stdout.decode())
     results = monitored_sockets[0].get_results(callback=(lambda y: [x.decode() for x in y]), timeout=1, accum_results=1)
