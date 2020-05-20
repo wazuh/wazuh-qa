@@ -6,3 +6,20 @@
     response: "OSSEC K:'0 test_agent 127.0.0.1 TopSecret'\n"
   configuration:
     agent_name: "test_agent"
+-
+  name: "Name config"
+  description: "Agent name in auto enrollment configuration"
+  enrollment:
+    expected_request: "OSSEC A:'rename_test'\n"
+    response: "OSSEC K:'1 rename_test 127.0.0.1 TopSecret'\n"
+  configuration:
+    agent_name: "rename_test"
+-
+  name: "Agent address"
+  description: "Agent address in auto enrollment configuration"
+  enrollment:
+    expected_request: "OSSEC A:'test_agent' IP:'192.168.0.10'\n"
+    response: "OSSEC K:'2 test_agent 192.168.0.10 TopSecret'\n"
+  configuration:
+    agent_name: "test_agent"
+    agent_address: "192.168.0.10"

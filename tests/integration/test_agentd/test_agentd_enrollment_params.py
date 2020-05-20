@@ -42,18 +42,9 @@ client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 
 #params = [{'SERVER_ADDRESS': SERVER_ADDRESS,}, {'PORT': REMOTED_PORT,},]
 
-conf_params = {'SERVER_ADDRESS' : [], 'REMOTED_PORT' : [], 'AGENT_NAME' : []}
-DEFAULT_AGENT_NAME = 'test_agent'
-
-for case in tests:
-    conf_params['SERVER_ADDRESS'].append(case.get('SERVER_ADDRESS', SERVER_ADDRESS))
-    conf_params['REMOTED_PORT'].append(case.get('REMOTED_PORT', REMOTED_PORT))
-    conf_params['AGENT_NAME'].append(case.get('AGENT_NAME', DEFAULT_AGENT_NAME))
-    
-
-p, m = generate_params(extra_params=conf_params, modes=['scheduled']*len(tests))
-
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+params = [{'SERVER_ADDRESS': SERVER_ADDRESS,}]
+metadata = [{}]
+configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
 enrollment_server = EnrollmentSimulator(server_address=SERVER_ADDRESS, remoted_port=REMOTED_PORT, key_path=SERVER_KEY_PATH, cert_path=SERVER_CERT_PATH)
 
@@ -106,10 +97,13 @@ def override_wazuh_conf(configuration):
     # Stop Wazuh
     control_service('stop')
     # Configuration for testing
-    test_config = set_section_wazuh_conf(configuration.get('sections'))
+    temp = get_temp_yaml(configuration)
+    conf = load_wazuh_configurations(temp, __name__,)
+    test_config = set_section_wazuh_conf(conf[0]['sections'])
     # Set new configuration
     write_wazuh_conf(test_config)
 
+    os.remove(temp)
     #reset_client_keys
     clean_client_keys_file()
     #reset password
@@ -118,11 +112,27 @@ def override_wazuh_conf(configuration):
     # Start Wazuh
     control_service('start')
 
+def get_temp_yaml(param):
+    temp = os.path.join(test_data_path,'temp.yaml')
+    with open(configurations_path , 'r') as conf_file:
+        auto_enroll_conf = {'auto_enrollment' : {'elements' : []}}
+        for elem in param:
+            auto_enroll_conf['auto_enrollment']['elements'].append({elem : {'value': param[elem]}})
+
+        temp_conf_file = yaml.safe_load(conf_file)
+        temp_conf_file[0]['sections'][0]['elements'].append(auto_enroll_conf)
+    with open(temp, 'w') as temp_file:
+        yaml.safe_dump(temp_conf_file, temp_file)
+    return temp
+        
+
+
 @pytest.mark.parametrize('test_case', [case for case in tests])
-def test_agent_agentd_enrollment(get_configuration, configure_enrollment_server, configure_environment, test_case: list):
+def test_agent_agentd_enrollment(configure_enrollment_server, configure_environment, test_case: list):
     print(f'Test: {test_case["name"]}')
     enrollment_server.clear()
-    override_wazuh_conf(get_configuration)
+    configuration = test_case.get('configuration', {})
+    override_wazuh_conf(configuration)
     #configuration = test_case.get('configuration', {})
     results = monitored_sockets[0].get_results(callback=(lambda y: [x.decode() for x in y]), timeout=1, accum_results=1)
     assert results[0] == test_case['enrollment']['expected_request'], 'Expected enrollment request message does not match'
