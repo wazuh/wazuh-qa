@@ -1,25 +1,66 @@
 -
-  name: "SSL - Default"
-  description: "Default ssl configuration"
+  name: "Default Name"
+  description: "No agent name in auto enrollment configuration"
   enrollment:
-    expected_request: "OSSEC A:'test_agent'\n"
-    response: "OSSEC K:'0 test_agent 127.0.0.1 TopSecret'\n"
+    expected_request: "yes"
+    response: "OSSEC K:'0 ubuntu-bionic 127.0.0.1 TopSecret'\n"
   configuration:
-    agent_name: "test_agent"
+    enabled: "yes"
+
 -
-  name: "Name config"
-  description: "Agent name in auto enrollment configuration"
+  name: "Valid agent address"
+  description: "Check a valid agent_address configurations"
   enrollment:
-    expected_request: "OSSEC A:'rename_test'\n"
-    response: "OSSEC K:'1 rename_test 127.0.0.1 TopSecret'\n"
+    expected_request: "yes"
+    response: "OSSEC K:'1 ubuntu-bionic 192.168.0.10 TopSecret'\n"
   configuration:
-    agent_name: "rename_test"
--
-  name: "Agent address"
-  description: "Agent address in auto enrollment configuration"
-  enrollment:
-    expected_request: "OSSEC A:'test_agent' IP:'192.168.0.10'\n"
-    response: "OSSEC K:'2 test_agent 192.168.0.10 TopSecret'\n"
-  configuration:
-    agent_name: "test_agent"
     agent_address: "192.168.0.10"
+
+-
+  name: "Groups"
+  description: "Agent groups in auto enrollment configuration"
+  enrollment:
+    expected_request: "yes"
+    response: "OSSEC K:'2 ubuntu-bionic 127.0.0.1 TopSecret'\n"
+  configuration:
+    groups: "group_1"
+-
+  name: "Multi Groups"
+  description: "Agent multi groups in auto enrollment configuration"
+  enrollment:
+    expected_request: "yes"
+    response: "OSSEC K:'3 ubuntu-bionic 127.0.0.1 TopSecret'\n"
+  configuration:
+    groups: "group_1,group_2,"
+
+-
+  name: "Invalid Agent address"
+  description: "Check a invalid agent_address in auto enrollment configuration"
+  enrollment:
+    expected_request: "error"
+  configuration:
+    agent_address: "192.168.0.1000"
+-
+  name: "Invalid enabled"
+  description: "Check a invalid enabled in auto enrollment configuration"
+  enrollment:
+    expected_request: "error"
+  configuration:
+    enabled: "nn"
+-
+  name: "Valid agent name config"
+  description: "Check a valid agent_name configurations"
+  enrollment:
+    expected_request: "yes"
+    response: "OSSEC K:'4 test_agent 127.0.0.1 TopSecret'\n"
+  configuration:
+    agent_name: "test_agent"
+-
+  name: "Invalid agent name config"
+  description: "Check a invalid agent_name configurations"
+  enrollment:
+    expected_request: "error"
+  configuration:
+    agent_name: "test_agent/+bad"
+
+  

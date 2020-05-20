@@ -5,7 +5,8 @@
 import os
 import pytest
 import subprocess
-import yaml 
+import yaml
+import socket 
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
@@ -33,6 +34,10 @@ def load_tests(path):
     """
     with open(path) as f:
         return yaml.safe_load(f)
+
+
+
+DEFAULT_VALUES = {'enabled' : 'yes', 'manager_address' : None, 'port' : 1515, 'agent_name' : socket.gethostname(), 'groups' : None, 'agent_address' : '127.0.0.1', 'use_source_ip' : 'no'}
 
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -81,7 +86,7 @@ def check_client_keys_file(response):
             else:
                 client_file.close()
                 return False
-    except IOError as exception:
+    except IOError:
         raise
     client_file.close()
     return False
@@ -93,17 +98,37 @@ def clean_client_keys_file():
     except IOError as exception:
         raise
 
+def build_expected_request(configuration):
+    expec_req = "OSSEC"
+    if configuration.get('agent_name'):
+        expec_req += " A:'%s'" % configuration.get('agent_name')
+    else:
+        expec_req += " A:'%s'" % DEFAULT_VALUES["agent_name"]
+    if configuration.get('agent_address'):
+        expec_req += " IP:'%s'" % configuration.get('agent_address')
+    elif DEFAULT_VALUES['use_source_ip'] == 'ýes':
+        expec_req += " IP:'src'"
+    if configuration.get('groups'):
+        expec_req += " G:'%s'" % configuration.get('groups')
+    return expec_req + '\n'
+
+
 def override_wazuh_conf(configuration):
     # Stop Wazuh
     control_service('stop')
+    
+    
     # Configuration for testing
     temp = get_temp_yaml(configuration)
     conf = load_wazuh_configurations(temp, __name__,)
+    os.remove(temp)
+    
+    
     test_config = set_section_wazuh_conf(conf[0]['sections'])
     # Set new configuration
     write_wazuh_conf(test_config)
 
-    os.remove(temp)
+    
     #reset_client_keys
     clean_client_keys_file()
     #reset password
@@ -118,7 +143,7 @@ def get_temp_yaml(param):
         auto_enroll_conf = {'auto_enrollment' : {'elements' : []}}
         for elem in param:
             auto_enroll_conf['auto_enrollment']['elements'].append({elem : {'value': param[elem]}})
-
+        print(auto_enroll_conf)
         temp_conf_file = yaml.safe_load(conf_file)
         temp_conf_file[0]['sections'][0]['elements'].append(auto_enroll_conf)
     with open(temp, 'w') as temp_file:
@@ -132,10 +157,22 @@ def test_agent_agentd_enrollment(configure_enrollment_server, configure_environm
     print(f'Test: {test_case["name"]}')
     enrollment_server.clear()
     configuration = test_case.get('configuration', {})
-    override_wazuh_conf(configuration)
-    #configuration = test_case.get('configuration', {})
-    results = monitored_sockets[0].get_results(callback=(lambda y: [x.decode() for x in y]), timeout=1, accum_results=1)
-    assert results[0] == test_case['enrollment']['expected_request'], 'Expected enrollment request message does not match'
-    #assert results[1] == test_case['enrollment']['response'], 'Expected response message does not match'
-    assert check_client_keys_file(test_case['enrollment']['response']) == True, 'Client key does not match'
+    
+    try:
+        override_wazuh_conf(configuration)
+    except:
+        if test_case['enrollment']['expected_request'] == 'error':
+            # Expected to happen
+            return
+        else:
+            raise AssertionError(f'Configuration error at ossec.conf file')
+
+    if test_case['enrollment']['expected_request'] == 'yes':
+        #configuration = test_case.get('configuration', {})
+        results = monitored_sockets[0].get_results(callback=(lambda y: [x.decode() for x in y]), timeout=1, accum_results=1)
+        assert results[0] == build_expected_request(configuration), 'Expected enrollment request message does not match'
+        assert results[1] == test_case['enrollment']['response'], 'Expected response message does not match'
+        assert check_client_keys_file(results[1]) == True, 'Client key does not match'
+    elif test_case['enrollment']['expected_request'] == 'error':
+        raise AssertionError(f'Will be configuration error at ossec.conf file')
     return
