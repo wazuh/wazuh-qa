@@ -73,9 +73,14 @@ def test_agent_auth_enrollment(configure_enrollment_server, configure_environmen
     run_command = ['sudo', f'{INSTALLATION_FOLDER}agent-auth']
     run_command.append('-m')
     run_command.append(f'{SERVER_ADDRESS}')
+    if configuration.get('id'):
+        enrollment_server.agent_id = configuration.get('id')
     if configuration.get('agent_name'):
         run_command.append('-A')
         run_command.append(f'{configuration.get("agent_name")}')
+    if configuration.get('agent_address'):
+        run_command.append('-I')
+        run_command.append(f'{configuration.get("agent_address")}')
     if configuration.get('auto_negotiation') == 'yes':
         run_command.append('-a')
     if configuration.get('protocol') == 'TLSv1_1':
@@ -106,6 +111,8 @@ def test_agent_auth_enrollment(configure_enrollment_server, configure_environmen
         run_command.append(AGENT_CERT_PATH)
     else:
         enrollment_server.mitm_enrollment.listener.set_ssl_configuration(cert_reqs=ssl.CERT_OPTIONAL)
+    if configuration.get('use_source_ip'):
+        run_command.append('-i')
 
     out = subprocess.Popen(run_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout,stderr = out.communicate()

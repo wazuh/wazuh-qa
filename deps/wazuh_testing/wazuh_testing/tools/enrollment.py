@@ -49,6 +49,14 @@ class EnrollmentSimulator:
     def cert_controller(self):
         return self.controller
 
+    @property
+    def agent_id(self):
+        return self.id_count
+
+    @agent_id.setter
+    def agent_id(self, value):
+        self.id_count = value
+
     def _process_enrollment_message(self, received):
         """ 
         Reads a message received at the SSL socket, and parses to emulate a authd response
@@ -70,6 +78,8 @@ class EnrollmentSimulator:
             if part.startswith('IP:'):
                 agent_info['ip'] = part.split("'")[1]
         if agent_info['ip'] is None:
+            agent_info['ip'] = 'any'
+        if agent_info['ip'] == 'src':
             agent_info['ip'] = self.mitm_enrollment.listener.last_address[0]
         self.id_count += 1
         self.mitm_enrollment.event.set()
