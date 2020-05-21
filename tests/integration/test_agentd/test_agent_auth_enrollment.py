@@ -12,19 +12,15 @@ from OpenSSL import crypto, SSL
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.enrollment import EnrollmentSimulator
 from wazuh_testing.tools.monitoring import QueueMonitor
-from conftest import AgentAuthParser
+from conftest import DEFAULT_VALUES, SERVER_KEY_PATH, SERVER_CERT_PATH, \
+        AgentAuthParser, build_expected_request, check_client_keys_file, \
+        configure_enrollment
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
 
 SERVER_ADDRESS = '127.0.0.1'
 REMOTED_PORT = 1514
-SERVER_KEY_PATH = '/etc/manager.key'
-SERVER_CERT_PATH = '/etc/manager.cert'
-SERVER_PEM_PATH = '/etc/manager.pem'
-AGENT_KEY_PATH = '/etc/agent.key'
-AGENT_CERT_PATH = '/etc/agent.cert'
-AGENT_PEM_PATH = '/etc/agent.pem'
 AGENT_AUTH_BINARY_PATH = '/var/ossec/bin/agent-auth'
 AUTHDPASS_PATH = '/var/ossec/etc/authd.pass'
 
@@ -65,43 +61,27 @@ def configure_enrollment_server(request):
 
     enrollment_server.shutdown()
 
-
 @pytest.mark.parametrize('test_case', [case for case in tests])
 def test_agent_auth_enrollment(configure_enrollment_server, configure_environment, test_case: list):
     print(f'Test: {test_case["name"]}')
-    enrollment_server.clear()
+    if 'agent-auth' in test_case.get("skips", []):
+        pytest.skip("This test does not apply to agent-auth") 
     parser = AgentAuthParser(server_address=SERVER_ADDRESS, BINARY_PATH=AGENT_AUTH_BINARY_PATH, sudo=True)
     configuration = test_case.get('configuration', {})
-    if configuration.get('id'):
-        enrollment_server.agent_id = configuration.get('id')
+    enrollment = test_case.get('enrollment', {})
+    configure_enrollment(enrollment, enrollment_server, configuration.get('agent_name'))
     if configuration.get('agent_name'):
         parser.add_agent_name(configuration.get("agent_name"))
     if configuration.get('agent_address'):
         parser.add_agent_adress(configuration.get("agent_address"))
     if configuration.get('auto_negotiation') == 'yes':
         parser.add_auto_negotiation()
-    if configuration.get('protocol') == 'TLSv1_1':
-        enrollment_server.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_1)
-    else:
-        enrollment_server.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2)
-    if configuration.get('ciphers'):
-        parser.add_ciphers(configuration.get('ciphers'))
-    if configuration.get('check_certificate'):
-        if configuration['check_certificate']['valid'] == 'yes':
-            # Store valid certificate
-            enrollment_server.cert_controller.store_ca_certificate(enrollment_server.cert_controller.get_root_ca_cert(), SERVER_PEM_PATH)
-        else:
-            # Create another certificate
-            enrollment_server.cert_controller.generate_agent_certificates(AGENT_KEY_PATH, SERVER_PEM_PATH, configuration.get('agent_name'))
-        parser.add_manager_ca(SERVER_PEM_PATH)
-    if configuration.get('agent_certificate'):
-        enrollment_server.mitm_enrollment.listener.set_ssl_configuration(cert_reqs=ssl.CERT_REQUIRED)
-        enrollment_server.cert_controller.generate_agent_certificates(AGENT_KEY_PATH, AGENT_CERT_PATH, configuration.get('agent_name'), 
-            signed=(configuration['agent_certificate']['valid'] == 'yes')
-        )
-        parser.add_agent_certificates(AGENT_KEY_PATH, AGENT_CERT_PATH)
-    else:
-        enrollment_server.mitm_enrollment.listener.set_ssl_configuration(cert_reqs=ssl.CERT_OPTIONAL)
+    if configuration.get('ssl_cipher'):
+        parser.add_ciphers(configuration.get('ssl_cipher'))
+    if configuration.get('server_ca_path'):
+        parser.add_manager_ca(configuration.get('server_ca_path'))
+    if configuration.get('agent_key_path'):
+        parser.add_agent_certificates(configuration.get('agent_key_path'), configuration.get('agent_certificate_path'))
     if configuration.get('use_source_ip'):
         parser.use_source_ip()
     if configuration.get('password'):
@@ -109,14 +89,17 @@ def test_agent_auth_enrollment(configure_enrollment_server, configure_environmen
     else:
         # Clears password file
         parser.add_password(None, isFile=True, path=AUTHDPASS_PATH)
+    if configuration.get('groups'):
+        parser.add_groups(configuration.get('groups'))
 
     out = subprocess.Popen(parser.get_command(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout,stderr = out.communicate()
     print(stdout.decode())
     results = monitored_sockets[0].get_results(callback=(lambda y: [x.decode() for x in y]), timeout=1, accum_results=1)
-    if test_case.get('enrollment'):
-        assert results[0] == test_case['enrollment']['expected_request'], 'Expected enrollment request message does not match'
-        assert results[1] == test_case['enrollment']['response'], 'Expected response message does not match'
+    if test_case.get('enrollment') and test_case['enrollment'].get('response'):
+        assert results[0] == build_expected_request(configuration), 'Expected enrollment request message does not match'
+        assert results[1] == test_case['enrollment']['response'].format(**DEFAULT_VALUES), 'Expected response message does not match'
+        assert check_client_keys_file(results[1]), 'Client key does not match'
     else:
         assert len(results) == 0
     return

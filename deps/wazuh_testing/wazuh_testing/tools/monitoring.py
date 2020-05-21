@@ -516,10 +516,11 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
     ssl_version = ssl.PROTOCOL_TLSv1_2
     certfile = None 
     keyfile = None 
+    ca_cert = None
     cert_reqs = ssl.CERT_OPTIONAL
 
     def set_ssl_configuration(self, ciphers=None,
-        connection_protocol=None, certificate=None, keyfile=None, cert_reqs=None):
+        connection_protocol=None, certificate=None, keyfile=None, cert_reqs=None, ca_cert=None):
         """Overrides SSL  default configurations.
 
         Parameters
@@ -534,6 +535,8 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
             Path to the ssl key
         cert_reqs (optional): ssl.CERT_NONE, ssl.CERT_OPTIONAL, ssl.CERT_REQUIRED
             Whetever or not a cert is required
+        ca_cert(optional):
+            If cert is required show accepted certs
         """
         if ciphers:
             self.ciphers = ciphers
@@ -545,9 +548,12 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
             self.keyfile = keyfile
         if cert_reqs:
             self.cert_reqs = cert_reqs
+        if ca_cert:
+            self.ca_cert = ca_cert
 
         return
     
+
     def get_request(self):
         """
         overrides get_request
@@ -556,15 +562,20 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
 
         if not self.certfile or not self.keyfile or not self.ssl_version:
             raise Exception('SSL configuration needs to be set in SSLStreamServer')
+        
+        try:
+            connstream = ssl.wrap_socket(newsocket,
+                                    server_side=True,
+                                    certfile = self.certfile,
+                                    keyfile = self.keyfile,
+                                    ssl_version = self.ssl_version,
+                                    ciphers= self.ciphers, 
+                                    cert_reqs=self.cert_reqs,
+                                    ca_certs=self.ca_cert)
+        except OSError as err:
+            print(err)
+            raise
 
-        connstream = ssl.wrap_socket(newsocket,
-                                server_side=True,
-                                certfile = self.certfile,
-                                keyfile = self.keyfile,
-                                ssl_version = self.ssl_version,
-                                ciphers= self.ciphers, 
-                                cert_reqs=self.cert_reqs,
-                                ca_certs=self.certfile)
         # Save last_adress
         self.last_address = fromaddr
         return connstream, fromaddr

@@ -71,6 +71,9 @@ class EnrollmentSimulator:
             'name': None,
             'ip': None
         }
+        if len(received) == 0:
+            # Empty message
+            raise
         parts = received.decode().split(' ')
         for part in parts:
             if part.startswith('A:'):

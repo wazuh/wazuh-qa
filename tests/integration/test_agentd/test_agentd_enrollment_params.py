@@ -13,17 +13,15 @@ from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_
 from wazuh_testing.tools.enrollment import EnrollmentSimulator
 from wazuh_testing.tools.monitoring import QueueMonitor
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.fim import generate_params
-from conftest import DEFAULT_VALUES
+from conftest import DEFAULT_VALUES, SERVER_KEY_PATH, SERVER_CERT_PATH, build_expected_request, clean_client_keys_file, check_client_keys_file, clean_password_file, \
+    configure_enrollment
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
 
 SERVER_ADDRESS = '127.0.0.1'
 REMOTED_PORT = 1514
-SERVER_KEY_PATH = '/etc/manager.key'
-SERVER_CERT_PATH = '/etc/manager.cert'
 INSTALLATION_FOLDER = '/var/ossec/bin/'
 
 
@@ -40,7 +38,6 @@ def load_tests(path):
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 tests = load_tests(os.path.join(test_data_path, 'wazuh_enrollment_tests.yaml'))
-client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 
 #params = [{'SERVER_ADDRESS': SERVER_ADDRESS,}, {'PORT': REMOTED_PORT,},]
 
@@ -68,48 +65,6 @@ def configure_enrollment_server(request):
 
     enrollment_server.shutdown()
 
-def check_client_keys_file(response):
-    try:
-        with open(client_keys_path) as client_file:
-            client_line = client_file.readline()
-            #check format key 4 items (id name ip key)
-            if len(client_line.split(" ")) != 4:
-                client_file.close()
-                return False
-            #discard \n character
-            elif client_line[:-1] in response:
-                client_file.close()
-                return True
-            else:
-                client_file.close()
-                return False
-    except IOError:
-        raise
-    client_file.close()
-    return False
-
-def clean_client_keys_file(): 
-    try:
-        client_file = open(client_keys_path, 'w')
-        client_file.close()        
-    except IOError as exception:
-        raise
-
-def build_expected_request(configuration):
-    expec_req = "OSSEC"
-    if configuration.get('agent_name'):
-        expec_req += " A:'%s'" % configuration.get('agent_name')
-    else:
-        expec_req += " A:'%s'" % DEFAULT_VALUES["agent_name"]
-    if configuration.get('agent_address'):
-        expec_req += " IP:'%s'" % configuration.get('agent_address')
-    elif DEFAULT_VALUES['use_source_ip'] == 'ýes':
-        expec_req += " IP:'src'"
-    if configuration.get('groups'):
-        expec_req += " G:'%s'" % configuration.get('groups')
-    return expec_req + '\n'
-
-
 def override_wazuh_conf(configuration):
     # Stop Wazuh
     control_service('stop')
@@ -128,6 +83,7 @@ def override_wazuh_conf(configuration):
     
     #reset_client_keys
     clean_client_keys_file()
+    clean_password_file()
     #reset password
     #reset_password(set_password)
 
@@ -152,24 +108,25 @@ def get_temp_yaml(param):
 @pytest.mark.parametrize('test_case', [case for case in tests])
 def test_agent_agentd_enrollment(configure_enrollment_server, configure_environment, test_case: list):
     print(f'Test: {test_case["name"]}')
-    enrollment_server.clear()
+    if 'ossec-agentd' in test_case.get("skips", []):
+        pytest.skip("This test does not apply to ossec-agentd")
     configuration = test_case.get('configuration', {})
-    
+    configure_enrollment(test_case.get('enrollment'), enrollment_server, configuration.get('agent_name'))
     try:
         override_wazuh_conf(configuration)
     except:
-        if test_case['enrollment']['expected_request'] == 'error':
+        if not test_case.get('enrollment',{}).get('response'):
             # Expected to happen
             return
         else:
             raise AssertionError(f'Configuration error at ossec.conf file')
 
-    if test_case['enrollment']['expected_request'] == 'yes':
+    if test_case.get('enrollment') and test_case['enrollment'].get('response'):
         #configuration = test_case.get('configuration', {})
         results = monitored_sockets[0].get_results(callback=(lambda y: [x.decode() for x in y]), timeout=1, accum_results=1)
         assert results[0] == build_expected_request(configuration), 'Expected enrollment request message does not match'
-        assert results[1] == test_case['enrollment']['response'], 'Expected response message does not match'
+        assert results[1] == test_case['enrollment']['response'].format(**DEFAULT_VALUES), 'Expected response message does not match'
         assert check_client_keys_file(results[1]) == True, 'Client key does not match'
-    elif test_case['enrollment']['expected_request'] == 'error':
+    else:
         raise AssertionError(f'Will be configuration error at ossec.conf file')
     return

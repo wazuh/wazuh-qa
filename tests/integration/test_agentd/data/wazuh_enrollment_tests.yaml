@@ -2,142 +2,143 @@
   name: "Default Name"
   description: "No agent name in auto enrollment configuration"
   enrollment:
-    expected_request: "yes"
-    response: "OSSEC K:'0 ubuntu-bionic 127.0.0.1 TopSecret'\n"
+    response: "OSSEC K:'0 {agent_name} any TopSecret'\n"
+    id: 0
   configuration:
     enabled: "yes"
 -
   name: "Valid agent address"
   description: "Check a valid agent_address configurations"
   enrollment:
-    expected_request: "yes"
-    response: "OSSEC K:'1 ubuntu-bionic 192.168.0.10 TopSecret'\n"
+    response: "OSSEC K:'1 {agent_name} 192.168.0.10 TopSecret'\n"
+    id: 1
   configuration:
     agent_address: "192.168.0.10"
 -
   name: "Groups"
   description: "Agent groups in auto enrollment configuration"
   enrollment:
-    expected_request: "yes"
-    response: "OSSEC K:'2 ubuntu-bionic 127.0.0.1 TopSecret'\n"
+    response: "OSSEC K:'2 {agent_name} any TopSecret'\n"
+    id: 2
   configuration:
     groups: "group_1"
 -
   name: "Multi Groups"
   description: "Agent multi groups in auto enrollment configuration"
   enrollment:
-    expected_request: "yes"
-    response: "OSSEC K:'3 ubuntu-bionic 127.0.0.1 TopSecret'\n"
+    response: "OSSEC K:'3 {agent_name} any TopSecret'\n"
+    id: 3
   configuration:
     groups: "group_1,group_2,"
-
 -
   name: "Invalid Agent address"
   description: "Check a invalid agent_address in auto enrollment configuration"
-  enrollment:
-    expected_request: "error"
   configuration:
     agent_address: "192.168.0.1000"
 -
   name: "Invalid enabled"
   description: "Check a invalid enabled in auto enrollment configuration"
-  enrollment:
-    expected_request: "error"
+  skips:
+    - agent-auth
   configuration:
     enabled: "nn"
 -
   name: "Valid agent name config"
   description: "Check a valid agent_name configurations"
   enrollment:
-    expected_request: "yes"
-    response: "OSSEC K:'4 test_agent 127.0.0.1 TopSecret'\n"
+    response: "OSSEC K:'4 test_agent any TopSecret'\n"
+    id: 4
   configuration:
     agent_name: "test_agent"
 -
   name: "Invalid agent name config"
   description: "Check a invalid agent_name configurations"
-  enrollment:
-    expected_request: "error"
   configuration:
-    agent_name: "test_agent/+bad"
-
-  
+    agent_name: "test_agent/+bad" 
 -
   name: "SSL - Auto Negotiation"
   description: "Try auto negotiation option"
   enrollment:
-    expected_request: "OSSEC A:'test_agent_1'\n"
-    response: "OSSEC K:'1 test_agent_1 127.0.0.1 TopSecret'\n"
+    response: "OSSEC K:'1 test_agent_1 any TopSecret'\n"
+    id: 1
+    protocol: "TLSv1_1"
   configuration:
     agent_name: "test_agent_1"
     auto_negotiation: "yes"
-    protocol: "TLSv1_1"
 -
   name: "SSL - Auto Negotiation Negative"
   description: "Try TLSv1_1 without auto_negotiation"
+  enrollment:
+    protocol: "TLSv1_1"
   configuration:
     agent_name: "test_agent_1"
     auto_negotiation: "no"
-    protocol: "TLSv1_1"
 -
   name: "SSL - Compatible Ciphers"
   description: "Try connecting with Compatible ciphers"
   enrollment:
-    expected_request: "OSSEC A:'test_agent_2'\n"
-    response: "OSSEC K:'2 test_agent_2 127.0.0.1 TopSecret'\n"
+    response: "OSSEC K:'2 test_agent_2 any TopSecret'\n"
+    id: 2
   configuration:
     agent_name: "test_agent_2"
-    ciphers: "SHA256"
+    ssl_cipher: "SHA256"
 -
   name: "SSL - Incompatible Ciphers"
   description: "Try connecting with Incompatible ciphers"
   configuration:
     agent_name: "test_agent_3"
-    ciphers: "CAMELLIA"
+    ssl_cipher: "CAMELLIA"
 -
   name: "Manager Verification - Valid Cert"
   description: "Try validating server with a valid certificate"
   enrollment:
-    expected_request: "OSSEC A:'test_agent_3'\n"
-    response: "OSSEC K:'3 test_agent_3 127.0.0.1 TopSecret'\n"
-  configuration:
-    agent_name: "test_agent_3"
+    response: "OSSEC K:'3 test_agent_3 any TopSecret'\n"
+    id: 3
     check_certificate: 
       valid: "yes"
+  configuration:
+    agent_name: "test_agent_3"
+    server_ca_path: "/var/ossec/etc/manager.pem"
 -
   name: "Manager Verification - Invalid Cert"
   description: "Try validating server with an invalid certificate"
-  configuration:
-    agent_name: "test_agent_3"
+  enrollment:
     check_certificate: 
       valid: "no"
+  configuration:
+    agent_name: "test_agent_3"
+    server_ca_path: "/var/ossec/etc/manager.pem"
 -
   name: "Agent Verification - Valid Cert"
   description: "Try validating agent with an invalid certificate"
   enrollment:
-    expected_request: "OSSEC A:'test_agent_4'\n"
-    response: "OSSEC K:'4 test_agent_4 127.0.0.1 TopSecret'\n"
-  configuration:
-    agent_name: "test_agent_4"
+    response: "OSSEC K:'4 test_agent_4 any TopSecret'\n"
+    id: 4
     agent_certificate: 
       valid: "yes"
+  configuration:
+    agent_name: "test_agent_4"
+    agent_certificate_path: "/var/ossec/etc/agent.cert"
+    agent_key_path: "/var/ossec/etc/agent.key"
 -
   name: "Agent Verification - Invalid Cert"
   description: "Try validating agent with an invalid certificate"
-  configuration:
-    agent_name: "test_agent_5"
+  enrollment:
     agent_certificate: 
       valid: "no"
+  configuration:
+    agent_name: "test_agent_5"
+    agent_certificate_path: "/var/ossec/etc/agent.cert"
+    agent_key_path: "/var/ossec/etc/agent.key"
 -
   name: "Use source IP"
   description: "Check that source IP is sent by agent"
   enrollment:
-    expected_request: "OSSEC A:'test_agent_5' IP:'src'\n"
-    response: "OSSEC K:'15 test_agent_5 127.0.0.1 TopSecret'\n"
+    response: "OSSEC K:'15 test_agent_5 {agent_address} TopSecret'\n"
+    id: 15
   configuration:
     agent_name: "test_agent_5"
     use_source_ip: "yes"
-    id: 15
 -
   name: "Incompatible - Use source IP"
   description: "Use source IP option while trying to set an IP"
@@ -146,26 +147,28 @@
     use_source_ip: "yes"
     agent_address: "127.0.0.1"
 -
-  name: "Password from string"
+  name: "Password from string - Agent-Auth"
   description: "Check that configured password is sent on string"
+  skips:
+    - ossec-agentd
   enrollment:
-    expected_request: "OSSEC PASS: pass123 OSSEC A:'test_agent_pass'\n"
     response: "OSSEC K:'11 test_agent_pass any TopSecret'\n"
+    id: 11
   configuration:
     agent_name: "test_agent_pass"
-    id: 11
     password:
       type: "string"
       value: "pass123"
 -
-  name: "Password from file"
+  name: "Password from file - Agent-Auth"
   description: "Check that password file is open and read successfully"
+  skips:
+    - ossec-agentd
   enrollment:
-    expected_request: "OSSEC PASS: passFile OSSEC A:'test_agent_pass_file'\n"
     response: "OSSEC K:'12 test_agent_pass_file any TopSecret'\n"
+    id: 12
   configuration:
     agent_name: "test_agent_pass_file"
-    id: 12
     password:
       type: "file"
       value: "passFile"

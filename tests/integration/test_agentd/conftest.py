@@ -1,5 +1,8 @@
+import os
 import pytest
 import socket
+import ssl
+from wazuh_testing.tools import WAZUH_PATH
 
 DEFAULT_VALUES = {
     'enabled' : 'yes', 
@@ -8,8 +11,99 @@ DEFAULT_VALUES = {
     'agent_name' : socket.gethostname(), 
     'groups' : None, 
     'agent_address' : '127.0.0.1', 
-    'use_source_ip' : 'no'
+    'use_source_ip' : 'no',
+    'ssl_cipher': None,
+    'server_ca_path': None,
+    'agent_certificate_path' : None,
+    'agent_key_path' : None,
+    'authorization_pass_path': None
 }
+
+CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
+AUTHDPASS_PATH = os.path.join(WAZUH_PATH, 'etc', 'authd.pass')
+SERVER_KEY_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.key')
+SERVER_CERT_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.cert')
+SERVER_PEM_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.pem')
+AGENT_KEY_PATH = os.path.join(WAZUH_PATH, 'etc', 'agent.key')
+AGENT_CERT_PATH = os.path.join(WAZUH_PATH, 'etc', 'agent.cert')
+AGENT_PEM_PATH = os.path.join(WAZUH_PATH, 'etc', 'agent.pem')
+
+def clean_client_keys_file(): 
+    try:
+        client_file = open(CLIENT_KEYS_PATH, 'w')
+        client_file.close()        
+    except IOError as exception:
+        raise
+
+def check_client_keys_file(response):
+    try:
+        with open(CLIENT_KEYS_PATH) as client_file:
+            client_line = client_file.readline()
+            #check format key 4 items (id name ip key)
+            if len(client_line.split(" ")) != 4:
+                client_file.close()
+                return False
+            #discard \n character
+            elif client_line[:-1] in response:
+                client_file.close()
+                return True
+            else:
+                client_file.close()
+                return False
+    except IOError:
+        raise
+    client_file.close()
+    return False
+
+def build_expected_request(configuration):
+    expec_req = "OSSEC"
+    if configuration.get('password'):
+        expec_req = f"OSSEC PASS: {configuration['password']['value']} " + expec_req
+    if configuration.get('agent_name'):
+        expec_req += " A:'%s'" % configuration.get('agent_name')
+    else:
+        expec_req += " A:'%s'" % DEFAULT_VALUES["agent_name"]
+    if configuration.get('agent_address'):
+        expec_req += " IP:'%s'" % configuration.get('agent_address')
+    elif configuration.get('use_source_ip') == 'yes':
+        expec_req += " IP:'src'"
+    elif DEFAULT_VALUES['use_source_ip'] == 'yes':
+        expec_req += " IP:'src'"
+    if configuration.get('groups'):
+        expec_req += " G:'%s'" % configuration.get('groups')
+    return expec_req + '\n'
+
+def clean_password_file(): 
+    try:
+        client_file = open(AUTHDPASS_PATH, 'w')
+        client_file.close()        
+    except IOError as exception:
+        raise
+
+def configure_enrollment(enrollment, enrollment_server, agent_name=socket.gethostname()):
+    enrollment_server.clear()
+    if enrollment:
+        if enrollment.get('id'):
+            enrollment_server.agent_id = enrollment.get('id')
+        if enrollment.get('protocol') == 'TLSv1_1':
+            enrollment_server.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_1)
+        else:
+            enrollment_server.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2)
+        if enrollment.get('check_certificate'):
+            if enrollment['check_certificate']['valid'] == 'yes':
+                # Store valid certificate
+                enrollment_server.cert_controller.store_ca_certificate(enrollment_server.cert_controller.get_root_ca_cert(), SERVER_PEM_PATH)
+            else:
+                # Create another certificate
+                enrollment_server.cert_controller.generate_agent_certificates(AGENT_KEY_PATH, SERVER_PEM_PATH, agent_name)
+        if enrollment.get('agent_certificate'):
+            enrollment_server.cert_controller.generate_agent_certificates(AGENT_KEY_PATH, AGENT_CERT_PATH, agent_name, 
+                signed=(enrollment['agent_certificate']['valid'] == 'yes')
+            )
+            enrollment_server.mitm_enrollment.listener.set_ssl_configuration(cert_reqs=ssl.CERT_REQUIRED, ca_cert=SERVER_PEM_PATH)
+            enrollment_server.cert_controller.store_ca_certificate(enrollment_server.cert_controller.get_root_ca_cert(), SERVER_PEM_PATH)
+        else:
+            enrollment_server.mitm_enrollment.listener.set_ssl_configuration(cert_reqs=ssl.CERT_OPTIONAL)
 class AgentAuthParser:
 
     def __init__(self, server_address=None, BINARY_PATH='/var/ossec/bin/agent-auth', sudo=False):
@@ -50,3 +144,6 @@ class AgentAuthParser:
                 f.write(password)
             elif password:
                 self._command += ['-P', password]
+
+    def add_groups(self, group_string):
+        self._command += ['-G', group_string]

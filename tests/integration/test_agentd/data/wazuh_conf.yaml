@@ -3,6 +3,7 @@
       - all
       apply_to_modules:
       - test_agentd_enrollment_params
+      - test_agent_auth_enrollment
       sections:
       - section: client
         elements:
