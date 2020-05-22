@@ -64,7 +64,7 @@
     protocol: "TLSv1_1"
   configuration:
     agent_name: "test_agent_1"
-    auto_negotiation: "yes"
+    auto_method: "yes"
 -
   name: "SSL - Auto Negotiation Negative"
   description: "Try TLSv1_1 without auto_negotiation"
@@ -72,7 +72,7 @@
     protocol: "TLSv1_1"
   configuration:
     agent_name: "test_agent_1"
-    auto_negotiation: "no"
+    auto_method: "no"
 -
   name: "SSL - Compatible Ciphers"
   description: "Try connecting with Compatible ciphers"

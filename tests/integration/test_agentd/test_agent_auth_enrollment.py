@@ -74,7 +74,7 @@ def test_agent_auth_enrollment(configure_enrollment_server, configure_environmen
         parser.add_agent_name(configuration.get("agent_name"))
     if configuration.get('agent_address'):
         parser.add_agent_adress(configuration.get("agent_address"))
-    if configuration.get('auto_negotiation') == 'yes':
+    if configuration.get('auto_method') == 'yes':
         parser.add_auto_negotiation()
     if configuration.get('ssl_cipher'):
         parser.add_ciphers(configuration.get('ssl_cipher'))

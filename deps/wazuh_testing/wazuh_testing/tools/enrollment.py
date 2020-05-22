@@ -38,6 +38,8 @@ class EnrollmentSimulator:
         Sockets need to be clear after each response since by the default the stops handling connection
         after one successfull connection, and needs to be cleared afterwards
         """
+        while not self.mitm_enrollment.queue.empty():
+            self.mitm_enrollment.queue.get_nowait()
         self.mitm_enrollment.event.clear()
         self.mitm_remoted.event.clear()
 
