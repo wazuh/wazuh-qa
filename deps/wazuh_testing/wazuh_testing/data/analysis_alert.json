@@ -163,6 +163,22 @@
             "pattern": "^(.*)$"
           }
         },
+        "tsc": {
+          "$id": "#/properties/rule/properties/tsc",
+          "type": "array",
+          "title": "The TSC Schema",
+          "items": {
+            "$id": "#/properties/rule/properties/tsc/items",
+            "type": "string",
+            "title": "The Items Schema",
+            "default": "",
+            "examples": [
+              "PI1.4",
+              "CC6.1"
+            ],
+            "pattern": "^(.*)$"
+          }
+        },
         "gpg13": {
           "$id": "#/properties/rule/properties/gpg13",
           "type": "array",
