@@ -26,6 +26,7 @@ directory_str = ','.join(test_directories)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'multiple_dirs.yaml')
+expected_discarded = ','.join([os.path.join(PREFIX, f'testdir{i}') for i in range(64, n_dirs)])
 
 # configurations
 
@@ -46,10 +47,11 @@ def get_configuration(request):
 
 def wait_for_event():
     # Wait until event is detected
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            callback=callback_warn_max_dir_monitored,
-                            error_message='Did not receive expected "Maximum number of directories to be '
-                                          'monitored reached" event')
+    discarded = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                        callback=callback_warn_max_dir_monitored,
+                                        error_message='Did not receive expected "Maximum number of directories to be '
+                                          'monitored in the same tag reached" event').result()
+    return discarded
 
 # tests
 
@@ -73,7 +75,9 @@ def test_multiple_dirs(dir_list, tags_to_apply, get_configuration, configure_env
         List with all the directories to be monitored.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    wait_for_event()
+    discarded = wait_for_event()
+    assert discarded == expected_discarded, f'Directories discarded expected to be: {discarded}'
+
     detect_initial_scan(wazuh_log_monitor)
     file = 'regular'
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'

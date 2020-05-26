@@ -916,10 +916,11 @@ def callback_entries_path_count(line):
 
 
 def callback_warn_max_dir_monitored(line):
-    match = re.match(r".*Maximum number of directories to be monitored.", line)
-
+    match = re.match(r'.*Maximum number of directories to be monitored in the same tag reached \(\d+\) '
+                     r'Excess are discarded: \'(.+)\'', line)
     if match:
-        return True
+        return match.group(1)
+    return None
 
 
 class EventChecker:
