@@ -2,7 +2,8 @@ import os
 import pytest
 import socket
 import ssl
-from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
+from wazuh_testing.tools.monitoring import FileMonitor
 
 DEFAULT_VALUES = {
     'enabled' : 'yes', 
@@ -35,7 +36,15 @@ def clean_client_keys_file():
     except IOError as exception:
         raise
 
-def check_client_keys_file(response):
+def check_client_keys_file():
+    """Wait until client key has been written"""
+    def wait_key_changes(line):
+        if 'Valid key created. Finished.' in line:
+            return line
+        return None
+
+    log_monitor = FileMonitor(LOG_FILE_PATH)
+    log_monitor.start(timeout=5, callback=wait_key_changes)
     try:
         with open(CLIENT_KEYS_PATH) as client_file:
             client_line = client_file.readline()
@@ -43,13 +52,8 @@ def check_client_keys_file(response):
             if len(client_line.split(" ")) != 4:
                 client_file.close()
                 return False
-            #discard \n character
-            elif client_line[:-1] in response:
-                client_file.close()
-                return True
-            else:
-                client_file.close()
-                return False
+            client_file.close()
+            return f"OSSEC K:'{client_line[:-1]}'\n"
     except IOError:
         raise
     client_file.close()

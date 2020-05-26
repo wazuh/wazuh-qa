@@ -67,7 +67,7 @@ def configure_enrollment_server(request):
 
 def override_wazuh_conf(configuration):
     # Stop Wazuh
-    control_service('stop')
+    control_service('stop', daemon="ossec-agentd")
 
     
     # Configuration for testing
@@ -88,7 +88,7 @@ def override_wazuh_conf(configuration):
     #reset_password(set_password)
 
     # Start Wazuh
-    control_service('start')
+    control_service('start', daemon="ossec-agentd")
 
 def get_temp_yaml(param):
     temp = os.path.join(test_data_path,'temp.yaml')
@@ -127,7 +127,7 @@ def test_agent_agentd_enrollment(configure_enrollment_server, configure_environm
     if test_case.get('enrollment') and test_case['enrollment'].get('response'):
         assert results[0] == build_expected_request(configuration), 'Expected enrollment request message does not match'
         assert results[1] == test_case['enrollment']['response'].format(**DEFAULT_VALUES), 'Expected response message does not match'
-        assert check_client_keys_file(results[1]) == True, 'Client key does not match'
+        assert results[1] == check_client_keys_file(), 'Client key does not match'
     else:
         assert len(results) == 0, 'Enrollment message was not expected!'
     return
