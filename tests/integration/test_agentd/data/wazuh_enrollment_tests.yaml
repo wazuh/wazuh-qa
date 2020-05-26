@@ -2,15 +2,15 @@
   name: "Default Name"
   description: "No agent name in auto enrollment configuration"
   enrollment:
-    response: "OSSEC K:'0 {agent_name} any TopSecret'\n"
-    id: 0
+    response: "OSSEC K:'001 {agent_name} any TopSecret'\n"
+    id: 1
   configuration:
     enabled: "yes"
 -
   name: "Valid agent address"
   description: "Check a valid agent_address configurations"
   enrollment:
-    response: "OSSEC K:'1 {agent_name} 192.168.0.10 TopSecret'\n"
+    response: "OSSEC K:'001 {agent_name} 192.168.0.10 TopSecret'\n"
     id: 1
   configuration:
     agent_address: "192.168.0.10"
@@ -18,7 +18,7 @@
   name: "Groups"
   description: "Agent groups in auto enrollment configuration"
   enrollment:
-    response: "OSSEC K:'2 {agent_name} any TopSecret'\n"
+    response: "OSSEC K:'002 {agent_name} any TopSecret'\n"
     id: 2
   configuration:
     groups: "group_1"
@@ -26,7 +26,7 @@
   name: "Multi Groups"
   description: "Agent multi groups in auto enrollment configuration"
   enrollment:
-    response: "OSSEC K:'3 {agent_name} any TopSecret'\n"
+    response: "OSSEC K:'003 {agent_name} any TopSecret'\n"
     id: 3
   configuration:
     groups: "group_1,group_2,"
@@ -46,7 +46,7 @@
   name: "Valid agent name config"
   description: "Check a valid agent_name configurations"
   enrollment:
-    response: "OSSEC K:'4 test_agent any TopSecret'\n"
+    response: "OSSEC K:'004 test_agent any TopSecret'\n"
     id: 4
   configuration:
     agent_name: "test_agent"
@@ -59,7 +59,7 @@
   name: "SSL - Auto Negotiation"
   description: "Try auto negotiation option"
   enrollment:
-    response: "OSSEC K:'1 test_agent_1 any TopSecret'\n"
+    response: "OSSEC K:'001 test_agent_1 any TopSecret'\n"
     id: 1
     protocol: "TLSv1_1"
   configuration:
@@ -77,7 +77,7 @@
   name: "SSL - Compatible Ciphers"
   description: "Try connecting with Compatible ciphers"
   enrollment:
-    response: "OSSEC K:'2 test_agent_2 any TopSecret'\n"
+    response: "OSSEC K:'002 test_agent_2 any TopSecret'\n"
     id: 2
   configuration:
     agent_name: "test_agent_2"
@@ -92,7 +92,7 @@
   name: "Manager Verification - Valid Cert"
   description: "Try validating server with a valid certificate"
   enrollment:
-    response: "OSSEC K:'3 test_agent_3 any TopSecret'\n"
+    response: "OSSEC K:'003 test_agent_3 any TopSecret'\n"
     id: 3
     check_certificate: 
       valid: "yes"
@@ -112,7 +112,7 @@
   name: "Agent Verification - Valid Cert"
   description: "Try validating agent with an invalid certificate"
   enrollment:
-    response: "OSSEC K:'4 test_agent_4 any TopSecret'\n"
+    response: "OSSEC K:'004 test_agent_4 any TopSecret'\n"
     id: 4
     agent_certificate: 
       valid: "yes"
@@ -134,7 +134,7 @@
   name: "Use source IP"
   description: "Check that source IP is sent by agent"
   enrollment:
-    response: "OSSEC K:'15 test_agent_5 {agent_address} TopSecret'\n"
+    response: "OSSEC K:'015 test_agent_5 {agent_address} TopSecret'\n"
     id: 15
   configuration:
     agent_name: "test_agent_5"
@@ -152,7 +152,7 @@
   skips:
     - ossec-agentd
   enrollment:
-    response: "OSSEC K:'11 test_agent_pass any TopSecret'\n"
+    response: "OSSEC K:'011 test_agent_pass any TopSecret'\n"
     id: 11
   configuration:
     agent_name: "test_agent_pass"
@@ -165,7 +165,7 @@
   skips:
     - ossec-agentd
   enrollment:
-    response: "OSSEC K:'12 test_agent_pass_file any TopSecret'\n"
+    response: "OSSEC K:'012 test_agent_pass_file any TopSecret'\n"
     id: 12
   configuration:
     agent_name: "test_agent_pass_file"

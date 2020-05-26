@@ -68,7 +68,7 @@ def configure_enrollment_server(request):
 def override_wazuh_conf(configuration):
     # Stop Wazuh
     control_service('stop')
-    
+
     
     # Configuration for testing
     temp = get_temp_yaml(configuration)
@@ -114,19 +114,20 @@ def test_agent_agentd_enrollment(configure_enrollment_server, configure_environm
     configure_enrollment(test_case.get('enrollment'), enrollment_server, configuration.get('agent_name'))
     try:
         override_wazuh_conf(configuration)
-    except:
+    except Exception as err:
         if not test_case.get('enrollment',{}).get('response'):
             # Expected to happen
             return
         else:
             raise AssertionError(f'Configuration error at ossec.conf file')
 
+    
+    #configuration = test_case.get('configuration', {})
+    results = monitored_sockets[0].get_results(callback=(lambda y: [x.decode() for x in y]), timeout=1, accum_results=1)
     if test_case.get('enrollment') and test_case['enrollment'].get('response'):
-        #configuration = test_case.get('configuration', {})
-        results = monitored_sockets[0].get_results(callback=(lambda y: [x.decode() for x in y]), timeout=1, accum_results=1)
         assert results[0] == build_expected_request(configuration), 'Expected enrollment request message does not match'
         assert results[1] == test_case['enrollment']['response'].format(**DEFAULT_VALUES), 'Expected response message does not match'
         assert check_client_keys_file(results[1]) == True, 'Client key does not match'
     else:
-        raise AssertionError(f'Will be configuration error at ossec.conf file')
+        assert len(results) == 0, 'Enrollment message was not expected!'
     return

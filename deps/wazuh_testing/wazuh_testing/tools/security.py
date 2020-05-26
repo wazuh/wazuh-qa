@@ -145,7 +145,7 @@ class CertificateController(object):
         with open(private_key_path, "wb") as f:
             data = crypto.dump_privatekey(crypto.FILETYPE_PEM, key)
             f.write(data)
-        os.chmod(private_key_path, stat.S_IREAD)
+        os.chmod(private_key_path, stat.S_IREAD | stat.S_IROTH)
         return
 
     def store_public_key(self, key, public_key_path):

@@ -88,7 +88,7 @@ class EnrollmentSimulator:
             agent_info['ip'] = self.mitm_enrollment.listener.last_address[0]
         self.id_count += 1
         self.mitm_enrollment.event.set()
-        return f'OSSEC K:\'{agent_info.get("id")} {agent_info.get("name")} {agent_info["ip"]} {self.secret}\'\n'.encode()
+        return f'OSSEC K:\'{agent_info.get("id"):03d} {agent_info.get("name")} {agent_info["ip"]} {self.secret}\'\n'.encode()
 
     def _generate_certificates(self):
         # Generate root key and certificate
