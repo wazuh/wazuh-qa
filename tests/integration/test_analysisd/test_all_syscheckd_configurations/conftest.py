@@ -47,8 +47,10 @@ def generate_events_and_alerts(request):
 
     n_alerts = len(test_cases)
     time.sleep(3)
-    alerts = alert_monitor.start(timeout=max(n_alerts * 0.001, 15), callback=callback_fim_alert,
-                                 accum_results=n_alerts).result()
+
+    # Timeout needs to be 40 for Windows performance reasons
+    alerts = alert_monitor.start(timeout=40, callback=callback_fim_alert,  accum_results=n_alerts,
+                                 error_message="Couln't retrieve all alerts.").result()
 
     setattr(request.module, 'alerts_list', alerts)
     setattr(request.module, 'events_dict', events)
