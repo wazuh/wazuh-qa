@@ -1,0 +1,616 @@
+2020-05-28 12:20:13,746 p=80772 u=vicferpoy n=ansible | PLAY [Create our container (Master)] *******************************************
+2020-05-28 12:20:13,757 p=80772 u=vicferpoy n=ansible | TASK [Gathering Facts] *********************************************************
+2020-05-28 12:20:13,758 p=80772 u=vicferpoy n=ansible | Thursday 28 May 2020  12:20:13 +0200 (0:00:00.019)       0:00:00.019 ********** 
+2020-05-28 12:20:15,029 p=80772 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:20:15,043 p=80772 u=vicferpoy n=ansible | TASK [Create a network] ********************************************************
+2020-05-28 12:20:15,043 p=80772 u=vicferpoy n=ansible | Thursday 28 May 2020  12:20:15 +0200 (0:00:01.285)       0:00:01.305 ********** 
+2020-05-28 12:20:15,432 p=80772 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:20:15,442 p=80772 u=vicferpoy n=ansible | TASK [docker_container] ********************************************************
+2020-05-28 12:20:15,442 p=80772 u=vicferpoy n=ansible | Thursday 28 May 2020  12:20:15 +0200 (0:00:00.398)       0:00:01.703 ********** 
+2020-05-28 12:20:16,404 p=80772 u=vicferpoy n=ansible | [DEPRECATION WARNING]: Please note that docker_container handles networks 
+slightly different than docker CLI. If you specify networks, the default 
+network will still be attached as the first network. (You can specify 
+purge_networks to remove all networks not explicitly listed.) This behavior 
+will change in Ansible 2.12. You can change the behavior now by setting the new
+ `networks_cli_compatible` option to `yes`, and remove this warning by setting 
+it to `no`. This feature will be removed in version 2.12. Deprecation warnings 
+can be disabled by setting deprecation_warnings=False in ansible.cfg.
+2020-05-28 12:20:16,404 p=80772 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:20:16,408 p=80772 u=vicferpoy n=ansible | PLAY [Create our container (Worker1)] ******************************************
+2020-05-28 12:20:16,421 p=80772 u=vicferpoy n=ansible | TASK [Gathering Facts] *********************************************************
+2020-05-28 12:20:16,421 p=80772 u=vicferpoy n=ansible | Thursday 28 May 2020  12:20:16 +0200 (0:00:00.979)       0:00:02.683 ********** 
+2020-05-28 12:20:17,090 p=80772 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:20:17,106 p=80772 u=vicferpoy n=ansible | TASK [docker_container] ********************************************************
+2020-05-28 12:20:17,106 p=80772 u=vicferpoy n=ansible | Thursday 28 May 2020  12:20:17 +0200 (0:00:00.685)       0:00:03.368 ********** 
+2020-05-28 12:20:17,960 p=80772 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:20:17,963 p=80772 u=vicferpoy n=ansible | PLAY [Create our container (Worker2)] ******************************************
+2020-05-28 12:20:17,974 p=80772 u=vicferpoy n=ansible | TASK [Gathering Facts] *********************************************************
+2020-05-28 12:20:17,974 p=80772 u=vicferpoy n=ansible | Thursday 28 May 2020  12:20:17 +0200 (0:00:00.867)       0:00:04.235 ********** 
+2020-05-28 12:20:18,617 p=80772 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:20:18,634 p=80772 u=vicferpoy n=ansible | TASK [docker_container] ********************************************************
+2020-05-28 12:20:18,634 p=80772 u=vicferpoy n=ansible | Thursday 28 May 2020  12:20:18 +0200 (0:00:00.660)       0:00:04.896 ********** 
+2020-05-28 12:20:19,473 p=80772 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:20:19,476 p=80772 u=vicferpoy n=ansible | PLAY [Wazuh Master] ************************************************************
+2020-05-28 12:20:19,479 p=80772 u=vicferpoy n=ansible | TASK [Gathering Facts] *********************************************************
+2020-05-28 12:20:19,479 p=80772 u=vicferpoy n=ansible | Thursday 28 May 2020  12:20:19 +0200 (0:00:00.845)       0:00:05.741 ********** 
+2020-05-28 12:20:25,640 p=80772 u=vicferpoy n=ansible | ok: [wazuh-master]
+2020-05-28 12:20:25,646 p=80772 u=vicferpoy n=ansible | TASK [roles/master-role : Installing dependencies using apt] *******************
+2020-05-28 12:20:25,646 p=80772 u=vicferpoy n=ansible | Thursday 28 May 2020  12:20:25 +0200 (0:00:06.166)       0:00:11.908 ********** 
+2020-05-28 12:20:34,569 p=80772 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:20:34,577 p=80772 u=vicferpoy n=ansible | TASK [roles/master-role : Clone wazuh repository] ******************************
+2020-05-28 12:20:34,577 p=80772 u=vicferpoy n=ansible | Thursday 28 May 2020  12:20:34 +0200 (0:00:08.930)       0:00:20.839 ********** 
+2020-05-28 12:20:53,425 p=80772 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:20:53,431 p=80772 u=vicferpoy n=ansible | TASK [roles/master-role : Install master] **************************************
+2020-05-28 12:20:53,432 p=80772 u=vicferpoy n=ansible | Thursday 28 May 2020  12:20:53 +0200 (0:00:18.854)       0:00:39.693 ********** 
+2020-05-28 12:22:42,705 p=80772 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:22:42,729 p=80772 u=vicferpoy n=ansible | TASK [roles/master-role : Copy ossec.conf file] ********************************
+2020-05-28 12:22:42,729 p=80772 u=vicferpoy n=ansible | Thursday 28 May 2020  12:22:42 +0200 (0:01:49.297)       0:02:28.991 ********** 
+2020-05-28 12:22:46,828 p=80772 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:22:46,834 p=80772 u=vicferpoy n=ansible | TASK [roles/master-role : Set cluster key] *************************************
+2020-05-28 12:22:46,834 p=80772 u=vicferpoy n=ansible | Thursday 28 May 2020  12:22:46 +0200 (0:00:04.104)       0:02:33.095 ********** 
+2020-05-28 12:22:48,311 p=80772 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:22:48,316 p=80772 u=vicferpoy n=ansible | TASK [roles/master-role : Set Wazuh Master IP] *********************************
+2020-05-28 12:22:48,316 p=80772 u=vicferpoy n=ansible | Thursday 28 May 2020  12:22:48 +0200 (0:00:01.482)       0:02:34.578 ********** 
+2020-05-28 12:22:49,674 p=80772 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:22:49,682 p=80772 u=vicferpoy n=ansible | TASK [roles/master-role : Restart Wazuh] ***************************************
+2020-05-28 12:22:49,682 p=80772 u=vicferpoy n=ansible | Thursday 28 May 2020  12:22:49 +0200 (0:00:01.366)       0:02:35.944 ********** 
+2020-05-28 12:22:50,880 p=80772 u=vicferpoy n=ansible | fatal: [wazuh-master]: FAILED! => changed=true 
+  cmd:
+  - /var/ossec/bin/ossec-control
+  - restart
+  delta: '0:00:00.755186'
+  end: '2020-05-28 12:22:50.851185'
+  msg: non-zero return code
+  rc: 1
+  start: '2020-05-28 12:22:50.095999'
+  stderr: |-
+    Traceback (most recent call last):
+      File "/var/ossec/framework/scripts/wazuh-clusterd.py", line 12, in <module>
+        import wazuh.core.cluster.cluster
+    ModuleNotFoundError: No module named 'wazuh'
+  stderr_lines: <omitted>
+  stdout: 'wazuh-clusterd: Configuration error. Exiting'
+  stdout_lines: <omitted>
+2020-05-28 12:22:50,881 p=80772 u=vicferpoy n=ansible | [WARNING]: Failure using method (v2_runner_on_failed) in callback plugin
+(<ansible.plugins.callback.mail.CallbackModule object at 0x7f7188301e50>):
+[Errno 111] Connection refused
+
+2020-05-28 12:22:50,887 p=80772 u=vicferpoy n=ansible | PLAY RECAP *********************************************************************
+2020-05-28 12:22:50,887 p=80772 u=vicferpoy n=ansible | localhost                  : ok=7    changed=4    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2020-05-28 12:22:50,887 p=80772 u=vicferpoy n=ansible | wazuh-master               : ok=7    changed=6    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+2020-05-28 12:22:50,887 p=80772 u=vicferpoy n=ansible | Thursday 28 May 2020  12:22:50 +0200 (0:00:01.204)       0:02:37.149 ********** 
+2020-05-28 12:22:50,887 p=80772 u=vicferpoy n=ansible | =============================================================================== 
+2020-05-28 12:22:50,887 p=80772 u=vicferpoy n=ansible | roles/master-role : Install master ------------------------------------ 109.30s
+2020-05-28 12:22:50,887 p=80772 u=vicferpoy n=ansible | roles/master-role : Clone wazuh repository ----------------------------- 18.85s
+2020-05-28 12:22:50,887 p=80772 u=vicferpoy n=ansible | roles/master-role : Installing dependencies using apt ------------------- 8.93s
+2020-05-28 12:22:50,887 p=80772 u=vicferpoy n=ansible | Gathering Facts --------------------------------------------------------- 6.17s
+2020-05-28 12:22:50,888 p=80772 u=vicferpoy n=ansible | roles/master-role : Copy ossec.conf file -------------------------------- 4.10s
+2020-05-28 12:22:50,888 p=80772 u=vicferpoy n=ansible | roles/master-role : Set cluster key ------------------------------------- 1.48s
+2020-05-28 12:22:50,888 p=80772 u=vicferpoy n=ansible | roles/master-role : Set Wazuh Master IP --------------------------------- 1.37s
+2020-05-28 12:22:50,888 p=80772 u=vicferpoy n=ansible | Gathering Facts --------------------------------------------------------- 1.29s
+2020-05-28 12:22:50,888 p=80772 u=vicferpoy n=ansible | roles/master-role : Restart Wazuh --------------------------------------- 1.20s
+2020-05-28 12:22:50,888 p=80772 u=vicferpoy n=ansible | docker_container -------------------------------------------------------- 0.98s
+2020-05-28 12:22:50,888 p=80772 u=vicferpoy n=ansible | docker_container -------------------------------------------------------- 0.87s
+2020-05-28 12:22:50,888 p=80772 u=vicferpoy n=ansible | docker_container -------------------------------------------------------- 0.85s
+2020-05-28 12:22:50,888 p=80772 u=vicferpoy n=ansible | Gathering Facts --------------------------------------------------------- 0.69s
+2020-05-28 12:22:50,888 p=80772 u=vicferpoy n=ansible | Gathering Facts --------------------------------------------------------- 0.66s
+2020-05-28 12:22:50,888 p=80772 u=vicferpoy n=ansible | Create a network -------------------------------------------------------- 0.40s
+2020-05-28 12:22:50,888 p=80772 u=vicferpoy n=ansible | Playbook run took 0 days, 0 hours, 2 minutes, 37 seconds
+2020-05-28 12:28:29,381 p=146797 u=vicferpoy n=ansible | PLAY [Create our container (Master)] *****************************************************************************************************************************
+2020-05-28 12:28:29,389 p=146797 u=vicferpoy n=ansible | TASK [Gathering Facts] *******************************************************************************************************************************************
+2020-05-28 12:28:29,389 p=146797 u=vicferpoy n=ansible | Thursday 28 May 2020  12:28:29 +0200 (0:00:00.016)       0:00:00.016 ********** 
+2020-05-28 12:28:30,597 p=146797 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:28:30,614 p=146797 u=vicferpoy n=ansible | TASK [Create a network] ******************************************************************************************************************************************
+2020-05-28 12:28:30,614 p=146797 u=vicferpoy n=ansible | Thursday 28 May 2020  12:28:30 +0200 (0:00:01.224)       0:00:01.240 ********** 
+2020-05-28 12:28:30,899 p=146797 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:28:30,910 p=146797 u=vicferpoy n=ansible | TASK [docker_container] ******************************************************************************************************************************************
+2020-05-28 12:28:30,910 p=146797 u=vicferpoy n=ansible | Thursday 28 May 2020  12:28:30 +0200 (0:00:00.295)       0:00:01.536 ********** 
+2020-05-28 12:28:31,280 p=146797 u=vicferpoy n=ansible | [DEPRECATION WARNING]: Please note that docker_container handles networks slightly different than docker CLI. If you specify networks, the default network will 
+still be attached as the first network. (You can specify purge_networks to remove all networks not explicitly listed.) This behavior will change in Ansible 2.12.
+ You can change the behavior now by setting the new `networks_cli_compatible` option to `yes`, and remove this warning by setting it to `no`. This feature will 
+be removed in version 2.12. Deprecation warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
+2020-05-28 12:28:31,280 p=146797 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:28:31,283 p=146797 u=vicferpoy n=ansible | PLAY [Create our container (Worker1)] ****************************************************************************************************************************
+2020-05-28 12:28:31,295 p=146797 u=vicferpoy n=ansible | TASK [Gathering Facts] *******************************************************************************************************************************************
+2020-05-28 12:28:31,295 p=146797 u=vicferpoy n=ansible | Thursday 28 May 2020  12:28:31 +0200 (0:00:00.384)       0:00:01.921 ********** 
+2020-05-28 12:28:33,385 p=146797 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:28:33,403 p=146797 u=vicferpoy n=ansible | TASK [docker_container] ******************************************************************************************************************************************
+2020-05-28 12:28:33,403 p=146797 u=vicferpoy n=ansible | Thursday 28 May 2020  12:28:33 +0200 (0:00:02.108)       0:00:04.029 ********** 
+2020-05-28 12:28:33,652 p=146797 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:28:33,655 p=146797 u=vicferpoy n=ansible | PLAY [Create our container (Worker2)] ****************************************************************************************************************************
+2020-05-28 12:28:33,666 p=146797 u=vicferpoy n=ansible | TASK [Gathering Facts] *******************************************************************************************************************************************
+2020-05-28 12:28:33,667 p=146797 u=vicferpoy n=ansible | Thursday 28 May 2020  12:28:33 +0200 (0:00:00.263)       0:00:04.293 ********** 
+2020-05-28 12:28:34,309 p=146797 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:28:34,328 p=146797 u=vicferpoy n=ansible | TASK [docker_container] ******************************************************************************************************************************************
+2020-05-28 12:28:34,328 p=146797 u=vicferpoy n=ansible | Thursday 28 May 2020  12:28:34 +0200 (0:00:00.661)       0:00:04.954 ********** 
+2020-05-28 12:28:34,591 p=146797 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:28:34,594 p=146797 u=vicferpoy n=ansible | PLAY [Wazuh Master] **********************************************************************************************************************************************
+2020-05-28 12:28:34,597 p=146797 u=vicferpoy n=ansible | TASK [Gathering Facts] *******************************************************************************************************************************************
+2020-05-28 12:28:34,597 p=146797 u=vicferpoy n=ansible | Thursday 28 May 2020  12:28:34 +0200 (0:00:00.269)       0:00:05.223 ********** 
+2020-05-28 12:28:40,535 p=146797 u=vicferpoy n=ansible | ok: [wazuh-master]
+2020-05-28 12:28:40,541 p=146797 u=vicferpoy n=ansible | TASK [roles/master-role : Installing dependencies using apt] *****************************************************************************************************
+2020-05-28 12:28:40,541 p=146797 u=vicferpoy n=ansible | Thursday 28 May 2020  12:28:40 +0200 (0:00:05.944)       0:00:11.168 ********** 
+2020-05-28 12:28:42,627 p=146797 u=vicferpoy n=ansible | ok: [wazuh-master]
+2020-05-28 12:28:42,631 p=146797 u=vicferpoy n=ansible | TASK [roles/master-role : Clone wazuh repository] ****************************************************************************************************************
+2020-05-28 12:28:42,631 p=146797 u=vicferpoy n=ansible | Thursday 28 May 2020  12:28:42 +0200 (0:00:02.089)       0:00:13.258 ********** 
+2020-05-28 12:28:50,338 p=146797 u=vicferpoy n=ansible | ok: [wazuh-master]
+2020-05-28 12:28:50,343 p=146797 u=vicferpoy n=ansible | TASK [roles/master-role : Prevent errors when installing Python] *************************************************************************************************
+2020-05-28 12:28:50,343 p=146797 u=vicferpoy n=ansible | Thursday 28 May 2020  12:28:50 +0200 (0:00:07.711)       0:00:20.970 ********** 
+2020-05-28 12:28:51,295 p=146797 u=vicferpoy n=ansible | [WARNING]: Consider using the replace, lineinfile or template module rather than running 'sed'.  If you need to use command because replace, lineinfile or
+template is insufficient you can add 'warn: false' to this command task or set 'command_warnings=False' in ansible.cfg to get rid of this message.
+
+2020-05-28 12:28:51,295 p=146797 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:28:51,299 p=146797 u=vicferpoy n=ansible | TASK [roles/master-role : Install master] ************************************************************************************************************************
+2020-05-28 12:28:51,299 p=146797 u=vicferpoy n=ansible | Thursday 28 May 2020  12:28:51 +0200 (0:00:00.956)       0:00:21.926 ********** 
+2020-05-28 12:28:51,722 p=146797 u=vicferpoy n=ansible | ok: [wazuh-master]
+2020-05-28 12:28:51,727 p=146797 u=vicferpoy n=ansible | TASK [roles/master-role : Copy ossec.conf file] ******************************************************************************************************************
+2020-05-28 12:28:51,728 p=146797 u=vicferpoy n=ansible | Thursday 28 May 2020  12:28:51 +0200 (0:00:00.428)       0:00:22.354 ********** 
+2020-05-28 12:28:55,603 p=146797 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:28:55,608 p=146797 u=vicferpoy n=ansible | TASK [roles/master-role : Set cluster key] ***********************************************************************************************************************
+2020-05-28 12:28:55,608 p=146797 u=vicferpoy n=ansible | Thursday 28 May 2020  12:28:55 +0200 (0:00:03.880)       0:00:26.235 ********** 
+2020-05-28 12:28:57,036 p=146797 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:28:57,041 p=146797 u=vicferpoy n=ansible | TASK [roles/master-role : Set Wazuh Master IP] *******************************************************************************************************************
+2020-05-28 12:28:57,041 p=146797 u=vicferpoy n=ansible | Thursday 28 May 2020  12:28:57 +0200 (0:00:01.432)       0:00:27.667 ********** 
+2020-05-28 12:28:58,371 p=146797 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:28:58,376 p=146797 u=vicferpoy n=ansible | TASK [roles/master-role : Restart Wazuh] *************************************************************************************************************************
+2020-05-28 12:28:58,376 p=146797 u=vicferpoy n=ansible | Thursday 28 May 2020  12:28:58 +0200 (0:00:01.335)       0:00:29.003 ********** 
+2020-05-28 12:28:59,597 p=146797 u=vicferpoy n=ansible | fatal: [wazuh-master]: FAILED! => changed=true 
+  cmd:
+  - /var/ossec/bin/ossec-control
+  - restart
+  delta: '0:00:00.796878'
+  end: '2020-05-28 12:28:59.570557'
+  msg: non-zero return code
+  rc: 1
+  start: '2020-05-28 12:28:58.773679'
+  stderr: |-
+    Traceback (most recent call last):
+      File "/var/ossec/framework/scripts/wazuh-clusterd.py", line 12, in <module>
+        import wazuh.core.cluster.cluster
+    ModuleNotFoundError: No module named 'wazuh'
+  stderr_lines: <omitted>
+  stdout: 'wazuh-clusterd: Configuration error. Exiting'
+  stdout_lines: <omitted>
+2020-05-28 12:28:59,598 p=146797 u=vicferpoy n=ansible | [WARNING]: Failure using method (v2_runner_on_failed) in callback plugin (<ansible.plugins.callback.mail.CallbackModule object at 0x7f87b2e12520>): [Errno 111]
+Connection refused
+
+2020-05-28 12:28:59,600 p=146797 u=vicferpoy n=ansible | PLAY RECAP *******************************************************************************************************************************************************
+2020-05-28 12:28:59,600 p=146797 u=vicferpoy n=ansible | localhost                  : ok=7    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2020-05-28 12:28:59,600 p=146797 u=vicferpoy n=ansible | wazuh-master               : ok=8    changed=4    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+2020-05-28 12:28:59,600 p=146797 u=vicferpoy n=ansible | Thursday 28 May 2020  12:28:59 +0200 (0:00:01.223)       0:00:30.226 ********** 
+2020-05-28 12:28:59,600 p=146797 u=vicferpoy n=ansible | =============================================================================== 
+2020-05-28 12:28:59,600 p=146797 u=vicferpoy n=ansible | roles/master-role : Clone wazuh repository ---------------------------------------------------------------------------------------------------------------- 7.71s
+2020-05-28 12:28:59,600 p=146797 u=vicferpoy n=ansible | Gathering Facts ------------------------------------------------------------------------------------------------------------------------------------------- 5.94s
+2020-05-28 12:28:59,600 p=146797 u=vicferpoy n=ansible | roles/master-role : Copy ossec.conf file ------------------------------------------------------------------------------------------------------------------ 3.88s
+2020-05-28 12:28:59,600 p=146797 u=vicferpoy n=ansible | Gathering Facts ------------------------------------------------------------------------------------------------------------------------------------------- 2.11s
+2020-05-28 12:28:59,600 p=146797 u=vicferpoy n=ansible | roles/master-role : Installing dependencies using apt ----------------------------------------------------------------------------------------------------- 2.09s
+2020-05-28 12:28:59,600 p=146797 u=vicferpoy n=ansible | roles/master-role : Set cluster key ----------------------------------------------------------------------------------------------------------------------- 1.43s
+2020-05-28 12:28:59,600 p=146797 u=vicferpoy n=ansible | roles/master-role : Set Wazuh Master IP ------------------------------------------------------------------------------------------------------------------- 1.34s
+2020-05-28 12:28:59,600 p=146797 u=vicferpoy n=ansible | Gathering Facts ------------------------------------------------------------------------------------------------------------------------------------------- 1.22s
+2020-05-28 12:28:59,601 p=146797 u=vicferpoy n=ansible | roles/master-role : Restart Wazuh ------------------------------------------------------------------------------------------------------------------------- 1.22s
+2020-05-28 12:28:59,601 p=146797 u=vicferpoy n=ansible | roles/master-role : Prevent errors when installing Python ------------------------------------------------------------------------------------------------- 0.96s
+2020-05-28 12:28:59,601 p=146797 u=vicferpoy n=ansible | Gathering Facts ------------------------------------------------------------------------------------------------------------------------------------------- 0.66s
+2020-05-28 12:28:59,601 p=146797 u=vicferpoy n=ansible | roles/master-role : Install master ------------------------------------------------------------------------------------------------------------------------ 0.43s
+2020-05-28 12:28:59,601 p=146797 u=vicferpoy n=ansible | docker_container ------------------------------------------------------------------------------------------------------------------------------------------ 0.38s
+2020-05-28 12:28:59,601 p=146797 u=vicferpoy n=ansible | Create a network ------------------------------------------------------------------------------------------------------------------------------------------ 0.30s
+2020-05-28 12:28:59,601 p=146797 u=vicferpoy n=ansible | docker_container ------------------------------------------------------------------------------------------------------------------------------------------ 0.27s
+2020-05-28 12:28:59,601 p=146797 u=vicferpoy n=ansible | docker_container ------------------------------------------------------------------------------------------------------------------------------------------ 0.26s
+2020-05-28 12:28:59,601 p=146797 u=vicferpoy n=ansible | Playbook run took 0 days, 0 hours, 0 minutes, 30 seconds
+2020-05-28 12:33:33,352 p=159398 u=vicferpoy n=ansible | PLAY [localhost] *************************************************************************************************************************************************
+2020-05-28 12:33:33,361 p=159398 u=vicferpoy n=ansible | TASK [Gathering Facts] *******************************************************************************************************************************************
+2020-05-28 12:33:33,361 p=159398 u=vicferpoy n=ansible | Thursday 28 May 2020  12:33:33 +0200 (0:00:00.016)       0:00:00.016 ********** 
+2020-05-28 12:33:34,700 p=159398 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:33:34,718 p=159398 u=vicferpoy n=ansible | TASK [docker_container] ******************************************************************************************************************************************
+2020-05-28 12:33:34,718 p=159398 u=vicferpoy n=ansible | Thursday 28 May 2020  12:33:34 +0200 (0:00:01.357)       0:00:01.373 ********** 
+2020-05-28 12:33:36,013 p=159398 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:33:36,024 p=159398 u=vicferpoy n=ansible | TASK [docker_container] ******************************************************************************************************************************************
+2020-05-28 12:33:36,024 p=159398 u=vicferpoy n=ansible | Thursday 28 May 2020  12:33:36 +0200 (0:00:01.305)       0:00:02.679 ********** 
+2020-05-28 12:33:36,789 p=159398 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:33:36,802 p=159398 u=vicferpoy n=ansible | TASK [docker_container] ******************************************************************************************************************************************
+2020-05-28 12:33:36,803 p=159398 u=vicferpoy n=ansible | Thursday 28 May 2020  12:33:36 +0200 (0:00:00.778)       0:00:03.458 ********** 
+2020-05-28 12:33:37,544 p=159398 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:33:37,545 p=159398 u=vicferpoy n=ansible | PLAY RECAP *******************************************************************************************************************************************************
+2020-05-28 12:33:37,545 p=159398 u=vicferpoy n=ansible | localhost                  : ok=4    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2020-05-28 12:33:37,545 p=159398 u=vicferpoy n=ansible | Thursday 28 May 2020  12:33:37 +0200 (0:00:00.742)       0:00:04.200 ********** 
+2020-05-28 12:33:37,545 p=159398 u=vicferpoy n=ansible | =============================================================================== 
+2020-05-28 12:33:37,545 p=159398 u=vicferpoy n=ansible | Gathering Facts ------------------------------------------------------------------------------------------------------------------------------------------- 1.36s
+2020-05-28 12:33:37,545 p=159398 u=vicferpoy n=ansible | docker_container ------------------------------------------------------------------------------------------------------------------------------------------ 1.31s
+2020-05-28 12:33:37,546 p=159398 u=vicferpoy n=ansible | docker_container ------------------------------------------------------------------------------------------------------------------------------------------ 0.78s
+2020-05-28 12:33:37,546 p=159398 u=vicferpoy n=ansible | docker_container ------------------------------------------------------------------------------------------------------------------------------------------ 0.74s
+2020-05-28 12:33:37,546 p=159398 u=vicferpoy n=ansible | Playbook run took 0 days, 0 hours, 0 minutes, 4 seconds
+2020-05-28 12:35:53,143 p=164809 u=vicferpoy n=ansible | PLAY [Create our container (Master)] *****************************************************************************************************************************
+2020-05-28 12:35:53,153 p=164809 u=vicferpoy n=ansible | TASK [Gathering Facts] *******************************************************************************************************************************************
+2020-05-28 12:35:53,153 p=164809 u=vicferpoy n=ansible | Thursday 28 May 2020  12:35:53 +0200 (0:00:00.020)       0:00:00.020 ********** 
+2020-05-28 12:35:54,463 p=164809 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:35:54,482 p=164809 u=vicferpoy n=ansible | TASK [Create a network] ******************************************************************************************************************************************
+2020-05-28 12:35:54,482 p=164809 u=vicferpoy n=ansible | Thursday 28 May 2020  12:35:54 +0200 (0:00:01.328)       0:00:01.348 ********** 
+2020-05-28 12:35:54,786 p=164809 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:35:54,798 p=164809 u=vicferpoy n=ansible | TASK [docker_container] ******************************************************************************************************************************************
+2020-05-28 12:35:54,798 p=164809 u=vicferpoy n=ansible | Thursday 28 May 2020  12:35:54 +0200 (0:00:00.316)       0:00:01.664 ********** 
+2020-05-28 12:35:55,761 p=164809 u=vicferpoy n=ansible | [DEPRECATION WARNING]: Please note that docker_container handles networks slightly different than docker CLI. If you specify networks, the default network will 
+still be attached as the first network. (You can specify purge_networks to remove all networks not explicitly listed.) This behavior will change in Ansible 2.12.
+ You can change the behavior now by setting the new `networks_cli_compatible` option to `yes`, and remove this warning by setting it to `no`. This feature will 
+be removed in version 2.12. Deprecation warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
+2020-05-28 12:35:55,761 p=164809 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:35:55,765 p=164809 u=vicferpoy n=ansible | PLAY [Create our container (Worker1)] ****************************************************************************************************************************
+2020-05-28 12:35:55,775 p=164809 u=vicferpoy n=ansible | TASK [Gathering Facts] *******************************************************************************************************************************************
+2020-05-28 12:35:55,775 p=164809 u=vicferpoy n=ansible | Thursday 28 May 2020  12:35:55 +0200 (0:00:00.977)       0:00:02.641 ********** 
+2020-05-28 12:35:56,377 p=164809 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:35:56,393 p=164809 u=vicferpoy n=ansible | TASK [docker_container] ******************************************************************************************************************************************
+2020-05-28 12:35:56,393 p=164809 u=vicferpoy n=ansible | Thursday 28 May 2020  12:35:56 +0200 (0:00:00.617)       0:00:03.259 ********** 
+2020-05-28 12:35:57,231 p=164809 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:35:57,234 p=164809 u=vicferpoy n=ansible | PLAY [Create our container (Worker2)] ****************************************************************************************************************************
+2020-05-28 12:35:57,245 p=164809 u=vicferpoy n=ansible | TASK [Gathering Facts] *******************************************************************************************************************************************
+2020-05-28 12:35:57,245 p=164809 u=vicferpoy n=ansible | Thursday 28 May 2020  12:35:57 +0200 (0:00:00.852)       0:00:04.111 ********** 
+2020-05-28 12:35:57,888 p=164809 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:35:57,905 p=164809 u=vicferpoy n=ansible | TASK [docker_container] ******************************************************************************************************************************************
+2020-05-28 12:35:57,905 p=164809 u=vicferpoy n=ansible | Thursday 28 May 2020  12:35:57 +0200 (0:00:00.659)       0:00:04.771 ********** 
+2020-05-28 12:35:58,728 p=164809 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:35:58,731 p=164809 u=vicferpoy n=ansible | PLAY [Wazuh Master] **********************************************************************************************************************************************
+2020-05-28 12:35:58,734 p=164809 u=vicferpoy n=ansible | TASK [Gathering Facts] *******************************************************************************************************************************************
+2020-05-28 12:35:58,734 p=164809 u=vicferpoy n=ansible | Thursday 28 May 2020  12:35:58 +0200 (0:00:00.829)       0:00:05.600 ********** 
+2020-05-28 12:36:04,726 p=164809 u=vicferpoy n=ansible | ok: [wazuh-master]
+2020-05-28 12:36:04,732 p=164809 u=vicferpoy n=ansible | TASK [roles/master-role : Installing dependencies using apt] *****************************************************************************************************
+2020-05-28 12:36:04,732 p=164809 u=vicferpoy n=ansible | Thursday 28 May 2020  12:36:04 +0200 (0:00:05.997)       0:00:11.598 ********** 
+2020-05-28 12:36:12,748 p=164809 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:36:12,753 p=164809 u=vicferpoy n=ansible | TASK [roles/master-role : Clone wazuh repository] ****************************************************************************************************************
+2020-05-28 12:36:12,753 p=164809 u=vicferpoy n=ansible | Thursday 28 May 2020  12:36:12 +0200 (0:00:08.020)       0:00:19.619 ********** 
+2020-05-28 12:36:30,105 p=164809 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:36:30,109 p=164809 u=vicferpoy n=ansible | TASK [roles/master-role : Prevent errors when installing Python] *************************************************************************************************
+2020-05-28 12:36:30,110 p=164809 u=vicferpoy n=ansible | Thursday 28 May 2020  12:36:30 +0200 (0:00:17.356)       0:00:36.976 ********** 
+2020-05-28 12:36:30,654 p=164809 u=vicferpoy n=ansible | fatal: [wazuh-master]: FAILED! => changed=false 
+  msg: Path /wazuh/src/MakeFile does not exist !
+  rc: 257
+2020-05-28 12:36:30,655 p=164809 u=vicferpoy n=ansible | [WARNING]: Failure using method (v2_runner_on_failed) in callback plugin (<ansible.plugins.callback.mail.CallbackModule object at 0x7f4350aba880>): [Errno 111]
+Connection refused
+
+2020-05-28 12:36:30,656 p=164809 u=vicferpoy n=ansible | PLAY RECAP *******************************************************************************************************************************************************
+2020-05-28 12:36:30,657 p=164809 u=vicferpoy n=ansible | localhost                  : ok=7    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2020-05-28 12:36:30,657 p=164809 u=vicferpoy n=ansible | wazuh-master               : ok=3    changed=2    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+2020-05-28 12:36:30,657 p=164809 u=vicferpoy n=ansible | Thursday 28 May 2020  12:36:30 +0200 (0:00:00.547)       0:00:37.523 ********** 
+2020-05-28 12:36:30,657 p=164809 u=vicferpoy n=ansible | =============================================================================== 
+2020-05-28 12:36:30,657 p=164809 u=vicferpoy n=ansible | roles/master-role : Clone wazuh repository --------------------------------------------------------------------------------------------------------------- 17.36s
+2020-05-28 12:36:30,657 p=164809 u=vicferpoy n=ansible | roles/master-role : Installing dependencies using apt ----------------------------------------------------------------------------------------------------- 8.02s
+2020-05-28 12:36:30,657 p=164809 u=vicferpoy n=ansible | Gathering Facts ------------------------------------------------------------------------------------------------------------------------------------------- 6.00s
+2020-05-28 12:36:30,657 p=164809 u=vicferpoy n=ansible | Gathering Facts ------------------------------------------------------------------------------------------------------------------------------------------- 1.33s
+2020-05-28 12:36:30,657 p=164809 u=vicferpoy n=ansible | docker_container ------------------------------------------------------------------------------------------------------------------------------------------ 0.98s
+2020-05-28 12:36:30,657 p=164809 u=vicferpoy n=ansible | docker_container ------------------------------------------------------------------------------------------------------------------------------------------ 0.85s
+2020-05-28 12:36:30,657 p=164809 u=vicferpoy n=ansible | docker_container ------------------------------------------------------------------------------------------------------------------------------------------ 0.83s
+2020-05-28 12:36:30,657 p=164809 u=vicferpoy n=ansible | Gathering Facts ------------------------------------------------------------------------------------------------------------------------------------------- 0.66s
+2020-05-28 12:36:30,657 p=164809 u=vicferpoy n=ansible | Gathering Facts ------------------------------------------------------------------------------------------------------------------------------------------- 0.62s
+2020-05-28 12:36:30,657 p=164809 u=vicferpoy n=ansible | roles/master-role : Prevent errors when installing Python ------------------------------------------------------------------------------------------------- 0.55s
+2020-05-28 12:36:30,657 p=164809 u=vicferpoy n=ansible | Create a network ------------------------------------------------------------------------------------------------------------------------------------------ 0.32s
+2020-05-28 12:36:30,657 p=164809 u=vicferpoy n=ansible | Playbook run took 0 days, 0 hours, 0 minutes, 37 seconds
+2020-05-28 12:37:51,814 p=170584 u=vicferpoy n=ansible | PLAY [localhost] **************************************************************************************************************************************************************************************************
+2020-05-28 12:37:51,822 p=170584 u=vicferpoy n=ansible | TASK [Gathering Facts] ********************************************************************************************************************************************************************************************
+2020-05-28 12:37:51,822 p=170584 u=vicferpoy n=ansible | Thursday 28 May 2020  12:37:51 +0200 (0:00:00.016)       0:00:00.016 ********** 
+2020-05-28 12:37:53,148 p=170584 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:37:53,165 p=170584 u=vicferpoy n=ansible | TASK [docker_container] *******************************************************************************************************************************************************************************************
+2020-05-28 12:37:53,165 p=170584 u=vicferpoy n=ansible | Thursday 28 May 2020  12:37:53 +0200 (0:00:01.342)       0:00:01.359 ********** 
+2020-05-28 12:37:54,029 p=170584 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:37:54,040 p=170584 u=vicferpoy n=ansible | TASK [docker_container] *******************************************************************************************************************************************************************************************
+2020-05-28 12:37:54,040 p=170584 u=vicferpoy n=ansible | Thursday 28 May 2020  12:37:54 +0200 (0:00:00.874)       0:00:02.234 ********** 
+2020-05-28 12:37:54,662 p=170584 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:37:54,673 p=170584 u=vicferpoy n=ansible | TASK [docker_container] *******************************************************************************************************************************************************************************************
+2020-05-28 12:37:54,673 p=170584 u=vicferpoy n=ansible | Thursday 28 May 2020  12:37:54 +0200 (0:00:00.633)       0:00:02.867 ********** 
+2020-05-28 12:37:55,478 p=170584 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:37:55,481 p=170584 u=vicferpoy n=ansible | PLAY RECAP ********************************************************************************************************************************************************************************************************
+2020-05-28 12:37:55,481 p=170584 u=vicferpoy n=ansible | localhost                  : ok=4    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2020-05-28 12:37:55,481 p=170584 u=vicferpoy n=ansible | Thursday 28 May 2020  12:37:55 +0200 (0:00:00.808)       0:00:03.675 ********** 
+2020-05-28 12:37:55,481 p=170584 u=vicferpoy n=ansible | =============================================================================== 
+2020-05-28 12:37:55,481 p=170584 u=vicferpoy n=ansible | Gathering Facts -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 1.34s
+2020-05-28 12:37:55,482 p=170584 u=vicferpoy n=ansible | docker_container ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.87s
+2020-05-28 12:37:55,482 p=170584 u=vicferpoy n=ansible | docker_container ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.81s
+2020-05-28 12:37:55,482 p=170584 u=vicferpoy n=ansible | docker_container ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.63s
+2020-05-28 12:37:55,482 p=170584 u=vicferpoy n=ansible | Playbook run took 0 days, 0 hours, 0 minutes, 3 seconds
+2020-05-28 12:38:08,144 p=171566 u=vicferpoy n=ansible | PLAY [Create our container (Master)] ******************************************************************************************************************************************************************************
+2020-05-28 12:38:08,152 p=171566 u=vicferpoy n=ansible | TASK [Gathering Facts] ********************************************************************************************************************************************************************************************
+2020-05-28 12:38:08,152 p=171566 u=vicferpoy n=ansible | Thursday 28 May 2020  12:38:08 +0200 (0:00:00.015)       0:00:00.015 ********** 
+2020-05-28 12:38:09,314 p=171566 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:38:09,329 p=171566 u=vicferpoy n=ansible | TASK [Create a network] *******************************************************************************************************************************************************************************************
+2020-05-28 12:38:09,329 p=171566 u=vicferpoy n=ansible | Thursday 28 May 2020  12:38:09 +0200 (0:00:01.176)       0:00:01.192 ********** 
+2020-05-28 12:38:09,620 p=171566 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:38:09,629 p=171566 u=vicferpoy n=ansible | TASK [docker_container] *******************************************************************************************************************************************************************************************
+2020-05-28 12:38:09,630 p=171566 u=vicferpoy n=ansible | Thursday 28 May 2020  12:38:09 +0200 (0:00:00.300)       0:00:01.493 ********** 
+2020-05-28 12:38:10,590 p=171566 u=vicferpoy n=ansible | [DEPRECATION WARNING]: Please note that docker_container handles networks slightly different than docker CLI. If you specify networks, the default network will still be attached as the first network. (You can 
+specify purge_networks to remove all networks not explicitly listed.) This behavior will change in Ansible 2.12. You can change the behavior now by setting the new `networks_cli_compatible` option to `yes`, and
+ remove this warning by setting it to `no`. This feature will be removed in version 2.12. Deprecation warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
+2020-05-28 12:38:10,590 p=171566 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:38:10,593 p=171566 u=vicferpoy n=ansible | PLAY [Create our container (Worker1)] *****************************************************************************************************************************************************************************
+2020-05-28 12:38:10,603 p=171566 u=vicferpoy n=ansible | TASK [Gathering Facts] ********************************************************************************************************************************************************************************************
+2020-05-28 12:38:10,603 p=171566 u=vicferpoy n=ansible | Thursday 28 May 2020  12:38:10 +0200 (0:00:00.973)       0:00:02.467 ********** 
+2020-05-28 12:38:11,245 p=171566 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:38:11,261 p=171566 u=vicferpoy n=ansible | TASK [docker_container] *******************************************************************************************************************************************************************************************
+2020-05-28 12:38:11,261 p=171566 u=vicferpoy n=ansible | Thursday 28 May 2020  12:38:11 +0200 (0:00:00.657)       0:00:03.124 ********** 
+2020-05-28 12:38:12,088 p=171566 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:38:12,091 p=171566 u=vicferpoy n=ansible | PLAY [Create our container (Worker2)] *****************************************************************************************************************************************************************************
+2020-05-28 12:38:12,102 p=171566 u=vicferpoy n=ansible | TASK [Gathering Facts] ********************************************************************************************************************************************************************************************
+2020-05-28 12:38:12,102 p=171566 u=vicferpoy n=ansible | Thursday 28 May 2020  12:38:12 +0200 (0:00:00.841)       0:00:03.966 ********** 
+2020-05-28 12:38:12,730 p=171566 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:38:12,746 p=171566 u=vicferpoy n=ansible | TASK [docker_container] *******************************************************************************************************************************************************************************************
+2020-05-28 12:38:12,746 p=171566 u=vicferpoy n=ansible | Thursday 28 May 2020  12:38:12 +0200 (0:00:00.643)       0:00:04.609 ********** 
+2020-05-28 12:38:13,584 p=171566 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:38:13,587 p=171566 u=vicferpoy n=ansible | PLAY [Wazuh Master] ***********************************************************************************************************************************************************************************************
+2020-05-28 12:38:13,590 p=171566 u=vicferpoy n=ansible | TASK [Gathering Facts] ********************************************************************************************************************************************************************************************
+2020-05-28 12:38:13,590 p=171566 u=vicferpoy n=ansible | Thursday 28 May 2020  12:38:13 +0200 (0:00:00.843)       0:00:05.453 ********** 
+2020-05-28 12:38:19,726 p=171566 u=vicferpoy n=ansible | ok: [wazuh-master]
+2020-05-28 12:38:19,732 p=171566 u=vicferpoy n=ansible | TASK [roles/master-role : Installing dependencies using apt] ******************************************************************************************************************************************************
+2020-05-28 12:38:19,733 p=171566 u=vicferpoy n=ansible | Thursday 28 May 2020  12:38:19 +0200 (0:00:06.142)       0:00:11.596 ********** 
+2020-05-28 12:38:28,056 p=171566 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:38:28,061 p=171566 u=vicferpoy n=ansible | TASK [roles/master-role : Clone wazuh repository] *****************************************************************************************************************************************************************
+2020-05-28 12:38:28,061 p=171566 u=vicferpoy n=ansible | Thursday 28 May 2020  12:38:28 +0200 (0:00:08.328)       0:00:19.924 ********** 
+2020-05-28 12:38:48,763 p=171566 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:38:48,767 p=171566 u=vicferpoy n=ansible | TASK [roles/master-role : Prevent errors when installing Python] **************************************************************************************************************************************************
+2020-05-28 12:38:48,767 p=171566 u=vicferpoy n=ansible | Thursday 28 May 2020  12:38:48 +0200 (0:00:20.706)       0:00:40.631 ********** 
+2020-05-28 12:38:49,246 p=171566 u=vicferpoy n=ansible | ok: [wazuh-master]
+2020-05-28 12:38:49,251 p=171566 u=vicferpoy n=ansible | TASK [roles/master-role : Install master] *************************************************************************************************************************************************************************
+2020-05-28 12:38:49,251 p=171566 u=vicferpoy n=ansible | Thursday 28 May 2020  12:38:49 +0200 (0:00:00.483)       0:00:41.114 ********** 
+2020-05-28 12:39:50,973 p=171566 u=vicferpoy n=ansible |  [ERROR]: User interrupted execution
+
+2020-05-28 12:39:53,345 p=207753 u=vicferpoy n=ansible | PLAY [localhost] **************************************************************************************************************************************************************************************************
+2020-05-28 12:39:53,375 p=207753 u=vicferpoy n=ansible | TASK [Gathering Facts] ********************************************************************************************************************************************************************************************
+2020-05-28 12:39:53,375 p=207753 u=vicferpoy n=ansible | Thursday 28 May 2020  12:39:53 +0200 (0:00:00.038)       0:00:00.038 ********** 
+2020-05-28 12:39:54,532 p=207753 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:39:54,549 p=207753 u=vicferpoy n=ansible | TASK [docker_container] *******************************************************************************************************************************************************************************************
+2020-05-28 12:39:54,549 p=207753 u=vicferpoy n=ansible | Thursday 28 May 2020  12:39:54 +0200 (0:00:01.174)       0:00:01.212 ********** 
+2020-05-28 12:39:55,721 p=207753 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:39:55,731 p=207753 u=vicferpoy n=ansible | TASK [docker_container] *******************************************************************************************************************************************************************************************
+2020-05-28 12:39:55,731 p=207753 u=vicferpoy n=ansible | Thursday 28 May 2020  12:39:55 +0200 (0:00:01.182)       0:00:02.394 ********** 
+2020-05-28 12:39:56,406 p=207753 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:39:56,419 p=207753 u=vicferpoy n=ansible | TASK [docker_container] *******************************************************************************************************************************************************************************************
+2020-05-28 12:39:56,419 p=207753 u=vicferpoy n=ansible | Thursday 28 May 2020  12:39:56 +0200 (0:00:00.687)       0:00:03.082 ********** 
+2020-05-28 12:39:57,138 p=207753 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:39:57,139 p=207753 u=vicferpoy n=ansible | PLAY RECAP ********************************************************************************************************************************************************************************************************
+2020-05-28 12:39:57,139 p=207753 u=vicferpoy n=ansible | localhost                  : ok=4    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2020-05-28 12:39:57,139 p=207753 u=vicferpoy n=ansible | Thursday 28 May 2020  12:39:57 +0200 (0:00:00.720)       0:00:03.803 ********** 
+2020-05-28 12:39:57,140 p=207753 u=vicferpoy n=ansible | =============================================================================== 
+2020-05-28 12:39:57,140 p=207753 u=vicferpoy n=ansible | docker_container ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 1.18s
+2020-05-28 12:39:57,140 p=207753 u=vicferpoy n=ansible | Gathering Facts -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 1.17s
+2020-05-28 12:39:57,140 p=207753 u=vicferpoy n=ansible | docker_container ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.72s
+2020-05-28 12:39:57,140 p=207753 u=vicferpoy n=ansible | docker_container ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.69s
+2020-05-28 12:39:57,140 p=207753 u=vicferpoy n=ansible | Playbook run took 0 days, 0 hours, 0 minutes, 3 seconds
+2020-05-28 12:40:59,536 p=211298 u=vicferpoy n=ansible | ERROR! Syntax Error while loading YAML.
+  found unknown escape character
+
+The error appears to be in '/home/vicferpoy/Desktop/Git/wazuh-qa/tests/system/provisioning/agentless_cluster/roles/master-role/tasks/main.yml': line 27, column 35, but may
+be elsewhere in the file depending on the exact syntax problem.
+
+The offending line appears to be:
+
+    path: "/wazuh/src/Makefile"
+    regexp: "--index-url=file:\/\/\${ROUTE_PATH}\/\${EXTERNAL_CPYTHON}\/Dependencies\/simple"
+                                  ^ here
+This one looks easy to fix. It seems that there is a value started
+with a quote, and the YAML parser is expecting to see the line ended
+with the same kind of quote. For instance:
+
+    when: "ok" in result.stdout
+
+Could be written as:
+
+   when: '"ok" in result.stdout'
+
+Or equivalently:
+
+   when: "'ok' in result.stdout"
+
+2020-05-28 12:41:03,959 p=211590 u=vicferpoy n=ansible | PLAY [localhost] **************************************************************************************************************************************************************************************************
+2020-05-28 12:41:03,967 p=211590 u=vicferpoy n=ansible | TASK [Gathering Facts] ********************************************************************************************************************************************************************************************
+2020-05-28 12:41:03,968 p=211590 u=vicferpoy n=ansible | Thursday 28 May 2020  12:41:03 +0200 (0:00:00.016)       0:00:00.016 ********** 
+2020-05-28 12:41:05,088 p=211590 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:41:05,103 p=211590 u=vicferpoy n=ansible | TASK [docker_container] *******************************************************************************************************************************************************************************************
+2020-05-28 12:41:05,103 p=211590 u=vicferpoy n=ansible | Thursday 28 May 2020  12:41:05 +0200 (0:00:01.135)       0:00:01.151 ********** 
+2020-05-28 12:41:05,410 p=211590 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:41:05,419 p=211590 u=vicferpoy n=ansible | TASK [docker_container] *******************************************************************************************************************************************************************************************
+2020-05-28 12:41:05,419 p=211590 u=vicferpoy n=ansible | Thursday 28 May 2020  12:41:05 +0200 (0:00:00.316)       0:00:01.468 ********** 
+2020-05-28 12:41:05,627 p=211590 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:41:05,636 p=211590 u=vicferpoy n=ansible | TASK [docker_container] *******************************************************************************************************************************************************************************************
+2020-05-28 12:41:05,636 p=211590 u=vicferpoy n=ansible | Thursday 28 May 2020  12:41:05 +0200 (0:00:00.216)       0:00:01.684 ********** 
+2020-05-28 12:41:05,847 p=211590 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:41:05,848 p=211590 u=vicferpoy n=ansible | PLAY RECAP ********************************************************************************************************************************************************************************************************
+2020-05-28 12:41:05,848 p=211590 u=vicferpoy n=ansible | localhost                  : ok=4    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2020-05-28 12:41:05,848 p=211590 u=vicferpoy n=ansible | Thursday 28 May 2020  12:41:05 +0200 (0:00:00.212)       0:00:01.897 ********** 
+2020-05-28 12:41:05,848 p=211590 u=vicferpoy n=ansible | =============================================================================== 
+2020-05-28 12:41:05,848 p=211590 u=vicferpoy n=ansible | Gathering Facts -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 1.14s
+2020-05-28 12:41:05,849 p=211590 u=vicferpoy n=ansible | docker_container ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.32s
+2020-05-28 12:41:05,849 p=211590 u=vicferpoy n=ansible | docker_container ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.22s
+2020-05-28 12:41:05,849 p=211590 u=vicferpoy n=ansible | docker_container ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.21s
+2020-05-28 12:41:05,849 p=211590 u=vicferpoy n=ansible | Playbook run took 0 days, 0 hours, 0 minutes, 1 seconds
+2020-05-28 12:41:08,329 p=211861 u=vicferpoy n=ansible | ERROR! Syntax Error while loading YAML.
+  found unknown escape character
+
+The error appears to be in '/home/vicferpoy/Desktop/Git/wazuh-qa/tests/system/provisioning/agentless_cluster/roles/master-role/tasks/main.yml': line 27, column 35, but may
+be elsewhere in the file depending on the exact syntax problem.
+
+The offending line appears to be:
+
+    path: "/wazuh/src/Makefile"
+    regexp: "--index-url=file:\/\/\${ROUTE_PATH}\/\${EXTERNAL_CPYTHON}\/Dependencies\/simple"
+                                  ^ here
+This one looks easy to fix. It seems that there is a value started
+with a quote, and the YAML parser is expecting to see the line ended
+with the same kind of quote. For instance:
+
+    when: "ok" in result.stdout
+
+Could be written as:
+
+   when: '"ok" in result.stdout'
+
+Or equivalently:
+
+   when: "'ok' in result.stdout"
+
+2020-05-28 12:44:23,591 p=218923 u=vicferpoy n=ansible | ERROR! Syntax Error while loading YAML.
+  found unknown escape character
+
+The error appears to be in '/home/vicferpoy/Desktop/Git/wazuh-qa/tests/system/provisioning/agentless_cluster/roles/master-role/tasks/main.yml': line 27, column 33, but may
+be elsewhere in the file depending on the exact syntax problem.
+
+The offending line appears to be:
+
+    path: "/wazuh/src/Makefile"
+    regexp: "--index-url=file://\${ROUTE_PATH}/\${EXTERNAL_CPYTHON}/Dependencies/simple"
+                                ^ here
+This one looks easy to fix. It seems that there is a value started
+with a quote, and the YAML parser is expecting to see the line ended
+with the same kind of quote. For instance:
+
+    when: "ok" in result.stdout
+
+Could be written as:
+
+   when: '"ok" in result.stdout'
+
+Or equivalently:
+
+   when: "'ok' in result.stdout"
+
+2020-05-28 12:45:32,939 p=221527 u=vicferpoy n=ansible | PLAY [Create our container (Master)] ******************************************************************************************************************************************************************************
+2020-05-28 12:45:32,947 p=221527 u=vicferpoy n=ansible | TASK [Gathering Facts] ********************************************************************************************************************************************************************************************
+2020-05-28 12:45:32,947 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:45:32 +0200 (0:00:00.015)       0:00:00.015 ********** 
+2020-05-28 12:45:34,084 p=221527 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:45:34,099 p=221527 u=vicferpoy n=ansible | TASK [Create a network] *******************************************************************************************************************************************************************************************
+2020-05-28 12:45:34,099 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:45:34 +0200 (0:00:01.151)       0:00:01.167 ********** 
+2020-05-28 12:45:34,389 p=221527 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:45:34,398 p=221527 u=vicferpoy n=ansible | TASK [docker_container] *******************************************************************************************************************************************************************************************
+2020-05-28 12:45:34,398 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:45:34 +0200 (0:00:00.299)       0:00:01.467 ********** 
+2020-05-28 12:45:35,344 p=221527 u=vicferpoy n=ansible | [DEPRECATION WARNING]: Please note that docker_container handles networks slightly different than docker CLI. If you specify networks, the default network will still be attached as the first network. (You can 
+specify purge_networks to remove all networks not explicitly listed.) This behavior will change in Ansible 2.12. You can change the behavior now by setting the new `networks_cli_compatible` option to `yes`, and
+ remove this warning by setting it to `no`. This feature will be removed in version 2.12. Deprecation warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
+2020-05-28 12:45:35,344 p=221527 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:45:35,347 p=221527 u=vicferpoy n=ansible | PLAY [Create our container (Worker1)] *****************************************************************************************************************************************************************************
+2020-05-28 12:45:35,358 p=221527 u=vicferpoy n=ansible | TASK [Gathering Facts] ********************************************************************************************************************************************************************************************
+2020-05-28 12:45:35,358 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:45:35 +0200 (0:00:00.959)       0:00:02.426 ********** 
+2020-05-28 12:45:37,037 p=221527 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:45:37,052 p=221527 u=vicferpoy n=ansible | TASK [docker_container] *******************************************************************************************************************************************************************************************
+2020-05-28 12:45:37,053 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:45:37 +0200 (0:00:01.694)       0:00:04.121 ********** 
+2020-05-28 12:45:37,972 p=221527 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:45:37,975 p=221527 u=vicferpoy n=ansible | PLAY [Create our container (Worker2)] *****************************************************************************************************************************************************************************
+2020-05-28 12:45:37,986 p=221527 u=vicferpoy n=ansible | TASK [Gathering Facts] ********************************************************************************************************************************************************************************************
+2020-05-28 12:45:37,986 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:45:37 +0200 (0:00:00.933)       0:00:05.054 ********** 
+2020-05-28 12:45:38,854 p=221527 u=vicferpoy n=ansible | ok: [localhost]
+2020-05-28 12:45:38,871 p=221527 u=vicferpoy n=ansible | TASK [docker_container] *******************************************************************************************************************************************************************************************
+2020-05-28 12:45:38,871 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:45:38 +0200 (0:00:00.884)       0:00:05.939 ********** 
+2020-05-28 12:45:39,775 p=221527 u=vicferpoy n=ansible | changed: [localhost]
+2020-05-28 12:45:39,778 p=221527 u=vicferpoy n=ansible | PLAY [Wazuh Master] ***********************************************************************************************************************************************************************************************
+2020-05-28 12:45:39,781 p=221527 u=vicferpoy n=ansible | TASK [Gathering Facts] ********************************************************************************************************************************************************************************************
+2020-05-28 12:45:39,782 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:45:39 +0200 (0:00:00.910)       0:00:06.850 ********** 
+2020-05-28 12:45:45,790 p=221527 u=vicferpoy n=ansible | ok: [wazuh-master]
+2020-05-28 12:45:45,796 p=221527 u=vicferpoy n=ansible | TASK [roles/master-role : Installing dependencies using apt] ******************************************************************************************************************************************************
+2020-05-28 12:45:45,796 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:45:45 +0200 (0:00:06.014)       0:00:12.864 ********** 
+2020-05-28 12:45:53,945 p=221527 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:45:53,950 p=221527 u=vicferpoy n=ansible | TASK [roles/master-role : Clone wazuh repository] *****************************************************************************************************************************************************************
+2020-05-28 12:45:53,950 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:45:53 +0200 (0:00:08.153)       0:00:21.018 ********** 
+2020-05-28 12:46:11,657 p=221527 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:46:11,662 p=221527 u=vicferpoy n=ansible | TASK [roles/master-role : Prevent errors when installing Python] **************************************************************************************************************************************************
+2020-05-28 12:46:11,662 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:46:11 +0200 (0:00:17.711)       0:00:38.730 ********** 
+2020-05-28 12:46:13,022 p=221527 u=vicferpoy n=ansible | [WARNING]: Module remote_tmp /root/.ansible/tmp did not exist and was created with a mode of 0700, this may cause issues when running as another user. To avoid this, create the remote_tmp dir with the correct
+permissions manually
+
+2020-05-28 12:46:13,022 p=221527 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:46:13,027 p=221527 u=vicferpoy n=ansible | TASK [roles/master-role : Install master] *************************************************************************************************************************************************************************
+2020-05-28 12:46:13,027 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:46:13 +0200 (0:00:01.365)       0:00:40.095 ********** 
+2020-05-28 12:48:53,620 p=221527 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:48:53,643 p=221527 u=vicferpoy n=ansible | TASK [roles/master-role : Copy ossec.conf file] *******************************************************************************************************************************************************************
+2020-05-28 12:48:53,643 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:48:53 +0200 (0:02:40.615)       0:03:20.711 ********** 
+2020-05-28 12:48:57,680 p=221527 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:48:57,686 p=221527 u=vicferpoy n=ansible | TASK [roles/master-role : Set cluster key] ************************************************************************************************************************************************************************
+2020-05-28 12:48:57,686 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:48:57 +0200 (0:00:04.043)       0:03:24.754 ********** 
+2020-05-28 12:48:59,063 p=221527 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:48:59,067 p=221527 u=vicferpoy n=ansible | TASK [roles/master-role : Set Wazuh Master IP] ********************************************************************************************************************************************************************
+2020-05-28 12:48:59,067 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:48:59 +0200 (0:00:01.380)       0:03:26.135 ********** 
+2020-05-28 12:49:00,406 p=221527 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:49:00,411 p=221527 u=vicferpoy n=ansible | TASK [roles/master-role : Restart Wazuh] **************************************************************************************************************************************************************************
+2020-05-28 12:49:00,411 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:49:00 +0200 (0:00:01.343)       0:03:27.479 ********** 
+2020-05-28 12:49:14,859 p=221527 u=vicferpoy n=ansible | changed: [wazuh-master]
+2020-05-28 12:49:14,862 p=221527 u=vicferpoy n=ansible | PLAY [Wazuh Worker1] **********************************************************************************************************************************************************************************************
+2020-05-28 12:49:14,865 p=221527 u=vicferpoy n=ansible | TASK [Gathering Facts] ********************************************************************************************************************************************************************************************
+2020-05-28 12:49:14,865 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:49:14 +0200 (0:00:14.453)       0:03:41.933 ********** 
+2020-05-28 12:49:20,846 p=221527 u=vicferpoy n=ansible | ok: [wazuh-worker1]
+2020-05-28 12:49:20,858 p=221527 u=vicferpoy n=ansible | TASK [roles/worker-role : Installing dependencies using apt] ******************************************************************************************************************************************************
+2020-05-28 12:49:20,858 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:49:20 +0200 (0:00:05.992)       0:03:47.926 ********** 
+2020-05-28 12:49:30,801 p=221527 u=vicferpoy n=ansible | changed: [wazuh-worker1]
+2020-05-28 12:49:30,807 p=221527 u=vicferpoy n=ansible | TASK [roles/worker-role : Clone wazuh repository] *****************************************************************************************************************************************************************
+2020-05-28 12:49:30,807 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:49:30 +0200 (0:00:09.949)       0:03:57.875 ********** 
+2020-05-28 12:49:48,825 p=221527 u=vicferpoy n=ansible | changed: [wazuh-worker1]
+2020-05-28 12:49:48,830 p=221527 u=vicferpoy n=ansible | TASK [roles/worker-role : Prevent errors when installing Python] **************************************************************************************************************************************************
+2020-05-28 12:49:48,830 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:49:48 +0200 (0:00:18.022)       0:04:15.898 ********** 
+2020-05-28 12:49:50,102 p=221527 u=vicferpoy n=ansible | changed: [wazuh-worker1]
+2020-05-28 12:49:50,107 p=221527 u=vicferpoy n=ansible | TASK [roles/worker-role : Install worker] *************************************************************************************************************************************************************************
+2020-05-28 12:49:50,107 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:49:50 +0200 (0:00:01.276)       0:04:17.175 ********** 
+2020-05-28 12:52:25,668 p=221527 u=vicferpoy n=ansible | changed: [wazuh-worker1]
+2020-05-28 12:52:25,690 p=221527 u=vicferpoy n=ansible | TASK [roles/worker-role : Copy ossec.conf file] *******************************************************************************************************************************************************************
+2020-05-28 12:52:25,690 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:52:25 +0200 (0:02:35.583)       0:06:52.758 ********** 
+2020-05-28 12:52:29,729 p=221527 u=vicferpoy n=ansible | changed: [wazuh-worker1]
+2020-05-28 12:52:29,735 p=221527 u=vicferpoy n=ansible | TASK [roles/worker-role : Set cluster key] ************************************************************************************************************************************************************************
+2020-05-28 12:52:29,735 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:52:29 +0200 (0:00:04.044)       0:06:56.803 ********** 
+2020-05-28 12:52:31,049 p=221527 u=vicferpoy n=ansible | changed: [wazuh-worker1]
+2020-05-28 12:52:31,054 p=221527 u=vicferpoy n=ansible | TASK [roles/worker-role : Set Wazuh Worker name] ******************************************************************************************************************************************************************
+2020-05-28 12:52:31,054 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:52:31 +0200 (0:00:01.319)       0:06:58.122 ********** 
+2020-05-28 12:52:32,380 p=221527 u=vicferpoy n=ansible | changed: [wazuh-worker1]
+2020-05-28 12:52:32,390 p=221527 u=vicferpoy n=ansible | TASK [roles/worker-role : Set Wazuh Worker IP] ********************************************************************************************************************************************************************
+2020-05-28 12:52:32,391 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:52:32 +0200 (0:00:01.336)       0:06:59.459 ********** 
+2020-05-28 12:52:33,684 p=221527 u=vicferpoy n=ansible | changed: [wazuh-worker1]
+2020-05-28 12:52:33,689 p=221527 u=vicferpoy n=ansible | TASK [roles/worker-role : Restart Wazuh] **************************************************************************************************************************************************************************
+2020-05-28 12:52:33,689 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:52:33 +0200 (0:00:01.298)       0:07:00.757 ********** 
+2020-05-28 12:52:47,859 p=221527 u=vicferpoy n=ansible | changed: [wazuh-worker1]
+2020-05-28 12:52:47,862 p=221527 u=vicferpoy n=ansible | PLAY [Wazuh Worker2] **********************************************************************************************************************************************************************************************
+2020-05-28 12:52:47,865 p=221527 u=vicferpoy n=ansible | TASK [Gathering Facts] ********************************************************************************************************************************************************************************************
+2020-05-28 12:52:47,865 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:52:47 +0200 (0:00:14.176)       0:07:14.933 ********** 
+2020-05-28 12:52:53,875 p=221527 u=vicferpoy n=ansible | ok: [wazuh-worker2]
+2020-05-28 12:52:53,881 p=221527 u=vicferpoy n=ansible | TASK [roles/worker-role : Installing dependencies using apt] ******************************************************************************************************************************************************
+2020-05-28 12:52:53,882 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:52:53 +0200 (0:00:06.016)       0:07:20.950 ********** 
+2020-05-28 12:53:03,279 p=221527 u=vicferpoy n=ansible | changed: [wazuh-worker2]
+2020-05-28 12:53:03,284 p=221527 u=vicferpoy n=ansible | TASK [roles/worker-role : Clone wazuh repository] *****************************************************************************************************************************************************************
+2020-05-28 12:53:03,284 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:53:03 +0200 (0:00:09.402)       0:07:30.352 ********** 
+2020-05-28 12:53:21,211 p=221527 u=vicferpoy n=ansible | changed: [wazuh-worker2]
+2020-05-28 12:53:21,216 p=221527 u=vicferpoy n=ansible | TASK [roles/worker-role : Prevent errors when installing Python] **************************************************************************************************************************************************
+2020-05-28 12:53:21,216 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:53:21 +0200 (0:00:17.932)       0:07:48.284 ********** 
+2020-05-28 12:53:22,467 p=221527 u=vicferpoy n=ansible | changed: [wazuh-worker2]
+2020-05-28 12:53:22,472 p=221527 u=vicferpoy n=ansible | TASK [roles/worker-role : Install worker] *************************************************************************************************************************************************************************
+2020-05-28 12:53:22,472 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:53:22 +0200 (0:00:01.255)       0:07:49.540 ********** 
+2020-05-28 12:56:13,335 p=221527 u=vicferpoy n=ansible | changed: [wazuh-worker2]
+2020-05-28 12:56:13,358 p=221527 u=vicferpoy n=ansible | TASK [roles/worker-role : Copy ossec.conf file] *******************************************************************************************************************************************************************
+2020-05-28 12:56:13,358 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:56:13 +0200 (0:02:50.886)       0:10:40.426 ********** 
+2020-05-28 12:56:17,564 p=221527 u=vicferpoy n=ansible | changed: [wazuh-worker2]
+2020-05-28 12:56:17,570 p=221527 u=vicferpoy n=ansible | TASK [roles/worker-role : Set cluster key] ************************************************************************************************************************************************************************
+2020-05-28 12:56:17,570 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:56:17 +0200 (0:00:04.212)       0:10:44.638 ********** 
+2020-05-28 12:56:19,037 p=221527 u=vicferpoy n=ansible | changed: [wazuh-worker2]
+2020-05-28 12:56:19,048 p=221527 u=vicferpoy n=ansible | TASK [roles/worker-role : Set Wazuh Worker name] ******************************************************************************************************************************************************************
+2020-05-28 12:56:19,048 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:56:19 +0200 (0:00:01.478)       0:10:46.117 ********** 
+2020-05-28 12:56:20,415 p=221527 u=vicferpoy n=ansible | changed: [wazuh-worker2]
+2020-05-28 12:56:20,419 p=221527 u=vicferpoy n=ansible | TASK [roles/worker-role : Set Wazuh Worker IP] ********************************************************************************************************************************************************************
+2020-05-28 12:56:20,419 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:56:20 +0200 (0:00:01.371)       0:10:47.488 ********** 
+2020-05-28 12:56:21,766 p=221527 u=vicferpoy n=ansible | changed: [wazuh-worker2]
+2020-05-28 12:56:21,770 p=221527 u=vicferpoy n=ansible | TASK [roles/worker-role : Restart Wazuh] **************************************************************************************************************************************************************************
+2020-05-28 12:56:21,770 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:56:21 +0200 (0:00:01.350)       0:10:48.839 ********** 
+2020-05-28 12:56:35,532 p=221527 u=vicferpoy n=ansible | changed: [wazuh-worker2]
+2020-05-28 12:56:35,533 p=221527 u=vicferpoy n=ansible | PLAY RECAP ********************************************************************************************************************************************************************************************************
+2020-05-28 12:56:35,533 p=221527 u=vicferpoy n=ansible | localhost                  : ok=7    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2020-05-28 12:56:35,533 p=221527 u=vicferpoy n=ansible | wazuh-master               : ok=9    changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2020-05-28 12:56:35,533 p=221527 u=vicferpoy n=ansible | wazuh-worker1              : ok=10   changed=9    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2020-05-28 12:56:35,533 p=221527 u=vicferpoy n=ansible | wazuh-worker2              : ok=10   changed=9    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2020-05-28 12:56:35,534 p=221527 u=vicferpoy n=ansible | Thursday 28 May 2020  12:56:35 +0200 (0:00:13.763)       0:11:02.602 ********** 
+2020-05-28 12:56:35,534 p=221527 u=vicferpoy n=ansible | =============================================================================== 
+2020-05-28 12:56:35,534 p=221527 u=vicferpoy n=ansible | roles/worker-role : Install worker ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- 170.89s
+2020-05-28 12:56:35,534 p=221527 u=vicferpoy n=ansible | roles/master-role : Install master ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- 160.62s
+2020-05-28 12:56:35,534 p=221527 u=vicferpoy n=ansible | roles/worker-role : Install worker ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- 155.58s
+2020-05-28 12:56:35,534 p=221527 u=vicferpoy n=ansible | roles/worker-role : Clone wazuh repository ---------------------------------------------------------------------------------------------------------------------------------------------------------------- 18.02s
+2020-05-28 12:56:35,534 p=221527 u=vicferpoy n=ansible | roles/worker-role : Clone wazuh repository ---------------------------------------------------------------------------------------------------------------------------------------------------------------- 17.93s
+2020-05-28 12:56:35,534 p=221527 u=vicferpoy n=ansible | roles/master-role : Clone wazuh repository ---------------------------------------------------------------------------------------------------------------------------------------------------------------- 17.71s
+2020-05-28 12:56:35,534 p=221527 u=vicferpoy n=ansible | roles/master-role : Restart Wazuh ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 14.45s
+2020-05-28 12:56:35,534 p=221527 u=vicferpoy n=ansible | roles/worker-role : Restart Wazuh ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 14.18s
+2020-05-28 12:56:35,534 p=221527 u=vicferpoy n=ansible | roles/worker-role : Restart Wazuh ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 13.76s
+2020-05-28 12:56:35,534 p=221527 u=vicferpoy n=ansible | roles/worker-role : Installing dependencies using apt ------------------------------------------------------------------------------------------------------------------------------------------------------ 9.95s
+2020-05-28 12:56:35,534 p=221527 u=vicferpoy n=ansible | roles/worker-role : Installing dependencies using apt ------------------------------------------------------------------------------------------------------------------------------------------------------ 9.40s
+2020-05-28 12:56:35,534 p=221527 u=vicferpoy n=ansible | roles/master-role : Installing dependencies using apt ------------------------------------------------------------------------------------------------------------------------------------------------------ 8.15s
+2020-05-28 12:56:35,534 p=221527 u=vicferpoy n=ansible | Gathering Facts -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 6.02s
+2020-05-28 12:56:35,535 p=221527 u=vicferpoy n=ansible | Gathering Facts -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 6.01s
+2020-05-28 12:56:35,535 p=221527 u=vicferpoy n=ansible | Gathering Facts -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 5.99s
+2020-05-28 12:56:35,535 p=221527 u=vicferpoy n=ansible | roles/worker-role : Copy ossec.conf file ------------------------------------------------------------------------------------------------------------------------------------------------------------------- 4.21s
+2020-05-28 12:56:35,535 p=221527 u=vicferpoy n=ansible | roles/worker-role : Copy ossec.conf file ------------------------------------------------------------------------------------------------------------------------------------------------------------------- 4.04s
+2020-05-28 12:56:35,535 p=221527 u=vicferpoy n=ansible | roles/master-role : Copy ossec.conf file ------------------------------------------------------------------------------------------------------------------------------------------------------------------- 4.04s
+2020-05-28 12:56:35,535 p=221527 u=vicferpoy n=ansible | Gathering Facts -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 1.69s
+2020-05-28 12:56:35,535 p=221527 u=vicferpoy n=ansible | roles/worker-role : Set cluster key ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ 1.48s
+2020-05-28 12:56:35,535 p=221527 u=vicferpoy n=ansible | Playbook run took 0 days, 0 hours, 11 minutes, 2 seconds
