@@ -67,14 +67,14 @@ def build_expected_request(configuration):
         expec_req += " A:'%s'" % configuration.get('agent_name')
     else:
         expec_req += " A:'%s'" % DEFAULT_VALUES["agent_name"]
+    if configuration.get('groups'):
+        expec_req += " G:'%s'" % configuration.get('groups')
     if configuration.get('agent_address'):
         expec_req += " IP:'%s'" % configuration.get('agent_address')
     elif configuration.get('use_source_ip') == 'yes':
         expec_req += " IP:'src'"
     elif DEFAULT_VALUES['use_source_ip'] == 'yes':
         expec_req += " IP:'src'"
-    if configuration.get('groups'):
-        expec_req += " G:'%s'" % configuration.get('groups')
     return expec_req + '\n'
 
 def clean_password_file(): 

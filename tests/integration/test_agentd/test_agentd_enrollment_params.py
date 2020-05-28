@@ -6,16 +6,18 @@ import os
 import pytest
 import subprocess
 import yaml
-import socket 
+import socket
+import time
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.enrollment import EnrollmentSimulator
-from wazuh_testing.tools.monitoring import QueueMonitor
+from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.fim import generate_params
 from conftest import DEFAULT_VALUES, SERVER_KEY_PATH, SERVER_CERT_PATH, build_expected_request, clean_client_keys_file, check_client_keys_file, clean_password_file, \
-    configure_enrollment
+    configure_enrollment, AgentAuthParser
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
@@ -65,6 +67,13 @@ def configure_enrollment_server(request):
 
     enrollment_server.shutdown()
 
+def clean_log_file(): 
+    try:
+        client_file = open(LOG_FILE_PATH, 'w')
+        client_file.close()        
+    except IOError as exception:
+        raise
+
 def override_wazuh_conf(configuration):
     # Stop Wazuh
     control_service('stop', daemon="ossec-agentd")
@@ -83,7 +92,11 @@ def override_wazuh_conf(configuration):
     
     #reset_client_keys
     clean_client_keys_file()
+    clean_log_file()
     clean_password_file()
+    if configuration.get('password'):
+        parser = AgentAuthParser()
+        parser.add_password(password = configuration['password']['value'], isFile = True, path = configuration.get('authorization_pass_path'))
     #reset password
     #reset_password(set_password)
 
@@ -95,6 +108,8 @@ def get_temp_yaml(param):
     with open(configurations_path , 'r') as conf_file:
         auto_enroll_conf = {'auto_enrollment' : {'elements' : []}}
         for elem in param:
+            if elem == 'password':
+                continue
             auto_enroll_conf['auto_enrollment']['elements'].append({elem : {'value': param[elem]}})
         print(auto_enroll_conf)
         temp_conf_file = yaml.safe_load(conf_file)
@@ -102,6 +117,22 @@ def get_temp_yaml(param):
     with open(temp, 'w') as temp_file:
         yaml.safe_dump(temp_conf_file, temp_file)
     return temp
+
+def check_time_to_connect(timeout):
+    """Wait until client try connect"""
+    def wait_connect(line):
+        if 'Trying to connect to server' in line:
+            return line
+        return None
+    initial_time = time.time()
+    log_monitor = FileMonitor(LOG_FILE_PATH)
+    try:
+        log_monitor.start(timeout=timeout + 2, callback=wait_connect)
+    except TimeoutError:
+        return -1
+    elapsed_time = time.time() - initial_time
+    return elapsed_time
+    
         
 
 
@@ -112,6 +143,7 @@ def test_agent_agentd_enrollment(configure_enrollment_server, configure_environm
         pytest.skip("This test does not apply to ossec-agentd")
     configuration = test_case.get('configuration', {})
     configure_enrollment(test_case.get('enrollment'), enrollment_server, configuration.get('agent_name'))
+
     try:
         override_wazuh_conf(configuration)
     except Exception as err:
@@ -120,11 +152,16 @@ def test_agent_agentd_enrollment(configure_enrollment_server, configure_environm
             return
         else:
             raise AssertionError(f'Configuration error at ossec.conf file')
-
+    
+    if configuration.get('delay_after_enrollment') and test_case.get('enrollment',{}).get('response'):
+        time_delay = configuration.get('delay_after_enrollment')
+        elapsed = check_time_to_connect(time_delay)
+        assert ((time_delay-2) < elapsed) and (elapsed < (time_delay+2)), 'Expected elapsed time between enrollment and connect does not match'
     
     #configuration = test_case.get('configuration', {})
     results = monitored_sockets[0].get_results(callback=(lambda y: [x.decode() for x in y]), timeout=1, accum_results=1)
     if test_case.get('enrollment') and test_case['enrollment'].get('response'):
+        #import pdb; pdb.set_trace()
         assert results[0] == build_expected_request(configuration), 'Expected enrollment request message does not match'
         assert results[1] == test_case['enrollment']['response'].format(**DEFAULT_VALUES), 'Expected response message does not match'
         assert results[1] == check_client_keys_file(), 'Client key does not match'

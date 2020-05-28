@@ -99,7 +99,7 @@ def test_agent_auth_enrollment(configure_enrollment_server, configure_environmen
     if test_case.get('enrollment') and test_case['enrollment'].get('response'):
         assert results[0] == build_expected_request(configuration), 'Expected enrollment request message does not match'
         assert results[1] == test_case['enrollment']['response'].format(**DEFAULT_VALUES), 'Expected response message does not match'
-        assert check_client_keys_file(results[1]), 'Client key does not match'
+        assert check_client_keys_file(), 'Client key does not match'
     else:
         assert len(results) == 0
     return

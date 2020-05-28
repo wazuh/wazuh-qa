@@ -15,6 +15,16 @@
   configuration:
     agent_address: "192.168.0.10"
 -
+  name: "Valid manager address"
+  description: "Check a valid manager_address configurations"
+  skips:
+    - agent-auth
+  enrollment:
+    response: "OSSEC K:'001 {agent_name} any TopSecret'\n"
+    id: 1
+  configuration:
+    manager_address: "127.0.0.1"
+-
   name: "Groups"
   description: "Agent groups in auto enrollment configuration"
   enrollment:
@@ -51,10 +61,28 @@
   configuration:
     agent_name: "test_agent"
 -
+  name: "Valid agent name config max length"
+  description: "Check a valid agent_name configurations max length"
+  enrollment:
+    response: "OSSEC K:'004 nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn any TopSecret'\n"
+    id: 4
+  configuration:
+    agent_name: "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+-
   name: "Invalid agent name config"
   description: "Check a invalid agent_name configurations"
   configuration:
-    agent_name: "test_agent/+bad" 
+    agent_name: "test_agent/+bad"
+-
+  name: "Invalid agent name config - too short"
+  description: "Check a invalid agent_name configurations too short"
+  configuration:
+    agent_name: "n" 
+-
+  name: "Invalid agent name config - too long"
+  description: "Check a invalid agent_name configurations too long"
+  configuration:
+    agent_name: "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn" 
 -
   name: "SSL - Auto Negotiation"
   description: "Try auto negotiation option"
@@ -172,3 +200,95 @@
     password:
       type: "file"
       value: "passFile"
+-
+  name: "Password from file - Agentd"
+  description: "Check that password file is open and read successfully"
+  skips:
+    - agent-auth
+  enrollment:
+    response: "OSSEC K:'013 test_agent_pass_file any TopSecret'\n"
+    id: 13
+  configuration:
+    agent_name: "test_agent_pass_file"
+    authorization_pass_path: "/var/ossec/etc/authd.pass"
+    password:
+      value: "passFile"
+-
+  name: "Valid port"
+  description: "Check a valid port configurations"
+  skips:
+    - agent-auth
+  enrollment:
+    response: "OSSEC K:'001 {agent_name} any TopSecret'\n"
+    id: 1
+  configuration:
+    port: 1515
+-
+  name: "Invalid port 65536"
+  description: "Check a invalid port configurations 65536"
+  skips:
+    - agent-auth
+  configuration:
+    port: 65536
+-
+  name: "Invalid port 0"
+  description: "Check a invalid port configurations 0"
+  skips:
+    - agent-auth
+  configuration:
+    port: 0
+-
+  name: "Invalid port -1515"
+  description: "Check a invalid port configurations -1515"
+  skips:
+    - agent-auth
+  configuration:
+    port: -1515
+-
+  name: "Valid delay_after_enrollment 30"
+  description: "Check a valid delay_after_enrollment configurations 30"
+  skips:
+    - agent-auth
+  enrollment:
+    response: "OSSEC K:'001 {agent_name} any TopSecret'\n"
+    id: 1
+  configuration:
+    delay_after_enrollment: 10
+-
+  name: "Invalid delay_after_enrollment -30"
+  description: "Check a invalid delay_after_enrollment configurations -30"
+  skips:
+    - agent-auth
+  configuration:
+    delay_after_enrollment: -30
+-
+  name: "All"
+  description: "Check enrollment with all parameters configurations"
+  skips:
+    - agent-auth
+  enrollment:
+    response: "OSSEC K:'031 test_agent_all 192.168.0.10 TopSecret'\n"
+    id: 31
+    check_certificate: 
+      valid: "yes"
+    agent_certificate: 
+      valid: "yes"
+  configuration:
+    enabled: "yes"
+    agent_name: "test_agent_all"
+    agent_address: "192.168.0.10"
+    manager_address: "127.0.0.1"
+    port: 1515
+    groups: "group_1,group_2,"
+    delay_after_enrollment: 10
+    authorization_pass_path: "/var/ossec/etc/authd.pass"
+    password:
+      value: "passFile"
+    agent_certificate_path: "/var/ossec/etc/agent.cert"
+    agent_key_path: "/var/ossec/etc/agent.key"
+    use_source_ip: "no"
+    auto_method: "no"
+    ssl_cipher: "SHA256"
+
+
+
