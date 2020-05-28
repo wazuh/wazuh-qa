@@ -15,6 +15,24 @@
   configuration:
     agent_address: "192.168.0.10"
 -
+  name: "Valid agent address CIDR"
+  description: "Check a valid agent_address configurations CIDR"
+  enrollment:
+    response: "OSSEC K:'001 {agent_name} 192.168.0.10/24 TopSecret'\n"
+    id: 1
+  configuration:
+    agent_address: "192.168.0.10/24"
+-
+  name: "Invalid Agent address CIDR"
+  description: "Check a invalid CIDR agent_address in auto enrollment configuration"
+  configuration:
+    agent_address: "192.168.0.10/100"
+-
+  name: "Invalid Agent address"
+  description: "Check a invalid agent_address in auto enrollment configuration"
+  configuration:
+    agent_address: "192.168.0.1000"
+-
   name: "Valid manager address"
   description: "Check a valid manager_address configurations"
   skips:
@@ -40,11 +58,6 @@
     id: 3
   configuration:
     groups: "group_1,group_2,"
--
-  name: "Invalid Agent address"
-  description: "Check a invalid agent_address in auto enrollment configuration"
-  configuration:
-    agent_address: "192.168.0.1000"
 -
   name: "Invalid enabled"
   description: "Check a invalid enabled in auto enrollment configuration"
