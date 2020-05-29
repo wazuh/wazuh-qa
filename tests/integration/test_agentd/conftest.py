@@ -2,6 +2,7 @@ import os
 import pytest
 import socket
 import ssl
+import pdb
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -20,7 +21,8 @@ DEFAULT_VALUES = {
     'authorization_pass_path': None
 }
 
-CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
+
+CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'client.keys') #for unix add 'etc'
 AUTHDPASS_PATH = os.path.join(WAZUH_PATH, 'etc', 'authd.pass')
 SERVER_KEY_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.key')
 SERVER_CERT_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.cert')

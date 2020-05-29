@@ -223,7 +223,7 @@
     id: 13
   configuration:
     agent_name: "test_agent_pass_file"
-    authorization_pass_path: "/var/ossec/etc/authd.pass"
+    authorization_pass_path: "/etc/authd.pass"
     password:
       value: "passFile"
 -
@@ -294,7 +294,7 @@
     port: 1515
     groups: "group_1,group_2,"
     delay_after_enrollment: 10
-    authorization_pass_path: "/var/ossec/etc/authd.pass"
+    authorization_pass_path: "/etc/authd.pass"
     password:
       value: "passFile"
     agent_certificate_path: "/var/ossec/etc/agent.cert"

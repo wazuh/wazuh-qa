@@ -8,13 +8,14 @@ import subprocess
 import yaml
 import socket
 import time
+import pdb
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.enrollment import EnrollmentSimulator
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.fim import generate_params
 from conftest import DEFAULT_VALUES, SERVER_KEY_PATH, SERVER_CERT_PATH, build_expected_request, clean_client_keys_file, check_client_keys_file, clean_password_file, \
     configure_enrollment, AgentAuthParser
@@ -24,8 +25,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
 
 SERVER_ADDRESS = '127.0.0.1'
 REMOTED_PORT = 1514
-INSTALLATION_FOLDER = '/var/ossec/bin/'
-
+INSTALLATION_FOLDER = WAZUH_PATH
 
 def load_tests(path):
     """ Loads a yaml file from a path 
