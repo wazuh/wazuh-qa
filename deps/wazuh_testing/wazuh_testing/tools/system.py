@@ -136,7 +136,8 @@ class HostManager:
         """
         return self.get_host(host).file(file_path).content_string
 
-    def apply_config(self, config_yml_path: str, dest_path: str = WAZUH_CONF, clear_files: list = None, restart_services: list = None):
+    def apply_config(self, config_yml_path: str, dest_path: str = WAZUH_CONF, clear_files: list = None,
+                     restart_services: list = None):
         """Apply the configuration described in the config_yml_path to the environment.
 
         Parameters
@@ -204,29 +205,11 @@ class HostManager:
                 self.clear_file(host=host, file_path=API_LOG_FILE_PATH)
 
     def get_api_token(self, host, user='wazuh', password='wazuh', port=55000, check=False):
-        response = self.get_host(host).ansible('uri', f'url=https://localhost:{port}/v4/security/user/authenticate '
-                                           f'user={user} password={password} method=GET validate_certs=no '
-                                           f'force_basic_auth=yes', check=check)
-
-        try:
-            token = response['json']['token']
-        except KeyError:
-            raise KeyError(f"Could not make API call. Response: {response}")
-
-        return token
+        return self.get_host(host).ansible('uri', f'url=https://localhost:{port}/v4/security/user/authenticate '
+                                                  f'user={user} password={password} method=GET validate_certs=no '
+                                                  f'force_basic_auth=yes', check=check)['json']['token']
 
     def make_api_call(self, host, port=55000, method='GET', endpoint='/', token=None, check=False):
         token_header = {'Authorization': f'Bearer {token}'}
-        response = self.get_host(host).ansible('uri', f'url=https://localhost:{port}/v4{endpoint} method={method} '
-                                                      f'headers="{token_header}" validate_certs=no', check=check)
-
-        try:
-            api_response = response['json']
-        except KeyError:
-            raise KeyError(f"Could not make API call. Response: {response}")
-
-        return api_response
-
-
-
-
+        return self.get_host(host).ansible('uri', f'url=https://localhost:{port}/v4{endpoint} method={method} '
+                                                  f'headers="{token_header}" validate_certs=no', check=check)
