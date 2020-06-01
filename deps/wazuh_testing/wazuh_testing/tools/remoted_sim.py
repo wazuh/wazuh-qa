@@ -43,7 +43,7 @@ class Cipher:
 
 class RemotedSimulator:
     
-    def __init__(self, server_address='127.0.0.1', remoted_port=1514, protocol='udp', mode='REJECT'):  
+    def __init__(self, server_address='127.0.0.1', remoted_port=1514, protocol='udp', mode='REJECT', client_keys='WAZUH_PATH//etc//client.keys'):  
         self.protocol = protocol
         self.global_count = 1234567891
         self.local_count = 5555
@@ -52,6 +52,7 @@ class RemotedSimulator:
         self.mode = mode 
         self.server_address = server_address
         self.remoted_port = remoted_port
+        self.client_keys_path = client_keys
         self.listener_thread = threading.Thread(target=self.listener)
         self.listener_thread.setName('listener_thread')
         self.last_message_ctx = ""
@@ -263,9 +264,7 @@ class RemotedSimulator:
         return(msg)
 
     def update_keys(self):
-        client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
-
-        with open(client_keys_path) as client_file:
+        with open(self.client_keys_path) as client_file:
             client_lines = client_file.read().splitlines() 
 
             self.keys = ({},{}) 

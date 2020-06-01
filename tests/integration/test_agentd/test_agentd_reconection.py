@@ -12,6 +12,7 @@ from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
+from conftest import *
 from time import sleep
 # Marks
 
@@ -45,7 +46,7 @@ monitored_sockets_params = []
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
-authd_server = AuthdSimulator()
+authd_server = AuthdSimulator(params[0]['SERVER_ADDRESS'], key_path=SERVER_KEY_PATH, cert_path=SERVER_CERT_PATH)
 
 
 # fixtures
@@ -68,15 +69,13 @@ def set_authd_id(request):
     authd_server.agent_id = 101    
 
 @pytest.fixture(scope="function")
-def clean_keys(request):
-    client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
-    truncate_file(client_keys_path)
+def clean_keys(request):   
+    truncate_file(CLIENT_KEYS_PATH)
     sleep(1)
 
 @pytest.fixture(scope="function")
-def set_keys(request):
-    client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
-    with open(client_keys_path, 'w') as f:
+def set_keys(request):    
+    with open(CLIENT_KEYS_PATH, 'w') as f:
         f.write("100 ubuntu-agent any TopSecret")
     sleep(1)
 
@@ -108,7 +107,7 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, set_authd
     #start hearing logs
     log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK')  
+    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK', client_keys=CLIENT_KEYS_PATH)  
     #hearing on enrollment server 
     authd_server.clear()   
 
@@ -151,7 +150,7 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, set_aut
     truncate_file(LOG_FILE_PATH)
     log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK')  
+    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK', client_keys=CLIENT_KEYS_PATH)  
     #hearing on enrollment server    
     authd_server.clear()   
       
