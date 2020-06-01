@@ -10,7 +10,7 @@ import yaml
 
 from OpenSSL import crypto, SSL
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.enrollment import EnrollmentSimulator
+from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.monitoring import QueueMonitor
 from conftest import DEFAULT_VALUES, SERVER_KEY_PATH, SERVER_CERT_PATH, \
         AgentAuthParser, build_expected_request, check_client_keys_file, \
@@ -41,7 +41,7 @@ params = [{'SERVER_ADDRESS': SERVER_ADDRESS,}]
 metadata = [{}]
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
-enrollment_server = EnrollmentSimulator(server_address=SERVER_ADDRESS, remoted_port=REMOTED_PORT, key_path=SERVER_KEY_PATH, cert_path=SERVER_CERT_PATH)
+authd_server = AuthdSimulator(server_address=SERVER_ADDRESS, key_path=SERVER_KEY_PATH, cert_path=SERVER_CERT_PATH)
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
@@ -52,24 +52,24 @@ def get_configuration(request):
     return request.param
 
 @pytest.fixture(scope="module")
-def configure_enrollment_server(request):
-    enrollment_server.start()
+def configure_authd_server(request):
+    authd_server.start()
     global monitored_sockets
-    monitored_sockets = [QueueMonitor(x) for x in enrollment_server.queues]
+    monitored_sockets = QueueMonitor(authd_server.queue)
 
     yield
 
-    enrollment_server.shutdown()
+    authd_server.shutdown()
 
 @pytest.mark.parametrize('test_case', [case for case in tests])
-def test_agent_auth_enrollment(configure_enrollment_server, configure_environment, test_case: list):
+def test_agent_auth_enrollment(configure_authd_server, configure_environment, test_case: list):
     print(f'Test: {test_case["name"]}')
     if 'agent-auth' in test_case.get("skips", []):
         pytest.skip("This test does not apply to agent-auth") 
     parser = AgentAuthParser(server_address=SERVER_ADDRESS, BINARY_PATH=AGENT_AUTH_BINARY_PATH, sudo=True)
     configuration = test_case.get('configuration', {})
     enrollment = test_case.get('enrollment', {})
-    configure_enrollment(enrollment, enrollment_server, configuration.get('agent_name'))
+    configure_enrollment(enrollment, authd_server, configuration.get('agent_name'))
     if configuration.get('agent_name'):
         parser.add_agent_name(configuration.get("agent_name"))
     if configuration.get('agent_address'):
@@ -95,7 +95,7 @@ def test_agent_auth_enrollment(configure_enrollment_server, configure_environmen
     out = subprocess.Popen(parser.get_command(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout,stderr = out.communicate()
     print(stdout.decode())
-    results = monitored_sockets[0].get_results(callback=(lambda y: [x.decode() for x in y]), timeout=1, accum_results=1)
+    results = monitored_sockets.get_results(callback=(lambda y: [x.decode() for x in y]), timeout=1, accum_results=1)
     if test_case.get('enrollment') and test_case['enrollment'].get('response'):
         assert results[0] == build_expected_request(configuration), 'Expected enrollment request message does not match'
         assert results[1] == test_case['enrollment']['response'].format(**DEFAULT_VALUES), 'Expected response message does not match'

@@ -11,7 +11,7 @@ import time
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools.enrollment import EnrollmentSimulator
+from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools import LOG_FILE_PATH
@@ -24,6 +24,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
 
 SERVER_ADDRESS = '127.0.0.1'
 REMOTED_PORT = 1514
+PROTOCOL = 'udp',
 INSTALLATION_FOLDER = '/var/ossec/bin/'
 
 
@@ -47,7 +48,7 @@ params = [{'SERVER_ADDRESS': SERVER_ADDRESS,}]
 metadata = [{}]
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
-enrollment_server = EnrollmentSimulator(server_address=SERVER_ADDRESS, remoted_port=REMOTED_PORT, key_path=SERVER_KEY_PATH, cert_path=SERVER_CERT_PATH)
+authd_server = AuthdSimulator(server_address=SERVER_ADDRESS, key_path=SERVER_KEY_PATH, cert_path=SERVER_CERT_PATH)
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
@@ -58,14 +59,14 @@ def get_configuration(request):
     return request.param
 
 @pytest.fixture(scope="module")
-def configure_enrollment_server(request):
-    enrollment_server.start()
+def configure_authd_server(request):
+    authd_server.start()
     global monitored_sockets
-    monitored_sockets = [QueueMonitor(x) for x in enrollment_server.queues]
+    monitored_sockets = QueueMonitor(authd_server.queue)
 
     yield
 
-    enrollment_server.shutdown()
+    authd_server.shutdown()
 
 def clean_log_file(): 
     try:
@@ -137,12 +138,12 @@ def check_time_to_connect(timeout):
 
 
 @pytest.mark.parametrize('test_case', [case for case in tests])
-def test_agent_agentd_enrollment(configure_enrollment_server, configure_environment, test_case: list):
+def test_agent_agentd_enrollment(configure_authd_server, configure_environment, test_case: list):
     print(f'Test: {test_case["name"]}')
     if 'ossec-agentd' in test_case.get("skips", []):
         pytest.skip("This test does not apply to ossec-agentd")
     configuration = test_case.get('configuration', {})
-    configure_enrollment(test_case.get('enrollment'), enrollment_server, configuration.get('agent_name'))
+    configure_enrollment(test_case.get('enrollment'), authd_server, configuration.get('agent_name'))
 
     try:
         override_wazuh_conf(configuration)
@@ -159,7 +160,7 @@ def test_agent_agentd_enrollment(configure_enrollment_server, configure_environm
         assert ((time_delay-2) < elapsed) and (elapsed < (time_delay+2)), 'Expected elapsed time between enrollment and connect does not match'
     
     #configuration = test_case.get('configuration', {})
-    results = monitored_sockets[0].get_results(callback=(lambda y: [x.decode() for x in y]), timeout=1, accum_results=1)
+    results = monitored_sockets.get_results(callback=(lambda y: [x.decode() for x in y]), timeout=1, accum_results=1)
     if test_case.get('enrollment') and test_case['enrollment'].get('response'):
         #import pdb; pdb.set_trace()
         assert results[0] == build_expected_request(configuration), 'Expected enrollment request message does not match'
