@@ -32,6 +32,17 @@ SERVER_PEM_PATH = os.path.join(WAZUH_PATH, folder, 'manager.pem')
 AGENT_KEY_PATH = os.path.join(WAZUH_PATH, folder, 'agent.key')
 AGENT_CERT_PATH = os.path.join(WAZUH_PATH, folder, 'agent.cert')
 AGENT_PEM_PATH = os.path.join(WAZUH_PATH, folder, 'agent.pem')
+AUTHDPASS_PATH = os.path.join(WAZUH_PATH, folder, 'authd.pass')
+AGENT_AUTH_BINARY_PATH = '/var/ossec/bin/agent-auth' if platform.system() == 'Linux' else  os.path.join(WAZUH_PATH, 'agent-auth.exe')
+
+CONFIG_PATHS = {
+    'SERVER_PEM_PATH' : SERVER_PEM_PATH,
+    'AGENT_CERT_PATH' : AGENT_CERT_PATH,
+    'AGENT_PEM_PATH'  : AGENT_PEM_PATH,
+    'AGENT_KEY_PATH'  : AGENT_KEY_PATH,
+    'PASSWORD_PATH'   : AUTHDPASS_PATH
+
+}
 
 def clean_client_keys_file(): 
     try:
@@ -112,6 +123,13 @@ def configure_enrollment(enrollment, enrollment_server, agent_name=socket.gethos
             enrollment_server.cert_controller.store_ca_certificate(enrollment_server.cert_controller.get_root_ca_cert(), SERVER_PEM_PATH)
         else:
             enrollment_server.mitm_enrollment.listener.set_ssl_configuration(cert_reqs=ssl.CERT_OPTIONAL)
+
+def parse_configuration_string(configuration):
+    for key, value in configuration.items():
+        if isinstance(value, str):
+            configuration[key] = value.format(**CONFIG_PATHS)
+
+
 class AgentAuthParser:
 
     def __init__(self, server_address=None, BINARY_PATH='/var/ossec/bin/agent-auth', sudo=False):

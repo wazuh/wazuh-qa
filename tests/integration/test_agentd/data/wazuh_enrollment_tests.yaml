@@ -139,7 +139,7 @@
       valid: "yes"
   configuration:
     agent_name: "test_agent_3"
-    server_ca_path: "/var/ossec/etc/manager.pem"
+    server_ca_path: "{SERVER_PEM_PATH}"
 -
   name: "Manager Verification - Invalid Cert"
   description: "Try validating server with an invalid certificate"
@@ -148,7 +148,7 @@
       valid: "no"
   configuration:
     agent_name: "test_agent_3"
-    server_ca_path: "/var/ossec/etc/manager.pem"
+    server_ca_path: "{SERVER_PEM_PATH}"
 -
   name: "Agent Verification - Valid Cert"
   description: "Try validating agent with an invalid certificate"
@@ -159,8 +159,8 @@
       valid: "yes"
   configuration:
     agent_name: "test_agent_4"
-    agent_certificate_path: "/var/ossec/etc/agent.cert"
-    agent_key_path: "/var/ossec/etc/agent.key"
+    agent_certificate_path: "{AGENT_CERT_PATH}"
+    agent_key_path: "{AGENT_KEY_PATH}"
 -
   name: "Agent Verification - Invalid Cert"
   description: "Try validating agent with an invalid certificate"
@@ -169,8 +169,8 @@
       valid: "no"
   configuration:
     agent_name: "test_agent_5"
-    agent_certificate_path: "/var/ossec/etc/agent.cert"
-    agent_key_path: "/var/ossec/etc/agent.key"
+    agent_certificate_path: "{AGENT_CERT_PATH}"
+    agent_key_path: "{AGENT_KEY_PATH}"
 -
   name: "Use source IP"
   description: "Check that source IP is sent by agent"
@@ -223,7 +223,7 @@
     id: 13
   configuration:
     agent_name: "test_agent_pass_file"
-    authorization_pass_path: "/etc/authd.pass"
+    authorization_pass_path: "{PASSWORD_PATH}"
     password:
       value: "passFile"
 -
@@ -294,11 +294,11 @@
     port: 1515
     groups: "group_1,group_2,"
     delay_after_enrollment: 10
-    authorization_pass_path: "/etc/authd.pass"
+    authorization_pass_path: "{PASSWORD_PATH}"
     password:
       value: "passFile"
-    agent_certificate_path: "/var/ossec/etc/agent.cert"
-    agent_key_path: "/var/ossec/etc/agent.key"
+    agent_certificate_path: "{AGENT_CERT_PATH}"
+    agent_key_path: "{AGENT_KEY_PATH}"
     use_source_ip: "no"
     auto_method: "no"
     ssl_cipher: "SHA256"

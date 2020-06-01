@@ -17,8 +17,7 @@ from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.fim import generate_params
-from conftest import DEFAULT_VALUES, SERVER_KEY_PATH, SERVER_CERT_PATH, build_expected_request, clean_client_keys_file, check_client_keys_file, clean_password_file, \
-    configure_enrollment, AgentAuthParser
+from conftest import *
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
@@ -142,6 +141,7 @@ def test_agent_agentd_enrollment(configure_enrollment_server, configure_environm
     if 'ossec-agentd' in test_case.get("skips", []):
         pytest.skip("This test does not apply to ossec-agentd")
     configuration = test_case.get('configuration', {})
+    parse_configuration_string(configuration)
     configure_enrollment(test_case.get('enrollment'), enrollment_server, configuration.get('agent_name'))
 
     try:
