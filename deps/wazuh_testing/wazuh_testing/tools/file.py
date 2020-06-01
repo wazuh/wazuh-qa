@@ -78,3 +78,13 @@ def random_string(length, encode=None):
         st = st.encode(encode)
 
     return st
+
+def read_file(file_path):
+    with open(file_path, 'r') as f:
+        data = f.read()
+    return data
+
+
+def write_file(file_path, data):
+    with open(file_path, 'w') as f:
+        f.write(data)
