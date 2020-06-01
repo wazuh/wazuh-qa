@@ -1,7 +1,7 @@
 # Copyright (C) 2015-2020, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
+import json
 import tempfile
 import xml.dom.minidom as minidom
 
@@ -209,7 +209,12 @@ class HostManager:
                                                   f'user={user} password={password} method=GET validate_certs=no '
                                                   f'force_basic_auth=yes', check=check)['json']['token']
 
-    def make_api_call(self, host, port=55000, method='GET', endpoint='/', token=None, check=False):
+    def make_api_call(self, host, port=55000, method='GET', endpoint='/', request_body='', token=None, check=False):
+        if request_body:
+            request_body = 'body="{}"'.format(
+                json.dumps(request_body).replace('"', '\\"').replace(' ', ''))
+
         token_header = {'Authorization': f'Bearer {token}'}
         return self.get_host(host).ansible('uri', f'url=https://localhost:{port}/v4{endpoint} method={method} '
-                                                  f'headers="{token_header}" validate_certs=no', check=check)
+                                                  f'headers="{token_header}" {request_body} '
+                                                  f'validate_certs=no', check=check)
