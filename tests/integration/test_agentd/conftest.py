@@ -3,6 +3,7 @@ import pytest
 import socket
 import ssl
 import pdb
+import platform
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -21,15 +22,16 @@ DEFAULT_VALUES = {
     'authorization_pass_path': None
 }
 
+folder = 'etc' if platform.system() == 'Linux' else ''
 
-CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'client.keys') #for unix add 'etc'
-AUTHDPASS_PATH = os.path.join(WAZUH_PATH, 'etc', 'authd.pass')
-SERVER_KEY_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.key')
-SERVER_CERT_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.cert')
-SERVER_PEM_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.pem')
-AGENT_KEY_PATH = os.path.join(WAZUH_PATH, 'etc', 'agent.key')
-AGENT_CERT_PATH = os.path.join(WAZUH_PATH, 'etc', 'agent.cert')
-AGENT_PEM_PATH = os.path.join(WAZUH_PATH, 'etc', 'agent.pem')
+CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, folder,'client.keys') #for unix add 'etc'
+AUTHDPASS_PATH = os.path.join(WAZUH_PATH, folder, 'authd.pass')
+SERVER_KEY_PATH = os.path.join(WAZUH_PATH, folder, 'manager.key')
+SERVER_CERT_PATH = os.path.join(WAZUH_PATH, folder, 'manager.cert')
+SERVER_PEM_PATH = os.path.join(WAZUH_PATH, folder, 'manager.pem')
+AGENT_KEY_PATH = os.path.join(WAZUH_PATH, folder, 'agent.key')
+AGENT_CERT_PATH = os.path.join(WAZUH_PATH, folder, 'agent.cert')
+AGENT_PEM_PATH = os.path.join(WAZUH_PATH, folder, 'agent.pem')
 
 def clean_client_keys_file(): 
     try:
