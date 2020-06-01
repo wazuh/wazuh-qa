@@ -53,9 +53,9 @@ class HostManager:
             Source path
         dest_path :
             Destination path
-        check : bool
+        check : bool, optional
             Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html),
-            by default it is enabled so no changes will be applied
+            by default it is enabled so no changes will be applied. Default `False`
         """
         self.get_host(host).ansible("copy", f"src={src_path} dest={dest_path} owner=ossec group=ossec mode=0775",
                                     check=check)
@@ -75,9 +75,9 @@ class HostManager:
             Lower stop of the block to be replaced
         after : str
             Upper stop of the block to be replaced
-        check : bool
+        check : bool, optional
             Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html),
-            by default it is enabled so no changes will be applied
+            by default it is enabled so no changes will be applied. Default `False`
         """
         replace = f'{after}{replace}{before}'
         self.get_host(host).ansible("replace", f"path={path} regexp='{after}[\s\S]+{before}' replace='{replace}'",
@@ -101,9 +101,9 @@ class HostManager:
             Service to be controlled
         state : str
             Final state in which service must end
-        check : bool
+        check : bool, optional
             Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html),
-            by default it is enabled so no changes will be applied
+            by default it is enabled so no changes will be applied. Default `False`
         """
         if service == 'wazuh':
             service = 'wazuh-agent' if 'agent' in host else 'wazuh-manager'
@@ -118,9 +118,9 @@ class HostManager:
             Hostname
         file_path : str
             File path to be truncated
-        check : bool
+        check : bool, optional
             Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html),
-            by default it is enabled so no changes will be applied
+            by default it is enabled so no changes will be applied. Default `False`
         """
         self.get_host(host).ansible("copy", f"dest={file_path} content='' force=yes", check=check)
 
@@ -205,16 +205,61 @@ class HostManager:
                 self.clear_file(host=host, file_path=API_LOG_FILE_PATH)
 
     def get_api_token(self, host, user='wazuh', password='wazuh', port=55000, check=False):
+        """Return an API token for the specified user.
+
+        Parameters
+        ----------
+        host : str
+            Hostname.
+        user : str, optional
+            API username. Default `wazuh`
+        password : str, optional
+            API password. Default `wazuh`
+        port : int, optional
+            API port. Default `55000`
+        check : bool, optional
+            Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html),
+            by default it is enabled so no changes will be applied. Default `False`
+
+        Returns
+        -------
+        API token : str
+            Usable API token.
+        """
         return self.get_host(host).ansible('uri', f'url=https://localhost:{port}/v4/security/user/authenticate '
                                                   f'user={user} password={password} method=GET validate_certs=no '
                                                   f'force_basic_auth=yes', check=check)['json']['token']
 
-    def make_api_call(self, host, port=55000, method='GET', endpoint='/', request_body='', token=None, check=False):
-        if request_body:
-            request_body = 'body="{}"'.format(
-                json.dumps(request_body).replace('"', '\\"').replace(' ', ''))
+    def make_api_call(self, host, port=55000, method='GET', endpoint='/', request_body=None, token=None, check=False):
+        """Make an API call to the specified host.
+
+        Parameters
+        ----------
+        host : str
+            Hostname.
+        port : int, optional
+            API port. Default `55000`
+        method : str, optional
+            Request method. Default `GET`
+        endpoint : str, optional
+            Request endpoint. It must start with '/'.. Default `/`
+        request_body : dict, optional
+            Request body. Default `None`
+        token : str, optional
+            Request token. Default `None`
+        check : bool, optional
+            Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html),
+            by default it is enabled so no changes will be applied. Default `False`
+
+        Returns
+        -------
+        API response : dict
+            Return the response in JSON format.
+        """
+        request_body = 'body="{}"'.format(
+            json.dumps(request_body).replace('"', '\\"').replace(' ', '')) if request_body else ''
 
         token_header = {'Authorization': f'Bearer {token}'}
-        return self.get_host(host).ansible('uri', f'url=https://localhost:{port}/v4{endpoint} method={method} '
-                                                  f'headers="{token_header}" {request_body} '
+        return self.get_host(host).ansible('uri', f'url="https://localhost:{port}/v4{endpoint}" '
+                                                  f'method={method} headers="{token_header}" {request_body} '
                                                   f'validate_certs=no', check=check)
