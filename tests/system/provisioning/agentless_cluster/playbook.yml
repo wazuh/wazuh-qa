@@ -13,6 +13,8 @@
         hostname: "{{ master_hostname }}"
         networks:
           - name: "{{ docker_network }}"
+        ports:
+          - "55010:55000"
 
 - name: Create our container (Worker1)
   hosts: localhost
@@ -25,6 +27,8 @@
         hostname: "{{ worker1_hostname }}"
         networks:
           - name: "{{ docker_network }}"
+        ports:
+          - "55011:55000"
 
 - name: Create our container (Worker2)
   hosts: localhost
@@ -37,6 +41,8 @@
         hostname: "{{ worker2_hostname }}"
         networks:
           - name: "{{ docker_network }}"
+        ports:
+          - "55012:55000"
 
 - name: Wazuh Master
   hosts: wazuh-master
