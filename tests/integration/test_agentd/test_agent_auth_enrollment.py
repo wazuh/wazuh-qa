@@ -12,17 +12,13 @@ from OpenSSL import crypto, SSL
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.monitoring import QueueMonitor
-from conftest import DEFAULT_VALUES, SERVER_KEY_PATH, SERVER_CERT_PATH, \
-        AgentAuthParser, build_expected_request, check_client_keys_file, \
-        configure_enrollment
+from conftest import *
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
 
 SERVER_ADDRESS = '127.0.0.1'
 REMOTED_PORT = 1514
-AGENT_AUTH_BINARY_PATH = '/var/ossec/bin/agent-auth'
-AUTHDPASS_PATH = '/var/ossec/etc/authd.pass'
 
 def load_tests(path):
     """ Loads a yaml file from a path 
@@ -66,8 +62,9 @@ def test_agent_auth_enrollment(configure_authd_server, configure_environment, te
     print(f'Test: {test_case["name"]}')
     if 'agent-auth' in test_case.get("skips", []):
         pytest.skip("This test does not apply to agent-auth") 
-    parser = AgentAuthParser(server_address=SERVER_ADDRESS, BINARY_PATH=AGENT_AUTH_BINARY_PATH, sudo=True)
+    parser = AgentAuthParser(server_address=SERVER_ADDRESS, BINARY_PATH=AGENT_AUTH_BINARY_PATH, sudo=True if platform.system() == 'Linux' else False)
     configuration = test_case.get('configuration', {})
+    parse_configuration_string(configuration)
     enrollment = test_case.get('enrollment', {})
     configure_enrollment(enrollment, authd_server, configuration.get('agent_name'))
     if configuration.get('agent_name'):
@@ -92,8 +89,9 @@ def test_agent_auth_enrollment(configure_authd_server, configure_environment, te
     if configuration.get('groups'):
         parser.add_groups(configuration.get('groups'))
 
+    print(parser.get_command())
     out = subprocess.Popen(parser.get_command(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    stdout,stderr = out.communicate()
+    stdout, stderr = out.communicate()
     print(stdout.decode())
     results = monitored_sockets.get_results(callback=(lambda y: [x.decode() for x in y]), timeout=1, accum_results=1)
     if test_case.get('enrollment') and test_case['enrollment'].get('response'):
