@@ -43,7 +43,7 @@ class Cipher:
 
 class RemotedSimulator:
     
-    def __init__(self, server_address='127.0.0.1', remoted_port=1514, protocol='udp', mode='REJECT', client_keys='WAZUH_PATH//etc//client.keys'):  
+    def __init__(self, server_address='127.0.0.1', remoted_port=1514, protocol='udp', mode='REJECT', client_keys=WAZUH_PATH+'/etc/client.keys'):  
         self.protocol = protocol
         self.global_count = 1234567891
         self.local_count = 5555
