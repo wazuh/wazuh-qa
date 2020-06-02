@@ -50,8 +50,8 @@ def create_testing_api_user(request):
                                 token=token)
     assert response['status'] == 200, f'Failed to assign administrator role: {response}'
 
-    setattr(request.module, 'testing_user', username)
-    setattr(request.module, 'testing_passw', password)
+    setattr(request.module, 'test_user', username)
+    setattr(request.module, 'test_passw', password)
 
     yield
 
@@ -59,6 +59,67 @@ def create_testing_api_user(request):
     token = hm.get_api_token(test_hosts[0])
 
     response = hm.make_api_call(test_hosts[0], method='DELETE',
-                                endpoint=f'/security/users?usernames=',
+                                endpoint='/security/users?usernames=',
                                 token=token)
     assert response['status'] == 200, f'Failed to delete testing users: {response}'
+
+
+@pytest.fixture(scope='module')
+def create_role_and_policy(request):
+    hm = getattr(request.module, 'host_manager')
+    test_hosts = getattr(request.module, 'test_hosts')
+    token = hm.get_api_token(test_hosts[0])
+
+    role_name = 'testing_role'
+    policy_name = 'testing_policy'
+
+    # Create testing policy
+    response = hm.make_api_call(test_hosts[0], method='POST', endpoint='/security/policies',
+                                request_body={'name': policy_name,
+                                              'policy': {
+                                                  'actions': [
+                                                      'agents:read'
+                                                  ],
+                                                  'resources': [
+                                                      'agent:id:000'
+                                                  ],
+                                                  'effect': 'allow'
+                                              }},
+                                token=token)
+    assert response['status'] == 200, f'Failed to create policy: {response}'
+    policy_id = response['json']['data']['affected_items'][0]['id']
+
+    # Create testing role
+    response = hm.make_api_call(test_hosts[0], method='POST', endpoint='/security/roles',
+                                request_body={'name': role_name,
+                                              'rule': {
+                                                  'MATCH': {
+                                                      'definition': 'test'
+                                                  }
+                                              }},
+                                token=token)
+    assert response['status'] == 200, f'Failed to create policy: {response}'
+    role_id = response['json']['data']['affected_items'][0]['id']
+
+    # Create relation between role and policy
+    response = hm.make_api_call(test_hosts[0], method='POST',
+                                endpoint=f'/security/roles/{role_id}/policies?policy_ids={policy_id}',
+                                token=token)
+    assert response['status'] == 200, f'Failed to create relation between role and policy: {response}'
+
+    setattr(request.module, 'test_role_id', role_id)
+    setattr(request.module, 'test_policy_id', policy_id)
+
+    yield
+
+    token = hm.get_api_token(test_hosts[0])
+
+    # Remove testing policies
+    response = hm.make_api_call(test_hosts[0], method='DELETE',
+                                endpoint='/security/policies?policy_ids=', token=token)
+    assert response['status'] == 200
+
+    # Remove testing roles
+    response = hm.make_api_call(test_hosts[0], method='DELETE',
+                                endpoint='/security/roles?role_ids=', token=token)
+    assert response['status'] == 200

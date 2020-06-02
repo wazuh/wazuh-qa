@@ -14,14 +14,14 @@ inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__
                               'provisioning', 'agentless_cluster', 'inventory.yml')
 
 # Testing credentials
-testing_user = None
-testing_passw = None
+test_user = None
+test_passw = None
 
 host_manager = HostManager(inventory_path)
 
 
 @pytest.mark.parametrize('host, old_password, new_password', [
-    ('wazuh-master', testing_passw, 'Newpass1*'),
+    ('wazuh-master', test_passw, 'Newpass1*'),
     ('wazuh-worker1', 'Newpass1*', 'Newpass2*')
 ])
 def test_update_password(host, old_password, new_password, create_testing_api_user):
@@ -37,17 +37,13 @@ def test_update_password(host, old_password, new_password, create_testing_api_us
         New password to update to.
     """
     # Get token
-    token = host_manager.get_api_token(host, user=testing_user,
-                                       password=testing_passw if not old_password else old_password)
+    token = host_manager.get_api_token(host, user=test_user,
+                                       password=test_passw if not old_password else old_password)
 
     # Update password
-    response = host_manager.make_api_call(host, method='PUT', endpoint=f'/security/users/{testing_user}',
+    response = host_manager.make_api_call(host, method='PUT', endpoint=f'/security/users/{test_user}',
                                           request_body={'password': new_password}, token=token)
     assert response['status'] == 200, f'Failed to change password: {response}'
-
-    # Wait for worker synchronization delay. TO BE REMOVED
-    if 'worker' in host:
-        time.sleep(20)
 
     # Try to make another call with the same token
     response = host_manager.make_api_call(host, endpoint='/agents', token=token)
