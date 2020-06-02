@@ -117,9 +117,9 @@ def create_role_and_policy(request):
     # Remove testing policies
     response = hm.make_api_call(test_hosts[0], method='DELETE',
                                 endpoint='/security/policies?policy_ids=', token=token)
-    assert response['status'] == 200
+    assert response['status'] == 200, f'Failed to remove testing policies: {response}'
 
     # Remove testing roles
     response = hm.make_api_call(test_hosts[0], method='DELETE',
                                 endpoint='/security/roles?role_ids=', token=token)
-    assert response['status'] == 200
+    assert response['status'] == 200, f'Failed to remove testing roles: {response}'
