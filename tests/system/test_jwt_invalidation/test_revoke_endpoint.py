@@ -9,20 +9,14 @@ import pytest
 from wazuh_testing.tools.system import HostManager
 
 test_hosts = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]
-default_api_conf = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/api_config.yaml')
-actual_path = os.path.dirname(os.path.abspath(__file__))
-inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                               'provisioning', 'agentless_cluster', 'inventory.yml')
 
 
 host_manager = HostManager(inventory_path)
 
 
-@pytest.mark.parametrize('host', [
-    'wazuh-master',
-    'wazuh-worker1',
-    'wazuh-worker2'
-])
+@pytest.mark.parametrize('host', test_hosts)
 def test_revoke_all_tokens_with_api(host):
     """Test that every token gets revoked after making an API call to 'PUT /security/user/revoke'.
 
