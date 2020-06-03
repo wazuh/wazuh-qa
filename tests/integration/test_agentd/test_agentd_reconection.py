@@ -50,6 +50,19 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 authd_server = AuthdSimulator(params[0]['SERVER_ADDRESS'], key_path=SERVER_KEY_PATH, cert_path=SERVER_CERT_PATH)
 
+def set_debug_mode():
+    if platform.system() == 'win32' or platform.system() == 'Windows':
+        local_int_conf_path=os.path.join(WAZUH_PATH, 'local_internal_options.conf')
+        with  open(local_int_conf_path, 'r') as local_file_read:
+            lines = local_file_read.readlines()
+            for line in lines: 
+                if line == 'windows.debug=2\n':
+                    return
+        with  open(local_int_conf_path, 'a') as local_file_write:
+            local_file_write.write('\nwindows.debug=2\n')
+
+set_debug_mode()
+
 
 # fixtures
 @pytest.fixture(scope="module", params=configurations)
@@ -106,10 +119,10 @@ def wait_notify(line):
     return None 
 
 def wait_enrollment(line):
-        if 'Valid key created. Finished.' in line:
-            return line
-        return None
-
+    if 'Valid key created. Finished.' in line:
+        return line
+    return None
+      
 # Tests   
 def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_authd, set_authd_id, set_keys, clean_logs, configure_environment, restart_agentd, get_configuration):
     
@@ -125,6 +138,7 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_a
     try:
         log_monitor.start(timeout=120, callback=wait_notify) 
     except TimeoutError as err:
+        remoted_server.stop()
         raise AssertionError("Notify message from agent was never sent!")
     assert "aes" in remoted_server.last_message_ctx, "Incorrect Secure Message"
 
@@ -136,6 +150,7 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_a
     try:    
         log_monitor.start(timeout=180, callback=wait_enrollment)
     except TimeoutError as err:
+        remoted_server.stop()
         raise AssertionError("Agent never enrolled after rejecting connection!")
 
     #Start responding to Agent
@@ -144,6 +159,7 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_a
     try:
         log_monitor.start(timeout=120, callback=wait_notify) 
     except TimeoutError as err:
+        remoted_server.stop()
         raise AssertionError("Notify message from agent was never sent!")
     assert "aes" in remoted_server.last_message_ctx, "Incorrect Secure Message"
     
@@ -164,12 +180,14 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, star
     try:
         log_monitor.start(timeout=120, callback=wait_enrollment)
     except TimeoutError as err:
+        remoted_server.stop()
         raise AssertionError("Agent never enrolled for the first time rejecting connection!")     
     
     #Wait until Agent is notifing Manager
     try:
         log_monitor.start(timeout=120, callback=wait_notify) 
     except TimeoutError as err:
+        remoted_server.stop()
         raise AssertionError("Notify message from agent was never sent!")     
     assert "aes" in remoted_server.last_message_ctx, "Incorrect Secure Message"
 
@@ -181,6 +199,7 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, star
     try:    
         log_monitor.start(timeout=180, callback=wait_enrollment)
     except TimeoutError as err:
+        remoted_server.stop()
         raise AssertionError("Agent never enrolled after rejecting connection!")
 
     #Start responding to Agent
@@ -189,6 +208,7 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, star
     try:
         log_monitor.start(timeout=120, callback=wait_notify)
     except TimeoutError as err:
+        remoted_server.stop()
         raise AssertionError("Notify message from agent was never sent!")
     assert "aes" in remoted_server.last_message_ctx, "Incorrect Secure Message"
 
@@ -209,12 +229,14 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, start_aut
     try:
         log_monitor.start(timeout=120, callback=wait_enrollment)
     except TimeoutError as err:
+        remoted_server.stop()
         raise AssertionError("Agent never enrolled for the first time rejecting connection!")     
     
     #Wait until Agent is notifing Manager
     try:
         log_monitor.start(timeout=120, callback=wait_notify) 
     except TimeoutError as err:
+        remoted_server.stop()
         raise AssertionError("Notify message from agent was never sent!")     
     assert remoted_server.last_message_ctx == "by_id 101 aes", "Incorrect Secure Message"
 
@@ -226,6 +248,7 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, start_aut
     try:    
         log_monitor.start(timeout=180, callback=wait_enrollment)
     except TimeoutError as err:
+        remoted_server.stop()
         raise AssertionError("Agent never enrolled after rejecting connection!")
 
     #Start responding to Agent
@@ -234,6 +257,7 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, start_aut
     try:
         log_monitor.start(timeout=120, callback=wait_notify)
     except TimeoutError as err:
+        remoted_server.stop()
         raise AssertionError("Notify message from agent was never sent!")
     assert remoted_server.last_message_ctx == "by_id 102 aes", "Incorrect Secure Message"
 

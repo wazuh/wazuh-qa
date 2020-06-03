@@ -169,7 +169,7 @@ class RemotedSimulator:
                 break
         msg_removepadding = msg_decrypted[padding:]
         msg_decompress = zlib.decompress(msg_removepadding)
-        msg_decoded = msg_decompress.decode()
+        msg_decoded = msg_decompress.decode('ISO-8859-1')
         
         return msg_decoded
         
