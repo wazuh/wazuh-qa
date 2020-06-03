@@ -164,7 +164,6 @@ metadata = [
             ],
             [ 
                 f'Connected to the server ({SERVER_HOSTS[2]}/{SERVER_ADDRESS}:{REMOTED_PORTS[2]}',
-                f'Server responded. Releasing lock.',
                 f"Received message: '#!-agent ack '"
             ]
         ]
@@ -228,6 +227,8 @@ metadata = [
     },
 ]
 
+#metadata = [metadata[4]] # Run only one test
+
 params = [
 {
     'SERVER_ADDRESS_1': SERVER_HOSTS[0],
@@ -250,7 +251,7 @@ monitored_sockets_params = []
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
 authd_server = AuthdSimulator()
-
+remoted_servers = []
 
 # fixtures
 @pytest.fixture(scope="module", params=configurations)
@@ -275,12 +276,19 @@ def add_hostnames(request):
 
 
 @pytest.fixture(scope="module")
-def configure_authd_server(request):    
+def configure_authd_server(request, get_configuration):    
     global monitored_sockets
     monitored_sockets = QueueMonitor(authd_server.queue)
     authd_server.start()
     authd_server.set_mode('REJECT')
+    global remoted_servers
+    for i in range(0, get_configuration['metadata']['SIMULATOR_NUMBER']):
+        remoted_servers.append(RemotedSimulator(server_address=SERVER_ADDRESS, remoted_port=REMOTED_PORTS[i], protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK'))
     yield
+    #hearing on enrollment server   
+    for i in range(0, get_configuration['metadata']['SIMULATOR_NUMBER']):  
+        remoted_servers[i].stop()
+    remoted_servers = []
     authd_server.shutdown()
 
 @pytest.fixture(scope="function")
@@ -316,9 +324,6 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
     #start hearing logs
     log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    remoted_servers = []
-    for i in range(0, get_configuration['metadata']['SIMULATOR_NUMBER']):
-        remoted_servers.append(RemotedSimulator(server_address=SERVER_ADDRESS, remoted_port=REMOTED_PORTS[i], protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK'))
     #hearing on enrollment server   
 
     for stage in range(0, len(get_configuration['metadata']['LOG_MONITOR_STR'])):
@@ -347,10 +352,6 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
                 remoted_servers[i].start()
 
         authd_server.clear()
-
-    #hearing on enrollment server   
-    for i in range(0, get_configuration['metadata']['SIMULATOR_NUMBER']):  
-        remoted_servers[i].stop()
     return
 
     
