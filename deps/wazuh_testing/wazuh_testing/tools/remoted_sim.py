@@ -52,8 +52,6 @@ class RemotedSimulator:
         self.mode = mode 
         self.server_address = server_address
         self.remoted_port = remoted_port
-        self.listener_thread = threading.Thread(target=self.listener)
-        self.listener_thread.setName('listener_thread')
         self.last_message_ctx = ""
         self.running = False
         self.start()
@@ -62,13 +60,16 @@ class RemotedSimulator:
         if self.protocol == "tcp":
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.sock.settimeout(1)
             self.sock.bind((self.server_address,self.remoted_port))
             self.sock.listen(1) 
         elif self.protocol == "udp":
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.sock.bind((self.server_address,self.remoted_port))  
-        
+            self.sock.settimeout(1)
+            self.sock.bind((self.server_address,self.remoted_port)) 
+        self.listener_thread = threading.Thread(target=self.listener)
+        self.listener_thread.setName('listener_thread') 
         self.running = True  
         self.listener_thread.start() 
         
@@ -176,30 +177,37 @@ class RemotedSimulator:
         while self.running:   
             if self.protocol == 'tcp': 
                 # Wait for a connection          
-                connection, client_address = self.sock.accept()                
-                while self.running:                    
-                    rcv = connection.recv(65536) 
-                    if len(rcv) >= 4:
-                        data = rcv[4:]  
-                        data_len = ((rcv[3]&0xFF) << 24) | ((rcv[2]&0xFF) << 16) | ((rcv[1]&0xFF) << 8) | (rcv[0]&0xFF)
-                        if data_len == len(data):                            
-                            ret = self.process_message(client_address, data)
-                            # Response -1 means connection have to be closed
-                            if ret == -1:
-                                connection.close()
-                                break
-                            # If there is a response, answer it
-                            elif ret:
-                                self.send(connection, ret)
-                    else:
-                        pass
+                try:
+                    connection, client_address = self.sock.accept()  
+                    while self.running:                    
+                        rcv = connection.recv(65536) 
+                        if len(rcv) >= 4:
+                            data = rcv[4:]  
+                            data_len = ((rcv[3]&0xFF) << 24) | ((rcv[2]&0xFF) << 16) | ((rcv[1]&0xFF) << 8) | (rcv[0]&0xFF)
+                            if data_len == len(data):                            
+                                ret = self.process_message(client_address, data)
+                                # Response -1 means connection have to be closed
+                                if ret == -1:
+                                    connection.close()
+                                    break
+                                # If there is a response, answer it
+                                elif ret:
+                                    self.send(connection, ret)
+                        else:
+                            pass              
+                except socket.timeout:
+                    continue
+               
 
-            elif self.protocol == 'udp':                 
-                data, client_address = self.sock.recvfrom(65536)                
-                ret = self.process_message(client_address, data)
-                # If there is a response, answer it
-                if ret != None and ret != -1:
-                    self.send(client_address, ret)
+            elif self.protocol == 'udp':   
+                try:              
+                    data, client_address = self.sock.recvfrom(65536)                
+                    ret = self.process_message(client_address, data)
+                    # If there is a response, answer it
+                    if ret != None and ret != -1:
+                        self.send(client_address, ret)
+                except socket.timeout:
+                    continue
 
     def send(self, dst, data):
         self.update_counters()

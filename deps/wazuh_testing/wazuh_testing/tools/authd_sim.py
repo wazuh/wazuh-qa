@@ -1,5 +1,6 @@
 from wazuh_testing.tools.monitoring import ManInTheMiddle
 from wazuh_testing.tools.security import CertificateController
+import time
 import ssl
 
 class AuthdSimulator:
@@ -7,13 +8,14 @@ class AuthdSimulator:
     Creates a SSL server sockets for simulting authd connection
     """
     def __init__(self, 
-        server_address='127.0.0.1', enorllment_port=1515, key_path='/etc/manager.key', cert_path='/etc/manager.cert'):
+        server_address='127.0.0.1', enorllment_port=1515, key_path='/etc/manager.key', cert_path='/etc/manager.cert', initial_mode='ACCEPT'):
         self.mitm_enrollment = ManInTheMiddle(address=(server_address, enorllment_port), family='AF_INET', connection_protocol='SSL', func=self._process_enrollment_message)
         self.key_path = key_path
         self.cert_path = cert_path
         self.id_count = 1
         self.secret = 'TopSecret'
         self.controller = CertificateController()
+        self.mode = initial_mode
 
     def start(self):
         """
@@ -55,6 +57,14 @@ class AuthdSimulator:
     def agent_id(self, value):
         self.id_count = value
 
+    def set_mode(self, mode):
+        """
+        Sets a mode:
+        ACCEPT: Accepts connection and produces enrollment
+        REJECT: Waits 2 seconds and anwsers with an empty message
+        """
+        self.mode = mode
+
     def _process_enrollment_message(self, received):
         """ 
         Reads a message received at the SSL socket, and parses to emulate a authd response
@@ -64,6 +74,10 @@ class AuthdSimulator:
         Key response:
         OSSEC K: {id} {name} {ip} {key:64}
         """
+        if self.mode == 'REJECT':
+            time.sleep(2)
+            return ''
+
         agent_info = {
             'id' : self.id_count,
             'name': None,
