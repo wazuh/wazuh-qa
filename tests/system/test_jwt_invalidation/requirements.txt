@@ -5,7 +5,6 @@ jq==0.1.6
 jsonschema==3.2.0
 numpydoc==0.9.2
 lockfile==0.12.2
-pandas==1.0.1
 paramiko==2.7.1
 psutil==5.6.6
 pytest==4.5.0
