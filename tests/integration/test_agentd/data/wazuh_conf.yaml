@@ -42,3 +42,42 @@
                     value: REMOTED_PORT
                 - protocol:
                     value: PROTOCOL
+    - tags:
+      - all
+      apply_to_modules:
+      - test_agentd_multi_server
+      sections:
+      - section: client
+        elements:
+            - notify_time: 
+                value: 10
+            - time-reconnect: 
+                value: 60
+            - auto_restart:
+                value: 'yes'
+            - crypto_method:
+                value: 'aes'
+            - server:
+                elements:
+                - address: 
+                    value: SERVER_ADDRESS_1
+                - port:
+                    value: REMOTED_PORT_1
+                - protocol:
+                    value: PROTOCOL
+            - server:
+                elements:
+                - address: 
+                    value: SERVER_ADDRESS_2
+                - port:
+                    value: REMOTED_PORT_2
+                - protocol:
+                    value: PROTOCOL
+            - server:
+                elements:
+                - address: 
+                    value: SERVER_ADDRESS_3
+                - port:
+                    value: REMOTED_PORT_3
+                - protocol:
+                    value: PROTOCOL
