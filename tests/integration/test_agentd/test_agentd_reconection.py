@@ -14,6 +14,7 @@ from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
 from conftest import *
 from time import sleep
+from datetime import datetime, timedelta
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
@@ -84,6 +85,10 @@ def start_authd(request):
     authd_server.clear()
 
 @pytest.fixture(scope="function")
+def stop_authd(request):
+    authd_server.set_mode("REJECT")
+
+@pytest.fixture(scope="function")
 def set_authd_id(request):
     authd_server.agent_id = 101    
 
@@ -122,11 +127,16 @@ def wait_enrollment(line):
     if 'Valid key created. Finished.' in line:
         return line
     return None
+
+def wait_enrollment_try(line):
+    if 'Starting enrollment process' in line:
+        return line
+    return None
       
 # Tests   
 def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_authd, set_authd_id, set_keys, clean_logs, configure_environment, restart_agentd, get_configuration):
     
-    #Clean log to start hearing it
+    #Start hearing logs
     truncate_file(LOG_FILE_PATH)
     log_monitor = FileMonitor(LOG_FILE_PATH)
 
@@ -264,3 +274,52 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, start_aut
     remoted_server.stop()
 
     return
+
+def test_agentd_initial_enrollment_retries(configure_authd_server, stop_authd, set_authd_id, clean_keys, clean_logs, configure_environment, restart_agentd, get_configuration):
+    
+    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK', client_keys=CLIENT_KEYS_PATH)  
+    
+    #Start hearing logs    
+    log_monitor = FileMonitor(LOG_FILE_PATH)
+
+    start_time = datetime.now()
+    #Check for unsuccesful enrollment retries in Agentd initialization
+    retries = 0
+    while retries < 4:
+        retries += 1
+        try:
+            log_monitor.start(timeout=retries*5+2, callback=wait_enrollment_try) 
+        except TimeoutError as err:
+            remoted_server.stop()
+            raise AssertionError("Enrollment retry was not sent!")    
+    stop_time = datetime.now()
+    expected_time = start_time + timedelta(seconds=retries*5-2)  
+    #Check if delay was aplied    
+    assert stop_time > expected_time, "Retries to quick"
+
+    #Enable authd
+    authd_server.clear()
+    authd_server.set_mode("ACCEPT")
+    #Wait succesfull enrollment
+    try:
+        log_monitor.start(timeout=70, callback=wait_enrollment) 
+    except TimeoutError as err:
+        remoted_server.stop()
+        raise AssertionError("No succesful enrollment after reties!")    
+    
+    #Wait until Agent is notifing Manager
+    try:
+        log_monitor.start(timeout=120, callback=wait_notify) 
+    except TimeoutError as err:
+        remoted_server.stop()
+        raise AssertionError("Notify message from agent was never sent!")
+    assert "aes" in remoted_server.last_message_ctx, "Incorrect Secure Message"
+
+    #Check if no Wazuh module stoped due to Agentd Initialization
+    with open(LOG_FILE_PATH) as log_file:
+        log_lines = log_file.read().splitlines() 
+        for line in log_lines:
+            if "Unable to access queue:" in line:
+                raise AssertionError("A Wazuh module stoped because of Agentd initialization!")
+    
+    remoted_server.stop()
