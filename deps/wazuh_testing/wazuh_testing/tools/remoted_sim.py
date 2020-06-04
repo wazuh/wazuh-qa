@@ -213,10 +213,16 @@ class RemotedSimulator:
     def send(self, dst, data):
         self.update_counters()
         if self.protocol == "tcp":
-            length = pack('<I', len(data))
-            dst.send(length+data)
+            try:
+                length = pack('<I', len(data))
+                dst.send(length+data)
+            except:
+                pass
         elif self.protocol == "udp":
-            self.sock.sendto(data, dst)   
+            try:
+                self.sock.sendto(data, dst)   
+            except:
+                pass
     
     def process_message(self, source, received):
         #parse agent identifier and payload

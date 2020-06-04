@@ -51,16 +51,21 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 authd_server = AuthdSimulator(params[0]['SERVER_ADDRESS'], key_path=SERVER_KEY_PATH, cert_path=SERVER_CERT_PATH)
 
-def set_debug_mode():
+def set_debug_mode():    
     if platform.system() == 'win32' or platform.system() == 'Windows':
         local_int_conf_path=os.path.join(WAZUH_PATH, 'local_internal_options.conf')
-        with  open(local_int_conf_path, 'r') as local_file_read:
-            lines = local_file_read.readlines()
-            for line in lines: 
-                if line == 'windows.debug=2\n':
-                    return
-        with  open(local_int_conf_path, 'a') as local_file_write:
-            local_file_write.write('\nwindows.debug=2\n')
+        debug_line = '\nwindows.debug=2\n'
+    else:
+        local_int_conf_path=os.path.join(WAZUH_PATH,'etc', 'local_internal_options.conf')
+        debug_line = '\nagent.debug=2\n'
+
+    with  open(local_int_conf_path, 'r') as local_file_read:
+        lines = local_file_read.readlines()
+        for line in lines: 
+            if line == debug_line:
+                return
+    with  open(local_int_conf_path, 'a') as local_file_write:
+        local_file_write.write(debug_line)
 
 set_debug_mode()
 
@@ -114,9 +119,9 @@ def clean_logs(request):
 
 
 @pytest.fixture(scope="function")
-def restart_agentd(request):
-    control_service('stop', daemon="ossec-agentd")
-    control_service('start', daemon="ossec-agentd", debug_mode=True)
+def restart_agent(request):
+    control_service('stop')
+    control_service('start')
 
 def wait_notify(line):
     if 'Sending keep alive:' in line:
@@ -133,8 +138,8 @@ def wait_enrollment_try(line):
         return line
     return None
       
-# Tests   
-def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_authd, set_authd_id, set_keys, clean_logs, configure_environment, restart_agentd, get_configuration):
+# Tests 
+def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_authd, set_authd_id, set_keys, clean_logs, configure_environment, restart_agent, get_configuration):
     
     #Start hearing logs
     truncate_file(LOG_FILE_PATH)
@@ -177,7 +182,7 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_a
    
     return
 
-def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, start_authd, set_authd_id, delete_keys, clean_logs, configure_environment, restart_agentd, get_configuration):
+def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, start_authd, set_authd_id, delete_keys, clean_logs, configure_environment, restart_agent, get_configuration):
   
     #start hearing logs
     log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -226,7 +231,7 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, star
 
     return
 
-def test_agentd_reconection_enrollment_no_keys(configure_authd_server, start_authd, set_authd_id, clean_keys, clean_logs, configure_environment, restart_agentd, get_configuration):
+def test_agentd_reconection_enrollment_no_keys(configure_authd_server, start_authd, set_authd_id, clean_keys, clean_logs, configure_environment, restart_agent, get_configuration):
   
     #start hearing logs
     log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -275,7 +280,7 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, start_aut
 
     return
 
-def test_agentd_initial_enrollment_retries(configure_authd_server, stop_authd, set_authd_id, clean_keys, clean_logs, configure_environment, restart_agentd, get_configuration):
+def test_agentd_initial_enrollment_retries(configure_authd_server, stop_authd, set_authd_id, clean_keys, clean_logs, configure_environment, restart_agent, get_configuration):
     
     remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK', client_keys=CLIENT_KEYS_PATH)  
     
@@ -294,7 +299,7 @@ def test_agentd_initial_enrollment_retries(configure_authd_server, stop_authd, s
             raise AssertionError("Enrollment retry was not sent!")    
     stop_time = datetime.now()
     expected_time = start_time + timedelta(seconds=retries*5-2)  
-    #Check if delay was aplied    
+    #Check if delay was aplied   
     assert stop_time > expected_time, "Retries to quick"
 
     #Enable authd
