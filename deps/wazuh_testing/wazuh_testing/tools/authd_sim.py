@@ -76,7 +76,7 @@ class AuthdSimulator:
         """
         if self.mode == 'REJECT':
             time.sleep(2)
-            return ''
+            return 'ERROR'
 
         agent_info = {
             'id' : self.id_count,
