@@ -228,7 +228,7 @@ metadata = [
     },
 ]
 
-#metadata = [metadata[6]] # 0,2 Run only one test
+#metadata = metadata[0:4] # 0,2 Run only one test
 
 params = [
 {
@@ -316,7 +316,10 @@ def restart_agentd():
     control_service('start', daemon="ossec-agentd", debug_mode=True)
 
 # Tests
-      
+def wait_until(x, log_str):
+    print(x)
+    return x if log_str in x else None
+
 #@pytest.mark.parametrize('test_case', [case for case in tests])
 def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id, clean_keys, configure_environment, get_configuration):
     log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -340,9 +343,9 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
 
         for index, log_str in enumerate(get_configuration['metadata']['LOG_MONITOR_STR'][stage]):
             try:
-                log_monitor.start(timeout=120, callback=lambda x: x if log_str in x else None) 
+                log_monitor.start(timeout=120, callback=lambda x: wait_until(x, log_str)) 
             except TimeoutError as err:
-                raise AssertionError(f'Expected message {log_str} never arrived! Stage: {stage}, message number: {index}')     
+                assert False, f'Expected message {log_str} never arrived! Stage: {stage}, message number: {index}'     
         
 
         for i in range(0, get_configuration['metadata']['SIMULATOR_NUMBER']):

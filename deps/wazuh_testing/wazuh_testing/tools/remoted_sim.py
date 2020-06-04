@@ -187,7 +187,11 @@ class RemotedSimulator:
                             data = rcv[4:]  
                             data_len = ((rcv[3]&0xFF) << 24) | ((rcv[2]&0xFF) << 16) | ((rcv[1]&0xFF) << 8) | (rcv[0]&0xFF)
                             if data_len == len(data):                            
-                                ret = self.process_message(client_address, data)
+                                try:
+                                    ret = self.process_message(client_address, data)
+                                except Exception:
+                                    time.sleep(1)
+                                    connection.close()
                                 # Response -1 means connection have to be closed
                                 if ret == -1:
                                     time.sleep(1)
@@ -198,7 +202,7 @@ class RemotedSimulator:
                                     self.send(connection, ret)
                         else:
                             pass              
-                except socket.timeout:
+                except Exception:
                     continue
                
 

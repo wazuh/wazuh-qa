@@ -76,7 +76,8 @@ class AuthdSimulator:
         """
         if self.mode == 'REJECT':
             time.sleep(2)
-            return 'ERROR'
+            self.mitm_enrollment.event.set()
+            return b'ERROR'
 
         agent_info = {
             'id' : self.id_count,
