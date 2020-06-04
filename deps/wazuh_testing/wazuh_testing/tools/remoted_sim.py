@@ -246,8 +246,12 @@ class RemotedSimulator:
 
         #Update keys to encrypt/decrypt        
         self.update_keys()
-        (id, name, ip, key) = self.get_key()  
-        self.create_encryption_key(id, name, key) 
+        #TODO: Ask for specific keys depending on Agent Identifier
+        keys = self.get_key()
+        if keys == None:
+            #No valid keys
+            return -1
+        (id, name, ip, key) = keys
 
         #Decrypt message
         rcv_msg = self.decrypt_message(received, crypto_method) 
@@ -290,13 +294,16 @@ class RemotedSimulator:
                 self.keys[1][ip] = (id, name, ip, key)
     
     def get_key(self, key=None, dictionary="by_id"):
-        if key==None:            
-            return next(iter(self.keys[0].values()))
+        try:
+            if key==None:            
+                return next(iter(self.keys[0].values()))
 
-        if dictionary == "by_ip":
-            return self.keys[0][key]
-        else:
-            return self.keys[1][key]
+            if dictionary == "by_ip":
+                return self.keys[0][key]
+            else:
+                return self.keys[1][key]
+        except:
+            return None
 
     def set_mode(self, mode):
         self.mode = mode
