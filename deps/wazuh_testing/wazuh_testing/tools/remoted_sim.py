@@ -252,6 +252,7 @@ class RemotedSimulator:
             #No valid keys
             return -1
         (id, name, ip, key) = keys
+        self.create_encryption_key(id, name, key) 
 
         #Decrypt message
         rcv_msg = self.decrypt_message(received, crypto_method) 
