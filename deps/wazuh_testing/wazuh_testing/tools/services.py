@@ -106,7 +106,7 @@ def control_service(action, daemon=None, debug_mode=False):
             command = subprocess.run(["net", action, "OssecSvc"], stderr=subprocess.PIPE)
             result = command.returncode
             if command.returncode != 0:
-                if action == 'stop' and command.stderr.decode() == 'The Wazuh service is not started.':
+                if action == 'stop' and 'The Wazuh service is not started.' in command.stderr.decode():
                     result = 0
                 print(command.stderr.decode())
     else:  # Default Unix
