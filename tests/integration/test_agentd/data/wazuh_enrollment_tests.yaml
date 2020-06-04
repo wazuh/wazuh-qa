@@ -258,8 +258,8 @@
   configuration:
     port: -1515
 -
-  name: "Valid delay_after_enrollment 30"
-  description: "Check a valid delay_after_enrollment configurations 30"
+  name: "Valid delay_after_enrollment 10"
+  description: "Check a valid delay_after_enrollment configurations 10"
   skips:
     - agent-auth
   enrollment:

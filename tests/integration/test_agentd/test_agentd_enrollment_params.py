@@ -9,15 +9,17 @@ import yaml
 import socket
 import time
 import pdb
+import datetime
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH, WAZUH_CONF
 from wazuh_testing.fim import generate_params
 from conftest import *
+
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
@@ -75,19 +77,16 @@ def clean_log_file():
 
 def override_wazuh_conf(configuration):
     # Stop Wazuh
-    control_service('stop', daemon="ossec-agentd")
+    control_service('stop')
 
-    
     # Configuration for testing
     temp = get_temp_yaml(configuration)
     conf = load_wazuh_configurations(temp, __name__,)
     os.remove(temp)
     
-    
     test_config = set_section_wazuh_conf(conf[0]['sections'])
     # Set new configuration
     write_wazuh_conf(test_config)
-
     
     #reset_client_keys
     clean_client_keys_file()
@@ -96,11 +95,9 @@ def override_wazuh_conf(configuration):
     if configuration.get('password'):
         parser = AgentAuthParser()
         parser.add_password(password = configuration['password']['value'], isFile = True, path = configuration.get('authorization_pass_path'))
-    #reset password
-    #reset_password(set_password)
 
     # Start Wazuh
-    control_service('start', daemon="ossec-agentd")
+    control_service('start')
 
 def get_temp_yaml(param):
     temp = os.path.join(test_data_path,'temp.yaml')
@@ -123,14 +120,43 @@ def check_time_to_connect(timeout):
         if 'Trying to connect to server' in line:
             return line
         return None
-    initial_time = time.time()
+        
     log_monitor = FileMonitor(LOG_FILE_PATH)
     try:
         log_monitor.start(timeout=timeout + 2, callback=wait_connect)
     except TimeoutError:
         return -1
-    elapsed_time = time.time() - initial_time
+    
+    final_line = log_monitor.result()
+    initial_line = None
+    elapsed_time = None
+
+    with open(LOG_FILE_PATH , 'r') as log_file:
+        lines = log_file.readlines()
+        #find enrollment end
+        for line in lines:
+            if "ossec-agentd: INFO: Valid key created. Finished." in line:
+                if "ossec-agentd: INFO: Connection closed." in lines[lines.index(line) + 1]:
+                    initial_line = lines[lines.index(line) + 1]
+                    break
+    
+    if initial_line != None and final_line != None:
+        form = '%H:%M:%S'
+        initial_time = datetime.datetime.strptime(initial_line.split()[1], form).time()
+        final_time = datetime.datetime.strptime(final_line.split()[1], form).time()
+        initial_delta = datetime.timedelta(hours=initial_time.hour, minutes=initial_time.minute, seconds=initial_time.second)
+        final_delta = datetime.timedelta(hours=final_time.hour, minutes=final_time.minute, seconds=final_time.second)
+        elapsed_time = (final_delta - initial_delta).total_seconds()
+        
     return elapsed_time
+
+def check_log_error_conf():
+    with open(LOG_FILE_PATH , 'r') as log_file:
+        lines = log_file.readlines()
+        for line in lines:
+            if f"ERROR: (1202): Configuration error at '{WAZUH_CONF}'" in line:
+                return True
+    return False
     
         
 
@@ -148,6 +174,7 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
     except Exception as err:
         if not test_case.get('enrollment',{}).get('response'):
             # Expected to happen
+            assert True == check_log_error_conf(), 'Expected configuration error at ossec.conf file, fail log_check'
             return
         else:
             raise AssertionError(f'Configuration error at ossec.conf file')
@@ -155,7 +182,7 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
     if configuration.get('delay_after_enrollment') and test_case.get('enrollment',{}).get('response'):
         time_delay = configuration.get('delay_after_enrollment')
         elapsed = check_time_to_connect(time_delay)
-        assert ((time_delay-2) < elapsed) and (elapsed < (time_delay+2)), 'Expected elapsed time between enrollment and connect does not match'
+        assert ((time_delay-2) < elapsed) and (elapsed < (time_delay+2)), f'Expected elapsed time between enrollment and connect does not match, should be around {time_delay} sec.'
     
     #configuration = test_case.get('configuration', {})
     results = monitored_sockets.get_results(callback=(lambda y: [x.decode() for x in y]), timeout=1, accum_results=1)
