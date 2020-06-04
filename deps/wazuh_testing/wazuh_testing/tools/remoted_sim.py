@@ -5,6 +5,7 @@ import socket
 import sys
 import threading
 import struct
+import time
 from wazuh_testing.tools import WAZUH_PATH
 from Crypto.Cipher import AES, Blowfish
 from Crypto.Util.Padding import pad, unpad
@@ -189,6 +190,7 @@ class RemotedSimulator:
                                 ret = self.process_message(client_address, data)
                                 # Response -1 means connection have to be closed
                                 if ret == -1:
+                                    time.sleep(1)
                                     connection.close()
                                     break
                                 # If there is a response, answer it

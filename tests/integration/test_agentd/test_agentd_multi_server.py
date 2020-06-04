@@ -12,6 +12,7 @@ from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
+from conftest import *
 from time import sleep
 # Marks
 
@@ -156,11 +157,11 @@ metadata = [
         'LOG_MONITOR_STR' : [
             [
                 f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
-                f"Unable to connect to '{SERVER_ADDRESS}': 'Connection refused'",
+                f"Unable to connect to '{SERVER_ADDRESS}'",
             ],
             [ 
                 f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
-                f"Unable to connect to '{SERVER_ADDRESS}': 'Connection refused'",
+                f"Unable to connect to '{SERVER_ADDRESS}'",
             ],
             [ 
                 f'Connected to the server ({SERVER_HOSTS[2]}/{SERVER_ADDRESS}:{REMOTED_PORTS[2]}',
@@ -188,11 +189,11 @@ metadata = [
             ],
             [ 
                 f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
-                f"Unable to connect to '{SERVER_ADDRESS}': 'Connection refused'",
+                f"Unable to connect to '{SERVER_ADDRESS}'",
             ],
             [ 
                 f'Trying to connect to server ({SERVER_HOSTS[2]}/{SERVER_ADDRESS}:{REMOTED_PORTS[2]}',
-                f"Unable to connect to '{SERVER_ADDRESS}': 'Connection refused'",
+                f"Unable to connect to '{SERVER_ADDRESS}'",
                 f'Connected to the server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f'Server responded. Releasing lock.',
                 f"Received message: '#!-agent ack '"
@@ -227,7 +228,7 @@ metadata = [
     },
 ]
 
-#metadata = [metadata[4]] # Run only one test
+#metadata = [metadata[6]] # 0,2 Run only one test
 
 params = [
 {
@@ -250,7 +251,7 @@ monitored_sockets_params = []
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
-authd_server = AuthdSimulator()
+authd_server = AuthdSimulator(SERVER_ADDRESS, key_path=SERVER_KEY_PATH, cert_path=SERVER_CERT_PATH)
 remoted_servers = []
 
 # fixtures
@@ -261,7 +262,7 @@ def get_configuration(request):
 
 @pytest.fixture(scope="module")
 def add_hostnames(request):
-    HOSTFILE_PATH = '/etc/hosts' 
+    HOSTFILE_PATH = os.path.join(os.environ['SystemRoot'], 'system32', 'drivers', 'etc', 'hosts') if os.sys.platform == 'win32' else '/etc/hosts' 
     hostfile = None
     with open(HOSTFILE_PATH, "r") as f:
         hostfile = f.read()
@@ -283,7 +284,11 @@ def configure_authd_server(request, get_configuration):
     authd_server.set_mode('REJECT')
     global remoted_servers
     for i in range(0, get_configuration['metadata']['SIMULATOR_NUMBER']):
-        remoted_servers.append(RemotedSimulator(server_address=SERVER_ADDRESS, remoted_port=REMOTED_PORTS[i], protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK'))
+        remoted_servers.append(RemotedSimulator(server_address=SERVER_ADDRESS, remoted_port=REMOTED_PORTS[i], protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK', client_keys=CLIENT_KEYS_PATH))
+        # Set simulator mode for that stage
+        if get_configuration['metadata']['SIMULATOR_MODES'][i][0] != 'CLOSE':
+            remoted_servers[i].set_mode(get_configuration['metadata']['SIMULATOR_MODES'][i][0])
+
     yield
     #hearing on enrollment server   
     for i in range(0, get_configuration['metadata']['SIMULATOR_NUMBER']):  
@@ -297,34 +302,24 @@ def set_authd_id(request):
 
 @pytest.fixture(scope="function")
 def clean_keys(request, get_configuration):
-    client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
     if get_configuration['metadata'].get('CLEAN_KEYS', True):
-        truncate_file(client_keys_path)
+        truncate_file(CLIENT_KEYS_PATH)
         sleep(1)
     else:
-        with open(client_keys_path, 'w') as f:
+        with open(CLIENT_KEYS_PATH, 'w') as f:
             f.write("100 ubuntu-agent any TopSecret")
         sleep(1)
 
-@pytest.fixture(scope="function")
-def clean_logs(request):
-    truncate_file(LOG_FILE_PATH)
-
-
-@pytest.fixture(scope="function")
-def restart_agentd(request):
+def restart_agentd():
     control_service('stop', daemon="ossec-agentd")
+    truncate_file(LOG_FILE_PATH)
     control_service('start', daemon="ossec-agentd", debug_mode=True)
 
 # Tests
       
 #@pytest.mark.parametrize('test_case', [case for case in tests])
-def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id, clean_keys, clean_logs, configure_environment, restart_agentd, get_configuration):
-  
-    #start hearing logs
+def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id, clean_keys, configure_environment, get_configuration):
     log_monitor = FileMonitor(LOG_FILE_PATH)
-
-    #hearing on enrollment server   
 
     for stage in range(0, len(get_configuration['metadata']['LOG_MONITOR_STR'])):
 
@@ -338,6 +333,10 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
                 remoted_servers[i].set_mode(get_configuration['metadata']['SIMULATOR_MODES'][i][stage])
             else:
                 remoted_servers[i].stop()
+
+        if stage == 0:
+            # Restart at beggining of test
+            restart_agentd()
 
         for index, log_str in enumerate(get_configuration['metadata']['LOG_MONITOR_STR'][stage]):
             try:
