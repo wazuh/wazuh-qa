@@ -16,8 +16,8 @@ inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__
 host_manager = HostManager(inventory_path)
 
 
-@pytest.mark.parametrize('host', test_hosts)
-def test_revoke_all_tokens_with_api(host):
+@pytest.mark.parametrize('revoke_host', test_hosts)
+def test_revoke_all_tokens_with_api(revoke_host):
     """Test that every token gets revoked after making an API call to 'PUT /security/user/revoke'.
 
     Parameters
@@ -25,21 +25,21 @@ def test_revoke_all_tokens_with_api(host):
     host : str
         Host where the test will be run.
     """
-    def default_api_call(t_list, expected_code=200):
-        for token in t_list:
+    def default_api_call(token_dikt, expected_code=200):
+        for host, token in token_dikt.items():
             response = host_manager.make_api_call(host, endpoint='/agents', token=token)
             assert response['status'] == expected_code, f'API call failed. Response: {response}'
 
     # Get valid tokens
-    n_tokens = 2
-    token_list = [host_manager.get_api_token(host) for _ in range(n_tokens)]
+    tokens = {host: host_manager.get_api_token(host) for host in test_hosts}
 
-    # Make an API call with each token and assert we have permissions. Default endpoint is 'GET /'
-    default_api_call(token_list)
+    # Make an API call with each token and assert we have permissions
+    default_api_call(tokens)
 
-    # Invalid all tokens
-    host_manager.make_api_call(host, method='PUT', endpoint='/security/user/revoke', token=token_list[0])
+    # Invalid all tokens from one node
+    host_manager.make_api_call(revoke_host, method='PUT', endpoint='/security/user/revoke',
+                               token=tokens[revoke_host])
 
     # Assert our tokens are invalid now
-    default_api_call(token_list, expected_code=401)
+    default_api_call(tokens, expected_code=401)
 

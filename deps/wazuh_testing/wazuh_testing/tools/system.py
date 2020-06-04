@@ -226,9 +226,14 @@ class HostManager:
         API token : str
             Usable API token.
         """
-        return self.get_host(host).ansible('uri', f'url=https://localhost:{port}/v4/security/user/authenticate '
-                                                  f'user={user} password={password} method=GET validate_certs=no '
-                                                  f'force_basic_auth=yes', check=check)['json']['token']
+        try:
+            token_response = self.get_host(host).ansible('uri',
+                                                         f'url=https://localhost:{port}/v4/security/user/authenticate '
+                                                         f'user={user} password={password} method=GET validate_certs=no '
+                                                         f'force_basic_auth=yes', check=check)
+            return token_response['json']['token']
+        except KeyError:
+            raise KeyError(f'Failed to get token: {token_response}')
 
     def make_api_call(self, host, port=55000, method='GET', endpoint='/', request_body=None, token=None, check=False):
         """Make an API call to the specified host.
