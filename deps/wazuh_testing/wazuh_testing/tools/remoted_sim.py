@@ -219,10 +219,16 @@ class RemotedSimulator:
     def send(self, dst, data):
         self.update_counters()
         if self.protocol == "tcp":
-            length = pack('<I', len(data))
-            dst.send(length+data)
+            try:
+                length = pack('<I', len(data))
+                dst.send(length+data)
+            except:
+                pass
         elif self.protocol == "udp":
-            self.sock.sendto(data, dst)   
+            try:
+                self.sock.sendto(data, dst)   
+            except:
+                pass
     
     def process_message(self, source, received):
         #parse agent identifier and payload
@@ -244,7 +250,12 @@ class RemotedSimulator:
 
         #Update keys to encrypt/decrypt        
         self.update_keys()
-        (id, name, ip, key) = self.get_key()  
+        #TODO: Ask for specific keys depending on Agent Identifier
+        keys = self.get_key()
+        if keys == None:
+            #No valid keys
+            return -1
+        (id, name, ip, key) = keys
         self.create_encryption_key(id, name, key) 
 
         #Decrypt message
@@ -288,13 +299,16 @@ class RemotedSimulator:
                 self.keys[1][ip] = (id, name, ip, key)
     
     def get_key(self, key=None, dictionary="by_id"):
-        if key==None:            
-            return next(iter(self.keys[0].values()))
+        try:
+            if key==None:            
+                return next(iter(self.keys[0].values()))
 
-        if dictionary == "by_ip":
-            return self.keys[0][key]
-        else:
-            return self.keys[1][key]
+            if dictionary == "by_ip":
+                return self.keys[0][key]
+            else:
+                return self.keys[1][key]
+        except:
+            return None
 
     def set_mode(self, mode):
         self.mode = mode
