@@ -135,8 +135,8 @@ def check_time_to_connect(timeout):
         lines = log_file.readlines()
         #find enrollment end
         for line in lines:
-            if "ossec-agentd: INFO: Valid key created. Finished." in line:
-                if "ossec-agentd: INFO: Connection closed." in lines[lines.index(line) + 1]:
+            if "INFO: Valid key created. Finished." in line:
+                if "INFO: Connection closed." in lines[lines.index(line) + 1]:
                     initial_line = lines[lines.index(line) + 1]
                     break
     
