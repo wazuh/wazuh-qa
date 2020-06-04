@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import random
 import string
+import json
 
 
 def truncate_file(file_path):
@@ -81,11 +82,68 @@ def random_string(length, encode=None):
 
 
 def read_file(file_path):
+    """
+    Read file data
+
+    Parameters
+    ----------
+    file_path : str
+        File path where is located the file to read
+
+    Returns
+    -------
+    str
+        File string data
+    """
     with open(file_path) as f:
         data = f.read()
     return data
 
 
 def write_file(file_path, data):
+    """
+    Write data to file
+
+    Parameters
+    ----------
+    file_path : str
+        File path where is located the file to write
+    data : str
+        Data to write
+    """
     with open(file_path, 'w') as f:
         f.write(data)
+
+
+def read_json_file(file_path):
+    """
+    Read JSON file data
+
+    Parameters
+    ----------
+    file_path : str
+        File path where is located the JSON file to read
+
+    Returns
+    -------
+    dict
+        File JSON data
+    """
+    return json.loads(read_file(file_path))
+
+
+def write_json_file(file_path, data, ensure_ascii=False):
+    """
+    Write dict data to JSON file
+
+    Parameters
+    ----------
+    file_path : str
+        File path where is located the JSON file to write
+    data : dict
+        Data to write
+    ensure_ascii : boolean
+        If ensure_ascii is true, the output is guaranteed to have all incoming non-ASCII characters
+        escaped. If ensure_ascii is false, these characters will be output as-is.
+    """
+    write_file(file_path, json.dumps(data, indent=4, ensure_ascii=ensure_ascii))
