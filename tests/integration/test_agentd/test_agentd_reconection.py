@@ -65,7 +65,7 @@ def set_debug_mode():
             if line == debug_line:
                 return
     with  open(local_int_conf_path, 'a') as local_file_write:
-        local_file_write.write(debug_line)
+        local_file_write.write('\n'+debug_line)
 
 set_debug_mode()
 

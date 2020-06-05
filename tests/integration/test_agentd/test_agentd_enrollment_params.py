@@ -153,7 +153,7 @@ def check_log_error_conf():
     with open(LOG_FILE_PATH , 'r') as log_file:
         lines = log_file.readlines()
         for line in lines:
-            if f"ERROR: (1202): Configuration error at '{WAZUH_CONF}'" in line:
+            if f"ERROR: (1202): Configuration error" in line:
                 return line
     return None
     
@@ -173,7 +173,7 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
     except Exception as err:
         if not test_case.get('enrollment',{}).get('response'):
             # Expected to happen
-            assert 'ERROR: (1202): Configuration error at' in check_log_error_conf(), 'Expected configuration error at ossec.conf file, fail log_check'
+            assert check_log_error_conf() != None, 'Expected configuration error at ossec.conf file, fail log_check'
             return
         else:
             raise AssertionError(f'Configuration error at ossec.conf file')
