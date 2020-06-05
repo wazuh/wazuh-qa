@@ -87,6 +87,7 @@ def configure_authd_server(request):
 
 @pytest.fixture(scope="function")
 def start_authd(request):
+    authd_server.set_mode("ACCEPT")
     authd_server.clear()
 
 @pytest.fixture(scope="function")
