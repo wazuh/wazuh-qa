@@ -59,7 +59,10 @@ def check_client_keys_file():
         return None
 
     log_monitor = FileMonitor(LOG_FILE_PATH)
-    log_monitor.start(timeout=5, callback=wait_key_changes)
+    try:
+        log_monitor.start(timeout=5, callback=wait_key_changes)
+    except:
+        pass
     try:
         with open(CLIENT_KEYS_PATH) as client_file:
             client_line = client_file.readline()
