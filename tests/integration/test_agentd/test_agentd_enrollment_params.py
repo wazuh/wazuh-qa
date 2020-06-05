@@ -136,9 +136,8 @@ def check_time_to_connect(timeout):
         #find enrollment end
         for line in lines:
             if "INFO: Valid key created. Finished." in line:
-                if "INFO: Connection closed." in lines[lines.index(line) + 1]:
-                    initial_line = lines[lines.index(line) + 1]
-                    break
+                initial_line = line
+                break
     
     if initial_line != None and final_line != None:
         form = '%H:%M:%S'
@@ -155,8 +154,8 @@ def check_log_error_conf():
         lines = log_file.readlines()
         for line in lines:
             if f"ERROR: (1202): Configuration error at '{WAZUH_CONF}'" in line:
-                return True
-    return False
+                return line
+    return None
     
         
 
@@ -174,7 +173,7 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
     except Exception as err:
         if not test_case.get('enrollment',{}).get('response'):
             # Expected to happen
-            assert True == check_log_error_conf(), 'Expected configuration error at ossec.conf file, fail log_check'
+            assert 'ERROR: (1202): Configuration error at' in check_log_error_conf(), 'Expected configuration error at ossec.conf file, fail log_check'
             return
         else:
             raise AssertionError(f'Configuration error at ossec.conf file')
