@@ -77,7 +77,7 @@ def clean_log_file():
 
 def override_wazuh_conf(configuration):
     # Stop Wazuh
-    control_service('stop')
+    control_service('stop', daemon='ossec-agentd')
 
     # Configuration for testing
     temp = get_temp_yaml(configuration)
@@ -96,8 +96,11 @@ def override_wazuh_conf(configuration):
         parser = AgentAuthParser()
         parser.add_password(password = configuration['password']['value'], isFile = True, path = configuration.get('authorization_pass_path'))
 
-    # Start Wazuh
-    control_service('start')
+    try:
+        # Start Wazuh
+        control_service('start', daemon='ossec-agentd')
+    except:
+        raise Exception
 
 def get_temp_yaml(param):
     temp = os.path.join(test_data_path,'temp.yaml')
@@ -149,11 +152,11 @@ def check_time_to_connect(timeout):
         
     return elapsed_time
 
-def check_log_error_conf():
+def check_log_error_conf(msg):
     with open(LOG_FILE_PATH , 'r') as log_file:
         lines = log_file.readlines()
         for line in lines:
-            if f"ERROR: (1202): Configuration error" in line:
+            if msg in line:
                 return line
     return None
     
@@ -171,9 +174,10 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
     try:
         override_wazuh_conf(configuration)
     except Exception as err:
-        if not test_case.get('enrollment',{}).get('response'):
+        #import pdb; pdb.set_trace()
+        if test_case.get('expected_error') and not test_case.get('enrollment',{}).get('response'):
             # Expected to happen
-            assert check_log_error_conf() != None, 'Expected configuration error at ossec.conf file, fail log_check'
+            assert check_log_error_conf(test_case.get('expected_error')) != None, 'Expected configuration error at ossec.conf file, fail log_check'
             return
         else:
             raise AssertionError(f'Configuration error at ossec.conf file')
@@ -191,5 +195,7 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
         assert results[1] == test_case['enrollment']['response'].format(**DEFAULT_VALUES), 'Expected response message does not match'
         assert results[1] == check_client_keys_file(), 'Client key does not match'
     else:
+        # Expected to happen
+        assert check_log_error_conf(test_case.get('expected_error')) != None, 'Expected configuration error at ossec.conf file, fail log_check'
         assert len(results) == 0, 'Enrollment message was not expected!'
     return

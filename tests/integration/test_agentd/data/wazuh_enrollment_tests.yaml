@@ -27,11 +27,13 @@
   description: "Check a invalid CIDR agent_address in auto enrollment configuration"
   configuration:
     agent_address: "192.168.0.10/100"
+  expected_error: "ERROR: (4104): Invalid hostname: '192.168.0.10/100'."
 -
   name: "Invalid Agent address"
   description: "Check a invalid agent_address in auto enrollment configuration"
   configuration:
     agent_address: "192.168.0.1000"
+  expected_error: "ERROR: (4104): Invalid hostname: '192.168.0.1000'."
 -
   name: "Valid manager address"
   description: "Check a valid manager_address configurations"
@@ -65,6 +67,7 @@
     - agent-auth
   configuration:
     enabled: "nn"
+  expected_error: "ERROR: Invalid content for tag 'enabled'."
 -
   name: "Valid agent name config"
   description: "Check a valid agent_name configurations"
@@ -86,16 +89,19 @@
   description: "Check a invalid agent_name configurations"
   configuration:
     agent_name: "test_agent/+bad"
+  expected_error: "ERROR: Invalid agent name"
 -
   name: "Invalid agent name config - too short"
   description: "Check a invalid agent_name configurations too short"
   configuration:
-    agent_name: "n" 
+    agent_name: "n"
+  expected_error: "ERROR: Invalid agent name"
 -
   name: "Invalid agent name config - too long"
   description: "Check a invalid agent_name configurations too long"
   configuration:
     agent_name: "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn" 
+  expected_error: "ERROR: Invalid agent name"
 -
   name: "SSL - Auto Negotiation"
   description: "Try auto negotiation option"
@@ -114,6 +120,7 @@
   configuration:
     agent_name: "test_agent_1"
     auto_method: "no"
+  expected_error: "ERROR: SSL error (1). Connection refused by the manager."
 -
   name: "SSL - Compatible Ciphers"
   description: "Try connecting with Compatible ciphers"
@@ -129,6 +136,7 @@
   configuration:
     agent_name: "test_agent_3"
     ssl_cipher: "CAMELLIA"
+  expected_error: "ERROR: SSL error (1). Connection refused by the manager."
 -
   name: "Manager Verification - Valid Cert"
   description: "Try validating server with a valid certificate"
@@ -149,6 +157,7 @@
   configuration:
     agent_name: "test_agent_3"
     server_ca_path: "{SERVER_PEM_PATH}"
+  expected_error: "ERROR: SSL error (1). Connection refused by the manager."
 -
   name: "Agent Verification - Valid Cert"
   description: "Try validating agent with an invalid certificate"
@@ -171,6 +180,7 @@
     agent_name: "test_agent_5"
     agent_certificate_path: "{AGENT_CERT_PATH}"
     agent_key_path: "{AGENT_KEY_PATH}"
+  expected_error: "ERROR: SSL error (1). Connection refused by the manager."
 -
   name: "Use source IP"
   description: "Check that source IP is sent by agent"
@@ -187,6 +197,7 @@
     agent_name: "test_agent_6"
     use_source_ip: "yes"
     agent_address: "127.0.0.1"
+  expected_error: "ERROR: Incompatible sender_ip options: Forcing IP while using use_source_ip flag."
 -
   name: "Password from string - Agent-Auth"
   description: "Check that configured password is sent on string"
@@ -243,6 +254,7 @@
     - agent-auth
   configuration:
     port: 65536
+  expected_error: "(1205): Invalid port number: '65536'"
 -
   name: "Invalid port 0"
   description: "Check a invalid port configurations 0"
@@ -250,6 +262,7 @@
     - agent-auth
   configuration:
     port: 0
+  expected_error: "(1205): Invalid port number: '0'"
 -
   name: "Invalid port -1515"
   description: "Check a invalid port configurations -1515"
@@ -257,6 +270,7 @@
     - agent-auth
   configuration:
     port: -1515
+  expected_error: "ERROR: (1235): Invalid value for element 'port': -1515."
 -
   name: "Valid delay_after_enrollment 10"
   description: "Check a valid delay_after_enrollment configurations 10"
@@ -274,6 +288,7 @@
     - agent-auth
   configuration:
     delay_after_enrollment: -30
+  expected_error: "(1235): Invalid value for element 'delay_after_enrollment': -30."
 -
   name: "All"
   description: "Check enrollment with all parameters configurations"
