@@ -54,10 +54,10 @@ authd_server = AuthdSimulator(params[0]['SERVER_ADDRESS'], key_path=SERVER_KEY_P
 def set_debug_mode():    
     if platform.system() == 'win32' or platform.system() == 'Windows':
         local_int_conf_path=os.path.join(WAZUH_PATH, 'local_internal_options.conf')
-        debug_line = '\nwindows.debug=2\n'
+        debug_line = 'windows.debug=2\n'
     else:
         local_int_conf_path=os.path.join(WAZUH_PATH,'etc', 'local_internal_options.conf')
-        debug_line = '\nagent.debug=2\n'
+        debug_line = 'agent.debug=2\n'
 
     with  open(local_int_conf_path, 'r') as local_file_read:
         lines = local_file_read.readlines()
