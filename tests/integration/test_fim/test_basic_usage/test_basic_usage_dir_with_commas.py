@@ -48,7 +48,7 @@ def get_configuration(request):
     dir1,
     dir2,
 ])
-def test_tag_directories(directory, get_configuration, put_env_variables, configure_environment,
+def test_directories_with_commas(directory, get_configuration, put_env_variables, configure_environment,
                          restart_syscheckd, wait_for_initial_scan):
     """
     Test alerts are generated when monitor environment variables
