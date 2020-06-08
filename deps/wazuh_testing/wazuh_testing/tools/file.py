@@ -82,53 +82,17 @@ def random_string(length, encode=None):
 
 
 def read_file(file_path):
-    """
-    Read file data
-
-    Parameters
-    ----------
-    file_path : str
-        File path where is located the file to read
-
-    Returns
-    -------
-    str
-        File string data
-    """
     with open(file_path) as f:
         data = f.read()
     return data
 
 
 def write_file(file_path, data):
-    """
-    Write data to file
-
-    Parameters
-    ----------
-    file_path : str
-        File path where is located the file to write
-    data : str
-        Data to write
-    """
     with open(file_path, 'w') as f:
         f.write(data)
 
 
 def read_json_file(file_path):
-    """
-    Read JSON file data
-
-    Parameters
-    ----------
-    file_path : str
-        File path where is located the JSON file to read
-
-    Returns
-    -------
-    dict
-        File JSON data
-    """
     return json.loads(read_file(file_path))
 
 
