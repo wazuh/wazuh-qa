@@ -9,6 +9,7 @@ import pytest
 
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools import PREFIX
+from wazuh_testing import global_parameters
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_event, callback_ignore, create_file,
                                REGULAR, generate_params, check_time_travel)
@@ -71,7 +72,7 @@ def test_tag_ignore(directory, event_generated, get_configuration, configure_env
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
 
     if event_generated:
-        event = wazuh_log_monitor.start(timeout=10,
+        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_detect_event,
                                         error_message='Did not receive expected '
                                                       '"Sending FIM event: ..." event').result()
@@ -79,7 +80,7 @@ def test_tag_ignore(directory, event_generated, get_configuration, configure_env
         assert event['data']['path'] == os.path.join(directory, filename), f'Event path not equal'
     else:
         while True:
-            ignored_file = wazuh_log_monitor.start(timeout=10,
+            ignored_file = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                    callback=callback_ignore).result()
             if ignored_file == os.path.join(directory, filename):
                 break
