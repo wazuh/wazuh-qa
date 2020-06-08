@@ -15,7 +15,7 @@ from wazuh_testing.tools.monitoring import QueueMonitor
 from conftest import *
 # Marks
 
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
+pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]
 
 SERVER_ADDRESS = '127.0.0.1'
 REMOTED_PORT = 1514

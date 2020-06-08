@@ -30,12 +30,11 @@ catalog = list()
 
 def pytest_runtest_setup(item):
     # Find if platform applies
-    #Here, plataform not match 
     supported_platforms = PLATFORMS.intersection(mark.name for mark in item.iter_markers())
     plat = sys.platform
     
-    #if supported_platforms and plat not in supported_platforms:
-    #    pytest.skip("Cannot run on platform {}".format(plat))
+    if supported_platforms and plat not in supported_platforms:
+        pytest.skip("Cannot run on platform {}".format(plat))
 
     host_type = 'agent' if 'agent' in WAZUH_SERVICE else 'server'
     supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())

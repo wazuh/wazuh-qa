@@ -20,7 +20,7 @@ SERVER_ADDRESS = '127.0.0.1'
 REMOTED_PORTS = [1514, 1516, 1517]
 SERVER_HOSTS = ['testServer1', 'testServer2', 'testServer3']
 
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
+pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')

@@ -586,19 +586,17 @@ class DatagramServerPort(socketserver.ThreadingUDPServer):
     pass
 
 
-#if hasattr(socketserver, 'ThreadingUnixStreamServer'):
+if hasattr(socketserver, 'ThreadingUnixStreamServer'):
 
-#class StreamServerUnix(socketserver.ThreadingUnixStreamServer):
-class StreamServerUnix(socketserver.ThreadingMixIn):
+    class StreamServerUnix(socketserver.ThreadingUnixStreamServer):
 
-    def shutdown_request(self, request):
-        pass
+        def shutdown_request(self, request):
+            pass
 
-#class DatagramServerUnix(socketserver.ThreadingUnixStreamServer):
-class DatagramServerUnix(socketserver.ThreadingMixIn):
+    class DatagramServerUnix(socketserver.ThreadingUnixStreamServer):
 
-    def shutdown_request(self, request):
-        pass
+        def shutdown_request(self, request):
+            pass
 
 
 class StreamHandler(socketserver.BaseRequestHandler):
@@ -733,11 +731,11 @@ class ManInTheMiddle:
         class_tree = {
             'listener': {
                 'tcp': {
-                    'AF_UNIX': StreamServerUnix,
+                    #'AF_UNIX': StreamServerUnix,
                     'AF_INET': StreamServerPort
                 },
                 'udp': {
-                    'AF_UNIX': DatagramServerUnix,
+                    #'AF_UNIX': DatagramServerUnix,
                     'AF_INET': DatagramServerPort
                 },
                 'ssl' : {
@@ -750,6 +748,9 @@ class ManInTheMiddle:
                 'ssl': StreamHandler
             }
         }
+        if hasattr(socketserver, 'ThreadingUnixStreamServer'):
+            class_tree['listener']['tcp']['AF_UNIX'] = StreamServerUnix
+            class_tree['listener']['udp']['AF_UNIX'] = DatagramServerUnix
 
         self.listener_class = class_tree['listener'][self.mode][self.family]
         self.handler_class = class_tree['handler'][self.mode]
