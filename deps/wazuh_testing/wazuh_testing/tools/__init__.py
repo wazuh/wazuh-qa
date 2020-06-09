@@ -27,7 +27,7 @@ else:
     WAZUH_PATH = os.path.join('/', 'var', 'ossec')
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
-    WAZUH_RBAC_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'rbac.yaml')
+    WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
