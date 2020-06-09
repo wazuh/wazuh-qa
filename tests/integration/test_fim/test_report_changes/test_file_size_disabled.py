@@ -9,6 +9,7 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_file_size_limit_reached, generate_params, create_file, \
     check_time_travel
+from test_fim.test_report_changes.common import generateString
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -16,12 +17,10 @@ from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
-
 pytestmark = [pytest.mark.tier(level=1)]
 
 
 # Variables
-
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_directories = [os.path.join(PREFIX, 'testdir1')]
@@ -32,7 +31,6 @@ testdir1 = test_directories[0]
 
 
 # Configurations
-
 
 conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': 'yes'},
                                                            'TEST_DIRECTORIES': directory_str,
@@ -47,44 +45,13 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 # Fixtures
 
-
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
 
-# Functions
-
-
-def generateString(stringLength=10, character='0'):
-    """Generate a string with line breaks.
-
-    Parameters
-    ----------
-    stringLength : int
-        Number of characters to add in the string.
-    character : str
-         Character to be added.
-
-    Returns
-    -------
-    random_str : str
-        String with line breaks.
-    """
-    random_str = ''
-
-    for i in range(stringLength):
-        random_str += character
-
-        if i % 127 == 0:
-            random_str += '\n'
-
-    return random_str
-
-
 # Tests
-
 
 @pytest.mark.parametrize('tags_to_apply', [
     {'ossec_conf_diff'}

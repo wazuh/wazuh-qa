@@ -13,6 +13,7 @@ import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, REGULAR, create_file, \
     generate_params, check_time_travel
+from test_fim.test_report_changes.common import generateString
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX, WAZUH_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -56,31 +57,6 @@ def get_configuration(request):
 
 # Functions
 
-def generateString(stringLength=10, character='0'):
-    """Generate a string with line breaks.
-
-    Parameters
-    ----------
-    stringLength : int
-        Number of characters to add in the string.
-    character : str
-         Character to be added.
-
-    Returns
-    -------
-    random_str : str
-        String with line breaks.
-    """
-    random_str = ''
-
-    for i in range(stringLength):
-        random_str += character
-
-        if i % 127 == 0:
-            random_str += '\n'
-
-    return random_str
-
 
 def extra_configuration_before_yield():
     """Create a folder to store diff files unzipped"""
@@ -90,6 +66,7 @@ def extra_configuration_before_yield():
 def extra_configuration_after_yield():
     """Delete the folder after the test"""
     shutil.rmtree(unzip_diff_dir, ignore_errors=True)
+
 
 # Tests
 
