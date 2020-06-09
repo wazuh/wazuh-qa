@@ -1,9 +1,9 @@
 ---
 - tags:
   - short_exp_time
-  configuration:
+  rbac_config:
     auth_token_exp_timeout: 8
 - tags:
   - long_exp_time
-  configuration:
+  rbac_config:
     auth_token_exp_timeout: 800

@@ -56,7 +56,7 @@ def test_jwt_token_exp_timeout(tags_to_apply, get_configuration, configure_api_e
         f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
 
     # Request manager info after token expires.
-    time.sleep(min(get_configuration['configuration']['auth_token_exp_timeout'] + 2, 10))
+    time.sleep(min(get_configuration['rbac_config']['auth_token_exp_timeout'] + 2, 10))
     get_response = requests.get(api_details['base_url'], headers=api_details['auth_headers'], verify=False)
 
     # If token has expired, user can't access that information.
