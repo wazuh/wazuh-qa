@@ -8,7 +8,6 @@ import subprocess
 import yaml
 import socket
 import time
-import pdb
 import datetime
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -174,7 +173,6 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
     try:
         override_wazuh_conf(configuration)
     except Exception as err:
-        #import pdb; pdb.set_trace()
         if test_case.get('expected_error') and not test_case.get('enrollment',{}).get('response'):
             # Expected to happen
             assert check_log_error_conf(test_case.get('expected_error')) != None, 'Expected configuration error at ossec.conf file, fail log_check'
@@ -187,10 +185,8 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
         elapsed = check_time_to_connect(time_delay)
         assert ((time_delay-2) < elapsed) and (elapsed < (time_delay+2)), f'Expected elapsed time between enrollment and connect does not match, should be around {time_delay} sec.'
     
-    #configuration = test_case.get('configuration', {})
     results = monitored_sockets.get_results(callback=(lambda y: [x.decode() for x in y]), timeout=1, accum_results=1)
     if test_case.get('enrollment') and test_case['enrollment'].get('response'):
-        #import pdb; pdb.set_trace()
         assert results[0] == build_expected_request(configuration), 'Expected enrollment request message does not match'
         assert results[1] == test_case['enrollment']['response'].format(**DEFAULT_VALUES), 'Expected response message does not match'
         assert results[1] == check_client_keys_file(), 'Client key does not match'

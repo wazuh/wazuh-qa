@@ -731,11 +731,9 @@ class ManInTheMiddle:
         class_tree = {
             'listener': {
                 'tcp': {
-                    #'AF_UNIX': StreamServerUnix,
                     'AF_INET': StreamServerPort
                 },
                 'udp': {
-                    #'AF_UNIX': DatagramServerUnix,
                     'AF_INET': DatagramServerPort
                 },
                 'ssl' : {
