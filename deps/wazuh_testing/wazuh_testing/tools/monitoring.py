@@ -396,6 +396,7 @@ class QueueMonitor:
         if not self._continue:
             self._continue = True
             self._abort = False
+            result = None
 
             while self._continue:
                 if self._abort:
@@ -403,7 +404,7 @@ class QueueMonitor:
                     if error_message:
                         logger.error(error_message)
                         logger.error(f"Results accumulated: "
-                                     f"{len(self._result) if isinstance(self._result, list) else 0}")
+                                     f"{len(result) if isinstance(result, list) else 0}")
                         logger.error(f"Results expected: {accum_results}")
                     raise TimeoutError()
                 result = self.get_results(callback=callback, accum_results=accum_results, timeout=timeout,
