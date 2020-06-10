@@ -20,7 +20,8 @@ def control_wazuh_services(node, state=None):
     """Control Wazuh services with `command` insteand of `service` due to incompatibility."""
     host_manager.get_host(node).ansible('command', f'service wazuh-manager {state}', check=False)
     host_manager.get_host(node).ansible('command', f'service wazuh-api {state}', check=False)
-    time.sleep(5)
+    if 'start' in state:
+        time.sleep(10)
 
 
 # Clean environment in case the test fails
