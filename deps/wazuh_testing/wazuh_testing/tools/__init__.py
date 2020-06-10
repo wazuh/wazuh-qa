@@ -2,9 +2,10 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import grp
 import os
+import pwd
 import sys
-
 
 if sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
@@ -26,11 +27,14 @@ else:
     WAZUH_PATH = os.path.join('/', 'var', 'ossec')
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
+    WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
     GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
     PREFIX = os.sep
+    OSSEC_UID = pwd.getpwnam("ossec").pw_uid
+    OSSEC_GID = grp.getgrnam("ossec").gr_gid
 
 if sys.platform == 'darwin' or sys.platform == 'win32' or sys.platform == 'sunos5':
     WAZUH_SERVICE = 'wazuh.agent'

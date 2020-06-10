@@ -10,8 +10,8 @@ import pytest
 
 from wazuh_testing.api import callback_detect_api_start, get_base_url, get_token_login_api, API_HOST, \
     API_LOGIN_ENDPOINT, API_PASS, API_PORT, API_USER, API_PROTOCOL, API_VERSION
-from wazuh_testing.tools import API_LOG_FILE_PATH, WAZUH_PATH, WAZUH_API_CONF
-from wazuh_testing.tools.configuration import get_api_conf, write_api_conf
+from wazuh_testing.tools import API_LOG_FILE_PATH, WAZUH_PATH, WAZUH_API_CONF, WAZUH_SECURITY_CONF
+from wazuh_testing.tools.configuration import get_api_conf, write_api_conf, write_security_conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -23,8 +23,18 @@ def configure_api_environment(get_configuration, request):
     # Save current configuration
     backup_config = get_api_conf(WAZUH_API_CONF)
 
+    # Save current security config
+    backup_security_config = get_api_conf(WAZUH_SECURITY_CONF) if os.path.exists(WAZUH_SECURITY_CONF) else None
+
     # Set new configuration
-    write_api_conf(WAZUH_API_CONF, get_configuration.get('configuration'))
+    api_config = get_configuration.get('configuration', None)
+    if api_config:
+        write_api_conf(WAZUH_API_CONF, api_config)
+
+    # Set security configuration
+    security_config = get_configuration.get('security_config', None)
+    if security_config:
+        write_security_conf(WAZUH_SECURITY_CONF, security_config)
 
     # Create test directories
     if hasattr(request.module, 'test_directories'):
@@ -47,7 +57,14 @@ def configure_api_environment(get_configuration, request):
             shutil.rmtree(test_dir, ignore_errors=True)
 
     # Restore previous configuration
-    write_api_conf(WAZUH_API_CONF, backup_config)
+    if backup_config:
+        write_api_conf(WAZUH_API_CONF, backup_config)
+
+    # Restore previous RBAC configuration
+    if backup_security_config:
+        write_security_conf(WAZUH_SECURITY_CONF, backup_security_config)
+    elif security_config and not backup_security_config:
+        os.remove(WAZUH_SECURITY_CONF)
 
     # Call extra functions after yield
     if hasattr(request.module, 'extra_configuration_after_yield'):
