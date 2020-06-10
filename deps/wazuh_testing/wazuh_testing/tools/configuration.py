@@ -13,7 +13,7 @@ import pytest
 import yaml
 
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, OSSEC_UID, OSSEC_GID
+from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
@@ -183,6 +183,8 @@ def write_security_conf(path: str, security_conf: dict):
         Dictionary to be written in the security.yaml file.
     """
     if not os.path.exists(path):
+        from wazuh_testing.tools import OSSEC_UID, OSSEC_GID
+
         open(path, mode='w').close()
         os.chown(uid=OSSEC_UID, gid=OSSEC_GID, path=path)
     write_api_conf(path, security_conf)
