@@ -20,12 +20,6 @@
     dest: /wazuh
     version: "{{ wazuh_branch }}"
 
-# Remove this task when Python 3.8 is merged
-- name: "Prevent errors when installing Python"
-  replace:
-    path: "/wazuh/src/Makefile"
-    regexp: --index-url=file:\/\/\${ROUTE_PATH}\/\${EXTERNAL_CPYTHON}\/Dependencies\/simple
-
 - name: Install master
   args:
     chdir: /wazuh
