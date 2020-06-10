@@ -27,3 +27,31 @@ def generateString(stringLength=10, character='0'):
             random_str += '\n'
 
     return random_str
+
+
+def translate_size(configured_size='1KB'):
+    """
+    Translate the configured size from string to number in bytes.
+
+    Parameters
+    ----------
+    configured_size: str
+        Configured size to translate.
+
+    Returns
+    -------
+    translated_size: int
+        Configured value in bytes.
+    """
+    translated_size = 0
+    configured_value = int(configured_size[:-2])     # Store value ignoring the data unit
+    data_unit = str(configured_size[-2:])
+
+    if data_unit == 'KB':
+        translated_size = configured_value * 1024
+    elif data_unit == 'MB':
+        translated_size = configured_value * 1024 * 1024
+    elif data_unit == 'GB':
+        translated_size = configured_value * 1024 * 1024
+
+    return translated_size
