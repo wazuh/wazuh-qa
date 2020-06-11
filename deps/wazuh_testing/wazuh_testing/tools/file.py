@@ -10,6 +10,7 @@ import filetype
 import requests
 import gzip
 import bz2
+from os.path import exists
 
 
 def truncate_file(file_path):
@@ -119,25 +120,21 @@ def write_json_file(file_path, data, ensure_ascii=False):
     write_file(file_path, json.dumps(data, indent=4, ensure_ascii=ensure_ascii))
 
 
-def check_file_exist(file_path):
-    return os.path.exists(file_path)
-
-
 def download_file(source_url, dest_path):
-    r = requests.get(source_url, allow_redirects=True)
-    with open(dest_path, 'wb') as f:
-        f.write(r.content)
+    request = requests.get(source_url, allow_redirects=True)
+    with open(dest_path, 'wb') as dest_file:
+        dest_file.write(request.content)
 
 
 def remove_file(file_path):
-    if check_file_exist(file_path):
+    if exists(file_path):
         os.remove(file_path)
 
 
 def validate_json_file(file_path):
     try:
-        with open(file_path) as f:
-            json.loads(f.read())
+        with open(file_path) as file:
+            json.loads(file.read())
         return True
     except json.decoder.JSONDecodeError:
         return False
@@ -151,14 +148,10 @@ def validate_xml_file(file_path):
         return False
 
 
-def get_file_extension(file_path):
-    if check_file_exist(file_path) and filetype.guess(file_path) is not None:
-        return filetype.guess(file_path).extension
-
-
-def get_file_mime_type(file_path):
-    if check_file_exist(file_path) and filetype.guess(file_path) is not None:
-        return filetype.guess(file_path).mime
+def get_file_info(file_path, info_type="extension"):
+    if exists(file_path) and filetype.guess(file_path) is not None:
+        file = filetype.guess(file_path)
+        return file.extension if info_type == "extension" else file.mime
 
 
 def decompress_gzip(gzip_file_path, dest_file_path):
