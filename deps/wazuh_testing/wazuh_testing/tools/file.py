@@ -4,6 +4,12 @@
 import random
 import string
 import json
+import os
+import xml.etree.ElementTree as ET
+import filetype
+import requests
+import gzip
+import bz2
 
 
 def truncate_file(file_path):
@@ -111,3 +117,55 @@ def write_json_file(file_path, data, ensure_ascii=False):
         escaped. If ensure_ascii is false, these characters will be output as-is.
     """
     write_file(file_path, json.dumps(data, indent=4, ensure_ascii=ensure_ascii))
+
+
+def check_file_exist(file_path):
+    return os.path.exists(file_path)
+
+
+def download_file(source_url, dest_path):
+    r = requests.get(source_url, allow_redirects=True)
+    with open(dest_path, 'wb') as f:
+        f.write(r.content)
+
+
+def remove_file(file_path):
+    if check_file_exist(file_path):
+        os.remove(file_path)
+
+
+def validate_json_file(file_path):
+    try:
+        with open(file_path) as f:
+            json.loads(f.read())
+        return True
+    except json.decoder.JSONDecodeError:
+        return False
+
+
+def validate_xml_file(file_path):
+    try:
+        ET.parse(file_path)
+        return True
+    except ET.ParseError:
+        return False
+
+
+def get_file_extension(file_path):
+    if check_file_exist(file_path) and filetype.guess(file_path) is not None:
+        return filetype.guess(file_path).extension
+
+
+def get_file_mime_type(file_path):
+    if check_file_exist(file_path) and filetype.guess(file_path) is not None:
+        return filetype.guess(file_path).mime
+
+
+def decompress_gzip(gzip_file_path, dest_file_path):
+    with gzip.open(gzip_file_path, 'rb') as source, open(dest_file_path, 'wb') as dest:
+        dest.write(source.read())
+
+
+def decompress_bz2(bz2_file_path, dest_file_path):
+    with open(bz2_file_path, 'rb') as source, open(dest_file_path, 'wb') as dest:
+        dest.write(bz2.decompress(source.read()))
