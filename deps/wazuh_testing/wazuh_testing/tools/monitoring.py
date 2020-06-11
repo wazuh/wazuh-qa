@@ -22,6 +22,7 @@ from collections import defaultdict
 from copy import copy
 from multiprocessing import Process, Manager
 from struct import pack, unpack
+from datetime import datetime
 
 import yaml
 from lockfile import FileLock
@@ -875,3 +876,38 @@ class HostMonitor:
         logger.debug(f'Cleaning temporal files...')
         for file in os.listdir(self._tmp_path):
             os.remove(os.path.join(self._tmp_path, file))
+
+
+def wait_mtime(path, time_step=5, timeout=-1):
+    """
+    Wait until the monitored log is not being modified.
+
+    Parameters
+    ----------
+    path : str
+        Path to the file.
+    time_step : int, optional
+        Time step between checks of mtime. Default `5`
+    timeout : int, optional
+        Timeout for function to fail. Default `-1`
+
+    Raises
+    ------
+    FileNotFoundError
+        Raised when the file does not exist.
+    TimeoutError
+        Raised when timeout is reached.
+    """
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"{path} not found.")
+
+    last_mtime = 0.0
+    tic = datetime.now().timestamp()
+
+    while last_mtime != os.path.getmtime(path):
+        last_mtime = os.path.getmtime(path)
+        time.sleep(time_step)
+
+        if last_mtime - tic >= timeout:
+            logger.error(f"{len(open(path, 'r').readlines())} lines within the file.")
+            raise TimeoutError("Reached timeout.")
