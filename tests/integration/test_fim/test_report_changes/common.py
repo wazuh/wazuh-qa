@@ -8,10 +8,10 @@ def generateString(stringLength=10, character='0'):
 
     Parameters
     ----------
-    stringLength : int
-        Number of characters to add in the string.
-    character : str
-         Character to be added.
+    stringLength : int, optional
+        Number of characters to add in the string. Default `10`
+    character : str, optional
+        Character to be added. Default `'0'`
 
     Returns
     -------
@@ -35,8 +35,8 @@ def translate_size(configured_size='1KB'):
 
     Parameters
     ----------
-    configured_size: str
-        Configured size to translate.
+    configured_size: str, optional
+        Configured size to translate. Default `'1KB'`
 
     Returns
     -------
@@ -52,6 +52,6 @@ def translate_size(configured_size='1KB'):
     elif data_unit == 'MB':
         translated_size = configured_value * 1024 * 1024
     elif data_unit == 'GB':
-        translated_size = configured_value * 1024 * 1024
+        translated_size = configured_value * 1024 * 1024 * 1024
 
     return translated_size

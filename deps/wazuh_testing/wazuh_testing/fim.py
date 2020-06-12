@@ -827,14 +827,14 @@ def callback_num_inotify_watches(line):
 
 
 def callback_file_size_limit_reached(line):
-    match = re.match(r".*File '(.*)' is too big for configured maximum size to perform diff operation\.", line)
+    match = re.match(r'.*File \'(.*)\' is too big for configured maximum size to perform diff operation\.', line)
 
     if match:
         return match.group(1)
 
 
 def callback_disk_quota_limit_reached(line):
-    match = re.match(r".*The maximum configured size for the '(.*)' folder has been reached.*", line)
+    match = re.match(r'.*The maximum configured size for the \'(.*)\' folder has been reached.*', line)
 
     if match:
         return match.group(1)

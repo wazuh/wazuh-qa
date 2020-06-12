@@ -9,7 +9,7 @@ import re
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_file_size_limit_reached, generate_params, create_file, \
+from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_disk_quota_limit_reached, generate_params, create_file, \
     check_time_travel, callback_detect_event, WAZUH_PATH, modify_file_content
 from test_fim.test_report_changes.common import generateString, translate_size
 from wazuh_testing.tools import PREFIX
@@ -34,16 +34,16 @@ testdir1 = test_directories[0]
 
 # Configurations
 
-file_size_values = ['1KB', '100KB', '1MB', '10MB', '1GB']
+disk_quota_values = ['1KB', '100KB', '1MB', '10MB']
 
 conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': 'yes'},
                                                            'TEST_DIRECTORIES': directory_str,
-                                                           'FILE_SIZE_ENABLED': 'yes',
-                                                           'DISK_QUOTA_ENABLED': 'no',
-                                                           'DISK_QUOTA_LIMIT': '2KB',
+                                                           'FILE_SIZE_ENABLED': 'no',
+                                                           'FILE_SIZE_LIMIT': '1KB',
+                                                           'DISK_QUOTA_ENABLED': 'yes',
                                                            'MODULE_NAME': __name__},
-                                             apply_to_all=({'FILE_SIZE_LIMIT': file_size_elem}
-                                                           for file_size_elem in file_size_values))
+                                             apply_to_all=({'DISK_QUOTA_LIMIT': disk_quota_elem}
+                                                           for disk_quota_elem in disk_quota_values))
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
@@ -56,6 +56,36 @@ def get_configuration(request):
     return request.param
 
 
+# Functions
+
+def new_mult(configured_size=1):
+    """
+    Returns the number needed to multiply the string to write in the file.
+
+    Parameters
+    ----------
+    configured_size : int, optional
+        Configured size in KB. Default `1`
+
+    Returns
+    -------
+    mult : int
+        Number to multiply the string to write.
+    """
+    mult = 1
+
+    if configured_size == 1:
+        mult = 2
+    elif configured_size == 100:
+        mult = 31
+    elif configured_size == 1024:
+        mult = 308
+    elif configured_size == 10 * 1024:
+        mult = 3101
+
+    return mult
+
+
 # Tests
 
 @pytest.mark.parametrize('tags_to_apply', [
@@ -64,14 +94,14 @@ def get_configuration(request):
 @pytest.mark.parametrize('filename, folder', [
     ('regular_0', testdir1),
 ])
-def test_file_size_values(tags_to_apply, filename, folder, get_configuration, configure_environment, restart_syscheckd,
-                          wait_for_initial_scan):
+def test_disk_quota_values(tags_to_apply, filename, folder, get_configuration, configure_environment, restart_syscheckd,
+                           wait_for_initial_scan):
     """
-    Check that the file_size option for report_changes is working correctly.
+    Check that the disk_quota option for report_changes is working correctly.
 
-    Create a file smaller than the limit and check that the compressed file has been created. If the first part is
-    successful, increase the size of the file and expect the message for file_size limit reached and no compressed file
-    in the queue/diff/local folder.
+    Create a file which compressed version is smaller than the limit and check that the compressed file has been
+    created. If the first part is successful, increase the size of the file and expect the message for disk_quota limit
+    reached and no compressed file in the queue/diff/local folder.
 
     Parameters
     ----------
@@ -86,9 +116,9 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
-    size_limit = translate_size_to_string(get_configuration['metadata']['file_size_limit'])
-
+    size_limit = translate_size(get_configuration['metadata']['file_size_limit'])
     diff_file_path = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
+    original_len = 1000000
 
     if sys.platform == 'win32':
         diff_file_path = os.path.join(diff_file_path, 'c')
@@ -97,7 +127,8 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
     else:
         diff_file_path = os.path.join(diff_file_path, folder.strip('/'), filename, 'last-entry.gz')
 
-    to_write = generateString(size_limit / 2, '0')
+    # Create file with a compressed version smaller than the disk_quota limit
+    to_write = generateString(original_len, '0')
     create_file(REGULAR, folder, filename, content=to_write)
 
     check_time_travel(scheduled)
@@ -107,11 +138,12 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
     if not os.path.exists(diff_file_path):
         pytest.raises(FileNotFoundError(f"{diff_file_path} not found. It should exist before increasing the size."))
 
-    modify_file_content(folder, filename, new_content=to_write*2)
+    # Modify file to increase the size and make its compressed version bigger than the disk_quota limit
+    modify_file_content(folder, filename, new_content=to_write*new_mult(size_limit))
 
     check_time_travel(scheduled)
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_file_size_limit_reached,
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_disk_quota_limit_reached,
                             error_message='Did not receive expected '
                             '"File ... is too big for configured maximum size to perform diff operation" event.')
 
