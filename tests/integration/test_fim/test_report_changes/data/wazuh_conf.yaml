@@ -44,3 +44,20 @@
       elements:
         - enabled: DISK_QUOTA_ENABLED
         - limit: DISK_QUOTA_LIMIT
+
+# conf 3
+- tags:
+  - ossec_conf_diff_default
+  apply_to_modules:
+  - MODULE_NAME
+  sections:
+  - section: syscheck
+  elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - check_all: 'yes'
+        - FIM_MODE
+        - REPORT_CHANGES

@@ -34,16 +34,9 @@ testdir1 = test_directories[0]
 
 # Configurations
 
-file_size_values = ['1KB', '100KB', '1MB', '10MB', '1GB']
-
 conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': 'yes'},
                                                            'TEST_DIRECTORIES': directory_str,
-                                                           'FILE_SIZE_ENABLED': 'yes',
-                                                           'DISK_QUOTA_ENABLED': 'no',
-                                                           'DISK_QUOTA_LIMIT': '2KB',
-                                                           'MODULE_NAME': __name__},
-                                             apply_to_all=({'FILE_SIZE_LIMIT': file_size_elem}
-                                                           for file_size_elem in file_size_values))
+                                                           'MODULE_NAME': __name__})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
@@ -59,19 +52,19 @@ def get_configuration(request):
 # Tests
 
 @pytest.mark.parametrize('tags_to_apply', [
-    {'ossec_conf_diff'}
+    {'ossec_conf_diff_default'}
 ])
 @pytest.mark.parametrize('filename, folder', [
     ('regular_0', testdir1),
 ])
-def test_file_size_values(tags_to_apply, filename, folder, get_configuration, configure_environment, restart_syscheckd,
-                          wait_for_initial_scan):
+def test_file_size_default(tags_to_apply, filename, folder, get_configuration, configure_environment, restart_syscheckd,
+                           wait_for_initial_scan):
     """
-    Check that the file_size option for report_changes is working correctly.
+    Check that the file_size option with a default value for report_changes is working correctly.
 
-    Create a file smaller than the limit and check that the compressed file has been created. If the first part is
-    successful, increase the size of the file and expect the message for file_size limit reached and no compressed file
-    in the queue/diff/local folder.
+    Create a file smaller than the default limit and check that the compressed file has been created. If the first part
+    is successful, increase the size of the file and expect the message for file_size limit reached and no compressed
+    file in the queue/diff/local folder.
 
     Parameters
     ----------
@@ -84,7 +77,7 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
-    size_limit = translate_size(get_configuration['metadata']['file_size_limit'])
+    size_limit = translate_size('50MB')
     diff_file_path = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
 
     if sys.platform == 'win32':

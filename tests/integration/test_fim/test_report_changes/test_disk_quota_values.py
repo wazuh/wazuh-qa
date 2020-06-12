@@ -109,8 +109,6 @@ def test_disk_quota_values(tags_to_apply, filename, folder, get_configuration, c
         Name of the file to be created.
     folder : str
         Directory where the files are being created.
-    size : int
-        Size of each file in bytes.
     tags_to_apply : set
         Run test if matches with a configuration identifier, skip otherwise.
     """
