@@ -10,6 +10,7 @@ import filetype
 import requests
 import gzip
 import bz2
+import zipfile
 from os.path import exists
 
 
@@ -162,3 +163,8 @@ def decompress_gzip(gzip_file_path, dest_file_path):
 def decompress_bz2(bz2_file_path, dest_file_path):
     with open(bz2_file_path, 'rb') as source, open(dest_file_path, 'wb') as dest:
         dest.write(bz2.decompress(source.read()))
+
+
+def decompress_zip(zip_file_path, dest_file_path):
+    with zipfile.ZipFile(zip_file_path, 'r') as zip_reference:
+        zip_reference.extractall(dest_file_path)
