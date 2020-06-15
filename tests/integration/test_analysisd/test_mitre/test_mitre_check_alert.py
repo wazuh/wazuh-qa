@@ -5,7 +5,7 @@
 import os
 import pytest
 
-from wazuh_testing.mitre import (callback_detect_mitre_event,
+from wazuh_testing.mitre import (callback_detect_mitre_event, callback_detect_mitre_warning,
                                  validate_mitre_event, detect_initial_analysisd)
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -38,5 +38,8 @@ def test_mitre_check_alert(get_configuration, restart_wazuh, configure_local_rul
     detect_initial_analysisd(wazuh_log_monitor)
 
     # Wait until Mitre's event is detected
-    event = wazuh_log_monitor.start(timeout=10, callback=callback_detect_mitre_event).result()
-    validate_mitre_event(event)
+    if get_configuration == os.path.join(_data_path, f"test8.xml"):
+        wazuh_log_monitor.start(timeout=10, callback=callback_detect_mitre_warning)
+    else:
+        event = wazuh_log_monitor.start(timeout=10, callback=callback_detect_mitre_event).result()
+        validate_mitre_event(event)

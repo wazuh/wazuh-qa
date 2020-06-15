@@ -45,6 +45,26 @@ def callback_detect_mitre_event(line):
     return None
 
 
+def callback_detect_mitre_warning(line):
+    """
+    Callback to detect Mitre ID not found on Hash table.
+
+    Parameters
+    ----------
+    line : str
+        Text to be compared with alerts in ossec.log
+
+    Returns
+    -------
+        dict
+            JSON object on success or None on fail
+    """
+    match = re.match(r'.*Rules_OP_ReadRules\(\): WARNING: No Mitre Technique ID found for rule', line)
+    if match:
+        return line
+    return None
+
+
 def callback_detect_analysisd_started(line):
     match = re.match(r'.*ossec-analysisd\[\d+\].*Started', line)
     if match:
