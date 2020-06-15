@@ -12,6 +12,9 @@ if sys.platform == 'win32':
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'ossec.log')
     PREFIX = os.path.join('c:', os.sep)
     GEN_OSSEC = None
+    WAZUH_API_CONF = None
+    WAZUH_SECURITY_CONF = None
+    API_LOG_FILE_PATH = None
 
 elif sys.platform == 'darwin':
     WAZUH_PATH = os.path.join('/', 'Library', 'Ossec')
@@ -20,6 +23,9 @@ elif sys.platform == 'darwin':
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     PREFIX = os.path.join('/', 'private', 'var', 'root')
     GEN_OSSEC = None
+    WAZUH_API_CONF = None
+    WAZUH_SECURITY_CONF = None
+    API_LOG_FILE_PATH = None
 
 else:
     WAZUH_PATH = os.path.join('/', 'var', 'ossec')
