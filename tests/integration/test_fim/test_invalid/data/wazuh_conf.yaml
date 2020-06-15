@@ -74,3 +74,22 @@
         value: TEST_DIRECTORIES
         attributes:
         - check_all: 'yes'
+
+# conf 5
+- tags:
+  - invalid_file_limit
+  apply_to_modules:
+  - test_file_limit_positive_value
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+    - file_limit:
+        elements:
+        - enabled:
+            value: 'yes'
+        - entries:
+            value: '-10'

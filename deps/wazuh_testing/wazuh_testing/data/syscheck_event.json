@@ -50,7 +50,7 @@
         "mode": {
           "$id": "#/properties/data/properties/mode",
           "type": "string",
-          "enum": ["real-time", "whodata", "scheduled"],
+          "enum": ["realtime", "whodata", "scheduled"],
           "examples": [
             "whodata"
           ],
@@ -270,7 +270,10 @@
             "audit_name",
             "effective_uid",
             "effective_name",
-            "ppid"
+            "cwd",
+            "ppid",
+            "parent_name",
+            "parent_cwd"
           ],
           "properties": {
             "user_id": {
@@ -378,8 +381,36 @@
               "examples": [
                 1899
               ]
+            },
+            "cwd": {
+              "$id": "#/properties/data/properties/audit/properties/cwd",
+              "type": "string",
+              "default": "",
+              "examples": [
+                "/working/directory"
+              ],
+              "pattern": "^(.*)$"
+            },
+            "parent_name": {
+              "$id": "#/properties/data/properties/audit/properties/parent_name",
+              "type": "string",
+              "default": "",
+              "examples": [
+                "/path/to/parent/exe"
+              ],
+              "pattern": "^(.*)$"
+            },
+            "parent_cwd": {
+              "$id": "#/properties/data/properties/audit/properties/parent_cwd",
+              "type": "string",
+              "default": "",
+              "examples": [
+                "/parent/working/directory"
+              ],
+              "pattern": "^(.*)$"
             }
-          }
+          },
+          "additionalProperties": false
         }
       }
     }

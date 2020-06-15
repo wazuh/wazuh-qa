@@ -121,6 +121,28 @@ def get_wazuh_conf() -> List[str]:
     return lines
 
 
+def get_api_conf(path) -> dict:
+    """Get current `api.yaml` file content.
+
+    Parameters
+    ----------
+    path : str
+        Path of config file.
+
+    Returns
+    -------
+    current_conf : dict
+        A dict containing all content of the `api.yaml` file.
+    """
+    current_conf = {}
+
+    if os.path.isfile(path):
+        with open(path) as f:
+            current_conf = yaml.full_load(f)
+
+    return current_conf
+
+
 def write_wazuh_conf(wazuh_conf: List[str]):
     """
     Write a new configuration in 'ossec.conf' file.
@@ -132,6 +154,40 @@ def write_wazuh_conf(wazuh_conf: List[str]):
     """
     with open(WAZUH_CONF, 'w') as f:
         f.writelines(wazuh_conf)
+
+
+def write_api_conf(path: str, api_conf: dict):
+    """
+    Write a new configuration in 'api.yaml' file.
+
+    Parameters
+    ----------
+    path : str
+        Path of config file.
+    api_conf : dict
+        Dictionary to be written in the api.yaml file.
+    """
+    with open(path, 'w+') as f:
+        yaml.dump(api_conf, f)
+
+
+def write_security_conf(path: str, security_conf: dict):
+    """
+    Write a new configuration in 'security.yaml' file.
+
+    Parameters
+    ----------
+    path : str
+        Path of config file.
+    security_conf : dict
+        Dictionary to be written in the security.yaml file.
+    """
+    if not os.path.exists(path):
+        from wazuh_testing.tools import OSSEC_UID, OSSEC_GID
+
+        open(path, mode='w').close()
+        os.chown(uid=OSSEC_UID, gid=OSSEC_GID, path=path)
+    write_api_conf(path, security_conf)
 
 
 def set_section_wazuh_conf(sections, template=None):
@@ -258,8 +314,7 @@ def set_section_wazuh_conf(sections, template=None):
         section_conf = wazuh_conf.find(section['section'])
         # Create section if it does not exist, clean otherwise
         if not section_conf:
-            for s in section:
-              section_conf = ET.SubElement(wazuh_conf.getroot(), section['section'])
+            section_conf = ET.SubElement(wazuh_conf.getroot(), section['section'])
         else:
             section_conf.clear()
 
@@ -437,42 +492,43 @@ def set_correct_prefix(configurations, new_prefix):
 
     for config in configurations:
         for section in config['sections']:
-            for element in section['elements']:
-                if isinstance(element, dict):
-                    # ADD HERE all fields with format sub_element: - value
-                    for sub_element in (element.get('directories'), element.get('ignore'), element.get('nodiff')):
-                        if sub_element:
-                            # Get restrict, directories, ignore and nodiff fields and split them into paths lists
-                            restrict_dict = {}
-                            attributes = sub_element.get('attributes', [])
-                            for attr in attributes:
-                                if isinstance(attr, dict):
-                                    if attr.get('restrict'):
-                                        restrict_dict = attr
-                            restrict_list = restrict_dict['restrict'].split('|') if restrict_dict != {} else []
-                            paths_list = sub_element['value'].split(',')
-                            modified_restricts = ''
-                            modified_paths = ''
+            if section['elements']:
+                for element in section['elements']:
+                    if isinstance(element, dict):
+                        # ADD HERE all fields with format sub_element: - value
+                        for sub_element in (element.get('directories'), element.get('ignore'), element.get('nodiff')):
+                            if sub_element:
+                                # Get restrict, directories, ignore and nodiff fields and split them into paths lists
+                                restrict_dict = {}
+                                attributes = sub_element.get('attributes', [])
+                                for attr in attributes:
+                                    if isinstance(attr, dict):
+                                        if attr.get('restrict'):
+                                            restrict_dict = attr
+                                restrict_list = restrict_dict['restrict'].split('|') if restrict_dict != {} else []
+                                paths_list = sub_element['value'].split(',')
+                                modified_restricts = ''
+                                modified_paths = ''
 
-                            # Insert the prefix in every path/regex and add a comma if directories.
-                            for path in paths_list:
-                                modified_paths += inserter(path)
-                                modified_paths += ',' if (element.get('directories') and modified_paths != '') else ''
-                            modified_paths = modified_paths.rstrip(',')
+                                # Insert the prefix in every path/regex and add a comma if directories.
+                                for path in paths_list:
+                                    modified_paths += inserter(path)
+                                    modified_paths += ',' if (element.get('directories') and modified_paths != '') else ''
+                                modified_paths = modified_paths.rstrip(',')
 
-                            # Insert the prefix in every path inside restrict
-                            for restrict in restrict_list:
-                                modified_restricts += inserter(restrict)
-                                modified_restricts += '|'
-                            modified_restricts = modified_restricts.rstrip('|')
+                                # Insert the prefix in every path inside restrict
+                                for restrict in restrict_list:
+                                    modified_restricts += inserter(restrict)
+                                    modified_restricts += '|'
+                                modified_restricts = modified_restricts.rstrip('|')
 
-                            # Replace the previous values with the new ones.
-                            if modified_paths:
-                                sub_element['value'] = modified_paths
-                            if modified_restricts:
-                                for i, sub_sub_element in enumerate(sub_element['attributes']):
-                                    if sub_sub_element == restrict_dict:
-                                        sub_element['attributes'][i] = {'restrict': modified_restricts}
+                                # Replace the previous values with the new ones.
+                                if modified_paths:
+                                    sub_element['value'] = modified_paths
+                                if modified_restricts:
+                                    for i, sub_sub_element in enumerate(sub_element['attributes']):
+                                        if sub_sub_element == restrict_dict:
+                                            sub_element['attributes'][i] = {'restrict': modified_restricts}
 
     return configurations
 
