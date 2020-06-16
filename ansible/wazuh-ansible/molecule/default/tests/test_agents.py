@@ -6,8 +6,8 @@ import pytest
 
 sys.path.append(
                 os.path.join(os.path.dirname(__file__), '../../_utils/')
-                )  # noqa: E402
-from test_utils import get_full_version, MOL_PLATFORM
+                )
+from test_utils import get_full_version, MOL_PLATFORM  # noqa: E402
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ["MOLECULE_INVENTORY_FILE"]
