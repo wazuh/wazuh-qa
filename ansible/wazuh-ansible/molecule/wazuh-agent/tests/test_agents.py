@@ -2,10 +2,11 @@ import os
 import pytest
 
 import testinfra.utils.ansible_runner
-from test_utils import get_full_version, MOL_PLATFORM
+from test_utils import get_full_version
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('agent')
+
 
 @pytest.fixture(scope="module")
 def AgentRoleDefaults(host):
@@ -17,6 +18,7 @@ def AgentRoleDefaults(host):
         ),
     )["ansible_facts"]
 
+
 def test_agent_version(host, AgentRoleDefaults):
     agent = host.package("wazuh-agent")
     agent_version = AgentRoleDefaults["wazuh_agent_version"]
@@ -26,6 +28,7 @@ def test_agent_version(host, AgentRoleDefaults):
     else:
         full_agent_version = get_full_version(agent)
         assert full_agent_version.startswith(agent_version)
+
 
 def test_ossec_package_installed(Package):
     ossec = Package('wazuh-agent')
