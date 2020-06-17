@@ -162,6 +162,10 @@ def search_error_messages():
     return None
       
 # Tests 
+"""
+This test covers the scenario of Agent starting with keys,
+when misses comunication with Remoted and a new enrollment is sent to Authd.
+"""
 def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_authd, set_authd_id, set_keys, clean_logs, configure_environment, restart_agent, get_configuration):
     global remoted_server
     
@@ -203,6 +207,10 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_a
         
     return
 
+"""
+This test covers the scenario of Agent starting without client.keys file
+and an enrollment is sent to Authd to start comunicating with Remoted
+"""
 def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, start_authd, set_authd_id, delete_keys, clean_logs, configure_environment, restart_agent, get_configuration):
     global remoted_server
 
@@ -247,6 +255,10 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, star
 
     return
 
+"""
+This test covers the scenario of Agent starting without keys in client.keys file
+and an enrollment is sent to Authd to start comunicating with Remoted
+"""
 def test_agentd_reconection_enrollment_no_keys(configure_authd_server, start_authd, set_authd_id, clean_keys, clean_logs, configure_environment, restart_agent, get_configuration):
     global remoted_server
     #start hearing logs
@@ -290,6 +302,10 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, start_aut
 
     return
 
+"""
+This test covers and check the scenario of Agent starting without keys
+and multiple retries are required until the new key is obtained to start comunicating with Remoted
+"""
 def test_agentd_initial_enrollment_retries(configure_authd_server, stop_authd, set_authd_id, clean_keys, clean_logs, configure_environment, restart_agent, get_configuration):
     global remoted_server
     remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK', client_keys=CLIENT_KEYS_PATH)  
@@ -336,7 +352,11 @@ def test_agentd_initial_enrollment_retries(configure_authd_server, stop_authd, s
    
     return
 
-def test_agentd_init_with_keys(configure_authd_server, stop_authd, stop_agent, set_keys, clean_logs, configure_environment, get_configuration):
+"""
+This test covers and check the scenario of Agent starting with keys
+but Remoted is not reachable during some seconds and multiple connection retries are required previous requesting a new enrollment
+"""
+def test_agentd_connection_retries_pre_enrollment(configure_authd_server, stop_authd, stop_agent, set_keys, clean_logs, configure_environment, get_configuration):
     global remoted_server
     REMOTED_KEYS_SYNC_TIME = 10
         
