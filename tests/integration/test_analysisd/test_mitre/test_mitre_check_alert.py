@@ -10,6 +10,10 @@ from wazuh_testing.mitre import (callback_detect_mitre_event, callback_detect_mi
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 
+# Marks
+
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
+
 # variables
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
