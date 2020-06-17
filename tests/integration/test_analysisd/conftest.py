@@ -6,14 +6,15 @@ import shutil
 
 import pytest
 
-from wazuh_testing.tools import WAZUH_LOGS_PATH, LOG_FILE_PATH
-from wazuh_testing.tools.monitoring import QueueMonitor, ManInTheMiddle, FileMonitor
-from wazuh_testing.tools.services import control_service, check_daemon_status
+from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.services import control_service
 
 
 @pytest.fixture(scope='module')
 def configure_local_rules(get_configuration, request):
-    """Configure a custom rule in local_rules.xml for testing. Restart Wazuh is needed for applying the configuration."""
+    """Configure a custom rule in local_rules.xml for testing. Restart Wazuh is needed for applying the
+    configuration. """
 
     # save current configuration
     shutil.copy('/var/ossec/etc/rules/local_rules.xml', '/var/ossec/etc/rules/local_rules.xml.cpy')
@@ -22,16 +23,10 @@ def configure_local_rules(get_configuration, request):
     file_test = str(get_configuration)
     shutil.copy(file_test, '/var/ossec/etc/rules/local_rules.xml')
 
-    # restart wazuh service
-    control_service('restart')
-
     yield
 
     # restore previous configuration
     shutil.move('/var/ossec/etc/rules/local_rules.xml.cpy', '/var/ossec/etc/rules/local_rules.xml')
-
-    # restart wazuh service
-    control_service('restart')
 
 
 @pytest.fixture(scope='module')

@@ -63,27 +63,3 @@ def callback_detect_mitre_warning(line):
     if match:
         return line
     return None
-
-
-def callback_detect_analysisd_started(line):
-    match = re.match(r'.*ossec-analysisd\[\d+\].*Started', line)
-    if match:
-        return line
-    return None
-
-
-def detect_initial_analysisd(file_monitor):
-    """
-    Detect analysisd start when restarting Wazuh
-
-    Parameters
-    ----------
-    file_monitor : FileMonitor
-        Wazuh log monitor to detect syscheck events
-
-    Raises
-    ------
-    TimeoutError
-        If no analysisd start is detected before `timeout` seconds
-    """
-    file_monitor.start(timeout=6, callback=callback_detect_analysisd_started)
