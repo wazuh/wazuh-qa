@@ -168,3 +168,31 @@ def decompress_bz2(bz2_file_path, dest_file_path):
 def decompress_zip(zip_file_path, dest_file_path):
     with zipfile.ZipFile(zip_file_path, 'r') as zip_reference:
         zip_reference.extractall(dest_file_path)
+
+
+def read_xml_file(file_path, namespaces=None):
+    """
+    Function to read XML file as string
+
+    Parameters
+    ----------
+    file_path: str
+        File path where is the XML file
+    namespaces: list
+        List with data {name: namespace, url: url_namespace}
+
+    Returns
+    -------
+    str:
+        XML string data
+    """
+    xml_root = ET.parse(file_path).getroot()
+
+    if namespaces is not None:
+        for namespace in namespaces:
+            try:
+                ET.register_namespace(namespace['name'], namespace['url'])
+            except KeyError:
+                pass
+
+    return ET.tostring(xml_root).decode()
