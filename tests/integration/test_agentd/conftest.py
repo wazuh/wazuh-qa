@@ -108,9 +108,11 @@ def configure_enrollment(enrollment, enrollment_server, agent_name=socket.gethos
         if enrollment.get('id'):
             enrollment_server.agent_id = enrollment.get('id')
         if enrollment.get('protocol') == 'TLSv1_1':
-            enrollment_server.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_1)
+            enrollment_server.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLS, options=(ssl.OP_ALL 
+            | ssl.OP_NO_TLSv1_2 | (ssl.OP_NO_TLSv1_3 if hasattr(ssl, 'OP_NO_TLSv1_3') else 0) | ssl.OP_CIPHER_SERVER_PREFERENCE | ssl.OP_NO_COMPRESSION),
+                cert_reqs=ssl.CERT_NONE)
         else:
-            enrollment_server.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2)
+            enrollment_server.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2, options=None)
         if enrollment.get('check_certificate'):
             if enrollment['check_certificate']['valid'] == 'yes':
                 # Store valid certificate

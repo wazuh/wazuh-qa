@@ -517,10 +517,11 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
     certfile = None 
     keyfile = None 
     ca_cert = None
-    cert_reqs = ssl.CERT_OPTIONAL
+    cert_reqs = ssl.CERT_NONE
+    options = None
 
     def set_ssl_configuration(self, ciphers=None,
-        connection_protocol=None, certificate=None, keyfile=None, cert_reqs=None, ca_cert=None):
+        connection_protocol=None, certificate=None, keyfile=None, cert_reqs=None, ca_cert=None, options=None):
         """Overrides SSL  default configurations.
 
         Parameters
@@ -537,6 +538,8 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
             Whetever or not a cert is required
         ca_cert(optional):
             If cert is required show accepted certs
+        options(optional):
+            Add adinitional options
         """
         if ciphers:
             self.ciphers = ciphers
@@ -546,10 +549,12 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
             self.certfile = certificate
         if keyfile:
             self.keyfile = keyfile
-        if cert_reqs:
+        if cert_reqs is not None:
             self.cert_reqs = cert_reqs
         if ca_cert:
             self.ca_cert = ca_cert
+        if options:
+            self.options = options
 
         return
     
@@ -564,14 +569,27 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
             raise Exception('SSL configuration needs to be set in SSLStreamServer')
         
         try:
-            connstream = ssl.wrap_socket(newsocket,
-                                    server_side=True,
-                                    certfile = self.certfile,
-                                    keyfile = self.keyfile,
-                                    ssl_version = self.ssl_version,
-                                    ciphers= self.ciphers, 
-                                    cert_reqs=self.cert_reqs,
-                                    ca_certs=self.ca_cert)
+            if self.options:
+                context = ssl.SSLContext(self.ssl_version)
+                context.options = self.options
+                if self.certfile:
+                    context.load_cert_chain(self.certfile, self.keyfile)
+                if self.ca_cert is None:
+                    context.verify_mode = ssl.CERT_NONE
+                else:
+                    context.verify_mode = self.cert_reqs
+                    context.load_verify_locations(cafile=self.ca_cert)
+                context.set_ciphers(self.ciphers)
+                connstream = context.wrap_socket(newsocket,server_side=True)
+            else:
+                connstream = ssl.wrap_socket(newsocket,
+                                        server_side=True,
+                                        certfile = self.certfile,
+                                        keyfile = self.keyfile,
+                                        ssl_version = self.ssl_version,
+                                        ciphers= self.ciphers, 
+                                        cert_reqs=self.cert_reqs,
+                                        ca_certs=self.ca_cert)
         except OSError as err:
             print(err)
             raise
