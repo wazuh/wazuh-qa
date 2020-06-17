@@ -111,7 +111,7 @@ def test_wazuh_api_version(host, ManagerRoleDefaults):
     [
         ("/var/ossec/etc/sslmanager.cert", "root", "root", 0o640),
         ("/var/ossec/etc/sslmanager.key", "root", "root", 0o640),
-        ("/var/ossec/etc/rules/local_rules.xml", "root", "ossec", 0o640),
+        ("/var/ossec/etc/rules/local_rules.xml", "ossec", "ossec", 0o640),
         ("/var/ossec/etc/lists/audit-keys", "ossec", "ossec", 0o660),
     ],
 )
