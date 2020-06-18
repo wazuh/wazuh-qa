@@ -35,3 +35,26 @@ def replace_regex_group(pattern, new_value, data):
             pass
 
     return data
+
+
+def replace_regex(pattern, new_value, data):
+    """
+    Function to replace a patter string in a data text
+
+    Parameters
+    ----------
+    pattern: str
+        Regular expresion pattern
+    new_value: str
+        New replaced string
+    data: str
+        String to search and replace
+
+    Returns
+    -------
+    str:
+        New replaced text
+    """
+    compiled_pattern = re.compile(pattern, re.DOTALL)
+
+    return re.sub(compiled_pattern, new_value, data)
