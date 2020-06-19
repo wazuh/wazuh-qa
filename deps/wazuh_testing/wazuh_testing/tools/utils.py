@@ -29,7 +29,7 @@ def replace_regex_group(pattern, new_value, data):
     """
     compiled_pattern = re.compile(pattern, re.DOTALL)
 
-    return re.sub(compiled_pattern, rf"\1{new_value}\3", data)
+    return re.sub(compiled_pattern, rf"\g<1>{new_value}\g<3>", data)
 
 
 def replace_regex(pattern, new_value, data):
