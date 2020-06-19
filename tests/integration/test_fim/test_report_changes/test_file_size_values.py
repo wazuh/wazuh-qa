@@ -11,7 +11,8 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_file_size_limit_reached, generate_params, create_file, \
     check_time_travel, callback_detect_event, WAZUH_PATH, modify_file_content
-from test_fim.test_report_changes.common import generateString, translate_size
+from test_fim.test_report_changes.common import generateString, translate_size, disable_file_max_size, \
+    restore_file_max_size
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -56,6 +57,22 @@ def get_configuration(request):
     return request.param
 
 
+# Functions
+
+def extra_configuration_before_yield():
+    """
+    Disable syscheck.file_max_size internal option
+    """
+    disable_file_max_size()
+
+
+def extra_configuration_after_yield():
+    """
+    Restore syscheck.file_max_size internal option
+    """
+    restore_file_max_size()
+
+
 # Tests
 
 @pytest.mark.parametrize('tags_to_apply', [
@@ -85,6 +102,8 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     size_limit = translate_size(get_configuration['metadata']['file_size_limit'])
+    is_big = get_configuration['metadata']['file_size_limit'] == '1GB'
+    mult_big = 1 if not is_big else 3
     diff_file_path = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
 
     if sys.platform == 'win32':
@@ -95,22 +114,25 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
         diff_file_path = os.path.join(diff_file_path, folder.strip('/'), filename, 'last-entry.gz')
 
     # Create file with a smaller size than the configured value
-    to_write = generateString(size_limit / 2, '0')
+    to_write = generateString(int(size_limit / 2), '0')
     create_file(REGULAR, folder, filename, content=to_write)
 
     check_time_travel(scheduled)
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout*mult_big, callback=callback_detect_event,
                             error_message='Did not receive expected "Sending FIM event: ..." event.').result()
 
     if not os.path.exists(diff_file_path):
         pytest.raises(FileNotFoundError(f"{diff_file_path} not found. It should exist before increasing the size."))
 
     # Increase the size of the file over the configured value
-    modify_file_content(folder, filename, new_content=to_write*3)
+    for _ in range(0, 3):
+        modify_file_content(folder, filename, new_content=to_write)
 
     check_time_travel(scheduled)
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_file_size_limit_reached,
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout*mult_big,
+                            callback=callback_file_size_limit_reached,
                             error_message='Did not receive expected '
                             '"File ... is too big for configured maximum size to perform diff operation" event.')
 

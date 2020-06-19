@@ -57,7 +57,7 @@ def get_configuration(request):
     {'ossec_conf_diff'}
 ])
 @pytest.mark.parametrize('filename, folder, size', [
-    ('regular_0', testdir1, 10000),
+    ('regular_0', testdir1, 1000000),
 ])
 def test_file_size_disabled(tags_to_apply, filename, folder, size, get_configuration, configure_environment,
                             restart_syscheckd, wait_for_initial_scan):

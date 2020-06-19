@@ -25,7 +25,7 @@
   - MODULE_NAME
   sections:
   - section: syscheck
-  elements:
+    elements:
     - disabled:
         value: 'no'
     - directories:
@@ -35,15 +35,19 @@
         - FIM_MODE
         - REPORT_CHANGES
     - diff:
-      elements:
-      - file_size:
-      elements:
-        - enabled: FILE_SIZE_ENABLED
-        - limit: FILE_SIZE_LIMIT
-      - disk_quota_:
-      elements:
-        - enabled: DISK_QUOTA_ENABLED
-        - limit: DISK_QUOTA_LIMIT
+        elements:
+        - file_size:
+            elements:
+            - enabled:
+                value: FILE_SIZE_ENABLED
+            - limit:
+                value: FILE_SIZE_LIMIT
+        - disk_quota:
+            elements:
+            - enabled:
+                value: DISK_QUOTA_ENABLED
+            - limit:
+                value: DISK_QUOTA_LIMIT
 
 # conf 3
 - tags:
