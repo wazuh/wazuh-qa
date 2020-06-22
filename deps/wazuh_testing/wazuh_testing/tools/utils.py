@@ -16,7 +16,7 @@ def replace_regex_group(pattern, new_value, data):
     Parameters
     ----------
     pattern: str
-        Regex pattern.Important
+        Regex pattern
     new_value: str
         String to replace the grouped text
     data: str
