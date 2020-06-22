@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 
 setup(name='wazuh_testing',
-      version='3.11.0',
+      version='3.13.0',
       description='Wazuh testing utilites to help programmers automate tests',
       url='https://github.com/wazuh',
       author='Wazuh',
