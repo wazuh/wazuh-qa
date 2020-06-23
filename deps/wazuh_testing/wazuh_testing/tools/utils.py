@@ -9,10 +9,14 @@ def replace_regex_group(pattern, new_value, data):
     """
     Replace a grouped text string with a regex, with a new one.
 
+    Important: the regex must be composed of 3 groups, group 2 being the string that is modified.
+    Example:
+        r'(hello )(world)(!) --> hello test!
+
     Parameters
     ----------
     pattern: str
-        Regex pattern, for instance: r"CVE:(),"
+        Regex pattern
     new_value: str
         String to replace the grouped text
     data: str
@@ -23,18 +27,9 @@ def replace_regex_group(pattern, new_value, data):
     data: str
         Data string with the new changes made
     """
-    match = re.search(pattern, data)
+    compiled_pattern = re.compile(pattern, re.DOTALL)
 
-    if match is not None:
-        try:
-            string_matched = match.group(0)
-            string_to_replace = match.group(1)
-            new_string = string_matched.replace(string_to_replace, new_value)
-            data = re.sub(pattern, new_string, data)
-        except IndexError:
-            pass
-
-    return data
+    return re.sub(compiled_pattern, rf"\g<1>{new_value}\g<3>", data)
 
 
 def replace_regex(pattern, new_value, data):
