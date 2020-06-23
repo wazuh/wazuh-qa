@@ -205,3 +205,26 @@ def delete_dbs():
     for root, dirs, files in os.walk(QUEUE_DB_PATH):
         for file in files:
             os.remove(os.path.join(root, file))
+
+
+def check_if_process_is_running(process_name):
+    """
+    Check if proccess is running
+
+    Parameters
+    ----------
+    proccess_name: str
+        Name of process
+
+    Returns
+    -------
+    boolean:
+        True if process is running, False otherwise
+    """
+    is_running = False
+    try:
+        is_running = process_name in (p.name() for p in psutil.process_iter())
+    except psutil.NoSuchProcess:
+        pass
+
+    return is_running
