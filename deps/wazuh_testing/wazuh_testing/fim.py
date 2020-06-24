@@ -840,6 +840,13 @@ def callback_disk_quota_limit_reached(line):
         return match.group(1)
 
 
+def callback_disk_quota_default(line):
+    match = re.match(r'.*Maximum disk quota size limit configured to \'(\d+) KB\'.*', line)
+
+    if match:
+        return match.group(1)
+
+
 def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None):
     """
     Change date and time of the system depending on a boolean condition. Optionally, a monitor may be used to check
