@@ -63,30 +63,32 @@ class RemotedSimulator:
     """
     Start socket and listener thread
     """
-    def start(self):   
-        if self.protocol == "tcp":
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   
-            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.sock.settimeout(1)
-            self.sock.bind((self.server_address,self.remoted_port))
-            self.sock.listen(1) 
-        elif self.protocol == "udp":
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.sock.settimeout(1)
-            self.sock.bind((self.server_address,self.remoted_port)) 
-        self.listener_thread = threading.Thread(target=self.listener)
-        self.listener_thread.setName('listener_thread') 
-        self.running = True  
-        self.listener_thread.start() 
+    def start(self):  
+        if self.running == False:
+            if self.protocol == "tcp":
+                self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   
+                self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                self.sock.settimeout(1)
+                self.sock.bind((self.server_address,self.remoted_port))
+                self.sock.listen(1) 
+            elif self.protocol == "udp":
+                self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                self.sock.settimeout(1)
+                self.sock.bind((self.server_address,self.remoted_port)) 
+            self.listener_thread = threading.Thread(target=self.listener)
+            self.listener_thread.setName('listener_thread') 
+            self.running = True  
+            self.listener_thread.start() 
         
     """
     Stop socket and listener thread
     """
     def stop(self):
-        self.running = False 
-        self.listener_thread.join()    
-        self.sock.close() 
+        if self.running == True: 
+            self.running = False 
+            self.listener_thread.join()    
+            self.sock.close() 
 
     """
     Generate encryption key (using agent metadata and key)
