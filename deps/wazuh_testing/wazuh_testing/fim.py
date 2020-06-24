@@ -36,14 +36,6 @@ elif sys.platform == 'linux2' or sys.platform == 'linux':
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
-if sys.platform == 'win32':
-    _REQUIRED_AUDIT = {"path", "process_id", "process_name", "user_id", "user_name"}
-
-else:
-    _REQUIRED_AUDIT = {'user_id', 'user_name', 'group_id', 'group_name', 'process_name', 'path', 'audit_uid',
-                       'audit_name', 'effective_uid', 'effective_name', 'ppid', 'process_id'
-                       }
-
 FIFO = 'fifo'
 SYMLINK = 'sym_link'
 HARDLINK = 'hard_link'
@@ -131,12 +123,6 @@ but was expected to be '{mode}'"
         intersection_debug += "\nRequired Attributes are: " + str(required_attributes)
         intersection_debug += "\nIntersection is: " + str(intersection)
         assert (intersection == set()), f'Attributes and required_attributes are not the same. ' + intersection_debug
-
-        # Check audit
-        if event['data']['mode'] == 'whodata':
-            assert ('audit' in event['data']), f'audit no detected in event'
-            assert (event['data']['audit'].keys() ^ _REQUIRED_AUDIT == set()), \
-                f'audit keys and required_audit are no the same'
 
         # Check add file event
         if event['data']['type'] == 'added':
@@ -881,11 +867,62 @@ def callback_configuration_warning(line):
     return None
 
 
-def callback_entries_path_count(line):
-    match = re.match(r'.*Fim inode entries: (\d+), path count: (\d+)', line)
+def callback_value_file_limit(line):
+    match = re.match(r".*Maximum number of files to be monitored: '(\d+)'", line)
 
     if match:
-        return match.group(1), match.group(2)
+        return match.group(1)
+
+
+def callback_file_limit_zero(line):
+    match = re.match(r".*No limit set to maximum number of files to be monitored", line)
+
+    if match:
+        return True
+
+
+def callback_file_limit_capacity(line):
+    match = re.match(r".*Sending DB (\d+)% full alert.", line)
+
+    if match:
+        return match.group(1)
+
+
+def callback_file_limit_back_to_normal(line):
+    match = re.match(r".*Sending DB back to normal alert.", line)
+
+    if match:
+        return True
+
+
+def callback_file_limit_full_database(line):
+    match = re.match(r".*Couldn't insert '.*' entry into DB\. The DB is full, please check your configuration\.", line)
+
+    if match:
+        return True
+
+
+def callback_entries_path_count(line):
+    if sys.platform != 'win32':
+        match = re.match(r".*Fim inode entries: (\d+), path count: (\d+)", line)
+    else:
+        match = re.match(r".*Fim entries: (\d+)", line)
+
+    if match:
+        if sys.platform != 'win32':
+            return match.group(1), match.group(2)
+        else:
+            return match.group(1), None
+
+
+def callback_delete_watch(line):
+    if sys.platform == 'win32':
+        match = re.match(r".*Realtime watch deleted for '(\S+)'", line)
+    else:
+        match = re.match(r".*Inotify watch deleted for '(\S+)'", line)
+
+    if match:
+        return match.group(1)
 
 
 class EventChecker:
