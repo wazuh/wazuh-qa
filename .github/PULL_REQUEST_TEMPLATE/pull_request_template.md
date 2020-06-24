@@ -15,6 +15,10 @@ Closes #`<YOUR_ISSUE_NUMBER>`
 - [ ] Proven that tests have the expected behavior in **RPM and DEB**
 - [ ] Checked that **all vulnerability detector tests work correctly** (my changes don't break anything)
 - [ ] Tested and passed in Jenkins. Build URL: `<YOUR_JENKINS_BUILD_URL>`
+<!--
+Important: Don't remove this check if your PR modifies Python code.
+-->
+- [ ] Python codebase satisfies PEP-8 style style guide. `pycodestyle --max-line-length=120 --show-source --show-pep8 file.py`
 
 ## RPM manager
 
