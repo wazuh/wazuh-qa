@@ -170,29 +170,30 @@ This test covers and check the scenario of Agent starting with keys
 but Remoted is not reachable during some seconds and multiple connection retries are required previous requesting a new enrollment
 """
 def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, stop_agent, set_keys, configure_environment, get_configuration):
-    DELTA = 2
+    DELTA = 1
+    RECV_TIMEOUT = 5
     ENROLLMENT_SLEEP = 20
-    DELTA_MAX = 20
 
     global remoted_server
     RETRIES = get_configuration['metadata']['MAX_RETRIES']
     INTERVAL = get_configuration['metadata']['RETRY_INTERVAL']
     AUTO_ENROLL = get_configuration['metadata']['AUTO_ENROLL']
         
-    def _test_agentd_parametrized_reconnections():
-
+    def _test_agentd_parametrized_reconnections(remoted_running):
         #Start hearing logs    
         log_monitor = FileMonitor(LOG_FILE_PATH)
 
-        interval_min = INTERVAL-DELTA
-        interval_max = INTERVAL+DELTA_MAX
         # 1 Wait first connection try
         try:
-            log_monitor.start(timeout=interval_max, callback=wait_connect) 
+            log_monitor.start(timeout=30, callback=wait_connect) 
         except TimeoutError as err:
-            raise AssertionError("Connection attempts tooks too much!")    
+            raise AssertionError("Initial connection attempt tooks too much!")    
         
-        # 2 Check for unsuccesful enrollment retries in Agentd initialization
+        # 2 Check for unsuccesful connection retries in Agentd initialization
+        interval_min = INTERVAL-DELTA
+        interval_max = INTERVAL+DELTA
+        if remoted_running:
+            interval_max += RECV_TIMEOUT
         for retry in range(RETRIES):
             # 3 If auto enrollment is enabled, retry check enrollment and retries after that
             if AUTO_ENROLL == 'yes' and retry == RETRIES-1: 
@@ -203,8 +204,10 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
                     raise AssertionError("No succesful enrollment after retries!") 
                                 
                 #Next retry will be after enrollment sleep
-                interval_min = ENROLLMENT_SLEEP
-                interval_max = ENROLLMENT_SLEEP+INTERVAL+DELTA_MAX
+                interval_min = ENROLLMENT_SLEEP-DELTA
+                interval_max = ENROLLMENT_SLEEP+DELTA
+                if remoted_running:
+                    interval_max += RECV_TIMEOUT
 
             start_time = datetime.now()
             try:
@@ -215,8 +218,6 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
             expected_time = start_time + timedelta(seconds=interval_min) 
             #Check if delay was aplied   
             assert stop_time > expected_time, "Retries to quick"
-
-            
     
         # 4 Wait for server rollback 
         try:
@@ -241,20 +242,20 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
             raise AssertionError("Notify message from agent was never sent!")
        
     
-    #Test with Remoted rejecting connections
+    #Test with Remoted running
     control_service('stop', daemon='ossec-agentd')
     clean_logs()
     authd_server.clear()
     remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], client_keys=CLIENT_KEYS_PATH) 
-    control_service('start', daemon='ossec-agentd')
-    _test_agentd_parametrized_reconnections()
+    control_service('start', daemon='ossec-agentd')    
+    _test_agentd_parametrized_reconnections(remoted_running = True)
     
     #Test with Remoted not connected
     control_service('stop', daemon='ossec-agentd')
     clean_logs()
     authd_server.clear()
     remoted_server.stop()
-    control_service('start', daemon='ossec-agentd')
-    _test_agentd_parametrized_reconnections()
+    control_service('start', daemon='ossec-agentd')   
+    _test_agentd_parametrized_reconnections(remoted_running = False)
 
     return
