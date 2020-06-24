@@ -3,16 +3,14 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import sys
-import re
 
 import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_file_size_limit_reached, generate_params, create_file, \
-    check_time_travel, callback_detect_event, WAZUH_PATH, modify_file_content
+    check_time_travel, callback_detect_event, modify_file_content
 from test_fim.test_report_changes.common import generateString, translate_size, disable_file_max_size, \
-    restore_file_max_size
+    restore_file_max_size, make_diff_file_path
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -20,7 +18,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
-pytestmark = [pytest.mark.tier(level=1)]
+pytestmark = [pytest.mark.tier(level=2)]
 
 
 # Variables
@@ -104,14 +102,7 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
     size_limit = translate_size(get_configuration['metadata']['file_size_limit'])
     is_big = get_configuration['metadata']['file_size_limit'] == '1GB'
     mult_big = 1 if not is_big else 3
-    diff_file_path = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
-
-    if sys.platform == 'win32':
-        diff_file_path = os.path.join(diff_file_path, 'c')
-        diff_file_path = os.path.join(diff_file_path, re.match(r'^[a-zA-Z]:(\\){1,2}(\w+)(\\){0,2}$', folder).group(2),
-                                      filename, 'last-entry.gz')
-    else:
-        diff_file_path = os.path.join(diff_file_path, folder.strip('/'), filename, 'last-entry.gz')
+    diff_file_path = make_diff_file_path(folder=folder, filename=filename)
 
     # Create file with a smaller size than the configured value
     to_write = generateString(int(size_limit / 2), '0')
@@ -123,7 +114,7 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
                             error_message='Did not receive expected "Sending FIM event: ..." event.').result()
 
     if not os.path.exists(diff_file_path):
-        pytest.raises(FileNotFoundError(f"{diff_file_path} not found. It should exist before increasing the size."))
+        raise FileNotFoundError(f"{diff_file_path} not found. It should exist before increasing the size.")
 
     # Increase the size of the file over the configured value
     for _ in range(0, 3):
@@ -137,4 +128,4 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
                             '"File ... is too big for configured maximum size to perform diff operation" event.')
 
     if os.path.exists(diff_file_path):
-        pytest.raises(FileExistsError(f"{diff_file_path} found. It should not exist after incresing the size."))
+        raise FileExistsError(f"{diff_file_path} found. It should not exist after incresing the size.")

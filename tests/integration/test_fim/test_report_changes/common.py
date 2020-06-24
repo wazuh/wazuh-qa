@@ -4,6 +4,7 @@
 
 import os
 import sys
+import re
 
 from wazuh_testing.fim import WAZUH_PATH
 from wazuh_testing.tools.file import truncate_file
@@ -107,3 +108,31 @@ def restore_file_max_size():
 
     with open(internal_options, 'w') as f:
         f.write(new_content)
+
+
+def make_diff_file_path(folder='/testdir1', filename='regular_0'):
+    """
+    Generate diff file path.
+
+    Parameters
+    ----------
+    folder : str, optional
+        Containing folder. Default `/testdir1`
+    filename : str, optional
+        File name. Default `regular_0`
+
+    Returns
+    -------
+    diff_file_path : str
+        Path to compressed file.
+    """
+    diff_file_path = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
+
+    if sys.platform == 'win32':
+        diff_file_path = os.path.join(diff_file_path, 'c')
+        diff_file_path = os.path.join(diff_file_path, re.match(r'^[a-zA-Z]:(\\){1,2}(\w+)(\\){0,2}$', folder).group(2),
+                                      filename, 'last-entry.gz')
+    else:
+        diff_file_path = os.path.join(diff_file_path, folder.strip('/'), filename, 'last-entry.gz')
+
+    return diff_file_path
