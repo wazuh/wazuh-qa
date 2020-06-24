@@ -7,7 +7,7 @@ import os
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, callback_disk_quota_default, generate_params
+from wazuh_testing.fim import LOG_FILE_PATH, callback_diff_size_limit_value, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -26,7 +26,7 @@ directory_str = ','.join(test_directories)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories[0]
-DEFAULT_SIZE = 1 * 1024 * 1024
+DEFAULT_SIZE = 50 * 1024
 
 
 # Configurations
@@ -51,9 +51,9 @@ def get_configuration(request):
 @pytest.mark.parametrize('tags_to_apply', [
     {'ossec_conf_diff_default'}
 ])
-def test_disk_quota_default(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
+def test_diff_size_limit_default(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
     """
-    Check that the default value for disk_quota (1GB) is configured properly.
+    Check that the diff_size_limit option is configured properly with the default value (50MB).
 
     Parameters
     ----------
@@ -62,13 +62,13 @@ def test_disk_quota_default(tags_to_apply, get_configuration, configure_environm
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    disk_quota_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                               callback=callback_disk_quota_default,
-                                               error_message='Did not receive expected '
-                                               '"Maximum disk quota size limit configured to \'... KB\'." event'
-                                               ).result()
+    diff_size_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                              callback=callback_diff_size_limit_value,
+                                              error_message='Did not receive expected '
+                                              '"Maximum file size limit configured to \'... KB\'..." event'
+                                              ).result()
 
-    if disk_quota_value:
-        assert disk_quota_value == str(DEFAULT_SIZE), 'Wrong value for disk_quota'
+    if diff_size_value:
+        assert diff_size_value == str(DEFAULT_SIZE), 'Wrong value for diff_size_limit'
     else:
-        raise AssertionError('Wrong value for disk_quota')
+        raise AssertionError('Wrong value for diff_size_limit')
