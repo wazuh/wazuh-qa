@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import random
 import string
+import gzip
 
 
 def truncate_file(file_path):
@@ -78,3 +79,19 @@ def random_string(length, encode=None):
         st = st.encode(encode)
 
     return st
+
+
+def compress_gzip_file(src_path, dest_path):
+    """
+    Compresses a text file into a .gz one
+
+    Parameters
+    ----------
+    src_path : path
+        Path to source file.
+    dest_path : path
+        Destination path of the output file.
+    """
+    with gzip.open(dest_path, 'wb') as dest:
+        with open(src_path, 'rb') as source:
+            dest.write(source.read())
