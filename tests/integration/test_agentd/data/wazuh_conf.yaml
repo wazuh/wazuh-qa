@@ -22,7 +22,7 @@
     - tags:
       - all
       apply_to_modules:
-      - test_agentd_reconection
+      - test_agentd_reconnection
       sections:
       - section: client
         elements:
