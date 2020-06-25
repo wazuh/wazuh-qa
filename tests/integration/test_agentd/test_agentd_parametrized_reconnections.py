@@ -166,8 +166,11 @@ def wait_enrollment(line):
 
 # Tests 
 """
-This test covers and check the scenario of Agent starting with keys
-but Remoted is not reachable during some seconds and multiple connection retries are required previous requesting a new enrollment
+This test covers different options of delays between server connection attempts:
+-Different values of max_retries parameter
+-Different values of retry_interval parameter
+-UDP/TCP connection
+-Enrollment between retries
 """
 def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, stop_agent, set_keys, configure_environment, get_configuration):
     DELTA = 1
@@ -194,8 +197,9 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
         interval_max = INTERVAL+DELTA
         if remoted_running:
             interval_max += RECV_TIMEOUT
+
         for retry in range(RETRIES):
-            # 3 If auto enrollment is enabled, retry check enrollment and retries after that
+            # 3 If auto enrollment is enabled, check enrollment and retries after that
             if AUTO_ENROLL == 'yes' and retry == RETRIES-1: 
                 #Wait succesfull enrollment
                 try:
@@ -225,7 +229,7 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
         except TimeoutError as err:
             raise AssertionError("Server rollback tooks too much!")  
 
-        # 5 Check ammount of retriesand enrollment
+        # 5 Check ammount of retries and enrollment
         (connect, enroll) = count_retry_mesages()
         assert connect == RETRIES+1
         if AUTO_ENROLL == 'yes':
