@@ -65,6 +65,10 @@
                     value: REMOTED_PORT_1
                 - protocol:
                     value: PROTOCOL
+                - max_retries: 
+                    value: 3
+                - retry_interval:
+                    value: 3
             - server:
                 elements:
                 - address: 
@@ -73,6 +77,10 @@
                     value: REMOTED_PORT_2
                 - protocol:
                     value: PROTOCOL
+                - max_retries: 
+                    value: 3
+                - retry_interval:
+                    value: 3
             - server:
                 elements:
                 - address: 
@@ -81,6 +89,10 @@
                     value: REMOTED_PORT_3
                 - protocol:
                     value: PROTOCOL
+                - max_retries: 
+                    value: 3
+                - retry_interval:
+                    value: 3
     - tags:
       - all
       apply_to_modules:
