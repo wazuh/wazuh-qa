@@ -1,10 +1,8 @@
 # Copyright (C) 2015-2020, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
 import pytest
 import os
-
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor
 from wazuh_testing.tools.file import truncate_file
@@ -15,10 +13,9 @@ from wazuh_testing.tools.services import control_service
 from conftest import *
 from time import sleep
 from datetime import datetime, timedelta
+
 # Marks
-
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]
-
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 
@@ -29,27 +26,21 @@ params = [
     {'PROTOCOL':'udp','MAX_RETRIES':10,'RETRY_INTERVAL':4,'AUTO_ENROLL':'no'},
     {'PROTOCOL':'udp','MAX_RETRIES':3,'RETRY_INTERVAL':12,'AUTO_ENROLL':'no'},
     #Different parameters on TCP
-    {'PROTOCOL':'tcp','MAX_RETRIES':1,'RETRY_INTERVAL':1,'AUTO_ENROLL':'no'},
+    {'PROTOCOL':'tcp','MAX_RETRIES':3,'RETRY_INTERVAL':3,'AUTO_ENROLL':'no'},
     {'PROTOCOL':'tcp','MAX_RETRIES':5,'RETRY_INTERVAL':5,'AUTO_ENROLL':'no'},
     {'PROTOCOL':'tcp','MAX_RETRIES':10,'RETRY_INTERVAL':10,'AUTO_ENROLL':'no'},
     #Enrollment enabled
     {'PROTOCOL':'udp','MAX_RETRIES':2,'RETRY_INTERVAL':2,'AUTO_ENROLL':'yes'},
     {'PROTOCOL':'tcp','MAX_RETRIES':5,'RETRY_INTERVAL':5,'AUTO_ENROLL':'yes'},
 ]
+
 metadata = params
-
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
-
 log_monitor_paths = []
-
 receiver_sockets_params = []
-
 monitored_sockets_params = []
-
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
-
 authd_server = AuthdSimulator('127.0.0.1', key_path=SERVER_KEY_PATH, cert_path=SERVER_CERT_PATH)
-
 remoted_server = None
 
 def teardown():
@@ -64,7 +55,6 @@ def set_debug_mode():
     else:
         local_int_conf_path=os.path.join(WAZUH_PATH,'etc', 'local_internal_options.conf')
         debug_line = 'agent.debug=2\n'
-    
     with  open(local_int_conf_path, 'r') as local_file_read:
         lines = local_file_read.readlines()
         for line in lines:
@@ -160,6 +150,11 @@ def wait_enrollment(line):
         return line
     return None
 
+def wait_unable_to_connect(line):
+    if 'connect_server(): ERROR: (1216):' in line:
+        return line
+    return None
+
 def change_timeout(new_value):
     new_timeout = 'agent.recv_timeout='+new_value
     if platform.system() == 'win32' or platform.system() == 'Windows':
@@ -176,6 +171,14 @@ def change_timeout(new_value):
 
 change_timeout('5')
 
+def parse_time_from_log_line(log_line):
+    data = log_line.split(" ")
+    (year, month, day) = data[0].split("/")
+    (hour, minute, second) = data[1].split(":")
+    log_time = datetime(year=int(year), month=int(month), day=int(day), hour=int(hour), minute=int(minute), second=int(second))
+    return log_time
+
+
 # Tests
 """
 This test covers different options of delays between server connection attempts:
@@ -186,10 +189,13 @@ This test covers different options of delays between server connection attempts:
 """
 def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, stop_agent, set_keys, configure_environment, get_configuration):
     DELTA = 1
-    RECV_TIMEOUT = 5
+    RECV_TIMEOUT = 5    
     ENROLLMENT_SLEEP = 20
-
+    LOG_TIMEOUT=20
+   
     global remoted_server
+    
+    PROTOCOL = protocol=get_configuration['metadata']['PROTOCOL']
     RETRIES = get_configuration['metadata']['MAX_RETRIES']
     INTERVAL = get_configuration['metadata']['RETRY_INTERVAL']
     AUTO_ENROLL = get_configuration['metadata']['AUTO_ENROLL']
@@ -204,18 +210,25 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
             log_monitor.start(timeout=30, callback=wait_connect)
         except TimeoutError as err:
             raise AssertionError("Initial connection attempt tooks too much!")
-        
+
+        if not remoted_running and PROTOCOL == 'tcp':                
+            try:
+                log_monitor.start(timeout=20, callback=wait_unable_to_connect)
+            except TimeoutError as err:
+                raise AssertionError("No unable to connect log")
+            
+        last_log = parse_time_from_log_line(log_monitor.result())
+
         # 2 Check for unsuccesful connection retries in Agentd initialization
-        interval_min = INTERVAL-DELTA
-        interval_max = INTERVAL+DELTA
-        if remoted_running:
-            interval_max += RECV_TIMEOUT
+        interval = INTERVAL
+        if remoted_running and PROTOCOL == 'udp':
+            interval += RECV_TIMEOUT
         
         if AUTO_ENROLL == 'yes':
             total_retries = RETRIES + 1
         else :
             total_retries = RETRIES
-        
+
         retries_after_error = total_retries-1
         for retry in range(retries_after_error):
             # 3 If auto enrollment is enabled, retry check enrollment and retries after that
@@ -225,31 +238,37 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
                     log_monitor.start(timeout=20, callback=wait_enrollment)
                 except TimeoutError as err:
                     raise AssertionError("No succesful enrollment after retries!")
+                last_log = parse_time_from_log_line(log_monitor.result())               
                 
-                #Next retry will be after enrollment sleep
-                interval_min = ENROLLMENT_SLEEP-DELTA
-                interval_max = ENROLLMENT_SLEEP+DELTA
-                if remoted_running:
-                    interval_max += RECV_TIMEOUT
-
-            start_time = datetime.now()
+                #Next retry will be after enrollment sleep                
+                interval = ENROLLMENT_SLEEP
+            
             try:
-                log_monitor.start(timeout=interval_max, callback=wait_connect)
+                log_monitor.start(timeout=interval+LOG_TIMEOUT, callback=wait_connect)
             except TimeoutError as err:
                 raise AssertionError("Connection attempts tooks too much!")
-            
-            stop_time = datetime.now()
-            expected_time = start_time + timedelta(seconds=interval_min)
+            actual_retry = parse_time_from_log_line(log_monitor.result())
+            delta_retry = actual_retry - last_log 
+            last_log = actual_retry
             
             #Check if delay was aplied
-            assert stop_time > expected_time, "Retries to quick"
-    
+            assert delta_retry >= timedelta(seconds=interval-DELTA), "Retries to quick"
+            assert delta_retry <= timedelta(seconds=interval+DELTA), "Retries to slow"
+
+            if not remoted_running and PROTOCOL == 'tcp':                
+                try:
+                    log_monitor.start(timeout=20, callback=wait_unable_to_connect)
+                except TimeoutError as err:
+                    raise AssertionError("No unable to connect log")
+                last_log = parse_time_from_log_line(log_monitor.result())
+                interval = INTERVAL
+        
         # 4 Wait for server rollback
         try:
-            log_monitor.start(timeout=20, callback=wait_server_rollback)
+            log_monitor.start(timeout=30, callback=wait_server_rollback)
         except TimeoutError as err:
             raise AssertionError("Server rollback tooks too much!")
-
+        
         # 5 Check ammount of retriesand enrollment
         (connect, enroll) = count_retry_mesages()
         assert connect == total_retries
@@ -262,7 +281,7 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
     control_service('stop', daemon='ossec-agentd')
     clean_logs()
     authd_server.clear()
-    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], client_keys=CLIENT_KEYS_PATH)
+    remoted_server = RemotedSimulator(protocol=PROTOCOL, client_keys=CLIENT_KEYS_PATH)
     control_service('start', daemon='ossec-agentd')
     _test_agentd_parametrized_reconnections(remoted_running = True)
    

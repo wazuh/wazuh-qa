@@ -229,7 +229,7 @@ class RemotedSimulator:
                                     connection.close()
                                 # Response -1 means connection have to be closed
                                 if ret == -1:
-                                    time.sleep(1)
+                                    time.sleep(0.1)
                                     connection.close()
                                     break
                                 # If there is a response, answer it
