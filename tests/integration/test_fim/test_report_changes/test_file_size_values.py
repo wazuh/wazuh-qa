@@ -18,7 +18,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
-pytestmark = [pytest.mark.tier(level=2)]
+pytestmark = [pytest.mark.tier(level=1)]
 
 
 # Variables
@@ -33,7 +33,7 @@ testdir1 = test_directories[0]
 
 # Configurations
 
-file_size_values = ['1KB', '100KB', '1MB', '10MB', '1GB']
+file_size_values = ['1KB', '100KB', '1MB', '10MB']
 
 conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': 'yes'},
                                                            'TEST_DIRECTORIES': directory_str,
@@ -100,8 +100,6 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     size_limit = translate_size(get_configuration['metadata']['file_size_limit'])
-    is_big = get_configuration['metadata']['file_size_limit'] == '1GB'
-    mult_big = 1 if not is_big else 3
     diff_file_path = make_diff_file_path(folder=folder, filename=filename)
 
     # Create file with a smaller size than the configured value
@@ -110,7 +108,7 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
 
     check_time_travel(scheduled)
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout*mult_big, callback=callback_detect_event,
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                             error_message='Did not receive expected "Sending FIM event: ..." event.').result()
 
     if not os.path.exists(diff_file_path):
@@ -122,8 +120,7 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
 
     check_time_travel(scheduled)
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout*mult_big,
-                            callback=callback_file_size_limit_reached,
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_file_size_limit_reached,
                             error_message='Did not receive expected '
                             '"File ... is too big for configured maximum size to perform diff operation" event.')
 
