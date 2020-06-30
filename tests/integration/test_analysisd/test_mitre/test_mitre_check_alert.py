@@ -34,7 +34,7 @@ def get_configuration(request):
 
 # tests
 
-def test_mitre_check_alert(get_configuration, configure_local_rules, restart_wazuh):
+def test_mitre_check_alert(get_configuration, configure_local_rules, restart_wazuh_alerts):
     """Check Mitre alerts have correct format in accordance with configuration"""
 
     # Wait until Mitre's event is detected
