@@ -16,19 +16,11 @@ if sys.platform == 'win32':
     WAZUH_SECURITY_CONF = None
     API_LOG_FILE_PATH = None
 
-elif sys.platform == 'darwin':
-    WAZUH_PATH = os.path.join('/', 'Library', 'Ossec')
-    WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
-    WAZUH_SOURCES = os.path.join('/', 'wazuh')
-    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
-    PREFIX = os.path.join('/', 'private', 'var', 'root')
-    GEN_OSSEC = None
-    WAZUH_API_CONF = None
-    WAZUH_SECURITY_CONF = None
-    API_LOG_FILE_PATH = None
-
 else:
-    WAZUH_PATH = os.path.join('/', 'var', 'ossec')
+    with open("/etc/ossec-init.conf") as ossec_init:
+        WAZUH_PATH = os.path.join(
+            [item.rstrip().replace("DIRECTORY=", "").replace("\"", "")
+            for item in ossec_init.readlines() if "DIRECTORY" in item][0])
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
     WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
