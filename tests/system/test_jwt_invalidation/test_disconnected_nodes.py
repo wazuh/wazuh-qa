@@ -17,7 +17,7 @@ host_manager = HostManager(inventory_path)
 
 
 def control_wazuh_services(node, state=None):
-    """Control Wazuh services with `command` insteand of `service` due to incompatibility."""
+    """Control Wazuh services with `command` instead of `service` due to incompatibility."""
     host_manager.get_host(node).ansible('command', f'service wazuh-manager {state}', check=False)
     host_manager.get_host(node).ansible('command', f'service wazuh-api {state}', check=False)
     if 'start' in state:
