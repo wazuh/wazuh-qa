@@ -268,3 +268,23 @@ class HostManager:
         return self.get_host(host).ansible('uri', f'url="https://localhost:{port}/v4{endpoint}" '
                                                   f'method={method} headers="{token_header}" {request_body} '
                                                   f'validate_certs=no', check=check)
+
+    def run_command(self, host: str, cmd: str, check: bool = False):
+        """Run a command on the specified host and return its stdout.
+
+        Parameters
+        ----------
+        host : str
+            Hostname
+        cmd : str
+            Command to execute
+        check : bool, optional
+            Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html),
+            by default it is enabled so no changes will be applied. Default `False`
+
+        Returns
+        -------
+        stdout : str
+            The output of the command execution.
+        """
+        return self.get_host(host).ansible("command", cmd, check=check)["stdout"]
