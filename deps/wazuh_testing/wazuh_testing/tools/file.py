@@ -4,6 +4,23 @@
 import random
 import string
 import gzip
+import json
+
+
+def read_json(file_path):
+    """
+    Read a JSON file from a given path, return a dictionary with the json data
+
+    Parameters
+    ----------
+    file_path : str
+        Path of the JSON file to be readed
+    """
+    # Read JSON data templates
+    with open(file_path, 'r') as f:
+        output = json.loads(f.read())
+
+    return output
 
 
 def truncate_file(file_path):
