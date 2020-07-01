@@ -50,7 +50,7 @@ def wait_for_event():
     discarded = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_warn_max_dir_monitored,
                                         error_message='Did not receive expected "Maximum number of directories to be '
-                                          'monitored in the same tag reached" event').result()
+                                                      'monitored in the same tag reached" event').result()
     return discarded
 
 # tests
