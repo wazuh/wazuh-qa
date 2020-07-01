@@ -199,98 +199,63 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
     RETRIES = get_configuration['metadata']['MAX_RETRIES']
     INTERVAL = get_configuration['metadata']['RETRY_INTERVAL']
     AUTO_ENROLL = get_configuration['metadata']['AUTO_ENROLL']
+        
+    control_service('stop', daemon='ossec-agentd')
+    clean_logs()
+    log_monitor = FileMonitor(LOG_FILE_PATH)
+    remoted_server = RemotedSimulator(protocol=PROTOCOL, client_keys=CLIENT_KEYS_PATH)
+    control_service('start', daemon='ossec-agentd')
    
-    def _test_agentd_parametrized_reconnections(remoted_running):
+    # 2 Check for unsuccesful connection retries in Agentd initialization
+    interval = INTERVAL
+    if PROTOCOL == 'udp':
+        interval += RECV_TIMEOUT
+    
+    if AUTO_ENROLL == 'yes':
+        total_retries = RETRIES + 1
+    else :
+        total_retries = RETRIES
+   
+    for retry in range(total_retries):
+        # 3 If auto enrollment is enabled, retry check enrollment and retries after that
+        if AUTO_ENROLL == 'yes' and retry == total_retries-1:
+            #Wait succesfull enrollment
+            try:
+                log_monitor.start(timeout=20, callback=wait_enrollment)
+            except TimeoutError as err:
+                raise AssertionError("No succesful enrollment after retries!")
+            last_log = parse_time_from_log_line(log_monitor.result())               
+            
+            #Next retry will be after enrollment sleep                
+            interval = ENROLLMENT_SLEEP
         
-        #Start hearing logs
-        log_monitor = FileMonitor(LOG_FILE_PATH)
-        
-        # 1 Wait first connection try
         try:
-            log_monitor.start(timeout=30, callback=wait_connect)
+            log_monitor.start(timeout=interval+LOG_TIMEOUT, callback=wait_connect)
         except TimeoutError as err:
-            raise AssertionError("Initial connection attempt tooks too much!")
-
-        if not remoted_running and PROTOCOL == 'tcp':                
-            try:
-                log_monitor.start(timeout=20, callback=wait_unable_to_connect)
-            except TimeoutError as err:
-                raise AssertionError("No unable to connect log")
-            
-        last_log = parse_time_from_log_line(log_monitor.result())
-
-        # 2 Check for unsuccesful connection retries in Agentd initialization
-        interval = INTERVAL
-        if remoted_running and PROTOCOL == 'udp':
-            interval += RECV_TIMEOUT
-        
-        if AUTO_ENROLL == 'yes':
-            total_retries = RETRIES + 1
-        else :
-            total_retries = RETRIES
-
-        retries_after_error = total_retries-1
-        for retry in range(retries_after_error):
-            # 3 If auto enrollment is enabled, retry check enrollment and retries after that
-            if AUTO_ENROLL == 'yes' and retry == retries_after_error-1:
-                #Wait succesfull enrollment
-                try:
-                    log_monitor.start(timeout=20, callback=wait_enrollment)
-                except TimeoutError as err:
-                    raise AssertionError("No succesful enrollment after retries!")
-                last_log = parse_time_from_log_line(log_monitor.result())               
-                
-                #Next retry will be after enrollment sleep                
-                interval = ENROLLMENT_SLEEP
-            
-            try:
-                log_monitor.start(timeout=interval+LOG_TIMEOUT, callback=wait_connect)
-            except TimeoutError as err:
-                raise AssertionError("Connection attempts tooks too much!")
-            actual_retry = parse_time_from_log_line(log_monitor.result())
+            raise AssertionError("Connection attempts tooks too much!")
+        actual_retry = parse_time_from_log_line(log_monitor.result())
+        if retry > 0:
             delta_retry = actual_retry - last_log 
-            last_log = actual_retry
-            
             #Check if delay was aplied
             assert delta_retry >= timedelta(seconds=interval-DELTA), "Retries to quick"
             assert delta_retry <= timedelta(seconds=interval+DELTA), "Retries to slow"
+        last_log = actual_retry
 
-            if not remoted_running and PROTOCOL == 'tcp':                
-                try:
-                    log_monitor.start(timeout=20, callback=wait_unable_to_connect)
-                except TimeoutError as err:
-                    raise AssertionError("No unable to connect log")
-                last_log = parse_time_from_log_line(log_monitor.result())
-                interval = INTERVAL
-        
-        # 4 Wait for server rollback
-        try:
-            log_monitor.start(timeout=30, callback=wait_server_rollback)
-        except TimeoutError as err:
-            raise AssertionError("Server rollback tooks too much!")
-        
-        # 5 Check ammount of retriesand enrollment
-        (connect, enroll) = count_retry_mesages()
-        assert connect == total_retries
-        if AUTO_ENROLL == 'yes':
-            assert enroll == 1
-        else:
-            assert enroll == 0
+    # 4 Wait for server rollback
+    try:
+        log_monitor.start(timeout=30, callback=wait_server_rollback)
+    except TimeoutError as err:
+        raise AssertionError("Server rollback tooks too much!")
+    
+    # 5 Check ammount of retriesand enrollment
+    (connect, enroll) = count_retry_mesages()
+    assert connect == total_retries
+    if AUTO_ENROLL == 'yes':
+        assert enroll == 1
+    else:
+        assert enroll == 0
 
-    #Test with Remoted running
-    control_service('stop', daemon='ossec-agentd')
-    clean_logs()
-    authd_server.clear()
-    remoted_server = RemotedSimulator(protocol=PROTOCOL, client_keys=CLIENT_KEYS_PATH)
-    control_service('start', daemon='ossec-agentd')
-    _test_agentd_parametrized_reconnections(remoted_running = True)
+    
    
-   #Test with Remoted not connected
-    control_service('stop', daemon='ossec-agentd')
-    clean_logs()
-    authd_server.clear()
-    remoted_server.stop()
-    control_service('start', daemon='ossec-agentd')
-    _test_agentd_parametrized_reconnections(remoted_running = False)
 
     return
