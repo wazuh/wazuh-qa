@@ -734,7 +734,6 @@ class HostMonitor:
         self._result = defaultdict(list)
         self._time_step = time_step
         self._file_monitors = list()
-        self._monitored_files = set()
         self._file_content_collectors = list()
         self._tmp_path = tmp_path
         try:
@@ -748,14 +747,16 @@ class HostMonitor:
         """This method creates and destroy the needed processes for the messages founded in messages_path.
         It creates one file composer (process) for every file to be monitored in every host."""
         for host, payload in self.test_cases.items():
-            self._monitored_files.update({case['path'] for case in payload})
-            if len(self._monitored_files) == 0:
+            monitored_files = set({case['path'] for case in payload})
+            if len(monitored_files) == 0:
                 raise AttributeError('There is no path to monitor. Exiting...')
-            for path in self._monitored_files:
+            for path in monitored_files:
                 output_path = f'{host}_{path.split("/")[-1]}.tmp'
                 self._file_content_collectors.append(self.file_composer(host=host, path=path, output_path=output_path))
                 logger.debug(f'Add new file composer process for {host} and path: {path}')
-                self._file_monitors.append(self._start(host=host, payload=payload, path=output_path))
+                self._file_monitors.append(self._start(host=host,
+                                                       payload=[block for block in payload if block["path"] == path],
+                                                       path=output_path))
                 logger.debug(f'Add new file monitor process for {host} and path: {path}')
 
         while True:
@@ -834,7 +835,8 @@ class HostMonitor:
                 monitor = QueueMonitor(tailer.queue, time_step=self._time_step)
                 try:
                     self._queue.put({host: monitor.start(timeout=case['timeout'],
-                                                         callback=callback_generator(case['regex'])
+                                                         callback=callback_generator(case['regex']),
+                                                         update_position=False
                                                          ).result().strip('\n')})
                 except TimeoutError:
                     try:
