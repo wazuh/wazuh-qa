@@ -319,7 +319,7 @@ def test_agentd_initial_enrollment_retries(configure_authd_server, stop_authd, s
     while retries < 4:
         retries += 1
         try:
-            log_monitor.start(timeout=retries*5+2, callback=wait_enrollment_try) 
+            log_monitor.start(timeout=retries*5+20, callback=wait_enrollment_try) 
         except TimeoutError as err:
             raise AssertionError("Enrollment retry was not sent!")    
     stop_time = datetime.now()

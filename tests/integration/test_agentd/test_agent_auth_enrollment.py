@@ -93,7 +93,7 @@ def test_agent_auth_enrollment(configure_authd_server, configure_environment, te
     out = subprocess.Popen(parser.get_command(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = out.communicate()
     print(stdout.decode())
-    results = monitored_sockets.get_results(callback=(lambda y: [x.decode() for x in y]), timeout=1, accum_results=1)
+    results = monitored_sockets.get_results(callback=(lambda y: [x.decode() for x in y]), timeout=5, accum_results=1)
     if test_case.get('enrollment') and test_case['enrollment'].get('response'):
         assert results[0] == build_expected_request(configuration), 'Expected enrollment request message does not match'
         assert results[1] == test_case['enrollment']['response'].format(**DEFAULT_VALUES), 'Expected response message does not match'
