@@ -747,7 +747,7 @@ class HostMonitor:
         """This method creates and destroy the needed processes for the messages founded in messages_path.
         It creates one file composer (process) for every file to be monitored in every host."""
         for host, payload in self.test_cases.items():
-            monitored_files = set({case['path'] for case in payload})
+            monitored_files = {case['path'] for case in payload}
             if len(monitored_files) == 0:
                 raise AttributeError('There is no path to monitor. Exiting...')
             for path in monitored_files:
