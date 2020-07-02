@@ -170,7 +170,7 @@ def decompress_zip(zip_file_path, dest_file_path):
         zip_reference.extractall(dest_file_path)
 
 
-def read_xml_file(file_path, namespaces=None):
+def read_xml_file(file_path, namespaces=None, xml_header=False):
     """
     Function to read XML file as string
 
@@ -195,4 +195,9 @@ def read_xml_file(file_path, namespaces=None):
             except KeyError:
                 pass
 
-    return ET.tostring(xml_root).decode()
+    if xml_header:
+        xml_string_data = ET.tostring(xml_root, encoding='utf8', method='xml').decode()
+    else:
+        xml_string_data = ET.tostring(xml_root).decode()
+
+    return xml_string_data
