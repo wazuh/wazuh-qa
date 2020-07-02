@@ -1060,7 +1060,6 @@ class EventChecker:
 
         def check_events_path(events, folder, file_list=['testfile0'], mode=None):
             mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
-            audit_path = filter_events(events, ".[].data.audit.path") if mode == "whodata" else None
             data_path = filter_events(events, ".[].data.path")
             for file_name in file_list:
                 expected_path = os.path.join(folder, file_name)
@@ -1068,22 +1067,12 @@ class EventChecker:
                 if self.encoding is not None:
                     for index, item in enumerate(data_path):
                         data_path[index] = item.encode(encoding=self.encoding)
-                    if audit_path:
-                        for index, item in enumerate(audit_path):
-                            audit_path[index] = item.encode(encoding=self.encoding)
                 if sys.platform == 'darwin' and self.encoding and self.encoding != 'utf-8':
                     logger.info(f'Not asserting {expected_path} in event.data.path. '
                                  f'Reason: using non-utf-8 encoding in darwin.')
                 else:
                     error_msg = f"Expected data path was '{expected_path}' but event data path is '{data_path}'"
                     assert (expected_path in data_path), error_msg
-                    if audit_path:
-                        try:
-                            error_msg = f"Expected audit path was '{expected_path}' " \
-                                        f"but event audit path is '{audit_path}'"
-                            assert (expected_path in audit_path), error_msg
-                        except AssertionError:
-                            pytest.xfail(reason='Xfailed due to issue: https://github.com/wazuh/wazuh/issues/4729')
 
         def filter_events(events, mask):
             """Returns a list of elements matching a specified mask in the events list using jq module."""
