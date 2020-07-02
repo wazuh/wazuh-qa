@@ -27,6 +27,8 @@ HOST_TYPES = set("server agent".split())
 
 catalog = list()
 
+results = dict()
+
 
 def pytest_runtest_setup(item):
     # Find if platform applies
@@ -240,6 +242,9 @@ def pytest_runtest_makereport(item, call):
     report.markers = ', '.join(mark.name for mark in item.iter_markers() if
                                mark.name != 'tier' and mark.name != 'parametrize')
 
+    if report.location[0] not in results:
+        results[report.location[0]] = {'passed': 0, 'failed': 0, 'skipped': 0, 'xfailed': 0, 'error': 0}
+
     extra = getattr(report, 'extra', [])
     if report.when == 'call':
         # Apply hack to fix length filename problem
@@ -272,6 +277,47 @@ def pytest_runtest_makereport(item, call):
 
         if not report.passed and not report.skipped:
             report.extra = extra
+
+        if report.longrepr is not None and report.longreprtext.split()[-1] == 'XFailed':
+            results[report.location[0]]['xfailed'] += 1
+        else:
+            results[report.location[0]][report.outcome] += 1
+
+    elif report.outcome == 'failed':
+        results[report.location[0]]['error'] += 1
+
+
+class SummaryTable(html):
+    class table(html.table):
+        style = html.Style(border='1px solid #e6e6e6', margin='16px 0px', color='#999', font_size='12px')
+
+    class td(html.td):
+        style = html.Style(padding='5px', border='1px solid #E6E6E6', text_align='left')
+
+    class th(html.th):
+        style = html.Style(padding='5px', border='1px solid #E6E6E6', text_align='left', font_weight='bold')
+
+
+def pytest_html_results_summary(prefix, summary, postfix):
+    postfix.extend([SummaryTable.table(
+        html.thead(
+            html.tr([
+                SummaryTable.th("Tests"),
+                SummaryTable.th("Failed"),
+                SummaryTable.th("Success"),
+                SummaryTable.th("XFail"),
+                SummaryTable.th("Error")]
+            ),
+        ),
+        [html.tbody(
+            html.tr([
+                SummaryTable.td(k),
+                SummaryTable.td(v['failed']),
+                SummaryTable.td(v['passed']),
+                SummaryTable.td(v['xfailed']),
+                SummaryTable.td(v['error']),
+            ])
+        ) for k, v in results.items()])])
 
 
 def connect_to_sockets(request):
