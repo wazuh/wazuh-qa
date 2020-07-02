@@ -39,7 +39,7 @@ def callback_detect_mitre_event(line):
         dict
             JSON object on success or None on fail
     """
-    match = re.match(r'.*Ossec started again with Mitre information for testing.*', line)
+    match = re.match(r'.*Ossec server started.*', line)
     if match:
         return json.loads(line)
     return None

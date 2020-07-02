@@ -54,7 +54,7 @@
           "title": "The Description Schema",
           "default": "",
           "examples": [
-            "Ossec started again with Mitre information for testing"
+            "Ossec server started."
           ],
           "pattern": "^(.*)$"
         },
