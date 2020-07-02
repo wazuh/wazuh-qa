@@ -79,7 +79,8 @@
           "title": "The Mitre Schema",
           "required": [
             "id",
-            "tactics"
+            "tactic",
+            "technique"
           ],
           "properties": {
             "id": {
@@ -97,17 +98,32 @@
                 "pattern": "^(.*)$"
               }
             },
-            "tactics": {
-              "$id": "#/properties/rule/properties/mitre/properties/tactics",
+            "tactic": {
+              "$id": "#/properties/rule/properties/mitre/properties/tactic",
               "type": "array",
-              "title": "The Tactics Schema",
+              "title": "The Tactic Schema",
               "items": {
-                "$id": "#/properties/rule/properties/mitre/properties/tactics/items",
+                "$id": "#/properties/rule/properties/mitre/properties/tactic/items",
                 "type": "string",
                 "title": "The Items Schema",
                 "default": "",
                 "examples": [
                   "Discovery"
+                ],
+                "pattern": "^(.*)$"
+              }
+            },
+            "technique": {
+              "$id": "#/properties/rule/properties/mitre/properties/technique",
+              "type": "array",
+              "title": "The technique Schema",
+              "items": {
+                "$id": "#/properties/rule/properties/mitre/properties/technique/items",
+                "type": "string",
+                "title": "The Items Schema",
+                "default": "",
+                "examples": [
+                  "Stored Data Manipulation"
                 ],
                 "pattern": "^(.*)$"
               }
