@@ -42,6 +42,18 @@
                     value: REMOTED_PORT
                 - protocol:
                     value: PROTOCOL
+      - section: active-response
+        elements:
+            - disabled:
+                value: 'no'
+      - section: rootcheck
+        elements:
+            - disabled:
+                value: 'no'
+      - section: syscheck
+        elements:
+            - disabled:
+                value: 'no'
     - tags:
       - all
       apply_to_modules:
