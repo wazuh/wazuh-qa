@@ -201,3 +201,19 @@ def read_xml_file(file_path, namespaces=None, xml_header=False):
         xml_string_data = ET.tostring(xml_root).decode()
 
     return xml_string_data
+
+
+def compress_gzip_file(src_path, dest_path):
+    """
+    Compresses a text file into a .gz one
+
+    Parameters
+    ----------
+    src_path : path
+        Path to source file.
+    dest_path : path
+        Destination path of the output file.
+    """
+    with gzip.open(dest_path, 'wb') as dest:
+        with open(src_path, 'rb') as source:
+            dest.write(source.read())

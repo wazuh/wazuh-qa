@@ -153,6 +153,26 @@ def get_process(search_name):
     return None
 
 
+def get_process_cmd(search_cmd):
+    """
+    Search process by its command line.
+
+    Parameters
+    ----------
+    search_cmd : str
+        Name of the command to be fetched.
+
+    Returns
+    -------
+    `psutil.Process` or None
+        First occurrence of the process object matching the `search_cmd` or None if no process has been found.
+    """
+    for proc in psutil.process_iter(attrs=['pid', 'name', 'cmdline']):
+        command = next((command for command in proc.cmdline() if search_cmd in command), None)
+        if command:
+            return proc
+
+
 def check_daemon_status(daemon=None, running=True, timeout=10, extra_sockets=None):
     """Check Wazuh daemon status.
 
