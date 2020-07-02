@@ -215,7 +215,9 @@ metadata = [
         'LOG_MONITOR_STR' : [
             [
                  f'Starting enrollment process to server: {SERVER_HOSTS[0]}',
+                 f'ERROR: SSL read',
                  f'Starting enrollment process to server: {SERVER_HOSTS[1]}',
+                 f'ERROR: SSL read',
             ],
             [
                 f'Starting enrollment process to server: {SERVER_HOSTS[2]}',
@@ -228,7 +230,7 @@ metadata = [
     },
 ]
 
-#metadata = metadata[0:4] # 0,2 Run only one test
+#metadata = metadata[:] # 0,2 Run only one test
 
 params = [
 {
@@ -355,5 +357,4 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
 
         authd_server.clear()
     return
-
-    
+  

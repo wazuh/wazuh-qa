@@ -372,8 +372,6 @@ def test_agentd_connection_retries_pre_enrollment(configure_authd_server, stop_a
     global remoted_server
     REMOTED_KEYS_SYNC_TIME = 10
 
-    control_service('stop')
-
     #Start Remoted mock
     remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], client_keys=CLIENT_KEYS_PATH)  
 
@@ -400,3 +398,4 @@ def test_agentd_connection_retries_pre_enrollment(configure_authd_server, stop_a
     assert log_errors == None, "Error found in logs: "+log_errors
 
     return
+    
