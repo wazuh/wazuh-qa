@@ -153,3 +153,15 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
             assert num_watches == str(EXPECTED_WATCHES), 'Wrong number of inotify watches when not modifying the folder'
     else:
         raise AssertionError('Wrong number of inotify watches')
+
+    # If directories have been removed or renamed, create directories again and check Wazuh add watches
+    if decreases_num_watches:
+        for directory in test_directories:
+                os.mkdir(directory)
+
+        num_watches = wazuh_log_monitor.start(timeout=40,
+                                            callback=callback_num_inotify_watches,
+                                            error_message='Did not receive expected '
+                                            '"Folders monitored with real-time engine: ..." event'
+                                            ).result()
+        assert (num_watches and num_watches != EXPECTED_WATCHES), 'Watches not added'

@@ -923,6 +923,16 @@ def callback_warn_max_dir_monitored(line):
     return None
 
 
+def callback_delete_watch(line):
+    if sys.platform == 'win32':
+        match = re.match(r".*Realtime watch deleted for '(\S+)'", line)
+    else:
+        match = re.match(r".*Inotify watch deleted for '(\S+)'", line)
+
+    if match:
+        return match.group(1)
+
+
 class EventChecker:
     """Utility to allow fetch events and validate them."""
 
