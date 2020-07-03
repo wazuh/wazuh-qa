@@ -15,7 +15,7 @@ from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, WAZUH_SERVICE
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, WAZUH_SERVICE, ALERT_FILE_PATH
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController
@@ -72,6 +72,20 @@ def reset_ossec_log(get_configuration, request):
     truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
+
+
+@pytest.fixture(scope='module')
+def restart_wazuh_alerts(get_configuration, request):
+    # Stop Wazuh
+    control_service('stop')
+
+    # Reset alerts.json and start a new monitor
+    truncate_file(ALERT_FILE_PATH)
+    file_monitor = FileMonitor(ALERT_FILE_PATH)
+    setattr(request.module, 'wazuh_alert_monitor', file_monitor)
+
+    # Start Wazuh
+    control_service('start')
 
 
 def pytest_addoption(parser):
