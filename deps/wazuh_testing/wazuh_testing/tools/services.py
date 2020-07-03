@@ -118,7 +118,10 @@ def control_service(action, daemon=None, debug_mode=False):
                 control_service('start', daemon=daemon)
             elif action == 'stop':
                 for proc in psutil.process_iter():
-                    any(daemon in cmd for cmd in proc.cmdline()) and proc.terminate()
+                    try:
+                        any(daemon in cmd for cmd in proc.cmdline()) and proc.terminate()
+                    except psutil.NoSuchProcess:
+                        pass
                 delete_sockets(WAZUH_SOCKETS[daemon])
             else:
                 daemon_path = os.path.join(WAZUH_PATH, 'bin')

@@ -5,7 +5,6 @@
 import os
 import sys
 
-
 if sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'ossec.conf')
@@ -13,24 +12,31 @@ if sys.platform == 'win32':
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'ossec.log')
     PREFIX = os.path.join('c:', os.sep)
     GEN_OSSEC = None
-
-elif sys.platform == 'darwin':
-    WAZUH_PATH = os.path.join('/', 'Library', 'Ossec')
-    WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
-    WAZUH_SOURCES = os.path.join('/', 'wazuh')
-    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
-    PREFIX = os.path.join('/', 'private', 'var', 'root')
-    GEN_OSSEC = None
+    WAZUH_API_CONF = None
+    WAZUH_SECURITY_CONF = None
+    API_LOG_FILE_PATH = None
 
 else:
-    WAZUH_PATH = os.path.join('/', 'var', 'ossec')
+    with open("/etc/ossec-init.conf") as ossec_init:
+        WAZUH_PATH = os.path.join(
+            [item.rstrip().replace("DIRECTORY=", "").replace("\"", "")
+            for item in ossec_init.readlines() if "DIRECTORY" in item][0])
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
+    WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
     GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
     PREFIX = os.sep
+    try:
+        import grp
+        import pwd
+
+        OSSEC_UID = pwd.getpwnam("ossec").pw_uid
+        OSSEC_GID = grp.getgrnam("ossec").gr_gid
+    except (ImportError, KeyError, ModuleNotFoundError):
+        pass
 
 if sys.platform == 'darwin' or sys.platform == 'win32' or sys.platform == 'sunos5':
     WAZUH_SERVICE = 'wazuh.agent'
