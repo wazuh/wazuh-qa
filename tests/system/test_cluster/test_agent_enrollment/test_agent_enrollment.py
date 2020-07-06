@@ -22,9 +22,10 @@ host_manager = HostManager(inventory_path)
 @pytest.fixture(scope='module')
 def clean_environment():
     yield
+    agent_id = host_manager.run_command('wazuh-master', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
+    host_manager.get_host('wazuh-master').ansible("command", f'{WAZUH_PATH}/bin/manage_agents -r {agent_id}', check=False)
     host_manager.control_service(host='wazuh-agent1', service='wazuh', state="stopped")
     host_manager.clear_file(host='wazuh-agent1',  file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
-    host_manager.get_host('wazuh-master').ansible("command", f'{WAZUH_PATH}/bin/manage_agents -r 001', check=False)
 
 
 def test_agent_enrollment(clean_environment):
@@ -45,15 +46,14 @@ def test_agent_enrollment(clean_environment):
     local_path = os.path.dirname(os.path.abspath(__file__))
 
     # Run the callback checks for the ossec.log and the cluster.log
-    for messages in ['data/messages_ossec.yml', 'data/messages_cluster.yml']:
-        HostMonitor(inventory_path=inventory_path,
-                    messages_path=os.path.join(local_path, messages),
-                    tmp_path=os.path.join(local_path, 'tmp')).run()
-
-    # Make sure the agent's client.keys is not empty
-    assert host_manager.get_file_content('wazuh-worker1', os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
+    HostMonitor(inventory_path=inventory_path,
+                messages_path=os.path.join(local_path, 'data/messages.yml'),
+                tmp_path=os.path.join(local_path, 'tmp')).run()
 
     # Make sure the worker's client.keys is not empty
+    assert host_manager.get_file_content('wazuh-worker1', os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
+
+    # Make sure the agent's client.keys is not empty
     assert host_manager.get_file_content('wazuh-agent1', os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
 
     # Check if the agent is active
