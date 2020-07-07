@@ -18,7 +18,7 @@ from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import SocketController, FileMonitor
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.services import control_service, check_daemon_status
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -128,8 +128,10 @@ def reset_password(set_password):
 
 def override_wazuh_conf(configuration, set_password):
     # Stop Wazuh
-    control_service('stop')
-     # Configuration for testing
+    control_service('stop', daemon='ossec-authd')
+    time.sleep(1)
+    check_daemon_status(running=False, daemon='ossec-authd')
+    # Configuration for testing
     test_config = set_section_wazuh_conf(configuration.get('sections'))
     # Set new configuration
     write_wazuh_conf(test_config)
@@ -139,8 +141,9 @@ def override_wazuh_conf(configuration, set_password):
     #reset password
     reset_password(set_password)
 
+    time.sleep(1)
     # Start Wazuh
-    control_service('start')
+    control_service('start', daemon='ossec-authd')
 
     """Wait until agentd has begun"""
     def callback_agentd_startup(line):

@@ -85,16 +85,16 @@ def generate_ca_certificate(get_configuration):
 
 def override_wazuh_conf(configuration):
     # Stop Wazuh
-    control_service('stop')
+    control_service('stop', daemon='ossec-authd')
     time.sleep(1)
-    check_daemon_status(running=False)
+    check_daemon_status(running=False, daemon='ossec-authd')
      # Configuration for testing
     test_config = set_section_wazuh_conf(configuration.get('sections'))
     # Set new configuration
     write_wazuh_conf(test_config)
     # Start Wazuh daemons
     time.sleep(1)
-    control_service('start')
+    control_service('start', daemon='ossec-authd')
 
     """Wait until agentd has begun"""
     def callback_agentd_startup(line):

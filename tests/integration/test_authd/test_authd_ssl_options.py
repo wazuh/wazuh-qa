@@ -8,6 +8,7 @@ import pytest
 import socket
 import ssl
 import yaml
+import time
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import generate_params
@@ -16,7 +17,7 @@ from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import SocketController, FileMonitor
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.services import control_service, check_daemon_status
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -73,13 +74,17 @@ def get_configuration(request):
 
 def override_wazuh_conf(configuration):
     # Stop Wazuh
-    control_service('stop')
+    control_service('stop', daemon='ossec-authd')
+    time.sleep(1)
+    check_daemon_status(running=False, daemon='ossec-authd')
      # Configuration for testing
     test_config = set_section_wazuh_conf(configuration.get('sections'))
     # Set new configuration
     write_wazuh_conf(test_config)
+
+    time.sleep(1)
     # Start Wazuh
-    control_service('start')
+    control_service('start', daemon='ossec-authd')
 
     """Wait until agentd has begun"""
     def callback_agentd_startup(line):
