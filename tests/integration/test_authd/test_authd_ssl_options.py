@@ -14,6 +14,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import generate_params
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
+from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import SocketController, FileMonitor
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -77,6 +78,8 @@ def override_wazuh_conf(configuration):
     control_service('stop', daemon='ossec-authd')
     time.sleep(1)
     check_daemon_status(running=False, daemon='ossec-authd')
+    truncate_file(LOG_FILE_PATH)
+
      # Configuration for testing
     test_config = set_section_wazuh_conf(configuration.get('sections'))
     # Set new configuration
@@ -94,6 +97,7 @@ def override_wazuh_conf(configuration):
 
     log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=30, callback=callback_agentd_startup)
+    time.sleep(1)
     
 def test_ossec_auth_configurations(get_configuration, configure_environment, configure_mitm_environment):
     """Check that every input message in authd port generates the adequate output
