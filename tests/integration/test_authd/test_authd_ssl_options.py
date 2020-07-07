@@ -66,12 +66,16 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 test_index = 0
 
+def get_current_test():
+    global test_index
+    current = test_index
+    test_index+=1
+    return current
+
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
     """Get configurations from the module"""
-    test_index = getattr(request.module, 'test_index')
-    yield request.param
-    setattr(request.module, 'test_index', test_index + 1) 
+    return request.param
 
 def override_wazuh_conf(configuration):
     # Stop Wazuh
@@ -113,8 +117,10 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
             - protocol: Value for ssl protocol
             - input: message that will be tried to send to the manager
             - output: expected response (if any)
-    """   
-    test_case = ssl_configuration_tests[test_index]['test_case']
+    """ 
+    current_test = get_current_test()
+
+    test_case = ssl_configuration_tests[current_test ]['test_case']
     override_wazuh_conf(get_configuration)
     for config in test_case:
         address, family, connection_protocol = receiver_sockets_params[0]

@@ -68,15 +68,16 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 test_index = 0
 
-
+def get_current_test():
+    global test_index
+    current = test_index
+    test_index+=1
+    return current
 
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
     """Get configurations from the module"""
-    test_index = getattr(request.module, 'test_index')
-    yield request.param
-    setattr(request.module, 'test_index', test_index + 1) 
-
+    return request.param
 
    
 def clean_client_keys_file(): 
@@ -223,14 +224,16 @@ def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, confi
                 2) if insert_prev_agent_custom is not present: send the masage equals to input
             - insert_random_pass_in_query: "yes" if is needed add random pass to input query (for register with random pass cases)
             - insert_hostname_in_query: "yes" if is present add host name to input message
-    """   
+    """
+    current_test = get_current_test()
+
     #setup the password enviroment to password test
     set_password = None
-    test_case = ip_name_configuration_tests[test_index]['test_case']
+    test_case = ip_name_configuration_tests[current_test]['test_case']
     try:
-        if ip_name_configuration_tests[test_index]['USE_PASSWORD'] == 'yes':
+        if ip_name_configuration_tests[current_test]['USE_PASSWORD'] == 'yes':
             set_password = 'defined'
-            if ip_name_configuration_tests[test_index]['random_pass'] == 'yes':
+            if ip_name_configuration_tests[current_test]['random_pass'] == 'yes':
                 set_password = 'random'                
     except KeyError:
         pass
@@ -248,11 +251,11 @@ def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, confi
                 
                 # Prev output is expected
                 expected = "OSSEC K:'"
-                assert response, 'Failed connection previous insert for {}: {}'.format(ip_name_configuration_tests[test_index]['name'], config['input'])
-                assert response[:len(expected)] == expected, "Failed response previous '{}': Input: {}".format(ip_name_configuration_tests[test_index]['name'], config['input'])
+                assert response, 'Failed connection previous insert for {}: {}'.format(ip_name_configuration_tests[current_test]['name'], config['input'])
+                assert response[:len(expected)] == expected, "Failed response previous '{}': Input: {}".format(ip_name_configuration_tests[current_test]['name'], config['input'])
                 if expected == "OSSEC K:'":
                     time.sleep(0.5)
-                    assert check_client_keys_file(response) == True, "Failed test case '{}' checking previous client.keys : Input: {}".format(ip_name_configuration_tests[test_index]['name'], config['input'])
+                    assert check_client_keys_file(response) == True, "Failed test case '{}' checking previous client.keys : Input: {}".format(ip_name_configuration_tests[current_test]['name'], config['input'])
         except KeyError:
             pass
         
@@ -279,13 +282,13 @@ def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, confi
         # Output is expected
         expected = config['output']
         response = send_message(config['input'])
-        assert response, "Failed connection stage '{}'': '{}'".format(ip_name_configuration_tests[test_index]['name'], config['input'])
-        assert response[:len(expected)] == expected, "Failed test case '{}': Input: {}".format(ip_name_configuration_tests[test_index]['name'], config['input'])
+        assert response, "Failed connection stage '{}'': '{}'".format(ip_name_configuration_tests[current_test]['name'], config['input'])
+        assert response[:len(expected)] == expected, "Failed test case '{}': Input: {}".format(ip_name_configuration_tests[current_test]['name'], config['input'])
 
         #if expect a key check with client.keys file
         if expected[:len("OSSEC K:'")] == "OSSEC K:'":
             time.sleep(0.5)
             if "/32" in response:
                 response = response.replace("/32", "")
-            assert check_client_keys_file(response) == True, "Failed test case '{}' checking client.keys : Input: {}".format(ip_name_configuration_tests[test_index]['name'], config['input'])
+            assert check_client_keys_file(response) == True, "Failed test case '{}' checking client.keys : Input: {}".format(ip_name_configuration_tests[current_test]['name'], config['input'])
     return
