@@ -27,21 +27,21 @@
     input: '{"arguments":{"name":"user4","ip":"any","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c915"},"function":"add"}'
     output: '{"error":0,"data":{"id":"101","name":"user4","ip":"any","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c915"'
 -
-  name: "ERROR Duplicated Name"
+  name: "ERROR Duplicate Name"
   description: "Try to add an agent with an existent name"
   test_case:
   -    
     input: '{"arguments":{"name":"user1","ip":"any"},"function":"add"}'
     output: '{"error":9008,"message":"Duplicated name"}'
 -
-  name: "ERROR Duplicated IP"
+  name: "ERROR Duplicate IP"
   description: "Try to add an agent with an existent IP"
   test_case:
   -    
     input: '{"arguments":{"name":"user_","ip":"192.0.0.0"},"function":"add"}'
     output: '{"error":9007,"message":"Duplicated IP"}'
 -
-  name: "ERROR Duplicated ID"
+  name: "ERROR Duplicate ID"
   description: "Try to add an agent with an existent ID"
   test_case:
   -    
@@ -49,7 +49,7 @@
     output: '{"error":9012,"message":"Duplicated ID"}'
 -
   name: "Force"
-  description: "Add duplicated agents with force option"
+  description: "Add duplicate agents with force option"
   test_case:
   -    
     input: '{"arguments":{"force":1,"name":"user1","ip":"any"},"function":"add"}'
@@ -99,5 +99,3 @@
   -    
     input: '{"arguments":{"id":"200"},"function":"remove"}'
     output: '{"error":9011,"message":"Agent ID not found"}'
-
-  

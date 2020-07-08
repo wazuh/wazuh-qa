@@ -35,8 +35,8 @@
     cluster_output: '{"error":0,"data":{"id":"003","name":"user4","ip":"192.0.0.0","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c915"}}'
     port_output: "OSSEC K:'"
 -
-  name: "Error Agent Name - Duplicated name"
-  description: "Try to add an agent with duplicated name"
+  name: "Error Agent Name - Duplicate name"
+  description: "Try to add an agent with duplicate name"
   test_case:
   -
     port_input: "OSSEC A:'user1'"
@@ -53,8 +53,8 @@
     cluster_output: '{"error":9014,"message":"Invalid Group(s) Name(s)"}'
     port_output: "ERROR: Invalid Group(s) Name(s)"
 -
-  name: "Error IP - Duplicated IP"
-  description: "Try to add an agent with duplicated IP"
+  name: "Error IP - Duplicate IP"
+  description: "Try to add an agent with duplicate IP"
   test_case:
   -
     port_input: "OSSEC A:'user_' IP:'192.0.0.0'"

@@ -13,5 +13,3 @@ def wait_for_agentd_startup(request):
 
     log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=30, callback=callback_agentd_startup)
-    
-

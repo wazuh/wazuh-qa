@@ -18,7 +18,7 @@
       insert_prev_agent: "no"
 
   -
-    name: "Try register duplicated agent name"
+    name: "Try register duplicate agent name"
     description: "Check for register an agent with repeated name and force_insert disabled: rejected"
     test_case:
     -
@@ -111,7 +111,7 @@
       output: "OSSEC K:'001 user1 10.10.10.10 "
       insert_prev_agent: "no"
   -  
-    name: "Valid and duplicated IP - force_insert disabled"
+    name: "Valid and duplicate IP - force_insert disabled"
     description: "Try register an agent with existing IP in client.keys and force_insert disabled: rejected"
     test_case:
     -
@@ -121,7 +121,7 @@
       insert_prev_agent_custom: "OSSEC A:'user0' IP:'10.10.10.10'"
     FORCE_INSERT: "no"
   -  
-    name: "Valid and duplicated IP - force_insert enabled"
+    name: "Valid and duplicate IP - force_insert enabled"
     description: "Try register an agent with existing IP in client.keys and force_insert disabled: register"
     test_case:
     -
@@ -386,3 +386,4 @@
       insert_prev_agent: "no"
     USE_PASSWORD: "yes"
     random_pass: "yes"
+    
