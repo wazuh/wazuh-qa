@@ -283,7 +283,11 @@ def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, confi
         expected = config['output']
         response = send_message(config['input'])
         assert response, "Failed connection stage '{}'': '{}'".format(ip_name_configuration_tests[current_test]['name'], config['input'])
-        assert response[:len(expected)] == expected, "Failed test case '{}': Input: {}".format(ip_name_configuration_tests[current_test]['name'], config['input'])
+        if response[:len(expected)] != expected:
+            if config.get('expected_fail') == 'yes':
+                pytest.xfail("Test expected to fail by configuration")
+            else:
+                raise AssertionError("Failed test case '{}': Input: {}".format(ip_name_configuration_tests[current_test]['name'], config['input']))
 
         #if expect a key check with client.keys file
         if expected[:len("OSSEC K:'")] == "OSSEC K:'":
