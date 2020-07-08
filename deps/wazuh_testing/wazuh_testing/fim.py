@@ -848,7 +848,7 @@ def callback_disk_quota_default(line):
 
 
 def callback_diff_size_limit_value(line):
-    match = re.match(r'.*Maximum file size limit configured to \'(\d+) KB\'.*', line)
+    match = re.match(r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*', line)
 
     if match:
         return match.group(1)
