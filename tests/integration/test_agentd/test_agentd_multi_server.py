@@ -357,4 +357,3 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
 
         authd_server.clear()
     return
-  

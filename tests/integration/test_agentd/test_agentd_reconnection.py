@@ -398,4 +398,3 @@ def test_agentd_connection_retries_pre_enrollment(configure_authd_server, stop_a
     assert log_errors == None, "Error found in logs: "+log_errors
 
     return
-    

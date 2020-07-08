@@ -369,4 +369,3 @@ class RemotedSimulator:
     """
     def set_mode(self, mode):
         self.mode = mode
-

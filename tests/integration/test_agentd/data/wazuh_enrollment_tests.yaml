@@ -325,6 +325,3 @@
     use_source_ip: "no"
     auto_method: "no"
     ssl_cipher: "SHA256"
-
-
-
