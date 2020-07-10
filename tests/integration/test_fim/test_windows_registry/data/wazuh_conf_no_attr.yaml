@@ -3,7 +3,9 @@
 - tags:
   - ossec_conf
   apply_to_modules:
-  - test_windows_registry
+  - test_windows_registry_32bit
+  - test_windows_registry_64bit
+  - test_windows_registry_both
   sections:
   - section: syscheck
     elements:

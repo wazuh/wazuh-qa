@@ -199,9 +199,12 @@ def create_registry(key, subkey, arch):
         The key of the registry (HKEY_* constants).
     subkey : str
         The subkey (name) of the registry.
+    arch : int   
+        Architecture of the registry. Can be KEY_WOW64_32KEY or KEY_WOW64_64KEY
+    
     """
-    sys.platform == 'win32' and winreg.CreateKeyEx(key, subkey, access=arch)
-
+    if sys.platform == 'win32':
+        winreg.CreateKeyEx(key, subkey, access=winreg.KEY_WRITE | arch)
 
 def _create_fifo(path, name):
     """
@@ -338,7 +341,7 @@ def delete_registry(key, subkey, arch):
     sys.platform == 'win32' and winreg.DeleteKeyEx(key, subkey, access=arch)
 
 
-def modify_registry(key, subkey, value):
+def modify_registry(key, subkey, value, arch):
     """
     Modify the content of REG_SZ in a registry
 
@@ -352,7 +355,9 @@ def modify_registry(key, subkey, value):
         The value to be set.
     """
     logger.info("Modifying windows registry.")
-    sys.platform == 'win32' and winreg.SetValue(key, subkey, winreg.REG_SZ, value)
+    if sys.platform == 'win32':
+        oppened_key = winreg.OpenKeyEx(key, subkey, 0, access=(arch | winreg.KEY_WRITE))
+        winreg.SetValueEx(oppened_key, "test_value", 0, winreg.REG_SZ, value)
 
 
 def modify_file_content(path, name, new_content=None, is_binary=False):

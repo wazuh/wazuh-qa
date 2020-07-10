@@ -27,7 +27,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 monitoring_modes = ['scheduled']
 
-sub_key = os.path.join('SOFTWARE', 'Classes', 'testkey')
+sub_key = os.path.join('SOFTWARE', 'testkey')
 registry = os.path.join('HKEY_LOCAL_MACHINE', sub_key)
 frequency = 4
 
@@ -38,7 +38,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf_no_attr.yaml')
 p, m = generate_params(extra_params=conf_params, modes=monitoring_modes)
 configurations1 = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
-attributes = [{'arch': 'both'}, {'tags': 'test_tag'}]
+attributes = [{'tags': 'test_tag'}]
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_attr.yaml')
 p, m = generate_params(extra_params=conf_params, apply_to_all=({'ATTRIBUTE': attr} for attr in attributes),
                        modes=monitoring_modes)
@@ -60,17 +60,16 @@ def get_configuration(request):
 def extra_configuration_before_yield():
     # It makes sure to delete the registry if it already exists.
     try:
-        delete_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, winreg.KEY_WOW64_32KEY)
+        delete_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, winreg.KEY_WOW64_64KEY)
     except OSError:
         pass
 
-
-@pytest.mark.parametrize('arch_list, tag, tags_to_apply', [
-    (['32'], None, {'ossec_conf'}),
-    (['32', '64'], None, {'ossec_conf_2'}),
-    (['32'], "test_tag", {'ossec_conf_2'})
+@pytest.mark.parametrize('tag, tags_to_apply', [
+    (None, {'ossec_conf'}),
+    ("test_tag", {'ossec_conf_2'})
 ])
-def test_windows_registry(arch_list, tag, tags_to_apply,
+
+def test_windows_registry(tag, tags_to_apply,
                           get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
     """Check the correct monitoring of Windows Registries.
 
@@ -89,53 +88,47 @@ def test_windows_registry(arch_list, tag, tags_to_apply,
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
+
     # Check that configuration is applying to the correct test
-    if ((tag and 'tags' not in get_configuration['metadata']['attribute'].keys()) or
-            (len(arch_list) > 1 and 'arch' not in get_configuration['metadata']['attribute'].keys())):
+    if (tag and 'tags' not in get_configuration['metadata']['attribute'].keys()):
         pytest.skip("Does not apply to this config file")
 
     # Check that windows_registry does not trigger alerts for new keys
-    create_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, winreg.KEY_WOW64_32KEY | winreg.KEY_WRITE)
+    create_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, winreg.KEY_WOW64_64KEY)
     check_time_travel(time_travel=True, interval=timedelta(seconds=frequency), monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                 error_message='Did not receive expected "Sending FIM event: ..." event',
-                                accum_results=len(arch_list))
-
+                                accum_results=1)
     # Check that windows_registry trigger alerts when adding an entry
-    modify_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 'test_add')
+    modify_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 'test_add', winreg.KEY_WOW64_64KEY)
     check_time_travel(time_travel=True, interval=timedelta(seconds=frequency), monitor=wazuh_log_monitor)
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                     error_message='Did not receive expected "Sending FIM event: ..." event',
-                                    accum_results=len(arch_list)).result()
+                                    accum_results=1).result()
     if not isinstance(event, list):
         event = [event]
-    for i, arch in enumerate(arch_list):
-        assert event[i]['data']['type'] == 'added', f'Event type not equal'
+        assert (event[0]['data']['path'][:5] == '[x64]', f'Registry architecture not equal') and (event[0]['data']['type'] == 'added', f'Event type not equal')
+        if tag:
+            assert event[0]['data']['tags'] == tag, f'{tag} not found in event'
 
     # Check that windows_registry trigger alerts when modifying existing entries
     # and check arch and tag values match with the ones in event
-    modify_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 'test_modify')
+    modify_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 'test_modify', winreg.KEY_WOW64_64KEY)
     check_time_travel(time_travel=True, interval=timedelta(seconds=frequency), monitor=wazuh_log_monitor)
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                     error_message='Did not receive expected "Sending FIM event: ..." event',
-                                    accum_results=len(arch_list)).result()
+                                    accum_results=1).result()
     if not isinstance(event, list):
         event = [event]
-    for i, arch in enumerate(arch_list):
-        assert event[i]['data']['type'] == 'modified', f'Event type not equal'
-        if arch:
-            assert arch in event[i]['data']['path'], f'Architecture is not correct'
-        if tag:
-            assert event[i]['data']['tags'] == tag, f'{tag} not found in event'
+        assert (event[0]['data']['path'][:5] == '[x64]', f'Registry architecture not equal') and (event[0]['data']['type'] == 'modified', f'Event type not equal')
 
-    # Check that windows_registry trigger alerts when deleting a key
-    delete_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, winreg.KEY_WOW64_32KEY)
+        # Check that windows_registry trigger alerts when deleting a key
+    delete_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, winreg.KEY_WOW64_64KEY)
     check_time_travel(time_travel=True, interval=timedelta(seconds=frequency), monitor=wazuh_log_monitor)
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                     error_message='Did not receive expected "Sending FIM event: ..." event',
-                                    accum_results=len(arch_list)).result()
+                                    accum_results=1).result()
     if not isinstance(event, list):
         event = [event]
-    for i, arch in enumerate(arch_list):
-        assert event[i]['data']['type'] == 'deleted', f'{event[i]["data"]["type"]} type not equal to deleted'
+        assert (event[0]['data']['path'][:5] == '[x64]', f'Registry architecture not equal') and (event[0]['data']['type'] == 'deleted', f'{event[0]["data"]["type"]} type not equal to deleted')
