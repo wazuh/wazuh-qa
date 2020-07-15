@@ -5,36 +5,9 @@ import json
 import re
 
 
-def replace_regex_group(pattern, new_value, data):
+def replace_regex(pattern, new_value, data, replace_group=False):
     """
-    Replace a grouped text string with a regex, with a new one.
-
-    Important: the regex must be composed of 3 groups, group 2 being the string that is modified.
-    Example:
-        r'(hello )(world)(!) --> hello test!
-
-    Parameters
-    ----------
-    pattern: str
-        Regex pattern
-    new_value: str
-        String to replace the grouped text
-    data: str
-        String data
-
-    Returns
-    -------
-    data: str
-        Data string with the new changes made
-    """
-    compiled_pattern = re.compile(pattern, re.DOTALL)
-
-    return re.sub(compiled_pattern, rf"\g<1>{new_value}\g<3>", data)
-
-
-def replace_regex(pattern, new_value, data):
-    """
-    Function to replace a patter string in a data text
+    Function to replace a pattern string in a data text
 
     Parameters
     ----------
@@ -44,6 +17,8 @@ def replace_regex(pattern, new_value, data):
         New replaced string
     data: str
         String to search and replace
+    replace_group: bool
+        Flag to replace a plain expression or to replace it in a group
 
     Returns
     -------
@@ -51,8 +26,9 @@ def replace_regex(pattern, new_value, data):
         New replaced text
     """
     compiled_pattern = re.compile(pattern, re.DOTALL)
+    replace_value = rf"\g<1>{new_value}\g<3>" if replace_group else new_value
 
-    return re.sub(compiled_pattern, new_value, data)
+    return re.sub(compiled_pattern, replace_value, data)
 
 
 def insert_xml_tag(pattern, tag, value, data):

@@ -27,8 +27,12 @@ else:
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
-    GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
-    PREFIX = os.sep
+    if sys.platform == 'darwin':
+        PREFIX = os.path.join('/', 'private', 'var', 'root') 
+        GEN_OSSEC = None
+    else:
+        PREFIX = os.sep
+        GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
     try:
         import grp
         import pwd
