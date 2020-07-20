@@ -1,6 +1,6 @@
 # Setting up a test environment
 
-You will need a proper environment to run the integration tests. You can use any virtual machine you wish. If you have one already, go to the [integration tests section](#integration-tests)
+You will need a proper environment to run the integration tests. You can use any virtual machine you wish. If you have one already, go to the [integration tests section](../)
 
 If you use [Vagrant](https://www.vagrantup.com/downloads.html) or [VirtualBox](https://www.virtualbox.org/wiki/Downloads), it is important to install the `vbguest` plugin since some tests modify the system date and there could be some synchronization issues.
 
@@ -8,13 +8,15 @@ This guide will cover the following platforms: [Linux](#linux), [Windows](#windo
 
 You can run these tests on a manager or an agent. In case you are using an agent, please remember to register it and use the correct version (Wazuh branch).
 
-_We are skipping Wazuh installation steps. For further information, check [Wazuh documentation](https://documentation.wazuh.com/3.11/installation-guide/index.html)._
+> Note: We are skipping Wazuh installation steps. For further information, check [Wazuh documentation](https://documentation.wazuh.com/3.13/installation-guide/index.html).
 
 ## Linux
 
 _We are using **CentOS** for this example:_
 
 - Install **Wazuh**
+
+- Disable all components in `ossec.conf`
 
 - Disable firewall (only for **CentOS**)
 
@@ -44,6 +46,9 @@ pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro p
 ```shell script
 # Enable debug 2
 echo 'syscheck.debug=2' >> $wazuh_path/etc/local_internal_options.conf
+echo 'wazuh_modules.debug=2' >> $wazuh_path/etc/local_internal_options.conf
+echo 'wazuh_db.debug=2' >> $wazuh_path/etc/local_internal_options.conf
+
 
 # Avoid agent disconnections when travelling in time (only for agents)
 sed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time-reconnect>:g" /var/ossec/etc/ossec.conf
@@ -55,11 +60,23 @@ echo 'monitord.rotate_log=0' >> $wazuh_path/etc/local_internal_options.conf
 /var/ossec/bin/ossec-control restart
 ```
 
+- Download wazuh-qa repository and install package dependencies.
+
+```shell script
+# Download wazuh-qa repository
+git clone https://github.com/wazuh/wazuh-qa.git
+
+# Install wazuh_testing package
+python3 wazuh-qa/deps/wazuh_testing/setup.py install
+```
+
 -----------
 
 ## Windows
 
 - Install **Wazuh**
+
+- Disable all components in `ossec.conf`
 
 - Download and install [Python](https://www.python.org/downloads/windows/)
 
@@ -88,6 +105,8 @@ pip install pytest freezegun jsonschema pyyaml==5.3 psutil paramiko distro pywin
 ```shell script
 # Enable debug 2
 echo 'syscheck.debug=2' >> "C:\Program Files (x86)\ossec-agent\local_internal_options.conf"
+echo 'wazuh_modules.debug=2' >> "C:\Program Files (x86)\ossec-agent\local_internal_options.conf"
+echo 'wazuh_db.debug=2' >> "C:\Program Files (x86)\ossec-agent\local_internal_options.conf"
 
 # Disable log rotation
 echo 'monitord.rotate_log=0' >> "C:\Program Files (x86)\ossec-agent\local_internal_options.conf"
@@ -95,11 +114,22 @@ echo 'monitord.rotate_log=0' >> "C:\Program Files (x86)\ossec-agent\local_intern
 
 - Restart **Wazuh** using the GUI
 
+- Download wazuh-qa repository and install package dependencies.
+
+```shell script
+# Download wazuh-qa repository
+git clone https://github.com/wazuh/wazuh-qa.git
+
+# Install wazuh_testing package
+python3 wazuh-qa/deps/wazuh_testing/setup.py install
+```
 -----------
 
 ## MacOS
 
 - Install **Wazuh**
+
+- Disable all components in `ossec.conf`
 
 - Install Python and its dependencies
 
@@ -120,6 +150,8 @@ pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro p
 
 # Enable debug 2
 echo 'syscheck.debug=2' >> /Library/Ossec/etc/local_internal_options.conf
+echo 'wazuh_modules.debug=2' >> /Library/Ossec/etc/local_internal_options.conf
+echo 'wazuh_db.debug=2' >> /Library/Ossec/etc/local_internal_options.conf
 
 # Avoid agent disconnections when travelling in time
 brew install gnu-sed
@@ -132,6 +164,12 @@ echo 'monitord.rotate_log=0' >> /Library/Ossec/etc/local_internal_options.conf
 /Library/Ossec/bin/ossec-control restart
 ```
 
------------
+- Download wazuh-qa repository and install package dependencies.
 
-Finally, copy your `wazuh-qa` repository within your testing environment and you are set.
+```shell script
+# Download wazuh-qa repository
+git clone https://github.com/wazuh/wazuh-qa.git
+
+# Install wazuh_testing package
+python3 wazuh-qa/deps/wazuh_testing/setup.py install
+```
