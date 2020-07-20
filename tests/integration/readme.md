@@ -21,4 +21,4 @@ You can see all the information about it **[here](set_up_environment.md)**
 
 ##  About test structure
 
-Click **[here](help.md)** to see more information about the testing files structure or about `pytest` testing framework.
+See **[here](help.md)** more information about the testing files structure or about `pytest` testing framework.
