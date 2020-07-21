@@ -1,0 +1,66 @@
+---
+- name: "Installing dependencies using apt"
+  apt:
+    pkg:
+      - git
+      - gcc
+      - make
+      - libc6-dev
+      - curl
+      - policycoreutils
+      - automake
+      - autoconf
+      - libtool
+    force_apt_get: True
+    state: present
+
+- name: "Clone wazuh repository"
+  git:
+    repo: "https://github.com/wazuh/wazuh"
+    dest: /wazuh
+    version: "{{ wazuh_branch }}"
+
+- name: Install master
+  args:
+    chdir: /wazuh
+    creates: /var/ossec
+  environment:
+    USER_LANGUAGE: "en"
+    USER_NO_STOP: "y"
+    USER_INSTALL_TYPE: "server"
+    USER_DIR: "/var/ossec"
+    USER_ENABLE_EMAIL: "n"
+    USER_ENABLE_SYSCHECK: "n"
+    USER_ENABLE_ROOTCHECK: "n"
+    USER_ENABLE_OPENSCAP: "n"
+    USER_WHITE_LIST: "n"
+    USER_ENABLE_SYSLOG: "y"
+    USER_ENABLE_AUTHD: "y"
+    USER_AUTO_START: "y"
+    USER_UPDATE: "n"
+  shell: "./install.sh"
+
+- name: Copy ossec.conf file
+  copy:
+    src: ../files/ossec.conf
+    dest: /var/ossec/etc/ossec.conf
+    owner: ossec
+    group: ossec
+    mode: '0644'
+
+- name: Set cluster key
+  lineinfile:
+    path: /var/ossec/etc/ossec.conf
+    regexp: '<key>(KEY)</key>'
+    line: "<key>{{ cluster_key }}</key>"
+    backrefs: yes
+
+- name: Set Wazuh Master IP
+  lineinfile:
+    path: /var/ossec/etc/ossec.conf
+    regexp: '<node>(.*)</node>'
+    line: "<node>{{ master_hostname }}</node>"
+    backrefs: yes
+
+- name: Restart Wazuh
+  command: /var/ossec/bin/ossec-control restart

@@ -78,7 +78,7 @@ def test_rbac_mode(tags_to_apply, get_configuration, configure_api_environment, 
         Run test if match with a configuration identifier, skip otherwise.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    rbac_white = get_configuration['configuration']['rbac']['mode'] == 'white'
+    rbac_white = get_configuration['security_config']['rbac_mode'] == 'white'
     api_details = get_api_details(user='test_user', password='wazuh')
     api_details['base_url'] += '/manager/info'
 

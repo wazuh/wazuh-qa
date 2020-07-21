@@ -171,6 +171,25 @@ def write_api_conf(path: str, api_conf: dict):
         yaml.dump(api_conf, f)
 
 
+def write_security_conf(path: str, security_conf: dict):
+    """
+    Write a new configuration in 'security.yaml' file.
+
+    Parameters
+    ----------
+    path : str
+        Path of config file.
+    security_conf : dict
+        Dictionary to be written in the security.yaml file.
+    """
+    if not os.path.exists(path):
+        from wazuh_testing.tools import OSSEC_UID, OSSEC_GID
+
+        open(path, mode='w').close()
+        os.chown(uid=OSSEC_UID, gid=OSSEC_GID, path=path)
+    write_api_conf(path, security_conf)
+
+
 def set_section_wazuh_conf(sections, template=None):
     """
     Set a configuration in a section of Wazuh. It replaces the content if it exists.
@@ -295,9 +314,12 @@ def set_section_wazuh_conf(sections, template=None):
         section_conf = wazuh_conf.find(section['section'])
         # Create section if it does not exist, clean otherwise
         if not section_conf:
-            section_conf = ET.SubElement(wazuh_conf.getroot(), section['section'])
+            for s in section:
+              section_conf = ET.SubElement(wazuh_conf.getroot(), section['section'])
         else:
             section_conf.clear()
+
+        section_conf.tail = "\n"
 
         # Insert section attributes
         attributes = section.get('attributes')
