@@ -37,16 +37,18 @@ else:
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_nodiff.yaml')
 
-conf_params = {'TEST_DIRECTORIES': dir_config, 'TEST_ENV_VARIABLES':test_env, 'MODULE_NAME':__name__}
+conf_params = {'TEST_DIRECTORIES': dir_config, 'TEST_ENV_VARIABLES': test_env, 'MODULE_NAME': __name__}
 p, m = generate_params(extra_params=conf_params)
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+
 
 # Fixture
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
+
 
 # Test
 @pytest.mark.parametrize('directory, filename, hidden_content', [
@@ -82,16 +84,16 @@ def test_tag_nodiff(directory, filename, hidden_content, get_configuration, put_
             diff_file = os.path.join(diff_file, striped, file)
 
             assert os.path.exists(diff_file), f'{diff_file} does not exist'
-            assert event['data'].get('content_changes') is not None, f'content_changes is empty'
+            assert event['data'].get('content_changes') is not None, 'content_changes is empty'
 
     def no_diff_validator(event):
         """Validate content_changes value is truncated if the file is set to no_diff"""
         if hidden_content:
             assert '<Diff truncated because nodiff option>' in event['data'].get('content_changes'), \
-                f'content_changes is not truncated'
+                'content_changes is not truncated'
         else:
             assert '<Diff truncated because nodiff option>' not in event['data'].get('content_changes'), \
-                f'content_changes is truncated'
+                'content_changes is truncated'
 
     regular_file_cud(directory, wazuh_log_monitor, file_list=files,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',

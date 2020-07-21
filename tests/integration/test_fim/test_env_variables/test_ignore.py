@@ -39,16 +39,18 @@ else:
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_ignore.yaml')
 
-conf_params = {'TEST_DIRECTORIES': dir_config, 'TEST_ENV_VARIABLES':test_env, 'MODULE_NAME':__name__}
+conf_params = {'TEST_DIRECTORIES': dir_config, 'TEST_ENV_VARIABLES': test_env, 'MODULE_NAME': __name__}
 p, m = generate_params(extra_params=conf_params)
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+
 
 # Fixture
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
+
 
 # Test
 @pytest.mark.parametrize('directory, event_generated', [
@@ -76,8 +78,8 @@ def test_tag_ignore(directory, event_generated, get_configuration, configure_env
                                         callback=callback_detect_event,
                                         error_message='Did not receive expected '
                                                       '"Sending FIM event: ..." event').result()
-        assert event['data']['type'] == 'added', f'Event type not equal'
-        assert event['data']['path'] == os.path.join(directory, filename), f'Event path not equal'
+        assert event['data']['type'] == 'added', 'Event type not equal'
+        assert event['data']['path'] == os.path.join(directory, filename), 'Event path not equal'
     else:
         while True:
             ignored_file = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
