@@ -1,6 +1,7 @@
 # Copyright (C) 2015-2020, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+import bz2
 import random
 import string
 import json
@@ -9,9 +10,24 @@ import xml.etree.ElementTree as ET
 import filetype
 import requests
 import gzip
-import bz2
 import zipfile
 from os.path import exists
+
+
+def read_json(file_path):
+    """
+    Read a JSON file from a given path, return a dictionary with the json data
+
+    Parameters
+    ----------
+    file_path : str
+        Path of the JSON file to be readed
+    """
+    # Read JSON data templates
+    with open(file_path, 'r') as f:
+        output = json.loads(f.read())
+
+    return output
 
 
 def truncate_file(file_path):
