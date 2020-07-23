@@ -20,6 +20,7 @@ class Parameters:
         self._gcp_subscription_name = None
         self._gcp_credentials_file = None
         self._gcp_topic_name = None
+        self._fim_mode = None
 
     @property
     def default_timeout(self):
@@ -183,6 +184,28 @@ class Parameters:
         """
         self._gcp_topic_name = value
 
+    @property
+    def fim_mode(self):
+        """
+        Getter method for the `fim_mode` property
+
+        Returns
+        -------
+        list FIM modes that will be used.
+        """
+        return self._fim_mode
+
+    @fim_mode.setter
+    def fim_mode(self, value):
+        """
+        Setter method for the `fim_mode` property
+
+        Parameters
+        ----------
+        value : list
+            New value for the `fim_mode`.
+        """
+        self._fim_mode = value
 
 global_parameters = Parameters()
 logger = logging.getLogger('wazuh_testing')

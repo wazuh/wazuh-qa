@@ -1405,10 +1405,13 @@ def get_fim_mode_param(mode, key='FIM_MODE'):
     """
     metadata = {key.lower(): mode}
     if mode == 'scheduled':
-        return {key: ''}, metadata
-    elif mode == 'realtime' and sys.platform not in _os_excluded_from_rt_wd:
+        if mode in global_parameters.fim_mode:
+            return {key: ''}, metadata
+        else:
+            return None, None
+    elif mode == 'realtime' and mode in global_parameters.fim_mode and sys.platform not in _os_excluded_from_rt_wd:
         return {key: {'realtime': 'yes'}}, metadata
-    elif mode == 'whodata' and sys.platform not in _os_excluded_from_rt_wd:
+    elif mode == 'whodata' and mode in global_parameters.fim_mode and sys.platform not in _os_excluded_from_rt_wd:
         return {key: {'whodata': 'yes'}}, metadata
     else:
         return None, None
