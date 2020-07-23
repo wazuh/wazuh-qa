@@ -4,7 +4,7 @@
 
 import os
 import sys
-
+import time
 import pytest
 
 from wazuh_testing import global_parameters
@@ -138,6 +138,7 @@ def test_hard_link(path_file, file_name, path_link, link_name, num_links, get_co
                               mode=get_configuration['metadata']['fim_mode'],
                               expected_hard_links=hardlinks_list)
 
+    time.sleep(1)
     # Modify one of the hard links
     modify_file_content(path_link, hardlinks_list[0], new_content="modified HardLink0")
 
