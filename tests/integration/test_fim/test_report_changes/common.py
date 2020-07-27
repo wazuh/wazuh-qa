@@ -7,10 +7,9 @@ import sys
 import re
 
 from wazuh_testing.fim import WAZUH_PATH
-from wazuh_testing.tools.file import truncate_file
 
 
-def generateString(stringLength=10, character='0'):
+def generate_string(stringLength=10, character='0'):
     """Generate a string with line breaks.
 
     Parameters
@@ -25,15 +24,15 @@ def generateString(stringLength=10, character='0'):
     random_str : str
         String with line breaks.
     """
-    random_str = ''
+    generated_string = ''
 
     for i in range(stringLength):
-        random_str += character
+        generated_string += character
 
         if i % 127 == 0:
-            random_str += '\n'
+            generated_string += '\n'
 
-    return random_str
+    return generated_string
 
 
 def translate_size(configured_size='1KB'):
@@ -68,11 +67,12 @@ def disable_file_max_size():
     """
     Disable the syscheck.max_file_size option from the internal_options.conf file.
     """
-    internal_options = os.path.join(WAZUH_PATH, 'etc', 'internal_options.conf')
     new_content = ''
 
     if sys.platform == 'win32':
         internal_options = os.path.join(WAZUH_PATH, 'internal_options.conf')
+    else:
+        internal_options = os.path.join(WAZUH_PATH, 'etc', 'internal_options.conf')
 
     with open(internal_options, 'r') as f:
         lines = f.readlines()
@@ -80,8 +80,6 @@ def disable_file_max_size():
         for line in lines:
             new_line = line.replace('syscheck.file_max_size=1024', 'syscheck.file_max_size=0')
             new_content += new_line
-
-    truncate_file(internal_options)
 
     with open(internal_options, 'w') as f:
         f.write(new_content)
@@ -91,11 +89,12 @@ def restore_file_max_size():
     """
     Restore the syscheck.max_file_size option from the internal_options.conf file.
     """
-    internal_options = os.path.join(WAZUH_PATH, 'etc', 'internal_options.conf')
     new_content = ''
 
     if sys.platform == 'win32':
         internal_options = os.path.join(WAZUH_PATH, 'internal_options.conf')
+    else:
+        internal_options = os.path.join(WAZUH_PATH, 'etc', 'internal_options.conf')
 
     with open(internal_options, 'r') as f:
         lines = f.readlines()
@@ -103,8 +102,6 @@ def restore_file_max_size():
         for line in lines:
             new_line = line.replace('syscheck.file_max_size=0', 'syscheck.file_max_size=1024')
             new_content += new_line
-
-    truncate_file(internal_options)
 
     with open(internal_options, 'w') as f:
         f.write(new_content)
@@ -129,9 +126,9 @@ def make_diff_file_path(folder='/testdir1', filename='regular_0'):
     diff_file_path = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
 
     if sys.platform == 'win32':
-        diff_file_path = os.path.join(diff_file_path, 'c')
-        diff_file_path = os.path.join(diff_file_path, re.match(r'^[a-zA-Z]:(\\){1,2}(\w+)(\\){0,2}$', folder).group(2),
-                                      filename, 'last-entry.gz')
+        folder_components = re.match(r'^([a-zA-Z]):\\{1,2}(\w+)\\{0,2}$', folder)
+        diff_file_path = os.path.join(diff_file_path, folder_components.group(1).lower(),
+                                      folder_components.group(2).lower(), filename, 'last-entry.gz')
     else:
         diff_file_path = os.path.join(diff_file_path, folder.strip('/'), filename, 'last-entry.gz')
 

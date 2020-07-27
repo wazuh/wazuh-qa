@@ -13,7 +13,7 @@ import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, REGULAR, create_file, \
     generate_params, check_time_travel
-from test_fim.test_report_changes.common import generateString
+from test_fim.test_report_changes.common import generate_string
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX, WAZUH_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -120,7 +120,7 @@ def test_large_changes(filename, folder, original_size, modified_size, tags_to_a
     fim_mode = get_configuration['metadata']['fim_mode']
 
     # Create the file and and capture the event.
-    original_string = generateString(original_size, '0')
+    original_string = generate_string(original_size, '0')
     create_file(REGULAR, folder, filename, content=original_string)
     check_time_travel(fim_mode == 'scheduled', monitor=wazuh_log_monitor)
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
@@ -131,7 +131,7 @@ def test_large_changes(filename, folder, original_size, modified_size, tags_to_a
             shutil.copyfileobj(f_in, f_out)
 
     # Modify the file with new content
-    modified_string = generateString(modified_size, '1')
+    modified_string = generate_string(modified_size, '1')
     create_file(REGULAR, folder, filename, content=modified_string)
     check_time_travel(fim_mode == 'scheduled', monitor=wazuh_log_monitor)
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()

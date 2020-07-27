@@ -9,7 +9,7 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_disk_quota_limit_reached, generate_params, create_file, \
     check_time_travel
-from test_fim.test_report_changes.common import generateString
+from test_fim.test_report_changes.common import generate_string
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -81,7 +81,7 @@ def test_disk_quota_disabled(tags_to_apply, filename, folder, size, get_configur
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
-    to_write = generateString(size, '0')
+    to_write = generate_string(size, '0')
     create_file(REGULAR, folder, filename, content=to_write)
 
     check_time_travel(scheduled)

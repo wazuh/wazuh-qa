@@ -3,15 +3,13 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import sys
-import re
 
 import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_file_size_limit_reached, generate_params, create_file, \
-    check_time_travel, callback_detect_event, WAZUH_PATH, modify_file_content
-from test_fim.test_report_changes.common import generateString, translate_size
+    check_time_travel, callback_detect_event, modify_file_content
+from test_fim.test_report_changes.common import generate_string, translate_size, make_diff_file_path
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -78,17 +76,10 @@ def test_file_size_default(tags_to_apply, filename, folder, get_configuration, c
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     size_limit = translate_size('50MB')
-    diff_file_path = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
-
-    if sys.platform == 'win32':
-        diff_file_path = os.path.join(diff_file_path, 'c')
-        diff_file_path = os.path.join(diff_file_path, re.match(r'^[a-zA-Z]:(\\){1,2}(\w+)(\\){0,2}$', folder).group(2),
-                                      filename, 'last-entry.gz')
-    else:
-        diff_file_path = os.path.join(diff_file_path, folder.strip('/'), filename, 'last-entry.gz')
+    diff_file_path = make_diff_file_path(folder=folder, filename=filename)
 
     # Create file with a smaller size than the configured value
-    to_write = generateString(int(size_limit / 2), '0')
+    to_write = generate_string(int(size_limit / 2), '0')
     create_file(REGULAR, folder, filename, content=to_write)
 
     check_time_travel(scheduled)
