@@ -3,7 +3,7 @@ wazuh-master:
   - regex: ".*Agent key generated for agent.*"
     path: "/var/ossec/logs/ossec.log"
     timeout: 60
-  - regex: '.*Received request:.*{"arguments":{"daemon_name":"authd","message":{"arguments":{"name":.*,"ip":"any","force":0},"function":"add"}},"function":"send_sync"}.*'
+  - regex: '.*Received request:.*{"daemon_name":"authd","message":{"arguments":{"name":".*","ip":"any","force":0},"function":"add"}}'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
   - regex: '.*Worker wazuh-worker1.*Finished integrity synchronization.*'
