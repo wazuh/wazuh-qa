@@ -75,7 +75,7 @@ choco install jq
 - Install Python dependencies
 
 ```shell script
-pip install pytest freezegun jsonschema pyyaml==5.3 psutil paramiko distro pywin32 pypiwin32 wmi pandas pytest-html==2.0.1 numpydoc==0.9.2
+pip install pytest freezegun jsonschema pyyaml==5.3 psutil paramiko distro pywin32 pypiwin32 wmi pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 - Change `time-reconnect` from `C:\Program Files (x86)\ossec-agent\ossec.conf`
@@ -110,7 +110,7 @@ brew install python3
 brew install autoconf automake libtool
 
 # Install Python libraries
-pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2
+pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro pandas pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 - Add some internal options and restart
