@@ -207,6 +207,7 @@ class Parameters:
         """
         self._fim_mode = value
 
+
 global_parameters = Parameters()
 logger = logging.getLogger('wazuh_testing')
 logger.setLevel(logging.DEBUG)

@@ -848,6 +848,11 @@ def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=1
     TimeoutError
         If `monitor` is not `None` and the scan has not ended in the default timeout specified in `global_parameters`.
     """
+    if 'fim_mode' in global_parameters.current_configuration['metadata'].keys():
+        mode = global_parameters.current_configuration['metadata']['fim_mode']
+        if mode != 'scheduled' or mode not in global_parameters.fim_mode:
+            return
+
     if time_travel:
         before = str(datetime.now())
         TimeMachine.travel_to_future(interval)
@@ -1069,7 +1074,7 @@ class EventChecker:
                         data_path[index] = item.encode(encoding=self.encoding)
                 if sys.platform == 'darwin' and self.encoding and self.encoding != 'utf-8':
                     logger.info(f'Not asserting {expected_path} in event.data.path. '
-                                 f'Reason: using non-utf-8 encoding in darwin.')
+                                f'Reason: using non-utf-8 encoding in darwin.')
                 else:
                     error_msg = f"Expected data path was '{expected_path}' but event data path is '{data_path}'"
                     assert (expected_path in data_path), error_msg
@@ -1403,15 +1408,16 @@ def get_fim_mode_param(mode, key='FIM_MODE'):
         Params: The key is `key` and the value is the string to be replaced in the target configuration.
         Metadata: The key is `key` in lowercase and the value is always `mode`.
     """
+
+    if mode not in global_parameters.fim_mode:
+        return None, None
+
     metadata = {key.lower(): mode}
     if mode == 'scheduled':
-        if mode in global_parameters.fim_mode:
-            return {key: ''}, metadata
-        else:
-            return None, None
-    elif mode == 'realtime' and mode in global_parameters.fim_mode and sys.platform not in _os_excluded_from_rt_wd:
+        return {key: ''}, metadata
+    elif mode == 'realtime' and sys.platform not in _os_excluded_from_rt_wd:
         return {key: {'realtime': 'yes'}}, metadata
-    elif mode == 'whodata' and mode in global_parameters.fim_mode and sys.platform not in _os_excluded_from_rt_wd:
+    elif mode == 'whodata' and sys.platform not in _os_excluded_from_rt_wd:
         return {key: {'whodata': 'yes'}}, metadata
     else:
         return None, None

@@ -171,6 +171,7 @@ def pytest_addoption(parser):
         help="run tests using a specific FIM mode"
     )
 
+
 def pytest_configure(config):
     # Register an additional marker
     config.addinivalue_line(
@@ -212,6 +213,7 @@ def pytest_configure(config):
     if not mode:
         mode = ["scheduled", "whodata", "realtime"]
     global_parameters.fim_mode = mode
+
 
 def pytest_html_results_table_header(cells):
     cells.insert(4, html.th('Tier', class_='sortable tier', col='tier'))
