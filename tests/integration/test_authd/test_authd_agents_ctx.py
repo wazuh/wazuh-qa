@@ -46,7 +46,7 @@ log_monitor_paths = []
 ls_sock_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'auth'))
 receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2'), (ls_sock_path, 'AF_UNIX', 'TCP')]
 
-monitored_sockets_params = [('wazuh-db', None, True), ('ossec-authd', None, True)]
+monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('ossec-authd', None, True)]
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
