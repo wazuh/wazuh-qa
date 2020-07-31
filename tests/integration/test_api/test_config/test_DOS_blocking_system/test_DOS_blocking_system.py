@@ -48,10 +48,10 @@ def test_DOS_blocking_system(tags_to_apply, get_configuration, configure_api_env
     check_apply_test(tags_to_apply, get_configuration['tags'])
     max_request_per_minute = get_configuration['conf']['max_request_per_minute']
 
-    # PUT configuration for security.yaml
+    # PUT configuration for api.yaml
     api_details = get_api_details()
-    data = {'max_request_per_minute': max_request_per_minute}
-    put_response = requests.put(api_details['base_url'] + '/security/config', json=data,
+    data = {'access': {'max_request_per_minute': max_request_per_minute}}
+    put_response = requests.put(api_details['base_url'] + '/manager/api/config', json=data,
                                 headers=api_details['auth_headers'], verify=False)
     assert put_response.status_code == 200, f'Expected status code was 200, ' \
                                             f'but {put_response.status_code} was returned. \nFull response: {put_response.text}'
@@ -74,9 +74,9 @@ def test_DOS_blocking_system(tags_to_apply, get_configuration, configure_api_env
     assert get_response.status_code == 200, f'Expected status code was 200, ' \
                                             f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
 
-    # DELETE configuration for security.yaml
+    # DELETE configuration for api.yaml
     api_details = get_api_details()
-    delete_response = requests.delete(api_details['base_url'] + '/security/config', json=data,
+    delete_response = requests.delete(api_details['base_url'] + '/manager/api/config', json=data,
                                       headers=api_details['auth_headers'], verify=False)
     assert delete_response.status_code == 200, f'Expected status code was 200, ' \
                                                f'but {delete_response.status_code} was returned. \nFull response: {delete_response.text}'

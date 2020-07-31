@@ -7,6 +7,7 @@ import time
 
 import pytest
 import requests
+
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 
 # Marks
@@ -52,10 +53,11 @@ def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_
     block_time = get_configuration['conf']['block_time']
     max_login_attempts = get_configuration['conf']['max_login_attempts']
 
-    # PUT configuration for security.yaml
+    # PUT configuration for api.yaml
     api_details = get_api_details()
-    data = {'block_time': block_time, 'max_login_attempts': max_login_attempts, 'max_request_per_minute': 300}
-    put_response = requests.put(api_details['base_url'] + '/security/config', json=data,
+    data = {
+        'access': {'block_time': block_time, 'max_login_attempts': max_login_attempts, 'max_request_per_minute': 300}}
+    put_response = requests.put(api_details['base_url'] + '/manager/api/config', json=data,
                                 headers=api_details['auth_headers'], verify=False)
     assert put_response.status_code == 200, f'Expected status code was 200, ' \
                                             f'but {put_response.status_code} was returned. \nFull response: {put_response.text}'
@@ -63,7 +65,7 @@ def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_
     # Provoke a block from an unknown IP (default: 5 tries => ip blocked)
     api_details = get_api_details(host=host, port=port)
     api_details['base_url'] += '/security/user/authenticate'
-    for _ in range(max_login_attempts - 1):
+    for _ in range(max_login_attempts - 2):
         requests.get(api_details['base_url'], headers=api_details['auth_headers'], verify=False)
 
     # Request before blocking time expires. (5th try)
@@ -79,9 +81,9 @@ def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_
     assert get_response.status_code == 401, f'Expected status code was 401, ' \
                                             f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
 
-    # DELETE configuration for security.yaml
+    # DELETE configuration for api.yaml
     api_details = get_api_details()
-    delete_response = requests.delete(api_details['base_url'] + '/security/config', json=data,
+    delete_response = requests.delete(api_details['base_url'] + '/manager/api/config', json=data,
                                       headers=api_details['auth_headers'], verify=False)
     assert delete_response.status_code == 200, f'Expected status code was 200, ' \
                                                f'but {delete_response.status_code} was returned. \nFull response: {delete_response.text}'
