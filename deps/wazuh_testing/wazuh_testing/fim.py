@@ -826,6 +826,34 @@ def callback_num_inotify_watches(line):
         return match.group(1)
 
 
+def callback_file_size_limit_reached(line):
+    match = re.match(r'.*File \'(.*)\' is too big for configured maximum size to perform diff operation\.', line)
+
+    if match:
+        return match.group(1)
+
+
+def callback_disk_quota_limit_reached(line):
+    match = re.match(r'.*The maximum configured size for the \'(.*)\' folder has been reached.*', line)
+
+    if match:
+        return match.group(1)
+
+
+def callback_disk_quota_default(line):
+    match = re.match(r'.*Maximum disk quota size limit configured to \'(\d+) KB\'.*', line)
+
+    if match:
+        return match.group(1)
+
+
+def callback_diff_size_limit_value(line):
+    match = re.match(r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*', line)
+
+    if match:
+        return match.group(1)
+
+
 def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None):
     """
     Change date and time of the system depending on a boolean condition. Optionally, a monitor may be used to check
