@@ -162,6 +162,14 @@ def pytest_addoption(parser):
         type=str,
         help="run tests using Google Cloud topic name"
     )
+    parser.addoption(
+        "--fim_mode",
+        action="append",
+        metavar="fim_mode",
+        default=None,
+        type=str,
+        help="run tests using a specific FIM mode"
+    )
 
 
 def pytest_configure(config):
@@ -199,6 +207,12 @@ def pytest_configure(config):
     gcp_topic_name = config.getoption("--gcp-topic-name")
     if gcp_topic_name:
         global_parameters.gcp_topic_name = gcp_topic_name
+
+    # Set fim_mode only if it is passed through command line args
+    mode = config.getoption("--fim_mode")
+    if not mode:
+        mode = ["scheduled", "whodata", "realtime"]
+    global_parameters.fim_mode = mode
 
 
 def pytest_html_results_table_header(cells):
