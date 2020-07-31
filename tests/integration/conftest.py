@@ -505,3 +505,24 @@ def configure_mitm_environment(request):
     delete_dbs()
 
     control_service('start')
+
+
+@pytest.fixture(scope='module')
+def put_env_variables(get_configuration, request):
+    """
+    Create environment variables
+    """
+    if hasattr(request.module, 'environment_variables'):
+        environment_variables = getattr(request.module, 'environment_variables')
+        for env, value in environment_variables:
+            if sys.platform == 'win32':
+                subprocess.call(['setx.exe', env, value, '/m'])
+            else:
+                os.putenv(env, value)
+
+    yield
+
+    if hasattr(request.module, 'environment_variables'):
+        for env in environment_variables:
+            if sys.platform != 'win32':
+                os.unsetenv(env[0])
