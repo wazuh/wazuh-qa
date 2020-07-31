@@ -73,6 +73,63 @@
           ],
           "pattern": "^(.*)$"
         },
+        "mitre": {
+          "$id": "#/properties/rule/properties/mitre",
+          "type": "object",
+          "title": "The Mitre Schema",
+          "required": [
+            "id",
+            "tactic",
+            "technique"
+          ],
+          "properties": {
+            "id": {
+              "$id": "#/properties/rule/properties/mitre/properties/id",
+              "type": "array",
+              "title": "The Id Schema",
+              "items": {
+                "$id": "#/properties/rule/properties/mitre/properties/id/items",
+                "type": "string",
+                "title": "The Items Schema",
+                "default": "",
+                "examples": [
+                  "T1120"
+                ],
+                "pattern": "^(.*)$"
+              }
+            },
+            "tactic": {
+              "$id": "#/properties/rule/properties/mitre/properties/tactic",
+              "type": "array",
+              "title": "The Tactic Schema",
+              "items": {
+                "$id": "#/properties/rule/properties/mitre/properties/tactic/items",
+                "type": "string",
+                "title": "The Items Schema",
+                "default": "",
+                "examples": [
+                  "Discovery"
+                ],
+                "pattern": "^(.*)$"
+              }
+            },
+            "technique": {
+              "$id": "#/properties/rule/properties/mitre/properties/technique",
+              "type": "array",
+              "title": "The technique Schema",
+              "items": {
+                "$id": "#/properties/rule/properties/mitre/properties/technique/items",
+                "type": "string",
+                "title": "The Items Schema",
+                "default": "",
+                "examples": [
+                  "Stored Data Manipulation"
+                ],
+                "pattern": "^(.*)$"
+              }
+            }
+          }
+        },
         "firedtimes": {
           "$id": "#/properties/rule/properties/firedtimes",
           "type": "integer",
@@ -118,6 +175,22 @@
             "default": "",
             "examples": [
               "11.5"
+            ],
+            "pattern": "^(.*)$"
+          }
+        },
+        "tsc": {
+          "$id": "#/properties/rule/properties/tsc",
+          "type": "array",
+          "title": "The TSC Schema",
+          "items": {
+            "$id": "#/properties/rule/properties/tsc/items",
+            "type": "string",
+            "title": "The Items Schema",
+            "default": "",
+            "examples": [
+              "PI1.4",
+              "CC6.1"
             ],
             "pattern": "^(.*)$"
           }
@@ -617,6 +690,17 @@
             ],
             "pattern": "^(.*)$"
           }
+        },
+        "mode": {
+          "$id": "#/properties/syscheck/properties/mode",
+          "type": "string",
+          "enum": ["realtime", "whodata", "scheduled"],
+          "title": "The Mode Schema",
+          "default": "",
+          "examples": [
+            "realtime"
+          ],
+          "pattern": "^(.*)$"
         },
         "changed_attributes": {
           "$id": "#/properties/syscheck/properties/changed_attributes",

@@ -273,23 +273,12 @@
           "$id": "#/properties/data/properties/audit",
           "type": "object",
           "required": [
-            "path",
             "process_id",
             "process_name",
             "user_id",
             "user_name"
           ],
           "properties": {
-            "path": {
-              "$id": "#/properties/data/properties/audit/properties/path",
-              "type": "string",
-              "default": "",
-              "examples": [
-                "/testdir1/example",
-                "c:/testdir1/example"
-              ],
-              "pattern": "^(?:([a-zA-Z]\\:|\\/)[^\\/]+)*$"
-            },
             "process_id": {
               "$id": "#/properties/data/properties/audit/properties/process_id",
               "type": "integer",
