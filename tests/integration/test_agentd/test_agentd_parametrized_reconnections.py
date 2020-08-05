@@ -191,7 +191,7 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
     DELTA = 1
     RECV_TIMEOUT = 5    
     ENROLLMENT_SLEEP = 20
-    LOG_TIMEOUT=20
+    LOG_TIMEOUT=30
    
     global remoted_server
     
@@ -200,11 +200,11 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
     INTERVAL = get_configuration['metadata']['RETRY_INTERVAL']
     AUTO_ENROLL = get_configuration['metadata']['AUTO_ENROLL']
         
-    control_service('stop', daemon='ossec-agentd')
+    control_service('stop')
     clean_logs()
     log_monitor = FileMonitor(LOG_FILE_PATH)
     remoted_server = RemotedSimulator(protocol=PROTOCOL, client_keys=CLIENT_KEYS_PATH)
-    control_service('start', daemon='ossec-agentd')
+    control_service('start')
    
     # 2 Check for unsuccesful connection retries in Agentd initialization
     interval = INTERVAL
@@ -254,8 +254,5 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
         assert enroll == 1
     else:
         assert enroll == 0
-
-    
-   
 
     return
