@@ -21,17 +21,17 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 
 params = [
     #Different parameters on UDP
-    {'PROTOCOL':'udp','MAX_RETRIES':1,'RETRY_INTERVAL':1,'AUTO_ENROLL':'no'},
-    {'PROTOCOL':'udp','MAX_RETRIES':5,'RETRY_INTERVAL':5,'AUTO_ENROLL':'no'},
-    {'PROTOCOL':'udp','MAX_RETRIES':10,'RETRY_INTERVAL':4,'AUTO_ENROLL':'no'},
-    {'PROTOCOL':'udp','MAX_RETRIES':3,'RETRY_INTERVAL':12,'AUTO_ENROLL':'no'},
+    {'PROTOCOL':'udp','MAX_RETRIES':1,'RETRY_INTERVAL':1,'ENROLL':'no'},
+    {'PROTOCOL':'udp','MAX_RETRIES':5,'RETRY_INTERVAL':5,'ENROLL':'no'},
+    {'PROTOCOL':'udp','MAX_RETRIES':10,'RETRY_INTERVAL':4,'ENROLL':'no'},
+    {'PROTOCOL':'udp','MAX_RETRIES':3,'RETRY_INTERVAL':12,'ENROLL':'no'},
     #Different parameters on TCP
-    {'PROTOCOL':'tcp','MAX_RETRIES':3,'RETRY_INTERVAL':3,'AUTO_ENROLL':'no'},
-    {'PROTOCOL':'tcp','MAX_RETRIES':5,'RETRY_INTERVAL':5,'AUTO_ENROLL':'no'},
-    {'PROTOCOL':'tcp','MAX_RETRIES':10,'RETRY_INTERVAL':10,'AUTO_ENROLL':'no'},
+    {'PROTOCOL':'tcp','MAX_RETRIES':3,'RETRY_INTERVAL':3,'ENROLL':'no'},
+    {'PROTOCOL':'tcp','MAX_RETRIES':5,'RETRY_INTERVAL':5,'ENROLL':'no'},
+    {'PROTOCOL':'tcp','MAX_RETRIES':10,'RETRY_INTERVAL':10,'ENROLL':'no'},
     #Enrollment enabled
-    {'PROTOCOL':'udp','MAX_RETRIES':2,'RETRY_INTERVAL':2,'AUTO_ENROLL':'yes'},
-    {'PROTOCOL':'tcp','MAX_RETRIES':5,'RETRY_INTERVAL':5,'AUTO_ENROLL':'yes'},
+    {'PROTOCOL':'udp','MAX_RETRIES':2,'RETRY_INTERVAL':2,'ENROLL':'yes'},
+    {'PROTOCOL':'tcp','MAX_RETRIES':5,'RETRY_INTERVAL':5,'ENROLL':'yes'},
 ]
 
 metadata = params
@@ -198,7 +198,7 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
     PROTOCOL = protocol=get_configuration['metadata']['PROTOCOL']
     RETRIES = get_configuration['metadata']['MAX_RETRIES']
     INTERVAL = get_configuration['metadata']['RETRY_INTERVAL']
-    AUTO_ENROLL = get_configuration['metadata']['AUTO_ENROLL']
+    ENROLL = get_configuration['metadata']['ENROLL']
         
     control_service('stop')
     clean_logs()
@@ -211,14 +211,14 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
     if PROTOCOL == 'udp':
         interval += RECV_TIMEOUT
     
-    if AUTO_ENROLL == 'yes':
+    if ENROLL == 'yes':
         total_retries = RETRIES + 1
     else :
         total_retries = RETRIES
    
     for retry in range(total_retries):
         # 3 If auto enrollment is enabled, retry check enrollment and retries after that
-        if AUTO_ENROLL == 'yes' and retry == total_retries-1:
+        if ENROLL == 'yes' and retry == total_retries-1:
             #Wait succesfull enrollment
             try:
                 log_monitor.start(timeout=20, callback=wait_enrollment)
@@ -250,7 +250,7 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
     # 5 Check ammount of retriesand enrollment
     (connect, enroll) = count_retry_mesages()
     assert connect == total_retries
-    if AUTO_ENROLL == 'yes':
+    if ENROLL == 'yes':
         assert enroll == 1
     else:
         assert enroll == 0

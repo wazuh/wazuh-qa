@@ -104,14 +104,14 @@ def override_wazuh_conf(configuration):
 def get_temp_yaml(param):
     temp = os.path.join(test_data_path,'temp.yaml')
     with open(configurations_path , 'r') as conf_file:
-        auto_enroll_conf = {'auto_enrollment' : {'elements' : []}}
+        enroll_conf = {'enrollment' : {'elements' : []}}
         for elem in param:
             if elem == 'password':
                 continue
-            auto_enroll_conf['auto_enrollment']['elements'].append({elem : {'value': param[elem]}})
-        print(auto_enroll_conf)
+            enroll_conf['enrollment']['elements'].append({elem : {'value': param[elem]}})
+        print(enroll_conf)
         temp_conf_file = yaml.safe_load(conf_file)
-        temp_conf_file[0]['sections'][0]['elements'].append(auto_enroll_conf)
+        temp_conf_file[0]['sections'][0]['elements'].append(enroll_conf)
     with open(temp, 'w') as temp_file:
         yaml.safe_dump(temp_conf_file, temp_file)
     return temp
