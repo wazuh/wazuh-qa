@@ -17,7 +17,7 @@ _We are skipping Wazuh installation steps. For further information, check [Wazuh
 
 _We are using **CentOS** for this example:_
 
-- Install **Wazuh** 
+- Install **Wazuh**
 
 - Disable firewall (only for **CentOS**)
 
@@ -60,7 +60,7 @@ echo 'monitord.rotate_log=0' >> $wazuh_path/etc/local_internal_options.conf
 
 ### Windows
 
-- Install **Wazuh** 
+- Install **Wazuh**
 
 - Download and install [Python](https://www.python.org/downloads/windows/)
 
@@ -75,7 +75,7 @@ choco install jq
 - Install Python dependencies
 
 ```shell script
-pip install pytest freezegun jsonschema pyyaml==5.3 psutil paramiko distro pywin32 pypiwin32 wmi pandas pytest-html==2.0.1 numpydoc==0.9.2
+pip install pytest freezegun jsonschema pyyaml==5.3 psutil paramiko distro pywin32 pypiwin32 wmi pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 - Change `time-reconnect` from `C:\Program Files (x86)\ossec-agent\ossec.conf`
@@ -98,7 +98,7 @@ echo 'monitord.rotate_log=0' >> "C:\Program Files (x86)\ossec-agent\local_intern
 
 ### MacOS
 
-- Install **Wazuh** 
+- Install **Wazuh**
 
 - Install Python and its dependencies
 
@@ -254,7 +254,7 @@ We can use `wildcards` as well to parametrize values or attributes. For example,
 
 #### test_module
 
-This will be our python module with all the needed code to test everything. 
+This will be our python module with all the needed code to test everything.
 
 ### Dependencies
 
@@ -276,7 +276,7 @@ wazuh_testing
     └── wazuh_testing
         ├── __init__.py
         ├── analysis.py
-        ├── cluster.py            
+        ├── cluster.py
         ├── data
         │   ├── event_analysis_schema.json
         │   ├── mitre_event.json
@@ -361,11 +361,12 @@ python3 -m pytest [options] [file_or_dir] [file_or_dir] [...]
 - `s`: shortcut for --capture=no. This will show the output in real time
 - `x`: instantly exit after the first error. Very helpful when using a log truncate since it will keep the last failed result
 - `m`: only run tests matching given expression (-m MARKEXPR)
-- `--tier`: only run tests with given tier (ex. --tier 2)
+- `--tier`: only run tests with given tier (ex. --tier=2)
 - `--html`: generates a HTML report for the test results. (ex. --html=report.html)
-- `--default-timeout`: overwrites the default timeout (in seconds). This value is used to make a test fail if a condition 
-is not met before the given time lapse. Some tests make use of this value and other has other fixed timeout that cannot be 
+- `--default-timeout`: overwrites the default timeout (in seconds). This value is used to make a test fail if a condition
+is not met before the given time lapse. Some tests make use of this value and other has other fixed timeout that cannot be
 modified.
+- `--fim_mode`: Specify the mode of execution of the FIM tests. (ex. --fim_mode="scheduled"). To run the test in realtime and whodata the option must be specified twice: --fim_mode="realtime" -- fim_mode="whodata". If the option is not specified, the test will run using scheduled, whodata and realtime.
 
 _Use `-h` to see the rest or check its [documentation](https://docs.pytest.org/en/latest/usage.html)._
 
@@ -380,7 +381,7 @@ python3 -m pytest -vvx test_fim/test_basic_usage/test_basic_usage_create_schedul
 platform linux -- Python 3.6.8, pytest-5.3.4, py-1.8.1, pluggy-0.13.1 -- /bin/python3
 cachedir: .pytest_cache
 rootdir: /vagrant/wazuh-qa/test_wazuh, inifile: pytest.ini
-collected 12 items                                                                                      
+collected 12 items
 
 test_fim/test_basic_usage/test_basic_usage_create_scheduled.py::test_create_file_scheduled[get_configuration0-file-regular-Sample content-checkers0-tags_to_apply0-/testdir1] PASSED [  8%]
 test_fim/test_basic_usage/test_basic_usage_create_scheduled.py::test_create_file_scheduled[get_configuration0-file-regular-Sample content-checkers0-tags_to_apply0-/testdir2] PASSED [ 16%]
@@ -405,7 +406,7 @@ python3 -m pytest test_fim/test_report_changes/
 =============================== test session starts ===============================
 platform linux -- Python 3.6.8, pytest-5.3.4, py-1.8.1, pluggy-0.13.1
 rootdir: /vagrant/wazuh-qa/test_wazuh, inifile: pytest.ini
-collected 12 items                                                                
+collected 12 items
 
 test_fim/test_report_changes/test_report_changes_and_diff.py ......         [ 50%]
 test_fim/test_report_changes/test_report_deleted_diff.py ......             [100%]
