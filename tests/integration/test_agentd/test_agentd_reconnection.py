@@ -126,12 +126,12 @@ def wait_notify(line):
     return None 
 
 def wait_enrollment(line):
-    if 'Valid key created. Finished.' in line:
+    if 'Valid key received' in line:
         return line
     return None
 
 def wait_enrollment_try(line):
-    if 'Starting enrollment process' in line:
+    if 'Requesting a key' in line:
         return line
     return None
 

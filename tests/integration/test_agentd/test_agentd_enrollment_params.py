@@ -137,7 +137,7 @@ def check_time_to_connect(timeout):
         lines = log_file.readlines()
         #find enrollment end
         for line in lines:
-            if "INFO: Valid key created. Finished." in line:
+            if "INFO: Valid key received" in line:
                 initial_line = line
                 break
     

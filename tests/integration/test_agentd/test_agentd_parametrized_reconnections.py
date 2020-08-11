@@ -139,14 +139,14 @@ def count_retry_mesages():
         for line in log_lines:
             if 'Trying to connect to server' in line:
                 connect += 1
-            if 'Valid key created. Finished.' in line:
+            if 'Valid key received' in line:
                 enroll += 1
             if "Unable to connect to any server" in line:
                 return (connect,enroll)
     return (connect,enroll)
 
 def wait_enrollment(line):
-    if 'Valid key created. Finished.' in line:
+    if 'Valid key received' in line:
         return line
     return None
 
