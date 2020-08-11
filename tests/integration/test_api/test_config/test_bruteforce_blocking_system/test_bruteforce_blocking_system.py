@@ -70,7 +70,7 @@ def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_
 
     # Request before blocking time expires. (5th try)
     get_response = requests.get(api_details['base_url'], headers=api_details['auth_headers'], verify=False)
-    assert get_response.status_code == 400, f'Expected status code was 400, ' \
+    assert get_response.status_code == 403, f'Expected status code was 403, ' \
                                             f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
 
     # Request after time expires.
