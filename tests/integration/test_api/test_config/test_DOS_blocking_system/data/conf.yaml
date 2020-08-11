@@ -1,0 +1,9 @@
+---
+- tags:
+  - config1
+  conf:
+    max_request_per_minute: 50
+- tags:
+  - config2
+  conf:
+    max_request_per_minute: 10
