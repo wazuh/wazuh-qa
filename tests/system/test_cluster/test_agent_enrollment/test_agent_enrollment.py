@@ -16,7 +16,9 @@ testinfra_hosts = ["wazuh-master", "wazuh-worker1", "wazuh-agent1"]
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'enrollment_cluster', 'inventory.yml')
 host_manager = HostManager(inventory_path)
-
+local_path = os.path.dirname(os.path.abspath(__file__))
+messages_path = os.path.join(local_path, 'data/messages.yml')
+tmp_path = os.path.join(local_path, 'tmp')
 
 # Remove the agent once the test has finished
 @pytest.fixture(scope='module')
@@ -41,14 +43,12 @@ def test_agent_enrollment(clean_environment):
     # Start the agent enrollment process by restarting the wazuh-agent
     host_manager.control_service(host='wazuh-master', service='wazuh', state="restarted")
     host_manager.control_service(host='wazuh-worker1', service='wazuh', state="restarted")
-    host_manager.control_service(host='wazuh-agent1', service='wazuh', state="restarted")
-
-    local_path = os.path.dirname(os.path.abspath(__file__))
+    host_manager.get_host('wazuh-agent1').ansible('command', f'service wazuh-agent restart', check=False)
 
     # Run the callback checks for the ossec.log and the cluster.log
     HostMonitor(inventory_path=inventory_path,
-                messages_path=os.path.join(local_path, 'data/messages.yml'),
-                tmp_path=os.path.join(local_path, 'tmp')).run()
+                messages_path=messages_path,
+                tmp_path=tmp_path).run()
 
     # Make sure the worker's client.keys is not empty
     assert host_manager.get_file_content('wazuh-worker1', os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
