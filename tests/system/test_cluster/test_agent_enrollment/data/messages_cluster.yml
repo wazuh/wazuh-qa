@@ -1,8 +1,0 @@
----
-wazuh-master:
-  - regex: '.*Received request:.*{"arguments":{"daemon_name":"authd","message":{"arguments":{"name":.*,"ip":"any","force":0},"function":"add"}},"function":"send_sync"}.*'
-    path: "/var/ossec/logs/cluster.log"
-    timeout: 60
-  - regex: '.*Finished integrity synchronization.*'
-    path: "/var/ossec/logs/cluster.log"
-    timeout: 60
