@@ -49,11 +49,11 @@ metadata = [
         'LOG_MONITOR_STR' : [
             [ # Stage 1
                 f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
-                f'Requesting a key to server: {SERVER_HOSTS[0]}/{SERVER_ADDRESS}',
+                f'Requesting a key from server: {SERVER_HOSTS[0]}/{SERVER_ADDRESS}',
                 f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
-                f'Requesting a key to server: {SERVER_HOSTS[1]}/{SERVER_ADDRESS}',
+                f'Requesting a key from server: {SERVER_HOSTS[1]}/{SERVER_ADDRESS}',
                 f'Trying to connect to server ({SERVER_HOSTS[2]}/{SERVER_ADDRESS}:{REMOTED_PORTS[2]}',
-                f'Requesting a key to server: {SERVER_HOSTS[2]}/{SERVER_ADDRESS}'
+                f'Requesting a key from server: {SERVER_HOSTS[2]}/{SERVER_ADDRESS}'
             ]
         ]
     },
@@ -71,14 +71,14 @@ metadata = [
         },
         'LOG_MONITOR_STR' : [
             [ # Stage 1 - Enroll to first server
-                f'Requesting a key to server: {SERVER_HOSTS[0]}',
+                f'Requesting a key from server: {SERVER_HOSTS[0]}',
                 f'Valid key received',
                 f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
             ],
             [ # Stage 2 - Pass second server and connect to third
-                f'Requesting a key to server: {SERVER_HOSTS[0]}',
+                f'Requesting a key from server: {SERVER_HOSTS[0]}',
                 f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
-                f'Requesting a key to server: {SERVER_HOSTS[1]}/{SERVER_ADDRESS}',
+                f'Requesting a key from server: {SERVER_HOSTS[1]}/{SERVER_ADDRESS}',
                 f'Trying to connect to server ({SERVER_HOSTS[2]}/{SERVER_ADDRESS}:{REMOTED_PORTS[2]}',
                 f'Connected to the server ({SERVER_HOSTS[2]}/{SERVER_ADDRESS}:{REMOTED_PORTS[2]}',
                 f"Received message: '#!-agent ack '"
@@ -99,7 +99,7 @@ metadata = [
         },
         'LOG_MONITOR_STR' : [
             [ # Stage 1 - Enroll and connect to first server
-                f'Requesting a key to server: {SERVER_HOSTS[0]}',
+                f'Requesting a key from server: {SERVER_HOSTS[0]}',
                 f'Valid key received',
                 f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f'Connected to the server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
@@ -128,7 +128,7 @@ metadata = [
         },
         'LOG_MONITOR_STR' : [
             [ # Stage 1 - Enroll and connect to first server
-                f'Requesting a key to server: {SERVER_HOSTS[0]}',
+                f'Requesting a key from server: {SERVER_HOSTS[0]}',
                 f'Valid key received',
                 f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f'Connected to the server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
@@ -136,7 +136,7 @@ metadata = [
             ],
             [ 
                 f'Server unavailable. Setting lock.',
-                f'Requesting a key to server: {SERVER_HOSTS[0]}',
+                f'Requesting a key from server: {SERVER_HOSTS[0]}',
                 f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
                 f'Connected to the server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
                 f"Received message: '#!-agent ack '",
@@ -214,13 +214,13 @@ metadata = [
         },
         'LOG_MONITOR_STR' : [
             [
-                 f'Requesting a key to server: {SERVER_HOSTS[0]}',
+                 f'Requesting a key from server: {SERVER_HOSTS[0]}',
                  f'ERROR: SSL read',
-                 f'Requesting a key to server: {SERVER_HOSTS[1]}',
+                 f'Requesting a key from server: {SERVER_HOSTS[1]}',
                  f'ERROR: SSL read',
             ],
             [
-                f'Requesting a key to server: {SERVER_HOSTS[2]}',
+                f'Requesting a key from server: {SERVER_HOSTS[2]}',
                 f'Valid key received',
                 f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f'Connected to the server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
