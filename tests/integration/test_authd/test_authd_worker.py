@@ -75,8 +75,7 @@ receiver_sockets_params = [(ossec_authd_socket_path , 'AF_INET', 'SSL_TLSv1_2')]
 
 mitm_master = WorkerMID(address=cluster_socket_path, family='AF_UNIX', connection_protocol='TCP')
 
-monitored_sockets_params = [('wazuh-clusterd', mitm_master, True), ('ossec-authd', None, True)]
-
+monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True),('wazuh-clusterd', mitm_master, True), ('ossec-authd', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 # Tests
 

@@ -16,8 +16,7 @@
   name: "AddAgent ID"
   description: "Add an agent with specific ID"
   test_case:
-  -   
-    #BUG? If id=4, on next addition without ID, ID will be 4 too 
+  - 
     input: '{"arguments":{"id":"100","name":"user100","ip":"any"},"function":"add"}'
     output: '{"error":0,"data":{"id":"100","name":"user100","ip":"any","key":'
 -
@@ -26,23 +25,23 @@
   test_case:
   -  
     input: '{"arguments":{"name":"user4","ip":"any","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c915"},"function":"add"}'
-    output: '{"error":0,"data":{"id":"004","name":"user4","ip":"any","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c915"'
+    output: '{"error":0,"data":{"id":"101","name":"user4","ip":"any","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c915"'
 -
-  name: "ERROR Duplicated Name"
+  name: "ERROR Duplicate Name"
   description: "Try to add an agent with an existent name"
   test_case:
   -    
     input: '{"arguments":{"name":"user1","ip":"any"},"function":"add"}'
     output: '{"error":9008,"message":"Duplicated name"}'
 -
-  name: "ERROR Duplicated IP"
+  name: "ERROR Duplicate IP"
   description: "Try to add an agent with an existent IP"
   test_case:
   -    
     input: '{"arguments":{"name":"user_","ip":"192.0.0.0"},"function":"add"}'
     output: '{"error":9007,"message":"Duplicated IP"}'
 -
-  name: "ERROR Duplicated ID"
+  name: "ERROR Duplicate ID"
   description: "Try to add an agent with an existent ID"
   test_case:
   -    
@@ -50,14 +49,14 @@
     output: '{"error":9012,"message":"Duplicated ID"}'
 -
   name: "Force"
-  description: "Add duplicated agents with force option"
+  description: "Add duplicate agents with force option"
   test_case:
   -    
     input: '{"arguments":{"force":1,"name":"user1","ip":"any"},"function":"add"}'
-    output: '{"error":0,"data":{"id":"005","name":"user1","ip":"any","key":'
+    output: '{"error":0,"data":{"id":"102","name":"user1","ip":"any","key":'
   -    
     input: '{"arguments":{"force":1,"name":"user10","ip":"192.0.0.0"},"function":"add"}'
-    output: '{"error":0,"data":{"id":"006","name":"user10","ip":"192.0.0.0","key":'
+    output: '{"error":0,"data":{"id":"103","name":"user10","ip":"192.0.0.0","key":'
   -    
     input: '{"arguments":{"force":1,"id":"001","name":"user11","ip":"any"},"function":"add"}'
     output: '{"error":0,"data":{"id":"001","name":"user11","ip":"any","key":'
@@ -69,7 +68,7 @@
   test_case:
   -
     input: '{"arguments":{"name":"user21","ip":"any","groups":"Group1"},"function":"add"}'
-    output: '{"error":0,"data":{"id":"007","name":"user21","ip":"any","key":'
+    output: '{"error":0,"data":{"id":"104","name":"user21","ip":"any","key":'
   -
     input: '{"arguments":{"name":"user_","ip":"any","groups":"Group2"},"function":"add"}'
     output: '{"error":9014,"message":"Invalid Group(s) Name(s)"}'
@@ -82,7 +81,7 @@
   test_case:
   -
     input: '{"arguments":{"name":"user22","ip":"any","groups":"Group1,Group2"},"function":"add"}'
-    output: '{"error":0,"data":{"id":"008","name":"user22","ip":"any","key":'
+    output: '{"error":0,"data":{"id":"105","name":"user22","ip":"any","key":'
   -
     input: '{"arguments":{"name":"user_","ip":"any","groups":"Group1,Group2,Group3"},"function":"add"}'
     output: '{"error":9014,"message":"Invalid Group(s) Name(s)"}'
@@ -100,5 +99,3 @@
   -    
     input: '{"arguments":{"id":"200"},"function":"remove"}'
     output: '{"error":9011,"message":"Agent ID not found"}'
-
-  

@@ -19,7 +19,8 @@ setup(name='wazuh_testing',
                                       'data/mitre_event.json',
                                       'data/analysis_alert.json',
                                       'data/analysis_alert_windows.json',
-                                      'data/state_integrity_analysis_schema.json'
+                                      'data/state_integrity_analysis_schema.json',
+                                      'data/gcp_event.json'
                                       ]
                     },
       include_package_data=True,
@@ -27,7 +28,8 @@ setup(name='wazuh_testing',
             'lockfile==0.12.2',
             'testinfra==5.0.0',
             'pyOpenSSL==19.1.0',
-            'pycryptodome'
+            'requests==2.23.0',
+            'pycryptodome'            
       ],
       zip_safe=False
       )

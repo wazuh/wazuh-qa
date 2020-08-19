@@ -94,6 +94,3 @@
         expect: "output"
         input: "OSSEC A:'user1'"
         output: "OSSEC K:'"
-
-        
-    

@@ -14,6 +14,7 @@ import yaml
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import generate_params
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
+from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf, load_wazuh_configurations
 from wazuh_testing.tools.monitoring import SocketController, FileMonitor
 from wazuh_testing.tools.security import CertificateController
@@ -60,7 +61,7 @@ log_monitor_paths = []
 
 receiver_sockets_params = [((AGENT_IP, 1515), 'AF_INET', 'SSL_TLSv1_2')]
 
-monitored_sockets_params = [('wazuh-db', None, True), ('ossec-authd', None, True)]
+monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('ossec-authd', None, True)]
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
@@ -85,16 +86,18 @@ def generate_ca_certificate(get_configuration):
 
 def override_wazuh_conf(configuration):
     # Stop Wazuh
-    control_service('stop')
+    control_service('stop', daemon='ossec-authd')
     time.sleep(1)
-    check_daemon_status(running=False)
+    check_daemon_status(running=False, daemon='ossec-authd')
+    truncate_file(LOG_FILE_PATH)
+
      # Configuration for testing
     test_config = set_section_wazuh_conf(configuration.get('sections'))
     # Set new configuration
     write_wazuh_conf(test_config)
     # Start Wazuh daemons
     time.sleep(1)
-    control_service('start')
+    control_service('start', daemon='ossec-authd')
 
     """Wait until agentd has begun"""
     def callback_agentd_startup(line):
@@ -104,6 +107,7 @@ def override_wazuh_conf(configuration):
 
     log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=30, callback=callback_agentd_startup)
+    time.sleep(1)
 
 def test_authd_ssl_certs(get_configuration, generate_ca_certificate):
     """

@@ -8,15 +8,17 @@ import pytest
 import socket
 import ssl
 import yaml
+import time
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import generate_params
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
+from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import SocketController, FileMonitor
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.services import control_service, check_daemon_status
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -57,29 +59,39 @@ log_monitor_paths = []
 
 receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2')]
 
-monitored_sockets_params = [('wazuh-db', None, True), ('ossec-authd', None, True)]
+monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('ossec-authd', None, True)]
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 # fixtures
 
 test_index = 0
 
+def get_current_test():
+    global test_index
+    current = test_index
+    test_index+=1
+    return current
+
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
     """Get configurations from the module"""
-    test_index = getattr(request.module, 'test_index')
-    yield request.param
-    setattr(request.module, 'test_index', test_index + 1) 
+    return request.param
 
 def override_wazuh_conf(configuration):
     # Stop Wazuh
-    control_service('stop')
+    control_service('stop', daemon='ossec-authd')
+    time.sleep(1)
+    check_daemon_status(running=False, daemon='ossec-authd')
+    truncate_file(LOG_FILE_PATH)
+
      # Configuration for testing
     test_config = set_section_wazuh_conf(configuration.get('sections'))
     # Set new configuration
     write_wazuh_conf(test_config)
+
+    time.sleep(1)
     # Start Wazuh
-    control_service('start')
+    control_service('start', daemon='ossec-authd')
 
     """Wait until agentd has begun"""
     def callback_agentd_startup(line):
@@ -89,6 +101,7 @@ def override_wazuh_conf(configuration):
 
     log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=30, callback=callback_agentd_startup)
+    time.sleep(1)
     
 def test_ossec_auth_configurations(get_configuration, configure_environment, configure_mitm_environment):
     """Check that every input message in authd port generates the adequate output
@@ -104,8 +117,10 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
             - protocol: Value for ssl protocol
             - input: message that will be tried to send to the manager
             - output: expected response (if any)
-    """   
-    test_case = ssl_configuration_tests[test_index]['test_case']
+    """ 
+    current_test = get_current_test()
+
+    test_case = ssl_configuration_tests[current_test ]['test_case']
     override_wazuh_conf(get_configuration)
     for config in test_case:
         address, family, connection_protocol = receiver_sockets_params[0]
