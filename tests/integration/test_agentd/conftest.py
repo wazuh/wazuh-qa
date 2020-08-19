@@ -54,7 +54,7 @@ def clean_client_keys_file():
 def check_client_keys_file():
     """Wait until client key has been written"""
     def wait_key_changes(line):
-        if 'Valid key created. Finished.' in line:
+        if 'Valid key received' in line:
             return line
         return None
 
