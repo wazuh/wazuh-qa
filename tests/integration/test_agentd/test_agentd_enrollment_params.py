@@ -93,7 +93,8 @@ def override_wazuh_conf(configuration):
     clean_password_file()
     if configuration.get('password'):
         parser = AgentAuthParser()
-        parser.add_password(password = configuration['password']['value'], isFile = True, path = configuration.get('authorization_pass_path'))
+        parser.add_password(password = configuration['password']['value'], isFile = True, 
+                            path = configuration.get('authorization_pass_path'))
 
     try:
         # Start Wazuh
@@ -145,7 +146,8 @@ def check_time_to_connect(timeout):
         form = '%H:%M:%S'
         initial_time = datetime.datetime.strptime(initial_line.split()[1], form).time()
         final_time = datetime.datetime.strptime(final_line.split()[1], form).time()
-        initial_delta = datetime.timedelta(hours=initial_time.hour, minutes=initial_time.minute, seconds=initial_time.second)
+        initial_delta = datetime.timedelta(hours=initial_time.hour, minutes=initial_time.minute,
+                                           seconds=initial_time.second)
         final_delta = datetime.timedelta(hours=final_time.hour, minutes=final_time.minute, seconds=final_time.second)
         elapsed_time = (final_delta - initial_delta).total_seconds()
         
@@ -174,7 +176,8 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
     except Exception as err:
         if test_case.get('expected_error') and not test_case.get('enrollment',{}).get('response'):
             # Expected to happen
-            assert check_log_error_conf(test_case.get('expected_error')) != None, 'Expected configuration error at ossec.conf file, fail log_check'
+            assert check_log_error_conf(test_case.get('expected_error')) != None, \
+                   'Expected configuration error at ossec.conf file, fail log_check'
             return
         else:
             raise AssertionError(f'Configuration error at ossec.conf file')
@@ -182,16 +185,19 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
     results = monitored_sockets.get_results(callback=(lambda y: [x.decode() for x in y]), timeout=20, accum_results=1)
     if test_case.get('enrollment') and test_case['enrollment'].get('response'):
         assert results[0] == build_expected_request(configuration), 'Expected enrollment request message does not match'
-        assert results[1] == test_case['enrollment']['response'].format(**DEFAULT_VALUES), 'Expected response message does not match'
+        assert results[1] == test_case['enrollment']['response'].format(**DEFAULT_VALUES), \
+               'Expected response message does not match'
         assert results[1] == check_client_keys_file(), 'Client key does not match'
     else:
         # Expected to happen
-        assert check_log_error_conf(test_case.get('expected_error')) != None, 'Expected configuration error at ossec.conf file, fail log_check'
+        assert check_log_error_conf(test_case.get('expected_error')) != None, \
+               'Expected configuration error at ossec.conf file, fail log_check'
         assert len(results) == 0, 'Enrollment message was not expected!'
     
     if configuration.get('delay_after_enrollment') and test_case.get('enrollment',{}).get('response'):
         time_delay = configuration.get('delay_after_enrollment')
         elapsed = check_time_to_connect(time_delay)
-        assert ((time_delay-2) < elapsed) and (elapsed < (time_delay+2)), f'Expected elapsed time between enrollment and connect does not match, should be around {time_delay} sec.'
+        assert ((time_delay-2) < elapsed) and (elapsed < (time_delay+2)), \
+               f'Expected elapsed time between enrollment and connect does not match, should be around {time_delay} sec'
     
     return

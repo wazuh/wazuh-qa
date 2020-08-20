@@ -364,7 +364,8 @@ def duplicate_name_agent_delete_test(server):
     assert check_diff('userB', False), 'Agent diff folder was not removed'
 
 
-def test_ossec_authd_agents_ctx_main(get_configuration, set_up_groups, configure_environment, configure_mitm_environment, connect_to_sockets_module):
+def test_ossec_authd_agents_ctx_main(get_configuration, set_up_groups, configure_environment,
+                                     configure_mitm_environment, connect_to_sockets_module):
     control_service('stop', daemon='ossec-authd')    
     check_daemon_status(running=False, daemon='ossec-authd')
     time.sleep(1)
@@ -382,7 +383,8 @@ def test_ossec_authd_agents_ctx_main(get_configuration, set_up_groups, configure
     clean_agents_ctx()
 
 
-def test_ossec_authd_agents_ctx_local(get_configuration, set_up_groups, configure_environment, configure_mitm_environment, connect_to_sockets_module):
+def test_ossec_authd_agents_ctx_local(get_configuration, set_up_groups, configure_environment,
+                                      configure_mitm_environment, connect_to_sockets_module):
     control_service('stop', daemon='ossec-authd')    
     check_daemon_status(running=False, daemon='ossec-authd')
     time.sleep(1)

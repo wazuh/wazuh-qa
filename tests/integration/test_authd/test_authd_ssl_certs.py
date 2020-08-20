@@ -128,7 +128,7 @@ def test_authd_ssl_certs(get_configuration, generate_ca_certificate):
             # Expected to happen
             return
         else:
-            raise AssertionError(f'Option {option} expected successfull socket connection but it failed')
+            raise AssertionError(f'Option {option} expected successful socket connection but it failed')
     SSL_socket.send(INPUT_MESSAGE, size=False)
     try:
         response = ''

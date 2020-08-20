@@ -29,14 +29,16 @@ How does this test work:
 - PROTOCOL: tcp/udp
 - CLEAN_KEYS: whetever start with an empty client.keys file or not
 - SIMULATOR_NUMBERS: Number of simulator to be instantiated, this should match wazuh_conf.yaml
-- SIMULATOR MODES: for each number of simulator will define a list of "stages" that defines the state that the remoted simulator should have in that state
+- SIMULATOR MODES: for each number of simulator will define a list of "stages" 
+  that defines the state that remoted simulator should have in that state
 Lenght of the stages should be the same for all simulators. Authd simulator will only accept one enrollment for stage
 - LOG_MONITOR_STR: (list of lists) Expected string to be monitored in all stages
 """
 metadata = [
     {
-        # 1. 3 Servers - (TCP/UDP) protocol all servers will refuse the connection to remoted but will accept enrollment. 
-        # Starting with an empty clients.key. We should verify that the agent tries to connect and enroll to each one of them.
+        # 1. 3 Servers - (TCP/UDP) protocol all servers will refuse the connection to remoted but will accept enrollment 
+        # Starting with an empty clients.key. 
+        # We should verify that the agent tries to connect and enroll to each one of them.
         'PROTOCOL': 'tcp',
         'CLEAN_KEYS' : True,
         'SIMULATOR_NUMBER' : 3,
@@ -59,7 +61,8 @@ metadata = [
     },
     {
         # 2. 3 Servers - (TCP/UDP) protocol. 
-        # First server only has enrollment available and third server only has remoted available. Agent should enroll to the first server and connect to the third one.
+        # First server only has enrollment available and third server only has remoted available.
+        # Agent should enroll to the first server and connect to the third one.
         'PROTOCOL': 'tcp',
         'CLEAN_KEYS' : True,
         'SIMULATOR_NUMBER' : 3,
@@ -86,8 +89,8 @@ metadata = [
         ]
     },
     {
-        # 3. 3 Server - TCP protocol. Agent should enroll and connect to first server, and then the first server will disconnect, 
-        # agent should connect to the second server with the same key
+        # 3. 3 Server - TCP protocol. Agent should enroll and connect to first server,
+        # and then the first server will disconnect, agent should connect to the second server with the same key
         'PROTOCOL': 'tcp',
         'CLEAN_KEYS' : True,
         'SIMULATOR_NUMBER' : 3,
@@ -144,7 +147,8 @@ metadata = [
         ]
     },
     {
-        # 5. 3 Servers / (TCP/UDP) protocol only the last one is available. Agent should enroll and connect to the last server.
+        # 5. 3 Servers / (TCP/UDP) protocol only the last one is available.
+        # Agent should enroll and connect to the last server.
         'PROTOCOL': 'tcp',
         'CLEAN_KEYS' : False,
         'SIMULATOR_NUMBER' : 3,
@@ -264,7 +268,8 @@ def get_configuration(request):
 
 @pytest.fixture(scope="module")
 def add_hostnames(request):
-    HOSTFILE_PATH = os.path.join(os.environ['SystemRoot'], 'system32', 'drivers', 'etc', 'hosts') if os.sys.platform == 'win32' else '/etc/hosts' 
+    HOSTFILE_PATH = os.path.join(os.environ['SystemRoot'], 'system32', 'drivers', 'etc', 'hosts') \
+                    if os.sys.platform == 'win32' else '/etc/hosts' 
     hostfile = None
     with open(HOSTFILE_PATH, "r") as f:
         hostfile = f.read()
@@ -286,7 +291,9 @@ def configure_authd_server(request, get_configuration):
     authd_server.set_mode('REJECT')
     global remoted_servers
     for i in range(0, get_configuration['metadata']['SIMULATOR_NUMBER']):
-        remoted_servers.append(RemotedSimulator(server_address=SERVER_ADDRESS, remoted_port=REMOTED_PORTS[i], protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK', client_keys=CLIENT_KEYS_PATH))
+        remoted_servers.append(RemotedSimulator(server_address=SERVER_ADDRESS, remoted_port=REMOTED_PORTS[i],
+                                                protocol=get_configuration['metadata']['PROTOCOL'],
+                                                mode='CONTROLED_ACK', client_keys=CLIENT_KEYS_PATH))
         # Set simulator mode for that stage
         if get_configuration['metadata']['SIMULATOR_MODES'][i][0] != 'CLOSE':
             remoted_servers[i].set_mode(get_configuration['metadata']['SIMULATOR_MODES'][i][0])
@@ -323,7 +330,8 @@ def wait_until(x, log_str):
     return x if log_str in x else None
 
 #@pytest.mark.parametrize('test_case', [case for case in tests])
-def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id, clean_keys, configure_environment, get_configuration):
+def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id, clean_keys, configure_environment,
+                             get_configuration):
     log_monitor = FileMonitor(LOG_FILE_PATH)
 
     for stage in range(0, len(get_configuration['metadata']['LOG_MONITOR_STR'])):

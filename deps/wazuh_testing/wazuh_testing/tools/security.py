@@ -54,7 +54,7 @@ class CertificateController(object):
 
     def _create_ca_cert(self, pub_key, issuer="Manger", subject=None):
         """
-        Creates a CA Certificate that will be sign with
+        Create a CA Certificate that will be sign with
         each agent key
 
         Parameters

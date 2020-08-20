@@ -39,7 +39,7 @@ yum groupinstall "Development Tools" -y
 yum install python36 python36-pip python36-devel -y
 
 # Install Python libraries
-pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2 pycryptodome
+pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 - Add some internal options and restart
