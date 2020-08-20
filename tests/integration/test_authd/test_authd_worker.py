@@ -46,7 +46,8 @@ class WorkerMID(ManInTheMiddle):
     def verify_message(self, data: bytes):
         if len(data) > CLUSTER_DATA_HEADER_SIZE:
             message = data[CLUSTER_DATA_HEADER_SIZE:]
-            response = cluster_msg_build(cmd=b'send_sync', counter=2, payload=bytes(self.cluster_output.encode()), encrypt=False)
+            response = cluster_msg_build(cmd=b'send_sync', counter=2, payload=bytes(self.cluster_output.encode()),
+                                         encrypt=False)
             print(f'Received message from ossec-authd: {message}')
             print(f'Response to send: {self.cluster_output}')
             self.pause()            
@@ -75,7 +76,8 @@ receiver_sockets_params = [(ossec_authd_socket_path , 'AF_INET', 'SSL_TLSv1_2')]
 
 mitm_master = WorkerMID(address=cluster_socket_path, family='AF_UNIX', connection_protocol='TCP')
 
-monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True),('wazuh-clusterd', mitm_master, True), ('ossec-authd', None, True)]
+monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True),
+                            ('wazuh-clusterd', mitm_master, True), ('ossec-authd', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 # Tests
 
@@ -120,8 +122,10 @@ def test_ossec_auth_messages( get_configuration, set_up_groups, configure_enviro
                 raise ConnectionResetError('Manager did not respond to sent message!')
         clusterd_queue = monitored_sockets[0]
         # callback lambda function takes out tcp header and decodes binary to string
-        results = clusterd_queue.get_results(callback=(lambda y: [x[CLUSTER_DATA_HEADER_SIZE:].decode() for x in y]), timeout=1, accum_results=1)
-        assert response[:len(expected)] == expected, 'Failed test case {}: Response was: {} instead of: {}'.format(set_up_groups['name'], response, expected)
+        results = clusterd_queue.get_results(callback=(lambda y: [x[CLUSTER_DATA_HEADER_SIZE:].decode() for x in y]), 
+                                             timeout=1, accum_results=1)
+        assert response[:len(expected)] == expected, \
+               'Failed test case {}: Response was: {} instead of: {}'.format(set_up_groups['name'], response, expected)
         # Assert monitored sockets
         assert results[0] == stage['cluster_input'], 'Expected clusterd input message does not match'
         assert results[1] == stage['cluster_output'], 'Expected clusterd output message does not match'

@@ -175,7 +175,8 @@ def parse_time_from_log_line(log_line):
     data = log_line.split(" ")
     (year, month, day) = data[0].split("/")
     (hour, minute, second) = data[1].split(":")
-    log_time = datetime(year=int(year), month=int(month), day=int(day), hour=int(hour), minute=int(minute), second=int(second))
+    log_time = datetime(year=int(year), month=int(month), day=int(day), hour=int(hour), minute=int(minute),
+                        second=int(second))
     return log_time
 
 

@@ -62,7 +62,8 @@ def test_agent_auth_enrollment(configure_authd_server, configure_environment, te
     print(f'Test: {test_case["name"]}')
     if 'agent-auth' in test_case.get("skips", []):
         pytest.skip("This test does not apply to agent-auth") 
-    parser = AgentAuthParser(server_address=SERVER_ADDRESS, BINARY_PATH=AGENT_AUTH_BINARY_PATH, sudo=True if platform.system() == 'Linux' else False)
+    parser = AgentAuthParser(server_address=SERVER_ADDRESS, BINARY_PATH=AGENT_AUTH_BINARY_PATH, 
+                             sudo=True if platform.system() == 'Linux' else False)
     configuration = test_case.get('configuration', {})
     parse_configuration_string(configuration)
     enrollment = test_case.get('enrollment', {})
@@ -82,7 +83,8 @@ def test_agent_auth_enrollment(configure_authd_server, configure_environment, te
     if configuration.get('use_source_ip'):
         parser.use_source_ip()
     if configuration.get('password'):
-        parser.add_password(configuration['password']['value'], isFile=(configuration['password']['type'] == 'file'), path=AUTHDPASS_PATH)
+        parser.add_password(configuration['password']['value'], isFile=(configuration['password']['type'] == 'file'),
+                            path=AUTHDPASS_PATH)
     else:
         # Clears password file
         parser.add_password(None, isFile=True, path=AUTHDPASS_PATH)
@@ -96,7 +98,8 @@ def test_agent_auth_enrollment(configure_authd_server, configure_environment, te
     results = monitored_sockets.get_results(callback=(lambda y: [x.decode() for x in y]), timeout=5, accum_results=1)
     if test_case.get('enrollment') and test_case['enrollment'].get('response'):
         assert results[0] == build_expected_request(configuration), 'Expected enrollment request message does not match'
-        assert results[1] == test_case['enrollment']['response'].format(**DEFAULT_VALUES), 'Expected response message does not match'
+        assert results[1] == test_case['enrollment']['response'].format(**DEFAULT_VALUES), \
+                             'Expected response message does not match'
         assert check_client_keys_file(), 'Client key does not match'
     else:
         assert len(results) == 0
