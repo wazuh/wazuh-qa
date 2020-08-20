@@ -9,6 +9,7 @@ import subprocess
 import sys
 import uuid
 from datetime import datetime
+import pdb
 
 import pytest
 from numpydoc.docscrape import FunctionDoc
@@ -27,11 +28,11 @@ HOST_TYPES = set("server agent".split())
 
 catalog = list()
 
-
 def pytest_runtest_setup(item):
     # Find if platform applies
     supported_platforms = PLATFORMS.intersection(mark.name for mark in item.iter_markers())
     plat = sys.platform
+    
     if supported_platforms and plat not in supported_platforms:
         pytest.skip("Cannot run on platform {}".format(plat))
 
@@ -39,7 +40,6 @@ def pytest_runtest_setup(item):
     supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())
     if supported_types and host_type not in supported_types:
         pytest.skip("Cannot run on wazuh {}".format(host_type))
-
     # Consider only first mark
     levels = [mark.kwargs['level'] for mark in item.iter_markers(name="tier")]
     if levels and len(levels) > 0:
@@ -55,6 +55,7 @@ def pytest_runtest_setup(item):
 @pytest.fixture(scope='module')
 def restart_wazuh(get_configuration, request):
     # Stop Wazuh
+    pdb.set_trace()
     control_service('stop')
 
     # Reset ossec.log and start a new monitor
@@ -147,7 +148,6 @@ def pytest_addoption(parser):
         help="run tests using Google Cloud topic name"
     )
 
-
 def pytest_configure(config):
     # Register an additional marker
     config.addinivalue_line(
@@ -191,7 +191,6 @@ def pytest_html_results_table_header(cells):
     cells.insert(2, html.th('Description'))
     cells.insert(1, html.th('Time', class_='sortable time', col='time'))
 
-
 def pytest_html_results_table_row(report, cells):
     try:
         cells.insert(4, html.td(report.tier))
@@ -200,7 +199,6 @@ def pytest_html_results_table_row(report, cells):
         cells.insert(1, html.td(datetime.utcnow(), class_='col-time'))
     except AttributeError:
         pass
-
 
 # HARDCODE: pytest-html generates too long file names. This temp fix is to reduce the name of
 # the assets
@@ -225,7 +223,6 @@ def create_asset(
     with open(asset_path, mode, **kwargs) as f:
         f.write(content)
     return relative_path
-
 
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
@@ -273,7 +270,6 @@ def pytest_runtest_makereport(item, call):
         if not report.passed and not report.skipped:
             report.extra = extra
 
-
 def connect_to_sockets(request):
     """Connect to the specified sockets for the test."""
     receiver_sockets_params = getattr(request.module, 'receiver_sockets_params')
@@ -286,7 +282,6 @@ def connect_to_sockets(request):
     setattr(request.module, 'receiver_sockets', receiver_sockets)
 
     return receiver_sockets
-
 
 def close_sockets(receiver_sockets):
     """Close the sockets connection gracefully."""
@@ -302,14 +297,14 @@ def close_sockets(receiver_sockets):
                 # Do not try to close the socket again if it was reused or closed already
                 pass
 
-
 @pytest.fixture(scope='module')
 def connect_to_sockets_module(request):
     """Module scope version of connect_to_sockets."""
+    
+
     receiver_sockets = connect_to_sockets(request)
     yield receiver_sockets
     close_sockets(receiver_sockets)
-
 
 @pytest.fixture(scope='function')
 def connect_to_sockets_function(request):
@@ -317,7 +312,6 @@ def connect_to_sockets_function(request):
     receiver_sockets = connect_to_sockets(request)
     yield receiver_sockets
     close_sockets(receiver_sockets)
-
 
 @pytest.fixture(scope='module')
 def configure_environment(get_configuration, request):
@@ -377,7 +371,6 @@ def configure_environment(get_configuration, request):
     if hasattr(request.module, 'force_restart_after_restoring'):
         if getattr(request.module, 'force_restart_after_restoring'):
             control_service('restart')
-
 
 @pytest.fixture(scope='module')
 def configure_mitm_environment(request):

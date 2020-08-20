@@ -39,7 +39,7 @@ yum groupinstall "Development Tools" -y
 yum install python36 python36-pip python36-devel -y
 
 # Install Python libraries
-pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro pandas pytest-html==2.0.1 numpydoc==0.9.2
+pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro pandas pytest-html==2.0.1 numpydoc==0.9.2 pycryptodome
 ```
 
 - Add some internal options and restart
@@ -75,7 +75,7 @@ choco install jq
 - Install Python dependencies
 
 ```shell script
-pip install pytest freezegun jsonschema pyyaml==5.3 psutil paramiko distro pywin32 pypiwin32 wmi pandas  pytest-html==2.0.1 numpydoc==0.9.2 pyOpenSSL==19.1.0
+pip install pytest freezegun jsonschema pyyaml==5.3 psutil paramiko distro pywin32 pypiwin32 wmi pandas  pytest-html==2.0.1 numpydoc==0.9.2 pyOpenSSL==19.1.0 pycryptodome
 ```
 
 - Change `time-reconnect` from `C:\Program Files (x86)\ossec-agent\ossec.conf`

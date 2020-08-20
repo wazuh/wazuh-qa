@@ -28,7 +28,8 @@ setup(name='wazuh_testing',
             'lockfile==0.12.2',
             'testinfra==5.0.0',
             'pyOpenSSL==19.1.0',
-            'requests==2.23.0'
+            'requests==2.23.0',
+            'pycryptodome'            
       ],
       zip_safe=False
       )

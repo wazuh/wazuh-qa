@@ -1,7 +1,11 @@
 import random
 import os
+import platform
 import stat
 from OpenSSL import crypto, SSL
+
+if platform.system() == 'Windows': #Windows
+    import win32api, win32con
 
 class CertificateController(object):
 
@@ -122,7 +126,9 @@ class CertificateController(object):
         ca_path : string
             Path to store the ca certificate
         """
-        with open(ca_path, "wb") as f:
+        if os.path.exists(ca_path):
+            os.remove(ca_path)
+        with open(ca_path, "wb+") as f:
             if isinstance(ca_cert, crypto.X509Req):
                 data = crypto.dump_certificate_request(crypto.FILETYPE_PEM, ca_cert)
             else:
@@ -142,10 +148,14 @@ class CertificateController(object):
         private_key_path : string
             Path to store the private key
         """
-        with open(private_key_path, "wb") as f:
+        if os.path.exists(private_key_path):
+            if platform.system() == 'Windows':
+                win32api.SetFileAttributes(private_key_path, win32con.FILE_ATTRIBUTE_NORMAL) 
+            os.remove(private_key_path)
+        with open(private_key_path, "wb+") as f:
             data = crypto.dump_privatekey(crypto.FILETYPE_PEM, key)
             f.write(data)
-        os.chmod(private_key_path, stat.S_IREAD)
+        os.chmod(private_key_path, stat.S_IREAD | stat.S_IROTH)
         return
 
     def store_public_key(self, key, public_key_path):
@@ -159,7 +169,9 @@ class CertificateController(object):
         public_key_path : string
             Path to store the private key
         """
-        with open(public_key_path, "wb") as f:
+        if os.path.exists(public_key_path):
+            os.remove(public_key_path)
+        with open(public_key_path, "wb+") as f:
             data = crypto.dump_publickey(crypto.FILETYPE_PEM, key)
             f.write(data)
         os.chmod(public_key_path, stat.S_IREAD | stat.S_IROTH)
