@@ -1,0 +1,327 @@
+-
+  name: "Default Name"
+  description: "No agent name in auto enrollment configuration"
+  enrollment:
+    response: "OSSEC K:'001 {agent_name} any TopSecret'\n"
+    id: 1
+  configuration:
+    enabled: "yes"
+-
+  name: "Valid agent address"
+  description: "Check a valid agent_address configurations"
+  enrollment:
+    response: "OSSEC K:'001 {agent_name} 192.168.0.10 TopSecret'\n"
+    id: 1
+  configuration:
+    agent_address: "192.168.0.10"
+-
+  name: "Valid agent address CIDR"
+  description: "Check a valid agent_address configurations CIDR"
+  enrollment:
+    response: "OSSEC K:'001 {agent_name} 192.168.0.10/24 TopSecret'\n"
+    id: 1
+  configuration:
+    agent_address: "192.168.0.10/24"
+-
+  name: "Invalid Agent address CIDR"
+  description: "Check a invalid CIDR agent_address in auto enrollment configuration"
+  configuration:
+    agent_address: "192.168.0.10/100"
+  expected_error: "ERROR: (4104): Invalid hostname: '192.168.0.10/100'."  
+  #Known Issue: Invalid CIDR is not checked. Skiped
+  skips:
+    - agent-auth
+    - ossec-agentd
+-
+  name: "Invalid Agent address"
+  description: "Check a invalid agent_address in auto enrollment configuration"
+  configuration:
+    agent_address: "192.168.0.1000"
+  expected_error: "ERROR: (4104): Invalid hostname: '192.168.0.1000'."
+  #Known Issue: Invalid adress is not checked. Skiped
+  skips:
+    - agent-auth
+    - ossec-agentd
+-
+  name: "Valid manager address"
+  description: "Check a valid manager_address configurations"
+  skips:
+    - agent-auth
+  enrollment:
+    response: "OSSEC K:'001 {agent_name} any TopSecret'\n"
+    id: 1
+  configuration:
+    manager_address: "127.0.0.1"
+-
+  name: "Groups"
+  description: "Agent groups in auto enrollment configuration"
+  enrollment:
+    response: "OSSEC K:'002 {agent_name} any TopSecret'\n"
+    id: 2
+  configuration:
+    groups: "group_1"
+-
+  name: "Multi Groups"
+  description: "Agent multi groups in auto enrollment configuration"
+  enrollment:
+    response: "OSSEC K:'003 {agent_name} any TopSecret'\n"
+    id: 3
+  configuration:
+    groups: "group_1,group_2,"
+-
+  name: "Invalid enabled"
+  description: "Check a invalid enabled in auto enrollment configuration"
+  skips:
+    - agent-auth
+  configuration:
+    enabled: "nn"
+  expected_error: "ERROR: Invalid content for tag 'enabled'."
+-
+  name: "Valid agent name config"
+  description: "Check a valid agent_name configurations"
+  enrollment:
+    response: "OSSEC K:'004 test_agent any TopSecret'\n"
+    id: 4
+  configuration:
+    agent_name: "test_agent"
+-
+  name: "Valid agent name config max length"
+  description: "Check a valid agent_name configurations max length"
+  enrollment:
+    response: "OSSEC K:'004 nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn any TopSecret'\n"
+    id: 4
+  configuration:
+    agent_name: "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+-
+  name: "Invalid agent name config"
+  description: "Check a invalid agent_name configurations"
+  configuration:
+    agent_name: "test_agent/+bad"
+  expected_error: "ERROR: Invalid agent name"
+-
+  name: "Invalid agent name config - too short"
+  description: "Check a invalid agent_name configurations too short"
+  configuration:
+    agent_name: "n"
+  expected_error: "ERROR: Invalid agent name"
+-
+  name: "Invalid agent name config - too long"
+  description: "Check a invalid agent_name configurations too long"
+  configuration:
+    agent_name: "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn" 
+  expected_error: "ERROR: Invalid agent name"
+-
+  name: "SSL - Auto Negotiation"
+  description: "Try auto negotiation option"
+  enrollment:
+    response: "OSSEC K:'001 test_agent_1 any TopSecret'\n"
+    id: 1
+    protocol: "TLSv1_1"
+  configuration:
+    agent_name: "test_agent_1"
+    auto_method: "yes"
+-
+  name: "SSL - Auto Negotiation Negative"
+  description: "Try TLSv1_1 without auto_negotiation"
+  enrollment:
+    protocol: "TLSv1_1"
+  configuration:
+    agent_name: "test_agent_1"
+    auto_method: "no"
+  expected_error: "ERROR: SSL error (1). Connection refused by the manager."
+-
+  name: "SSL - Compatible Ciphers"
+  description: "Try connecting with Compatible ciphers"
+  enrollment:
+    response: "OSSEC K:'002 test_agent_2 any TopSecret'\n"
+    id: 2
+  configuration:
+    agent_name: "test_agent_2"
+    ssl_cipher: "SHA256"
+-
+  name: "SSL - Incompatible Ciphers"
+  description: "Try connecting with Incompatible ciphers"
+  configuration:
+    agent_name: "test_agent_3"
+    ssl_cipher: "CAMELLIA"
+  expected_error: "ERROR: SSL error (1). Connection refused by the manager."
+-
+  name: "Manager Verification - Valid Cert"
+  description: "Try validating server with a valid certificate"
+  enrollment:
+    response: "OSSEC K:'003 test_agent_3 any TopSecret'\n"
+    id: 3
+    check_certificate: 
+      valid: "yes"
+  configuration:
+    agent_name: "test_agent_3"
+    server_ca_path: "{SERVER_PEM_PATH}"
+-
+  name: "Manager Verification - Invalid Cert"
+  description: "Try validating server with an invalid certificate"
+  enrollment:
+    check_certificate: 
+      valid: "no"
+  configuration:
+    agent_name: "test_agent_3"
+    server_ca_path: "{SERVER_PEM_PATH}"
+  expected_error: "ERROR: SSL error (1). Connection refused by the manager."
+-
+  name: "Agent Verification - Valid Cert"
+  description: "Try validating agent with an invalid certificate"
+  enrollment:
+    response: "OSSEC K:'004 test_agent_4 any TopSecret'\n"
+    id: 4
+    agent_certificate: 
+      valid: "yes"
+  configuration:
+    agent_name: "test_agent_4"
+    agent_certificate_path: "{AGENT_CERT_PATH}"
+    agent_key_path: "{AGENT_KEY_PATH}"
+-
+  name: "Agent Verification - Invalid Cert"
+  description: "Try validating agent with an invalid certificate"
+  enrollment:
+    agent_certificate: 
+      valid: "no"
+  configuration:
+    agent_name: "test_agent_5"
+    agent_certificate_path: "{AGENT_CERT_PATH}"
+    agent_key_path: "{AGENT_KEY_PATH}"
+  expected_error: "ERROR: SSL error (1). Connection refused by the manager."
+-
+  name: "Use source IP"
+  description: "Check that source IP is sent by agent"
+  enrollment:
+    response: "OSSEC K:'015 test_agent_5 {agent_address} TopSecret'\n"
+    id: 15
+  configuration:
+    agent_name: "test_agent_5"
+    use_source_ip: "yes"
+-
+  name: "Incompatible - Use source IP"
+  description: "Use source IP option while trying to set an IP"
+  configuration:
+    agent_name: "test_agent_6"
+    use_source_ip: "yes"
+    agent_address: "127.0.0.1"
+  expected_error: "ERROR: Incompatible sender_ip options: Forcing IP while using use_source_ip flag."
+-
+  name: "Password from string - Agent-Auth"
+  description: "Check that configured password is sent on string"
+  skips:
+    - ossec-agentd
+  enrollment:
+    response: "OSSEC K:'011 test_agent_pass any TopSecret'\n"
+    id: 11
+  configuration:
+    agent_name: "test_agent_pass"
+    password:
+      type: "string"
+      value: "pass123"
+-
+  name: "Password from file - Agent-Auth"
+  description: "Check that password file is open and read successfully"
+  skips:
+    - ossec-agentd
+  enrollment:
+    response: "OSSEC K:'012 test_agent_pass_file any TopSecret'\n"
+    id: 12
+  configuration:
+    agent_name: "test_agent_pass_file"
+    password:
+      type: "file"
+      value: "passFile"
+-
+  name: "Password from file - Agentd"
+  description: "Check that password file is open and read successfully"
+  skips:
+    - agent-auth
+  enrollment:
+    response: "OSSEC K:'013 test_agent_pass_file any TopSecret'\n"
+    id: 13
+  configuration:
+    agent_name: "test_agent_pass_file"
+    authorization_pass_path: "{PASSWORD_PATH}"
+    password:
+      value: "passFile"
+-
+  name: "Valid port"
+  description: "Check a valid port configurations"
+  skips:
+    - agent-auth
+  enrollment:
+    response: "OSSEC K:'001 {agent_name} any TopSecret'\n"
+    id: 1
+  configuration:
+    port: 1515
+-
+  name: "Invalid port 65536"
+  description: "Check a invalid port configurations 65536"
+  skips:
+    - agent-auth
+  configuration:
+    port: 65536
+  expected_error: "(1205): Invalid port number: '65536'"
+-
+  name: "Invalid port 0"
+  description: "Check a invalid port configurations 0"
+  skips:
+    - agent-auth
+  configuration:
+    port: 0
+  expected_error: "(1205): Invalid port number: '0'"
+-
+  name: "Invalid port -1515"
+  description: "Check a invalid port configurations -1515"
+  skips:
+    - agent-auth
+  configuration:
+    port: -1515
+  expected_error: "ERROR: (1235): Invalid value for element 'port': -1515."
+-
+  name: "Valid delay_after_enrollment 10"
+  description: "Check a valid delay_after_enrollment configurations 10"
+  skips:
+    - agent-auth
+  enrollment:
+    response: "OSSEC K:'001 {agent_name} any TopSecret'\n"
+    id: 1
+  configuration:
+    delay_after_enrollment: 10
+-
+  name: "Invalid delay_after_enrollment -30"
+  description: "Check a invalid delay_after_enrollment configurations -30"
+  skips:
+    - agent-auth
+  configuration:
+    delay_after_enrollment: -30
+  expected_error: "(1235): Invalid value for element 'delay_after_enrollment': -30."
+-
+  name: "All"
+  description: "Check enrollment with all parameters configurations"
+  skips:
+    - agent-auth
+  enrollment:
+    response: "OSSEC K:'031 test_agent_all 192.168.0.10 TopSecret'\n"
+    id: 31
+    check_certificate: 
+      valid: "yes"
+    agent_certificate: 
+      valid: "yes"
+  configuration:
+    enabled: "yes"
+    agent_name: "test_agent_all"
+    agent_address: "192.168.0.10"
+    manager_address: "127.0.0.1"
+    port: 1515
+    groups: "group_1,group_2,"
+    delay_after_enrollment: 10
+    authorization_pass_path: "{PASSWORD_PATH}"
+    password:
+      value: "passFile"
+    agent_certificate_path: "{AGENT_CERT_PATH}"
+    agent_key_path: "{AGENT_KEY_PATH}"
+    use_source_ip: "no"
+    auto_method: "no"
+    ssl_cipher: "SHA256"
