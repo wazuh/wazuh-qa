@@ -23,8 +23,12 @@ host_manager = HostManager(inventory_path)
 
 
 @pytest.mark.parametrize('login_endpoint, host, old_password, new_password', [
+    # User-roles based login
     ({}, 'wazuh-master', test_passw, 'Newpass1*'),
-    ({}, 'wazuh-worker1', 'Newpass1*', 'Newpass2*')
+    ({}, 'wazuh-worker1', 'Newpass1*', 'Newpass2*'),
+    # Auth context login
+    ({"auth_context": {"username": "testing"}}, 'wazuh-master', 'Newpass2*', 'Newpass1*'),
+    ({"auth_context": {"username": "testing"}}, 'wazuh-worker1', 'Newpass1*', 'Newpass2*')
 ])
 def test_update_password(login_endpoint, host, old_password, new_password, set_default_api_conf, create_testing_api_user,
                          create_security_resources):
@@ -51,13 +55,3 @@ def test_update_password(login_endpoint, host, old_password, new_password, set_d
     # Try to make another call with the same token
     response = host_manager.make_api_call(host, endpoint='/agents', token=token)
     assert response['status'] == 401, f'Token was not revoked: {response}'
-
-
-@pytest.mark.parametrize('login_endpoint, host, old_password, new_password', [
-    ({"auth_context": {"username": "testing"}}, 'wazuh-master', 'Newpass2*', 'Newpass1*'),
-    ({"auth_context": {"username": "testing"}}, 'wazuh-worker1', 'Newpass1*', 'Newpass2*')
-])
-def test_update_password_auth_context(login_endpoint, host, old_password, new_password, set_default_api_conf,
-                                      create_testing_api_user, create_security_resources):
-    test_update_password(login_endpoint, host, old_password, new_password, set_default_api_conf, create_testing_api_user,
-                         create_security_resources)

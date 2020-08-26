@@ -36,7 +36,7 @@ def set_role_to_user():
 
 
 @pytest.mark.parametrize('login_endpoint', [
-    # Normal login
+    # User-roles based login
     {},
     # Auth context login
     {'auth_context': {"username": "testing"}}

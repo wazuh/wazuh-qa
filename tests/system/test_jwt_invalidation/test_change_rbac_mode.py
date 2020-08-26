@@ -28,7 +28,7 @@ def restore_default_security_settings():
 
 
 @pytest.mark.parametrize('login_endpoint', [
-    # Normal login
+    # User-roles based login
     {},
     # Auth context login
     {'user': 'wazuh-wui', 'password': 'wazuh-wui', 'auth_context': {"username": "elastic"}}
