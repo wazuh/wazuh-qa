@@ -65,6 +65,7 @@ QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 CLUSTER_SOCKET_PATH = os.path.join(WAZUH_PATH, 'queue', 'cluster')
 
 WAZUH_SOCKETS = {
+    'ossec-agentd'   : [],
     'ossec-analysisd': [os.path.join(QUEUE_OSSEC_PATH, 'analysis'),
                         os.path.join(QUEUE_OSSEC_PATH, 'queue')],
     'ossec-authd': [os.path.join(QUEUE_OSSEC_PATH, 'auth')],
@@ -82,4 +83,7 @@ WAZUH_SOCKETS = {
 }
 
 # These sockets do not exist with default Wazuh configuration
-WAZUH_OPTIONAL_SOCKETS = [os.path.join(QUEUE_OSSEC_PATH, 'krequest')]
+WAZUH_OPTIONAL_SOCKETS = [
+    os.path.join(QUEUE_OSSEC_PATH, 'krequest'),
+    os.path.join(QUEUE_OSSEC_PATH, 'auth')
+]

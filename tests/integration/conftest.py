@@ -9,6 +9,7 @@ import subprocess
 import sys
 import uuid
 from datetime import datetime
+import pdb
 
 import pytest
 from numpydoc.docscrape import FunctionDoc
@@ -26,7 +27,6 @@ PLATFORMS = set("darwin linux win32 sunos5".split())
 HOST_TYPES = set("server agent".split())
 
 catalog = list()
-
 results = dict()
 
 
@@ -34,6 +34,7 @@ def pytest_runtest_setup(item):
     # Find if platform applies
     supported_platforms = PLATFORMS.intersection(mark.name for mark in item.iter_markers())
     plat = sys.platform
+    
     if supported_platforms and plat not in supported_platforms:
         pytest.skip("Cannot run on platform {}".format(plat))
 
@@ -41,7 +42,6 @@ def pytest_runtest_setup(item):
     supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())
     if supported_types and host_type not in supported_types:
         pytest.skip("Cannot run on wazuh {}".format(host_type))
-
     # Consider only first mark
     levels = [mark.kwargs['level'] for mark in item.iter_markers(name="tier")]
     if levels and len(levels) > 0:
@@ -57,6 +57,7 @@ def pytest_runtest_setup(item):
 @pytest.fixture(scope='module')
 def restart_wazuh(get_configuration, request):
     # Stop Wazuh
+    pdb.set_trace()
     control_service('stop')
 
     # Reset ossec.log and start a new monitor

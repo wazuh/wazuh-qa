@@ -39,7 +39,7 @@ yum groupinstall "Development Tools" -y
 yum install python36 python36-pip python36-devel -y
 
 # Install Python libraries
-pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro pandas pytest-html==2.0.1 numpydoc==0.9.2
+pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2 pycryptodome
 ```
 
 - Add some internal options and restart
@@ -110,7 +110,7 @@ brew install python3
 brew install autoconf automake libtool
 
 # Install Python libraries
-pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro pandas pytest-html==2.0.1 numpydoc==0.9.2
+pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 - Add some internal options and restart
@@ -261,7 +261,7 @@ This will be our python module with all the needed code to test everything.
 To run them, we need to install all these Python dependencies:
 
 ```shell script
-pip3 install distro freezegun jq jsonschema paramiko psutil pydevd-pycharm pytest pyyaml==5.3 pandas pytest-html==2.0.1 numpydoc==0.9.2
+pip3 install distro freezegun jq jsonschema paramiko psutil pydevd-pycharm pytest pyyaml==5.3 pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 _**NOTE:** `jq` library can only be installed with `pip` on **Linux**_
