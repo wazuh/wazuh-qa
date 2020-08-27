@@ -17,10 +17,13 @@ if sys.platform == 'win32':
     API_LOG_FILE_PATH = None
 
 else:
-    with open("/etc/ossec-init.conf") as ossec_init:
-        WAZUH_PATH = os.path.join(
-            [item.rstrip().replace("DIRECTORY=", "").replace("\"", "")
-            for item in ossec_init.readlines() if "DIRECTORY" in item][0])
+    if os.path.isfile("/etc/ossec-init.conf"):
+        with open("/etc/ossec-init.conf") as ossec_init:
+            WAZUH_PATH = os.path.join(
+                [item.rstrip().replace("DIRECTORY=", "").replace("\"", "")
+                for item in ossec_init.readlines() if "DIRECTORY" in item][0])
+    else:
+        WAZUH_PATH = os.path.join("/", "var", "ossec")
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
     WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
