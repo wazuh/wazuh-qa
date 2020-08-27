@@ -22,6 +22,7 @@ CRYPTO = "aes"
 CHUNK_SIZE = 16384
 
 cases = [
+    # 1. Single Agent - success
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -34,7 +35,27 @@ cases = [
             'agents_os': ['debian7'],
             'sha_list' : ['dca785b264b134f4c474d4fdf029f0f2c70d6bfc'],
             'upgrade_exec_result' : ['0'],
-            'status': 'Updated'
+            'upgrade_script_result' : [0],
+            'status': 'Updated',
+            'upgrade_notification': True
+        }
+    },
+    # 2. Single Agent - faliure
+    {
+        'params': {
+            'PROTOCOL': 'tcp',
+            'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
+            'CHUNK_SIZE' : CHUNK_SIZE
+        },
+        'metadata' : {
+            'agents_number': 1,
+            'protocol': 'tcp',
+            'agents_os': ['debian7'],
+            'sha_list' : ['dca785b264b134f4c474d4fdf029f0f2c70d6bfc'],
+            'upgrade_exec_result' : ['0'],
+            'upgrade_script_result' : [2],
+            'status': 'Error',
+            'upgrade_notification': True
         }
     }
 ]
@@ -67,7 +88,7 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
     expected_status = metadata['status']
     sender = Sender(SERVER_ADDRESS, protocol=protocol)
     for index, agent in enumerate(agents):
-        agent.set_wpk_variables(metadata['sha_list'][index], metadata['upgrade_exec_result'][index])
+        agent.set_wpk_variables(metadata['sha_list'][index], metadata['upgrade_exec_result'][index], metadata['upgrade_notification'], metadata['upgrade_script_result'][index])
 
         injector = Injector(sender, agent)
         injector.run()
@@ -91,10 +112,5 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
             break
 
     assert expected_status == upgrade_status, f'Upgrade Status did not match expected! Expected {expected_status} obtained {upgrade_status}'
-
-
-    flag = True
-    while flag:
-        time.sleep(10)
 
     return

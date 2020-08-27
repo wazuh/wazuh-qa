@@ -60,6 +60,8 @@ class Agent:
         }
         self.sha_key = None
         self.upgrade_exec_result = None
+        self.send_upgrade_notification = False
+        self.upgrade_script_result = 0
         self.setup()
     
     # Set up agent: Keep alive, encryption key and start up msg.
@@ -79,9 +81,11 @@ class Agent:
             self.os = os_list[agent_count % len(os_list) - 1]
     
     # Set variables related to wpk simulated respnses
-    def set_wpk_variables(self, sha=None, upgrade_exec_result=None):
+    def set_wpk_variables(self, sha=None, upgrade_exec_result=None, upgrade_notification=False, upgrade_script_result=0):
         self.sha_key = sha
         self.upgrade_exec_result = upgrade_exec_result
+        self.send_upgrade_notification = upgrade_notification
+        self.upgrade_script_result = upgrade_script_result
 
     # Set agent name
     def set_name(self):
@@ -206,7 +210,6 @@ class Agent:
             msg_removepadding = msg_decrypted[padding:]
             msg_decompress = zlib.decompress(msg_removepadding)
             msg_decoded = msg_decompress.decode('ISO-8859-1')
-            print(msg_decoded)
             self.processMessage(sender, msg_decoded)
     
     def processMessage(self, sender, message):
@@ -218,7 +221,7 @@ class Agent:
         com_index = message_list.index('com')
         command = message_list[com_index+1]
         parameter = message_list[com_index+2]
-        if command in ['lock_restart', 'open', 'write', 'close']:
+        if command in ['lock_restart', 'open', 'write', 'close', 'clear_upgrade_result']:
             sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} ok '))
         elif command == 'sha1':
             # !-req num ok {sha}
@@ -229,16 +232,17 @@ class Agent:
         elif command == 'upgrade':
             if self.upgrade_exec_result:
                 sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} ok {self.upgrade_exec_result}'))
-                upgrade_update_status_message = {
-                    'command': 'upgrade_update_status',
-                    'params' : {
-                        'error': 0,
-                        'data' : 'Upgrade was successful',
-                        'status' : 'Done'
+                if self.send_upgrade_notification:
+                    upgrade_update_status_message = {
+                        'command': 'upgrade_update_status',
+                        'params' : {
+                            'error': self.upgrade_script_result,
+                            'data' : 'Upgrade was successful' if self.upgrade_script_result == 0 else 'Upgrade failed',
+                            'status' : 'Done' if self.upgrade_script_result == 0 else 'Failed',
+                        }
                     }
-                }
 
-                sender.sendEvent(self.createEvent("u:upgrade_module:" + json.dumps(upgrade_update_status_message)))
+                    sender.sendEvent(self.createEvent("u:upgrade_module:" + json.dumps(upgrade_update_status_message)))
             else:
                 raise ValueError(f'Execution result should be configured in agent')
         else:
