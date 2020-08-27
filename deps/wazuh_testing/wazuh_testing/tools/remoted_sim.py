@@ -12,35 +12,35 @@ from Crypto.Util.Padding import pad, unpad
 from struct import pack
 
 class Cipher:
-  def __init__(self,data,key):
-    self.block_size = 16
-    self.data = data
-    self.key_blowfish = key
-    self.key_aes = key[:32]
+    def __init__(self,data,key):
+        self.block_size = 16
+        self.data = data
+        self.key_blowfish = key
+        self.key_aes = key[:32]
 
-  def encrypt_aes(self):
-    iv = b'FEDCBA0987654321'
-    cipher = AES.new(self.key_aes,AES.MODE_CBC,iv)
-    crp = cipher.encrypt(pad(self.data, self.block_size))
-    return (crp)
+    def encrypt_aes(self):
+        iv = b'FEDCBA0987654321'
+        cipher = AES.new(self.key_aes,AES.MODE_CBC,iv)
+        crp = cipher.encrypt(pad(self.data, self.block_size))
+        return (crp)
 
-  def decrypt_aes(self):
-    iv = b'FEDCBA0987654321'
-    cipher = AES.new(self.key_aes,AES.MODE_CBC,iv)
-    dcrp = cipher.decrypt(pad(self.data, self.block_size))
-    return (dcrp)
+    def decrypt_aes(self):
+        iv = b'FEDCBA0987654321'
+        cipher = AES.new(self.key_aes,AES.MODE_CBC,iv)
+        dcrp = cipher.decrypt(pad(self.data, self.block_size))
+        return (dcrp)
 
-  def encrypt_blowfish(self):
-    iv = b'\xfe\xdc\xba\x98\x76\x54\x32\x10'
-    cipher = Blowfish.new(self.key_blowfish, Blowfish.MODE_CBC, iv)
-    crp = cipher.encrypt(self.data)
-    return (crp)
+    def encrypt_blowfish(self):
+        iv = b'\xfe\xdc\xba\x98\x76\x54\x32\x10'
+        cipher = Blowfish.new(self.key_blowfish, Blowfish.MODE_CBC, iv)
+        crp = cipher.encrypt(self.data)
+        return (crp)
 
-  def decrypt_blowfish(self):
-    iv = b'\xfe\xdc\xba\x98\x76\x54\x32\x10'
-    cipher = Blowfish.new(self.key_blowfish, Blowfish.MODE_CBC, iv)
-    dcrp = cipher.decrypt(self.data)
-    return (dcrp)
+    def decrypt_blowfish(self):
+        iv = b'\xfe\xdc\xba\x98\x76\x54\x32\x10'
+        cipher = Blowfish.new(self.key_blowfish, Blowfish.MODE_CBC, iv)
+        dcrp = cipher.decrypt(self.data)
+        return (dcrp)
 
 class RemotedSimulator:
     """

@@ -1,0 +1,22 @@
+---
+    - tags:
+      - all
+      apply_to_modules:
+      - test_wpk_manager
+      sections:
+      - section: wodle[@name="task-manager"]
+        attributes:
+          - name: 'task-manager'
+        elements:
+        - enabled:
+            value: 'yes'
+      - section: wodle[@name="agent-upgrade"]
+        attributes:
+          - name: 'agent-upgrade'
+        elements:
+        - enabled:
+            value: 'yes'
+        - wpk_repository:
+            value: WPK_REPOSITORY
+        - chunk_size:
+            value: CHUNK_SIZE
