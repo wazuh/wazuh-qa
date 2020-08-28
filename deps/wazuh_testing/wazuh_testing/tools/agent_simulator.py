@@ -562,7 +562,7 @@ class InjectorThread (threading.Thread):
         starttime=time()
         while(1):
             # Send agent keep alive
-            print("KeepAlive - {}({})".format(self.agent.name, self.agent.id))
+            #print("KeepAlive - {}({})".format(self.agent.name, self.agent.id))
             self.sender.sendEvent(self.agent.keep_alive_msg)
             sleep(self.agent.modules["keepalive"]["frequency"] - ((time() - starttime) % self.agent.modules["keepalive"]["frequency"]))
     
