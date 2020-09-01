@@ -14,7 +14,6 @@ API_HOST = 'localhost'
 API_PORT = '55000'
 API_USER = 'wazuh'
 API_PASS = 'wazuh'
-API_VERSION = 'v4'
 API_LOGIN_ENDPOINT = '/security/user/authenticate'
 
 
@@ -34,10 +33,10 @@ def callback_detect_api_debug(line):
 
 # Functions
 
-def get_base_url(protocol, host, port, version):
+def get_base_url(protocol, host, port):
     """Get complete url of api"""
 
-    return f"{protocol}://{host}:{port}/{version}"
+    return f"{protocol}://{host}:{port}"
 
 
 def get_login_headers(user, password):
@@ -46,10 +45,10 @@ def get_login_headers(user, password):
                      'Authorization': f'Basic {b64encode(basic_auth).decode()}'}
 
 
-def get_token_login_api(protocol, host, port, version, user, password, login_endpoint, timeout):
+def get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout):
     """Get API login token"""
 
-    login_url = f"{get_base_url(protocol, host, port, version)}{login_endpoint}"
+    login_url = f"{get_base_url(protocol, host, port)}{login_endpoint}"
     response = requests.get(login_url, headers=get_login_headers(user, password), verify=False, timeout=timeout)
 
     if response.status_code == 200:
