@@ -4,16 +4,16 @@
 
 import os
 import shutil
-import subprocess
 
 import pytest
 
 from wazuh_testing.api import callback_detect_api_start, get_base_url, get_token_login_api, API_HOST, \
     API_LOGIN_ENDPOINT, API_PASS, API_PORT, API_USER, API_PROTOCOL
-from wazuh_testing.tools import API_LOG_FILE_PATH, WAZUH_PATH, WAZUH_API_CONF, WAZUH_SECURITY_CONF
+from wazuh_testing.tools import API_LOG_FILE_PATH, WAZUH_API_CONF, WAZUH_SECURITY_CONF
 from wazuh_testing.tools.configuration import get_api_conf, write_api_conf, write_security_conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.services import control_service
 
 
 @pytest.fixture(scope='module')
@@ -73,17 +73,21 @@ def configure_api_environment(get_configuration, request):
 
     if hasattr(request.module, 'force_restart_after_restoring'):
         if getattr(request.module, 'force_restart_after_restoring'):
-            subprocess.call([os.path.join(WAZUH_PATH, 'bin', 'wazuh-apid'), 'restart'])
+            control_service('restart')
 
 
 @pytest.fixture(scope='module')
 def restart_api(get_configuration, request):
+    # Stop Wazuh and Wazuh API
+    control_service('stop')
+
     # Reset api.log and start a new monitor
-    subprocess.call([os.path.join(WAZUH_PATH, 'bin', 'wazuh-apid'), 'stop'])
     truncate_file(API_LOG_FILE_PATH)
     file_monitor = FileMonitor(API_LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
-    subprocess.call([os.path.join(WAZUH_PATH, 'bin', 'wazuh-apid'), 'start'])
+
+    # Start Wazuh and Wazuh API
+    control_service('start')
 
 
 @pytest.fixture(scope='module')
@@ -105,4 +109,5 @@ def get_api_details():
                 'Authorization': f'Bearer {get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout)}'
             }
         }
+
     return _get_api_details
