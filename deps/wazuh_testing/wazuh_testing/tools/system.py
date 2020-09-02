@@ -197,10 +197,10 @@ class HostManager:
             configuration = {host: api_config for host in host_list}
 
         for host, config in configuration.items():
-            self.modify_file_content(host, path=dest_path, content=yaml.safe_dump(config))
+            self.modify_file_content(host, path=dest_path, content=yaml.dump("" if config is None else config))
 
         for host in host_list:
-            self.control_service(host=host, service='wazuh-api', state='restarted')
+            self.control_service(host=host, service='wazuh-manager', state='restarted')
             if clear_log:
                 self.clear_file(host=host, file_path=API_LOG_FILE_PATH)
 

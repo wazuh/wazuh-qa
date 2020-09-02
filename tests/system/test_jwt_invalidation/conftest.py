@@ -16,7 +16,7 @@ def set_default_api_conf(request):
         api_conf_backup[host] = yaml.safe_load(hm.get_file_content(host, WAZUH_API_CONF))
 
     with open(api_tmp_backup, 'w') as f:
-        f.write(yaml.safe_dump(api_conf_backup))
+        f.write(yaml.dump(api_conf_backup))
 
     hm.apply_api_config(api_config=new_api_conf, host_list=test_hosts, clear_log=True)
 
