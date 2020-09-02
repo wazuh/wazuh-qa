@@ -109,4 +109,5 @@ def get_api_details():
                 'Authorization': f'Bearer {get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout)}'
             }
         }
+
     return _get_api_details
