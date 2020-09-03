@@ -46,9 +46,8 @@ def test_invalid_socket_input(connect_to_sockets_function, test_case: list):
         List of test_case stages (dicts with input, output and stage keys)
     """
     stage = test_case[0]
-    receiver_sockets[0].send(stage['input'])
-    result = receiver_sockets[0].receive().decode()
+    receiver_sockets[0].send(stage['input'], size=True)
+    result = receiver_sockets[0].receive(size=True).rstrip(b'\x00').decode()
 
-    assert stage['output'] in result, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1,
-                                                                                 stage['stage'])
-
+    assert stage['output'] == result, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1,
+                                                                                stage['stage'])

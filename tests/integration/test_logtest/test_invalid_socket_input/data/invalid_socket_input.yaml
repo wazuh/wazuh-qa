@@ -13,7 +13,7 @@
   test_case:
   -
     input: '{"token": "4885bbf4","log_format": "syslog","location": "master->/var/log/syslog"}'
-    output: "{\"messages\":[\"ERROR: (7308): 'event' JSON field is required and must be a string\"],\"codemsg\":-2}"
+    output: "{\"messages\":[\"ERROR: (7313): 'event' JSON field not found or is empty\"],\"codemsg\":-2}"
     stage: 'Missing event'
 -
   name: "Missing log_format"
@@ -37,7 +37,7 @@
   test_case:
   -
     input: '{"token": "4885bbf4","location": "master->/var/log/syslog"}'
-    output: "{\"messages\":[\"ERROR: (7308): 'log_format' JSON field is required and must be a string\",\"ERROR: (7308): 'event' JSON field is required and must be a string\"],\"codemsg\":-2}"
+    output: "{\"messages\":[\"ERROR: (7308): 'log_format' JSON field is required and must be a string\",\"ERROR: (7313): 'event' JSON field not found or is empty\"],\"codemsg\":-2}"
     stage: 'Missing event/log_format'
 -
   name: "Missing event/location"
@@ -45,7 +45,7 @@
   test_case:
   -
     input: '{"token": "4885bbf4","log_format": "syslog"}'
-    output: "{\"messages\":[\"ERROR: (7308): 'location' JSON field is required and must be a string\",\"ERROR: (7308): 'event' JSON field is required and must be a string\"],\"codemsg\":-2}"
+    output: "{\"messages\":[\"ERROR: (7308): 'location' JSON field is required and must be a string\",\"ERROR: (7313): 'event' JSON field not found or is empty\"],\"codemsg\":-2}"
     stage: 'Missing event/location'
 -
   name: "Missing log_format/location"
@@ -61,5 +61,5 @@
   test_case:
   -
     input: '{"token": "4885bbf4"}'
-    output: "{\"messages\":[\"ERROR: (7308): 'location' JSON field is required and must be a string\",\"ERROR: (7308): 'log_format' JSON field is required and must be a string\",\"ERROR: (7308): 'event' JSON field is required and must be a string\"],\"codemsg\":-2}"
+    output: "{\"messages\":[\"ERROR: (7308): 'location' JSON field is required and must be a string\",\"ERROR: (7308): 'log_format' JSON field is required and must be a string\",\"ERROR: (7313): 'event' JSON field not found or is empty\"],\"codemsg\":-2}"
     stage: 'Missing event/log_format/location'
