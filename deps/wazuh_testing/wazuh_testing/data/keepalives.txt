@@ -23,7 +23,7 @@ debian7
 d6e3ac3e75ca0319af3e7c262776f331 merged.mg
 #"_agent_ip":10.0.2.15
 debian8
-#!-Linux |agent-debian8 |3.16.0-9-amd64 |#1 SMP Debian 3.16.68-1 (2019-05-22) |x86_64 [Debian GNU/Linux|debian: 8 (jessie)] - Wazuh v3.11.3 / ab73af41699f13fdd81903b5f23d8d00
+#!-Linux |agent-debian8 |3.16.0-9-amd64 |#1 SMP Debian 3.16.68-1 (2019-05-22) |x86_64 [Debian GNU/Linux|debian: 8 (jessie)] - Wazuh v4.1.0 / ab73af41699f13fdd81903b5f23d8d00
 d6e3ac3e75ca0319af3e7c262776f331 merged.mg
 #"_agent_ip":10.0.2.15
 debian9
