@@ -1,0 +1,49 @@
+---
+-
+  name: "Remove invalid token type"
+  description: "Check remove session"
+  test_case:
+  -
+    input: '{"remove_session": 6}'
+    output: "{\"messages\":[\"ERROR: (7316): Failure to remove session. remove_session JSON field must be a string\"],\"codemsg\":-2}"
+    stage: 'Remove invalid token type'
+-
+  name: "Remove invalid json"
+  description: "Check remove session"
+  test_case:
+  -
+    input: '{"remove_session": asd}'
+    output: "{\"messages\":[\"ERROR: (7306): Error parsing JSON\",\"ERROR: (7307): Error in position 20, ... ession\\\":asd}\\n ...\"],\"codemsg\":-2}"
+    stage: 'Remove invalid json'
+-
+  name: "Remove null token"
+  description: "Check remove session"
+  test_case:
+  -
+    input: '{"remove_session": {}}'
+    output: "{\"messages\":[\"ERROR: (7316): Failure to remove session. remove_session JSON field must be a string\"],\"codemsg\":-2}"
+    stage: 'Remove null token'
+-
+  name: "Remove invalid token"
+  description: "Check remove session"
+  test_case:
+  -
+    input: '{"remove_session": "{asd}"}'
+    output: "{\"messages\":[\"ERROR: (7309): '{asd}' is not a valid token\"],\"codemsg\":-2}"
+    stage: 'Remove invalid token'
+-
+  name: "Remove non-exist session"
+  description: "Check remove session"
+  test_case:
+  -
+    input: '{"remove_session": "12345678"}'
+    output: "{\"messages\":[\"ERROR: (7004): No session found for token '12345678'\"],\"codemsg\":-1}"
+    stage: 'Remove non-exist session'
+-
+  name: "Remove session OK"
+  description: "Check remove session"
+  test_case:
+  -
+    input: '{{"remove_session": "{}"}}'
+    output: "{{\"messages\":[\"INFO: (7206): The session '{}' was closed successfully\"],\"codemsg\":0}}"
+    stage: 'Remove session OK'
