@@ -21,7 +21,6 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 UPGRADE_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'upgrade')
 TASK_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'task')
 SERVER_ADDRESS = 'localhost'
-MANAGER_VERSION = 'v4.0.0'
 WPK_REPOSITORY_4x = 'packages.wazuh.com/4.x/wpk/'
 CRYPTO = "aes"
 CHUNK_SIZE = 16384
@@ -88,7 +87,7 @@ params = [ case['params'] for case in cases ]
 metadata = [ case['metadata'] for case in cases ]
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_manager_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
 #configurations = configurations[2:]
@@ -106,7 +105,6 @@ def restart_service():
     control_service('restart')
 
     yield
-
 
 def send_message(data_object, socket_path):
     upgrade_sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)

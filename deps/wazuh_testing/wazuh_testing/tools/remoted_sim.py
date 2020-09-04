@@ -1,5 +1,6 @@
 import os
 import hashlib
+import json
 import zlib
 import socket
 import sys
@@ -46,10 +47,13 @@ class RemotedSimulator:
     """
     Creates an AF_INET server sockets for simulting remoted connection
     """
-    def __init__(self, server_address='127.0.0.1', remoted_port=1514, protocol='udp', mode='REJECT', client_keys=WAZUH_PATH+'/etc/client.keys'):  
+    def __init__(self, server_address='127.0.0.1', remoted_port=1514, protocol='udp', mode='REJECT', client_keys=WAZUH_PATH+'/etc/client.keys', start_on_init=True):  
         self.protocol = protocol
         self.global_count = 1234567891
         self.local_count = 5555
+        self.request_counter = 111
+        self.request_confirmed = False
+        self.request_answer = None
         self.keys = ({},{}) 
         self.encryption_key = ""  
         self.mode = mode 
@@ -58,12 +62,16 @@ class RemotedSimulator:
         self.client_keys_path = client_keys
         self.last_message_ctx = ""
         self.running = False
-        self.start()
+        self.upgrade_errors = False
+        self.upgrade_success = False
+        self.upgrade_notification = None
+        if start_on_init:
+            self.start()
 
     """
     Start socket and listener thread
     """
-    def start(self):  
+    def start(self, custom_listener=None, args=[]):  
         if self.running == False:
             if self.protocol == "tcp":
                 self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   
@@ -76,7 +84,7 @@ class RemotedSimulator:
                 self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 self.sock.settimeout(1)
                 self.sock.bind((self.server_address,self.remoted_port)) 
-            self.listener_thread = threading.Thread(target=self.listener)
+            self.listener_thread = threading.Thread(target=(self.listener if not custom_listener else custom_listener), args=args)
             self.listener_thread.setName('listener_thread') 
             self.running = True  
             self.listener_thread.start() 
@@ -101,8 +109,10 @@ class RemotedSimulator:
     """   
     Compose event from raw message
     """
-    def compose_sec_message(self, message):
+    def compose_sec_message(self, message, binary_data=None):
         message = message.encode()
+        if binary_data:
+            message += binary_data
         random_number = b'55555'
         split = b':'
         global_counter = str(self.global_count).encode()
@@ -149,9 +159,9 @@ class RemotedSimulator:
     """
     Create a sec_message to Agent
     """
-    def create_sec_message(self, message, crypto_method):
+    def create_sec_message(self, message, crypto_method, binary_data=None):
         # Compose sec_message
-        sec_message = self.compose_sec_message(message)
+        sec_message = self.compose_sec_message(message, binary_data)
         # Compress
         compressed_sec_message = zlib.compress(sec_message)
         # Padding
@@ -167,6 +177,32 @@ class RemotedSimulator:
     """
     def createACK(self, crypto_method):        
         return self.create_sec_message("#!-agent ack ", crypto_method) 
+
+    """
+    Create a COM message
+    """
+    def sendComMessage(self, client_address, connection, command, payload=None):
+        self.request_counter += 1
+        message = self.create_sec_message(f"#!-req {self.request_counter} com {command}", 'aes', binary_data=payload)
+        self.send(connection, message)
+        self.request_confirmed = False
+        # Wait for confirmation
+        while not self.request_confirmed:
+            data = self.receiveMessage(connection)                               
+            ret = self.process_message(client_address, data)
+            # Response -1 means connection have to be closed
+            if ret == -1:
+                time.sleep(0.1)
+                connection.close()
+                break
+            # If there is a response, answer it
+            elif ret:
+                self.send(connection, ret)
+
+        if not self.request_answer.startswith('ok '):
+            self.upgrade_errors = True
+            raise
+        return self.request_answer
 
     """
     Create an invalid message, without encryption and headers
@@ -207,6 +243,21 @@ class RemotedSimulator:
         
         return msg_decoded
         
+    def receiveMessage(self, connection):
+        while True:
+            if self.protocol == 'tcp':
+                rcv = connection.recv(4)
+                if len(rcv) == 4:
+                    data_len = ((rcv[3]&0xFF) << 24) | ((rcv[2]&0xFF) << 16) | ((rcv[1]&0xFF) << 8) | (rcv[0]&0xFF)  
+
+                    buffer_array = connection.recv(data_len) 
+                    
+                    if data_len == len(buffer_array):
+                        return buffer_array
+            else:
+                buffer_array, client_address = self.sock.recvfrom(65536)  
+                return buffer_array
+
     """
     Listener thread to read every received package from the socket and process it
     """
@@ -250,6 +301,62 @@ class RemotedSimulator:
                         self.send(client_address, ret)
                 except socket.timeout:
                     continue
+
+     
+    """
+    Listener thread that will finish when encryption_keys are obtained
+    """
+    def upgrade_listener(self, filename, filepath, chunk_size, installer, sha1hash):   
+        self.upgrade_errors = False
+        self.upgrade_success = False
+        while not self.upgrade_errors: 
+            try:
+                connection = None
+                if self.protocol == 'tcp':
+                    connection, client_address = self.sock.accept()
+                elif self.protocol == 'udp':   
+                    data, client_address = self.sock.recvfrom(65536)  
+                
+                while not self.encryption_key: 
+                    # Receive ACK message and process it
+                    data = self.receiveMessage(connection)                               
+                    try:
+                        ret = self.process_message(client_address, data)
+
+                        # Response -1 means connection have to be closed
+                        if ret == -1:
+                            time.sleep(0.1)
+                            connection.close()
+                            break
+                        # If there is a response, answer it
+                        elif ret:
+                            self.send(connection, ret)
+                    except Exception:
+                        time.sleep(1)
+                        connection.close()
+
+                response = self.sendComMessage(client_address, connection, 'lock_restart -1')
+                response = self.sendComMessage(client_address, connection, f'open wb {filename}')
+                with open(filepath, 'rb') as f:
+                    bytes_stream = f.read(chunk_size)
+                    while len(bytes_stream) == chunk_size:
+                        response = self.sendComMessage(client_address, connection, f'write {len(bytes_stream)} {filename} ', payload=bytes_stream)
+                        bytes_stream = f.read(chunk_size)
+                    response = self.sendComMessage(client_address, connection, f'write {len(bytes_stream)} {filename} ', payload=bytes_stream)
+                response = self.sendComMessage(client_address, connection, f'close {filename}')
+                response = self.sendComMessage(client_address, connection, f'sha1 {filename}')
+                if response.split(' ')[1] != sha1hash:
+                    self.upgrade_errors = True
+                    raise
+                response = self.sendComMessage(client_address, connection, f'upgrade {filename} {installer}')
+                self.upgrade_notification = None
+                self.upgrade_success = True
+                # Switch to common listener once the upgrade has ended
+                return self.listener()
+            except Exception as identifier:
+                continue
+        
+        
 
     """
     send method to write on the socket
@@ -304,9 +411,17 @@ class RemotedSimulator:
 
         #Hash message means a response is required   
         if rcv_msg.find('#!-') != -1:
+            req_index = rcv_msg.find('#!-req')
+            if req_index != -1:
+                if int(rcv_msg[req_index:].split(' ')[1]) == self.request_counter:
+                    self.request_answer = ' '.join(rcv_msg[req_index:].split(' ')[2:])
+                    self.request_confirmed = True
             hash_message = True
         else:
             hash_message = False
+
+        if rcv_msg.find('upgrade_update_status') != -1:
+            self.upgrade_notification = json.loads(rcv_msg[rcv_msg.find('\"params\":')+9:-1])
 
         #Save context of received message for future asserts
         self.last_message_ctx = '{} {} {}'.format(agent_identifier_type, agent_identifier, crypto_method)
@@ -369,3 +484,26 @@ class RemotedSimulator:
     """
     def set_mode(self, mode):
         self.mode = mode
+
+
+    """
+    Wait for upgrade process to run
+    timeout: Max timeout in seconds
+    """
+    def wait_upgrade_process(self, timeout=None):
+        while not self.upgrade_success and not self.upgrade_errors and (timeout is None or timeout > 0):
+            time.sleep(1)
+            if timeout is not None:
+                timeout -= 1
+        return self.upgrade_success, self.request_answer
+
+    """
+    Wait for the arrival of the agent notification
+    timeout: Max timeout in seconds
+    """
+    def wait_upgrade_notification(self, timeout=None):
+        while (self.upgrade_notification is None) and (timeout is None or timeout > 0):
+            time.sleep(1)
+            if timeout is not None:
+                timeout -= 1
+        return self.upgrade_notification
