@@ -18,7 +18,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, WAZUH_SERVICE
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController
+from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
 
@@ -286,21 +286,6 @@ def connect_to_sockets(request):
     setattr(request.module, 'receiver_sockets', receiver_sockets)
 
     return receiver_sockets
-
-
-def close_sockets(receiver_sockets):
-    """Close the sockets connection gracefully."""
-    for socket in receiver_sockets:
-        try:
-            # We flush the buffer before closing connection if connection is TCP
-            if socket.protocol == 1:
-                socket.sock.settimeout(5)
-                socket.receive()  # Flush buffer before closing connection
-            socket.close()
-        except OSError as e:
-            if e.errno == 9:
-                # Do not try to close the socket again if it was reused or closed already
-                pass
 
 
 @pytest.fixture(scope='module')
