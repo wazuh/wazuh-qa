@@ -13,7 +13,7 @@
   test_case:
   -
     input: '{"remove_session": asd}'
-    output: "{\"messages\":[\"ERROR: (7306): Error parsing JSON\",\"ERROR: (7307): Error in position 20, ... ession\\\":asd}\\n ...\"],\"codemsg\":-2}"
+    output: "{\"messages\":[\"ERROR: (7306): Error parsing JSON\",\"ERROR: (7307): Error in position 19, ... session\\\": asd} ...\"],\"codemsg\":-2}"
     stage: 'Remove invalid json'
 -
   name: "Remove null token"
