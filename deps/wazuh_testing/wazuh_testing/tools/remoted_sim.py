@@ -367,7 +367,7 @@ class RemotedSimulator:
     """
     Listener thread that will finish when encryption_keys are obtained
     """
-    def upgrade_listener(self, filename, filepath, chunk_size, installer, sha1hash, simulate_interruption=False):   
+    def upgrade_listener(self, filename, filepath, chunk_size, installer, sha1hash, simulate_interruption=False, simulate_connection_error=False):   
         self.upgrade_errors = False
         self.upgrade_success = False
         while not self.upgrade_errors and self.running: 
@@ -391,6 +391,10 @@ class RemotedSimulator:
                 self.upgrade_notification = None
                 self.upgrade_success = True
                 # Switch to common listener once the upgrade has ended
+                if simulate_connection_error:
+                    time.sleep(100)  # Sleep long enought to make the connection after upgrade fail and generate a rollback   
+                    self.sock.close()
+                    self._start_socket()
                 return self.listener()
             except Exception as identifier:
                 continue

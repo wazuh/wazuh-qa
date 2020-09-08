@@ -27,26 +27,6 @@ CRYPTO = "aes"
 SERVER_ADDRESS = 'localhost'
 PROTOCOL = "tcp"
 
-params = [
-    {
-        'CRYPTO': CRYPTO,
-        'SERVER_ADDRESS': SERVER_ADDRESS,
-        'REMOTED_PORT': 1514,
-        'PROTOCOL': PROTOCOL
-    },
-    {
-        'CRYPTO': CRYPTO,
-        'SERVER_ADDRESS': SERVER_ADDRESS,
-        'REMOTED_PORT': 1514,
-        'PROTOCOL': PROTOCOL
-    },
-    {
-        'CRYPTO': CRYPTO,
-        'SERVER_ADDRESS': SERVER_ADDRESS,
-        'REMOTED_PORT': 1514,
-        'PROTOCOL': PROTOCOL
-    }
-]
 metadata = [
     {
         'protocol': PROTOCOL,
@@ -55,6 +35,7 @@ metadata = [
         'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
         'chunk_size': 16384,
         'simulate_interruption': False,
+        'simulate_rollback': False,
         'results': {
             'upgrade_ok': True,
             'result_code': 0,
@@ -69,6 +50,7 @@ metadata = [
         'upgrade_script': 'fake_upgrade.sh',
         'chunk_size': 16384,
         'simulate_interruption': False,
+        'simulate_rollback': False,
         'results': {
             'upgrade_ok': False,
             'error_message': 'err Could not chmod',
@@ -82,12 +64,37 @@ metadata = [
         'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
         'chunk_size': 16384,
         'simulate_interruption': True,
+        'simulate_rollback': False,
         'results': {
             'upgrade_ok': False,
             'error_message': 'Request confirmation never arrived',
             'receive_notification': False,
         }
-    }
+    },
+    {
+        'protocol': PROTOCOL,
+        'agent_version': 'v4.0.0',
+        'use_http': False,
+        'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
+        'chunk_size': 16384,
+        'simulate_interruption': False,
+        'simulate_rollback': True,
+        'results': {
+            'upgrade_ok': True,
+            'result_code': 0,
+            'receive_notification': True,
+            'status': 'Failed',   
+        }
+    },
+]
+
+params = [
+    {
+        'CRYPTO': CRYPTO,
+        'SERVER_ADDRESS': SERVER_ADDRESS,
+        'REMOTED_PORT': 1514,
+        'PROTOCOL': PROTOCOL
+    } for x in range(0, len(metadata))
 ]
 
 def load_tests(path):
@@ -124,7 +131,8 @@ def start_agent(request, get_configuration):
     truncate_file(CLIENT_KEYS_PATH)
     time.sleep(1)
     
-    remoted_simulator.start(custom_listener=remoted_simulator.upgrade_listener, args=(metadata['filename'], metadata['filepath'], metadata['chunk_size'], metadata['upgrade_script'], metadata['sha1'], metadata['simulate_interruption']))
+    remoted_simulator.start(custom_listener=remoted_simulator.upgrade_listener, args=(metadata['filename'], metadata['filepath'], metadata['chunk_size'], metadata['upgrade_script'], metadata['sha1'], 
+        metadata['simulate_interruption'], metadata['simulate_rollback']))
     control_service('restart')  
 
     yield
@@ -180,8 +188,10 @@ def test_wpk_agent(get_configuration, download_wpk, configure_environment, start
     else:
         assert upgrade_exec_message == expected['error_message'], f'Expected error message does not match'
     if upgrade_process_result and expected['receive_notification']:
-        result = remoted_simulator.wait_upgrade_notification(timeout=120)
+        result = remoted_simulator.wait_upgrade_notification(timeout=180)
         if result is not None:
             data = result['data']
             status = result['status']
             assert status == expected['status'], 'Notification status did not match expected'
+        else:
+            assert expected['receive_notification'] == False, 'Notification was expected but was not received'
