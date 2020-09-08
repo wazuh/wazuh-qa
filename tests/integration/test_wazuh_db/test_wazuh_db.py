@@ -6,6 +6,7 @@ import os
 
 import pytest
 import yaml
+import re
 
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.monitoring import ManInTheMiddle
@@ -42,9 +43,19 @@ monitored_sockets_params = [('wazuh-db', None, True)]
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
+def regex_match(regex, string):
+    regex = regex.replace("*", ".*")
+    regex = regex.replace("[", "")
+    regex = regex.replace("]", "")
+    regex = regex.replace("(", "")
+    regex = regex.replace(")", "")
+    string = string.replace("[", "")
+    string = string.replace("]", "")
+    string = string.replace("(", "")
+    string = string.replace(")", "")
+    return bool(re.match(regex, string))
 
 # Tests
-
 
 @pytest.mark.parametrize('test_case',
                          [case['test_case'] for module_data in module_tests for case in module_data[0]],
@@ -61,10 +72,20 @@ def test_wazuh_db_messages(configure_sockets_environment, connect_to_sockets_mod
         List of test_case stages (dicts with input, output and stage keys).
     """
     for stage in test_case:
+        if 'ignore' in stage and stage['ignore'] == "yes":
+            continue
+        
         expected = stage['output']
         receiver_sockets[0].send(stage['input'], size=True)
-        response = receiver_sockets[0].receive(size=True).decode()
-        assert response == expected, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1, stage['stage'])
+        response = monitored_sockets[0].start(timeout=global_parameters.default_timeout,
+                                              callback=callback_wazuhdb_response).result()
+        
+        if 'use_regex' in stage and stage['use_regex'] == 'yes':
+            match = regex_match(expected, response)
+        else:
+            match = (expected == response)
+        assert match, 'Failed test case stage {}: {}. Expected: {}. Response: {}'\
+               .format(test_case.index(stage) + 1, stage['stage'], expected, response)
 
 
 def test_wazuh_db_create_agent(configure_sockets_environment, connect_to_sockets_module):
