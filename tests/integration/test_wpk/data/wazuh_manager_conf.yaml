@@ -4,6 +4,12 @@
       apply_to_modules:
       - test_wpk_manager
       sections:
+      - section: task-manager
+        attributes:
+          - name: 'task-manager'
+        elements:
+        - task_timeout:
+            value: TASK_TIMEOUT
       - section: agent-upgrade
         attributes:
           - name: 'agent-upgrade'

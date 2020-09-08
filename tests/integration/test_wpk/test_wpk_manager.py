@@ -29,6 +29,7 @@ WPK_REPOSITORY_4x = 'packages.wazuh.com/4.x/wpk/'
 WPK_REPOSITORY_3x = 'packages.wazuh.com/wpk/'
 CRYPTO = "aes"
 CHUNK_SIZE = 16384
+TASK_TIMEOUT = '15m'
 
 cases = [
     # 1. Single Agent - success
@@ -36,13 +37,14 @@ cases = [
         'params': {
             'PROTOCOL': 'tcp',
             'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
-            'CHUNK_SIZE' : CHUNK_SIZE
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
-            'sha_list' : ['dca785b264b134f4c474d4fdf029f0f2c70d6bfc'],
+            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
@@ -55,13 +57,14 @@ cases = [
         'params': {
             'PROTOCOL': 'tcp',
             'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
-            'CHUNK_SIZE' : CHUNK_SIZE
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
-            'sha_list' : ['dca785b264b134f4c474d4fdf029f0f2c70d6bfc'],
+            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [2],
             'status': ['Failed'],
@@ -74,13 +77,14 @@ cases = [
         'params': {
             'PROTOCOL': 'tcp',
             'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
-            'CHUNK_SIZE' : CHUNK_SIZE
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
             'agents_number': 3,
             'protocol': 'tcp',
             'agents_os': ['debian7', 'ubuntu12.04', 'debian10'],
-            'sha_list' : ['dca785b264b134f4c474d4fdf029f0f2c70d6bfc', 'INVALIDSHA', 'dca785b264b134f4c474d4fdf029f0f2c70d6bfc'],
+            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302', 'INVALIDSHA', '739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0', '0', '0'],
             'upgrade_script_result' : [0, 0, 2],
             'status': ['Done', 'Failed', 'Failed'],
@@ -93,13 +97,14 @@ cases = [
         'params': {
             'PROTOCOL': 'tcp',
             'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
-            'CHUNK_SIZE' : CHUNK_SIZE
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
-            'sha_list' : ['dca785b264b134f4c474d4fdf029f0f2c70d6bfc'],
+            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
@@ -113,13 +118,14 @@ cases = [
         'params': {
             'PROTOCOL': 'tcp',
             'WPK_REPOSITORY' : WPK_REPOSITORY_3x,
-            'CHUNK_SIZE' : CHUNK_SIZE
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
-            'sha_list' : ['dca785b264b134f4c474d4fdf029f0f2c70d6bfc'],
+            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
@@ -133,13 +139,14 @@ cases = [
         'params': {
             'PROTOCOL': 'tcp',
             'WPK_REPOSITORY' : WPK_REPOSITORY_3x,
-            'CHUNK_SIZE' : CHUNK_SIZE
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
-            'sha_list' : ['dca785b264b134f4c474d4fdf029f0f2c70d6bfc'],
+            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
@@ -153,13 +160,14 @@ cases = [
         'params': {
             'PROTOCOL': 'tcp',
             'WPK_REPOSITORY' : 'bad.repository.url',
-            'CHUNK_SIZE' : CHUNK_SIZE
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
-            'sha_list' : ['dca785b264b134f4c474d4fdf029f0f2c70d6bfc'],
+            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
@@ -173,13 +181,14 @@ cases = [
         'params': {
             'PROTOCOL': 'tcp',
             'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
-            'CHUNK_SIZE' : CHUNK_SIZE
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['mojave'],
-            'sha_list' : ['dca785b264b134f4c474d4fdf029f0f2c70d6bfc'],
+            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
@@ -192,13 +201,14 @@ cases = [
         'params': {
             'PROTOCOL': 'tcp',
             'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
-            'CHUNK_SIZE' : CHUNK_SIZE
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian8'],
-            'sha_list' : ['dca785b264b134f4c474d4fdf029f0f2c70d6bfc'],
+            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
@@ -211,13 +221,14 @@ cases = [
         'params': {
             'PROTOCOL': 'tcp',
             'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
-            'CHUNK_SIZE' : CHUNK_SIZE
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian8'],
-            'sha_list' : ['dca785b264b134f4c474d4fdf029f0f2c70d6bfc'],
+            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
@@ -231,13 +242,14 @@ cases = [
         'params': {
             'PROTOCOL': 'tcp',
             'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
-            'CHUNK_SIZE' : CHUNK_SIZE
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian8'], #debian8 have v4.0.0 agent version
-            'sha_list' : ['dca785b264b134f4c474d4fdf029f0f2c70d6bfc'],
+            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
@@ -251,7 +263,8 @@ cases = [
         'params': {
             'PROTOCOL': 'tcp',
             'WPK_REPOSITORY' : WPK_REPOSITORY_3x,
-            'CHUNK_SIZE' : CHUNK_SIZE
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
             'agents_number': 1,
@@ -271,18 +284,20 @@ cases = [
         'params': {
             'PROTOCOL': 'tcp',
             'WPK_REPOSITORY' : WPK_REPOSITORY_3x,
-            'CHUNK_SIZE' : CHUNK_SIZE
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
             'agents_number': 1,
             'protocol': 'tcp',
-            'agents_os': ['debian7'], #debian8 have v4.0.0 agent version
+            'agents_os': ['debian7'],
             'sha_list' : ['af4d150d58500f79ccb71012057f3ad796017a68'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Failed'],
             'upgrade_notification': [False],
             'message_params': {'file_path' : 'invalid/path/to.wpk'},
+            'error_msg' : ['The WPK file does not exist.'],
             'expected_response' : 'Success',
             'command' : 'upgrade_custom'
         }
@@ -292,13 +307,14 @@ cases = [
         'params': {
             'PROTOCOL': 'tcp',
             'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
-            'CHUNK_SIZE' : CHUNK_SIZE
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'], #debian8 have v4.0.0 agent version
-            'sha_list' : ['dca785b264b134f4c474d4fdf029f0f2c70d6bfc'],
+            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
@@ -312,13 +328,14 @@ cases = [
         'params': {
             'PROTOCOL': 'tcp',
             'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
-            'CHUNK_SIZE' : CHUNK_SIZE
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
-            'sha_list' : ['dca785b264b134f4c474d4fdf029f0f2c70d6bfc'],
+            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
@@ -333,13 +350,14 @@ cases = [
         'params': {
             'PROTOCOL': 'tcp',
             'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
-            'CHUNK_SIZE' : CHUNK_SIZE
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
-            'sha_list' : ['dca785b264b134f4c474d4fdf029f0f2c70d6bfc'],
+            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
@@ -353,19 +371,65 @@ cases = [
         'params': {
             'PROTOCOL': 'tcp',
             'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
-            'CHUNK_SIZE' : CHUNK_SIZE
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
-            'sha_list' : ['dca785b264b134f4c474d4fdf029f0f2c70d6bfc'],
+            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
             'message_params': {'use_http' : 1},
             'upgrade_notification': [True],
             'checks' : ['use_http', 'version'],
+            'expected_response' : 'Success'
+        }
+    },
+    # 18. Upgrade an agent that is timeouted - Success
+    {
+        'params': {
+            'PROTOCOL': 'tcp',
+            'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : '1m'
+        },
+        'metadata' : {
+            'agents_number': 1,
+            'protocol': 'tcp',
+            'agents_os': ['debian7'], #debian8 have v4.0.0 agent version
+            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'upgrade_exec_result' : ['0'],
+            'upgrade_script_result' : [0],
+            'status': ['In progress'],
+            'upgrade_notification': [False],
+            'expected_response' : 'Success',
+            'first_attempt' : 'Timeout'
+        }
+    }
+]
+
+cases = [
+    # 3. Multiple Agents
+    {
+        'params': {
+            'PROTOCOL': 'tcp',
+            'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
+        },
+        'metadata' : {
+            'agents_number': 3,
+            'protocol': 'tcp',
+            'agents_os': ['debian7', 'ubuntu12.04', 'debian10'],
+            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302', 'INVALIDSHA', '739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'upgrade_exec_result' : ['0', '0', '0'],
+            'upgrade_script_result' : [0, 0, 2],
+            'status': ['Done', 'Failed', 'Failed'],
+            'error_msg' : [None, 'Send verify sha1 error.', 'Upgrade procedure exited with error code.'],
+            'upgrade_notification': [True, False, True],
             'expected_response' : 'Success'
         }
     }
@@ -415,6 +479,11 @@ def wait_download(line):
         return line
     return None
 
+def wait_chunk_size(line):
+    if ("wm_agent_upgrade_send_command_to_agent(): DEBUG: (8165): Sending message to agent: " in line) and ("com write" in line):
+        return line
+    return None
+
 def remove_wpk_package():
     for file in os.scandir(UPGRADE_PATH):
         if file.name.endswith('.wpk'):
@@ -427,7 +496,9 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
     expected_status = metadata['status']
     sender = Sender(SERVER_ADDRESS, protocol=protocol)
     log_monitor = FileMonitor(LOG_FILE_PATH)
-
+    #expected_error_msg = None
+    #if metadata.get('error_msg'):
+    expected_error_msg = metadata.get('error_msg')
     for index, agent in enumerate(agents):
         agent.set_wpk_variables(metadata['sha_list'][index], metadata['upgrade_exec_result'][index], metadata['upgrade_notification'][index], metadata['upgrade_script_result'][index])
 
@@ -459,7 +530,7 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
         
     response = send_message(data, UPGRADE_SOCKET)
 
-    if metadata.get('checks'):
+    if metadata.get('checks') and (('use_http' in metadata.get('checks')) or ('version' in metadata.get('checks'))):
         # Checking version in logs
         try:
             log_monitor.start(timeout=60, callback=wait_download)
@@ -483,6 +554,16 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
         #let time to download wpk
         time.sleep(60)
     
+    if metadata.get('checks') and ('chunk_size' in metadata.get('checks')):
+        # Checking version in logs
+        try:
+            log_monitor.start(timeout=60, callback=wait_chunk_size)
+        except TimeoutError as err:
+            raise AssertionError("Chunk size log tooks too much!")
+            
+        last_log = log_monitor.result()
+        assert f'com write {metadata.get("chunk_size")}' in last_log, f'Chunk size did not match expected! Expected {metadata.get("chunk_size")} obtained {last_log}'
+    
     if metadata.get('first_attempt'):
         #Chech that result of first attempt is Success
         assert 'Success' == response[0]['data'], f'First upgrade response did not match expected! Expected {metadata.get("expected_response")} obtained {response[0]["data"]}'
@@ -499,11 +580,11 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
             time.sleep(30)
             response = send_message(data, TASK_SOCKET)
             retries = 0
-            while (response[0]['status'] != metadata.get('first_attempt')) and (retries < 10):
+            while (response[0]['status'] != metadata.get('first_attempt')) and (retries < 10) and (response[0]['status'] != metadata.get('first_attempt')):
                 time.sleep(30)
                 response = send_message(data, TASK_SOCKET)
                 retries += 1
-            assert metadata.get('first_attempt') == response[0]['status'], f'First upgrade Status did not match expected! Expected {metadata.get("first_attempt")} obtained {response[0]["status"]}'
+            assert metadata.get('first_attempt') == response[0]['status'], f'First upgrade status did not match expected! Expected {metadata.get("first_attempt")} obtained {response[0]["status"]}'
         
         #send upgrade request again
         response = send_message(repeat_message, UPGRADE_SOCKET)
@@ -527,7 +608,9 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
                 time.sleep(30)
                 response = send_message(data, TASK_SOCKET)
                 retries += 1
-            assert expected_status[index] == response[0]['status'], f'Upgrade Status did not match expected! Expected {expected_status[index]} obtained {response[0]["status"]} at index {index}'
+            assert expected_status[index] == response[0]['status'], f'Upgrade status did not match expected! Expected {expected_status[index]} obtained {response[0]["status"]} at index {index}'
+            if expected_status[index] == 'Failed':
+                assert expected_error_msg[index] == response[0]['error_msg'], f'Error msg did not match expected! Expected {expected_error_msg[index]} obtained {response[0]["error_msg"]} at index {index}'
     else:
         assert metadata.get('expected_response') == response[0]['data'], f'Upgrade response did not match expected! Expected {metadata.get("expected_response")} obtained {response[0]["data"]}'
 

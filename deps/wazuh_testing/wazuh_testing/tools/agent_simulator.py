@@ -113,7 +113,7 @@ class Agent:
         self.key = registration_info[3]
         ssl_socket.close()
         sock.close()
-        print("Registration - {}({})".format(self.name, self.id))
+        #print("Registration - {}({})".format(self.name, self.id))
     
     # Add the Wazuh custom padding to each event sent
     def wazuh_padding(self, compressed_event):
@@ -528,6 +528,9 @@ class Sender:
         if self.protocol == "udp":
             self.socket.sendto(event, (self.manager_address, int(self.manager_port)))
         return(0)
+    
+    def close(self):
+        self.socket.close()
 
 class Injector:
     def __init__(self, sender, agent):
@@ -539,11 +542,12 @@ class Injector:
             if config["status"] == "enabled":
                 self.threads.append(InjectorThread(self.thread_number, "Thread-"+str(self.agent.id)+str(module), self.sender, self.agent, module))
                 self.thread_number += 1
+    
     def run(self):
         for thread in range(self.thread_number):
             self.threads[thread].setDaemon(True)
             self.threads[thread].start()
-
+    
 class InjectorThread (threading.Thread):
     def __init__(self, threadID, name, sender, agent, module):
         threading.Thread.__init__(self)
@@ -556,7 +560,7 @@ class InjectorThread (threading.Thread):
     
     def keepalive(self):
         sleep(10)
-        print("Startup - {}({})".format(self.agent.name, self.agent.id))
+        #print("Startup - {}({})".format(self.agent.name, self.agent.id))
         self.sender.sendEvent(self.agent.startup_msg)
         self.sender.sendEvent(self.agent.keep_alive_msg)
         starttime=time()
@@ -594,7 +598,7 @@ class InjectorThread (threading.Thread):
         starttime=time()
         while(1):
             # Send agent inventory scan
-            print("Scan started - {}({}) - {}({})".format(self.agent.name, self.agent.id, "syscollector", self.agent.inventory.inventory_path))
+            #print("Scan started - {}({}) - {}({})".format(self.agent.name, self.agent.id, "syscollector", self.agent.inventory.inventory_path))
             scan_id = int(time()) # Random start scan ID
             for item in self.agent.inventory.inventory:
                 event = self.agent.createEvent(item.replace("<scan_id>",str(scan_id)))
@@ -603,11 +607,11 @@ class InjectorThread (threading.Thread):
                 if self.totalMessages % self.agent.modules["syscollector"]["eps"] == 0:
                     self.totalMessages = 0
                     sleep(1.0 - ((time() - starttime) % 1.0))
-            print("Scan ended - {}({}) - {}({})".format(self.agent.name, self.agent.id, "syscollector", self.agent.inventory.inventory_path))
+            #print("Scan ended - {}({}) - {}({})".format(self.agent.name, self.agent.id, "syscollector", self.agent.inventory.inventory_path))
             sleep(self.agent.modules["syscollector"]["frequency"] - ((time() - starttime) % self.agent.modules["syscollector"]["frequency"]))
     def run(self):
         #message = "1:/var/log/syslog:Jan 29 10:03:41 master sshd[19635]: pam_unix(sshd:session): session opened for user vagrant by (uid=0) uid: 0"
-        print("Starting - {}({})({}) - {}".format(self.agent.name, self.agent.id, self.agent.os, self.module))
+        #print("Starting - {}({})({}) - {}".format(self.agent.name, self.agent.id, self.agent.os, self.module))
         if self.module == "keepalive":
             self.keepalive()
         elif self.module == "fim":
@@ -619,7 +623,8 @@ class InjectorThread (threading.Thread):
         elif self.module == "receive_messages":
             self.agent.receiveMessage(self.sender)
         else:
-            print("Module unknown: {}".format(self.module))
+            #print("Module unknown: {}".format(self.module))
+            pass
 
 def create_agents(agents_number, manager_address, cypher, fim_eps=None, authd_password=None, os=None):
     global agent_count
