@@ -73,22 +73,25 @@ class RemotedSimulator:
     """
     def start(self, custom_listener=None, args=[]):  
         if self.running == False:
-            if self.protocol == "tcp":
-                self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   
-                self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self.sock.settimeout(1)
-                self.sock.bind((self.server_address,self.remoted_port))
-                self.sock.listen(1) 
-            elif self.protocol == "udp":
-                self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self.sock.settimeout(1)
-                self.sock.bind((self.server_address,self.remoted_port)) 
+            self._start_socket()
             self.listener_thread = threading.Thread(target=(self.listener if not custom_listener else custom_listener), args=args)
             self.listener_thread.setName('listener_thread') 
             self.running = True  
             self.listener_thread.start() 
         
+    def _start_socket(self):
+        if self.protocol == "tcp":
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   
+            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.sock.settimeout(1)
+            self.sock.bind((self.server_address,self.remoted_port))
+            self.sock.listen(1) 
+        elif self.protocol == "udp":
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.sock.settimeout(1)
+            self.sock.bind((self.server_address,self.remoted_port)) 
+
     """
     Stop socket and listener thread
     """
@@ -180,14 +183,35 @@ class RemotedSimulator:
 
     """
     Create a COM message
+    - client_address: client of the connection
+    - connection: established connection (tcp only)
+    - payload: Optional binary data to add to the message
+    - interruption_time: Time that will be added in between connections 
     """
-    def sendComMessage(self, client_address, connection, command, payload=None):
+    def sendComMessage(self, client_address, connection, command, payload=None, interruption_time=None):
         self.request_counter += 1
         message = self.create_sec_message(f"#!-req {self.request_counter} com {command}", 'aes', binary_data=payload)
         self.send(connection, message)
+
+        if interruption_time:
+            if connection:
+                connection.close()
+                self.sock.close()
+                time.sleep(interruption_time)
+                self._start_socket()
+                connection, client_address = self.start_connection()
+            else:
+                time.sleep(interruption_time)
+            
         self.request_confirmed = False
+       
+        timeout = time.time() + 60 
         # Wait for confirmation
         while not self.request_confirmed:
+            if time.time() > timeout:
+                self.request_answer = 'Request confirmation never arrived'
+                self.upgrade_errors = True
+                raise TimeoutError(self.request_answer)
             data = self.receiveMessage(connection)                               
             ret = self.process_message(client_address, data)
             # Response -1 means connection have to be closed
@@ -302,24 +326,24 @@ class RemotedSimulator:
                 except socket.timeout:
                     continue
 
-     
+
     """
-    Listener thread that will finish when encryption_keys are obtained
+    Established connection and receives startup message
     """
-    def upgrade_listener(self, filename, filepath, chunk_size, installer, sha1hash):   
-        self.upgrade_errors = False
-        self.upgrade_success = False
-        while not self.upgrade_errors: 
+    def start_connection(self):
+        self.encryption_key = ""
+        while not self.encryption_key and self.running:
             try:
                 connection = None
                 if self.protocol == 'tcp':
                     connection, client_address = self.sock.accept()
-                elif self.protocol == 'udp':   
-                    data, client_address = self.sock.recvfrom(65536)  
+                else:
+                    data, client_address = self.sock.recvfrom(65536) 
                 
-                while not self.encryption_key: 
+                while not self.encryption_key and self.running: 
                     # Receive ACK message and process it
-                    data = self.receiveMessage(connection)                               
+                    if self.protocol == 'tcp':
+                        data = self.receiveMessage(connection)                               
                     try:
                         ret = self.process_message(client_address, data)
 
@@ -333,10 +357,25 @@ class RemotedSimulator:
                             self.send(connection, ret)
                     except Exception:
                         time.sleep(1)
-                        connection.close()
+                        if connection:
+                            connection.close()
+                        
+                return connection, client_address
+            except Exception as identifier:
+                continue
+     
+    """
+    Listener thread that will finish when encryption_keys are obtained
+    """
+    def upgrade_listener(self, filename, filepath, chunk_size, installer, sha1hash, simulate_interruption=False):   
+        self.upgrade_errors = False
+        self.upgrade_success = False
+        while not self.upgrade_errors and self.running: 
+            try:
+                connection, client_address = self.start_connection()
 
                 response = self.sendComMessage(client_address, connection, 'lock_restart -1')
-                response = self.sendComMessage(client_address, connection, f'open wb {filename}')
+                response = self.sendComMessage(client_address, connection, f'open wb {filename}', interruption_time=5 if simulate_interruption else None)
                 with open(filepath, 'rb') as f:
                     bytes_stream = f.read(chunk_size)
                     while len(bytes_stream) == chunk_size:

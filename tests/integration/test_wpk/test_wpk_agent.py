@@ -39,6 +39,12 @@ params = [
         'SERVER_ADDRESS': SERVER_ADDRESS,
         'REMOTED_PORT': 1514,
         'PROTOCOL': PROTOCOL
+    },
+    {
+        'CRYPTO': CRYPTO,
+        'SERVER_ADDRESS': SERVER_ADDRESS,
+        'REMOTED_PORT': 1514,
+        'PROTOCOL': PROTOCOL
     }
 ]
 metadata = [
@@ -48,6 +54,7 @@ metadata = [
         'use_http': False,
         'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
         'chunk_size': 16384,
+        'simulate_interruption': False,
         'results': {
             'upgrade_ok': True,
             'result_code': 0,
@@ -61,9 +68,23 @@ metadata = [
         'use_http': False,
         'upgrade_script': 'fake_upgrade.sh',
         'chunk_size': 16384,
+        'simulate_interruption': False,
         'results': {
             'upgrade_ok': False,
             'error_message': 'err Could not chmod',
+            'receive_notification': False,
+        }
+    },
+    {
+        'protocol': PROTOCOL,
+        'agent_version': 'v4.0.0',
+        'use_http': False,
+        'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
+        'chunk_size': 16384,
+        'simulate_interruption': True,
+        'results': {
+            'upgrade_ok': False,
+            'error_message': 'Request confirmation never arrived',
             'receive_notification': False,
         }
     }
@@ -81,6 +102,8 @@ def load_tests(path):
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_agent_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
+
+# configurations = configurations[-1:]
 
 remoted_simulator = None 
 
@@ -101,7 +124,7 @@ def start_agent(request, get_configuration):
     truncate_file(CLIENT_KEYS_PATH)
     time.sleep(1)
     
-    remoted_simulator.start(custom_listener=remoted_simulator.upgrade_listener, args=(metadata['filename'], metadata['filepath'], metadata['chunk_size'], metadata['upgrade_script'], metadata['sha1']))
+    remoted_simulator.start(custom_listener=remoted_simulator.upgrade_listener, args=(metadata['filename'], metadata['filepath'], metadata['chunk_size'], metadata['upgrade_script'], metadata['sha1'], metadata['simulate_interruption']))
     control_service('restart')  
 
     yield
@@ -149,7 +172,7 @@ def download_wpk(get_configuration):
 
 def test_wpk_agent(get_configuration, download_wpk, configure_environment, start_agent):
     expected = get_configuration['metadata']['results']
-    upgrade_process_result, upgrade_exec_message = remoted_simulator.wait_upgrade_process(timeout=60)
+    upgrade_process_result, upgrade_exec_message = remoted_simulator.wait_upgrade_process(timeout=180)
     assert upgrade_process_result == expected['upgrade_ok'], 'Upgrade process result was not the expected'
     if upgrade_process_result:
         upgrade_result_code = int(upgrade_exec_message.split(' ')[1])
