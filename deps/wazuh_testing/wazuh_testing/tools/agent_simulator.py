@@ -81,11 +81,13 @@ class Agent:
             self.os = os_list[agent_count % len(os_list) - 1]
     
     # Set variables related to wpk simulated respnses
-    def set_wpk_variables(self, sha=None, upgrade_exec_result=None, upgrade_notification=False, upgrade_script_result=0):
+    def set_wpk_variables(self, sha=None, upgrade_exec_result=None, upgrade_notification=False, upgrade_script_result=0, disconnect =False):
         self.sha_key = sha
         self.upgrade_exec_result = upgrade_exec_result
         self.send_upgrade_notification = upgrade_notification
         self.upgrade_script_result = upgrade_script_result
+        self.disconnect = disconnect
+        self.counter_disconnect = 0
 
     # Set agent name
     def set_name(self):
@@ -223,6 +225,10 @@ class Agent:
         parameter = message_list[com_index+2]
         if command in ['lock_restart', 'open', 'write', 'close', 'clear_upgrade_result']:
             sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} ok '))
+            if command == 'write' and self.disconnect == True:
+                self.counter_disconnect +=1
+                if self.counter_disconnect == 10:
+                    sleep(120)
         elif command == 'sha1':
             # !-req num ok {sha}
             if self.sha_key:
@@ -528,9 +534,6 @@ class Sender:
         if self.protocol == "udp":
             self.socket.sendto(event, (self.manager_address, int(self.manager_port)))
         return(0)
-    
-    def close(self):
-        self.socket.close()
 
 class Injector:
     def __init__(self, sender, agent):

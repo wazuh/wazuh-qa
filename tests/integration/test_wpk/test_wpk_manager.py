@@ -44,6 +44,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'disconnect' : [False],
             'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
@@ -64,15 +65,39 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'disconnect' : [False],
             'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [2],
             'status': ['Failed'],
+            'error_msg' : ['Upgrade procedure exited with error code.'],
             'upgrade_notification': [True],
             'expected_response' : 'Success'
         }
     },
-    # 3. Multiple Agents
+    # 3. Single Agent - faliure SHA-1
+    {
+        'params': {
+            'PROTOCOL': 'tcp',
+            'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
+        },
+        'metadata' : {
+            'agents_number': 1,
+            'protocol': 'tcp',
+            'agents_os': ['debian7'],
+            'disconnect' : [False],
+            'sha_list' : ['INVALID'],
+            'upgrade_exec_result' : ['0'],
+            'upgrade_script_result' : [0],
+            'status': ['Failed'],
+            'error_msg' : ['Send verify sha1 error.'],
+            'upgrade_notification': [False],
+            'expected_response' : 'Success'
+        }
+    },
+    # 4. Multiple Agents
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -84,15 +109,17 @@ cases = [
             'agents_number': 3,
             'protocol': 'tcp',
             'agents_os': ['debian7', 'ubuntu12.04', 'debian10'],
+            'disconnect' : [False, False, False],
             'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302', 'INVALIDSHA', '739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0', '0', '0'],
             'upgrade_script_result' : [0, 0, 2],
             'status': ['Done', 'Failed', 'Failed'],
+            'error_msg' : ['','Send verify sha1 error.','Upgrade procedure exited with error code.'],
             'upgrade_notification': [True, False, True],
             'expected_response' : 'Success'
         }
     },
-    # 4. Upgrading an agent to a version higher than the manager - Fail
+    # 5. Upgrading an agent to a version higher than the manager - Fail
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -104,16 +131,17 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'disconnect' : [False],
             'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
-            'upgrade_notification': [True],
+            'upgrade_notification': [False],
             'message_params': {'version' : 'v4.1.0', 'force_upgrade': 0 },
             'expected_response' : 'Upgrading an agent to a version higher than the manager requires the force flag.'
         }
     },
-    # 5. Current agent version is greater or equal - Fail
+    # 6. Current agent version is greater or equal - Fail
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -125,6 +153,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'disconnect' : [False],
             'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
@@ -134,7 +163,7 @@ cases = [
             'expected_response' : 'Current agent version is greater or equal.'
         }
     },
-    # 6. The version of the WPK does not exist in the repository - Fail
+    # 7. The version of the WPK does not exist in the repository - Fail
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -146,6 +175,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'disconnect' : [False],
             'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
@@ -155,7 +185,7 @@ cases = [
             'expected_response' : 'The version of the WPK does not exist in the repository.'
         }
     },
-    # 7. The repository is not reachable - Fail
+    # 8. The repository is not reachable - Fail
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -167,6 +197,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'disconnect' : [False],
             'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
@@ -176,7 +207,7 @@ cases = [
             'expected_response' : 'The repository is not reachable.'
         }
     },
-    # 8. The WPK for this platform is not available - Fail
+    # 9. The WPK for this platform is not available - Fail
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -188,6 +219,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['mojave'],
+            'disconnect' : [False],
             'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
@@ -196,7 +228,7 @@ cases = [
             'expected_response' : 'The WPK for this platform is not available.'
         }
     },
-    # 9. Already updated - Current agent version is greater or equal - Fail
+    # 10. Already updated - Current agent version is greater or equal - Fail
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -208,6 +240,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian8'],
+            'disconnect' : [False],
             'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
@@ -216,7 +249,7 @@ cases = [
             'expected_response' : 'Current agent version is greater or equal.'
         }
     },
-    # 10. Already updated with force=1 - Success
+    # 11. Already updated with force=1 - Success
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -228,6 +261,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian8'],
+            'disconnect' : [False],
             'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
@@ -237,7 +271,7 @@ cases = [
             'expected_response' : 'Success'
         }
     },
-    # 11. Already updated with force=1 - Current agent version is greater or equal - Fail
+    # 12. Already updated with force=0 - Current agent version is greater or equal - Fail
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -249,6 +283,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian8'], #debian8 have v4.0.0 agent version
+            'disconnect' : [False],
             'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
@@ -258,7 +293,7 @@ cases = [
             'expected_response' : 'Current agent version is greater or equal.'
         }
     },
-    # 12 Upgrade Legacy - Success
+    # 13 Upgrade Legacy - Success
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -270,6 +305,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'disconnect' : [False],
             'sha_list' : ['af4d150d58500f79ccb71012057f3ad796017a68'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
@@ -291,6 +327,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'disconnect' : [False],
             'sha_list' : ['af4d150d58500f79ccb71012057f3ad796017a68'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
@@ -313,7 +350,8 @@ cases = [
         'metadata' : {
             'agents_number': 1,
             'protocol': 'tcp',
-            'agents_os': ['debian7'], #debian8 have v4.0.0 agent version
+            'disconnect' : [False],
+            'agents_os': ['debian7'],
             'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
@@ -335,6 +373,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'disconnect' : [False],
             'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
@@ -357,6 +396,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'disconnect' : [False],
             'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
@@ -378,6 +418,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'disconnect' : [False],
             'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
@@ -399,7 +440,8 @@ cases = [
         'metadata' : {
             'agents_number': 1,
             'protocol': 'tcp',
-            'agents_os': ['debian7'], #debian8 have v4.0.0 agent version
+            'agents_os': ['debian7'],
+            'disconnect' : [False],
             'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
@@ -408,11 +450,8 @@ cases = [
             'expected_response' : 'Success',
             'first_attempt' : 'Timeout'
         }
-    }
-]
-
-cases = [
-    # 3. Multiple Agents
+    },
+    # 19. Disconnect Agent - Fail
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -421,15 +460,40 @@ cases = [
             'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
-            'agents_number': 3,
+            'agents_number': 1,
             'protocol': 'tcp',
-            'agents_os': ['debian7', 'ubuntu12.04', 'debian10'],
-            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302', 'INVALIDSHA', '739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
-            'upgrade_exec_result' : ['0', '0', '0'],
-            'upgrade_script_result' : [0, 0, 2],
-            'status': ['Done', 'Failed', 'Failed'],
-            'error_msg' : [None, 'Send verify sha1 error.', 'Upgrade procedure exited with error code.'],
-            'upgrade_notification': [True, False, True],
+            'disconnect' : [True],
+            'agents_os': ['debian7'],
+            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'upgrade_exec_result' : ['0'],
+            'upgrade_script_result' : [0],
+            'status': ['Failed'],
+            'upgrade_notification': [False], 
+            'expected_response' : 'Success',
+            'error_msg' : ['Send write file error.'],
+        }
+    },
+    # 20. Change default chunk_size - success
+    {
+        'params': {
+            'PROTOCOL': 'tcp',
+            'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
+            'CHUNK_SIZE' : 31111,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
+        },
+        'metadata' : {
+            'agents_number': 1,
+            'protocol': 'tcp',
+            'agents_os': ['debian7'],
+            'disconnect' : [False],
+            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'upgrade_exec_result' : ['0'],
+            'upgrade_script_result' : [0],
+            'status': ['Done'],
+            'message_params': {'use_http' : 1},
+            'upgrade_notification': [True],
+            'checks' : ['chunk_size'],
+            'chunk_size' : 31111,
             'expected_response' : 'Success'
         }
     }
@@ -489,6 +553,11 @@ def remove_wpk_package():
         if file.name.endswith('.wpk'):
             os.unlink(file.path)
 
+def create_wpk_custom_file(file_name):
+    with open(file_name, 'wb') as f:
+        f.seek(1024*1024*10)
+        f.write(b'\0')
+
 
 def test_wpk_manager(get_configuration, configure_environment, restart_service, configure_agents):
     metadata = get_configuration.get('metadata')
@@ -496,11 +565,10 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
     expected_status = metadata['status']
     sender = Sender(SERVER_ADDRESS, protocol=protocol)
     log_monitor = FileMonitor(LOG_FILE_PATH)
-    #expected_error_msg = None
-    #if metadata.get('error_msg'):
     expected_error_msg = metadata.get('error_msg')
+
     for index, agent in enumerate(agents):
-        agent.set_wpk_variables(metadata['sha_list'][index], metadata['upgrade_exec_result'][index], metadata['upgrade_notification'][index], metadata['upgrade_script_result'][index])
+        agent.set_wpk_variables(metadata['sha_list'][index], metadata['upgrade_exec_result'][index], metadata['upgrade_notification'][index], metadata['upgrade_script_result'][index], metadata['disconnect'][index])
 
         injector = Injector(sender, agent)
         injector.run()
@@ -512,7 +580,7 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
 
     command = ''
     if metadata.get('command') and metadata.get('command') == 'upgrade_custom':
-        command = 'upgrade_custom'
+        command = 'upgrade_custom'  
     else :
         command = 'upgrade'
     
