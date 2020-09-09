@@ -1,12 +1,12 @@
 ---
 -
-  name: "Remove invalid token type"
+  name: "Remove invalid numeric token"
   description: "Check remove session"
   test_case:
   -
     input: '{"remove_session": 6}'
     output: "{\"messages\":[\"ERROR: (7316): Failure to remove session. remove_session JSON field must be a string\"],\"codemsg\":-2}"
-    stage: 'Remove invalid token type'
+    stage: 'Remove invalid numeric token'
 -
   name: "Remove invalid json"
   description: "Check remove session"
@@ -16,21 +16,45 @@
     output: "{\"messages\":[\"ERROR: (7306): Error parsing JSON\",\"ERROR: (7307): Error in position 19, ... session\\\": asd} ...\"],\"codemsg\":-2}"
     stage: 'Remove invalid json'
 -
-  name: "Remove null token"
+  name: "Remove invalid empty json object token"
   description: "Check remove session"
   test_case:
   -
     input: '{"remove_session": {}}'
     output: "{\"messages\":[\"ERROR: (7316): Failure to remove session. remove_session JSON field must be a string\"],\"codemsg\":-2}"
-    stage: 'Remove null token'
+    stage: 'Remove invalid empty json object token'
 -
-  name: "Remove invalid token"
+  name: "Remove invalid array token"
   description: "Check remove session"
   test_case:
   -
-    input: '{"remove_session": "{asd}"}'
-    output: "{\"messages\":[\"ERROR: (7309): '{asd}' is not a valid token\"],\"codemsg\":-2}"
-    stage: 'Remove invalid token'
+    input: '{"remove_session":["asdasd",123123]}'
+    output: "{\"messages\":[\"ERROR: (7316): Failure to remove session. remove_session JSON field must be a string\"],\"codemsg\":-2}"
+    stage: 'Remove invalid array token'
+-
+  name: "Remove invalid token null"
+  description: "Check remove session"
+  test_case:
+  -
+    input: '{"remove_session":null}'
+    output: "{\"messages\":[\"ERROR: (7316): Failure to remove session. remove_session JSON field must be a string\"],\"codemsg\":-2}"
+    stage: 'Remove invalid token null'
+-
+  name: "Remove invalid boolean token "
+  description: "Check remove session"
+  test_case:
+  -
+    input: '{"remove_session":true}'
+    output: "{\"messages\":[\"ERROR: (7316): Failure to remove session. remove_session JSON field must be a string\"],\"codemsg\":-2}"
+    stage: 'Remove invalid boolean token'
+-
+  name: "Remove invalid token len"
+  description: "Check remove session"
+  test_case:
+  -
+    input: '{"remove_session": "asd"}'
+    output: "{\"messages\":[\"ERROR: (7309): 'asd' is not a valid token\"],\"codemsg\":-2}"
+    stage: 'Remove invalid token len'
 -
   name: "Remove non-exist session"
   description: "Check remove session"
