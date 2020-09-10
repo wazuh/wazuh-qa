@@ -1,15 +1,17 @@
 # Copyright (C) 2015-2020, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
 import hashlib
 import os
 import platform
 import pytest
 import time
 import requests
+import subprocess
 import yaml
 
+from configobj import ConfigObj
+from datetime import datetime
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -17,7 +19,7 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
 
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
+pytestmark = [pytest.mark.tier(level=0), pytest.mark.agent]
 
 folder = 'etc' if platform.system() == 'Linux' else ''
 
@@ -30,6 +32,7 @@ PROTOCOL = "tcp"
 metadata = [
     {
         'protocol': PROTOCOL,
+        'initial_version': 'v3.13.1',
         'agent_version': 'v4.0.0',
         'use_http': False,
         'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
@@ -45,6 +48,7 @@ metadata = [
     },
     {
         'protocol': PROTOCOL,
+        'initial_version': 'v3.13.1',
         'agent_version': 'v4.0.0',
         'use_http': False,
         'upgrade_script': 'fake_upgrade.sh',
@@ -59,6 +63,7 @@ metadata = [
     },
     {
         'protocol': PROTOCOL,
+        'initial_version': 'v3.13.1',
         'agent_version': 'v4.0.0',
         'use_http': False,
         'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
@@ -73,6 +78,22 @@ metadata = [
     },
     {
         'protocol': PROTOCOL,
+        'initial_version': 'v3.13.1',
+        'agent_version': 'v4.0.0',
+        'use_http': False,
+        'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
+        'chunk_size': 16384,
+        'simulate_interruption': False,
+        'simulate_rollback': True,
+        'results': {
+            'upgrade_ok': True,
+            'result_code': 0,
+            'receive_notification': False,
+        }
+    },
+    {
+        'protocol': PROTOCOL,
+        'initial_version': 'v4.0.0',
         'agent_version': 'v4.0.0',
         'use_http': False,
         'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
@@ -133,14 +154,17 @@ def start_agent(request, get_configuration):
     
     remoted_simulator.start(custom_listener=remoted_simulator.upgrade_listener, args=(metadata['filename'], metadata['filepath'], metadata['chunk_size'], metadata['upgrade_script'], metadata['sha1'], 
         metadata['simulate_interruption'], metadata['simulate_rollback']))
-    control_service('restart')  
+    
+    control_service('stop')
+    subprocess.call([f'{WAZUH_PATH}/bin/agent-auth', '-m', SERVER_ADDRESS])
+    control_service('start') 
 
     yield
 
     remoted_simulator.stop()
     authd_simulator.shutdown()
     
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def download_wpk(get_configuration):
     metadata = get_configuration['metadata']
     agent_version = metadata['agent_version']
@@ -177,9 +201,40 @@ def download_wpk(get_configuration):
     metadata['filepath'] = wpk_file_path
     metadata['sha1'] = sha1hash
 
+@pytest.fixture(scope="function")
+def prepare_agent_version(get_configuration):
+    metadata = get_configuration['metadata']
+    config_file_path = os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')
+    config = ConfigObj(config_file_path)
 
-def test_wpk_agent(get_configuration, download_wpk, configure_environment, start_agent):
-    expected = get_configuration['metadata']['results']
+    if config['VERSION'] != metadata["initial_version"]:
+        # We should change initial version to match expected
+        backup_file_start = f'backup_{metadata["initial_version"]}_[{datetime.strftime(datetime.now(), "%m-%d-%Y")}'
+        backups_files = [x for x in sorted(os.listdir(os.path.join(WAZUH_PATH, 'backup'))) if backup_file_start in x]
+
+        if len(backups_files) > 0:
+            subprocess.call(['tar', 'xzf', f'{WAZUH_PATH}/backup/{backups_files[-1]}', '-C', '/'])
+        else: 
+            raise Exception('Expected initial version for test does not match current agent version and there is no backup available to restore it')
+    
+    yield
+
+    
+    backup_file_start = f'backup_{metadata["initial_version"]}_[{datetime.strftime(datetime.now(), "%m-%d-%Y")}'
+    backups_files = [x for x in sorted(os.listdir(os.path.join(WAZUH_PATH, 'backup'))) if backup_file_start in x]
+
+    subprocess.call(['tar', 'xzf', f'{WAZUH_PATH}/backup/{backups_files[-1]}', '-C', '/'])
+    # tar xzf ${DIRECTORY}/backup/backup_${VERSION}_[${BDATE}].tar.gz
+
+def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk, configure_environment, start_agent):
+    metadata = get_configuration['metadata']
+    expected = metadata['results']
+    
+    # Extract initial Wazuh Agent version
+    config_file_path = os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')
+    config = ConfigObj(config_file_path)
+    assert config['VERSION'] == metadata["initial_version"], 'Initial version does not match Expected for agent'
+
     upgrade_process_result, upgrade_exec_message = remoted_simulator.wait_upgrade_process(timeout=180)
     assert upgrade_process_result == expected['upgrade_ok'], 'Upgrade process result was not the expected'
     if upgrade_process_result:
@@ -195,3 +250,10 @@ def test_wpk_agent(get_configuration, download_wpk, configure_environment, start
             assert status == expected['status'], 'Notification status did not match expected'
         else:
             assert expected['receive_notification'] == False, 'Notification was expected but was not received'
+
+    config = ConfigObj(config_file_path)
+    
+    if expected['upgrade_ok'] and not metadata['simulate_rollback']:
+        assert config['VERSION'] == metadata['agent_version'], 'End version does not match expected!'
+    else: 
+        assert config['VERSION'] == metadata['initial_version'], 'End version does not match expected!'
