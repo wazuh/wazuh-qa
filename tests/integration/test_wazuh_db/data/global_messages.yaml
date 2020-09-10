@@ -1,7 +1,7 @@
 ---
 -
-  name: "Basics success"
-  description: "Check success use cases for each global command"
+  name: "Basics Insert"
+  description: "Check success use cases for insert commands on global DB"
   test_case:
   -
     input: 'global delete-group TestGroup1'
@@ -41,12 +41,32 @@
     stage: "global insert-agent success"
   -
     input: 'global get-agent-info 1'
-    output: 'ok [{"id":1,"name":"TestName1","ip":"0.0.0.1","register_ip":"0.0.0.1","internal_key":"TopSecret","node_name":"unknown","date_add":1599223378,"status":"empty","fim_offset":0,"reg_offset":0,"group":"TestGroup1","sync_status":1}]'
+    output: 'ok [{"id":1,"name":"TestName1","ip":"0.0.0.1","register_ip":"0.0.0.1","internal_key":"TopSecret","node_name":"unknown","date_add":1599223378,"status":"empty","fim_offset":0,"reg_offset":0,"group":"TestGroup1","sync_status":0}]'
     stage: "global get-agent-info after insert"
   -
     input: 'global find-agent {"name":"TestName1","ip":"0.0.0.1"}'
     output: 'ok [{"id":1}]'
-    stage: "global find-agent success"
+    stage: "global find-agent success"   
+  -  
+    input: 'global delete-agent 2'
+    output: "ok"
+    stage: "global delete-agent previous insert"
+  -
+    input: 'global insert-agent {"id":2,"name":"TestName2","date_add":1599223378}'
+    output: "ok"
+    stage: "global insert-agent minimal fields success"
+  -
+    input: 'global get-agent-info 2'
+    output: 'ok [{"id":2,"name":"TestName2","node_name":"unknown","date_add":1599223378,"status":"empty","fim_offset":0,"reg_offset":0,"sync_status":0}]'
+    stage: "global get-agent-info after minimal fields insert"
+  -  
+    input: 'global delete-agent 2'
+    output: "ok"
+    stage: "global delete-agent after insert"
+-
+  name: "Basics Update"
+  description: "Check success use cases for update commands on global DB"
+  test_case:
   -
     input: 'global update-agent-name {"id":1,"name":"TestName2"}'
     output: "ok"
@@ -77,16 +97,25 @@
     stage: "global update-keepalive success"
   -
     input: 'global get-agent-info 1'
-    output: 'ok [{"id":1,"name":"TestName1","ip":"0.0.0.1","register_ip":"0.0.0.1","internal_key":"TopSecret","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","version":"TestOsVersion","config_sum":"TestConfigSum","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","date_add":1599223378,"status":"updated","fim_offset":100,"reg_offset":100,"group":"TestGroup","sync_status":1}]'
+    output: 'ok [{"id":1,"name":"TestName2","ip":"0.0.0.1","register_ip":"0.0.0.1","internal_key":"TopSecret","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","version":"TestOsVersion","config_sum":"TestConfigSum","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","date_add":1599223378,"last_keepalive":*,"status":"updated","fim_offset":100,"reg_offset":100,"group":"TestGroup2","sync_status":1}]'
     stage: "global get-agent-info success after updates"
+    use_regex: "yes"
+-
+  name: "Basics labels"
+  description: "Check success use cases for labels table commands on global DB"
+  test_case:
   -
     input: 'global set-labels 1 TestKey:TestLabel'
     output: 'ok'
-    stage: "global get-agent-info success after updates"
+    stage: "global set-labels success"
   -
     input: 'global get-labels 1'
     output: 'ok [{"id":1,"key":"#\"_agent_ip\"","value":"0.0.0.1"},{"id":1,"key":"#\"_manager_hostname\"","value":"TestManagerHost"},{"id":1,"key":"#\"_node_name\"","value":"TestNodeName"},{"id":1,"key":"TestKey","value":"TestLabel"}]'
-    stage: "global get-agent-info success after updates"
+    stage: "global get-labels success"
+-
+  name: "Basics Select"
+  description: "Check success use cases for select commands on global DB"
+  test_case:
   -
     input: 'global select-agent-name 1'
     output: 'ok [{"name":"TestName2"}]'
@@ -108,7 +137,7 @@
     output: 'ok [{"reg_offset":100}]'
     stage: "global select-reg-offset success"
   -
-    input: 'global select-keepalive TestName1 0.0.0.1'
+    input: 'global select-keepalive TestName2 0.0.0.1'
     output: 'ok [{"last_keepalive":*}]'
     stage: "global select-keepalive success"
     use_regex: "yes" 
@@ -116,11 +145,18 @@
     input: 'global select-groups'
     output: 'ok [{"name":"default"},{"name":"TestGroup1"}]'
     stage: "global select-groups success"
-
+-
+  name: "Basics get-all-agents"
+  description: "Check success use cases for get-all-agents command on global DB. Chunks command"
+  test_case:
   -
     input: 'global get-all-agents start_id -1'
     output: 'ok 0,1'
     stage: "global get-all-agents success"
+-
+  name: "Basics get-agents-by-keepalive"
+  description: "Check success use cases for get-agents-by-keepalive command on global DB. Chunks command"
+  test_case:
   -
     input: 'global get-agents-by-keepalive condition > 100 start_id 0'
     output: 'ok 1'
@@ -129,23 +165,60 @@
     input: 'global get-agents-by-keepalive condition < 100 start_id 0'
     output: 'ok '
     stage: "global get-agents-by-keepalive success"
-
+-
+  name: "Basics sync-agent-info-get"
+  description: "Check success use cases for sync-agent-info-get command on global DB. Chunks command"
+  test_case:
   -
     input: 'global sync-agent-info-get start_id 0'
-    output: 'ok [{"id":1,"name":"TestName1","ip":"0.0.0.1","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","config_sum":"TestOsVersion","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","last_keepalive":*,"labels":[{"id":1,"key":"#\\"_agent_ip\\"","value":"0.0.0.1"},{"id":1,"key":"#\\"_manager_hostname\\"","value":"TestManagerHost"},{"id":1,"key":"#\\"_node_name\\"","value":"TestNodeName"},{"id":1,"key":"TestKey","value":"TestLabel"}]}]'
-    stage: "global sync-agent-info-get"
+    output: 'ok [{"id":1,"name":"TestName2","ip":"0.0.0.1","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","config_sum":"TestOsVersion","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","last_keepalive":*,"labels":[{"id":1,"key":"#\\"_agent_ip\\"","value":"0.0.0.1"},{"id":1,"key":"#\\"_manager_hostname\\"","value":"TestManagerHost"},{"id":1,"key":"#\\"_node_name\\"","value":"TestNodeName"},{"id":1,"key":"TestKey","value":"TestLabel"}]}]'
+    stage: "global sync-agent-info-get success"
     use_regex: 'yes'
+  -
+    input: 'global sync-agent-info-get start_id 0'
+    output: 'ok []'
+    stage: "global sync-agent-info-get after first get success"
+  -
+    input: 'global update-keepalive {"id":1,"sync_status":1}'
+    output: "ok"
+    stage: "global update-keepalive success"
   -
     input: 'global sync-agent-info-get'
-    output: 'ok [{"id":1,"name":"TestName1","ip":"0.0.0.1","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","config_sum":"TestOsVersion","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","last_keepalive":*,"labels":[{"id":1,"key":"#\\"_agent_ip\\"","value":"0.0.0.1"},{"id":1,"key":"#\\"_manager_hostname\\"","value":"TestManagerHost"},{"id":1,"key":"#\\"_node_name\\"","value":"TestNodeName"},{"id":1,"key":"TestKey","value":"TestLabel"}]}]'
-    stage: "global sync-agent-info-get"
+    output: 'ok [{"id":1,"name":"TestName2","ip":"0.0.0.1","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","config_sum":"TestOsVersion","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","last_keepalive":*,"labels":[{"id":1,"key":"#\\"_agent_ip\\"","value":"0.0.0.1"},{"id":1,"key":"#\\"_manager_hostname\\"","value":"TestManagerHost"},{"id":1,"key":"#\\"_node_name\\"","value":"TestNodeName"},{"id":1,"key":"TestKey","value":"TestLabel"}]}]'
+    stage: "global sync-agent-info-get no arg success"
     use_regex: 'yes'
+-
+  name: "Basics sync-agent-info-set"
+  description: "Check success use cases for sync-agent-info-get command on global DB."
+  test_case:
   -
-    input: 'global sync-agent-info-set'
+    input: 'global sync-agent-info-set [{"id":3,"name":"TestName3","ip":"0.0.0.3","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","config_sum":"TestOsVersion","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","last_keepalive":200}]'
     output: 'ok'
-    stage: "global sync-agent-info-set"
-    
-
+    stage: "global sync-agent-info-set non-existent agent"
+  -
+    input: 'global get-agent-info 3'
+    output: 'ok []'
+    stage: "global get-agent-info success after non-existent sync-agent-info-set"
+  -  
+    input: 'global delete-agent 3'
+    output: "ok"
+    stage: "global delete-agent previous insert"
+  -
+    input: 'global insert-agent {"id":3,"name":"TestName3","ip":"0.0.0.3","register_ip":"0.0.0.3","internal_key":"TopSecret","date_add":1599223378}'
+    output: "ok"
+    stage: "global insert-agent success"
+  -
+    input: 'global sync-agent-info-set [{"id":3,"name":"TestName3","ip":"0.0.0.3","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","config_sum":"TestOsVersion","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","last_keepalive":200}]'
+    output: 'ok'
+    stage: "global sync-agent-info-set success"
+  -
+    input: 'global get-agent-info 3'
+    output: 'ok [{"id":3,"name":"TestName3","ip":"0.0.0.3","register_ip":"0.0.0.3","internal_key":"TopSecret","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","config_sum":"TestOsVersion","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","date_add":1599223378,"last_keepalive":200,"status":"empty","fim_offset":0,"reg_offset":0,"sync_status":0}]'
+    stage: "global get-agent-info success after sync-agent-info-set success"
+-
+  name: "Basics Belongs"
+  description: "Check success use cases for belongs table commands on global DB"
+  test_case:  
   -
     input: 'global insert-agent-belong {"id_group":1,"id_agent":1}'
     output: 'ok'
@@ -158,6 +231,10 @@
     input: 'global insert-agent-belong {"id_group":1,"id_agent":1}'
     output: 'ok'
     stage: "global insert-agent-belong success"
+-
+  name: "Basics Delete"
+  description: "Check success use cases for delete commands on global DB."
+  test_case:
   -
     input: 'global delete-group-belong TestGroup1'
     output: 'ok'
@@ -168,5 +245,9 @@
     stage: "global delete-group after insert"   
   -
     input: 'global delete-agent 1'
+    output: "ok"
+    stage: "global delete-agent after insert"
+  -
+    input: 'global delete-agent 3'
     output: "ok"
     stage: "global delete-agent after insert"
