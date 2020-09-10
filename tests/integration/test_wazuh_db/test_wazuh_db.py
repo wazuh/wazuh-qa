@@ -163,7 +163,7 @@ def test_wazuh_db_chunks(configure_mitm_environment, connect_to_sockets_module):
     insert_agents(AGENTS_OFFSET, AGENTS_CANT)
    
     #Check get-all-agents chunk limit
-    command = f'global get-all-agents start_id 0'
+    command = f'global get-all-agents last_id 0'
     receiver_sockets[0].send(command, size=True)
     response = monitored_sockets[0].start(timeout=global_parameters.default_timeout,
                                           callback=callback_wazuhdb_response).result()
@@ -173,7 +173,7 @@ def test_wazuh_db_chunks(configure_mitm_environment, connect_to_sockets_module):
            .format('due', status)
     
     #Check get-agents-by-keepalive chunk limit
-    command = f'global get-agents-by-keepalive condition > -1 start_id 0'
+    command = f'global get-agents-by-keepalive condition > -1 last_id 0'
     receiver_sockets[0].send(command, size=True)
     response = monitored_sockets[0].start(timeout=global_parameters.default_timeout,
                                           callback=callback_wazuhdb_response).result()
@@ -184,7 +184,7 @@ def test_wazuh_db_chunks(configure_mitm_environment, connect_to_sockets_module):
 
     
     #Check sync-agent-info-get chunk limit
-    command = f'global sync-agent-info-get start_id 0'
+    command = f'global sync-agent-info-get last_id 0'
     receiver_sockets[0].send(command, size=True)
     response = monitored_sockets[0].start(timeout=global_parameters.default_timeout,
                                           callback=callback_wazuhdb_response).result()
