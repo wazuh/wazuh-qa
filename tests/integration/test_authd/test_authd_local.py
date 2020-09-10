@@ -82,7 +82,7 @@ def clean_client_keys_file():
 
 def test_ossec_auth_messages(clean_client_keys_file, get_configuration, set_up_groups, configure_environment,
                              configure_mitm_environment, connect_to_sockets_module, wait_for_agentd_startup):
-    """Check that every input message in authd port generate the adequate output
+    """Check that every input message in authd port generates the adequate output
 
     Parameters
     ----------

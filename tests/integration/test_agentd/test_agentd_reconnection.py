@@ -374,7 +374,7 @@ def test_agentd_initial_enrollment_retries(configure_authd_server, stop_authd, s
 
 """
 This test covers and check the scenario of Agent starting with keys but Remoted is not reachable during some seconds 
-and multiple connection retries are required previous requesting a new enrollment
+and multiple connection retries are required prior to requesting a new enrollment
 """
 def test_agentd_connection_retries_pre_enrollment(configure_authd_server, stop_authd, set_keys, configure_environment,
                                                   get_configuration):
