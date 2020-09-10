@@ -19,7 +19,6 @@ from wazuh_testing.tools.services import control_service
 
 pytestmark = pytest.mark.server
 
-
 # Configurations
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -72,16 +71,18 @@ def test_add_agent(tags_to_apply, get_configuration, configure_api_environment,
     data = {'name': token_hex(16),
             'ip': IPv4Address(getrandbits(32)).compressed}
 
+    if use_only_authd:
+        control_service('stop', daemon='ossec-authd')
     # Add agent POST request
     post_response = requests.post(api_details['base_url'], json=data, headers=api_details['auth_headers'], verify=False)
 
     # Assert if an error code was returned when ossec-authd is disabled and use_only_authd enabled.
     if use_only_authd:
         assert post_response.status_code == 500, 'Expected status code was 500, ' \
-            f'but {post_response.status_code} was returned. \nFull response: {post_response.text}'
+                                                 f'but {post_response.status_code} was returned. \nFull response: {post_response.text}'
     else:
         assert post_response.status_code == 200, 'Expected status code was 200, ' \
-            f'but {post_response.status_code} was returned. \nFull response: {post_response.text}'
+                                                 f'but {post_response.status_code} was returned. \nFull response: {post_response.text}'
 
         # Delete the agent created
         agent_id = post_response.json()['data']['id']
@@ -123,10 +124,10 @@ def test_insert_agent(tags_to_apply, get_configuration, configure_api_environmen
     # Assert if an error code was returned when ossec-authd is disabled and use_only_authd enabled.
     if use_only_authd:
         assert post_response.status_code == 500, 'Expected status code was 500, ' \
-            f'but {post_response.status_code} was returned. \nFull response: {post_response.text}'
+                                                 f'but {post_response.status_code} was returned. \nFull response: {post_response.text}'
     else:
         assert post_response.status_code == 200, 'Expected status code was 200, ' \
-            f'but {post_response.status_code} was returned. \nFull response: {post_response.text}'
+                                                 f'but {post_response.status_code} was returned. \nFull response: {post_response.text}'
 
         # Delete the agent
         agent_id = post_response.json()['data']['id']
@@ -164,10 +165,10 @@ def test_insert_quick_agent(tags_to_apply, get_configuration, configure_api_envi
     # Assert if an error code was returned when ossec-authd is disabled and use_only_authd enabled.
     if use_only_authd:
         assert post_response.status_code == 500, 'Expected status code was 500, ' \
-            f'but {post_response.status_code} was returned. \nFull response: {post_response.text}'
+                                                 f'but {post_response.status_code} was returned. \nFull response: {post_response.text}'
     else:
         assert post_response.status_code == 200, 'Expected status code was 200, ' \
-            f'but {post_response.status_code} was returned. \nFull response: {post_response.text}'
+                                                 f'but {post_response.status_code} was returned. \nFull response: {post_response.text}'
 
         # Delete the agent
         agent_id = post_response.json()['data']['id']
@@ -223,7 +224,7 @@ def test_delete_agent(tags_to_apply, get_configuration, configure_api_environmen
                                                                      f'Full response: {delete_response}'
     else:
         assert delete_response['data']['failed_items'][0]['error']['code'] == 1726, 'Expected error code was 1726.' \
-                                                                                  f'Full response: {delete_response}'
+                                                                                    f'Full response: {delete_response}'
         # Delete created agent
         control_service('start', daemon='ossec-authd')
         time.sleep(1)
