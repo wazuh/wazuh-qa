@@ -10,6 +10,8 @@ import subprocess
 import struct
 import threading
 import time
+import hashlib
+import requests
 
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -30,6 +32,9 @@ WPK_REPOSITORY_3x = 'packages.wazuh.com/wpk/'
 CRYPTO = "aes"
 CHUNK_SIZE = 16384
 TASK_TIMEOUT = '15m'
+global file_name, installer
+file_name = ''
+installer = ''
 
 cases = [
     # 1. Single Agent - success
@@ -41,11 +46,12 @@ cases = [
             'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
             'disconnect' : [False],
-            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'sha_list' : ['VALIDSHA1'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
@@ -62,11 +68,12 @@ cases = [
             'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
             'disconnect' : [False],
-            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'sha_list' : ['VALIDSHA1'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [2],
             'status': ['Failed'],
@@ -84,6 +91,7 @@ cases = [
             'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
@@ -106,39 +114,18 @@ cases = [
             'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
             'agents_number': 3,
             'protocol': 'tcp',
             'agents_os': ['debian7', 'ubuntu12.04', 'debian10'],
             'disconnect' : [False, False, False],
-            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302', 'INVALIDSHA', '739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'sha_list' : ['VALIDSHA1', 'INVALIDSHA', 'VALIDSHA1'],
             'upgrade_exec_result' : ['0', '0', '0'],
             'upgrade_script_result' : [0, 0, 2],
             'status': ['Done', 'Failed', 'Failed'],
             'error_msg' : ['','Send verify sha1 error.','Upgrade procedure exited with error code.'],
             'upgrade_notification': [True, False, True],
             'expected_response' : 'Success'
-        }
-    },
-    # 5. Upgrading an agent to a version higher than the manager - Fail
-    {
-        'params': {
-            'PROTOCOL': 'tcp',
-            'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
-            'CHUNK_SIZE' : CHUNK_SIZE,
-            'TASK_TIMEOUT' : TASK_TIMEOUT
-        },
-        'metadata' : {
-            'agents_number': 1,
-            'protocol': 'tcp',
-            'agents_os': ['debian7'],
-            'disconnect' : [False],
-            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
-            'upgrade_exec_result' : ['0'],
-            'upgrade_script_result' : [0],
-            'status': ['Done'],
-            'upgrade_notification': [False],
-            'message_params': {'version' : 'v4.1.0', 'force_upgrade': 0 },
-            'expected_response' : 'Upgrading an agent to a version higher than the manager requires the force flag.'
         }
     },
     # 6. Current agent version is greater or equal - Fail
@@ -150,11 +137,12 @@ cases = [
             'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
             'disconnect' : [False],
-            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'sha_list' : ['NOT_NEED'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
@@ -172,16 +160,17 @@ cases = [
             'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
             'disconnect' : [False],
-            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'sha_list' : ['NOT_NEED'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
-            'upgrade_notification': [True],
-            'message_params': {'version' : 'v4.1.0', 'force_upgrade': 0 },
+            'upgrade_notification': [False],
+            'message_params': {'version' : 'v4.55.55', 'force_upgrade': 0 },
             'expected_response' : 'The version of the WPK does not exist in the repository.'
         }
     },
@@ -194,15 +183,16 @@ cases = [
             'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
             'disconnect' : [False],
-            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'sha_list' : ['NOT_NEED'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
-            'upgrade_notification': [True],
+            'upgrade_notification': [False],
             'message_params': {'version' : 'v4.1.0', 'force_upgrade': 0 },
             'expected_response' : 'The repository is not reachable.'
         }
@@ -216,15 +206,16 @@ cases = [
             'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['mojave'],
             'disconnect' : [False],
-            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'sha_list' : ['NOT_NEED'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
-            'upgrade_notification': [True],
+            'upgrade_notification': [False],
             'expected_response' : 'The WPK for this platform is not available.'
         }
     },
@@ -237,15 +228,16 @@ cases = [
             'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian8'],
             'disconnect' : [False],
-            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'sha_list' : ['NOT_NEED'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
-            'upgrade_notification': [True],
+            'upgrade_notification': [False],
             'expected_response' : 'Current agent version is greater or equal.'
         }
     },
@@ -258,11 +250,12 @@ cases = [
             'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian8'],
             'disconnect' : [False],
-            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'sha_list' : ['VALIDSHA1'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
@@ -280,15 +273,16 @@ cases = [
             'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian8'], #debian8 have v4.0.0 agent version
             'disconnect' : [False],
-            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'sha_list' : ['NOT_NEED'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
-            'upgrade_notification': [True],
+            'upgrade_notification': [False],
             'message_params': {'force_upgrade': 0 },
             'expected_response' : 'Current agent version is greater or equal.'
         }
@@ -302,41 +296,18 @@ cases = [
             'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_3x,
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
             'disconnect' : [False],
-            'sha_list' : ['af4d150d58500f79ccb71012057f3ad796017a68'],
+            'sha_list' : ['VALIDSHA1'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Legacy'],
             'upgrade_notification': [False],
             'message_params': {'version' : 'v3.13.1'},
             'expected_response' : 'Success'
-        }
-    },
-    # 13. Custom - File not found
-    {
-        'params': {
-            'PROTOCOL': 'tcp',
-            'WPK_REPOSITORY' : WPK_REPOSITORY_3x,
-            'CHUNK_SIZE' : CHUNK_SIZE,
-            'TASK_TIMEOUT' : TASK_TIMEOUT
-        },
-        'metadata' : {
-            'agents_number': 1,
-            'protocol': 'tcp',
-            'agents_os': ['debian7'],
-            'disconnect' : [False],
-            'sha_list' : ['af4d150d58500f79ccb71012057f3ad796017a68'],
-            'upgrade_exec_result' : ['0'],
-            'upgrade_script_result' : [0],
-            'status': ['Failed'],
-            'upgrade_notification': [False],
-            'message_params': {'file_path' : 'invalid/path/to.wpk'},
-            'error_msg' : ['The WPK file does not exist.'],
-            'expected_response' : 'Success',
-            'command' : 'upgrade_custom'
         }
     },
     # 14. Upgrade an agent that is begin upgraded - Fail
@@ -348,11 +319,12 @@ cases = [
             'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
             'disconnect' : [False],
             'agents_os': ['debian7'],
-            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'sha_list' : ['VALIDSHA1'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
@@ -370,11 +342,12 @@ cases = [
             'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
             'disconnect' : [False],
-            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'sha_list' : ['VALIDSHA1'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
@@ -393,14 +366,15 @@ cases = [
             'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
             'disconnect' : [False],
-            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'sha_list' : ['VALIDSHA1'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
-            'status': ['Done'],
+            'status': ['In progress'],
             'upgrade_notification': [True],
             'checks' : ['use_http', 'version'],
             'expected_response' : 'Success'
@@ -415,21 +389,22 @@ cases = [
             'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
             'disconnect' : [False],
-            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'sha_list' : ['VALIDSHA1'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
-            'status': ['Done'],
+            'status': ['In progress'],
             'message_params': {'use_http' : 1},
             'upgrade_notification': [True],
             'checks' : ['use_http', 'version'],
             'expected_response' : 'Success'
         }
     },
-    # 18. Upgrade an agent that is timeouted - Success
+    # 18. Upgrade an agent that previus task is timeouted - Success
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -438,11 +413,12 @@ cases = [
             'TASK_TIMEOUT' : '1m'
         },
         'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
             'disconnect' : [False],
-            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'sha_list' : ['VALIDSHA1'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['In progress'],
@@ -460,11 +436,12 @@ cases = [
             'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
             'disconnect' : [True],
             'agents_os': ['debian7'],
-            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'sha_list' : ['VALIDSHA1'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Failed'],
@@ -482,11 +459,12 @@ cases = [
             'TASK_TIMEOUT' : TASK_TIMEOUT
         },
         'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
             'disconnect' : [False],
-            'sha_list' : ['739ff59a306d8ec3014bc1bcecd01ce78e83e302'],
+            'sha_list' : ['VALIDSHA1'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['Done'],
@@ -495,6 +473,81 @@ cases = [
             'checks' : ['chunk_size'],
             'chunk_size' : 31111,
             'expected_response' : 'Success'
+        }
+    },
+    # 21. Custom 
+    {
+        'params': {
+            'PROTOCOL': 'tcp',
+            'WPK_REPOSITORY' : WPK_REPOSITORY_3x,
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
+        },
+        'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_3x,
+            'agents_number': 1,
+            'protocol': 'tcp',
+            'agents_os': ['debian7'],
+            'disconnect' : [False],
+            'sha_list' : ['NOT_NEED'],
+            'upgrade_exec_result' : ['0'],
+            'upgrade_script_result' : [0],
+            'status': ['In progress'],
+            'upgrade_notification': [False],
+            'message_params': {'file_path' : 'wpk_test.wpk'},
+            'checks' : ['wpk_name'],
+            'expected_response' : 'Success',
+            'command' : 'upgrade_custom'
+        }
+    },
+    # 22. Custom - File not found
+    {
+        'params': {
+            'PROTOCOL': 'tcp',
+            'WPK_REPOSITORY' : WPK_REPOSITORY_3x,
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
+        },
+        'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_3x,
+            'agents_number': 1,
+            'protocol': 'tcp',
+            'agents_os': ['debian7'],
+            'disconnect' : [False],
+            'sha_list' : ['NOT_NEED'],
+            'upgrade_exec_result' : ['0'],
+            'upgrade_script_result' : [0],
+            'status': ['Failed'],
+            'upgrade_notification': [False],
+            'message_params': {'file_path' : 'invalid/path/to.wpk'},
+            'error_msg' : ['The WPK file does not exist.'],
+            'expected_response' : 'Success',
+            'command' : 'upgrade_custom'
+        }
+    },
+    # 23. Custom installer
+    {
+        'params': {
+            'PROTOCOL': 'tcp',
+            'WPK_REPOSITORY' : WPK_REPOSITORY_3x,
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
+        },
+        'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_3x,
+            'agents_number': 1,
+            'protocol': 'tcp',
+            'agents_os': ['debian7'],
+            'disconnect' : [False],
+            'sha_list' : ['NOT_NEED'],
+            'upgrade_exec_result' : ['0'],
+            'upgrade_script_result' : [0],
+            'status': ['In progress'],
+            'upgrade_notification': [False],
+            'message_params': {'file_path' : 'wpk_test.wpk', 'installer' : 'custom_installer.sh'},
+            'error_msg' : ['Not need'],
+            'expected_response' : 'Success',
+            'command' : 'upgrade_custom'
         }
     }
 ]
@@ -543,20 +596,68 @@ def wait_download(line):
         return line
     return None
 
-def wait_chunk_size(line):
-    if ("wm_agent_upgrade_send_command_to_agent(): DEBUG: (8165): Sending message to agent: " in line) and ("com write" in line):
+def wait_wpk_custom(line):
+    global file_name, installer
+    assert file_name == 'wpk_test.wpk','error filename'
+    if ('Sending message to agent:' in line) and (f'com upgrade {file_name} {installer}' in line):
         return line
     return None
+
 
 def remove_wpk_package():
     for file in os.scandir(UPGRADE_PATH):
         if file.name.endswith('.wpk'):
             os.unlink(file.path)
 
-def create_wpk_custom_file(file_name):
-    with open(file_name, 'wb') as f:
+def create_wpk_custom_file(file):
+    with open(file, 'wb') as f:
         f.seek(1024*1024*10)
         f.write(b'\0')
+
+def get_sha_list(metadata):
+    agent_os = metadata['agents_os']
+    protocol = 'https://'
+    wpk_repo = metadata.get('wpk_repository')
+    architecture = 'x86_64'
+
+    if metadata.get('message_params') and metadata.get('message_params').get('version'):
+        agent_version = metadata.get('message_params').get('version')
+    else :
+        agent_version = MANAGER_VERSION
+    
+    if metadata.get('message_params') and metadata.get('message_params').get('use_http'):
+        protocol = 'http://' if metadata.get('message_params').get('use_http') == 1 else 'https://'
+    
+    # Generating file name
+    wpk_file = "wazuh_agent_{0}_linux_{1}.wpk".format(agent_version, architecture)
+    wpk_url = protocol + wpk_repo + "linux/" + architecture + "/" + wpk_file
+
+    wpk_file_path = os.path.join(UPGRADE_PATH, wpk_file)
+    
+    if not os.path.exists(wpk_file_path):
+        try:
+            result = requests.get(wpk_url)
+        except requests.exceptions.RequestException as e:
+            pass
+        
+        if result.ok:
+            with open(wpk_file_path, 'wb') as fd:
+                for chunk in result.iter_content(chunk_size=128):
+                    fd.write(chunk)        
+        else:
+            error = "Can't access to the WPK file in {}".format(wpk_url)
+    
+    # Get SHA1 file sum
+    sha1hash = hashlib.sha1(open(wpk_file_path, 'rb').read()).hexdigest()
+    
+    sha_list = []
+    for sha in metadata['sha_list']:
+        if sha == 'VALIDSHA1':
+            sha_list.append(sha1hash)
+        else:
+            sha_list.append('INVALIDSHA1')
+    
+    return sha_list
 
 
 def test_wpk_manager(get_configuration, configure_environment, restart_service, configure_agents):
@@ -566,9 +667,28 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
     sender = Sender(SERVER_ADDRESS, protocol=protocol)
     log_monitor = FileMonitor(LOG_FILE_PATH)
     expected_error_msg = metadata.get('error_msg')
+    sha_list = metadata.get('sha_list')
+
+    if 'VALIDSHA1' in sha_list:
+        sha_list = get_sha_list(metadata)
+    
+    command = 'upgrade'
+    if metadata.get('command') == 'upgrade_custom':
+        command = 'upgrade_custom'
+        if not expected_error_msg or ('The WPK file does not exist.' not in expected_error_msg):
+            global file_name, installer
+            file_name = metadata.get('message_params').get('file_path')
+            file = os.path.join(UPGRADE_PATH, file_name)
+            create_wpk_custom_file(file)
+            metadata['message_params']['file_path'] = file
+            sha_list = [hashlib.sha1(open(file, 'rb').read()).hexdigest()]
+        if metadata.get('message_params').get('installer'):
+            installer = metadata.get('message_params').get('installer')
+        else:
+            installer = 'upgrade.sh'
 
     for index, agent in enumerate(agents):
-        agent.set_wpk_variables(metadata['sha_list'][index], metadata['upgrade_exec_result'][index], metadata['upgrade_notification'][index], metadata['upgrade_script_result'][index], metadata['disconnect'][index])
+        agent.set_wpk_variables(sha_list[index], metadata['upgrade_exec_result'][index], metadata['upgrade_notification'][index], metadata['upgrade_script_result'][index], metadata['disconnect'][index])
 
         injector = Injector(sender, agent)
         injector.run()
@@ -576,30 +696,33 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
             sender = Sender(manager_address=SERVER_ADDRESS, protocol=protocol)
 
     # Give time for registration key to be avilable and send a few heartbeats
-    time.sleep(30)
-
-    command = ''
-    if metadata.get('command') and metadata.get('command') == 'upgrade_custom':
-        command = 'upgrade_custom'  
+    time.sleep(40)
+    
+    agents_id = []
+    if metadata.get('duplicate') == True:
+        for index, agent in enumerate(agents):
+            agents_id.append(int(agents[0].id))
     else :
-        command = 'upgrade'
+        agents_id = [int(x.id) for x in agents]
     
     data = { 
         'command' : command, 
-        'agents' : [int(x.id) for x in agents] 
+        'agents' : agents_id
     }
 
+    # If have params for test case add to the data to send
     if metadata.get('message_params'):
         data['params'] = metadata.get('message_params')
 
     # remove wpk if need check http or version
     if metadata.get('checks') and ( 'use_http' in metadata.get('checks') or 'version' in metadata.get('checks')):
         remove_wpk_package()
-        
+    
+    # Send upgrade request
     response = send_message(data, UPGRADE_SOCKET)
 
     if metadata.get('checks') and (('use_http' in metadata.get('checks')) or ('version' in metadata.get('checks'))):
-        # Checking version in logs
+        # Checking version or http in logs
         try:
             log_monitor.start(timeout=60, callback=wait_download)
         except TimeoutError as err:
@@ -609,8 +732,6 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
         if 'use_http' in metadata.get('checks'):
             if metadata.get('message_params') and metadata.get('message_params').get('use_http') and metadata.get('message_params').get('use_http') == 1:
                 assert "'http://" in last_log, "Use http protocol did not match expected! Expected 'http://'"
-            elif metadata.get('message_params') and metadata.get('message_params').get('use_http') and metadata.get('message_params').get('use_http') == 0:
-                assert "'https://" in last_log, "Use http protocol did not match expected! Expected 'https://'"
             else:
                 assert "'https://" in last_log, "Use http protocol did not match expected! Expected 'https://'"
         
@@ -631,6 +752,16 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
             
         last_log = log_monitor.result()
         assert f'com write {metadata.get("chunk_size")}' in last_log, f'Chunk size did not match expected! Expected {metadata.get("chunk_size")} obtained {last_log}'
+    
+    if metadata.get('checks') and ('wpk_name' in metadata.get('checks')):
+        # Checking version in logs
+        try:
+            log_monitor.start(timeout=120, callback=wait_wpk_custom)
+        except TimeoutError as err:
+            raise AssertionError("Custom wpk log tooks too much!")
+            
+        last_log = log_monitor.result()
+        assert f'com upgrade {file_name} {installer}' in last_log, f'Wpk custom package did not match expected! Expected {metadata.get("message_params").get("file_path")} obtained {last_log}'
     
     if metadata.get('first_attempt'):
         #Chech that result of first attempt is Success
@@ -669,7 +800,7 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
                 "command" : 'task_result', 
                 "task_id" : task_id 
             }]
-            time.sleep(10)
+            time.sleep(30)
             response = send_message(data, TASK_SOCKET)
             retries = 0
             while (response[0]['status'] == 'In progress') and (retries < 10) and (response[0]['status'] != expected_status[index]):
