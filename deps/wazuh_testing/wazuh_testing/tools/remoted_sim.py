@@ -11,6 +11,7 @@ from Crypto.Cipher import AES, Blowfish
 from Crypto.Util.Padding import pad, unpad
 from struct import pack
 
+
 class Cipher:
     def __init__(self,data,key):
         self.block_size = 16
@@ -42,9 +43,10 @@ class Cipher:
         dcrp = cipher.decrypt(self.data)
         return (dcrp)
 
+
 class RemotedSimulator:
     """
-    Create an AF_INET server sockets for simulating remoted connection
+    Create an AF_INET server socket for simulating remoted connection
     """
     def __init__(self, server_address='127.0.0.1', remoted_port=1514, protocol='udp', mode='REJECT',
                  client_keys=WAZUH_PATH+'/etc/client.keys'):  
