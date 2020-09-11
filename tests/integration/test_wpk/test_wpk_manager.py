@@ -36,6 +36,19 @@ global file_name, installer
 file_name = ''
 installer = ''
 
+def set_debug_mode():
+    local_int_conf_path=os.path.join(WAZUH_PATH,'etc', 'local_internal_options.conf')
+    debug_line = 'wazuh_modules.debug=2\n'
+    with  open(local_int_conf_path, 'r') as local_file_read:
+        lines = local_file_read.readlines()
+        for line in lines:
+            if line == debug_line:
+                return
+    with  open(local_int_conf_path, 'a') as local_file_write:
+        local_file_write.write('\n'+debug_line)
+
+set_debug_mode()
+
 cases = [
     # 1. Single Agent - success
     {
@@ -347,10 +360,10 @@ cases = [
             'protocol': 'tcp',
             'agents_os': ['debian7'],
             'disconnect' : [False],
-            'sha_list' : ['VALIDSHA1'],
+            'sha_list' : ['NOT_NEED'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
-            'status': ['Done'],
+            'status': ['In progress'],
             'upgrade_notification': [True],
             'message_params': {'use_http' : 1},
             'checks' : ['use_http', 'version'],
@@ -371,7 +384,7 @@ cases = [
             'protocol': 'tcp',
             'agents_os': ['debian7'],
             'disconnect' : [False],
-            'sha_list' : ['VALIDSHA1'],
+            'sha_list' : ['NOT_NEED'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['In progress'],
@@ -394,7 +407,7 @@ cases = [
             'protocol': 'tcp',
             'agents_os': ['debian7'],
             'disconnect' : [False],
-            'sha_list' : ['VALIDSHA1'],
+            'sha_list' : ['NOT_NEED'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
             'status': ['In progress'],
@@ -467,8 +480,7 @@ cases = [
             'sha_list' : ['VALIDSHA1'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
-            'status': ['Done'],
-            'message_params': {'use_http' : 1},
+            'status': ['In progress'],
             'upgrade_notification': [True],
             'checks' : ['chunk_size'],
             'chunk_size' : 31111,
@@ -546,6 +558,7 @@ cases = [
             'upgrade_notification': [False],
             'message_params': {'file_path' : 'wpk_test.wpk', 'installer' : 'custom_installer.sh'},
             'error_msg' : ['Not need'],
+            'checks' : ['wpk_name'],
             'expected_response' : 'Success',
             'command' : 'upgrade_custom'
         }
@@ -559,8 +572,6 @@ metadata = [ case['metadata'] for case in cases ]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_manager_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
-
-#configurations = configurations[2:]
 
 # List where the agents objects will be stored
 agents = []
@@ -592,7 +603,12 @@ def clean_logs():
 
 
 def wait_download(line):
-    if "DEBUG: Downloading " in line:
+    if "Downloading WPK file from: " in line:
+        return line
+    return None
+
+def wait_chunk_size(line):
+    if ("Sending message to agent: " in line) and ("com write" in line):
         return line
     return None
 
@@ -611,7 +627,7 @@ def remove_wpk_package():
 
 def create_wpk_custom_file(file):
     with open(file, 'wb') as f:
-        f.seek(1024*1024*10)
+        f.seek(1024*128)
         f.write(b'\0')
 
 def get_sha_list(metadata):
@@ -698,12 +714,7 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
     # Give time for registration key to be avilable and send a few heartbeats
     time.sleep(40)
     
-    agents_id = []
-    if metadata.get('duplicate') == True:
-        for index, agent in enumerate(agents):
-            agents_id.append(int(agents[0].id))
-    else :
-        agents_id = [int(x.id) for x in agents]
+    agents_id = [int(x.id) for x in agents]
     
     data = { 
         'command' : command, 
