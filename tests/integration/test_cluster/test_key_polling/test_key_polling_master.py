@@ -85,6 +85,7 @@ def test_key_polling_master(cmd, counter, payload, expected, configure_environme
     expected : str
         Expected message in krequest socket
     """
+    pytest.xfail("Development in progress: https://github.com/wazuh/wazuh/issues/4387")
     # Build message and send it to the master
     message = cluster_msg_build(cmd=cmd, counter=counter, payload=payload, encrypt=True)
     receiver_sockets[0].send(message)
