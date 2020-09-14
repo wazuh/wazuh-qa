@@ -30,7 +30,7 @@ wazuh-worker1:
 
 
 wazuh-agent1:
-  - regex: ".*Requesting a key to server:.*"
+  - regex: ".*Requesting a key from server:.*"
     path: "/var/ossec/logs/ossec.log"
     timeout: 60
   - regex: ".*Registering agent to unverified manager"
@@ -39,12 +39,12 @@ wazuh-agent1:
   - regex: ".*Using agent name as:*"
     path: "/var/ossec/logs/ossec.log"
     timeout: 60
-  - regex: ".*Waiting for manager reply"
+  - regex: ".*Waiting for server reply"
     path: "/var/ossec/logs/ossec.log"
     timeout: 60
   - regex: ".*Valid key received"
     path: "/var/ossec/logs/ossec.log"
     timeout: 60
-  - regex: ".*Sleeping .* seconds to allow manager key file updates"
+  - regex: ".*Waiting .* seconds before server connection"
     path: "/var/ossec/logs/ossec.log"
     timeout: 60
