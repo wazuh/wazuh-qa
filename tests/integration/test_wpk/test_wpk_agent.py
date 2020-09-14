@@ -29,10 +29,18 @@ CRYPTO = "aes"
 SERVER_ADDRESS = 'localhost'
 PROTOCOL = "tcp"
 
-metadata = [
+# Test will varying according to agent version. This test should be tried with at least:
+# 1. v3.13.1
+# 2. v4.0.0
+config_file_path = os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')
+_config = ConfigObj(config_file_path)
+_agent_version = _config['VERSION']
+
+test_metadata = [
+    # 1. Upgrade from initial_version to v4.0.0
     {
         'protocol': PROTOCOL,
-        'initial_version': 'v3.13.1',
+        'initial_version': _agent_version,
         'agent_version': 'v4.0.0',
         'use_http': False,
         'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
@@ -46,9 +54,10 @@ metadata = [
             'status': 'Done',   
         }
     },
+    # 2. False upgrade script parameter
     {
         'protocol': PROTOCOL,
-        'initial_version': 'v3.13.1',
+        'initial_version': _agent_version,
         'agent_version': 'v4.0.0',
         'use_http': False,
         'upgrade_script': 'fake_upgrade.sh',
@@ -61,9 +70,10 @@ metadata = [
             'receive_notification': False,
         }
     },
+    # 3. Simulate an interruption
     {
         'protocol': PROTOCOL,
-        'initial_version': 'v3.13.1',
+        'initial_version': _agent_version,
         'agent_version': 'v4.0.0',
         'use_http': False,
         'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
@@ -75,8 +85,12 @@ metadata = [
             'error_message': 'Request confirmation never arrived',
             'receive_notification': False,
         }
-    },
-    {
+    }
+]
+
+if _agent_version == 'v3.13.1':
+    test_metadata += [{
+        # 4. Simulate a rollback (v3.13.1)
         'protocol': PROTOCOL,
         'initial_version': 'v3.13.1',
         'agent_version': 'v4.0.0',
@@ -90,8 +104,10 @@ metadata = [
             'result_code': 0,
             'receive_notification': False,
         }
-    },
-    {
+    }]
+elif _agent_version == 'v4.0.0':
+    test_metadata += [{
+        # 5. Simulate a rollback (v4.0.0)
         'protocol': PROTOCOL,
         'initial_version': 'v4.0.0',
         'agent_version': 'v4.0.0',
@@ -106,8 +122,7 @@ metadata = [
             'receive_notification': True,
             'status': 'Failed',   
         }
-    },
-]
+    }]
 
 params = [
     {
@@ -115,7 +130,7 @@ params = [
         'SERVER_ADDRESS': SERVER_ADDRESS,
         'REMOTED_PORT': 1514,
         'PROTOCOL': PROTOCOL
-    } for x in range(0, len(metadata))
+    } for x in range(0, len(test_metadata))
 ]
 
 def load_tests(path):
@@ -129,7 +144,7 @@ def load_tests(path):
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_agent_conf.yaml')
-configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=test_metadata)
 
 # configurations = configurations[-1:]
 
@@ -204,7 +219,6 @@ def download_wpk(get_configuration):
 @pytest.fixture(scope="function")
 def prepare_agent_version(get_configuration):
     metadata = get_configuration['metadata']
-    config_file_path = os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')
     config = ConfigObj(config_file_path)
 
     if config['VERSION'] != metadata["initial_version"]:
@@ -231,7 +245,6 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk, confi
     expected = metadata['results']
     
     # Extract initial Wazuh Agent version
-    config_file_path = os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')
     config = ConfigObj(config_file_path)
     assert config['VERSION'] == metadata["initial_version"], 'Initial version does not match Expected for agent'
 
