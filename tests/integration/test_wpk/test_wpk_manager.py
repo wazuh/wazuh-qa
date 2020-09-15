@@ -32,9 +32,10 @@ WPK_REPOSITORY_3x = 'packages.wazuh.com/wpk/'
 CRYPTO = "aes"
 CHUNK_SIZE = 16384
 TASK_TIMEOUT = '15m'
-global file_name, installer
+global file_name, installer, valid_sha1_list
 file_name = ''
 installer = ''
+valid_sha1_list = {}
 
 def set_debug_mode():
     local_int_conf_path=os.path.join(WAZUH_PATH,'etc', 'local_internal_options.conf')
@@ -50,7 +51,7 @@ def set_debug_mode():
 set_debug_mode()
 
 cases = [
-    # 1. Single Agent - success
+    # 0. Single Agent - success
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -72,7 +73,7 @@ cases = [
             'expected_response' : 'Success'
         }
     },
-    # 2. Single Agent - faliure
+    # 1. Single Agent - faliure
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -95,7 +96,7 @@ cases = [
             'expected_response' : 'Success'
         }
     },
-    # 3. Single Agent - faliure SHA-1
+    # 2. Single Agent - faliure SHA-1
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -118,7 +119,7 @@ cases = [
             'expected_response' : 'Success'
         }
     },
-    # 4. Multiple Agents
+    # 3. Multiple Agents
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -141,7 +142,7 @@ cases = [
             'expected_response' : 'Success'
         }
     },
-    # 6. Current agent version is greater or equal - Fail
+    # 4. Current agent version is greater or equal - Fail
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -164,7 +165,7 @@ cases = [
             'expected_response' : 'Current agent version is greater or equal.'
         }
     },
-    # 7. The version of the WPK does not exist in the repository - Fail
+    # 5. The version of the WPK does not exist in the repository - Fail
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -187,7 +188,7 @@ cases = [
             'expected_response' : 'The version of the WPK does not exist in the repository.'
         }
     },
-    # 8. The repository is not reachable - Fail
+    # 6. The repository is not reachable - Fail
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -210,7 +211,7 @@ cases = [
             'expected_response' : 'The repository is not reachable.'
         }
     },
-    # 9. The WPK for this platform is not available - Fail
+    # 7. The WPK for this platform is not available - Fail
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -232,7 +233,7 @@ cases = [
             'expected_response' : 'The WPK for this platform is not available.'
         }
     },
-    # 10. Already updated - Current agent version is greater or equal - Fail
+    # 8. Already updated - Current agent version is greater or equal - Fail
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -254,7 +255,7 @@ cases = [
             'expected_response' : 'Current agent version is greater or equal.'
         }
     },
-    # 11. Already updated with force=1 - Success
+    # 9. Already updated with force=1 - Success
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -277,7 +278,7 @@ cases = [
             'expected_response' : 'Success'
         }
     },
-    # 12. Already updated with force=0 - Current agent version is greater or equal - Fail
+    # 10. Already updated with force=0 - Current agent version is greater or equal - Fail
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -300,7 +301,7 @@ cases = [
             'expected_response' : 'Current agent version is greater or equal.'
         }
     },
-    # 13 Upgrade Legacy - Success
+    # 11 Upgrade Legacy - Success
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -323,7 +324,7 @@ cases = [
             'expected_response' : 'Success'
         }
     },
-    # 14. Upgrade an agent that is begin upgraded - Fail
+    # 12. Upgrade an agent that is begin upgraded - Fail
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -346,78 +347,7 @@ cases = [
             'first_attempt' : 'In progress'
         }
     },
-    # 15. Single Agent with use_http = 1 - success
-    {
-        'params': {
-            'PROTOCOL': 'tcp',
-            'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
-            'CHUNK_SIZE' : CHUNK_SIZE,
-            'TASK_TIMEOUT' : TASK_TIMEOUT
-        },
-        'metadata' : {
-            'wpk_repository' : WPK_REPOSITORY_4x,
-            'agents_number': 1,
-            'protocol': 'tcp',
-            'agents_os': ['debian7'],
-            'disconnect' : [False],
-            'sha_list' : ['NOT_NEED'],
-            'upgrade_exec_result' : ['0'],
-            'upgrade_script_result' : [0],
-            'status': ['In progress'],
-            'upgrade_notification': [True],
-            'message_params': {'use_http' : 1},
-            'checks' : ['use_http', 'version'],
-            'expected_response' : 'Success'
-        }
-    },
-    # 16. Single Agent with use_http = default - success
-    {
-        'params': {
-            'PROTOCOL': 'tcp',
-            'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
-            'CHUNK_SIZE' : CHUNK_SIZE,
-            'TASK_TIMEOUT' : TASK_TIMEOUT
-        },
-        'metadata' : {
-            'wpk_repository' : WPK_REPOSITORY_4x,
-            'agents_number': 1,
-            'protocol': 'tcp',
-            'agents_os': ['debian7'],
-            'disconnect' : [False],
-            'sha_list' : ['NOT_NEED'],
-            'upgrade_exec_result' : ['0'],
-            'upgrade_script_result' : [0],
-            'status': ['In progress'],
-            'upgrade_notification': [True],
-            'checks' : ['use_http', 'version'],
-            'expected_response' : 'Success'
-        }
-    },
-    # 17. Single Agent with use_http = 0 - success
-    {
-        'params': {
-            'PROTOCOL': 'tcp',
-            'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
-            'CHUNK_SIZE' : CHUNK_SIZE,
-            'TASK_TIMEOUT' : TASK_TIMEOUT
-        },
-        'metadata' : {
-            'wpk_repository' : WPK_REPOSITORY_4x,
-            'agents_number': 1,
-            'protocol': 'tcp',
-            'agents_os': ['debian7'],
-            'disconnect' : [False],
-            'sha_list' : ['NOT_NEED'],
-            'upgrade_exec_result' : ['0'],
-            'upgrade_script_result' : [0],
-            'status': ['In progress'],
-            'message_params': {'use_http' : 1},
-            'upgrade_notification': [True],
-            'checks' : ['use_http', 'version'],
-            'expected_response' : 'Success'
-        }
-    },
-    # 18. Upgrade an agent that previus task is timeouted - Success
+    # 13. Upgrade an agent that previus task is timeouted - Success
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -440,7 +370,7 @@ cases = [
             'first_attempt' : 'Timeout'
         }
     },
-    # 19. Disconnect Agent - Fail
+    # 14. Disconnect Agent - Fail
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -463,7 +393,7 @@ cases = [
             'error_msg' : ['Send write file error.'],
         }
     },
-    # 20. Change default chunk_size - success
+    # 15. Change default chunk_size - success
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -487,7 +417,7 @@ cases = [
             'expected_response' : 'Success'
         }
     },
-    # 21. Custom 
+    # 16. Custom 
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -512,7 +442,7 @@ cases = [
             'command' : 'upgrade_custom'
         }
     },
-    # 22. Custom - File not found
+    # 17. Custom - File not found
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -537,7 +467,7 @@ cases = [
             'command' : 'upgrade_custom'
         }
     },
-    # 23. Custom installer
+    # 18. Custom installer
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -561,6 +491,101 @@ cases = [
             'checks' : ['wpk_name'],
             'expected_response' : 'Success',
             'command' : 'upgrade_custom'
+        }
+    },
+    # 19. Single Agent with use_http = 1 - success
+    {
+        'params': {
+            'PROTOCOL': 'tcp',
+            'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
+        },
+        'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
+            'agents_number': 1,
+            'protocol': 'tcp',
+            'agents_os': ['debian7'],
+            'disconnect' : [False],
+            'sha_list' : ['VALIDSHA1'],
+            'upgrade_exec_result' : ['0'],
+            'upgrade_script_result' : [0],
+            'status': ['Done'],
+            'upgrade_notification': [True],
+            'message_params': {'use_http' : 1},
+            'checks' : ['use_http', 'version'],
+            'expected_response' : 'Success'
+        }
+    },
+    # 20. Change default chunk_size - success
+    {
+        'params': {
+            'PROTOCOL': 'tcp',
+            'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
+            'CHUNK_SIZE' : 31111,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
+        },
+        'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
+            'agents_number': 1,
+            'protocol': 'tcp',
+            'agents_os': ['debian7'],
+            'disconnect' : [False],
+            'sha_list' : ['VALIDSHA1'],
+            'upgrade_exec_result' : ['0'],
+            'upgrade_script_result' : [0],
+            'status': ['Done'],
+            'upgrade_notification': [True],
+            'checks' : ['chunk_size'],
+            'chunk_size' : 31111,
+            'expected_response' : 'Success'
+        }
+    },
+    # 21. Single Agent with use_http = default - success
+    {
+        'params': {
+            'PROTOCOL': 'tcp',
+            'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
+        },
+        'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
+            'agents_number': 1,
+            'protocol': 'tcp',
+            'agents_os': ['debian7'],
+            'disconnect' : [False],
+            'sha_list' : ['VALIDSHA1'],
+            'upgrade_exec_result' : ['0'],
+            'upgrade_script_result' : [0],
+            'status': ['Done'],
+            'upgrade_notification': [True],
+            'checks' : ['use_http', 'version'],
+            'expected_response' : 'Success'
+        }
+    },
+    # 22. Single Agent with use_http = 0 - success
+    {
+        'params': {
+            'PROTOCOL': 'tcp',
+            'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
+            'CHUNK_SIZE' : CHUNK_SIZE,
+            'TASK_TIMEOUT' : TASK_TIMEOUT
+        },
+        'metadata' : {
+            'wpk_repository' : WPK_REPOSITORY_4x,
+            'agents_number': 1,
+            'protocol': 'tcp',
+            'agents_os': ['debian7'],
+            'disconnect' : [False],
+            'sha_list' : ['VALIDSHA1'],
+            'upgrade_exec_result' : ['0'],
+            'upgrade_script_result' : [0],
+            'status': ['Done'],
+            'message_params': {'use_http' : 1},
+            'upgrade_notification': [True],
+            'checks' : ['use_http', 'version'],
+            'expected_response' : 'Success'
         }
     }
 ]
@@ -631,6 +656,7 @@ def create_wpk_custom_file(file):
         f.write(b'\0')
 
 def get_sha_list(metadata):
+    global valid_sha1_list
     agent_os = metadata['agents_os']
     protocol = 'https://'
     wpk_repo = metadata.get('wpk_repository')
@@ -650,7 +676,7 @@ def get_sha_list(metadata):
 
     wpk_file_path = os.path.join(UPGRADE_PATH, wpk_file)
     
-    if not os.path.exists(wpk_file_path):
+    if not os.path.exists(wpk_file_path) and (not valid_sha1_list.get(wpk_file)):
         try:
             result = requests.get(wpk_url)
         except requests.exceptions.RequestException as e:
@@ -664,7 +690,11 @@ def get_sha_list(metadata):
             error = "Can't access to the WPK file in {}".format(wpk_url)
     
     # Get SHA1 file sum
-    sha1hash = hashlib.sha1(open(wpk_file_path, 'rb').read()).hexdigest()
+    if valid_sha1_list.get(wpk_file):
+        sha1hash =  valid_sha1_list.get(wpk_file)
+    else:
+        sha1hash = hashlib.sha1(open(wpk_file_path, 'rb').read()).hexdigest()
+        valid_sha1_list[wpk_file] = sha1hash
     
     sha_list = []
     for sha in metadata['sha_list']:
@@ -710,9 +740,6 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
         injector.run()
         if protocol == "tcp":
             sender = Sender(manager_address=SERVER_ADDRESS, protocol=protocol)
-
-    # Give time for registration key to be avilable and send a few heartbeats
-    time.sleep(40)
     
     agents_id = [int(x.id) for x in agents]
     
@@ -729,6 +756,9 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
     if metadata.get('checks') and ( 'use_http' in metadata.get('checks') or 'version' in metadata.get('checks')):
         remove_wpk_package()
     
+    # Give time for registration key to be avilable and send a few heartbeats
+    time.sleep(40)
+
     # Send upgrade request
     response = send_message(data, UPGRADE_SOCKET)
 
