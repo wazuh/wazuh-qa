@@ -9,6 +9,7 @@ import pytest
 import requests
 
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
+from wazuh_testing.tools.services import control_service
 
 # Marks
 
@@ -48,8 +49,6 @@ def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_
         Run test if match with a configuration identifier, skip otherwise.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    host = get_configuration['conf']['host']
-    port = get_configuration['conf']['port']
     block_time = get_configuration['conf']['block_time']
     max_login_attempts = get_configuration['conf']['max_login_attempts']
 
@@ -62,27 +61,30 @@ def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_
     assert put_response.status_code == 200, f'Expected status code was 200, ' \
                                             f'but {put_response.status_code} was returned. \nFull response: {put_response.text}'
 
-    # Provoke a block from an unknown IP (default: 5 tries => ip blocked)
-    api_details = get_api_details(host=host, port=port)
-    api_details['base_url'] += '/security/user/authenticate'
-    for _ in range(max_login_attempts - 2):
-        requests.get(api_details['base_url'], headers=api_details['auth_headers'], verify=False)
+    control_service('restart')
 
-    # Request before blocking time expires. (5th try)
-    get_response = requests.get(api_details['base_url'], headers=api_details['auth_headers'], verify=False)
-    assert get_response.status_code == 403, f'Expected status code was 403, ' \
-                                            f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
+    # Provoke a block from an unknown IP ('max_login_attempts' attempts with incorrect credentials).
+    for _ in range(max_login_attempts):
+        with pytest.raises(Exception):
+            get_api_details(user='wrong', password='wrong')
+
+    # Request with correct credentials before blocking time expires.
+    with pytest.raises(Exception) as login_exc:
+        get_api_details()
+    assert 'Error obtaining login token' in login_exc.value.args[0], f'An error getting the token was expected, but ' \
+                                                                     f'it was not obtained. \nFull response: ' \
+                                                                     f'{login_exc.value}'
 
     # Request after time expires.
     time.sleep(block_time)  # 300 = default blocking time
-    get_response = requests.get(api_details['base_url'], headers=api_details['auth_headers'], verify=False)
 
-    # After blocking time, status code will be 401 again (unauthorized)
-    assert get_response.status_code == 401, f'Expected status code was 401, ' \
-                                            f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
+    try:
+        api_details = get_api_details()
+    except Exception as e:
+        pytest.fail("No exception was expected when obtaining login token after 'block_time' has expired, but"
+                    f"this was returned: {e}")
 
     # DELETE configuration for api.yaml
-    api_details = get_api_details()
     delete_response = requests.delete(api_details['base_url'] + '/manager/api/config', json=data,
                                       headers=api_details['auth_headers'], verify=False)
     assert delete_response.status_code == 200, f'Expected status code was 200, ' \
