@@ -50,7 +50,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 @pytest.mark.parametrize('test_case',
                          [test_case['test_case'] for test_case in test_cases],
                          ids=[test_case['name'] for test_case in test_cases])
-def test_validate_rare_socket_responses(configure_mitm_environment, connect_to_sockets_module,
+def test_validate_rare_socket_responses(configure_sockets_environment, connect_to_sockets_module,
                                         wait_for_analysisd_startup, test_case: list):
     """Validate every response from the analysisd socket to the wazuh-db socket using rare cases with encoded characters.
 

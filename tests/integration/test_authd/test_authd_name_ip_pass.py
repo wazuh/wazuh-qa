@@ -209,7 +209,7 @@ log_monitor = FileMonitor(LOG_FILE_PATH)
 log_monitor.start(timeout=30, callback=callback_agentd_startup)
     
 #@pytest.mark.parametrize('test_case', [case['test_case'] for case in ssl_configuration_tests])
-def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, configure_mitm_environment):
+def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, configure_sockets_environment):
     """Check that every input message in authd port generates the adequate output
 
     Parameters

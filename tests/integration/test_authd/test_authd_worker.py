@@ -95,8 +95,8 @@ def get_configuration(request):
     """Get configurations from the module"""
     yield request.param
 
-def test_ossec_auth_messages( get_configuration, set_up_groups, configure_environment, configure_mitm_environment, 
-                            connect_to_sockets_module, wait_for_agentd_startup):
+def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environment, configure_sockets_environment,
+                             connect_to_sockets_module, wait_for_agentd_startup):
     """Check that every input message in authd port generates the adequate output
 
     Parameters

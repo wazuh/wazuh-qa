@@ -47,7 +47,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 @pytest.mark.parametrize('test_case',
                          [test_case['test_case'] for test_case in test_cases],
                          ids=[test_case['name'] for test_case in test_cases])
-def test_error_messages(configure_mitm_environment, connect_to_sockets_module, wait_for_analysisd_startup,
+def test_error_messages(configure_sockets_environment, connect_to_sockets_module, wait_for_analysisd_startup,
                         test_case: list):
     """Check that every input message in analysisd socket generates the adequate output to wazuh-db socket
 

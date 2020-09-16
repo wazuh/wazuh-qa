@@ -453,7 +453,7 @@ def configure_environment(get_configuration, request):
 
 
 @pytest.fixture(scope='module')
-def configure_mitm_environment(request):
+def configure_sockets_environment(request):
     """Configure environment for sockets and MITM"""
     monitored_sockets_params = getattr(request.module, 'monitored_sockets_params')
     log_monitor_paths = getattr(request.module, 'log_monitor_paths')
