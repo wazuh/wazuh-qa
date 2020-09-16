@@ -7,7 +7,9 @@ import time
 
 import pytest
 import requests
+
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
+from wazuh_testing.tools.services import control_service
 
 # Marks
 
@@ -55,6 +57,8 @@ def test_DOS_blocking_system(tags_to_apply, get_configuration, configure_api_env
                                 headers=api_details['auth_headers'], verify=False)
     assert put_response.status_code == 200, f'Expected status code was 200, ' \
                                             f'but {put_response.status_code} was returned. \nFull response: {put_response.text}'
+
+    control_service('restart')
 
     # Provoke an api block (default: 300 requests)
     api_details['base_url'] += '/agents'
