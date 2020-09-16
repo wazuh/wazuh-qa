@@ -63,6 +63,7 @@ class Agent:
         self.send_upgrade_notification = False
         self.upgrade_script_result = 0
         self.setup()
+        self.stop_receive = 0
     
     # Set up agent: Keep alive, encryption key and start up msg.
     def setup(self):
@@ -180,7 +181,7 @@ class Agent:
         return (headers_event)
     
     def receiveMessage(self, sender):
-        while True:
+        while self.stop_receive == 0:
             if sender.protocol == 'tcp':
                 rcv = sender.socket.recv(4)
                 if len(rcv) == 4:
@@ -213,6 +214,9 @@ class Agent:
             msg_decompress = zlib.decompress(msg_removepadding)
             msg_decoded = msg_decompress.decode('ISO-8859-1')
             self.processMessage(sender, msg_decoded)
+
+    def stop_receiver(self):
+        self.stop_receive = 1
     
     def processMessage(self, sender, message):
         msg_decoded_list = message.split(' ')
@@ -550,6 +554,12 @@ class Injector:
         for thread in range(self.thread_number):
             self.threads[thread].setDaemon(True)
             self.threads[thread].start()
+
+    def stop_receive(self):
+        for thread in range(self.thread_number):
+            self.threads[thread].stop_rec()
+        sleep(2)
+        self.sender.socket.close()
     
 class InjectorThread (threading.Thread):
     def __init__(self, threadID, name, sender, agent, module):
@@ -560,6 +570,7 @@ class InjectorThread (threading.Thread):
         self.agent = agent
         self.totalMessages = 0
         self.module = module
+        self.stop_thread = 0
     
     def keepalive(self):
         sleep(10)
@@ -577,7 +588,7 @@ class InjectorThread (threading.Thread):
         sleep(10)
         starttime=time()
         # Loop events
-        while(1):
+        while self.stop_thread == 0:
             #event = self.agent.createEvent(self.agent.fim.getMessage(event_type="added"))
             event = self.agent.createEvent(self.agent.fim.getMessage())
             self.sender.sendEvent(event)
@@ -589,7 +600,7 @@ class InjectorThread (threading.Thread):
         sleep(10)
         starttime=time()
         # Loop events
-        while(1):
+        while self.stop_thread == 0:
             event = self.agent.createEvent(self.agent.fim_integrity.getMessage())
             self.sender.sendEvent(event)
             self.totalMessages += 1
@@ -599,7 +610,7 @@ class InjectorThread (threading.Thread):
     def inventory(self):
         sleep(10)
         starttime=time()
-        while(1):
+        while self.stop_thread == 0:
             # Send agent inventory scan
             print("Scan started - {}({}) - {}({})".format(self.agent.name, self.agent.id, "syscollector", self.agent.inventory.inventory_path))
             scan_id = int(time()) # Random start scan ID
@@ -628,6 +639,12 @@ class InjectorThread (threading.Thread):
         else:
             print("Module unknown: {}".format(self.module))
             pass
+    
+    def stop_rec(self):
+        if self.module == "receive_messages":
+            self.agent.stop_receiver()
+        else:
+            self.stop_thread = 1
 
 def create_agents(agents_number, manager_address, cypher, fim_eps=None, authd_password=None, os=None):
     global agent_count
