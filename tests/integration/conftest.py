@@ -453,7 +453,7 @@ def configure_environment(get_configuration, request):
 
 
 @pytest.fixture(scope='module')
-def configure_mitm_environment(request):
+def configure_sockets_environment(request):
     """Configure environment for sockets and MITM"""
     monitored_sockets_params = getattr(request.module, 'monitored_sockets_params')
     log_monitor_paths = getattr(request.module, 'log_monitor_paths')
@@ -525,33 +525,3 @@ def put_env_variables(get_configuration, request):
         for env in environment_variables:
             if sys.platform != 'win32':
                 os.unsetenv(env[0])
-
-
-@pytest.fixture(scope='module')
-def isolate_daemons(request):
-    """Stop every daemon except the ones in a given list."""
-    daemon_list = getattr(request.module, 'daemon_list')
-
-    # Stop wazuh-service and ensure all daemons are stopped
-    control_service('stop')
-    check_daemon_status(running=False)
-
-    for daemon in daemon_list:
-        control_service('start', daemon=daemon, debug_mode=True)
-        check_daemon_status(
-            running=True,
-            daemon=daemon
-        )
-
-    yield
-
-    for daemon in daemon_list:
-        control_service('stop', daemon=daemon)
-        check_daemon_status(
-            running=False,
-            daemon=daemon
-        )
-
-    delete_dbs()
-
-    control_service('start')

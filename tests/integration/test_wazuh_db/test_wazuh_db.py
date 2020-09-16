@@ -8,6 +8,7 @@ import pytest
 import yaml
 
 from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools.monitoring import ManInTheMiddle
 
 # Marks
 
@@ -24,11 +25,22 @@ for file in messages_files:
 
 # Variables
 
+log_monitor_paths = []
+
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
-daemon_list = ['wazuh-db']
 
 receiver_sockets_params = [(wdb_path, 'AF_UNIX', 'TCP')]
-receiver_sockets = None  # Set in the fixtures
+
+# mitm_analysisd = ManInTheMiddle(address=analysis_path, family='AF_UNIX', connection_protocol='UDP')
+# monitored_sockets_params is a List of daemons to start with optional ManInTheMiddle to monitor
+# List items -> (wazuh_daemon: str,(
+#                mitm: ManInTheMiddle
+#                daemon_first: bool))
+# Example1 -> ('wazuh-clusterd', None)              Only start wazuh-clusterd with no MITM
+# Example2 -> ('wazuh-clusterd', (my_mitm, True))   Start MITM and then wazuh-clusterd
+monitored_sockets_params = [('wazuh-db', None, True)]
+
+receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
 
 # Tests
@@ -40,7 +52,7 @@ receiver_sockets = None  # Set in the fixtures
                               for module_data, module_name in module_tests
                               for case in module_data]
                          )
-def test_wazuh_db_messages(isolate_daemons, connect_to_sockets_module, test_case: list):
+def test_wazuh_db_messages(configure_sockets_environment, connect_to_sockets_module, test_case: list):
     """Check that every input message in wazuh-db socket generates the adequate output to wazuh-db socket
 
     Parameters
@@ -55,7 +67,7 @@ def test_wazuh_db_messages(isolate_daemons, connect_to_sockets_module, test_case
         assert response == expected, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1, stage['stage'])
 
 
-def test_wazuh_db_create_agent(isolate_daemons, connect_to_sockets_module):
+def test_wazuh_db_create_agent(configure_sockets_environment, connect_to_sockets_module):
     """Check that Wazuh DB creates the agent database when a query with a new agent ID is sent"""
     test = {"name": "Create agent",
             "description": "Wazuh DB creates automatically the agent's database the first time a query with a new agent"
@@ -63,5 +75,5 @@ def test_wazuh_db_create_agent(isolate_daemons, connect_to_sockets_module):
             "test_case": [{"input": "agent 999 syscheck integrity_check_left",
                            "output": "err Invalid FIM query syntax, near 'integrity_check_left'",
                            "stage": "Syscheck - Agent does not exits yet"}]}
-    test_wazuh_db_messages(isolate_daemons, connect_to_sockets_module, test['test_case'])
+    test_wazuh_db_messages(configure_sockets_environment, connect_to_sockets_module, test['test_case'])
     assert os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'db', "999.db"))

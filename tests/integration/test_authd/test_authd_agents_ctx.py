@@ -365,7 +365,7 @@ def duplicate_name_agent_delete_test(server):
 
 
 def test_ossec_authd_agents_ctx_main(get_configuration, set_up_groups, configure_environment,
-                                     configure_mitm_environment, connect_to_sockets_module):
+                                     configure_sockets_environment, connect_to_sockets_module):
     control_service('stop', daemon='ossec-authd')    
     check_daemon_status(running=False, daemon='ossec-authd')
     time.sleep(1)
@@ -384,7 +384,7 @@ def test_ossec_authd_agents_ctx_main(get_configuration, set_up_groups, configure
 
 
 def test_ossec_authd_agents_ctx_local(get_configuration, set_up_groups, configure_environment,
-                                      configure_mitm_environment, connect_to_sockets_module):
+                                      configure_sockets_environment, connect_to_sockets_module):
     control_service('stop', daemon='ossec-authd')    
     check_daemon_status(running=False, daemon='ossec-authd')
     time.sleep(1)
@@ -400,4 +400,3 @@ def test_ossec_authd_agents_ctx_local(get_configuration, set_up_groups, configur
     duplicate_name_agent_delete_test("local")
 
     clean_agents_ctx()
-    
