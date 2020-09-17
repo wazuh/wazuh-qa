@@ -3,10 +3,10 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import re
 
 import pytest
 import yaml
-import re
 
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.monitoring import ManInTheMiddle
@@ -42,7 +42,6 @@ receiver_sockets_params = [(wdb_path, 'AF_UNIX', 'TCP')]
 monitored_sockets_params = [('wazuh-db', None, True)]
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
-global_parameters.default_timeout = 30 
 
 def regex_match(regex, string):
     regex = regex.replace("*", ".*")
@@ -61,16 +60,14 @@ def insert_agents(id_offset, amount):
     for id in range(id_offset,id_offset+amount):
         command = f'global insert-agent {{"id":{id},"name":"TestName{id}","date_add":1599223378}}'
         receiver_sockets[0].send(command, size=True)
-        response = monitored_sockets[0].start(timeout=global_parameters.default_timeout,
-                                          callback=callback_wazuhdb_response).result()
+        response = receiver_sockets[0].receive(size=True).decode()
         data = response.split(" ", 1)
         if data[0] != 'ok':
             raise AssertionError('Unable to add agent {id}')
 
         command = f'global update-keepalive {{"id":{id},"sync_status":1}}'
         receiver_sockets[0].send(command, size=True)
-        response = monitored_sockets[0].start(timeout=global_parameters.default_timeout,
-                                          callback=callback_wazuhdb_response).result()
+        response = receiver_sockets[0].receive(size=True).decode()
         data = response.split(" ", 1)
         if data[0] != 'ok':
             raise AssertionError('Unable to add agent {id}')
@@ -91,15 +88,14 @@ def test_wazuh_db_messages(configure_sockets_environment, connect_to_sockets_mod
     ----------
     test_case : list
         List of test_case stages (dicts with input, output and stage keys).
-    """    
+    """
     for stage in test_case:
         if 'ignore' in stage and stage['ignore'] == "yes":
             continue
         
         expected = stage['output']
         receiver_sockets[0].send(stage['input'], size=True)
-        response = monitored_sockets[0].start(timeout=global_parameters.default_timeout,
-                                              callback=callback_wazuhdb_response).result()
+        response = receiver_sockets[0].receive(size=True).decode()
         
         if 'use_regex' in stage and stage['use_regex'] == 'yes':
             match = regex_match(expected, response)
@@ -121,7 +117,7 @@ def test_wazuh_db_create_agent(configure_sockets_environment, connect_to_sockets
     assert os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'db', "999.db"))
 
 
-def test_wazuh_db_chunks(configure_mitm_environment, connect_to_sockets_module):
+def test_wazuh_db_chunks(configure_sockets_environment, connect_to_sockets_module):
     """Check that commands by chunks work properly when agents amount exceed the response maximum size"""  
     AGENTS_CANT = 14000
     AGENTS_OFFSET = 20
@@ -133,8 +129,7 @@ def test_wazuh_db_chunks(configure_mitm_environment, connect_to_sockets_module):
     #Check get-all-agents chunk limit
     command = f'global get-all-agents last_id 0'
     receiver_sockets[0].send(command, size=True)
-    response = monitored_sockets[0].start(timeout=global_parameters.default_timeout,
-                                          callback=callback_wazuhdb_response).result()
+    response = receiver_sockets[0].receive(size=True).decode()
     
     status = response.split(" ",1)[0]
     assert status == 'due', 'Failed chunks check onget-all-agents. Expected: {}. Response: {}'\
@@ -143,8 +138,7 @@ def test_wazuh_db_chunks(configure_mitm_environment, connect_to_sockets_module):
     #Check get-agents-by-keepalive chunk limit
     command = f'global get-agents-by-keepalive condition > -1 last_id 0'
     receiver_sockets[0].send(command, size=True)
-    response = monitored_sockets[0].start(timeout=global_parameters.default_timeout,
-                                          callback=callback_wazuhdb_response).result()
+    response = receiver_sockets[0].receive(size=True).decode()
     
     status = response.split(" ",1)[0]
     assert status == 'due', 'Failed chunks check on get-agents-by-keepalive. Expected: {}. Response: {}'\
@@ -153,8 +147,7 @@ def test_wazuh_db_chunks(configure_mitm_environment, connect_to_sockets_module):
     #Check sync-agent-info-get chunk limit
     command = f'global sync-agent-info-get last_id 0'
     receiver_sockets[0].send(command, size=True)
-    response = monitored_sockets[0].start(timeout=global_parameters.default_timeout,
-                                          callback=callback_wazuhdb_response).result()
+    response = receiver_sockets[0].receive(size=True).decode()
     
     status = response.split(" ",1)[0]
     assert status == 'due', 'Failed chunks check on sync-agent-info-get. Expected: {}. Response: {}'\
