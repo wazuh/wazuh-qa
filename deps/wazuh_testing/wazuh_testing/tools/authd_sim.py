@@ -3,13 +3,15 @@ from wazuh_testing.tools.security import CertificateController
 import time
 import ssl
 
+
 class AuthdSimulator:
     """
-    Creates a SSL server sockets for simulting authd connection
+    Create an SSL server socket for simulating authd connection
     """
-    def __init__(self, 
-        server_address='127.0.0.1', enorllment_port=1515, key_path='/etc/manager.key', cert_path='/etc/manager.cert', initial_mode='ACCEPT'):
-        self.mitm_enrollment = ManInTheMiddle(address=(server_address, enorllment_port), family='AF_INET', connection_protocol='SSL', func=self._process_enrollment_message)
+    def __init__(self, server_address='127.0.0.1', enrollment_port=1515, key_path='/etc/manager.key',
+                 cert_path='/etc/manager.cert', initial_mode='ACCEPT'):
+        self.mitm_enrollment = ManInTheMiddle(address=(server_address, enrollment_port), family='AF_INET',
+                                              connection_protocol='SSL', func=self._process_enrollment_message)
         self.key_path = key_path
         self.cert_path = cert_path
         self.id_count = 1
@@ -23,8 +25,8 @@ class AuthdSimulator:
         """
         self._generate_certificates()
         self.mitm_enrollment.start()
-        self.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2, certificate=self.cert_path, keyfile=self.key_path)
-        
+        self.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2,
+                                                            certificate=self.cert_path, keyfile=self.key_path)
 
     def shutdown(self):
         """
@@ -34,8 +36,8 @@ class AuthdSimulator:
 
     def clear(self):
         """
-        Sockets need to be clear after each response since by the default the stops handling connection
-        after one successfull connection, and needs to be cleared afterwards
+        Clear sockets after each response. By default, they stop handling connections
+        after one successful connection, and they need to be cleared afterwards
         """
         while not self.mitm_enrollment.queue.empty():
             self.mitm_enrollment.queue.get_nowait()

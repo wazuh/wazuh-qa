@@ -12,6 +12,7 @@ from Crypto.Cipher import AES, Blowfish
 from Crypto.Util.Padding import pad, unpad
 from struct import pack
 
+
 class Cipher:
     def __init__(self,data,key):
         self.block_size = 16
@@ -45,9 +46,10 @@ class Cipher:
 
 class RemotedSimulator:
     """
-    Creates an AF_INET server sockets for simulting remoted connection
+    Create an AF_INET server socket for simulating remoted connection
     """
-    def __init__(self, server_address='127.0.0.1', remoted_port=1514, protocol='udp', mode='REJECT', client_keys=WAZUH_PATH+'/etc/client.keys', start_on_init=True):  
+    def __init__(self, server_address='127.0.0.1', remoted_port=1514, protocol='udp', mode='REJECT', 
+                 client_keys=WAZUH_PATH+'/etc/client.keys', start_on_init=True):  
         self.protocol = protocol
         self.global_count = 1234567891
         self.local_count = 5555
@@ -295,7 +297,7 @@ class RemotedSimulator:
                         rcv = connection.recv(65536) 
                         if len(rcv) >= 4:
                             data = rcv[4:]  
-                            data_len = ((rcv[3]&0xFF) << 24) | ((rcv[2]&0xFF) << 16) | ((rcv[1]&0xFF) << 8) | (rcv[0]&0xFF)
+                            data_len = ((rcv[3]&0xFF)<<24) | ((rcv[2]&0xFF)<<16) | ((rcv[1]&0xFF)<<8) | (rcv[0]&0xFF)
                             if data_len == len(data):                            
                                 try:
                                     ret = self.process_message(client_address, data)
@@ -519,11 +521,13 @@ class RemotedSimulator:
 
     """
     Set Remoted simulator work mode:
-    REJECT: Any connection will be rejected. UDP will ignore incoming connection, TCP will actively close incoming connection.
-    DUMMY_ACK: Any received package will be answered with an ACK
-    CONTROLED_ACK: Received package will be processed and decrypted, only valid decrypted messages starting with #!- will receive an ACK
-    WRONG_KEY: Any received package will be answered with an ACK created with incorrect keys.
-    INVALID_MSG: Any received package will be answered with a message that is not encrypted and without header.
+    -REJECT: Any connection will be rejected. UDP will ignore incoming connection, TCP will actively
+     close incoming connection.
+    -DUMMY_ACK: Any received package will be answered with an ACK
+    -CONTROLED_ACK: Received package will be processed and decrypted. Only valid decrypted messages
+     starting with #!- will receive an ACK
+    -WRONG_KEY: Any received package will be answered with an ACK created with incorrect keys.
+    -INVALID_MSG: Any received package will be answered with a message that is not encrypted and without header.
     """
     def set_mode(self, mode):
         self.mode = mode

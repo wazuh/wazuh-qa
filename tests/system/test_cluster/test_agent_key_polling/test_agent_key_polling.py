@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import pytest
 
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools.monitoring import HostMonitor
@@ -41,6 +42,7 @@ def test_agent_key_polling(inventory_path):
     inventory_path : str
         Path to the Ansible hosts inventory
     """
+    pytest.xfail("Development in progress: https://github.com/wazuh/wazuh/issues/4387")
     actual_path = os.path.dirname(os.path.abspath(__file__))
     host_manager = HostManager(inventory_path=inventory_path)
     configure_environment(host_manager)

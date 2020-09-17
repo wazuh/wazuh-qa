@@ -4,7 +4,7 @@
 
 import os
 import sys
-
+import time
 import pytest
 
 from wazuh_testing import global_parameters
@@ -30,7 +30,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-p, m = generate_params(apply_to_all=({'INODE': {'check_inode': inode}} for inode in ['yes', 'no']))
+p, m = generate_params(apply_to_all=({'INODE': {'check_inode': inode}} for inode in ['yes', 'no']), modes=['scheduled'])
 
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=p,
@@ -94,16 +94,15 @@ def test_hard_link(path_file, file_name, path_link, link_name, num_links, get_co
             event_checker.check_events("modified", mode=mode)
 
         # Validate number of events
-        assert len(event_checker.events) == 1, f"More than one 'modified' event was detected."
+        assert len(event_checker.events) == 1, "More than one 'modified' event was detected."
         event = event_checker.events[0]
 
         # Validate 'Hard_links' field
         if path_file == path_link:
             expected_hard_links = set(expected_hard_links)
-            assert (set(event['data']['hard_links']).intersection(expected_hard_links) == set()), f"The event's "
+            assert (set(event['data']['hard_links']).intersection(expected_hard_links) == set()), "The event's "
             f"'hard_links' field was '{event['data']['hard_links']}' when was expected to be '{expected_hard_links}'"
 
-    is_scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     file_list = [file_name]
     hardlinks_list = list()
 
@@ -111,7 +110,7 @@ def test_hard_link(path_file, file_name, path_link, link_name, num_links, get_co
 
     # Create the regular file
     create_file(REGULAR, path_file, file_name, content='test content')
-    check_time_travel(is_scheduled, monitor=wazuh_log_monitor)
+    check_time_travel(True, monitor=wazuh_log_monitor)
     event_checker.fetch_and_check('added', min_timeout=global_parameters.default_timeout)
 
     # Create as many links pointing to the regular file as num_links
@@ -122,33 +121,27 @@ def test_hard_link(path_file, file_name, path_link, link_name, num_links, get_co
 
     # Detect the 'added' events for all the created links
     if path_file == path_link:
-        check_time_travel(is_scheduled, monitor=wazuh_log_monitor)
+        check_time_travel(True, monitor=wazuh_log_monitor)
         event_checker.file_list = hardlinks_list
         event_checker.fetch_and_check('added', min_timeout=global_parameters.default_timeout)
 
     # Modify the regular file
     modify_file_content(path_file, file_name, new_content="modified testregularfile")
-    check_time_travel(is_scheduled, monitor=wazuh_log_monitor)
+    check_time_travel(True, monitor=wazuh_log_monitor)
 
     # Expect an event for the regular file or one of the hard links if the links are in the monitored dir and mode
     # is scheduled. Expect an event for the regular file only otherwise.
     event_checker.file_list = file_list
-    expected_file = [file_name] + hardlinks_list if path_file == path_link and is_scheduled else file_name
+    expected_file = [file_name] + hardlinks_list if path_file == path_link else file_name
     detect_and_validate_event(expected_file=expected_file,
                               mode=get_configuration['metadata']['fim_mode'],
                               expected_hard_links=hardlinks_list)
 
+    time.sleep(1)
     # Modify one of the hard links
     modify_file_content(path_link, hardlinks_list[0], new_content="modified HardLink0")
 
-    if path_file == path_link and not is_scheduled:
-        detect_and_validate_event(expected_file=hardlinks_list[0],
-                                  mode=get_configuration['metadata']['fim_mode'],
-                                  expected_hard_links=[file_name] + hardlinks_list[1:])
-    else:
-        # If the link is not inside the monitored dir Scheduled run should detect the modification of the file
-        # even if we are using Real-time or Whodata.
-        check_time_travel(True, monitor=wazuh_log_monitor)
-        detect_and_validate_event(expected_file=[file_name] + hardlinks_list,
-                                  mode="scheduled",
-                                  expected_hard_links=hardlinks_list)
+    check_time_travel(True, monitor=wazuh_log_monitor)
+    detect_and_validate_event(expected_file=[file_name] + hardlinks_list,
+                              mode="scheduled",
+                              expected_hard_links=hardlinks_list)

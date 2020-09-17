@@ -23,6 +23,7 @@ from collections import defaultdict
 from copy import copy
 from multiprocessing import Process, Manager
 from struct import pack, unpack
+from datetime import datetime
 
 import yaml
 from lockfile import FileLock
@@ -425,7 +426,7 @@ class QueueMonitor:
                 else:
                     item = callback(self._queue.peek(position=position, block=True, timeout=self._time_step))
                     position += 1
-                if item is not None:
+                if item is not None and item:
                     result_list.append(item)
                     if len(result_list) == accum_results and timeout_extra > 0 and not extra_timer_is_running:
                         extra_timer_is_running = True
@@ -448,6 +449,7 @@ class QueueMonitor:
         if not self._continue:
             self._continue = True
             self._abort = False
+            result = None
 
             while self._continue:
                 if self._abort:
@@ -455,7 +457,7 @@ class QueueMonitor:
                     if error_message:
                         logger.error(error_message)
                         logger.error(f"Results accumulated: "
-                                     f"{len(self._result) if isinstance(self._result, list) else 0}")
+                                     f"{len(result) if isinstance(result, list) else 0}")
                         logger.error(f"Results expected: {accum_results}")
                     raise TimeoutError()
                 result = self.get_results(callback=callback, accum_results=accum_results, timeout=timeout,
@@ -881,7 +883,6 @@ class HostMonitor:
         self._result = defaultdict(list)
         self._time_step = time_step
         self._file_monitors = list()
-        self._monitored_files = set()
         self._file_content_collectors = list()
         self._tmp_path = tmp_path
         try:
@@ -895,14 +896,16 @@ class HostMonitor:
         """This method creates and destroy the needed processes for the messages founded in messages_path.
         It creates one file composer (process) for every file to be monitored in every host."""
         for host, payload in self.test_cases.items():
-            self._monitored_files.update({case['path'] for case in payload})
-            if len(self._monitored_files) == 0:
+            monitored_files = {case['path'] for case in payload}
+            if len(monitored_files) == 0:
                 raise AttributeError('There is no path to monitor. Exiting...')
-            for path in self._monitored_files:
+            for path in monitored_files:
                 output_path = f'{host}_{path.split("/")[-1]}.tmp'
                 self._file_content_collectors.append(self.file_composer(host=host, path=path, output_path=output_path))
                 logger.debug(f'Add new file composer process for {host} and path: {path}')
-                self._file_monitors.append(self._start(host=host, payload=payload, path=output_path))
+                self._file_monitors.append(self._start(host=host,
+                                                       payload=[block for block in payload if block["path"] == path],
+                                                       path=output_path))
                 logger.debug(f'Add new file monitor process for {host} and path: {path}')
 
         while True:
@@ -981,7 +984,8 @@ class HostMonitor:
                 monitor = QueueMonitor(tailer.queue, time_step=self._time_step)
                 try:
                     self._queue.put({host: monitor.start(timeout=case['timeout'],
-                                                         callback=callback_generator(case['regex'])
+                                                         callback=callback_generator(case['regex']),
+                                                         update_position=False
                                                          ).result().strip('\n')})
                 except TimeoutError:
                     try:
@@ -1021,3 +1025,38 @@ class HostMonitor:
         logger.debug(f'Cleaning temporal files...')
         for file in os.listdir(self._tmp_path):
             os.remove(os.path.join(self._tmp_path, file))
+
+
+def wait_mtime(path, time_step=5, timeout=-1):
+    """
+    Wait until the monitored log is not being modified.
+
+    Parameters
+    ----------
+    path : str
+        Path to the file.
+    time_step : int, optional
+        Time step between checks of mtime. Default `5`
+    timeout : int, optional
+        Timeout for function to fail. Default `-1`
+
+    Raises
+    ------
+    FileNotFoundError
+        Raised when the file does not exist.
+    TimeoutError
+        Raised when timeout is reached.
+    """
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"{path} not found.")
+
+    last_mtime = 0.0
+    tic = datetime.now().timestamp()
+
+    while last_mtime != os.path.getmtime(path):
+        last_mtime = os.path.getmtime(path)
+        time.sleep(time_step)
+
+        if last_mtime - tic >= timeout:
+            logger.error(f"{len(open(path, 'r').readlines())} lines within the file.")
+            raise TimeoutError("Reached timeout.")

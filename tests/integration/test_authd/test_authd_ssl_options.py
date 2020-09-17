@@ -103,7 +103,7 @@ def override_wazuh_conf(configuration):
     log_monitor.start(timeout=30, callback=callback_agentd_startup)
     time.sleep(1)
     
-def test_ossec_auth_configurations(get_configuration, configure_environment, configure_mitm_environment):
+def test_ossec_auth_configurations(get_configuration, configure_environment, configure_sockets_environment):
     """Check that every input message in authd port generates the adequate output
 
     Parameters
@@ -124,7 +124,8 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
     override_wazuh_conf(get_configuration)
     for config in test_case:
         address, family, connection_protocol = receiver_sockets_params[0]
-        SSL_socket = SocketController(address, family=family, connection_protocol=connection_protocol, open_at_start=False)
+        SSL_socket = SocketController(address, family=family, connection_protocol=connection_protocol,
+                                      open_at_start=False)
         ciphers = config['ciphers']
         protocol = config['protocol']
         SSL_socket.set_ssl_configuration(ciphers=ciphers, connection_protocol=protocol)
@@ -146,6 +147,7 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
             if expected:
                 response = SSL_socket.receive().decode()
                 assert response, 'Failed connection stage {}: {}'.format(test_case.index(config) + 1, config['stage'])
-                assert response[:len(expected)] == expected, 'Failed test case stage {}: {}'.format(test_case.index(config) + 1, config['stage'])
+                assert response[:len(expected)] == expected, \
+                       'Failed test case stage {}: {}'.format(test_case.index(config) + 1, config['stage'])
 
     return

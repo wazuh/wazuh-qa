@@ -76,7 +76,8 @@ def clean_client_keys_file():
     # Start Wazuh
     control_service('start')
 
-def test_ossec_auth_messages( clean_client_keys_file, get_configuration, set_up_groups, configure_environment, configure_mitm_environment, connect_to_sockets_module, wait_for_agentd_startup):
+def test_ossec_auth_messages(clean_client_keys_file, get_configuration, set_up_groups, configure_environment,
+                             configure_sockets_environment, connect_to_sockets_module, wait_for_agentd_startup):
     """Check that every input message in authd port generates the adequate output
 
     Parameters
@@ -97,4 +98,5 @@ def test_ossec_auth_messages( clean_client_keys_file, get_configuration, set_up_
             response = receiver_sockets[0].receive().decode()
             if time.time() > timeout: 
                 raise ConnectionResetError('Manager did not respond to sent message!')
-        assert response[:len(expected)] == expected, 'Failed test case {}: Response was: {} instead of: {}'.format(set_up_groups['name'], response, expected)
+        assert response[:len(expected)] == expected, \
+               'Failed test case {}: Response was: {} instead of: {}'.format(set_up_groups['name'], response, expected)

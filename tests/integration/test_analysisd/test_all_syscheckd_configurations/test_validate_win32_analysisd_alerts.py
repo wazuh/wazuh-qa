@@ -52,7 +52,7 @@ def get_alert(request):
     return alerts_list[request.param]
 
 
-def test_validate_all_win32_alerts(configure_mitm_environment, connect_to_sockets_module, wait_for_analysisd_startup,
+def test_validate_all_win32_alerts(configure_sockets_environment, connect_to_sockets_module, wait_for_analysisd_startup,
                                    generate_events_and_alerts, get_alert):
     """Check the event messages handling by analysisd with events generated on Windows.
 

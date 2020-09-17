@@ -122,7 +122,10 @@ def control_service(action, daemon=None, debug_mode=False):
                 control_service('start', daemon=daemon)
             elif action == 'stop':
                 for proc in psutil.process_iter():
-                    any(daemon in cmd for cmd in proc.cmdline()) and proc.terminate()
+                    try:
+                        any(daemon in cmd for cmd in proc.cmdline()) and proc.terminate()
+                    except psutil.NoSuchProcess:
+                        pass
                 delete_sockets(WAZUH_SOCKETS[daemon])
             else:
                 daemon_path = os.path.join(WAZUH_PATH, 'bin')
@@ -226,3 +229,26 @@ def delete_dbs():
     for root, dirs, files in os.walk(QUEUE_DB_PATH):
         for file in files:
             os.remove(os.path.join(root, file))
+
+
+def check_if_process_is_running(process_name):
+    """
+    Check if proccess is running
+
+    Parameters
+    ----------
+    proccess_name: str
+        Name of process
+
+    Returns
+    -------
+    boolean:
+        True if process is running, False otherwise
+    """
+    is_running = False
+    try:
+        is_running = process_name in (p.name() for p in psutil.process_iter())
+    except psutil.NoSuchProcess:
+        pass
+
+    return is_running

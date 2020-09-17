@@ -209,7 +209,7 @@ log_monitor = FileMonitor(LOG_FILE_PATH)
 log_monitor.start(timeout=30, callback=callback_agentd_startup)
     
 #@pytest.mark.parametrize('test_case', [case['test_case'] for case in ssl_configuration_tests])
-def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, configure_mitm_environment):
+def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, configure_sockets_environment):
     """Check that every input message in authd port generates the adequate output
 
     Parameters
@@ -222,8 +222,10 @@ def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, confi
                 1) if insert_prev_agent_custom is present: previous input message is overwrite by the custom message
                     (insert_prev_agent_custom: "OSSEC A:'user0' IP:'10.10.10.10'")
                 2) if insert_prev_agent_custom is not present: send the masage equals to input
-            - insert_random_pass_in_query: "yes" if is needed add random pass to input query (for register with random pass cases)
-            - insert_hostname_in_query: "yes" if is present add host name to input message
+            - insert_random_pass_in_query: 
+              "yes" if is needed add random pass to input query (for register with random pass cases)
+            - insert_hostname_in_query: 
+              "yes" if is present add host name to input message
     """
     current_test = get_current_test()
 
@@ -251,11 +253,17 @@ def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, confi
                 
                 # Prev output is expected
                 expected = "OSSEC K:'"
-                assert response, 'Failed connection previous insert for {}: {}'.format(ip_name_configuration_tests[current_test]['name'], config['input'])
-                assert response[:len(expected)] == expected, "Failed response previous '{}': Input: {}".format(ip_name_configuration_tests[current_test]['name'], config['input'])
+                assert response, \
+                       'Failed connection previous insert for {}: {}'.format \
+                       (ip_name_configuration_tests[current_test]['name'], config['input'])
+                assert response[:len(expected)] == expected, \
+                       "Failed response previous '{}': Input: {}".format \
+                       (ip_name_configuration_tests[current_test]['name'], config['input'])
                 if expected == "OSSEC K:'":
                     time.sleep(0.5)
-                    assert check_client_keys_file(response) == True, "Failed test case '{}' checking previous client.keys : Input: {}".format(ip_name_configuration_tests[current_test]['name'], config['input'])
+                    assert check_client_keys_file(response) == True, \
+                           "Failed test case '{}' checking previous client.keys : Input: {}".format \
+                           (ip_name_configuration_tests[current_test]['name'], config['input'])
         except KeyError:
             pass
         
@@ -282,17 +290,21 @@ def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, confi
         # Output is expected
         expected = config['output']
         response = send_message(config['input'])
-        assert response, "Failed connection stage '{}'': '{}'".format(ip_name_configuration_tests[current_test]['name'], config['input'])
+        assert response, "Failed connection stage '{}'': '{}'".format \
+               (ip_name_configuration_tests[current_test]['name'], config['input'])
         if response[:len(expected)] != expected:
             if config.get('expected_fail') == 'yes':
                 pytest.xfail("Test expected to fail by configuration")
             else:
-                raise AssertionError("Failed test case '{}': Input: {}".format(ip_name_configuration_tests[current_test]['name'], config['input']))
+                raise AssertionError("Failed test case '{}': Input: {}".format \
+                      (ip_name_configuration_tests[current_test]['name'], config['input']))
 
         #if expect a key check with client.keys file
         if expected[:len("OSSEC K:'")] == "OSSEC K:'":
             time.sleep(0.5)
             if "/32" in response:
                 response = response.replace("/32", "")
-            assert check_client_keys_file(response) == True, "Failed test case '{}' checking client.keys : Input: {}".format(ip_name_configuration_tests[current_test]['name'], config['input'])
+            assert check_client_keys_file(response) == True, \
+                   "Failed test case '{}' checking client.keys : Input: {}".format \
+                   (ip_name_configuration_tests[current_test]['name'], config['input'])
     return

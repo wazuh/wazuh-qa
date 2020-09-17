@@ -33,7 +33,8 @@ AGENT_KEY_PATH = os.path.join(WAZUH_PATH, folder, 'agent.key')
 AGENT_CERT_PATH = os.path.join(WAZUH_PATH, folder, 'agent.cert')
 AGENT_PEM_PATH = os.path.join(WAZUH_PATH, folder, 'agent.pem')
 AUTHDPASS_PATH = os.path.join(WAZUH_PATH, folder, 'authd.pass')
-AGENT_AUTH_BINARY_PATH = '/var/ossec/bin/agent-auth' if platform.system() == 'Linux' else  os.path.join(WAZUH_PATH, 'agent-auth.exe')
+AGENT_AUTH_BINARY_PATH = '/var/ossec/bin/agent-auth' if platform.system() == 'Linux' else \
+                         os.path.join(WAZUH_PATH, 'agent-auth.exe')
 
 CONFIG_PATHS = {
     'SERVER_PEM_PATH' : SERVER_PEM_PATH,
@@ -108,24 +109,30 @@ def configure_enrollment(enrollment, enrollment_server, agent_name=socket.gethos
         if enrollment.get('id'):
             enrollment_server.agent_id = enrollment.get('id')
         if enrollment.get('protocol') == 'TLSv1_1':
-            enrollment_server.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLS, options=(ssl.OP_ALL 
-            | ssl.OP_NO_TLSv1_2 | (ssl.OP_NO_TLSv1_3 if hasattr(ssl, 'OP_NO_TLSv1_3') else 0) | ssl.OP_CIPHER_SERVER_PREFERENCE | ssl.OP_NO_COMPRESSION),
+            enrollment_server.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLS,
+                options=(ssl.OP_ALL | ssl.OP_NO_TLSv1_2 | (ssl.OP_NO_TLSv1_3 if hasattr(ssl, 'OP_NO_TLSv1_3') else 0) |
+                ssl.OP_CIPHER_SERVER_PREFERENCE | ssl.OP_NO_COMPRESSION),
                 cert_reqs=ssl.CERT_NONE)
         else:
-            enrollment_server.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2, options=None)
+            enrollment_server.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2,
+                                                                             options=None)
         if enrollment.get('check_certificate'):
             if enrollment['check_certificate']['valid'] == 'yes':
                 # Store valid certificate
-                enrollment_server.cert_controller.store_ca_certificate(enrollment_server.cert_controller.get_root_ca_cert(), SERVER_PEM_PATH)
+                enrollment_server.cert_controller.store_ca_certificate(enrollment_server.cert_controller.get_root_ca_cert(),
+                                                                       SERVER_PEM_PATH)
             else:
                 # Create another certificate
-                enrollment_server.cert_controller.generate_agent_certificates(AGENT_KEY_PATH, SERVER_PEM_PATH, agent_name)
+                enrollment_server.cert_controller.generate_agent_certificates(AGENT_KEY_PATH, SERVER_PEM_PATH,
+                                                                              agent_name)
         if enrollment.get('agent_certificate'):
             enrollment_server.cert_controller.generate_agent_certificates(AGENT_KEY_PATH, AGENT_CERT_PATH, agent_name, 
                 signed=(enrollment['agent_certificate']['valid'] == 'yes')
             )
-            enrollment_server.mitm_enrollment.listener.set_ssl_configuration(cert_reqs=ssl.CERT_REQUIRED, ca_cert=SERVER_PEM_PATH)
-            enrollment_server.cert_controller.store_ca_certificate(enrollment_server.cert_controller.get_root_ca_cert(), SERVER_PEM_PATH)
+            enrollment_server.mitm_enrollment.listener.set_ssl_configuration(cert_reqs=ssl.CERT_REQUIRED,
+                                                                             ca_cert=SERVER_PEM_PATH)
+            enrollment_server.cert_controller.store_ca_certificate(enrollment_server.cert_controller.get_root_ca_cert(),
+                                                                   SERVER_PEM_PATH)
         else:
             enrollment_server.mitm_enrollment.listener.set_ssl_configuration(cert_reqs=ssl.CERT_OPTIONAL)
 

@@ -826,6 +826,34 @@ def callback_num_inotify_watches(line):
         return match.group(1)
 
 
+def callback_file_size_limit_reached(line):
+    match = re.match(r'.*File \'(.*)\' is too big for configured maximum size to perform diff operation\.', line)
+
+    if match:
+        return match.group(1)
+
+
+def callback_disk_quota_limit_reached(line):
+    match = re.match(r'.*The maximum configured size for the \'(.*)\' folder has been reached.*', line)
+
+    if match:
+        return match.group(1)
+
+
+def callback_disk_quota_default(line):
+    match = re.match(r'.*Maximum disk quota size limit configured to \'(\d+) KB\'.*', line)
+
+    if match:
+        return match.group(1)
+
+
+def callback_diff_size_limit_value(line):
+    match = re.match(r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*', line)
+
+    if match:
+        return match.group(1)
+
+
 def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None):
     """
     Change date and time of the system depending on a boolean condition. Optionally, a monitor may be used to check
@@ -848,6 +876,11 @@ def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=1
     TimeoutError
         If `monitor` is not `None` and the scan has not ended in the default timeout specified in `global_parameters`.
     """
+    if 'fim_mode' in global_parameters.current_configuration['metadata'].keys():
+        mode = global_parameters.current_configuration['metadata']['fim_mode']
+        if mode != 'scheduled' or mode not in global_parameters.fim_mode:
+            return
+
     if time_travel:
         before = str(datetime.now())
         TimeMachine.travel_to_future(interval)
@@ -913,6 +946,14 @@ def callback_entries_path_count(line):
             return match.group(1), match.group(2)
         else:
             return match.group(1), None
+
+
+def callback_warn_max_dir_monitored(line):
+    match = re.match(r'.*Maximum number of directories to be monitored in the same tag reached \(\d+\) '
+                     r'Excess are discarded: \'(.+)\'', line)
+    if match:
+        return match.group(1)
+    return None
 
 
 def callback_delete_watch(line):
@@ -1052,7 +1093,6 @@ class EventChecker:
 
         def check_events_path(events, folder, file_list=['testfile0'], mode=None):
             mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
-            audit_path = filter_events(events, ".[].data.audit.path") if mode == "whodata" else None
             data_path = filter_events(events, ".[].data.path")
             for file_name in file_list:
                 expected_path = os.path.join(folder, file_name)
@@ -1060,22 +1100,12 @@ class EventChecker:
                 if self.encoding is not None:
                     for index, item in enumerate(data_path):
                         data_path[index] = item.encode(encoding=self.encoding)
-                    if audit_path:
-                        for index, item in enumerate(audit_path):
-                            audit_path[index] = item.encode(encoding=self.encoding)
                 if sys.platform == 'darwin' and self.encoding and self.encoding != 'utf-8':
                     logger.info(f'Not asserting {expected_path} in event.data.path. '
-                                 f'Reason: using non-utf-8 encoding in darwin.')
+                                f'Reason: using non-utf-8 encoding in darwin.')
                 else:
                     error_msg = f"Expected data path was '{expected_path}' but event data path is '{data_path}'"
                     assert (expected_path in data_path), error_msg
-                    if audit_path:
-                        try:
-                            error_msg = f"Expected audit path was '{expected_path}' " \
-                                        f"but event audit path is '{audit_path}'"
-                            assert (expected_path in audit_path), error_msg
-                        except AssertionError:
-                            pytest.xfail(reason='Xfailed due to issue: https://github.com/wazuh/wazuh/issues/4729')
 
         def filter_events(events, mask):
             """Returns a list of elements matching a specified mask in the events list using jq module."""
@@ -1406,6 +1436,10 @@ def get_fim_mode_param(mode, key='FIM_MODE'):
         Params: The key is `key` and the value is the string to be replaced in the target configuration.
         Metadata: The key is `key` in lowercase and the value is always `mode`.
     """
+
+    if mode not in global_parameters.fim_mode:
+        return None, None
+
     metadata = {key.lower(): mode}
     if mode == 'scheduled':
         return {key: ''}, metadata

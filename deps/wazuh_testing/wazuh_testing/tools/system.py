@@ -197,14 +197,14 @@ class HostManager:
             configuration = {host: api_config for host in host_list}
 
         for host, config in configuration.items():
-            self.modify_file_content(host, path=dest_path, content=yaml.safe_dump(config))
+            self.modify_file_content(host, path=dest_path, content=yaml.dump("" if config is None else config))
 
         for host in host_list:
-            self.control_service(host=host, service='wazuh-api', state='restarted')
+            self.control_service(host=host, service='wazuh-manager', state='restarted')
             if clear_log:
                 self.clear_file(host=host, file_path=API_LOG_FILE_PATH)
 
-    def get_api_token(self, host, user='wazuh', password='wazuh', port=55000, check=False):
+    def get_api_token(self, host, user='wazuh', password='wazuh', auth_context=None, port=55000, check=False):
         """Return an API token for the specified user.
 
         Parameters
@@ -215,6 +215,8 @@ class HostManager:
             API username. Default `wazuh`
         password : str, optional
             API password. Default `wazuh`
+        auth_context : dict, optional
+            Authorization context body. Default `None`
         port : int, optional
             API port. Default `55000`
         check : bool, optional
@@ -226,11 +228,20 @@ class HostManager:
         API token : str
             Usable API token.
         """
+        if auth_context is not None:
+            login_endpoint = '/security/user/authenticate/run_as'
+            login_method = 'POST'
+            login_body = 'body="{}"'.format(json.dumps(auth_context).replace('"', '\\"').replace(' ', ''))
+        else:
+            login_endpoint = '/security/user/authenticate'
+            login_method = 'GET'
+            login_body = ''
+
         try:
-            token_response = self.get_host(host).ansible('uri',
-                                                         f'url=https://localhost:{port}/v4/security/user/authenticate '
-                                                         f'user={user} password={password} method=GET validate_certs=no '
-                                                         f'force_basic_auth=yes', check=check)
+            token_response = self.get_host(host).ansible('uri', f'url=https://localhost:{port}{login_endpoint} '
+                                                         f'user={user} password={password} method={login_method} '
+                                                         f'{login_body} validate_certs=no force_basic_auth=yes',
+                                                         check=check)
             return token_response['json']['token']
         except KeyError:
             raise KeyError(f'Failed to get token: {token_response}')
@@ -264,7 +275,30 @@ class HostManager:
         request_body = 'body="{}"'.format(
             json.dumps(request_body).replace('"', '\\"').replace(' ', '')) if request_body else ''
 
-        token_header = {'Authorization': f'Bearer {token}'}
-        return self.get_host(host).ansible('uri', f'url="https://localhost:{port}/v4{endpoint}" '
-                                                  f'method={method} headers="{token_header}" {request_body} '
+        headers = {'Authorization': f'Bearer {token}'}
+        if request_body:
+            headers['Content-Type'] = 'application/json'
+
+        return self.get_host(host).ansible('uri', f'url="https://localhost:{port}{endpoint}" '
+                                                  f'method={method} headers="{headers}" {request_body} '
                                                   f'validate_certs=no', check=check)
+
+    def run_command(self, host: str, cmd: str, check: bool = False):
+        """Run a command on the specified host and return its stdout.
+
+        Parameters
+        ----------
+        host : str
+            Hostname
+        cmd : str
+            Command to execute
+        check : bool, optional
+            Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html),
+            by default it is enabled so no changes will be applied. Default `False`
+
+        Returns
+        -------
+        stdout : str
+            The output of the command execution.
+        """
+        return self.get_host(host).ansible("command", cmd, check=check)["stdout"]

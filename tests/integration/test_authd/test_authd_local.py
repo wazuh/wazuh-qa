@@ -80,7 +80,8 @@ def clean_client_keys_file():
     control_service('start')
     
 
-def test_ossec_auth_messages(clean_client_keys_file, get_configuration, set_up_groups, configure_environment, configure_mitm_environment, connect_to_sockets_module, wait_for_agentd_startup):
+def test_ossec_auth_messages(clean_client_keys_file, get_configuration, set_up_groups, configure_environment,
+                             configure_sockets_environment, connect_to_sockets_module, wait_for_agentd_startup):
     """Check that every input message in authd port generates the adequate output
 
     Parameters
@@ -96,4 +97,6 @@ def test_ossec_auth_messages(clean_client_keys_file, get_configuration, set_up_g
         message = stage['input']
         receiver_sockets[0].send(stage['input'], size=True)
         response = receiver_sockets[0].receive(size=True).decode()
-        assert response[:len(expected)] == expected, 'Failed test case {}: Response was: {} instead of: {}'.format(test_case.index(stage) + 1, response, expected)
+        assert response[:len(expected)] == expected, \
+               'Failed test case {}: Response was: {} instead of: {}'.format \
+               (test_case.index(stage) + 1, response, expected)

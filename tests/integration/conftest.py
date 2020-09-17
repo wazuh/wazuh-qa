@@ -9,14 +9,13 @@ import subprocess
 import sys
 import uuid
 from datetime import datetime
-import pdb
 
 import pytest
 from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, WAZUH_SERVICE
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, WAZUH_SERVICE, ALERT_FILE_PATH
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController
@@ -27,6 +26,8 @@ PLATFORMS = set("darwin linux win32 sunos5".split())
 HOST_TYPES = set("server agent".split())
 
 catalog = list()
+results = dict()
+
 
 def pytest_runtest_setup(item):
     # Find if platform applies
@@ -55,7 +56,6 @@ def pytest_runtest_setup(item):
 @pytest.fixture(scope='module')
 def restart_wazuh(get_configuration, request):
     # Stop Wazuh
-    pdb.set_trace()
     control_service('stop')
 
     # Reset ossec.log and start a new monitor
@@ -73,6 +73,20 @@ def reset_ossec_log(get_configuration, request):
     truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
+
+
+@pytest.fixture(scope='module')
+def restart_wazuh_alerts(get_configuration, request):
+    # Stop Wazuh
+    control_service('stop')
+
+    # Reset alerts.json and start a new monitor
+    truncate_file(ALERT_FILE_PATH)
+    file_monitor = FileMonitor(ALERT_FILE_PATH)
+    setattr(request.module, 'wazuh_alert_monitor', file_monitor)
+
+    # Start Wazuh
+    control_service('start')
 
 
 def pytest_addoption(parser):
@@ -147,6 +161,15 @@ def pytest_addoption(parser):
         type=str,
         help="run tests using Google Cloud topic name"
     )
+    parser.addoption(
+        "--fim_mode",
+        action="append",
+        metavar="fim_mode",
+        default=None,
+        type=str,
+        help="run tests using a specific FIM mode"
+    )
+
 
 def pytest_configure(config):
     # Register an additional marker
@@ -184,12 +207,19 @@ def pytest_configure(config):
     if gcp_topic_name:
         global_parameters.gcp_topic_name = gcp_topic_name
 
+    # Set fim_mode only if it is passed through command line args
+    mode = config.getoption("--fim_mode")
+    if not mode:
+        mode = ["scheduled", "whodata", "realtime"]
+    global_parameters.fim_mode = mode
+
 
 def pytest_html_results_table_header(cells):
     cells.insert(4, html.th('Tier', class_='sortable tier', col='tier'))
     cells.insert(3, html.th('Markers'))
     cells.insert(2, html.th('Description'))
     cells.insert(1, html.th('Time', class_='sortable time', col='time'))
+
 
 def pytest_html_results_table_row(report, cells):
     try:
@@ -199,6 +229,7 @@ def pytest_html_results_table_row(report, cells):
         cells.insert(1, html.td(datetime.utcnow(), class_='col-time'))
     except AttributeError:
         pass
+
 
 # HARDCODE: pytest-html generates too long file names. This temp fix is to reduce the name of
 # the assets
@@ -224,6 +255,7 @@ def create_asset(
         f.write(content)
     return relative_path
 
+
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     pytest_html = item.config.pluginmanager.getplugin('html')
@@ -236,6 +268,9 @@ def pytest_runtest_makereport(item, call):
     report.tier = ', '.join(str(mark.kwargs['level']) for mark in item.iter_markers(name="tier"))
     report.markers = ', '.join(mark.name for mark in item.iter_markers() if
                                mark.name != 'tier' and mark.name != 'parametrize')
+
+    if report.location[0] not in results:
+        results[report.location[0]] = {'passed': 0, 'failed': 0, 'skipped': 0, 'xfailed': 0, 'error': 0}
 
     extra = getattr(report, 'extra', [])
     if report.when == 'call':
@@ -270,6 +305,48 @@ def pytest_runtest_makereport(item, call):
         if not report.passed and not report.skipped:
             report.extra = extra
 
+        if report.longrepr is not None and report.longreprtext.split()[-1] == 'XFailed':
+            results[report.location[0]]['xfailed'] += 1
+        else:
+            results[report.location[0]][report.outcome] += 1
+
+    elif report.outcome == 'failed':
+        results[report.location[0]]['error'] += 1
+
+
+class SummaryTable(html):
+    class table(html.table):
+        style = html.Style(border='1px solid #e6e6e6', margin='16px 0px', color='#999', font_size='12px')
+
+    class td(html.td):
+        style = html.Style(padding='5px', border='1px solid #E6E6E6', text_align='left')
+
+    class th(html.th):
+        style = html.Style(padding='5px', border='1px solid #E6E6E6', text_align='left', font_weight='bold')
+
+
+def pytest_html_results_summary(prefix, summary, postfix):
+    postfix.extend([SummaryTable.table(
+        html.thead(
+            html.tr([
+                SummaryTable.th("Tests"),
+                SummaryTable.th("Failed"),
+                SummaryTable.th("Success"),
+                SummaryTable.th("XFail"),
+                SummaryTable.th("Error")]
+            ),
+        ),
+        [html.tbody(
+            html.tr([
+                SummaryTable.td(k),
+                SummaryTable.td(v['failed']),
+                SummaryTable.td(v['passed']),
+                SummaryTable.td(v['xfailed']),
+                SummaryTable.td(v['error']),
+            ])
+        ) for k, v in results.items()])])
+
+
 def connect_to_sockets(request):
     """Connect to the specified sockets for the test."""
     receiver_sockets_params = getattr(request.module, 'receiver_sockets_params')
@@ -282,6 +359,7 @@ def connect_to_sockets(request):
     setattr(request.module, 'receiver_sockets', receiver_sockets)
 
     return receiver_sockets
+
 
 def close_sockets(receiver_sockets):
     """Close the sockets connection gracefully."""
@@ -297,14 +375,14 @@ def close_sockets(receiver_sockets):
                 # Do not try to close the socket again if it was reused or closed already
                 pass
 
+
 @pytest.fixture(scope='module')
 def connect_to_sockets_module(request):
     """Module scope version of connect_to_sockets."""
-    
-
     receiver_sockets = connect_to_sockets(request)
     yield receiver_sockets
     close_sockets(receiver_sockets)
+
 
 @pytest.fixture(scope='function')
 def connect_to_sockets_function(request):
@@ -312,6 +390,7 @@ def connect_to_sockets_function(request):
     receiver_sockets = connect_to_sockets(request)
     yield receiver_sockets
     close_sockets(receiver_sockets)
+
 
 @pytest.fixture(scope='module')
 def configure_environment(get_configuration, request):
@@ -372,8 +451,9 @@ def configure_environment(get_configuration, request):
         if getattr(request.module, 'force_restart_after_restoring'):
             control_service('restart')
 
+
 @pytest.fixture(scope='module')
-def configure_mitm_environment(request):
+def configure_sockets_environment(request):
     """Configure environment for sockets and MITM"""
     monitored_sockets_params = getattr(request.module, 'monitored_sockets_params')
     log_monitor_paths = getattr(request.module, 'log_monitor_paths')
@@ -424,3 +504,24 @@ def configure_mitm_environment(request):
     delete_dbs()
 
     control_service('start')
+
+
+@pytest.fixture(scope='module')
+def put_env_variables(get_configuration, request):
+    """
+    Create environment variables
+    """
+    if hasattr(request.module, 'environment_variables'):
+        environment_variables = getattr(request.module, 'environment_variables')
+        for env, value in environment_variables:
+            if sys.platform == 'win32':
+                subprocess.call(['setx.exe', env, value, '/m'])
+            else:
+                os.putenv(env, value)
+
+    yield
+
+    if hasattr(request.module, 'environment_variables'):
+        for env in environment_variables:
+            if sys.platform != 'win32':
+                os.unsetenv(env[0])

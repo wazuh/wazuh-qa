@@ -12,12 +12,14 @@ from wazuh_testing.tools.system import HostManager
 test_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                               'provisioning', 'agentless_cluster', 'inventory.yml')
+default_api_conf = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'api_configurations', 'default.yaml')
+
 
 host_manager = HostManager(inventory_path)
 
 
 def control_wazuh_services(node, state=None):
-    """Control Wazuh services with `command` insteand of `service` due to incompatibility."""
+    """Control Wazuh services with `command` instead of `service` due to incompatibility."""
     host_manager.get_host(node).ansible('command', f'service wazuh-manager {state}', check=False)
     host_manager.get_host(node).ansible('command', f'service wazuh-api {state}', check=False)
     if 'start' in state:
@@ -31,14 +33,14 @@ def clean_environment():
 
     token = host_manager.get_api_token('wazuh-master')
     response = host_manager.make_api_call('wazuh-master', method='DELETE',
-                                          endpoint='/security/users?usernames=', token=token)
+                                          endpoint='/security/users?user_ids=all', token=token)
 
     assert response['status'] == 200, f'Failed to clean environment: {response}'
     for host in test_hosts[1:]:
         control_wazuh_services(host, state='restart')
 
 
-def test_create_user_when_node_is_disconnected(clean_environment):
+def test_create_user_when_node_is_disconnected(set_default_api_conf, clean_environment):
     """Check that user information is not lost when different nodes from the cluster disconnect and reconnect."""
     # Disconnect both workers from cluster and API
     control_wazuh_services('wazuh-worker1', state='stop')
@@ -55,6 +57,7 @@ def test_create_user_when_node_is_disconnected(clean_environment):
                                                         'password': test_pass},
                                           token=master_token)
     assert response['status'] == 200, f'Failed to create user: {response}'
+    test_user_id = response['json']['data']['affected_items'][0]['id']
 
     # Reconnect worker1 and check that the user is created
     control_wazuh_services('wazuh-worker1', state='start')
@@ -62,7 +65,7 @@ def test_create_user_when_node_is_disconnected(clean_environment):
 
     # Remove the user in the master node
     response = host_manager.make_api_call('wazuh-master', method='DELETE',
-                                          endpoint=f'/security/users?usernames={test_user}',
+                                          endpoint=f'/security/users?user_ids={test_user_id}',
                                           token=master_token)
     assert response['status'] == 200, f'Failed to delete user: {response}'
 
