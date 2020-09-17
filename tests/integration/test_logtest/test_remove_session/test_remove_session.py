@@ -38,7 +38,7 @@ def create_session():
         '{"event": "Jun 24 11:54:19 Master systemd[2099]: Started VTE child process 20118 launched by terminator process'
         ' 17756.","log_format": "syslog","location": "master->/var/log/syslog"}',
         size=True)
-    token = json.loads(receiver_sockets[0].receive(size=True).rstrip(b'\x00').decode())['token']
+    token = json.loads(receiver_sockets[0].receive(size=True).rstrip(b'\x00').decode())['data']['token']
 
     # Close socket
     close_sockets(receiver_sockets)
