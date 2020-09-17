@@ -410,7 +410,7 @@ cases = [
             'sha_list' : ['VALIDSHA1'],
             'upgrade_exec_result' : ['0'],
             'upgrade_script_result' : [0],
-            'status': ['In progress'],
+            'status': ['Done'],
             'upgrade_notification': [True],
             'checks' : ['chunk_size'],
             'chunk_size' : 31111,
@@ -517,31 +517,7 @@ cases = [
             'expected_response' : 'Success'
         }
     },
-    # 20. Change default chunk_size - success
-    {
-        'params': {
-            'PROTOCOL': 'tcp',
-            'WPK_REPOSITORY' : WPK_REPOSITORY_4x,
-            'CHUNK_SIZE' : 31111,
-            'TASK_TIMEOUT' : TASK_TIMEOUT
-        },
-        'metadata' : {
-            'wpk_repository' : WPK_REPOSITORY_4x,
-            'agents_number': 1,
-            'protocol': 'tcp',
-            'agents_os': ['debian7'],
-            'disconnect' : [False],
-            'sha_list' : ['VALIDSHA1'],
-            'upgrade_exec_result' : ['0'],
-            'upgrade_script_result' : [0],
-            'status': ['Done'],
-            'upgrade_notification': [True],
-            'checks' : ['chunk_size'],
-            'chunk_size' : 31111,
-            'expected_response' : 'Success'
-        }
-    },
-    # 21. Single Agent with use_http = default - success
+    # 20. Single Agent with use_http = default - success
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -564,7 +540,7 @@ cases = [
             'expected_response' : 'Success'
         }
     },
-    # 22. Single Agent with use_http = 0 - success
+    # 21. Single Agent with use_http = 0 - success
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -628,19 +604,22 @@ def clean_logs():
 
 
 def wait_download(line):
-    if "Downloading WPK file from: " in line:
+    if 'Downloading WPK file from:' in line:
+        return line
+    return None
+
+def wait_downloaded(line):
+    if ('Download' in line) and ('finished' in line):
         return line
     return None
 
 def wait_chunk_size(line):
-    if ("Sending message to agent: " in line) and ("com write" in line):
+    if ('Sending message to agent:' in line) and ('com write ' in line):
         return line
     return None
 
 def wait_wpk_custom(line):
-    global file_name, installer
-    assert file_name == 'wpk_test.wpk','error filename'
-    if ('Sending message to agent:' in line) and (f'com upgrade {file_name} {installer}' in line):
+    if ('Sending message to agent:' in line) and ('com upgrade ' in line):
         return line
     return None
 
@@ -714,6 +693,9 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
     log_monitor = FileMonitor(LOG_FILE_PATH)
     expected_error_msg = metadata.get('error_msg')
     sha_list = metadata.get('sha_list')
+    injectors = []
+    file_name = ''
+    installer = ''
 
     if 'VALIDSHA1' in sha_list:
         sha_list = get_sha_list(metadata)
@@ -722,7 +704,6 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
     if metadata.get('command') == 'upgrade_custom':
         command = 'upgrade_custom'
         if not expected_error_msg or ('The WPK file does not exist.' not in expected_error_msg):
-            global file_name, installer
             file_name = metadata.get('message_params').get('file_path')
             file = os.path.join(UPGRADE_PATH, file_name)
             create_wpk_custom_file(file)
@@ -735,8 +716,8 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
 
     for index, agent in enumerate(agents):
         agent.set_wpk_variables(sha_list[index], metadata['upgrade_exec_result'][index], metadata['upgrade_notification'][index], metadata['upgrade_script_result'][index], metadata['disconnect'][index])
-
         injector = Injector(sender, agent)
+        injectors.append(injector)
         injector.run()
         if protocol == "tcp":
             sender = Sender(manager_address=SERVER_ADDRESS, protocol=protocol)
@@ -782,7 +763,11 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
             else :
                 assert MANAGER_VERSION in last_log, f'Versions did not match expected! Expected {MANAGER_VERSION}'
         #let time to download wpk
-        time.sleep(60)
+        try:
+            log_monitor.start(timeout=600, callback=wait_downloaded)
+        except TimeoutError as err:
+            raise AssertionError("Finish download wpk log tooks too much!")
+        #time.sleep(60)
     
     if metadata.get('checks') and ('chunk_size' in metadata.get('checks')):
         # Checking version in logs
@@ -790,9 +775,9 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
             log_monitor.start(timeout=60, callback=wait_chunk_size)
         except TimeoutError as err:
             raise AssertionError("Chunk size log tooks too much!")
-            
+        chunk = metadata.get('chunk_size')
         last_log = log_monitor.result()
-        assert f'com write {metadata.get("chunk_size")}' in last_log, f'Chunk size did not match expected! Expected {metadata.get("chunk_size")} obtained {last_log}'
+        assert f'com write {chunk}' in last_log, f'Chunk size did not match expected! Expected {chunk} obtained {last_log}'
     
     if metadata.get('checks') and ('wpk_name' in metadata.get('checks')):
         # Checking version in logs
@@ -820,7 +805,7 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
             time.sleep(30)
             response = send_message(data, TASK_SOCKET)
             retries = 0
-            while (response[0]['status'] != metadata.get('first_attempt')) and (retries < 10) and (response[0]['status'] != metadata.get('first_attempt')):
+            while (response[0]['status'] != metadata.get('first_attempt')) and (retries < 10):
                 time.sleep(30)
                 response = send_message(data, TASK_SOCKET)
                 retries += 1
@@ -854,4 +839,6 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
     else:
         assert metadata.get('expected_response') == response[0]['data'], f'Upgrade response did not match expected! Expected {metadata.get("expected_response")} obtained {response[0]["data"]}'
 
+    for injector in injectors:
+        injector.stop_receive()
     return
