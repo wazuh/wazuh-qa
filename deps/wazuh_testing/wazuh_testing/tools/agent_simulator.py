@@ -74,6 +74,7 @@ class Agent:
         self.stop_receive = 0
         self.disconnect = None
         self.counter_disconnect = None
+        self.fim_integrity = None
         self.setup()
 
     # Set up agent: Keep alive, encryption key and start up msg.
@@ -138,14 +139,15 @@ class Agent:
         print("Registration - {}({})".format(self.name, self.id))
 
     # Add the Wazuh custom padding to each event sent
-    def wazuh_padding(self, compressed_event):
+    @staticmethod
+    def wazuh_padding(compressed_event):
         padding = 8
         extra = len(compressed_event) % padding
         if extra > 0:
             padded_event = (b'!' * (padding - extra)) + compressed_event
         else:
-            padded_event = (b'!' * (padding)) + compressed_event
-        return (padded_event)
+            padded_event = (b'!' * padding) + compressed_event
+        return padded_event
 
     # Generate encryption key (using agent metadata and key)
     def create_encryption_key(self):
@@ -160,7 +162,8 @@ class Agent:
         self.encryption_key = key
 
     # Compose event from raw message
-    def compose_event(self, message):
+    @staticmethod
+    def compose_event(message):
         message = message.encode()
         random_number = b'55555'
         global_counter = b'1234567891'
@@ -170,7 +173,7 @@ class Agent:
             + split + message
         msg_md5 = hashlib.md5(msg).hexdigest()
         event = msg_md5.encode() + msg
-        return (event)
+        return event
 
     # Encrypt event AES or Blowfish
     def encrypt(self, padded_event):
@@ -180,7 +183,7 @@ class Agent:
         if self.cypher == "blowfish":
             encrypted_event = Cipher(padded_event,
                                      self.encryption_key).encrypt_blowfish()
-        return (encrypted_event)
+        return encrypted_event
 
     # Add event headers for AES or Blowfish Cyphers
     def headers(self, agentid, encrypted_event):
@@ -189,7 +192,7 @@ class Agent:
         if self.cypher == "blowfish":
             header = "!{0}!:".format(agentid).encode()
         headers_event = header + encrypted_event
-        return (headers_event)
+        return headers_event
 
     def createEvent(self, message):
         # Compose event
@@ -202,10 +205,11 @@ class Agent:
         encrypted_event = self.encrypt(padded_event)
         # Add headers
         headers_event = self.headers(self.id, encrypted_event)
-        return (headers_event)
+        return headers_event
 
     def receiveMessage(self, sender):
         while self.stop_receive == 0:
+            buffer_array = None
             if sender.protocol == 'tcp':
                 rcv = sender.socket.recv(4)
                 if len(rcv) == 4:
@@ -218,6 +222,8 @@ class Agent:
 
                     if data_len != len(buffer_array):
                         continue
+                else:
+                    continue
             else:
                 buffer_array, client_address = sender.socket.recvfrom(65536)
             index = buffer_array.find(b'!')
@@ -255,7 +261,6 @@ class Agent:
     def processCommand(self, sender, message_list):
         com_index = message_list.index('com')
         command = message_list[com_index+1]
-        parameter = message_list[com_index+2]
         if command in ['lock_restart', 'open', 'write', 'close',
                        'clear_upgrade_result']:
             sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} ok '))
@@ -364,15 +369,16 @@ class GeneratorIntegrityFIM:
                                           self.agent_version)
 
     def formatMessage(self, message):
-        return ('{0}:[{1}] ({2}) any->syscheck:{3}'.format(self.INTEGRITY_MQ,
-                                                           self.agent_id,
-                                                           self.agent_name,
-                                                           message))
+        return '{0}:[{1}] ({2}) any->syscheck:{3}'.format(self.INTEGRITY_MQ,
+                                                          self.agent_id,
+                                                          self.agent_name,
+                                                          message)
 
     def generateMessage(self):
+        data = None
         if self.event_type == "integrity_check_global" or \
-                                self.event_type == "integrity_check_left" or \
-                                self.event_type == "integrity_check_right":
+                              self.event_type == "integrity_check_left" or \
+                              self.event_type == "integrity_check_right":
             id = int(time())
             data = {"id": id,
                     "begin": self.fim_generator.randfile(),
@@ -536,7 +542,7 @@ class GeneratorFIM:
         if attributes["hash_sha256"] != old_attributes["hash_sha256"]:
             changed_attributes.append("sha256")
 
-        return (changed_attributes)
+        return changed_attributes
 
     def getAttributes(self):
         attributes = {
@@ -548,22 +554,22 @@ class GeneratorFIM:
                     "hash_sha1": self._sha1, "hash_sha256": self._sha256,
                     "checksum": self._checksum
                     }
-        return (attributes)
+        return attributes
 
     def formatMessage(self, message):
         if self.agent_version == "3.12":
-            return ('{0}:[{1}] ({2}) any->syscheck:{3}'
+            return '{0}:[{1}] ({2}) any->syscheck:{3}' \
                     .format(self.SYSCHECK_MQ, self.agent_id,
-                            self.agent_name, message))
+                            self.agent_name, message)
         if self.agent_version == "3.11":
             # If first time generating. Send control message to simulate
             # end of FIM baseline.
             if self.baseline_completed == 0:
                 self.baseline_completed = 1
-                return ('{0}:{1}:{2}'.format(self.SYSCHECK_MQ, self.SYSCHECK,
-                                             "syscheck-db-completed"))
-            return ('{0}:{1}:{2}'.format(self.SYSCHECK_MQ, self.SYSCHECK,
-                                         message))
+                return '{0}:{1}:{2}'.format(self.SYSCHECK_MQ, self.SYSCHECK,
+                                            "syscheck-db-completed")
+            return '{0}:{1}:{2}'.format(self.SYSCHECK_MQ, self.SYSCHECK,
+                                        message)
 
     def generateMessage(self):
         if self.agent_version == "3.12":
@@ -574,7 +580,7 @@ class GeneratorFIM:
                 data = {"path": self._file, "mode": self.event_mode,
                         "type": self.event_type, "timestamp": timestamp,
                         "attributes": attributes}
-            if self.event_type == "modified":
+            elif self.event_type == "modified":
                 timestamp = int(time())
                 self.generateAttributes()
                 attributes = self.getAttributes()
@@ -587,8 +593,7 @@ class GeneratorFIM:
                         "attributes": attributes,
                         "old_attributes": old_attributes,
                         "changed_attributes": changed_attributes}
-
-            if self.event_type == "deleted":
+            else:
                 timestamp = int(time())
                 self.generateAttributes()
                 attributes = self.getAttributes()
@@ -642,7 +647,6 @@ class Sender:
         if self.protocol == "udp":
             self.socket.sendto(event, (self.manager_address,
                                        int(self.manager_port)))
-        return(0)
 
 
 class Injector:
