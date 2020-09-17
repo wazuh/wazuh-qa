@@ -608,6 +608,11 @@ def wait_download(line):
         return line
     return None
 
+def wait_downloaded(line):
+    if ('Download' in line) and ('finished' in line):
+        return line
+    return None
+
 def wait_chunk_size(line):
     if ('Sending message to agent:' in line) and ('com write ' in line):
         return line
@@ -711,7 +716,6 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
 
     for index, agent in enumerate(agents):
         agent.set_wpk_variables(sha_list[index], metadata['upgrade_exec_result'][index], metadata['upgrade_notification'][index], metadata['upgrade_script_result'][index], metadata['disconnect'][index])
-
         injector = Injector(sender, agent)
         injectors.append(injector)
         injector.run()
@@ -759,7 +763,11 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
             else :
                 assert MANAGER_VERSION in last_log, f'Versions did not match expected! Expected {MANAGER_VERSION}'
         #let time to download wpk
-        time.sleep(60)
+        try:
+            log_monitor.start(timeout=600, callback=wait_downloaded)
+        except TimeoutError as err:
+            raise AssertionError("Finish download wpk log tooks too much!")
+        #time.sleep(60)
     
     if metadata.get('checks') and ('chunk_size' in metadata.get('checks')):
         # Checking version in logs

@@ -232,7 +232,7 @@ class Agent:
             if command == 'write' and self.disconnect == True:
                 self.counter_disconnect +=1
                 if self.counter_disconnect == 10:
-                    sleep(120)
+                    self.stop_receive = 1
         elif command == 'sha1':
             # !-req num ok {sha}
             if self.sha_key:
