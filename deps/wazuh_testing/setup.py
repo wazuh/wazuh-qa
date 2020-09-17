@@ -32,7 +32,7 @@ setup(name='wazuh_testing',
             'requests==2.23.0',
             'pyOpenSSL==19.1.0',
             'pycryptodome==3.9.8',
-            'configobj'
+            'configobj==5.0.6'
       ],
       zip_safe=False
       )

@@ -829,16 +829,19 @@ def test_wpk_manager(get_configuration, configure_environment, restart_service, 
             time.sleep(30)
             response = send_message(data, TASK_SOCKET)
             retries = 0
-            while (response[0]['status'] == 'In progress') and (retries < 10) and (response[0]['status'] != expected_status[index]):
+            while response[0]['status'] == 'In progress' and retries < 10 and \
+                 response[0]['status'] != expected_status[index]:
                 time.sleep(30)
                 response = send_message(data, TASK_SOCKET)
                 retries += 1
-            assert expected_status[index] == response[0]['status'], f'Upgrade status did not match expected! Expected {expected_status[index]} obtained {response[0]["status"]} at index {index}'
+            assert expected_status[index] == response[0]['status'], \
+                f'Upgrade status did not match expected! Expected {expected_status[index]} obtained {response[0]["status"]} at index {index}'
             if expected_status[index] == 'Failed':
-                assert expected_error_msg[index] == response[0]['error_msg'], f'Error msg did not match expected! Expected {expected_error_msg[index]} obtained {response[0]["error_msg"]} at index {index}'
+                assert expected_error_msg[index] == response[0]['error_msg'], \
+                    f'Error msg did not match expected! Expected {expected_error_msg[index]} obtained {response[0]["error_msg"]} at index {index}'
     else:
-        assert metadata.get('expected_response') == response[0]['data'], f'Upgrade response did not match expected! Expected {metadata.get("expected_response")} obtained {response[0]["data"]}'
+        assert metadata.get('expected_response') == response[0]['data'], \
+            f'Upgrade response did not match expected! Expected {metadata.get("expected_response")} obtained {response[0]["data"]}'
 
     for injector in injectors:
         injector.stop_receive()
-    return
