@@ -17,7 +17,7 @@ from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
-# Configurations    
+# Configurations
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 messages_path = os.path.join(test_data_path, 'invalid_socket_input.yaml')
@@ -57,4 +57,4 @@ def test_invalid_socket_input(connect_to_sockets_function, test_case: list):
 
     result = receiver_sockets[0].receive(size=True).rstrip(b'\x00').decode()
     assert stage['output'] == result, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1,
-                                                                                    stage['stage'])
+                                                                             stage['stage'])
