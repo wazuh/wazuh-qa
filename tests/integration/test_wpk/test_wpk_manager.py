@@ -35,22 +35,6 @@ TASK_TIMEOUT = '15m'
 global valid_sha1_list
 valid_sha1_list = {}
 
-
-def set_debug_mode():
-    local_int_conf_path = os.path.join(WAZUH_PATH, 'etc', 'local_internal_options.conf')
-    debug_line = 'wazuh_modules.debug=2\n'
-    with open(local_int_conf_path, 'r') as local_file_read:
-        lines = local_file_read.readlines()
-        for line in lines:
-            if line == debug_line:
-                return
-    with open(local_int_conf_path, 'a') as local_file_write:
-        local_file_write.write('\n'+debug_line)
-
-
-set_debug_mode()
-
-
 cases = [
     # 0. Single Agent - success
     {
@@ -579,6 +563,19 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 agents = []
 
 
+@pytest.fixture(scope="session")
+def set_debug_mode():
+    local_int_conf_path = os.path.join(WAZUH_PATH, 'etc', 'local_internal_options.conf')
+    debug_line = 'wazuh_modules.debug=2\n'
+    with open(local_int_conf_path, 'r') as local_file_read:
+        lines = local_file_read.readlines()
+        for line in lines:
+            if line == debug_line:
+                return
+    with open(local_int_conf_path, 'a') as local_file_write:
+        local_file_write.write('\n'+debug_line)
+
+
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
     """Get configurations from the module"""
@@ -693,7 +690,7 @@ def get_sha_list(metadata):
     return sha_list
 
 
-def test_wpk_manager(get_configuration, configure_environment,
+def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
                      restart_service, configure_agents):
     metadata = get_configuration.get('metadata')
     protocol = metadata['protocol']
