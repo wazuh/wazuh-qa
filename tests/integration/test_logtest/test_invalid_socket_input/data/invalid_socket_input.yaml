@@ -63,3 +63,11 @@
     input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{}}'
     output: "{\"error\":7308,\"data\":{},\"messages\":\"'location' JSON field is required and must be a string\"}"
     stage: 'Missing event/log_format/location'
+-
+  name: "Oversize message"
+  description: "Check a message larger than the expected maximum"
+  test_case:
+  -
+    input: '{{"token": kTy234Sdvtp7","event": "{}","log_format": "syslog","location": "master->/var/log/syslog"}}'
+    output: "{\"error\":7315,\"data\":{},\"messages\":\"Failure to receive message: size is bigger than expected\"}"
+    stage: 'Oversize message'

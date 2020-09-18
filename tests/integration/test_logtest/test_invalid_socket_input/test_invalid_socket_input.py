@@ -6,6 +6,8 @@ import os
 
 import pytest
 import yaml
+from string import ascii_uppercase
+import random
 
 from wazuh_testing import global_parameters
 from wazuh_testing.analysis import callback_fim_error
@@ -46,8 +48,13 @@ def test_invalid_socket_input(connect_to_sockets_function, test_case: list):
         List of test_case stages (dicts with input, output and stage keys)
     """
     stage = test_case[0]
-    receiver_sockets[0].send(stage['input'], size=True)
-    result = receiver_sockets[0].receive(size=True).rstrip(b'\x00').decode()
 
+    if stage["stage"] != 'Oversize message':
+        receiver_sockets[0].send(stage['input'], size=True)
+    else:
+        over_size_parameter = ''.join(random.choice(ascii_uppercase) for _ in range(2 ** 16))
+        receiver_sockets[0].send(stage['input'].format(over_size_parameter), size=True)
+
+    result = receiver_sockets[0].receive(size=True).rstrip(b'\x00').decode()
     assert stage['output'] == result, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1,
-                                                                                stage['stage'])
+                                                                                    stage['stage'])
