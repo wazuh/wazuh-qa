@@ -23,13 +23,15 @@ pytestmark = [pytest.mark.tier(level=0), pytest.mark.agent]
 
 folder = 'etc' if platform.system() == 'Linux' else ''
 
-DEFAULT_UPGRADE_SCRIPT = 'upgrade.sh' if platform.system() == 'Linux' else 'upgrade.bat'
-CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, folder,'client.keys') #for unix add 'etc'
+DEFAULT_UPGRADE_SCRIPT = 'upgrade.sh' if platform.system() == 'Linux' \
+                                      else 'upgrade.bat'
+CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, folder, 'client.keys')
 CRYPTO = "aes"
 SERVER_ADDRESS = 'localhost'
 PROTOCOL = "tcp"
 
-# Test will varying according to agent version. This test should be tried with at least:
+# Test will varying according to agent version. This test should be tried
+# with at least:
 # 1. v3.13.1
 # 2. v4.0.0
 config_file_path = os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')
@@ -133,6 +135,7 @@ params = [
     } for x in range(0, len(test_metadata))
 ]
 
+
 def load_tests(path):
     """ Loads a yaml file from a path 
     Retrun 
@@ -142,43 +145,52 @@ def load_tests(path):
     with open(path) as f:
         return yaml.safe_load(f)
 
+
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_agent_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=test_metadata)
 
 # configurations = configurations[-1:]
 
-remoted_simulator = None 
+remoted_simulator = None
+
 
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
     """Get configurations from the module"""
     yield request.param
 
+
 @pytest.fixture(scope="function")
 def start_agent(request, get_configuration):
     metadata = get_configuration['metadata']
-    authd_simulator = AuthdSimulator(server_address=SERVER_ADDRESS, enorllment_port=1515)
+    authd_simulator = AuthdSimulator(server_address=SERVER_ADDRESS,
+                                     enrollment_port=1515)
     authd_simulator.start()
     global remoted_simulator
-    remoted_simulator = RemotedSimulator(server_address=SERVER_ADDRESS, remoted_port=1514, protocol=metadata['protocol'], mode='CONTROLED_ACK',start_on_init=False)
-    
+    remoted_simulator = RemotedSimulator(server_address=SERVER_ADDRESS,
+                                         remoted_port=1514,
+                                         protocol=metadata['protocol'],
+                                         mode='CONTROLED_ACK',
+                                         start_on_init=False)
+
     # Clean client.keys file
     truncate_file(CLIENT_KEYS_PATH)
     time.sleep(1)
-    
+
     remoted_simulator.start(custom_listener=remoted_simulator.upgrade_listener, args=(metadata['filename'], metadata['filepath'], metadata['chunk_size'], metadata['upgrade_script'], metadata['sha1'], 
-        metadata['simulate_interruption'], metadata['simulate_rollback']))
-    
+                            metadata['simulate_interruption'], metadata['simulate_rollback']))
+
     control_service('stop')
     subprocess.call([f'{WAZUH_PATH}/bin/agent-auth', '-m', SERVER_ADDRESS])
-    control_service('start') 
+    control_service('start')
 
     yield
 
     remoted_simulator.stop()
     authd_simulator.shutdown()
-    
+
+
 @pytest.fixture(scope="function")
 def download_wpk(get_configuration):
     metadata = get_configuration['metadata']
@@ -189,7 +201,8 @@ def download_wpk(get_configuration):
     architecture = 'x86_64'
     # Generating file name
     if current_plaform == "windows":
-        wpk_file = "wazuh_agent_{0}_{1}.wpk".format(agent_version, current_plaform)
+        wpk_file = "wazuh_agent_{0}_{1}.wpk".format(agent_version,
+                                                    current_plaform)
         wpk_url = protocol + wpk_repo + "windows/" + wpk_file
     else:
         wpk_file = "wazuh_agent_{0}_linux_{1}.wpk".format(agent_version, architecture)
