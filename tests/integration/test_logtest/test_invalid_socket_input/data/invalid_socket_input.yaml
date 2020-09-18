@@ -5,61 +5,61 @@
   test_case:
   -
     input: '{"token": kTy234Sdvtp7","event": "Jun 24 11:54:19 Master systemd[2099]: Started VTE child process 20118 launched by terminator process 17756.","log_format": "syslog","location": "master->/var/log/syslog"}'
-    output: "{\"messages\":[\"ERROR: (7306): Error parsing JSON\",\"ERROR: (7307): Error in position 10, ... {\\\"token\\\": kTy234Sdvt ...\"],\"codemsg\":-2}"
+    output: '{"error":7306,"data":{},"message":"Error parsing JSON"}'
     stage: 'Json malformed (Missing ")'
 -
   name: "Missing event"
   description: "Check invalid input for client request"
   test_case:
   -
-    input: '{"token": "4885bbf4","log_format": "syslog","location": "master->/var/log/syslog"}'
-    output: "{\"messages\":[\"ERROR: (7313): 'event' JSON field not found or is empty\"],\"codemsg\":-2}"
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"token":"4885bbf4","log_format":"syslog","location":"master->/var/log/syslog"}}'
+    output: "{\"error\":7313,\"data\":{},\"messages\":\"'event' JSON field not found or is empty\"}"
     stage: 'Missing event'
 -
   name: "Missing log_format"
   description: "Check invalid input for client request"
   test_case:
   -
-    input: '{"token": "4885bbf4","event": "Jun 24 11:54:19 Master systemd[2099]: Started VTE child process 20118 launched by terminator process 17756.","location": "master->/var/log/syslog"}'
-    output: "{\"messages\":[\"ERROR: (7308): 'log_format' JSON field is required and must be a string\"],\"codemsg\":-2}"
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"event":"Jun 24 11:54:19 Master systemd[2099]: Started VTE child process 20118 launched by terminator process 17756.","location":"master->/var/log/syslog"}}'
+    output: "{\"error\":7308,\"data\":{},\"messages\":\"'log_format' JSON field is required and must be a string\"}"
     stage: 'Missing log_format'
 -
   name: "Missing location"
   description: "Check invalid input for client request"
   test_case:
   -
-    input: '{"token": "4885bbf4","event": "Jun 24 11:54:19 Master systemd[2099]: Started VTE child process 20118 launched by terminator process 17756.","log_format": "syslog"}'
-    output: "{\"messages\":[\"ERROR: (7308): 'location' JSON field is required and must be a string\"],\"codemsg\":-2}"
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"token":"4885bbf4","event":"Jun 24 11:54:19 Master systemd[2099]: Started VTE child process 20118 launched by terminator process 17756.","log_format":"syslog"}}'
+    output: "{\"error\":7308,\"data\":{},\"messages\":\"'location' JSON field is required and must be a string\"}"
     stage: 'Missing location'
 -
   name: "Missing event/log_format"
   description: "Check invalid input for client request"
   test_case:
   -
-    input: '{"token": "4885bbf4","location": "master->/var/log/syslog"}'
-    output: "{\"messages\":[\"ERROR: (7308): 'log_format' JSON field is required and must be a string\",\"ERROR: (7313): 'event' JSON field not found or is empty\"],\"codemsg\":-2}"
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"token":"4885bbf4","location":"master->/var/log/syslog"}}'
+    output: "{\"error\":7308,\"data\":{},\"messages\":\"'log_format' JSON field is required and must be a string\"}"
     stage: 'Missing event/log_format'
 -
   name: "Missing event/location"
   description: "Check invalid input for client request"
   test_case:
   -
-    input: '{"token": "4885bbf4","log_format": "syslog"}'
-    output: "{\"messages\":[\"ERROR: (7308): 'location' JSON field is required and must be a string\",\"ERROR: (7313): 'event' JSON field not found or is empty\"],\"codemsg\":-2}"
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"token":"4885bbf4","log_format":"syslog"}}'
+    output: "{\"error\":7308,\"data\":{},\"messages\":\"'location' JSON field is required and must be a string\"}"
     stage: 'Missing event/location'
 -
   name: "Missing log_format/location"
   description: "Check invalid input for client request"
   test_case:
   -
-    input: '{"token": "4885bbf4","event": "Jun 24 11:54:19 Master systemd[2099]: Started VTE child process 20118 launched by terminator process 17756."}'
-    output: "{\"messages\":[\"ERROR: (7308): 'location' JSON field is required and must be a string\",\"ERROR: (7308): 'log_format' JSON field is required and must be a string\"],\"codemsg\":-2}"
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"token":"4885bbf4","event":"Jun 24 11:54:19 Master systemd[2099]: Started VTE child process 20118 launched by terminator process 17756."}}'
+    output: "{\"error\":7308,\"data\":{},\"messages\":\"'location' JSON field is required and must be a string\"}"
     stage: 'Missing log_format/location'
 -
   name: "Missing event/log_format/location"
   description: "Check invalid input for client request"
   test_case:
   -
-    input: '{"token": "4885bbf4"}'
-    output: "{\"messages\":[\"ERROR: (7308): 'location' JSON field is required and must be a string\",\"ERROR: (7308): 'log_format' JSON field is required and must be a string\",\"ERROR: (7313): 'event' JSON field not found or is empty\"],\"codemsg\":-2}"
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{}}'
+    output: "{\"error\":7308,\"data\":{},\"messages\":\"'location' JSON field is required and must be a string\"}"
     stage: 'Missing event/log_format/location'
