@@ -16,6 +16,38 @@
     output: "{\"error\":7313,\"data\":{},\"messages\":\"'event' JSON field not found or is empty\"}"
     stage: 'Missing event'
 -
+  name: "Bad type num - event"
+  description: "Check invalid input for client request"
+  test_case:
+  -
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"event": 123456,"log_format":"syslog","location":"master->/var/log/syslog"}}'
+    output: "{\"error\":7313,\"data\":{},\"messages\":\"'event' JSON field not found or is empty\"}"
+    stage: 'Bad type num - event'
+-
+  name: "Bad type array - event"
+  description: "Check invalid input for client request"
+  test_case:
+  -
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"event": ["test"],"log_format":"syslog","location":"master->/var/log/syslog"}}'
+    output: "{\"error\":7313,\"data\":{},\"messages\":\"'event' JSON field not found or is empty\"}"
+    stage: 'Bad type array - event'
+-
+  name: "Bad type bool - event"
+  description: "Check invalid input for client request"
+  test_case:
+  -
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"event": true,"log_format":"syslog","location":"master->/var/log/syslog"}}'
+    output: "{\"error\":7313,\"data\":{},\"messages\":\"'event' JSON field not found or is empty\"}"
+    stage: 'Bad type bool - event'
+-
+  name: "Null event"
+  description: "Check invalid input for client request"
+  test_case:
+  -
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"event": null,"log_format":"syslog","location":"master->/var/log/syslog"}}'
+    output: "{\"error\":7313,\"data\":{},\"messages\":\"'event' JSON field not found or is empty\"}"
+    stage: 'Null event'
+-
   name: "Missing log_format"
   description: "Check invalid input for client request"
   test_case:
@@ -24,6 +56,38 @@
     output: "{\"error\":7308,\"data\":{},\"messages\":\"'log_format' JSON field is required and must be a string\"}"
     stage: 'Missing log_format'
 -
+  name: "Bad type num - log_format"
+  description: "Check invalid input for client request"
+  test_case:
+  -
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"log_format" : 123456,"event":"Jun 24 11:54:19 Master systemd[2099]: Started VTE child process 20118 launched by terminator process 17756.","location":"master->/var/log/syslog"}}'
+    output: "{\"error\":7308,\"data\":{},\"messages\":\"'log_format' JSON field is required and must be a string\"}"
+    stage: 'Bad type num - log_format'
+-
+  name: "Bad type array - log_format"
+  description: "Check invalid input for client request"
+  test_case:
+  -
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"log_format" : ["test"] ,"event":"Jun 24 11:54:19 Master systemd[2099]: Started VTE child process 20118 launched by terminator process 17756.","location":"master->/var/log/syslog"}}'
+    output: "{\"error\":7308,\"data\":{},\"messages\":\"'log_format' JSON field is required and must be a string\"}"
+    stage: 'Bad type array - log_format'
+-
+  name: "Bad type bool - log_format"
+  description: "Check invalid input for client request"
+  test_case:
+  -
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"log_format" : false,"event":"Jun 24 11:54:19 Master systemd[2099]: Started VTE child process 20118 launched by terminator process 17756.","location":"master->/var/log/syslog"}}'
+    output: "{\"error\":7308,\"data\":{},\"messages\":\"'log_format' JSON field is required and must be a string\"}"
+    stage: 'Bad type bool - log_format'
+-
+  name: "Null log_format"
+  description: "Check invalid input for client request"
+  test_case:
+  -
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"log_format" : null,"event":"Jun 24 11:54:19 Master systemd[2099]: Started VTE child process 20118 launched by terminator process 17756.","location":"master->/var/log/syslog"}}'
+    output: "{\"error\":7308,\"data\":{},\"messages\":\"'log_format' JSON field is required and must be a string\"}"
+    stage: 'Null log_format'
+-
   name: "Missing location"
   description: "Check invalid input for client request"
   test_case:
@@ -31,6 +95,38 @@
     input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"token":"4885bbf4","event":"Jun 24 11:54:19 Master systemd[2099]: Started VTE child process 20118 launched by terminator process 17756.","log_format":"syslog"}}'
     output: "{\"error\":7308,\"data\":{},\"messages\":\"'location' JSON field is required and must be a string\"}"
     stage: 'Missing location'
+-
+  name: "Bad type num - location"
+  description: "Check invalid input for client request"
+  test_case:
+  -
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"location" : 123456,"event":"Jun 24 11:54:19 Master systemd[2099]: Started VTE child process 20118 launched by terminator process 17756.","log_format":"syslog"}}'
+    output: "{\"error\":7308,\"data\":{},\"messages\":\"'location' JSON field is required and must be a string\"}"
+    stage: 'Bad type num - location'
+-
+  name: "Bad type array - location"
+  description: "Check invalid input for client request"
+  test_case:
+  -
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"location" : ["test"] ,"event":"Jun 24 11:54:19 Master systemd[2099]: Started VTE child process 20118 launched by terminator process 17756.","log_format":"syslog"}}'
+    output: "{\"error\":7308,\"data\":{},\"messages\":\"'location' JSON field is required and must be a string\"}"
+    stage: 'Bad type array - location'
+-
+  name: "Bad type bool - location"
+  description: "Check invalid input for client request"
+  test_case:
+  -
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"location" : false,"event":"Jun 24 11:54:19 Master systemd[2099]: Started VTE child process 20118 launched by terminator process 17756.","log_format":"syslog"}}'
+    output: "{\"error\":7308,\"data\":{},\"messages\":\"'location' JSON field is required and must be a string\"}"
+    stage: 'Bad type bool - location'
+-
+  name: "Null location"
+  description: "Check invalid input for client request"
+  test_case:
+  -
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"location" : null,"event":"Jun 24 11:54:19 Master systemd[2099]: Started VTE child process 20118 launched by terminator process 17756.","log_format":"syslog"}}'
+    output: "{\"error\":7308,\"data\":{},\"messages\":\"'location' JSON field is required and must be a string\"}"
+    stage: 'Null location'
 -
   name: "Missing event/log_format"
   description: "Check invalid input for client request"
