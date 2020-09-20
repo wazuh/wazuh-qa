@@ -30,6 +30,7 @@ CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, folder, 'client.keys')
 CRYPTO = "aes"
 SERVER_ADDRESS = 'localhost'
 PROTOCOL = "tcp"
+version_to_upgrade = 'v4.0.0'
 
 
 # Test will varying according to agent version. This test should be tried
@@ -56,7 +57,7 @@ test_metadata = [
     {
         'protocol': PROTOCOL,
         'initial_version': _agent_version,
-        'agent_version': 'v4.0.0',
+        'agent_version': version_to_upgrade,
         'use_http': False,
         'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
         'chunk_size': 16384,
@@ -73,7 +74,7 @@ test_metadata = [
     {
         'protocol': PROTOCOL,
         'initial_version': _agent_version,
-        'agent_version': 'v4.0.0',
+        'agent_version': version_to_upgrade,
         'use_http': False,
         'upgrade_script': 'fake_upgrade.sh',
         'chunk_size': 16384,
@@ -89,7 +90,7 @@ test_metadata = [
     {
         'protocol': PROTOCOL,
         'initial_version': _agent_version,
-        'agent_version': 'v4.0.0',
+        'agent_version': version_to_upgrade,
         'use_http': False,
         'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
         'chunk_size': 16384,
@@ -108,7 +109,7 @@ if _agent_version == 'v3.13.1':
         # 4. Simulate a rollback (v3.13.1)
         'protocol': PROTOCOL,
         'initial_version': 'v3.13.1',
-        'agent_version': 'v4.0.0',
+        'agent_version': version_to_upgrade,
         'use_http': False,
         'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
         'chunk_size': 16384,
@@ -125,7 +126,7 @@ elif _agent_version == 'v4.0.0':
         # 5. Simulate a rollback (v4.0.0)
         'protocol': PROTOCOL,
         'initial_version': 'v4.0.0',
-        'agent_version': 'v4.0.0',
+        'agent_version': version_to_upgrade,
         'use_http': False,
         'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
         'chunk_size': 16384,
@@ -145,13 +146,13 @@ params = [
         'SERVER_ADDRESS': SERVER_ADDRESS,
         'REMOTED_PORT': 1514,
         'PROTOCOL': PROTOCOL
-    } for x in range(0, len(test_metadata))
+    } for _ in range(0, len(test_metadata))
 ]
 
 
 def load_tests(path):
     """ Loads a yaml file from a path
-    Retrun
+    Return
     ----------
     yaml structure
     """
@@ -234,16 +235,16 @@ def download_wpk(get_configuration):
     wpk_file_path = os.path.join(WAZUH_PATH, 'var', wpk_file)
     try:
         result = requests.get(wpk_url)
-    except requests.exceptions.RequestException as e:
-        pass
-    
+    except requests.exceptions.RequestException:
+        raise Exception("The WPK package could not be obtained")
+
     if result.ok:
         with open(wpk_file_path, 'wb') as fd:
             for chunk in result.iter_content(chunk_size=128):
-                fd.write(chunk)        
+                fd.write(chunk)
     else:
-        error = "Can't access to the WPK file in {}".format(wpk_url)
-    
+        raise Exception("Can't access to the WPK file in {}".format(wpk_url))
+
     # Get SHA1 file sum
     sha1hash = hashlib.sha1(open(wpk_file_path, 'rb').read()).hexdigest()
 
@@ -310,12 +311,11 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
     if upgrade_process_result and expected['receive_notification']:
         result = remoted_simulator.wait_upgrade_notification(timeout=180)
         if result is not None:
-            data = result['data']
             status = result['status']
             assert status == expected['status'], \
                    'Notification status did not match expected'
         else:
-            assert expected['receive_notification'] is False, \
+            assert not expected['receive_notification'], \
                    'Notification was expected but was not received'
 
     if expected['upgrade_ok'] and not metadata['simulate_rollback']:
