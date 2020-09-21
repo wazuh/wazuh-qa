@@ -65,12 +65,12 @@ def insert_agents(id_offset, amount):
         if data[0] != 'ok':
             raise AssertionError('Unable to add agent {id}')
 
-        command = f'global update-keepalive {{"id":{id},"sync_status":1}}'
+        command = f'global update-keepalive {{"id":{id},"sync_status":"syncreq"}}'
         receiver_sockets[0].send(command, size=True)
         response = receiver_sockets[0].receive(size=True).decode()
         data = response.split(" ", 1)
         if data[0] != 'ok':
-            raise AssertionError('Unable to add agent {id}')
+            raise AssertionError('Unable to update agent {id}')
 
 
 # Tests
@@ -132,7 +132,7 @@ def test_wazuh_db_chunks(configure_sockets_environment, connect_to_sockets_modul
     response = receiver_sockets[0].receive(size=True).decode()
     
     status = response.split(" ",1)[0]
-    assert status == 'due', 'Failed chunks check onget-all-agents. Expected: {}. Response: {}'\
+    assert status == 'due', 'Failed chunks check on get-all-agents. Expected: {}. Response: {}'\
            .format('due', status)
     
     #Check get-agents-by-keepalive chunk limit
