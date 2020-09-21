@@ -34,10 +34,10 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 
 def create_session():
-    receiver_sockets[0].send(
-        '{"event": "Jun 24 11:54:19 Master systemd[2099]: Started VTE child process 20118 launched by terminator process'
-        ' 17756.","log_format": "syslog","location": "master->/var/log/syslog"}',
-        size=True)
+    receiver_sockets[0].send('{"version":1,"origin":{"name":"Integration Test","module":"api"},\
+        "command":"log_processing","parameters":{"event":"Jun 24 11:54:19 Master systemd[2099]: \
+        Started VTE child process 20118 launched by terminator process 17756.","log_format":"syslog",\
+        "location":"master->/var/log/syslog"}}', size=True)
     token = json.loads(receiver_sockets[0].receive(size=True).rstrip(b'\x00').decode())['data']['token']
 
     # Close socket

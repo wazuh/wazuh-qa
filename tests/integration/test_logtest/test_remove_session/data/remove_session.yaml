@@ -5,15 +5,15 @@
   test_case:
   -
     input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"remove_session","parameters":{"token":6}}'
-    output: '{"error":7316,"data":{},"message":"Failure to remove session. remove_session JSON field must be a string"}'
+    output: '{"message":"(7316): Failure to remove session. token JSON field must be a string","error":4,"data":{}}'
     stage: 'Remove invalid numeric token'
 -
   name: "Remove invalid json"
   description: "Check remove session"
   test_case:
   -
-    input: '{"remove_session": asd}'
-    output: '{"error":7306,"data":{},"message":"Error parsing JSON"}'
+    input: '{"version:1,"origin":{"name":"Integration Test","module":"api"},"command":"remove_session","parameters":{"token":6}}'
+    output: '{"message":"(7307): Error parsing JSON in position 13, ... ersion:1,\"origin\":{\" ...","error":1,"data":{}}'
     stage: 'Remove invalid json'
 -
   name: "Remove invalid empty json object token"
@@ -21,15 +21,15 @@
   test_case:
   -
     input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"remove_session","parameters":{"token":{}}}}'
-    output: '{"error":7316,"data":{},"message":"Failure to remove session. remove_session JSON field must be a string"}'
+    output: '{"message":"(7316): Failure to remove session. token JSON field must be a string","error":4,"data":{}}'
     stage: 'Remove invalid empty json object token'
 -
   name: "Remove invalid array token"
   description: "Check remove session"
   test_case:
   -
-    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"remove_session","parameters":{"token":["12345678","asd"]]}}'
-    output: '{"error":7316,"data":{},"message":"Failure to remove session. remove_session JSON field must be a string"}'
+    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"remove_session","parameters":{"token":["12345678","asd"]}}'
+    output: '{"message":"(7316): Failure to remove session. token JSON field must be a string","error":4,"data":{}}'
     stage: 'Remove invalid array token'
 -
   name: "Remove invalid token null"
@@ -37,7 +37,7 @@
   test_case:
   -
     input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"remove_session","parameters":{"token":null}}'
-    output: '{"error":7316,"data":{},"message":"Failure to remove session. remove_session JSON field must be a string"}'
+    output: '{"message":"(7316): Failure to remove session. token JSON field must be a string","error":4,"data":{}}'
     stage: 'Remove invalid token null'
 -
   name: "Remove invalid boolean token "
@@ -45,7 +45,7 @@
   test_case:
   -
     input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"remove_session","parameters":{"token":true}}'
-    output: '{"error":7316,"data":{},"message":"Failure to remove session. remove_session JSON field must be a string"}'
+    output: '{"message":"(7316): Failure to remove session. token JSON field must be a string","error":4,"data":{}}'
     stage: 'Remove invalid boolean token'
 -
   name: "Remove invalid token len"
@@ -53,7 +53,7 @@
   test_case:
   -
     input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"remove_session","parameters":{"token":"asd"}}'
-    output: "{\"error\":7309,\"data\":{},\"message\":\"'asd' is not a valid token\"}"
+    output: "{\"message\":\"(7309): 'asd' is not a valid token\",\"error\":4,\"data\":{}}"
     stage: 'Remove invalid token len'
 -
   name: "Remove non-exist session"
@@ -68,6 +68,6 @@
   description: "Check remove session"
   test_case:
   -
-    input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"remove_session","parameters":{"token":"{}"}}'
-    output: "{\"error\":0,\"data\":{\"messages\":[\"INFO: (7206): The session '{}' was closed successfully\"],\"codemsg\":0}}"
+    input: '{{"version": 1,"origin": {{"name": "Integration Test","module": "api"}},"command": "remove_session", "parameters": {{"token": "{}"}}}}'
+    output: "{{\"error\":0,\"data\":{{\"messages\":[\"INFO: (7206): The session '{}' was closed successfully\"],\"codemsg\":0}}}}"
     stage: 'Remove session OK'
