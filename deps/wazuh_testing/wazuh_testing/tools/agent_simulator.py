@@ -282,7 +282,7 @@ class Agent:
                 if self.send_upgrade_notification:
                     upgrade_update_status_message = {
                         'command': 'upgrade_update_status',
-                        'params': {
+                        'parameters': {
                             'error': self.upgrade_script_result,
                             'data': 'Upgrade was successful'
                                     if self.upgrade_script_result == 0

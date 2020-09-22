@@ -76,7 +76,7 @@ cases = [
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [2],
             'status': ['Failed'],
-            'error_msg': ['Upgrade procedure exited with error code.'],
+            'error_msg': ['Upgrade procedure exited with error code'],
             'upgrade_notification': [True],
             'expected_response': 'Success'
         }
@@ -99,7 +99,7 @@ cases = [
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
             'status': ['Failed'],
-            'error_msg': ['Send verify sha1 error.'],
+            'error_msg': ['Send verify sha1 error'],
             'upgrade_notification': [False],
             'expected_response': 'Success'
         }
@@ -122,7 +122,7 @@ cases = [
             'upgrade_exec_result': ['0', '0', '0'],
             'upgrade_script_result': [0, 0, 2],
             'status': ['Done', 'Failed', 'Failed'],
-            'error_msg': ['', 'Send verify sha1 error.','Upgrade procedure exited with error code.'],
+            'error_msg': ['', 'Send verify sha1 error','Upgrade procedure exited with error code'],
             'upgrade_notification': [True, False, True],
             'expected_response': 'Success'
         }
@@ -147,7 +147,7 @@ cases = [
             'status': ['Done'],
             'upgrade_notification': [True],
             'message_params': {'version': 'v3.5.0', 'force_upgrade': 0},
-            'expected_response': 'Current agent version is greater or equal.'
+            'expected_response': 'Current agent version is greater or equal'
         }
     },
     # 5. The version of the WPK does not exist in the repository - Fail
@@ -170,7 +170,7 @@ cases = [
             'status': ['Done'],
             'upgrade_notification': [False],
             'message_params': {'version': 'v4.55.55', 'force_upgrade': 0},
-            'expected_response': 'The version of the WPK does not exist in the repository.'
+            'expected_response': 'The version of the WPK does not exist in the repository'
         }
     },
     # 6. The repository is not reachable - Fail
@@ -193,7 +193,7 @@ cases = [
             'status': ['Done'],
             'upgrade_notification': [False],
             'message_params': {'version': 'v4.1.0', 'force_upgrade': 0},
-            'expected_response': 'The repository is not reachable.'
+            'expected_response': 'The repository is not reachable'
         }
     },
     # 7. The WPK for this platform is not available - Fail
@@ -215,7 +215,7 @@ cases = [
             'upgrade_script_result': [0],
             'status': ['Done'],
             'upgrade_notification': [False],
-            'expected_response': 'The WPK for this platform is not available.'
+            'expected_response': 'The WPK for this platform is not available'
         }
     },
     # 8. Already updated - Current agent version is greater or equal - Fail
@@ -237,7 +237,7 @@ cases = [
             'upgrade_script_result': [0],
             'status': ['Done'],
             'upgrade_notification': [False],
-            'expected_response': 'Current agent version is greater or equal.'
+            'expected_response': 'Current agent version is greater or equal'
         }
     },
     # 9. Already updated with force=1 - Success
@@ -283,7 +283,7 @@ cases = [
             'status': ['Done'],
             'upgrade_notification': [False],
             'message_params': {'force_upgrade': 0},
-            'expected_response': 'Current agent version is greater or equal.'
+            'expected_response': 'Current agent version is greater or equal'
         }
     },
     # 11 Upgrade Legacy - Success
@@ -328,7 +328,7 @@ cases = [
             'upgrade_script_result': [0],
             'status': ['Done'],
             'upgrade_notification': [False],
-            'expected_response': 'Upgrade procedure could not start. Agent already upgrading.',
+            'expected_response': 'Upgrade procedure could not start. Agent already upgrading',
             'first_attempt': 'In progress'
         }
     },
@@ -375,7 +375,7 @@ cases = [
             'status': ['Failed'],
             'upgrade_notification': [False],
             'expected_response': 'Success',
-            'error_msg': ['Send write file error.'],
+            'error_msg': ['Send write file error'],
         }
     },
     # 15. Change default chunk_size - success
@@ -447,7 +447,7 @@ cases = [
             'status': ['Failed'],
             'upgrade_notification': [False],
             'message_params': {'file_path': 'invalid/path/to.wpk'},
-            'error_msg': ['The WPK file does not exist.'],
+            'error_msg': ['The WPK file does not exist'],
             'expected_response': 'Success',
             'command': 'upgrade_custom'
         }
@@ -709,7 +709,7 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
     command = 'upgrade'
     if metadata.get('command') == 'upgrade_custom':
         command = 'upgrade_custom'
-        if not expected_error_msg or ('The WPK file does not exist.' not in expected_error_msg):
+        if not expected_error_msg or ('The WPK file does not exist' not in expected_error_msg):
             file_name = metadata.get('message_params').get('file_path')
             file = os.path.join(UPGRADE_PATH, file_name)
             create_wpk_custom_file(file)
@@ -736,12 +736,12 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
 
     data = { 
         'command': command,
-        'agents': agents_id
+        'parameters': {'agents': agents_id}
     }
 
     # If have params for test case add to the data to send
     if metadata.get('message_params'):
-        data['params'] = metadata.get('message_params')
+        data['parameters'].update(metadata.get('message_params'))
 
     # remove wpk if need check http or version
     if metadata.get('checks') and ('use_http' in metadata.get('checks') or 'version' in metadata.get('checks')):
@@ -808,61 +808,69 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
 
     if metadata.get('first_attempt'):
         # Chech that result of first attempt is Success
-        assert 'Success' == response[0]['data'], \
-            f'First upgrade response did not match expected! Expected {metadata.get("expected_response")} obtained {response[0]["data"]}'
+        assert 'Success' == response['data'][0]['message'], \
+            f'First upgrade response did not match expected! Expected {metadata.get("expected_response")} obtained {response["data"][0]["message"]}'
 
         repeat_message = data
         # Continue with the validations of first attempt
-        task_ids = [item.get('task_id') for item in response]
+        task_ids = [item.get('task_id') for item in response['data']]
         for index, task_id in enumerate(task_ids):
-            data = [{ 
-                "module": "api",
+            data = { 
+                "origin": {
+                    "module": "api"
+                },
                 "command": 'task_result',
-                "task_id": task_id
-            }]
+                "parameters": {
+                    "tasks": [task_id]
+                }
+            }
             time.sleep(30)
             response = send_message(data, TASK_SOCKET)
             retries = 0
-            while (response[0]['status'] != metadata.get('first_attempt')) \
+            while (response['data'][0]['status'] != metadata.get('first_attempt')) \
                     and (retries < 10):
                 time.sleep(30)
                 response = send_message(data, TASK_SOCKET)
                 retries += 1
-            assert metadata.get('first_attempt') == response[0]['status'], \
-                f'First upgrade status did not match expected! Expected {metadata.get("first_attempt")} obtained {response[0]["status"]}'
+            assert metadata.get('first_attempt') == response['data'][0]['status'], \
+                f'First upgrade status did not match expected! Expected {metadata.get("first_attempt")} obtained {response["data"][0]["status"]}'
 
         # send upgrade request again
         response = send_message(repeat_message, UPGRADE_SOCKET)
 
     if metadata.get('expected_response') == 'Success':
         # Chech that result is expected
-        assert metadata.get('expected_response') == response[0]['data'], \
-            f'Upgrade response did not match expected! Expected {metadata.get("expected_response")} obtained {response[0]["data"]}'
+        assert metadata.get('expected_response') == response['data'][0]['message'], \
+            f'Upgrade response did not match expected! Expected {metadata.get("expected_response")} obtained {response["data"][0]["message"]}'
 
         # Continue with the test validations
-        task_ids = [item.get('task_id') for item in response]
+        task_ids = [item.get('task_id') for item in response['data']]
         for index, task_id in enumerate(task_ids):
-            data = [{ 
-                "module": "api",
+            data = { 
+                "origin": {
+                    "module": "api"
+                },
                 "command": 'task_result',
-                "task_id": task_id
-            }]
+                "parameters": {
+                    "tasks": [task_id]
+                }
+            }
             time.sleep(30)
             response = send_message(data, TASK_SOCKET)
             retries = 0
-            while response[0]['status'] == 'In progress' and retries < 10 and \
-                    response[0]['status'] != expected_status[index]:
+            while response['data'][0]['status'] == 'In progress' and retries < 10 and \
+                    response['data'][0]['status'] != expected_status[index]:
                 time.sleep(30)
                 response = send_message(data, TASK_SOCKET)
                 retries += 1
-            assert expected_status[index] == response[0]['status'], \
-                f'Upgrade status did not match expected! Expected {expected_status[index]} obtained {response[0]["status"]} at index {index}'
+            assert expected_status[index] == response['data'][0]['status'], \
+                f'Upgrade status did not match expected! Expected {expected_status[index]} obtained {response["data"][0]["status"]} at index {index}'
             if expected_status[index] == 'Failed':
-                assert expected_error_msg[index] == response[0]['error_msg'], \
-                    f'Error msg did not match expected! Expected {expected_error_msg[index]} obtained {response[0]["error_msg"]} at index {index}'
+                assert expected_error_msg[index] == response['data'][0]['error_msg'], \
+                    f'Error msg did not match expected! Expected {expected_error_msg[index]} obtained {response["data"][0]["error_msg"]} at index {index}'
     else:
-        assert metadata.get('expected_response') == response[0]['data'], \
-            f'Upgrade response did not match expected! Expected {metadata.get("expected_response")} obtained {response[0]["data"]}'
+        assert metadata.get('expected_response') == response['data'][0]['message'], \
+            f'Upgrade response did not match expected! Expected {metadata.get("expected_response")} obtained {response["data"][0]["message"]}'
 
     for injector in injectors:
         injector.stop_receive()
