@@ -284,7 +284,7 @@ class Agent:
                         'command': 'upgrade_update_status',
                         'parameters': {
                             'error': self.upgrade_script_result,
-                            'data': 'Upgrade was successful'
+                            'message': 'Upgrade was successful'
                                     if self.upgrade_script_result == 0
                                     else 'Upgrade failed',
                             'status': 'Done' if self.upgrade_script_result == 0

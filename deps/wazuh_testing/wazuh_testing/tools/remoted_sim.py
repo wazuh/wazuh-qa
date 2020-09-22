@@ -466,7 +466,7 @@ class RemotedSimulator:
             hash_message = False
 
         if rcv_msg.find('upgrade_update_status') != -1:
-            self.upgrade_notification = json.loads(rcv_msg[rcv_msg.find('\"params\":')+9:-1])
+            self.upgrade_notification = json.loads(rcv_msg[rcv_msg.find('\"parameters\":')+13:-1])
 
         #Save context of received message for future asserts
         self.last_message_ctx = '{} {} {}'.format(agent_identifier_type, agent_identifier, crypto_method)

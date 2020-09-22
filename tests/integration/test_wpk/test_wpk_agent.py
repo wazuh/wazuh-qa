@@ -67,7 +67,7 @@ test_metadata = [
             'upgrade_ok': True,
             'result_code': 0,
             'receive_notification': True,
-            'status': 'Done',   
+            'status': 'Done',
         }
     },
     # 2. False upgrade script parameter
