@@ -83,12 +83,6 @@ def test_load_rules_decoders(test_case):
         file_test = test_case['local_decoders']
         # copy test decoder
         shutil.copy(test_data_path + file_test, '/var/ossec/etc/decoders/local_decoder.xml')
-
-    if 'local_rules' in test_case or 'local_decoders' in test_case:
-        #restart wazuh service
-        control_service('restart',daemon='ossec-analysisd')
-        #Average time to logtest to settle
-        time.sleep(10)
     
     #Create session token
     if 'same_session' in test_case and test_case['same_session'] is True:
@@ -158,9 +152,5 @@ def test_load_rules_decoders(test_case):
         # restore previous decoders
         shutil.move('/var/ossec/etc/decoders/local_decoder.xml.cpy',
                     '/var/ossec/etc/decoders/local_decoder.xml')
-
-    if 'local_rules' in test_case or 'local_decoders' in test_case:
-        # restart wazuh service
-        control_service('restart',daemon='ossec-analysisd')
 
     assert not errors , "Failed stage(s) :{}".format("\n".join(errors))
