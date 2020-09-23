@@ -11,7 +11,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_file_size_limit_reached, generate_params, create_file, \
     check_time_travel, callback_detect_event, modify_file_content
 from test_fim.test_report_changes.common import generate_string, translate_size, disable_file_max_size, \
-    restore_file_max_size, make_diff_file_path
+    restore_file_max_size, make_diff_file_path, disable_rt_delay, restore_rt_delay
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -63,6 +63,7 @@ def extra_configuration_before_yield():
     Disable syscheck.file_max_size internal option
     """
     disable_file_max_size()
+    disable_rt_delay()
 
 
 def extra_configuration_after_yield():
@@ -70,6 +71,7 @@ def extra_configuration_after_yield():
     Restore syscheck.file_max_size internal option
     """
     restore_file_max_size()
+    restore_rt_delay()
 
 
 # Tests
@@ -116,11 +118,8 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
         raise FileNotFoundError(f"{diff_file_path} not found. It should exist before increasing the size.")
 
     # Increase the size of the file over the configured value
-    if sys.platform == 'linux':
-        os.system('dd if=/dev/zero of=' + os.path.join(folder, filename) + ' bs=1024 count=0 seek=20480')
-    else:
-        to_write = generate_string(size_limit, '0')
-        modify_file_content(folder, filename, new_content=to_write*3)
+    to_write = generate_string(size_limit, '0')
+    modify_file_content(folder, filename, new_content=to_write*3)
 
     check_time_travel(scheduled)
 
