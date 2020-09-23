@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import sys
 
 import pytest
 
@@ -115,7 +116,11 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
         raise FileNotFoundError(f"{diff_file_path} not found. It should exist before increasing the size.")
 
     # Increase the size of the file over the configured value
-    modify_file_content(folder, filename, new_content=to_write*3)
+    if sys.platform == 'linux':
+        os.system('dd if=/dev/zero of=' + os.path.join(folder, filename) + ' bs=1024 count=0 seek=20480')
+    else:
+        to_write = generate_string(size_limit, '0')
+        modify_file_content(folder, filename, new_content=to_write*3)
 
     check_time_travel(scheduled)
 
