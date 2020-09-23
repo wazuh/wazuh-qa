@@ -7,11 +7,8 @@ import os
 import pytest
 import yaml
 import json
-import ast
 
-from wazuh_testing import global_parameters
-from wazuh_testing.analysis import callback_fim_error
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
+from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.monitoring import SocketController
 
 
@@ -19,7 +16,8 @@ from wazuh_testing.tools.monitoring import SocketController
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
-# Configurations    
+
+# Configurations
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 messages_path = os.path.join(test_data_path, 'invalid_session_token.yaml')
@@ -27,21 +25,19 @@ with open(messages_path) as f:
     test_cases = yaml.safe_load(f)
     tc=list(test_cases)
 
+
 # Variables
 
-log_monitor_paths = [LOG_FILE_PATH]
 logtest_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'logtest'))
 
-receiver_sockets_params = [(logtest_path, 'AF_UNIX', 'TCP')]
 
-receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
-
+# Functions used on the test
 
 def create_connection():
     return SocketController(address=logtest_path, family='AF_UNIX', connection_protocol='TCP')
 
 def close_connection(connection):
-    connection.close();
+    connection.close()
 
 
 # Tests
@@ -58,13 +54,16 @@ def test_invalid_session_token(test_case):
         connection = create_connection();
         
         #Generate logtest request
-        request_pattern = '{{ "version":1, \
-            "origin":{{"name":"Integration Test","module":"api"}}, \
-            "command":"log_processing", \
-            "parameters":{{ "token":{} , {} , {} , {} }} \
-            }}'
-        input = request_pattern.format(stage['input_token'],test_case['input_event'],
-            test_case['input_log_format'],test_case['input_location'])
+        request_pattern = """{{ "version":1,
+            "origin":{{"name":"Integration Test","module":"api"}},
+            "command":"log_processing",
+            "parameters":{{ "token":{} , {} , {} , {} }}
+            }}"""
+
+        input = request_pattern.format(stage['input_token'],
+                                       test_case['input_event'],
+                                       test_case['input_log_format'],
+                                       test_case['input_location'])
 
         #Send request
         connection.send(input, size=True)
@@ -83,6 +82,7 @@ def test_invalid_session_token(test_case):
         #Check if invalid token warning message and new token is generated
         if expected['messages'][0].format(stage['input_token']) != result["data"]['messages'][0]:
             errors.append(stage['stage'])
+
         if expected['messages'][1] != result["data"]['messages'][1]:
             errors.append(stage['stage'])
 
