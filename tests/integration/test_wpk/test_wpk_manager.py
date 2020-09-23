@@ -27,7 +27,7 @@ TASK_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'task')
 UPGRADE_PATH = os.path.join(WAZUH_PATH, 'var', 'upgrade')
 SERVER_ADDRESS = 'localhost'
 MANAGER_VERSION = 'v4.0.0'
-WPK_REPOSITORY_4x = 'packages.wazuh.com/4.x/wpk/'
+WPK_REPOSITORY_4x = 'packages-dev.wazuh.com/trash/wpk/'
 WPK_REPOSITORY_3x = 'packages.wazuh.com/wpk/'
 CRYPTO = "aes"
 CHUNK_SIZE = 16384
@@ -146,7 +146,7 @@ cases = [
             'upgrade_script_result': [0],
             'status': ['Done'],
             'upgrade_notification': [True],
-            'message_params': {'version': 'v3.5.0', 'force_upgrade': 0},
+            'message_params': {'version': 'v3.5.0', 'force_upgrade': False},
             'expected_response': 'Current agent version is greater or equal'
         }
     },
@@ -169,7 +169,7 @@ cases = [
             'upgrade_script_result': [0],
             'status': ['Done'],
             'upgrade_notification': [False],
-            'message_params': {'version': 'v4.55.55', 'force_upgrade': 0},
+            'message_params': {'version': 'v4.55.55', 'force_upgrade': False},
             'expected_response': 'The version of the WPK does not exist in the repository'
         }
     },
@@ -192,7 +192,7 @@ cases = [
             'upgrade_script_result': [0],
             'status': ['Done'],
             'upgrade_notification': [False],
-            'message_params': {'version': 'v4.1.0', 'force_upgrade': 0},
+            'message_params': {'version': 'v4.1.0', 'force_upgrade': False},
             'expected_response': 'The repository is not reachable'
         }
     },
@@ -240,7 +240,7 @@ cases = [
             'expected_response': 'Current agent version is greater or equal'
         }
     },
-    # 9. Already updated with force=1 - Success
+    # 9. Already updated with force=True - Success
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -259,11 +259,11 @@ cases = [
             'upgrade_script_result': [0],
             'status': ['Done'],
             'upgrade_notification': [True],
-            'message_params': {'force_upgrade': 1},
+            'message_params': {'force_upgrade': True},
             'expected_response': 'Success'
         }
     },
-    # 10. Already updated with force=0 - Current agent version is greater or equal - Fail
+    # 10. Already updated with force=False - Current agent version is greater or equal - Fail
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -282,7 +282,7 @@ cases = [
             'upgrade_script_result': [0],
             'status': ['Done'],
             'upgrade_notification': [False],
-            'message_params': {'force_upgrade': 0},
+            'message_params': {'force_upgrade': False},
             'expected_response': 'Current agent version is greater or equal'
         }
     },
@@ -478,7 +478,7 @@ cases = [
             'command': 'upgrade_custom'
         }
     },
-    # 19. Single Agent with use_http = 1 - success
+    # 19. Single Agent with use_http = True - success
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -497,7 +497,7 @@ cases = [
             'upgrade_script_result': [0],
             'status': ['Done'],
             'upgrade_notification': [True],
-            'message_params': {'use_http': 1},
+            'message_params': {'use_http': True},
             'checks': ['use_http', 'version'],
             'expected_response': 'Success'
         }
@@ -525,7 +525,7 @@ cases = [
             'expected_response': 'Success'
         }
     },
-    # 21. Single Agent with use_http = 0 - success
+    # 21. Single Agent with use_http = False - success
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -543,7 +543,7 @@ cases = [
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
             'status': ['Done'],
-            'message_params': {'use_http': 1},
+            'message_params': {'use_http': True},
             'upgrade_notification': [True],
             'checks': ['use_http', 'version'],
             'expected_response': 'Success'
@@ -652,7 +652,7 @@ def get_sha_list(metadata):
         agent_version = MANAGER_VERSION
 
     if metadata.get('message_params') and metadata.get('message_params').get('use_http'):
-        protocol = 'http://' if metadata.get('message_params').get('use_http') == 1 else 'https://'
+        protocol = 'http://' if metadata.get('message_params').get('use_http') == True else 'https://'
 
     # Generating file name
     wpk_file = "wazuh_agent_{0}_linux_{1}.wpk".format(agent_version, architecture)
@@ -764,7 +764,7 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
         if 'use_http' in metadata.get('checks'):
             if metadata.get('message_params') and \
                 metadata.get('message_params').get('use_http') and \
-                    metadata.get('message_params').get('use_http') == 1:
+                    metadata.get('message_params').get('use_http') == True:
                 assert "'http://" in last_log, "Use http protocol did not match expected! Expected 'http://'"
             else:
                 assert "'https://" in last_log, "Use http protocol did not match expected! Expected 'https://'"
