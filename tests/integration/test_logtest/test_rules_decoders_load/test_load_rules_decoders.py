@@ -10,10 +10,7 @@ import json
 import shutil
 import time
 
-
-from wazuh_testing import global_parameters
-from wazuh_testing.analysis import callback_fim_error
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
+from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.monitoring import SocketController
 from wazuh_testing.tools.services import control_service
 
@@ -21,6 +18,7 @@ from wazuh_testing.tools.services import control_service
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
+
 
 # Configurations    
 
@@ -30,29 +28,29 @@ with open(messages_path) as f:
     test_cases = yaml.safe_load(f)
     tc=list(test_cases)
 
+
 # Variables
 
-log_monitor_paths = [LOG_FILE_PATH]
 logtest_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'logtest'))
 
-receiver_sockets_params = [(logtest_path, 'AF_UNIX', 'TCP')]
 
-receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
-
+# Functions used on the test
 
 def create_connection():
     return SocketController(address=logtest_path, family='AF_UNIX', connection_protocol='TCP')
 
 def close_connection(connection):
-    connection.close();
+    connection.close()
 
 def create_dummy_session():
+
     connection = create_connection()
-    dummy_request= '{ "version": 1, \
-            "origin":{"name":"Integration Test","module":"api"}, \
-            "command":"log_processing", \
-            "parameters":{ "event": "Dummy event to generate new session token","log_format": "syslog", \
-            "location": "master->/var/log/syslog"}, "origin": {"name":"integration tests", "module": "qa"} }'
+    dummy_request= """{ "version": 1,
+            "origin":{"name":"Integration Test","module":"api"},
+            "command":"log_processing",
+            "parameters":{ "event": "Dummy event to generate new session token","log_format": "syslog",
+            "location": "master->/var/log/syslog"}, "origin": {"name":"integration tests", "module": "qa"} }"""
+
     connection.send(dummy_request, size=True)
     token = json.loads(connection.receive(size=True).rstrip(b'\x00').decode())["data"]["token"]
     close_connection(connection)
@@ -60,11 +58,11 @@ def create_dummy_session():
 
 
 # Tests
-
 @pytest.mark.parametrize('test_case',
                          list(test_cases),
                          ids=[test_case['name'] for test_case in test_cases])
 def test_load_rules_decoders(test_case):
+
     #List to store assert messages
     errors = []
 
@@ -100,23 +98,27 @@ def test_load_rules_decoders(test_case):
 
         for i in range(stage['repeat'] if 'repeat' in stage else 1): 
 
-            connection = create_connection();
+            connection = create_connection()
             
             #Generate logtest request
             if 'same_session' in test_case and test_case['same_session'] is True:
-                request_pattern = '{{ "version":1, \
-                    "origin":{{"name":"Integration Test","module":"api"}}, \
-                    "command":"log_processing", \
-                    "parameters":{{ "token":"{}" , {} , {} , {} }} \
-                    }}'
-                input = request_pattern.format(session_token,stage['input_event'],test_case['input_log_format'],test_case['input_location'])
+                request_pattern = """{{ "version":1,
+                    "origin":{{"name":"Integration Test","module":"api"}},
+                    "command":"log_processing",
+                    "parameters":{{ "token":"{}" , {} , {} , {} }}
+                    }}"""
+                input = request_pattern.format(session_token,stage['input_event'],
+                                               test_case['input_log_format'],
+                                               test_case['input_location'])
             else:
-                request_pattern = '{{ "version":1, \
-                    "origin":{{"name":"Integration Test","module":"api"}}, \
-                    "command":"log_processing", \
-                    "parameters":{{ {} , {} , {} }} \
-                    }}'
-                input = request_pattern.format(stage['input_event'],test_case['input_log_format'],test_case['input_location'])
+                request_pattern = """{{ "version":1,
+                    "origin":{{"name":"Integration Test","module":"api"}},
+                    "command":"log_processing",
+                    "parameters":{{ {} , {} , {} }}
+                    }}"""
+                input = request_pattern.format(stage['input_event'],
+                                               test_case['input_log_format'],
+                                               test_case['input_location'])
 
             #Send request
             connection.send(input, size=True)
@@ -130,35 +132,28 @@ def test_load_rules_decoders(test_case):
             close_connection(connection)
 
             #Check predecoder
-            if 'output_predecoder' in stage  and \
-                json.loads(stage['output_predecoder']) != result["data"]['output']['predecoder']:
-
+            if ('output_predecoder' in stage  and
+                json.loads(stage['output_predecoder']) != result["data"]['output']['predecoder']):
                 errors.append(stage['stage'])
-            
-            #Check decoder
-            if 'output_decoder'in  stage and \
-                json.loads(stage['output_decoder']) != result["data"]['output']['decoder']:
 
+            #Check decoder
+            if ('output_decoder'in  stage and
+                json.loads(stage['output_decoder']) != result["data"]['output']['decoder']):
                 errors.append(stage['stage'])
 
             #Check rule
-            if 'output_rule_id' in stage and \
-                stage['output_rule_id'] != result["data"]['output']['rule']['id']:
-
+            if 'output_rule_id' in stage and stage['output_rule_id'] != result["data"]['output']['rule']['id']:
                 errors.append(stage['stage'])
 
             #Check alert
-            if 'output_alert' in stage and \
-                stage['output_alert'] != result["data"]['alert']:
-
+            if 'output_alert' in stage and stage['output_alert'] != result["data"]['alert']:
                 errors.append(stage['stage'])
-
-
 
     if 'local_rules' in test_case:
         # restore previous rules
         shutil.move('/var/ossec/etc/rules/local_rules.xml.cpy', 
                     '/var/ossec/etc/rules/local_rules.xml')
+
     if 'local_decoders' in test_case:
         # restore previous decoders
         shutil.move('/var/ossec/etc/decoders/local_decoder.xml.cpy',
@@ -169,4 +164,3 @@ def test_load_rules_decoders(test_case):
         control_service('restart',daemon='ossec-analysisd')
 
     assert not errors , "Failed stage(s) :{}".format("\n".join(errors))
-
