@@ -26,3 +26,17 @@ def callback_configuration_error(line):
     if match:
         return True
     return None
+
+
+def callback_session_initialized(line):
+    match = re.match(r".*\(7202\): Session initialized with token '(\S+)'", line)
+    if match:
+        return match.group(1)
+    return None
+
+
+def callback_invalid_token(line):
+    match = re.match(r".*\(7309\): '(\S+)' is not a valid token", line)
+    if match:
+        return match.group(1)
+    return None

@@ -10,6 +10,7 @@ import json
 
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.monitoring import SocketController
+from wazuh_testing.logtest import callback_session_initialized, callback_invalid_token
 
 
 # Marks
@@ -76,14 +77,13 @@ def test_invalid_session_token(test_case):
         #Get the generated token
         new_token = result["data"]['token']
 
-        #Generate expected message using output template
-        expected = json.loads(stage['output'].format(new_token,new_token))
-
         #Check if invalid token warning message and new token is generated
-        if expected['messages'][0].format(stage['input_token']) != result["data"]['messages'][0]:
+        match = callback_invalid_token(result["data"]['messages'][0])
+        if match == None:
             errors.append(stage['stage'])
 
-        if expected['messages'][1] != result["data"]['messages'][1]:
+        match = callback_session_initialized(result["data"]['messages'][1])
+        if match == None:
             errors.append(stage['stage'])
 
     assert not errors , "Failed stage(s) :{}".format("\n".join(errors))

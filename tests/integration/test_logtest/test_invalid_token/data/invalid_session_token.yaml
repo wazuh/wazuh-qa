@@ -8,25 +8,19 @@
   test_case:
   -
     input_token: '"helloworld"'
-    output: "{{\"token\":\"{}\",\"messages\":[\"WARNING: (7309): 'helloworld' is not a valid token\",\"INFO: (7202): Session initialized with token '{}'\"]}}"
     stage: 'Invalid length'
   -
     input_token: '123123132'
-    output: "{{\"token\":\"{}\",\"messages\":[\"WARNING: (7309): '123123132' is not a valid token\",\"INFO: (7202): Session initialized with token '{}'\"]}}"
     stage: 'Invalid data type: number'
   -
     input_token: 'true'
-    output: "{{\"token\":\"{}\",\"messages\":[\"WARNING: (7309): 'true' is not a valid token\",\"INFO: (7202): Session initialized with token '{}'\"]}}"
     stage: 'Invalid data type: boolean'
   -
     input_token: 'null'
-    output: "{{\"token\":\"{}\",\"messages\":[\"WARNING: (7309): 'null' is not a valid token\",\"INFO: (7202): Session initialized with token '{}'\"]}}"
     stage: 'Invalid data type: null'
   -
     input_token: '["hello","world!"]'
-    output: "{{\"token\":\"{}\",\"messages\":[\"WARNING: (7309): '[\\\"hello\\\",\\\"world!\\\"]' is not a valid token\",\"INFO: (7202): Session initialized with token '{}'\"]}}"
     stage: 'Invalid data type: array'
   -
     input_token: '{}'
-    output: "{{\"token\":\"{}\",\"messages\":[\"WARNING: (7309): '{{}}' is not a valid token\",\"INFO: (7202): Session initialized with token '{}'\"]}}"
     stage: 'Invalid data type: json object'
