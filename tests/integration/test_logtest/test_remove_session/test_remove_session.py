@@ -15,7 +15,7 @@ from wazuh_testing.tools.monitoring import SocketController
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
-# Configurations    
+# Configurations
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 messages_path = os.path.join(test_data_path, 'remove_session.yaml')
 
@@ -62,15 +62,21 @@ def test_remove_session(connect_to_sockets_function, test_case: list):
 
     if stage["stage"] != 'Remove session OK':
         receiver_sockets[0].send(stage['input'], size=True)
-        result = receiver_sockets[0].receive(size=True).rstrip(b'\x00').decode()
-
-        assert stage['output'] == result, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1,
-                                                                                 stage['stage'])
+        reply = receiver_sockets[0].receive(size=True).rstrip(b'\x00').decode()
+        expected = json.loads(stage['output'])
     else:
         session_token = create_session()
         receiver_sockets[0].send(stage['input'].format(session_token), size=True)
-        result = receiver_sockets[0].receive(size=True).rstrip(b'\x00').decode()
+        reply = receiver_sockets[0].receive(size=True).rstrip(b'\x00').decode()
+        expected = json.loads(stage['output'].format(session_token))
 
-        assert stage['output'].format(session_token) == result, 'Failed test case stage {}: {}'.format(
-            test_case.index(stage) + 1,
-            stage['stage'])
+    result = json.loads(reply)
+    if 'messages' in expected['data'] and 'messages' in result['data']:
+        message_expected = expected['data']['messages'][0]
+        message_recieved = result['data']['messages'][0]
+        if message_recieved.split(': ')[-1] == message_expected.split(': ')[-1]:
+            expected['data']['messages'][0] = result['data']['messages'][0]
+
+    assert expected == result, 'Failed test case stage {}: {}'.format(
+        test_case.index(stage) + 1,
+        stage['stage'])
