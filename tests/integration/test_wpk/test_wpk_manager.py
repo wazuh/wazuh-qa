@@ -26,7 +26,7 @@ UPGRADE_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'upgrade')
 TASK_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'task')
 UPGRADE_PATH = os.path.join(WAZUH_PATH, 'var', 'upgrade')
 SERVER_ADDRESS = 'localhost'
-MANAGER_VERSION = 'v4.0.0'
+MANAGER_VERSION = 'v4.1.0'
 WPK_REPOSITORY_4x = 'packages-dev.wazuh.com/trash/wpk/'
 WPK_REPOSITORY_3x = 'packages.wazuh.com/wpk/'
 CRYPTO = "aes"
@@ -275,7 +275,7 @@ cases = [
             'wpk_repository': WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
-            'agents_os': ['debian8'],  # debian8 have v4.0.0 agent version
+            'agents_os': ['debian8'],  # debian8 have v4.1.0 agent version
             'disconnect': [False],
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],

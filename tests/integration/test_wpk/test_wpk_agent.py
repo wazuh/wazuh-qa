@@ -30,13 +30,13 @@ CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, folder, 'client.keys')
 CRYPTO = "aes"
 SERVER_ADDRESS = 'localhost'
 PROTOCOL = "tcp"
-version_to_upgrade = 'v4.0.0'
+version_to_upgrade = 'v4.1.0'
 
 
 # Test will varying according to agent version. This test should be tried
 # with at least:
-# 1. v3.13.1
-# 2. v4.0.0
+# 1. v3.13.2
+# 2. v4.1.0
 def get_current_version():
     if platform.system() == 'Linux':
         config_file_path = os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')
@@ -53,7 +53,7 @@ def get_current_version():
 _agent_version = get_current_version()
 
 test_metadata = [
-    # 1. Upgrade from initial_version to v4.0.0
+    # 1. Upgrade from initial_version to v4.1.0
     {
         'protocol': PROTOCOL,
         'initial_version': _agent_version,
@@ -104,11 +104,11 @@ test_metadata = [
     }
 ]
 
-if _agent_version == 'v3.13.1':
+if _agent_version == 'v3.13.2':
     test_metadata += [{
-        # 4. Simulate a rollback (v3.13.1)
+        # 4. Simulate a rollback (v3.13.2)
         'protocol': PROTOCOL,
-        'initial_version': 'v3.13.1',
+        'initial_version': 'v3.13.2',
         'agent_version': version_to_upgrade,
         'use_http': False,
         'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
@@ -121,11 +121,11 @@ if _agent_version == 'v3.13.1':
             'receive_notification': False,
         }
     }]
-elif _agent_version == 'v4.0.0':
+elif _agent_version == 'v4.1.0':
     test_metadata += [{
-        # 5. Simulate a rollback (v4.0.0)
+        # 5. Simulate a rollback (v4.1.0)
         'protocol': PROTOCOL,
-        'initial_version': 'v4.0.0',
+        'initial_version': 'v4.1.0',
         'agent_version': version_to_upgrade,
         'use_http': False,
         'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
