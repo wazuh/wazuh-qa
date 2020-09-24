@@ -15,5 +15,7 @@
         - FIM_MODE
     - synchronization:
         elements:
+        - interval:
+            value: 60
         - max_eps:
             value: MAX_EPS

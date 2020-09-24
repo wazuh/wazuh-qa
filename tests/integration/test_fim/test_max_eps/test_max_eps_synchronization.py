@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import sys
 import shutil
 from collections import Counter
 
@@ -33,8 +34,10 @@ conf_params = {'TEST_DIRECTORIES': directory_str,
                'MODULE_NAME': __name__}
 
 eps_values = ['50', '10']
+test_modes = ['realtime'] if sys.platform == 'linux' or sys.platform == 'win32' else ['scheduled']
 
-p, m = generate_params(extra_params=conf_params, apply_to_all=({'MAX_EPS': eps_value} for eps_value in eps_values))
+p, m = generate_params(extra_params=conf_params, apply_to_all=({'MAX_EPS': eps_value} for eps_value in eps_values),
+                       modes=test_modes)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
