@@ -8,8 +8,8 @@ import yaml
 import shutil
 import json
 
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools import WAZUH_PATH
+
 
 # Marks
 
@@ -24,15 +24,18 @@ with open(messages_path) as f:
 
 # Variables
 
-log_monitor_paths = [LOG_FILE_PATH]
 logtest_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'logtest'))
 receiver_sockets_params = [(logtest_path, 'AF_UNIX', 'TCP')]
+
 
 # Fixtures
 
 @pytest.fixture(scope='function')
 def configure_local_decoders(get_configuration, request):
-    """Configure a custom decoder in local_decoder.xml for testing. Restart Wazuh is needed for applying the configuration is optional."""
+    """
+    Configure a custom decoder in local_decoder.xml for testing.
+    Restart Wazuh is needed for applying the configuration is optional.
+    """
 
     # save current configuration
     shutil.copy('/var/ossec/etc/decoders/local_decoder.xml', '/var/ossec/etc/decoders/local_decoder.xml.cpy')
@@ -51,6 +54,7 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
+
 # Tests
 
 def test_invalid_decoder_syntax(get_configuration, configure_local_decoders,connect_to_sockets_function):
@@ -65,18 +69,17 @@ def test_invalid_decoder_syntax(get_configuration, configure_local_decoders,conn
 
     # error list to enable multi-assert per test-case
     errors = []
-    
-    if 'output_error' in  get_configuration and \
-            get_configuration['output_error'] != result["error"]:
-        errors.append( "output_error" )
 
-    if 'output_data_msg' in  get_configuration and \
-            get_configuration['output_data_msg'] != result["data"]["messages"][0]:
-        errors.append( "output_data_msg" )
+    if 'output_error' in  get_configuration and get_configuration['output_error'] != result["error"]:
+        errors.append("output_error")
 
-    if 'output_data_codemsg' in  get_configuration and \
-            get_configuration['output_data_codemsg'] != result["data"]["codemsg"]:
-        errors.append( "output_data_codemsg" )
+    if ('output_data_msg' in  get_configuration and
+            get_configuration['output_data_msg'] not in result["data"]["messages"][0]):
+        errors.append("output_data_msg")
+
+    if ('output_data_codemsg' in  get_configuration and
+            get_configuration['output_data_codemsg'] != result["data"]["codemsg"]):
+        errors.append("output_data_codemsg")
 
     # error if any check fails
     assert not errors , "Failed stage(s) :{}".format("\n".join(errors))

@@ -8,8 +8,8 @@ import yaml
 import shutil
 import json
 
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools import WAZUH_PATH
+
 
 # Marks
 
@@ -24,9 +24,9 @@ with open(messages_path) as f:
 
 # Variables
 
-log_monitor_paths = [LOG_FILE_PATH]
 logtest_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'logtest'))
 receiver_sockets_params = [(logtest_path, 'AF_UNIX', 'TCP')]
+
 
 # Fixtures
 
@@ -67,17 +67,16 @@ def test_invalid_rule_syntax(get_configuration, configure_local_rules,connect_to
     # error list to enable multi-assert per test-case
     errors = []
 
-    if 'output_error' in  get_configuration and \
-            get_configuration['output_error'] != result["error"]:
-        errors.append( "output_error" )
+    if 'output_error' in  get_configuration and get_configuration['output_error'] != result["error"]:
+        errors.append("output_error")
 
-    if 'output_data_msg' in  get_configuration and \
-            get_configuration['output_data_msg'] != result["data"]["messages"][0]:
-        errors.append( "output_data_msg" )
+    if ('output_data_msg' in  get_configuration and
+            get_configuration['output_data_msg'] not in result["data"]["messages"][0]):
+        errors.append("output_data_msg")
 
-    if 'output_data_codemsg' in  get_configuration and \
-            get_configuration['output_data_codemsg'] != result["data"]["codemsg"]:
-        errors.append( "output_data_codemsg" )
-    
+    if ('output_data_codemsg' in  get_configuration and
+            get_configuration['output_data_codemsg'] != result["data"]["codemsg"]):
+        errors.append("output_data_codemsg")
+
     # error if any check fails
     assert not errors , "Failed stage(s) :{}".format("\n".join(errors))
