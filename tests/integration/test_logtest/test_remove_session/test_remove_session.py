@@ -8,36 +8,33 @@ import pytest
 import yaml
 import json
 
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
+from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.monitoring import close_sockets
-
-# Marks
 from wazuh_testing.tools.monitoring import SocketController
 
+# Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 # Configurations    
-
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 messages_path = os.path.join(test_data_path, 'remove_session.yaml')
+
 with open(messages_path) as f:
     test_cases = yaml.safe_load(f)
 
 # Variables
-
-log_monitor_paths = [LOG_FILE_PATH]
 logtest_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'logtest'))
-
 receiver_sockets_params = [(logtest_path, 'AF_UNIX', 'TCP')]
-
-receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
+receiver_sockets = None  # Set in the fixtures
 
 
 def create_session():
-    receiver_sockets[0].send('{"version":1,"origin":{"name":"Integration Test","module":"api"},\
-        "command":"log_processing","parameters":{"event":"Jun 24 11:54:19 Master systemd[2099]: \
-        Started VTE child process 20118 launched by terminator process 17756.","log_format":"syslog",\
-        "location":"master->/var/log/syslog"}}', size=True)
+    msg = """{"version":1,"origin":{"name":"Integration Test","module":"api"},
+        "command":"log_processing","parameters":{"event":"Jun 24 11:54:19 Master systemd[2099]:
+        Started VTE child process 20118 launched by terminator process 17756.","log_format":"syslog",
+        "location":"master->/var/log/syslog"}}"""
+
+    receiver_sockets[0].send(msg, size=True)
     token = json.loads(receiver_sockets[0].receive(size=True).rstrip(b'\x00').decode())['data']['token']
 
     # Close socket
@@ -73,6 +70,7 @@ def test_remove_session(connect_to_sockets_function, test_case: list):
         session_token = create_session()
         receiver_sockets[0].send(stage['input'].format(session_token), size=True)
         result = receiver_sockets[0].receive(size=True).rstrip(b'\x00').decode()
+
         assert stage['output'].format(session_token) == result, 'Failed test case stage {}: {}'.format(
             test_case.index(stage) + 1,
             stage['stage'])
