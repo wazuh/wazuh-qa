@@ -30,6 +30,3 @@
     input_token: '{}'
     output: "{{\"token\":\"{}\",\"messages\":[\"WARNING: (7309): '{{}}' is not a valid token\",\"INFO: (7202): Session initialized with token '{}'\"]}}"
     stage: 'Invalid data type: json object'
-
-
-    
