@@ -9,29 +9,21 @@ import yaml
 from string import ascii_uppercase
 import random
 
-from wazuh_testing import global_parameters
-from wazuh_testing.analysis import callback_fim_error
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
+from wazuh_testing.tools import WAZUH_PATH
 
 # Marks
-
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 # Configurations
-
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 messages_path = os.path.join(test_data_path, 'invalid_socket_input.yaml')
 with open(messages_path) as f:
     test_cases = yaml.safe_load(f)
 
 # Variables
-
-log_monitor_paths = [LOG_FILE_PATH]
 logtest_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'logtest'))
-
 receiver_sockets_params = [(logtest_path, 'AF_UNIX', 'TCP')]
-
-receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
+receiver_sockets = None  # Set in the fixtures
 
 
 # Tests
