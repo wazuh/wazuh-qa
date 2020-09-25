@@ -27,6 +27,8 @@ folder = 'etc' if platform.system() == 'Linux' else ''
 DEFAULT_UPGRADE_SCRIPT = 'upgrade.sh' if platform.system() == 'Linux' \
                                       else 'upgrade.bat'
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, folder, 'client.keys')
+SERVER_KEY_PATH = os.path.join(WAZUH_PATH, folder, 'manager.key')
+SERVER_CERT_PATH = os.path.join(WAZUH_PATH, folder, 'manager.cert')
 CRYPTO = "aes"
 SERVER_ADDRESS = 'localhost'
 PROTOCOL = "tcp"
@@ -47,6 +49,7 @@ def get_current_version():
         version = None
         with open(os.path.join(WAZUH_PATH, 'VERSION'), 'r') as f:
             version = f.read()
+            version = version[:version.rfind('\n')]
         return version
 
 
@@ -82,7 +85,9 @@ test_metadata = [
         'simulate_rollback': False,
         'results': {
             'upgrade_ok': False,
-            'error_message': 'err Could not chmod',
+            'error_message': 'err Could not chmod' \
+            if platform.system() == 'Linux' else \
+            'err Cannot execute installer',
             'receive_notification': False,
         }
     },
@@ -182,14 +187,17 @@ def get_configuration(request):
 def start_agent(request, get_configuration):
     metadata = get_configuration['metadata']
     authd_simulator = AuthdSimulator(server_address=SERVER_ADDRESS,
-                                     enrollment_port=1515)
+                                     enrollment_port=1515,
+                                     key_path=SERVER_KEY_PATH,
+                                     cert_path=SERVER_CERT_PATH)
     authd_simulator.start()
     global remoted_simulator
     remoted_simulator = RemotedSimulator(server_address=SERVER_ADDRESS,
                                          remoted_port=1514,
                                          protocol=metadata['protocol'],
                                          mode='CONTROLED_ACK',
-                                         start_on_init=False)
+                                         start_on_init=False,
+                                         client_keys=CLIENT_KEYS_PATH)
 
     # Clean client.keys file
     truncate_file(CLIENT_KEYS_PATH)
@@ -204,7 +212,9 @@ def start_agent(request, get_configuration):
                                   metadata['simulate_rollback']))
 
     control_service('stop')
-    subprocess.call([f'{WAZUH_PATH}/bin/agent-auth', '-m', SERVER_ADDRESS])
+    agent_auth_pat = 'bin' if platform.system() == 'Linux' else ''
+    subprocess.call([f'{WAZUH_PATH}/{agent_auth_pat}/agent-auth', '-m',
+                    SERVER_ADDRESS])
     control_service('start')
 
     yield
@@ -217,22 +227,23 @@ def start_agent(request, get_configuration):
 def download_wpk(get_configuration):
     metadata = get_configuration['metadata']
     agent_version = metadata['agent_version']
-    current_plaform = platform.system()
+    current_plaform = platform.system().lower()
     protocol = 'http://' if metadata['use_http'] else 'https://'
     wpk_repo = 'packages-dev.wazuh.com/trash/wpk/'
     architecture = 'x86_64'
+    wpk_file_path = ''
     # Generating file name
     if current_plaform == "windows":
         wpk_file = "wazuh_agent_{0}_{1}.wpk".format(agent_version,
                                                     current_plaform)
         wpk_url = protocol + wpk_repo + "windows/" + wpk_file
+        wpk_file_path = os.path.join(WAZUH_PATH, 'tmp', wpk_file)
     else:
         wpk_file = "wazuh_agent_{0}_linux_{1}.wpk"\
                 .format(agent_version, architecture)
         wpk_url = protocol + wpk_repo \
             + "linux/" + architecture + "/" + wpk_file
-
-    wpk_file_path = os.path.join(WAZUH_PATH, 'var', wpk_file)
+        wpk_file_path = os.path.join(WAZUH_PATH, 'var', wpk_file)
     try:
         result = requests.get(wpk_url)
     except requests.exceptions.RequestException:
@@ -259,36 +270,50 @@ def prepare_agent_version(get_configuration):
     metadata = get_configuration['metadata']
 
     if get_current_version() != metadata["initial_version"]:
-        # We should change initial version to match expected
-        backup_file_start = f'backup_{metadata["initial_version"]}_[' \
-                            f'{datetime.strftime(datetime.now(), "%m-%d-%Y")}'
-        backups_files = [x for x in sorted(os.listdir(os.path.join(WAZUH_PATH,
-                                           'backup')))
-                         if backup_file_start in x]
-
-        if len(backups_files) > 0:
-            subprocess.call(['tar', 'xzf', f'{WAZUH_PATH}/backup/'
-                             f'{backups_files[-1]}', '-C', '/'])
+        if platform.system() == 'Windows':
+            control_service('stop')
+            time.sleep(10)
+            backup_path = os.path.join(WAZUH_PATH, 'backup')
+            subprocess.call(['robocopy', backup_path, WAZUH_PATH, 
+                                '/E', '/IS', '/NFL', '/NDL', '/NJH', 
+                                '/NP', '/NS', '/NC'])
         else:
-            raise Exception('Expected initial version for test does not match'
-                            ' current agent version and there is no backup '
-                            'available to restore it')
+            # We should change initial version to match expected
+            backup_file_start = f'backup_{metadata["initial_version"]}_[' \
+                                f'{datetime.strftime(datetime.now(), "%m-%d-%Y")}'
+            backups_files = [x for x in sorted(os.listdir(os.path.join(WAZUH_PATH,
+                                               'backup')))
+                             if backup_file_start in x]
+
+            if len(backups_files) > 0:
+                subprocess.call(['tar', 'xzf', f'{WAZUH_PATH}/backup/'
+                                 f'{backups_files[-1]}', '-C', '/'])
+            else:
+                raise Exception('Expected initial version for test does not match'
+                                ' current agent version and there is no backup '
+                                'available to restore it')
 
     yield
 
-    backup_file_start = f'backup_{metadata["initial_version"]}_[' \
-                        f'{datetime.strftime(datetime.now(), "%m-%d-%Y")}'
-    backups_files = [x for x in sorted(os.listdir(os.path.join(WAZUH_PATH,
-                                                               'backup')))
-                     if backup_file_start in x]
+    if platform.system() == 'Windows':
+        control_service('stop')
+        time.sleep(10)
+        backup_path = os.path.join(WAZUH_PATH, 'backup')
+        subprocess.call(['robocopy', backup_path, WAZUH_PATH,
+        				 '/E', '/IS', '/NFL', '/NDL', '/NJH', '/NP', '/NS', '/NC'])
+    else:
+        backup_file_start = f'backup_{metadata["initial_version"]}_[' \
+                            f'{datetime.strftime(datetime.now(), "%m-%d-%Y")}'
+        backups_files = [x for x in sorted(os.listdir(os.path.join(WAZUH_PATH,
+                                                                   'backup')))
+                         if backup_file_start in x]
 
-    subprocess.call(['tar', 'xzf', f'{WAZUH_PATH}/backup/{backups_files[-1]}',
-                     '-C', '/'])
-    # tar xzf ${DIRECTORY}/backup/backup_${VERSION}_[${BDATE}].tar.gz
+        subprocess.call(['tar', 'xzf', f'{WAZUH_PATH}/backup/{backups_files[-1]}',
+                         '-C', '/'])
 
 
 def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
-                   configure_environment, start_agent):
+                    configure_environment, start_agent):
     metadata = get_configuration['metadata']
     expected = metadata['results']
 
