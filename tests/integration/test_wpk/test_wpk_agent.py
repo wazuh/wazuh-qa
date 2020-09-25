@@ -271,7 +271,10 @@ def prepare_agent_version(get_configuration):
 
     if get_current_version() != metadata["initial_version"]:
         if platform.system() == 'Windows':
-            control_service('stop')
+            try:
+                control_service('stop')
+            except ValueError:
+                pass
             time.sleep(10)
             backup_path = os.path.join(WAZUH_PATH, 'backup')
             subprocess.call(['robocopy', backup_path, WAZUH_PATH, 
@@ -296,7 +299,10 @@ def prepare_agent_version(get_configuration):
     yield
 
     if platform.system() == 'Windows':
-        control_service('stop')
+        try:
+            control_service('stop')
+        except ValueError:
+            pass
         time.sleep(10)
         backup_path = os.path.join(WAZUH_PATH, 'backup')
         subprocess.call(['robocopy', backup_path, WAZUH_PATH,
