@@ -19,74 +19,88 @@ inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 messages_path = os.path.join(local_path, 'data/messages.yml')
+messages_path_remove = os.path.join(local_path, 'data/messages_remove_agent.yml')
 tmp_path = os.path.join(local_path, 'tmp')
+global_db_path = os.path.join(WAZUH_PATH, "queue", "db", "global.db")
+client_keys_path = os.path.join(WAZUH_PATH, "etc", "client.keys")
 
 label = "test_label"
+modified_agent = "wazuh-agent2"
+deleted_agent = "wazuh-agent3"
 
 
-@pytest.fixture(scope='module')
-def configure_environment():
-    host_manager.get_host('wazuh-master').ansible('command', f'service wazuh-manager stop', check=False)
-    host_manager.get_host('wazuh-worker1').ansible('command', f'service wazuh-manager stop', check=False)
-    host_manager.get_host('wazuh-worker2').ansible('command', f'service wazuh-manager stop', check=False)
-    host_manager.get_host('wazuh-agent1').ansible('command', f'service wazuh-agent stop', check=False)
-    host_manager.get_host('wazuh-agent2').ansible('command', f'service wazuh-agent stop', check=False)
-    host_manager.get_host('wazuh-agent3').ansible('command', f'service wazuh-agent stop', check=False)
+@pytest.fixture(scope='function')
+def clean_cluster_logs():
     host_manager.clear_file(host='wazuh-master',  file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
     host_manager.clear_file(host='wazuh-worker1', file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
     host_manager.clear_file(host='wazuh-worker2', file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
+    # Its required to restart each node after clearing the log files
+    host_manager.get_host('wazuh-master').ansible('command', f'service wazuh-manager restart', check=False)
+    host_manager.get_host('wazuh-worker1').ansible('command', f'service wazuh-manager restart', check=False)
+    host_manager.get_host('wazuh-worker2').ansible('command', f'service wazuh-manager restart', check=False)
+
+
+@pytest.fixture(scope='function')
+def remove_labels():
+    """Remove any label set to the modified wazuh-agent and restart it to apply the new config."""
     yield
-    # Remove the label configuration
-    host_manager.add_block_to_file(host='wazuh-agent2', path=f'{WAZUH_PATH}/etc/ossec.conf', after='</client>',
-                                   before='<client_buffer>', replace='')
-    # Restart agent 2 to apply label removal.
-    host_manager.get_host('wazuh-agent2').ansible('command', f'service wazuh-agent restart', check=False)
-
-    # Restart the removed agent to re-register in the worker to avoid impact over following tests
-    host_manager.get_host('wazuh-agent3').ansible('command', f'service wazuh-agent restart', check=False)
+    host_manager.add_block_to_file(host=modified_agent, path=f'{WAZUH_PATH}/etc/ossec.conf',
+                                   after='</client>', before='<client_buffer>', replace='')
+    host_manager.get_host(modified_agent).ansible('command', f'service wazuh-agent restart', check=False)
 
 
-def test_agent_info_sync(configure_environment):
+@pytest.fixture(scope='function')
+def register_agent():
+    """Restart the removed agent to trigger auto-enrollment."""
+    yield
+    host_manager.get_host(deleted_agent).ansible('command', f'service wazuh-agent restart', check=False)
+
+
+def test_agent_info_sync(clean_cluster_logs, remove_labels):
     """Check agent agent-info synchronization works as expected.
 
     This test will wait for the expected agent-info messages declared in data/messages.yml. Additionally, it will
-    ensure agent-info synchronization is working by modifying one agent and removing another one."""
-    host_manager.control_service(host='wazuh-master', service='wazuh', state="started")
-    host_manager.control_service(host='wazuh-worker1', service='wazuh', state="started")
-    host_manager.control_service(host='wazuh-worker2', service='wazuh', state="started")
+    ensure agent-info synchronization is working by modifying one agent."""
 
-    # Add a label to one of the agents
-    host_manager.add_block_to_file(host='wazuh-agent2', path=f'{WAZUH_PATH}/etc/ossec.conf', after='</client>',
+    # Add a label to one of the agents and restart it to apply the change
+    host_manager.add_block_to_file(host=modified_agent, path=f'{WAZUH_PATH}/etc/ossec.conf', after='</client>',
                                    before='<client_buffer>',
                                    replace=f'<labels><label key="{label}">value</label></labels>')
+    host_manager.control_service(host=modified_agent, service='wazuh', state="restarted")
 
-    host_manager.control_service(host='wazuh-agent1', service='wazuh', state="started")
-    host_manager.control_service(host='wazuh-agent2', service='wazuh', state="started")
-    host_manager.control_service(host='wazuh-agent3', service='wazuh', state="started")
-
-    # Run the callback checks for the cluster.log
+    # Run the callback checks for the Master and Worker nodes
     HostMonitor(inventory_path=inventory_path, messages_path=messages_path, tmp_path=tmp_path).run()
 
-    # Check the wazuh-agent2's label is present in the Master node DB
-    master_label = host_manager.run_command('wazuh-master', f'sqlite3 {WAZUH_PATH}/queue/db/global.db '
-                                                            f'"SELECT key FROM labels LIMIT 1;"')
-    assert master_label == f'"{label}"'
+    # Check the wazuh-agent's label is present in the Master's global.db
+    master_label = host_manager.run_command('wazuh-master', f'sqlite3 {global_db_path} "SELECT key FROM labels LIMIT 1;"')
+    assert master_label == f'"{label}"', "The label present in global.db does not match with the expected one."
 
-    # Check the agent2 is present on the Worker2's client.keys
-    agent_id = host_manager.run_command('wazuh-worker1', f'grep wazuh-agent2 {WAZUH_PATH}/etc/client.keys')
-    assert agent_id, f'wazuh-agent2 was not found in wazuh-worker2\'s client.keys file.'
+    # Check the agent2 is present on the Worker1's global.db
+    agent_list = host_manager.run_command('wazuh-worker1', f'sqlite3 {global_db_path} "SELECT name FROM agent;"')
+    assert modified_agent in agent_list, f'{modified_agent} was not found in wazuh-worker1\'s global.db'
 
-    # Stop agent2 to avoid agent enrollment
-    host_manager.get_host('wazuh-agent2').ansible('command', f'service wazuh-agent stop', check=False)
 
-    # Remove an agent
-    agent_id = host_manager.run_command('wazuh-master', f'grep wazuh-agent2 {WAZUH_PATH}/etc/client.keys')
-    assert agent_id, f'wazuh-agent2 was not found in Master\'s client.keys file.'
+def test_agent_info_sync_remove_agent(clean_cluster_logs, register_agent):
+    """Check agent agent-info synchronization works as expected when removing an agent from the Master node."""
+
+    # Ensure the agent to be removed is present in the Worker's global.db before attempting the test
+    agent_list = host_manager.run_command('wazuh-worker2', f'sqlite3 {global_db_path} "SELECT name FROM agent;"')
+    assert deleted_agent in agent_list, f'{deleted_agent} was NOT found in wazuh-worker2\'s global.db'
+
+    # Stop the agent to avoid agent auto-enrollment
+    host_manager.get_host(deleted_agent).ansible('command', f'service wazuh-agent stop', check=False)
+
+    # Get the ID of the agent
+    agent_id = host_manager.run_command('wazuh-master', f'grep {deleted_agent} {client_keys_path}')
+    assert agent_id and agent_id != "", f'{deleted_agent} was not found in Master\'s client.keys file.'
+
+    # Remove the agent from Master node
     host_manager.run_command('wazuh-master', f'{WAZUH_PATH}/bin/manage_agents -r {agent_id[0:3]}')
 
-    # Run again the callback checks for the cluster.log to ensure the info is synchronized
-    HostMonitor(inventory_path=inventory_path, messages_path=messages_path, tmp_path=tmp_path).run()
+    # Wait until the Workers synchronize and the agent is removed from the nodes
+    HostMonitor(inventory_path=inventory_path, messages_path=messages_path_remove, tmp_path=tmp_path).run()
 
-    # Check the removed agent is not present in wazuh-worker1's client.keys
-    agent_id = host_manager.run_command('wazuh-worker1', f'grep wazuh-agent2 {WAZUH_PATH}/etc/client.keys')
-    assert agent_id is ""
+    # Get the content of Worker's client.keys and check if the agent is present.
+    agent_list = host_manager.run_command('wazuh-worker2', f'cat {client_keys_path}')
+    assert deleted_agent not in agent_list, f'{deleted_agent} was found in Worker2\'s client.keys file and it should ' \
+                                            f'not be there.'
