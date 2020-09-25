@@ -35,6 +35,13 @@ def callback_session_initialized(line):
     return None
 
 
+def callback_remove_session(line):
+    match = re.match(r".*\(7206\): The session '(\S+)' was closed successfully", line)
+    if match:
+        return match.group(1)
+    return None
+
+
 def callback_invalid_token(line):
     match = re.match(r".*\(7309\): '(\S+)' is not a valid token", line)
     if match:
