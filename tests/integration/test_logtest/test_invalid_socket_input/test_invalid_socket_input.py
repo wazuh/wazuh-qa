@@ -8,6 +8,7 @@ import pytest
 import yaml
 from string import ascii_uppercase
 import random
+from struct import pack
 
 from wazuh_testing.tools import WAZUH_PATH
 
@@ -44,8 +45,9 @@ def test_invalid_socket_input(connect_to_sockets_function, test_case: list):
     if stage["stage"] != 'Oversize message':
         receiver_sockets[0].send(stage['input'], size=True)
     else:
-        over_size_parameter = ''.join(random.choice(ascii_uppercase) for _ in range(2 ** 16))
-        receiver_sockets[0].send(stage['input'].format(over_size_parameter), size=True)
+        logtest_max_req_size = 2 ** 16
+        oversize_header = pack("<I", logtest_max_req_size)
+        receiver_sockets[0].send(stage['input'].format(oversize_header))
 
     result = receiver_sockets[0].receive(size=True).rstrip(b'\x00').decode()
     assert stage['output'] == result, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1,
