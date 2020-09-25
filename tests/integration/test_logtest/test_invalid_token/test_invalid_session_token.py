@@ -24,7 +24,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 messages_path = os.path.join(test_data_path, 'invalid_session_token.yaml')
 with open(messages_path) as f:
     test_cases = yaml.safe_load(f)
-    tc=list(test_cases)
+    tc = list(test_cases)
 
 
 # Variables
@@ -37,6 +37,7 @@ logtest_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'logtest'
 def create_connection():
     return SocketController(address=logtest_path, family='AF_UNIX', connection_protocol='TCP')
 
+
 def close_connection(connection):
     connection.close()
 
@@ -44,46 +45,52 @@ def close_connection(connection):
 # Tests
 
 @pytest.mark.parametrize('test_case',
-                         list(test_cases),
+                         [test_case['test_case'] for test_case in test_cases],
                          ids=[test_case['name'] for test_case in test_cases])
 def test_invalid_session_token(test_case):
+    """Check that every input message in logtest socket generates the adequate output
+
+    Parameters
+    ----------
+    test_case : list
+        List of test_case stages (dicts with input, output and stage keys)
+    """
 
     errors = []
+    stage = test_case[0]
+    connection = create_connection()
 
-    for stage in test_case['test_case']:
-        
-        connection = create_connection();
-        
-        #Generate logtest request
-        request_pattern = """{{ "version":1,
-            "origin":{{"name":"Integration Test","module":"api"}},
-            "command":"log_processing",
-            "parameters":{{ "token":{} , {} , {} , {} }}
-            }}"""
+    # Generate logtest request
+    request_pattern = """{{ "version":1,
+        "origin":{{"name":"Integration Test","module":"api"}},
+        "command":"log_processing",
+        "parameters":{{ "token":{} , {} , {} , {} }}
+        }}"""
 
-        input = request_pattern.format(stage['input_token'],
-                                       test_case['input_event'],
-                                       test_case['input_log_format'],
-                                       test_case['input_location'])
+    input = request_pattern.format(stage['input_token'],
+                                   stage['input_event'],
+                                   stage['input_log_format'],
+                                   stage['input_location'])
 
-        #Send request
-        connection.send(input, size=True)
+    # Send request
+    connection.send(input, size=True)
 
-        #Parse logtest reply as JSON
-        result = json.loads(connection.receive(size=True).rstrip(b'\x00').decode())
+    # Parse logtest reply as JSON
+    result = json.loads(connection.receive(size=True).rstrip(b'\x00').decode())
 
-        close_connection(connection)
+    close_connection(connection)
 
-        #Get the generated token
-        new_token = result["data"]['token']
+    # Get the generated token
+    new_token = result["data"]['token']
 
-        #Check if invalid token warning message and new token is generated
-        match = callback_invalid_token(result["data"]['messages'][0])
-        if match == None:
-            errors.append(stage['stage'])
+    # Check invalid token warning message
+    match = callback_invalid_token(result["data"]['messages'][0])
+    if match is None:
+        errors.append(stage['stage'])
 
-        match = callback_session_initialized(result["data"]['messages'][1])
-        if match == None:
-            errors.append(stage['stage'])
+    # Check new token message is generated
+    match = callback_session_initialized(result["data"]['messages'][1])
+    if match is None:
+        errors.append(stage['stage'])
 
-    assert not errors , "Failed stage(s) :{}".format("\n".join(errors))
+    assert not errors, "Failed stage(s) :{}".format("\n".join(errors))
