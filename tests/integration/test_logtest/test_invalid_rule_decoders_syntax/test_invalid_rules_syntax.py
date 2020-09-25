@@ -15,7 +15,7 @@ from wazuh_testing.tools import WAZUH_PATH
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
-# Configurations    
+# Configurations
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 messages_path = os.path.join(test_data_path, 'invalid_rules_syntax.yaml')
@@ -52,9 +52,10 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
+
 # Tests
 
-def test_invalid_rule_syntax(get_configuration, configure_local_rules,connect_to_sockets_function):
+def test_invalid_rule_syntax(get_configuration, configure_local_rules, connect_to_sockets_function):
     """Check that every input message in logtest socket generates the adequate output """
 
     # send the logtest request
@@ -67,16 +68,16 @@ def test_invalid_rule_syntax(get_configuration, configure_local_rules,connect_to
     # error list to enable multi-assert per test-case
     errors = []
 
-    if 'output_error' in  get_configuration and get_configuration['output_error'] != result["error"]:
+    if 'output_error' in get_configuration and get_configuration['output_error'] != result["error"]:
         errors.append("output_error")
 
-    if ('output_data_msg' in  get_configuration and
+    if ('output_data_msg' in get_configuration and
             get_configuration['output_data_msg'] not in result["data"]["messages"][0]):
         errors.append("output_data_msg")
 
-    if ('output_data_codemsg' in  get_configuration and
+    if ('output_data_codemsg' in get_configuration and
             get_configuration['output_data_codemsg'] != result["data"]["codemsg"]):
         errors.append("output_data_codemsg")
 
     # error if any check fails
-    assert not errors , "Failed stage(s) :{}".format("\n".join(errors))
+    assert not errors, "Failed stage(s) :{}".format("\n".join(errors))
