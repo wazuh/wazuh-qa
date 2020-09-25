@@ -97,9 +97,16 @@ pip3 uninstall -y wazuh_testing && pip3 install .
 
 **DISCLAIMER:** this guide assumes you have a proper testing environment. If you do not, please check our [testing environment guide](#setting-up-a-test-environment).
 
-Our cluster system tests are located in `wazuh-qa/tests/system/test_cluster`. They are organized by functionalities:
+Our cluster system tests are located in `wazuh-qa/tests/system/`. They are organized by functionalities and each one may required an specific testing environment located in `wazuh-qa/tests/system/provisioning`:
 
-- _agent_key_polling_
+| Functionality                       | Required environment |
+|-------------------------------------|----------------------|
+| test_cluster/test_agent_enrollment  | enrollment_cluster   |
+| test_cluster/test_agent_info_sync   | basic_cluster        |
+| test_cluster/test_agent_key_polling | basic_cluster        |
+| test_jwt_invalidation               | agentless_cluster    |
+
+### Test structure
 
 Every group will have the following structure:
 
