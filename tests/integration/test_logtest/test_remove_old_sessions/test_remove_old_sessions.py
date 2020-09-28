@@ -61,6 +61,8 @@ def test_remove_old_session(get_configuration, configure_environment, restart_wa
 
     max_sessions = int(get_configuration['sections'][0]['elements'][2]['max_sessions']['value'])
 
+    first_session_token = None
+
     for i in range(0, max_sessions):
 
         receiver_socket = create_connection()
@@ -68,9 +70,15 @@ def test_remove_old_session(get_configuration, configure_environment, restart_wa
         msg_recived = receiver_socket.receive().decode()
         remove_connection(receiver_socket)
 
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                callback=callback_session_initialized,
-                                error_message='Event not found')
+        if i == 0:
+
+            first_session_token = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                                          callback=callback_session_initialized,
+                                                          error_message='Event not found')
+        else:
+            wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                    callback=callback_session_initialized,
+                                    error_message='Event not found')
 
     # This session should do Wazuh-logtest to remove the oldest session
     receiver_socket = create_connection()
@@ -78,9 +86,12 @@ def test_remove_old_session(get_configuration, configure_environment, restart_wa
     msg_recived = receiver_socket.receive().decode()
     remove_connection(receiver_socket)
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            callback=callback_remove_session,
-                            error_message='Event not found')
+    remove_session_token = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                                   callback=callback_remove_session,
+                                                   error_message='Event not found')
+
+    assert first_session_token == remove_session_token, "Incorrect session removed"
+
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                             callback=callback_session_initialized,
                             error_message='Event not found')
