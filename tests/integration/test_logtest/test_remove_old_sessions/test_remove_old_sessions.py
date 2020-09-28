@@ -35,6 +35,7 @@ msg_create_session = """{"version":1, "command":"log_processing", "parameters":{
 def create_connection():
     return SocketController(address=logtest_sock, family='AF_UNIX', connection_protocol='TCP')
 
+
 def remove_connection(connection):
     connection.close()
     del connection

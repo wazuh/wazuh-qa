@@ -29,21 +29,21 @@ def callback_configuration_error(line):
 
 
 def callback_session_initialized(line):
-    match = re.match(r".*\(7202\): Session initialized with token '(\S+)'", line)
+    match = re.match(r".*\(7202\): Session initialized with token '(\w{8})'", line)
     if match:
         return match.group(1)
     return None
 
 
 def callback_remove_session(line):
-    match = re.match(r".*\(7206\): The session '(\S+)' was closed successfully", line)
+    match = re.match(r".*\(7206\): The session '(\w{8})' was closed successfully", line)
     if match:
         return match.group(1)
     return None
 
 
 def callback_invalid_token(line):
-    match = re.match(r".*\(7309\): '(\S+)' is not a valid token", line)
+    match = re.match(r".*\(7309\): '(\w{8})' is not a valid token", line)
     if match:
         return match.group(1)
     return None
