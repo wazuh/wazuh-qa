@@ -9,7 +9,6 @@ import subprocess
 import sys
 import uuid
 from datetime import datetime
-import pdb
 
 import pytest
 from numpydoc.docscrape import FunctionDoc
@@ -55,7 +54,6 @@ def pytest_runtest_setup(item):
 @pytest.fixture(scope='module')
 def restart_wazuh(get_configuration, request):
     # Stop Wazuh
-    pdb.set_trace()
     control_service('stop')
 
     # Reset ossec.log and start a new monitor

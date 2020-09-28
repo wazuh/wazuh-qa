@@ -43,7 +43,7 @@ def callback_remove_session(line):
 
 
 def callback_invalid_token(line):
-    match = re.match(r".*\(7309\): '(\w{8})' is not a valid token", line)
+    match = re.match(r".*\(7309\): '(\S+)' is not a valid token", line)
     if match:
         return match.group(1)
     return None
