@@ -18,6 +18,7 @@ import socketserver
 import sys
 import threading
 import time
+import ssl
 from collections import defaultdict
 from copy import copy
 from multiprocessing import Process, Manager
@@ -196,7 +197,7 @@ class FileMonitor:
 
 class SocketController:
 
-    def __init__(self, address, family='AF_UNIX', connection_protocol='TCP', timeout=30):
+    def __init__(self, address, family='AF_UNIX', connection_protocol='TCP', timeout=30, open_at_start=True):
         """Create a new unix socket or connect to a existing one.
 
         Parameters
@@ -207,9 +208,11 @@ class SocketController:
         family : str
             Family type of socket to connect to, AF_UNIX for unix sockets or AF_INET for port sockets.
         connection_protocol : str
-            Flag that indicates if the connection is TCP (SOCK_STREAM) or UDP (SOCK_DGRAM).
+            Flag that indicates if the connection is TCP (SOCK_STREAM), UDP (SOCK_DGRAM) or SSL_TLSv1_2.
         timeout : int, optional
             Socket's timeout, 0 for non-blocking mode.
+        open_at_start : boolean
+            Defines if the socket is opened at start or not. Default True
 
         Raises
         ------
@@ -217,6 +220,13 @@ class SocketController:
             If the socket connection failed.
         """
         self.address = address
+        self.ssl = False
+        self.connection_protocol = connection_protocol
+        self.timeout = timeout
+        # SSL options
+        self.ciphers = None
+        self.certificate = None
+        self.keyfile = None
 
         # Set socket family
         if family == 'AF_UNIX':
@@ -227,21 +237,42 @@ class SocketController:
             raise TypeError(f'Invalid family type detected: {family}. Valid ones are AF_UNIX or AF_INET')
 
         # Set socket protocol
-        if connection_protocol.lower() == 'tcp':
+        if connection_protocol.lower() == 'tcp' or 'ssl' in connection_protocol.lower():
             self.protocol = socket.SOCK_STREAM
         elif connection_protocol.lower() == 'udp':
             self.protocol = socket.SOCK_DGRAM
         else:
             raise TypeError(f'Invalid connection protocol detected: {connection_protocol.lower()}. '
-                            f'Valid ones are TCP or UDP')
+                            f'Valid ones are TCP, UDP or SSL versions')
 
+        if(open_at_start):
+            self.open()
+
+
+    def open(self):
+        """Opens sokcet """
         # Create socket object
         self.sock = socket.socket(family=self.family, type=self.protocol)
+
+        if 'ssl' in self.connection_protocol.lower():
+            versions_maps = {
+                "ssl_v2_3"    : ssl.PROTOCOL_SSLv23,
+                "ssl_tls"     : ssl.PROTOCOL_TLS,
+                "ssl_tlsv1_1" : ssl.PROTOCOL_TLSv1,
+                "ssl_tlsv1_2" : ssl.PROTOCOL_TLSv1_2,
+            }
+            ssl_version = versions_maps.get(self.connection_protocol.lower(), None)
+            if ssl_version is None:
+                raise TypeError(f'Invalid or unsupported SSL version specified, valid versions are: {list(versions_maps.keys())}')
+            # Wrap socket into ssl
+            self.sock = ssl.wrap_socket(self.sock, ssl_version=ssl_version, ciphers=self.ciphers,
+                    certfile=self.certificate, keyfile=self.keyfile)
+            self.ssl = True
 
         # Connect only if protocol is TCP
         if self.protocol == socket.SOCK_STREAM:
             try:
-                self.sock.settimeout(timeout)
+                self.sock.settimeout(self.timeout)
                 self.sock.connect(self.address)
             except socket.timeout as e:
                 raise TimeoutError(f'Could not connect to socket {self.address} of family {self.family}')
@@ -304,8 +335,29 @@ class SocketController:
                         output += self.sock.recv(4096, socket.MSG_DONTWAIT)
                     except:
                         break
-
+        
         return output
+
+    def set_ssl_configuration(self, ciphers="HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH",
+        connection_protocol="SSL_TLSv1_2", certificate=None, keyfile=None):
+        """Set SSL configurations (use on SSL socket only). Should be set before opening the socket
+
+        Parameters
+        ----------
+        ciphers: string
+            String with supported ciphers
+        connection_protocol: string
+            ssl version to be used
+        certificate (optional): path
+            Path to the ssl certificate
+        keyfile (optional): path
+            Path to the ssl key
+        """
+        self.ciphers = ciphers
+        self.connection_protocol = connection_protocol
+        self.certificate = certificate
+        self.keyfile = keyfile
+        return
 
     def __enter__(self):
         return self
@@ -476,6 +528,96 @@ class StreamServerPort(socketserver.ThreadingTCPServer):
     pass
 
 
+class SSLStreamServerPort(socketserver.ThreadingTCPServer):
+    
+    ciphers = "HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH"
+    ssl_version = ssl.PROTOCOL_TLSv1_2
+    certfile = None 
+    keyfile = None 
+    ca_cert = None
+    cert_reqs = ssl.CERT_NONE
+    options = None
+
+    def set_ssl_configuration(self, ciphers=None,
+        connection_protocol=None, certificate=None, keyfile=None, cert_reqs=None, ca_cert=None, options=None):
+        """Overrides SSL  default configurations.
+
+        Parameters
+        ----------
+        ciphers: string
+            String with supported ciphers
+        connection_protocol: string
+            ssl version to be used
+        certificate (optional): path
+            Path to the ssl certificate
+        keyfile (optional): path
+            Path to the ssl key
+        cert_reqs (optional): ssl.CERT_NONE, ssl.CERT_OPTIONAL, ssl.CERT_REQUIRED
+            Whetever or not a cert is required
+        ca_cert(optional):
+            If cert is required show accepted certs
+        options(optional):
+            Add adinitional options
+        """
+        if ciphers:
+            self.ciphers = ciphers
+        if connection_protocol:
+            self.ssl_version = connection_protocol
+        if certificate:
+            self.certfile = certificate
+        if keyfile:
+            self.keyfile = keyfile
+        if cert_reqs is not None:
+            self.cert_reqs = cert_reqs
+        if ca_cert:
+            self.ca_cert = ca_cert
+        if options:
+            self.options = options
+
+        return
+    
+
+    def get_request(self):
+        """
+        overrides get_request
+        """
+        newsocket, fromaddr = self.socket.accept()
+
+        if not self.certfile or not self.keyfile or not self.ssl_version:
+            raise Exception('SSL configuration needs to be set in SSLStreamServer')
+        
+        try:
+            if self.options:
+                context = ssl.SSLContext(self.ssl_version)
+                context.options = self.options
+                if self.certfile:
+                    context.load_cert_chain(self.certfile, self.keyfile)
+                if self.ca_cert is None:
+                    context.verify_mode = ssl.CERT_NONE
+                else:
+                    context.verify_mode = self.cert_reqs
+                    context.load_verify_locations(cafile=self.ca_cert)
+                context.set_ciphers(self.ciphers)
+                connstream = context.wrap_socket(newsocket,server_side=True)
+            else:
+                connstream = ssl.wrap_socket(newsocket,
+                                        server_side=True,
+                                        certfile = self.certfile,
+                                        keyfile = self.keyfile,
+                                        ssl_version = self.ssl_version,
+                                        ciphers= self.ciphers, 
+                                        cert_reqs=self.cert_reqs,
+                                        ca_certs=self.ca_cert)
+        except OSError as err:
+            print(err)
+            raise
+
+        # Save last_adress
+        self.last_address = fromaddr
+        return connstream, fromaddr
+
+
+
 class DatagramServerPort(socketserver.ThreadingUDPServer):
     pass
 
@@ -487,206 +629,211 @@ if hasattr(socketserver, 'ThreadingUnixStreamServer'):
         def shutdown_request(self, request):
             pass
 
-    class DatagramServerUnix(socketserver.ThreadingUnixDatagramServer):
+    class DatagramServerUnix(socketserver.ThreadingUnixStreamServer):
 
         def shutdown_request(self, request):
             pass
 
 
-    class StreamHandler(socketserver.BaseRequestHandler):
+class StreamHandler(socketserver.BaseRequestHandler):
 
-        def unix_forward(self, data):
-            """Default TCP unix socket forwarder for MITM servers."""
-            # Create a socket context
-            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as forwarded_sock:
-                # Connect to server and send data
-                forwarded_sock.connect(self.server.mitm.forwarded_socket_path)
-                forwarded_sock.sendall(wazuh_pack(len(data)) + data)
+    def unix_forward(self, data):
+        """Default TCP unix socket forwarder for MITM servers."""
+        # Create a socket context
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as forwarded_sock:
+            # Connect to server and send data
+            forwarded_sock.connect(self.server.mitm.forwarded_socket_path)
+            forwarded_sock.sendall(wazuh_pack(len(data)) + data)
 
-                # Receive data from the server and shut down
-                size = wazuh_unpack(self.recvall_size(forwarded_sock, 4, socket.MSG_WAITALL))
-                response = self.recvall_size(forwarded_sock, size, socket.MSG_WAITALL)
+            # Receive data from the server and shut down
+            size = wazuh_unpack(self.recvall_size(forwarded_sock, 4, socket.MSG_WAITALL))
+            response = self.recvall_size(forwarded_sock, size, socket.MSG_WAITALL)
 
-                return response
+            return response
 
-        def recvall_size(self, sock: socket.socket, size: int, mask: int):
-            """Recvall with known size of the message."""
-            buffer = bytearray()
-            while len(buffer) < size:
-                try:
-                    data = sock.recv(size - len(buffer), mask)
-                    if not data:
-                        break
-                    buffer.extend(data)
-                except socket.timeout:
-                    if self.server.mitm.event.is_set():
-                        break
-            return bytes(buffer)
-
-        def recvall(self, chunk_size: int = 4096):
-            """Recvall without known size of the message."""
-            received = self.request.recv(chunk_size)
-            if len(received) == chunk_size:
-                while 1:
-                    try:  # error means no more data
-                        received += self.request.recv(chunk_size, socket.MSG_DONTWAIT)
-                    except:
-                        break
-            return received
-
-        def default_wazuh_handler(self):
-            """Default wazuh daemons TCP handler method for MITM server."""
-            self.request.settimeout(1)
-            while not self.server.mitm.event.is_set():
-                header = self.recvall_size(self.request, 4, socket.MSG_WAITALL)
-                if not header:
-                    break
-                size = wazuh_unpack(header)
-                data = self.recvall_size(self.request, size, socket.MSG_WAITALL)
+    def recvall_size(self, sock: socket.socket, size: int, mask: int):
+        """Recvall with known size of the message."""
+        buffer = bytearray()
+        while len(buffer) < size:
+            try:
+                data = sock.recv(size - len(buffer), mask)
                 if not data:
                     break
+                buffer.extend(data)
+            except socket.timeout:
+                if self.server.mitm.event.is_set():
+                    break
+        return bytes(buffer)
 
-                response = self.unix_forward(data)
+    def recvall(self, chunk_size: int = 4096):
+        """Recvall without known size of the message."""
+        received = self.request.recv(chunk_size)
+        if len(received) == chunk_size:
+            while 1:
+                try:  # error means no more data
+                    received += self.request.recv(chunk_size, socket.MSG_DONTWAIT)
+                except:
+                    break
+        return received
 
-                self.server.mitm.put_queue((data.rstrip(b'\x00'), response.rstrip(b'\x00')))
+    def default_wazuh_handler(self):
+        """Default wazuh daemons TCP handler method for MITM server."""
+        self.request.settimeout(1)
+        while not self.server.mitm.event.is_set():
+            header = self.recvall_size(self.request, 4, socket.MSG_WAITALL)
+            if not header:
+                break
+            size = wazuh_unpack(header)
+            data = self.recvall_size(self.request, size, socket.MSG_WAITALL)
+            if not data:
+                break
 
-                self.request.sendall(wazuh_pack(len(response)) + response)
+            response = self.unix_forward(data)
 
-        def handle(self):
-            """Overriden handle method for TCP MITM server."""
-            if self.server.mitm.handler_func is None:
-                self.default_wazuh_handler()
-            else:
-                while not self.server.mitm.event.is_set():
-                    received = self.recvall()
-                    response = self.server.mitm.handler_func(received)
-                    self.server.mitm.put_queue((received, response))
-                    self.request.sendall(response)
+            self.server.mitm.put_queue((data.rstrip(b'\x00'), response.rstrip(b'\x00')))
 
-    class DatagramHandler(socketserver.BaseRequestHandler):
+            self.request.sendall(wazuh_pack(len(response)) + response)
 
-        def unix_forward(self, data):
-            """Default UDP unix socket forwarder for MITM servers."""
-            with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as forwarded_sock:
-                forwarded_sock.sendto(data, self.server.mitm.forwarded_socket_path)
+    def handle(self):
+        """Overriden handle method for TCP MITM server."""
+        if self.server.mitm.handler_func is None:
+            self.default_wazuh_handler()
+        else:
+            while not self.server.mitm.event.is_set():
+                received = self.recvall()
+                response = self.server.mitm.handler_func(received)
+                self.server.mitm.put_queue((received, response))
+                self.request.sendall(response)
 
-        def default_wazuh_handler(self):
-            """Default wazuh daemons UDP handler method for MITM server."""
+class DatagramHandler(socketserver.BaseRequestHandler):
+
+    def unix_forward(self, data):
+        """Default UDP unix socket forwarder for MITM servers."""
+        with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as forwarded_sock:
+            forwarded_sock.sendto(data, self.server.mitm.forwarded_socket_path)
+
+    def default_wazuh_handler(self):
+        """Default wazuh daemons UDP handler method for MITM server."""
+        data = self.request[0]
+        self.unix_forward(data)
+        self.server.mitm.put_queue(data.rstrip(b'\x00'))
+
+    def handle(self):
+        """Overriden handle method for UDP MITM server."""
+        if self.server.mitm.handler_func is None:
+            self.default_wazuh_handler()
+        else:
             data = self.request[0]
-            self.unix_forward(data)
-            self.server.mitm.put_queue(data.rstrip(b'\x00'))
+            self.server.mitm.handler_func(data)
+            self.server.mitm.put_queue(data)
 
-        def handle(self):
-            """Overriden handle method for UDP MITM server."""
-            if self.server.mitm.handler_func is None:
-                self.default_wazuh_handler()
-            else:
-                data = self.request[0]
-                self.server.mitm.handler_func(data)
-                self.server.mitm.put_queue(data)
+class ManInTheMiddle:
 
-    class ManInTheMiddle:
+    def __init__(self, address, family='AF_UNIX', connection_protocol='TCP', func: callable = None):
+        """Create a MITM server for the socket `socket_address`.
 
-        def __init__(self, address, family='AF_UNIX', connection_protocol='TCP', func: callable = None):
-            """Create a MITM server for the socket `socket_address`.
+        Parameters
+        ----------
+        address : str or Tuple(str, int)
+            Address of the socket, the format of the address depends on the type. A regular file path for AF_UNIX or
+            a Tuple(HOST, PORT) for AF_INET
+        family : str
+            Family type of socket to connect to, AF_UNIX for unix sockets or AF_INET for port sockets.
+            Default `'AF_UNIX'`
+        connection_protocol : str
+            It can be either 'TCP', 'UDP' or SSL. Default `'TCP'`
+        func : callable
+            Function to be applied to every received data before sending it.
+        """
+        if isinstance(address, str) or (isinstance(address, tuple) and len(address) == 2
+                                        and isinstance(address[0], str) and isinstance(address[1], int)):
+            self.listener_socket_address = address
+        else:
+            raise TypeError(f"Invalid address type: {type(address)}. Valid types are str or Tuple(str, int)")
 
-            Parameters
-            ----------
-            address : str or Tuple(str, int)
-                Address of the socket, the format of the address depends on the type. A regular file path for AF_UNIX or
-                a Tuple(HOST, PORT) for AF_INET
-            family : str
-                Family type of socket to connect to, AF_UNIX for unix sockets or AF_INET for port sockets.
-                Default `'AF_UNIX'`
-            connection_protocol : str
-                It can be either 'TCP' or 'UDP'. Default `'TCP'`
-            func : callable
-                Function to be applied to every received data before sending it.
-            """
-            if isinstance(address, str) or (isinstance(address, tuple) and len(address) == 2
-                                            and isinstance(address[0], str) and isinstance(address[1], int)):
-                self.listener_socket_address = address
-            else:
-                raise TypeError(f"Invalid address type: {type(address)}. Valid types are str or Tuple(str, int)")
+        if connection_protocol.lower() == 'tcp' or connection_protocol.lower() == 'udp' or connection_protocol.lower() == 'ssl':
+            self.mode = connection_protocol.lower()
+        else:
+            raise TypeError(f'Invalid connection protocol detected: {connection_protocol.lower()}. '
+                            f'Valid ones are TCP or UDP')
 
-            if connection_protocol.lower() == 'tcp' or connection_protocol.lower() == 'udp':
-                self.mode = connection_protocol.lower()
-            else:
-                raise TypeError(f'Invalid connection protocol detected: {connection_protocol.lower()}. '
-                                f'Valid ones are TCP or UDP')
+        if family in ('AF_UNIX', 'AF_INET'):
+            self.family = family
+        else:
+            raise TypeError('Invalid family type detected. Valid ones are AF_UNIX or AF_INET')
 
-            if family in ('AF_UNIX', 'AF_INET'):
-                self.family = family
-            else:
-                raise TypeError('Invalid family type detected. Valid ones are AF_UNIX or AF_INET')
+        self.forwarded_socket_path = None
 
-            self.forwarded_socket_path = None
-
-            class_tree = {
-                'listener': {
-                    'tcp': {
-                        'AF_UNIX': StreamServerUnix,
-                        'AF_INET': StreamServerPort
-                    },
-                    'udp': {
-                        'AF_UNIX': DatagramServerUnix,
-                        'AF_INET': DatagramServerPort
-                    }
+        class_tree = {
+            'listener': {
+                'tcp': {
+                    'AF_INET': StreamServerPort
                 },
-                'handler': {
-                    'tcp': StreamHandler,
-                    'udp': DatagramHandler
+                'udp': {
+                    'AF_INET': DatagramServerPort
+                },
+                'ssl' : {
+                    'AF_INET': SSLStreamServerPort
                 }
+            },
+            'handler': {
+                'tcp': StreamHandler,
+                'udp': DatagramHandler,
+                'ssl': StreamHandler
             }
+        }
+        if hasattr(socketserver, 'ThreadingUnixStreamServer'):
+            class_tree['listener']['tcp']['AF_UNIX'] = StreamServerUnix
+            class_tree['listener']['udp']['AF_UNIX'] = DatagramServerUnix
 
-            self.listener_class = class_tree['listener'][self.mode][self.family]
-            self.handler_class = class_tree['handler'][self.mode]
-            self.handler_func = func
-            self.listener = None
-            self.thread = None
-            self.event = threading.Event()
-            self._queue = Queue()
+        self.listener_class = class_tree['listener'][self.mode][self.family]
+        self.handler_class = class_tree['handler'][self.mode]
+        self.handler_func = func
+        self.listener = None
+        self.thread = None
+        self.event = threading.Event()
+        self._queue = Queue()
 
-        def run(self, *args):
-            """Run a MITM server."""
-            # Rename socket if it is a file (AF_UNIX)
-            if isinstance(self.listener_socket_address, str):
-                self.forwarded_socket_path = f'{self.listener_socket_address}.original'
-                os.rename(self.listener_socket_address, self.forwarded_socket_path)
+    def run(self, *args):
+        """Run a MITM server."""
+        # Rename socket if it is a file (AF_UNIX)
+        if isinstance(self.listener_socket_address, str):
+            self.forwarded_socket_path = f'{self.listener_socket_address}.original'
+            os.rename(self.listener_socket_address, self.forwarded_socket_path)
 
-            self.listener_class.allow_reuse_address = True
-            self.listener = self.listener_class(self.listener_socket_address, self.handler_class)
-            self.listener.mitm = self
+        self.listener_class.allow_reuse_address = True
+        self.listener = self.listener_class(self.listener_socket_address, self.handler_class)
+        self.listener.mitm = self
 
-            # Give proper permissions to socket
-            if isinstance(self.listener_socket_address, str):
-                uid = pwd.getpwnam('ossec').pw_uid
-                gid = grp.getgrnam('ossec').gr_gid
-                os.chown(self.listener_socket_address, uid, gid)
-                os.chmod(self.listener_socket_address, 0o660)
+        # Give proper permissions to socket
+        if isinstance(self.listener_socket_address, str):
+            uid = pwd.getpwnam('ossec').pw_uid
+            gid = grp.getgrnam('ossec').gr_gid
+            os.chown(self.listener_socket_address, uid, gid)
+            os.chmod(self.listener_socket_address, 0o660)
 
-            self.thread = threading.Thread(target=self.listener.serve_forever)
-            self.thread.start()
+        self.thread = threading.Thread(target=self.listener.serve_forever)
+        self.thread.start()
 
-        def start(self):
-            self.run()
+    def start(self):
+        self.run()
 
-        def shutdown(self):
-            """Gracefully shutdown a MITM server."""
-            self.listener.shutdown()
-            self.listener.socket.close()
-            self.event.set()
-            # Remove created unix socket and restore original
-            if isinstance(self.listener_socket_address, str):
-                os.remove(self.listener_socket_address)
-                os.rename(self.forwarded_socket_path, self.listener_socket_address)
+    def shutdown(self):
+        """Gracefully shutdown a MITM server."""
+        self.listener.shutdown()
+        self.listener.socket.close()
+        self.event.set()
+        # Remove created unix socket and restore original
+        if isinstance(self.listener_socket_address, str):
+            os.remove(self.listener_socket_address)
+            os.rename(self.forwarded_socket_path, self.listener_socket_address)
 
-        @property
-        def queue(self):
-            return self._queue
+    @property
+    def queue(self):
+        return self._queue
 
-        def put_queue(self, item):
-            self._queue.put(item)
+    def put_queue(self, item):
+        self._queue.put(item)
 
 
 def new_process(fn):

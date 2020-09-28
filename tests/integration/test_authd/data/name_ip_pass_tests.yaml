@@ -1,0 +1,389 @@
+---
+  -
+    name: "Agent name same as Manager"
+    description: "Check for register an agent with name same as manager: rejected"
+    test_case:
+    -
+      input: "OSSEC A:'{}'"
+      output: "ERROR: Invalid agent name: {}"
+      insert_hostname_in_query: "yes"
+    FORCE_INSERT: "no"
+  -
+    name: "Register with Default config"
+    description: "Default manager configuration: registered"
+    test_case:
+    -
+      input: "OSSEC A:'user1'"
+      output: "OSSEC K:'001 user1 any "
+      insert_prev_agent: "no"
+
+  -
+    name: "Try register duplicate agent name"
+    description: "Check for register an agent with repeated name and force_insert disabled: rejected"
+    test_case:
+    -
+      input: "OSSEC A:'user1'"
+      output: "ERROR: Duplicated agent name: "
+      insert_prev_agent: "yes"
+
+    FORCE_INSERT: "no"
+  -
+    name: "Overwrite agent name"
+    description: "Check for register an agent with repeated name and force_insert enabled: registered"
+    test_case:
+    -
+      input: "OSSEC A:'user1'"
+      output: "OSSEC K:'002 user1 any "
+      insert_prev_agent: "yes"
+    FORCE_INSERT: "yes"
+  -
+    name: "Too short agent name"
+    description: "Agent name too short < 2: rejected"
+    test_case:
+    -
+      input: "OSSEC A:'n'"
+      output: "ERROR: Invalid agent name: "
+      insert_prev_agent: "no"
+  -
+    name: "Min len agent name"
+    description: "Agent name length = 2: registered"
+    test_case:
+    -
+      input: "OSSEC A:'nn'"
+      output: "OSSEC K:'001 nn any "
+      insert_prev_agent: "no"
+      
+  -
+    name: "Max len agent name"
+    description: "Agent name length = 128: registered"
+    test_case:
+    -
+      input: "OSSEC A:'userxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'"
+      output: "OSSEC K:'001 userxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx any"
+      insert_prev_agent: "no"
+  -  
+    name: "Too long agent name"
+    description: "Agent name length = 129: rejected"
+    test_case:
+    -
+      input: "OSSEC A:'userxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'"
+      output: "ERROR: Invalid agent name: "
+      insert_prev_agent: "no"
+  -  
+    name: "Check non-alphanumeric '*'"
+    description: "Agent name with '*': rejected"
+    test_case:
+    -
+      input: "OSSEC A:'user*1'"
+      output: "ERROR: Invalid agent name: "
+      insert_prev_agent: "no"
+  -  
+    name: "Check non-alphanumeric '-'"
+    description: "Agent name with '-': registered"
+    test_case:
+    -
+      input: "OSSEC A:'user-1'"
+      output: "OSSEC K:'001 user-1 any "
+      insert_prev_agent: "no"
+  -  
+    name: "Check non-alphanumeric '_'"
+    description: "Agent name with '_': registered"
+    test_case:
+    -
+      input: "OSSEC A:'user_1'"
+      output: "OSSEC K:'001 user_1 any "
+      insert_prev_agent: "no"
+  -  
+    name: "Check non-alphanumeric '.'"
+    description: "Agent name with '.': registered"
+    test_case:
+    -
+      input: "OSSEC A:'user.1'"
+      output: "OSSEC K:'001 user.1 any "
+      insert_prev_agent: "no"
+  #IP tests
+  -  
+    name: "Valid IP"
+    description: "Try register an agent with valid IP: register"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.10'"
+      output: "OSSEC K:'001 user1 10.10.10.10 "
+      insert_prev_agent: "no"
+  -  
+    name: "Valid and duplicate IP - force_insert disabled"
+    description: "Try register an agent with existing IP in client.keys and force_insert disabled: rejected"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.10'"
+      output: "ERROR: Duplicated IP: "
+      insert_prev_agent: "yes"
+      insert_prev_agent_custom: "OSSEC A:'user0' IP:'10.10.10.10'"
+    FORCE_INSERT: "no"
+  -  
+    name: "Valid and duplicate IP - force_insert enabled"
+    description: "Try register an agent with existing IP in client.keys and force_insert disabled: register"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.10'"
+      output: "OSSEC K:'002 user1 10.10.10.10 "
+      insert_prev_agent: "yes"
+      insert_prev_agent_custom: "OSSEC A:'user0' IP:'10.10.10.10'"
+    FORCE_INSERT: "yes"
+  -  
+    name: "Invalid IP: incomplete"
+    description: "Try register an agent with invalid IP: rejected"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10'"
+      output: "ERROR: Invalid IP: "
+      insert_prev_agent: "no"
+  -  
+    name: "Invalid IP: alphabetic character"
+    description: "Try register an agent with invalid IP: rejected"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.nn'"
+      output: "ERROR: Invalid IP: "
+      insert_prev_agent: "no"
+  -
+    name: "Invalid IP: greater than 255"
+    description: "Try register an agent with invalid IP: rejected"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.257'"
+      output: "ERROR: Invalid IP: "
+      insert_prev_agent: "no"
+      expected_fail: 'yes'
+  -  
+    name: "Invalid IP: greater than 255"
+    description: "Try register an agent with invalid IP: rejected"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'257.257.257.257'"
+      output: "ERROR: Invalid IP: "
+      insert_prev_agent: "no"
+      expected_fail: 'yes'
+  -  
+    name: "Invalid IP: 4 digits"
+    description: "Try register an agent with invalid IP: rejected"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'999.9999.999.999'"
+      output: "ERROR: Invalid IP: "
+      insert_prev_agent: "no"
+  -  
+    name: "Not specific IP, USE_SOURCE yes"
+    description: "Not specific IP, USE_SOURCE yes: register"
+    test_case:
+    -
+      input: "OSSEC A:'user1' "
+      output: "OSSEC K:'001 user1 127.0.0.1 "
+      insert_prev_agent: "no"
+    USE_SOURCE_IP: "yes"
+  -  
+    name: "Not specific IP, USE_SOURCE no"
+    description: "Not specific IP, USE_SOURCE no: register"
+    test_case:
+    -
+      input: "OSSEC A:'user1' "
+      output: "OSSEC K:'001 user1 any "
+      insert_prev_agent: "no"
+    USE_SOURCE_IP: "no"
+  -  
+    name: "Let manager decide, USE_SOURCE no"
+    description: "Let manager decide, USE_SOURCE no: register"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'src'"
+      output: "OSSEC K:'001 user1 127.0.0.1 "
+      insert_prev_agent: "no"
+    USE_SOURCE_IP: "no"
+  -  
+    name: "Let manager decide, use_source_ip enabled"
+    description: "Let manager decide, use_source_ip enabled: register"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'src'"
+      output: "OSSEC K:'001 user1 127.0.0.1 "
+      insert_prev_agent: "no"
+    USE_SOURCE_IP: "yes"
+  -  
+    name: "Ip with mask/24, use_source_ip enabled"
+    description: "Ip with mask, use_source_ip enabled: register"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.1/24'"
+      output: "OSSEC K:'001 user1 10.10.10.1/24 "
+      insert_prev_agent: "no"
+    USE_SOURCE_IP: "yes"
+  -  
+    name: "Ip with mask/32, use_source_ip enabled"
+    description: "Ip with mask, use_source_ip enabled: register"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.1/32'"
+      output: "OSSEC K:'001 user1 10.10.10.1/32"
+      insert_prev_agent: "no"
+    USE_SOURCE_IP: "yes"
+  -  
+    name: "Ip with mask/0, use_source_ip enabled"
+    description: "Ip with mask, use_source_ip disabled: register"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.1/0'"
+      output: "OSSEC K:'001 user1 10.10.10.1/0 "
+      insert_prev_agent: "no"
+    USE_SOURCE_IP: "yes"
+  -  
+    name: "Ip with mask/0, use_source_ip disabled"
+    description: "Ip with mask, use_source_ip disabled: register"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.10/0'"
+      output: "OSSEC K:'001 user1 10.10.10.10/0 "
+      insert_prev_agent: "no"
+    USE_SOURCE_IP: "no"
+  -  
+    name: "Ip with mask/0, use_source_ip disabled"
+    description: "Ip with mask, use_source_ip disabled: register"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'0.0.0.0/0'"
+      output: "OSSEC K:'001 user1 0.0.0.0/0 "
+      insert_prev_agent: "no"
+    USE_SOURCE_IP: "no"
+  -  
+    name: "Ip with mask /24 force_insert disabled"
+    description: "Ip with mask /24 force_insert disabled"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.1/24'"
+      output: "OSSEC K:'001 user1 10.10.10.1/24 "
+      insert_prev_agent: "no"
+    USE_SOURCE_IP: "no"
+  -  
+    name: "Ip with mask /32 force_insert disabled"
+    description: "Ip with mask /32 force_insert disabled"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.1/32'"
+      output: "OSSEC K:'001 user1 10.10.10.1/32"
+      insert_prev_agent: "no"
+    USE_SOURCE_IP: "no"
+  -  
+    name: "Invalid mask, use_source_ip disabled"
+    description: "Invalid mask, use_source_ip disabled: rejected"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.1/55'"
+      output: "ERROR: Invalid IP: 10.10.10.1"
+      insert_prev_agent: "no"
+    USE_SOURCE_IP: "no"
+  -  
+    name: "Invalid mask, use_source_ip enabled"
+    description: "Invalid mask, use_source_ip enabled: rejected"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.1/55'"
+      output: "ERROR: Invalid IP: 10.10.10.1"
+      insert_prev_agent: "no"
+    USE_SOURCE_IP: "yes"
+  -  
+    name: "Invalid mask, wrong character"
+    description: "Invalid mask, wrong character, use_source_ip enabled: rejected"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.1/2{'"
+      output: "ERROR: Invalid IP: 10.10.10.1"
+      insert_prev_agent: "no"
+    USE_SOURCE_IP: "yes"
+  -  
+    name: "Invalid mask, wrong charact"
+    description: "Invalid mask, wrong charact, use_source_ip enabled: rejected"
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.1/<'"
+      output: "ERROR: Invalid IP: 10.10.10.1"
+      insert_prev_agent: "no"
+    USE_SOURCE_IP: "yes"
+    
+  #PASSWORD test
+  -  
+    name: "Default USE_PASSWORD request with password use_password enabled"
+    description: "Try register an agent with password and use_password enabled: register"
+    test_case:
+    -
+      input: "OSSEC PASS: TopSecret OSSEC A:'user1'"
+      output: "OSSEC K:'001 user1 any "
+      insert_prev_agent: "no"
+    USE_PASSWORD: "yes"
+  -  
+    name: "Manager without password"
+    description: "Try register an agent without password and use_password disabled: register"
+    test_case:
+    -
+      input: "OSSEC A:'user1'"
+      output: "OSSEC K:'001 user1 any "
+      insert_prev_agent: "no"
+    USE_PASSWORD: "no"
+  -  
+    name: "Manager without password, request with password"
+    description: "Try register an agent with password and use_password disabled: rejected"
+    test_case:
+    -
+      input: "OSSEC PASS: TopSecret OSSEC A:'user1'"
+      output: "ERROR: Invalid request for new agent"
+      insert_prev_agent: "no"
+    USE_PASSWORD: "no"
+  -  
+    name: "Manager with password, request with correct password"
+    description: "Try register an agent with correct password and use_password enabled: register"
+    test_case:
+    -
+      input: "OSSEC PASS: TopSecret OSSEC A:'user1'"
+      output: "OSSEC K:'001 user1 any "
+      insert_prev_agent: "no"
+    USE_PASSWORD: "yes"
+  -  
+    name: "Manager with password, request with wrong password"
+    description: "Try register an agent with password and use_password enabled: rejected"
+    test_case:
+    -
+      input: "OSSEC PASS: wrongPass OSSEC A:'user1'"
+      output: "ERROR: Invalid password"
+      insert_prev_agent: "no"
+    USE_PASSWORD: "yes"
+  -  
+    name: "Random password, request with correct password"
+    description: "Try register an agent with correct password and use_password enabled, random password created: register"
+    test_case:
+    -
+      input: "OSSEC PASS: {} OSSEC A:'user1'"
+      output: "OSSEC K:'001 user1 any "
+      insert_prev_agent: "no"
+      insert_random_pass_in_query: "yes"
+      
+    USE_PASSWORD: "yes"
+    random_pass: "yes"
+  -  
+    name: "Random password, request with wrong password"
+    description: "Try register an agent with wrong password and use_password enabled, random password created: rejected"
+    test_case:
+    -
+      input: "OSSEC PASS: wrongPass OSSEC A:'user1'"
+      output: "ERROR: Invalid password"
+      insert_prev_agent: "no"
+    USE_PASSWORD: "yes"
+    random_pass: "yes"
+  -  
+    name: "Random password, request without password"
+    description: "Try register an agent without password and use_password enabled, random password created: rejected"
+    test_case:
+    -
+      input: "OSSEC A:'user1'"
+      output: "ERROR: Invalid password"
+      insert_prev_agent: "no"
+    USE_PASSWORD: "yes"
+    random_pass: "yes"
+    
