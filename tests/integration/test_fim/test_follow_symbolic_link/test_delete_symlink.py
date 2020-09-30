@@ -46,7 +46,7 @@ def get_configuration(request):
     ({'monitored_dir'}, testdir_target, testdir_not_target)
 ])
 def test_symbolic_delete_symlink(tags_to_apply, main_folder, aux_folder, get_configuration, configure_environment,
-                                 restart_syscheckd, wait_for_initial_scan):
+                                 restart_syscheckd, wait_for_syscheck_start):
     """
     Check if syscheck stops detecting events when deleting the monitored symlink.
 

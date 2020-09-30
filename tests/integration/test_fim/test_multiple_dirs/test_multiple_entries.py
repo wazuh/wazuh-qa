@@ -81,7 +81,7 @@ def get_configuration(request):
     (test_directories, {'multiple_dir_entries'})
 ])
 def test_cud_multiple_dir_entries(dir_list, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
-                                  wait_for_initial_scan):
+                                  wait_for_syscheck_start):
     """
     Check if syscheck can detect every event when adding, modifying and deleting a file within multiple monitored
     directories.

@@ -60,7 +60,7 @@ def get_configuration(request):
     (dir4, True),
 ])
 def test_tag_ignore(directory, event_generated, get_configuration, configure_environment, put_env_variables,
-                    restart_syscheckd, wait_for_initial_scan):
+                    restart_syscheckd, wait_for_syscheck_start):
     """
     Test environment variables are ignored
     """

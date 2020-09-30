@@ -52,7 +52,7 @@ def get_configuration(request):
 ])
 def test_remove_and_read_folder(tags_to_apply, folder, get_configuration,
                                 configure_environment, restart_syscheckd,
-                                wait_for_initial_scan):
+                                wait_for_syscheck_start):
     """Remove folder which is monitored with auditd and then create it again.
 
     Parameters
@@ -79,7 +79,7 @@ def test_remove_and_read_folder(tags_to_apply, folder, get_configuration,
     {'config1'}
 ])
 def test_reconnect_to_audit(tags_to_apply, get_configuration, configure_environment,
-                            restart_syscheckd, wait_for_initial_scan):
+                            restart_syscheckd, wait_for_syscheck_start):
     """Restart auditd and check Wazuh reconnect to auditd
 
     Parameters

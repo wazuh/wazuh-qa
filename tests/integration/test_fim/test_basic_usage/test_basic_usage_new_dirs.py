@@ -64,7 +64,7 @@ def extra_configuration_after_yield():
     {'ossec_conf'}
 ])
 def test_new_directory(tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
-                       wait_for_initial_scan):
+                       wait_for_syscheck_start):
     """
     Check that a new monitored directory generates events after the next scheduled scan.
 

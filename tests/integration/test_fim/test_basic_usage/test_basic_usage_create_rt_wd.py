@@ -79,7 +79,7 @@ def get_configuration(request):
 ])
 def test_create_file_realtime_whodata(folder, name, filetype, content, checkers, tags_to_apply, encoding,
                                       get_configuration,
-                                      configure_environment, restart_syscheckd, wait_for_initial_scan):
+                                      configure_environment, restart_syscheckd, wait_for_syscheck_start):
     """
     Check if a special or regular file creation is detected by syscheck using realtime and whodata monitoring
 

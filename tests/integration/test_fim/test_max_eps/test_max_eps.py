@@ -45,7 +45,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_max_eps(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
+def test_max_eps(get_configuration, configure_environment, restart_syscheckd, wait_for_syscheck_start):
     """
     Check that max_eps is respected when a big quantity of syscheck events are generated.
 

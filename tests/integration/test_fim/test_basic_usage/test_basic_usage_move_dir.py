@@ -70,7 +70,7 @@ def extra_configuration_after_yield():
     (testdir3, testdir2, f'subdir3{os.path.sep}', {'ossec_conf'}, True, True)
 ])
 def test_move_dir(source_folder, target_folder, subdir, tags_to_apply, triggers_delete_event, triggers_add_event,
-                  get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
+                  get_configuration, configure_environment, restart_syscheckd, wait_for_syscheck_start):
     """
     Check if syscheckd detects 'added' or 'deleted' events when moving a
     subfolder from a folder to another one.

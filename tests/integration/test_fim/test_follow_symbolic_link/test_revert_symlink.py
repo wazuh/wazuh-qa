@@ -45,7 +45,7 @@ def get_configuration(request):
     {'monitored_file'}
 ])
 def test_symbolic_revert_symlink(tags_to_apply, get_configuration, configure_environment,
-                                 restart_syscheckd, wait_for_initial_scan):
+                                 restart_syscheckd, wait_for_syscheck_start):
     """
     Check if syscheck detects new targets properly
 

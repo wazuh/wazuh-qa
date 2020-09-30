@@ -68,7 +68,7 @@ def clean_directories(request):
 ])
 def test_rename(folder, tags_to_apply,
                 get_configuration, clean_directories, configure_environment,
-                restart_syscheckd, wait_for_initial_scan):
+                restart_syscheckd, wait_for_syscheck_start):
     """
     Check if syscheckd detects events when renaming directories or files.
 

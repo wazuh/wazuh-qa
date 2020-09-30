@@ -60,7 +60,7 @@ def get_configuration(request):
     ('regular_0', testdir1, 10000000),
 ])
 def test_disk_quota_disabled(tags_to_apply, filename, folder, size, get_configuration, configure_environment,
-                             restart_syscheckd, wait_for_initial_scan):
+                             restart_syscheckd, wait_for_syscheck_start):
     """
     Check that the disk_quota option is disabled correctly.
 

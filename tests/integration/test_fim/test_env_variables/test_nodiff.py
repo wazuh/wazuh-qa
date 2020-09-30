@@ -58,7 +58,7 @@ def get_configuration(request):
     (dir4, "testing.txt", False),
 ])
 def test_tag_nodiff(directory, filename, hidden_content, get_configuration, put_env_variables, configure_environment,
-                    restart_syscheckd, wait_for_initial_scan):
+                    restart_syscheckd, wait_for_syscheck_start):
     """
     Test nodiff option works with environment variables
 

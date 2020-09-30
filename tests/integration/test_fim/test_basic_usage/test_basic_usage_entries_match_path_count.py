@@ -51,7 +51,7 @@ def extra_configuration_before_yield():
     create_file(HARDLINK, testdir1, 'hardlink', target=os.path.join(testdir1, 'test_2'))
 
 
-def test_entries_match_path_count(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
+def test_entries_match_path_count(get_configuration, configure_environment, restart_syscheckd, wait_for_syscheck_start):
     """
     Check if FIM entries match the path count
 

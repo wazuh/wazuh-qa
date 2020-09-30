@@ -83,7 +83,7 @@ def extra_configuration_after_yield():
     ('regular_0', testdir1),
 ])
 def test_file_size_values(tags_to_apply, filename, folder, get_configuration, configure_environment, restart_syscheckd,
-                          wait_for_initial_scan):
+                          wait_for_syscheck_start):
     """
     Check that the file_size option for report_changes is working correctly.
 

@@ -82,7 +82,7 @@ def get_configuration(request):
 ])
 def test_scan_day_and_time(tags_to_apply,
                            get_configuration, configure_environment,
-                           restart_syscheckd, wait_for_initial_scan):
+                           restart_syscheckd, wait_for_syscheck_start):
     """
     Check if there is a scan in a certain day and time
 

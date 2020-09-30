@@ -39,7 +39,7 @@ def get_configuration(request):
 
 # tests
 
-def test_process_priority(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
+def test_process_priority(get_configuration, configure_environment, restart_syscheckd, wait_for_syscheck_start):
     """Check if the ossec-syscheckd service priority is updated correctly using
        <process_priority> tag in ossec.conf.
     """

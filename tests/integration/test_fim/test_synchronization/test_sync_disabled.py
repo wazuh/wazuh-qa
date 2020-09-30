@@ -39,7 +39,7 @@ def get_configuration(request):
 # Tests
 
 
-def test_sync_disabled(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
+def test_sync_disabled(get_configuration, configure_environment, restart_syscheckd, wait_for_syscheck_start):
     """
     Verify that synchronization is disabled when enabled is set to no in the configuration.
     """

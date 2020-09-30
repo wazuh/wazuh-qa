@@ -60,7 +60,7 @@ def get_configuration(request):
 ])
 def test_benchmark_regular_files(files, folder, tags_to_apply, get_configuration,
                                  configure_environment, restart_syscheckd,
-                                 wait_for_initial_scan):
+                                 wait_for_syscheck_start):
     """
     Check syscheckd detects a certain volume of file changes (add, modify, delete)
 

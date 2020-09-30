@@ -7,6 +7,7 @@ import sys
 
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, callback_ignore, create_file, REGULAR, \
     generate_params, check_time_travel
 from wazuh_testing.tools import PREFIX
@@ -81,7 +82,7 @@ def get_configuration(request):
 def test_ignore_subdirectory(folder, filename, content, triggers_event,
                              tags_to_apply, get_configuration,
                              configure_environment, restart_syscheckd,
-                             wait_for_initial_scan):
+                             wait_for_syscheck_start):
     """
     Check files are ignored in subdirectory according to configuration. It also ensures that events for files that
     are not being ignored are still detected when using the ignore option.
@@ -109,7 +110,7 @@ def test_ignore_subdirectory(folder, filename, content, triggers_event,
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
 
     if triggers_event:
-        event = wazuh_log_monitor.start(timeout=10,
+        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 2,
                                         callback=callback_detect_event,
                                         error_message='Did not receive expected '
                                                       '"Sending FIM event: ..." event').result()
@@ -117,7 +118,7 @@ def test_ignore_subdirectory(folder, filename, content, triggers_event,
         assert event['data']['path'] == os.path.join(folder, filename), f'Event path not equal'
     else:
         while True:
-            ignored_file = wazuh_log_monitor.start(timeout=10,
+            ignored_file = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 2,
                                                    callback=callback_ignore).result()
             if ignored_file == os.path.join(folder, filename):
                 break
