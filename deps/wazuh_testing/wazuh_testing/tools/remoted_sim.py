@@ -67,6 +67,7 @@ class RemotedSimulator:
         self.upgrade_errors = False
         self.upgrade_success = False
         self.upgrade_notification = None
+        self.listener_thread = None
         if start_on_init:
             self.start()
 
@@ -76,7 +77,10 @@ class RemotedSimulator:
     def start(self, custom_listener=None, args=[]):  
         if self.running == False:
             self._start_socket()
-            self.listener_thread = threading.Thread(target=(self.listener if not custom_listener else custom_listener), args=args)
+            self.listener_thread = threading.Thread(target=(self.listener 
+                                                            if not custom_listener 
+                                                            else custom_listener), 
+                                                    args=args)
             self.listener_thread.setName('listener_thread') 
             self.running = True  
             self.listener_thread.start() 
@@ -316,7 +320,6 @@ class RemotedSimulator:
                             pass              
                 except Exception:
                     continue
-               
 
             elif self.protocol == 'udp':   
                 try:              
@@ -369,32 +372,37 @@ class RemotedSimulator:
     """
     Listener thread that will finish when encryption_keys are obtained
     """
-    def upgrade_listener(self, filename, filepath, chunk_size, installer, sha1hash, simulate_interruption=False, simulate_connection_error=False):   
+    def upgrade_listener(self, filename, filepath, chunk_size, installer, 
+                         sha1hash, simulate_interruption=False,
+                         simulate_connection_error=False):   
         self.upgrade_errors = False
         self.upgrade_success = False
         while not self.upgrade_errors and self.running: 
             try:
                 connection, client_address = self.start_connection()
-
-                response = self.sendComMessage(client_address, connection, 'lock_restart -1')
-                response = self.sendComMessage(client_address, connection, f'open wb {filename}', interruption_time=5 if simulate_interruption else None)
+                self.sendComMessage(client_address, connection, 'lock_restart -1')
+                self.sendComMessage(client_address, connection, f'open wb {filename}', 
+                                    interruption_time=5 if simulate_interruption else None)
                 with open(filepath, 'rb') as f:
                     bytes_stream = f.read(chunk_size)
                     while len(bytes_stream) == chunk_size:
-                        response = self.sendComMessage(client_address, connection, f'write {len(bytes_stream)} {filename} ', payload=bytes_stream)
+                        self.sendComMessage(client_address, connection, f'write {len(bytes_stream)} {filename} ', 
+                                            payload=bytes_stream)
                         bytes_stream = f.read(chunk_size)
-                    response = self.sendComMessage(client_address, connection, f'write {len(bytes_stream)} {filename} ', payload=bytes_stream)
-                response = self.sendComMessage(client_address, connection, f'close {filename}')
+                    self.sendComMessage(client_address, connection, f'write {len(bytes_stream)} {filename} ', 
+                                        payload=bytes_stream)
+                self.sendComMessage(client_address, connection, f'close {filename}')
                 response = self.sendComMessage(client_address, connection, f'sha1 {filename}')
                 if response.split(' ')[1] != sha1hash:
                     self.upgrade_errors = True
                     raise
-                response = self.sendComMessage(client_address, connection, f'upgrade {filename} {installer}')
+                self.sendComMessage(client_address, connection, f'upgrade {filename} {installer}')
                 self.upgrade_notification = None
                 self.upgrade_success = True
                 # Switch to common listener once the upgrade has ended
                 if simulate_connection_error:
-                    time.sleep(100)  # Sleep long enought to make the connection after upgrade fail and generate a rollback   
+                    # Sleep long enough to make the connection after upgrade fail and generate a rollback
+                    time.sleep(100)  
                     self.sock.close()
                     self._start_socket()
                 return self.listener()

@@ -81,7 +81,7 @@ cases = [
             'expected_response': 'Success'
         }
     },
-    # 2. Single Agent - faliure SHA-1
+    # 2. Single Agent - failure SHA-1
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -332,7 +332,7 @@ cases = [
             'first_attempt': 'In progress'
         }
     },
-    # 13. Upgrade an agent that previus task is timeouted - Success
+    # 13. Upgrade an agent that previous task's result is timeou - Success
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -804,12 +804,14 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
 
         last_log = log_monitor.result()
         assert f'com upgrade {file_name} {installer}' in last_log, \
-            f'Wpk custom package did not match expected! Expected {metadata.get("message_params").get("file_path")} obtained {last_log}'
+            f'Wpk custom package did not match expected! ' \
+            f'Expected {metadata.get("message_params").get("file_path")} obtained {last_log}'
 
     if metadata.get('first_attempt'):
         # Chech that result of first attempt is Success
         assert 'Success' == response['data'][0]['message'], \
-            f'First upgrade response did not match expected! Expected {metadata.get("expected_response")} obtained {response["data"][0]["message"]}'
+            f'First upgrade response did not match expected! ' \
+            f'Expected {metadata.get("expected_response")} obtained {response["data"][0]["message"]}'
 
         repeat_message = data
         # Continue with the validations of first attempt
@@ -833,7 +835,8 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
                 response = send_message(data, TASK_SOCKET)
                 retries += 1
             assert metadata.get('first_attempt') == response['data'][0]['status'], \
-                f'First upgrade status did not match expected! Expected {metadata.get("first_attempt")} obtained {response["data"][0]["status"]}'
+                f'First upgrade status did not match expected! ' \
+                f'Expected {metadata.get("first_attempt")} obtained {response["data"][0]["status"]}'
 
         # send upgrade request again
         response = send_message(repeat_message, UPGRADE_SOCKET)
@@ -841,7 +844,8 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
     if metadata.get('expected_response') == 'Success':
         # Chech that result is expected
         assert metadata.get('expected_response') == response['data'][0]['message'], \
-            f'Upgrade response did not match expected! Expected {metadata.get("expected_response")} obtained {response["data"][0]["message"]}'
+            f'Upgrade response did not match expected! ' \
+            f'Expected {metadata.get("expected_response")} obtained {response["data"][0]["message"]}'
 
         # Continue with the test validations
         task_ids = [item.get('task_id') for item in response['data']]
@@ -864,13 +868,16 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
                 response = send_message(data, TASK_SOCKET)
                 retries += 1
             assert expected_status[index] == response['data'][0]['status'], \
-                f'Upgrade status did not match expected! Expected {expected_status[index]} obtained {response["data"][0]["status"]} at index {index}'
+                f'Upgrade status did not match expected! ' \
+                f'Expected {expected_status[index]} obtained {response["data"][0]["status"]} at index {index}'
             if expected_status[index] == 'Failed':
                 assert expected_error_msg[index] == response['data'][0]['error_msg'], \
-                    f'Error msg did not match expected! Expected {expected_error_msg[index]} obtained {response["data"][0]["error_msg"]} at index {index}'
+                    f'Error msg did not match expected! ' \
+                    f'Expected {expected_error_msg[index]} obtained {response["data"][0]["error_msg"]} at index {index}'
     else:
         assert metadata.get('expected_response') == response['data'][0]['message'], \
-            f'Upgrade response did not match expected! Expected {metadata.get("expected_response")} obtained {response["data"][0]["message"]}'
+            f'Upgrade response did not match expected! ' \
+            f'Expected {metadata.get("expected_response")} obtained {response["data"][0]["message"]}'
 
     for injector in injectors:
         injector.stop_receive()

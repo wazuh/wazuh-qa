@@ -277,9 +277,9 @@ def prepare_agent_version(get_configuration):
                 pass
             time.sleep(10)
             backup_path = os.path.join(WAZUH_PATH, 'backup')
-            subprocess.call(['robocopy', backup_path, WAZUH_PATH, 
-                                '/E', '/IS', '/NFL', '/NDL', '/NJH', 
-                                '/NP', '/NS', '/NC'])
+            subprocess.call(['robocopy', backup_path, WAZUH_PATH,
+                             '/E', '/IS', '/NFL', '/NDL', '/NJH',
+                             '/NP', '/NS', '/NC'])
         else:
             # We should change initial version to match expected
             backup_file_start = f'backup_{metadata["initial_version"]}_[' \
@@ -306,7 +306,7 @@ def prepare_agent_version(get_configuration):
         time.sleep(10)
         backup_path = os.path.join(WAZUH_PATH, 'backup')
         subprocess.call(['robocopy', backup_path, WAZUH_PATH,
-        				 '/E', '/IS', '/NFL', '/NDL', '/NJH', '/NP', '/NS', '/NC'])
+                         '/E', '/IS', '/NFL', '/NDL', '/NJH', '/NP', '/NS', '/NC'])
     else:
         backup_file_start = f'backup_{metadata["initial_version"]}_[' \
                             f'{datetime.strftime(datetime.now(), "%m-%d-%Y")}'

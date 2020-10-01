@@ -177,6 +177,7 @@ class Agent:
 
     # Encrypt event AES or Blowfish
     def encrypt(self, padded_event):
+        encrypted_event = None
         if self.cypher == "aes":
             encrypted_event = Cipher(padded_event,
                                      self.encryption_key).encrypt_aes()
@@ -187,6 +188,7 @@ class Agent:
 
     # Add event headers for AES or Blowfish Cyphers
     def headers(self, agentid, encrypted_event):
+        headers_event = None
         if self.cypher == "aes":
             header = "!{0}!#AES:".format(agentid).encode()
         if self.cypher == "blowfish":
