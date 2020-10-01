@@ -104,7 +104,8 @@ def test_checksums_checkall(path, checkers, get_configuration, configure_environ
     (testdir8, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_MD5SUM} - {CHECK_SHA256SUM}),
     (testdir8, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_SHA256SUM} - {CHECK_MD5SUM})
 ])
-def test_checksums(path, checkers, get_configuration, configure_environment, restart_syscheckd, wait_for_syscheck_start):
+def test_checksums(path, checkers, get_configuration, configure_environment, restart_syscheckd,
+                   wait_for_syscheck_start):
     """
     Test the checksum options (checksum, sha1sum, sha256sum and md5sum)
     behaviour when is used alone or in conjunction.

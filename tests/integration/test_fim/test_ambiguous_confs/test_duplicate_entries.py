@@ -210,7 +210,8 @@ def test_duplicate_entries_report(get_configuration, configure_environment, rest
         'Error: Diff file created'
 
 
-def test_duplicate_entries_complex(get_configuration, configure_environment, restart_syscheckd, wait_for_syscheck_start):
+def test_duplicate_entries_complex(get_configuration, configure_environment, restart_syscheckd,
+                                   wait_for_syscheck_start):
     """Check if syscheckd ignores duplicate entries, complex entries.
        For instance:
            - The second entry should prevail over the first one.

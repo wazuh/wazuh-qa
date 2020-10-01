@@ -116,7 +116,8 @@ else:
 
 
 @pytest.mark.parametrize('path, checkers', parametrize_list)
-def test_check_all(path, checkers, get_configuration, configure_environment, restart_syscheckd, wait_for_syscheck_start):
+def test_check_all(path, checkers, get_configuration, configure_environment, restart_syscheckd,
+                   wait_for_syscheck_start):
     """
     Test the functionality of `check_all` option when used in conjunction with more than one check on the same directory,
     having "check_all" to "yes" and the other ones to "no".

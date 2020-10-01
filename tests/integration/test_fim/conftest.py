@@ -25,12 +25,17 @@ def restart_syscheckd(get_configuration, request):
 @pytest.fixture(scope='module')
 def wait_for_syscheck_start(get_configuration, request):
     """
-    Wait for initial FIM scan to end. If realtime or whodata are enabled, it will wait for their start too.
+    Wait for realtime start, whodata start or end of initial FIM scan.
     """
     file_monitor = getattr(request.module, 'wazuh_log_monitor')
-    detect_initial_scan(file_monitor)
+    mode_key = 'fim_mode' if 'fim_mode2' not in get_configuration['metadata'] else 'fim_mode2'
 
-    if get_configuration['metadata']['fim_mode'] == 'realtime':
-        detect_realtime_start(file_monitor)
-    elif get_configuration['metadata']['fim_mode'] == 'whodata':
-        detect_whodata_start(file_monitor)
+    try:
+        if get_configuration['metadata'][mode_key] == 'realtime':
+            detect_realtime_start(file_monitor)
+        elif get_configuration['metadata'][mode_key] == 'whodata':
+            detect_whodata_start(file_monitor)
+        else:   # scheduled
+            detect_initial_scan(file_monitor)
+    except KeyError:
+        detect_initial_scan(file_monitor)

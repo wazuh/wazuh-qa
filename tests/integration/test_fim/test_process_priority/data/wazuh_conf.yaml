@@ -9,5 +9,9 @@
     elements:
     - disabled:
         value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - FIM_MODE
     - process_priority:
         value: PROCESS_PRIORITY

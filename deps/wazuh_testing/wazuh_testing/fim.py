@@ -826,13 +826,6 @@ def callback_num_inotify_watches(line):
         return match.group(1)
 
 
-def callback_realtime_engine_started(line):
-    match = re.match(r'.*Real-time file integrity monitoring started.*', line)
-
-    if match:
-        return True
-
-
 def callback_file_size_limit_reached(line):
     match = re.match(r'.*File \'(.*)\' is too big for configured maximum size to perform diff operation\.', line)
 
@@ -1313,8 +1306,8 @@ def detect_realtime_start(file_monitor):
     file_monitor : FileMonitor
         File log monitor to detect events
     """
-    file_monitor.start(timeout=60, callback=callback_realtime_engine_started,
-                       error_message='Did not receive expected "Real-time file integrity monitoring started" event')
+    file_monitor.start(timeout=60, callback=callback_num_inotify_watches,
+                       error_message='Did not receive expected "Folders monitored with real-time engine..." event')
 
 
 def detect_whodata_start(file_monitor):
