@@ -257,3 +257,30 @@
     input: 'global delete-agent 3'
     output: "ok"
     stage: "global delete-agent after insert"
+-
+  name: "Manager keepalive"
+  description: "Check success use cases for manager keepalive."
+  test_case:
+  -
+    input: 'global get-agent-info 0'
+    output: 'ok [{"id":0,"name":"*","ip":"*","register_ip":"*","os_name":"*","os_version":"*","os_major":"*","os_minor":"*","os_codename":"*","os_platform":"*","os_uname":"*","os_arch":"*","version":"*","manager_host":"*","node_name":"*","date_add":*,"last_keepalive":253402300799,"status":"*","fim_offset":0,"reg_offset":0,"sync_status":"synced"}]'
+    stage: "global manager get-agent-info success pre update"
+    use_regex: "yes"
+  -
+    input: 'global update-agent-data {"id":0,"os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_platform":"TestOsPlatfor","os_build":"TestOsBuild","os_uname":"TestOsUname","os_arch":"TestOsArch","version":"TestVersion","config_sum":"TestConfigSum","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","agent_ip":"127.0.0.1","sync_status":"synced"}'
+    output: "ok"
+    stage: "global manager update-agent-data success"
+  -
+    input: 'global get-agent-info 0'
+    output: 'ok [{"id":0,"name":"*","ip":"*","register_ip":"*","os_name":"*","os_version":"*","os_major":"*","os_minor":"*","os_codename":"*","os_platform":"*","os_uname":"*","os_arch":"*","version":"*","manager_host":"*","node_name":"*","date_add":*,"last_keepalive":253402300799,"status":"*","fim_offset":0,"reg_offset":0,"sync_status":"synced"}]'
+    stage: "global manager get-agent-info success post update with IP"
+    use_regex: "yes" 
+  -
+    input: 'global update-agent-data {"id":0,"os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_platform":"TestOsPlatfor","os_build":"TestOsBuild","os_uname":"TestOsUname","os_arch":"TestOsArch","version":"TestVersion","config_sum":"TestConfigSum","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","sync_status":"synced"}'
+    output: "ok"
+    stage: "global manager update-agent-data success"
+  -
+    input: 'global get-agent-info 0'
+    output: 'ok [{"id":0,"name":"*","ip":"*","register_ip":"*","os_name":"*","os_version":"*","os_major":"*","os_minor":"*","os_codename":"*","os_platform":"*","os_uname":"*","os_arch":"*","version":"*","manager_host":"*","node_name":"*","date_add":*,"last_keepalive":253402300799,"status":"*","fim_offset":0,"reg_offset":0,"sync_status":"synced"}]'
+    stage: "global manager get-agent-info success post update without IP"
+    use_regex: "yes"
