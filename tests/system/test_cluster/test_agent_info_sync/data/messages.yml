@@ -21,7 +21,7 @@ wazuh-worker1:
   - regex: ".*Obtained .* chunks of data to be sent."
     path: "/var/ossec/logs/cluster.log"
     timeout: 15
-  - regex: ".*Starting sending information to wazuh-db."
+  - regex: ".*Starting to send information to wazuh-db."
     path: "/var/ossec/logs/cluster.log"
     timeout: 15
   - regex: ".*Master's wazuh-db response: ok."
@@ -42,7 +42,7 @@ wazuh-worker2:
   - regex: ".*Obtained .* chunks of data to be sent."
     path: "/var/ossec/logs/cluster.log"
     timeout: 15
-  - regex: ".*Starting sending information to wazuh-db."
+  - regex: ".*Starting to send information to wazuh-db."
     path: "/var/ossec/logs/cluster.log"
     timeout: 15
   - regex: ".*Master's wazuh-db response: ok."
