@@ -57,8 +57,13 @@ def regex_match(regex, string):
     return re.match(regex, string)
 
 
-def insert_agents(id_offset, amount): 
-    for id in range(id_offset, id_offset+amount):
+# Tests
+
+@pytest.fixture(scope="function")
+def pre_insert_agents(): 
+    AGENTS_CANT = 14000
+    AGENTS_OFFSET = 20
+    for id in range(AGENTS_OFFSET, AGENTS_OFFSET+AGENTS_CANT):
         command = f'global insert-agent {{"id":{id},"name":"TestName{id}","date_add":1599223378}}'
         receiver_sockets[0].send(command, size=True)
         response = receiver_sockets[0].receive(size=True).decode()
@@ -70,9 +75,6 @@ def insert_agents(id_offset, amount):
         response = receiver_sockets[0].receive(size=True).decode()
         data = response.split(" ", 1)
         assert data[0] == 'ok', f'Unable to update agent {id}'
-
-
-# Tests
 
 @pytest.mark.parametrize('test_case',
                          [case['test_case'] for module_data in module_tests for case in module_data[0]],
@@ -88,7 +90,7 @@ def test_wazuh_db_messages(configure_sockets_environment, connect_to_sockets_mod
     test_case : list
         List of test_case stages (dicts with input, output and stage keys).
     """
-    for stage in test_case:
+    for index, stage in enumerate(test_case):
         if 'ignore' in stage and stage['ignore'] == "yes":
             continue
         
@@ -101,7 +103,7 @@ def test_wazuh_db_messages(configure_sockets_environment, connect_to_sockets_mod
         else:
             match = (expected == response)
         assert match, 'Failed test case stage {}: {}. Expected: {}. Response: {}'\
-               .format(test_case.index(stage) + 1, stage['stage'], expected, response)
+               .format(index + 1, stage['stage'], expected, response)
 
 
 def test_wazuh_db_create_agent(configure_sockets_environment, connect_to_sockets_module):
@@ -116,38 +118,21 @@ def test_wazuh_db_create_agent(configure_sockets_environment, connect_to_sockets
     assert os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'db', "999.db"))
 
 
-def test_wazuh_db_chunks(configure_sockets_environment, connect_to_sockets_module):
-    """Check that commands by chunks work properly when agents amount exceed the response maximum size"""  
-    AGENTS_CANT = 14000
-    AGENTS_OFFSET = 20
-    AGENTS_MAX = AGENTS_OFFSET+AGENTS_CANT
+def test_wazuh_db_chunks(configure_sockets_environment, connect_to_sockets_module, pre_insert_agents):
+    """Check that commands by chunks work properly when agents amount exceed the response maximum size""" 
+
+    def test_chunk_command(command):
+        receiver_sockets[0].send(command, size=True)
+        response = receiver_sockets[0].receive(size=True).decode()
     
-    #Pre insert agents
-    insert_agents(AGENTS_OFFSET, AGENTS_CANT)
+        status = response.split(" ",1)[0]
+        assert status == 'due', 'Failed chunks check on < {} >. Expected: {}. Response: {}'\
+               .format(command, 'due', status)
    
     #Check get-all-agents chunk limit
-    command = f'global get-all-agents last_id 0'
-    receiver_sockets[0].send(command, size=True)
-    response = receiver_sockets[0].receive(size=True).decode()
-    
-    status = response.split(" ",1)[0]
-    assert status == 'due', 'Failed chunks check on get-all-agents. Expected: {}. Response: {}'\
-           .format('due', status)
-    
+    test_chunk_command(f'global get-all-agents last_id 0')
     #Check get-agents-by-keepalive chunk limit
-    command = f'global get-agents-by-keepalive condition > -1 last_id 0'
-    receiver_sockets[0].send(command, size=True)
-    response = receiver_sockets[0].receive(size=True).decode()
-    
-    status = response.split(" ",1)[0]
-    assert status == 'due', 'Failed chunks check on get-agents-by-keepalive. Expected: {}. Response: {}'\
-           .format('due', status)
-   
+    test_chunk_command(f'global get-agents-by-keepalive condition > -1 last_id 0')
     #Check sync-agent-info-get chunk limit
-    command = f'global sync-agent-info-get last_id 0'
-    receiver_sockets[0].send(command, size=True)
-    response = receiver_sockets[0].receive(size=True).decode()
+    test_chunk_command(f'global sync-agent-info-get last_id 0')
     
-    status = response.split(" ",1)[0]
-    assert status == 'due', 'Failed chunks check on sync-agent-info-get. Expected: {}. Response: {}'\
-           .format('due', status)
