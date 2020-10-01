@@ -43,6 +43,7 @@ monitored_sockets_params = [('wazuh-db', None, True)]
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
+
 def regex_match(regex, string):
     regex = regex.replace("*", ".*")
     regex = regex.replace("[", "")
@@ -53,24 +54,22 @@ def regex_match(regex, string):
     string = string.replace("]", "")
     string = string.replace("(", "")
     string = string.replace(")", "")
-    return bool(re.match(regex, string))
+    return re.match(regex, string)
 
 
 def insert_agents(id_offset, amount): 
-    for id in range(id_offset,id_offset+amount):
+    for id in range(id_offset, id_offset+amount):
         command = f'global insert-agent {{"id":{id},"name":"TestName{id}","date_add":1599223378}}'
         receiver_sockets[0].send(command, size=True)
         response = receiver_sockets[0].receive(size=True).decode()
         data = response.split(" ", 1)
-        if data[0] != 'ok':
-            raise AssertionError('Unable to add agent {id}')
+        assert data[0] == 'ok', f'Unable to add agent {id}'
 
         command = f'global update-keepalive {{"id":{id},"sync_status":"syncreq"}}'
         receiver_sockets[0].send(command, size=True)
         response = receiver_sockets[0].receive(size=True).decode()
         data = response.split(" ", 1)
-        if data[0] != 'ok':
-            raise AssertionError('Unable to update agent {id}')
+        assert data[0] == 'ok', f'Unable to update agent {id}'
 
 
 # Tests
@@ -98,7 +97,7 @@ def test_wazuh_db_messages(configure_sockets_environment, connect_to_sockets_mod
         response = receiver_sockets[0].receive(size=True).decode()
         
         if 'use_regex' in stage and stage['use_regex'] == 'yes':
-            match = regex_match(expected, response)
+            match = True if regex_match(expected, response) else False
         else:
             match = (expected == response)
         assert match, 'Failed test case stage {}: {}. Expected: {}. Response: {}'\
