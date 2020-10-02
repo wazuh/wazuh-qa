@@ -9,6 +9,9 @@ wazuh-master:
   - regex: '.*wazuh-worker2.*Finished integrity synchronization.'
     path: "/var/ossec/logs/cluster.log"
     timeout: 15
+  - regex: '.*Received request: .*test_label.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
 
 
 wazuh-worker1:
