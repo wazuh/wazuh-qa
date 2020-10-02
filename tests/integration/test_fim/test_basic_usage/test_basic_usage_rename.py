@@ -4,7 +4,6 @@
 
 import os
 import shutil
-from datetime import timedelta
 
 import pytest
 
@@ -14,7 +13,6 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGUL
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.time import TimeMachine
 
 # Marks
 
@@ -134,6 +132,4 @@ def test_rename(folder, tags_to_apply,
         os.rename(folder, os.path.join(os.path.dirname(folder), new_name))
         check_time_travel(scheduled, monitor=wazuh_log_monitor)
         expect_events(new_name)
-        # Travel in time to force delete event in realtime/whodata
-        check_time_travel(not scheduled, monitor=wazuh_log_monitor)
         expect_events(folder)
