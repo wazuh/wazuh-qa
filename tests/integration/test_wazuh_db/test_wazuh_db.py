@@ -121,18 +121,17 @@ def test_wazuh_db_create_agent(configure_sockets_environment, connect_to_sockets
 def test_wazuh_db_chunks(configure_sockets_environment, connect_to_sockets_module, pre_insert_agents):
     """Check that commands by chunks work properly when agents amount exceed the response maximum size""" 
 
-    def test_chunk_command(command):
+    def send_chunk_command(command):
         receiver_sockets[0].send(command, size=True)
         response = receiver_sockets[0].receive(size=True).decode()
     
-        status = response.split(" ",1)[0]
+        status = response.split(" ", 1)[0]
         assert status == 'due', 'Failed chunks check on < {} >. Expected: {}. Response: {}'\
                .format(command, 'due', status)
    
-    #Check get-all-agents chunk limit
-    test_chunk_command(f'global get-all-agents last_id 0')
-    #Check get-agents-by-keepalive chunk limit
-    test_chunk_command(f'global get-agents-by-keepalive condition > -1 last_id 0')
-    #Check sync-agent-info-get chunk limit
-    test_chunk_command(f'global sync-agent-info-get last_id 0')
-    
+    # Check get-all-agents chunk limit
+    send_chunk_command(f'global get-all-agents last_id 0')
+    # Check get-agents-by-keepalive chunk limit
+    send_chunk_command(f'global get-agents-by-keepalive condition > -1 last_id 0')
+    # Check sync-agent-info-get chunk limit
+    send_chunk_command(f'global sync-agent-info-get last_id 0')
