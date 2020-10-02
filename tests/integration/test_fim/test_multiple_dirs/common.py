@@ -40,20 +40,15 @@ def multiple_dirs_test(mode=None, dir_list=None, file=None, scheduled=None, whod
                 time.sleep(0.05)  # This sleep is to let whodata fetching all events
 
         check_time_travel(time_travel=scheduled)
-        try:
-            events = log_monitor.start(timeout=timeout,
-                                       callback=callback_detect_event,
-                                       accum_results=n_results,
-                                       error_message='Did not receive expected "Sending FIM event: ..." event').result()
-            time.sleep(1)
 
-            for ev in events:
-                validate_event(ev)
-        except TimeoutError as e:
-            if len(log_monitor.result()) != n_results:
-                pytest.fail(reason=f'Expected {n_results} events, not {len(log_monitor.result())}')
-            else:
-                raise e
+        events = log_monitor.start(timeout=timeout,
+                                   callback=callback_detect_event,
+                                   accum_results=n_results,
+                                   error_message='Did not receive expected "Sending FIM event: ..." event').result()
+        time.sleep(1)
+
+        for ev in events:
+            validate_event(ev)
 
     try:
         perform_and_validate_events(create_file, {'content': ''})
