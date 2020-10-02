@@ -67,11 +67,11 @@ def test_remove_old_session(get_configuration, configure_environment, restart_wa
 
         receiver_socket = create_connection()
         receiver_socket.send(msg_create_session, True)
-        msg_recived = receiver_socket.receive().decode()
+        msg_recived = receiver_socket.receive()[4:]
+        msg_recived = msg_recived.decode()
         remove_connection(receiver_socket)
 
         if i == 0:
-
             first_session_token = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                           callback=callback_session_initialized,
                                                           error_message='Event not found')
@@ -83,7 +83,8 @@ def test_remove_old_session(get_configuration, configure_environment, restart_wa
     # This session should do Wazuh-logtest to remove the oldest session
     receiver_socket = create_connection()
     receiver_socket.send(msg_create_session, True)
-    msg_recived = receiver_socket.receive().decode()
+    msg_recived = receiver_socket.receive()[4:]
+    msg_recived = msg_recived.decode()
     remove_connection(receiver_socket)
 
     remove_session_token = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,

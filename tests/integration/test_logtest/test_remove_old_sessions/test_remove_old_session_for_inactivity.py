@@ -57,7 +57,8 @@ def test_remove_old_session_for_inactivity(get_configuration, configure_environm
     session_timeout = int(get_configuration['sections'][0]['elements'][3]['session_timeout']['value'])
 
     receiver_sockets[0].send(msg_create_session, True)
-    msg_recived = receiver_sockets[0].receive().decode()
+    msg_recived = receiver_sockets[0].receive()[4:]
+    msg_recived = msg_recived.decode()
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                             callback=callback_session_initialized,
