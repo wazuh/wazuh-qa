@@ -57,7 +57,7 @@ def get_configuration(request):
     (0, {'file_limit_conf'})
 ])
 def test_file_limit_capacity_alert(percentage, tags_to_apply, get_configuration, configure_environment,
-                                   restart_syscheckd, wait_for_syscheck_start):
+                                   restart_syscheckd, wait_for_fim_start):
     """
     Checks that the corresponding alerts appear in schedule mode for different capacity thresholds.
 

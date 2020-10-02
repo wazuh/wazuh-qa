@@ -60,7 +60,7 @@ def check_prelink():
     ({'prefilter_cmd'})
 ])
 def test_prefilter_cmd(tags_to_apply, get_configuration, configure_environment, check_prelink, restart_syscheckd,
-                       wait_for_syscheck_start):
+                       wait_for_fim_start):
     """
     Check if prelink is installed and syscheck works
 

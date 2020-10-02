@@ -49,7 +49,7 @@ def get_configuration(request):
     ({'monitored_dir'}, testdir_target)
 ])
 def test_follow_symbolic_disabled(path, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
-                                  wait_for_syscheck_start):
+                                  wait_for_fim_start):
     """Check what happens when follow_symbolic_link option is set to "no".
 
     Ensure that the monitored symbolic link is considered a regular file and it will not follow its target path. It will

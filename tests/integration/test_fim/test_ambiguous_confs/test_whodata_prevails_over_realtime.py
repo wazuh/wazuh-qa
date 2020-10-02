@@ -46,7 +46,7 @@ def get_configuration(request):
     dir2,
 ])
 def test_whodata_prevails_over_realtime(directory, get_configuration, put_env_variables, configure_environment,
-                                        restart_syscheckd, wait_for_syscheck_start):
+                                        restart_syscheckd, wait_for_fim_start):
     """
     Test alerts are generated when monitor environment variables
     """

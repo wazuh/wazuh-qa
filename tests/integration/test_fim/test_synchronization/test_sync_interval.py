@@ -43,7 +43,7 @@ def get_configuration(request):
 
 # Tests
 
-def test_sync_interval(get_configuration, configure_environment, restart_syscheckd, wait_for_syscheck_start):
+def test_sync_interval(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """
     Verify that synchronization checks take place at the expected time given SYNC_INTERVAL variable.
     """

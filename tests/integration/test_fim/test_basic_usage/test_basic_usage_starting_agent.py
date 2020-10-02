@@ -65,7 +65,7 @@ def get_configuration(request):
     {'ossec_conf'}
 ])
 def test_events_from_existing_files(filename, tags_to_apply, get_configuration,
-                                    configure_environment, restart_syscheckd, wait_for_syscheck_start):
+                                    configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check if syscheck generates modified alerts for files that exists when starting the agent"""
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'

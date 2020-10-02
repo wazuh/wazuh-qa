@@ -84,7 +84,7 @@ def get_configuration(request):
     (keys_strings, keys_objects, {'ignore_registry'})
 ])
 def test_ignore_registry(key_string, key_object, tags_to_apply, get_configuration,
-                         configure_environment, restart_syscheckd, wait_for_syscheck_start):
+                         configure_environment, restart_syscheckd, wait_for_fim_start):
     """
     Check registries are ignored according to configuration.
 

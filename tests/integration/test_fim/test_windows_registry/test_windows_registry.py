@@ -71,7 +71,7 @@ def extra_configuration_before_yield():
     (['32'], "test_tag", {'ossec_conf_2'})
 ])
 def test_windows_registry(arch_list, tag, tags_to_apply,
-                          get_configuration, configure_environment, restart_syscheckd, wait_for_syscheck_start):
+                          get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check the correct monitoring of Windows Registries.
 
     This test creates a new registry in windows, adds a value, modifies

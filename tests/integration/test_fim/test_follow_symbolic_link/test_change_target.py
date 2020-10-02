@@ -44,7 +44,7 @@ def get_configuration(request):
     ({'monitored_dir'}, testdir_target, testdir_not_target)
 ])
 def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_configuration, configure_environment,
-                                restart_wazuh, wait_for_syscheck_start):
+                                restart_wazuh, wait_for_fim_start):
     """
     Check if syscheck updates the symlink target properly
 

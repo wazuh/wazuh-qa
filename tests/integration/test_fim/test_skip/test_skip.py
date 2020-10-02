@@ -92,7 +92,7 @@ def extra_configuration_before_yield():
 
 # tests
 
-def test_skip_proc(get_configuration, configure_environment, restart_syscheckd, wait_for_syscheck_start):
+def test_skip_proc(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check if syscheckd skips /proc when setting 'skip_proc="yes"'."""
     check_apply_test({'skip_proc'}, get_configuration['tags'])
     trigger = get_configuration['metadata']['skip'] == 'no'
@@ -139,7 +139,7 @@ def test_skip_proc(get_configuration, configure_environment, restart_syscheckd, 
             raise AttributeError(f'Unexpected event {event}')
 
 
-def test_skip_sys(get_configuration, configure_environment, restart_syscheckd, wait_for_syscheck_start):
+def test_skip_sys(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check if syscheckd skips /sys when setting 'skip_sys="yes"'."""
     check_apply_test({'skip_sys'}, get_configuration['tags'])
     trigger = get_configuration['metadata']['skip'] == 'no'
@@ -177,7 +177,7 @@ def test_skip_sys(get_configuration, configure_environment, restart_syscheckd, w
 ])
 @patch('wazuh_testing.fim.modify_file_inode')
 def test_skip_dev(modify_inode_mock, directory, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
-                  wait_for_syscheck_start):
+                  wait_for_fim_start):
     """Check if syscheckd skips /dev when setting 'skip_dev="yes"'.
 
     /proc, /sys, /dev and nfs directories are special directories. Unless it is specified with skip_*='no', syscheck
@@ -199,7 +199,7 @@ def test_skip_dev(modify_inode_mock, directory, tags_to_apply, get_configuration
 ])
 @patch('wazuh_testing.fim.modify_file_inode')
 def test_skip_nfs(modify_inode_mock, directory, tags_to_apply, configure_nfs, get_configuration, configure_environment,
-                  restart_syscheckd, wait_for_syscheck_start):
+                  restart_syscheckd, wait_for_fim_start):
     """Check if syscheckd skips nfs directories when setting 'skip_nfs="yes"'.
 
     This test assumes you have a nfs directory mounted on '/nfs-mount-point'. If you do not have one, use the fixture

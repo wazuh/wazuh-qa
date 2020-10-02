@@ -202,7 +202,7 @@ def get_checkers(check_list):
 ])
 def test_ambiguous_complex(tags_to_apply,
                            get_configuration, configure_environment,
-                           restart_syscheckd, wait_for_syscheck_start):
+                           restart_syscheckd, wait_for_fim_start):
     """Automatic test for each configuration given in the yaml.
 
     The main purpose of this test is to check that syscheck will apply different configurations between subdirectories

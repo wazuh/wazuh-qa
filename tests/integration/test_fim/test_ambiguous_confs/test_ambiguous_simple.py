@@ -123,7 +123,7 @@ def _test_recursion_cud(ini, fin, path, recursion_subdir, scheduled,
     ([testdir, subdir], {'ambiguous_restrict'})
 ])
 def test_ambiguous_restrict(folders, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
-                            wait_for_syscheck_start):
+                            wait_for_fim_start):
     """Check restrict configuration events.
 
     Check if syscheck detects regular file changes (add, modify, delete) depending on its restrict configuration.
@@ -159,7 +159,7 @@ def test_ambiguous_restrict(folders, tags_to_apply, get_configuration, configure
     ([testdir, subdir], {'ambiguous_report_changes'})
 ])
 def test_ambiguous_report(folders, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
-                          wait_for_syscheck_start):
+                          wait_for_fim_start):
     """Check content_changes field for each event
 
     Check if syscheck detects or not the content_changes field for each event depending on its report_changes
@@ -220,7 +220,7 @@ def test_ambiguous_report(folders, tags_to_apply, get_configuration, configure_e
     ([testdir, subdir], {'ambiguous_tags'})
 ])
 def test_ambiguous_tags(folders, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
-                        wait_for_syscheck_start):
+                        wait_for_fim_start):
     """Check if syscheck detects the event property 'tags' for each event.
 
     This test validates both situations, making sure that if tags='no', there won't be a
@@ -252,7 +252,7 @@ def test_ambiguous_tags(folders, tags_to_apply, get_configuration, configure_env
     (testdir_recursion, 4, {'ambiguous_recursion'})
 ])
 def test_ambiguous_recursion(dirname, recursion_level, tags_to_apply, get_configuration, configure_environment,
-                             restart_syscheckd, wait_for_syscheck_start):
+                             restart_syscheckd, wait_for_fim_start):
     """Check alerts for each level defined in recursion_level
 
     Check if syscheck detects alerts for each level defined in the recursion_level attribute.
@@ -295,7 +295,7 @@ def test_ambiguous_recursion(dirname, recursion_level, tags_to_apply, get_config
     ([testdir_recursion_tag, testdir_recursion_no_tag], 2, False, {'ambiguous_no_recursion_tag'})
 ])
 def test_ambiguous_recursion_tag(dirnames, recursion_level, triggers_event, tags_to_apply, get_configuration,
-                                 configure_environment, restart_syscheckd, wait_for_syscheck_start):
+                                 configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check alerts for each level defined in recursion_level with tags
 
     Check if syscheck detects alerts for each level defined in the recursion_level attribute and
@@ -335,7 +335,7 @@ def test_ambiguous_recursion_tag(dirnames, recursion_level, triggers_event, tags
 ])
 @pytest.mark.parametrize('dirname, checkers', parametrize_list)
 def test_ambiguous_check(dirname, checkers, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
-                         wait_for_syscheck_start):
+                         wait_for_fim_start):
     """Check if syscheck detects every check set in the configuration.
 
     Check are read from left to right, overwriting any ambiguous configuration.

@@ -55,7 +55,7 @@ def get_configuration(request):
     (2, {'ossec_conf'})
 ])
 def test_regular_file_changes(sleep, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
-                              wait_for_syscheck_start):
+                              wait_for_fim_start):
     """
     Check if syscheckd detects regular file changes (add, modify, delete) with a very specific delay between every
     action.

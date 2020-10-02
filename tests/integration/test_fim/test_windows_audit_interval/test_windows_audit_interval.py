@@ -80,7 +80,7 @@ def callback_sacl_restored(line):
     {'audit_interval'}
 ])
 def test_windows_audit_modify_sacl(tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
-                                   wait_for_syscheck_start):
+                                   wait_for_fim_start):
     """Check that Wazuh detects a SACL change every 'windows_audit_interval' and sets monitoring to real-time if so."""
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -108,7 +108,7 @@ def test_windows_audit_modify_sacl(tags_to_apply, get_configuration, configure_e
     {'audit_interval'}
 ])
 def test_windows_audit_restore_sacl(tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
-                                    wait_for_syscheck_start):
+                                    wait_for_fim_start):
     """Check that Wazuh restores previous SACL rules when the service is stopped."""
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

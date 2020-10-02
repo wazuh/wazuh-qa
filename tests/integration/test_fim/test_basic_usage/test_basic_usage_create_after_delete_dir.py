@@ -50,7 +50,7 @@ def get_configuration(request):
     {'ossec_conf'}
 ])
 def test_create_after_delete(tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
-                             wait_for_syscheck_start):
+                             wait_for_fim_start):
     """
     Check that a monitored directory keeps reporting events after deleting and creating it again. It tests
     that under Windows systems the directory watcher is refreshed after directory re-creation 1 second after.

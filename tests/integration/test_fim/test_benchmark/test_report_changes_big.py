@@ -194,7 +194,7 @@ def write_csv(data):
     0, 1024*59
 ])
 def test_report_changes_big(file_size, n_files, tags_to_apply, get_configuration, configure_environment,
-                            restart_syscheckd, wait_for_syscheck_start):
+                            restart_syscheckd, wait_for_fim_start):
     """Verify syscheck when using the report_changes option with large amount of files.
 
     This test creates, in a monitored directory with the report_changes option,

@@ -54,7 +54,7 @@ def get_configuration(request):
     (testdir1, "regular2", testdir1, "hardlink", 2)
 ])
 def test_hard_link(path_file, file_name, path_link, link_name, num_links, get_configuration,
-                   configure_environment, restart_syscheckd, wait_for_syscheck_start):
+                   configure_environment, restart_syscheckd, wait_for_fim_start):
     """
     Test the check_inode option when used with Hard links by creating a hard link file inside and outside the
     monitored directory.

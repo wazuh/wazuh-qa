@@ -93,7 +93,7 @@ def get_configuration(request):
     (testdir2, testdir1, testfile2, realtime, whodata)
 ])
 def test_moving_file_to_whodata(dirsrc, dirdst, filename, mod_del_event, mod_add_event, get_configuration,
-                                configure_environment, restart_syscheckd, wait_for_syscheck_start):
+                                configure_environment, restart_syscheckd, wait_for_fim_start):
     """
     Test Syscheck's behaviors when moving files from a directory monitored by whodata to another
     monitored by realtime and vice versa.

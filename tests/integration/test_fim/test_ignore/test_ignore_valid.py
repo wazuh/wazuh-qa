@@ -82,7 +82,7 @@ def get_configuration(request):
 def test_ignore_subdirectory(folder, filename, content, triggers_event,
                              tags_to_apply, get_configuration,
                              configure_environment, restart_syscheckd,
-                             wait_for_syscheck_start):
+                             wait_for_fim_start):
     """
     Check files are ignored in subdirectory according to configuration. It also ensures that events for files that
     are not being ignored are still detected when using the ignore option.

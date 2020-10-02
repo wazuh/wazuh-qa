@@ -56,7 +56,7 @@ def get_configuration(request):
     ('regular_0', testdir1),
 ])
 def test_file_size_default(tags_to_apply, filename, folder, get_configuration, configure_environment, restart_syscheckd,
-                           wait_for_syscheck_start):
+                           wait_for_fim_start):
     """
     Check that the file_size option with a default value for report_changes is working correctly.
 

@@ -71,7 +71,7 @@ def get_configuration(request):
 ])
 def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply,
                   get_configuration, configure_environment, restart_syscheckd,
-                  wait_for_syscheck_start):
+                  wait_for_fim_start):
     """
     Check the only files detected are those matching the restrict regex
 

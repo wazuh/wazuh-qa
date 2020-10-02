@@ -23,7 +23,7 @@ def restart_syscheckd(get_configuration, request):
 
 
 @pytest.fixture(scope='module')
-def wait_for_syscheck_start(get_configuration, request):
+def wait_for_fim_start(get_configuration, request):
     """
     Wait for realtime start, whodata start or end of initial FIM scan.
     """

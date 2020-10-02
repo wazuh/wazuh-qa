@@ -48,7 +48,7 @@ def get_configuration(request):
 ])
 def test_scan_day(tags_to_apply,
                   get_configuration, configure_environment,
-                  restart_syscheckd, wait_for_syscheck_start):
+                  restart_syscheckd, wait_for_fim_start):
     """Check if there is a scan at a certain day of the week
 
     It will only scan once a week, on the given day.

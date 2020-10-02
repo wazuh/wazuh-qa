@@ -58,7 +58,7 @@ def get_configuration(request):
 def test_move_file(file, file_content, tags_to_apply, source_folder, target_folder,
                    triggers_delete_event, triggers_add_event,
                    get_configuration, configure_environment,
-                   restart_syscheckd, wait_for_syscheck_start):
+                   restart_syscheckd, wait_for_fim_start):
     """
     Check if syscheckd detects 'added' or 'deleted' events when moving a file.
 
