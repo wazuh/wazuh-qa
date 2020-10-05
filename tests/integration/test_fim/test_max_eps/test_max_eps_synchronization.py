@@ -93,6 +93,6 @@ def test_max_eps_on_start(get_configuration, create_files, configure_environment
     counter = Counter([date_time for date_time, _ in result])
     error_margin = (max_eps * 0.1)
 
-    for date_time, n_occurrences in counter.items():
+    for _, n_occurrences in counter.items():
         assert n_occurrences <= round(
             max_eps + error_margin), f'Sent {n_occurrences} but a maximum of {max_eps} was set'
