@@ -854,6 +854,13 @@ def callback_diff_size_limit_value(line):
         return match.group(1)
 
 
+def callback_deleted_diff_folder(line):
+    match = re.match(r'.*Folder \'(.*)\' has been deleted.*', line)
+
+    if match:
+        return match.group(1)
+
+
 def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None):
     """
     Change date and time of the system depending on a boolean condition. Optionally, a monitor may be used to check

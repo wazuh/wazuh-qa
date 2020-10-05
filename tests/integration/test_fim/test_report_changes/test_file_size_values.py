@@ -8,7 +8,7 @@ import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_file_size_limit_reached, generate_params, create_file, \
-    check_time_travel, callback_detect_event, modify_file_content
+    check_time_travel, callback_detect_event, modify_file_content, callback_deleted_diff_folder
 from test_fim.test_report_changes.common import generate_string, translate_size, disable_file_max_size, \
     restore_file_max_size, make_diff_file_path, disable_rt_delay, restore_rt_delay
 from wazuh_testing.tools import PREFIX
@@ -125,6 +125,9 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_file_size_limit_reached,
                             error_message='Did not receive expected '
                             '"File ... is too big for configured maximum size to perform diff operation" event.')
+
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_deleted_diff_folder,
+                            error_message='Did not receive expected "Folder ... has been deleted." event.')
 
     if os.path.exists(diff_file_path):
         raise FileExistsError(f"{diff_file_path} found. It should not exist after incresing the size.")
