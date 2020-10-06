@@ -72,6 +72,12 @@ The base environment defined for Docker provisioning is
 - Two workers nodes
 - Three agents, each connected to a different manager.
 
+| Agent        | Reports to    |
+|--------------|---------------|
+| wazuh-agent1 | wazuh-master  |
+| wazuh-agent2 | wazuh-worker1 |
+| wazuh-agent3 | wazuh-worker2 |
+
 ## Environment management
 
 For running the docker provisioning we must execute the following command:

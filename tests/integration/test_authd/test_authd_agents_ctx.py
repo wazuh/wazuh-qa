@@ -183,30 +183,12 @@ def check_agent_timestamp(id, name, ip, expected):
     else:
         return False
 
-def check_agent_info(name, ip, expected):
-    agent_info_file = name+'-'+ip
-    agent_info_path = os.path.join(WAZUH_PATH, 'queue', 'agent-info', agent_info_file)
-    if expected == os.path.exists(agent_info_path):
-        return True
-    else:
-        return False
-
 def check_rids(id, expected):
     agent_info_path = os.path.join(WAZUH_PATH, 'queue', 'rids', id)
     if expected == os.path.exists(agent_info_path):
         return True
     else:
         return False
-
-def create_agent_info(name, ip):
-    agent_info_file = name+'-'+ip
-    agent_info_path = os.path.join(WAZUH_PATH, 'queue', 'agent-info', agent_info_file)
-    try:
-        file = open(agent_info_path, 'w')
-        file.close()
-        os.chmod(agent_info_path, 0o777)
-    except IOError:
-        raise
 
 def create_rids(id):
     rids_path = os.path.join(WAZUH_PATH, 'queue', 'rids', id)
@@ -295,16 +277,14 @@ def duplicate_ip_agent_delete_test(server):
     #Register first agent
     response = register_agent('userA', 'TestGroup','192.0.0.0') 
     create_rids('001') #Simulate rids was created
-    create_agent_info('userA','192.0.0.0') #Simulate agent_info was created
     create_diff('userA') #Simulate diff folder was created
     assert response[:len(SUCCESS_RESPONSE)] == SUCCESS_RESPONSE, 'Wrong response received' 
     assert check_client_keys('001', True), 'Agent key was never created' 
     assert check_agent_groups('001', True), 'Agent group was never created'
     assert check_agent_timestamp('001', 'userA', '192.0.0.0', True), 'Agent_timestamp was never created'
     assert check_rids('001', True), 'Rids file was never created'
-    assert check_agent_info('userA', '192.0.0.0', True), 'Agent_info was never created'
     assert check_diff('userA', True), 'Agent diff folder was never created'
-   
+
     #Register agent with duplicate IP
     response = register_agent('userC', 'TestGroup', '192.0.0.0')
     assert response[:len(SUCCESS_RESPONSE)] == SUCCESS_RESPONSE, 'Wrong response received'
@@ -315,7 +295,6 @@ def duplicate_ip_agent_delete_test(server):
     assert check_agent_timestamp('002', 'userC', '192.0.0.0', True), 'Agent_timestamp was never created'
     assert check_agent_timestamp('001', 'userA', '192.0.0.0', False), 'Agent_timestamp was not removed'
     assert check_rids('001', False), 'Rids file was was not removed'
-    assert check_agent_info('userA', '192.0.0.0', False), 'Agent_info was not removed'
     assert check_diff('userA', False), 'Agent diff folder was not removed'
           
 
@@ -340,14 +319,12 @@ def duplicate_name_agent_delete_test(server):
     #Register first agents
     response = register_agent('userB', 'TestGroup')   
     create_rids('003') #Simulate rids was created 
-    create_agent_info('userB','any') #Simulate agent_info was created
     create_diff('userB') #Simulate diff folder was created
     assert response[:len(SUCCESS_RESPONSE)] == SUCCESS_RESPONSE, 'Wrong response received' 
     assert check_client_keys('003', True), 'Agent key was never created'
     assert check_agent_groups('003', True), 'Agent group was never created'
     assert check_agent_timestamp('003', 'userB', 'any', True), 'Agent_timestamp was never created'
     assert check_rids('003', True), 'Rids file was never created'
-    assert check_agent_info('userB', 'any', True), 'Agent_info was never created'
     assert check_diff('userB', True), 'Agent diff folder was never created'  
     
     #Register agent with duplicate Name
@@ -360,7 +337,6 @@ def duplicate_name_agent_delete_test(server):
     assert check_agent_timestamp('004', 'userB', 'any', True), 'Agent_timestamp was never created'
     assert check_agent_timestamp('003', 'userB', 'any', False), 'Agent_timestamp was not removed'
     assert check_rids('003', False), 'Rids file was was not removed'
-    assert check_agent_info('userB', 'any', False), 'Agent_info was not removed'
     assert check_diff('userB', False), 'Agent diff folder was not removed'
 
 

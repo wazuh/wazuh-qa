@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import re
 
 import pytest
 import yaml
@@ -43,8 +44,37 @@ monitored_sockets_params = [('wazuh-db', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
 
+def regex_match(regex, string):
+    regex = regex.replace("*", ".*")
+    regex = regex.replace("[", "")
+    regex = regex.replace("]", "")
+    regex = regex.replace("(", "")
+    regex = regex.replace(")", "")
+    string = string.replace("[", "")
+    string = string.replace("]", "")
+    string = string.replace("(", "")
+    string = string.replace(")", "")
+    return re.match(regex, string)
+
+
 # Tests
 
+@pytest.fixture(scope="function")
+def pre_insert_agents(): 
+    AGENTS_CANT = 14000
+    AGENTS_OFFSET = 20
+    for id in range(AGENTS_OFFSET, AGENTS_OFFSET+AGENTS_CANT):
+        command = f'global insert-agent {{"id":{id},"name":"TestName{id}","date_add":1599223378}}'
+        receiver_sockets[0].send(command, size=True)
+        response = receiver_sockets[0].receive(size=True).decode()
+        data = response.split(" ", 1)
+        assert data[0] == 'ok', f'Unable to add agent {id}'
+
+        command = f'global update-keepalive {{"id":{id},"sync_status":"syncreq"}}'
+        receiver_sockets[0].send(command, size=True)
+        response = receiver_sockets[0].receive(size=True).decode()
+        data = response.split(" ", 1)
+        assert data[0] == 'ok', f'Unable to update agent {id}'
 
 @pytest.mark.parametrize('test_case',
                          [case['test_case'] for module_data in module_tests for case in module_data[0]],
@@ -60,11 +90,20 @@ def test_wazuh_db_messages(configure_sockets_environment, connect_to_sockets_mod
     test_case : list
         List of test_case stages (dicts with input, output and stage keys).
     """
-    for stage in test_case:
+    for index, stage in enumerate(test_case):
+        if 'ignore' in stage and stage['ignore'] == "yes":
+            continue
+        
         expected = stage['output']
         receiver_sockets[0].send(stage['input'], size=True)
         response = receiver_sockets[0].receive(size=True).decode()
-        assert response == expected, 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1, stage['stage'])
+        
+        if 'use_regex' in stage and stage['use_regex'] == 'yes':
+            match = True if regex_match(expected, response) else False
+        else:
+            match = (expected == response)
+        assert match, 'Failed test case stage {}: {}. Expected: {}. Response: {}'\
+               .format(index + 1, stage['stage'], expected, response)
 
 
 def test_wazuh_db_create_agent(configure_sockets_environment, connect_to_sockets_module):
@@ -77,3 +116,22 @@ def test_wazuh_db_create_agent(configure_sockets_environment, connect_to_sockets
                            "stage": "Syscheck - Agent does not exits yet"}]}
     test_wazuh_db_messages(configure_sockets_environment, connect_to_sockets_module, test['test_case'])
     assert os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'db', "999.db"))
+
+
+def test_wazuh_db_chunks(configure_sockets_environment, connect_to_sockets_module, pre_insert_agents):
+    """Check that commands by chunks work properly when agents amount exceed the response maximum size""" 
+
+    def send_chunk_command(command):
+        receiver_sockets[0].send(command, size=True)
+        response = receiver_sockets[0].receive(size=True).decode()
+    
+        status = response.split(" ", 1)[0]
+        assert status == 'due', 'Failed chunks check on < {} >. Expected: {}. Response: {}'\
+               .format(command, 'due', status)
+   
+    # Check get-all-agents chunk limit
+    send_chunk_command(f'global get-all-agents last_id 0')
+    # Check get-agents-by-keepalive chunk limit
+    send_chunk_command(f'global get-agents-by-keepalive condition > -1 last_id 0')
+    # Check sync-agent-info-get chunk limit
+    send_chunk_command(f'global sync-agent-info-get last_id 0')

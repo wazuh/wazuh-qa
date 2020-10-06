@@ -1,0 +1,15 @@
+---
+wazuh-worker2:
+  - regex: "*Agents to remove.*"
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 20
+  - regex: ".*Agent files removed"
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 10
+  - regex: ".*Updating files: End"
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 10
+  - regex: ".*The master has verified that the integrity is right."
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
+
