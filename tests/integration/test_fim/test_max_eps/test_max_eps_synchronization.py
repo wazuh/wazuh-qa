@@ -57,7 +57,7 @@ def create_files(get_configuration):
         create_file(REGULAR, testdir1, f'test{i}_{mode}_{max_eps}', content='')
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def delete_files():
     yield
     for test_dir in test_directories_no_delete:
