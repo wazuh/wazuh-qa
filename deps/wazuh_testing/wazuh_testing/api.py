@@ -52,6 +52,6 @@ def get_token_login_api(protocol, host, port, user, password, login_endpoint, ti
     response = requests.get(login_url, headers=get_login_headers(user, password), verify=False, timeout=timeout)
 
     if response.status_code == 200:
-        return json.loads(response.content.decode())['token']
+        return json.loads(response.content.decode())['data']['token']
     else:
         raise Exception(f"Error obtaining login token: {response.json()}")
