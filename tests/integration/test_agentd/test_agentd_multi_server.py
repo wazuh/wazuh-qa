@@ -161,11 +161,11 @@ metadata = [
         'LOG_MONITOR_STR' : [
             [
                 f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
-                f"Unable to connect to '{SERVER_ADDRESS}'",
+                f"Unable to connect to '{SERVER_ADDRESS}:{REMOTED_PORTS[0]}",
             ],
             [ 
                 f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
-                f"Unable to connect to '{SERVER_ADDRESS}'",
+                f"Unable to connect to '{SERVER_ADDRESS}:{REMOTED_PORTS[1]}",
             ],
             [ 
                 f'Connected to the server ({SERVER_HOSTS[2]}/{SERVER_ADDRESS}:{REMOTED_PORTS[2]}',
@@ -193,43 +193,15 @@ metadata = [
             ],
             [ 
                 f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
-                f"Unable to connect to '{SERVER_ADDRESS}'",
+                f"Unable to connect to '{SERVER_ADDRESS}:{REMOTED_PORTS[1]}",
             ],
             [ 
                 f'Trying to connect to server ({SERVER_HOSTS[2]}/{SERVER_ADDRESS}:{REMOTED_PORTS[2]}',
-                f"Unable to connect to '{SERVER_ADDRESS}'",
+                f"Unable to connect to '{SERVER_ADDRESS}:{REMOTED_PORTS[2]}",
                 f'Connected to the server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f'Server responded. Releasing lock.',
                 f"Received message: '#!-agent ack '"
             ]
-        ]
-    },
-    {
-        # 7. 3 Servers / (TCP/UDP) protocol. Server 1 and 2 have remoted availble but doesn't have authd,
-        #  agent should enroll in 3rd server and then connect to the first.
-        'PROTOCOL': 'tcp',
-        'CLEAN_KEYS' : True,
-        'SIMULATOR_NUMBER' : 3,
-        'SIMULATOR_MODES' : {
-            0: ['CONTROLED_ACK', 'CONTROLED_ACK'],
-            1: ['CONTROLED_ACK', 'CONTROLED_ACK'],
-            2: ['CLOSE', 'CLOSE'],
-            'AUTHD' : ['REJECT', 'ACCEPT'],
-        },
-        'LOG_MONITOR_STR' : [
-            [
-                 f'Requesting a key from server: {SERVER_HOSTS[0]}',
-                 f'ERROR: SSL read',
-                 f'Requesting a key from server: {SERVER_HOSTS[1]}',
-                 f'ERROR: SSL read',
-            ],
-            [
-                f'Requesting a key from server: {SERVER_HOSTS[2]}',
-                f'Valid key received',
-                f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
-                f'Connected to the server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
-                f"Received message: '#!-agent ack '",
-            ],
         ]
     },
 ]
