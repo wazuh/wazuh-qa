@@ -56,7 +56,7 @@ assignees: ''
 
 ### Filling Add API form badly once per every form field
 
-- [ ] Should appear the appropiate error message for every wrong inserted form field
+- [ ] Should appear the appropriate error message for every wrong inserted form field
 
 ### Filling "Add API" form correctly
 
@@ -70,7 +70,7 @@ assignees: ''
 
 - [ ] Should be the same as the config.yml file
 
-### Insert a new API and check every one with the Check button
+### Insert a new API and check each one with the Check button
 
 - [ ] Should not change the currently selected API
 
@@ -80,7 +80,7 @@ assignees: ''
 
 ### Go to a new tab (Manager)
 
-- [ ] After the healthcheck, should open the selected tab
+- [ ] After the health check, should open the selected tab
 
 ### (Alternative) Press F5 after inserting the APIs
 
@@ -88,7 +88,7 @@ assignees: ''
 
 ## Basic data flow test
 
-### Check the initial number of checks of the healthcheck when opening the app
+### Check the initial number of checks of the health check when opening the app
 
 - [ ] Should be 4 (the default config on the wazuh.yml file)
 
@@ -114,11 +114,11 @@ assignees: ''
 
 ### Click several times the app tabs when using the same tab
 
-- [ ] Filters should persist and not dissappear
+- [ ] Filters should persist and not disappear
 
-### Search something on the searchbar, press Enter, remove the content and press Enter again
+### Search something on the search bar, press Enter, remove the content and press Enter again
 
-- [ ] The visualizations watchers should not loose data
+- [ ] The visualizations watchers should not lose data
 
 ### Add a pinned filter and navigate to a different tab
 
@@ -128,7 +128,7 @@ assignees: ''
 
 ### Go to Settings, select a different API with different extensions and go back to /Agents
 
-- [ ] The extensions configuration should keep on main Security events dashboard
+- [ ] The extensions configuration should keep on the main Security events dashboard
 
 ### From Security Events, go to Events, and then go to Integrity Monitoring
 
@@ -214,7 +214,7 @@ assignees: ''
 
 ### Modify the config.yml checks. Uncomment the default ones and change the values
 
-- [ ] After restarting the Kibana service, should apply the new checks configuration and you shouldn't be able to see the pattern selector
+- [ ] After restarting the Kibana service, should apply the new configuration and you shouldn't be able to see the pattern selector
 
 ### Modify the IP selector on config.yml (using false or 0)
 
@@ -256,6 +256,6 @@ assignees: ''
 
 - [ ] The app should recover properly after restarting
 
-### Select the wazuh-alerts* index pattern on the app, create a wa* index pattern and select it on the app, and finally go again to Management -> Index patterns
+### Select the 'wazuh-alerts*' index pattern on the app, create a 'wa*' index pattern and select it on the app, and finally go again to Management -> Index patterns
 
 - [ ] The new pattern should have the same number of known fields (182) without having to reboot Kibana
