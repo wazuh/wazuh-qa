@@ -77,6 +77,7 @@
     block: |
       authd.debug=2
       wazuh_clusterd.debug=2
+      wazuh_db.debug=2
 
 - name: Restart Wazuh
   command: /var/ossec/bin/ossec-control restart
