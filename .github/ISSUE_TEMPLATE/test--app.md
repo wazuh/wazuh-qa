@@ -124,7 +124,6 @@ assignees: ''
 
 - [ ] The pinned filter should always be persistent
 
-### Go to Settings and select different extensions, and then go back to Modules/Agents
 
 ### Go to Settings, select a different API with different extensions and go back to /Agents
 
@@ -184,8 +183,8 @@ assignees: ''
 
 ### Logs
 
-- [ ]The Logs scrolling table should work properly
-- [ ]The search should work correctly
+- [ ] The Logs scrolling table should work properly
+- [ ] The search should work correctly
 - [ ] The "Play realtime" button should work properly and update the table every few seconds
 
 ## Agents
