@@ -152,6 +152,9 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_a
                                                  configure_environment, get_configuration):
     global remoted_server
     
+    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK',
+                                      client_keys=CLIENT_KEYS_PATH)
+    
     #Stop target Agent
     control_service('stop')
     #Clean logs
@@ -163,8 +166,6 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_a
     truncate_file(LOG_FILE_PATH)
     log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK',
-                                      client_keys=CLIENT_KEYS_PATH)  
     #hearing on enrollment server    
     authd_server.clear()   
       
@@ -206,6 +207,9 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, star
                                                     configure_environment, get_configuration):
     global remoted_server
 
+    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK',
+                                      client_keys=CLIENT_KEYS_PATH)
+
     #Stop target Agent
     control_service('stop')
     #Clean logs
@@ -216,8 +220,6 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, star
     #start hearing logs
     log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK',
-                                      client_keys=CLIENT_KEYS_PATH)  
     #hearing on enrollment server 
     authd_server.clear()   
 
@@ -263,6 +265,9 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, start_aut
                                                configure_environment, get_configuration):
     global remoted_server
     
+    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK',
+                                      client_keys=CLIENT_KEYS_PATH)
+
     #Stop target Agent
     control_service('stop')
     #Clean logs
@@ -273,8 +278,6 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, start_aut
     #start hearing logs
     log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK',
-                                      client_keys=CLIENT_KEYS_PATH)  
     #hearing on enrollment server 
     authd_server.clear()   
 
@@ -319,7 +322,10 @@ and multiple retries are required until the new key is obtained to start comunic
 def test_agentd_initial_enrollment_retries(configure_authd_server, stop_authd, set_authd_id, clean_keys,
                                            configure_environment, get_configuration):
     global remoted_server
-    
+
+    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK',
+                                      client_keys=CLIENT_KEYS_PATH)
+
     #Stop target Agent
     control_service('stop')
     #Clean logs
@@ -327,8 +333,7 @@ def test_agentd_initial_enrollment_retries(configure_authd_server, stop_authd, s
     #Start whole Agent service to check other daemons status after initialization
     control_service('start')
     
-    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK',
-                                      client_keys=CLIENT_KEYS_PATH)  
+
     
     #Start hearing logs    
     log_monitor = FileMonitor(LOG_FILE_PATH)
