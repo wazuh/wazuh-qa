@@ -74,6 +74,9 @@ def test_change_rbac_mode_manually(login_endpoint, set_default_api_conf, restore
     host_manager.modify_file_content(test_hosts[0], path=WAZUH_SECURITY_CONF,
                                      content=yaml.safe_dump({'rbac_mode': new_rbac_mode}))
 
+    # Restart the wazuh-manager service
+    host_manager.get_host(test_hosts[0]).ansible('command', f'service wazuh-manager restart', check=False)
+
     # Assert every token is revoked
     for host in test_hosts:
         response = host_manager.make_api_call(host, endpoint='/agents', token=tokens[host])
