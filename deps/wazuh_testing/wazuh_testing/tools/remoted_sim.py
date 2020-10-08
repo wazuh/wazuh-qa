@@ -71,13 +71,13 @@ class RemotedSimulator:
             if self.protocol == "tcp":
                 self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   
                 self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self.sock.settimeout(1)
+                self.sock.settimeout(10)
                 self.sock.bind((self.server_address,self.remoted_port))
                 self.sock.listen(1) 
             elif self.protocol == "udp":
                 self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                 self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self.sock.settimeout(1)
+                self.sock.settimeout(10)
                 self.sock.bind((self.server_address,self.remoted_port)) 
             self.listener_thread = threading.Thread(target=self.listener)
             self.listener_thread.setName('listener_thread') 
@@ -209,7 +209,22 @@ class RemotedSimulator:
         msg_decoded = msg_decompress.decode('ISO-8859-1')
         
         return msg_decoded
-        
+    
+    """
+    Recvall with known size of the message
+    """
+    def recv_all(self, connection, size: int):
+        buffer = bytearray()
+        while len(buffer) < size:
+            try:
+                data = connection.recv(size - len(buffer))
+                if not data:
+                    break
+                buffer.extend(data)
+            except socket.timeout:
+                continue
+        return bytes(buffer)
+    
     """
     Listener thread to read every received package from the socket and process it
     """
@@ -218,26 +233,26 @@ class RemotedSimulator:
             if self.protocol == 'tcp': 
                 # Wait for a connection          
                 try:
-                    connection, client_address = self.sock.accept()  
-                    while self.running:                    
-                        rcv = connection.recv(65536) 
-                        if len(rcv) >= 4:
-                            data = rcv[4:]  
-                            data_len = ((rcv[3]&0xFF)<<24) | ((rcv[2]&0xFF)<<16) | ((rcv[1]&0xFF)<<8) | (rcv[0]&0xFF)
-                            if data_len == len(data):                            
-                                try:
-                                    ret = self.process_message(client_address, data)
-                                except Exception:
-                                    time.sleep(1)
-                                    connection.close()
-                                # Response -1 means connection have to be closed
-                                if ret == -1:
-                                    time.sleep(0.1)
-                                    connection.close()
-                                    break
-                                # If there is a response, answer it
-                                elif ret:
-                                    self.send(connection, ret)
+                    connection, client_address = self.sock.accept()
+                    while self.running:
+                        data = self.recv_all(connection, 4)
+                        data_size = struct.unpack('<I', data[0:4])[0]
+                        data = self.recv_all(connection, data_size)
+
+                        try:
+                            ret = self.process_message(client_address, data)
+                        except Exception:
+                            time.sleep(1)
+                            connection.close()
+
+                        # Response -1 means connection have to be closed
+                        if ret == -1:
+                            time.sleep(0.1)
+                            connection.close()
+                            break
+                        # If there is a response, answer it
+                        elif ret:
+                            self.send(connection, ret)
                         else:
                             pass              
                 except Exception:
@@ -275,8 +290,12 @@ class RemotedSimulator:
     Process a received message and answer according to the simulator mode
     """
     def process_message(self, source, received):
+        #handle ping pong response
+        if received == b'#ping':
+            return b'#pong'
+
         #parse agent identifier and payload
-        index = received.find(b'!')        
+        index = received.find(b'!')
         if index == 0:
             agent_identifier_type = "by_id"
             index = received[1:].find(b'!')
