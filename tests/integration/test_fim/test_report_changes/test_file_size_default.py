@@ -90,6 +90,7 @@ def test_file_size_default(tags_to_apply, filename, folder, get_configuration, c
         pytest.raises(FileNotFoundError(f"{diff_file_path} not found. It should exist before increasing the size."))
 
     # Increase the size of the file over the configured value
+    to_write = generate_string(size_limit, '0')
     modify_file_content(folder, filename, new_content=to_write*3)
 
     check_time_travel(scheduled)
