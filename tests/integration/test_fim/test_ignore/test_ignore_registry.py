@@ -4,14 +4,13 @@
 
 import os
 import sys
-from datetime import timedelta
 
 import pytest
 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_ignore, create_registry, delete_registry
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.time import TimeMachine
 
 if sys.platform == 'win32':
     import winreg
@@ -49,7 +48,6 @@ configurations = load_wazuh_configurations(configurations_path, __name__)
 
 def extra_configuration_before_yield():
     """ Initialize registries for this test """
-    reg_handlers = list()
     for reg in regs:
         create_registry(keys_objects[0], reg, winreg.KEY_WOW64_32KEY | winreg.KEY_WRITE)
         create_registry(keys_objects[0], reg, winreg.KEY_WOW64_64KEY | winreg.KEY_WRITE)
@@ -83,8 +81,8 @@ def get_configuration(request):
 @pytest.mark.parametrize('key_string, key_object, tags_to_apply', [
     (keys_strings, keys_objects, {'ignore_registry'})
 ])
-def test_ignore_registry(key_string, key_object, tags_to_apply, get_configuration,
-                         configure_environment, restart_syscheckd, wait_for_fim_start):
+def test_ignore_registry(key_string, key_object, tags_to_apply, get_configuration, configure_environment,
+                         restart_syscheckd):
     """
     Check registries are ignored according to configuration.
 
@@ -99,16 +97,17 @@ def test_ignore_registry(key_string, key_object, tags_to_apply, get_configuratio
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    TimeMachine.travel_to_future(timedelta(hours=13))
-
-    ignored_registry = wazuh_log_monitor.start(timeout=10, callback=callback_ignore,
+    ignored_registry = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_ignore,
                                                accum_results=len(sub_keys),
                                                error_message='Did not receive expected '
                                                              '"Ignoring ... due to( sregex)?" event').result()
+
     ignored_registry = set(ignored_registry)
+
     for ign_reg in sub_keys:
         try:
             ignored_registry.remove(os.path.join(keys_strings[0], ign_reg))
         except KeyError:
             raise KeyError(f'{os.path.join(keys_strings[0], ign_reg)} not in {ignored_registry}')
+
     assert len(ignored_registry) == 0

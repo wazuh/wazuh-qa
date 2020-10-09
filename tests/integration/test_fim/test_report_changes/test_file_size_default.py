@@ -79,7 +79,7 @@ def test_file_size_default(tags_to_apply, filename, folder, get_configuration, c
     diff_file_path = make_diff_file_path(folder=folder, filename=filename)
 
     # Create file with a smaller size than the configured value
-    to_write = generate_string(int(size_limit / 2), '0')
+    to_write = generate_string(int(size_limit / 10), '0')
     create_file(REGULAR, folder, filename, content=to_write)
 
     check_time_travel(scheduled)

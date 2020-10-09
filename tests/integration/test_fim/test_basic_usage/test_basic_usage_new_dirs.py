@@ -81,6 +81,8 @@ def test_new_directory(tags_to_apply, get_configuration, configure_environment, 
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     if sys.platform != 'win32':
+        detect_initial_scan(wazuh_log_monitor)
+
         # Create the monitored directory with files and check that events are not raised
         regular_file_cud(directory_str, wazuh_log_monitor, file_list=['file1', 'file2', 'file3'],
                          min_timeout=global_parameters.default_timeout, triggers_event=False)

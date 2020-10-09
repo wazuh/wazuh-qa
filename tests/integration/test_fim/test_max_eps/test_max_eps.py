@@ -33,7 +33,8 @@ conf_params = {'TEST_DIRECTORIES': directory_str,
 
 eps_values = ['50', '10']
 
-p, m = generate_params(extra_params=conf_params, apply_to_all=({'MAX_EPS': eps_value} for eps_value in eps_values))
+p, m = generate_params(extra_params=conf_params, apply_to_all=({'MAX_EPS': eps_value} for eps_value in eps_values),
+                       modes=['scheduled'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
@@ -62,7 +63,7 @@ def test_max_eps(get_configuration, configure_environment, restart_syscheckd, wa
         create_file(REGULAR, testdir1, f'test{i}_{mode}_{max_eps}', content='')
 
     check_time_travel(mode == "scheduled")
-    n_results = max_eps * 4
+    n_results = max_eps * 5
 
     result = wazuh_log_monitor.start(timeout=(n_results/max_eps)*6,
                                      accum_results=n_results,
