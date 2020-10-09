@@ -71,7 +71,7 @@ else:
 
 @pytest.mark.parametrize('path, checkers', parametrize_list)
 def test_check_others_individually(path, checkers, get_configuration, configure_environment, restart_syscheckd,
-                                   wait_for_initial_scan):
+                                   wait_for_fim_start):
     """
     Test the behaviour of every Check option individually without using the Check_all option. Check_all option will
     be set to "no" in order to avoid using the default check_all configuration.
@@ -117,7 +117,7 @@ else:
 
 @pytest.mark.parametrize('path, checkers', parametrize_list)
 def test_check_others(path, checkers, get_configuration, configure_environment,
-                      restart_syscheckd, wait_for_initial_scan):
+                      restart_syscheckd, wait_for_fim_start):
     """
     Test the behaviour of several combinations of Check options over the same directory with Check_all disabled to
     avoid using the default check_all configuration. The order of the checks (including check_all="no") will be

@@ -58,7 +58,7 @@ def get_configuration(request):
     dir4
 ])
 def test_tag_directories(directory, get_configuration, put_env_variables, configure_environment,
-                         restart_syscheckd, wait_for_initial_scan):
+                         restart_syscheckd, wait_for_fim_start):
     """
     Test alerts are generated when monitor environment variables
     """

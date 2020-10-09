@@ -65,7 +65,7 @@ def translate_size(configured_size='1KB'):
 
 def disable_file_max_size():
     """
-    Disable the syscheck.max_file_size option from the internal_options.conf file.
+    Disable the syscheck.file_max_size option from the internal_options.conf file.
     """
     new_content = ''
 
@@ -87,7 +87,7 @@ def disable_file_max_size():
 
 def restore_file_max_size():
     """
-    Restore the syscheck.max_file_size option from the internal_options.conf file.
+    Restore the syscheck.file_max_size option from the internal_options.conf file.
     """
     new_content = ''
 
@@ -101,6 +101,50 @@ def restore_file_max_size():
 
         for line in lines:
             new_line = line.replace('syscheck.file_max_size=0', 'syscheck.file_max_size=1024')
+            new_content += new_line
+
+    with open(internal_options, 'w') as f:
+        f.write(new_content)
+
+
+def disable_rt_delay():
+    """
+    Disable the syscheck.rt_delay option from the internal_options.conf file.
+    """
+    new_content = ''
+
+    if sys.platform == 'win32':
+        internal_options = os.path.join(WAZUH_PATH, 'internal_options.conf')
+    else:
+        internal_options = os.path.join(WAZUH_PATH, 'etc', 'internal_options.conf')
+
+    with open(internal_options, 'r') as f:
+        lines = f.readlines()
+
+        for line in lines:
+            new_line = line.replace('syscheck.rt_delay=5', 'syscheck.rt_delay=1000')
+            new_content += new_line
+
+    with open(internal_options, 'w') as f:
+        f.write(new_content)
+
+
+def restore_rt_delay():
+    """
+    Restore the syscheck.rt_delay option from the internal_options.conf file.
+    """
+    new_content = ''
+
+    if sys.platform == 'win32':
+        internal_options = os.path.join(WAZUH_PATH, 'internal_options.conf')
+    else:
+        internal_options = os.path.join(WAZUH_PATH, 'etc', 'internal_options.conf')
+
+    with open(internal_options, 'r') as f:
+        lines = f.readlines()
+
+        for line in lines:
+            new_line = line.replace('syscheck.rt_delay=1000', 'syscheck.rt_delay=5')
             new_content += new_line
 
     with open(internal_options, 'w') as f:

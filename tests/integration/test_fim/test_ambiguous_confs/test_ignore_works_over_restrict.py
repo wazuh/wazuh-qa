@@ -54,7 +54,7 @@ def get_configuration(request):
     (testdir2, 'not_ignored_sregex', True, {'valid_regex'})
 ])
 def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_apply, get_configuration,
-                                    configure_environment, restart_syscheckd, wait_for_initial_scan):
+                                    configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check if the ignore tag prevails over the restrict one when using both in the same directory.
 
     This test is intended to be used with valid configurations files. Each execution of this test will configure

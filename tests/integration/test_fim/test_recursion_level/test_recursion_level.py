@@ -157,7 +157,7 @@ def get_configuration(request):
     (dir_recursion_320_space, subdir_space, 320)
 ])
 def test_recursion_level(dirname, subdirname, recursion_level, get_configuration, configure_environment,
-                         restart_syscheckd, wait_for_initial_scan):
+                         restart_syscheckd, wait_for_fim_start):
     """
     Check if files are correctly detected by syscheck with recursion level using scheduled, realtime and whodata
     monitoring.

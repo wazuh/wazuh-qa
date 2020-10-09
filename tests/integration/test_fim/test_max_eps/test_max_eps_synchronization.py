@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import sys
 import shutil
 from collections import Counter
 
@@ -33,8 +34,10 @@ conf_params = {'TEST_DIRECTORIES': directory_str,
                'MODULE_NAME': __name__}
 
 eps_values = ['50', '10']
+test_modes = ['realtime'] if sys.platform == 'linux' or sys.platform == 'win32' else ['scheduled']
 
-p, m = generate_params(extra_params=conf_params, apply_to_all=({'MAX_EPS': eps_value} for eps_value in eps_values))
+p, m = generate_params(extra_params=conf_params, apply_to_all=({'MAX_EPS': eps_value} for eps_value in eps_values),
+                       modes=test_modes)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
@@ -54,7 +57,7 @@ def create_files(get_configuration):
         create_file(REGULAR, testdir1, f'test{i}_{mode}_{max_eps}', content='')
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def delete_files():
     yield
     for test_dir in test_directories_no_delete:
@@ -90,6 +93,6 @@ def test_max_eps_on_start(get_configuration, create_files, configure_environment
     counter = Counter([date_time for date_time, _ in result])
     error_margin = (max_eps * 0.1)
 
-    for date_time, n_occurrences in counter.items():
+    for _, n_occurrences in counter.items():
         assert n_occurrences <= round(
             max_eps + error_margin), f'Sent {n_occurrences} but a maximum of {max_eps} was set'

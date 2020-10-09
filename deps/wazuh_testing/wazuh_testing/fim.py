@@ -854,6 +854,13 @@ def callback_diff_size_limit_value(line):
         return match.group(1)
 
 
+def callback_deleted_diff_folder(line):
+    match = re.match(r'.*Folder \'(.*)\' has been deleted.*', line)
+
+    if match:
+        return match.group(1)
+
+
 def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None):
     """
     Change date and time of the system depending on a boolean condition. Optionally, a monitor may be used to check
@@ -1295,6 +1302,34 @@ def detect_initial_scan(file_monitor):
     """
     file_monitor.start(timeout=60, callback=callback_detect_end_scan,
                        error_message='Did not receive expected "File integrity monitoring scan ended" event')
+
+
+def detect_realtime_start(file_monitor):
+    """
+    Detect realtime engine start when restarting Wazuh.
+
+    Parameters
+    ----------
+    file_monitor : FileMonitor
+        File log monitor to detect events
+    """
+    file_monitor.start(timeout=60, callback=callback_num_inotify_watches,
+                       error_message='Did not receive expected "Folders monitored with real-time engine..." event')
+
+
+def detect_whodata_start(file_monitor):
+    """
+    Detect whodata engine start when restarting Wazuh.
+
+    Parameters
+    ----------
+    file_monitor : FileMonitor
+        File log monitor to detect events
+    """
+    file_monitor.start(timeout=60, callback=callback_real_time_whodata_started,
+                       error_message='Did not receive expected'
+                                     '"File integrity monitoring real-time Whodata engine started" event')
+
 
 
 def generate_params(extra_params: dict = None, apply_to_all: Union[Sequence[Any], Generator[dict, None, None]] = None,
