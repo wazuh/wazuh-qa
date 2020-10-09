@@ -111,7 +111,7 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
     check_time_travel(scheduled)
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                            error_message='Did not receive expected "Sending FIM event: ..." event.').result()
+                            error_message='Did not receive expected "Sending FIM event: ..." event.')
 
     if not os.path.exists(diff_file_path):
         raise FileNotFoundError(f"{diff_file_path} not found. It should exist before increasing the size.")
