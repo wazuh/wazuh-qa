@@ -86,8 +86,9 @@ def test_add_agent(tags_to_apply, get_configuration, configure_api_environment,
 
         # Delete the agent created
         agent_id = post_response.json()['data']['id']
-        api_details['base_url'] += f"?list_agents={agent_id}&purge=true&status=&older_than=0s"
-        requests.delete(api_details['base_url'], headers=api_details['auth_headers'], verify=False)
+        api_details['base_url'] += f"?agents_list={agent_id}&purge=true&status=&older_than=0s"
+        delete_response = requests.delete(api_details['base_url'], headers=api_details['auth_headers'], verify=False)
+        assert delete_response.status_code == 200, f'Delete response was not 200. Response: {delete_response.text}'
 
 
 @pytest.mark.parametrize('tags_to_apply', [
@@ -131,7 +132,7 @@ def test_insert_agent(tags_to_apply, get_configuration, configure_api_environmen
 
         # Delete the agent
         agent_id = post_response.json()['data']['id']
-        api_details['base_url'] += f"?list_agents={agent_id}&purge=true&status=&older_than=0s"
+        api_details['base_url'] += f"?agents_list={agent_id}&purge=true&status=&older_than=0s"
         requests.delete(api_details['base_url'], headers=api_details['auth_headers'], verify=False)
 
 
@@ -172,7 +173,7 @@ def test_insert_quick_agent(tags_to_apply, get_configuration, configure_api_envi
 
         # Delete the agent
         agent_id = post_response.json()['data']['id']
-        api_details['base_url'] += f"?list_agents={agent_id}&purge=true&status=&older_than=0s"
+        api_details['base_url'] += f"?agents_list={agent_id}&purge=true&status=&older_than=0s"
         requests.delete(api_details['base_url'], headers=api_details['auth_headers'], verify=False)
 
 
@@ -215,7 +216,7 @@ def test_delete_agent(tags_to_apply, get_configuration, configure_api_environmen
     # It is necessary to wait a bit after adding the agent before deleting or querying it.
     time.sleep(1)
     delete_url = api_details['base_url'] + \
-                 f"?list_agents={post_response.json()['data']['id']}&purge=true&status=&older_than=0s"
+                 f"?agents_list={post_response.json()['data']['id']}&purge=true&status=&older_than=0s"
     delete_response = requests.delete(delete_url, headers=api_details['auth_headers'], verify=False).json()
 
     # Assert if an error code was returned when ossec-authd is disabled and use_only_authd enabled.
