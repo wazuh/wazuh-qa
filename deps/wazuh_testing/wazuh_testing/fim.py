@@ -558,7 +558,7 @@ def modify_file_permission(path, name):
         user, domain, account_type = win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")
         sd = win32sec.GetFileSecurity(path_to_file, win32sec.DACL_SECURITY_INFORMATION)
         dacl = sd.GetSecurityDescriptorDacl()
-        dacl.AddAccessAllowedAce(win32sec.ACL_REVISION, win32con.FILE_ALL_ACCESS, user)
+        dacl.AddAccessAllowedAce(win32sec.ACL_REVISION, ntc.FILE_ALL_ACCESS, user)
         sd.SetSecurityDescriptorDacl(1, dacl, 0)
         win32sec.SetFileSecurity(path_to_file, win32sec.DACL_SECURITY_INFORMATION, sd)
 
@@ -945,34 +945,6 @@ def callback_diff_size_limit_value(line):
 
 def callback_deleted_diff_folder(line):
     match = re.match(r'.*Folder \'(.*)\' has been deleted.*', line)
-
-    if match:
-        return match.group(1)
-
-
-def callback_file_size_limit_reached(line):
-    match = re.match(r'.*File \'(.*)\' is too big for configured maximum size to perform diff operation\.', line)
-
-    if match:
-        return match.group(1)
-
-
-def callback_disk_quota_limit_reached(line):
-    match = re.match(r'.*The maximum configured size for the \'(.*)\' folder has been reached.*', line)
-
-    if match:
-        return match.group(1)
-
-
-def callback_disk_quota_default(line):
-    match = re.match(r'.*Maximum disk quota size limit configured to \'(\d+) KB\'.*', line)
-
-    if match:
-        return match.group(1)
-
-
-def callback_diff_size_limit_value(line):
-    match = re.match(r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*', line)
 
     if match:
         return match.group(1)
