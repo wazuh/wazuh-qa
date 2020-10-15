@@ -1,0 +1,28 @@
+---
+- apply_to_modules:
+  - test_recursion_level_registry
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - windows_registry:
+        value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\norecursion"
+        attributes:
+        - recursion_level: "0"
+        - FIM_MODE
+    - windows_registry:
+        value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\recursion1"
+        attributes:
+        - recursion_level: "1"
+        - FIM_MODE
+    - windows_registry:
+        value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\recursion5"
+        attributes:
+        - recursion_level: "5"
+        - FIM_MODE
+    - windows_registry:
+        value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\recursion512"
+        attributes:
+        - recursion_level: "512"
+        - FIM_MODE
