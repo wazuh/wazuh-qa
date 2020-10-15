@@ -30,7 +30,8 @@ from wazuh_testing.tools.time import TimeMachine
 if sys.platform == 'win32':
     import win32con
     import win32api
-    import winreg
+    import win32security as win32sec
+    import ntsecuritycon as ntc
 elif sys.platform == 'linux2' or sys.platform == 'linux':
     from jq import jq
 
@@ -73,6 +74,15 @@ REQUIRED_ATTRIBUTES = {
 
 _last_log_line = 0
 _os_excluded_from_rt_wd = ['darwin', 'sunos5']
+
+if sys.platform == 'win32':
+    registry_parser = {
+            'HKEY_CLASSES_ROOT'  : win32con.HKEY_CLASSES_ROOT,
+            'HKEY_CURRENT_USER'  : win32con.HKEY_CURRENT_USER,
+            'HKEY_LOCAL_MACHINE' : win32con.HKEY_LOCAL_MACHINE,
+            'HKEY_USERS'         : win32con.HKEY_USERS,
+            'HKEY_CURRENT_CONFIG': win32con.HKEY_CURRENT_CONFIG
+            }
 
 
 def validate_event(event, checks=None, mode=None):
@@ -195,13 +205,17 @@ def create_registry(key, subkey, arch):
 
     Parameters
     ----------
-    key : str
+    key : int
         The key of the registry (HKEY_* constants).
     subkey : str
         The subkey (name) of the registry.
+    arch : int
+        Architecture of the registry (KEY_WOW64_32KEY or KEY_WOW64_64KEY)
+    return the key handle of the new/opened key
     """
-    sys.platform == 'win32' and winreg.CreateKeyEx(key, subkey, access=arch)
-
+    if sys.platform == 'win32':
+        key = win32api.RegCreateKeyEx(key, subkey, win32con.KEY_ALL_ACCESS | arch)
+        return key[0] #Ignore the flag that RegCreateKeyEx returns
 
 def _create_fifo(path, name):
     """
@@ -330,29 +344,107 @@ def delete_registry(key, subkey, arch):
 
     Parameters
     ----------
-    key : str
+    key : pyHKEY
         The key of the registry (HKEY_* constants).
     subkey : str
         The subkey (name) of the registry.
+    arch : int
+        Architecture of the registry (KEY_WOW64_32KEY or KEY_WOW64_64KEY)
     """
-    sys.platform == 'win32' and winreg.DeleteKeyEx(key, subkey, access=arch)
+    if sys.platform == 'win32':
+        key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS | arch)
+        win32api.RegDeleteTree(key_h, None)
+        win32api.RegDeleteKeyEx(key, subkey, samDesired=arch)
 
 
-def modify_registry(key, subkey, value):
+def delete_registry_value(key_h, value_name):
     """
-    Modify the content of REG_SZ in a registry
+    Delete a registry value from a registry
 
     Parameters
     ----------
-    key : str
-        The key of the registry (HKEY_* constants)
+    key : pyHKEY
+        The key handle of the registry
     subkey : str
         The subkey (name) of the registry.
     value : str
-        The value to be set.
+        The value to be deleted.
     """
-    logger.info("Modifying windows registry.")
-    sys.platform == 'win32' and winreg.SetValue(key, subkey, winreg.REG_SZ, value)
+    logger.info("- Deleting registry value.")
+    if (sys.platform == 'win32'):
+        win32api.RegDeleteValue(key_h, value_name)
+
+
+def modify_registry(key_h, value_name, type, value):
+    """
+    Modify the content of a registry. If the value doesn't not exists, it will be created
+
+    Parameters
+    ----------
+    key : pyHKEY
+        The key handle of the registry
+    subkey : str
+        The subkey (name) of the registry.
+    value_name : str
+        The value to be set.
+    type : int
+        Type of the value.
+    value : str
+        The content that will be written to the registry value.
+    """
+    logger.info("- Modifying windows registry.")
+    if sys.platform == 'win32':
+        win32api.RegSetValueEx(key_h, value_name, 0, type, value)
+
+
+def modify_key_perms(key, subkey, user):
+    """
+    Modify the permissions (ACL) of a registry key
+
+    Parameters
+    ----------
+    key : int
+        The key of the registry (HKEY_* constants)
+    subkey : str
+        The subkey (name) of the registry.
+    user : PySID
+        User that is going to be used for the modification
+    """
+    logger.info("- Changing permissions of key")
+    if (sys.platform == 'win32'):
+        key_h = win32api.RegOpenKey(key, subkey, 0, win32con.KEY_ALL_ACCESS)
+        sd = win32api.RegGetKeySecurity(key_h, win32con.DACL_SECURITY_INFORMATION)
+        acl = sd.GetSecurityDescriptorDacl()
+        acl.AddAccessAllowedAce(ntc.GENERIC_ALL, user)
+        sd.SetDacl(True, acl, False)
+        win32api.RegSetKeySecurity(key_h, win32con.DACL_SECURITY_INFORMATION, sd)
+
+
+def rename_registry(key, subkey_path, src_name, arch, dst_name):
+    """
+    Function that "renames" a registry
+
+    Parameters
+    ----------
+    key : int
+        The key of the registry (HKEY_* constants)
+    subkey_path : str
+        The path where the subkey that is going to be renamed is.
+    src_name : str
+        Name of the key that is going to be renamed
+    arch : int
+        Architecture of the registry
+    dst_name : str
+        Name of the renamed key
+    """
+    source_key = os.path.join(subkey_path, src_name)
+    destination_key = os.path.join(subkey_path, dst_name)
+
+    src_key_h = win32api.RegOpenKey(key, source_key, 0, win32con.KEY_ALL_ACCESS | arch)
+    dst_key_h = create_registry(key, destination_key, arch)
+
+    win32api.RegCopyTree(src_key_h, None, dst_key_h)
+    delete_registry(key, source_key, arch)
 
 
 def modify_file_content(path, name, new_content=None, is_binary=False):
@@ -463,15 +555,12 @@ def modify_file_permission(path, name):
         Name of the file to be modified.
     """
     def modify_file_permission_windows():
-        import win32security
-        import ntsecuritycon
-
-        user, domain, account_type = win32security.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")
-        sd = win32security.GetFileSecurity(path_to_file, win32security.DACL_SECURITY_INFORMATION)
+        user, domain, account_type = win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")
+        sd = win32sec.GetFileSecurity(path_to_file, win32sec.DACL_SECURITY_INFORMATION)
         dacl = sd.GetSecurityDescriptorDacl()
-        dacl.AddAccessAllowedAce(win32security.ACL_REVISION, ntsecuritycon.FILE_ALL_ACCESS, user)
+        dacl.AddAccessAllowedAce(win32sec.ACL_REVISION, win32con.FILE_ALL_ACCESS, user)
         sd.SetSecurityDescriptorDacl(1, dacl, 0)
-        win32security.SetFileSecurity(path_to_file, win32security.DACL_SECURITY_INFORMATION, sd)
+        win32sec.SetFileSecurity(path_to_file, win32sec.DACL_SECURITY_INFORMATION, sd)
 
     def modify_file_permission_unix():
         os.chmod(path_to_file, 0o666)
@@ -859,6 +948,47 @@ def callback_deleted_diff_folder(line):
 
     if match:
         return match.group(1)
+
+
+def callback_file_size_limit_reached(line):
+    match = re.match(r'.*File \'(.*)\' is too big for configured maximum size to perform diff operation\.', line)
+
+    if match:
+        return match.group(1)
+
+
+def callback_disk_quota_limit_reached(line):
+    match = re.match(r'.*The maximum configured size for the \'(.*)\' folder has been reached.*', line)
+
+    if match:
+        return match.group(1)
+
+
+def callback_disk_quota_default(line):
+    match = re.match(r'.*Maximum disk quota size limit configured to \'(\d+) KB\'.*', line)
+
+    if match:
+        return match.group(1)
+
+
+def callback_diff_size_limit_value(line):
+    match = re.match(r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*', line)
+
+    if match:
+        return match.group(1)
+
+
+def callback_non_existing_monitored_registry(line):
+    if 'Registry key does not exists' in line :
+        return True
+
+
+def callback_registry_count_entries(line):
+    if sys.platform != 'win32':
+        match = re.match(r".*Number of keys: (\d+), value count: (\d+)", line)
+
+    if match:
+        return match.group(1), match.group(2)
 
 
 def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None):
@@ -1289,6 +1419,93 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
     event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
     if triggers_event:
         logger.info("'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
+
+
+def registry_key_cud(registry_key, registry_sub_key, arch, log_monitor, value_list=['test_value'], time_travel=False, min_timeout=1, options=None,
+                     triggers_event=True, encoding=None, callback=callback_detect_event, validators_after_create=None,
+                     validators_after_update=None, validators_after_delete=None, validators_after_cud=None):
+    """
+    Check if creation, update and delete registry value events are detected by syscheck.
+
+    This function provides multiple tools to validate events with custom validators.
+
+    Parameters
+    ----------
+    registry_key : str
+        Root key (HKEY_LOCAL_MACHINE, HKEY_LOCAL_USER, etc).
+    registry_subkey : str
+        Path of the subkey that will be created
+    arch : int
+        Architecture of the registry key (KEY_WOW64_32KEY or KEY_WOW64_64KEY)
+    log_monitor : FileMonitor
+        File event monitor.
+    value_list : list(str) or dict, optional
+        If it is a list, it will be transformed to a dict with empty strings in each value. Default `['test_value']`
+    time_travel : boolean, optional
+        Boolean to determine if there will be time travels or not. Default `False`
+    min_timeout : int, optional
+        Minimum timeout. Default `1`
+    options : set, optional
+        Set with all the checkers. Default `None`
+    triggers_event : boolean, optional
+        Boolean to determine if the event should be raised or not. Default `True`
+    encoding : str, optional
+        String to determine the encoding of the file name. Default `None`
+    callback : callable, optional
+        Callback to use with the log monitor. Default `callback_detect_event`
+    validators_after_create : list, optional
+        List of functions that validates an event triggered when a new file is created. Each function must accept
+        a param to receive the event to be validated. Default `None`
+    validators_after_update : list, optional
+        List of functions that validates an event triggered when a new file is modified. Each function must accept
+        a param to receive the event to be validated. Default `None`
+    validators_after_delete : list, optional
+        List of functions that validates an event triggered when a new file is deleted. Each function must accept
+        a param to receive the event to be validated. Default `None`
+    validators_after_cud : list, optional
+        List of functions that validates an event triggered when a new file is created, modified or deleted. Each
+        function must accept a param to receive the event to be validated. Default `None`
+    """
+    # Transform file list
+    if registry_key not in registry_parser:
+        raise ValueError("Registry_key not valid")
+    elif not isinstance(value_list, list) and not isinstance(value_list, dict):
+        raise ValueError('Value error. It can only be list or dict')
+    elif isinstance(value_list, list):
+        value_list = {i: '' for i in value_list}
+    registry_path = os.path.join(registry_key, registry_sub_key)
+
+    custom_validator = CustomValidator(validators_after_create, validators_after_update,
+                                       validators_after_delete, validators_after_cud)
+    event_checker = EventChecker(log_monitor=log_monitor, folder=registry_path, file_list=value_list, options=options,
+                                 custom_validator=custom_validator, encoding=encoding, callback=callback)
+
+    # Open the desired key
+    key_handle = win32api.RegOpenKeyEx(registry_parser[registry_key], registry_sub_key, 0, win32con.KEY_ALL_ACCESS | arch)
+
+    for name, _ in value_list.items():
+        modify_registry(key_handle, name, win32con.REG_SZ, "added")
+
+    check_time_travel(time_travel, monitor=log_monitor)
+    event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
+    if triggers_event:
+        logger.info("'added' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
+
+    for name, content in value_list.items():
+        modify_registry(key_handle, name, win32con.REG_SZ, content)
+
+    check_time_travel(time_travel, monitor=log_monitor)
+    event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
+    if triggers_event:
+        logger.info("'added' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
+
+    for name, _ in value_list.items():
+        delete_registry_value(key_handle, name)
+
+    check_time_travel(time_travel, monitor=log_monitor)
+    event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
+    if triggers_event:
+        logger.info("'deleted' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
 
 
 def detect_initial_scan(file_monitor):
