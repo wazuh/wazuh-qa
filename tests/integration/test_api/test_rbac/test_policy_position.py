@@ -12,6 +12,7 @@ policy_positions = list()
 
 @pytest.fixture(scope='function')
 def add_new_policies(get_api_details):
+    """Create new policies and relationships between them and the testing role."""
     api_details = get_api_details()
     # Add first policy to list
     policy_positions.append(policy_id)
@@ -40,6 +41,13 @@ def add_new_policies(get_api_details):
 
 # Functions
 def remove_role_policy(api_details, p_id):
+    """Remove a role-policy relationship and update the relationships reference list.
+
+    Parameters
+    ----------
+    p_id : int
+        Policy ID.
+    """
     response = requests.delete(f"{api_details['base_url']}/security/roles/{role_id}/policies?policy_ids={p_id}",
                                headers=api_details['auth_headers'], verify=False)
     assert response.status_code == 200, f'Expected status code was 200. Full response: {response.text}'
@@ -48,6 +56,15 @@ def remove_role_policy(api_details, p_id):
 
 
 def add_role_policy(api_details, p_id, position):
+    """Add a role-policy relationship and update the relationships reference list.
+
+    Parameters
+    ----------
+    p_id : int
+        Policy ID.
+    position : int
+        Relationship position.
+    """
     response = requests.post(f"{api_details['base_url']}/security/roles/{role_id}/policies?policy_ids={p_id}"
                              f"&position={position}", headers=api_details['auth_headers'], verify=False)
     assert response.status_code == 200, f'Expected status code was 200. Full response: {response.text}'
@@ -57,6 +74,8 @@ def add_role_policy(api_details, p_id, position):
 
 # Tests
 def test_policy_position(set_security_resources, add_new_policies, get_api_details):
+    """Test if the correct order between role-policy relationships remain after removing some of them and adding others
+    using the `position` parameter."""
     api_details = get_api_details()
 
     # Remove and add in the same position

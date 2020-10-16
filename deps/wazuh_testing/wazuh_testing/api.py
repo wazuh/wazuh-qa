@@ -70,6 +70,7 @@ def get_api_details_dict(protocol=API_PROTOCOL, host=API_HOST, port=API_PORT, us
 
 
 def get_security_resource_information(**kwargs):
+    """Get all information about a security resource."""
     assert len(kwargs) == 1, f'This function only admits one argument'
     endpoint = {
         'user_ids': '/users?user_ids=',

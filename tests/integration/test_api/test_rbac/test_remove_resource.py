@@ -11,6 +11,17 @@ user_id, role_id, policy_id, rule_id = None, None, None, None
 
 # Functions
 def check_relationships(original_relationships, new_relationships, deleted_relationship):
+    """Check if the relationships stay the same after removing security resources.
+
+    Parameters
+    ----------
+    original_relationships : dict
+        Original relationships.
+    new_relationships : dict
+        Relationships after removing a security resource.
+    deleted_relationship : str
+        Security resource that was deleted.
+    """
     original_relationships[deleted_relationship] = []
     assert original_relationships == new_relationships, f'Some relationships were deleted. ' \
                                                         f'\nOriginal: {original_relationships}\n' \
@@ -18,6 +29,15 @@ def check_relationships(original_relationships, new_relationships, deleted_relat
 
 
 def check_resources(deleted_resource, resource_id):
+    """Check if the security resources stay the same.
+
+    Parameters
+    ----------
+    deleted_resource : str
+        Name of the deleted resource.
+    resource_id : int
+        ID of the resource.
+    """
     resources = {
         'users': 'user_ids',
         'roles': 'role_ids',
@@ -32,6 +52,7 @@ def check_resources(deleted_resource, resource_id):
 
 # Tests
 def test_remove_rule(set_security_resources, get_api_details):
+    """Test if relationships between security resources stay the same after removing the linked rule."""
     api_details = get_api_details()
     relationships = get_security_resource_information(role_ids=role_id)
     assert relationships, 'There are not relationships'
@@ -48,6 +69,7 @@ def test_remove_rule(set_security_resources, get_api_details):
 
 
 def test_remove_policy(set_security_resources, get_api_details):
+    """Test if relationships between security resources stay the same after removing the linked policy."""
     api_details = get_api_details()
     relationships = get_security_resource_information(role_ids=role_id)
     assert relationships, 'There are not relationships'
@@ -64,6 +86,7 @@ def test_remove_policy(set_security_resources, get_api_details):
 
 
 def test_remove_user(set_security_resources, get_api_details):
+    """Test if relationships between security resources stay the same after removing the linked user."""
     api_details = get_api_details()
     relationships = get_security_resource_information(role_ids=role_id)
     assert relationships, 'There are not relationships'
@@ -80,6 +103,7 @@ def test_remove_user(set_security_resources, get_api_details):
 
 
 def test_remove_role(set_security_resources, get_api_details):
+    """Test if relationships between security resources stay the same after removing the linked role."""
     api_details = get_api_details()
     relationships = get_security_resource_information(user_ids=user_id)
     assert relationships, 'There are not relationships'

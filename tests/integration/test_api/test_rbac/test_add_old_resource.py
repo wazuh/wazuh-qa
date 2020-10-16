@@ -10,6 +10,7 @@ user_id, role_id, policy_id, rule_id = None, None, None, None
 
 # Tests
 def test_add_old_user(set_security_resources, get_api_details):
+    """Remove a user with defined relationships and create it with the same ID to see if said relationships remain."""
     api_details = get_api_details()
     old_user_info = get_security_resource_information(user_ids=user_id)
     assert old_user_info, f'There is not information about this role: {user_id}'
@@ -30,6 +31,7 @@ def test_add_old_user(set_security_resources, get_api_details):
 
 
 def test_add_old_role(set_security_resources, get_api_details):
+    """Remove a role with defined relationships and create it with the same ID to see if said relationships remain."""
     api_details = get_api_details()
     old_role_info = get_security_resource_information(role_ids=role_id)
     assert old_role_info, f'There is not information about this role: {role_id}'
@@ -49,6 +51,7 @@ def test_add_old_role(set_security_resources, get_api_details):
 
 
 def test_add_old_policy(set_security_resources, get_api_details):
+    """Remove a policy with defined relationships and create it with the same ID to see if said relationships remain."""
     api_details = get_api_details()
     old_policy_info = get_security_resource_information(policy_ids=policy_id)
     assert old_policy_info, f'There is not information about this policy: {policy_id}'
@@ -71,6 +74,7 @@ def test_add_old_policy(set_security_resources, get_api_details):
 
 
 def test_add_old_rule(set_security_resources, get_api_details):
+    """Remove a rule with defined relationships and create it with the same ID to see if said relationships remain."""
     api_details = get_api_details()
     old_rule_info = get_security_resource_information(rule_ids=rule_id)
     assert old_rule_info, f'There is not information about this policy: {rule_id}'
