@@ -21,7 +21,8 @@ setup(name='wazuh_testing',
                                       'data/analysis_alert_windows.json',
                                       'data/state_integrity_analysis_schema.json',
                                       'data/gcp_event.json',
-                                      'data/keepalives.txt'
+                                      'data/keepalives.txt',
+                                      'data/rootcheck.txt'
                                       ]
                     },
       include_package_data=True,
