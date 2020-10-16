@@ -6,7 +6,7 @@ import requests
 from wazuh_testing.api import get_security_resource_information
 
 # Variables
-user_ids, role_ids, policy_ids, rule_ids = list(), list(), list(), list()
+user_id, role_id, policy_id, rule_id = None, None, None, None
 
 
 # Functions
@@ -45,9 +45,9 @@ def remove_relationship(api_details, endpoint, resource, related_resource, relat
 def test_remove_user_role_relationship(set_security_resources, get_api_details):
     """Test if the user and role still exist after removing their relationship."""
     api_details = get_api_details()
-    endpoint = api_details['base_url'] + f'/security/users/{user_ids[0]}/roles?role_ids={role_ids[0]}'
-    resource = role_ids[0]
-    related_resource = {'user_ids': user_ids[0]}
+    endpoint = api_details['base_url'] + f'/security/users/{user_id}/roles?role_ids={role_id}'
+    resource = role_id
+    related_resource = {'user_ids': user_id}
     relation = 'users'
 
     remove_relationship(api_details, endpoint, resource, related_resource, relation)
@@ -56,9 +56,9 @@ def test_remove_user_role_relationship(set_security_resources, get_api_details):
 def test_remove_role_policy_relationship(set_security_resources, get_api_details):
     """Test if the role and policy still exist after removing their relationship."""
     api_details = get_api_details()
-    endpoint = api_details['base_url'] + f'/security/roles/{role_ids[1]}/policies?policy_ids={policy_ids[1]}'
-    resource = role_ids[1]
-    related_resource = {'policy_ids': policy_ids[1]}
+    endpoint = api_details['base_url'] + f'/security/roles/{role_id}/policies?policy_ids={policy_id}'
+    resource = role_id
+    related_resource = {'policy_ids': policy_id}
     relation = 'policies'
 
     remove_relationship(api_details, endpoint, resource, related_resource, relation)
@@ -67,9 +67,9 @@ def test_remove_role_policy_relationship(set_security_resources, get_api_details
 def test_remove_role_rule_relationship(set_security_resources, get_api_details):
     """Test if the role and rule still exist after removing their relationship."""
     api_details = get_api_details()
-    endpoint = api_details['base_url'] + f'/security/roles/{role_ids[2]}/rules?rule_ids={rule_ids[2]}'
-    resource = role_ids[2]
-    related_resource = {'rule_ids': rule_ids[2]}
+    endpoint = api_details['base_url'] + f'/security/roles/{role_id}/rules?rule_ids={rule_id}'
+    resource = role_id
+    related_resource = {'rule_ids': rule_id}
     relation = 'rules'
 
     remove_relationship(api_details, endpoint, resource, related_resource, relation)
