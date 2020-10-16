@@ -1,0 +1,99 @@
+# Copyright (C) 2015-2020, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+import requests
+from wazuh_testing.api import get_security_resource_information
+
+# Variables
+user_ids, role_ids, policy_ids, rule_ids = list(), list(), list(), list()
+
+
+# Functions
+def check_relationships(original_relationships, new_relationships, deleted_relationship):
+    original_relationships[deleted_relationship] = []
+    assert original_relationships == new_relationships, f'Some relationships were deleted. ' \
+                                                        f'\nOriginal: {original_relationships}\n' \
+                                                        f'New: {new_relationships}'
+
+
+def check_resources(deleted_resource, resource_id):
+    resources = {
+        'users': 'user_ids',
+        'roles': 'role_ids',
+        'policies': 'policy_ids',
+        'rules': 'rule_ids'
+    }
+    del resources[deleted_resource]
+    # Check that the rest of resources still exists
+    for param in resources.values():
+        assert get_security_resource_information(**{param: resource_id})
+
+
+# Tests
+def test_remove_rule(set_security_resources, get_api_details):
+    id_index = 0
+    api_details = get_api_details()
+    relationships = get_security_resource_information(role_ids=role_ids[id_index])
+    assert relationships, 'There are not relationships'
+
+    delete_endpoint = api_details['base_url'] + f'/security/rules?rule_ids={rule_ids[id_index]}'
+    response = requests.delete(delete_endpoint, headers=api_details['auth_headers'], verify=False)
+    assert response.status_code == 200, f'Status code was not 200. Response: {response.text}'
+
+    new_relationships = get_security_resource_information(role_ids=role_ids[id_index])
+    assert new_relationships, 'There are not relationships'
+
+    check_resources('rules', rule_ids[id_index])
+    check_relationships(relationships, new_relationships, 'rules')
+
+
+def test_remove_policy(set_security_resources, get_api_details):
+    id_index = 1
+    api_details = get_api_details()
+    relationships = get_security_resource_information(role_ids=role_ids[id_index])
+    assert relationships, 'There are not relationships'
+
+    delete_endpoint = api_details['base_url'] + f'/security/policies?policy_ids={policy_ids[id_index]}'
+    response = requests.delete(delete_endpoint, headers=api_details['auth_headers'], verify=False)
+    assert response.status_code == 200, f'Status code was not 200. Response: {response.text}'
+
+    new_relationships = get_security_resource_information(role_ids=role_ids[id_index])
+    assert new_relationships, 'There are not relationships'
+
+    check_resources('policies', policy_ids[id_index])
+    check_relationships(relationships, new_relationships, 'policies')
+
+
+def test_remove_user(set_security_resources, get_api_details):
+    id_index = 2
+    api_details = get_api_details()
+    relationships = get_security_resource_information(role_ids=role_ids[id_index])
+    assert relationships, 'There are not relationships'
+
+    delete_endpoint = api_details['base_url'] + f'/security/users?user_ids={user_ids[id_index]}'
+    response = requests.delete(delete_endpoint, headers=api_details['auth_headers'], verify=False)
+    assert response.status_code == 200, f'Status code was not 200. Response: {response.text}'
+
+    new_relationships = get_security_resource_information(role_ids=role_ids[id_index])
+    assert new_relationships, 'There are not relationships'
+
+    check_resources('users', user_ids[id_index])
+    check_relationships(relationships, new_relationships, 'users')
+
+
+def test_remove_role(set_security_resources, get_api_details):
+    id_index = 3
+    api_details = get_api_details()
+    relationships = get_security_resource_information(user_ids=user_ids[id_index])
+    assert relationships, 'There are not relationships'
+
+    delete_endpoint = api_details['base_url'] + f'/security/roles?role_ids={role_ids[id_index]}'
+    response = requests.delete(delete_endpoint, headers=api_details['auth_headers'], verify=False)
+    assert response.status_code == 200, f'Status code was not 200. Response: {response.text}'
+
+    new_relationships = get_security_resource_information(user_ids=user_ids[id_index])
+    assert new_relationships, 'There are not relationships'
+
+    check_resources('roles', role_ids[id_index])
+    check_relationships(relationships, new_relationships, 'roles')
