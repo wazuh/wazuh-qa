@@ -10,6 +10,7 @@ import shutil
 import socket
 import subprocess
 import sys
+import time
 import tempfile
 from collections import Counter
 from copy import deepcopy
@@ -32,6 +33,7 @@ if sys.platform == 'win32':
     import win32api
     import win32security as win32sec
     import ntsecuritycon as ntc
+    import pywintypes
 elif sys.platform == 'linux2' or sys.platform == 'linux':
     from jq import jq
 
@@ -55,6 +57,7 @@ CHECK_PERM = 'check_perm'
 CHECK_ATTRS = 'check_attrs'
 CHECK_MTIME = 'check_mtime'
 CHECK_INODE = 'check_inode'
+CHECK_TYPE = 'check_type'
 
 REQUIRED_ATTRIBUTES = {
     CHECK_SHA1SUM: 'hash_sha1',
@@ -72,17 +75,55 @@ REQUIRED_ATTRIBUTES = {
     CHECK_SUM: {CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_MD5SUM}
 }
 
+REQUIRED_REGISTRY_ATTRIBUTES = {
+    CHECK_SHA1SUM: 'hash_sha1',
+    CHECK_MD5SUM: 'hash_md5',
+    CHECK_SHA256SUM: 'hash_sha256',
+    CHECK_SIZE: 'size',
+    CHECK_OWNER: ['uid', 'user_name'],
+    CHECK_GROUP: ['gid', 'group_name'],
+    CHECK_PERM: 'perm',
+    CHECK_MTIME: 'mtime',
+    CHECK_TYPE: 'type',
+    CHECK_ALL: {CHECK_SHA256SUM, CHECK_SHA1SUM, CHECK_MD5SUM, CHECK_SIZE, CHECK_OWNER,
+                CHECK_GROUP, CHECK_PERM, CHECK_MTIME, CHECK_TYPE},
+    CHECK_SUM: {CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_MD5SUM}
+}
+
 _last_log_line = 0
 _os_excluded_from_rt_wd = ['darwin', 'sunos5']
 
 if sys.platform == 'win32':
     registry_parser = {
-            'HKEY_CLASSES_ROOT'  : win32con.HKEY_CLASSES_ROOT,
-            'HKEY_CURRENT_USER'  : win32con.HKEY_CURRENT_USER,
-            'HKEY_LOCAL_MACHINE' : win32con.HKEY_LOCAL_MACHINE,
-            'HKEY_USERS'         : win32con.HKEY_USERS,
-            'HKEY_CURRENT_CONFIG': win32con.HKEY_CURRENT_CONFIG
-            }
+        'HKEY_CLASSES_ROOT': win32con.HKEY_CLASSES_ROOT,
+        'HKEY_CURRENT_USER': win32con.HKEY_CURRENT_USER,
+        'HKEY_LOCAL_MACHINE': win32con.HKEY_LOCAL_MACHINE,
+        'HKEY_USERS': win32con.HKEY_USERS,
+        'HKEY_CURRENT_CONFIG': win32con.HKEY_CURRENT_CONFIG
+        }
+
+    registry_class_name = {
+        win32con.HKEY_CLASSES_ROOT: 'HKEY_CLASSES_ROOT',
+        win32con.HKEY_CURRENT_USER: 'HKEY_CURRENT_USER',
+        win32con.HKEY_LOCAL_MACHINE: 'HKEY_LOCAL_MACHINE',
+        win32con.HKEY_USERS: 'HKEY_USERS',
+        win32con.HKEY_CURRENT_CONFIG: 'HKEY_CURRENT_CONFIG'
+    }
+
+    registry_value_type = {
+        win32con.REG_NONE: 'REG_NONE',
+        win32con.REG_SZ: 'REG_SZ',
+        win32con.REG_EXPAND_SZ: 'REG_EXPAND_SZ',
+        win32con.REG_BINARY: 'REG_BINARY',
+        win32con.REG_DWORD: 'REG_DWORD',
+        win32con.REG_DWORD_BIG_ENDIAN: 'REG_DWORD_BIG_ENDIAN',
+        win32con.REG_LINK: 'REG_LINK',
+        win32con.REG_MULTI_SZ: 'REG_MULTI_SZ',
+        win32con.REG_RESOURCE_LIST: 'REG_RESOURCE_LIST',
+        win32con.REG_FULL_RESOURCE_DESCRIPTOR: 'REG_FULL_RESOURCE_DESCRIPTOR',
+        win32con.REG_RESOURCE_REQUIREMENTS_LIST: 'REG_RESOURCE_REQUIREMENTS_LIST',
+        win32con.REG_QWORD: 'REG_QWORD'
+    }
 
 
 def validate_event(event, checks=None, mode=None):
@@ -146,7 +187,8 @@ but was expected to be '{mode}'"
             old_intersection_debug = "Event attributes are: " + str(old_attributes)
             old_intersection_debug += "\nRequired Attributes are: " + str(required_attributes)
             old_intersection_debug += "\nIntersection is: " + str(old_intersection)
-            assert (old_intersection == set()), f'Old_attributes and required_attributes are not the same. ' + old_intersection_debug
+            assert (old_intersection == set()), (f'Old_attributes and required_attributes are not the same. ' +
+                                                 old_intersection_debug)
 
 
 def is_fim_scan_ended():
@@ -201,7 +243,7 @@ def create_file(type_, path, name, **kwargs):
 
 def create_registry(key, subkey, arch):
     """
-    Create a registry given the key and the subkey. The registry is opened if it already exists
+    Create a registry given the key and the subkey. The registry is opened if it already exists.
 
     Parameters
     ----------
@@ -211,11 +253,22 @@ def create_registry(key, subkey, arch):
         The subkey (name) of the registry.
     arch : int
         Architecture of the registry (KEY_WOW64_32KEY or KEY_WOW64_64KEY)
+
     return the key handle of the new/opened key
     """
+
     if sys.platform == 'win32':
-        key = win32api.RegCreateKeyEx(key, subkey, win32con.KEY_ALL_ACCESS | arch)
-        return key[0] #Ignore the flag that RegCreateKeyEx returns
+        try:
+            logger.info("Creating registry key " + str(os.path.join(registry_class_name[key], subkey)))
+
+            key = win32api.RegCreateKeyEx(key, subkey, win32con.KEY_ALL_ACCESS | arch)
+
+            return key[0]   # Ignore the flag that RegCreateKeyEx returns
+        except OSError:
+            logger.info("Registry could not be created.")
+        except pywintypes.error:
+            logger.info("Registry could not be created.")
+
 
 def _create_fifo(path, name):
     """
@@ -340,7 +393,7 @@ def delete_file(path, name):
 
 def delete_registry(key, subkey, arch):
     """
-    Delete a registry
+    Delete a registry key.
 
     Parameters
     ----------
@@ -352,32 +405,43 @@ def delete_registry(key, subkey, arch):
         Architecture of the registry (KEY_WOW64_32KEY or KEY_WOW64_64KEY)
     """
     if sys.platform == 'win32':
-        key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS | arch)
-        win32api.RegDeleteTree(key_h, None)
-        win32api.RegDeleteKeyEx(key, subkey, samDesired=arch)
+        logger.info(f"Removing registry key {str(os.path.join(registry_class_name[key], subkey))}")
+
+        try:
+            key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS | arch)
+            win32api.RegDeleteTree(key_h, None)
+            win32api.RegDeleteKeyEx(key, subkey, samDesired=arch)
+        except OSError:
+            logger.info(f"Couldn't remove registry key {str(os.path.join(registry_class_name[key], subkey))}")
+        except pywintypes.error:
+            logger.info(f"Couldn't remove registry key {str(os.path.join(registry_class_name[key], subkey))}")
 
 
 def delete_registry_value(key_h, value_name):
     """
-    Delete a registry value from a registry
+    Delete a registry value from a registry key.
 
     Parameters
     ----------
     key : pyHKEY
         The key handle of the registry
-    subkey : str
-        The subkey (name) of the registry.
     value : str
         The value to be deleted.
     """
-    logger.info("- Deleting registry value.")
     if (sys.platform == 'win32'):
-        win32api.RegDeleteValue(key_h, value_name)
+        logger.info(f"Removing registry value {value_name}.")
+
+        try:
+            win32api.RegDeleteValue(key_h, value_name)
+        except OSError:
+            logger.info(f"Couldn't remove registry value {value_name}")
+        except pywintypes.error:
+            logger.info(f"Couldn't remove registry value {value_name}")
 
 
-def modify_registry(key_h, value_name, type, value):
+def modify_registry_value(key_h, value_name, type, value):
     """
-    Modify the content of a registry. If the value doesn't not exists, it will be created
+    Modify the content of a registry. If the value doesn't not exists, it will be created.
 
     Parameters
     ----------
@@ -392,14 +456,19 @@ def modify_registry(key_h, value_name, type, value):
     value : str
         The content that will be written to the registry value.
     """
-    logger.info("- Modifying windows registry.")
-    if sys.platform == 'win32':
-        win32api.RegSetValueEx(key_h, value_name, 0, type, value)
+    if (sys.platform == 'win32'):
+        try:
+            logger.info(f"Modifying value '{value_name}' of type {registry_value_type[type]} and value '{value}'")
+            win32api.RegSetValueEx(key_h, value_name, 0, type, value)
+        except OSError:
+            logger.info("Could not modify registry value content.")
+        except pywintypes.error:
+            logger.info("Could not modify registry value content.")
 
 
 def modify_key_perms(key, subkey, user):
     """
-    Modify the permissions (ACL) of a registry key
+    Modify the permissions (ACL) of a registry key.
 
     Parameters
     ----------
@@ -408,21 +477,98 @@ def modify_key_perms(key, subkey, user):
     subkey : str
         The subkey (name) of the registry.
     user : PySID
-        User that is going to be used for the modification
+        User that is going to be used for the modification.
     """
-    logger.info("- Changing permissions of key")
     if (sys.platform == 'win32'):
-        key_h = win32api.RegOpenKey(key, subkey, 0, win32con.KEY_ALL_ACCESS)
-        sd = win32api.RegGetKeySecurity(key_h, win32con.DACL_SECURITY_INFORMATION)
-        acl = sd.GetSecurityDescriptorDacl()
-        acl.AddAccessAllowedAce(ntc.GENERIC_ALL, user)
-        sd.SetDacl(True, acl, False)
-        win32api.RegSetKeySecurity(key_h, win32con.DACL_SECURITY_INFORMATION, sd)
+        logger.info(f"- Changing permissions of {os.path.join(registry_class_name[key], subkey)}")
+
+        try:
+            key_h = win32api.RegOpenKey(key, subkey, 0, win32con.KEY_ALL_ACCESS)
+            sd = win32api.RegGetKeySecurity(key_h, win32con.DACL_SECURITY_INFORMATION)
+            acl = sd.GetSecurityDescriptorDacl()
+            acl.AddAccessAllowedAce(ntc.GENERIC_ALL, user)
+            sd.SetDacl(True, acl, False)
+
+            win32api.RegSetKeySecurity(key_h, win32con.DACL_SECURITY_INFORMATION, sd)
+        except OSError:
+            logger.warn("Registry permissions could not be modified")
+        except pywintypes.error:
+            logger.warn("Registry permissions could not be modified")
+
+
+def modify_registry_key_mtime(key, subkey):
+    """
+    Modify the modification time of a registry key.
+
+    Parameters
+    ----------
+    key : pyHKEY
+        The key handle of the registry
+    subkey : str
+        The subkey (name) of the registry.
+    """
+
+    if (sys.platform == 'win32'):
+        logger.info(f"- Changing mtime of {os.path.join(registry_class_name[key], subkey)}")
+
+        try:
+            key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS)
+
+            modify_registry_value(key_h, "dummy_value", win32con.REG_SZ, "this is a dummy value")
+            time.sleep(2)
+            delete_registry_value(key_h, "dummy_value")
+
+            win32api.RegCloseKey(key_h)
+            key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS)
+        except OSError:
+            logger.info("Registry mtime could not be modified")
+        except pywintypes.error:
+            logger.info("Registry mtime could not be modified")
+
+
+def modify_registry_owner(key, subkey, user):
+    """
+    Modify the owner of a registry key.
+
+    Parameters
+    ----------
+    key : pyHKEY
+        The key handle of the registry
+    subkey : str
+        The subkey (name) of the registry.
+    user : pySID
+        Identifier of the user (pySID)
+    """
+    if (sys.platform == 'win32'):
+        logger.info(f"- Changing owner of {os.path.join(registry_class_name[key], subkey)}")
+
+        try:
+            key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS)
+            desc = win32api.RegGetKeySecurity(key_h,
+                                              win32sec.DACL_SECURITY_INFORMATION | win32sec.OWNER_SECURITY_INFORMATION)
+            desc.SetSecurityDescriptorOwner(user, 0)
+
+            win32api.RegSetKeySecurity(key_h, win32sec.OWNER_SECURITY_INFORMATION | win32sec.DACL_SECURITY_INFORMATION,
+                                       desc)
+
+            return key_h
+        except OSError:
+            logger.info("Registry owner could not be modified")
+        except pywintypes.error:
+            logger.info("Registry owner could not be modified")
+
+
+def modify_registry(key, subkey):
+    logger.warn(f"Modifying registry key {os.path.join(registry_class_name[key], subkey)}")
+
+    modify_key_perms(key, subkey, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
+    modify_registry_owner(key, subkey, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
+    modify_registry_key_mtime(key, subkey)
 
 
 def rename_registry(key, subkey_path, src_name, arch, dst_name):
     """
-    Function that "renames" a registry
+    Rename a registry key.
 
     Parameters
     ----------
@@ -437,14 +583,23 @@ def rename_registry(key, subkey_path, src_name, arch, dst_name):
     dst_name : str
         Name of the renamed key
     """
-    source_key = os.path.join(subkey_path, src_name)
-    destination_key = os.path.join(subkey_path, dst_name)
+    if (sys.platform == 'win32'):
+        logger.info(f"- Renaming registry {src_name} to {dst_name}")
 
-    src_key_h = win32api.RegOpenKey(key, source_key, 0, win32con.KEY_ALL_ACCESS | arch)
-    dst_key_h = create_registry(key, destination_key, arch)
+        try:
+            source_key = os.path.join(subkey_path, src_name)
+            destination_key = os.path.join(subkey_path, dst_name)
 
-    win32api.RegCopyTree(src_key_h, None, dst_key_h)
-    delete_registry(key, source_key, arch)
+            src_key_h = win32api.RegOpenKey(key, source_key, 0, win32con.KEY_ALL_ACCESS | arch)
+            dst_key_h = create_registry(key, destination_key, arch)
+
+            win32api.RegCopyTree(src_key_h, None, dst_key_h)
+
+            delete_registry(key, source_key, arch)
+        except OSError:
+            logger.info("Registry could not be renamed")
+        except pywintypes.error:
+            logger.info("Registry could not be renamed")
 
 
 def modify_file_content(path, name, new_content=None, is_binary=False):
@@ -951,7 +1106,7 @@ def callback_deleted_diff_folder(line):
 
 
 def callback_non_existing_monitored_registry(line):
-    if 'Registry key does not exists' in line :
+    if 'Registry key does not exists' in line:
         return True
 
 
@@ -1393,9 +1548,10 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         logger.info("'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
 
-def registry_key_cud(registry_key, registry_sub_key, arch, log_monitor, value_list=['test_value'], time_travel=False, min_timeout=1, options=None,
-                     triggers_event=True, encoding=None, callback=callback_detect_event, validators_after_create=None,
-                     validators_after_update=None, validators_after_delete=None, validators_after_cud=None):
+def registry_key_cud(registry_key, registry_sub_key, arch, log_monitor, value_list=['test_value'], time_travel=False,
+                     min_timeout=1, options=None, triggers_event=True, encoding=None, callback=callback_detect_event,
+                     validators_after_create=None, validators_after_update=None, validators_after_delete=None,
+                     validators_after_cud=None):
     """
     Check if creation, update and delete registry value events are detected by syscheck.
 
@@ -1438,13 +1594,14 @@ def registry_key_cud(registry_key, registry_sub_key, arch, log_monitor, value_li
         List of functions that validates an event triggered when a new file is created, modified or deleted. Each
         function must accept a param to receive the event to be validated. Default `None`
     """
-    # Transform file list
+    # Transform registry list
     if registry_key not in registry_parser:
         raise ValueError("Registry_key not valid")
     elif not isinstance(value_list, list) and not isinstance(value_list, dict):
         raise ValueError('Value error. It can only be list or dict')
     elif isinstance(value_list, list):
         value_list = {i: '' for i in value_list}
+
     registry_path = os.path.join(registry_key, registry_sub_key)
 
     custom_validator = CustomValidator(validators_after_create, validators_after_update,
@@ -1453,21 +1610,24 @@ def registry_key_cud(registry_key, registry_sub_key, arch, log_monitor, value_li
                                  custom_validator=custom_validator, encoding=encoding, callback=callback)
 
     # Open the desired key
-    key_handle = win32api.RegOpenKeyEx(registry_parser[registry_key], registry_sub_key, 0, win32con.KEY_ALL_ACCESS | arch)
+    key_handle = win32api.RegOpenKeyEx(registry_parser[registry_key], registry_sub_key, 0,
+                                       win32con.KEY_ALL_ACCESS | arch)
 
     for name, _ in value_list.items():
-        modify_registry(key_handle, name, win32con.REG_SZ, "added")
+        modify_registry_value(key_handle, name, win32con.REG_SZ, "added")
 
     check_time_travel(time_travel, monitor=log_monitor)
     event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
+
     if triggers_event:
         logger.info("'added' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
 
     for name, content in value_list.items():
-        modify_registry(key_handle, name, win32con.REG_SZ, content)
+        modify_registry_value(key_handle, name, win32con.REG_SZ, content)
 
     check_time_travel(time_travel, monitor=log_monitor)
     event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
+
     if triggers_event:
         logger.info("'added' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
 
@@ -1476,6 +1636,7 @@ def registry_key_cud(registry_key, registry_sub_key, arch, log_monitor, value_li
 
     check_time_travel(time_travel, monitor=log_monitor)
     event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
+
     if triggers_event:
         logger.info("'deleted' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
 
@@ -1520,7 +1681,6 @@ def detect_whodata_start(file_monitor):
                                      '"File integrity monitoring real-time Whodata engine started" event')
 
 
-
 def generate_params(extra_params: dict = None, apply_to_all: Union[Sequence[Any], Generator[dict, None, None]] = None,
                     modes: list = None):
     """
@@ -1528,7 +1688,8 @@ def generate_params(extra_params: dict = None, apply_to_all: Union[Sequence[Any]
 
     extra_params = {'WILDCARD': {'attribute': ['list', 'of', 'values']}} - Max. 3 elements in the list of values
                         or
-                   {'WILDCARD': {'attribute': 'value'}} - It will have the same value for scheduled, realtime and whodata
+                   {'WILDCARD': {'attribute': 'value'}} - It will have the same value for scheduled, realtime and
+                                                          whodata
                         or
                    {'WILDCARD': 'value'} - Valid when param is not an attribute. (ex: 'MODULE_NAME': __name__)
                         or
