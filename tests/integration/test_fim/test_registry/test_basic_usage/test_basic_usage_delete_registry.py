@@ -10,7 +10,7 @@ import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_registry, modify_registry_value, delete_registry, \
-    callback_detect_event, check_time_travel, validate_event, registry_parser
+    callback_detect_event, check_time_travel, validate_registry_event, registry_parser
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -89,7 +89,7 @@ def test_delete_registry(registry_key, registry_subkey, arch, value_list,
                                      accum_results=len(value_list) + 1, error_message='Did not receive expected '
                                      '"Sending FIM event: ..." event').result()
     for ev in events:
-        validate_event(ev, mode=mode)
+        validate_registry_event(ev, mode=mode)
 
     # Remove registry
     delete_registry(registry_parser[registry_key], registry_subkey, arch)
@@ -102,8 +102,9 @@ def test_delete_registry(registry_key, registry_subkey, arch, value_list,
                                          accum_results=len(value_list) + 1).result()
     path_list = set([event['data']['path'] for event in event_list])
     counter_type = Counter([event['data']['type'] for event in event_list])
+
     for ev in events:
-        validate_event(ev, mode=mode)
+        validate_registry_event(ev, mode=mode)
 
     assert counter_type['deleted'] == len(value_list) + 1, f'Number of "deleted" events should be {len(value_list) + 1}'
 
