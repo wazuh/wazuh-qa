@@ -9,7 +9,7 @@ import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, timedelta, callback_detect_event,  \
-     check_time_travel, registry_key_cud, create_registry, delete_registry, registry_parser
+     check_time_travel, registry_value_cud, create_registry, delete_registry, registry_parser
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 from win32api
@@ -32,8 +32,8 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 registr_str, registry2 = test_regs
 
-registry_list=[(sub_key_1, win32con.KEY_WOW64_64KEY), (sub_key_2, win32con.KEY_WOW64_32KEY),
-               (sub_key_2, win32con.KEY_WOW64_64KEY)]
+registry_list = [(sub_key_1, win32con.KEY_WOW64_64KEY), (sub_key_2, win32con.KEY_WOW64_32KEY),
+                 (sub_key_2, win32con.KEY_WOW64_64KEY)]
 
 monitoring_modes = ['scheduled', 'scheduled']
 
@@ -60,7 +60,7 @@ def extra_configuration_before_yield():
     for reg_key, arch in registry_list:
         try:
             delete_registry(registry_parser[key], reg_key, arch)
-        except win32api.error: # Ignore the error in case the key doesn't exists
+        except win32api.error:  # Ignore the error in case the key doesn't exists
             pass
 
 
@@ -69,16 +69,17 @@ def extra_configuration_after_yield():
     for reg_key, arch in registry_list:
         try:
             delete_registry(registry_parser[key], reg_key, arch)
-        except win32api.error: # Ignore the error in case the key doesn't exists
+        except win32api.error:  # Ignore the error in case the key doesn't exists
             pass
+
 
 @pytest.mark.parametrize('registry_key, registry_subkey, arch', [
     (key, sub_key_1, win32con.KEY_WOW64_64KEY),
     (key, sub_key_2, win32con.KEY_WOW64_32KEY),
     (key, sub_key_2, win32con.KEY_WOW64_64KEY)
 ])
-def test_basic_usage_registry_changes(registry_key, registry_subkey, arch,
-                          get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
+def test_basic_usage_registry_changes(registry_key, registry_subkey, arch, get_configuration, configure_environment,
+                                      restart_syscheckd, wait_for_initial_scan):
     """
     Check if syscheckd detects value changes (add, modify, delete)
 
@@ -99,5 +100,5 @@ def test_basic_usage_registry_changes(registry_key, registry_subkey, arch,
 
     create_registry(registry_parser[key], registry_subkey, 0, arch)
 
-    registry_key_cud(registry_key, registry_subkey, arch, wazuh_log_monitor, value_list={'value_name' : 'asdfg'}, time_travel=True,
-                     validators_after_update=[shared_registry_validator_after_modify])
+    registry_value_cud(registry_key, registry_subkey, arch, wazuh_log_monitor, value_list={'value_name': 'asdfg'},
+                       time_travel=True, validators_after_update=[shared_registry_validator_after_modify])

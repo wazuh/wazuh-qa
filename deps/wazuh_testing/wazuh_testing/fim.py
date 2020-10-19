@@ -125,6 +125,9 @@ if sys.platform == 'win32':
         win32con.REG_QWORD: 'REG_QWORD'
     }
 
+    KEY_WOW64_32KEY = win32con.KEY_WOW64_32KEY
+    KEY_WOW64_64KEY = win32con.KEY_WOW64_64KEY
+
 
 def validate_event(event, checks=None, mode=None):
     """
@@ -252,9 +255,9 @@ def create_registry(key, subkey, arch):
     subkey : str
         The subkey (name) of the registry.
     arch : int
-        Architecture of the registry (KEY_WOW64_32KEY or KEY_WOW64_64KEY)
+        Architecture of the registry (KEY_WOW64_32KEY or KEY_WOW64_64KEY).
 
-    return the key handle of the new/opened key
+    return the key handle of the new/opened key.
     """
 
     if sys.platform == 'win32':
@@ -383,7 +386,7 @@ def delete_file(path, name):
     path : str
         Path to the file to be deleted.
     name : str
-        Name of the file to be deleted
+        Name of the file to be deleted.
     """
     logger.info(f"Removing file {str(os.path.join(path, name))}")
     regular_path = os.path.join(path, name)
@@ -402,7 +405,7 @@ def delete_registry(key, subkey, arch):
     subkey : str
         The subkey (name) of the registry.
     arch : int
-        Architecture of the registry (KEY_WOW64_32KEY or KEY_WOW64_64KEY)
+        Architecture of the registry (KEY_WOW64_32KEY or KEY_WOW64_64KEY).
     """
     if sys.platform == 'win32':
         logger.info(f"Removing registry key {str(os.path.join(registry_class_name[key], subkey))}")
@@ -424,7 +427,7 @@ def delete_registry_value(key_h, value_name):
     Parameters
     ----------
     key : pyHKEY
-        The key handle of the registry
+        The key handle of the registry.
     value : str
         The value to be deleted.
     """
@@ -446,7 +449,7 @@ def modify_registry_value(key_h, value_name, type, value):
     Parameters
     ----------
     key : pyHKEY
-        The key handle of the registry
+        The key handle of the registry.
     subkey : str
         The subkey (name) of the registry.
     value_name : str
@@ -473,7 +476,7 @@ def modify_key_perms(key, subkey, user):
     Parameters
     ----------
     key : int
-        The key of the registry (HKEY_* constants)
+        The key of the registry (HKEY_* constants).
     subkey : str
         The subkey (name) of the registry.
     user : PySID
@@ -503,7 +506,7 @@ def modify_registry_key_mtime(key, subkey):
     Parameters
     ----------
     key : pyHKEY
-        The key handle of the registry
+        The key handle of the registry.
     subkey : str
         The subkey (name) of the registry.
     """
@@ -533,7 +536,7 @@ def modify_registry_owner(key, subkey, user):
     Parameters
     ----------
     key : pyHKEY
-        The key handle of the registry
+        The key handle of the registry.
     subkey : str
         The subkey (name) of the registry.
     user : pySID
@@ -559,6 +562,16 @@ def modify_registry_owner(key, subkey, user):
 
 
 def modify_registry(key, subkey):
+    """
+    Modify a registry key.
+
+    Parameters
+    ----------
+    key : pyHKEY
+        The key handle of the registry.
+    subkey : str
+        The subkey (name) of the registry.
+    """
     logger.warn(f"Modifying registry key {os.path.join(registry_class_name[key], subkey)}")
 
     modify_key_perms(key, subkey, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
@@ -1548,10 +1561,10 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         logger.info("'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
 
-def registry_key_cud(registry_key, registry_sub_key, arch, log_monitor, value_list=['test_value'], time_travel=False,
-                     min_timeout=1, options=None, triggers_event=True, encoding=None, callback=callback_detect_event,
-                     validators_after_create=None, validators_after_update=None, validators_after_delete=None,
-                     validators_after_cud=None):
+def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, value_list=['test_value'],
+                       time_travel=False, min_timeout=1, options=None, triggers_event=True, encoding=None,
+                       callback=callback_detect_event, validators_after_create=None, validators_after_update=None,
+                       validators_after_delete=None, validators_after_cud=None):
     """
     Check if creation, update and delete registry value events are detected by syscheck.
 
@@ -1559,14 +1572,14 @@ def registry_key_cud(registry_key, registry_sub_key, arch, log_monitor, value_li
 
     Parameters
     ----------
-    registry_key : str
+    root_key : str
         Root key (HKEY_LOCAL_MACHINE, HKEY_LOCAL_USER, etc).
     registry_subkey : str
         Path of the subkey that will be created
-    arch : int
-        Architecture of the registry key (KEY_WOW64_32KEY or KEY_WOW64_64KEY)
     log_monitor : FileMonitor
         File event monitor.
+    arch : int
+        Architecture of the registry key (KEY_WOW64_32KEY or KEY_WOW64_64KEY). Default `KEY_WOW64_64KEY`
     value_list : list(str) or dict, optional
         If it is a list, it will be transformed to a dict with empty strings in each value. Default `['test_value']`
     time_travel : boolean, optional
@@ -1578,31 +1591,31 @@ def registry_key_cud(registry_key, registry_sub_key, arch, log_monitor, value_li
     triggers_event : boolean, optional
         Boolean to determine if the event should be raised or not. Default `True`
     encoding : str, optional
-        String to determine the encoding of the file name. Default `None`
+        String to determine the encoding of the registry value name. Default `None`
     callback : callable, optional
         Callback to use with the log monitor. Default `callback_detect_event`
     validators_after_create : list, optional
-        List of functions that validates an event triggered when a new file is created. Each function must accept
-        a param to receive the event to be validated. Default `None`
+        List of functions that validates an event triggered when a new registry value is created. Each function must
+        accept a param to receive the event to be validated. Default `None`
     validators_after_update : list, optional
-        List of functions that validates an event triggered when a new file is modified. Each function must accept
-        a param to receive the event to be validated. Default `None`
+        List of functions that validates an event triggered when a new registry value is modified. Each function must
+        accept a param to receive the event to be validated. Default `None`
     validators_after_delete : list, optional
-        List of functions that validates an event triggered when a new file is deleted. Each function must accept
-        a param to receive the event to be validated. Default `None`
+        List of functions that validates an event triggered when a new registry value is deleted. Each function must
+        accept a param to receive the event to be validated. Default `None`
     validators_after_cud : list, optional
-        List of functions that validates an event triggered when a new file is created, modified or deleted. Each
-        function must accept a param to receive the event to be validated. Default `None`
+        List of functions that validates an event triggered when a new registry value is created, modified or deleted.
+        Each function must accept a param to receive the event to be validated. Default `None`
     """
     # Transform registry list
-    if registry_key not in registry_parser:
+    if root_key not in registry_parser:
         raise ValueError("Registry_key not valid")
     elif not isinstance(value_list, list) and not isinstance(value_list, dict):
         raise ValueError('Value error. It can only be list or dict')
     elif isinstance(value_list, list):
         value_list = {i: '' for i in value_list}
 
-    registry_path = os.path.join(registry_key, registry_sub_key)
+    registry_path = os.path.join(root_key, registry_sub_key)
 
     custom_validator = CustomValidator(validators_after_create, validators_after_update,
                                        validators_after_delete, validators_after_cud)
@@ -1610,9 +1623,9 @@ def registry_key_cud(registry_key, registry_sub_key, arch, log_monitor, value_li
                                  custom_validator=custom_validator, encoding=encoding, callback=callback)
 
     # Open the desired key
-    key_handle = win32api.RegOpenKeyEx(registry_parser[registry_key], registry_sub_key, 0,
-                                       win32con.KEY_ALL_ACCESS | arch)
+    key_handle = win32api.RegOpenKeyEx(registry_parser[root_key], registry_sub_key, 0, win32con.KEY_ALL_ACCESS | arch)
 
+    # Create registry values
     for name, _ in value_list.items():
         modify_registry_value(key_handle, name, win32con.REG_SZ, "added")
 
@@ -1622,6 +1635,7 @@ def registry_key_cud(registry_key, registry_sub_key, arch, log_monitor, value_li
     if triggers_event:
         logger.info("'added' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
 
+    # Modify previous registry values
     for name, content in value_list.items():
         modify_registry_value(key_handle, name, win32con.REG_SZ, content)
 
@@ -1629,8 +1643,9 @@ def registry_key_cud(registry_key, registry_sub_key, arch, log_monitor, value_li
     event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
 
     if triggers_event:
-        logger.info("'added' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
+        logger.info("'modified' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
 
+    # Delete previous registry values
     for name, _ in value_list.items():
         delete_registry_value(key_handle, name)
 
@@ -1639,6 +1654,101 @@ def registry_key_cud(registry_key, registry_sub_key, arch, log_monitor, value_li
 
     if triggers_event:
         logger.info("'deleted' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
+
+
+def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, key_list=['test_key'],
+                     time_travel=False, min_timeout=1, options=None, triggers_event=True, encoding=None,
+                     callback=callback_detect_event, validators_after_create=None, validators_after_update=None,
+                     validators_after_delete=None, validators_after_cud=None):
+    """
+    Check if creation, update and delete registry key events are detected by syscheck.
+
+    This function provides multiple tools to validate events with custom validators.
+
+    Parameters
+    ----------
+    root_key : str
+        Root key (HKEY_LOCAL_MACHINE, HKEY_LOCAL_USER, etc).
+    registry_subkey : str
+        Path of the subkey that will be created
+    log_monitor : FileMonitor
+        File event monitor.
+    arch : int
+        Architecture of the registry key (KEY_WOW64_32KEY or KEY_WOW64_64KEY). Default `KEY_WOW64_64KEY`
+    key_list : list(str) or dict, optional
+        If it is a list, it will be transformed to a dict with empty strings in each value. Default `['test_key']`
+    time_travel : boolean, optional
+        Boolean to determine if there will be time travels or not. Default `False`
+    min_timeout : int, optional
+        Minimum timeout. Default `1`
+    options : set, optional
+        Set with all the checkers. Default `None`
+    triggers_event : boolean, optional
+        Boolean to determine if the event should be raised or not. Default `True`
+    encoding : str, optional
+        String to determine the encoding of the registry value name. Default `None`
+    callback : callable, optional
+        Callback to use with the log monitor. Default `callback_detect_event`
+    validators_after_create : list, optional
+        List of functions that validates an event triggered when a new registry value is created. Each function must
+        accept a param to receive the event to be validated. Default `None`
+    validators_after_update : list, optional
+        List of functions that validates an event triggered when a new registry value is modified. Each function must
+        accept a param to receive the event to be validated. Default `None`
+    validators_after_delete : list, optional
+        List of functions that validates an event triggered when a new registry value is deleted. Each function must
+        accept a param to receive the event to be validated. Default `None`
+    validators_after_cud : list, optional
+        List of functions that validates an event triggered when a new registry value is created, modified or deleted.
+        Each function must accept a param to receive the event to be validated. Default `None`
+    """
+    # Transform registry list
+    if root_key not in registry_parser:
+        raise ValueError("Registry_key not valid")
+    elif not isinstance(key_list, list) and not isinstance(key_list, dict):
+        raise ValueError('Value error. It can only be list or dict')
+    elif isinstance(key_list, list):
+        key_list = {i: '' for i in key_list}
+
+    registry_path = os.path.join(root_key, registry_sub_key)
+
+    custom_validator = CustomValidator(validators_after_create, validators_after_update,
+                                       validators_after_delete, validators_after_cud)
+    event_checker = EventChecker(log_monitor=log_monitor, folder=registry_path, file_list=key_list, options=options,
+                                 custom_validator=custom_validator, encoding=encoding, callback=callback)
+
+    # Open the desired key
+    key_handle = win32api.RegOpenKeyEx(registry_parser[root_key], registry_sub_key, 0, win32con.KEY_ALL_ACCESS | arch)
+
+    # Create registry subkeys
+    for name, _ in key_list.items():
+        create_registry(root_key, os.path.join(registry_sub_key, name), arch)
+
+    check_time_travel(time_travel, monitor=log_monitor)
+    event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
+
+    if triggers_event:
+        logger.info("'added' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
+
+    # Modify previous registry subkeys
+    for name, _ in key_list.items():
+        modify_registry(key_handle, name)
+
+    check_time_travel(time_travel, monitor=log_monitor)
+    event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
+
+    if triggers_event:
+        logger.info("'modified' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
+
+    # Delete previous registry subkeys
+    for name, _ in key_list.items():
+        delete_registry_value(key_handle, name)
+
+    check_time_travel(time_travel, monitor=log_monitor)
+    event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
+
+    if triggers_event:
+        logger.info("'deleted' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
 
 
 def detect_initial_scan(file_monitor):

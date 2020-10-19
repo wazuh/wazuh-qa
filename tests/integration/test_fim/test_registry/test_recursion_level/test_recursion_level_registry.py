@@ -6,8 +6,8 @@ import pytest
 import sys
 
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_event_too_long, registry_key_cud, delete_registry,
-                               registry_parser, generate_params, registry_parser, create_registry)
+from wazuh_testing.fim import LOG_FILE_PATH, callback_audit_event_too_long, registry_value_cud, delete_registry, \
+    registry_parser, generate_params, registry_parser, create_registry
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -111,13 +111,13 @@ def recursion_test(key, registry, subkey, recursion_level, timeout=1, edge_limit
             if ((recursion_level < edge_limit * 2) or
                     (recursion_level >= edge_limit * 2 and n < edge_limit) or
                     (recursion_level >= edge_limit * 2 and n > recursion_level - edge_limit)):
-                registry_key_cud(path, wazuh_log_monitor, time_travel=is_scheduled, min_timeout=timeout)
+                registry_value_cud(path, wazuh_log_monitor, time_travel=is_scheduled, min_timeout=timeout)
 
         # Check False (exceeding the specified recursion_level)
         for n in range(recursion_level, recursion_level + ignored_levels):
             path = os.path.join(path, subkey + str(n + 1))
-            registry_key_cud(path, wazuh_log_monitor, time_travel=is_scheduled, min_timeout=timeout,
-                             triggers_event=False)
+            registry_value_cud(path, wazuh_log_monitor, time_travel=is_scheduled, min_timeout=timeout,
+                               triggers_event=False)
 
     except TimeoutError:
         timeout_log_monitor = FileMonitor(LOG_FILE_PATH)
