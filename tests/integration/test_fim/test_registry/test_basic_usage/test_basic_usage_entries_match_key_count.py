@@ -9,12 +9,14 @@ import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, timedelta, callback_registry_count_entries,  \
-     check_time_travel, create_registry, modify_registry, delete_registry, registry_parser
+     check_time_travel, create_registry, modify_registry_value, delete_registry, registry_parser
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
-from win32api
-import win32con
+if sys.platform == 'win32':
+    import win32api
+    import win32con
+
 # Marks
 
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=0)]
@@ -55,12 +57,14 @@ def extra_configuration_after_yield():
     except win32api.error:
         pass
 
+
 def extra_configuration_before_yield():
     key_h = create_registry(registry_parser[registry_key], registry_subkey, arch)
 
-    modify_registry(key_h, 'value1', win32con.REG_SZ, 'some value')
-    modify_registry(key_h, 'value2', win32con.REG_DWORD, 123456)
-    modify_registry(key_h, 'value3', win32con.REG_QWORD, 654321)
+    modify_registry_value(key_h, 'value1', win32con.REG_SZ, 'some value')
+    modify_registry_value(key_h, 'value2', win32con.REG_DWORD, 123456)
+    modify_registry_value(key_h, 'value3', win32con.REG_QWORD, 654321)
+
 
 def test_entries_match_key_count(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
     """
