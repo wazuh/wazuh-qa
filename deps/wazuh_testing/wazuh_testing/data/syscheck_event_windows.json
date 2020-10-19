@@ -66,6 +66,26 @@
           ],
           "pattern": "^(.*)$"
         },
+        "arch": {
+          "$id": "#/properties/data/properties/arch",
+          "type": "string",
+          "enum": ["[x32]", "[x64]"],
+          "examples": [
+            "[x32]",
+            "[x64]"
+          ],
+          "pattern": "^[x('32'|'64')]$"
+        },
+        "value_name": {
+          "$id": "#/properties/data/properties/value_name",
+          "type": "string",
+          "default": "",
+          "examples": [
+            "New Value #1",
+            "Some_value"
+          ],
+          "pattern": "^(.*)$"
+        },
         "tags": {
           "$id": "#/properties/data/properties/tags",
           "type": "string",
@@ -105,6 +125,18 @@
                 "file"
               ],
               "pattern": "^(.*)$"
+            },
+            "value_type": {
+              "$id": "#/properties/data/properties/attributes/properties/type",
+              "type": "string",
+              "enum": ["REG_NONE", "REG_SZ", "REG_EXPAND_SZ", "REG_BINARY", "REG_DWORD", "REG_DWORD_BIG_ENDIAN",
+                       "REG_LINK", "REG_MULTI_SZ", "REG_RESOURCE_LIST", "REG_FULL_RESOURCE_DESCRIPTOR",
+                       "REG_RESOURCE_REQUIREMENTS_LIST", "REG_QWORD"],
+              "examples": [
+                "REG_SZ"
+              ],
+              "pattern": "^(.*)$"
+
             },
             "size": {
               "$id": "#/properties/data/properties/attributes/properties/size",
