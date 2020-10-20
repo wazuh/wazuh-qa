@@ -1694,7 +1694,7 @@ def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_6
                                  custom_validator=custom_validator, encoding=encoding, callback=callback)
 
     # Open the desired key
-    key_handle = win32api.RegOpenKeyEx(registry_parser[root_key], registry_sub_key, 0, win32con.KEY_ALL_ACCESS | arch)
+    key_handle = create_registry(registry_parser[root_key], registry_sub_key, arch)
 
     # Create registry values
     for name, _ in value_list.items():
@@ -1789,7 +1789,7 @@ def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64K
                                  custom_validator=custom_validator, encoding=encoding, callback=callback)
 
     # Open the desired key
-    key_handle = win32api.RegOpenKeyEx(registry_parser[root_key], registry_sub_key, 0, win32con.KEY_ALL_ACCESS | arch)
+    key_handle = create_registry(registry_parser[root_key], registry_sub_key, arch)
 
     # Create registry subkeys
     for name, _ in key_list.items():
