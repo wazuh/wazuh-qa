@@ -75,7 +75,7 @@
             "[x32]",
             "[x64]"
           ],
-          "pattern": "^[x('32'|'64')]$"
+          "pattern": "^\\[x(32|64)\\]$"
         },
         "value_name": {
           "$id": "#/properties/data/properties/value_name",

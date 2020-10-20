@@ -1202,6 +1202,22 @@ def callback_registry_count_entries(line):
         return match.group(1), match.group(2)
 
 
+def callback_value_event(line):
+    match = re.match(r'.*Sending FIM event: .*value_name.*', line)
+
+    if match is not None:
+        msg = r'.*Sending FIM event: (.+)$'
+        match = re.match(msg, line)
+
+        try:
+            if json.loads(match.group(1))['type'] == 'event':
+                return json.loads(match.group(1))
+        except (AttributeError, JSONDecodeError, KeyError):
+            pass
+
+    return None
+
+
 def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None):
     """
     Change date and time of the system depending on a boolean condition. Optionally, a monitor may be used to check
@@ -1328,7 +1344,7 @@ class EventChecker:
         self.events = None
         self.callback = callback
 
-    def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0):
+    def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0, is_reg_value=False):
         """
         Call both 'fetch_events' and 'check_events'.
 
@@ -1352,7 +1368,7 @@ class EventChecker:
         error_msg += " but were not detected." if len(self.file_list) > 1 else " but was not detected."
 
         self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
-        self.check_events(event_type)
+        self.check_events(event_type, is_registry_value=is_reg_value)
 
     def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0, error_message=''):
         """
@@ -1414,7 +1430,7 @@ class EventChecker:
                 raise
             logger.info("TimeoutError was expected and correctly caught.")
 
-    def check_events(self, event_type, mode=None):
+    def check_events(self, event_type, mode=None, is_registry_value=False):
         """Check and validate all events in the 'events' list.
 
         Parameters
@@ -1437,7 +1453,8 @@ class EventChecker:
 
         def check_events_type(events, ev_type, file_list=['testfile0']):
             event_types = Counter(filter_events(events, ".[].data.type"))
-            assert (event_types[ev_type] == len(file_list)), f'Non expected number of events. {event_types[ev_type]} != {len(file_list)}'
+            msg = f'Non expected number of events. {event_types[ev_type]} != {len(file_list)}'
+            assert (event_types[ev_type] == len(file_list)), msg
 
         def check_events_path(events, folder, file_list=['testfile0'], mode=None):
             mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
@@ -1455,6 +1472,17 @@ class EventChecker:
                     error_msg = f"Expected data path was '{expected_path}' but event data path is '{data_path}'"
                     assert (expected_path in data_path), error_msg
 
+        def check_events_registry_value(events, key, value_list=['testfile0'], mode=None):
+            mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
+            key_path = filter_events(events, ".[].data.path")
+            value_name = filter_events(events, ".[].data.value_name")
+            for value in value_list:
+                error_msg = f"Expected value name was '{value}' but event value name is '{value_name}'"
+                assert (value in value_name), error_msg
+
+                error_msg = f"Expected key path was '{key}' but event key path is '{key_path}'"
+                assert (value in value_name), error_msg
+
         def filter_events(events, mask):
             """Returns a list of elements matching a specified mask in the events list using jq module."""
             if sys.platform in ("win32", 'sunos5', 'darwin'):
@@ -1466,7 +1494,11 @@ class EventChecker:
         if self.events is not None:
             validate_checkers_per_event(self.events, self.options, mode)
             check_events_type(self.events, event_type, self.file_list)
-            check_events_path(self.events, self.folder, file_list=self.file_list, mode=mode)
+
+            if is_registry_value:
+                check_events_registry_value(self.events, self.folder, value_list=self.file_list, mode=mode)
+            else:
+                check_events_path(self.events, self.folder, file_list=self.file_list, mode=mode)
 
             if self.custom_validator is not None:
                 self.custom_validator.validate_after_cud(self.events)
@@ -1634,7 +1666,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
 def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, value_list=['test_value'],
                        time_travel=False, min_timeout=1, options=None, triggers_event=True, encoding=None,
-                       callback=callback_detect_event, validators_after_create=None, validators_after_update=None,
+                       callback=callback_value_event, validators_after_create=None, validators_after_update=None,
                        validators_after_delete=None, validators_after_cud=None):
     """
     Check if creation, update and delete registry value events are detected by syscheck.
@@ -1664,7 +1696,7 @@ def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_6
     encoding : str, optional
         String to determine the encoding of the registry value name. Default `None`
     callback : callable, optional
-        Callback to use with the log monitor. Default `callback_detect_event`
+        Callback to use with the log monitor. Default `callback_value_event`
     validators_after_create : list, optional
         List of functions that validates an event triggered when a new registry value is created. Each function must
         accept a param to receive the event to be validated. Default `None`
@@ -1701,7 +1733,8 @@ def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_6
         modify_registry_value(key_handle, name, win32con.REG_SZ, "added")
 
     check_time_travel(time_travel, monitor=log_monitor)
-    event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
+    event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2,
+                                  is_reg_value=True)
 
     if triggers_event:
         logger.info("'added' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
@@ -1711,7 +1744,8 @@ def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_6
         modify_registry_value(key_handle, name, win32con.REG_SZ, content)
 
     check_time_travel(time_travel, monitor=log_monitor)
-    event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
+    event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2,
+                                  is_reg_value=True)
 
     if triggers_event:
         logger.info("'modified' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
@@ -1721,7 +1755,7 @@ def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_6
         delete_registry_value(key_handle, name)
 
     check_time_travel(time_travel, monitor=log_monitor)
-    event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
+    event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event, is_reg_value=True)
 
     if triggers_event:
         logger.info("'deleted' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
@@ -1789,21 +1823,21 @@ def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64K
                                  custom_validator=custom_validator, encoding=encoding, callback=callback)
 
     # Open the desired key
-    key_handle = create_registry(registry_parser[root_key], registry_sub_key, arch)
+    create_registry(registry_parser[root_key], registry_sub_key, arch)
 
     # Create registry subkeys
     for name, _ in key_list.items():
-        create_registry(root_key, os.path.join(registry_sub_key, name), arch)
+        create_registry(registry_parser[root_key], os.path.join(registry_sub_key, name), arch)
 
     check_time_travel(time_travel, monitor=log_monitor)
-    event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
+    event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
 
     if triggers_event:
         logger.info("'added' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
 
     # Modify previous registry subkeys
     for name, _ in key_list.items():
-        modify_registry(key_handle, name)
+        modify_registry(registry_parser[root_key], os.path.join(registry_path, name))
 
     check_time_travel(time_travel, monitor=log_monitor)
     event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
@@ -1813,7 +1847,7 @@ def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64K
 
     # Delete previous registry subkeys
     for name, _ in key_list.items():
-        delete_registry_value(key_handle, name)
+        delete_registry_value(registry_parser[root_key], os.path.join(registry_path, name))
 
     check_time_travel(time_travel, monitor=log_monitor)
     event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
