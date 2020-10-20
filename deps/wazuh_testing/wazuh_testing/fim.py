@@ -540,7 +540,7 @@ def modify_registry_value(key_h, value_name, type, value):
             logger.info(f"Could not modify registry value content: {e}")
 
 
-def modify_key_perms(key, subkey, user):
+def modify_key_perms(key, subkey, arch, user):
     """
     Modify the permissions (ACL) of a registry key.
 
@@ -557,7 +557,7 @@ def modify_key_perms(key, subkey, user):
         logger.info(f"- Changing permissions of {os.path.join(registry_class_name[key], subkey)}")
 
         try:
-            key_h = win32api.RegOpenKey(key, subkey, 0, win32con.KEY_ALL_ACCESS)
+            key_h = win32api.RegOpenKey(key, subkey, 0, win32con.KEY_ALL_ACCESS | arch)
             sd = win32api.RegGetKeySecurity(key_h, win32con.DACL_SECURITY_INFORMATION)
             acl = sd.GetSecurityDescriptorDacl()
             acl.AddAccessAllowedAce(ntc.GENERIC_ALL, user)
@@ -570,7 +570,7 @@ def modify_key_perms(key, subkey, user):
             logger.info(f"Registry permissions could not be modified: {e}")
 
 
-def modify_registry_key_mtime(key, subkey):
+def modify_registry_key_mtime(key, subkey, arch):
     """
     Modify the modification time of a registry key.
 
@@ -586,7 +586,7 @@ def modify_registry_key_mtime(key, subkey):
         logger.info(f"- Changing mtime of {os.path.join(registry_class_name[key], subkey)}")
 
         try:
-            key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS)
+            key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS | arch)
 
             modify_registry_value(key_h, "dummy_value", win32con.REG_SZ, "this is a dummy value")
             time.sleep(2)
@@ -600,7 +600,7 @@ def modify_registry_key_mtime(key, subkey):
             logger.info(f"Registry mtime could not be modified: {e}")
 
 
-def modify_registry_owner(key, subkey, user):
+def modify_registry_owner(key, subkey, arch, user):
     """
     Modify the owner of a registry key.
 
@@ -617,7 +617,7 @@ def modify_registry_owner(key, subkey, user):
         logger.info(f"- Changing owner of {os.path.join(registry_class_name[key], subkey)}")
 
         try:
-            key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS)
+            key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS | arch)
             desc = win32api.RegGetKeySecurity(key_h,
                                               win32sec.DACL_SECURITY_INFORMATION | win32sec.OWNER_SECURITY_INFORMATION)
             desc.SetSecurityDescriptorOwner(user, 0)
@@ -632,7 +632,7 @@ def modify_registry_owner(key, subkey, user):
             logger.info(f"Registry owner could not be modified: {e}")
 
 
-def modify_registry(key, subkey):
+def modify_registry(key, subkey, arch):
     """
     Modify a registry key.
 
@@ -645,9 +645,9 @@ def modify_registry(key, subkey):
     """
     logger.info(f"Modifying registry key {os.path.join(registry_class_name[key], subkey)}")
 
-    modify_key_perms(key, subkey, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
-    modify_registry_owner(key, subkey, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
-    modify_registry_key_mtime(key, subkey)
+    modify_key_perms(key, subkey, arch, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
+    modify_registry_owner(key, subkey, arch, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
+    modify_registry_key_mtime(key, subkey, arch)
 
 
 def rename_registry(key, subkey_path, src_name, arch, dst_name):
@@ -1840,7 +1840,7 @@ def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64K
 
     # Modify previous registry subkeys
     for name, _ in key_list.items():
-        modify_registry(registry_parser[root_key], os.path.join(registry_path, name))
+        modify_registry(registry_parser[root_key], os.path.join(registry_path, name), arch)
 
     check_time_travel(time_travel, monitor=log_monitor)
     event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
