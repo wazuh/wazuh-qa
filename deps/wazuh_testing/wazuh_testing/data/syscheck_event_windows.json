@@ -47,7 +47,7 @@
             "c:/testdir1/example",
             "HKEY_LOCAL_MACHINE\\SOFTWARE\\testkey"
           ],
-          "pattern": "(^(?:([a-zA-Z]\\:|\\/)[^\\/]+)*$)|(^HKEY_[a-zA-Z_]+\\.+$)"
+          "pattern": "(^(?:([a-zA-Z]\\:|\\/)[^\\/]+)*$)|(^HKEY_[a-zA-Z_]+\\\\.+$)"
         },
         "mode": {
           "$id": "#/properties/data/properties/mode",
