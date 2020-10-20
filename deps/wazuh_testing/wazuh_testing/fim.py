@@ -565,9 +565,9 @@ def modify_key_perms(key, subkey, user):
 
             win32api.RegSetKeySecurity(key_h, win32con.DACL_SECURITY_INFORMATION, sd)
         except OSError:
-            logger.warn("Registry permissions could not be modified")
+            logger.info("Registry permissions could not be modified")
         except pywintypes.error:
-            logger.warn("Registry permissions could not be modified")
+            logger.info("Registry permissions could not be modified")
 
 
 def modify_registry_key_mtime(key, subkey):
@@ -643,7 +643,7 @@ def modify_registry(key, subkey):
     subkey : str
         The subkey (name) of the registry.
     """
-    logger.warn(f"Modifying registry key {os.path.join(registry_class_name[key], subkey)}")
+    logger.info(f"Modifying registry key {os.path.join(registry_class_name[key], subkey)}")
 
     modify_key_perms(key, subkey, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
     modify_registry_owner(key, subkey, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
