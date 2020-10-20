@@ -1334,7 +1334,7 @@ class EventChecker:
     """Utility to allow fetch events and validate them."""
 
     def __init__(self, log_monitor, folder, file_list=['testfile0'], options=None, custom_validator=None, encoding=None,
-                 callback=callback_detect_event):
+                 callback=callback_detect_event, is_reg_value=False, is_reg_key=False):
         self.log_monitor = log_monitor
         self.folder = folder
         self.file_list = file_list
@@ -1343,8 +1343,11 @@ class EventChecker:
         self.encoding = encoding
         self.events = None
         self.callback = callback
+        self.is_reg_value = is_reg_value
+        self.is_reg_key = is_reg_key
 
-    def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0, is_reg_value=False):
+
+    def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0):
         """
         Call both 'fetch_events' and 'check_events'.
 
@@ -1368,7 +1371,7 @@ class EventChecker:
         error_msg += " but were not detected." if len(self.file_list) > 1 else " but was not detected."
 
         self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
-        self.check_events(event_type, is_registry_value=is_reg_value)
+        self.check_events(event_type)
 
     def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0, error_message=''):
         """
@@ -1430,7 +1433,7 @@ class EventChecker:
                 raise
             logger.info("TimeoutError was expected and correctly caught.")
 
-    def check_events(self, event_type, mode=None, is_registry_value=False):
+    def check_events(self, event_type, mode=None):
         """Check and validate all events in the 'events' list.
 
         Parameters
@@ -1461,7 +1464,8 @@ class EventChecker:
             data_path = filter_events(events, ".[].data.path")
             for file_name in file_list:
                 expected_path = os.path.join(folder, file_name)
-                expected_path = expected_path[:1].lower() + expected_path[1:]
+                if not self.is_reg_key:
+                    expected_path = expected_path[:1].lower() + expected_path[1:]
                 if self.encoding is not None:
                     for index, item in enumerate(data_path):
                         data_path[index] = item.encode(encoding=self.encoding)
@@ -1495,7 +1499,7 @@ class EventChecker:
             validate_checkers_per_event(self.events, self.options, mode)
             check_events_type(self.events, event_type, self.file_list)
 
-            if is_registry_value:
+            if self.is_reg_value:
                 check_events_registry_value(self.events, self.folder, value_list=self.file_list, mode=mode)
             else:
                 check_events_path(self.events, self.folder, file_list=self.file_list, mode=mode)
@@ -1723,7 +1727,7 @@ def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_6
     custom_validator = CustomValidator(validators_after_create, validators_after_update,
                                        validators_after_delete, validators_after_cud)
     event_checker = EventChecker(log_monitor=log_monitor, folder=registry_path, file_list=value_list, options=options,
-                                 custom_validator=custom_validator, encoding=encoding, callback=callback)
+                                 custom_validator=custom_validator, encoding=encoding, callback=callback, is_reg_value=True)
 
     # Open the desired key
     key_handle = create_registry(registry_parser[root_key], registry_sub_key, arch)
@@ -1733,8 +1737,7 @@ def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_6
         modify_registry_value(key_handle, name, win32con.REG_SZ, "added")
 
     check_time_travel(time_travel, monitor=log_monitor)
-    event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2,
-                                  is_reg_value=True)
+    event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
 
     if triggers_event:
         logger.info("'added' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
@@ -1744,8 +1747,7 @@ def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_6
         modify_registry_value(key_handle, name, win32con.REG_SZ, content)
 
     check_time_travel(time_travel, monitor=log_monitor)
-    event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2,
-                                  is_reg_value=True)
+    event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
 
     if triggers_event:
         logger.info("'modified' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
@@ -1755,7 +1757,7 @@ def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_6
         delete_registry_value(key_handle, name)
 
     check_time_travel(time_travel, monitor=log_monitor)
-    event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event, is_reg_value=True)
+    event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
 
     if triggers_event:
         logger.info("'deleted' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
@@ -1820,7 +1822,7 @@ def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64K
     custom_validator = CustomValidator(validators_after_create, validators_after_update,
                                        validators_after_delete, validators_after_cud)
     event_checker = EventChecker(log_monitor=log_monitor, folder=registry_path, file_list=key_list, options=options,
-                                 custom_validator=custom_validator, encoding=encoding, callback=callback)
+                                 custom_validator=custom_validator, encoding=encoding, callback=callback, is_reg_key=True)
 
     # Open the desired key
     create_registry(registry_parser[root_key], registry_sub_key, arch)
