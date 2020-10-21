@@ -479,7 +479,7 @@ def delete_registry(key, subkey, arch):
         Architecture of the registry (KEY_WOW64_32KEY or KEY_WOW64_64KEY).
     """
     if sys.platform == 'win32':
-        logger.info(f"Removing registry key {str(os.path.join(registry_class_name[key], subkey))}")
+        logger.info(f"Removing registry key {'[x64]' if arch == KEY_WOW64_64KEY else '[x32]'}{str(os.path.join(registry_class_name[key], subkey))}")
 
         try:
             key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS | arch)
@@ -554,7 +554,7 @@ def modify_key_perms(key, subkey, arch, user):
         User that is going to be used for the modification.
     """
     if (sys.platform == 'win32'):
-        logger.info(f"- Changing permissions of {os.path.join(registry_class_name[key], subkey)}")
+        logger.info(f"- Changing permissions of {'[x64]' if arch == KEY_WOW64_64KEY else '[x32]'}{os.path.join(registry_class_name[key], subkey)}")
 
         try:
             key_h = win32api.RegOpenKey(key, subkey, 0, win32con.KEY_ALL_ACCESS | arch)
@@ -583,7 +583,7 @@ def modify_registry_key_mtime(key, subkey, arch):
     """
 
     if (sys.platform == 'win32'):
-        logger.info(f"- Changing mtime of {os.path.join(registry_class_name[key], subkey)}")
+        logger.info(f"- Changing mtime of {'[x64]' if arch == KEY_WOW64_64KEY else '[x32]'}{os.path.join(registry_class_name[key], subkey)}")
 
         try:
             key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS | arch)
@@ -614,7 +614,7 @@ def modify_registry_owner(key, subkey, arch, user):
         Identifier of the user (pySID)
     """
     if (sys.platform == 'win32'):
-        logger.info(f"- Changing owner of {os.path.join(registry_class_name[key], subkey)}")
+        logger.info(f"- Changing owner of {'[x64]' if arch == KEY_WOW64_64KEY else '[x32]'}{os.path.join(registry_class_name[key], subkey)}")
 
         try:
             key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS | arch)
@@ -643,7 +643,7 @@ def modify_registry(key, subkey, arch):
     subkey : str
         The subkey (name) of the registry.
     """
-    logger.info(f"Modifying registry key {os.path.join(registry_class_name[key], subkey)}")
+    logger.info(f"Modifying registry key {'[x64]' if arch == KEY_WOW64_64KEY else '[x32]'}{os.path.join(registry_class_name[key], subkey)}")
 
     modify_key_perms(key, subkey, arch, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
     modify_registry_owner(key, subkey, arch, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
@@ -1334,7 +1334,7 @@ class EventChecker:
     """Utility to allow fetch events and validate them."""
 
     def __init__(self, log_monitor, folder, file_list=['testfile0'], options=None, custom_validator=None, encoding=None,
-                 callback=callback_detect_event, is_reg_value=False, is_reg_key=False):
+                 callback=callback_detect_event):
         self.log_monitor = log_monitor
         self.folder = folder
         self.file_list = file_list
@@ -1343,8 +1343,6 @@ class EventChecker:
         self.encoding = encoding
         self.events = None
         self.callback = callback
-        self.is_reg_value = is_reg_value
-        self.is_reg_key = is_reg_key
 
     def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0):
         """
@@ -1463,8 +1461,6 @@ class EventChecker:
             data_path = filter_events(events, ".[].data.path")
             for file_name in file_list:
                 expected_path = os.path.join(folder, file_name)
-                if not self.is_reg_key:
-                    expected_path = expected_path[:1].lower() + expected_path[1:]
                 if self.encoding is not None:
                     for index, item in enumerate(data_path):
                         data_path[index] = item.encode(encoding=self.encoding)
@@ -1475,16 +1471,6 @@ class EventChecker:
                     error_msg = f"Expected data path was '{expected_path}' but event data path is '{data_path}'"
                     assert (expected_path in data_path), error_msg
 
-        def check_events_registry_value(events, key, value_list=['testfile0'], mode=None):
-            mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
-            key_path = filter_events(events, ".[].data.path")
-            value_name = filter_events(events, ".[].data.value_name")
-            for value in value_list:
-                error_msg = f"Expected value name was '{value}' but event value name is '{value_name}'"
-                assert (value in value_name), error_msg
-
-                error_msg = f"Expected key path was '{key}' but event key path is '{key_path}'"
-                assert (value in value_name), error_msg
 
         def filter_events(events, mask):
             """Returns a list of elements matching a specified mask in the events list using jq module."""
@@ -1497,11 +1483,7 @@ class EventChecker:
         if self.events is not None:
             validate_checkers_per_event(self.events, self.options, mode)
             check_events_type(self.events, event_type, self.file_list)
-
-            if self.is_reg_value:
-                check_events_registry_value(self.events, self.folder, value_list=self.file_list, mode=mode)
-            else:
-                check_events_path(self.events, self.folder, file_list=self.file_list, mode=mode)
+            check_events_path(self.events, self.folder, file_list=self.file_list, mode=mode)
 
             if self.custom_validator is not None:
                 self.custom_validator.validate_after_cud(self.events)
@@ -1519,6 +1501,155 @@ class EventChecker:
             expected_file_path = expected_file_path[:1].lower() + expected_file_path[1:]
             result_list.append(expected_file_path)
         return result_list
+
+
+if sys.platform == 'win32':
+    class RegistryEventChecker:
+        """Utility to allow fetch events and validate them."""
+
+        def __init__(self, log_monitor, folder, file_list=['testfile0'], options=None, custom_validator=None, encoding=None,
+                    callback=callback_detect_event, is_reg_value=False, is_reg_key=False):
+            self.log_monitor = log_monitor
+            self.folder = folder
+            self.file_list = file_list
+            self.custom_validator = custom_validator
+            self.options = options
+            self.encoding = encoding
+            self.events = None
+            self.callback = callback
+            self.is_reg_value = is_reg_value
+            self.is_reg_key = is_reg_key
+
+
+        def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0):
+            """
+            Call both 'fetch_events' and 'check_events'.
+
+            Parameters
+            ----------
+            event_type : {'added', 'modified', 'deleted'}
+                Expected type of the raised event.
+            min_timeout : int, optional
+                Seconds to wait until an event is raised when trying to fetch. Default `1`
+            triggers_event : boolean, optional
+                True if the event should be raised. False otherwise. Default `True`
+            extra_timeout : int, optional
+                Additional time to wait after the min_timeout
+            """
+            num_files = len(self.file_list)
+            error_msg = "TimeoutError was raised because "
+            error_msg += str(num_files) if num_files > 1 else "a single"
+            error_msg += " '" + str(event_type) + "' "
+            error_msg += "events were " if num_files > 1 else "event was "
+            error_msg += "expected for " + str(self._get_file_list())
+            error_msg += " but were not detected." if len(self.file_list) > 1 else " but was not detected."
+
+            self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
+            import pdb; pdb.set_trace()
+            self.check_events(event_type)
+
+        def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0, error_message=''):
+            try:
+                result = self.log_monitor.start(timeout=max(len(self.file_list) * 0.01, min_timeout),
+                                                callback=self.callback,
+                                                accum_results=len(self.file_list),
+                                                timeout_extra=extra_timeout,
+                                                encoding=self.encoding,
+                                                error_message=error_message).result()
+                assert triggers_event, f'No events should be detected.'
+                return result if isinstance(result, list) else [result]
+            except TimeoutError:
+                if triggers_event:
+                    raise
+                logger.info("TimeoutError was expected and correctly caught.")
+
+        def check_events(self, event_type, mode=None):
+            """Check and validate all events in the 'events' list.
+
+            Parameters
+            ----------
+            event_type : {'added', 'modified', 'deleted'}
+                Expected type of the raised event.
+            """
+            def validate_checkers_per_event(events, options, mode):
+                """Check if each event is properly formatted according to some checks.
+
+                Parameters
+                ----------
+                events : list
+                    Event list to be checked.
+                options : set
+                    Set of XML CHECK_* options. Default `{CHECK_ALL}`
+                """
+                for ev in events:
+                    validate_event(ev, options, mode)
+
+            def check_events_type(events, ev_type, file_list=['testfile0']):
+                event_types = Counter(filter_events(events, ".[].data.type"))
+                msg = f'Non expected number of events. {event_types[ev_type]} != {len(file_list)}'
+                assert (event_types[ev_type] == len(file_list)), msg
+
+            def check_events_key_path(events, folder, file_list=['testfile0'], mode=None):
+                mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
+                data_path = filter_events(events, ".[].data.path")
+                for file_name in file_list:
+                    expected_path = os.path.join(folder, file_name)
+                    if not self.is_reg_key:
+                        expected_path = expected_path[:1].lower() + expected_path[1:]
+                    if self.encoding is not None:
+                        for index, item in enumerate(data_path):
+                            data_path[index] = item.encode(encoding=self.encoding)
+                    if sys.platform == 'darwin' and self.encoding and self.encoding != 'utf-8':
+                        logger.info(f'Not asserting {expected_path} in event.data.path. '
+                                    f'Reason: using non-utf-8 encoding in darwin.')
+                    else:
+                        error_msg = f"Expected data path was '{expected_path}' but event data path is '{data_path}'"
+                        assert (expected_path in data_path), error_msg
+
+            def check_events_registry_value(events, key, value_list=['testfile0'], mode=None):
+                mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
+                key_path = filter_events(events, ".[].data.path")
+                value_name = filter_events(events, ".[].data.value_name")
+                for value in value_list:
+                    error_msg = f"Expected value name was '{value}' but event value name is '{value_name}'"
+                    assert (value in value_name), error_msg
+
+                    error_msg = f"Expected key path was '{key}' but event key path is '{key_path}'"
+                    assert (value in value_name), error_msg
+
+            def filter_events(events, mask):
+                """Returns a list of elements matching a specified mask in the events list using jq module."""
+                if sys.platform in ("win32", 'sunos5', 'darwin'):
+                    stdout = subprocess.check_output(["jq", "-r", mask], input=json.dumps(events).encode())
+                    return stdout.decode("utf8").strip().split(os.linesep)
+                else:
+                    return jq(mask).transform(events, multiple_output=True)
+
+            if self.events is not None:
+                validate_checkers_per_event(self.events, self.options, mode)
+                check_events_type(self.events, event_type, self.file_list)
+
+                if self.is_reg_value:
+                    check_events_registry_value(self.events, self.folder, value_list=self.file_list, mode=mode)
+                else:
+                    check_events_key_path(self.events, self.folder, file_list=self.file_list, mode=mode)
+
+                if self.custom_validator is not None:
+                    self.custom_validator.validate_after_cud(self.events)
+                    if event_type == "added":
+                        self.custom_validator.validate_after_create(self.events)
+                    elif event_type == "modified":
+                        self.custom_validator.validate_after_update(self.events)
+                    elif event_type == "deleted":
+                        self.custom_validator.validate_after_delete(self.events)
+
+        def _get_file_list(self):
+            result_list = []
+            for file_name in self.file_list:
+                expected_file_path = os.path.join(self.folder, file_name)
+                expected_file_path = expected_file_path[:1].lower() + expected_file_path[1:]
+                result_list.append(expected_file_path)
+            return result_list
 
 
 class CustomValidator:
@@ -1725,7 +1856,7 @@ def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_6
 
     custom_validator = CustomValidator(validators_after_create, validators_after_update,
                                        validators_after_delete, validators_after_cud)
-    event_checker = EventChecker(log_monitor=log_monitor, folder=registry_path, file_list=value_list, options=options,
+    event_checker = RegistryEventChecker(log_monitor=log_monitor, folder=registry_path, file_list=value_list, options=options,
                                  custom_validator=custom_validator, encoding=encoding, callback=callback,
                                  is_reg_value=True)
 
@@ -1821,7 +1952,7 @@ def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64K
 
     custom_validator = CustomValidator(validators_after_create, validators_after_update,
                                        validators_after_delete, validators_after_cud)
-    event_checker = EventChecker(log_monitor=log_monitor, folder=registry_path, file_list=key_list, options=options,
+    event_checker = RegistryEventChecker(log_monitor=log_monitor, folder=registry_path, file_list=key_list, options=options,
                                  custom_validator=custom_validator, encoding=encoding, callback=callback,
                                  is_reg_key=True)
 
@@ -1850,7 +1981,7 @@ def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64K
 
     # Delete previous registry subkeys
     for name, _ in key_list.items():
-        delete_registry_value(registry_parser[root_key], os.path.join(registry_path, name))
+        delete_registry(registry_parser[root_key], os.path.join(registry_sub_key, name), arch)
 
     check_time_travel(time_travel, monitor=log_monitor)
     event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
