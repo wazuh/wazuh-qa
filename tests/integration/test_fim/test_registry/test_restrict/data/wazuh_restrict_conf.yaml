@@ -1,0 +1,45 @@
+---
+# Registry values configuration
+- tags:
+  - value_restrict
+  apply_to_modules:
+  - test_registry_restrict
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - windows_registry:
+        value: WINDOWS_REGISTRY_1
+        attributes:
+        - check_all: 'yes'
+        - arch: "64bit"
+        - restrict_value: "restrict_value$"
+    - windows_registry:
+        value: WINDOWS_REGISTRY_2
+        attributes:
+        - check_all: 'yes'
+        - arch: "both"
+        - restrict_value: "restrict_value$"
+# Registry keys configuration
+- tags:
+  - key_restrict
+  apply_to_modules:
+  - test_registry_restrict
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - windows_registry:
+        value: WINDOWS_REGISTRY_1
+        attributes:
+        - check_all: 'yes'
+        - arch: "64bit"
+        - restrict_key: "restrict_key$"
+    - windows_registry:
+        value: WINDOWS_REGISTRY_2
+        attributes:
+        - check_all: 'yes'
+        - arch: "both"
+        - restrict_key: "restrict_key$"
