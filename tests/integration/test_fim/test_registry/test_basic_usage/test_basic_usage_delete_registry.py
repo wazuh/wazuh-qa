@@ -9,14 +9,15 @@ from collections import Counter
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_registry, modify_registry, delete_registry, \
-    callback_detect_event, check_time_travel, validate_event, registry_parser
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_registry, modify_registry_value, delete_registry, \
+    callback_detect_event, check_time_travel, validate_registry_event, registry_parser
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
-import win32api
-import win32con
+if sys.platform == 'win32':
+    import win32api
+    import win32con
 
 # Marks
 
@@ -59,8 +60,8 @@ def get_configuration(request):
 
 ])
 def test_delete_registry(registry_key, registry_subkey, arch, value_list,
-                       get_configuration, configure_environment,
-                       restart_syscheckd, wait_for_initial_scan):
+                         get_configuration, configure_environment,
+                         restart_syscheckd, wait_for_initial_scan):
     """
     Check if syscheckd detects 'deleted' events from the values contained
     in a registry key that is being deleted.
@@ -81,14 +82,14 @@ def test_delete_registry(registry_key, registry_subkey, arch, value_list,
     key_h = create_registry(registry_parser[registry_key], registry_subkey, arch)
     # Create values inside subkey
     for value in value_list:
-        modify_registry(key_h, value, win32con.REG_SZ, "some content")
+        modify_registry_value(key_h, value, win32con.REG_SZ, "some content")
 
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
     events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                            accum_results=len(value_list) + 1, error_message='Did not receive expected '
-                                                                        '"Sending FIM event: ..." event').result()
+                                     accum_results=len(value_list) + 1, error_message='Did not receive expected '
+                                     '"Sending FIM event: ..." event').result()
     for ev in events:
-        validate_event(ev, mode=mode)
+        validate_registry_event(ev, mode=mode)
 
     # Remove registry
     delete_registry(registry_parser[registry_key], registry_subkey, arch)
@@ -101,8 +102,9 @@ def test_delete_registry(registry_key, registry_subkey, arch, value_list,
                                          accum_results=len(value_list) + 1).result()
     path_list = set([event['data']['path'] for event in event_list])
     counter_type = Counter([event['data']['type'] for event in event_list])
+
     for ev in events:
-        validate_event(ev, mode=mode)
+        validate_registry_event(ev, mode=mode)
 
     assert counter_type['deleted'] == len(value_list) + 1, f'Number of "deleted" events should be {len(value_list) + 1}'
 

@@ -7,8 +7,8 @@ from time import time
 
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, delete_registry, timedelta, callback_detect_event,
-                       check_time_travel, create_registry, registry_key_cud, callback_detect_end_scan, registry_parser)
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, delete_registry, timedelta, callback_detect_event, \
+    check_time_travel, create_registry, registry_value_cud, callback_detect_end_scan, registry_parser
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -88,7 +88,7 @@ def extra_configuration_after_yield():
     (key, sub_key_2, win32con.KEY_WOW64_64KEY)
 ])
 def test_basic_usage_registry_baseline_generation(registry_key, registry_subkey, arch,
-                         get_configuration, configure_environment, restart_syscheckd):
+                                                  get_configuration, configure_environment, restart_syscheckd):
     """
     Check if events are appearing after the baseline
     The message 'File integrity monitoring scan ended' informs about the end of the first scan,
@@ -97,7 +97,7 @@ def test_basic_usage_registry_baseline_generation(registry_key, registry_subkey,
     check_apply_test({'ossec_conf'}, get_configuration['tags'])
 
     # Create a file during initial scan to check if the event is logged after the 'scan ended' message
-    registry_key_cud(key, registry_subkey, arch,  wazuh_log_monitor, time_travel=True)
+    registry_value_cud(key, registry_subkey, arch,  wazuh_log_monitor, time_travel=True)
 
     wazuh_log_monitor.start(timeout=120, callback=callback_detect_event_before_end_scan,
                             error_message='Did not receive expected event before end the scan')

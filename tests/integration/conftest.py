@@ -7,6 +7,7 @@ import os
 import shutil
 import subprocess
 import sys
+import re
 import uuid
 from datetime import datetime
 
@@ -22,6 +23,9 @@ from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketCont
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
 
+if sys.platform == 'win32':
+    from wazuh_testing.fim import KEY_WOW64_64KEY, delete_registry, registry_parser, create_registry
+
 PLATFORMS = set("darwin linux win32 sunos5".split())
 HOST_TYPES = set("server agent".split())
 
@@ -33,7 +37,7 @@ def pytest_runtest_setup(item):
     # Find if platform applies
     supported_platforms = PLATFORMS.intersection(mark.name for mark in item.iter_markers())
     plat = sys.platform
-    
+
     if supported_platforms and plat not in supported_platforms:
         pytest.skip("Cannot run on platform {}".format(plat))
 
@@ -408,6 +412,15 @@ def configure_environment(get_configuration, request):
         for test_dir in test_directories:
             os.makedirs(test_dir, exist_ok=True, mode=0o777)
 
+    # Create test registry keys
+    if sys.platform == 'win32':
+        if hasattr(request.module, 'test_regs'):
+            test_regs = getattr(request.module, 'test_regs')
+
+            for reg in test_regs:
+                match = re.match(r"(^HKEY_[a-zA-Z_]+)\\+(.+$)", reg)
+                create_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_64KEY)
+
     # Set new configuration
     write_wazuh_conf(test_config)
 
@@ -435,6 +448,12 @@ def configure_environment(get_configuration, request):
     if hasattr(request.module, 'test_directories'):
         for test_dir in test_directories:
             shutil.rmtree(test_dir, ignore_errors=True)
+
+    if sys.platform == 'win32':
+        if hasattr(request.module, 'test_regs'):
+            for reg in test_regs:
+                match = re.match(r"(^HKEY_[a-zA-Z_]+)\\+(.+$)", reg)
+                delete_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_64KEY)
 
     if sys.platform == 'win32':
         control_service('start')

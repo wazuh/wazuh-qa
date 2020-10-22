@@ -8,7 +8,7 @@ import sys
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_registry, modify_registry, delete_registry, \
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_registry, modify_registry_value, delete_registry, \
     timedelta, callback_detect_event, check_time_travel
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -103,7 +103,7 @@ def test_windows_registry(arch_list, tag, tags_to_apply,
                                 accum_results=len(arch_list))
 
     # Check that windows_registry trigger alerts when adding an entry
-    modify_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 'test_add')
+    modify_registry_value(winreg.HKEY_LOCAL_MACHINE, sub_key, 'test_add')
     check_time_travel(time_travel=True, interval=timedelta(seconds=frequency), monitor=wazuh_log_monitor)
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                     error_message='Did not receive expected "Sending FIM event: ..." event',
@@ -115,7 +115,7 @@ def test_windows_registry(arch_list, tag, tags_to_apply,
 
     # Check that windows_registry trigger alerts when modifying existing entries
     # and check arch and tag values match with the ones in event
-    modify_registry(winreg.HKEY_LOCAL_MACHINE, sub_key, 'test_modify')
+    modify_registry_value(winreg.HKEY_LOCAL_MACHINE, sub_key, 'test_modify')
     check_time_travel(time_travel=True, interval=timedelta(seconds=frequency), monitor=wazuh_log_monitor)
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                     error_message='Did not receive expected "Sending FIM event: ..." event',
