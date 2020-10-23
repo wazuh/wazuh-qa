@@ -141,7 +141,7 @@ elif _agent_version == 'v4.1.0':
             'upgrade_ok': True,
             'result_code': 0,
             'receive_notification': True,
-            'status': 'Failed',   
+            'status': 'Failed',
         }
     }]
 

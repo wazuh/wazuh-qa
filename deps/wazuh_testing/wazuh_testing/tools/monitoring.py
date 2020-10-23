@@ -312,7 +312,8 @@ class SocketController:
         return output
 
     def receive(self, size=False):
-        """Receive a message from the socket.
+        """
+        Receive a message from the socket.
 
         Parameters
         ----------
