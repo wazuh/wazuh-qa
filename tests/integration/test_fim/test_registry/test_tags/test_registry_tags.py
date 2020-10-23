@@ -21,10 +21,11 @@ sub_key_2 = "SOFTWARE\\Classes\\test_key"
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
+test_regs = [ os.path.join(key, sub_key), os.path.join(key, sub_key_2)]
+reg1, reg2 = test_regs
 # Configurations
 tags = ['tag1', 'tág', '0tag', '000', 'a' * 1000]
-conf_params = {'WINDOWS_REGISTRY_1': os.path.join(key, sub_key), 'WINDOWS_REGISTRY_2': os.path.join(key, sub_key_2)}
+conf_params = {'WINDOWS_REGISTRY_1':reg1, 'WINDOWS_REGISTRY_2':reg2}
 
 configurations_path = os.path.join(test_data_path, 'wazuh_registry_tag_conf.yaml')
 p, m = generate_params(extra_params=conf_params,
@@ -68,5 +69,7 @@ def test_tags(key, subkey, arch,
 
     registry_value_cud(key, subkey, wazuh_log_monitor, arch=arch,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                     min_timeout=global_parameters.default_timeout, triggers_event=True
+                     min_timeout=global_parameters.default_timeout,
+                     triggers_event=True,
+                     validators_after_cud=[tag_validator]
                     )
