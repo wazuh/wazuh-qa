@@ -14,6 +14,7 @@ from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.agent_simulator import Sender, Injector, Agent, \
                     create_agents
+from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import SocketController
 from wazuh_testing.tools.services import control_service
 
@@ -21,6 +22,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 WAZUH_DB_DIR = os.path.join(WAZUH_PATH, 'queue', 'db')
 WDB_PATH = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
+ALERTS_JSON_PATH = os.path.join(WAZUH_PATH, 'logs', 'alerts', 'alerts.json')
 
 SERVER_ADDRESS = 'localhost'
 CRYPTO = 'aes'
@@ -81,6 +83,11 @@ def restart_service():
     yield
 
 
+@pytest.fixture(scope="function")
+def clean_alert_logs():
+    truncate_file(ALERTS_JSON_PATH)
+
+
 def retrieve_rootcheck_rows(agent_id):
     agent_db_path = os.path.join(WAZUH_DB_DIR, f'{agent_id}.db')
     conn = sqlite3.connect(agent_db_path)
@@ -111,7 +118,8 @@ def send_delete_table_request(agent_id):
     return response
 
 
-def test_rootcheck(get_configuration, configure_environment, restart_service):
+def test_rootcheck(get_configuration, configure_environment, restart_service,
+                   clean_alert_logs):
     metadata = get_configuration.get('metadata')
     agents_number = metadata['agents_number']
     check_updates = metadata['check_updates']
@@ -139,6 +147,17 @@ def test_rootcheck(get_configuration, configure_environment, restart_service):
                        agent.rootcheck.rootcheck]
         for log in logs_string:
             assert log in db_string, f"Log: \"{log}\" not found in Database"
+
+        alerts_description = None
+        with open(ALERTS_JSON_PATH, 'r') as f:
+            json_lines = [json.loads(x) for x in f.readlines()]
+            alerts_description = [x['full_log'] for x in json_lines
+                                  if 'rootcheck' in x['decoder']['name']]
+            for log in logs_string:
+                if log not in ['Starting rootcheck scan.',
+                               'Ending rootcheck scan.']:
+                    assert log in alerts_description, f"Log: \"{log}\" " \
+                            "not found in alerts file"
 
     if check_updates:
         # Service needs to be stopped otherwise db lock will be held by
