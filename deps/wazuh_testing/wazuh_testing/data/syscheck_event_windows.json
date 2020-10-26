@@ -121,7 +121,7 @@
             "type": {
               "$id": "#/properties/data/properties/attributes/properties/type",
               "type": "string",
-              "enum": ["file", "registry"],
+              "enum": ["file", "registry_key", "registry_value"],
               "examples": [
                 "file"
               ],

@@ -24,7 +24,7 @@ from wazuh_testing.tools.services import control_service, check_daemon_status, d
 from wazuh_testing.tools.time import TimeMachine
 
 if sys.platform == 'win32':
-    from wazuh_testing.fim import KEY_WOW64_64KEY, delete_registry, registry_parser, create_registry
+    from wazuh_testing.fim import KEY_WOW64_64KEY, KEY_WOW64_32KEY, delete_registry, registry_parser, create_registry
 
 PLATFORMS = set("darwin linux win32 sunos5".split())
 HOST_TYPES = set("server agent".split())
@@ -419,6 +419,7 @@ def configure_environment(get_configuration, request):
 
             for reg in test_regs:
                 match = re.match(r"(^HKEY_[a-zA-Z_]+)\\+(.+$)", reg)
+                create_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_32KEY)
                 create_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_64KEY)
 
     # Set new configuration
@@ -453,6 +454,7 @@ def configure_environment(get_configuration, request):
         if hasattr(request.module, 'test_regs'):
             for reg in test_regs:
                 match = re.match(r"(^HKEY_[a-zA-Z_]+)\\+(.+$)", reg)
+                delete_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_32KEY)
                 delete_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_64KEY)
 
     if sys.platform == 'win32':
