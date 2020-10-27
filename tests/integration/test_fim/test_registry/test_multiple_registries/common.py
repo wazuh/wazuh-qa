@@ -1,0 +1,55 @@
+# Copyright (C) 2015-2020, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+import os
+import win32con
+import win32api
+
+from wazuh_testing.fim import create_registry, registry_parser, check_time_travel, modify_registry, delete_registry, \
+    callback_detect_event, validate_registry_key_event, KEY_WOW64_32KEY, modify_registry_value, delete_registry_value
+
+
+def multiple_keys_and_entries_keys(num_entries, subkeys, log_monitor, root_key, timeout=10):
+    def perform_and_validate_events(func):
+        for reg in subkeys:
+            func(registry_parser[root_key], os.path.join(reg, 'test_key'), KEY_WOW64_32KEY)
+
+        check_time_travel(True, monitor=log_monitor)
+
+        events = log_monitor.start(timeout=timeout,
+                                   callback=callback_detect_event,
+                                   accum_results=num_entries,
+                                   error_message='Did not receive expected "Sending FIM event: ..." event').result()
+
+        for ev in events:
+            validate_registry_key_event(ev)
+
+    perform_and_validate_events(create_registry)
+    perform_and_validate_events(modify_registry)
+    perform_and_validate_events(delete_registry)
+
+
+def multiple_keys_and_entries_values(num_entries, subkeys, log_monitor, root_key, timeout=10):
+    def perform_and_validate_events(func, is_delete=False):
+        for reg in subkeys:
+            key_handle = create_registry(registry_parser[root_key], reg, KEY_WOW64_32KEY)
+            if not is_delete:
+                func(key_handle, 'test_value', win32con.REG_SZ, 'added')
+            else:
+                func(key_handle, 'test_value')
+            win32api.RegCloseKey(key_handle)
+
+        check_time_travel(True, monitor=log_monitor)
+
+        events = log_monitor.start(timeout=timeout,
+                                   callback=callback_detect_event,
+                                   accum_results=num_entries,
+                                   error_message='Did not receive expected "Sending FIM event: ..." event').result()
+
+        for ev in events:
+            validate_registry_key_event(ev)
+
+    perform_and_validate_events(modify_registry_value)  # Create
+    perform_and_validate_events(modify_registry_value)  # Modify
+    perform_and_validate_events(delete_registry_value, is_delete=True)  # Delete
