@@ -7,8 +7,7 @@ import shutil
 
 import pytest
 
-from wazuh_testing.api import callback_detect_api_start, get_base_url, get_token_login_api, API_HOST, \
-    API_LOGIN_ENDPOINT, API_PASS, API_PORT, API_USER, API_PROTOCOL
+from wazuh_testing.api import callback_detect_api_start, get_api_details_dict
 from wazuh_testing.tools import API_LOG_FILE_PATH, WAZUH_API_CONF, WAZUH_SECURITY_CONF
 from wazuh_testing.tools.configuration import get_api_conf, write_api_conf, write_security_conf
 from wazuh_testing.tools.file import truncate_file
@@ -100,14 +99,4 @@ def wait_for_start(get_configuration, request):
 
 @pytest.fixture(scope='module')
 def get_api_details():
-    def _get_api_details(protocol=API_PROTOCOL, host=API_HOST, port=API_PORT, user=API_USER,
-                         password=API_PASS, login_endpoint=API_LOGIN_ENDPOINT, timeout=10):
-        return {
-            'base_url': get_base_url(protocol, host, port),
-            'auth_headers': {
-                'Content-Type': 'application/json',
-                'Authorization': f'Bearer {get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout)}'
-            }
-        }
-
-    return _get_api_details
+    return get_api_details_dict
