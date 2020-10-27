@@ -11,6 +11,22 @@ from wazuh_testing.fim import create_registry, registry_parser, check_time_trave
 
 
 def multiple_keys_and_entries_keys(num_entries, subkeys, log_monitor, root_key, timeout=10):
+    """
+    Perform a given action for every registry key and validate all the events. Performs registry key actions.
+
+    Parameters
+    ----------
+    num_entries: int
+        Number of events to find.
+    subkeys: list
+        List with all the subkeys to modify.
+    log_monitor : FileMonitor
+        File monitor.
+    root_key: str
+        Name of the root registry key (HKEY_CLASSES_ROOT, HKEY_CURRENT_USER).
+    timeout: int, optional
+        Maximum timeout to raise a TimeoutError. Default `10`
+    """
     def perform_and_validate_events(func):
         for reg in subkeys:
             func(registry_parser[root_key], os.path.join(reg, 'test_key'), KEY_WOW64_32KEY)
@@ -31,6 +47,22 @@ def multiple_keys_and_entries_keys(num_entries, subkeys, log_monitor, root_key, 
 
 
 def multiple_keys_and_entries_values(num_entries, subkeys, log_monitor, root_key, timeout=10):
+    """
+    Perform a given action for every registry key and validate all the events. Performs registry value actions.
+
+    Parameters
+    ----------
+    num_entries: int
+        Number of events to find.
+    subkeys: list
+        List with all the subkeys to modify.
+    log_monitor : FileMonitor
+        File monitor.
+    root_key: str
+        Name of the root registry key (HKEY_CLASSES_ROOT, HKEY_CURRENT_USER).
+    timeout: int, optional
+        Maximum timeout to raise a TimeoutError. Default `10`
+    """
     def perform_and_validate_events(func, is_delete=False):
         for reg in subkeys:
             key_handle = create_registry(registry_parser[root_key], reg, KEY_WOW64_32KEY)
