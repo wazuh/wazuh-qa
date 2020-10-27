@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import time
 
 import pytest
 
@@ -67,4 +68,5 @@ def test_multiple_entries(tags_to_apply, get_configuration, configure_environmen
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     multiple_keys_and_entries_keys(n_regs, subkeys, wazuh_log_monitor, KEY, timeout=global_parameters.default_timeout)
+    time.sleep(2)   # These 2 seconds are needed to avoid overlapping between keys and values
     multiple_keys_and_entries_values(n_regs, subkeys, wazuh_log_monitor, KEY, timeout=global_parameters.default_timeout)

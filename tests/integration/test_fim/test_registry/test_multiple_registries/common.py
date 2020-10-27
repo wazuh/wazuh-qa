@@ -7,7 +7,8 @@ import win32con
 import win32api
 
 from wazuh_testing.fim import create_registry, registry_parser, check_time_travel, modify_registry, delete_registry, \
-    callback_detect_event, validate_registry_key_event, KEY_WOW64_32KEY, modify_registry_value, delete_registry_value
+    callback_detect_event, validate_registry_key_event, KEY_WOW64_32KEY, modify_registry_value, delete_registry_value, \
+    validate_registry_value_event, callback_value_event
 
 
 def multiple_keys_and_entries_keys(num_entries, subkeys, log_monitor, root_key, timeout=10):
@@ -63,11 +64,11 @@ def multiple_keys_and_entries_values(num_entries, subkeys, log_monitor, root_key
     timeout: int, optional
         Maximum timeout to raise a TimeoutError. Default `10`
     """
-    def perform_and_validate_events(func, is_delete=False):
+    def perform_and_validate_events(func, content='added', is_delete=False):
         for reg in subkeys:
             key_handle = create_registry(registry_parser[root_key], reg, KEY_WOW64_32KEY)
             if not is_delete:
-                func(key_handle, 'test_value', win32con.REG_SZ, 'added')
+                func(key_handle, 'test_value', win32con.REG_SZ, content)
             else:
                 func(key_handle, 'test_value')
             win32api.RegCloseKey(key_handle)
@@ -75,13 +76,13 @@ def multiple_keys_and_entries_values(num_entries, subkeys, log_monitor, root_key
         check_time_travel(True, monitor=log_monitor)
 
         events = log_monitor.start(timeout=timeout,
-                                   callback=callback_detect_event,
+                                   callback=callback_value_event,
                                    accum_results=num_entries,
                                    error_message='Did not receive expected "Sending FIM event: ..." event').result()
 
         for ev in events:
-            validate_registry_key_event(ev)
+            validate_registry_value_event(ev)
 
     perform_and_validate_events(modify_registry_value)  # Create
-    perform_and_validate_events(modify_registry_value)  # Modify
+    perform_and_validate_events(modify_registry_value, content='modified')  # Modify
     perform_and_validate_events(delete_registry_value, is_delete=True)  # Delete

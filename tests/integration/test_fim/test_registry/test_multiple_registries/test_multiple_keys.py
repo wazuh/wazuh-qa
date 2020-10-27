@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import time
 
 import pytest
 
@@ -30,7 +31,7 @@ expected_discarded = ','.join([os.path.join(KEY, subkeys[i]) for i in range(64, 
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf_multiple_registries.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf_multiple_keys.yaml')
 
 # Configurations
 
@@ -76,5 +77,6 @@ def test_multiple_keys(tags_to_apply, get_configuration, configure_environment, 
 
     multiple_keys_and_entries_keys(MAX_MONITORED_ONE_TAG, subkeys, wazuh_log_monitor, KEY,
                                    timeout=global_parameters.default_timeout)
+    time.sleep(2)   # These 2 seconds are needed to avoid overlapping between keys and values
     multiple_keys_and_entries_values(MAX_MONITORED_ONE_TAG, subkeys, wazuh_log_monitor, KEY,
                                      timeout=global_parameters.default_timeout)
