@@ -3,6 +3,7 @@
       - all
       apply_to_modules:
       - test_rids
+      - test_rids_conf
       sections:
       - section: remote
         elements:
