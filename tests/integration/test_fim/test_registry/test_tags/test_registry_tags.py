@@ -6,11 +6,10 @@ import os
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, registry_value_cud, generate_params, delete_registry, registry_parser
-from wazuh_testing.tools import PREFIX
+from wazuh_testing.fim import LOG_FILE_PATH, registry_value_cud, generate_params, KEY_WOW64_64KEY, KEY_WOW64_32KEY
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
-import win32con
+
 
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
@@ -21,11 +20,11 @@ sub_key_2 = "SOFTWARE\\Classes\\test_key"
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-test_regs = [ os.path.join(key, sub_key), os.path.join(key, sub_key_2)]
+test_regs = [os.path.join(key, sub_key), os.path.join(key, sub_key_2)]
 reg1, reg2 = test_regs
 # Configurations
 tags = ['tag1', 'tág', '0tag', '000', 'a' * 1000]
-conf_params = {'WINDOWS_REGISTRY_1':reg1, 'WINDOWS_REGISTRY_2':reg2}
+conf_params = {'WINDOWS_REGISTRY_1': reg1, 'WINDOWS_REGISTRY_2': reg2}
 
 configurations_path = os.path.join(test_data_path, 'wazuh_registry_tag_conf.yaml')
 p, m = generate_params(extra_params=conf_params,
@@ -35,6 +34,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 # Fixtures
 
+
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -42,9 +42,9 @@ def get_configuration(request):
 
 
 @pytest.mark.parametrize('key, subkey, arch', [
-                         (key, sub_key, win32con.KEY_WOW64_32KEY),
-                         (key, sub_key, win32con.KEY_WOW64_64KEY),
-                         (key, sub_key_2, win32con.KEY_WOW64_64KEY)
+                         (key, sub_key, KEY_WOW64_32KEY),
+                         (key, sub_key, KEY_WOW64_64KEY),
+                         (key, sub_key_2, KEY_WOW64_64KEY)
                          ])
 def test_tags(key, subkey, arch,
               get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
@@ -66,10 +66,9 @@ def test_tags(key, subkey, arch,
     def tag_validator(event):
         assert defined_tags == event['data']['tags'], f'defined_tags are not equal'
 
-
     registry_value_cud(key, subkey, wazuh_log_monitor, arch=arch,
-                     time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                     min_timeout=global_parameters.default_timeout,
-                     triggers_event=True,
-                     validators_after_cud=[tag_validator]
-                    )
+                       time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
+                       min_timeout=global_parameters.default_timeout,
+                       triggers_event=True,
+                       validators_after_cud=[tag_validator]
+                       )
