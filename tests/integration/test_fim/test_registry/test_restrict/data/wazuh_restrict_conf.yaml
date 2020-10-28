@@ -14,13 +14,12 @@
         attributes:
         - check_all: 'yes'
         - arch: "64bit"
-        - restrict_value: "restrict_value$"
+        - restrict_value: RESTRICT_VALUE
     - windows_registry:
         value: WINDOWS_REGISTRY_2
         attributes:
-        - check_all: 'yes'
         - arch: "both"
-        - restrict_value: "restrict_value$"
+        - restrict_value: RESTRICT_VALUE
 # Registry keys configuration
 - tags:
   - key_restrict
@@ -36,10 +35,9 @@
         attributes:
         - check_all: 'yes'
         - arch: "64bit"
-        - restrict_key: "restrict_key$"
+        - restrict_key: RESTRICT_KEY
     - windows_registry:
         value: WINDOWS_REGISTRY_2
         attributes:
-        - check_all: 'yes'
         - arch: "both"
-        - restrict_key: "restrict_key$"
+        - restrict_key: RESTRICT_KEY
