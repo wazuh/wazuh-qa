@@ -3,8 +3,8 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import win32con
-import win32api
+from win32con import REG_SZ
+from win32api import RegCloseKey
 
 from wazuh_testing.fim import create_registry, registry_parser, check_time_travel, modify_registry, delete_registry, \
     callback_detect_event, validate_registry_key_event, KEY_WOW64_32KEY, modify_registry_value, delete_registry_value, \
@@ -68,10 +68,10 @@ def multiple_keys_and_entries_values(num_entries, subkeys, log_monitor, root_key
         for reg in subkeys:
             key_handle = create_registry(registry_parser[root_key], reg, KEY_WOW64_32KEY)
             if not is_delete:
-                func(key_handle, 'test_value', win32con.REG_SZ, content)
+                func(key_handle, 'test_value', REG_SZ, content)
             else:
                 func(key_handle, 'test_value')
-            win32api.RegCloseKey(key_handle)
+            RegCloseKey(key_handle)
 
         check_time_travel(True, monitor=log_monitor)
 
