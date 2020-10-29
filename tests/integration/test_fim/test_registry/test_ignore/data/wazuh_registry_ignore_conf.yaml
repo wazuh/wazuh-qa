@@ -22,11 +22,6 @@
             attributes:
                 - type: 'sregex'
                 - arch: 'both'
-        - registry_ignore:
-            value: "REGISTRY_IGNORE_REGEX"
-            attributes:
-                - type: 'sregex'
-                - arch: '64bit'
         - windows_registry:
             value: WINDOWS_REGISTRY_1
             attributes:
@@ -58,11 +53,6 @@
             attributes:
                 - type: 'sregex'
                 - arch: 'both'
-        - registry_ignore_value:
-            value: "VALUE_IGNORE_REGEX"
-            attributes:
-                - type: 'sregex'
-                - arch: '64bit'
         - windows_registry:
             value: WINDOWS_REGISTRY_1
             attributes:
