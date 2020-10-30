@@ -3,7 +3,6 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import time
-import pytest
 
 from wazuh_testing.fim import REGULAR, check_time_travel, validate_event, create_file, modify_file, delete_file, \
     callback_detect_event

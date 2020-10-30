@@ -1398,6 +1398,14 @@ def callback_warn_max_dir_monitored(line):
     return None
 
 
+def callback_max_registry_monitored(line):
+    match = re.match(r'.*Maximum number of registries to be monitored in the same tag reached \(\d+\) '
+                     r'Excess are discarded: \'(.+)\'', line)
+
+    if match:
+        return match.group(1)
+
+
 def callback_delete_watch(line):
     if sys.platform == 'win32':
         match = re.match(r".*Realtime watch deleted for '(\S+)'", line)
