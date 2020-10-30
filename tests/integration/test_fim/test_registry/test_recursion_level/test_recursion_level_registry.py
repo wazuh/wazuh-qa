@@ -1,6 +1,7 @@
 # Copyright (C) 2015-2020, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import os
 import pytest
 
@@ -46,7 +47,7 @@ conf_params = {'REGISTRY_0': os.path.join(key, registry_no_recursion),
 
                'REGISTRY_3': os.path.join(key, registry_recursion_29),
                'LEVEL_3': rl_dict[registry_recursion_29]
-}
+               }
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
@@ -72,6 +73,7 @@ def extra_configuration_before_yield():
         create_registry(registry_parser[key], path, KEY_WOW64_64KEY)
 
 # Tests
+
 
 @pytest.mark.parametrize('root_key, registry, arch, edge_limit, ignored_levels', [
     (key, registry_no_recursion, KEY_WOW64_64KEY, 2, 1),
@@ -135,7 +137,7 @@ def test_recursion_level(root_key, registry, arch, edge_limit, ignored_levels,
             path = os.path.join(path, str(level + 1))
             path_list.append(path)
     else:
-        for level in range (recursion_level):
+        for level in range(recursion_level):
             path = os.path.join(path, str(level + 1))
             if level < edge_limit or level > recursion_level - edge_limit:
                 path_list.append(path)
