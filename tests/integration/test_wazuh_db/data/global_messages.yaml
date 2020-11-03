@@ -205,24 +205,12 @@
     output: 'ok 0,1,2'
     stage: "global get-all-agents success"
 -
-  name: "get-agents-by-keepalive command"
-  description: "Check success use cases for get-agents-by-keepalive command on global DB. Chunks command"
-  test_case:
-  -
-    input: 'global get-agents-by-keepalive condition > 100 last_id 0'
-    output: 'ok 1'
-    stage: "global get-agents-by-keepalive success"
-  -
-    input: 'global get-agents-by-keepalive condition < 100 last_id 0'
-    output: 'ok '
-    stage: "global get-agents-by-keepalive success"
--
   name: "sync-agent-info-get command"
   description: "Check success use cases for sync-agent-info-get command on global DB. Chunks command"
   test_case:
   -
     input: 'global sync-agent-info-get last_id 0'
-    output: 'ok [{"id":1,"name":"TestName2","ip":"0.0.0.1","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","version":"TestVersion","config_sum":"TestConfigSum","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","last_keepalive":*,"labels":[{"id":1,"key":"TestKey2","value":"TestLabel2"}]}]'
+    output: 'ok [{"id":1,"name":"TestName2","ip":"0.0.0.1","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","version":"TestVersion","config_sum":"TestConfigSum","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","last_keepalive":*,"connection_status":"active","labels":[{"id":1,"key":"TestKey2","value":"TestLabel2"}]}]'
     stage: "global sync-agent-info-get success"
     use_regex: 'yes'
   -
@@ -235,7 +223,7 @@
     stage: "global update-keepalive success"
   -
     input: 'global sync-agent-info-get'
-    output: 'ok [{"id":1,"name":"TestName2","ip":"0.0.0.1","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","version":"TestVersion","config_sum":"TestConfigSum","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","last_keepalive":*,"labels":[{"id":1,"key":"TestKey2","value":"TestLabel2"}]}]'
+    output: 'ok [{"id":1,"name":"TestName2","ip":"0.0.0.1","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","version":"TestVersion","config_sum":"TestConfigSum","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","last_keepalive":*,"connection_status":"active","labels":[{"id":1,"key":"TestKey2","value":"TestLabel2"}]}]'
     stage: "global sync-agent-info-get no arg success"
     use_regex: 'yes'
 -
@@ -259,7 +247,7 @@
     output: "ok"
     stage: "global insert-agent success"
   -
-    input: 'global sync-agent-info-set [{"id":3,"name":"TestName3","ip":"0.0.0.3","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","config_sum":"TestConfigSum","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","last_keepalive":200}]'
+    input: 'global sync-agent-info-set [{"id":3,"name":"TestName3","ip":"0.0.0.3","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","config_sum":"TestConfigSum","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","last_keepalive":200,"connection_status":"never_connected"}]'
     output: 'ok'
     stage: "global sync-agent-info-set success"
   -
