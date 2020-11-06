@@ -64,7 +64,7 @@ def get_configuration(request):
 ])
 def test_reports_file_and_nodiff(folder, checkers, tags_to_apply,
                                  get_configuration, configure_environment,
-                                 restart_syscheckd, wait_for_initial_scan):
+                                 restart_syscheckd, wait_for_fim_start):
     """
     Check if report_changes events and diff truncated files are correct
 

@@ -64,7 +64,7 @@ class Agent:
             "fim_integrity": {"status": "disabled",
                               "eps": self.fim_integrity_eps},
             "syscollector": {"status": "disabled", "frequency": 60.0,
-                             "eps": 200},           
+                             "eps": 200},
             "receive_messages": {"status": "enabled"},
         }
         self.sha_key = None

@@ -46,7 +46,7 @@ def get_configuration(request):
     ({'config1'}, '/testdir2', 'wazuh_fim')
 ])
 def test_remove_rule_five_times(tags_to_apply, folder, audit_key,
-                                get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
+                                get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """Remove auditd rule using auditctl five times and check Wazuh ignores folder.
 
     Parameters

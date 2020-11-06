@@ -366,7 +366,7 @@ python3 -m pytest [options] [file_or_dir] [file_or_dir] [...]
 - `--default-timeout`: overwrites the default timeout (in seconds). This value is used to make a test fail if a condition
 is not met before the given time lapse. Some tests make use of this value and other has other fixed timeout that cannot be
 modified.
-- `--fim_mode`: Specify the mode of execution of the FIM tests. (ex. --fim_mode="scheduled"). To run the test in realtime and whodata the option must be specified twice: --fim_mode="realtime" -- fim_mode="whodata". If the option is not specified, the test will run using scheduled, whodata and realtime.
+- `--fim_mode`: Specify the mode of execution of the FIM tests. (ex. --fim_mode="scheduled"). To run the test in realtime and whodata the option must be specified twice: --fim_mode="realtime" --fim_mode="whodata". If the option is not specified, the test will run using scheduled, whodata and realtime.
 
 _Use `-h` to see the rest or check its [documentation](https://docs.pytest.org/en/latest/usage.html)._
 

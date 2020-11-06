@@ -83,7 +83,7 @@ def extra_configuration_after_yield():
     ('regular_6', testdir, 70000, 10),
 ])
 def test_large_changes(filename, folder, original_size, modified_size, tags_to_apply, get_configuration,
-                       configure_environment, restart_syscheckd, wait_for_initial_scan):
+                       configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check content_changes shows the tag 'More changes' when it exceeds the maximum size.
 
     Every change in the content of the file shall produce an alert including

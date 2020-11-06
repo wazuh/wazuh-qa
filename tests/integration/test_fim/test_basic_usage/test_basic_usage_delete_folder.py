@@ -53,7 +53,7 @@ def get_configuration(request):
 ])
 def test_delete_folder(folder, file_list, filetype, tags_to_apply,
                        get_configuration, configure_environment,
-                       restart_syscheckd, wait_for_initial_scan):
+                       restart_syscheckd, wait_for_fim_start):
     """
     Check if syscheckd detects 'deleted' events from the files contained
     in a folder that is being deleted.

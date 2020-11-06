@@ -48,7 +48,7 @@ def get_configuration(request):
     ({'monitored_dir'}, testdir_target, testdir_not_target)
 ])
 def test_symbolic_delete_target(tags_to_apply, main_folder, aux_folder, get_configuration, configure_environment,
-                                restart_syscheckd, wait_for_initial_scan):
+                                restart_syscheckd, wait_for_fim_start):
     """
     Check if syscheck detects events properly when removing a target, have the symlink updated and
     then recreating the target

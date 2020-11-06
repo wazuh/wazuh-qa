@@ -79,7 +79,7 @@ def get_configuration(request):
                         pytest.mark.xfail(reason='Xfail due to issue: https://github.com/wazuh/wazuh/issues/4612')))
 ])
 def test_create_file_scheduled(folder, name, filetype, content, checkers, tags_to_apply, encoding, get_configuration,
-                               configure_environment, restart_syscheckd, wait_for_initial_scan):
+                               configure_environment, restart_syscheckd, wait_for_fim_start):
     """
     Check if a special or regular file creation is detected by syscheck using scheduled monitoring
 
