@@ -272,8 +272,10 @@ class RemotedSimulator:
         msg_decoded = msg_decompress.decode('ISO-8859-1')
 
         return msg_decoded
-<<<<<<< HEAD
 
+    """
+    Receive message from connection
+    """
     def receiveMessage(self, connection):
         while True:
             if self.protocol == 'tcp':
@@ -288,8 +290,6 @@ class RemotedSimulator:
             else:
                 buffer_array, client_address = self.sock.recvfrom(65536)
                 return buffer_array
-
-=======
 
     """
     Recvall with known size of the message
@@ -306,7 +306,6 @@ class RemotedSimulator:
                 continue
         return bytes(buffer)
 
->>>>>>> master
     """
     Listener thread to read every received package from the socket and process it
     """
