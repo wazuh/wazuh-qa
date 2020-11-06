@@ -19,6 +19,8 @@
                 elements:
                 - address: 
                     value: 127.0.0.1
+                - protocol:
+                    value: 'tcp'
     - tags:
       - all
       apply_to_modules:

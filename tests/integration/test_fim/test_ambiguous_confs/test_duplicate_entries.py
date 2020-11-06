@@ -102,7 +102,7 @@ def check_event(previous_mode: str, previous_event: dict, file: str):
 # tests
 
 
-def test_duplicate_entries(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
+def test_duplicate_entries(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check if syscheckd ignores duplicate entries.
        For instance:
            - The second entry should prevail over the first one.
@@ -138,7 +138,7 @@ def test_duplicate_entries(get_configuration, configure_environment, restart_sys
 
 
 def test_duplicate_entries_sregex(get_configuration, configure_environment,
-                                  restart_syscheckd, wait_for_initial_scan):
+                                  restart_syscheckd, wait_for_fim_start):
     """Check if syscheckd ignores duplicate entries, sregex patterns of restrict.
        For instance:
            - The second entry should prevail over the first one.
@@ -175,7 +175,7 @@ def test_duplicate_entries_sregex(get_configuration, configure_environment,
         raise AttributeError(f'Unexpected event {event}')
 
 
-def test_duplicate_entries_report(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
+def test_duplicate_entries_report(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check if syscheckd ignores duplicate entries, report changes.
        For instance:
            - The second entry should prevail over the first one.
@@ -210,7 +210,8 @@ def test_duplicate_entries_report(get_configuration, configure_environment, rest
         'Error: Diff file created'
 
 
-def test_duplicate_entries_complex(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
+def test_duplicate_entries_complex(get_configuration, configure_environment, restart_syscheckd,
+                                   wait_for_fim_start):
     """Check if syscheckd ignores duplicate entries, complex entries.
        For instance:
            - The second entry should prevail over the first one.

@@ -58,7 +58,7 @@ def get_configuration(request):
     ('file2', b'Sample content')
 ])
 def test_tags(folder, name, content,
-              get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
+              get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """
     Check the tags functionality by applying some tags an ensuring the events raised for the monitored directory has
     the expected tags.

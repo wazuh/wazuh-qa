@@ -136,7 +136,7 @@ def disable_report_changes(fim_mode):
 
 @pytest.mark.parametrize('path', [testdir_nodiff])
 def test_report_when_deleted_directories(path, get_configuration, configure_environment, restart_syscheckd,
-                                         wait_for_initial_scan):
+                                         wait_for_fim_start):
     """Check if the diff directory is empty when the monitored directory is deleted.
 
     Parameters
@@ -160,7 +160,7 @@ def test_report_when_deleted_directories(path, get_configuration, configure_envi
 
 @pytest.mark.parametrize('path', [testdir_reports])
 def test_no_report_changes(path, get_configuration, configure_environment,
-                           restart_syscheckd, wait_for_initial_scan):
+                           restart_syscheckd, wait_for_fim_start):
     """Check if duplicated directories in diff are deleted when changing `report_changes` to 'no' or deleting the
     monitored directories.
 
@@ -183,7 +183,7 @@ def test_no_report_changes(path, get_configuration, configure_environment,
 
 
 def test_report_changes_after_restart(get_configuration, configure_environment, restart_syscheckd,
-                                      wait_for_initial_scan):
+                                      wait_for_fim_start):
     """Check if duplicated directories in diff are deleted when restarting syscheck.
 
     The duplicated directories in diff will be removed after Syscheck restarts but will be created again if the report

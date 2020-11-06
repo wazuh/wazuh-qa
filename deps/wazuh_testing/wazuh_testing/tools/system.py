@@ -242,7 +242,7 @@ class HostManager:
                                                          f'user={user} password={password} method={login_method} '
                                                          f'{login_body} validate_certs=no force_basic_auth=yes',
                                                          check=check)
-            return token_response['json']['token']
+            return token_response['json']['data']['token']
         except KeyError:
             raise KeyError(f'Failed to get token: {token_response}')
 

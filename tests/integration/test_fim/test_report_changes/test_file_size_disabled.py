@@ -60,7 +60,7 @@ def get_configuration(request):
     ('regular_0', testdir1, 1000000),
 ])
 def test_file_size_disabled(tags_to_apply, filename, folder, size, get_configuration, configure_environment,
-                            restart_syscheckd, wait_for_initial_scan):
+                            restart_syscheckd, wait_for_fim_start):
     """
     Check that the file_size option is disabled correctly.
 

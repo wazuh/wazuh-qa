@@ -69,10 +69,8 @@ def extra_configuration_after_yield():
     (testdir3, testdir2, 'subdir2', {'ossec_conf'}, True, True),
     (testdir3, testdir2, f'subdir3{os.path.sep}', {'ossec_conf'}, True, True)
 ])
-def test_move_dir(source_folder, target_folder, subdir, tags_to_apply,
-                   triggers_delete_event, triggers_add_event,
-                   get_configuration, configure_environment,
-                   restart_syscheckd, wait_for_initial_scan):
+def test_move_dir(source_folder, target_folder, subdir, tags_to_apply, triggers_delete_event, triggers_add_event,
+                  get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """
     Check if syscheckd detects 'added' or 'deleted' events when moving a
     subfolder from a folder to another one.
@@ -97,6 +95,8 @@ def test_move_dir(source_folder, target_folder, subdir, tags_to_apply,
 
     if mode == 'whodata' and subdir[-1] == os.path.sep and sys.platform == 'linux':
         pytest.xfail('Xfailing due to issue: https://github.com/wazuh/wazuh/issues/4720')
+    elif mode == 'whodata' and subdir[-1] == os.path.sep and sys.platform == 'win32':
+        pytest.xfail('Xfailing due to issue: https://github.com/wazuh/wazuh/issues/6089')
 
     # Move folder to target directory
     os.rename(os.path.join(source_folder, subdir), os.path.join(target_folder, subdir))

@@ -9,7 +9,8 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_file_size_limit_reached, generate_params, create_file, \
     check_time_travel, callback_detect_event, modify_file_content
-from test_fim.test_report_changes.common import generate_string, translate_size, make_diff_file_path
+from test_fim.test_report_changes.common import generate_string, translate_size, make_diff_file_path, \
+    disable_file_max_size, restore_file_max_size, make_diff_file_path, disable_rt_delay, restore_rt_delay
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -47,6 +48,22 @@ def get_configuration(request):
     return request.param
 
 
+# Functions
+
+def extra_configuration_before_yield():
+    """
+    Disable syscheck.rt_delay internal option
+    """
+    disable_rt_delay()
+
+
+def extra_configuration_after_yield():
+    """
+    Restore syscheck.rt_delay internal option
+    """
+    restore_rt_delay()
+
+
 # Tests
 
 @pytest.mark.parametrize('tags_to_apply', [
@@ -56,7 +73,7 @@ def get_configuration(request):
     ('regular_0', testdir1),
 ])
 def test_file_size_default(tags_to_apply, filename, folder, get_configuration, configure_environment, restart_syscheckd,
-                           wait_for_initial_scan):
+                           wait_for_fim_start):
     """
     Check that the file_size option with a default value for report_changes is working correctly.
 
@@ -79,17 +96,18 @@ def test_file_size_default(tags_to_apply, filename, folder, get_configuration, c
     diff_file_path = make_diff_file_path(folder=folder, filename=filename)
 
     # Create file with a smaller size than the configured value
-    to_write = generate_string(int(size_limit / 2), '0')
+    to_write = generate_string(int(size_limit / 10), '0')
     create_file(REGULAR, folder, filename, content=to_write)
 
     check_time_travel(scheduled)
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                            error_message='Did not receive expected "Sending FIM event: ..." event.').result()
+                            error_message='Did not receive expected "Sending FIM event: ..." event.')
 
     if not os.path.exists(diff_file_path):
         pytest.raises(FileNotFoundError(f"{diff_file_path} not found. It should exist before increasing the size."))
 
     # Increase the size of the file over the configured value
+    to_write = generate_string(size_limit, '0')
     modify_file_content(folder, filename, new_content=to_write*3)
 
     check_time_travel(scheduled)

@@ -63,8 +63,7 @@ def extra_configuration_after_yield():
 @pytest.mark.parametrize('tags_to_apply', [
     {'ossec_conf'}
 ])
-def test_new_directory(tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
-                       wait_for_initial_scan):
+def test_new_directory(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
     """
     Check that a new monitored directory generates events after the next scheduled scan.
 
@@ -82,12 +81,16 @@ def test_new_directory(tags_to_apply, get_configuration, configure_environment, 
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     if sys.platform != 'win32':
+        detect_initial_scan(wazuh_log_monitor)
+
         # Create the monitored directory with files and check that events are not raised
         regular_file_cud(directory_str, wazuh_log_monitor, file_list=['file1', 'file2', 'file3'],
                          min_timeout=global_parameters.default_timeout, triggers_event=False)
 
         detect_initial_scan(wazuh_log_monitor)
     else:
+        detect_initial_scan(wazuh_log_monitor)
+
         # Wait for syscheck to realize the directories don't exist
         wazuh_log_monitor.start(timeout=10, callback=callback_non_existing_monitored_dir,
                                 error_message='Monitoring discarded message not found')

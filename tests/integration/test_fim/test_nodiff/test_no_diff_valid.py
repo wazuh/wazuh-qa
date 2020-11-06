@@ -75,7 +75,7 @@ def get_configuration(request):
 def test_no_diff_subdirectory(folder, filename, content, hidden_content,
                               tags_to_apply, get_configuration,
                               configure_environment, restart_syscheckd,
-                              wait_for_initial_scan):
+                              wait_for_fim_start):
     """
     Check files are ignored in the subdirectory according to configuration
 
