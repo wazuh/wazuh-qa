@@ -160,16 +160,21 @@ def test_rootcheck(get_configuration, configure_environment, restart_service,
                             "not found in alerts file"
 
     if check_updates:
-        # Service needs to be stopped otherwise db lock will be held by
-        # Wazuh db
+        # Service needs to be restarted
         control_service('start')
 
         update_threshold = time.time()
 
-        create_injectors(agents)
+        injectors = create_injectors(agents)
 
         # Let rootcheck events to be sent for 60 seconds
         time.sleep(60)
+
+        for injector in injectors:
+            injector.stop_receive()
+
+        # Service needs to be stopped otherwise db lock will be held by Wazuh db
+        control_service('stop')
 
         # Check that logs have been updated
         for agent in agents:
@@ -186,8 +191,7 @@ def test_rootcheck(get_configuration, configure_environment, restart_service,
                     f"Log: \"{log}\" not found in Database"
 
     if check_delete:
-        # Service needs to be stopped otherwise db lock will be held by
-        # Wazuh db
+        # Service needs to be restarted
         control_service('start')
 
         for agent in agents:
@@ -195,5 +199,13 @@ def test_rootcheck(get_configuration, configure_environment, restart_service,
             assert response.startswith(b'ok'), "Wazuh DB returned an error " \
                 "trying to delete the agent"
 
+        # Wait 5 seconds
+        time.sleep(5)
+
+        # Service needs to be stopped otherwise db lock will be held by Wazuh db
+        control_service('stop')
+
+        # Check that logs have been deleted
+        for agent in agents:
             rows = retrieve_rootcheck_rows(agent.id)
             assert len(rows) == 0, 'Rootcheck events were not deleted'
