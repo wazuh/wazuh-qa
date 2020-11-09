@@ -166,7 +166,7 @@ def test_rootcheck(get_configuration, configure_environment, restart_service,
 
         update_threshold = time.time()
 
-        injectors = create_injectors(agents)
+        create_injectors(agents)
 
         # Let rootcheck events to be sent for 60 seconds
         time.sleep(60)
@@ -174,8 +174,6 @@ def test_rootcheck(get_configuration, configure_environment, restart_service,
         # Check that logs have been updated
         for agent in agents:
             rows = retrieve_rootcheck_rows(agent.id)
-
-            db_string = [row[3] for row in rows]
 
             logs_string = [':'.join(x.split(':')[2:]) for x in
                            agent.rootcheck.rootcheck]
