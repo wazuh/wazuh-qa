@@ -336,7 +336,7 @@ class SocketController:
                         output += self.sock.recv(4096, socket.MSG_DONTWAIT)
                     except:
                         break
-        
+
         return output
 
     def set_ssl_configuration(self, ciphers="HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH",
@@ -516,11 +516,11 @@ class StreamServerPort(socketserver.ThreadingTCPServer):
 
 
 class SSLStreamServerPort(socketserver.ThreadingTCPServer):
-    
+
     ciphers = "HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH"
     ssl_version = ssl.PROTOCOL_TLSv1_2
-    certfile = None 
-    keyfile = None 
+    certfile = None
+    keyfile = None
     ca_cert = None
     cert_reqs = ssl.CERT_NONE
     options = None
@@ -562,7 +562,7 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
             self.options = options
 
         return
-    
+
 
     def get_request(self):
         """
@@ -572,7 +572,7 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
 
         if not self.certfile or not self.keyfile or not self.ssl_version:
             raise Exception('SSL configuration needs to be set in SSLStreamServer')
-        
+
         try:
             if self.options:
                 context = ssl.SSLContext(self.ssl_version)
@@ -592,7 +592,7 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
                                         certfile = self.certfile,
                                         keyfile = self.keyfile,
                                         ssl_version = self.ssl_version,
-                                        ciphers= self.ciphers, 
+                                        ciphers= self.ciphers,
                                         cert_reqs=self.cert_reqs,
                                         ca_certs=self.ca_cert)
         except OSError as err:
