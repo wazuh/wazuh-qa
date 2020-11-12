@@ -351,8 +351,8 @@
     output: 'ok []'
     stage: "global get-agents-by-connection-status disconnected before disconnecting agents success"
   -
-    input: 'global disconnect-agents 175'
-    output: 'ok [{"id":1}]'
+    input: 'global disconnect-agents 0 175'
+    output: 'ok 1'
     stage: "global disconnect-agents success"
   -
     input: 'global get-agents-by-connection-status disconnected'
