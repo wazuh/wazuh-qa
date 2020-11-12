@@ -41,7 +41,7 @@ def test_change_rbac_mode_with_endpoint(login_endpoint, set_default_api_conf, re
     # Get current RBAC mode
     response = host_manager.make_api_call(test_hosts[0], endpoint='/security/config', token=tokens[test_hosts[0]])
     assert response['status'] == 200, f'Failed to get security settings: {response}'
-    new_rbac_mode = opposite_rbac_mode[response['json']['rbac_mode']]
+    new_rbac_mode = opposite_rbac_mode[response['json']['data']['rbac_mode']]
 
     # Change RBAC mode using endpoint
     response = host_manager.make_api_call(test_hosts[0], method='PUT', endpoint='/security/config',
@@ -68,11 +68,14 @@ def test_change_rbac_mode_manually(login_endpoint, set_default_api_conf, restore
     # Get current RBAC mode
     response = host_manager.make_api_call(test_hosts[0], endpoint='/security/config', token=tokens[test_hosts[0]])
     assert response['status'] == 200, f'Failed to get security settings: {response}'
-    new_rbac_mode = opposite_rbac_mode[response['json']['rbac_mode']]
+    new_rbac_mode = opposite_rbac_mode[response['json']['data']['rbac_mode']]
 
     # Change RBAC mode manually
     host_manager.modify_file_content(test_hosts[0], path=WAZUH_SECURITY_CONF,
                                      content=yaml.safe_dump({'rbac_mode': new_rbac_mode}))
+
+    # Restart the wazuh-manager service
+    host_manager.get_host(test_hosts[0]).ansible('command', f'service wazuh-manager restart', check=False)
 
     # Assert every token is revoked
     for host in test_hosts:

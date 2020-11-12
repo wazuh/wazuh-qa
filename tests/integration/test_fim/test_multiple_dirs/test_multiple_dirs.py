@@ -9,7 +9,7 @@ from wazuh_testing import global_parameters
 
 from test_fim.test_multiple_dirs.common import multiple_dirs_test
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_warn_max_dir_monitored, \
-                               detect_initial_scan
+                               detect_initial_scan, detect_realtime_start, detect_whodata_start
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools import PREFIX
@@ -75,11 +75,19 @@ def test_multiple_dirs(dir_list, tags_to_apply, get_configuration, configure_env
         List with all the directories to be monitored.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
+
     discarded = wait_for_event()
     assert discarded == expected_discarded, f'Directories discarded expected to be: {discarded}'
 
-    detect_initial_scan(wazuh_log_monitor)
+    if get_configuration['metadata']['fim_mode'] == 'realtime':
+        detect_realtime_start(wazuh_log_monitor)
+    elif get_configuration['metadata']['fim_mode'] == 'whodata':
+        detect_whodata_start(wazuh_log_monitor)
+    else:   # scheduled
+        detect_initial_scan(wazuh_log_monitor)
+
     file = 'regular'
+
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     whodata = get_configuration['metadata']['fim_mode'] == 'whodata'
 

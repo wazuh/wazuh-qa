@@ -76,29 +76,29 @@ class RemotedSimulator:
     """
     Start socket and listener thread
     """
-    def start(self, custom_listener=None, args=[]):  
+    def start(self, custom_listener=None, args=[]):
         if self.running == False:
             self._start_socket()
-            self.listener_thread = threading.Thread(target=(self.listener 
-                                                            if not custom_listener 
-                                                            else custom_listener), 
+            self.listener_thread = threading.Thread(target=(self.listener
+                                                            if not custom_listener
+                                                            else custom_listener),
                                                     args=args)
-            self.listener_thread.setName('listener_thread') 
-            self.running = True  
-            self.listener_thread.start() 
+            self.listener_thread.setName('listener_thread')
+            self.running = True
+            self.listener_thread.start()
 
     def _start_socket(self):
         if self.protocol == "tcp":
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.sock.settimeout(1)
+            self.sock.settimeout(10)
             self.sock.bind((self.server_address,self.remoted_port))
-            self.sock.listen(1) 
+            self.sock.listen(1)
         elif self.protocol == "udp":
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.sock.settimeout(1)
-            self.sock.bind((self.server_address,self.remoted_port)) 
+            self.sock.settimeout(10)
+            self.sock.bind((self.server_address,self.remoted_port))
 
     def setWcomMessageVersion(self, version):
         self.wcom_message_version = version
@@ -107,20 +107,20 @@ class RemotedSimulator:
     Stop socket and listener thread
     """
     def stop(self):
-        if self.running == True: 
-            self.running = False 
-            self.listener_thread.join()    
-            self.sock.close() 
+        if self.running == True:
+            self.running = False
+            self.listener_thread.join()
+            self.sock.close()
 
     """
     Generate encryption key (using agent metadata and key)
-    """ 
+    """
     def create_encryption_key(self,id,name,key):
         sum1 = (hashlib.md5((hashlib.md5(name.encode()).hexdigest().encode() + hashlib.md5(id.encode()).hexdigest().encode())).hexdigest().encode())[:15]
         sum2 = hashlib.md5(key.encode()).hexdigest().encode()
         self.encryption_key = sum2 + sum1
 
-    """   
+    """
     Compose event from raw message
     """
     def compose_sec_message(self, message, binary_data=None):
@@ -158,14 +158,14 @@ class RemotedSimulator:
         elif crypto_method == "blowfish":
             encrypted_sec_message = Cipher(padded_sec_message,self.encryption_key).encrypt_blowfish()
         return (encrypted_sec_message)
-    
+
     """
     Add sec_message headers for AES or Blowfish Cyphers
     """
     def headers(self, encrypted_sec_message, crypto_method):
-        if crypto_method == "aes":            
+        if crypto_method == "aes":
             header = "#AES:".encode()
-        elif crypto_method == "blowfish":            
+        elif crypto_method == "blowfish":
             header = ":".encode()
         headers_sec_message = header + encrypted_sec_message
         return (headers_sec_message)
@@ -274,7 +274,7 @@ class RemotedSimulator:
             # If there is a response, answer it
             elif ret:
                 self.send(connection, ret)
-        
+
         if command == 'lock_restart -1' or not self.wcom_message_version:
             if not self.request_answer.startswith('ok '):
                 self.upgrade_errors = True
@@ -305,7 +305,7 @@ class RemotedSimulator:
     """
     Decrypt a message received from Agent
     """
-    def decrypt_message(self, data, crypto_method):          
+    def decrypt_message(self, data, crypto_method):
         if crypto_method == 'aes':
             msg_removeheader = bytes(data[5:])
             msg_decrypted = Cipher(msg_removeheader,self.encryption_key).decrypt_aes()
@@ -322,60 +322,78 @@ class RemotedSimulator:
         msg_removepadding = msg_decrypted[padding:]
         msg_decompress = zlib.decompress(msg_removepadding)
         msg_decoded = msg_decompress.decode('ISO-8859-1')
-        
+
         return msg_decoded
-        
+
+    """
+    Receive message from connection
+    """
     def receiveMessage(self, connection):
         while True:
             if self.protocol == 'tcp':
                 rcv = connection.recv(4)
                 if len(rcv) == 4:
-                    data_len = ((rcv[3]&0xFF) << 24) | ((rcv[2]&0xFF) << 16) | ((rcv[1]&0xFF) << 8) | (rcv[0]&0xFF)  
+                    data_len = ((rcv[3]&0xFF) << 24) | ((rcv[2]&0xFF) << 16) | ((rcv[1]&0xFF) << 8) | (rcv[0]&0xFF)
 
-                    buffer_array = connection.recv(data_len) 
-                    
+                    buffer_array = connection.recv(data_len)
+
                     if data_len == len(buffer_array):
                         return buffer_array
             else:
-                buffer_array, client_address = self.sock.recvfrom(65536)  
+                buffer_array, client_address = self.sock.recvfrom(65536)
                 return buffer_array
+
+    """
+    Recvall with known size of the message
+    """
+    def recv_all(self, connection, size: int):
+        buffer = bytearray()
+        while len(buffer) < size:
+            try:
+                data = connection.recv(size - len(buffer))
+                if not data:
+                    break
+                buffer.extend(data)
+            except socket.timeout:
+                continue
+        return bytes(buffer)
 
     """
     Listener thread to read every received package from the socket and process it
     """
-    def listener(self):    
-        while self.running:   
-            if self.protocol == 'tcp': 
-                # Wait for a connection          
+    def listener(self):
+        while self.running:
+            if self.protocol == 'tcp':
+                # Wait for a connection
                 try:
-                    connection, client_address = self.sock.accept()  
-                    while self.running:                    
-                        rcv = connection.recv(65536) 
-                        if len(rcv) >= 4:
-                            data = rcv[4:]  
-                            data_len = ((rcv[3]&0xFF)<<24) | ((rcv[2]&0xFF)<<16) | ((rcv[1]&0xFF)<<8) | (rcv[0]&0xFF)
-                            if data_len == len(data):                            
-                                try:
-                                    ret = self.process_message(client_address, data)
-                                except Exception:
-                                    time.sleep(1)
-                                    connection.close()
-                                # Response -1 means connection have to be closed
-                                if ret == -1:
-                                    time.sleep(0.1)
-                                    connection.close()
-                                    break
-                                # If there is a response, answer it
-                                elif ret:
-                                    self.send(connection, ret)
+                    connection, client_address = self.sock.accept()
+                    while self.running:
+                        data = self.recv_all(connection, 4)
+                        data_size = struct.unpack('<I', data[0:4])[0]
+                        data = self.recv_all(connection, data_size)
+
+                        try:
+                            ret = self.process_message(client_address, data)
+                        except Exception:
+                            time.sleep(1)
+                            connection.close()
+
+                        # Response -1 means connection have to be closed
+                        if ret == -1:
+                            time.sleep(0.1)
+                            connection.close()
+                            break
+                        # If there is a response, answer it
+                        elif ret:
+                            self.send(connection, ret)
                         else:
-                            pass              
+                            pass
                 except Exception:
                     continue
 
-            elif self.protocol == 'udp':   
-                try:              
-                    data, client_address = self.sock.recvfrom(65536)                
+            elif self.protocol == 'udp':
+                try:
+                    data, client_address = self.sock.recvfrom(65536)
                     ret = self.process_message(client_address, data)
                     # If there is a response, answer it
                     if ret != None and ret != -1:
@@ -395,12 +413,12 @@ class RemotedSimulator:
                 if self.protocol == 'tcp':
                     connection, client_address = self.sock.accept()
                 else:
-                    data, client_address = self.sock.recvfrom(65536) 
-                
-                while not self.encryption_key and self.running: 
+                    data, client_address = self.sock.recvfrom(65536)
+
+                while not self.encryption_key and self.running:
                     # Receive ACK message and process it
                     if self.protocol == 'tcp':
-                        data = self.receiveMessage(connection)                               
+                        data = self.receiveMessage(connection)
                     try:
                         ret = self.process_message(client_address, data)
 
@@ -481,13 +499,17 @@ class RemotedSimulator:
                 self.sock.sendto(data, dst)
             except:
                 pass
-    
+
     """
     Process a received message and answer according to the simulator mode
     """
     def process_message(self, source, received):
+        #handle ping pong response
+        if received == b'#ping':
+            return b'#pong'
+
         #parse agent identifier and payload
-        index = received.find(b'!')        
+        index = received.find(b'!')
         if index == 0:
             agent_identifier_type = "by_id"
             index = received[1:].find(b'!')
@@ -503,7 +525,7 @@ class RemotedSimulator:
         else:
             crypto_method = "blowfish"
 
-        #Update keys to encrypt/decrypt        
+        #Update keys to encrypt/decrypt
         self.update_keys()
         #TODO: Ask for specific keys depending on Agent Identifier
         keys = self.get_key()
@@ -511,7 +533,7 @@ class RemotedSimulator:
             #No valid keys
             return -1
         (id, name, ip, key) = keys
-        self.create_encryption_key(id, name, key) 
+        self.create_encryption_key(id, name, key)
 
         #Decrypt message
         rcv_msg = self.decrypt_message(received, crypto_method)
@@ -532,22 +554,22 @@ class RemotedSimulator:
 
         #Save context of received message for future asserts
         self.last_message_ctx = '{} {} {}'.format(agent_identifier_type, agent_identifier, crypto_method)
-        
+
         #Create response
         if self.mode == "REJECT":
             return -1
-        elif self.mode == "DUMMY_ACK":                       
-            msg = self.createACK(crypto_method) 
-        elif self.mode == "CONTROLED_ACK":            
+        elif self.mode == "DUMMY_ACK":
+            msg = self.createACK(crypto_method)
+        elif self.mode == "CONTROLED_ACK":
             if hash_message :
-                msg = self.createACK(crypto_method) 
+                msg = self.createACK(crypto_method)
             else:
                 msg = None
         elif self.mode == "WRONG_KEY":
-            self.create_encryption_key(id+'inv', name+'inv', key+'inv')      
-            msg = self.createACK(crypto_method) 
+            self.create_encryption_key(id+'inv', name+'inv', key+'inv')
+            msg = self.createACK(crypto_method)
         elif self.mode == "INVALID_MSG":
-            msg = self.createINVALID()      
+            msg = self.createINVALID()
 
         return(msg)
 
@@ -556,14 +578,14 @@ class RemotedSimulator:
     """
     def update_keys(self):
         with open(self.client_keys_path) as client_file:
-            client_lines = client_file.read().splitlines() 
+            client_lines = client_file.read().splitlines()
 
-            self.keys = ({},{}) 
+            self.keys = ({},{})
             for line in client_lines:
                 (id, name, ip, key) = line.split(" ")
                 self.keys[0][id] = (id, name, ip, key)
                 self.keys[1][ip] = (id, name, ip, key)
-    
+
     """
     Get an specific key
     keys can be found in two dictionaries: by_id and by_ip
@@ -571,7 +593,7 @@ class RemotedSimulator:
     """
     def get_key(self, key=None, dictionary="by_id"):
         try:
-            if key==None:            
+            if key==None:
                 return next(iter(self.keys[0].values()))
 
             if dictionary == "by_ip":

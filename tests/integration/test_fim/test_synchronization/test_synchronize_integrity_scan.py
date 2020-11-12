@@ -80,21 +80,23 @@ def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure
     # Wait for whodata to start and the synchronization check. Since they are different threads, we cannot expect
     # them to come in order every time
     if get_configuration['metadata']['fim_mode'] == 'whodata':
-        value_1 = wazuh_log_monitor.start(timeout=10, callback=callback_integrity_or_whodata,
+        value_1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 2,
+                                          callback=callback_integrity_or_whodata,
                                           error_message='Did not receive expected "File integrity monitoring '
                                                         'real-time Whodata engine started" or "Initializing '
                                                         'FIM Integrity Synchronization check"').result()
 
-        value_2 = wazuh_log_monitor.start(timeout=10, callback=callback_integrity_or_whodata,
+        value_2 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 2,
+                                          callback=callback_integrity_or_whodata,
                                           error_message='Did not receive expected "File integrity monitoring '
                                                         'real-time Whodata engine started" or "Initializing FIM '
                                                         'Integrity Synchronization check"').result()
         assert value_1 != value_2, "callback_integrity_or_whodata detected the same message twice"
 
     else:
-
         # Check the integrity scan has begun
-        wazuh_log_monitor.start(timeout=15, callback=callback_integrity_synchronization_check,
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 3,
+                                callback=callback_integrity_synchronization_check,
                                 error_message='Did not receive expected '
                                               '"Initializing FIM Integrity Synchronization check" event')
 

@@ -45,7 +45,7 @@ def remove_labels():
     """Remove any label set to the modified wazuh-agent and restart it to apply the new config."""
     yield
     host_manager.add_block_to_file(host=modified_agent, path=f'{WAZUH_PATH}/etc/ossec.conf',
-                                   after='</client>', before='<client_buffer>', replace='')
+                                   after='</client>', before='<client_buffer>', replace=os.linesep)
     host_manager.get_host(modified_agent).ansible('command', f'service wazuh-agent restart', check=False)
 
 
@@ -63,21 +63,13 @@ def test_agent_info_sync(clean_cluster_logs, remove_labels):
     ensure agent-info synchronization is working by modifying one agent."""
 
     # Add a label to one of the agents and restart it to apply the change
-    host_manager.add_block_to_file(host=modified_agent, path=f'{WAZUH_PATH}/etc/ossec.conf', after='</client>',
-                                   before='<client_buffer>',
+    host_manager.add_block_to_file(host=modified_agent, path=f'{WAZUH_PATH}/etc/ossec.conf',
+                                   after='</client>', before='<client_buffer>',
                                    replace=f'<labels><label key="{label}">value</label></labels>')
-    host_manager.control_service(host=modified_agent, service='wazuh', state="restarted")
+    host_manager.get_host(modified_agent).ansible('command', f'service wazuh-agent restart', check=False)
 
     # Run the callback checks for the Master and Worker nodes
     HostMonitor(inventory_path=inventory_path, messages_path=messages_path, tmp_path=tmp_path).run()
-
-    # Check the wazuh-agent's label is present in the Master's global.db
-    master_label = host_manager.run_command('wazuh-master', f'sqlite3 {global_db_path} "SELECT key FROM labels LIMIT 1;"')
-    assert master_label == f'"{label}"', "The label present in global.db does not match with the expected one."
-
-    # Check the agent2 is present on the Worker1's global.db
-    agent_list = host_manager.run_command('wazuh-worker1', f'sqlite3 {global_db_path} "SELECT name FROM agent;"')
-    assert modified_agent in agent_list, f'{modified_agent} was not found in wazuh-worker1\'s global.db'
 
 
 def test_agent_info_sync_remove_agent(clean_cluster_logs, register_agent):
@@ -97,10 +89,5 @@ def test_agent_info_sync_remove_agent(clean_cluster_logs, register_agent):
     # Remove the agent from Master node
     host_manager.run_command('wazuh-master', f'{WAZUH_PATH}/bin/manage_agents -r {agent_id[0:3]}')
 
-    # Wait until the Workers synchronize and the agent is removed from the nodes
+    # Check the Workers synchronize and the agent is removed from the nodes
     HostMonitor(inventory_path=inventory_path, messages_path=messages_path_remove, tmp_path=tmp_path).run()
-
-    # Get the content of Worker's client.keys and check if the agent is present.
-    agent_list = host_manager.run_command('wazuh-worker2', f'cat {client_keys_path}')
-    assert deleted_agent not in agent_list, f'{deleted_agent} was found in Worker2\'s client.keys file and it should ' \
-                                            f'not be there.'

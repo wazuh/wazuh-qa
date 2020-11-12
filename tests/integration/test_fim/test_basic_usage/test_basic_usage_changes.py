@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import sys
 
 import pytest
 
@@ -66,7 +67,7 @@ def get_configuration(request):
 ])
 def test_regular_file_changes(folder, name, encoding, checkers, tags_to_apply,
                               get_configuration, configure_environment,
-                              restart_syscheckd, wait_for_initial_scan):
+                              restart_syscheckd, wait_for_fim_start):
     """
     Check if syscheckd detects regular file changes (add, modify, delete)
 
@@ -78,6 +79,7 @@ def test_regular_file_changes(folder, name, encoding, checkers, tags_to_apply,
         Syscheck checkers (check_all).
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
+    mult = 1 if sys.platform == 'win32' else 2
 
     if encoding is not None:
         name = name.encode(encoding)
@@ -85,5 +87,5 @@ def test_regular_file_changes(folder, name, encoding, checkers, tags_to_apply,
 
     regular_file_cud(folder, wazuh_log_monitor, file_list=[name],
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                     min_timeout=global_parameters.default_timeout, options=checkers, encoding=encoding,
+                     min_timeout=global_parameters.default_timeout * mult, options=checkers, encoding=encoding,
                      triggers_event=True)

@@ -13,6 +13,7 @@ import datetime
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.authd_sim import AuthdSimulator
+from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH, WAZUH_CONF
@@ -25,6 +26,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), p
 
 SERVER_ADDRESS = '127.0.0.1'
 REMOTED_PORT = 1514
+PROTOCOL = 'tcp'
 INSTALLATION_FOLDER = WAZUH_PATH
 
 def load_tests(path):
@@ -50,6 +52,13 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 authd_server = AuthdSimulator(server_address=SERVER_ADDRESS, key_path=SERVER_KEY_PATH, cert_path=SERVER_CERT_PATH)
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
+
+remoted_server = None
+
+def teardown():
+    global remoted_server
+    if remoted_server != None:
+        remoted_server.stop()
 
 # fixtures
 @pytest.fixture(scope="module", params=configurations)
@@ -165,9 +174,13 @@ def check_log_error_conf(msg):
 
 @pytest.mark.parametrize('test_case', [case for case in tests])
 def test_agent_agentd_enrollment(configure_authd_server, configure_environment, test_case: list):
+    global remoted_server
     print(f'Test: {test_case["name"]}')
     if 'ossec-agentd' in test_case.get("skips", []):
         pytest.skip("This test does not apply to ossec-agentd")
+    
+    remoted_server = RemotedSimulator(protocol=PROTOCOL, mode='CONTROLED_ACK', client_keys=CLIENT_KEYS_PATH)
+    
     configuration = test_case.get('configuration', {})
     parse_configuration_string(configuration)
     configure_enrollment(test_case.get('enrollment'), authd_server, configuration.get('agent_name'))

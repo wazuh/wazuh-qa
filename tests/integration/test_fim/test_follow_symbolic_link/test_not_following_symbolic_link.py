@@ -54,7 +54,7 @@ def get_configuration(request):
 ])
 def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_dir1, non_monitored_dir2,
                                                  sym_target, tags_to_apply, get_configuration, configure_environment,
-                                                 restart_syscheckd, wait_for_initial_scan):
+                                                 restart_syscheckd, wait_for_fim_start):
     """
     Check what happens with a symlink and its target when syscheck monitors a directory with a symlink
     and not the symlink itself.

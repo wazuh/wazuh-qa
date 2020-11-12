@@ -3,10 +3,12 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import sys
 
 import pytest
 
 from wazuh_testing.fim import generate_params
+from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.services import get_process
 
@@ -19,13 +21,16 @@ pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 force_restart_after_restoring = True
-test_directories = []
+test_directories = [os.path.join(PREFIX, 'testdir1')]
 
 # configurations
 
 priority_list = ['0', '4', '-5']
+test_modes = ['realtime'] if sys.platform == 'linux' else ['scheduled']
+conf_params = {'TEST_DIRECTORIES': test_directories[0], 'MODULE_NAME': __name__}
 
-p, m = generate_params(apply_to_all=({'PROCESS_PRIORITY': priority_value} for priority_value in priority_list))
+p, m = generate_params(apply_to_all=({'PROCESS_PRIORITY': priority_value} for priority_value in priority_list),
+                       extra_params=conf_params, modes=test_modes)
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
@@ -39,7 +44,7 @@ def get_configuration(request):
 
 # tests
 
-def test_process_priority(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
+def test_process_priority(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check if the ossec-syscheckd service priority is updated correctly using
        <process_priority> tag in ossec.conf.
     """

@@ -38,8 +38,9 @@ agent_count = 1
 
 class Agent:
     def __init__(self, manager_address, cypher="aes", os=None,
-                 inventory_sample=None, id=None, name=None, key=None,
-                 version="3.12", fim_eps=None, fim_integrity_eps=None,
+                 inventory_sample=None, rootcheck_sample= None,
+                 id=None, name=None, key=None, version="3.12",
+                 fim_eps=None, fim_integrity_eps=None,
                  authd_password=None):
         self.id = id
         self.name = name
@@ -57,14 +58,16 @@ class Agent:
         self.authd_password = authd_password
         self.inventory_sample = inventory_sample
         self.inventory = None
+        self.rootcheck_sample = rootcheck_sample
+        self.rootcheck = None
         self.fim = None
+        self.fim_integrity = None
         self.modules = {
             "keepalive": {"status": "enabled", "frequency": 60.0},
             "fim": {"status": "enabled", "eps": self.fim_eps},
-            "fim_integrity": {"status": "disabled",
-                              "eps": self.fim_integrity_eps},
-            "syscollector": {"status": "disabled", "frequency": 60.0,
-                             "eps": 200},
+            "fim_integrity": {"status": "disabled", "eps": self.fim_integrity_eps},
+            "syscollector": {"status": "disabled", "frequency": 60.0, "eps": 200},
+            "rootcheck": {"status": "enabled", "frequency": 60.0, "eps": 200},
             "receive_messages": {"status": "enabled"},
         }
         self.sha_key = None
@@ -73,7 +76,6 @@ class Agent:
         self.upgrade_script_result = 0
         self.stop_receive = 0
         self.stage_disconnect = None
-        self.fim_integrity = None
         self.setup()
 
     # Set up agent: Keep alive, encryption key and start up msg.
@@ -356,6 +358,8 @@ class Agent:
     def initializeModules(self):
         if self.modules["syscollector"]["status"] == "enabled":
             self.inventory = Inventory(self.os, self.inventory_sample)
+        if self.modules["rootcheck"]["status"] == "enabled":
+            self.rootcheck = Rootcheck(self.rootcheck_sample)
         if self.modules["fim"]["status"] == "enabled":
             self.fim = GeneratorFIM(self.id, self.name, self.version)
         if self.modules["fim_integrity"]["status"] == "enabled":
@@ -389,6 +393,32 @@ class Inventory:
                                                self.SYSCOLLECTOR,
                                                line.strip("\n"))
                     self.inventory.append(msg)
+                line = fp.readline()
+
+
+class Rootcheck:
+    def __init__(self, os, rootcheck_sample=None):
+        self.os = os
+        self.ROOTCHECK = 'rootcheck'
+        self.ROOTCHECK_MQ = '9'
+        self.rootcheck = []
+        self.rootcheck_path = ""
+        self.rootcheck_sample = rootcheck_sample
+        self.setup()
+
+    def setup(self):
+        if self.rootcheck_sample is None:
+            self.rootcheck_path = os.path.join(_data_path, 'rootcheck.txt')
+        else:
+            self.rootcheck_path = os.path.join(_data_path, self.rootcheck_sample)
+        with open(self.rootcheck_path) as fp:
+            line = fp.readline()
+            while line:
+                if not line.startswith("#"):
+                    msg = "{0}:{1}:{2}".format(self.ROOTCHECK_MQ,
+                                               self.ROOTCHECK,
+                                               line.strip("\n"))
+                    self.rootcheck.append(msg)
                 line = fp.readline()
 
 
@@ -792,6 +822,32 @@ class InjectorThread (threading.Thread):
                   - ((time() - starttime)
                      % self.agent.modules["syscollector"]["frequency"]))
 
+    def rootcheck(self):
+        sleep(10)
+        starttime = time()
+        while self.stop_thread == 0:
+            # Send agent rootcheck scan
+            print("Scan started - {}({}) - {}({})"
+                  .format(self.agent.name,
+                          self.agent.id,
+                          "rootcheck",
+                          self.agent.rootcheck.rootcheck_path))
+            for item in self.agent.rootcheck.rootcheck:
+                self.sender.sendEvent(self.agent.createEvent(item))
+                self.totalMessages += 1
+                if self.totalMessages % \
+                   self.agent.modules["rootcheck"]["eps"] == 0:
+                    self.totalMessages = 0
+                    sleep(1.0 - ((time() - starttime) % 1.0))
+            print("Scan ended - {}({}) - {}({})"
+                  .format(self.agent.name,
+                          self.agent.id,
+                          "rootcheck",
+                          self.agent.rootcheck.rootcheck_path))
+            sleep(self.agent.modules["rootcheck"]["frequency"]
+                  - ((time() - starttime)
+                     % self.agent.modules["rootcheck"]["frequency"]))
+
     def run(self):
         # message = "1:/var/log/syslog:Jan 29 10:03:41 master sshd[19635]:
         #   pam_unix(sshd:session): session opened for user vagrant by (uid=0)
@@ -805,6 +861,8 @@ class InjectorThread (threading.Thread):
             self.fim()
         elif self.module == "syscollector":
             self.inventory()
+        elif self.module == "rootcheck":
+            self.rootcheck()
         elif self.module == "fim_integrity":
             self.fim_integrity()
         elif self.module == "receive_messages":
