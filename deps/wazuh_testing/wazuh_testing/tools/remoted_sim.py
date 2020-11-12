@@ -7,6 +7,7 @@ import sys
 import threading
 import struct
 import time
+import base64
 from wazuh_testing.tools import WAZUH_PATH
 from Crypto.Cipher import AES, Blowfish
 from Crypto.Util.Padding import pad, unpad
@@ -48,17 +49,17 @@ class RemotedSimulator:
     """
     Create an AF_INET server socket for simulating remoted connection
     """
-    def __init__(self, server_address='127.0.0.1', remoted_port=1514, protocol='udp', mode='REJECT', 
-                 client_keys=WAZUH_PATH+'/etc/client.keys', start_on_init=True):  
+    def __init__(self, server_address='127.0.0.1', remoted_port=1514, protocol='udp', mode='REJECT',
+                 client_keys=WAZUH_PATH+'/etc/client.keys', start_on_init=True):
         self.protocol = protocol
         self.global_count = 1234567891
         self.local_count = 5555
         self.request_counter = 111
         self.request_confirmed = False
         self.request_answer = None
-        self.keys = ({},{}) 
-        self.encryption_key = ""  
-        self.mode = mode 
+        self.keys = ({},{})
+        self.encryption_key = ""
+        self.mode = mode
         self.server_address = server_address
         self.remoted_port = remoted_port
         self.client_keys_path = client_keys
@@ -67,6 +68,7 @@ class RemotedSimulator:
         self.upgrade_errors = False
         self.upgrade_success = False
         self.upgrade_notification = None
+        self.wcom_message_version = None
         self.listener_thread = None
         if start_on_init:
             self.start()
@@ -84,7 +86,7 @@ class RemotedSimulator:
             self.listener_thread.setName('listener_thread') 
             self.running = True  
             self.listener_thread.start() 
-        
+
     def _start_socket(self):
         if self.protocol == "tcp":
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   
@@ -97,6 +99,9 @@ class RemotedSimulator:
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.sock.settimeout(1)
             self.sock.bind((self.server_address,self.remoted_port)) 
+
+    def setWcomMessageVersion(self, version):
+        self.wcom_message_version = version
 
     """
     Stop socket and listener thread
@@ -179,24 +184,65 @@ class RemotedSimulator:
         encrypted_sec_message = self.encrypt(padded_sec_message, crypto_method)
         # Add headers
         headers_sec_message = self.headers(encrypted_sec_message, crypto_method)
-        return (headers_sec_message) 
+        return (headers_sec_message)
 
     """
     Create an ACK message
     """
-    def createACK(self, crypto_method):        
-        return self.create_sec_message("#!-agent ack ", crypto_method) 
+    def createACK(self, crypto_method):
+        return self.create_sec_message("#!-agent ack ", crypto_method)
+
+    """
+    Build com message with new format
+    """
+    def buildNewComMessage(self, command, payload=None):
+        list_command = command.split(' ')
+        message = None
+        if list_command[0] == 'open':
+            message = json.dumps({"command": list_command[0],
+                                  "parameters": {
+                                    "file": list_command[2],
+                                    "mode": list_command[1]
+                                    }})
+        elif list_command[0] == 'write':
+            payload_b64 = base64.b64encode(payload)
+            payload_b64 = payload_b64.decode('ascii')
+            message = json.dumps({"command": list_command[0],
+                                  "parameters": {
+                                    "file": list_command[2],
+                                    "buffer": payload_b64,
+                                    "length": (len(payload_b64) * 3) / 4 - payload_b64.count('=', -2)
+                                    }})
+        elif list_command[0] == 'close' or list_command[0] == 'sha1':
+            message = json.dumps({"command": list_command[0],
+                                  "parameters": {
+                                    "file": list_command[1]
+                                    }})
+        elif list_command[0] == 'upgrade':
+            message = json.dumps({"command": list_command[0],
+                                  "parameters": {
+                                    "file": list_command[1],
+                                    "installer": list_command[2]
+                                    }})
+        else:
+            pass
+        return message
 
     """
     Create a COM message
     - client_address: client of the connection
     - connection: established connection (tcp only)
     - payload: Optional binary data to add to the message
-    - interruption_time: Time that will be added in between connections 
+    - interruption_time: Time that will be added in between connections
     """
     def sendComMessage(self, client_address, connection, command, payload=None, interruption_time=None):
         self.request_counter += 1
-        message = self.create_sec_message(f"#!-req {self.request_counter} com {command}", 'aes', binary_data=payload)
+        message = None
+        if command == 'lock_restart -1' or not self.wcom_message_version:
+            message = self.create_sec_message(f"#!-req {self.request_counter} com {command}", 'aes', binary_data=payload)
+        else:
+            msg = self.buildNewComMessage(command, payload=payload)
+            message = self.create_sec_message(f"#!-req {self.request_counter} upgrade {msg}", 'aes', None)
         self.send(connection, message)
 
         if interruption_time:
@@ -208,17 +254,17 @@ class RemotedSimulator:
                 connection, client_address = self.start_connection()
             else:
                 time.sleep(interruption_time)
-            
+
         self.request_confirmed = False
-       
-        timeout = time.time() + 60 
+
+        timeout = time.time() + 60
         # Wait for confirmation
         while not self.request_confirmed:
             if time.time() > timeout:
                 self.request_answer = 'Request confirmation never arrived'
                 self.upgrade_errors = True
                 raise TimeoutError(self.request_answer)
-            data = self.receiveMessage(connection)                               
+            data = self.receiveMessage(connection)
             ret = self.process_message(client_address, data)
             # Response -1 means connection have to be closed
             if ret == -1:
@@ -228,16 +274,22 @@ class RemotedSimulator:
             # If there is a response, answer it
             elif ret:
                 self.send(connection, ret)
+        
+        if command == 'lock_restart -1' or not self.wcom_message_version:
+            if not self.request_answer.startswith('ok '):
+                self.upgrade_errors = True
+                raise
+        else:
+            if f'"error":0' not in self.request_answer and 'sha1' not in command:
+                self.upgrade_errors = True
+                raise
 
-        if not self.request_answer.startswith('ok '):
-            self.upgrade_errors = True
-            raise
         return self.request_answer
 
     """
     Create an invalid message, without encryption and headers
     """
-    def createINVALID(self):        
+    def createINVALID(self):
         return  "INVALID".encode()
 
     """
@@ -364,36 +416,40 @@ class RemotedSimulator:
                         time.sleep(1)
                         if connection:
                             connection.close()
-                        
+
                 return connection, client_address
             except Exception as identifier:
                 continue
-     
+
     """
     Listener thread that will finish when encryption_keys are obtained
     """
-    def upgrade_listener(self, filename, filepath, chunk_size, installer, 
+    def upgrade_listener(self, filename, filepath, chunk_size, installer,
                          sha1hash, simulate_interruption=False,
-                         simulate_connection_error=False):   
+                         simulate_connection_error=False):
         self.upgrade_errors = False
         self.upgrade_success = False
-        while not self.upgrade_errors and self.running: 
+
+        while not self.upgrade_errors and self.running:
             try:
                 connection, client_address = self.start_connection()
                 self.sendComMessage(client_address, connection, 'lock_restart -1')
-                self.sendComMessage(client_address, connection, f'open wb {filename}', 
+                self.sendComMessage(client_address, connection, f'open wb {filename}',
                                     interruption_time=5 if simulate_interruption else None)
                 with open(filepath, 'rb') as f:
                     bytes_stream = f.read(chunk_size)
+                    bytes_stream_64 = base64.b64encode(bytes_stream)
+                    bytes_stream_64 = bytes_stream_64.decode('utf-8')
                     while len(bytes_stream) == chunk_size:
-                        self.sendComMessage(client_address, connection, f'write {len(bytes_stream)} {filename} ', 
+                        self.sendComMessage(client_address, connection, f'write {len(bytes_stream)} {filename} ',
                                             payload=bytes_stream)
                         bytes_stream = f.read(chunk_size)
-                    self.sendComMessage(client_address, connection, f'write {len(bytes_stream)} {filename} ', 
+                    self.sendComMessage(client_address, connection, f'write {len(bytes_stream)} {filename} ',
                                         payload=bytes_stream)
                 self.sendComMessage(client_address, connection, f'close {filename}')
                 response = self.sendComMessage(client_address, connection, f'sha1 {filename}')
-                if response.split(' ')[1] != sha1hash:
+
+                if f'"message":"{sha1hash}"' not in response:
                     self.upgrade_errors = True
                     raise
                 self.sendComMessage(client_address, connection, f'upgrade {filename} {installer}')
@@ -402,14 +458,12 @@ class RemotedSimulator:
                 # Switch to common listener once the upgrade has ended
                 if simulate_connection_error:
                     # Sleep long enough to make the connection after upgrade fail and generate a rollback
-                    time.sleep(100)  
+                    time.sleep(100)
                     self.sock.close()
                     self._start_socket()
                 return self.listener()
             except Exception as identifier:
                 continue
-        
-        
 
     """
     send method to write on the socket
@@ -424,7 +478,7 @@ class RemotedSimulator:
                 pass
         elif self.protocol == "udp":
             try:
-                self.sock.sendto(data, dst)   
+                self.sock.sendto(data, dst)
             except:
                 pass
     
@@ -460,9 +514,9 @@ class RemotedSimulator:
         self.create_encryption_key(id, name, key) 
 
         #Decrypt message
-        rcv_msg = self.decrypt_message(received, crypto_method) 
+        rcv_msg = self.decrypt_message(received, crypto_method)
 
-        #Hash message means a response is required   
+        #Hash message means a response is required
         if rcv_msg.find('#!-') != -1:
             req_index = rcv_msg.find('#!-req')
             if req_index != -1:

@@ -9,6 +9,7 @@ import time
 import requests
 import subprocess
 import yaml
+import json
 
 from configobj import ConfigObj
 from datetime import datetime
@@ -55,6 +56,16 @@ def get_current_version():
 
 _agent_version = get_current_version()
 
+error_msg = ''
+if _agent_version == 'v4.1.0':
+    error_msg = 'Could not chmod' \
+        if platform.system() == 'Linux' else \
+        'Cannot execute installer'
+else:
+    error_msg = 'err Could not chmod' \
+        if platform.system() == 'Linux' else \
+        'err Cannot execute installer'
+
 test_metadata = [
     # 1. Upgrade from initial_version to v4.1.0
     {
@@ -85,9 +96,7 @@ test_metadata = [
         'simulate_rollback': False,
         'results': {
             'upgrade_ok': False,
-            'error_message': 'err Could not chmod' \
-            if platform.system() == 'Linux' else \
-            'err Cannot execute installer',
+            'error_message': error_msg,
             'receive_notification': False,
         }
     },
@@ -198,11 +207,20 @@ def start_agent(request, get_configuration):
                                          mode='CONTROLED_ACK',
                                          start_on_init=False,
                                          client_keys=CLIENT_KEYS_PATH)
+    if _agent_version == 'v4.1.0':
+        remoted_simulator.setWcomMessageVersion('4.1')
 
     # Clean client.keys file
     truncate_file(CLIENT_KEYS_PATH)
     time.sleep(1)
 
+    control_service('stop')
+    agent_auth_pat = 'bin' if platform.system() == 'Linux' else ''
+    subprocess.call([f'{WAZUH_PATH}/{agent_auth_pat}/agent-auth', '-m',
+                    SERVER_ADDRESS])
+    control_service('start')
+
+    time.sleep(80)
     remoted_simulator.start(custom_listener=remoted_simulator.upgrade_listener,
                             args=(metadata['filename'], metadata['filepath'],
                                   metadata['chunk_size'], 
@@ -210,12 +228,6 @@ def start_agent(request, get_configuration):
                                   metadata['sha1'],
                                   metadata['simulate_interruption'],
                                   metadata['simulate_rollback']))
-
-    control_service('stop')
-    agent_auth_pat = 'bin' if platform.system() == 'Linux' else ''
-    subprocess.call([f'{WAZUH_PATH}/{agent_auth_pat}/agent-auth', '-m',
-                    SERVER_ADDRESS])
-    control_service('start')
 
     yield
 
@@ -328,15 +340,23 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
            'Initial version does not match Expected for agent'
 
     upgrade_process_result, upgrade_exec_message = \
-        remoted_simulator.wait_upgrade_process(timeout=180)
+        remoted_simulator.wait_upgrade_process(timeout=240)
     assert upgrade_process_result == expected['upgrade_ok'], \
            'Upgrade process result was not the expected'
     if upgrade_process_result:
-        upgrade_result_code = int(upgrade_exec_message.split(' ')[1])
+        upgrade_result_code = None
+        if expected['result_code'] == 0 or _agent_version == 'v4.1.0':
+            exp_json = json.loads(upgrade_exec_message)
+            upgrade_result_code = int(exp_json['message'])
+        else:
+            upgrade_result_code = int(upgrade_exec_message.split(' ')[1])
         assert upgrade_result_code == expected['result_code'], \
                f'Expected upgrade result code was {expected["result_code"]} ' \
                f'but obtained {upgrade_result_code} instead'
     else:
+        if _agent_version == 'v4.1.0' and not metadata['simulate_interruption']:
+            exp_json = json.loads(upgrade_exec_message)
+            upgrade_exec_message = str(exp_json['message'])
         assert upgrade_exec_message == expected['error_message'], \
                f'Expected error message does not match'
     if upgrade_process_result and expected['receive_notification']:
