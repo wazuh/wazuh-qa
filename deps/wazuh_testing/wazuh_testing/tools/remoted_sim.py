@@ -7,6 +7,7 @@ import sys
 import threading
 import struct
 import time
+import base64
 from wazuh_testing.tools import WAZUH_PATH
 from Crypto.Cipher import AES, Blowfish
 from Crypto.Util.Padding import pad, unpad
@@ -67,6 +68,7 @@ class RemotedSimulator:
         self.upgrade_errors = False
         self.upgrade_success = False
         self.upgrade_notification = None
+        self.wcom_message_version = None
         self.listener_thread = None
         if start_on_init:
             self.start()
@@ -97,6 +99,9 @@ class RemotedSimulator:
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.sock.settimeout(10)
             self.sock.bind((self.server_address,self.remoted_port))
+
+    def setWcomMessageVersion(self, version):
+        self.wcom_message_version = version
 
     """
     Stop socket and listener thread
@@ -188,6 +193,42 @@ class RemotedSimulator:
         return self.create_sec_message("#!-agent ack ", crypto_method)
 
     """
+    Build com message with new format
+    """
+    def buildNewComMessage(self, command, payload=None):
+        list_command = command.split(' ')
+        message = None
+        if list_command[0] == 'open':
+            message = json.dumps({"command": list_command[0],
+                                  "parameters": {
+                                    "file": list_command[2],
+                                    "mode": list_command[1]
+                                    }})
+        elif list_command[0] == 'write':
+            payload_b64 = base64.b64encode(payload)
+            payload_b64 = payload_b64.decode('ascii')
+            message = json.dumps({"command": list_command[0],
+                                  "parameters": {
+                                    "file": list_command[2],
+                                    "buffer": payload_b64,
+                                    "length": (len(payload_b64) * 3) / 4 - payload_b64.count('=', -2)
+                                    }})
+        elif list_command[0] == 'close' or list_command[0] == 'sha1':
+            message = json.dumps({"command": list_command[0],
+                                  "parameters": {
+                                    "file": list_command[1]
+                                    }})
+        elif list_command[0] == 'upgrade':
+            message = json.dumps({"command": list_command[0],
+                                  "parameters": {
+                                    "file": list_command[1],
+                                    "installer": list_command[2]
+                                    }})
+        else:
+            pass
+        return message
+
+    """
     Create a COM message
     - client_address: client of the connection
     - connection: established connection (tcp only)
@@ -196,7 +237,12 @@ class RemotedSimulator:
     """
     def sendComMessage(self, client_address, connection, command, payload=None, interruption_time=None):
         self.request_counter += 1
-        message = self.create_sec_message(f"#!-req {self.request_counter} com {command}", 'aes', binary_data=payload)
+        message = None
+        if command == 'lock_restart -1' or self.wcom_message_version == None:
+            message = self.create_sec_message(f"#!-req {self.request_counter} com {command}", 'aes', binary_data=payload)
+        else:
+            msg = self.buildNewComMessage(command, payload=payload)
+            message = self.create_sec_message(f"#!-req {self.request_counter} upgrade {msg}", 'aes', None)
         self.send(connection, message)
 
         if interruption_time:
@@ -229,9 +275,15 @@ class RemotedSimulator:
             elif ret:
                 self.send(connection, ret)
 
-        if not self.request_answer.startswith('ok '):
-            self.upgrade_errors = True
-            raise
+        if command == 'lock_restart -1' or self.wcom_message_version == None:
+            if not self.request_answer.startswith('ok '):
+                self.upgrade_errors = True
+                raise
+        else:
+            if f'"error":0' not in self.request_answer:
+                self.upgrade_errors = True
+                raise
+
         return self.request_answer
 
     """
@@ -395,9 +447,12 @@ class RemotedSimulator:
                          simulate_connection_error=False):
         self.upgrade_errors = False
         self.upgrade_success = False
+
         while not self.upgrade_errors and self.running:
             try:
                 connection, client_address = self.start_connection()
+
+                time.sleep(60)
                 self.sendComMessage(client_address, connection, 'lock_restart -1')
                 self.sendComMessage(client_address, connection, f'open wb {filename}',
                                     interruption_time=5 if simulate_interruption else None)
@@ -411,7 +466,11 @@ class RemotedSimulator:
                                         payload=bytes_stream)
                 self.sendComMessage(client_address, connection, f'close {filename}')
                 response = self.sendComMessage(client_address, connection, f'sha1 {filename}')
-                if response.split(' ')[1] != sha1hash:
+                if self.wcom_message_version == None:
+                    if response.split(' ')[1] != sha1hash:
+                        self.upgrade_errors = True
+                        raise
+                elif f'"message":"{sha1hash}"' not in response:
                     self.upgrade_errors = True
                     raise
                 self.sendComMessage(client_address, connection, f'upgrade {filename} {installer}')
@@ -426,8 +485,6 @@ class RemotedSimulator:
                 return self.listener()
             except Exception as identifier:
                 continue
-
-
 
     """
     send method to write on the socket

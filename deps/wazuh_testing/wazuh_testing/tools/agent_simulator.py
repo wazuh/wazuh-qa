@@ -75,8 +75,7 @@ class Agent:
         self.send_upgrade_notification = False
         self.upgrade_script_result = 0
         self.stop_receive = 0
-        self.disconnect = None
-        self.counter_disconnect = None
+        self.stage_disconnect = None
         self.setup()
 
     # Set up agent: Keep alive, encryption key and start up msg.
@@ -98,13 +97,14 @@ class Agent:
     # Set variables related to wpk simulated responses
     def set_wpk_variables(self, sha=None, upgrade_exec_result=None,
                           upgrade_notification=False, upgrade_script_result=0,
-                          disconnect=False):
+                          stage_disconnect=None, version=None):
         self.sha_key = sha
         self.upgrade_exec_result = upgrade_exec_result
         self.send_upgrade_notification = upgrade_notification
         self.upgrade_script_result = upgrade_script_result
-        self.disconnect = disconnect
-        self.counter_disconnect = 0
+        self.stage_disconnect = stage_disconnect
+        if version:
+            self.version = version
 
     # Set agent name
     def set_name(self):
@@ -259,46 +259,78 @@ class Agent:
 
     def processMessage(self, sender, message):
         msg_decoded_list = message.split(' ')
-        if 'com' in msg_decoded_list:
+        if 'com' in msg_decoded_list or 'upgrade' in msg_decoded_list:
             self.processCommand(sender, msg_decoded_list)
 
     def processCommand(self, sender, message_list):
-        com_index = message_list.index('com')
-        command = message_list[com_index+1]
+        command = None
+        if 'com' in message_list:
+            com_index = message_list.index('com')
+            command = message_list[com_index+1]
+        else:
+            com_index = message_list.index('upgrade')
+            json_command = json.loads(message_list[com_index+1])
+            command = json_command['command']
         if command in ['lock_restart', 'open', 'write', 'close',
                        'clear_upgrade_result']:
-            sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} ok '))
-            if command == 'write' and self.disconnect is True:
-                self.counter_disconnect += 1
-                if self.counter_disconnect == 10:
-                    self.stop_receive = 1
+            if command == 'lock_restart' and \
+                          self.stage_disconnect == 'lock_restart':
+                self.stop_receive = 1
+            elif command == 'open' and self.stage_disconnect == 'open':
+                self.stop_receive = 1
+            elif command == 'write' and self.stage_disconnect == 'write':
+                self.stop_receive = 1
+            elif command == 'close' and self.stage_disconnect == 'close':
+                self.stop_receive = 1
+            elif command == 'clear_upgrade_result' and \
+                            self.stage_disconnect == 'clear_upgrade_result':
+                self.stop_receive = 1
+            else:
+                if float(self.version) < 4.1 or command == 'lock_restart':
+                    sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} ok '))
+                else:
+                    sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} '
+                                                      f'{{"error":0, "message":"ok", "data":[]}} '))
         elif command == 'sha1':
             # !-req num ok {sha}
             if self.sha_key:
-                sender.sendEvent(self.createEvent(
-                    f'#!-req {message_list[1]} ok {self.sha_key}'))
+                if command == 'sha1' and self.stage_disconnect == 'sha1':
+                    self.stop_receive = 1
+                else:
+                    if float(self.version) < 4.1:
+                        sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} '
+                                                          f'ok {self.sha_key}'))
+                    else:
+                        sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} {{"error":0, '
+                                                          f'"message":"{self.sha_key}", "data":[]}}'))
             else:
                 raise ValueError(f'WPK SHA key should be configured in agent')
         elif command == 'upgrade':
             if self.upgrade_exec_result:
-                sender.sendEvent(self.createEvent(
-                    f'#!-req {message_list[1]} ok {self.upgrade_exec_result}'))
-                if self.send_upgrade_notification:
-                    upgrade_update_status_message = {
-                        'command': 'upgrade_update_status',
-                        'parameters': {
-                            'error': self.upgrade_script_result,
-                            'message': 'Upgrade was successful'
-                                    if self.upgrade_script_result == 0
-                                    else 'Upgrade failed',
-                            'status': 'Done' if self.upgrade_script_result == 0
-                                      else 'Failed',
+                if command == 'upgrade' and self.stage_disconnect == 'upgrade':
+                    self.stop_receive = 1
+                else:
+                    if float(self.version) < 4.1:
+                        sender.sendEvent(self.createEvent(
+                                         f'#!-req {message_list[1]} ok '
+                                         f'{self.upgrade_exec_result}'))
+                    else:
+                        sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} {{"error":0, '
+                                                          f'"message":"{self.upgrade_exec_result}", "data":[]}}'))
+                    if self.send_upgrade_notification:
+                        message = 'Upgrade was successful'if self.upgrade_script_result == 0 else 'Upgrade failed'
+                        status = 'Done' if self.upgrade_script_result == 0 else 'Failed'
+                        upgrade_update_status_message = {
+                            'command': 'upgrade_update_status',
+                            'parameters': {
+                                'error': self.upgrade_script_result,
+                                'message': message,
+                                'status': status,
+                            }
                         }
-                    }
-
-                    sender.sendEvent(self.createEvent("u:upgrade_module:"
-                                     + json.dumps(
-                                         upgrade_update_status_message)))
+                        sender.sendEvent(self.createEvent("u:upgrade_module:"
+                                         + json.dumps(
+                                            upgrade_update_status_message)))
             else:
                 raise ValueError(f'Execution result should be configured \
                                  in agent')
