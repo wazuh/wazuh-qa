@@ -238,7 +238,7 @@ class RemotedSimulator:
     def sendComMessage(self, client_address, connection, command, payload=None, interruption_time=None):
         self.request_counter += 1
         message = None
-        if command == 'lock_restart -1' or not self.wcom_message_version:
+        if command == 'lock_restart -1' or self.wcom_message_version == None:
             message = self.create_sec_message(f"#!-req {self.request_counter} com {command}", 'aes', binary_data=payload)
         else:
             msg = self.buildNewComMessage(command, payload=payload)
@@ -275,12 +275,12 @@ class RemotedSimulator:
             elif ret:
                 self.send(connection, ret)
 
-        if command == 'lock_restart -1' or not self.wcom_message_version:
+        if command == 'lock_restart -1' or self.wcom_message_version == None:
             if not self.request_answer.startswith('ok '):
                 self.upgrade_errors = True
                 raise
         else:
-            if f'"error":0' not in self.request_answer and 'sha1' not in command:
+            if f'"error":0' not in self.request_answer:
                 self.upgrade_errors = True
                 raise
 
@@ -456,8 +456,6 @@ class RemotedSimulator:
                                     interruption_time=5 if simulate_interruption else None)
                 with open(filepath, 'rb') as f:
                     bytes_stream = f.read(chunk_size)
-                    bytes_stream_64 = base64.b64encode(bytes_stream)
-                    bytes_stream_64 = bytes_stream_64.decode('utf-8')
                     while len(bytes_stream) == chunk_size:
                         self.sendComMessage(client_address, connection, f'write {len(bytes_stream)} {filename} ',
                                             payload=bytes_stream)
@@ -466,8 +464,11 @@ class RemotedSimulator:
                                         payload=bytes_stream)
                 self.sendComMessage(client_address, connection, f'close {filename}')
                 response = self.sendComMessage(client_address, connection, f'sha1 {filename}')
-
-                if f'"message":"{sha1hash}"' not in response:
+                if self.wcom_message_version == None:
+                    if response.split(' ')[1] != sha1hash:
+                        self.upgrade_errors = True
+                        raise
+                elif f'"message":"{sha1hash}"' not in response:
                     self.upgrade_errors = True
                     raise
                 self.sendComMessage(client_address, connection, f'upgrade {filename} {installer}')

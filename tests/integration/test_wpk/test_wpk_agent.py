@@ -25,11 +25,14 @@ pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0),
 
 folder = 'etc' if platform.system() == 'Linux' else ''
 
+upgrade_result_folder = 'var/upgrade' if platform.system() == 'Linux' else 'upgrade'
+
 DEFAULT_UPGRADE_SCRIPT = 'upgrade.sh' if platform.system() == 'Linux' \
                                       else 'upgrade.bat'
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, folder, 'client.keys')
 SERVER_KEY_PATH = os.path.join(WAZUH_PATH, folder, 'manager.key')
 SERVER_CERT_PATH = os.path.join(WAZUH_PATH, folder, 'manager.cert')
+UPGRADE_RESULT_PATH = os.path.join(WAZUH_PATH, upgrade_result_folder, 'upgrade_result')
 CRYPTO = "aes"
 SERVER_ADDRESS = 'localhost'
 PROTOCOL = "tcp"
@@ -57,7 +60,7 @@ def get_current_version():
 _agent_version = get_current_version()
 
 error_msg = ''
-if _agent_version == 'v4.1.0':
+if _agent_version == version_to_upgrade:
     error_msg = 'Could not chmod' \
         if platform.system() == 'Linux' else \
         'Cannot execute installer'
@@ -135,7 +138,7 @@ if _agent_version == 'v3.13.2':
             'receive_notification': False,
         }
     }]
-elif _agent_version == 'v4.1.0':
+elif _agent_version == version_to_upgrade:
     test_metadata += [{
         # 5. Simulate a rollback (v4.1.0)
         'protocol': PROTOCOL,
@@ -209,6 +212,8 @@ def start_agent(request, get_configuration):
                                          client_keys=CLIENT_KEYS_PATH)
     if _agent_version == 'v4.1.0':
         remoted_simulator.setWcomMessageVersion('4.1')
+    else:
+        remoted_simulator.setWcomMessageVersion(None)
 
     # Clean client.keys file
     truncate_file(CLIENT_KEYS_PATH)
@@ -220,7 +225,9 @@ def start_agent(request, get_configuration):
                     SERVER_ADDRESS])
     control_service('start')
 
-    time.sleep(80)
+    if _agent_version == 'v4.1.0':
+        time.sleep(80)
+
     remoted_simulator.start(custom_listener=remoted_simulator.upgrade_listener,
                             args=(metadata['filename'], metadata['filepath'],
                                   metadata['chunk_size'], 
@@ -280,6 +287,9 @@ def download_wpk(get_configuration):
 @pytest.fixture(scope="function")
 def prepare_agent_version(get_configuration):
     metadata = get_configuration['metadata']
+
+    if os.path.exists(UPGRADE_RESULT_PATH):
+        os.remove(UPGRADE_RESULT_PATH)
 
     if get_current_version() != metadata["initial_version"]:
         if platform.system() == 'Windows':
@@ -345,7 +355,7 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
            'Upgrade process result was not the expected'
     if upgrade_process_result:
         upgrade_result_code = None
-        if expected['result_code'] == 0 or _agent_version == 'v4.1.0':
+        if expected['result_code'] == 0 and _agent_version == version_to_upgrade:
             exp_json = json.loads(upgrade_exec_message)
             upgrade_result_code = int(exp_json['message'])
         else:
@@ -354,7 +364,7 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
                f'Expected upgrade result code was {expected["result_code"]} ' \
                f'but obtained {upgrade_result_code} instead'
     else:
-        if _agent_version == 'v4.1.0' and not metadata['simulate_interruption']:
+        if _agent_version == version_to_upgrade and not metadata['simulate_interruption']:
             exp_json = json.loads(upgrade_exec_message)
             upgrade_exec_message = str(exp_json['message'])
         assert upgrade_exec_message == expected['error_message'], \
