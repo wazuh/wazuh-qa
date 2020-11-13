@@ -18,7 +18,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, WAZUH_SERVICE, ALERT_FILE_PATH
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController
+from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
 

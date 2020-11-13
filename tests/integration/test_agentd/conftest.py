@@ -2,7 +2,6 @@ import os
 import pytest
 import socket
 import ssl
-import pdb
 import platform
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
