@@ -225,9 +225,6 @@ def start_agent(request, get_configuration):
                     SERVER_ADDRESS])
     control_service('start')
 
-    if _agent_version == 'v4.1.0':
-        time.sleep(80)
-
     remoted_simulator.start(custom_listener=remoted_simulator.upgrade_listener,
                             args=(metadata['filename'], metadata['filepath'],
                                   metadata['chunk_size'], 

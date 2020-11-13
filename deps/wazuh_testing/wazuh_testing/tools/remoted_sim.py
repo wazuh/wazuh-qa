@@ -451,6 +451,8 @@ class RemotedSimulator:
         while not self.upgrade_errors and self.running:
             try:
                 connection, client_address = self.start_connection()
+
+                time.sleep(30)
                 self.sendComMessage(client_address, connection, 'lock_restart -1')
                 self.sendComMessage(client_address, connection, f'open wb {filename}',
                                     interruption_time=5 if simulate_interruption else None)
