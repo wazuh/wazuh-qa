@@ -357,7 +357,7 @@
   -
     input: 'global get-agents-by-connection-status 0 disconnected'
     output: 'ok 1'
-    stage: "global get-agents-by-connection-status disconnected before disconnecting agents success"
+    stage: "global get-agents-by-connection-status disconnected after disconnecting agents success"
 -
   name: "Delete commands"
   description: "Check success use cases for delete commands on global DB."
