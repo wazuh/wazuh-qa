@@ -452,7 +452,7 @@ class RemotedSimulator:
             try:
                 connection, client_address = self.start_connection()
 
-                time.sleep(30)
+                time.sleep(60)
                 self.sendComMessage(client_address, connection, 'lock_restart -1')
                 self.sendComMessage(client_address, connection, f'open wb {filename}',
                                     interruption_time=5 if simulate_interruption else None)
