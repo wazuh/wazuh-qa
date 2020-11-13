@@ -63,7 +63,7 @@ error_msg = ''
 if _agent_version == version_to_upgrade:
     error_msg = 'Could not chmod' \
         if platform.system() == 'Linux' else \
-        'Cannot execute installer'
+        'Error executing command'
 else:
     error_msg = 'err Could not chmod' \
         if platform.system() == 'Linux' else \
