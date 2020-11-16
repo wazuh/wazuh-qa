@@ -299,24 +299,24 @@
     output: "ok"
     stage: "global update-connection-status active"
   -
-    input: 'global get-agents-by-connection-status never_connected'
-    output: 'ok [{"id":1}]'
+    input: 'global get-agents-by-connection-status 0 never_connected'
+    output: 'ok 1'
     stage: "global get-agents-by-connection-status never_connected success"
   -
-    input: 'global get-agents-by-connection-status pending'
-    output: 'ok [{"id":2}]'
+    input: 'global get-agents-by-connection-status 0 pending'
+    output: 'ok 2'
     stage: "global get-agents-by-connection-status pending success"
   -
-    input: 'global get-agents-by-connection-status active'
-    output: 'ok [{"id":3}]'
+    input: 'global get-agents-by-connection-status 0 active'
+    output: 'ok 3'
     stage: "global get-agents-by-connection-status active success"
   -
     input: 'global reset-agents-connection'
     output: 'ok'
     stage: "global reset-agents-connection"
   -
-    input: 'global get-agents-by-connection-status disconnected'
-    output: 'ok [{"id":2},{"id":3}]'
+    input: 'global get-agents-by-connection-status 0 disconnected'
+    output: 'ok 2,3'
     stage: "global get-agents-by-connection-status disconnected success"
 -
   name: "disconnect-agents command"
@@ -347,17 +347,17 @@
     output: "ok"
     stage: "global update-connection-status as active for agent 3 success"
   -
-    input: 'global get-agents-by-connection-status disconnected'
-    output: 'ok []'
+    input: 'global get-agents-by-connection-status 0 disconnected'
+    output: 'ok '
     stage: "global get-agents-by-connection-status disconnected before disconnecting agents success"
   -
     input: 'global disconnect-agents 0 175'
     output: 'ok 1'
     stage: "global disconnect-agents success"
   -
-    input: 'global get-agents-by-connection-status disconnected'
-    output: 'ok [{"id":1}]'
-    stage: "global get-agents-by-connection-status disconnected before disconnecting agents success"
+    input: 'global get-agents-by-connection-status 0 disconnected'
+    output: 'ok 1'
+    stage: "global get-agents-by-connection-status disconnected after disconnecting agents success"
 -
   name: "Delete commands"
   description: "Check success use cases for delete commands on global DB."
