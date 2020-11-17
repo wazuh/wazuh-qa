@@ -91,7 +91,7 @@
     stage: "global get-agent-info success after updates"
     use_regex: "yes"
   -
-    input: 'global update-connection-status {"id":1,"connection_status":"pending"}'
+    input: 'global update-connection-status {"id":1,"connection_status":"pending","sync_status":"syncreq"}'
     output: "ok"
     stage: "global update-connection-status pending success"
   -
@@ -100,7 +100,7 @@
     stage: "global get-agent-info success after updates"
     use_regex: "yes"
   -
-    input: 'global update-connection-status {"id":1,"connection_status":"active"}'
+    input: 'global update-connection-status {"id":1,"connection_status":"active","sync_status":"syncreq"}'
     output: "ok"
     stage: "global update-connection-status active success"
   -
@@ -109,7 +109,7 @@
     stage: "global get-agent-info success after updates"
     use_regex: "yes"
   -
-    input: 'global update-connection-status {"id":1,"connection_status":"disconnected"}'
+    input: 'global update-connection-status {"id":1,"connection_status":"disconnected","sync_status":"syncreq"}'
     output: "ok"
     stage: "global update-connection-status disconnected success"
   -
@@ -118,7 +118,7 @@
     stage: "global get-agent-info success after updates"
     use_regex: "yes"
   -
-    input: 'global update-connection-status {"id":1,"connection_status":"dummy_status"}'
+    input: 'global update-connection-status {"id":1,"connection_status":"dummy_status","sync_status":"syncreq"}'
     output: "err Cannot execute Global database query; CHECK constraint failed: agent"
     stage: "global update-connection-status dummy_status error"
   -
@@ -251,15 +251,15 @@
   description: "Check success use cases for reset connection status command."
   test_case:
   -
-    input: 'global update-connection-status {"id":1,"connection_status":"pending"}'
+    input: 'global update-connection-status {"id":1,"connection_status":"pending","sync_status":"syncreq"}'
     output: "ok"
     stage: "global update-connection-status pending success"
   -
-    input: 'global update-connection-status {"id":3,"connection_status":"active"}'
+    input: 'global update-connection-status {"id":3,"connection_status":"active","sync_status":"syncreq"}'
     output: "ok"
     stage: "global update-connection-status active success"
   -
-    input: 'global reset-agents-connection'
+    input: 'global reset-agents-connection synced'
     output: 'ok'
     stage: "global reset-agents-connection success"
   -
@@ -287,15 +287,15 @@
   description: "Check success use cases for get-agents-by-connection-status command on global DB."
   test_case:
   -
-    input: 'global update-connection-status {"id":1,"connection_status":"never_connected"}'
+    input: 'global update-connection-status {"id":1,"connection_status":"never_connected","sync_status":"synced"}'
     output: "ok"
     stage: "global update-connection-status never_connected"
   -
-    input: 'global update-connection-status {"id":2,"connection_status":"pending"}'
+    input: 'global update-connection-status {"id":2,"connection_status":"pending","sync_status":"synced"}'
     output: "ok"
     stage: "global update-connection-status pending"
   -
-    input: 'global update-connection-status {"id":3,"connection_status":"active"}'
+    input: 'global update-connection-status {"id":3,"connection_status":"active","sync_status":"synced"}'
     output: "ok"
     stage: "global update-connection-status active"
   -
@@ -311,7 +311,7 @@
     output: 'ok 3'
     stage: "global get-agents-by-connection-status active success"
   -
-    input: 'global reset-agents-connection'
+    input: 'global reset-agents-connection synced'
     output: 'ok'
     stage: "global reset-agents-connection"
   -
@@ -327,7 +327,7 @@
     output: "ok []"
     stage: "global updating agent's 1 keepalive to 100"
   -
-    input: 'global update-connection-status {"id":1,"connection_status":"active"}'
+    input: 'global update-connection-status {"id":1,"connection_status":"active","sync_status":"syncreq"}'
     output: "ok"
     stage: "global update-connection-status as active for agent 1 success"
   -
@@ -335,7 +335,7 @@
     output: "ok []"
     stage: "global updating agent's 2 keepalive to 150"
   -
-    input: 'global update-connection-status {"id":2,"connection_status":"pending"}'
+    input: 'global update-connection-status {"id":2,"connection_status":"pending","sync_status":"syncreq"}'
     output: "ok"
     stage: "global update-connection-status as pending for agent 2 success"
   -
@@ -343,7 +343,7 @@
     output: "ok []"
     stage: "global updating agent's 3 keepalive to 200"
   -
-    input: 'global update-connection-status {"id":3,"connection_status":"active"}'
+    input: 'global update-connection-status {"id":3,"connection_status":"active","sync_status":"syncreq"}'
     output: "ok"
     stage: "global update-connection-status as active for agent 3 success"
   -
