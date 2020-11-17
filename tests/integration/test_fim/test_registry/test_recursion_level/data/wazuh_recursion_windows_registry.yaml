@@ -1,4 +1,5 @@
 ---
+# Configuration for recursion level
 - apply_to_modules:
   - test_recursion_level_registry
   sections:
@@ -7,22 +8,22 @@
     - disabled:
         value: 'no'
     - windows_registry:
-        value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\norecursion"
+        value: REGISTRY_0
         attributes:
-        - recursion_level: "0"
-        - FIM_MODE
+        - recursion_level: LEVEL_0
+        - arch: '64bit'
     - windows_registry:
-        value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\recursion1"
+        value: REGISTRY_1
         attributes:
-        - recursion_level: "1"
-        - FIM_MODE
+        - recursion_level: LEVEL_1
+        - arch: '64bit'
     - windows_registry:
-        value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\recursion5"
+        value: REGISTRY_2
         attributes:
-        - recursion_level: "5"
-        - FIM_MODE
+        - recursion_level: LEVEL_2
+        - arch: '64bit'
     - windows_registry:
-        value: "HKEY_LOCAL_MACHINE\\SOFTWARE\\recursion512"
+        value: REGISTRY_3
         attributes:
-        - recursion_level: "512"
-        - FIM_MODE
+        - recursion_level: LEVEL_3
+        - arch: '64bit'
