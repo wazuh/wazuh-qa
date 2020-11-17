@@ -1,0 +1,96 @@
+---
+# Configuration for test checksum all
+- tags:
+  - test_checksum_all
+  apply_to_modules:
+  - test_check_checksum
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - windows_registry:
+        value: WINDOWS_REGISTRY_1
+        attributes:
+        - FIM_MODE
+        - check_all: "yes"
+        - check_sum: "no"
+        - arch: "64bit"
+    - windows_registry:
+        value: WINDOWS_REGISTRY_2
+        attributes:
+        - FIM_MODE
+        - check_all: "yes"
+        - check_sum: "no"
+        - check_sha1sum: "yes"
+        - arch: "64bit"
+    - windows_registry:
+        value: WINDOWS_REGISTRY_3
+        attributes:
+        - FIM_MODE
+        - check_all: "yes"
+        - check_sum: "no"
+        - check_sha256sum: "yes"
+        - arch: "64bit"
+    - windows_registry:
+        value: WINDOWS_REGISTRY_4
+        attributes:
+        - FIM_MODE
+        - check_all: "yes"
+        - check_sum: "no"
+        - check_md5sum: "yes"
+        - arch: "64bit"
+# Configuration for test checksum
+- tags:
+  - test_checksum
+  apply_to_modules:
+  - test_check_checksum
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - windows_registry:
+        value: WINDOWS_REGISTRY_1
+        attributes:
+        - FIM_MODE
+        - check_all: "no"
+        - check_owner: "yes"
+        - check_group: "yes"
+        - check_perm: "yes"
+        - check_mtime: "yes"
+        - check_sum: "yes"
+        - arch: "64bit"
+    - windows_registry:
+        value: WINDOWS_REGISTRY_2
+        attributes:
+        - FIM_MODE
+        - check_all: "no"
+        - check_owner: "yes"
+        - check_group: "yes"
+        - check_perm: "yes"
+        - check_mtime: "yes"
+        - check_sha1sum: "yes"
+        - arch: "64bit"
+    - windows_registry:
+        value: WINDOWS_REGISTRY_3
+        attributes:
+        - FIM_MODE
+        - check_all: "no"
+        - check_owner: "yes"
+        - check_group: "yes"
+        - check_perm: "yes"
+        - check_mtime: "yes"
+        - check_sha256sum: "yes"
+        - arch: "64bit"
+    - windows_registry:
+        value: WINDOWS_REGISTRY_4
+        attributes:
+        - FIM_MODE
+        - check_all: "no"
+        - check_owner: "yes"
+        - check_group: "yes"
+        - check_perm: "yes"
+        - check_mtime: "yes"
+        - check_md5sum: "yes"
+        - arch: "64bit"
