@@ -12,6 +12,7 @@ from wazuh_testing.fim import CHECK_SHA256SUM, CHECK_SHA1SUM, CHECK_MD5SUM, CHEC
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing import global_parameters
 
 # Marks
 
@@ -76,53 +77,53 @@ def get_configuration(request):
 def test_check_checksum_all(key, subkey, value_attr,
                             get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """
-    Test the behaviour disabling different check options over the same key with check_all enabled
+    Test the behaviour disabling different check options over the same key with check_all enabled.
 
     Example:
-        check_all: "yes" check_size: "no" check_sum: "no"
+        check_all: "yes" check_size: "no" check_sum: "no".
 
     Parameters
     ----------
     key: str
-        Key of the registry (HKEY_* constants)
+        Key of the registry (HKEY_* constants).
     subkey: str
         Path of the subkey.
     value_attr: set
-        Set of options that are expected for value events
+        Set of options that are expected for value events.
     """
     check_apply_test({'test_checksum_all'}, get_configuration['tags'])
     # Test registry keys.
-    registry_key_cud(key, subkey, wazuh_log_monitor, min_timeout=15,
+    registry_key_cud(key, subkey, wazuh_log_monitor, min_timeout=global_parameters.default_timeout,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled')
 
     # Test registry values.
-    registry_value_cud(key, subkey, wazuh_log_monitor, min_timeout=15, options=value_attr,
-                       time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled')
+    registry_value_cud(key, subkey, wazuh_log_monitor, min_timeout=global_parameters.default_timeout,
+                       options=value_attr, time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled')
 
 
 @pytest.mark.parametrize('key, subkey, value_attr', params_list)
 def test_check_checksum(key, subkey, value_attr,
                         get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """
-    Test the behaviour disabling different check options over the same key with check_all enabled
+    Test the behaviour disabling different check options over the same key with check_all enabled.
 
     Example:
         check_all: "yes" check_size: "no" check_sum: "no"
 
-    Parameterskey_attr
+    Parameters
+    ----------
+    key
+        Key of the registry (HKEY_* constants).
+    subkey: str
         Path of the subkey.
-    key_attr: set
-        Set of options that are expected for key events
     value_attr: set
-        Set of options that are expected for value events
-    triggers_value_modification: boolean
-        Specify if value modification events are going to be triggered
+        Set of options that are expected for value events.
     """
     check_apply_test({'test_checksum'}, get_configuration['tags'])
     # Test registry keys.
-    registry_key_cud(key, subkey, wazuh_log_monitor, min_timeout=15,
+    registry_key_cud(key, subkey, wazuh_log_monitor, min_timeout=global_parameters.default_timeout,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled')
 
     # Test registry values.
-    registry_value_cud(key, subkey, wazuh_log_monitor, min_timeout=15, options=value_attr,
-                       time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled')
+    registry_value_cud(key, subkey, wazuh_log_monitor, min_timeout=global_parameters.default_timeout,
+                       options=value_attr, time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled')

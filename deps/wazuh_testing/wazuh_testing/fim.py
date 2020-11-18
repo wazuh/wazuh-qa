@@ -88,7 +88,6 @@ REQUIRED_REG_VALUE_ATTRIBUTES = {
     CHECK_MD5SUM: 'hash_md5',
     CHECK_SHA256SUM: 'hash_sha256',
     CHECK_SIZE: 'size',
-    CHECK_MTIME: 'mtime',
     CHECK_TYPE: 'value_type',
     CHECK_ALL: {CHECK_SHA256SUM, CHECK_SHA1SUM, CHECK_MD5SUM, CHECK_SIZE, CHECK_TYPE},
     CHECK_SUM: {CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_MD5SUM}
@@ -1971,7 +1970,7 @@ def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_6
     root_key : str
         Root key (HKEY_LOCAL_MACHINE, HKEY_LOCAL_USER, etc).
     registry_subkey : str
-        Path of the subkey that will be created
+        Path of the subkey that will be created.
     log_monitor : FileMonitor
         File event monitor.
     arch : int
@@ -1987,11 +1986,13 @@ def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_6
     triggers_event : boolean, optional
         Boolean to determine if the event should be raised or not. Default `True`
     triggers_event_add: boolean, optional
-        Boolean to determine if the added event should be raised. If triggers_event is false, this parameter is ignored
+        Boolean to determine if the added event should be raised. If triggers_event is false, this parameter is ignored.
     triggers_event_modified: boolean, optional
-        Boolean to determine if the modified event should be raised. If triggers_event is false, this parameter is ignored
+        Boolean to determine if the modified event should be raised. If triggers_event is false, this parameter
+        is ignored.
     triggers_event_delete: boolean, optional
-        Boolean to determine if the delete event should be raised. If triggers_event is false, this parameter is ignored
+        Boolean to determine if the delete event should be raised.
+        If triggers_event is false, this parameter is ignored.
     encoding : str, optional
         String to determine the encoding of the registry value name. Default `None`
     callback : callable, optional
@@ -2121,11 +2122,14 @@ def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64K
     triggers_event : boolean, optional
         Boolean to determine if the event should be raised or not. Default `True`
     triggers_event_add: boolean, optional
-        Boolean to determine if the added event should be raised. If triggers_event is false, this parameter is ignored
+        Boolean to determine if the added event should be raised.
+        If triggers_event is false, this parameter is ignored.
     triggers_event_modified: boolean, optional
-        Boolean to determine if the modified event should be raised. If triggers_event is false, this parameter is ignored
+        Boolean to determine if the modified event should be raised.
+        If triggers_event is false, this parameter is ignored.
     triggers_event_delete: boolean, optional
-        Boolean to determine if the delete event should be raised. If triggers_event is false, this parameter is ignored
+        Boolean to determine if the delete event should be raised.
+        If triggers_event is false, this parameter is ignored.
     encoding : str, optional
         String to determine the encoding of the registry value name. Default `None`
     callback : callable, optional
