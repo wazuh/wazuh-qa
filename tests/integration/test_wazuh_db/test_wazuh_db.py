@@ -136,4 +136,4 @@ def test_wazuh_db_chunks(configure_sockets_environment, connect_to_sockets_modul
     # Check get-agents-by-connection-status chunk limit
     send_chunk_command(f'global get-agents-by-connection-status 0 active')
     # Check disconnect-agents chunk limit
-    send_chunk_command(f'global disconnect-agents 0 100')
+    send_chunk_command(f'global disconnect-agents 0 100 syncreq')
