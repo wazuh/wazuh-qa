@@ -367,9 +367,17 @@
     output: 'ok '
     stage: "global get-agents-by-connection-status disconnected before disconnecting agents success"
   -
-    input: 'global disconnect-agents 0 175'
+    input: 'global sql UPDATE agent SET sync_status = "synced" WHERE id =1'
+    output: 'ok []'
+    stage: "global setting sync_status before disconnecting-agents command"
+  -
+    input: 'global disconnect-agents 0 175 syncreq'
     output: 'ok 1'
     stage: "global disconnect-agents success"
+  -
+    input: 'global sql SELECT id,sync_status FROM agent WHERE id =1'
+    output: 'ok [{"id":1,"sync_status":"syncreq"}]'
+    stage: "global testing sync_status after disconnecting-agents command"
   -
     input: 'global get-agents-by-connection-status 0 disconnected'
     output: 'ok 1'
