@@ -1272,11 +1272,11 @@ def callback_non_existing_monitored_registry(line):
 
 
 def callback_registry_count_entries(line):
-    if sys.platform != 'win32':
-        match = re.match(r".*Number of keys: (\d+), value count: (\d+)", line)
+    if sys.platform == 'win32':
+        match = re.match(r".*Fim registry entries: (\d+)", line)
 
     if match:
-        return match.group(1), match.group(2)
+        return match.group(1)
 
 
 def callback_value_event(line):
