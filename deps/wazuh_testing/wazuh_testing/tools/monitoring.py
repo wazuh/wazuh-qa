@@ -366,6 +366,21 @@ class SocketController:
         self.close()
 
 
+def close_sockets(receiver_sockets):
+    """Close the sockets connection gracefully."""
+    for socket in receiver_sockets:
+        try:
+            # We flush the buffer before closing connection if connection is TCP
+            if socket.protocol == 1:
+                socket.sock.settimeout(5)
+                socket.receive()  # Flush buffer before closing connection
+            socket.close()
+        except OSError as e:
+            if e.errno == 9:
+                # Do not try to close the socket again if it was reused or closed already
+                pass
+
+
 class QueueMonitor:
     def __init__(self, queue_item, time_step=0.5):
         """Create a new instance to monitor any given queue.
