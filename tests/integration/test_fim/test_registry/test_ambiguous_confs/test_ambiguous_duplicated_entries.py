@@ -6,7 +6,9 @@
 import os
 
 import pytest
+from hashlib import sha1
 
+from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, registry_value_cud, registry_key_cud, \
                               generate_params, CHECK_GROUP, CHECK_TYPE, \
@@ -132,9 +134,6 @@ def test_duplicate_entries_rc(key, subkey, arch, value_list, tags_to_apply, repo
         List with the name of the values that will be used for cud.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-
-    from wazuh_testing.tools import WAZUH_PATH
-    from hashlib import sha1
 
     def report_changes_validator(event):
         """Validate content_changes attribute exists in the event"""
