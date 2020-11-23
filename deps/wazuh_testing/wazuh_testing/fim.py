@@ -2033,7 +2033,11 @@ def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_6
 
         value_list = aux_dict
 
-    if options is not None and CHECK_MTIME not in options:
+    options_set = REQUIRED_REG_VALUE_ATTRIBUTES[CHECK_ALL]
+    if options is not None:
+        options_set = options_set.intersection(options)
+
+    if options_set is not None and CHECK_MTIME not in options_set:
         value_list[registry_path] = ('', None)
 
     triggers_event_add = triggers_event and triggers_event_add
@@ -2044,7 +2048,7 @@ def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_6
                                        validators_after_delete, validators_after_cud)
 
     registry_event_checker = RegistryEventChecker(log_monitor=log_monitor, registry_key=registry_path,
-                                                  registry_dict=value_list, options=options,
+                                                  registry_dict=value_list, options=options_set,
                                                   custom_validator=custom_validator, encoding=encoding,
                                                   callback=callback, is_value=True)
 
@@ -2170,7 +2174,11 @@ def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64K
 
         key_list = aux_dict
 
-    if options is not None and CHECK_MTIME not in options:
+    options_set = REQUIRED_REG_KEY_ATTRIBUTES[CHECK_ALL]
+    if options is not None:
+        options_set = options_set.intersection(options)
+
+    if options_set is not None and CHECK_MTIME not in options_set:
         key_list[registry_path] = ('', None)
 
     triggers_event_add = triggers_event and triggers_event_add
@@ -2181,7 +2189,7 @@ def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64K
                                        validators_after_delete, validators_after_cud)
 
     registry_event_checker = RegistryEventChecker(log_monitor=log_monitor, registry_key=registry_path,
-                                                  registry_dict=key_list, options=options,
+                                                  registry_dict=key_list, options=options_set,
                                                   custom_validator=custom_validator, encoding=encoding,
                                                   callback=callback, is_value=False)
 
