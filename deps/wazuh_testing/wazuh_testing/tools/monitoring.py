@@ -628,7 +628,7 @@ if hasattr(socketserver, 'ThreadingUnixStreamServer'):
         def shutdown_request(self, request):
             pass
 
-    class DatagramServerUnix(socketserver.ThreadingUnixStreamServer):
+    class DatagramServerUnix(socketserver.ThreadingUnixDatagramServer):
 
         def shutdown_request(self, request):
             pass
@@ -752,7 +752,8 @@ class ManInTheMiddle:
         else:
             raise TypeError(f"Invalid address type: {type(address)}. Valid types are str or Tuple(str, int)")
 
-        if connection_protocol.lower() == 'tcp' or connection_protocol.lower() == 'udp' or connection_protocol.lower() == 'ssl':
+        if (connection_protocol.lower() == 'tcp' or connection_protocol.lower() == 'udp' or
+                connection_protocol.lower() == 'ssl'):
             self.mode = connection_protocol.lower()
         else:
             raise TypeError(f'Invalid connection protocol detected: {connection_protocol.lower()}. '
@@ -773,7 +774,7 @@ class ManInTheMiddle:
                 'udp': {
                     'AF_INET': DatagramServerPort
                 },
-                'ssl' : {
+                'ssl': {
                     'AF_INET': SSLStreamServerPort
                 }
             },
