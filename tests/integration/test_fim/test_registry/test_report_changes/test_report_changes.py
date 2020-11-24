@@ -57,8 +57,8 @@ def test_report_changes(key, subkey, arch, value_name, tags_to_apply,
                         get_configuration, configure_environment, restart_syscheckd,
                         wait_for_fim_start):
     """
-    Check the only values detected are those matching the restrict using the value path.
-    It also checks that all the files in the report_changes folders are deleted after the values are deleted.
+    Checks that events of keys configured using report changes are correct.
+    It also checks that the diff file is created for each value.
 
     Parameters
     ----------

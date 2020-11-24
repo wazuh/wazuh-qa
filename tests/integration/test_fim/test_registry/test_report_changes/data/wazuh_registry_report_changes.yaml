@@ -20,7 +20,6 @@
           attributes:
             - arch: '64bit'
             - report_changes: 'yes'
-
 - tags:
   - test_duplicate_report
   apply_to_modules:
@@ -50,7 +49,25 @@
           attributes:
             - arch: '64bit'
             - report_changes: 'yes'
-
+- tags:
+  - test_delete_after_restart
+  apply_to_modules:
+  - test_report_changes_deleted
+  sections:
+  - section: syscheck
+    elements:
+      - disabled:
+          value: 'no'
+      - windows_registry:
+          value: WINDOWS_REGISTRY_1
+          attributes:
+            - arch: '64bit'
+            - report_changes: REPORT_CHANGES_1
+      - windows_registry:
+          value: WINDOWS_REGISTRY_2
+          attributes:
+            - arch: '64bit'
+            - report_changes: REPORT_CHANGES_2
 - tags:
   - test_limits
   apply_to_modules:

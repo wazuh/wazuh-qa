@@ -6,12 +6,15 @@ import os
 import pytest
 from hashlib import sha1
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, delete_registry, registry_value_cud, KEY_WOW64_32KEY, KEY_WOW64_64KEY, \
-                              registry_parser, generate_params
-from wazuh_testing.tools import WAZUH_PATH
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.fim import LOG_FILE_PATH, check_time_travel, delete_registry, detect_initial_scan, \
+                              registry_value_cud, KEY_WOW64_32KEY, KEY_WOW64_64KEY, \
+                              registry_parser, generate_params, create_registry, modify_registry_value
+from wazuh_testing.tools.services import restart_wazuh_with_new_conf
 
+from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test, set_section_wazuh_conf
+from wazuh_testing.tools.monitoring import FileMonitor
+from win32con import REG_SZ
 # Marks
 
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
@@ -33,12 +36,68 @@ reg1, reg2 = test_regs
 # Configurations
 
 conf_params = {'WINDOWS_REGISTRY_1': reg1,
-               'WINDOWS_REGISTRY_2': reg2}
+               'WINDOWS_REGISTRY_2': reg2,
+               'REPORT_CHANGES_1': 'yes',
+               'REPORT_CHANGES_2': 'yes'}
 
 configurations_path = os.path.join(test_data_path, 'wazuh_registry_report_changes.yaml')
 p, m = generate_params(extra_params=conf_params, modes=['scheduled'])
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+
+# Functions
+
+
+def calculate_diff_paths(reg_key, reg_subkey, arch, value_name):
+    """
+    Calculate the diff folder path of a value.
+    Parameters
+    ---------
+    reg_key: str
+        Registry name (HKEY_* constants).
+    reg_subkey: str
+        Path of the subkey.
+    arch: int
+        architecture of the registry.
+    value_name: str
+        name of the value.
+
+    Returns
+    -------
+    A tuple with the diff folder path of the key and the path of the value.
+    """
+    key_path = os.path.join(reg_key, reg_subkey)
+    folder_path = "{} {}".format("[x32]" if arch == KEY_WOW64_32KEY else "[x64]",
+                                 sha1(key_path.encode()).hexdigest())
+    diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'registry', folder_path,
+                             sha1(value_name.encode()).hexdigest(), 'last-entry.gz')
+    return (folder_path, diff_file)
+
+
+def reload_new_conf(report_value, reg1, reg2):
+    """"
+    Return a new ossec configuration with a changed report_value
+
+    Parameters
+    ----------
+    report_value: str
+        Value that will be used for the report_changes option.
+    reg1: str
+        Registry path that will be written in the configuration for WINDOWS_REGISTRY_1.
+    reg2: str
+        Registry path that will be written in the configuration for WINDOWS_REGISTRY_2.
+    """
+    new_conf_params = {'WINDOWS_REGISTRY_1': reg1,
+                       'WINDOWS_REGISTRY_2': reg2,
+                       'REPORT_CHANGES_1': report_value,
+                       'REPORT_CHANGES_2': report_value}
+
+    conf_params, conf_metadata = generate_params(extra_params=new_conf_params, modes=['scheduled'])
+    new_conf = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
+    # Load the third configuration in the yaml
+    restart_wazuh_with_new_conf(set_section_wazuh_conf(new_conf[2].get('sections')))
+    # Wait for FIM scan to finish
+    detect_initial_scan(wazuh_log_monitor)
 
 # Fixtures
 
@@ -86,11 +145,8 @@ def test_report_when_deleted_key(key, subkey, arch, value_name, enabled, tags_to
 
     vals_after_update = None
     vals_after_delete = None
-    key_path = os.path.join(key, subkey)
-    folder_path = "{} {}".format("[x32]" if arch == KEY_WOW64_32KEY else "[x64]",
-                                 sha1(key_path.encode()).hexdigest())
-    diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'registry', folder_path,
-                             sha1(value_name.encode()).hexdigest(), 'last-entry.gz')
+
+    folder_path, diff_file = calculate_diff_paths(key, subkey, arch, value_name)
 
     def report_changes_diff_file_validator(unused_param):
         """
@@ -121,3 +177,33 @@ def test_report_when_deleted_key(key, subkey, arch, value_name, enabled, tags_to
     delete_registry(registry_parser[key], subkey, arch)
 
     assert not os.path.exists(folder_path), f'{folder_path} exists'
+
+
+def test_report_changes_after_restart(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
+    """
+    Check if diff directories are removed after disabling report_changes and Wazuh is restarted.
+    """
+    check_apply_test({'test_delete_after_restart'}, get_configuration['tags'])
+    value_name = 'random_value'
+
+    folder_path_key1, diff_file_key_1 = calculate_diff_paths(key, sub_key_1, KEY_WOW64_64KEY, value_name)
+    folder_path_key2, diff_file_key_2 = calculate_diff_paths(key, sub_key_1, KEY_WOW64_64KEY, value_name)
+
+    # Open key
+    key1_h = create_registry(registry_parser[key], sub_key_1, KEY_WOW64_64KEY)
+    key2_h = create_registry(registry_parser[key], sub_key_2, KEY_WOW64_64KEY)
+
+    # Modify the registry
+    modify_registry_value(key1_h, value_name, REG_SZ, "some_content")
+    modify_registry_value(key2_h, value_name, REG_SZ, "some_content")
+
+    # Travel to future
+    check_time_travel(True, monitor=wazuh_log_monitor)
+
+    assert os.path.exists(diff_file_key_1), f'{diff_file_key_1} does not exists'
+    assert os.path.exists(diff_file_key_2), f'{diff_file_key_2} does not exists'
+
+    reload_new_conf('no', test_regs[0], test_regs[1])
+
+    assert not os.path.exists(folder_path_key1), f'{folder_path_key1} does exists'
+    assert not os.path.exists(folder_path_key2), f'{folder_path_key2} does exists'
