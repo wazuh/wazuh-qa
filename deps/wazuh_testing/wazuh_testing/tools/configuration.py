@@ -577,3 +577,19 @@ def generate_syscheck_config():
     for yn_values, tag_value in itertools.product(values_list, tags):
         yn_str = ' '.join([f'{name}="{value}"' for name, value in zip(check_names, yn_values)])
         yield ' '.join([yn_str, tag_value])
+
+
+def generate_syscheck_registry_config():
+    """Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags' for Windowsregistries.
+
+    Every configuration is ready to be applied in the tag <directories>.
+    """
+    check_names = ['check_all', 'check_sha1sum', 'check_md5sum', 'check_sha256sum', 'check_size', 'check_owner',
+                   'check_group', 'check_perm', 'check_mtime', 'check_type', 'report_changes']
+
+    values_list = itertools.product(['yes', 'no'], repeat=len(check_names))
+    tags = ['tags="Sample"', '']
+
+    for yn_values, tag_value in itertools.product(values_list, tags):
+        yn_str = ' '.join([f'{name}="{value}"' for name, value in zip(check_names, yn_values)])
+        yield ' '.join([yn_str, tag_value])
