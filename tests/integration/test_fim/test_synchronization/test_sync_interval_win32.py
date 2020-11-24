@@ -4,7 +4,6 @@
 import os
 
 import pytest
-import time
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_synchronization, generate_params, check_time_travel
@@ -55,7 +54,6 @@ def test_sync_interval(get_configuration, configure_environment, restart_syschec
     check_apply_test({'sync_interval'}, get_configuration['tags'])
 
     interval = time_to_timedelta(get_configuration['metadata']['interval'])
-    time.sleep(5)
     try:
         check_time_travel(True, interval=interval)
 
@@ -68,8 +66,6 @@ def test_sync_interval(get_configuration, configure_environment, restart_syschec
                                               '"Initializing FIM Integrity Synchronization check" event')
 
         # This should fail as we are only advancing half the time needed for synchronization to occur
-        time.sleep(5)
-
     except TimeoutError:
         pytest.xfail("Expected fail due to issue: https://github.com/wazuh/wazuh-qa/issues/947 ")
 

@@ -8,13 +8,12 @@ import os
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import KEY_WOW64_64KEY, LOG_FILE_PATH, create_registry, generate_params, \
+from wazuh_testing.fim import LOG_FILE_PATH, create_registry, generate_params, \
         create_file, modify_registry_value, REGULAR, callback_detect_event, callback_real_time_whodata_started, \
         KEY_WOW64_64KEY, registry_parser
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from win32con import REG_SZ
 
 from wazuh_testing.tools.time import TimeMachine
 
@@ -86,6 +85,10 @@ def callback_integrity_or_whodata(line):
 def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
     """Check that events are being generated while a synchronization is being performed simultaneously.
     """
+
+    from win32con import REG_SZ
+    check_apply_test(tags_to_apply, get_configuration['tags'])
+
     folder = testdir1 if get_configuration['metadata']['fim_mode'] == 'realtime' else testdir2
     key_h = create_registry(registry_parser[key], subkey, KEY_WOW64_64KEY)
 
