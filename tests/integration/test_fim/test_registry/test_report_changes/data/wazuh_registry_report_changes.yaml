@@ -1,0 +1,21 @@
+---
+# Test report changes
+- tags:
+  - test_report_changes
+  apply_to_modules:
+  - test_report_changes
+  sections:
+  - section: syscheck
+    elements:
+      - disabled:
+          value: 'no'
+      - windows_registry:
+          value: WINDOWS_REGISTRY_1
+          attributes:
+            - arch: 'both'
+            - report_changes: 'yes'
+      - windows_registry:
+          value: WINDOWS_REGISTRY_2
+          attributes:
+            - arch: '64bit'
+            - report_changes: 'yes'
