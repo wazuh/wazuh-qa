@@ -1272,8 +1272,7 @@ def callback_non_existing_monitored_registry(line):
 
 
 def callback_registry_count_entries(line):
-    if sys.platform == 'win32':
-        match = re.match(r".*Fim registry entries: (\d+)", line)
+    match = re.match(r".*Fim registry entries: (\d+)", line)
 
     if match:
         return match.group(1)
@@ -1959,7 +1958,7 @@ def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_6
                        time_travel=False, min_timeout=1, options=None, triggers_event=True, triggers_event_add=True,
                        triggers_event_modified=True, triggers_event_delete=True, encoding=None,
                        callback=callback_value_event, validators_after_create=None, validators_after_update=None,
-                       validators_after_delete=None, validators_after_cud=None):
+                       validators_after_delete=None, validators_after_cud=None, value_type=win32con.REG_SZ):
     """
     Check if creation, update and delete registry value events are detected by syscheck.
 
@@ -2016,17 +2015,24 @@ def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_6
 
     registry_path = os.path.join(root_key, registry_sub_key)
 
+    if value_type in [win32con.REG_SZ, win32con.REG_MULTI_SZ]:
+        value_added_content = 'added'
+        value_default_content = ''
+    else:
+        value_added_content = 0
+        value_default_content = 1
+
     if not isinstance(value_list, list) and not isinstance(value_list, dict):
         raise ValueError('Value error. It can only be list or dict')
     elif isinstance(value_list, list):
-        aux_dict = {registry_path: ('', callback_detect_event)}
+        aux_dict = {registry_path: (value_default_content, callback_detect_event)}
 
         for elem in value_list:
-            aux_dict[elem] = ('', callback)
+            aux_dict[elem] = (value_default_content, callback)
 
         value_list = aux_dict
     elif isinstance(value_list, dict):
-        aux_dict = {registry_path: ('', callback_detect_event)}
+        aux_dict = {registry_path: (value_default_content, callback_detect_event)}
 
         for key, elem in value_list.items():
             aux_dict[key] = (elem, callback)
@@ -2038,7 +2044,7 @@ def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_6
         options_set = options_set.intersection(options)
 
     if options_set is not None and CHECK_MTIME not in options_set:
-        value_list[registry_path] = ('', None)
+        value_list[registry_path] = (value_default_content, None)
 
     triggers_event_add = triggers_event and triggers_event_add
     triggers_event_modified = triggers_event and triggers_event_modified
@@ -2060,7 +2066,7 @@ def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_6
         if name in registry_path:
             continue
 
-        modify_registry_value(key_handle, name, win32con.REG_SZ, 'added')
+        modify_registry_value(key_handle, name, value_type, value_added_content)
 
     check_time_travel(time_travel, monitor=log_monitor)
     registry_event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event_add)
@@ -2073,7 +2079,7 @@ def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_6
         if name in registry_path:
             continue
 
-        modify_registry_value(key_handle, name, win32con.REG_SZ, content[0])
+        modify_registry_value(key_handle, name, value_type, content[0])
 
     check_time_travel(time_travel, monitor=log_monitor)
     registry_event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event_modified)
