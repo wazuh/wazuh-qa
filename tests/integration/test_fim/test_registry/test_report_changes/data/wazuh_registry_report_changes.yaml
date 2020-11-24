@@ -4,6 +4,7 @@
   - test_report_changes
   apply_to_modules:
   - test_report_changes
+  - test_report_changes_deleted
   sections:
   - section: syscheck
     elements:
@@ -14,6 +15,35 @@
           attributes:
             - arch: 'both'
             - report_changes: 'yes'
+      - windows_registry:
+          value: WINDOWS_REGISTRY_2
+          attributes:
+            - arch: '64bit'
+            - report_changes: 'yes'
+- tags:
+  - test_duplicate_report
+  apply_to_modules:
+  - test_report_changes_deleted
+  sections:
+  - section: syscheck
+    elements:
+      - disabled:
+          value: 'no'
+      - windows_registry:
+          value: WINDOWS_REGISTRY_1
+          attributes:
+            - arch: '64bit'
+            - report_changes: 'yes'
+      - windows_registry:
+          value: WINDOWS_REGISTRY_1
+          attributes:
+            - arch: '64bit'
+            - report_changes: 'no'
+      - windows_registry:
+          value: WINDOWS_REGISTRY_2
+          attributes:
+            - arch: '64bit'
+            - report_changes: 'no'
       - windows_registry:
           value: WINDOWS_REGISTRY_2
           attributes:
