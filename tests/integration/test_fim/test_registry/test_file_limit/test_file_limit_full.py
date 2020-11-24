@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import sys
 
 import pytest
 
@@ -11,8 +12,10 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_va
     callback_registry_count_entries, callback_file_limit_full_database, registry_parser, KEY_WOW64_64KEY
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from win32con import REG_SZ, KEY_ALL_ACCESS
-from win32api import RegOpenKeyEx, RegCloseKey
+
+if sys.platform == 'win32':
+    from win32con import REG_SZ, KEY_ALL_ACCESS
+    from win32api import RegOpenKeyEx, RegCloseKey
 
 # Marks
 
@@ -56,7 +59,7 @@ def get_configuration(request):
 
 
 def extra_configuration_before_yield():
-    """Generate files to fill database"""
+    """Generate registry entries to fill database"""
     reg1_handle = RegOpenKeyEx(registry_parser[KEY], sub_key_1, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
 
     for i in range(0, NUM_REGS):
