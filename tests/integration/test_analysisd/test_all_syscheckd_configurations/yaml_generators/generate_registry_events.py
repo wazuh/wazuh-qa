@@ -28,6 +28,8 @@ reg_list = list()
 KEY = "HKEY_LOCAL_MACHINE"
 testreg = os.path.join('SOFTWARE', 'testreg')
 
+SCAN_WAIT = 120
+
 
 def _callback_default(line):
     print(line)
@@ -50,6 +52,7 @@ def set_syscheck_config():
                                    '</windows_registry>\n')
                     registry += 1
             elif re.match(r'.*\</syscheck\>.*', line):
+                new_conf.write("<synchronization><enabled>no</enabled></synchronization>")
                 new_conf.write('</syscheck>\n')
                 syscheck_flag = False
             else:
@@ -79,8 +82,8 @@ def configure_syscheck_environment(time_sleep):
     logger.debug(f'Waiting {str(time_sleep)} seconds. Execute `generate_windows_yaml.py` now.')
     time.sleep(time_sleep)
 
-    logger.debug('Waiting 60 seconds for baseline scan to finish.')
-    time.sleep(60)
+    logger.debug(f'Waiting {SCAN_WAIT} seconds for baseline scan to finish.')
+    time.sleep(120)
 
     logger.debug('Creating registries...')
     for registry in reg_list:
@@ -89,8 +92,8 @@ def configure_syscheck_environment(time_sleep):
 
     TimeMachine.travel_to_future(timedelta(hours=13))
 
-    logger.debug('Waiting 60 seconds for scan to finish.')
-    time.sleep(60)
+    logger.debug(f'Waiting {SCAN_WAIT} seconds for scan to finish.')
+    time.sleep(SCAN_WAIT)
 
     logger.debug('Modifying registries...')
     for registry in reg_list:
@@ -103,8 +106,8 @@ def configure_syscheck_environment(time_sleep):
 
     TimeMachine.travel_to_future(timedelta(hours=13))
 
-    logger.debug('Waiting 60 seconds for scan to finish.')
-    time.sleep(60)
+    logger.debug(f'Waiting {SCAN_WAIT} seconds for scan to finish.')
+    time.sleep(SCAN_WAIT)
 
     logger.debug('Deleting registries...')
     for registry in reg_list:
@@ -112,8 +115,8 @@ def configure_syscheck_environment(time_sleep):
 
     TimeMachine.travel_to_future(timedelta(hours=13))
 
-    logger.debug('Waiting 60 seconds for scan to finish.')
-    time.sleep(60)
+    logger.debug(f'Waiting {SCAN_WAIT} seconds for scan to finish.')
+    time.sleep(SCAN_WAIT)
 
 
 def clean_environment(original_conf):

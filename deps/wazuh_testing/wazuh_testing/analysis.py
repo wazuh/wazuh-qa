@@ -23,6 +23,7 @@ with open(os.path.join(_data_path, 'analysis_alert_windows.json'), 'r') as f:
 with open(os.path.join(_data_path, 'state_integrity_analysis_schema.json'), 'r') as f:
     state_integrity_analysis_schema = json.load(f)
 
+
 def callback_analysisd_message(line):
     if isinstance(line, bytes):
         line = line.decode()
@@ -62,7 +63,7 @@ def callback_analysisd_agent_id(line):
 
 
 def callback_wazuhdb_message_added_and_modified(item):
-    data, response = item
+    data, _ = item
     match = re.match(r'^agent (\d{3,}) \w+ (save2) (.+)$', data.decode())
     if match:
         try:
@@ -73,14 +74,14 @@ def callback_wazuhdb_message_added_and_modified(item):
 
 
 def callback_wazuh_db_message_deleted(item):
-    data, response = item
+    data, _ = item
     match = re.match(r'^agent (\d{3,}) \w+ (delete) (.+)$', data.decode())
     if match:
         return match.group(1), match.group(2), match.group(3)
 
 
 def get_wazuh_db_message(item, keyword: str = None):
-    data, response = item
+    data, _ = item
     match = re.match(r'^agent (\d{3,}) \w+ (\w+) (.+)$', data.decode())
     if match:
         if keyword is not None and keyword not in match.group(2):
@@ -177,7 +178,7 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
             assert str(value) == str(syscheck_alert['{}_{}'.format(attribute, suffix)]), \
                 f"{value} not equal to {syscheck_alert['{}_{}'.format(attribute, suffix)]}"
         if 'tags' in event['data']:
-            assert event['data']['tags'] == syscheck_alert['tags'][0], f'Tags not in alert or with different value'
+            assert event['data']['tags'] == syscheck_alert['tags'][0], 'Tags not in alert or with different value'
         if 'content_changes' in event['data']:
             assert event['data']['content_changes'] == syscheck_alert['diff']
     try:
