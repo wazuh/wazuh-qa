@@ -28,7 +28,7 @@ TASK_TIMEOUT = '15m'
 MAX_THREADS = 8
 
 cases = [
-    # 0. Pending -> Cancelled after manager restart
+    # 0. In queue -> Cancelled after manager restart
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -43,13 +43,13 @@ cases = [
             'protocol': 'tcp',
             'agents_os': ['debian7', 'debian7'],
             'stage_disconnect': ['lock_restart', None],
-            'first_status': ['In progress', 'Pending'],
+            'first_status': ['Updating', 'In queue'],
             'expected_response': 'Success',
-            'status': ['In progress', 'Cancelled'],
+            'status': ['Updating', 'Task cancelled since the manager was restarted'],
             'upgrade_after_change_name': False
         }
     },
-    # 1. In progress -> Timeout after manager restart
+    # 1. Updating -> Timeout after manager restart
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -64,13 +64,13 @@ cases = [
             'protocol': 'tcp',
             'agents_os': ['debian7'],
             'stage_disconnect': ['write'],
-            'first_status': ['In progress'],
+            'first_status': ['Updating'],
             'expected_response': 'Success',
-            'status': ['Timeout'],
+            'status': ['Timeout reached while waiting for the response from the agent'],
             'upgrade_after_change_name': False
         }
     },
-    # 2. Pending -> New task after manager restart and change node
+    # 2. In queue -> New task after manager restart and change node
     {
         'params': {
             'PROTOCOL': 'tcp',
@@ -85,9 +85,9 @@ cases = [
             'protocol': 'tcp',
             'agents_os': ['debian7', 'debian7'],
             'stage_disconnect': ['lock_restart', None],
-            'first_status': ['In progress', 'Pending'],
+            'first_status': ['Updating', 'In queue'],
             'expected_response': 'Success',
-            'status': ['In progress', 'Pending'],
+            'status': ['Updating', 'In queue'],
             'upgrade_after_change_name': True,
             'change_node_name': True,
             'new_expected_response': [f'Upgrade procedure could not start. '\
@@ -109,9 +109,9 @@ cases = [
             'protocol': 'tcp',
             'agents_os': ['debian7'],
             'stage_disconnect': ['write'],
-            'first_status': ['In progress'],
+            'first_status': ['Updating'],
             'expected_response': 'Success',
-            'status': ['In progress'],
+            'status': ['Updating'],
             'change_node_name': True,
             'upgrade_after_change_name': True,
             'new_expected_response': [f'Upgrade procedure could not start. '\
@@ -133,9 +133,9 @@ cases = [
             'protocol': 'tcp',
             'agents_os': ['debian7'],
             'stage_disconnect': ['write'],
-            'first_status': ['In progress'],
+            'first_status': ['Updating'],
             'expected_response': 'Success',
-            'status': ['Timeout'],
+            'status': ['Timeout reached while waiting for the response from the agent'],
             'change_node_name': True,
             'upgrade_after_change_name': True,
             'new_expected_response': ['Success']
@@ -241,17 +241,17 @@ def test_wpk_manager_task_states(get_configuration, configure_environment,
             f'First upgrade response did not match expected! ' \
             f'Expected Success obtained {response["data"][0]["message"]}'
 
-        task_ids += [item.get('task_id') for item in response['data']]
+        task_ids += [item.get('agent') for item in response['data']]
 
     # Check initial task state
-    for index, task_id in enumerate(task_ids):
+    for index, agent_id in enumerate(task_ids):
         data = {
             "origin": {
                 "module": "api"
             },
-            "command": 'task_result',
+            "command": 'upgrade_result',
             "parameters": {
-                "tasks": [task_id]
+                "agents": [agent_id]
             }
         }
 
@@ -295,20 +295,20 @@ def test_wpk_manager_task_states(get_configuration, configure_environment,
     time.sleep(80)
 
     # Check task state after restart
-    for index, task_id in enumerate(task_ids):
+    for index, agent_id in enumerate(task_ids):
         data = {
             "origin": {
                 "module": "api"
             },
-            "command": 'task_result',
+            "command": 'upgrade_result',
             "parameters": {
-                "tasks": [task_id]
+                "agents": [agent_id]
             }
         }
 
         response = send_message(data, TASK_SOCKET)
         retries = 0
-        while response['data'][0]['status'] == 'In progress' \
+        while response['data'][0]['status'] == 'Updating' \
                 and retries < 30 and response['data'][0]['status'] \
                 != expected_status[index]:
             time.sleep(5)
