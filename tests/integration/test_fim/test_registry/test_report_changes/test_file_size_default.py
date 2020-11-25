@@ -67,7 +67,7 @@ def get_configuration(request):
     (key, sub_key_2, KEY_WOW64_64KEY, "some_value", {'test_report_changes'})
 ])
 def test_file_size_default(key, subkey, arch, value_name, tags_to_apply,
-                            get_configuration, configure_environment, restart_syscheckd_each_time):
+                           get_configuration, configure_environment, restart_syscheckd_each_time):
     """
     Check that no events are sent when the disk_quota exceeded
 
