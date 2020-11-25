@@ -67,7 +67,6 @@ def test_long_registry_path(get_configuration, configure_environment, restart_sy
     """
     Check if long key names generates events
     """
-    pytest.xfail(reason='Xfailed due to https://github.com/wazuh/wazuh/issues/6451')
 
     max_value_name = "value_test"
     for i in range(16372):

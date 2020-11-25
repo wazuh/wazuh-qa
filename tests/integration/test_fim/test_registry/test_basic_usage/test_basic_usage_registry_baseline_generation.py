@@ -4,6 +4,7 @@
 
 import os
 import pytest
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_detect_event, \
     modify_registry_value, callback_detect_end_scan, registry_parser, create_registry
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -91,5 +92,5 @@ def test_wait_until_baseline(key, subkey, arch, value_type, content, get_configu
 
     modify_registry_value(key_handle, "value_name", value_type, content)
 
-    wazuh_log_monitor.start(timeout=10, callback=callback_detect_event_before_end_scan,
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event_before_end_scan,
                             error_message='Did not receive expected event before end the scan')
