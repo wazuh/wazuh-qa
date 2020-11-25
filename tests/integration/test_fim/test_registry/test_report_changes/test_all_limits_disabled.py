@@ -4,10 +4,9 @@
 
 import os
 import pytest
-from hashlib import sha1
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, registry_value_cud, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params
-from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.fim import LOG_FILE_PATH, registry_value_cud, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, \
+                              calculate_registry_diff_paths
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 from test_fim.test_files.test_report_changes.common import generate_string
@@ -28,6 +27,7 @@ test_regs = [os.path.join(key, sub_key_1),
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 reg1, reg2 = test_regs
+size_limit_configured = 10 * 1024
 
 
 # Configurations
@@ -35,11 +35,11 @@ reg1, reg2 = test_regs
 p, m = generate_params(modes=['scheduled'], extra_params={'WINDOWS_REGISTRY_1': reg1,
                                                           'WINDOWS_REGISTRY_2': reg2,
                                                           'FILE_SIZE_ENABLED': 'no',
-                                                          'FILE_SIZE_LIMIT': '1KB',
+                                                          'FILE_SIZE_LIMIT': '10KB',
                                                           'DISK_QUOTA_ENABLED': 'no',
                                                           'DISK_QUOTA_LIMIT': '4KB'})
 
-configurations_path = os.path.join(test_data_path, 'wazuh_registry_report_changes.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_registry_report_changes_limits_quota.yaml')
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
@@ -52,16 +52,16 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.parametrize('key, subkey, arch, value_name, tags_to_apply, size', [
-    (key, sub_key_1, KEY_WOW64_64KEY, "some_value", {'test_limits'}, 2048),
-    (key, sub_key_1, KEY_WOW64_32KEY, "some_value", {'test_limits'}, 2048),
-    (key, sub_key_2, KEY_WOW64_64KEY, "some_value", {'test_limits'}, 2048)
+@pytest.mark.parametrize('key, subkey, arch, value_name, tags_to_apply', [
+    (key, sub_key_1, KEY_WOW64_64KEY, "some_value", {'test_limits'}),
+    (key, sub_key_1, KEY_WOW64_32KEY, "some_value", {'test_limits'}),
+    (key, sub_key_2, KEY_WOW64_64KEY, "some_value", {'test_limits'})
 ])
-def test_file_size_disabled(key, subkey, arch, value_name, tags_to_apply, size,
-                            get_configuration, configure_environment, restart_syscheckd,
-                            wait_for_fim_start):
+def test_all_limits_disabled(key, subkey, arch, value_name, tags_to_apply,
+                             get_configuration, configure_environment, restart_syscheckd,
+                             wait_for_fim_start):
     """
-    Check that events are still sent when the file_size exceeded
+    Check that no events are sent when the file_size exceeded
 
     Parameters
     ----------
@@ -75,23 +75,17 @@ def test_file_size_disabled(key, subkey, arch, value_name, tags_to_apply, size,
         Name of the value that will be created
     tags_to_apply : set
         Run test if match with a configuration identifier, skip otherwise.
-    size : int
-        Size of the content to write in value
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    value_content = generate_string(size, '0')
+    value_content = generate_string(4 * 1024 * 1024, '0')
     values = {value_name: value_content}
+
+    _, diff_file = calculate_registry_diff_paths(key, subkey, arch, value_name)
 
     def report_changes_validator_diff(event):
         """Validate content_changes attribute exists in the event"""
-        for value in values:
-            folder_key = "{} {}".format("[x32]" if arch == KEY_WOW64_32KEY else "[x64]",
-                                        sha1(os.path.join(key, subkey).encode()).hexdigest())
-            diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'registry', folder_key,
-                                     sha1(value.encode()).hexdigest(), 'last-entry.gz')
-
-            assert os.path.exists(diff_file), '{diff_file} does not exist'
-            assert event['data'].get('content_changes') is not None, 'content_changes is empty'
+        assert os.path.exists(diff_file), '{diff_file} does not exist'
+        assert event['data'].get('content_changes') is not None, 'content_changes is empty'
 
     registry_value_cud(key, subkey, wazuh_log_monitor, arch=arch, value_list=values,
                        time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',

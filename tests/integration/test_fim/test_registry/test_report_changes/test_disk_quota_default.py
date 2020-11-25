@@ -6,7 +6,7 @@ import os
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, \
-                              callback_diff_size_limit_value, create_registry, registry_parser, modify_registry_value, \
+                              callback_disk_quota_default, create_registry, registry_parser, modify_registry_value, \
                               check_time_travel, validate_registry_value_event, callback_detect_event
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -31,7 +31,7 @@ test_regs = [os.path.join(key, sub_key_1),
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 reg1, reg2 = test_regs
-DEFAULT_SIZE = 50 * 1024
+DEFAULT_SIZE = 1024 * 1024
 
 
 # Configurations
@@ -66,7 +66,7 @@ def get_configuration(request):
     (key, sub_key_1, KEY_WOW64_32KEY, "some_value", {'test_report_changes'}),
     (key, sub_key_2, KEY_WOW64_64KEY, "some_value", {'test_report_changes'})
 ])
-def test_file_size_default(key, subkey, arch, value_name, tags_to_apply,
+def test_disk_quota_default(key, subkey, arch, value_name, tags_to_apply,
                             get_configuration, configure_environment, restart_syscheckd_each_time):
     """
     Check that no events are sent when the disk_quota exceeded
@@ -89,18 +89,15 @@ def test_file_size_default(key, subkey, arch, value_name, tags_to_apply,
     check_apply_test(tags_to_apply, get_configuration['tags'])
     mode = get_configuration['metadata']['fim_mode']
 
-    file_size_values = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                               callback=callback_diff_size_limit_value,
-                                               accum_results=3,
+    disk_quota_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                               callback=callback_disk_quota_default,
                                                error_message='Did not receive expected '
-                                               '"Maximum file size limit to generate diff information '
-                                               'configured to \'... KB\'..." event'
+                                               '"Maximum disk quota size limit configured to \'... KB\'." event'
                                                ).result()
-    for value in file_size_values:
-        if value:
-            assert value == str(DEFAULT_SIZE), 'Wrong value for file_size'
-        else:
-            raise AssertionError('Wrong value for file_size')
+    if disk_quota_value:
+        assert disk_quota_value == str(DEFAULT_SIZE), 'Wrong value for disk_quota'
+    else:
+        raise AssertionError('Wrong value for disk_quota')
 
     key_h = create_registry(registry_parser[key], subkey, arch)
 
