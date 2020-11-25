@@ -130,6 +130,15 @@ if sys.platform == 'win32':
 
     KEY_WOW64_32KEY = win32con.KEY_WOW64_32KEY
     KEY_WOW64_64KEY = win32con.KEY_WOW64_64KEY
+else:
+    registry_parser = {}
+
+    registry_class_name = {}
+
+    registry_value_type = {}
+
+    KEY_WOW64_32KEY = 0
+    KEY_WOW64_64KEY = 0
 
 
 def validate_event(event, checks=None, mode=None):
