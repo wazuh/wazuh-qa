@@ -5,6 +5,7 @@
   apply_to_modules:
   - test_report_changes
   - test_report_changes_deleted
+  - test_report_changes_more_changes
   sections:
   - section: syscheck
     elements:

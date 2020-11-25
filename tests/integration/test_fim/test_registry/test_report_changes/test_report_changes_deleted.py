@@ -7,8 +7,8 @@ import pytest
 from hashlib import sha1
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, check_time_travel, delete_registry, detect_initial_scan, \
-                              registry_value_cud, KEY_WOW64_32KEY, KEY_WOW64_64KEY, \
-                              registry_parser, generate_params, create_registry, modify_registry_value
+                              registry_value_cud, KEY_WOW64_32KEY, KEY_WOW64_64KEY, registry_parser, generate_params, \
+                              create_registry, modify_registry_value, calculate_registry_diff_paths
 from wazuh_testing.tools.services import restart_wazuh_with_new_conf
 
 from wazuh_testing.tools import WAZUH_PATH
@@ -46,32 +46,6 @@ p, m = generate_params(extra_params=conf_params, modes=['scheduled'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 # Functions
-
-
-def calculate_diff_paths(reg_key, reg_subkey, arch, value_name):
-    """
-    Calculate the diff folder path of a value.
-    Parameters
-    ---------
-    reg_key: str
-        Registry name (HKEY_* constants).
-    reg_subkey: str
-        Path of the subkey.
-    arch: int
-        architecture of the registry.
-    value_name: str
-        name of the value.
-
-    Returns
-    -------
-    A tuple with the diff folder path of the key and the path of the value.
-    """
-    key_path = os.path.join(reg_key, reg_subkey)
-    folder_path = "{} {}".format("[x32]" if arch == KEY_WOW64_32KEY else "[x64]",
-                                 sha1(key_path.encode()).hexdigest())
-    diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'registry', folder_path,
-                             sha1(value_name.encode()).hexdigest(), 'last-entry.gz')
-    return (folder_path, diff_file)
 
 
 def reload_new_conf(report_value, reg1, reg2):
@@ -146,7 +120,7 @@ def test_report_when_deleted_key(key, subkey, arch, value_name, enabled, tags_to
     vals_after_update = None
     vals_after_delete = None
 
-    folder_path, diff_file = calculate_diff_paths(key, subkey, arch, value_name)
+    folder_path, diff_file = calculate_registry_diff_paths(key, subkey, arch, value_name)
 
     def report_changes_diff_file_validator(unused_param):
         """
@@ -186,8 +160,8 @@ def test_report_changes_after_restart(get_configuration, configure_environment, 
     check_apply_test({'test_delete_after_restart'}, get_configuration['tags'])
     value_name = 'random_value'
 
-    folder_path_key1, diff_file_key_1 = calculate_diff_paths(key, sub_key_1, KEY_WOW64_64KEY, value_name)
-    folder_path_key2, diff_file_key_2 = calculate_diff_paths(key, sub_key_1, KEY_WOW64_64KEY, value_name)
+    folder_path_key1, diff_file_key_1 = calculate_registry_diff_paths(key, sub_key_1, KEY_WOW64_64KEY, value_name)
+    folder_path_key2, diff_file_key_2 = calculate_registry_diff_paths(key, sub_key_1, KEY_WOW64_64KEY, value_name)
 
     # Open key
     key1_h = create_registry(registry_parser[key], sub_key_1, KEY_WOW64_64KEY)

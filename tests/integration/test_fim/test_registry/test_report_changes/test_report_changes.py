@@ -4,10 +4,9 @@
 
 import os
 import pytest
-from hashlib import sha1
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, registry_value_cud, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params
-from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.fim import LOG_FILE_PATH, calculate_registry_diff_paths, registry_value_cud, KEY_WOW64_32KEY, \
+                              KEY_WOW64_64KEY, generate_params
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -79,10 +78,7 @@ def test_report_changes(key, subkey, arch, value_name, tags_to_apply,
     def report_changes_validator(event):
         """Validate content_changes attribute exists in the event"""
         for value in values:
-            folder_key = "{} {}".format("[x32]" if arch == KEY_WOW64_32KEY else "[x64]",
-                                        sha1(os.path.join(key, subkey).encode()).hexdigest())
-            diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'registry', folder_key,
-                                     sha1(value.encode()).hexdigest(), 'last-entry.gz')
+            _, diff_file = calculate_registry_diff_paths(key, subkey, arch, value)
 
             assert os.path.exists(diff_file), '{diff_file} does not exist'
             assert event['data'].get('content_changes') is not None, 'content_changes is empty'
