@@ -956,15 +956,15 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
 
         repeat_message = data
         # Continue with the validations of first attempt
-        task_ids = [item.get('task_id') for item in response['data']]
-        for index, task_id in enumerate(task_ids):
+        task_ids = [item.get('agent') for item in response['data']]
+        for index, agent_id in enumerate(task_ids):
             data = {
                 "origin": {
                     "module": "api"
                 },
-                "command": 'task_result',
+                "command": 'upgrade_result',
                 "parameters": {
-                    "tasks": [task_id]
+                    "agents": [agent_id]
                 }
             }
             time.sleep(30)
@@ -989,15 +989,15 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
             f'Expected {metadata.get("expected_response")} obtained {response["data"][0]["message"]}'
 
         # Continue with the test validations
-        task_ids = [item.get('task_id') for item in response['data']]
-        for index, task_id in enumerate(task_ids):
+        task_ids = [item.get('agent') for item in response['data']]
+        for index, agent_id in enumerate(task_ids):
             data = {
                 "origin": {
                     "module": "api"
                 },
-                "command": 'task_result',
+                "command": 'upgrade_result',
                 "parameters": {
-                    "tasks": [task_id]
+                    "agents": [agent_id]
                 }
             }
             time.sleep(30)
