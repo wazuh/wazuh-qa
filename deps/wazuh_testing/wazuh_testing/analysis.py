@@ -111,7 +111,8 @@ def callback_fim_alert(line):
     try:
         alert = json.loads(line)
         # Avoid syscheck alerts that are not 'added', 'modified' or 'deleted'
-        if alert['rule']['id'] in ['550', '553', '554'] and 'syscheck' in alert:
+        if (alert['rule']['id'] in ['550', '553', '554', '594', '597', '598', '750', '751', '752'] and
+                'syscheck' in alert):
             return alert
     except json.decoder.JSONDecodeError:
         return None
@@ -158,7 +159,8 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
     def validate_attributes(syscheck_alert, syscheck_event, event_field, suffix):
         for attribute, value in syscheck_event['data'][event_field].items():
             # Skip certain attributes since their alerts will not have them
-            if attribute in ['type', 'checksum', 'attributes'] or ('inode' in attribute and schema == 'win32'):
+            if attribute in ['type', 'checksum', 'attributes', 'value_type'] or ('inode' in attribute and
+                                                                                 schema == 'win32'):
                 continue
             # Change `mtime` format to match with alerts
             elif attribute == 'mtime':
@@ -170,15 +172,21 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
             elif 'perm' in attribute and schema == 'win32':
                 attribute = 'win_perm'
                 win_perm_list = []
+
                 for win_perm in value.split(','):
                     user, effect, permissions = re.match(r'^(.+?) \((.+?)\): (.+?)$', win_perm).groups()
                     win_perm_list.append({'name': user.strip(' '), effect: permissions.upper().split('|')})
+
                 value = win_perm_list
+
             attribute = '{}name'.format(attribute[0]) if attribute in ['user_name', 'group_name'] else attribute
+
             assert str(value) == str(syscheck_alert['{}_{}'.format(attribute, suffix)]), \
                 f"{value} not equal to {syscheck_alert['{}_{}'.format(attribute, suffix)]}"
+
         if 'tags' in event['data']:
             assert event['data']['tags'] == syscheck_alert['tags'][0], 'Tags not in alert or with different value'
+
         if 'content_changes' in event['data']:
             assert event['data']['content_changes'] == syscheck_alert['diff']
     try:
