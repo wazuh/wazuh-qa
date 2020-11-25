@@ -53,7 +53,7 @@ cases = [
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Done'],
+            'status': ['Updated'],
             'upgrade_notification': [True],
             'expected_response': 'Success'
         }
@@ -75,7 +75,7 @@ cases = [
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [2],
-            'status': ['Failed'],
+            'status': ['Error'],
             'error_msg': ['Upgrade procedure exited with error code'],
             'upgrade_notification': [True],
             'expected_response': 'Success'
@@ -98,7 +98,7 @@ cases = [
             'sha_list': ['INVALID'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Failed'],
+            'status': ['Error'],
             'error_msg': ['Send verify sha1 error'],
             'upgrade_notification': [False],
             'expected_response': 'Success'
@@ -121,7 +121,7 @@ cases = [
             'sha_list': ['VALIDSHA1', 'INVALIDSHA', 'VALIDSHA1'],
             'upgrade_exec_result': ['0', '0', '0'],
             'upgrade_script_result': [0, 0, 2],
-            'status': ['Done', 'Failed', 'Failed'],
+            'status': ['Updated', 'Error', 'Error'],
             'error_msg': ['', 'Send verify sha1 error','Upgrade procedure exited with error code'],
             'upgrade_notification': [True, False, True],
             'expected_response': 'Success'
@@ -144,7 +144,7 @@ cases = [
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Done'],
+            'status': ['Updated'],
             'upgrade_notification': [True],
             'message_params': {'version': 'v3.5.0', 'force_upgrade': False},
             'expected_response': 'Current agent version is greater or equal'
@@ -168,7 +168,7 @@ cases = [
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
             'upgrade_notification': [False],
-            'status': ['Failed'],
+            'status': ['Error'],
             'message_params': {'version': 'v4.55.55', 'force_upgrade': True},
             'error_msg': ['The version of the WPK does not exist in the repository'],
             'expected_response': 'Success'
@@ -191,7 +191,7 @@ cases = [
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Failed'],
+            'status': ['Error'],
             'upgrade_notification': [False],
             'message_params': {'version': 'v4.1.0', 'force_upgrade': False},
             'error_msg': ['The repository is not reachable'],
@@ -215,7 +215,7 @@ cases = [
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Done'],
+            'status': ['Updated'],
             'upgrade_notification': [False],
             'expected_response': 'The WPK for this platform is not available'
         }
@@ -237,7 +237,7 @@ cases = [
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Done'],
+            'status': ['Updated'],
             'upgrade_notification': [False],
             'expected_response': 'Current agent version is greater or equal'
         }
@@ -260,7 +260,7 @@ cases = [
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
             'upgrade_notification': [False],
-            'status': ['Failed'],
+            'status': ['Error'],
             'message_params': {'version': 'v4.55.55', 'force_upgrade': False},
             'expected_response': 'Upgrading an agent to a version higher than the manager requires the force flag'
         }
@@ -282,7 +282,7 @@ cases = [
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Done'],
+            'status': ['Updated'],
             'upgrade_notification': [True],
             'message_params': {'force_upgrade': True},
             'expected_response': 'Success'
@@ -305,7 +305,7 @@ cases = [
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Done'],
+            'status': ['Updated'],
             'upgrade_notification': [False],
             'message_params': {'force_upgrade': False},
             'expected_response': 'Current agent version is greater or equal'
@@ -328,7 +328,7 @@ cases = [
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Legacy'],
+            'status': ['Legacy upgrade: check the result manually since the agent cannot report the result of the task'],
             'upgrade_notification': [False],
             'message_params': {'version': 'v3.13.1'},
             'expected_response': 'Success'
@@ -351,10 +351,10 @@ cases = [
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Done'],
+            'status': ['Updated'],
             'upgrade_notification': [False],
             'expected_response': 'Upgrade procedure could not start. Agent already upgrading',
-            'first_attempt': 'In progress'
+            'first_attempt': 'Updating'
         }
     },
     # 14. Upgrade an agent that previous task's result is timeout - Success
@@ -374,10 +374,10 @@ cases = [
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['In progress'],
+            'status': ['Updating'],
             'upgrade_notification': [False],
             'expected_response': 'Success',
-            'first_attempt': 'Timeout'
+            'first_attempt': 'Timeout reached while waiting for the response from the agent'
         }
     },
     # 15. Disconnect Agent open error - Fail
@@ -397,7 +397,7 @@ cases = [
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Failed'],
+            'status': ['Error'],
             'upgrade_notification': [False],
             'expected_response': 'Success',
             'error_msg': ['Send open file error'],
@@ -420,7 +420,7 @@ cases = [
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Failed'],
+            'status': ['Error'],
             'upgrade_notification': [False],
             'expected_response': 'Success',
             'error_msg': ['Send write file error'],
@@ -443,7 +443,7 @@ cases = [
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Failed'],
+            'status': ['Error'],
             'upgrade_notification': [False],
             'expected_response': 'Success',
             'error_msg': ['Send close file error'],
@@ -466,7 +466,7 @@ cases = [
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Failed'],
+            'status': ['Error'],
             'upgrade_notification': [False],
             'expected_response': 'Success',
             'error_msg': ['Send lock restart error'],
@@ -489,7 +489,7 @@ cases = [
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Failed'],
+            'status': ['Error'],
             'upgrade_notification': [False],
             'expected_response': 'Success',
             'error_msg': ['Send verify sha1 error'],
@@ -512,7 +512,7 @@ cases = [
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Failed'],
+            'status': ['Error'],
             'upgrade_notification': [False],
             'expected_response': 'Success',
             'error_msg': ['Send upgrade command error'],
@@ -535,7 +535,7 @@ cases = [
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Done'],
+            'status': ['Updated'],
             'upgrade_notification': [True],
             'checks': ['chunk_size'],
             'chunk_size': 31111,
@@ -559,7 +559,7 @@ cases = [
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['In progress'],
+            'status': ['Updating'],
             'upgrade_notification': [False],
             'message_params': {'file_path': 'wpk_test.wpk'},
             'checks': ['wpk_name'],
@@ -584,7 +584,7 @@ cases = [
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Failed'],
+            'status': ['Error'],
             'upgrade_notification': [False],
             'message_params': {'file_path': 'invalid/path/to.wpk'},
             'error_msg': ['The WPK file does not exist'],
@@ -609,7 +609,7 @@ cases = [
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['In progress'],
+            'status': ['Updating'],
             'upgrade_notification': [False],
             'message_params': {'file_path': 'wpk_test.wpk', 'installer': 'custom_installer.sh'},
             'error_msg': ['Not need'],
@@ -635,7 +635,7 @@ cases = [
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Done'],
+            'status': ['Updated'],
             'upgrade_notification': [True],
             'message_params': {'use_http': True},
             'checks': ['use_http', 'version'],
@@ -659,7 +659,7 @@ cases = [
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Done'],
+            'status': ['Updated'],
             'upgrade_notification': [True],
             'checks': ['use_http', 'version'],
             'expected_response': 'Success'
@@ -682,7 +682,7 @@ cases = [
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Done'],
+            'status': ['Updated'],
             'message_params': {'use_http': True},
             'upgrade_notification': [True],
             'checks': ['use_http', 'version'],
@@ -1003,7 +1003,7 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
             time.sleep(30)
             response = send_message(data, TASK_SOCKET)
             retries = 0
-            while response['data'][0]['status'] == 'In progress' and retries < 30 and \
+            while response['data'][0]['status'] == 'Updating' and retries < 30 and \
                     response['data'][0]['status'] != expected_status[index]:
                 time.sleep(30)
                 response = send_message(data, TASK_SOCKET)
@@ -1011,7 +1011,7 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
             assert expected_status[index] == response['data'][0]['status'], \
                 f'Upgrade status did not match expected! ' \
                 f'Expected {expected_status[index]} obtained {response["data"][0]["status"]} at index {index}'
-            if expected_status[index] == 'Failed':
+            if expected_status[index] == 'Error':
                 assert expected_error_msg[index] == response['data'][0]['error_msg'], \
                     f'Error msg did not match expected! ' \
                     f'Expected {expected_error_msg[index]} obtained {response["data"][0]["error_msg"]} at index {index}'
