@@ -63,7 +63,7 @@ class Agent:
         self.fim = None
         self.fim_integrity = None
         self.modules = {
-            "keepalive": {"status": "enabled", "frequency": 60.0},
+            "keepalive": {"status": "enabled", "frequency": 10.0},
             "fim": {"status": "enabled", "eps": self.fim_eps},
             "fim_integrity": {"status": "disabled", "eps": self.fim_integrity_eps},
             "syscollector": {"status": "disabled", "frequency": 60.0, "eps": 200},
