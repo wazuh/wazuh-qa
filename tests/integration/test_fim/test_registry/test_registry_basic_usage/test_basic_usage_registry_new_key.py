@@ -6,10 +6,9 @@ import os
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, \
-     check_time_travel, create_registry, registry_parser, registry_value_cud
+     check_time_travel, create_registry, registry_parser, registry_value_cud, KEY_WOW64_64KEY
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
-import win32con
 
 
 # Marks
@@ -18,7 +17,7 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=0)]
 
 
 # Variables
-arch = win32con.KEY_WOW64_64KEY
+arch = KEY_WOW64_64KEY
 key = "HKEY_LOCAL_MACHINE"
 sub_key_1 = "SOFTWARE\\Classes\\testkey"
 

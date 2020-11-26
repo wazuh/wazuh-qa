@@ -6,10 +6,10 @@ import os
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_registry_count_entries,  \
-     check_time_travel, create_registry, modify_registry_value, registry_parser
+     check_time_travel, create_registry, modify_registry_value, registry_parser, KEY_WOW64_64KEY, \
+     REG_SZ, REG_MULTI_SZ, REG_DWORD
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
-import win32con
 
 
 # Marks
@@ -19,7 +19,7 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=0)]
 
 # Variables
 
-arch = win32con.KEY_WOW64_64KEY
+arch = KEY_WOW64_64KEY
 key = "HKEY_LOCAL_MACHINE"
 sub_key_1 = "SOFTWARE\\Classes\\testkey"
 
@@ -52,9 +52,9 @@ def get_configuration(request):
 def extra_configuration_before_yield():
     key_h = create_registry(registry_parser[key], sub_key_1, arch)
 
-    modify_registry_value(key_h, "value1", win32con.REG_SZ, "some content")
-    modify_registry_value(key_h, "value2", win32con.REG_MULTI_SZ, "some content\0second string\0")
-    modify_registry_value(key_h, "value3", win32con.REG_DWORD, 1234)
+    modify_registry_value(key_h, "value1", REG_SZ, "some content")
+    modify_registry_value(key_h, "value2", REG_MULTI_SZ, "some content\0second string\0")
+    modify_registry_value(key_h, "value3", REG_DWORD, 1234)
 
 
 def test_entries_match_key_count(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):

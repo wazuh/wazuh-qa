@@ -7,11 +7,10 @@ import pytest
 from collections import Counter
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_registry, modify_registry_value, delete_registry, \
-    callback_detect_event, check_time_travel, validate_registry_value_event, registry_parser
+    callback_detect_event, check_time_travel, validate_registry_value_event, registry_parser, KEY_WOW64_32KEY, \
+    KEY_WOW64_64KEY, REG_SZ, REG_MULTI_SZ, REG_DWORD
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
-import win32con
-
 
 # Marks
 
@@ -38,9 +37,9 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf_registry_both.yam
 p, m = generate_params(extra_params=conf_params, modes=monitoring_modes)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
-registry_list = [(key, sub_key_1, win32con.KEY_WOW64_64KEY),
-                 (key, sub_key_2, win32con.KEY_WOW64_32KEY),
-                 (key, sub_key_2, win32con.KEY_WOW64_64KEY)]
+registry_list = [(key, sub_key_1, KEY_WOW64_64KEY),
+                 (key, sub_key_2, KEY_WOW64_32KEY),
+                 (key, sub_key_2, KEY_WOW64_64KEY)]
 
 
 # fixtures
@@ -54,9 +53,9 @@ def get_configuration(request):
 # test
 
 @pytest.mark.parametrize('key, subkey, arch, value_list', [
-    (key, sub_key_1, win32con.KEY_WOW64_64KEY, ['value1', 'value2', 'value3']),
-    (key, sub_key_2, win32con.KEY_WOW64_32KEY, ['value1', 'value2', 'value3']),
-    (key, sub_key_2, win32con.KEY_WOW64_64KEY, ['value1', 'value2', 'value3'])
+    (key, sub_key_1, KEY_WOW64_64KEY, ['value1', 'value2', 'value3']),
+    (key, sub_key_2, KEY_WOW64_32KEY, ['value1', 'value2', 'value3']),
+    (key, sub_key_2, KEY_WOW64_64KEY, ['value1', 'value2', 'value3'])
 
 ])
 def test_delete_registry(key, subkey, arch, value_list,
@@ -84,9 +83,9 @@ def test_delete_registry(key, subkey, arch, value_list,
     key_h = create_registry(registry_parser[key], subkey, arch)
 
     # Create values inside subkey
-    modify_registry_value(key_h, value_list[0], win32con.REG_SZ, "some content")
-    modify_registry_value(key_h, value_list[1], win32con.REG_MULTI_SZ, "some content\0second string\0")
-    modify_registry_value(key_h, value_list[2], win32con.REG_DWORD, 1234)
+    modify_registry_value(key_h, value_list[0], REG_SZ, "some content")
+    modify_registry_value(key_h, value_list[1], REG_MULTI_SZ, "some content\0second string\0")
+    modify_registry_value(key_h, value_list[2], REG_DWORD, 1234)
 
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
     events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,

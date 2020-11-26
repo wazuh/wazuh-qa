@@ -7,12 +7,11 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, \
                               callback_disk_quota_default, create_registry, registry_parser, modify_registry_value, \
-                              check_time_travel, validate_registry_value_event, callback_detect_event
+                              check_time_travel, validate_registry_value_event, callback_detect_event, REG_SZ
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import truncate_file
-import win32con
 
 
 # Marks
@@ -101,7 +100,7 @@ def test_disk_quota_default(key, subkey, arch, value_name, tags_to_apply,
 
     key_h = create_registry(registry_parser[key], subkey, arch)
 
-    modify_registry_value(key_h, "some_value", win32con.REG_SZ, "some content")
+    modify_registry_value(key_h, "some_value", REG_SZ, "some content")
     check_time_travel(True, monitor=wazuh_log_monitor)
     events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                      accum_results=2, error_message='Did not receive expected '

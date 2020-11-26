@@ -6,12 +6,12 @@ import os
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_detect_event, \
-    modify_registry_value, callback_detect_end_scan, registry_parser, create_registry
+    modify_registry_value, callback_detect_end_scan, registry_parser, create_registry, KEY_WOW64_64KEY, \
+    KEY_WOW64_32KEY, REG_SZ
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import truncate_file
-import win32con
 
 
 # Marks
@@ -41,9 +41,9 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf_registry_both.yam
 p, m = generate_params(extra_params=conf_params, modes=monitoring_modes)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
-registry_list = [(key, sub_key_1, win32con.KEY_WOW64_64KEY),
-                 (key, sub_key_2, win32con.KEY_WOW64_32KEY),
-                 (key, sub_key_2, win32con.KEY_WOW64_64KEY)]
+registry_list = [(key, sub_key_1, KEY_WOW64_64KEY),
+                 (key, sub_key_2, KEY_WOW64_32KEY),
+                 (key, sub_key_2, KEY_WOW64_64KEY)]
 
 
 # fixtures
@@ -76,9 +76,9 @@ def callback_detect_event_before_end_scan(line):
 
 
 @pytest.mark.parametrize('key, subkey, arch, value_type, content', [
-    (key, sub_key_1, win32con.KEY_WOW64_64KEY, win32con.REG_SZ, 'added'),
-    (key, sub_key_2, win32con.KEY_WOW64_32KEY, win32con.REG_SZ, 'added'),
-    (key, sub_key_2, win32con.KEY_WOW64_64KEY, win32con.REG_SZ, 'added')
+    (key, sub_key_1, KEY_WOW64_64KEY, REG_SZ, 'added'),
+    (key, sub_key_2, KEY_WOW64_32KEY, REG_SZ, 'added'),
+    (key, sub_key_2, KEY_WOW64_64KEY, REG_SZ, 'added')
 ])
 def test_wait_until_baseline(key, subkey, arch, value_type, content, get_configuration,
                              configure_environment, restart_syscheckd_each_time):

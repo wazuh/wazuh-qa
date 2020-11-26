@@ -3,21 +3,15 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import sys
 
 import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, callback_file_limit_capacity, \
     callback_registry_count_entries, check_time_travel, delete_registry_value, callback_file_limit_back_to_normal, \
-    registry_parser, KEY_WOW64_64KEY, callback_detect_end_scan
+    registry_parser, KEY_WOW64_64KEY, callback_detect_end_scan, REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-
-if sys.platform == 'win32':
-    from win32con import REG_SZ, KEY_ALL_ACCESS
-    from win32api import RegOpenKeyEx, RegCloseKey
-    import pywintypes
 
 # Marks
 
@@ -76,6 +70,9 @@ def test_file_limit_capacity_alert(percentage, tags_to_apply, get_configuration,
     tags_to_apply : set
         Run test if matches with a configuration identifier, skip otherwise.
     """
+    # This import must be here in order to avoid problems in Linux.
+    import pywintypes
+
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     limit = int(get_configuration['metadata']['file_limit'])

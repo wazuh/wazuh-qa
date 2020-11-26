@@ -7,12 +7,11 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, check_time_travel, delete_registry, detect_initial_scan, \
                               registry_value_cud, KEY_WOW64_32KEY, KEY_WOW64_64KEY, registry_parser, generate_params, \
-                              create_registry, modify_registry_value, calculate_registry_diff_paths
+                              create_registry, modify_registry_value, calculate_registry_diff_paths, REG_SZ
 from wazuh_testing.tools.services import restart_wazuh_with_new_conf
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test, set_section_wazuh_conf
 from wazuh_testing.tools.monitoring import FileMonitor
-from win32con import REG_SZ
 # Marks
 
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]

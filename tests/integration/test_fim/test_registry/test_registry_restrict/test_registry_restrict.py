@@ -8,10 +8,9 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, create_registry, modify_registry_value, registry_parser, KEY_WOW64_32KEY, \
         KEY_WOW64_64KEY, callback_restricted, generate_params, callback_detect_event, delete_registry_value, \
-        check_time_travel, delete_registry
+        check_time_travel, delete_registry, REG_SZ
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from win32con import REG_SZ
 
 # Marks
 

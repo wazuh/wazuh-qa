@@ -5,11 +5,10 @@
 import os
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, registry_value_cud, registry_key_cud
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, registry_value_cud, registry_key_cud, KEY_WOW64_64KEY, \
+    KEY_WOW64_32KEY, REG_SZ, REG_MULTI_SZ, REG_DWORD
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
-import win32con
-
 
 # Marks
 
@@ -38,9 +37,9 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf_registry_both.yam
 p, m = generate_params(extra_params=conf_params, modes=monitoring_modes)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
-registry_list = [(key, sub_key_1, win32con.KEY_WOW64_64KEY),
-                 (key, sub_key_2, win32con.KEY_WOW64_32KEY),
-                 (key, sub_key_2, win32con.KEY_WOW64_64KEY)]
+registry_list = [(key, sub_key_1, KEY_WOW64_64KEY),
+                 (key, sub_key_2, KEY_WOW64_32KEY),
+                 (key, sub_key_2, KEY_WOW64_64KEY)]
 
 
 # fixtures
@@ -54,20 +53,19 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.parametrize('value_type', [
-    win32con.REG_SZ,
-    win32con.REG_MULTI_SZ,
-    win32con.REG_DWORD
+    REG_SZ,
+    REG_MULTI_SZ,
+    REG_DWORD
 ])
 @pytest.mark.parametrize('key, subkey, arch', [
-    (key, sub_key_1, win32con.KEY_WOW64_64KEY),
-    (key, sub_key_2, win32con.KEY_WOW64_32KEY),
-    (key, sub_key_2, win32con.KEY_WOW64_64KEY)
+    (key, sub_key_1, KEY_WOW64_64KEY),
+    (key, sub_key_2, KEY_WOW64_32KEY),
+    (key, sub_key_2, KEY_WOW64_64KEY)
 ])
 def test_registry_changes(key, subkey, arch, value_type, get_configuration, configure_environment, restart_syscheckd):
     """
     Check if events appear for subkeys/values of a monitored key
     """
-
     registry_key_cud(key, subkey, wazuh_log_monitor, arch=arch,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
                      min_timeout=global_parameters.default_timeout,

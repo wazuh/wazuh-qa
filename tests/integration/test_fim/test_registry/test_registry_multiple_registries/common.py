@@ -3,12 +3,10 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-from win32con import REG_SZ
-from win32api import RegCloseKey
 
 from wazuh_testing.fim import create_registry, registry_parser, check_time_travel, modify_registry, delete_registry, \
     callback_detect_event, validate_registry_key_event, KEY_WOW64_32KEY, modify_registry_value, delete_registry_value, \
-    validate_registry_value_event, callback_value_event
+    validate_registry_value_event, callback_value_event, REG_SZ, RegCloseKey
 
 
 def multiple_keys_and_entries_keys(num_entries, subkeys, log_monitor, root_key, timeout=10):

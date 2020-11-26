@@ -6,11 +6,9 @@ import os
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, \
-     create_registry, delete_registry, registry_parser, registry_value_cud
+     create_registry, registry_parser, registry_value_cud, KEY_WOW64_64KEY
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
-import win32api
-import win32con
 
 
 # Marks
@@ -18,7 +16,7 @@ import win32con
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=0)]
 
 # Variables
-arch = win32con.KEY_WOW64_64KEY
+arch = KEY_WOW64_64KEY
 key = "HKEY_LOCAL_MACHINE"
 sub_key_1 = "SOFTWARE\\Classes"
 for i in range(30):
@@ -53,14 +51,6 @@ def get_configuration(request):
 
 def extra_configuration_before_yield():
     create_registry(registry_parser[key], sub_key_1, arch)
-
-
-def extra_configuration_after_yield():
-    """Make sure to delete the key after performing the test"""
-    try:
-        delete_registry(registry_parser[key], sub_key_1, arch)
-    except win32api.error:
-        pass
 
 
 def test_long_registry_path(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
