@@ -86,7 +86,7 @@ def test_file_limit_values(tags_to_apply, get_configuration, configure_environme
     file_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                callback=callback_value_file_limit,
                                                error_message='Did not receive expected '
-                                               '"DEBUG: ...: Maximum number of files to be monitored: ..." event'
+                                               '"DEBUG: ...: Maximum number of entries to be monitored: ..." event'
                                                ).result()
 
     if file_limit_value:

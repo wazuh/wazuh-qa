@@ -1066,7 +1066,7 @@ def callback_ignore(line):
 
 
 def callback_restricted(line):
-    match = re.match(r".*Ignoring file '(.*?)' due to restriction '.*?'", line)
+    match = re.match(r".*Ignoring entry '(.*?)' due to restriction '.*?'", line)
     if match:
         return match.group(1)
     return None
@@ -1240,10 +1240,10 @@ def callback_file_size_limit_reached(line):
 
 
 def callback_disk_quota_limit_reached(line):
-    match = re.match(r'.*The maximum configured size for the \'(.*)\' folder has been reached.*', line)
+    match = re.match(r'.*The (.*) of the file size \'(.*)\' exceeds the disk_quota.*', line)
 
     if match:
-        return match.group(1)
+        return match.group(2)
 
 
 def callback_disk_quota_default(line):
@@ -1342,14 +1342,14 @@ def callback_configuration_warning(line):
 
 
 def callback_value_file_limit(line):
-    match = re.match(r".*Maximum number of files to be monitored: '(\d+)'", line)
+    match = re.match(r".*Maximum number of entries to be monitored: '(\d+)'", line)
 
     if match:
         return match.group(1)
 
 
 def callback_file_limit_zero(line):
-    match = re.match(r".*No limit set to maximum number of files to be monitored", line)
+    match = re.match(r".*No limit set to maximum number of entries to be monitored", line)
 
     if match:
         return True

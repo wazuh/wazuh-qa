@@ -57,5 +57,5 @@ def test_file_limit_no_limit(tags_to_apply, get_configuration, configure_environ
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_file_limit_zero,
-                            error_message='Did not receive expected '
-                                          '"DEBUG: ...: No limit set to maximum number of files to be monitored" event')
+                            error_message='Did not receive expected "DEBUG: ...: '
+                                          'No limit set to maximum number of entries to be monitored" event')
