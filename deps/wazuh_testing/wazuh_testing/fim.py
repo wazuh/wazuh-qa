@@ -19,6 +19,7 @@ from datetime import timedelta
 from json import JSONDecodeError
 from stat import ST_ATIME, ST_MTIME
 from typing import Sequence, Union, Generator, Any
+from hashlib import sha1
 
 import pytest
 from jsonschema import validate
@@ -2240,6 +2241,32 @@ def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64K
 
     if triggers_event_delete:
         logger.info("'deleted' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
+
+
+def calculate_registry_diff_paths(reg_key, reg_subkey, arch, value_name):
+    """
+    Calculate the diff folder path of a value.
+    Parameters
+    ---------
+    reg_key: str
+        Registry name (HKEY_* constants).
+    reg_subkey: str
+        Path of the subkey.
+    arch: int
+        architecture of the registry.
+    value_name: str
+        name of the value.
+
+    Returns
+    -------
+    A tuple with the diff folder path of the key and the path of the value.
+    """
+    key_path = os.path.join(reg_key, reg_subkey)
+    folder_path = "{} {}".format("[x32]" if arch == KEY_WOW64_32KEY else "[x64]",
+                                 sha1(key_path.encode()).hexdigest())
+    diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'registry', folder_path,
+                             sha1(value_name.encode()).hexdigest(), 'last-entry.gz')
+    return (folder_path, diff_file)
 
 
 def detect_initial_scan(file_monitor):
