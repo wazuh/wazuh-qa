@@ -282,7 +282,8 @@ def test_wpk_manager_task_states(get_configuration, configure_environment,
 
     if upgrade_after_change_name:
         injectors = []
-
+        sender = Sender(manager_address=SERVER_ADDRESS,
+                                protocol=protocol)
         for index, agent in enumerate(agents):
             injector = Injector(sender, agent)
             injectors.append(injector)
