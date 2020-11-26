@@ -4,14 +4,12 @@
 import os
 
 import pytest
-from hashlib import sha1
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, check_time_travel, delete_registry, detect_initial_scan, \
                               registry_value_cud, KEY_WOW64_32KEY, KEY_WOW64_64KEY, registry_parser, generate_params, \
                               create_registry, modify_registry_value, calculate_registry_diff_paths
 from wazuh_testing.tools.services import restart_wazuh_with_new_conf
 
-from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test, set_section_wazuh_conf
 from wazuh_testing.tools.monitoring import FileMonitor
 from win32con import REG_SZ
@@ -131,7 +129,6 @@ def test_report_when_deleted_key(key, subkey, arch, value_name, enabled, tags_to
     def report_changes_removed_diff_file_validator(unused_param):
         """
         Validator that checks if the files are removed when the values are removed.
-        event needs to be
         """
         assert not os.path.exists(diff_file), f'{diff_file} does exist'
 
@@ -139,7 +136,7 @@ def test_report_when_deleted_key(key, subkey, arch, value_name, enabled, tags_to
         vals_after_update = [report_changes_diff_file_validator]
         vals_after_delete = [report_changes_removed_diff_file_validator]
     else:
-        vals_after_delete = [report_changes_removed_diff_file_validator]
+        vals_after_update = [report_changes_removed_diff_file_validator]
         vals_after_delete = [report_changes_removed_diff_file_validator]
 
     registry_value_cud(key, subkey, wazuh_log_monitor, arch=arch, value_list={value_name: "some content"},
