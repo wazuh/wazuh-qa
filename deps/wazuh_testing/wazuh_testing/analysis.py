@@ -170,6 +170,9 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
                 attribute = attribute.split('_')[-1]
             # `perm` attribute has a different format on Windows
             elif 'perm' in attribute and schema == 'win32':
+                if 'registry_key' in str(syscheck_event):
+                    continue
+
                 attribute = 'win_perm'
                 win_perm_list = []
 
@@ -178,6 +181,9 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
                     win_perm_list.append({'name': user.strip(' '), effect: permissions.upper().split('|')})
 
                 value = win_perm_list
+
+            if 'registry_key' in str(syscheck_event) and attribute in ['group_name', 'mtime']:
+                continue
 
             attribute = '{}name'.format(attribute[0]) if attribute in ['user_name', 'group_name'] else attribute
 
@@ -196,7 +202,7 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
         raise e
     try:
         validate_attributes(deepcopy(alert['syscheck']), deepcopy(event), 'attributes', 'after')
-        if event['data']['type'] == 'modified':
+        if event['data']['type'] == 'modified' and 'registry' not in str(event):
             validate_attributes(deepcopy(alert['syscheck']), deepcopy(event), 'old_attributes', 'before')
     except KeyError:
         raise KeyError('Alert does not have the same keys as the event.')
