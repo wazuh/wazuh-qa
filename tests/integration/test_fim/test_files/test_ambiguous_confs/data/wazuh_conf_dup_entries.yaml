@@ -13,12 +13,12 @@
         value: TEST_DIRECTORIES
         attributes:
         - check_all: 'yes'
-        - FIM_MODE
+        - FIM_MODE_REPLACED
     - directories:
         value: TEST_DIRECTORIES
         attributes:
         - check_all: 'yes'
-        - FIM_MODE2
+        - FIM_MODE
 # conf 2
 - tags:
   - ossec_conf_duplicate_complex
@@ -35,14 +35,14 @@
         - check_all: 'no'
         - check_owner: 'yes'
         - check_inode: 'yes'
-        - FIM_MODE
+        - FIM_MODE_REPLACED
     - directories:
         value: TEST_DIRECTORIES
         attributes:
         - check_all: 'no'
         - check_size: 'yes'
         - check_perm: 'yes'
-        - FIM_MODE2
+        - FIM_MODE
 # conf 3
 - tags:
   - ossec_conf_duplicate_report
@@ -57,12 +57,12 @@
         value: TEST_DIRECTORIES
         attributes:
         - report_changes: 'yes'
-        - FIM_MODE
+        - FIM_MODE_REPLACED
     - directories:
         value: TEST_DIRECTORIES
         attributes:
         - report_changes: 'no'
-        - FIM_MODE2
+        - FIM_MODE
 # conf 4
 - tags:
   - ossec_conf_duplicate_sregex
@@ -77,9 +77,9 @@
         value: TEST_DIRECTORIES
         attributes:
         - restrict: '^good.*$'
-        - FIM_MODE
+        - FIM_MODE_REPLACED
     - directories:
         value: TEST_DIRECTORIES
         attributes:
         - restrict: '^he.*$'
-        - FIM_MODE2
+        - FIM_MODE
