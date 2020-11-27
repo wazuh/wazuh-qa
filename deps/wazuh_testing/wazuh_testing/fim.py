@@ -19,6 +19,7 @@ from datetime import timedelta
 from json import JSONDecodeError
 from stat import ST_ATIME, ST_MTIME
 from typing import Sequence, Union, Generator, Any
+from hashlib import sha1
 
 import pytest
 from jsonschema import validate
@@ -128,26 +129,56 @@ if sys.platform == 'win32':
         win32con.REG_QWORD: 'REG_QWORD'
     }
 
+    REG_NONE = win32con.REG_NONE
+    REG_SZ = win32con.REG_SZ
+    REG_EXPAND_SZ = win32con.REG_EXPAND_SZ
+    REG_BINARY = win32con.REG_BINARY
+    REG_DWORD = win32con.REG_DWORD
+    REG_DWORD_BIG_ENDIAN = win32con.REG_DWORD_BIG_ENDIAN
+    REG_LINK = win32con.REG_LINK
+    REG_MULTI_SZ = win32con.REG_MULTI_SZ
+    REG_RESOURCE_LIST = win32con.REG_RESOURCE_LIST
+    REG_FULL_RESOURCE_DESCRIPTOR = win32con.REG_FULL_RESOURCE_DESCRIPTOR
+    REG_RESOURCE_REQUIREMENTS_LIST = win32con.REG_RESOURCE_REQUIREMENTS_LIST
+    REG_QWORD = win32con.REG_QWORD
     KEY_WOW64_32KEY = win32con.KEY_WOW64_32KEY
     KEY_WOW64_64KEY = win32con.KEY_WOW64_64KEY
+    KEY_ALL_ACCESS = win32con.KEY_ALL_ACCESS
+    RegOpenKeyEx = win32api.RegOpenKeyEx
+    RegCloseKey = win32api.RegCloseKey
 else:
+
     registry_parser = {}
-
     registry_class_name = {}
-
     registry_value_type = {}
 
     KEY_WOW64_32KEY = 0
     KEY_WOW64_64KEY = 0
-
-    def registry_key_cud():
-        return
+    REG_NONE = 0
+    REG_SZ = 0
+    REG_EXPAND_SZ = 0
+    REG_BINARY = 0
+    REG_DWORD = 0
+    REG_DWORD_BIG_ENDIAN = 0
+    REG_LINK = 0
+    REG_MULTI_SZ = 0
+    REG_RESOURCE_LIST = 0
+    REG_FULL_RESOURCE_DESCRIPTOR = 0
+    REG_RESOURCE_REQUIREMENTS_LIST = 0
+    REG_QWORD = 0
+    KEY_ALL_ACCESS = 0
 
     def registry_value_cud():
-        return
+        pass
+
+    def registry_key_cud():
+        pass
 
     def validate_registry_event():
-        return
+        pass
+
+    RegOpenKeyEx = 0
+    RegCloseKey = 0
 
 
 def validate_event(event, checks=None, mode=None):
@@ -1083,7 +1114,7 @@ def callback_ignore(line):
 
 
 def callback_restricted(line):
-    match = re.match(r".*Ignoring file '(.*?)' due to restriction '.*?'", line)
+    match = re.match(r".*Ignoring entry '(.*?)' due to restriction '.*?'", line)
     if match:
         return match.group(1)
     return None
@@ -1257,10 +1288,10 @@ def callback_file_size_limit_reached(line):
 
 
 def callback_disk_quota_limit_reached(line):
-    match = re.match(r'.*The maximum configured size for the \'(.*)\' folder has been reached.*', line)
+    match = re.match(r'.*The (.*) of the file size \'(.*)\' exceeds the disk_quota.*', line)
 
     if match:
-        return match.group(1)
+        return match.group(2)
 
 
 def callback_disk_quota_default(line):
@@ -1290,11 +1321,10 @@ def callback_non_existing_monitored_registry(line):
 
 
 def callback_registry_count_entries(line):
-    if sys.platform != 'win32':
-        match = re.match(r".*Number of keys: (\d+), value count: (\d+)", line)
+    match = re.match(r".*Fim registry entries: (\d+)", line)
 
     if match:
-        return match.group(1), match.group(2)
+        return match.group(1)
 
 
 def callback_value_event(line):
@@ -1360,14 +1390,14 @@ def callback_configuration_warning(line):
 
 
 def callback_value_file_limit(line):
-    match = re.match(r".*Maximum number of files to be monitored: '(\d+)'", line)
+    match = re.match(r".*Maximum number of entries to be monitored: '(\d+)'", line)
 
     if match:
         return match.group(1)
 
 
 def callback_file_limit_zero(line):
-    match = re.match(r".*No limit set to maximum number of files to be monitored", line)
+    match = re.match(r".*No limit set to maximum number of entries to be monitored", line)
 
     if match:
         return True
@@ -1388,7 +1418,7 @@ def callback_file_limit_back_to_normal(line):
 
 
 def callback_file_limit_full_database(line):
-    match = re.match(r".*Couldn't insert '.*' entry into DB\. The DB is full, please check your configuration\.", line)
+    match = re.match(r".*Couldn't insert '.*' (value )?entry into DB\. The DB is full.*", line)
 
     if match:
         return True
@@ -1830,7 +1860,7 @@ if sys.platform == 'win32':
                            time_travel=False, min_timeout=1, options=None, triggers_event=True, triggers_event_add=True,
                            triggers_event_modified=True, triggers_event_delete=True, encoding=None,
                            callback=callback_value_event, validators_after_create=None, validators_after_update=None,
-                           validators_after_delete=None, validators_after_cud=None):
+                           validators_after_delete=None, validators_after_cud=None, value_type=win32con.REG_SZ):
         """
         Check if creation, update and delete registry value events are detected by syscheck.
 
@@ -1888,25 +1918,36 @@ if sys.platform == 'win32':
 
         registry_path = os.path.join(root_key, registry_sub_key)
 
+        if value_type in [win32con.REG_SZ, win32con.REG_MULTI_SZ]:
+            value_added_content = 'added'
+            value_default_content = ''
+        else:
+            value_added_content = 0
+            value_default_content = 1
+
         if not isinstance(value_list, list) and not isinstance(value_list, dict):
             raise ValueError('Value error. It can only be list or dict')
         elif isinstance(value_list, list):
-            aux_dict = {registry_path: ('', callback_detect_event)}
+            aux_dict = {registry_path: (value_default_content, callback_detect_event)}
 
             for elem in value_list:
-                aux_dict[elem] = ('', callback)
+                aux_dict[elem] = (value_default_content, callback)
 
             value_list = aux_dict
         elif isinstance(value_list, dict):
-            aux_dict = {registry_path: ('', callback_detect_event)}
+            aux_dict = {registry_path: (value_default_content, callback_detect_event)}
 
             for key, elem in value_list.items():
                 aux_dict[key] = (elem, callback)
 
             value_list = aux_dict
 
-        if options is not None and CHECK_MTIME not in options:
-            value_list[registry_path] = ('', None)
+        options_set = REQUIRED_REG_VALUE_ATTRIBUTES[CHECK_ALL]
+        if options is not None:
+            options_set = options_set.intersection(options)
+
+        if options_set is not None and CHECK_MTIME not in options_set:
+            value_list[registry_path] = (value_default_content, None)
 
         triggers_event_add = triggers_event and triggers_event_add
         triggers_event_modified = triggers_event and triggers_event_modified
@@ -1916,7 +1957,7 @@ if sys.platform == 'win32':
                                            validators_after_delete, validators_after_cud)
 
         registry_event_checker = RegistryEventChecker(log_monitor=log_monitor, registry_key=registry_path,
-                                                      registry_dict=value_list, options=options,
+                                                      registry_dict=value_list, options=options_set,
                                                       custom_validator=custom_validator, encoding=encoding,
                                                       callback=callback, is_value=True)
 
@@ -1928,7 +1969,7 @@ if sys.platform == 'win32':
             if name in registry_path:
                 continue
 
-            modify_registry_value(key_handle, name, win32con.REG_SZ, 'added')
+            modify_registry_value(key_handle, name, value_type, value_added_content)
 
         check_time_travel(time_travel, monitor=log_monitor)
         registry_event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event_add)
@@ -1941,7 +1982,7 @@ if sys.platform == 'win32':
             if name in registry_path:
                 continue
 
-            modify_registry_value(key_handle, name, win32con.REG_SZ, content[0])
+            modify_registry_value(key_handle, name, value_type, content[0])
 
         check_time_travel(time_travel, monitor=log_monitor)
         registry_event_checker.fetch_and_check('modified', min_timeout=min_timeout,
@@ -2042,7 +2083,11 @@ if sys.platform == 'win32':
 
             key_list = aux_dict
 
-        if options is not None and CHECK_MTIME not in options:
+        options_set = REQUIRED_REG_KEY_ATTRIBUTES[CHECK_ALL]
+        if options is not None:
+            options_set = options_set.intersection(options)
+
+        if options_set is not None and CHECK_MTIME not in options_set:
             key_list[registry_path] = ('', None)
 
         triggers_event_add = triggers_event and triggers_event_add
@@ -2053,7 +2098,7 @@ if sys.platform == 'win32':
                                            validators_after_delete, validators_after_cud)
 
         registry_event_checker = RegistryEventChecker(log_monitor=log_monitor, registry_key=registry_path,
-                                                      registry_dict=key_list, options=options,
+                                                      registry_dict=key_list, options=options_set,
                                                       custom_validator=custom_validator, encoding=encoding,
                                                       callback=callback, is_value=False)
 
@@ -2245,6 +2290,32 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
     event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
     if triggers_event:
         logger.info("'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
+
+
+def calculate_registry_diff_paths(reg_key, reg_subkey, arch, value_name):
+    """
+    Calculate the diff folder path of a value.
+    Parameters
+    ---------
+    reg_key: str
+        Registry name (HKEY_* constants).
+    reg_subkey: str
+        Path of the subkey.
+    arch: int
+        architecture of the registry.
+    value_name: str
+        name of the value.
+
+    Returns
+    -------
+    A tuple with the diff folder path of the key and the path of the value.
+    """
+    key_path = os.path.join(reg_key, reg_subkey)
+    folder_path = "{} {}".format("[x32]" if arch == KEY_WOW64_32KEY else "[x64]",
+                                 sha1(key_path.encode()).hexdigest())
+    diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'registry', folder_path,
+                             sha1(value_name.encode()).hexdigest(), 'last-entry.gz')
+    return (folder_path, diff_file)
 
 
 def detect_initial_scan(file_monitor):

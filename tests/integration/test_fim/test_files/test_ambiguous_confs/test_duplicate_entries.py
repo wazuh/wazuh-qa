@@ -35,7 +35,7 @@ p, m = generate_params(extra_params={'MODULE_NAME': __name__, 'TEST_DIRECTORIES'
 
 params, metadata = list(), list()
 for mode in ['scheduled', 'realtime', 'whodata']:
-    p_fim, m_fim = get_fim_mode_param(mode, key='FIM_MODE2')
+    p_fim, m_fim = get_fim_mode_param(mode, key='FIM_MODE')
     if p_fim:
         for p_dict, m_dict in zip(p, m):
             p_dict.update(p_fim.items())
@@ -115,10 +115,10 @@ def test_duplicate_entries(get_configuration, configure_environment, restart_sys
     logger.info('Applying the test configuration')
     check_apply_test({'ossec_conf_duplicate_simple'}, get_configuration['tags'])
     file = 'hello'
-    mode2 = get_configuration['metadata']['fim_mode2']
+    mode = get_configuration['metadata']['fim_mode']
 
-    scheduled = mode2 == 'scheduled'
-    mode2 = "realtime" if mode2 == "real-time" else mode2
+    scheduled = mode == 'scheduled'
+    mode = "realtime" if mode == "real-time" else mode
 
     logger.info(f'Adding file {os.path.join(testdir1, file)}, content: " "')
     create_file(REGULAR, testdir1, file, content=' ')
@@ -133,7 +133,7 @@ def test_duplicate_entries(get_configuration, configure_environment, restart_sys
                                      ).result()
 
     # Check for a second event
-    event2 = check_event(previous_mode=mode2, previous_event=event1, file=file)
+    event2 = check_event(previous_mode=mode, previous_event=event1, file=file)
     assert event2 is None, "Multiple events created"
 
 
@@ -149,8 +149,8 @@ def test_duplicate_entries_sregex(get_configuration, configure_environment,
     logger.info('Applying the test configuration')
     check_apply_test({'ossec_conf_duplicate_sregex'}, get_configuration['tags'])
     file = 'hello'
-    mode2 = get_configuration['metadata']['fim_mode2']
-    scheduled = mode2 == 'scheduled'
+    mode = get_configuration['metadata']['fim_mode']
+    scheduled = mode == 'scheduled'
 
     # Check for an event
     logger.info(f'Adding file {os.path.join(testdir1, file)}, content: " "')
@@ -185,8 +185,8 @@ def test_duplicate_entries_report(get_configuration, configure_environment, rest
     logger.info('Applying the test configuration')
     check_apply_test({'ossec_conf_duplicate_report'}, get_configuration['tags'])
     file = 'hello'
-    mode2 = get_configuration['metadata']['fim_mode2']
-    scheduled = mode2 == 'scheduled'
+    mode = get_configuration['metadata']['fim_mode']
+    scheduled = mode == 'scheduled'
 
     # Check for an event
     logger.info(f'Adding file {os.path.join(testdir1, file)}, content: " "')
@@ -229,10 +229,10 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
     logger.info('Applying the test configuration')
     check_apply_test({'ossec_conf_duplicate_complex'}, get_configuration['tags'])
     file = 'hello'
-    mode2 = get_configuration['metadata']['fim_mode2']
+    mode = get_configuration['metadata']['fim_mode']
 
-    scheduled = mode2 == 'scheduled'
-    mode2 = "realtime" if mode2 == "real-time" else mode2
+    scheduled = mode == 'scheduled'
+    mode = "realtime" if mode == "real-time" else mode
 
     logger.info(f'Adding file {os.path.join(testdir1, file)}, content: "testing"')
     create_file(REGULAR, testdir1, file, content='testing')
@@ -259,7 +259,7 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
 
     logger.info(f'Time travel: {scheduled}')
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
-    event2 = check_event(previous_mode=mode2, previous_event=event1, file=file)
+    event2 = check_event(previous_mode=mode, previous_event=event1, file=file)
     assert event2 is None, "Multiple events created"
 
     # Change the permissions and the size of the file
@@ -275,4 +275,4 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
                                      callback=callback_detect_event,
                                      error_message=f'Did not receive expected "Sending FIM event:" '
                                                    f'event for file {os.path.join(testdir1, file)}').result()
-    validate_event(event3, [CHECK_PERM, CHECK_SIZE], mode=mode2)
+    validate_event(event3, [CHECK_PERM, CHECK_SIZE], mode=mode)
