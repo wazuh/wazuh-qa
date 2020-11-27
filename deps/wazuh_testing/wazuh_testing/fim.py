@@ -140,6 +140,15 @@ else:
     KEY_WOW64_32KEY = 0
     KEY_WOW64_64KEY = 0
 
+    def registry_key_cud():
+        return
+
+    def registry_value_cud():
+        return
+
+    def validate_registry_event():
+        return
+
 
 def validate_event(event, checks=None, mode=None):
     """
