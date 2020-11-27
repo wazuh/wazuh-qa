@@ -112,7 +112,8 @@ def test_ignore_registry_key(root_key, registry, arch, subkey, triggers_event, t
         while True:  # Look for the ignore event of the created key
             ignored_key = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                   callback=callback_ignore).result()
-            if ignored_key == os.path.join(key, os.path.join(registry, subkey)):
+            if ignored_key == "{} {}".format('[x64]' if arch == KEY_WOW64_64KEY else '[x32]',
+                                             os.path.join(root_key, registry, subkey)):
                 break
 
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
@@ -189,5 +190,6 @@ def test_ignore_registry_value(root_key, registry, arch, value, triggers_event, 
         while True:  # Look for the ignore event of the created value
             ignored_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                     callback=callback_ignore).result()
-            if ignored_value == os.path.join(root_key, registry, value):
+            if ignored_value == "{} {}".format('[x64]' if arch == KEY_WOW64_64KEY else '[x32]',
+                                               os.path.join(root_key, registry, value)):
                 break
