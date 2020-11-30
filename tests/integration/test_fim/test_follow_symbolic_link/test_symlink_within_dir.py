@@ -55,7 +55,7 @@ def extra_configuration_before_yield():
 
 
 def extra_configuration_after_yield():
-    """Set symlink_scan_interval to default value"""
+    """Remove symbolic link"""
     rmtree(testdir_target, ignore_errors=True)
 
 
