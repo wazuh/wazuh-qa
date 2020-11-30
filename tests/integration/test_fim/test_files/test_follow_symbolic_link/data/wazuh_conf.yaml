@@ -60,3 +60,18 @@
         attributes:
           - FIM_MODE
           - follow_symbolic_link: FOLLOW_MODE
+# conf 4
+- tags:
+    - replace_with_directory
+  apply_to_modules:
+    - test_link_to_dir_between_scans
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: '/testdir_link'
+        attributes:
+        - FIM_MODE
+        - follow_symbolic_link: FOLLOW_MODE
