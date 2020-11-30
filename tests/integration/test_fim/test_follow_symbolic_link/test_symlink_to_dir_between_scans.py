@@ -69,8 +69,8 @@ def extra_configuration_after_yield():
 @pytest.mark.parametrize('tags_to_apply', [
     {'replace_with_directory'},
 ])
-def test_link_to_dir_between_scans(tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
-                                   wait_for_fim_start):
+def test_symlink_to_dir_between_scans(tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
+                                      wait_for_fim_start):
     """
     Replace a link with a directory between scans.
 
