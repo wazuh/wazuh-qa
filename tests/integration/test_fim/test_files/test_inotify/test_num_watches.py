@@ -111,23 +111,32 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
         pytest.skip("Does not apply to this config file")
 
     # Check that the number of inotify watches is correct before modifying the folder
-    num_watches = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                          callback=callback_num_inotify_watches,
-                                          error_message='Did not receive expected '
-                                          '"Folders monitored with real-time engine: ..." event'
-                                          ).result()
-
-    if num_watches:
-        if not realtime_enabled:    # Realtime disabled
-            assert num_watches == str(NO_WATCHES), 'Wrong number of inotify watches when realtime is disabled'
-        elif decreases_num_watches and not rename_folder:   # Delete folder
-            assert num_watches == str(EXPECTED_WATCHES), 'Wrong number of inotify watches before deleting folder'
-        elif decreases_num_watches and rename_folder:   # Rename folder
-            assert num_watches == str(EXPECTED_WATCHES), 'Wrong number of inotify watches before renaming folder '
-        elif not decreases_num_watches and not rename_folder:   # Not modifying the folder
-            assert num_watches == str(EXPECTED_WATCHES), 'Wrong number of inotify watches when not modifying the folder'
+    try:
+        num_watches = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                              callback=callback_num_inotify_watches,
+                                              error_message='Did not receive expected '
+                                              '"Folders monitored with real-time engine: ..." event'
+                                              ).result()
+    except TimeoutError:
+        if not realtime_enabled:
+            pass
+        else:
+            pytest.fail('Did not receive expected "Folders monitored with real-time engine: ..." event')
     else:
-        raise AssertionError('Wrong number of inotify watches')
+        if not realtime_enabled:
+            pytest.fail('Received unexpected the "Folders monitored with real-time engine: ..."'
+                        'event in scheduled mode')
+
+        if num_watches:
+            if decreases_num_watches and not rename_folder:   # Delete folder
+                assert num_watches == str(EXPECTED_WATCHES), 'Wrong number of inotify watches before deleting folder'
+            elif decreases_num_watches and rename_folder:   # Rename folder
+                assert num_watches == str(EXPECTED_WATCHES), 'Wrong number of inotify watches before renaming folder'
+            elif not decreases_num_watches and not rename_folder:   # Not modifying the folder
+                error_msg = 'Wrong number of inotify watches when not modifying the folder'
+                assert num_watches == str(EXPECTED_WATCHES), error_msg
+        else:
+            pytest.fail('Wrong number of inotify watches')
 
     if realtime_enabled:
         if decreases_num_watches and not rename_folder:
@@ -135,33 +144,43 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
         elif decreases_num_watches and rename_folder:
             os.rename(testdir1, os.path.join(PREFIX, 'changed_name'))
 
-    # Check that the number of inotify watches is correct after modifying the folder
-    num_watches = wazuh_log_monitor.start(timeout=40,
-                                          callback=callback_num_inotify_watches,
-                                          error_message='Did not receive expected '
-                                          '"Folders monitored with real-time engine: ..." event'
-                                          ).result()
-
-    if num_watches:
-        if not realtime_enabled:    # Realtime disabled
-            assert num_watches == str(NO_WATCHES), 'Wrong number of inotify watches when realtime is disabled'
-        elif decreases_num_watches and not rename_folder:   # Delete folder
-            assert num_watches == str(NO_WATCHES), 'Wrong number of inotify watches after deleting folder'
-        elif decreases_num_watches and rename_folder:   # Rename folder
-            assert num_watches == str(NO_WATCHES), 'Wrong number of inotify watches after renaming folder'
-        elif not decreases_num_watches and not rename_folder:   # Not modifying the folder
-            assert num_watches == str(EXPECTED_WATCHES), 'Wrong number of inotify watches when not modifying the folder'
+    try:
+        # Check that the number of inotify watches is correct after modifying the folder
+        num_watches = wazuh_log_monitor.start(timeout=40,
+                                              callback=callback_num_inotify_watches,
+                                              error_message='Did not receive expected '
+                                              '"Folders monitored with real-time engine: ..." event'
+                                              ).result()
+    except TimeoutError:
+        if not realtime_enabled:
+            pass
+        else:
+            pytest.fail('Did not receive expected "Folders monitored with real-time engine: ..." event')
     else:
-        raise AssertionError('Wrong number of inotify watches')
+        if not realtime_enabled:
+            pytest.fail('Received unexpected the "Folders monitored with real-time engine: ..."'
+                        'event in scheduled mode')
+
+        if num_watches:
+            if decreases_num_watches and not rename_folder:   # Delete folder
+                assert num_watches == str(NO_WATCHES), 'Wrong number of inotify watches after deleting folder'
+            elif decreases_num_watches and rename_folder:   # Rename folder
+                assert num_watches == str(NO_WATCHES), 'Wrong number of inotify watches after renaming folder'
+            elif not decreases_num_watches and not rename_folder:   # Not modifying the folder
+                error_msg = 'Wrong number of inotify watches when not modifying the folder'
+                assert num_watches == str(EXPECTED_WATCHES), error_msg
+        else:
+            pytest.fail('Wrong number of inotify watches')
 
     # If directories have been removed or renamed, create directories again and check Wazuh add watches
     if decreases_num_watches:
         for directory in test_directories:
-                os.mkdir(directory)
+            os.mkdir(directory)
 
         num_watches = wazuh_log_monitor.start(timeout=40,
-                                            callback=callback_num_inotify_watches,
-                                            error_message='Did not receive expected '
-                                            '"Folders monitored with real-time engine: ..." event'
-                                            ).result()
+                                              callback=callback_num_inotify_watches,
+                                              error_message='Did not receive expected '
+                                              '"Folders monitored with real-time engine: ..." event'
+                                              ).result()
+
         assert (num_watches and num_watches != EXPECTED_WATCHES), 'Watches not added'

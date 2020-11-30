@@ -102,15 +102,16 @@ def test_readded_watches(removed, renamed, get_configuration, configure_environm
         os.rename(testdir, os.path.join(PREFIX, 'changed_name'))
 
     directory = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_delete_watch,
-                                   error_message='Did not receive expected "Delete watch ..." event').result()
+                                        error_message='Did not receive expected "Delete watch ..." event').result()
     assert(directory == testdir), 'Unexpected path'
 
     # Create directories again and check Wazuh add watches
     os.mkdir(testdir)
 
     num_watches = wazuh_log_monitor.start(timeout=40, callback=callback_num_inotify_watches,
-                                         error_message='Did not receive expected '
-                                         '"Folders monitored with real-time engine: ..." event'
-                                         ).result()
+                                          error_message='Did not receive expected '
+                                          '"Folders monitored with real-time engine: ..." event'
+                                          ).result()
+
     assert (num_watches and num_watches != EXPECTED_WATCHES), 'Watches not added'
     regular_file_cud(testdir, wazuh_log_monitor, min_timeout=global_parameters.default_timeout, triggers_event=True)

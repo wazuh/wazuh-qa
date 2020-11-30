@@ -91,7 +91,7 @@
     stage: "global get-agent-info success after updates"
     use_regex: "yes"
   -
-    input: 'global update-connection-status {"id":1,"connection_status":"pending"}'
+    input: 'global update-connection-status {"id":1,"connection_status":"pending","sync_status":"syncreq"}'
     output: "ok"
     stage: "global update-connection-status pending success"
   -
@@ -100,16 +100,16 @@
     stage: "global get-agent-info success after updates"
     use_regex: "yes"
   -
-    input: 'global update-connection-status {"id":1,"connection_status":"active"}'
+    input: 'global update-connection-status {"id":1,"connection_status":"active","sync_status":"synced"}'
     output: "ok"
     stage: "global update-connection-status active success"
   -
     input: 'global get-agent-info 1'
-    output: 'ok [{"id":1,"name":"TestName2","ip":"0.0.0.1","register_ip":"0.0.0.1","internal_key":"TopSecret","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","version":"TestVersion","config_sum":"TestConfigSum","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","date_add":1599223378,"last_keepalive":*,"group":"TestGroup2","sync_status":"syncreq","connection_status":"active"}]'
+    output: 'ok [{"id":1,"name":"TestName2","ip":"0.0.0.1","register_ip":"0.0.0.1","internal_key":"TopSecret","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","version":"TestVersion","config_sum":"TestConfigSum","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","date_add":1599223378,"last_keepalive":*,"group":"TestGroup2","sync_status":"synced","connection_status":"active"}]'
     stage: "global get-agent-info success after updates"
     use_regex: "yes"
   -
-    input: 'global update-connection-status {"id":1,"connection_status":"disconnected"}'
+    input: 'global update-connection-status {"id":1,"connection_status":"disconnected","sync_status":"syncreq"}'
     output: "ok"
     stage: "global update-connection-status disconnected success"
   -
@@ -118,7 +118,7 @@
     stage: "global get-agent-info success after updates"
     use_regex: "yes"
   -
-    input: 'global update-connection-status {"id":1,"connection_status":"dummy_status"}'
+    input: 'global update-connection-status {"id":1,"connection_status":"dummy_status","sync_status":"synced"}'
     output: "err Cannot execute Global database query; CHECK constraint failed: agent"
     stage: "global update-connection-status dummy_status error"
   -
@@ -178,7 +178,7 @@
   test_case:
   -
     input: 'global get-all-agents last_id -1'
-    output: 'ok 0,1,2'
+    output: 'ok [{"id":0},{"id":1},{"id":2}]'
     stage: "global get-all-agents success"
 -
   name: "sync-agent-info-get command"
@@ -251,17 +251,25 @@
   description: "Check success use cases for reset connection status command."
   test_case:
   -
-    input: 'global update-connection-status {"id":1,"connection_status":"pending"}'
+    input: 'global update-connection-status {"id":1,"connection_status":"pending","sync_status":"synced"}'
     output: "ok"
     stage: "global update-connection-status pending success"
   -
-    input: 'global update-connection-status {"id":3,"connection_status":"active"}'
+    input: 'global update-connection-status {"id":3,"connection_status":"active","sync_status":"synced"}'
     output: "ok"
     stage: "global update-connection-status active success"
   -
-    input: 'global reset-agents-connection'
+    input: 'global sql SELECT id,sync_status FROM agent'
+    output: 'ok [{"id":0,"sync_status":"synced"},{"id":1,"sync_status":"synced"},{"id":2,"sync_status":"synced"},{"id":3,"sync_status":"synced"}]'
+    stage: "global checking sync_status before reset-agents-connection"
+  -
+    input: 'global reset-agents-connection syncreq'
     output: 'ok'
     stage: "global reset-agents-connection success"
+  -
+    input: 'global sql SELECT id,sync_status FROM agent'
+    output: 'ok [{"id":0,"sync_status":"synced"},{"id":1,"sync_status":"syncreq"},{"id":2,"sync_status":"synced"},{"id":3,"sync_status":"syncreq"}]'
+    stage: "global checking sync_status after reset-agents-connection"
   -
     input: 'global get-agent-info 0'
     output: 'ok [{"id":0,*,"last_keepalive":253402300799,"sync_status":"synced","connection_status":"active"}]'
@@ -269,7 +277,7 @@
     use_regex: "yes"
   -
     input: 'global get-agent-info 1'
-    output: 'ok [{"id":1,"name":"TestName2","ip":"0.0.0.1","register_ip":"0.0.0.1","internal_key":"TopSecret","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","version":"TestVersion","config_sum":"TestConfigSum","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","date_add":1599223378,"last_keepalive":*,"group":"TestGroup2","sync_status":"synced","connection_status":"disconnected"}]'
+    output: 'ok [{"id":1,"name":"TestName2","ip":"0.0.0.1","register_ip":"0.0.0.1","internal_key":"TopSecret","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","version":"TestVersion","config_sum":"TestConfigSum","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","date_add":1599223378,"last_keepalive":*,"group":"TestGroup2","sync_status":"syncreq","connection_status":"disconnected"}]'
     stage: "global agent get-agent-info success post reset connection status"
     use_regex: "yes"
   -
@@ -279,7 +287,7 @@
     use_regex: "yes"
   -
     input: 'global get-agent-info 3'
-    output: 'ok [{"id":3,"name":"TestName3","ip":"0.0.0.3","register_ip":"0.0.0.3","internal_key":"TopSecret","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","config_sum":"TestConfigSum","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","date_add":1599223378,"last_keepalive":200,"sync_status":"synced","connection_status":"disconnected"}]'
+    output: 'ok [{"id":3,"name":"TestName3","ip":"0.0.0.3","register_ip":"0.0.0.3","internal_key":"TopSecret","os_name":"TestOsName","os_version":"TestOsVersion","os_major":"TestOsMajor","os_minor":"TestOsMinor","os_codename":"TestOsCodeName","os_build":"TestOsBuild","os_platform":"TestOsPlatfor","os_uname":"TestOsUname","os_arch":"TestOsArch","config_sum":"TestConfigSum","merged_sum":"TestMergedSum","manager_host":"TestManagerHost","node_name":"TestNodeName","date_add":1599223378,"last_keepalive":200,"sync_status":"syncreq","connection_status":"disconnected"}]'
     stage: "global agent get-agent-info success post reset connection status"
     use_regex: "yes"
 -
@@ -287,35 +295,43 @@
   description: "Check success use cases for get-agents-by-connection-status command on global DB."
   test_case:
   -
-    input: 'global update-connection-status {"id":1,"connection_status":"never_connected"}'
+    input: 'global update-connection-status {"id":1,"connection_status":"never_connected","sync_status":"syncreq"}'
     output: "ok"
     stage: "global update-connection-status never_connected"
   -
-    input: 'global update-connection-status {"id":2,"connection_status":"pending"}'
+    input: 'global update-connection-status {"id":2,"connection_status":"pending","sync_status":"syncreq"}'
     output: "ok"
     stage: "global update-connection-status pending"
   -
-    input: 'global update-connection-status {"id":3,"connection_status":"active"}'
+    input: 'global update-connection-status {"id":3,"connection_status":"active","sync_status":"syncreq"}'
     output: "ok"
     stage: "global update-connection-status active"
   -
-    input: 'global get-agents-by-connection-status never_connected'
+    input: 'global get-agents-by-connection-status 0 never_connected'
     output: 'ok [{"id":1}]'
     stage: "global get-agents-by-connection-status never_connected success"
   -
-    input: 'global get-agents-by-connection-status pending'
+    input: 'global get-agents-by-connection-status 0 pending'
     output: 'ok [{"id":2}]'
     stage: "global get-agents-by-connection-status pending success"
   -
-    input: 'global get-agents-by-connection-status active'
+    input: 'global get-agents-by-connection-status 0 active'
     output: 'ok [{"id":3}]'
     stage: "global get-agents-by-connection-status active success"
   -
-    input: 'global reset-agents-connection'
+    input: 'global sql SELECT id,sync_status FROM agent'
+    output: 'ok [{"id":0,"sync_status":"synced"},{"id":1,"sync_status":"syncreq"},{"id":2,"sync_status":"syncreq"},{"id":3,"sync_status":"syncreq"}]'
+    stage: "global checking sync_status before reset-agents-connection"
+  -
+    input: 'global reset-agents-connection synced'
     output: 'ok'
     stage: "global reset-agents-connection"
   -
-    input: 'global get-agents-by-connection-status disconnected'
+    input: 'global sql SELECT id,sync_status FROM agent'
+    output: 'ok [{"id":0,"sync_status":"synced"},{"id":1,"sync_status":"syncreq"},{"id":2,"sync_status":"synced"},{"id":3,"sync_status":"synced"}]'
+    stage: "global checking sync_status after reset-agents-connection"
+  -
+    input: 'global get-agents-by-connection-status 0 disconnected'
     output: 'ok [{"id":2},{"id":3}]'
     stage: "global get-agents-by-connection-status disconnected success"
 -
@@ -327,7 +343,7 @@
     output: "ok []"
     stage: "global updating agent's 1 keepalive to 100"
   -
-    input: 'global update-connection-status {"id":1,"connection_status":"active"}'
+    input: 'global update-connection-status {"id":1,"connection_status":"active","sync_status":"syncreq"}'
     output: "ok"
     stage: "global update-connection-status as active for agent 1 success"
   -
@@ -335,7 +351,7 @@
     output: "ok []"
     stage: "global updating agent's 2 keepalive to 150"
   -
-    input: 'global update-connection-status {"id":2,"connection_status":"pending"}'
+    input: 'global update-connection-status {"id":2,"connection_status":"pending","sync_status":"syncreq"}'
     output: "ok"
     stage: "global update-connection-status as pending for agent 2 success"
   -
@@ -343,21 +359,29 @@
     output: "ok []"
     stage: "global updating agent's 3 keepalive to 200"
   -
-    input: 'global update-connection-status {"id":3,"connection_status":"active"}'
+    input: 'global update-connection-status {"id":3,"connection_status":"active","sync_status":"syncreq"}'
     output: "ok"
     stage: "global update-connection-status as active for agent 3 success"
   -
-    input: 'global get-agents-by-connection-status disconnected'
+    input: 'global get-agents-by-connection-status 0 disconnected'
     output: 'ok []'
     stage: "global get-agents-by-connection-status disconnected before disconnecting agents success"
   -
-    input: 'global disconnect-agents 175'
+    input: 'global sql UPDATE agent SET sync_status = "synced" WHERE id =1'
+    output: 'ok []'
+    stage: "global setting sync_status before disconnecting-agents command"
+  -
+    input: 'global disconnect-agents 0 175 syncreq'
     output: 'ok [{"id":1}]'
     stage: "global disconnect-agents success"
   -
-    input: 'global get-agents-by-connection-status disconnected'
+    input: 'global sql SELECT id,sync_status FROM agent WHERE id =1'
+    output: 'ok [{"id":1,"sync_status":"syncreq"}]'
+    stage: "global testing sync_status after disconnecting-agents command"
+  -
+    input: 'global get-agents-by-connection-status 0 disconnected'
     output: 'ok [{"id":1}]'
-    stage: "global get-agents-by-connection-status disconnected before disconnecting agents success"
+    stage: "global get-agents-by-connection-status disconnected after disconnecting agents success"
 -
   name: "Delete commands"
   description: "Check success use cases for delete commands on global DB."
