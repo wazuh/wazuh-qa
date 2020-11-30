@@ -96,3 +96,24 @@
         - FIM_MODE
         - follow_symbolic_link: FOLLOW_MODE
         - check_size: 'no'
+# conf 6
+- tags:
+    - symlink_dir_inside_monitored_dir
+  apply_to_modules:
+    - test_symlink_dir_inside_monitored_dir
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: '/testdir'
+        attributes:
+        - FIM_MODE
+        - check_all: 'yes'
+    - directories:
+        value: '/testdir_link'
+        attributes:
+        - FIM_MODE
+        - follow_symbolic_link: FOLLOW_MODE
+        - check_size: 'no'

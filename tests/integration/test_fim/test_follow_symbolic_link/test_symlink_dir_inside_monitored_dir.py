@@ -24,8 +24,8 @@ pytestmark = [pytest.mark.linux, pytest.mark.sunos5, pytest.mark.darwin, pytest.
 
 test_directories = [os.path.join(PREFIX, 'testdir')]
 testdir = test_directories[0]
-testdir_link = os.path.join(testdir, 'testdir_link')
-testdir_target = os.path.join(PREFIX, 'testdir_target')
+testdir_link = os.path.join(PREFIX, 'testdir_link')
+testdir_target = os.path.join(testdir, 'testdir_target')
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -51,25 +51,26 @@ def extra_configuration_before_yield():
     """Create files and symlinks"""
     os.makedirs(testdir_target, exist_ok=True, mode=0o777)
     create_file(REGULAR, testdir_target, 'regular1')
-    create_file(SYMLINK, testdir, 'testdir_link', target=testdir_target)
+    create_file(SYMLINK, PREFIX, 'testdir_link', target=testdir_target)
 
 
 def extra_configuration_after_yield():
     """Set symlink_scan_interval to default value"""
-    rmtree(testdir_target, ignore_errors=True)
+    os.remove(testdir_link)
 
 
 # Tests
 
 @pytest.mark.parametrize('tags_to_apply, checkers', [
-    ({'symlink_within_directory'}, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_SIZE}),
+    ({'symlink_dir_inside_monitored_dir'}, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_SIZE}),
 ])
-def test_symlink_within_dir(tags_to_apply, checkers, get_configuration, configure_environment, restart_syscheckd,
-                            wait_for_fim_start):
+def test_symlink_dir_inside_monitored_dir(tags_to_apply, checkers, get_configuration, configure_environment,
+                                          restart_syscheckd, wait_for_fim_start):
     """
-    Monitor a link within a monitored directory.
+    Monitor a directory within a directory monitored through a symbolic link with `follow_symbolic_link` enabled.
 
-    The link configuration should prevail over the monitored directory (checks, follow_symbolic_link, etc...).
+    The monitored directory configuration should prevail over the configuration of the symbolic link (checks,
+    follow_symbolic_link, etc...)
 
     Parameters
     ----------
