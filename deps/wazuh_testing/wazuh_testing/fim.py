@@ -1856,6 +1856,295 @@ if sys.platform == 'win32':
 
             return result_list
 
+    def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, value_list=['test_value'],
+                           time_travel=False, min_timeout=1, options=None, triggers_event=True, triggers_event_add=True,
+                           triggers_event_modified=True, triggers_event_delete=True, encoding=None,
+                           callback=callback_value_event, validators_after_create=None, validators_after_update=None,
+                           validators_after_delete=None, validators_after_cud=None, value_type=win32con.REG_SZ):
+        """
+        Check if creation, update and delete registry value events are detected by syscheck.
+
+        This function provides multiple tools to validate events with custom validators.
+
+        Parameters
+        ----------
+        root_key : str
+            Root key (HKEY_LOCAL_MACHINE, HKEY_LOCAL_USER, etc).
+        registry_subkey : str
+            Path of the subkey that will be created.
+        log_monitor : FileMonitor
+            File event monitor.
+        arch : int
+            Architecture of the registry key (KEY_WOW64_32KEY or KEY_WOW64_64KEY). Default `KEY_WOW64_64KEY`
+        value_list : list(str) or dict, optional
+            If it is a list, it will be transformed to a dict with empty strings in each value. Default `['test_value']`
+        time_travel : boolean, optional
+            Boolean to determine if there will be time travels or not. Default `False`
+        min_timeout : int, optional
+            Minimum timeout. Default `1`
+        options : set, optional
+            Set with all the checkers. Default `None`
+        triggers_event : boolean, optional
+            Boolean to determine if the event should be raised or not. Default `True`
+        triggers_event_add: boolean, optional
+            Boolean to determine if the added event should be raised. If triggers_event is false, this parameter is
+            ignored.
+        triggers_event_modified: boolean, optional
+            Boolean to determine if the modified event should be raised. If triggers_event is false, this parameter
+            is ignored.
+        triggers_event_delete: boolean, optional
+            Boolean to determine if the delete event should be raised.
+            If triggers_event is false, this parameter is ignored.
+        encoding : str, optional
+            String to determine the encoding of the registry value name. Default `None`
+        callback : callable, optional
+            Callback to use with the log monitor. Default `callback_value_event`
+        validators_after_create : list, optional
+            List of functions that validates an event triggered when a new registry value is created. Each function must
+            accept a param to receive the event to be validated. Default `None`
+        validators_after_update : list, optional
+            List of functions that validates an event triggered when a new registry value is modified. Each function
+            must accept a param to receive the event to be validated. Default `None`
+        validators_after_delete : list, optional
+            List of functions that validates an event triggered when a new registry value is deleted. Each function must
+            accept a param to receive the event to be validated. Default `None`
+        validators_after_cud : list, optional
+            List of functions that validates an event triggered when a new registry value is created, modified or
+            deleted. Each function must accept a param to receive the event to be validated. Default `None`
+        """
+        # Transform registry list
+        if root_key not in registry_parser:
+            raise ValueError("root_key not valid")
+
+        registry_path = os.path.join(root_key, registry_sub_key)
+
+        if value_type in [win32con.REG_SZ, win32con.REG_MULTI_SZ]:
+            value_added_content = 'added'
+            value_default_content = ''
+        else:
+            value_added_content = 0
+            value_default_content = 1
+
+        if not isinstance(value_list, list) and not isinstance(value_list, dict):
+            raise ValueError('Value error. It can only be list or dict')
+        elif isinstance(value_list, list):
+            aux_dict = {registry_path: (value_default_content, callback_detect_event)}
+
+            for elem in value_list:
+                aux_dict[elem] = (value_default_content, callback)
+
+            value_list = aux_dict
+        elif isinstance(value_list, dict):
+            aux_dict = {registry_path: (value_default_content, callback_detect_event)}
+
+            for key, elem in value_list.items():
+                aux_dict[key] = (elem, callback)
+
+            value_list = aux_dict
+
+        options_set = REQUIRED_REG_VALUE_ATTRIBUTES[CHECK_ALL]
+        if options is not None:
+            options_set = options_set.intersection(options)
+
+        if options_set is not None and CHECK_MTIME not in options_set:
+            value_list[registry_path] = (value_default_content, None)
+
+        triggers_event_add = triggers_event and triggers_event_add
+        triggers_event_modified = triggers_event and triggers_event_modified
+        triggers_event_delete = triggers_event and triggers_event_delete
+
+        custom_validator = CustomValidator(validators_after_create, validators_after_update,
+                                           validators_after_delete, validators_after_cud)
+
+        registry_event_checker = RegistryEventChecker(log_monitor=log_monitor, registry_key=registry_path,
+                                                      registry_dict=value_list, options=options_set,
+                                                      custom_validator=custom_validator, encoding=encoding,
+                                                      callback=callback, is_value=True)
+
+        # Open the desired key
+        key_handle = create_registry(registry_parser[root_key], registry_sub_key, arch)
+
+        # Create registry values
+        for name, _ in value_list.items():
+            if name in registry_path:
+                continue
+
+            modify_registry_value(key_handle, name, value_type, value_added_content)
+
+        check_time_travel(time_travel, monitor=log_monitor)
+        registry_event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event_add)
+
+        if triggers_event_add:
+            logger.info("'added' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
+
+        # Modify previous registry values
+        for name, content in value_list.items():
+            if name in registry_path:
+                continue
+
+            modify_registry_value(key_handle, name, value_type, content[0])
+
+        check_time_travel(time_travel, monitor=log_monitor)
+        registry_event_checker.fetch_and_check('modified', min_timeout=min_timeout,
+                                               triggers_event=triggers_event_modified)
+
+        if triggers_event_modified:
+            logger.info("'modified' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
+
+        # Delete previous registry values
+        for name, _ in value_list.items():
+            if name in registry_path:
+                continue
+
+            delete_registry_value(key_handle, name)
+
+        check_time_travel(time_travel, monitor=log_monitor)
+        registry_event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event_delete)
+
+        if triggers_event_delete:
+            logger.info("'deleted' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
+
+    def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, key_list=['test_key'],
+                         time_travel=False, min_timeout=1, options=None, triggers_event=True, triggers_event_add=True,
+                         triggers_event_modified=True, triggers_event_delete=True, encoding=None,
+                         callback=callback_detect_event, validators_after_create=None, validators_after_update=None,
+                         validators_after_delete=None, validators_after_cud=None):
+        """
+        Check if creation, update and delete registry key events are detected by syscheck.
+
+        This function provides multiple tools to validate events with custom validators.
+
+        Parameters
+        ----------
+        root_key : str
+            Root key (HKEY_LOCAL_MACHINE, HKEY_LOCAL_USER, etc).
+        registry_subkey : str
+            Path of the subkey that will be created
+        log_monitor : FileMonitor
+            File event monitor.
+        arch : int
+            Architecture of the registry key (KEY_WOW64_32KEY or KEY_WOW64_64KEY). Default `KEY_WOW64_64KEY`
+        key_list : list(str) or dict, optional
+            If it is a list, it will be transformed to a dict with empty strings in each value. Default `['test_key']`
+        time_travel : boolean, optional
+            Boolean to determine if there will be time travels or not. Default `False`
+        min_timeout : int, optional
+            Minimum timeout. Default `1`
+        options : set, optional
+            Set with all the checkers. Default `None`
+        triggers_event : boolean, optional
+            Boolean to determine if the event should be raised or not. Default `True`
+        triggers_event_add: boolean, optional
+            Boolean to determine if the added event should be raised.
+            If triggers_event is false, this parameter is ignored.
+        triggers_event_modified: boolean, optional
+            Boolean to determine if the modified event should be raised.
+            If triggers_event is false, this parameter is ignored.
+        triggers_event_delete: boolean, optional
+            Boolean to determine if the delete event should be raised.
+            If triggers_event is false, this parameter is ignored.
+        encoding : str, optional
+            String to determine the encoding of the registry value name. Default `None`
+        callback : callable, optional
+            Callback to use with the log monitor. Default `callback_detect_event`
+        validators_after_create : list, optional
+            List of functions that validates an event triggered when a new registry value is created. Each function must
+            accept a param to receive the event to be validated. Default `None`
+        validators_after_update : list, optional
+            List of functions that validates an event triggered when a new registry value is modified. Each function
+            must accept a param to receive the event to be validated. Default `None`
+        validators_after_delete : list, optional
+            List of functions that validates an event triggered when a new registry value is deleted. Each function must
+            accept a param to receive the event to be validated. Default `None`
+        validators_after_cud : list, optional
+            List of functions that validates an event triggered when a new registry value is created, modified or
+            deleted. Each function must accept a param to receive the event to be validated. Default `None`
+        """
+        # Transform registry list
+        if root_key not in registry_parser:
+            raise ValueError("Registry_key not valid")
+
+        registry_path = os.path.join(root_key, registry_sub_key)
+
+        if not isinstance(key_list, list) and not isinstance(key_list, dict):
+            raise ValueError('Value error. It can only be list or dict')
+        elif isinstance(key_list, list):
+            aux_dict = {registry_path: ('', callback_detect_event)}
+
+            for elem in key_list:
+                aux_dict[elem] = ('', callback)
+
+            key_list = aux_dict
+        elif isinstance(key_list, dict):
+            aux_dict = {registry_path: ('', callback_detect_event)}
+
+            for key, elem in key_list.items():
+                aux_dict[key] = (elem, callback)
+
+            key_list = aux_dict
+
+        options_set = REQUIRED_REG_KEY_ATTRIBUTES[CHECK_ALL]
+        if options is not None:
+            options_set = options_set.intersection(options)
+
+        if options_set is not None and CHECK_MTIME not in options_set:
+            key_list[registry_path] = ('', None)
+
+        triggers_event_add = triggers_event and triggers_event_add
+        triggers_event_modified = triggers_event and triggers_event_modified
+        triggers_event_delete = triggers_event and triggers_event_delete
+
+        custom_validator = CustomValidator(validators_after_create, validators_after_update,
+                                           validators_after_delete, validators_after_cud)
+
+        registry_event_checker = RegistryEventChecker(log_monitor=log_monitor, registry_key=registry_path,
+                                                      registry_dict=key_list, options=options_set,
+                                                      custom_validator=custom_validator, encoding=encoding,
+                                                      callback=callback, is_value=False)
+
+        # Open the desired key
+        create_registry(registry_parser[root_key], registry_sub_key, arch)
+
+        # Create registry subkeys
+        for name, _ in key_list.items():
+            if name in registry_path:
+                continue
+
+            create_registry(registry_parser[root_key], os.path.join(registry_sub_key, name), arch)
+
+        check_time_travel(time_travel, monitor=log_monitor)
+        registry_event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event_add)
+
+        if triggers_event_add:
+            logger.info("'added' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
+
+        # Modify previous registry subkeys
+        for name, _ in key_list.items():
+            if name in registry_path:
+                continue
+
+            modify_registry(registry_parser[root_key], os.path.join(registry_sub_key, name), arch)
+
+        check_time_travel(time_travel, monitor=log_monitor)
+        registry_event_checker.fetch_and_check('modified', min_timeout=min_timeout,
+                                               triggers_event=triggers_event_modified)
+
+        if triggers_event_modified:
+            logger.info("'modified' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
+
+        # Delete previous registry subkeys
+        for name, _ in key_list.items():
+            if name in registry_path:
+                continue
+
+            delete_registry(registry_parser[root_key], os.path.join(registry_sub_key, name), arch)
+
+        check_time_travel(time_travel, monitor=log_monitor)
+        registry_event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event_delete)
+
+        if triggers_event_delete:
+            logger.info("'deleted' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
+
 
 class CustomValidator:
     """Enable using user-defined validators over the events when validating them with EventChecker"""
@@ -2001,294 +2290,6 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
     event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
     if triggers_event:
         logger.info("'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
-
-if sys.platform == 'win32':
-    def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, value_list=['test_value'],
-                        time_travel=False, min_timeout=1, options=None, triggers_event=True, triggers_event_add=True,
-                        triggers_event_modified=True, triggers_event_delete=True, encoding=None,
-                        callback=callback_value_event, validators_after_create=None, validators_after_update=None,
-                        validators_after_delete=None, validators_after_cud=None, value_type=win32con.REG_SZ):
-        """
-        Check if creation, update and delete registry value events are detected by syscheck.
-
-        This function provides multiple tools to validate events with custom validators.
-
-        Parameters
-        ----------
-        root_key : str
-            Root key (HKEY_LOCAL_MACHINE, HKEY_LOCAL_USER, etc).
-        registry_subkey : str
-            Path of the subkey that will be created.
-        log_monitor : FileMonitor
-            File event monitor.
-        arch : int
-            Architecture of the registry key (KEY_WOW64_32KEY or KEY_WOW64_64KEY). Default `KEY_WOW64_64KEY`
-        value_list : list(str) or dict, optional
-            If it is a list, it will be transformed to a dict with empty strings in each value. Default `['test_value']`
-        time_travel : boolean, optional
-            Boolean to determine if there will be time travels or not. Default `False`
-        min_timeout : int, optional
-            Minimum timeout. Default `1`
-        options : set, optional
-            Set with all the checkers. Default `None`
-        triggers_event : boolean, optional
-            Boolean to determine if the event should be raised or not. Default `True`
-        triggers_event_add: boolean, optional
-            Boolean to determine if the added event should be raised. If triggers_event is false, this parameter is ignored.
-        triggers_event_modified: boolean, optional
-            Boolean to determine if the modified event should be raised. If triggers_event is false, this parameter
-            is ignored.
-        triggers_event_delete: boolean, optional
-            Boolean to determine if the delete event should be raised.
-            If triggers_event is false, this parameter is ignored.
-        encoding : str, optional
-            String to determine the encoding of the registry value name. Default `None`
-        callback : callable, optional
-            Callback to use with the log monitor. Default `callback_value_event`
-        validators_after_create : list, optional
-            List of functions that validates an event triggered when a new registry value is created. Each function must
-            accept a param to receive the event to be validated. Default `None`
-        validators_after_update : list, optional
-            List of functions that validates an event triggered when a new registry value is modified. Each function must
-            accept a param to receive the event to be validated. Default `None`
-        validators_after_delete : list, optional
-            List of functions that validates an event triggered when a new registry value is deleted. Each function must
-            accept a param to receive the event to be validated. Default `None`
-        validators_after_cud : list, optional
-            List of functions that validates an event triggered when a new registry value is created, modified or deleted.
-            Each function must accept a param to receive the event to be validated. Default `None`
-        """
-        # Transform registry list
-        if root_key not in registry_parser:
-            raise ValueError("root_key not valid")
-
-        registry_path = os.path.join(root_key, registry_sub_key)
-
-        if value_type in [win32con.REG_SZ, win32con.REG_MULTI_SZ]:
-            value_added_content = 'added'
-            value_default_content = ''
-        else:
-            value_added_content = 0
-            value_default_content = 1
-
-        if not isinstance(value_list, list) and not isinstance(value_list, dict):
-            raise ValueError('Value error. It can only be list or dict')
-        elif isinstance(value_list, list):
-            aux_dict = {registry_path: (value_default_content, callback_detect_event)}
-
-            for elem in value_list:
-                aux_dict[elem] = (value_default_content, callback)
-
-            value_list = aux_dict
-        elif isinstance(value_list, dict):
-            aux_dict = {registry_path: (value_default_content, callback_detect_event)}
-
-            for key, elem in value_list.items():
-                aux_dict[key] = (elem, callback)
-
-            value_list = aux_dict
-
-        options_set = REQUIRED_REG_VALUE_ATTRIBUTES[CHECK_ALL]
-        if options is not None:
-            options_set = options_set.intersection(options)
-
-        if options_set is not None and CHECK_MTIME not in options_set:
-            value_list[registry_path] = (value_default_content, None)
-
-        triggers_event_add = triggers_event and triggers_event_add
-        triggers_event_modified = triggers_event and triggers_event_modified
-        triggers_event_delete = triggers_event and triggers_event_delete
-
-        custom_validator = CustomValidator(validators_after_create, validators_after_update,
-                                        validators_after_delete, validators_after_cud)
-
-        registry_event_checker = RegistryEventChecker(log_monitor=log_monitor, registry_key=registry_path,
-                                                    registry_dict=value_list, options=options_set,
-                                                    custom_validator=custom_validator, encoding=encoding,
-                                                    callback=callback, is_value=True)
-
-        # Open the desired key
-        key_handle = create_registry(registry_parser[root_key], registry_sub_key, arch)
-
-        # Create registry values
-        for name, _ in value_list.items():
-            if name in registry_path:
-                continue
-
-            modify_registry_value(key_handle, name, value_type, value_added_content)
-
-        check_time_travel(time_travel, monitor=log_monitor)
-        registry_event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event_add)
-
-        if triggers_event_add:
-            logger.info("'added' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
-
-        # Modify previous registry values
-        for name, content in value_list.items():
-            if name in registry_path:
-                continue
-
-            modify_registry_value(key_handle, name, value_type, content[0])
-
-        check_time_travel(time_travel, monitor=log_monitor)
-        registry_event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event_modified)
-
-        if triggers_event_modified:
-            logger.info("'modified' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
-
-        # Delete previous registry values
-        for name, _ in value_list.items():
-            if name in registry_path:
-                continue
-
-            delete_registry_value(key_handle, name)
-
-        check_time_travel(time_travel, monitor=log_monitor)
-        registry_event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event_delete)
-
-        if triggers_event_delete:
-            logger.info("'deleted' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
-
-
-    def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, key_list=['test_key'],
-                        time_travel=False, min_timeout=1, options=None, triggers_event=True, triggers_event_add=True,
-                        triggers_event_modified=True, triggers_event_delete=True, encoding=None,
-                        callback=callback_detect_event, validators_after_create=None, validators_after_update=None,
-                        validators_after_delete=None, validators_after_cud=None):
-        """
-        Check if creation, update and delete registry key events are detected by syscheck.
-
-        This function provides multiple tools to validate events with custom validators.
-
-        Parameters
-        ----------
-        root_key : str
-            Root key (HKEY_LOCAL_MACHINE, HKEY_LOCAL_USER, etc).
-        registry_subkey : str
-            Path of the subkey that will be created
-        log_monitor : FileMonitor
-            File event monitor.
-        arch : int
-            Architecture of the registry key (KEY_WOW64_32KEY or KEY_WOW64_64KEY). Default `KEY_WOW64_64KEY`
-        key_list : list(str) or dict, optional
-            If it is a list, it will be transformed to a dict with empty strings in each value. Default `['test_key']`
-        time_travel : boolean, optional
-            Boolean to determine if there will be time travels or not. Default `False`
-        min_timeout : int, optional
-            Minimum timeout. Default `1`
-        options : set, optional
-            Set with all the checkers. Default `None`
-        triggers_event : boolean, optional
-            Boolean to determine if the event should be raised or not. Default `True`
-        triggers_event_add: boolean, optional
-            Boolean to determine if the added event should be raised.
-            If triggers_event is false, this parameter is ignored.
-        triggers_event_modified: boolean, optional
-            Boolean to determine if the modified event should be raised.
-            If triggers_event is false, this parameter is ignored.
-        triggers_event_delete: boolean, optional
-            Boolean to determine if the delete event should be raised.
-            If triggers_event is false, this parameter is ignored.
-        encoding : str, optional
-            String to determine the encoding of the registry value name. Default `None`
-        callback : callable, optional
-            Callback to use with the log monitor. Default `callback_detect_event`
-        validators_after_create : list, optional
-            List of functions that validates an event triggered when a new registry value is created. Each function must
-            accept a param to receive the event to be validated. Default `None`
-        validators_after_update : list, optional
-            List of functions that validates an event triggered when a new registry value is modified. Each function must
-            accept a param to receive the event to be validated. Default `None`
-        validators_after_delete : list, optional
-            List of functions that validates an event triggered when a new registry value is deleted. Each function must
-            accept a param to receive the event to be validated. Default `None`
-        validators_after_cud : list, optional
-            List of functions that validates an event triggered when a new registry value is created, modified or deleted.
-            Each function must accept a param to receive the event to be validated. Default `None`
-        """
-        # Transform registry list
-        if root_key not in registry_parser:
-            raise ValueError("Registry_key not valid")
-
-        registry_path = os.path.join(root_key, registry_sub_key)
-
-        if not isinstance(key_list, list) and not isinstance(key_list, dict):
-            raise ValueError('Value error. It can only be list or dict')
-        elif isinstance(key_list, list):
-            aux_dict = {registry_path: ('', callback_detect_event)}
-
-            for elem in key_list:
-                aux_dict[elem] = ('', callback)
-
-            key_list = aux_dict
-        elif isinstance(key_list, dict):
-            aux_dict = {registry_path: ('', callback_detect_event)}
-
-            for key, elem in key_list.items():
-                aux_dict[key] = (elem, callback)
-
-            key_list = aux_dict
-
-        options_set = REQUIRED_REG_KEY_ATTRIBUTES[CHECK_ALL]
-        if options is not None:
-            options_set = options_set.intersection(options)
-
-        if options_set is not None and CHECK_MTIME not in options_set:
-            key_list[registry_path] = ('', None)
-
-        triggers_event_add = triggers_event and triggers_event_add
-        triggers_event_modified = triggers_event and triggers_event_modified
-        triggers_event_delete = triggers_event and triggers_event_delete
-
-        custom_validator = CustomValidator(validators_after_create, validators_after_update,
-                                        validators_after_delete, validators_after_cud)
-
-        registry_event_checker = RegistryEventChecker(log_monitor=log_monitor, registry_key=registry_path,
-                                                    registry_dict=key_list, options=options_set,
-                                                    custom_validator=custom_validator, encoding=encoding,
-                                                    callback=callback, is_value=False)
-
-        # Open the desired key
-        create_registry(registry_parser[root_key], registry_sub_key, arch)
-
-        # Create registry subkeys
-        for name, _ in key_list.items():
-            if name in registry_path:
-                continue
-
-            create_registry(registry_parser[root_key], os.path.join(registry_sub_key, name), arch)
-
-        check_time_travel(time_travel, monitor=log_monitor)
-        registry_event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event_add)
-
-        if triggers_event_add:
-            logger.info("'added' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
-
-        # Modify previous registry subkeys
-        for name, _ in key_list.items():
-            if name in registry_path:
-                continue
-
-            modify_registry(registry_parser[root_key], os.path.join(registry_sub_key, name), arch)
-
-        check_time_travel(time_travel, monitor=log_monitor)
-        registry_event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event_modified)
-
-        if triggers_event_modified:
-            logger.info("'modified' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
-
-        # Delete previous registry subkeys
-        for name, _ in key_list.items():
-            if name in registry_path:
-                continue
-
-            delete_registry(registry_parser[root_key], os.path.join(registry_sub_key, name), arch)
-
-        check_time_travel(time_travel, monitor=log_monitor)
-        registry_event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event_delete)
-
-        if triggers_event_delete:
-            logger.info("'deleted' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
 
 
 def calculate_registry_diff_paths(reg_key, reg_subkey, arch, value_name):
