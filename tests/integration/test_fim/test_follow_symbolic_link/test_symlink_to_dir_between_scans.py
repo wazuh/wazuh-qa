@@ -7,15 +7,15 @@ from shutil import rmtree
 
 import pytest
 
-from wazuh_testing import global_parameters, logger
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import SYMLINK, REGULAR, LOG_FILE_PATH, generate_params, create_file, change_internal_options,\
     check_time_travel, callback_detect_event
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
-from test_fim.test_follow_symbolic_link.common import wait_for_symlink_check, wait_for_audit, symlink_interval, \
-    testdir_link, testdir_target
+from test_fim.test_follow_symbolic_link.common import wait_for_symlink_check, symlink_interval, testdir_link, \
+    testdir_target
 
 
 # Marks
@@ -32,7 +32,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # Configurations
 
-conf_params, conf_metadata = generate_params(extra_params={'FOLLOW_MODE': 'yes'})
+conf_params, conf_metadata = generate_params(extra_params={'FOLLOW_MODE': 'yes'}, modes=['scheduled'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
 
@@ -75,8 +75,7 @@ def test_symlink_to_dir_between_scans(tags_to_apply, get_configuration, configur
     Replace a link with a directory between scans.
 
     This test monitors a link with `follow_symblic_link` enabled. After the first scan, it is replaced with a directory,
-    the new directory must be scanned silently and no events should be sent if no changes occurred between the 2 scans
-    in scheduled. In realtime and whodata, the events should be sent only after the silent scan.
+    the new directory should send alerts during a second scan.
 
     Parameters
     ----------
@@ -85,29 +84,20 @@ def test_symlink_to_dir_between_scans(tags_to_apply, get_configuration, configur
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
-    whodata = get_configuration['metadata']['fim_mode'] == 'whodata'
+    regular2 = 'regular2'
 
     # Delete symbolic link and create a folder with the same name
     os.remove(testdir_link)
     os.makedirs(testdir_link, exist_ok=True, mode=0o777)
-    create_file(REGULAR, testdir_link, 'regular2')
+    create_file(REGULAR, testdir_link, regular2)
 
     # Wait for both audit and the symlink check to run
     wait_for_symlink_check(wazuh_log_monitor)
-    wait_for_audit(whodata, wazuh_log_monitor)
-
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
 
-    # The scan should not send any alert
-    with pytest.raises(TimeoutError):
-        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event)
-        logger.error(f'Unexpected event {event.result()}')
-        raise AttributeError(f'Unexpected event {event.result()}')
+    event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                                    error_message='Did not receive expected '
+                                    '"Sending FIM event: ..." event').result()
 
-    # A second scan should send alerts
-    create_file(REGULAR, testdir_link, 'regular3')
-
-    check_time_travel(scheduled, monitor=wazuh_log_monitor)
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                            error_message='Did not receive expected '
-                            '"Sending FIM event: ..." event')
+    assert 'added' in event['data']['type'] and regular2 in event['data']['path'], \
+        f'"added" event not matching for {event}'
