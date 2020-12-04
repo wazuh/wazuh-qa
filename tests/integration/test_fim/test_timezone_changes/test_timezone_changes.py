@@ -3,6 +3,8 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import time
+import sys
 import pytest
 from wazuh_testing.fim import (LOG_FILE_PATH, REGULAR, callback_detect_event, callback_detect_end_scan, create_file,
                                generate_params, delete_file, global_parameters, check_time_travel)
@@ -40,6 +42,22 @@ def get_configuration(request):
 
 # tests
 
+def set_local_timezone():
+    if sys.platform == 'win32':
+        os.system('tzutil /s "Romance Standard Time"')
+    else:
+        os.environ['TZ'] = 'Europe/Madrid'
+        time.tzset()
+
+
+def set_foreign_timezone():
+    if sys.platform == 'win32':
+        os.system('tzutil /s "Egypt Standard Time"')
+    else:
+        os.environ['TZ'] = 'Asia/Tokyo'
+        time.tzset()
+
+
 def callback_detect_event_before_end_scan(line):
     ended_scan = callback_detect_end_scan(line)
     if ended_scan is None:
@@ -51,13 +69,13 @@ def callback_detect_event_before_end_scan(line):
 
 
 def extra_configuration_before_yield():
-    os.system('tzutil /s "Romance Standard Time"')
+    set_local_timezone()
     create_file(REGULAR, testdir1, 'regular', content='')
 
 
 def extra_configuration_after_yield():
     delete_file(testdir1, 'regular')
-    os.system('tzutil /s "Romance Standard Time"')
+    set_local_timezone()
 
 
 def test_timezone_changes(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
@@ -72,7 +90,7 @@ def test_timezone_changes(get_configuration, configure_environment, restart_sysc
     check_apply_test({'timezone_conf'}, get_configuration['tags'])
 
     # Change time zone
-    os.system('tzutil /s "Egypt Standard Time"')
+    set_foreign_timezone()
 
     check_time_travel(True, monitor=wazuh_log_monitor)
 
