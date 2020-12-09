@@ -58,12 +58,14 @@ def extra_configuration_before_yield():
     for i in range(2, NUM_FILES_TO_CREATE):
         create_file(REGULAR, testdir1, f'{base_file_name}{i}', content='content')
 
+    create_file(REGULAR, testdir1, f'{base_file_name}{1}')
+
 # Tests
 
 
 @pytest.mark.parametrize('folder, file_name, tags_to_apply', [
                          (testdir1, f'{base_file_name}{1}', {'tags_delete_full'})
-])
+                         ])
 def test_file_limit_delete_full(folder, file_name, tags_to_apply,
                                 get_configuration, configure_environment, restart_syscheckd):
     """
@@ -90,16 +92,12 @@ def test_file_limit_delete_full(folder, file_name, tags_to_apply,
     if database_state:
         assert database_state == '100', 'Wrong value for full database alert'
 
-    create_file(REGULAR, folder, file_name)
-
     delete_file(folder, file_name)
 
-    try:
+    with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_detect_event).result()
         assert event is None, 'No events should be detected.'
-    except TimeoutError:
-        pass
 
     delete_file(folder, f'{file_name}{0}')
 
