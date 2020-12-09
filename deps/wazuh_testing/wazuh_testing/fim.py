@@ -1343,6 +1343,13 @@ def callback_value_event(line):
     return None
 
 
+def callback_detect_max_fps(line):
+    msg = r'.*Maximum number of files read per second reached, sleeping\.'
+    match = re.match(msg, line)
+
+    return match is not None
+
+
 def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None):
     """
     Change date and time of the system depending on a boolean condition. Optionally, a monitor may be used to check
