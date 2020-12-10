@@ -62,7 +62,8 @@ def get_configuration(request):
     (key, sub_key_2, KEY_WOW64_32KEY),
     (key, sub_key_2, KEY_WOW64_64KEY)
 ])
-def test_registry_changes(key, subkey, arch, value_type, get_configuration, configure_environment, restart_syscheckd):
+def test_registry_changes(key, subkey, arch, value_type, get_configuration, configure_environment, restart_syscheckd,
+                          wait_for_fim_start):
     """
     Check if events appear for subkeys/values of a monitored key
     """
