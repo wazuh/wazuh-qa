@@ -78,4 +78,4 @@
       wazuh_clusterd.debug=2
 
 - name: Restart Wazuh
-  command: /var/ossec/bin/ossec-control restart
+  command: /var/ossec/bin/wazuh-control restart
