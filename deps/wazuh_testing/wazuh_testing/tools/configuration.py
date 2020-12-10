@@ -82,7 +82,7 @@ def set_wazuh_conf(wazuh_conf: List[str]):
     """
     write_wazuh_conf(wazuh_conf)
     print("Restarting Wazuh...")
-    command = os.path.join(WAZUH_PATH, 'bin/ossec-control')
+    command = os.path.join(WAZUH_PATH, 'bin/wazuh-control')
     arguments = ['restart']
     check_call([command] + arguments, stdout=DEVNULL, stderr=DEVNULL)
 

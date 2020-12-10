@@ -229,7 +229,7 @@ Add the following lines in /var/ossec/etc/rules/local_rules.xml
 </group>
  ```
  ```
- ossec-control restart
+ wazuh-control restart
  CTRL + D
  sudo su
  CRTL + D
@@ -295,7 +295,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 </group>
  ```
  ```
- ossec-control restart
+ wazuh-control restart
  CTRL + D
  sudo su
  CRTL + D
@@ -364,7 +364,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 </group>
  ```
  ```
- ossec-control restart
+ wazuh-control restart
  CTRL + D
  sudo su
  CRTL + D
@@ -431,7 +431,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 </group>
  ```
  ```
- ossec-control restart
+ wazuh-control restart
  CTRL + D
  sudo su
  CRTL + D
@@ -497,7 +497,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 </group>
  ```
  ```
- ossec-control restart
+ wazuh-control restart
  CTRL + D
  sudo su
  CRTL + D
@@ -565,7 +565,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 </group>
  ```
  ```
- ossec-control restart
+ wazuh-control restart
  CTRL + D
  sudo su
  CRTL + D
@@ -632,7 +632,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 </group>
  ```
  ```
- ossec-control restart
+ wazuh-control restart
  CTRL + D
  sudo su
  CRTL + D
@@ -702,7 +702,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 </group>
  ```
  ```
- ossec-control restart
+ wazuh-control restart
  CTRL + D
  sudo su
  CRTL + D
@@ -771,7 +771,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 sqlite3 /var/ossec/var/db/mitre.db
 sqlite> DROP TABLE has_phase;
 CTRL + D
-ossec-control restart
+wazuh-control restart
  ```
 **Compatible versions**
 
@@ -846,7 +846,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 sqlite3 /var/ossec/var/db/mitre.db
 sqlite> DROP TABLE attack;
 CTRL + D
-ossec-control restart
+wazuh-control restart
  ```
 **Compatible versions**
 
@@ -1070,7 +1070,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 
 ```
 rm /var/ossec/var/db/mitre*
-ossec-control restart
+wazuh-control restart
  ```
 **Compatible versions**
 
