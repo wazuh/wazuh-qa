@@ -1,9 +1,9 @@
 - tags:
   - test_limits
   apply_to_modules:
-  - test_all_limits_disabled
-  - test_file_size_values
-  - test_disk_quota_values
+  - test_registry_all_limits_disabled
+  - test_registry_file_size_values
+  - test_registry_disk_quota_values
   sections:
   - section: syscheck
     elements:
@@ -37,7 +37,7 @@
 - tags:
   - test_diff_size_limit
   apply_to_modules:
-  - test_diff_size_limit_values
+  - test_registry_diff_size_limit_values
   sections:
   - section: syscheck
     elements:

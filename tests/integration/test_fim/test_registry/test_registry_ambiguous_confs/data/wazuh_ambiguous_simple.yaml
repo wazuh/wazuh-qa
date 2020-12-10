@@ -3,7 +3,7 @@
 - tags:
   - ambiguous_restrict
   apply_to_modules:
-  - test_ambiguous_simple
+  - test_registry_ambiguous_simple
   sections:
   - section: syscheck
     elements:
@@ -31,7 +31,7 @@
 - tags:
   - ambiguous_tag
   apply_to_modules:
-  - test_ambiguous_simple
+  - test_registry_ambiguous_simple
   sections:
   - section: syscheck
     elements:
@@ -59,7 +59,7 @@
 - tags:
   - ambiguous_recursion
   apply_to_modules:
-  - test_ambiguous_simple
+  - test_registry_ambiguous_simple
   sections:
   - section: syscheck
     elements:
@@ -89,7 +89,7 @@
 - tags:
   - ambiguous_checks
   apply_to_modules:
-  - test_ambiguous_simple
+  - test_registry_ambiguous_simple
   sections:
   - section: syscheck
     elements:

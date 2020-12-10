@@ -3,7 +3,7 @@
 - tags:
   - test_others
   apply_to_modules:
-  - test_check_others
+  - test_registry_check_others
   sections:
   - section: syscheck
     elements:

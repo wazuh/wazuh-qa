@@ -3,11 +3,11 @@
 - tags:
   - test_report_changes
   apply_to_modules:
-  - test_report_changes
-  - test_report_changes_deleted
-  - test_report_changes_more_changes
-  - test_file_size_default
-  - test_disk_quota_default
+  - test_registry_report_changes
+  - test_registry_report_changes_deleted
+  - test_registry_report_changes_more_changes
+  - test_registry_file_size_default
+  - test_registry_disk_quota_default
   sections:
   - section: syscheck
     elements:
@@ -26,7 +26,7 @@
 - tags:
   - test_duplicate_report
   apply_to_modules:
-  - test_report_changes_deleted
+  - test_registry_report_changes_deleted
   sections:
   - section: syscheck
     elements:
@@ -55,7 +55,7 @@
 - tags:
   - test_delete_after_restart
   apply_to_modules:
-  - test_report_changes_deleted
+  - test_registry_report_changes_deleted
   sections:
   - section: syscheck
     elements:

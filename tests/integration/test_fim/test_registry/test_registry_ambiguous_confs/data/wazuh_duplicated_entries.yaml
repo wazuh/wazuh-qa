@@ -3,7 +3,7 @@
 - tags:
   - duplicate_entries
   apply_to_modules:
-  - test_ambiguous_duplicated_entries
+  - test_registry_ambiguous_duplicated_entries
   sections:
   - section: syscheck
     elements:
@@ -29,7 +29,7 @@
 - tags:
   - duplicate_restrict_entries
   apply_to_modules:
-  - test_ambiguous_duplicated_entries
+  - test_registry_ambiguous_duplicated_entries
   sections:
   - section: syscheck
     elements:
@@ -59,7 +59,7 @@
 - tags:
   - duplicate_arch_entries
   apply_to_modules:
-  - test_ambiguous_duplicated_entries
+  - test_registry_ambiguous_duplicated_entries
   sections:
   - section: syscheck
     elements:
@@ -85,7 +85,7 @@
 - tags:
   - duplicate_complex_entries
   apply_to_modules:
-  - test_ambiguous_duplicated_entries
+  - test_registry_ambiguous_duplicated_entries
   sections:
   - section: syscheck
     elements:
@@ -130,7 +130,7 @@
 - tags:
   - duplicate_report_entries
   apply_to_modules:
-  - test_ambiguous_duplicated_entries
+  - test_registry_ambiguous_duplicated_entries
   sections:
   - section: syscheck
     elements:

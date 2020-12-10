@@ -3,7 +3,7 @@
 - tags:
   - multiple_reg_entries
   apply_to_modules:
-  - test_multiple_entries
+  - test_multiple_registry_entries
   sections:
   - section: syscheck
     elements:

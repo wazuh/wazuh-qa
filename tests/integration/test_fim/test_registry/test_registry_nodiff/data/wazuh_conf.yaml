@@ -3,7 +3,7 @@
 - tags:
   - no_diff_str
   apply_to_modules:
-  - test_no_diff
+  - test_registry_no_diff
   sections:
   - section: syscheck
     elements:
@@ -33,7 +33,7 @@
 - tags:
   - no_diff_regex
   apply_to_modules:
-  - test_no_diff
+  - test_registry_no_diff
   sections:
   - section: syscheck
     elements:

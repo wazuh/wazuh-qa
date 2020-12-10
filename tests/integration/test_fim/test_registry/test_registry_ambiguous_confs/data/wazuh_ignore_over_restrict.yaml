@@ -3,7 +3,7 @@
 - tags:
   - ambiguous_ignore_restrict_key
   apply_to_modules:
-  - test_ambiguous_ignore_works_over_restrict
+  - test_registry_ambiguous_ignore_works_over_restrict
   sections:
   - section: syscheck
     elements:
@@ -32,7 +32,7 @@
 - tags:
   - ambiguous_ignore_restrict_values
   apply_to_modules:
-  - test_ambiguous_ignore_works_over_restrict
+  - test_registry_ambiguous_ignore_works_over_restrict
   sections:
   - section: syscheck
     elements:

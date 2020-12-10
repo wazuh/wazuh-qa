@@ -3,7 +3,7 @@
 - tags:
   - complex_checks
   apply_to_modules:
-  - test_ambiguous_complex
+  - test_registry_ambiguous_complex
   sections:
   - section: syscheck
     elements:
@@ -39,7 +39,7 @@
 - tags:
   - complex_report_changes
   apply_to_modules:
-  - test_ambiguous_complex
+  - test_registry_ambiguous_complex
   sections:
   - section: syscheck
     elements:
@@ -69,7 +69,7 @@
 - tags:
   - complex_tags
   apply_to_modules:
-  - test_ambiguous_complex
+  - test_registry_ambiguous_complex
   sections:
   - section: syscheck
     elements:

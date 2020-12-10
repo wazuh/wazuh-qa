@@ -3,7 +3,7 @@
 - tags:
   - check_all_yes
   apply_to_modules:
-  - test_checkers
+  - test_registry_checkers
   sections:
   - section: syscheck
     elements:
@@ -25,7 +25,7 @@
 - tags:
   - check_all_no
   apply_to_modules:
-  - test_checkers
+  - test_registry_checkers
   sections:
   - section: syscheck
     elements:
@@ -47,7 +47,7 @@
 - tags:
   - check_all_conjuction
   apply_to_modules:
-  - test_checkers
+  - test_registry_checkers
   sections:
   - section: syscheck
     elements:
@@ -101,7 +101,7 @@
 - tags:
   - test_checksum_all
   apply_to_modules:
-  - test_checkers
+  - test_registry_checkers
   sections:
   - section: syscheck
     elements:
@@ -142,7 +142,7 @@
 - tags:
   - test_checksum
   apply_to_modules:
-  - test_checkers
+  - test_registry_checkers
   sections:
   - section: syscheck
     elements:
