@@ -4,6 +4,7 @@
 
 import os
 import re
+import time
 
 import pytest
 import yaml
@@ -130,10 +131,10 @@ def test_wazuh_db_chunks(configure_sockets_environment, connect_to_sockets_modul
                .format(command, 'due', status)
 
     # Check get-all-agents chunk limit
-    send_chunk_command(f'global get-all-agents last_id 0')
+    send_chunk_command('global get-all-agents last_id 0')
     # Check sync-agent-info-get chunk limit
-    send_chunk_command(f'global sync-agent-info-get last_id 0')
+    send_chunk_command('global sync-agent-info-get last_id 0')
     # Check get-agents-by-connection-status chunk limit
-    send_chunk_command(f'global get-agents-by-connection-status 0 active')
+    send_chunk_command('global get-agents-by-connection-status 0 active')
     # Check disconnect-agents chunk limit
-    send_chunk_command(f'global disconnect-agents 0 100 syncreq')
+    send_chunk_command('global disconnect-agents 0 {} syncreq'.format(str(int(time.time())+1)))
