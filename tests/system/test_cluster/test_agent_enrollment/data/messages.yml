@@ -21,7 +21,7 @@ wazuh-worker1:
   - regex: ".*Agent key generated for.*"
     path: "/var/ossec/logs/ossec.log"
     timeout: 60
-  - regex: '.*Processing file \/etc\/client\.keys.*'
+  - regex: '.*Processing file etc\/client\.keys.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
   - regex: '.*Updating files: End.*'
