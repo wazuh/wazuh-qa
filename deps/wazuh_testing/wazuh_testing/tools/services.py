@@ -33,7 +33,7 @@ def restart_wazuh_daemon(daemon):
     check_call([f'{daemon_path}/{daemon}'])
 
 
-def restart_wazuh_with_new_conf(new_conf, daemon='ossec-syscheckd'):
+def restart_wazuh_with_new_conf(new_conf, daemon='wazuh-syscheckd'):
     """
     Restart Wazuh service applying a new ossec.conf
 

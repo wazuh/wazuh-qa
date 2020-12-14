@@ -59,7 +59,7 @@ def get_configuration(request):
 
 @pytest.fixture(scope='function')
 def restart_syscheckd_each_time(request):
-    control_service('stop', daemon='ossec-syscheckd')
+    control_service('stop', daemon='wazuh-syscheckd')
     truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
@@ -68,7 +68,7 @@ def restart_syscheckd_each_time(request):
         for directory in test_directories:
             os.mkdir(directory)
 
-    control_service('start', daemon='ossec-syscheckd')
+    control_service('start', daemon='wazuh-syscheckd')
     detect_initial_scan(file_monitor)
 
 # Functions

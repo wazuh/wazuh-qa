@@ -16,9 +16,9 @@ assignees: ''
 ## Analysisd performance
 
 - [ ] Check the manager starts with an empty `ossec.conf`.
-- [ ] Change the number of threads used by analysisd in the internal options. Check the performance at `var/run/ossec-analysisd.state` depending on the threads.
+- [ ] Change the number of threads used by analysisd in the internal options. Check the performance at `var/run/wazuh-analysisd.state` depending on the threads.
 - [ ] Change the value of the queues size of analysisd. Check its behavior when flooded.
-- [ ] Check the refresh interval of `ossec-analysisd.state` matches with the defined `analysisd.state_interval` at internal options.
+- [ ] Check the refresh interval of `wazuh-analysisd.state` matches with the defined `analysisd.state_interval` at internal options.
 - [ ] Check every file is written correctly when enabling/disabling `alerts_log`, `jsonout_output`, `logall` and `logall_json` options.
 
 ## Ruleset

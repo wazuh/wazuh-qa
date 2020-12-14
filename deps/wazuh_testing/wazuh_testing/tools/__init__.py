@@ -68,15 +68,15 @@ QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 CLUSTER_SOCKET_PATH = os.path.join(WAZUH_PATH, 'queue', 'cluster')
 
 WAZUH_SOCKETS = {
-    'ossec-agentd'   : [],
-    'ossec-analysisd': [os.path.join(QUEUE_OSSEC_PATH, 'analysis'),
+    'wazuh-agentd'   : [],
+    'wazuh-analysisd': [os.path.join(QUEUE_OSSEC_PATH, 'analysis'),
                         os.path.join(QUEUE_OSSEC_PATH, 'queue')],
-    'ossec-authd': [os.path.join(QUEUE_OSSEC_PATH, 'auth')],
-    'ossec-execd': [os.path.join(QUEUE_OSSEC_PATH, 'com')],
-    'ossec-logcollector': [os.path.join(QUEUE_OSSEC_PATH, 'logcollector')],
-    'ossec-monitord': [os.path.join(QUEUE_OSSEC_PATH, 'monitor')],
-    'ossec-remoted': [os.path.join(QUEUE_OSSEC_PATH, 'request')],
-    'ossec-syscheckd': [os.path.join(QUEUE_OSSEC_PATH, 'syscheck')],
+    'wazuh-authd': [os.path.join(QUEUE_OSSEC_PATH, 'auth')],
+    'wazuh-execd': [os.path.join(QUEUE_OSSEC_PATH, 'com')],
+    'wazuh-logcollector': [os.path.join(QUEUE_OSSEC_PATH, 'logcollector')],
+    'wazuh-monitord': [os.path.join(QUEUE_OSSEC_PATH, 'monitor')],
+    'wazuh-remoted': [os.path.join(QUEUE_OSSEC_PATH, 'request')],
+    'wazuh-syscheckd': [os.path.join(QUEUE_OSSEC_PATH, 'syscheck')],
     'wazuh-db': [os.path.join(QUEUE_DB_PATH, 'wdb')],
     'wazuh-modulesd': [os.path.join(QUEUE_OSSEC_PATH, 'wmodules'),
                        os.path.join(QUEUE_OSSEC_PATH, 'download'),

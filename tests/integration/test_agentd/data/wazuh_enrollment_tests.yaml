@@ -31,7 +31,7 @@
   #Known Issue: Invalid CIDR is not checked. Skiped
   skips:
     - agent-auth
-    - ossec-agentd
+    - wazuh-agentd
 -
   name: "Invalid Agent address"
   description: "Check a invalid agent_address in auto enrollment configuration"
@@ -41,7 +41,7 @@
   #Known Issue: Invalid adress is not checked. Skiped
   skips:
     - agent-auth
-    - ossec-agentd
+    - wazuh-agentd
 -
   name: "Valid manager address"
   description: "Check a valid manager_address configurations"
@@ -210,7 +210,7 @@
   name: "Password from string - Agent-Auth"
   description: "Check that configured password is sent on string"
   skips:
-    - ossec-agentd
+    - wazuh-agentd
   enrollment:
     response: "OSSEC K:'011 test_agent_pass any TopSecret'\n"
     id: 11
@@ -223,7 +223,7 @@
   name: "Password from file - Agent-Auth"
   description: "Check that password file is open and read successfully"
   skips:
-    - ossec-agentd
+    - wazuh-agentd
   enrollment:
     response: "OSSEC K:'012 test_agent_pass_file any TopSecret'\n"
     id: 12

@@ -18,9 +18,9 @@ def test_ossec_package_installed(Package):
 
 
 @pytest.mark.parametrize("wazuh_service, wazuh_owner", (
-        ("ossec-agentd", "ossec"),
-        ("ossec-execd", "root"),
-        ("ossec-syscheckd", "root"),
+        ("wazuh-agentd", "ossec"),
+        ("wazuh-execd", "root"),
+        ("wazuh-syscheckd", "root"),
         ("wazuh-modulesd", "root"),
 ))
 def test_wazuh_processes_running(host, wazuh_service, wazuh_owner):

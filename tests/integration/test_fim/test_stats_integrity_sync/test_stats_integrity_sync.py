@@ -35,7 +35,7 @@ setup_environment_time = 1  # Seconds
 state_collector_time = 1  # Seconds
 max_time_for_agent_setup = 300  # Seconds
 max_n_attempts = 50
-tested_daemons = ["wazuh-db", "ossec-analysisd", "ossec-remoted"]
+tested_daemons = ["wazuh-db", "wazuh-analysisd", "wazuh-remoted"]
 stats_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stats', 'metrics')
 dataframe_write_every_rows = 10
 state_configuration = {
@@ -572,9 +572,9 @@ def state_collector(agents_dict, configuration, stats_path, attempts_info):
         Dictionary with a flag that indicates if the stats collector must start.
     """
 
-    def get_csv(daemon_df='ossec-analysisd'):
+    def get_csv(daemon_df='wazuh-analysisd'):
         filename = os.path.join(os.path.join(stats_path, f"state-{daemon_df}.csv"))
-        if daemon_df == 'ossec-analysisd':
+        if daemon_df == 'wazuh-analysisd':
             state_df = pd.DataFrame(columns=['configuration', 'seconds', 'syscheck_events_decoded', 'syscheck_edps',
                                              'dbsync_queue_usage', 'dbsync_messages_dispatched', 'dbsync_mdps',
                                              'events_received', 'events_dropped', 'syscheck_queue_usage',
@@ -585,7 +585,7 @@ def state_collector(agents_dict, configuration, stats_path, attempts_info):
                        'dbsync_messages_dispatched': 'float32', 'dbsync_mdps': 'float32',
                        'events_received': 'float32', 'events_dropped': 'float32', 'syscheck_queue_usage': 'float32',
                        'event_queue_usage': 'float32'})
-        elif daemon_df == 'ossec-remoted':
+        elif daemon_df == 'wazuh-remoted':
             state_df = pd.DataFrame(columns=['configuration', 'seconds', 'queue_size', 'tcp_sessions', 'evt_count',
                                              'discarded_count', 'recv_bytes'])
             state_df = state_df.astype(
@@ -598,14 +598,14 @@ def state_collector(agents_dict, configuration, stats_path, attempts_info):
         return state_df
 
     daemons_dict = {
-        'ossec-analysisd': get_csv('ossec-analysisd'),
-        'ossec-remoted': get_csv('ossec-remoted')
+        'wazuh-analysisd': get_csv('wazuh-analysisd'),
+        'wazuh-remoted': get_csv('wazuh-remoted')
     }
 
     states_exists = False
     counter = 0
-    filename_analysisd = os.path.join(os.path.join(stats_path, "state-ossec-analysisd.csv"))
-    filename_remoted = os.path.join(os.path.join(stats_path, "state-ossec-remoted.csv"))
+    filename_analysisd = os.path.join(os.path.join(stats_path, "state-wazuh-analysisd.csv"))
+    filename_remoted = os.path.join(os.path.join(stats_path, "state-wazuh-remoted.csv"))
     while not attempts_info['finish'] and attempts_info['agents_failed'] < len(agents_dict.keys()):
         for file in os.listdir(state_path):
             if file.endswith('.state'):
@@ -623,10 +623,10 @@ def state_collector(agents_dict, configuration, stats_path, attempts_info):
                 daemons_dict[daemon] = daemons_dict[daemon].append([values], ignore_index=True)
         counter += 1
         if counter % dataframe_write_every_rows == 0:
-            logger.debug('Writing ossec-analysisd state chunk')
-            logger.debug('Writing ossec-remoted state chunk')
-            daemons_dict['ossec-analysisd'] = append_to_dataframe(filename_analysisd, daemons_dict['ossec-analysisd'])
-            daemons_dict['ossec-remoted'] = append_to_dataframe(filename_remoted, daemons_dict['ossec-remoted'])
+            logger.debug('Writing wazuh-analysisd state chunk')
+            logger.debug('Writing wazuh-remoted state chunk')
+            daemons_dict['wazuh-analysisd'] = append_to_dataframe(filename_analysisd, daemons_dict['wazuh-analysisd'])
+            daemons_dict['wazuh-remoted'] = append_to_dataframe(filename_remoted, daemons_dict['wazuh-remoted'])
             counter = 0
         time.sleep(state_collector_time)
 

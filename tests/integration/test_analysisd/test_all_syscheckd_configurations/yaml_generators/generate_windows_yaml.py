@@ -83,15 +83,15 @@ def generate_analysisd_yaml(n_events, modify_events):
 
     remove_logs()
 
-    control_service('start', daemon='ossec-analysisd', debug_mode=True)
-    check_daemon_status(running=True, daemon='ossec-analysisd')
+    control_service('start', daemon='wazuh-analysisd', debug_mode=True)
+    check_daemon_status(running=True, daemon='wazuh-analysisd')
 
     mitm_analysisd = ManInTheMiddle(address=analysis_path, family='AF_UNIX', connection_protocol='UDP')
     analysis_queue = mitm_analysisd.queue
     mitm_analysisd.start()
 
-    control_service('start', daemon='ossec-remoted', debug_mode=True)
-    check_daemon_status(running=True, daemon='ossec-remoted')
+    control_service('start', daemon='wazuh-remoted', debug_mode=True)
+    check_daemon_status(running=True, daemon='wazuh-remoted')
 
     analysis_monitor = QueueMonitor(analysis_queue)
 
@@ -132,7 +132,7 @@ def generate_analysisd_yaml(n_events, modify_events):
 
 
 def kill_daemons():
-    for daemon in ['ossec-remoted', 'ossec-analysisd']:
+    for daemon in ['wazuh-remoted', 'wazuh-analysisd']:
         control_service('stop', daemon=daemon)
         check_daemon_status(running=False, daemon=daemon)
 

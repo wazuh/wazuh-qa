@@ -25,9 +25,9 @@ from wazuh_testing.tools.services import control_service, check_daemon_status
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=3), pytest.mark.server]
 
 root_dir = '/test'
-tested_daemon = 'ossec-syscheckd'
+tested_daemon = 'wazuh-syscheckd'
 state_collector_time = 1
-state_path = os.path.join(WAZUH_PATH, 'var', 'run', 'ossec-agentd.state')
+state_path = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-agentd.state')
 performance_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stats', 'performance')
 fim_db_path = os.path.join(WAZUH_PATH, 'queue', 'fim', 'db')
 # local_internal_options configuration

@@ -48,7 +48,7 @@ class WorkerMID(ManInTheMiddle):
             message = data[CLUSTER_DATA_HEADER_SIZE:]
             response = cluster_msg_build(cmd=b'send_sync', counter=2, payload=bytes(self.cluster_output.encode()),
                                          encrypt=False)
-            print(f'Received message from ossec-authd: {message}')
+            print(f'Received message from wazuh-authd: {message}')
             print(f'Response to send: {self.cluster_output}')
             self.pause()            
             return response
@@ -77,7 +77,7 @@ receiver_sockets_params = [(ossec_authd_socket_path , 'AF_INET', 'SSL_TLSv1_2')]
 mitm_master = WorkerMID(address=cluster_socket_path, family='AF_UNIX', connection_protocol='TCP')
 
 monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True),
-                            ('wazuh-clusterd', mitm_master, True), ('ossec-authd', None, True)]
+                            ('wazuh-clusterd', mitm_master, True), ('wazuh-authd', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 # Tests
 

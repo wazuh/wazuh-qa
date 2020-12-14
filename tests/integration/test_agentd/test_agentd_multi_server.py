@@ -292,9 +292,9 @@ def clean_keys(request, get_configuration):
         sleep(1)
 
 def restart_agentd():
-    control_service('stop', daemon="ossec-agentd")
+    control_service('stop', daemon="wazuh-agentd")
     truncate_file(LOG_FILE_PATH)
-    control_service('start', daemon="ossec-agentd", debug_mode=True)
+    control_service('start', daemon="wazuh-agentd", debug_mode=True)
 
 # Tests
 def wait_until(x, log_str):

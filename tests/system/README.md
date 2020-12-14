@@ -318,11 +318,11 @@ test_agent_key_polling/test_agent_key_polling.py::test_agent_key_polling 2020-03
 2020-03-31 09:42:57,113 - wazuh_testing - DEBUG - Finishing QueueMonitor for wazuh-agent2 and message: .*Connected to the server \(wazuh-worker1.*
 2020-03-31 09:42:58,117 - wazuh_testing - DEBUG - Cleaning temporal files...
 2020-03-31 09:42:58,118 - wazuh_testing - DEBUG - Checking results...
-2020-03-31 09:42:58,123 - wazuh_testing - DEBUG - Received from wazuh-master the expected message: 2020/03/31 09:42:47 ossec-authd: INFO: Agent key generated for agent 'wazuh-agent2' (requested locally)
-2020-03-31 09:42:58,124 - wazuh_testing - DEBUG - Received from wazuh-worker1 the expected message: 2020/03/31 09:42:47 ossec-remoted: WARNING: (1404): Authentication error. Wrong key or corrupt payload. Message received from agent '002' at 'any'.
-2020-03-31 09:42:58,125 - wazuh_testing - DEBUG - Received from wazuh-agent2 the expected message: 2020/03/31 09:42:47 ossec-agentd: ERROR: (1137): Lost connection with manager. Setting lock.
-2020-03-31 09:42:58,125 - wazuh_testing - DEBUG - Received from wazuh-agent2 the expected message: 2020/03/31 09:42:56 ossec-agentd: INFO: Trying to connect to server (wazuh-worker1/172.18.0.3:1514/tcp).
-2020-03-31 09:42:58,126 - wazuh_testing - DEBUG - Received from wazuh-agent2 the expected message: 2020/03/31 09:42:56 ossec-agentd: INFO: (4102): Connected to the server (wazuh-worker1/172.18.0.3:1514/tcp).
+2020-03-31 09:42:58,123 - wazuh_testing - DEBUG - Received from wazuh-master the expected message: 2020/03/31 09:42:47 wazuh-authd: INFO: Agent key generated for agent 'wazuh-agent2' (requested locally)
+2020-03-31 09:42:58,124 - wazuh_testing - DEBUG - Received from wazuh-worker1 the expected message: 2020/03/31 09:42:47 wazuh-remoted: WARNING: (1404): Authentication error. Wrong key or corrupt payload. Message received from agent '002' at 'any'.
+2020-03-31 09:42:58,125 - wazuh_testing - DEBUG - Received from wazuh-agent2 the expected message: 2020/03/31 09:42:47 wazuh-agentd: ERROR: (1137): Lost connection with manager. Setting lock.
+2020-03-31 09:42:58,125 - wazuh_testing - DEBUG - Received from wazuh-agent2 the expected message: 2020/03/31 09:42:56 wazuh-agentd: INFO: Trying to connect to server (wazuh-worker1/172.18.0.3:1514/tcp).
+2020-03-31 09:42:58,126 - wazuh_testing - DEBUG - Received from wazuh-agent2 the expected message: 2020/03/31 09:42:56 wazuh-agentd: INFO: (4102): Connected to the server (wazuh-worker1/172.18.0.3:1514/tcp).
 PASSED
 
 ======================================================================== 1 passed in 81.86 seconds ========================================================================

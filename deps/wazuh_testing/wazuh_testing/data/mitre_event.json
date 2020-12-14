@@ -330,7 +330,7 @@
       "title": "The Location Schema",
       "default": "",
       "examples": [
-        "ossec-monitord"
+        "wazuh-monitord"
       ],
       "pattern": "^(.*)$"
     }

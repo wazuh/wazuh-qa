@@ -46,7 +46,7 @@ log_monitor_paths = []
 ls_sock_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'auth'))
 receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2'), (ls_sock_path, 'AF_UNIX', 'TCP')]
 
-monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('ossec-authd', None, True)]
+monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
@@ -342,14 +342,14 @@ def duplicate_name_agent_delete_test(server):
 
 def test_ossec_authd_agents_ctx_main(get_configuration, set_up_groups, configure_environment,
                                      configure_sockets_environment, connect_to_sockets_module):
-    control_service('stop', daemon='ossec-authd')    
-    check_daemon_status(running=False, daemon='ossec-authd')
+    control_service('stop', daemon='wazuh-authd')    
+    check_daemon_status(running=False, daemon='wazuh-authd')
     time.sleep(1)
     clean_logs()
     clean_agents_ctx()
     time.sleep(1)
-    control_service('start', daemon='ossec-authd')
-    check_daemon_status(running=True, daemon='ossec-authd')
+    control_service('start', daemon='wazuh-authd')
+    check_daemon_status(running=True, daemon='wazuh-authd')
     wait_server_connection()
     time.sleep(1)
     
@@ -361,14 +361,14 @@ def test_ossec_authd_agents_ctx_main(get_configuration, set_up_groups, configure
 
 def test_ossec_authd_agents_ctx_local(get_configuration, set_up_groups, configure_environment,
                                       configure_sockets_environment, connect_to_sockets_module):
-    control_service('stop', daemon='ossec-authd')    
-    check_daemon_status(running=False, daemon='ossec-authd')
+    control_service('stop', daemon='wazuh-authd')    
+    check_daemon_status(running=False, daemon='wazuh-authd')
     time.sleep(1)
     clean_logs()
     clean_agents_ctx()
     time.sleep(1)
-    control_service('start', daemon='ossec-authd')
-    check_daemon_status(running=True, daemon='ossec-authd')
+    control_service('start', daemon='wazuh-authd')
+    check_daemon_status(running=True, daemon='wazuh-authd')
     wait_server_connection()
     time.sleep(1)
     
