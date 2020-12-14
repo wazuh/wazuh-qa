@@ -79,7 +79,7 @@ def test_behind_proxy_server(insert_agent, tags_to_apply, get_configuration, con
     api_details['base_url'] += '/agents'
 
     # Delete previous agents to avoid duplicate data error.
-    delete_url = api_details['base_url'] + f"?agents_list=all&purge=true&status=&older_than=0s"
+    delete_url = api_details['base_url'] + f"?agents_list=all&purge=true&status=&older_than=0s&status=all"
     delete_response = requests.delete(delete_url, headers=api_details['auth_headers'], verify=False)
     assert delete_response.status_code == 200, f'Delete response was not 200. Response: {delete_response.text}'
 
@@ -111,7 +111,7 @@ def test_behind_proxy_server(insert_agent, tags_to_apply, get_configuration, con
             assert register_ip != proxy_ip, 'IP should not be equal to the one in "X-Forwarded-For" header, but it is.'
 
         # Delete the agent
-        api_details['base_url'] += f"&purge=true&status=&older_than=0s"
+        api_details['base_url'] += f"&purge=true&status=&older_than=0s&status=all"
         requests.delete(api_details['base_url'], headers=api_details['auth_headers'], verify=False)
 
     else:
