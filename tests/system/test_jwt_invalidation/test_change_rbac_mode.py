@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import time
 
 import pytest
 import yaml
@@ -76,6 +77,9 @@ def test_change_rbac_mode_manually(login_endpoint, set_default_api_conf, restore
 
     # Restart the wazuh-manager service
     host_manager.get_host(test_hosts[0]).ansible('command', f'service wazuh-manager restart', check=False)
+
+    # Ensure workers are connected to master
+    time.sleep(11)
 
     # Assert every token is revoked
     for host in test_hosts:
