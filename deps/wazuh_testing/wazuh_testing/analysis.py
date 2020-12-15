@@ -23,6 +23,7 @@ with open(os.path.join(_data_path, 'analysis_alert_windows.json'), 'r') as f:
 with open(os.path.join(_data_path, 'state_integrity_analysis_schema.json'), 'r') as f:
     state_integrity_analysis_schema = json.load(f)
 
+
 def callback_analysisd_message(line):
     if isinstance(line, bytes):
         line = line.decode()
@@ -62,7 +63,7 @@ def callback_analysisd_agent_id(line):
 
 
 def callback_wazuhdb_message_added_and_modified(item):
-    data, response = item
+    data, _ = item
     match = re.match(r'^agent (\d{3,}) \w+ (save2) (.+)$', data.decode())
     if match:
         try:
@@ -73,14 +74,14 @@ def callback_wazuhdb_message_added_and_modified(item):
 
 
 def callback_wazuh_db_message_deleted(item):
-    data, response = item
+    data, _ = item
     match = re.match(r'^agent (\d{3,}) \w+ (delete) (.+)$', data.decode())
     if match:
         return match.group(1), match.group(2), match.group(3)
 
 
 def get_wazuh_db_message(item, keyword: str = None):
-    data, response = item
+    data, _ = item
     match = re.match(r'^agent (\d{3,}) \w+ (\w+) (.+)$', data.decode())
     if match:
         if keyword is not None and keyword not in match.group(2):
@@ -110,7 +111,8 @@ def callback_fim_alert(line):
     try:
         alert = json.loads(line)
         # Avoid syscheck alerts that are not 'added', 'modified' or 'deleted'
-        if alert['rule']['id'] in ['550', '553', '554'] and 'syscheck' in alert:
+        if (alert['rule']['id'] in ['550', '553', '554', '594', '597', '598', '750', '751', '752'] and
+                'syscheck' in alert):
             return alert
     except json.decoder.JSONDecodeError:
         return None
@@ -157,7 +159,8 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
     def validate_attributes(syscheck_alert, syscheck_event, event_field, suffix):
         for attribute, value in syscheck_event['data'][event_field].items():
             # Skip certain attributes since their alerts will not have them
-            if attribute in ['type', 'checksum', 'attributes'] or ('inode' in attribute and schema == 'win32'):
+            if attribute in ['type', 'checksum', 'attributes', 'value_type'] or ('inode' in attribute and
+                                                                                 schema == 'win32'):
                 continue
             # Change `mtime` format to match with alerts
             elif attribute == 'mtime':
@@ -167,17 +170,29 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
                 attribute = attribute.split('_')[-1]
             # `perm` attribute has a different format on Windows
             elif 'perm' in attribute and schema == 'win32':
+                if 'registry_key' in str(syscheck_event):
+                    continue
+
                 attribute = 'win_perm'
                 win_perm_list = []
+
                 for win_perm in value.split(','):
                     user, effect, permissions = re.match(r'^(.+?) \((.+?)\): (.+?)$', win_perm).groups()
                     win_perm_list.append({'name': user.strip(' '), effect: permissions.upper().split('|')})
+
                 value = win_perm_list
+
+            if 'registry_key' in str(syscheck_event) and attribute in ['group_name', 'mtime']:
+                continue
+
             attribute = '{}name'.format(attribute[0]) if attribute in ['user_name', 'group_name'] else attribute
+
             assert str(value) == str(syscheck_alert['{}_{}'.format(attribute, suffix)]), \
                 f"{value} not equal to {syscheck_alert['{}_{}'.format(attribute, suffix)]}"
+
         if 'tags' in event['data']:
-            assert event['data']['tags'] == syscheck_alert['tags'][0], f'Tags not in alert or with different value'
+            assert event['data']['tags'] == syscheck_alert['tags'][0], 'Tags not in alert or with different value'
+
         if 'content_changes' in event['data']:
             assert event['data']['content_changes'] == syscheck_alert['diff']
     try:
@@ -187,7 +202,7 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
         raise e
     try:
         validate_attributes(deepcopy(alert['syscheck']), deepcopy(event), 'attributes', 'after')
-        if event['data']['type'] == 'modified':
+        if event['data']['type'] == 'modified' and 'registry' not in str(event):
             validate_attributes(deepcopy(alert['syscheck']), deepcopy(event), 'old_attributes', 'before')
     except KeyError:
         raise KeyError('Alert does not have the same keys as the event.')
