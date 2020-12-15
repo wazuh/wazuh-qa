@@ -249,7 +249,6 @@ class SocketController:
         if(open_at_start):
             self.open()
 
-
     def open(self):
         """Opens sokcet """
         # Create socket object
@@ -267,7 +266,7 @@ class SocketController:
                 raise TypeError(f'Invalid or unsupported SSL version specified, valid versions are: {list(versions_maps.keys())}')
             # Wrap socket into ssl
             self.sock = ssl.wrap_socket(self.sock, ssl_version=ssl_version, ciphers=self.ciphers,
-                    certfile=self.certificate, keyfile=self.keyfile)
+                                        certfile=self.certificate, keyfile=self.keyfile)
             self.ssl = True
 
         # Connect only if protocol is TCP
@@ -340,7 +339,7 @@ class SocketController:
         return output
 
     def set_ssl_configuration(self, ciphers="HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH",
-        connection_protocol="SSL_TLSv1_2", certificate=None, keyfile=None):
+                              connection_protocol="SSL_TLSv1_2", certificate=None, keyfile=None):
         """Set SSL configurations (use on SSL socket only). Should be set before opening the socket
 
         Parameters
@@ -540,8 +539,8 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
     cert_reqs = ssl.CERT_NONE
     options = None
 
-    def set_ssl_configuration(self, ciphers=None,
-        connection_protocol=None, certificate=None, keyfile=None, cert_reqs=None, ca_cert=None, options=None):
+    def set_ssl_configuration(self, ciphers=None, connection_protocol=None, certificate=None, keyfile=None,
+                              cert_reqs=None, ca_cert=None, options=None):
         """Overrides SSL  default configurations.
 
         Parameters
@@ -578,7 +577,6 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
 
         return
 
-
     def get_request(self):
         """
         overrides get_request
@@ -600,16 +598,16 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
                     context.verify_mode = self.cert_reqs
                     context.load_verify_locations(cafile=self.ca_cert)
                 context.set_ciphers(self.ciphers)
-                connstream = context.wrap_socket(newsocket,server_side=True)
+                connstream = context.wrap_socket(newsocket, server_side=True)
             else:
                 connstream = ssl.wrap_socket(newsocket,
-                                        server_side=True,
-                                        certfile = self.certfile,
-                                        keyfile = self.keyfile,
-                                        ssl_version = self.ssl_version,
-                                        ciphers= self.ciphers,
-                                        cert_reqs=self.cert_reqs,
-                                        ca_certs=self.ca_cert)
+                                             server_side=True,
+                                             certfile=self.certfile,
+                                             keyfile=self.keyfile,
+                                             ssl_version=self.ssl_version,
+                                             ciphers=self.ciphers,
+                                             cert_reqs=self.cert_reqs,
+                                             ca_certs=self.ca_cert)
         except OSError as err:
             print(err)
             raise
@@ -617,7 +615,6 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
         # Save last_adress
         self.last_address = fromaddr
         return connstream, fromaddr
-
 
 
 class DatagramServerPort(socketserver.ThreadingUDPServer):
@@ -631,7 +628,7 @@ if hasattr(socketserver, 'ThreadingUnixStreamServer'):
         def shutdown_request(self, request):
             pass
 
-    class DatagramServerUnix(socketserver.ThreadingUnixStreamServer):
+    class DatagramServerUnix(socketserver.ThreadingUnixDatagramServer):
 
         def shutdown_request(self, request):
             pass
@@ -707,6 +704,7 @@ class StreamHandler(socketserver.BaseRequestHandler):
                 self.server.mitm.put_queue((received, response))
                 self.request.sendall(response)
 
+
 class DatagramHandler(socketserver.BaseRequestHandler):
 
     def unix_forward(self, data):
@@ -728,6 +726,7 @@ class DatagramHandler(socketserver.BaseRequestHandler):
             data = self.request[0]
             self.server.mitm.handler_func(data)
             self.server.mitm.put_queue(data)
+
 
 class ManInTheMiddle:
 
@@ -753,7 +752,8 @@ class ManInTheMiddle:
         else:
             raise TypeError(f"Invalid address type: {type(address)}. Valid types are str or Tuple(str, int)")
 
-        if connection_protocol.lower() == 'tcp' or connection_protocol.lower() == 'udp' or connection_protocol.lower() == 'ssl':
+        if (connection_protocol.lower() == 'tcp' or connection_protocol.lower() == 'udp' or
+                connection_protocol.lower() == 'ssl'):
             self.mode = connection_protocol.lower()
         else:
             raise TypeError(f'Invalid connection protocol detected: {connection_protocol.lower()}. '
@@ -774,7 +774,7 @@ class ManInTheMiddle:
                 'udp': {
                     'AF_INET': DatagramServerPort
                 },
-                'ssl' : {
+                'ssl': {
                     'AF_INET': SSLStreamServerPort
                 }
             },

@@ -72,7 +72,7 @@ def generate_analysisd_yaml(n_events, modify_events):
             y_f.write(yaml.safe_dump(yaml_result))
 
     def remove_logs():
-        for root, dirs, files in os.walk(WAZUH_LOGS_PATH):
+        for root, _, files in os.walk(WAZUH_LOGS_PATH):
             for file in files:
                 os.remove(os.path.join(root, file))
 
@@ -82,6 +82,9 @@ def generate_analysisd_yaml(n_events, modify_events):
     check_daemon_status(running=False)
 
     remove_logs()
+
+    control_service('start', daemon='wazuh-db', debug_mode=True)
+    check_daemon_status(running=True, daemon='wazuh-db')
 
     control_service('start', daemon='wazuh-analysisd', debug_mode=True)
     check_daemon_status(running=True, daemon='wazuh-analysisd')
@@ -122,7 +125,7 @@ def generate_analysisd_yaml(n_events, modify_events):
 
     # Truncate file
     with open(yaml_file, 'w')as y_f:
-        y_f.write(f'---\n')
+        y_f.write('---\n')
 
     for ev_list in [added, modified, deleted]:
         parse_events_into_yaml(ev_list, yaml_file)
@@ -132,7 +135,7 @@ def generate_analysisd_yaml(n_events, modify_events):
 
 
 def kill_daemons():
-    for daemon in ['wazuh-remoted', 'wazuh-analysisd']:
+    for daemon in ['wazuh-remoted', 'wazuh-analysisd', 'wazuh-db']:
         control_service('stop', daemon=daemon)
         check_daemon_status(running=False, daemon=daemon)
 
@@ -156,14 +159,14 @@ if __name__ == '__main__':
 
     options = get_script_arguments()
     events = options.n_events
-    modified = options.dropped_events
+    modified = options.modified_events
     logger.setLevel(log_level[options.debug_level])
 
     try:
         mitm = generate_analysisd_yaml(n_events=events, modify_events=modified)
         mitm.shutdown()
-    except (TimeoutError, FileNotFoundError):
-        logger.error('Could not generate the YAML. Please clean the environment.')
+    except (TimeoutError, FileNotFoundError) as e:
+        logger.error(f'Could not generate the YAML. Please clean the environment.{e}')
         delete_sockets()
     finally:
         kill_daemons()

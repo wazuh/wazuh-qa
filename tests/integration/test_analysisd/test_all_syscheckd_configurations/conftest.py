@@ -39,7 +39,13 @@ def generate_events_and_alerts(request):
     for test_case in test_cases:
         case = test_case['test_case'][0]
         event = (json.loads(re.match(r'(.*)syscheck:(.+)$', case['input']).group(2)))
-        events[event['data']['path']].update({case['stage']: event})
+
+        try:
+            value_name = '\\' + event['data']['value_name']
+        except KeyError:
+            value_name = ''
+
+        events[event['data']['path'] + value_name].update({case['stage']: event})
         socket_controller.send(case['input'])
         time.sleep(1 / ips)
 

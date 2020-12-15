@@ -1,0 +1,76 @@
+---
+# Configuration for test others
+- tags:
+  - test_others
+  apply_to_modules:
+  - test_registry_check_others
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - windows_registry:
+        value: WINDOWS_REGISTRY_1
+        attributes:
+        - FIM_MODE
+        - check_all: "no"
+        - check_owner: "yes"
+        - check_group: "yes"
+        - check_perm: "yes"
+        - check_mtime: "yes"
+        - check_sum: "yes"
+        - arch: "64bit"
+    - windows_registry:
+        value: WINDOWS_REGISTRY_2
+        attributes:
+        - FIM_MODE
+        - check_all: "no"
+        - check_owner: "yes"
+        - check_group: "yes"
+        - check_perm: "yes"
+        - check_mtime: "yes"
+        - check_size: "yes"
+        - arch: "64bit"
+    - windows_registry:
+        value: WINDOWS_REGISTRY_3
+        attributes:
+        - FIM_MODE
+        - check_all: "no"
+        - check_owner: "yes"
+        - check_group: "yes"
+        - check_perm: "yes"
+        - check_mtime: "yes"
+        - check_type: "yes"
+        - arch: "64bit"
+    - windows_registry:
+        value: WINDOWS_REGISTRY_4
+        attributes:
+        - FIM_MODE
+        - check_all: "no"
+        - check_size: "yes"
+        - check_sum: "yes"
+        - check_type: "yes"
+        - arch: "64bit"
+    - windows_registry:
+        value: WINDOWS_REGISTRY_5
+        attributes:
+        - FIM_MODE
+        - check_all: "no"
+        - check_owner: "yes"
+        - check_group: "yes"
+        - check_mtime: "yes"
+        - check_size: "yes"
+        - check_sum: "yes"
+        - check_type: "yes"
+        - arch: "64bit"
+    - windows_registry:
+        value: WINDOWS_REGISTRY_6
+        attributes:
+        - FIM_MODE
+        - check_all: "no"
+        - check_perm: "yes"
+        - check_mtime: "yes"
+        - check_size: "yes"
+        - check_sum: "yes"
+        - check_type: "yes"
+        - arch: "64bit"
