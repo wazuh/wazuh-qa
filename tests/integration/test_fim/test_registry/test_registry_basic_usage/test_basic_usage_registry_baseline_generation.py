@@ -50,11 +50,11 @@ registry_list = [(key, sub_key_1, KEY_WOW64_64KEY),
 
 @pytest.fixture(scope='function')
 def restart_syscheckd_each_time(request):
-    control_service('stop', daemon='ossec-syscheckd')
+    control_service('stop', daemon='wazuh-syscheckd')
     truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
-    control_service('start', daemon='ossec-syscheckd')
+    control_service('start', daemon='wazuh-syscheckd')
 
 
 @pytest.fixture(scope='module', params=configurations)
