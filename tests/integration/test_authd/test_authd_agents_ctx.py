@@ -65,7 +65,6 @@ def get_configuration(request):
 def clean_agents_ctx():  
     clean_keys()
     clean_groups()
-    clean_agentinfo()
     clean_rids()
     clean_agents_timestamp()
     clean_diff()
@@ -103,15 +102,6 @@ def clean_diff():
             shutil.rmtree(diff_path)
         except Exception as e:
             print('Failed to delete %s. Reason: %s' % (diff_path, e))
-
-def clean_agentinfo():
-    agentinfo_folder = os.path.join(WAZUH_PATH, 'queue', 'agent-info')
-    for filename in os.listdir(agentinfo_folder):
-        file_path = os.path.join(agentinfo_folder, filename)
-        try:
-            os.unlink(file_path)
-        except Exception as e:
-            print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 def clean_rids():
     rids_folder = os.path.join(WAZUH_PATH, 'queue', 'rids')
@@ -258,7 +248,7 @@ def register_agent_local_server(Name, Group=None, IP=None):
 # Tests
 def duplicate_ip_agent_delete_test(server): 
     """Register a first agent, then register an agent with duplicated IP.
-        Check that client.keys, agent-info, agent-groups, agent-timestamp and agent diff were updated correctly
+        Check that client.keys, agent-groups, agent-timestamp and agent diff were updated correctly
 
     Parameters
     ----------
@@ -300,7 +290,7 @@ def duplicate_ip_agent_delete_test(server):
 
 def duplicate_name_agent_delete_test(server): 
     """Register a first agent, then register an agent with duplicated Name.
-        Check that client.keys, agent-info, agent-groups, agent-timestamp and agent diff were updated correctly
+        Check that client.keys, agent-groups, agent-timestamp and agent diff were updated correctly
 
     Parameters
     ----------
