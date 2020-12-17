@@ -3,9 +3,9 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+from time import sleep
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, callback_file_limit_capacity, delete_file, \
                               generate_params, create_file, REGULAR
@@ -58,8 +58,6 @@ def extra_configuration_before_yield():
     for i in range(2, NUM_FILES_TO_CREATE):
         create_file(REGULAR, testdir1, f'{base_file_name}{i}', content='content')
 
-    create_file(REGULAR, testdir1, f'{base_file_name}{1}')
-
 # Tests
 
 
@@ -91,6 +89,9 @@ def test_file_limit_delete_full(folder, file_name, tags_to_apply,
 
     if database_state:
         assert database_state == '100', 'Wrong value for full database alert'
+
+    create_file(REGULAR, testdir1, file_name)
+    sleep(2)
 
     delete_file(folder, file_name)
 
