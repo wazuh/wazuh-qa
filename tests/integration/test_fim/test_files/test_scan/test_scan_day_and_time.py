@@ -27,8 +27,8 @@ test_directories = [os.path.join(PREFIX, 'testdir1')]
 
 directory_str = ','.join(test_directories)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-scan_days = ['thursday', 'wednesday']
-scan_times = ['9PM', '20:00']
+scan_days = ['thursday', 'wednesday', 'saturday', 'monday']
+scan_times = ['9PM', '20:00', '12am', '12pm']
 
 # configurations
 
