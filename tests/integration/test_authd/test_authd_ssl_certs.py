@@ -61,7 +61,7 @@ log_monitor_paths = []
 
 receiver_sockets_params = [((AGENT_IP, 1515), 'AF_INET', 'SSL_TLSv1_2')]
 
-monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('ossec-authd', None, True)]
+monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
@@ -86,9 +86,9 @@ def generate_ca_certificate(get_configuration):
 
 def override_wazuh_conf(configuration):
     # Stop Wazuh
-    control_service('stop', daemon='ossec-authd')
+    control_service('stop', daemon='wazuh-authd')
     time.sleep(1)
-    check_daemon_status(running=False, daemon='ossec-authd')
+    check_daemon_status(running=False, daemon='wazuh-authd')
     truncate_file(LOG_FILE_PATH)
 
      # Configuration for testing
@@ -97,7 +97,7 @@ def override_wazuh_conf(configuration):
     write_wazuh_conf(test_config)
     # Start Wazuh daemons
     time.sleep(1)
-    control_service('start', daemon='ossec-authd')
+    control_service('start', daemon='wazuh-authd')
 
     """Wait until agentd has begun"""
     def callback_agentd_startup(line):

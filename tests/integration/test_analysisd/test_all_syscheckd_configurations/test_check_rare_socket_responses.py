@@ -39,7 +39,7 @@ mitm_wdb = ManInTheMiddle(address=wdb_path, family='AF_UNIX', connection_protoco
 #                daemon_first: bool))
 # Example1 -> ('wazuh-clusterd', None)              Only start wazuh-clusterd with no MITM
 # Example2 -> ('wazuh-clusterd', (my_mitm, True))   Start MITM and then wazuh-clusterd
-monitored_sockets_params = [('wazuh-db', mitm_wdb, True), ('ossec-analysisd', None, None)]
+monitored_sockets_params = [('wazuh-db', mitm_wdb, True), ('wazuh-analysisd', None, None)]
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 

@@ -86,7 +86,7 @@ def create_injectors(agents):
 
 def get_remoted_pid():
     for process in psutil.process_iter():
-        if process.name() == 'ossec-remoted':
+        if process.name() == 'wazuh-remoted':
             return process.pid
     return None
 

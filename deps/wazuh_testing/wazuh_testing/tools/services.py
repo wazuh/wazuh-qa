@@ -33,7 +33,7 @@ def restart_wazuh_daemon(daemon):
     check_call([f'{daemon_path}/{daemon}'])
 
 
-def restart_wazuh_with_new_conf(new_conf, daemon='ossec-syscheckd'):
+def restart_wazuh_with_new_conf(new_conf, daemon='wazuh-syscheckd'):
     """
     Restart Wazuh service applying a new ossec.conf
 
@@ -103,7 +103,7 @@ def control_service(action, daemon=None, debug_mode=False):
             control_service('start')
             result = 0
         else:
-            command = subprocess.run(["net", action, "OssecSvc"], stderr=subprocess.PIPE)
+            command = subprocess.run(["net", action, "WazuhSvc"], stderr=subprocess.PIPE)
             result = command.returncode
             if command.returncode != 0:
                 if action == 'stop' and 'The Wazuh service is not started.' in command.stderr.decode():

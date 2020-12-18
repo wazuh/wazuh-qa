@@ -85,7 +85,7 @@ def clean_log_file():
 
 def override_wazuh_conf(configuration):
     # Stop Wazuh
-    control_service('stop', daemon='ossec-agentd')
+    control_service('stop', daemon='wazuh-agentd')
 
     # Configuration for testing
     temp = get_temp_yaml(configuration)
@@ -107,7 +107,7 @@ def override_wazuh_conf(configuration):
 
     try:
         # Start Wazuh
-        control_service('start', daemon='ossec-agentd')
+        control_service('start', daemon='wazuh-agentd')
     except:
         raise Exception
 
@@ -176,8 +176,8 @@ def check_log_error_conf(msg):
 def test_agent_agentd_enrollment(configure_authd_server, configure_environment, test_case: list):
     global remoted_server
     print(f'Test: {test_case["name"]}')
-    if 'ossec-agentd' in test_case.get("skips", []):
-        pytest.skip("This test does not apply to ossec-agentd")
+    if 'wazuh-agentd' in test_case.get("skips", []):
+        pytest.skip("This test does not apply to wazuh-agentd")
     
     remoted_server = RemotedSimulator(protocol=PROTOCOL, mode='CONTROLED_ACK', client_keys=CLIENT_KEYS_PATH)
     
