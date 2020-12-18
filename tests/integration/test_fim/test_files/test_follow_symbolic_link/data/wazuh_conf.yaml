@@ -136,3 +136,22 @@
         attributes:
         - FIM_MODE
         - follow_symbolic_link: FOLLOW_MODE
+# conf 9
+- tags:
+    - nested_dir
+  apply_to_modules:
+    - test_change_target_with_nested_directory
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: '/testdir1/subdir'
+        attributes:
+          - FIM_MODE
+    - directories:
+        value: '/testdir_link/symlink3'
+        attributes:
+          - FIM_MODE
+          - follow_symbolic_link: FOLLOW_MODE

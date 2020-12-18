@@ -13,8 +13,8 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [os.path.join(PREFIX, 'testdir_link'), os.path.join(PREFIX, 'testdir1'),
                     os.path.join(PREFIX, 'testdir2'), os.path.join(PREFIX, 'testdir_target'),
-                    os.path.join(PREFIX, 'testdir_not_target')]
-testdir_link, testdir1, testdir2, testdir_target, testdir_not_target = test_directories
+                    os.path.join(PREFIX, 'testdir_not_target'), os.path.join(PREFIX, 'testdir1', 'subdir')]
+testdir_link, testdir1, testdir2, testdir_target, testdir_not_target, test_subdir = test_directories
 symlink_interval = 20
 
 
@@ -74,10 +74,14 @@ def extra_configuration_before_yield():
     create_file(REGULAR, testdir1, 'regular2', content='')
     create_file(REGULAR, testdir2, 'regular1', content='')
     create_file(REGULAR, testdir2, 'regular2', content='')
+    create_file(REGULAR, test_subdir, 'regular1', content='')
+    create_file(REGULAR, test_subdir, 'regular2', content='')
     # Symlink pointing to /testdir1/regular1
     create_file(SYMLINK, symlinkdir, 'symlink', target=os.path.join(testdir1, 'regular1'))
     # Symlink pointing to /testdir_target/
     create_file(SYMLINK, symlinkdir, 'symlink2', target=testdir_target)
+    # Symlink pointing to /testdir1
+    create_file(SYMLINK, symlinkdir, 'symlink3', target=testdir1)
     # Set symlink_scan_interval to a given value
     change_internal_options(param='syscheck.symlink_scan_interval', value=symlink_interval)
 
