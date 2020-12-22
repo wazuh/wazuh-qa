@@ -1,11 +1,10 @@
 # SCA tests
 
 
-This tests are not part of the current testing framework for Wazuh, so they have to be executed manually. The necessary instructions are described below.
+These tests are not part of the current testing framework for Wazuh, so they have to be executed manually. The necessary instructions are described below.
 
 ## Introduction
-----------------
-
+---------------
 
 A brief knowledge of SCA is recommended, the documentation covers it in detail in [How SCA works](https://documentation.wazuh.com/4.0/user-manual/capabilities/sec-config-assessment/how_it_works.html). Also, there is a blog post about [Security Configuration Assessment](https://wazuh.com/blog/security-configuration-assessment/).
 
@@ -22,9 +21,9 @@ Basically, the tests inside **data** folder contain different _.yml_ policies th
     │ ├── sca_files_test_suite.yml
     │ ├── sca_negation_test_suite.yml
     │ ├── sca_processes_test_suite.yml
-    │ ├── sca_repeated_global_ids_1.yml  # Will be skipped
-    │ ├── sca_repeated_global_ids_2.yml  # Will be skipped
-    │ ├── sca_repeated_local.yml         # Will be skipped
+    │ ├── sca_repeated_global_ids_1.yml     # Will be skipped
+    │ ├── sca_repeated_global_ids_2.yml     # Will be skipped
+    │ ├── sca_repeated_local.yml            # Will be skipped
     │ ├── sca_win_registry_test_suite.yml
     │ ├── set_linux_config_to_compliance.sh # Script to improve the SCA score
     |
@@ -45,7 +44,7 @@ The **SCA** module has to be enabled in the agent
 ```
 
 And the test policies have to copied to __INSTALL_DIR/ruleset/sca__.
-Then restart the agent to force the policy evaluation.
+Then, restart the agent to force the policy evaluation.
 
 ## Results
 ----------
@@ -88,7 +87,7 @@ curl -k -X GET "https://localhost:55000/sca/001?pretty=true" -H "Authorization: 
     ...
 ```
 
-This results and those described in the test must be equal
+The scan results and those described in the test must be equal
 
 ```
 ...
