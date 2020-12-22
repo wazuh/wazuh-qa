@@ -83,6 +83,9 @@ def test_symbolic_revert_symlink(tags_to_apply, get_configuration, configure_env
     # Modify symlink target, wait for sym_check to update it
     modify_symlink(os.path.join(testdir1, file1), os.path.join(testdir_link, 'symlink'))
     wait_for_symlink_check(wazuh_log_monitor)
+    # Wait for audit to reload the rules
+    wait_for_audit(whodata, wazuh_log_monitor)
+
     modify_file_content(testdir1, file2, new_content='Sample modification2')
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):

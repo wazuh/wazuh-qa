@@ -5,7 +5,7 @@ import os
 
 import pytest
 from test_fim.test_files.test_follow_symbolic_link.common import configurations_path, testdir1, \
-    testdir_link, wait_for_symlink_check, testdir_target, testdir_not_target, delete_f
+    testdir_link, wait_for_symlink_check, testdir_target, testdir_not_target, delete_f, wait_for_audit
 # noinspection PyUnresolvedReferences
 from test_fim.test_files.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
     extra_configuration_after_yield
@@ -61,6 +61,7 @@ def test_symbolic_delete_symlink(tags_to_apply, main_folder, aux_folder, get_con
         Directory that will be pointed at or will contain the future pointed file.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
+
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     file1 = 'regular1'
     if tags_to_apply == {'monitored_dir'}:
@@ -83,6 +84,9 @@ def test_symbolic_delete_symlink(tags_to_apply, main_folder, aux_folder, get_con
     # Restore symlink and modify the target again. Expect events now
     create_file(SYMLINK, testdir_link, symlink, target=os.path.join(main_folder, file1))
     wait_for_symlink_check(wazuh_log_monitor)
+    # Wait unitl the audit rule of the link's target is loaded again
+    wait_for_audit(get_configuration['metadata']['fim_mode'] == "whodata", wazuh_log_monitor)
+
     modify_file_content(main_folder, file1, new_content='Sample modification 2')
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
     modify = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()

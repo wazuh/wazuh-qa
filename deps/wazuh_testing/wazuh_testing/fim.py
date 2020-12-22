@@ -1096,6 +1096,13 @@ def callback_audit_loaded_rule(line):
     return None
 
 
+def callback_end_audit_reload_rules(line):
+    match = re.match(r'.*Audit rules reloaded\. Rules loaded: (.+)', line)
+    if match:
+        return match.group(1)
+    return None
+
+
 def callback_audit_event_too_long(line):
     if 'Caching Audit message: event too long' in line:
         return True
@@ -1109,7 +1116,7 @@ def callback_audit_reloading_rules(line):
 
 
 def callback_audit_reloaded_rule(line):
-    match = re.match(r'.*Reloaded audit rule for monitoring directory: \'(.+)\'', line)
+    match = re.match(r'.*Already added audit rule for monitoring directory: \'(.+)\'', line)
     if match:
         return match.group(1)
     return None

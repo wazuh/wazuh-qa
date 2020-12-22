@@ -10,7 +10,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.sunos5, pytest.mark.darwin, pytest.
 
 from test_fim.test_files.test_follow_symbolic_link.common import configurations_path, testdir1, \
     modify_symlink, testdir_link, testdir_target, testdir_not_target, \
-    test_directories
+    test_directories, wait_for_audit
 
 from wazuh_testing.fim import generate_params, create_file, REGULAR, SYMLINK, callback_detect_event, \
                               LOG_FILE_PATH, change_internal_options
@@ -133,6 +133,8 @@ def test_audit_rules_removed_after_change_link(replaced_target, new_target, file
     # Change the target of the symlink and expect events while there's no syscheck scan
 
     modify_symlink(new_target, symlink_path)
+
+    wait_for_audit(True, wazuh_log_monitor)
     rules_paths = get_reloaded_rules(wazuh_log_monitor)
 
     create_file(REGULAR, new_target, file_name)

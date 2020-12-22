@@ -95,8 +95,8 @@ def test_symbolic_delete_target(tags_to_apply, main_folder, aux_folder, get_conf
         wazuh_log_monitor.start(timeout=RELOAD_RULES_INTERVAL, callback=callback_audit_reloading_rules,
                                 error_message='Did not receive expected "Reloading Audit rules" event')
         wazuh_log_monitor.start(timeout=RELOAD_RULES_INTERVAL, callback=callback_audit_reloaded_rule,
-                                error_message='Did not receive expected "Reloaded audit rule for monitoring directory: '
-                                              '\'{main_folder}\'" event')
+                                error_message='Did not receive expected "Already added audit rule... '
+                                '\'{main_folder}\'" event')
     else:
         # If syscheck is monitoring with whodata, wait for audit to reload rules
         wait_for_audit(whodata, wazuh_log_monitor)

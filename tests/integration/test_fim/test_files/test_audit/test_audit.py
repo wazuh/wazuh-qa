@@ -103,7 +103,7 @@ def test_readded_rules(tags_to_apply, get_configuration,
                                               f'command {command}')
 
         events = wazuh_log_monitor.start(timeout=10,
-                                         callback=callback_audit_reloaded_rule,
+                                         callback=callback_audit_added_rule,
                                          error_message='Did not receive expected "reload" event with the rule '
                                                        'modification').result()
 
