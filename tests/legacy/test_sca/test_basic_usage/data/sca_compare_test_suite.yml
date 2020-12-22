@@ -15,7 +15,7 @@ policy:
 # Pass = 6
 # Fail = 1
 # Invalid = 7
-# Total checks = 13
+# Total checks = 14
 
 
 checks:

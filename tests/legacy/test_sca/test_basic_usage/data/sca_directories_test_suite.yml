@@ -12,10 +12,10 @@ policy:
   name: Test suite for directories rules
   description: This document includes directories rules for testing purposes with the syntax rule of Wazuh v3.10.0
 ############### Expected results
-# Passed = 8
-# Failed = 8
-# Invalid = 2
-# Total checks = 18
+# Passed = 12
+# Failed = 9
+# Invalid = 4
+# Total checks = 25
 # Directory checks
 checks:
 #################################
