@@ -33,6 +33,7 @@ def configure_environment(host_manager):
     host_manager.clear_file(host='wazuh-agent2', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
 
 
+@pytest.mark.skip(reason='Development in progress: https://github.com/wazuh/wazuh/issues/4387')
 def test_agent_key_polling(inventory_path):
     """Check that the agent key polling cycle works correctly. To do this, we use the messages and the hosts defined
     in data/messages.yml and the hosts inventory.
@@ -42,7 +43,6 @@ def test_agent_key_polling(inventory_path):
     inventory_path : str
         Path to the Ansible hosts inventory
     """
-    pytest.xfail("Development in progress: https://github.com/wazuh/wazuh/issues/4387")
     actual_path = os.path.dirname(os.path.abspath(__file__))
     host_manager = HostManager(inventory_path=inventory_path)
     configure_environment(host_manager)
