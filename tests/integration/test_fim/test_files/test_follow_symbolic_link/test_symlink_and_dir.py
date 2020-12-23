@@ -13,7 +13,7 @@ from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
-from test_fim.test_follow_symbolic_link.common import wait_for_symlink_check, wait_for_audit, symlink_interval, \
+from test_fim.test_files.test_follow_symbolic_link.common import wait_for_symlink_check, wait_for_audit, symlink_interval, \
     modify_symlink
 
 
