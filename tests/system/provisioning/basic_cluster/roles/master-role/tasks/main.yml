@@ -64,7 +64,7 @@
     backrefs: yes
 
 - name: Stop Wazuh
-  command: /var/ossec/bin/ossec-control stop
+  command: /var/ossec/bin/wazuh-control stop
 
 - name: Remove client.keys
   file:
@@ -92,4 +92,4 @@
     create: yes
 
 - name: Start Wazuh
-  command: /var/ossec/bin/ossec-control restart
+  command: /var/ossec/bin/wazuh-control restart
