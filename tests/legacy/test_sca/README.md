@@ -63,7 +63,7 @@ sca: WARNING: Found duplicated check ID: 200100. First appearance at policy 'sca
 sca: WARNING: Error found while validating policy file: '/var/ossec/ruleset/sca/sca_repeated_global_ids_1.yml'. Skipping it.
 ```
 
-After all the scans finish, the results can be checked in the Master with this API request
+After all the scans finish, the results can be checked in the manager with this API request
 
 ```
 curl -k -X GET "https://localhost:55000/sca/001?pretty=true" -H "Authorization: Bearer $TOKEN"
