@@ -141,13 +141,19 @@ Finally, copy your `wazuh-qa` repository within your testing environment and you
 
 Our newest integration tests are located in `wazuh-qa/tests/integration/`. They are organized by capabilities:
 
+- _test_agentd_
 - _test_analysisd_
+- _test_api_
+- _test_authd_
 - _test_cluster_
 - _test_fim_
 - _test_gcloud_
-- _test_mitre_
+- _test_logtest_
+- _test_rids_
+- _test_rootcheck_
+- _test_vulnerability_detector_
 - _test_wazuh_db_
-- _test_sca_
+- _test_wpk_
 
 Every group will have the following structure:
 
@@ -367,7 +373,7 @@ python3 -m pytest [options] [file_or_dir] [file_or_dir] [...]
 is not met before the given time lapse. Some tests make use of this value and other has other fixed timeout that cannot be
 modified.
 - `--fim_mode`: Specify the mode of execution of the FIM tests. (ex. --fim_mode="scheduled"). To run the test in realtime and whodata the option must be specified twice: --fim_mode="realtime" --fim_mode="whodata". If the option is not specified, the test will run using scheduled, whodata and realtime.
-- `--wpk_version`: Specify the WPK package version used to upgrade on WPK tests. Required. (ex. --wpk_version=v4.2.0).
+- `--wpk_version`: Specify the WPK package version used to upgrade on WPK tests. (ex. --wpk_version=v4.2.0). Note: This field is required to execute any WPK test and the WPK package must be previously created in the [repository](packages-dev.wazuh.com/trash/wpk/).
 
 _Use `-h` to see the rest or check its [documentation](https://docs.pytest.org/en/latest/usage.html)._
 
