@@ -37,6 +37,7 @@ UPGRADE_RESULT_PATH = os.path.join(WAZUH_PATH, upgrade_result_folder, 'upgrade_r
 CRYPTO = "aes"
 SERVER_ADDRESS = 'localhost'
 PROTOCOL = "tcp"
+
 if not global_parameters.wpk_version:
     raise Exception("The WPK package version must be defined by parameter. See README.md")
 version_to_upgrade = global_parameters.wpk_version[0]

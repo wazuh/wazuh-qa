@@ -12,13 +12,16 @@ import threading
 import time
 import hashlib
 import requests
+import platform
 
+from configobj import ConfigObj
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.agent_simulator import Sender, Injector
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing import global_parameters
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
@@ -26,7 +29,6 @@ UPGRADE_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'upgrade')
 TASK_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'task')
 UPGRADE_PATH = os.path.join(WAZUH_PATH, 'var', 'upgrade')
 SERVER_ADDRESS = 'localhost'
-MANAGER_VERSION = 'v4.1.0'
 WPK_REPOSITORY_4x = 'packages-dev.wazuh.com/trash/wpk/'
 WPK_REPOSITORY_3x = 'packages.wazuh.com/wpk/'
 CRYPTO = "aes"
@@ -34,6 +36,21 @@ CHUNK_SIZE = 16384
 TASK_TIMEOUT = '15m'
 global valid_sha1_list
 valid_sha1_list = {}
+
+if not global_parameters.wpk_version:
+    raise Exception("The WPK package version must be defined by parameter. See README.md")
+version_to_upgrade = global_parameters.wpk_version[0]
+ver_split = version_to_upgrade.replace("v", "").split(".")
+agent_sim_version = "{}.{}".format(ver_split[0],ver_split[1])
+
+def get_current_version():
+    if platform.system() == 'Linux':
+        config_file_path = os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')
+        _config = ConfigObj(config_file_path)
+        return _config['VERSION']
+    return None
+
+MANAGER_VERSION = get_current_version()
 
 cases = [
     # 0. Single Agent - success
@@ -193,7 +210,7 @@ cases = [
             'upgrade_script_result': [0],
             'status': ['Error'],
             'upgrade_notification': [False],
-            'message_params': {'version': 'v4.1.0', 'force_upgrade': False},
+            'message_params': {'version': MANAGER_VERSION, 'force_upgrade': False},
             'error_msg': ['The repository is not reachable'],
             'expected_response': 'Success'
         }
@@ -866,7 +883,7 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
                                 metadata['upgrade_notification'][index],
                                 metadata['upgrade_script_result'][index],
                                 stage_disconnect=metadata['stage_disconnect'][index],
-                                version='4.1' if metadata['agents_os'][index] == 'debian8' else None)
+                                version=agent_sim_version if metadata['agents_os'][index] == 'debian8' else None)
         injector = Injector(sender, agent)
         injectors.append(injector)
         injector.run()
