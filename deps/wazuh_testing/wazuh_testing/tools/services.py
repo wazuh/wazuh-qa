@@ -112,7 +112,7 @@ def control_service(action, daemon=None, debug_mode=False):
     else:  # Default Unix
         if daemon is None:
             if sys.platform == 'darwin' or sys.platform == 'sunos5':
-                result = subprocess.run([f'{WAZUH_PATH}/bin/ossec-control', action]).returncode
+                result = subprocess.run([f'{WAZUH_PATH}/bin/wazuh-control', action]).returncode
             else:
                 result = subprocess.run(['service', WAZUH_SERVICE, action]).returncode
             action == 'stop' and delete_sockets()

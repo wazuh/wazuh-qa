@@ -34,7 +34,7 @@ assignees: ''
 - [ ] Make the manager fails when starting by setting a duplicated rule ID, as well as other invalid fields.
 - [ ] Decode static and dynamic fields and use them into a rule.
 - [ ] Trigger a rule depending on a CDB list.
-- [ ] Trigger an alert by using `ossec-logtest`.
+- [ ] Trigger an alert by using `wazuh-logtest`.
 
 https://documentation.wazuh.com/current/user-manual/ruleset/ruleset-xml-syntax/rules.html
 
