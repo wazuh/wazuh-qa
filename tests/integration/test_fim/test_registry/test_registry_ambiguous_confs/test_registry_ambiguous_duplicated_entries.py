@@ -26,13 +26,20 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=2)]
 key = "HKEY_LOCAL_MACHINE"
 subkey_1 = "SOFTWARE\\test_key1"
 subkey_2 = "SOFTWARE\\test_key2"
+subkey_3 = "SOFTWARE\\test_key3"
+subkey_4 = "SOFTWARE\\test_key4"
 
 test_regs = [os.path.join(key, subkey_1),
-             os.path.join(key, subkey_2)
+             os.path.join(key, subkey_2),
+             os.path.join(key, subkey_3),
+             os.path.join(key, subkey_4)
              ]
+
+registry_list = "{},{},{},{}".format(test_regs[0], test_regs[1], test_regs[2], test_regs[3])
 
 conf_params = {'WINDOWS_REGISTRY_1': test_regs[0],
                'WINDOWS_REGISTRY_2': test_regs[1],
+               'WINDOWS_REGISTRY_LIST': registry_list,
                'RESTRICT_1': "overwritten_restrict$",
                'RESTRICT_2': "restrict_test_|test_key"
                }
@@ -77,6 +84,11 @@ def get_configuration(request):
     (subkey_1, KEY_WOW64_64KEY, ['restrict_test_key'], ['restrict_test_value'], checkers_key_1, {'complex_entries'}),
     (subkey_2, KEY_WOW64_64KEY, ['random_key'], ['random_value'], checkers_key_2, {'complex_entries'}),
     (subkey_2, KEY_WOW64_32KEY, ['random_key'], ['random_value'], checkers_key_2, {'complex_entries'}),
+    (subkey_1, KEY_WOW64_64KEY, ['random_key'], ['test_value'], key_all_attrs, {'single_registry_and_list'}),
+    (subkey_2, KEY_WOW64_64KEY, ['random_key'], ['test_value'], key_all_attrs, {'single_registry_and_list'}),
+    (subkey_3, KEY_WOW64_64KEY, ['random_key'], ['test_value'], key_all_attrs, {'single_registry_and_list'}),
+    (subkey_4, KEY_WOW64_64KEY, ['random_key'], ['test_value'], key_all_attrs, {'single_registry_and_list'}),
+
 ])
 def test_duplicate_entries(key, subkey, arch, key_list, value_list, checkers, tags_to_apply,
                            get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
