@@ -3,10 +3,11 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
 from time import sleep
+import subprocess
 
 import pytest
 
-pytestmark = [pytest.mark.linux, pytest.mark.sunos5, pytest.mark.darwin, pytest.mark.tier(level=1)]
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
 from test_fim.test_files.test_follow_symbolic_link.common import configurations_path, testdir1, \
     modify_symlink, testdir_link, testdir_target, testdir_not_target, \
@@ -17,7 +18,6 @@ from wazuh_testing.fim import generate_params, create_file, REGULAR, SYMLINK, ca
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing import global_parameters
-import re
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
@@ -40,44 +40,6 @@ conf_params, conf_metadata = generate_params(extra_params=param_dir, modes=['who
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
 # Functions
-
-
-def callback_get_audit_reload_paths(line):
-    """
-    Callback that gets the path of the reloaded rules and the number of rules that has been reloaded
-    """
-    match = re.match(r'.*Audit rule loaded: -w (.+) -p', line)
-    if match:
-        return match.group(1)
-
-    match = re.match(r'.*Audit rules reloaded. Rules loaded: (.+)', line)
-    if match:
-        return int(match.group(1))
-
-    return None
-
-
-def get_reloaded_rules(monitor, sleep_time=30):
-    """
-    Functions that gets the path of all the rules that has been reloaded.
-    Parameters
-    ----------
-    monitor: FileMonitor
-        FileMonitor object to monitor the Wazuh log
-    sleep_time: int
-        Time to sleep before looking for the logs. Defaults to 30 seconds in the wazuh code.
-    """
-    sleep(sleep_time)
-    ret = None
-    path_list = list()
-
-    while not isinstance(ret, int):
-        ret = monitor.start(timeout=global_parameters.default_timeout, callback=callback_get_audit_reload_paths,
-                            error_message='Did not receive expected "Audit rule loaded: -w ... -p" event').result()
-        if isinstance(ret, str):
-            path_list.append(ret)
-
-    return path_list
 
 
 def extra_configuration_before_yield():
@@ -135,8 +97,7 @@ def test_audit_rules_removed_after_change_link(replaced_target, new_target, file
     modify_symlink(new_target, symlink_path)
 
     wait_for_audit(True, wazuh_log_monitor)
-    rules_paths = get_reloaded_rules(wazuh_log_monitor)
-
+    rules_paths = str(subprocess.check_output(['auditctl', '-l']))
     create_file(REGULAR, new_target, file_name)
     ev = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                  error_message='Did not receive expected "Sending FIM event: ..." event').result()
