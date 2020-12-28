@@ -76,7 +76,6 @@ def get_remote_configuration(component_name, config):
     socket_path = os.path.join(WAZUH_PATH, 'queue', 'ossec')
     dest_socket = os.path.join(socket_path, component_name)
     command = f"getconfig {config}"
-    host_type = 'agent' if 'agent' in WAZUH_SERVICE else 'server'
 
     # Socket connection
     s = SocketController(dest_socket)
