@@ -981,7 +981,7 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
     if metadata.get('checks') and ('wpk_name' in metadata.get('checks')):
         # Checking version in logs
         try:
-            log_monitor.start(timeout=120, callback=wait_wpk_custom)
+            log_monitor.start(timeout=180, callback=wait_wpk_custom)
         except TimeoutError as err:
             raise AssertionError("Custom wpk log tooks too much!")
 
