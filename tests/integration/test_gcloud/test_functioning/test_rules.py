@@ -84,10 +84,13 @@ def test_rules(get_configuration, configure_environment,
     rules_id = []
     file_ind = 0
 
-    for number in range(65004, 65037):
+    for number in range(65005, 65011):
         rules_id.append(number)
 
-    for number in range(65039, 65045):
+    for number in range(65012, 65039):
+        rules_id.append(number)
+
+    for number in range(65041, 65047):
         rules_id.append(number)
 
     events_file = open(file_path, 'r')
