@@ -626,11 +626,11 @@ class GeneratorFIM:
         return attributes
 
     def formatMessage(self, message):
-        if self.agent_version == "3.12":
+        if float(self.agent_version) >= 3.12:
             return '{0}:[{1}] ({2}) any->syscheck:{3}' \
                     .format(self.SYSCHECK_MQ, self.agent_id,
                             self.agent_name, message)
-        if self.agent_version == "3.11":
+        else:
             # If first time generating. Send control message to simulate
             # end of FIM baseline.
             if self.baseline_completed == 0:
@@ -641,7 +641,7 @@ class GeneratorFIM:
                                         message)
 
     def generateMessage(self):
-        if self.agent_version == "3.12":
+        if float(self.agent_version) >= 3.12:
             if self.event_type == "added":
                 timestamp = int(time())
                 self.generateAttributes()
@@ -672,7 +672,7 @@ class GeneratorFIM:
 
             message = json.dumps({"type": "event", "data": data})
 
-        if self.agent_version == "3.11":
+        else:
             self.generateAttributes()
             message = '{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8}:{9} {10}'.format(
                    self._size, self._mode, self._uid, self._gid, self._md5,
@@ -884,7 +884,7 @@ class InjectorThread (threading.Thread):
 
 
 def create_agents(agents_number, manager_address, cypher, fim_eps=None,
-                  authd_password=None, os=None):
+                  authd_password=None, os=None, version=None):
     global agent_count
     # Read client.keys and create virtual agents
     agents = []
@@ -893,11 +893,16 @@ def create_agents(agents_number, manager_address, cypher, fim_eps=None,
             agent_os = os[agent]
         else:
             agent_os = None
+        if version is not None:
+            agent_version = version[agent]
+        else:
+            agent_version = None
+
         if authd_password is not None:
             agents.append(Agent(manager_address, cypher, fim_eps=fim_eps,
-                                authd_password=authd_password, os=agent_os))
+                                authd_password=authd_password, os=agent_os, version=agent_version))
         else:
             agents.append(Agent(manager_address, cypher, fim_eps=fim_eps,
-                                os=agent_os))
+                                os=agent_os, version=agent_version))
         agent_count = agent_count + 1
     return agents

@@ -908,8 +908,7 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
                                 metadata['upgrade_exec_result'][index],
                                 metadata['upgrade_notification'][index],
                                 metadata['upgrade_script_result'][index],
-                                stage_disconnect=metadata['stage_disconnect'][index],
-                                version=metadata['agents_version'][index])
+                                stage_disconnect=metadata['stage_disconnect'][index])
         injector = Injector(sender, agent)
         injectors.append(injector)
         injector.run()
