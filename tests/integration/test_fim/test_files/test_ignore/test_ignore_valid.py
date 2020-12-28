@@ -77,7 +77,8 @@ def get_configuration(request):
     (testdir1, 'mytest', "test", True, {'negation_regex'}),
     (testdir1, 'othername', "test", False, {'negation_regex'}),
     (testdir1, 'file1', "test", False, {'incomplete_regex'}),
-    (testdir1_ignore_folder, 'file2', "test", False, {'incomplete_regex'})
+    (testdir1_ignore_folder, 'file2', "test", False, {'incomplete_regex'}),
+    (testdir1, 'file1', "test", False, {'ignore_disk'})
 ])
 def test_ignore_subdirectory(folder, filename, content, triggers_event,
                              tags_to_apply, get_configuration,
