@@ -1064,3 +1064,5 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
 
     for injector in injectors:
         injector.stop_receive()
+
+    time.sleep(3) # Wait for agents threads to stop
