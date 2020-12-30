@@ -78,10 +78,3 @@ def extra_configuration_before_yield():
     create_file(SYMLINK, symlinkdir, 'symlink', target=os.path.join(testdir1, 'regular1'))
     # Symlink pointing to /testdir_target/
     create_file(SYMLINK, symlinkdir, 'symlink2', target=testdir_target)
-    # Set symlink_scan_interval to a given value
-    change_internal_options(param='syscheck.symlink_scan_interval', value=symlink_interval)
-
-
-def extra_configuration_after_yield():
-    """Set symlink_scan_interval to default value"""
-    change_internal_options(param='syscheck.symlink_scan_interval', value=600)

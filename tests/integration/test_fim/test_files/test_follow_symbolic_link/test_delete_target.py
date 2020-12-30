@@ -9,7 +9,7 @@ from test_fim.test_files.test_follow_symbolic_link.common import configurations_
     wait_for_symlink_check, wait_for_audit, testdir_target, testdir_not_target, delete_f, symlink_interval
 # noinspection PyUnresolvedReferences
 from test_fim.test_files.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
-    extra_configuration_after_yield
+    symlink_interval
 
 from wazuh_testing import logger
 from wazuh_testing.fim import generate_params, create_file, REGULAR, callback_detect_event, \
@@ -24,7 +24,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.sunos5, pytest.mark.darwin, pytest.
 
 # configurations
 
-conf_params, conf_metadata = generate_params(extra_params={'FOLLOW_MODE': 'yes'})
+conf_params, conf_metadata = generate_params(extra_params={'FOLLOW_MODE': 'yes', 'SYM_INTERVAL': symlink_interval})
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=conf_params,
                                            metadata=conf_metadata
