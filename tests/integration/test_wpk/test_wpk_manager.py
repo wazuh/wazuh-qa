@@ -12,13 +12,16 @@ import threading
 import time
 import hashlib
 import requests
+import platform
 
+from configobj import ConfigObj
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.agent_simulator import Sender, Injector
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing import global_parameters
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
@@ -26,7 +29,6 @@ UPGRADE_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'upgrade')
 TASK_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'task')
 UPGRADE_PATH = os.path.join(WAZUH_PATH, 'var', 'upgrade')
 SERVER_ADDRESS = 'localhost'
-MANAGER_VERSION = 'v4.1.0'
 WPK_REPOSITORY_4x = 'packages-dev.wazuh.com/trash/wpk/'
 WPK_REPOSITORY_3x = 'packages.wazuh.com/wpk/'
 CRYPTO = "aes"
@@ -34,6 +36,19 @@ CHUNK_SIZE = 16384
 TASK_TIMEOUT = '15m'
 global valid_sha1_list
 valid_sha1_list = {}
+
+if not global_parameters.wpk_version:
+    raise Exception("The WPK package version must be defined by parameter. See README.md")
+version_to_upgrade = global_parameters.wpk_version[0]
+
+def get_current_version():
+    if platform.system() == 'Linux':
+        config_file_path = os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')
+        _config = ConfigObj(config_file_path)
+        return _config['VERSION']
+    return None
+
+MANAGER_VERSION = get_current_version()
 
 cases = [
     # 0. Single Agent - success
@@ -49,6 +64,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'stage_disconnect': [None],
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
@@ -71,6 +87,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'stage_disconnect': [None],
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
@@ -94,6 +111,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'stage_disconnect': [None],
             'sha_list': ['INVALID'],
             'upgrade_exec_result': ['0'],
@@ -117,6 +135,7 @@ cases = [
             'agents_number': 3,
             'protocol': 'tcp',
             'agents_os': ['debian7', 'ubuntu12.04', 'debian10'],
+            'agents_version': ['v3.12.0','v3.12.0','v3.12.0'],
             'stage_disconnect': [None, None, None],
             'sha_list': ['VALIDSHA1', 'INVALIDSHA', 'VALIDSHA1'],
             'upgrade_exec_result': ['0', '0', '0'],
@@ -140,6 +159,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'stage_disconnect': [None],
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
@@ -163,6 +183,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'stage_disconnect': [None],
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
@@ -187,13 +208,14 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'stage_disconnect': [None],
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
             'status': ['Error'],
             'upgrade_notification': [False],
-            'message_params': {'version': 'v4.1.0', 'force_upgrade': False},
+            'message_params': {'version': MANAGER_VERSION, 'force_upgrade': False},
             'error_msg': ['The repository is not reachable'],
             'expected_response': 'Success'
         }
@@ -211,6 +233,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['mojave'],
+            'agents_version': ['v3.11.0'],
             'stage_disconnect': [None],
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
@@ -233,6 +256,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian8'],
+            'agents_version': [version_to_upgrade],
             'stage_disconnect': [None],
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
@@ -255,6 +279,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'stage_disconnect': [None],
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
@@ -278,6 +303,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian8'],
+            'agents_version': [version_to_upgrade],
             'stage_disconnect': [None],
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
@@ -300,7 +326,8 @@ cases = [
             'wpk_repository': WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
-            'agents_os': ['debian8'],  # debian8 have v4.1.0 agent version
+            'agents_os': ['debian8'],
+            'agents_version': [version_to_upgrade],
             'stage_disconnect': [None],
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
@@ -324,6 +351,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'stage_disconnect': [None],
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
@@ -348,6 +376,7 @@ cases = [
             'protocol': 'tcp',
             'stage_disconnect': [None],
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
@@ -370,6 +399,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'stage_disconnect': [None],
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
@@ -394,6 +424,7 @@ cases = [
             'protocol': 'tcp',
             'stage_disconnect': ['open'],
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
@@ -417,6 +448,7 @@ cases = [
             'protocol': 'tcp',
             'stage_disconnect': ['write'],
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
@@ -440,6 +472,7 @@ cases = [
             'protocol': 'tcp',
             'stage_disconnect': ['close'],
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
@@ -463,6 +496,7 @@ cases = [
             'protocol': 'tcp',
             'stage_disconnect': ['lock_restart'],
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
@@ -486,6 +520,7 @@ cases = [
             'protocol': 'tcp',
             'stage_disconnect': ['sha1'],
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
@@ -509,6 +544,7 @@ cases = [
             'protocol': 'tcp',
             'stage_disconnect': ['upgrade'],
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
@@ -531,6 +567,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'stage_disconnect': [None],
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
@@ -555,6 +592,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'stage_disconnect': [None],
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
@@ -580,6 +618,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'stage_disconnect': [None],
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
@@ -605,6 +644,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'stage_disconnect': [None],
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
@@ -631,6 +671,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'stage_disconnect': [None],
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
@@ -655,6 +696,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'stage_disconnect': [None],
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
@@ -678,6 +720,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'agents_version': ['v3.12.0'],
             'stage_disconnect': [None],
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
@@ -865,8 +908,7 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
                                 metadata['upgrade_exec_result'][index],
                                 metadata['upgrade_notification'][index],
                                 metadata['upgrade_script_result'][index],
-                                stage_disconnect=metadata['stage_disconnect'][index],
-                                version='4.1' if metadata['agents_os'][index] == 'debian8' else None)
+                                stage_disconnect=metadata['stage_disconnect'][index])
         injector = Injector(sender, agent)
         injectors.append(injector)
         injector.run()
@@ -939,7 +981,7 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
     if metadata.get('checks') and ('wpk_name' in metadata.get('checks')):
         # Checking version in logs
         try:
-            log_monitor.start(timeout=120, callback=wait_wpk_custom)
+            log_monitor.start(timeout=180, callback=wait_wpk_custom)
         except TimeoutError as err:
             raise AssertionError("Custom wpk log tooks too much!")
 
@@ -1022,3 +1064,5 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
 
     for injector in injectors:
         injector.stop_receive()
+
+    time.sleep(3) # Wait for agents threads to stop
