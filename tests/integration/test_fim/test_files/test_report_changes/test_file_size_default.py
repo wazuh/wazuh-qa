@@ -10,7 +10,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_file_size_limit_reached, generate_params, create_file, \
     check_time_travel, callback_detect_event, modify_file_content
 from test_fim.test_files.test_report_changes.common import generate_string, translate_size, make_diff_file_path, \
-    disable_file_max_size, restore_file_max_size, make_diff_file_path, disable_rt_delay, restore_rt_delay
+     make_diff_file_path, default_file_max_size
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -35,6 +35,8 @@ testdir1 = test_directories[0]
 
 conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': 'yes'},
                                                            'TEST_DIRECTORIES': directory_str,
+                                                           'RT_DELAY': 1000,
+                                                           'FILE_MAX_SIZE': default_file_max_size,
                                                            'MODULE_NAME': __name__})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
@@ -46,22 +48,6 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
-
-
-# Functions
-
-def extra_configuration_before_yield():
-    """
-    Disable syscheck.rt_delay internal option
-    """
-    disable_rt_delay()
-
-
-def extra_configuration_after_yield():
-    """
-    Restore syscheck.rt_delay internal option
-    """
-    restore_rt_delay()
 
 
 # Tests

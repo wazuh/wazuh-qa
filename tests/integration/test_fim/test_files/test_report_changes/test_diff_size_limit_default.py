@@ -11,6 +11,7 @@ from wazuh_testing.fim import LOG_FILE_PATH, callback_diff_size_limit_value, gen
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+from test_fim.test_files.test_report_changes.common import default_rt_delay, default_file_max_size
 
 
 # Marks
@@ -33,6 +34,8 @@ DEFAULT_SIZE = 50 * 1024
 
 conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': 'yes'},
                                                            'TEST_DIRECTORIES': directory_str,
+                                                           'RT_DELAY': default_rt_delay,
+                                                           'FILE_MAX_SIZE': default_file_max_size,
                                                            'MODULE_NAME': __name__})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)

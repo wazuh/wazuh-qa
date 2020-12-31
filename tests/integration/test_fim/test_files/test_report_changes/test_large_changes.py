@@ -13,7 +13,7 @@ import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, REGULAR, create_file, \
     generate_params, check_time_travel
-from test_fim.test_files.test_report_changes.common import generate_string
+from test_fim.test_files.test_report_changes.common import generate_string, default_rt_delay, default_file_max_size
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX, WAZUH_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -42,6 +42,8 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 
 conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': 'yes'},
                                                            'TEST_DIRECTORIES': directory_str,
+                                                           'RT_DELAY': default_rt_delay,
+                                                           'FILE_MAX_SIZE': default_file_max_size,
                                                            'NODIFF_FILE': nodiff_file,
                                                            'MODULE_NAME': __name__})
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)

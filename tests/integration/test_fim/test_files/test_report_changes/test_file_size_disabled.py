@@ -9,7 +9,7 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_file_size_limit_reached, generate_params, create_file, \
     check_time_travel
-from test_fim.test_files.test_report_changes.common import generate_string
+from test_fim.test_files.test_report_changes.common import generate_string, default_file_max_size, default_rt_delay
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -38,6 +38,8 @@ conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'r
                                                            'FILE_SIZE_LIMIT': '1KB',
                                                            'DISK_QUOTA_ENABLED': 'yes',
                                                            'DISK_QUOTA_LIMIT': '2KB',
+                                                           'RT_DELAY': default_rt_delay,
+                                                           'FILE_MAX_SIZE': default_file_max_size,
                                                            'MODULE_NAME': __name__})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)

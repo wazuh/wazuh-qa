@@ -9,8 +9,7 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_file_size_limit_reached, generate_params, create_file, \
     check_time_travel, callback_detect_event, modify_file_content, callback_deleted_diff_folder
-from test_fim.test_files.test_report_changes.common import generate_string, translate_size, disable_file_max_size, \
-    restore_file_max_size, make_diff_file_path, disable_rt_delay, restore_rt_delay
+from test_fim.test_files.test_report_changes.common import generate_string, translate_size, make_diff_file_path
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -40,6 +39,8 @@ conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'r
                                                            'FILE_SIZE_ENABLED': 'yes',
                                                            'DISK_QUOTA_ENABLED': 'no',
                                                            'DISK_QUOTA_LIMIT': '2KB',
+                                                           'RT_DELAY': 1000,
+                                                           'FILE_MAX_SIZE': 0,
                                                            'MODULE_NAME': __name__},
                                              apply_to_all=({'FILE_SIZE_LIMIT': file_size_elem}
                                                            for file_size_elem in file_size_values))
@@ -53,24 +54,6 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
-
-
-# Functions
-
-def extra_configuration_before_yield():
-    """
-    Disable syscheck.file_max_size internal option
-    """
-    disable_file_max_size()
-    disable_rt_delay()
-
-
-def extra_configuration_after_yield():
-    """
-    Restore syscheck.file_max_size internal option
-    """
-    restore_file_max_size()
-    restore_rt_delay()
 
 
 # Tests

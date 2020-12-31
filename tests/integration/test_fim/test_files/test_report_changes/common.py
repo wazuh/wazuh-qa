@@ -8,6 +8,9 @@ import re
 
 from wazuh_testing.fim import WAZUH_PATH
 
+default_file_max_size = 1024
+default_rt_delay = 5
+
 
 def generate_string(stringLength=10, character='0'):
     """Generate a string with line breaks.
@@ -61,94 +64,6 @@ def translate_size(configured_size='1KB'):
         translated_size = configured_value * 1024 * 1024 * 1024
 
     return translated_size
-
-
-def disable_file_max_size():
-    """
-    Disable the syscheck.file_max_size option from the internal_options.conf file.
-    """
-    new_content = ''
-
-    if sys.platform == 'win32':
-        internal_options = os.path.join(WAZUH_PATH, 'internal_options.conf')
-    else:
-        internal_options = os.path.join(WAZUH_PATH, 'etc', 'internal_options.conf')
-
-    with open(internal_options, 'r') as f:
-        lines = f.readlines()
-
-        for line in lines:
-            new_line = line.replace('syscheck.file_max_size=1024', 'syscheck.file_max_size=0')
-            new_content += new_line
-
-    with open(internal_options, 'w') as f:
-        f.write(new_content)
-
-
-def restore_file_max_size():
-    """
-    Restore the syscheck.file_max_size option from the internal_options.conf file.
-    """
-    new_content = ''
-
-    if sys.platform == 'win32':
-        internal_options = os.path.join(WAZUH_PATH, 'internal_options.conf')
-    else:
-        internal_options = os.path.join(WAZUH_PATH, 'etc', 'internal_options.conf')
-
-    with open(internal_options, 'r') as f:
-        lines = f.readlines()
-
-        for line in lines:
-            new_line = line.replace('syscheck.file_max_size=0', 'syscheck.file_max_size=1024')
-            new_content += new_line
-
-    with open(internal_options, 'w') as f:
-        f.write(new_content)
-
-
-def disable_rt_delay():
-    """
-    Disable the syscheck.rt_delay option from the internal_options.conf file.
-    """
-    new_content = ''
-
-    if sys.platform == 'win32':
-        internal_options = os.path.join(WAZUH_PATH, 'internal_options.conf')
-    else:
-        internal_options = os.path.join(WAZUH_PATH, 'etc', 'internal_options.conf')
-
-    with open(internal_options, 'r') as f:
-        lines = f.readlines()
-
-        for line in lines:
-            new_line = line.replace('syscheck.rt_delay=5', 'syscheck.rt_delay=1000')
-            new_content += new_line
-
-    with open(internal_options, 'w') as f:
-        f.write(new_content)
-
-
-def restore_rt_delay():
-    """
-    Restore the syscheck.rt_delay option from the internal_options.conf file.
-    """
-    new_content = ''
-
-    if sys.platform == 'win32':
-        internal_options = os.path.join(WAZUH_PATH, 'internal_options.conf')
-    else:
-        internal_options = os.path.join(WAZUH_PATH, 'etc', 'internal_options.conf')
-
-    with open(internal_options, 'r') as f:
-        lines = f.readlines()
-
-        for line in lines:
-            new_line = line.replace('syscheck.rt_delay=1000', 'syscheck.rt_delay=5')
-            new_content += new_line
-
-    with open(internal_options, 'w') as f:
-        f.write(new_content)
 
 
 def make_diff_file_path(folder='/testdir1', filename='regular_0'):
