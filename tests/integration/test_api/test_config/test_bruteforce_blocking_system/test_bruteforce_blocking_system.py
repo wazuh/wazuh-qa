@@ -49,19 +49,8 @@ def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_
         Run test if match with a configuration identifier, skip otherwise.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    block_time = get_configuration['conf']['block_time']
-    max_login_attempts = get_configuration['conf']['max_login_attempts']
-
-    # PUT configuration for api.yaml
-    api_details = get_api_details()
-    data = {
-        'access': {'block_time': block_time, 'max_login_attempts': max_login_attempts, 'max_request_per_minute': 300}}
-    put_response = requests.put(api_details['base_url'] + '/manager/api/config', json=data,
-                                headers=api_details['auth_headers'], verify=False)
-    assert put_response.status_code == 200, f'Expected status code was 200, ' \
-                                            f'but {put_response.status_code} was returned. \nFull response: {put_response.text}'
-
-    control_service('restart')
+    block_time = get_configuration['configuration']['access']['block_time']
+    max_login_attempts = get_configuration['configuration']['access']['max_login_attempts']
 
     # Provoke a block from an unknown IP ('max_login_attempts' attempts with incorrect credentials).
     for _ in range(max_login_attempts):
@@ -77,15 +66,3 @@ def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_
 
     # Request after time expires.
     time.sleep(block_time)  # 300 = default blocking time
-
-    try:
-        api_details = get_api_details()
-    except Exception as e:
-        pytest.fail("No exception was expected when obtaining login token after 'block_time' has expired, but"
-                    f"this was returned: {e}")
-
-    # DELETE configuration for api.yaml
-    delete_response = requests.delete(api_details['base_url'] + '/manager/api/config', json=data,
-                                      headers=api_details['auth_headers'], verify=False)
-    assert delete_response.status_code == 200, f'Expected status code was 200, ' \
-                                               f'but {delete_response.status_code} was returned. \nFull response: {delete_response.text}'
