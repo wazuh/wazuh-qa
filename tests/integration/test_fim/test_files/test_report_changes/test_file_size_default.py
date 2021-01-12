@@ -10,7 +10,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_file_size_limit_reached, generate_params, create_file, \
     check_time_travel, callback_detect_event, modify_file_content
 from test_fim.test_files.test_report_changes.common import generate_string, translate_size, make_diff_file_path, \
-     make_diff_file_path, default_file_max_size
+     default_file_max_size
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor

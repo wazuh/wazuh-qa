@@ -4,8 +4,7 @@ import shutil
 import subprocess
 import sys
 
-from wazuh_testing.fim import callback_audit_loaded_rule, create_file, REGULAR, SYMLINK, callback_symlink_scan_ended, \
-    change_internal_options
+from wazuh_testing.fim import callback_audit_loaded_rule, create_file, REGULAR, SYMLINK, callback_symlink_scan_ended
 from wazuh_testing.tools import PREFIX
 
 # variables
