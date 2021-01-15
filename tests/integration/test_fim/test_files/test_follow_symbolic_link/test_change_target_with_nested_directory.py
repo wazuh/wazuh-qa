@@ -7,7 +7,7 @@ import pytest
 from test_fim.test_files.test_follow_symbolic_link.common import configurations_path, testdir1, \
     modify_symlink, testdir_link, wait_for_symlink_check, wait_for_audit, testdir2
 # noinspection PyUnresolvedReferences
-from test_fim.test_files.test_follow_symbolic_link.common import extra_configuration_before_yield, \
+from test_fim.test_files.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
     extra_configuration_after_yield
 
 from wazuh_testing import logger, global_parameters
@@ -63,7 +63,7 @@ def test_symbolic_change_target_inside_folder(tags_to_apply, previous_target, ne
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     whodata = get_configuration['metadata']['fim_mode'] == 'whodata'
-    file1 = 'regular1'
+    file1 = 'new_file'
     symlink = 'symlink3'
 
     # Check create event
