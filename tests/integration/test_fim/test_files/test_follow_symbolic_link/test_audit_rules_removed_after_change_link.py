@@ -2,22 +2,21 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
-from time import sleep
 import subprocess
 
 import pytest
 
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
-
-from test_fim.test_files.test_follow_symbolic_link.common import configurations_path, testdir1, \
-    modify_symlink, testdir_link, testdir_target, testdir_not_target, \
-    test_directories, wait_for_audit
 
 from wazuh_testing.fim import generate_params, create_file, REGULAR, SYMLINK, callback_detect_event, \
                               LOG_FILE_PATH, change_internal_options
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing import global_parameters
+
+from test_fim.test_files.test_follow_symbolic_link.common import configurations_path, testdir1, \
+    modify_symlink, testdir_not_target, test_directories, wait_for_audit
+
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
