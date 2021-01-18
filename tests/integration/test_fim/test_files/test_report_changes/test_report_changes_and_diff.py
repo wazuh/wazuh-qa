@@ -14,6 +14,7 @@ from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH, regular_file_cud, WAZUH
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+from test_fim.test_files.test_report_changes.common import default_rt_delay, default_file_max_size
 
 # Marks
 
@@ -36,6 +37,8 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': 'yes'},
                                                            'TEST_DIRECTORIES': directory_str,
+                                                           'RT_DELAY': default_rt_delay,
+                                                           'FILE_MAX_SIZE': default_file_max_size,
                                                            'NODIFF_FILE': nodiff_file,
                                                            'MODULE_NAME': __name__})
 

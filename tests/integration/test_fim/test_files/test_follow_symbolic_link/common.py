@@ -4,8 +4,7 @@ import shutil
 import subprocess
 import sys
 
-from wazuh_testing.fim import callback_audit_loaded_rule, create_file, REGULAR, SYMLINK, callback_symlink_scan_ended, \
-    change_internal_options
+from wazuh_testing.fim import callback_audit_loaded_rule, create_file, REGULAR, SYMLINK, callback_symlink_scan_ended
 from wazuh_testing.tools import PREFIX
 
 # variables
@@ -78,10 +77,3 @@ def extra_configuration_before_yield():
     create_file(SYMLINK, symlinkdir, 'symlink', target=os.path.join(testdir1, 'regular1'))
     # Symlink pointing to /testdir_target/
     create_file(SYMLINK, symlinkdir, 'symlink2', target=testdir_target)
-    # Set symlink_scan_interval to a given value
-    change_internal_options(param='syscheck.symlink_scan_interval', value=symlink_interval)
-
-
-def extra_configuration_after_yield():
-    """Set symlink_scan_interval to default value"""
-    change_internal_options(param='syscheck.symlink_scan_interval', value=600)

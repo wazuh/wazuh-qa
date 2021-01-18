@@ -7,6 +7,10 @@
   sections:
   - section: syscheck
     elements:
+    - rt_delay:
+        value: RT_DELAY
+    - file_max_size:
+        value: FILE_MAX_SIZE
     - disabled:
         value: 'no'
     - directories:
@@ -26,6 +30,10 @@
   sections:
   - section: syscheck
     elements:
+    - rt_delay:
+        value: RT_DELAY
+    - file_max_size:
+        value: FILE_MAX_SIZE
     - disabled:
         value: 'no'
     - directories:
@@ -57,6 +65,10 @@
   sections:
   - section: syscheck
     elements:
+    - rt_delay:
+        value: RT_DELAY
+    - file_max_size:
+        value: FILE_MAX_SIZE
     - disabled:
         value: 'no'
     - directories:
@@ -74,6 +86,10 @@
   sections:
   - section: syscheck
     elements:
+    - rt_delay:
+        value: RT_DELAY
+    - file_max_size:
+        value: FILE_MAX_SIZE
     - disabled:
         value: 'no'
     - directories:

@@ -6,7 +6,7 @@ import os
 
 import pytest
 from test_fim.test_files.test_follow_symbolic_link.common import test_directories, testdir_target, testdir1,\
-    extra_configuration_before_yield, extra_configuration_after_yield
+    extra_configuration_before_yield, symlink_interval
 
 from wazuh_testing import logger
 from wazuh_testing.fim import (LOG_FILE_PATH,
@@ -27,7 +27,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-conf_params, conf_metadata = generate_params(extra_params={'FOLLOW_MODE': 'no'})
+conf_params, conf_metadata = generate_params(extra_params={'FOLLOW_MODE': 'no', 'SYM_INTERVAL': symlink_interval})
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=conf_params,
                                            metadata=conf_metadata

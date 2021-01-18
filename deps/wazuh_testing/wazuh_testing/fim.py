@@ -996,41 +996,6 @@ def modify_file(path, name, new_content=None, is_binary=False):
     modify_file_win_attributes(path, name)
 
 
-def change_internal_options(param, value, opt_path=None):
-    """
-    Change the value of a given parameter in local_internal_options.
-
-    Parameters
-    ----------
-    param : str
-        Parameter to change.
-    value : str or int
-        New value.
-    opt_path : str, optional
-        local_internal_options.conf path. Default `None`
-    """
-    if opt_path is None:
-        local_conf_path = os.path.join(WAZUH_PATH, 'local_internal_options.conf') if sys.platform == 'win32' else \
-            os.path.join(WAZUH_PATH, 'etc', 'local_internal_options.conf')
-    else:
-        local_conf_path = opt_path
-
-    add_pattern = True
-    with open(local_conf_path, "r") as sources:
-        lines = sources.readlines()
-
-    with open(local_conf_path, "w") as sources:
-        for line in lines:
-            sources.write(
-                re.sub(f'{param}=[0-9]*', f'{param}={value}', line))
-            if param in line:
-                add_pattern = False
-
-    if add_pattern:
-        with open(local_conf_path, "a") as sources:
-            sources.write(f'\n\n{param}={value}')
-
-
 def change_conf_param(param, value):
     """
     Change the value of a given parameter in ossec.conf.

@@ -9,10 +9,10 @@ import pytest
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_disk_quota_limit_reached, generate_params
-from test_fim.test_files.test_report_changes.common import disable_file_max_size, restore_file_max_size
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+from test_fim.test_files.test_report_changes.common import default_rt_delay
 
 
 # Marks
@@ -50,6 +50,8 @@ conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'r
                                                            'FILE_SIZE_ENABLED': 'no',
                                                            'FILE_SIZE_LIMIT': '10MB',
                                                            'DISK_QUOTA_ENABLED': 'yes',
+                                                           'RT_DELAY': default_rt_delay,
+                                                           'FILE_MAX_SIZE': 0,
                                                            'MODULE_NAME': __name__},
                                              apply_to_all=({'DISK_QUOTA_LIMIT': disk_quota_elem}
                                                            for disk_quota_elem in disk_quota_values))
@@ -63,22 +65,6 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
-
-
-# Functions
-
-def extra_configuration_before_yield():
-    """
-    Disable syscheck.file_max_size internal option
-    """
-    disable_file_max_size()
-
-
-def extra_configuration_after_yield():
-    """
-    Restore syscheck.file_max_size internal option
-    """
-    restore_file_max_size()
 
 
 # Tests

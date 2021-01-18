@@ -9,6 +9,8 @@
     elements:
     - disabled:
         value: 'no'
+    - symlink_scan_interval:
+        value: SYM_INTERVAL
     - directories:
         value: '/testdir_link'
         attributes:
@@ -30,6 +32,8 @@
     elements:
     - disabled:
         value: 'no'
+    - symlink_scan_interval:
+        value: SYM_INTERVAL
     - directories:
         value: '/testdir_link/symlink'
         attributes:
@@ -55,6 +59,8 @@
     elements:
     - disabled:
         value: 'no'
+    - symlink_scan_interval:
+        value: SYM_INTERVAL
     - directories:
         value: '/testdir_link/symlink2'
         attributes:

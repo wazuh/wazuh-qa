@@ -5,10 +5,9 @@ import os
 
 import pytest
 from test_fim.test_files.test_follow_symbolic_link.common import configurations_path, testdir1, \
-    modify_symlink, testdir_link, wait_for_symlink_check, wait_for_audit
+    modify_symlink, testdir_link, wait_for_symlink_check, wait_for_audit, symlink_interval
 # noinspection PyUnresolvedReferences
-from test_fim.test_files.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
-    extra_configuration_after_yield
+from test_fim.test_files.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield
 
 from wazuh_testing import logger
 from wazuh_testing.fim import (generate_params, callback_detect_event,
@@ -24,7 +23,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-conf_params, conf_metadata = generate_params(extra_params={'FOLLOW_MODE': 'yes'})
+conf_params, conf_metadata = generate_params(extra_params={'FOLLOW_MODE': 'yes', 'SYM_INTERVAL': symlink_interval})
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=conf_params,
                                            metadata=conf_metadata
