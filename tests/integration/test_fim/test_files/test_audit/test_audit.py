@@ -130,7 +130,7 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
                                           f'{" ".join(restart_command)}')
 
     events = wazuh_log_monitor.start(timeout=30,
-                                     callback=callback_audit_reloaded_rule,
+                                     callback=callback_audit_added_rule,
                                      accum_results=3,
                                      error_message=f'Did not receive expected "load" event with the command '
                                                    f'{" ".join(restart_command)}').result()
