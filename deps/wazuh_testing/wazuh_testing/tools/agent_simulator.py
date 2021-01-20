@@ -45,9 +45,10 @@ class Agent:
         self.id = id
         self.name = name
         self.key = key
-        self.long_version = version
-        ver_split = version.replace("v","").split(".")
-        self.short_version = '{}.{}'.format(ver_split[0],ver_split[1])
+        if version is not None:
+            self.long_version = version
+            ver_split = version.replace("v","").split(".")
+            self.short_version = f"{'.'.join(ver_split[:2])}"
         self.cypher = cypher
         self.os = os
         self.fim_eps = 1000 if fim_eps is None else fim_eps
@@ -105,10 +106,6 @@ class Agent:
         self.send_upgrade_notification = upgrade_notification
         self.upgrade_script_result = upgrade_script_result
         self.stage_disconnect = stage_disconnect
-        if version:
-            self.long_version = version
-            ver_split = version.replace("v","").split(".")
-            self.short_version = '{}.{}'.format(ver_split[0],ver_split[1])
 
     # Set agent name
     def set_name(self):
@@ -290,7 +287,7 @@ class Agent:
                             self.stage_disconnect == 'clear_upgrade_result':
                 self.stop_receive = 1
             else:
-                if float(self.short_version) < 4.1 or command == 'lock_restart':
+                if self.short_version < "4.1" or command == 'lock_restart':
                     sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} ok '))
                 else:
                     sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} '
@@ -301,7 +298,7 @@ class Agent:
                 if command == 'sha1' and self.stage_disconnect == 'sha1':
                     self.stop_receive = 1
                 else:
-                    if float(self.short_version) < 4.1:
+                    if self.short_version < "4.1":
                         sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} '
                                                           f'ok {self.sha_key}'))
                     else:
@@ -314,7 +311,7 @@ class Agent:
                 if command == 'upgrade' and self.stage_disconnect == 'upgrade':
                     self.stop_receive = 1
                 else:
-                    if float(self.short_version) < 4.1:
+                    if self.short_version < "4.1":
                         sender.sendEvent(self.createEvent(
                                          f'#!-req {message_list[1]} ok '
                                          f'{self.upgrade_exec_result}'))
@@ -626,7 +623,7 @@ class GeneratorFIM:
         return attributes
 
     def formatMessage(self, message):
-        if float(self.agent_version) >= 3.12:
+        if self.agent_version >= "3.12":
             return '{0}:[{1}] ({2}) any->syscheck:{3}' \
                     .format(self.SYSCHECK_MQ, self.agent_id,
                             self.agent_name, message)
@@ -641,7 +638,7 @@ class GeneratorFIM:
                                         message)
 
     def generateMessage(self):
-        if float(self.agent_version) >= 3.12:
+        if self.agent_version >= "3.12":
             if self.event_type == "added":
                 timestamp = int(time())
                 self.generateAttributes()
@@ -893,10 +890,8 @@ def create_agents(agents_number, manager_address, cypher, fim_eps=None,
             agent_os = os[agent]
         else:
             agent_os = None
-        if version is not None:
-            agent_version = version[agent]
-        else:
-            agent_version = None
+
+        agent_version = version[agent] if version is not None else None
 
         if authd_password is not None:
             agents.append(Agent(manager_address, cypher, fim_eps=fim_eps,

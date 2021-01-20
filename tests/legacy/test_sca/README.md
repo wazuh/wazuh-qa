@@ -6,7 +6,7 @@ These tests are not part of the current testing framework for Wazuh, so they hav
 ## Introduction
 ---------------
 
-A brief knowledge of SCA is recommended, the documentation covers it in detail in [How SCA works](https://documentation.wazuh.com/4.0/user-manual/capabilities/sec-config-assessment/how_it_works.html). Also, there is a blog post about [Security Configuration Assessment](https://wazuh.com/blog/security-configuration-assessment/).
+A brief knowledge of SCA is recommended, the documentation covers it in detail in [How SCA works](https://documentation.wazuh.com/4.2/user-manual/capabilities/sec-config-assessment/how_it_works.html). Also, there is a blog post about [Security Configuration Assessment](https://wazuh.com/blog/security-configuration-assessment/).
 
 Basically, the tests inside **data** folder contain different _.yml_ policies that will test the general capabilities of **SCA**. It will be necessary to install a Manager and register an agent. There is more information about this part of the process in the [Installation Guide](https://documentation.wazuh.com/4.0/installation-guide/index.html).
 

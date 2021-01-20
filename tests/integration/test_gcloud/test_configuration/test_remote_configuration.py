@@ -93,8 +93,8 @@ def get_remote_configuration(component_name, config):
     try:
         if rec_msg_ok.startswith('ok'):
             remote_configuration = json.loads(rec_msg)
-       	    for	element	in remote_configuration['wmodules']:
-       	       	if 'gcp-pubsub'	in element:
+            for element in remote_configuration['wmodules']:
+                if 'gcp-pubsub' in element:
                     remote_configuration_gcp = element['gcp-pubsub']
         else:
             s.close()

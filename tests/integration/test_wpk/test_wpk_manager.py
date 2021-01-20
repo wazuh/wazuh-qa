@@ -37,8 +37,8 @@ TASK_TIMEOUT = '15m'
 global valid_sha1_list
 valid_sha1_list = {}
 
-if not global_parameters.wpk_version:
-    raise Exception("The WPK package version must be defined by parameter. See README.md")
+if global_parameters.wpk_version is None:
+    raise ValueError("The WPK package version must be defined by parameter. See README.md")
 version_to_upgrade = global_parameters.wpk_version[0]
 
 def get_current_version():
@@ -46,7 +46,6 @@ def get_current_version():
         config_file_path = os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')
         _config = ConfigObj(config_file_path)
         return _config['VERSION']
-    return None
 
 MANAGER_VERSION = get_current_version()
 
