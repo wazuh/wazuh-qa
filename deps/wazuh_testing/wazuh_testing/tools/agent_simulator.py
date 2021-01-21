@@ -100,7 +100,7 @@ class Agent:
     # Set variables related to wpk simulated responses
     def set_wpk_variables(self, sha=None, upgrade_exec_result=None,
                           upgrade_notification=False, upgrade_script_result=0,
-                          stage_disconnect=None, version=None):
+                          stage_disconnect=None):
         self.sha_key = sha
         self.upgrade_exec_result = upgrade_exec_result
         self.send_upgrade_notification = upgrade_notification
