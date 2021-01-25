@@ -1,9 +1,9 @@
 ---
 # conf 1
 - tags:
-  - max_fps
+  - max_files_per_second
   apply_to_modules:
-  - test_max_fps
+  - test_max_files_per_second
   sections:
   - section: syscheck
     elements:
@@ -13,5 +13,5 @@
         value: TEST_DIRECTORIES
         attributes:
         - check_all: 'yes'
-    - max_fps:
-        value: MAX_FPS
+    - max_files_per_second:
+        value: MAX_FILES_PER_SEC

@@ -1343,7 +1343,7 @@ def callback_value_event(line):
     return None
 
 
-def callback_detect_max_fps(line):
+def callback_detect_max_files_per_second(line):
     msg = r'.*Maximum number of files read per second reached, sleeping\.'
     match = re.match(msg, line)
 
