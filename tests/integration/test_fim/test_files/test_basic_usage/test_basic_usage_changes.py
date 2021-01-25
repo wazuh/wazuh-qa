@@ -26,21 +26,14 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2 = test_directories
-subdir1 = os.path.join(PREFIX, 'testdir3/subdir1')
-subdir2 = os.path.join(PREFIX, 'testdir3/subdir2')
+
 
 # configurations
 
-conf_params = {'TEST_DIRECTORIES': directory_str, 'TEST_WILDCARDS': os.path.join(PREFIX, 'testdir3/*'), 'MODULE_NAME': __name__}
+conf_params = {'TEST_DIRECTORIES': directory_str, 'TEST_WILDCARDS': os.path.join(PREFIX, 'testdir?'),
+               'MODULE_NAME': __name__}
 p, m = generate_params(extra_params=conf_params)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
-
-
-# Extra functions
-
-def extra_configuration_before_yield():
-    os.makedirs(subdir1, exist_ok=True, mode=0o777)
-    os.makedirs(subdir2, exist_ok=True, mode=0o777)
 
 
 # fixtures
@@ -92,8 +85,6 @@ def test_regular_file_changes(folder, name, encoding, checkers, tags_to_apply,
         Syscheck checkers (check_all).
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    if tags_to_apply == {'ossec_conf_wildcards'}:
-        folder = subdir1 if folder == testdir1 else subdir2
     mult = 1 if sys.platform == 'win32' else 2
 
     if encoding is not None:
