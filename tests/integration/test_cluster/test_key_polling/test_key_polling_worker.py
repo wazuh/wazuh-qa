@@ -55,6 +55,7 @@ def get_configuration(request):
 # Tests
 
 
+@pytest.mark.skip(reason='Development in progress: https://github.com/wazuh/wazuh/issues/4387')
 @pytest.mark.parametrize('cmd, counter, payload', [
     (b'run_keypoll', 1, b'{"message": "id:001"}'),
     (b'run_keypoll', 2, b'{"message": "ip:124.0.0.1"}')
@@ -78,7 +79,6 @@ def test_key_polling_worker(cmd, counter, payload, configure_environment, config
     payload : bytes
         Cluster message payload data
     """
-    pytest.xfail("Development in progress: https://github.com/wazuh/wazuh/issues/4387")
     # Build message to send to c-internal.sock in the worker and send it
     message = cluster_msg_build(cmd=cmd, counter=counter, payload=payload, encrypt=False)
     receiver_sockets[0].send(message)

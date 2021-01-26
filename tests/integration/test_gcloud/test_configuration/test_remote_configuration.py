@@ -76,7 +76,6 @@ def get_remote_configuration(component_name, config):
     socket_path = os.path.join(WAZUH_PATH, 'queue', 'ossec')
     dest_socket = os.path.join(socket_path, component_name)
     command = f"getconfig {config}"
-    host_type = 'agent' if 'agent' in WAZUH_SERVICE else 'server'
 
     # Socket connection
     s = SocketController(dest_socket)
@@ -94,13 +93,9 @@ def get_remote_configuration(component_name, config):
     try:
         if rec_msg_ok.startswith('ok'):
             remote_configuration = json.loads(rec_msg)
-            if host_type == 'server':
-                remote_configuration_gcp = remote_configuration['wmodules'][6]['gcp-pubsub']
-            else:
-                if sys.platform == 'darwin':
-                    remote_configuration_gcp = remote_configuration['wmodules'][3]['gcp-pubsub']
-                else:
-                    remote_configuration_gcp = remote_configuration['wmodules'][5]['gcp-pubsub']
+            for element in remote_configuration['wmodules']:
+                if 'gcp-pubsub' in element:
+                    remote_configuration_gcp = element['gcp-pubsub']
         else:
             s.close()
             raise ValueError(rec_msg_ok)

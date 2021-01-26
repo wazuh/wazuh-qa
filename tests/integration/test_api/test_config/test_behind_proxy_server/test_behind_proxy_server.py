@@ -35,6 +35,7 @@ def get_configuration(request):
 
 # Tests
 
+@pytest.mark.xfail(reason='To be deprecated in https://github.com/wazuh/wazuh/issues/7006')
 @pytest.mark.parametrize('tags_to_apply', [
     {'bps_enabled'},
     {'bps_disabled'},

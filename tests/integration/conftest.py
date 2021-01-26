@@ -173,6 +173,14 @@ def pytest_addoption(parser):
         type=str,
         help="run tests using a specific FIM mode"
     )
+    parser.addoption(
+        "--wpk_version",
+        action="append",
+        metavar="wpk_version",
+        default=None,
+        type=str,
+        help="run tests using a specific WPK package version"
+    )
 
 
 def pytest_configure(config):
@@ -217,6 +225,8 @@ def pytest_configure(config):
         mode = ["scheduled", "whodata", "realtime"]
     global_parameters.fim_mode = mode
 
+    # Set WPK package version
+    global_parameters.wpk_version = config.getoption("--wpk_version")  
 
 def pytest_html_results_table_header(cells):
     cells.insert(4, html.th('Tier', class_='sortable tier', col='tier'))

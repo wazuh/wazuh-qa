@@ -19,6 +19,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
+from wazuh_testing import global_parameters
 
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), 
               pytest.mark.agent]
@@ -36,7 +37,10 @@ UPGRADE_RESULT_PATH = os.path.join(WAZUH_PATH, upgrade_result_folder, 'upgrade_r
 CRYPTO = "aes"
 SERVER_ADDRESS = 'localhost'
 PROTOCOL = "tcp"
-version_to_upgrade = 'v4.1.0'
+
+if not global_parameters.wpk_version:
+    raise Exception("The WPK package version must be defined by parameter. See README.md")
+version_to_upgrade = global_parameters.wpk_version[0]
 
 
 # Test will varying according to agent version. This test should be tried
@@ -60,7 +64,8 @@ def get_current_version():
 _agent_version = get_current_version()
 
 error_msg = ''
-if _agent_version == version_to_upgrade:
+ver_split = _agent_version.replace("v", "").split(".")
+if int(ver_split[0])>=4 and int(ver_split[1])>=1:
     error_msg = 'Could not chmod' \
         if platform.system() == 'Linux' else \
         'Error executing command'
@@ -70,7 +75,7 @@ else:
         'err Cannot execute installer'
 
 test_metadata = [
-    # 1. Upgrade from initial_version to v4.1.0
+    # 1. Upgrade from initial_version to new version
     {
         'protocol': PROTOCOL,
         'initial_version': _agent_version,
@@ -140,9 +145,9 @@ if _agent_version == 'v3.13.2':
     }]
 elif _agent_version == version_to_upgrade:
     test_metadata += [{
-        # 5. Simulate a rollback (v4.1.0)
+        # 5. Simulate a rollback (new version)
         'protocol': PROTOCOL,
-        'initial_version': 'v4.1.0',
+        'initial_version': version_to_upgrade,
         'agent_version': version_to_upgrade,
         'use_http': False,
         'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
@@ -210,7 +215,9 @@ def start_agent(request, get_configuration):
                                          mode='CONTROLED_ACK',
                                          start_on_init=False,
                                          client_keys=CLIENT_KEYS_PATH)
-    if _agent_version == 'v4.1.0':
+
+    ver_split = _agent_version.replace("v", "").split(".")
+    if int(ver_split[0])>=4 and int(ver_split[1])>=1:
         remoted_simulator.setWcomMessageVersion('4.1')
     else:
         remoted_simulator.setWcomMessageVersion(None)

@@ -39,13 +39,16 @@ agent_count = 1
 class Agent:
     def __init__(self, manager_address, cypher="aes", os=None,
                  inventory_sample=None, rootcheck_sample= None,
-                 id=None, name=None, key=None, version="3.12",
+                 id=None, name=None, key=None, version="v3.12.0",
                  fim_eps=None, fim_integrity_eps=None,
                  authd_password=None):
         self.id = id
         self.name = name
         self.key = key
-        self.version = version
+        if version is not None:
+            self.long_version = version
+            ver_split = version.replace("v","").split(".")
+            self.short_version = f"{'.'.join(ver_split[:2])}"
         self.cypher = cypher
         self.os = os
         self.fim_eps = 1000 if fim_eps is None else fim_eps
@@ -97,14 +100,12 @@ class Agent:
     # Set variables related to wpk simulated responses
     def set_wpk_variables(self, sha=None, upgrade_exec_result=None,
                           upgrade_notification=False, upgrade_script_result=0,
-                          stage_disconnect=None, version=None):
+                          stage_disconnect=None):
         self.sha_key = sha
         self.upgrade_exec_result = upgrade_exec_result
         self.send_upgrade_notification = upgrade_notification
         self.upgrade_script_result = upgrade_script_result
         self.stage_disconnect = stage_disconnect
-        if version:
-            self.version = version
 
     # Set agent name
     def set_name(self):
@@ -286,7 +287,7 @@ class Agent:
                             self.stage_disconnect == 'clear_upgrade_result':
                 self.stop_receive = 1
             else:
-                if float(self.version) < 4.1 or command == 'lock_restart':
+                if self.short_version < "4.1" or command == 'lock_restart':
                     sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} ok '))
                 else:
                     sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} '
@@ -297,7 +298,7 @@ class Agent:
                 if command == 'sha1' and self.stage_disconnect == 'sha1':
                     self.stop_receive = 1
                 else:
-                    if float(self.version) < 4.1:
+                    if self.short_version < "4.1":
                         sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} '
                                                           f'ok {self.sha_key}'))
                     else:
@@ -310,7 +311,7 @@ class Agent:
                 if command == 'upgrade' and self.stage_disconnect == 'upgrade':
                     self.stop_receive = 1
                 else:
-                    if float(self.version) < 4.1:
+                    if self.short_version < "4.1":
                         sender.sendEvent(self.createEvent(
                                          f'#!-req {message_list[1]} ok '
                                          f'{self.upgrade_exec_result}'))
@@ -353,6 +354,7 @@ class Agent:
                         line = fp.readline()
                     break
                 line = fp.readline()
+        msg = msg.replace("<VERSION>",self.long_version)
         self.keep_alive_msg = self.createEvent(msg)
 
     def initializeModules(self):
@@ -361,10 +363,10 @@ class Agent:
         if self.modules["rootcheck"]["status"] == "enabled":
             self.rootcheck = Rootcheck(self.rootcheck_sample)
         if self.modules["fim"]["status"] == "enabled":
-            self.fim = GeneratorFIM(self.id, self.name, self.version)
+            self.fim = GeneratorFIM(self.id, self.name, self.short_version)
         if self.modules["fim_integrity"]["status"] == "enabled":
             self.fim_integrity = GeneratorIntegrityFIM(self.id, self.name,
-                                                       self.version)
+                                                       self.short_version)
 
 
 class Inventory:
@@ -621,11 +623,11 @@ class GeneratorFIM:
         return attributes
 
     def formatMessage(self, message):
-        if self.agent_version == "3.12":
+        if self.agent_version >= "3.12":
             return '{0}:[{1}] ({2}) any->syscheck:{3}' \
                     .format(self.SYSCHECK_MQ, self.agent_id,
                             self.agent_name, message)
-        if self.agent_version == "3.11":
+        else:
             # If first time generating. Send control message to simulate
             # end of FIM baseline.
             if self.baseline_completed == 0:
@@ -636,7 +638,7 @@ class GeneratorFIM:
                                         message)
 
     def generateMessage(self):
-        if self.agent_version == "3.12":
+        if self.agent_version >= "3.12":
             if self.event_type == "added":
                 timestamp = int(time())
                 self.generateAttributes()
@@ -667,7 +669,7 @@ class GeneratorFIM:
 
             message = json.dumps({"type": "event", "data": data})
 
-        if self.agent_version == "3.11":
+        else:
             self.generateAttributes()
             message = '{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8}:{9} {10}'.format(
                    self._size, self._mode, self._uid, self._gid, self._md5,
@@ -879,7 +881,7 @@ class InjectorThread (threading.Thread):
 
 
 def create_agents(agents_number, manager_address, cypher, fim_eps=None,
-                  authd_password=None, os=None):
+                  authd_password=None, os=None, version=None):
     global agent_count
     # Read client.keys and create virtual agents
     agents = []
@@ -888,11 +890,14 @@ def create_agents(agents_number, manager_address, cypher, fim_eps=None,
             agent_os = os[agent]
         else:
             agent_os = None
+
+        agent_version = version[agent] if version is not None else None
+
         if authd_password is not None:
             agents.append(Agent(manager_address, cypher, fim_eps=fim_eps,
-                                authd_password=authd_password, os=agent_os))
+                                authd_password=authd_password, os=agent_os, version=agent_version))
         else:
             agents.append(Agent(manager_address, cypher, fim_eps=fim_eps,
-                                os=agent_os))
+                                os=agent_os, version=agent_version))
         agent_count = agent_count + 1
     return agents
