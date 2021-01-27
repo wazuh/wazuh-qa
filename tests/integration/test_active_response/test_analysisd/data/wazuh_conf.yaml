@@ -11,6 +11,10 @@
         value: AR_NAME
     - executable:
         value: AR_NAME
+    - extra_args:
+        value: EXTRA_ARGS
+    - timeout_allowed:
+        value: TIMEOUT_ALLOWED
   - section: active-response
     attributes:
       - name: 'active-response'
@@ -20,6 +24,8 @@
     - command:
         value: AR_NAME
     - location:
-        value: 'local'
+        value: AR_LOCATION
     - rules_id:
         value: RULE_ID
+    - timeout:
+        value: TIMEOUT

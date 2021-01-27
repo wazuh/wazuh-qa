@@ -27,40 +27,100 @@ RULE_ID = '5715'
 LOG_LOCATION = 'any->logcollector'
 SRC_IP = '172.16.5.15'
 DST_USR = 'root'
+ARG1 = '--argv1'
+ARG2 = '--argv2'
+AR_TIMEOUT = 10
 LOG_MESSAGE = 'Jan 27 11:52:25 vm-test sshd[32046]: Accepted password for ' + DST_USR + ' from ' + SRC_IP + ' port 62300 ssh2'
 
 cases = [
+    # Case 1: Local AR, new agent (version 4.2)
     {
         'params': {
+            'AR_LOCATION': 'local',
             'AR_NAME': AR_NAME,
-            'RULE_ID': RULE_ID
+            'RULE_ID': RULE_ID,
+            'EXTRA_ARGS': '',
+            'TIMEOUT_ALLOWED': 'no',
+            'TIMEOUT': 0
         },
         'metadata': {
             'agents_number': 1,
             'agents_os': ['ubuntu20.04'],
-            'protocol': 'tcp'
+            'protocol': 'tcp',
+            'extra_args': 'no',
+            'timeout': 'no'
         }
     },
+    # Case 2: Local AR, old agent (version < 4.2)
     {
         'params': {
+            'AR_LOCATION': 'local',
             'AR_NAME': AR_NAME,
-            'RULE_ID': RULE_ID
+            'RULE_ID': RULE_ID,
+            'EXTRA_ARGS': '',
+            'TIMEOUT_ALLOWED': 'no',
+            'TIMEOUT': 0
         },
         'metadata': {
             'agents_number': 1,
             'agents_os': ['debian8'],
-            'protocol': 'tcp'
+            'protocol': 'tcp',
+            'extra_args': 'no',
+            'timeout': 'no'
         }
     },
+    # Case 3: Local AR, old and new agent
     {
         'params': {
+            'AR_LOCATION': 'local',
             'AR_NAME': AR_NAME,
-            'RULE_ID': RULE_ID
+            'RULE_ID': RULE_ID,
+            'EXTRA_ARGS': '',
+            'TIMEOUT_ALLOWED': 'no',
+            'TIMEOUT': 0
         },
         'metadata': {
             'agents_number': 2,
             'agents_os': ['debian8', 'ubuntu20.04'],
-            'protocol': 'tcp'
+            'protocol': 'tcp',
+            'extra_args': 'no',
+            'timeout': 'no'
+        }
+    },
+    # Case 4: Local AR, old and new agent with extra_args
+    {
+        'params': {
+            'AR_LOCATION': 'local',
+            'AR_NAME': AR_NAME,
+            'RULE_ID': RULE_ID,
+            'EXTRA_ARGS': f'{ARG1} {ARG2}',
+            'TIMEOUT_ALLOWED': 'no',
+            'TIMEOUT': 0
+        },
+        'metadata': {
+            'agents_number': 2,
+            'agents_os': ['debian8', 'ubuntu20.04'],
+            'protocol': 'tcp',
+            'extra_args': 'yes',
+            'timeout': 'no'
+        }
+    },
+    # Case 5: Local AR, old and new agent with timeout
+    {
+        'params': {
+            'AR_LOCATION': 'local',
+            'AR_NAME': AR_NAME,
+            'RULE_ID': RULE_ID,
+            'EXTRA_ARGS': '',
+            'TIMEOUT_ALLOWED': 'yes',
+            'TIMEOUT': AR_TIMEOUT
+        },
+        'metadata': {
+            'agents_number': 2,
+            'agents_os': ['debian8', 'ubuntu20.04'],
+            'protocol': 'tcp',
+            'extra_args': 'no',
+            'timeout': 'yes'
         }
     }
 ]
@@ -128,19 +188,25 @@ def wait_ar_line(line):
     return None
 
 
-def validate_old_ar_message(agent, message):
+def validate_old_ar_message(agent, message, extra_args, timeout):
     args = message.split()
     assert args[0] == f'({agent.name})', 'Agent name did not match expected!'
     assert args[1] == LOG_LOCATION, 'Event location did not match expected!'
     assert args[2] == 'NRN', 'AR flags did not match expected!'
     assert args[3] == agent.id, 'Agent ID did not match expected!'
-    assert args[4] == f'{AR_NAME}0', 'AR name did not match expected!'
+    if timeout == 'yes':
+        assert args[4] == f'{AR_NAME}{AR_TIMEOUT}', 'AR name did not match expected!'
+    else:
+        assert args[4] == f'{AR_NAME}0', 'AR name did not match expected!'
     assert args[5] == DST_USR, 'Destination user did not match expected!'
     assert args[6] == SRC_IP, 'Source IP did not match expected!'
     assert args[8] == RULE_ID, 'Rule ID did not match expected!'
+    if extra_args == 'yes':
+        assert args[12] == ARG1, 'ARG1 did not match expected!'
+        assert args[13] == ARG2, 'ARG2 did not match expected!'
 
 
-def validate_new_ar_message(agent, message):
+def validate_new_ar_message(agent, message, extra_args, timeout):
     args = message.split(' ', 4)
     assert args[0] == f'({agent.name})', 'Agent name did not match expected!'
     assert args[1] == LOG_LOCATION, 'Event location did not match expected!'
@@ -154,7 +220,10 @@ def validate_new_ar_message(agent, message):
     assert json_alert['origin']['module'], 'Missing module in JSON message'
     assert json_alert['origin']['module'] == 'wazuh-analysisd', 'Invalid module in JSON message'
     assert json_alert['command'], 'Missing command in JSON message'
-    assert json_alert['command'] == f'{AR_NAME}0', 'Invalid command in JSON message'
+    if timeout == 'yes':
+        assert json_alert['command'] == f'{AR_NAME}{AR_TIMEOUT}', 'Invalid command in JSON message'
+    else:
+        assert json_alert['command'] == f'{AR_NAME}0', 'Invalid command in JSON message'
     assert json_alert['parameters'], 'Missing parameters in JSON message'
     assert json_alert['parameters']['alert'], 'Missing alert in JSON message'
     assert json_alert['parameters']['alert']['rule'], 'Missing rule in JSON message'
@@ -165,6 +234,10 @@ def validate_new_ar_message(agent, message):
     assert json_alert['parameters']['alert']['data']['srcip'] == SRC_IP, 'Invalid source IP in JSON message'
     assert json_alert['parameters']['alert']['data']['dstuser'], 'Missing destination user in JSON message'
     assert json_alert['parameters']['alert']['data']['dstuser'] == DST_USR, 'Invalid destination user in JSON message'
+    if extra_args == 'yes':
+        assert json_alert['parameters']['extra_args'], 'Missing extra_args in JSON message'
+        assert json_alert['parameters']['extra_args'][0] == ARG1, 'Missing arg1 in JSON message'
+        assert json_alert['parameters']['extra_args'][1] == ARG2, 'Missing arg1 in JSON message'
 
 
  # TESTS
@@ -172,6 +245,8 @@ def validate_new_ar_message(agent, message):
 def test_os_exec(set_debug_mode, get_configuration, configure_environment, restart_service, configure_agents):
     metadata = get_configuration.get('metadata')
     protocol = metadata['protocol']
+    extra_args = metadata['extra_args']
+    timeout = metadata['timeout']
     sender = Sender(SERVER_ADDRESS, protocol=protocol)
     log_monitor = FileMonitor(LOG_FILE_PATH)
     injectors = []
@@ -201,10 +276,10 @@ def test_os_exec(set_debug_mode, get_configuration, configure_environment, resta
 
         if agent.os == 'ubuntu20.04':
             # Version 4.2
-            validate_new_ar_message(agent, last_log)
+            validate_new_ar_message(agent, last_log, extra_args, timeout)
         else:
             # Version < 4.2
-            validate_old_ar_message(agent, last_log)
+            validate_old_ar_message(agent, last_log, extra_args, timeout)
 
     for injector in injectors:
         injector.stop_receive()
