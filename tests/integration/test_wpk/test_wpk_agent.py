@@ -49,9 +49,8 @@ version_to_upgrade = global_parameters.wpk_version[0]
 # 2. v4.1.0
 def get_current_version():
     if platform.system() == 'Linux':
-        config_file_path = os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')
-        _config = ConfigObj(config_file_path)
-        return _config['VERSION']
+        _version = subprocess.check_output([f"{WAZUH_PATH}/bin/wazuh-control", "info", "-v"], stderr=subprocess.PIPE).decode('utf-8')stderr=subprocess.PIPE).decode('utf-8')
+        return _version.replace("v", "")
 
     else:
         version = None

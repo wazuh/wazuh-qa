@@ -4,6 +4,7 @@
 
 import os
 import sys
+import subprocess
 
 if sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
@@ -17,25 +18,25 @@ if sys.platform == 'win32':
     API_LOG_FILE_PATH = None
 
 else:
-    if os.path.isfile("/etc/ossec-init.conf"):
-        with open("/etc/ossec-init.conf") as ossec_init:
-            WAZUH_PATH = os.path.join(
-                [item.rstrip().replace("DIRECTORY=", "").replace("\"", "")
-                for item in ossec_init.readlines() if "DIRECTORY" in item][0])
+
+    WAZUH_SOURCES = os.path.join('/', 'wazuh')
+
+    if sys.platform == 'darwin':
+        WAZUH_PATH = os.path.join("/", "Library", "Ossec")
+        PREFIX = os.path.join('/', 'private', 'var', 'root')
+        GEN_OSSEC = None
     else:
         WAZUH_PATH = os.path.join("/", "var", "ossec")
+        GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
+        PREFIX = os.sep
+
+
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
     WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
-    WAZUH_SOURCES = os.path.join('/', 'wazuh')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
-    if sys.platform == 'darwin':
-        PREFIX = os.path.join('/', 'private', 'var', 'root') 
-        GEN_OSSEC = None
-    else:
-        PREFIX = os.sep
-        GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
+
     try:
         import grp
         import pwd
@@ -48,15 +49,8 @@ else:
 if sys.platform == 'darwin' or sys.platform == 'win32' or sys.platform == 'sunos5':
     WAZUH_SERVICE = 'wazuh.agent'
 else:
-    try:
-        with open(os.path.join(WAZUH_PATH, 'etc/ossec-init.conf'), 'r') as f:
-            type_ = None
-            for line in f.readlines():
-                if 'TYPE' in line:
-                    type_ = line.split('"')[1]
-            WAZUH_SERVICE = 'wazuh-manager' if type_ == 'server' else 'wazuh-agent'
-    except FileNotFoundError:
-        pass
+    type_ = subprocess.check_output([f"{WAZUH_PATH}/bin/wazuh-control", "info", "-t"], stderr=subprocess.PIPE).decode('utf-8')
+    WAZUH_SERVICE = 'wazuh-manager' if type_ == 'server' else 'wazuh-agent'
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
