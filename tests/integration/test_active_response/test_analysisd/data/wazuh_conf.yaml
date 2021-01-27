@@ -1,0 +1,25 @@
+- tags:
+  - valid_conf
+  apply_to_modules:
+  - test_os_exec
+  sections:
+  - section: command
+    attributes:
+      - name: 'command'
+    elements:
+    - name:
+        value: 'restart-wazuh'
+    - executable:
+        value: 'restart-wazuh'
+  - section: active-response
+    attributes:
+      - name: 'active-response'
+    elements:
+    - disabled:
+        value: 'no'
+    - command:
+        value: 'restart-wazuh'
+    - location:
+        value: 'local'
+    - rules_id:
+        value: '554'
