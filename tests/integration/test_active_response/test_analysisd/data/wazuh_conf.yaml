@@ -1,5 +1,5 @@
 - tags:
-  - valid_conf
+  - local_ar
   apply_to_modules:
   - test_os_exec
   sections:
@@ -8,9 +8,9 @@
       - name: 'command'
     elements:
     - name:
-        value: 'restart-wazuh'
+        value: AR_NAME
     - executable:
-        value: 'restart-wazuh'
+        value: AR_NAME
   - section: active-response
     attributes:
       - name: 'active-response'
@@ -18,8 +18,8 @@
     - disabled:
         value: 'no'
     - command:
-        value: 'restart-wazuh'
+        value: AR_NAME
     - location:
         value: 'local'
     - rules_id:
-        value: '5715'
+        value: RULE_ID
