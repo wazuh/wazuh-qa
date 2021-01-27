@@ -250,7 +250,7 @@ This is a sample yaml used for `FIM`:
 
 - **tags**: Informative tag that could be used to filter out within test functions for the same module.
 - **apply_to_modules**: Module/s that will load this configuration.
-- **section**: Section that will be modified within `<ossec_config`.
+- **section**: Section that will be modified within `<wazuh_config`.
 - **elements**: Elements that will be written within the given section.
     - disabled: `<disabled>no</disabled>`
     - directories: `<directories check_all="yes">/sample_directory</directories>`
