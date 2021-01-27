@@ -218,24 +218,26 @@ def set_section_wazuh_conf(sections, template=None):
                 tag.tail = "\n    "
         tag.tail = "\n  "
 
-    def purge_multiple_root_elements(str_list: List[str], root_delimeter: str = "</ossec_config>") -> List[str]:
+    def purge_multiple_root_elements(str_list: List[str], root_delimiter: str = "</wazuh_config>") -> List[str]:
         """
         Remove from the list all the lines located after the root element ends.
 
         This operation is needed before attempting to convert the list to ElementTree because if the ossec.conf had more
-        than one `<ossec_config>` element as root the conversion would fail.
+        than one `<wazuh_config>` element as root the conversion would fail.
 
         Args:
             str_list (list or str): The content of the ossec.conf file in a list of str.
-            root_delimeter (str, optional: The expected string to identify when the first root element ends, by default "</ossec_config>"
+            root_delimiter (str, optional): The expected string to identify when the first root element ends, 
+                                            by default "</wazuh_config>"
 
         Returns:
-            list of str : The first N lines of the specified str_list until the root_delimeter is found. The rest of the list will be ignored.
+            list of str : The first N lines of the specified str_list until the root_delimiter is found. 
+                        The rest of the list will be ignored.
         """
         line_counter = 0
         for line in str_list:
             line_counter += 1
-            if root_delimeter in line:
+            if root_delimiter in line:
                 return str_list[0:line_counter]
         else:
             return str_list
