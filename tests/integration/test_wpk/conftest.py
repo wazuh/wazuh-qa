@@ -1,0 +1,13 @@
+import pytest
+
+from wazuh_testing.tools.agent_simulator import Agent, create_agents
+
+@pytest.fixture(scope="function")
+def configure_agents(request, get_configuration):
+    metadata = get_configuration.get('metadata')
+    agents_number = metadata['agents_number']
+    SERVER_ADDRESS = getattr(request.module, 'SERVER_ADDRESS')
+    CRYPTO = getattr(request.module, 'CRYPTO')
+
+    agents = create_agents(agents_number, SERVER_ADDRESS, CRYPTO,  os=metadata['agents_os'], version=metadata['agents_version'])
+    setattr(request.module, 'agents', agents)

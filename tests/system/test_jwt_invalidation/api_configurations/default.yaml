@@ -1,0 +1,9 @@
+wazuh-master:
+  access:
+    max_login_attempts: 9999
+wazuh-worker1:
+  access:
+    max_login_attempts: 9999
+wazuh-worker2:
+  access:
+    max_login_attempts: 9999

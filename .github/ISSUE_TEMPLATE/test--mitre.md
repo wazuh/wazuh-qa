@@ -114,9 +114,9 @@ Then, install Manager
 ```
 # cat ossec.log | grep Mitre
 ```
-> ossec-analysisd[19213] mitre.c:71 at mitre_load(): DEBUG: Mitre info loading failed. Mitre's database response has 0 elements.
+> wazuh-analysisd[19213] mitre.c:71 at mitre_load(): DEBUG: Mitre info loading failed. Mitre's database response has 0 elements.
 
-> ossec-analysisd[4729] mitre.c:50 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
+> wazuh-analysisd[4729] mitre.c:50 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
 
 ## MIT003
 
@@ -150,9 +150,9 @@ Then, install Manager
 ```
 # cat ossec.log | grep Mitre
 ```
-> ossec-analysisd[19213] mitre.c:71 at mitre_load(): DEBUG: Mitre info loading failed. Query's response has 0 elements.
+> wazuh-analysisd[19213] mitre.c:71 at mitre_load(): DEBUG: Mitre info loading failed. Query's response has 0 elements.
 
-> ossec-analysisd[4729] mitre.c:50 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
+> wazuh-analysisd[4729] mitre.c:50 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
 
 ## MIT004
 
@@ -229,7 +229,7 @@ Add the following lines in /var/ossec/etc/rules/local_rules.xml
 </group>
  ```
  ```
- ossec-control restart
+ wazuh-control restart
  CTRL + D
  sudo su
  CRTL + D
@@ -295,7 +295,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 </group>
  ```
  ```
- ossec-control restart
+ wazuh-control restart
  CTRL + D
  sudo su
  CRTL + D
@@ -364,7 +364,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 </group>
  ```
  ```
- ossec-control restart
+ wazuh-control restart
  CTRL + D
  sudo su
  CRTL + D
@@ -431,7 +431,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 </group>
  ```
  ```
- ossec-control restart
+ wazuh-control restart
  CTRL + D
  sudo su
  CRTL + D
@@ -463,7 +463,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 }
 
 ```
-> ossec-analysisd[27311] to_json.c:110 at Eventinfo_to_jsonstr(): WARNING: Mitre Technique ID T6000 is not in mitre database.
+> wazuh-analysisd[27311] to_json.c:110 at Eventinfo_to_jsonstr(): WARNING: Mitre Technique ID T6000 is not in mitre database.
 
 ## MIT009
 
@@ -497,7 +497,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 </group>
  ```
  ```
- ossec-control restart
+ wazuh-control restart
  CTRL + D
  sudo su
  CRTL + D
@@ -529,7 +529,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 }
 
 ```
-> ossec-analysisd[27311] to_json.c:109 at Eventinfo_to_jsonstr(): WARNING: Mitre Technique ID T1169, T1078 is not in mitre database.
+> wazuh-analysisd[27311] to_json.c:109 at Eventinfo_to_jsonstr(): WARNING: Mitre Technique ID T1169, T1078 is not in mitre database.
 
 ## MIT010
 
@@ -565,7 +565,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 </group>
  ```
  ```
- ossec-control restart
+ wazuh-control restart
  CTRL + D
  sudo su
  CRTL + D
@@ -632,7 +632,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 </group>
  ```
  ```
- ossec-control restart
+ wazuh-control restart
  CTRL + D
  sudo su
  CRTL + D
@@ -702,7 +702,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 </group>
  ```
  ```
- ossec-control restart
+ wazuh-control restart
  CTRL + D
  sudo su
  CRTL + D
@@ -771,7 +771,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 sqlite3 /var/ossec/var/db/mitre.db
 sqlite> DROP TABLE has_phase;
 CTRL + D
-ossec-control restart
+wazuh-control restart
  ```
 **Compatible versions**
 
@@ -803,11 +803,11 @@ ossec-control restart
 ```
 > wazuh-db[7314] wdb_parser.c:348 at wdb_parse(): DEBUG: Mitre DB Cannot execute SQL query; err database var/db/mitre.db: no such table: has_phase
 
-> ossec-remoted[7354] wazuhdb_op.c:94 at wdb_send_query(): ERROR: Bad response 'err Cannot execute Mitre database query; no such table: has_phase'
+> wazuh-remoted[7354] wazuhdb_op.c:94 at wdb_send_query(): ERROR: Bad response 'err Cannot execute Mitre database query; no such table: has_phase'
 
-> ossec-analysisd[7339] mitre.c:98 at mitre_load(): DEBUG: Mitre info loading failed. No response or bad response from wazuh-db: err Cannot execute Mitre database query; no such table: has_phase
+> wazuh-analysisd[7339] mitre.c:98 at mitre_load(): DEBUG: Mitre info loading failed. No response or bad response from wazuh-db: err Cannot execute Mitre database query; no such table: has_phase
 
-> ossec-analysisd[7339] mitre.c:99 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
+> wazuh-analysisd[7339] mitre.c:99 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
 
 ## MIT014
 
@@ -846,7 +846,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 sqlite3 /var/ossec/var/db/mitre.db
 sqlite> DROP TABLE attack;
 CTRL + D
-ossec-control restart
+wazuh-control restart
  ```
 **Compatible versions**
 
@@ -878,11 +878,11 @@ ossec-control restart
 ```
 > wazuh-db[27581] wdb_parser.c:348 at wdb_parse(): DEBUG: Mitre DB Cannot execute SQL query; err database var/db/mitre.db: no such table: attack
 
-> ossec-remoted[27593] wazuhdb_op.c:94 at wdb_send_query(): ERROR: Bad response 'err Cannot execute Mitre database query; no such table: attack'
+> wazuh-remoted[27593] wazuhdb_op.c:94 at wdb_send_query(): ERROR: Bad response 'err Cannot execute Mitre database query; no such table: attack'
 
-> ossec-analysisd[27609] mitre.c:48 at mitre_load(): DEBUG: Mitre info loading failed. Query gave an error response: err Cannot execute Mitre database query; no such table: attack
+> wazuh-analysisd[27609] mitre.c:48 at mitre_load(): DEBUG: Mitre info loading failed. Query gave an error response: err Cannot execute Mitre database query; no such table: attack
 
-> ossec-analysisd[27609] mitre.c:49 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
+> wazuh-analysisd[27609] mitre.c:49 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
 
 ## MIT015
 
@@ -951,11 +951,11 @@ Change  id for ids in sql_create_attack = """CREATE TABLE IF NOT EXISTS attack (
 ```
 > wazuh-db[28187] wdb_parser.c:358 at wdb_parse(): DEBUG: Mitre DB Cannot execute SQL query; err database var/db/mitre.db: no such column: id
 
-> ossec-remoted[28195] wazuhdb_op.c:94 at wdb_send_query(): ERROR: Bad response 'err Cannot execute Mitre database query; no such column: id'
+> wazuh-remoted[28195] wazuhdb_op.c:94 at wdb_send_query(): ERROR: Bad response 'err Cannot execute Mitre database query; no such column: id'
 
-> ossec-analysisd[28215] mitre.c:48 at mitre_load(): DEBUG: Mitre info loading failed. No response or bad response from wazuh-db: err Cannot execute Mitre database query; no such column: id
+> wazuh-analysisd[28215] mitre.c:48 at mitre_load(): DEBUG: Mitre info loading failed. No response or bad response from wazuh-db: err Cannot execute Mitre database query; no such column: id
 
-> ossec-analysisd[28215] mitre.c:49 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
+> wazuh-analysisd[28215] mitre.c:49 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
 
 ## MIT016
 
@@ -1029,11 +1029,11 @@ Change phase_name for phase in sql_create_has_phase = """CREATE TABLE IF NOT EXI
 ```
 > wazuh-db[3303] wdb_parser.c:358 at wdb_parse(): DEBUG: Mitre DB Cannot execute SQL query; err database var/db/mitre.db: no such table: has_phase
 
-> ossec-remoted[3319] wazuhdb_op.c:94 at wdb_send_query(): ERROR: Bad response 'err Cannot execute Mitre database query; no such table: has_phase'
+> wazuh-remoted[3319] wazuhdb_op.c:94 at wdb_send_query(): ERROR: Bad response 'err Cannot execute Mitre database query; no such table: has_phase'
 
-> ossec-analysisd[3331] mitre.c:98 at mitre_load(): DEBUG: Mitre info loading failed. No response or bad response from wazuh-db: err Cannot execute Mitre database query; no such table: has_phase
+> wazuh-analysisd[3331] mitre.c:98 at mitre_load(): DEBUG: Mitre info loading failed. No response or bad response from wazuh-db: err Cannot execute Mitre database query; no such table: has_phase
 
-> ossec-analysisd[3331] mitre.c:99 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
+> wazuh-analysisd[3331] mitre.c:99 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
 
 ## MIT017
 
@@ -1070,7 +1070,7 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 
 ```
 rm /var/ossec/var/db/mitre*
-ossec-control restart
+wazuh-control restart
  ```
 **Compatible versions**
 
@@ -1104,11 +1104,11 @@ ossec-control restart
 
 > wazuh-db[14586] wdb_parser.c:320 at wdb_parse(): ERROR: Couldn't open DB mitre
 
-> ossec-remoted[14614] wazuhdb_op.c:94 at wdb_send_query(): ERROR: Bad response 'err Couldn't open DB mitre'.
+> wazuh-remoted[14614] wazuhdb_op.c:94 at wdb_send_query(): ERROR: Bad response 'err Couldn't open DB mitre'.
 
-> ossec-analysisd[14614] mitre.c:48 at mitre_load(): DEBUG: Mitre info loading failed. Query gave an error response: err Couldn't open DB mitre
+> wazuh-analysisd[14614] mitre.c:48 at mitre_load(): DEBUG: Mitre info loading failed. Query gave an error response: err Couldn't open DB mitre
 
-> ossec-analysisd[14614] mitre.c:49 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
+> wazuh-analysisd[14614] mitre.c:49 at mitre_load(): ERROR: Mitre matrix information could not be loaded.
 
 ## MIT018
 
@@ -1162,4 +1162,4 @@ Delete rule '100002' and add the following lines in /var/ossec/etc/rules/local_r
 
 **Expected logs**
 
-> ossec-analysisd[22563] analysisd.c:572 at main(): CRITICAL: (1220): Error loading the rules: 'ruleset/rules/0020-syslog_rules.xml'.
+> wazuh-analysisd[22563] analysisd.c:572 at main(): CRITICAL: (1220): Error loading the rules: 'ruleset/rules/0020-syslog_rules.xml'.

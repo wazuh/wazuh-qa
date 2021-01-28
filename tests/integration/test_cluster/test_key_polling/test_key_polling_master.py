@@ -60,11 +60,12 @@ def get_configuration(request):
 
 # Tests
 
+@pytest.mark.skip(reason='Development in progress: https://github.com/wazuh/wazuh/issues/4387')
 @pytest.mark.parametrize('cmd, counter, payload, expected', [
     (b'run_keypoll', 1, b'{"message": "id:001"}', "id:001"),
     (b'run_keypoll', 2, b'{"message": "ip:124.0.0.1"}', "ip:124.0.0.1")
 ])
-def test_key_polling_master(cmd, counter, payload, expected, configure_environment, configure_mitm_environment,
+def test_key_polling_master(cmd, counter, payload, expected, configure_environment, configure_sockets_environment,
                             detect_initial_master_serving, connect_to_sockets_module, send_initial_worker_hello):
     """
     Test master behaviour with agent key-polling.

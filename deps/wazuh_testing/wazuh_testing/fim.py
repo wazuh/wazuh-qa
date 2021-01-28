@@ -10,6 +10,7 @@ import shutil
 import socket
 import subprocess
 import sys
+import time
 import tempfile
 from collections import Counter
 from copy import deepcopy
@@ -18,6 +19,7 @@ from datetime import timedelta
 from json import JSONDecodeError
 from stat import ST_ATIME, ST_MTIME
 from typing import Sequence, Union, Generator, Any
+from hashlib import sha1
 
 import pytest
 from jsonschema import validate
@@ -30,7 +32,9 @@ from wazuh_testing.tools.time import TimeMachine
 if sys.platform == 'win32':
     import win32con
     import win32api
-    import winreg
+    import win32security as win32sec
+    import ntsecuritycon as ntc
+    import pywintypes
 elif sys.platform == 'linux2' or sys.platform == 'linux':
     from jq import jq
 
@@ -54,6 +58,7 @@ CHECK_PERM = 'check_perm'
 CHECK_ATTRS = 'check_attrs'
 CHECK_MTIME = 'check_mtime'
 CHECK_INODE = 'check_inode'
+CHECK_TYPE = 'check_type'
 
 REQUIRED_ATTRIBUTES = {
     CHECK_SHA1SUM: 'hash_sha1',
@@ -71,8 +76,109 @@ REQUIRED_ATTRIBUTES = {
     CHECK_SUM: {CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_MD5SUM}
 }
 
+REQUIRED_REG_KEY_ATTRIBUTES = {
+    CHECK_OWNER: ['uid', 'user_name'],
+    CHECK_GROUP: ['gid', 'group_name'],
+    CHECK_PERM: 'perm',
+    CHECK_MTIME: 'mtime',
+    CHECK_ALL: {CHECK_OWNER, CHECK_GROUP, CHECK_PERM, CHECK_MTIME}
+}
+
+REQUIRED_REG_VALUE_ATTRIBUTES = {
+    CHECK_SHA1SUM: 'hash_sha1',
+    CHECK_MD5SUM: 'hash_md5',
+    CHECK_SHA256SUM: 'hash_sha256',
+    CHECK_SIZE: 'size',
+    CHECK_TYPE: 'value_type',
+    CHECK_ALL: {CHECK_SHA256SUM, CHECK_SHA1SUM, CHECK_MD5SUM, CHECK_SIZE, CHECK_TYPE},
+    CHECK_SUM: {CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_MD5SUM}
+}
+
 _last_log_line = 0
 _os_excluded_from_rt_wd = ['darwin', 'sunos5']
+
+if sys.platform == 'win32':
+    registry_parser = {
+        'HKEY_CLASSES_ROOT': win32con.HKEY_CLASSES_ROOT,
+        'HKEY_CURRENT_USER': win32con.HKEY_CURRENT_USER,
+        'HKEY_LOCAL_MACHINE': win32con.HKEY_LOCAL_MACHINE,
+        'HKEY_USERS': win32con.HKEY_USERS,
+        'HKEY_CURRENT_CONFIG': win32con.HKEY_CURRENT_CONFIG
+        }
+
+    registry_class_name = {
+        win32con.HKEY_CLASSES_ROOT: 'HKEY_CLASSES_ROOT',
+        win32con.HKEY_CURRENT_USER: 'HKEY_CURRENT_USER',
+        win32con.HKEY_LOCAL_MACHINE: 'HKEY_LOCAL_MACHINE',
+        win32con.HKEY_USERS: 'HKEY_USERS',
+        win32con.HKEY_CURRENT_CONFIG: 'HKEY_CURRENT_CONFIG'
+    }
+
+    registry_value_type = {
+        win32con.REG_NONE: 'REG_NONE',
+        win32con.REG_SZ: 'REG_SZ',
+        win32con.REG_EXPAND_SZ: 'REG_EXPAND_SZ',
+        win32con.REG_BINARY: 'REG_BINARY',
+        win32con.REG_DWORD: 'REG_DWORD',
+        win32con.REG_DWORD_BIG_ENDIAN: 'REG_DWORD_BIG_ENDIAN',
+        win32con.REG_LINK: 'REG_LINK',
+        win32con.REG_MULTI_SZ: 'REG_MULTI_SZ',
+        win32con.REG_RESOURCE_LIST: 'REG_RESOURCE_LIST',
+        win32con.REG_FULL_RESOURCE_DESCRIPTOR: 'REG_FULL_RESOURCE_DESCRIPTOR',
+        win32con.REG_RESOURCE_REQUIREMENTS_LIST: 'REG_RESOURCE_REQUIREMENTS_LIST',
+        win32con.REG_QWORD: 'REG_QWORD'
+    }
+
+    REG_NONE = win32con.REG_NONE
+    REG_SZ = win32con.REG_SZ
+    REG_EXPAND_SZ = win32con.REG_EXPAND_SZ
+    REG_BINARY = win32con.REG_BINARY
+    REG_DWORD = win32con.REG_DWORD
+    REG_DWORD_BIG_ENDIAN = win32con.REG_DWORD_BIG_ENDIAN
+    REG_LINK = win32con.REG_LINK
+    REG_MULTI_SZ = win32con.REG_MULTI_SZ
+    REG_RESOURCE_LIST = win32con.REG_RESOURCE_LIST
+    REG_FULL_RESOURCE_DESCRIPTOR = win32con.REG_FULL_RESOURCE_DESCRIPTOR
+    REG_RESOURCE_REQUIREMENTS_LIST = win32con.REG_RESOURCE_REQUIREMENTS_LIST
+    REG_QWORD = win32con.REG_QWORD
+    KEY_WOW64_32KEY = win32con.KEY_WOW64_32KEY
+    KEY_WOW64_64KEY = win32con.KEY_WOW64_64KEY
+    KEY_ALL_ACCESS = win32con.KEY_ALL_ACCESS
+    RegOpenKeyEx = win32api.RegOpenKeyEx
+    RegCloseKey = win32api.RegCloseKey
+else:
+
+    registry_parser = {}
+    registry_class_name = {}
+    registry_value_type = {}
+
+    KEY_WOW64_32KEY = 0
+    KEY_WOW64_64KEY = 0
+    REG_NONE = 0
+    REG_SZ = 0
+    REG_EXPAND_SZ = 0
+    REG_BINARY = 0
+    REG_DWORD = 0
+    REG_DWORD_BIG_ENDIAN = 0
+    REG_LINK = 0
+    REG_MULTI_SZ = 0
+    REG_RESOURCE_LIST = 0
+    REG_FULL_RESOURCE_DESCRIPTOR = 0
+    REG_RESOURCE_REQUIREMENTS_LIST = 0
+    REG_QWORD = 0
+    KEY_ALL_ACCESS = 0
+
+    def registry_value_cud():
+        pass
+
+    def registry_key_cud():
+        pass
+
+    def validate_registry_event():
+        pass
+
+    RegOpenKeyEx = 0
+    RegCloseKey = 0
 
 
 def validate_event(event, checks=None, mode=None):
@@ -86,7 +192,7 @@ def validate_event(event, checks=None, mode=None):
     checks : set, optional
         Set of XML CHECK_* options. Default `{CHECK_ALL}`
     mode : str, optional
-        Represents the FIM mode expected for the event to validate
+        Represents the FIM mode expected for the event to validate.
     """
 
     def get_required_attributes(check_attributes, result=None):
@@ -109,7 +215,7 @@ def validate_event(event, checks=None, mode=None):
     # Check FIM mode
     mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode.replace('-', '')
     assert (event['data']['mode']).replace('-', '') == mode, f"The event's FIM mode was '{event['data']['mode']}' \
-but was expected to be '{mode}'"
+        but was expected to be '{mode}'"
 
     # Check attributes
     if checks:
@@ -136,7 +242,148 @@ but was expected to be '{mode}'"
             old_intersection_debug = "Event attributes are: " + str(old_attributes)
             old_intersection_debug += "\nRequired Attributes are: " + str(required_attributes)
             old_intersection_debug += "\nIntersection is: " + str(old_intersection)
-            assert (old_intersection == set()), f'Old_attributes and required_attributes are not the same. ' + old_intersection_debug
+            assert (old_intersection == set()), (f'Old_attributes and required_attributes are not the same. ' +
+                                                 old_intersection_debug)
+
+
+def validate_registry_key_event(event, checks=None, mode=None):
+    """
+    Check if event is properly formatted according to some checks.
+
+    Parameters
+    ----------
+    event : dict
+        Represents an event generated by syscheckd.
+    checks : set, optional
+        Set of XML CHECK_* options. Default `{CHECK_ALL}`
+    mode : str, optional
+        Represents the FIM mode expected for the event to validate.
+    """
+
+    def get_required_attributes(check_attributes, result=None):
+        result = set() if result is None else result
+        for check in check_attributes:
+            mapped = REQUIRED_REG_KEY_ATTRIBUTES[check]
+
+            if isinstance(mapped, str):
+                result |= {mapped}
+            elif isinstance(mapped, list):
+                result |= set(mapped)
+            elif isinstance(mapped, set):
+                result |= get_required_attributes(mapped, result=result)
+
+        return result
+
+    json_file = 'syscheck_event_windows.json' if sys.platform == "win32" else 'syscheck_event.json'
+    with open(os.path.join(_data_path, json_file), 'r') as f:
+        schema = json.load(f)
+
+    validate(schema=schema, instance=event)
+
+    # Check FIM mode
+    mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode.replace('-', '')
+    assert (event['data']['mode']).replace('-', '') == mode, f"The event's FIM mode was '{event['data']['mode']}' \
+        but was expected to be '{mode}'"
+
+    # Check attributes
+    if checks:
+        attributes = event['data']['attributes'].keys() - {'type', 'checksum'}
+
+        required_attributes = get_required_attributes(checks)
+
+        intersection = attributes ^ required_attributes
+        intersection_debug = "Event attributes are: " + str(attributes)
+        intersection_debug += "\nRequired Attributes are: " + str(required_attributes)
+        intersection_debug += "\nIntersection is: " + str(intersection)
+
+        assert (intersection == set()), f'Attributes and required_attributes are not the same. ' + intersection_debug
+
+        # Check add file event
+        if event['data']['type'] == 'added':
+            assert 'old_attributes' not in event['data'] and 'changed_attributes' not in event['data']
+
+        # Check modify file event
+        if event['data']['type'] == 'modified':
+            assert 'old_attributes' in event['data'] and 'changed_attributes' in event['data']
+
+            old_attributes = event['data']['old_attributes'].keys() - {'type', 'checksum'}
+            old_intersection = old_attributes ^ required_attributes
+            old_intersection_debug = "Event attributes are: " + str(old_attributes)
+            old_intersection_debug += "\nRequired Attributes are: " + str(required_attributes)
+            old_intersection_debug += "\nIntersection is: " + str(old_intersection)
+
+            assert (old_intersection == set()), (f'Old_attributes and required_attributes are not the same. ' +
+                                                 old_intersection_debug)
+
+
+def validate_registry_value_event(event, checks=None, mode=None):
+    """
+    Check if event is properly formatted according to some checks.
+
+    Parameters
+    ----------
+    event : dict
+        Represents an event generated by syscheckd.
+    checks : set, optional
+        Set of XML CHECK_* options. Default `{CHECK_ALL}`
+    mode : str, optional
+        Represents the FIM mode expected for the event to validate.
+    """
+
+    def get_required_attributes(check_attributes, result=None):
+        result = set() if result is None else result
+        for check in check_attributes:
+            mapped = REQUIRED_REG_VALUE_ATTRIBUTES[check]
+
+            if isinstance(mapped, str):
+                result |= {mapped}
+            elif isinstance(mapped, list):
+                result |= set(mapped)
+            elif isinstance(mapped, set):
+                result |= get_required_attributes(mapped, result=result)
+
+        return result
+
+    json_file = 'syscheck_event_windows.json' if sys.platform == "win32" else 'syscheck_event.json'
+    with open(os.path.join(_data_path, json_file), 'r') as f:
+        schema = json.load(f)
+
+    validate(schema=schema, instance=event)
+
+    # Check FIM mode
+    mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode.replace('-', '')
+    assert (event['data']['mode']).replace('-', '') == mode, f"The event's FIM mode was '{event['data']['mode']}' \
+        but was expected to be '{mode}'"
+
+    # Check attributes
+    if checks:
+        attributes = event['data']['attributes'].keys() - {'type', 'checksum'}
+
+        required_attributes = get_required_attributes(checks)
+
+        intersection = attributes ^ required_attributes
+        intersection_debug = "Event attributes are: " + str(attributes)
+        intersection_debug += "\nRequired Attributes are: " + str(required_attributes)
+        intersection_debug += "\nIntersection is: " + str(intersection)
+
+        assert (intersection == set()), f'Attributes and required_attributes are not the same. ' + intersection_debug
+
+        # Check add file event
+        if event['data']['type'] == 'added':
+            assert 'old_attributes' not in event['data'] and 'changed_attributes' not in event['data']
+
+        # Check modify file event
+        if event['data']['type'] == 'modified':
+            assert 'old_attributes' in event['data'] and 'changed_attributes' in event['data']
+
+            old_attributes = event['data']['old_attributes'].keys() - {'type', 'checksum'}
+            old_intersection = old_attributes ^ required_attributes
+            old_intersection_debug = "Event attributes are: " + str(old_attributes)
+            old_intersection_debug += "\nRequired Attributes are: " + str(required_attributes)
+            old_intersection_debug += "\nIntersection is: " + str(old_intersection)
+
+            assert (old_intersection == set()), (f'Old_attributes and required_attributes are not the same. ' +
+                                                 old_intersection_debug)
 
 
 def is_fim_scan_ended():
@@ -191,16 +438,31 @@ def create_file(type_, path, name, **kwargs):
 
 def create_registry(key, subkey, arch):
     """
-    Create a registry given the key and the subkey. The registry is opened if it already exists
+    Create a registry given the key and the subkey. The registry is opened if it already exists.
 
     Parameters
     ----------
-    key : str
+    key : pyHKEY
         The key of the registry (HKEY_* constants).
     subkey : str
         The subkey (name) of the registry.
+    arch : int
+        Architecture of the registry (KEY_WOW64_32KEY or KEY_WOW64_64KEY).
+
+    return the key handle of the new/opened key.
     """
-    sys.platform == 'win32' and winreg.CreateKeyEx(key, subkey, access=arch)
+
+    if sys.platform == 'win32':
+        try:
+            logger.info("Creating registry key " + str(os.path.join(registry_class_name[key], subkey)))
+
+            key = win32api.RegCreateKeyEx(key, subkey, win32con.KEY_ALL_ACCESS | arch)
+
+            return key[0]   # Ignore the flag that RegCreateKeyEx returns
+        except OSError as e:
+            logger.warning(f"Registry could not be created: {e}")
+        except pywintypes.error as e:
+            logger.warning(f"Registry could not be created: {e}")
 
 
 def _create_fifo(path, name):
@@ -316,7 +578,7 @@ def delete_file(path, name):
     path : str
         Path to the file to be deleted.
     name : str
-        Name of the file to be deleted
+        Name of the file to be deleted.
     """
     logger.info(f"Removing file {str(os.path.join(path, name))}")
     regular_path = os.path.join(path, name)
@@ -326,33 +588,228 @@ def delete_file(path, name):
 
 def delete_registry(key, subkey, arch):
     """
-    Delete a registry
+    Delete a registry key.
 
     Parameters
     ----------
-    key : str
+    key : pyHKEY
         The key of the registry (HKEY_* constants).
     subkey : str
         The subkey (name) of the registry.
+    arch : int
+        Architecture of the registry (KEY_WOW64_32KEY or KEY_WOW64_64KEY).
     """
-    sys.platform == 'win32' and winreg.DeleteKeyEx(key, subkey, access=arch)
+    if sys.platform == 'win32':
+        print_arch = '[x64]' if arch == KEY_WOW64_64KEY else '[x32]'
+        logger.info(f"Removing registry key {print_arch}{str(os.path.join(registry_class_name[key], subkey))}")
+
+        try:
+            key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS | arch)
+            win32api.RegDeleteTree(key_h, None)
+            win32api.RegDeleteKeyEx(key, subkey, samDesired=arch)
+        except OSError as e:
+            logger.warning(f"Couldn't remove registry key {str(os.path.join(registry_class_name[key], subkey))}: {e}")
+        except pywintypes.error as e:
+            logger.warning(f"Couldn't remove registry key {str(os.path.join(registry_class_name[key], subkey))}: {e}")
 
 
-def modify_registry(key, subkey, value):
+def delete_registry_value(key_h, value_name):
     """
-    Modify the content of REG_SZ in a registry
+    Delete a registry value from a registry key.
 
     Parameters
     ----------
-    key : str
-        The key of the registry (HKEY_* constants)
+    key : pyHKEY
+        The key handle of the registry.
+    value : str
+        The value to be deleted.
+    """
+    if (sys.platform == 'win32'):
+        logger.info(f"Removing registry value {value_name}.")
+
+        try:
+            win32api.RegDeleteValue(key_h, value_name)
+        except OSError as e:
+            logger.warning(f"Couldn't remove registry value {value_name}: {e}")
+        except pywintypes.error as e:
+            logger.warning(f"Couldn't remove registry value {value_name}: {e}")
+
+
+def modify_registry_value(key_h, value_name, type, value):
+    """
+    Modify the content of a registry. If the value doesn't not exists, it will be created.
+
+    Parameters
+    ----------
+    key : pyHKEY
+        The key handle of the registry.
     subkey : str
         The subkey (name) of the registry.
-    value : str
+    value_name : str
         The value to be set.
+    type : int
+        Type of the value.
+    value : str
+        The content that will be written to the registry value.
     """
-    logger.info("Modifying windows registry.")
-    sys.platform == 'win32' and winreg.SetValue(key, subkey, winreg.REG_SZ, value)
+    if (sys.platform == 'win32'):
+        try:
+            logger.info(f"Modifying value '{value_name}' of type {registry_value_type[type]} and value '{value}'")
+            win32api.RegSetValueEx(key_h, value_name, 0, type, value)
+        except OSError as e:
+            logger.warning(f"Could not modify registry value content: {e}")
+        except pywintypes.error as e:
+            logger.warning(f"Could not modify registry value content: {e}")
+
+
+def modify_key_perms(key, subkey, arch, user):
+    """
+    Modify the permissions (ACL) of a registry key.
+
+    Parameters
+    ----------
+    key : pyHKEY
+        The key of the registry (HKEY_* constants).
+    subkey : str
+        The subkey (name) of the registry.
+    user : PySID
+        User that is going to be used for the modification.
+    """
+    if (sys.platform == 'win32'):
+        print_arch = '[x64]' if arch == KEY_WOW64_64KEY else '[x32]'
+        logger.info(f"- Changing permissions of {print_arch}{os.path.join(registry_class_name[key], subkey)}")
+
+        try:
+            key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS | arch)
+            sd = win32api.RegGetKeySecurity(key_h, win32con.DACL_SECURITY_INFORMATION)
+            acl = sd.GetSecurityDescriptorDacl()
+            acl.AddAccessAllowedAce(ntc.GENERIC_ALL, user)
+            sd.SetDacl(True, acl, False)
+
+            win32api.RegSetKeySecurity(key_h, win32con.DACL_SECURITY_INFORMATION, sd)
+        except OSError as e:
+            logger.warning(f"Registry permissions could not be modified: {e}")
+        except pywintypes.error as e:
+            logger.warning(f"Registry permissions could not be modified: {e}")
+
+
+def modify_registry_key_mtime(key, subkey, arch):
+    """
+    Modify the modification time of a registry key.
+
+    Parameters
+    ----------
+    key : pyHKEY
+        The key handle of the registry.
+    subkey : str
+        The subkey (name) of the registry.
+    """
+
+    if (sys.platform == 'win32'):
+        print_arch = '[x64]' if arch == KEY_WOW64_64KEY else '[x32]'
+        logger.info(f"- Changing mtime of {print_arch}{os.path.join(registry_class_name[key], subkey)}")
+
+        try:
+            key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS | arch)
+
+            modify_registry_value(key_h, "dummy_value", win32con.REG_SZ, "this is a dummy value")
+            time.sleep(2)
+            delete_registry_value(key_h, "dummy_value")
+
+            win32api.RegCloseKey(key_h)
+            key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS)
+        except OSError as e:
+            logger.warning(f"Registry mtime could not be modified: {e}")
+        except pywintypes.error as e:
+            logger.warning(f"Registry mtime could not be modified: {e}")
+
+
+def modify_registry_owner(key, subkey, arch, user):
+    """
+    Modify the owner of a registry key.
+
+    Parameters
+    ----------
+    key : pyHKEY
+        The key handle of the registry.
+    subkey : str
+        The subkey (name) of the registry.
+    user : pySID
+        Identifier of the user (pySID)
+    """
+    if (sys.platform == 'win32'):
+        print_arch = '[x64]' if arch == KEY_WOW64_64KEY else '[x32]'
+        logger.info(f"- Changing owner of {print_arch}{os.path.join(registry_class_name[key], subkey)}")
+
+        try:
+            key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS | arch)
+            desc = win32api.RegGetKeySecurity(key_h,
+                                              win32sec.DACL_SECURITY_INFORMATION | win32sec.OWNER_SECURITY_INFORMATION)
+            desc.SetSecurityDescriptorOwner(user, 0)
+
+            win32api.RegSetKeySecurity(key_h, win32sec.OWNER_SECURITY_INFORMATION | win32sec.DACL_SECURITY_INFORMATION,
+                                       desc)
+
+            return key_h
+        except OSError as e:
+            logger.warning(f"Registry owner could not be modified: {e}")
+        except pywintypes.error as e:
+            logger.warning(f"Registry owner could not be modified: {e}")
+
+
+def modify_registry(key, subkey, arch):
+    """
+    Modify a registry key.
+
+    Parameters
+    ----------
+    key : pyHKEY
+        The key handle of the registry.
+    subkey : str
+        The subkey (name) of the registry.
+    """
+    print_arch = '[x64]' if arch == KEY_WOW64_64KEY else '[x32]'
+    logger.info(f"Modifying registry key {print_arch}{os.path.join(registry_class_name[key], subkey)}")
+
+    modify_key_perms(key, subkey, arch, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
+    modify_registry_owner(key, subkey, arch, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
+    modify_registry_key_mtime(key, subkey, arch)
+
+
+def rename_registry(key, subkey_path, src_name, arch, dst_name):
+    """
+    Rename a registry key.
+
+    Parameters
+    ----------
+    key : int
+        The key of the registry (HKEY_* constants)
+    subkey_path : str
+        The path where the subkey that is going to be renamed is.
+    src_name : str
+        Name of the key that is going to be renamed
+    arch : int
+        Architecture of the registry
+    dst_name : str
+        Name of the renamed key
+    """
+    if (sys.platform == 'win32'):
+        logger.info(f"- Renaming registry {src_name} to {dst_name}")
+
+        try:
+            source_key = os.path.join(subkey_path, src_name)
+            destination_key = os.path.join(subkey_path, dst_name)
+
+            src_key_h = win32api.RegOpenKey(key, source_key, 0, win32con.KEY_ALL_ACCESS | arch)
+            dst_key_h = create_registry(key, destination_key, arch)
+
+            win32api.RegCopyTree(src_key_h, None, dst_key_h)
+
+            delete_registry(key, source_key, arch)
+        except OSError as e:
+            logger.warning(f"Registry could not be renamed: {e}")
+        except pywintypes.error as e:
+            logger.warning(f"Registry could not be renamed: {e}")
 
 
 def modify_file_content(path, name, new_content=None, is_binary=False):
@@ -463,15 +920,12 @@ def modify_file_permission(path, name):
         Name of the file to be modified.
     """
     def modify_file_permission_windows():
-        import win32security
-        import ntsecuritycon
-
-        user, domain, account_type = win32security.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")
-        sd = win32security.GetFileSecurity(path_to_file, win32security.DACL_SECURITY_INFORMATION)
+        user, _, _ = win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")
+        sd = win32sec.GetFileSecurity(path_to_file, win32sec.DACL_SECURITY_INFORMATION)
         dacl = sd.GetSecurityDescriptorDacl()
-        dacl.AddAccessAllowedAce(win32security.ACL_REVISION, ntsecuritycon.FILE_ALL_ACCESS, user)
+        dacl.AddAccessAllowedAce(win32sec.ACL_REVISION, ntc.FILE_ALL_ACCESS, user)
         sd.SetSecurityDescriptorDacl(1, dacl, 0)
-        win32security.SetFileSecurity(path_to_file, win32security.DACL_SECURITY_INFORMATION, sd)
+        win32sec.SetFileSecurity(path_to_file, win32sec.DACL_SECURITY_INFORMATION, sd)
 
     def modify_file_permission_unix():
         os.chmod(path_to_file, 0o666)
@@ -660,7 +1114,7 @@ def callback_ignore(line):
 
 
 def callback_restricted(line):
-    match = re.match(r".*Ignoring file '(.*?)' due to restriction '.*?'", line)
+    match = re.match(r".*Ignoring entry '(.*?)' due to restriction '.*?'", line)
     if match:
         return match.group(1)
     return None
@@ -826,6 +1280,69 @@ def callback_num_inotify_watches(line):
         return match.group(1)
 
 
+def callback_file_size_limit_reached(line):
+    match = re.match(r'.*File \'(.*)\' is too big for configured maximum size to perform diff operation\.', line)
+
+    if match:
+        return match.group(1)
+
+
+def callback_disk_quota_limit_reached(line):
+    match = re.match(r'.*The (.*) of the file size \'(.*)\' exceeds the disk_quota.*', line)
+
+    if match:
+        return match.group(2)
+
+
+def callback_disk_quota_default(line):
+    match = re.match(r'.*Maximum disk quota size limit configured to \'(\d+) KB\'.*', line)
+
+    if match:
+        return match.group(1)
+
+
+def callback_diff_size_limit_value(line):
+    match = re.match(r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*', line)
+
+    if match:
+        return match.group(1)
+
+
+def callback_deleted_diff_folder(line):
+    match = re.match(r'.*Folder \'(.*)\' has been deleted.*', line)
+
+    if match:
+        return match.group(1)
+
+
+def callback_non_existing_monitored_registry(line):
+    if 'Registry key does not exists' in line:
+        return True
+
+
+def callback_registry_count_entries(line):
+    match = re.match(r".*Fim registry entries: (\d+)", line)
+
+    if match:
+        return match.group(1)
+
+
+def callback_value_event(line):
+    match = re.match(r'.*Sending FIM event: .*value_name.*', line)
+
+    if match is not None:
+        msg = r'.*Sending FIM event: (.+)$'
+        match = re.match(msg, line)
+
+        try:
+            if json.loads(match.group(1))['type'] == 'event':
+                return json.loads(match.group(1))
+        except (AttributeError, JSONDecodeError, KeyError):
+            pass
+
+    return None
+
+
 def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None):
     """
     Change date and time of the system depending on a boolean condition. Optionally, a monitor may be used to check
@@ -848,6 +1365,11 @@ def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=1
     TimeoutError
         If `monitor` is not `None` and the scan has not ended in the default timeout specified in `global_parameters`.
     """
+    if 'fim_mode' in global_parameters.current_configuration['metadata'].keys():
+        mode = global_parameters.current_configuration['metadata']['fim_mode']
+        if mode != 'scheduled' or mode not in global_parameters.fim_mode:
+            return
+
     if time_travel:
         before = str(datetime.now())
         TimeMachine.travel_to_future(interval)
@@ -868,14 +1390,14 @@ def callback_configuration_warning(line):
 
 
 def callback_value_file_limit(line):
-    match = re.match(r".*Maximum number of files to be monitored: '(\d+)'", line)
+    match = re.match(r".*Maximum number of entries to be monitored: '(\d+)'", line)
 
     if match:
         return match.group(1)
 
 
 def callback_file_limit_zero(line):
-    match = re.match(r".*No limit set to maximum number of files to be monitored", line)
+    match = re.match(r".*No limit set to maximum number of entries to be monitored", line)
 
     if match:
         return True
@@ -896,7 +1418,7 @@ def callback_file_limit_back_to_normal(line):
 
 
 def callback_file_limit_full_database(line):
-    match = re.match(r".*Couldn't insert '.*' entry into DB\. The DB is full, please check your configuration\.", line)
+    match = re.match(r".*Couldn't insert '.*' (value )?entry into DB\. The DB is full.*", line)
 
     if match:
         return True
@@ -913,6 +1435,22 @@ def callback_entries_path_count(line):
             return match.group(1), match.group(2)
         else:
             return match.group(1), None
+
+
+def callback_warn_max_dir_monitored(line):
+    match = re.match(r'.*Maximum number of directories to be monitored in the same tag reached \(\d+\) '
+                     r'Excess are discarded: \'(.+)\'', line)
+    if match:
+        return match.group(1)
+    return None
+
+
+def callback_max_registry_monitored(line):
+    match = re.match(r'.*Maximum number of registries to be monitored in the same tag reached \(\d+\) '
+                     r'Excess are discarded: \'(.+)\'', line)
+
+    if match:
+        return match.group(1)
 
 
 def callback_delete_watch(line):
@@ -1048,34 +1586,23 @@ class EventChecker:
 
         def check_events_type(events, ev_type, file_list=['testfile0']):
             event_types = Counter(filter_events(events, ".[].data.type"))
-            assert (event_types[ev_type] == len(file_list)), f'Non expected number of events. {event_types[ev_type]} != {len(file_list)}'
+            msg = f'Non expected number of events. {event_types[ev_type]} != {len(file_list)}'
+            assert (event_types[ev_type] == len(file_list)), msg
 
         def check_events_path(events, folder, file_list=['testfile0'], mode=None):
             mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
-            audit_path = filter_events(events, ".[].data.audit.path") if mode == "whodata" else None
             data_path = filter_events(events, ".[].data.path")
             for file_name in file_list:
                 expected_path = os.path.join(folder, file_name)
-                expected_path = expected_path[:1].lower() + expected_path[1:]
                 if self.encoding is not None:
                     for index, item in enumerate(data_path):
                         data_path[index] = item.encode(encoding=self.encoding)
-                    if audit_path:
-                        for index, item in enumerate(audit_path):
-                            audit_path[index] = item.encode(encoding=self.encoding)
                 if sys.platform == 'darwin' and self.encoding and self.encoding != 'utf-8':
                     logger.info(f'Not asserting {expected_path} in event.data.path. '
-                                 f'Reason: using non-utf-8 encoding in darwin.')
+                                f'Reason: using non-utf-8 encoding in darwin.')
                 else:
                     error_msg = f"Expected data path was '{expected_path}' but event data path is '{data_path}'"
                     assert (expected_path in data_path), error_msg
-                    if audit_path:
-                        try:
-                            error_msg = f"Expected audit path was '{expected_path}' " \
-                                        f"but event audit path is '{audit_path}'"
-                            assert (expected_path in audit_path), error_msg
-                        except AssertionError:
-                            pytest.xfail(reason='Xfailed due to issue: https://github.com/wazuh/wazuh/issues/4729')
 
         def filter_events(events, mask):
             """Returns a list of elements matching a specified mask in the events list using jq module."""
@@ -1106,6 +1633,517 @@ class EventChecker:
             expected_file_path = expected_file_path[:1].lower() + expected_file_path[1:]
             result_list.append(expected_file_path)
         return result_list
+
+
+if sys.platform == 'win32':
+    class RegistryEventChecker:
+        """Utility to allow fetch events and validate them."""
+
+        def __init__(self, log_monitor, registry_key, registry_dict=None, options=None, custom_validator=None,
+                     encoding=None, callback=callback_detect_event, is_value=False):
+            self.log_monitor = log_monitor
+            self.registry_key = registry_key
+            self.registry_dict = registry_dict
+            self.custom_validator = custom_validator
+            self.options = options
+            self.encoding = encoding
+            self.events = None
+            self.callback = callback
+            self.is_value = is_value
+
+        def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0):
+            """
+            Call 'fetch_events', 'fetch_key_events' and 'check_events', depending on the type of event expected.
+
+            Parameters
+            ----------
+            event_type : {'added', 'modified', 'deleted'}
+                Expected type of the raised event.
+            min_timeout : int, optional
+                Seconds to wait until an event is raised when trying to fetch. Default `1`
+            triggers_event : boolean, optional
+                True if the event should be raised. False otherwise. Default `True`
+            extra_timeout : int, optional
+                Additional time to wait after the min_timeout
+            """
+            assert event_type in ['added', 'modified', 'deleted'], f'Incorrect event type: {event_type}'
+
+            # Minus 1 because we don't need to count the registry parent key here
+            num_elems = len(self.registry_dict) - 1
+
+            error_msg = "TimeoutError was raised because "
+            error_msg += str(num_elems) if num_elems > 1 else "a single"
+            error_msg += " '" + str(event_type) + "' "
+            error_msg += "events were " if num_elems > 1 else "event was "
+            error_msg += "expected for " + str(self._get_elem_list())
+            error_msg += " but were not detected." if num_elems > 1 else " but was not detected."
+
+            key_error_msg = f"TimeoutError was raised because 1 event was expected for {self.registry_key} "
+            key_error_msg += "but was not detected."
+
+            if event_type == 'modified' or self.is_value:
+                self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
+                self.check_events(event_type)
+            elif event_type == 'added':
+                self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
+                self.check_events(event_type)
+
+                # The callback for the registry parent key will be `None` when `check_mtime` is disabled
+                if self.registry_dict[self.registry_key][1] is not None:
+                    self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout,
+                                                    error_message=key_error_msg, is_parent=True)
+                    self.check_events(event_type, check_parent_key=True)
+            elif event_type == 'deleted':
+                if self.registry_dict[self.registry_key][1] is not None:
+                    self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout,
+                                                    error_message=key_error_msg, is_parent=True)
+                    self.check_events(event_type, check_parent_key=True)
+
+                self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
+                self.check_events(event_type)
+
+        def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0, error_message='', is_parent=False):
+            try:
+                if is_parent:
+                    result = self.log_monitor.start(timeout=min_timeout,
+                                                    callback=self.registry_dict[self.registry_key][1],
+                                                    timeout_extra=extra_timeout,
+                                                    encoding=self.encoding,
+                                                    error_message=error_message).result()
+                else:
+                    # We substract 1 to the length of the dictionary because the parent key should not be detected here
+                    result = self.log_monitor.start(timeout=max((len(self.registry_dict) - 1) * 0.01, min_timeout),
+                                                    callback=self.callback,
+                                                    accum_results=len(self.registry_dict) - 1,
+                                                    timeout_extra=extra_timeout,
+                                                    encoding=self.encoding,
+                                                    error_message=error_message).result()
+
+                assert triggers_event, f'No events should be detected.'
+                return result if isinstance(result, list) else [result]
+            except TimeoutError:
+                if triggers_event:
+                    raise
+                logger.info("TimeoutError was expected and correctly caught.")
+
+        def check_events(self, event_type, mode=None, check_parent_key=False):
+            """
+            Check and validate all events in the 'events' list.
+
+            Parameters
+            ----------
+            event_type : {'added', 'modified', 'deleted'}
+                Expected type of the raised event.
+            mode : str
+                Expected mode of the raised event.
+            check_parent_key : Boolean, optional
+                Check the event raised by the parent key. Default `False`
+            """
+            def validate_checkers_per_event(events, options, mode):
+                """Check if each event is properly formatted according to some checks.
+
+                Parameters
+                ----------
+                events : list
+                    Event list to be checked.
+                options : set
+                    Set of XML CHECK_* options. Default `{CHECK_ALL}`
+                """
+                for ev in events:
+                    if self.is_value:
+                        validate_registry_value_event(ev, options, mode)
+                    else:
+                        validate_registry_key_event(ev, options, mode)
+
+            def check_events_type(events, ev_type, reg_list=['testkey0']):
+                event_types = Counter(filter_events(events, ".[].data.type"))
+
+                # We substract 1 to the length of the dictionary because the parent key should not be counted here
+                msg = f'Non expected number of events. {event_types[ev_type]} != {len(reg_list) - 1}'
+
+                assert (event_types[ev_type] == (len(reg_list)) - 1), msg
+
+            def check_events_key_path(events, registry_key, reg_list=['testkey0'], mode=None):
+                mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
+                key_path = filter_events(events, ".[].data.path")
+                skip_parent = True
+
+                for reg in reg_list:
+                    if skip_parent:
+                        skip_parent = False
+                        continue
+
+                    expected_path = os.path.join(registry_key, reg)
+
+                    if self.encoding is not None:
+                        for index, item in enumerate(key_path):
+                            key_path[index] = item.encode(encoding=self.encoding)
+
+                    error_msg = f"Expected key path was '{expected_path}' but event key path is '{key_path}'"
+                    assert (expected_path in key_path), error_msg
+
+            def check_events_parent_registry_key(events, mode=None):
+                mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
+                parent_key_path = filter_events(events, ".[].data.path")
+
+                if self.encoding is not None:
+                    for index, item in enumerate(parent_key_path):
+                        parent_key_path[index] = item.encode(encoding=self.encoding)
+
+                error_msg = f"Expected parent key path was '{self.registry_key}'"
+                error_msg += f"but event parent key path is '{parent_key_path}'"
+
+                assert (self.registry_key in parent_key_path), error_msg
+
+            def check_events_registry_value(events, key, value_list=['testvalue0'], mode=None):
+                mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
+                key_path = filter_events(events, ".[].data.path")
+                value_name = filter_events(events, ".[].data.value_name")
+                skip_parent = True
+
+                for value in value_list:
+                    if skip_parent:
+                        skip_parent = False
+                        continue
+
+                    error_msg = f"Expected value name was '{value}' but event value name is '{value_name}'"
+                    assert (value in value_name), error_msg
+
+                    error_msg = f"Expected key path was '{key}' but event key path is '{key_path}'"
+                    assert (key in key_path), error_msg
+
+            def filter_events(events, mask):
+                """Returns a list of elements matching a specified mask in the events list using jq module."""
+                if sys.platform in ("win32", 'sunos5', 'darwin'):
+                    stdout = subprocess.check_output(["jq", "-r", mask], input=json.dumps(events).encode())
+
+                    return stdout.decode("utf8").strip().split(os.linesep)
+                else:
+                    return jq(mask).transform(events, multiple_output=True)
+
+            if self.events is not None:
+                validate_checkers_per_event(self.events, self.options, mode)
+
+                if check_parent_key:
+                    check_events_parent_registry_key(self.events, mode=mode)
+                elif self.is_value:
+                    check_events_type(self.events, event_type, self.registry_dict)
+                    check_events_registry_value(self.events, self.registry_key, value_list=self.registry_dict,
+                                                mode=mode)
+                else:
+                    check_events_type(self.events, event_type, self.registry_dict)
+                    check_events_key_path(self.events, self.registry_key, reg_list=self.registry_dict, mode=mode)
+
+                if self.custom_validator is not None and not check_parent_key:
+                    self.custom_validator.validate_after_cud(self.events)
+
+                    if event_type == "added":
+                        self.custom_validator.validate_after_create(self.events)
+                    elif event_type == "modified":
+                        self.custom_validator.validate_after_update(self.events)
+                    elif event_type == "deleted":
+                        self.custom_validator.validate_after_delete(self.events)
+
+        def _get_elem_list(self):
+            result_list = []
+
+            for elem_name in self.registry_dict:
+                if elem_name in self.registry_key:
+                    continue
+
+                expected_elem_path = os.path.join(self.registry_key, elem_name)
+                result_list.append(expected_elem_path)
+
+            return result_list
+
+    def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, value_list=['test_value'],
+                           time_travel=False, min_timeout=1, options=None, triggers_event=True, triggers_event_add=True,
+                           triggers_event_modified=True, triggers_event_delete=True, encoding=None,
+                           callback=callback_value_event, validators_after_create=None, validators_after_update=None,
+                           validators_after_delete=None, validators_after_cud=None, value_type=win32con.REG_SZ):
+        """
+        Check if creation, update and delete registry value events are detected by syscheck.
+
+        This function provides multiple tools to validate events with custom validators.
+
+        Parameters
+        ----------
+        root_key : str
+            Root key (HKEY_LOCAL_MACHINE, HKEY_LOCAL_USER, etc).
+        registry_subkey : str
+            Path of the subkey that will be created.
+        log_monitor : FileMonitor
+            File event monitor.
+        arch : int
+            Architecture of the registry key (KEY_WOW64_32KEY or KEY_WOW64_64KEY). Default `KEY_WOW64_64KEY`
+        value_list : list(str) or dict, optional
+            If it is a list, it will be transformed to a dict with empty strings in each value. Default `['test_value']`
+        time_travel : boolean, optional
+            Boolean to determine if there will be time travels or not. Default `False`
+        min_timeout : int, optional
+            Minimum timeout. Default `1`
+        options : set, optional
+            Set with all the checkers. Default `None`
+        triggers_event : boolean, optional
+            Boolean to determine if the event should be raised or not. Default `True`
+        triggers_event_add: boolean, optional
+            Boolean to determine if the added event should be raised. If triggers_event is false, this parameter is
+            ignored.
+        triggers_event_modified: boolean, optional
+            Boolean to determine if the modified event should be raised. If triggers_event is false, this parameter
+            is ignored.
+        triggers_event_delete: boolean, optional
+            Boolean to determine if the delete event should be raised.
+            If triggers_event is false, this parameter is ignored.
+        encoding : str, optional
+            String to determine the encoding of the registry value name. Default `None`
+        callback : callable, optional
+            Callback to use with the log monitor. Default `callback_value_event`
+        validators_after_create : list, optional
+            List of functions that validates an event triggered when a new registry value is created. Each function must
+            accept a param to receive the event to be validated. Default `None`
+        validators_after_update : list, optional
+            List of functions that validates an event triggered when a new registry value is modified. Each function
+            must accept a param to receive the event to be validated. Default `None`
+        validators_after_delete : list, optional
+            List of functions that validates an event triggered when a new registry value is deleted. Each function must
+            accept a param to receive the event to be validated. Default `None`
+        validators_after_cud : list, optional
+            List of functions that validates an event triggered when a new registry value is created, modified or
+            deleted. Each function must accept a param to receive the event to be validated. Default `None`
+        """
+        # Transform registry list
+        if root_key not in registry_parser:
+            raise ValueError("root_key not valid")
+
+        registry_path = os.path.join(root_key, registry_sub_key)
+
+        if value_type in [win32con.REG_SZ, win32con.REG_MULTI_SZ]:
+            value_added_content = 'added'
+            value_default_content = ''
+        else:
+            value_added_content = 0
+            value_default_content = 1
+
+        if not isinstance(value_list, list) and not isinstance(value_list, dict):
+            raise ValueError('Value error. It can only be list or dict')
+        elif isinstance(value_list, list):
+            aux_dict = {registry_path: (value_default_content, callback_detect_event)}
+
+            for elem in value_list:
+                aux_dict[elem] = (value_default_content, callback)
+
+            value_list = aux_dict
+        elif isinstance(value_list, dict):
+            aux_dict = {registry_path: (value_default_content, callback_detect_event)}
+
+            for key, elem in value_list.items():
+                aux_dict[key] = (elem, callback)
+
+            value_list = aux_dict
+
+        options_set = REQUIRED_REG_VALUE_ATTRIBUTES[CHECK_ALL]
+        if options is not None:
+            options_set = options_set.intersection(options)
+
+        if options_set is not None and CHECK_MTIME not in options_set:
+            value_list[registry_path] = (value_default_content, None)
+
+        triggers_event_add = triggers_event and triggers_event_add
+        triggers_event_modified = triggers_event and triggers_event_modified
+        triggers_event_delete = triggers_event and triggers_event_delete
+
+        custom_validator = CustomValidator(validators_after_create, validators_after_update,
+                                           validators_after_delete, validators_after_cud)
+
+        registry_event_checker = RegistryEventChecker(log_monitor=log_monitor, registry_key=registry_path,
+                                                      registry_dict=value_list, options=options_set,
+                                                      custom_validator=custom_validator, encoding=encoding,
+                                                      callback=callback, is_value=True)
+
+        # Open the desired key
+        key_handle = create_registry(registry_parser[root_key], registry_sub_key, arch)
+
+        # Create registry values
+        for name, _ in value_list.items():
+            if name in registry_path:
+                continue
+
+            modify_registry_value(key_handle, name, value_type, value_added_content)
+
+        check_time_travel(time_travel, monitor=log_monitor)
+        registry_event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event_add)
+
+        if triggers_event_add:
+            logger.info("'added' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
+
+        # Modify previous registry values
+        for name, content in value_list.items():
+            if name in registry_path:
+                continue
+
+            modify_registry_value(key_handle, name, value_type, content[0])
+
+        check_time_travel(time_travel, monitor=log_monitor)
+        registry_event_checker.fetch_and_check('modified', min_timeout=min_timeout,
+                                               triggers_event=triggers_event_modified)
+
+        if triggers_event_modified:
+            logger.info("'modified' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
+
+        # Delete previous registry values
+        for name, _ in value_list.items():
+            if name in registry_path:
+                continue
+
+            delete_registry_value(key_handle, name)
+
+        check_time_travel(time_travel, monitor=log_monitor)
+        registry_event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event_delete)
+
+        if triggers_event_delete:
+            logger.info("'deleted' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
+
+    def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, key_list=['test_key'],
+                         time_travel=False, min_timeout=1, options=None, triggers_event=True, triggers_event_add=True,
+                         triggers_event_modified=True, triggers_event_delete=True, encoding=None,
+                         callback=callback_detect_event, validators_after_create=None, validators_after_update=None,
+                         validators_after_delete=None, validators_after_cud=None):
+        """
+        Check if creation, update and delete registry key events are detected by syscheck.
+
+        This function provides multiple tools to validate events with custom validators.
+
+        Parameters
+        ----------
+        root_key : str
+            Root key (HKEY_LOCAL_MACHINE, HKEY_LOCAL_USER, etc).
+        registry_subkey : str
+            Path of the subkey that will be created
+        log_monitor : FileMonitor
+            File event monitor.
+        arch : int
+            Architecture of the registry key (KEY_WOW64_32KEY or KEY_WOW64_64KEY). Default `KEY_WOW64_64KEY`
+        key_list : list(str) or dict, optional
+            If it is a list, it will be transformed to a dict with empty strings in each value. Default `['test_key']`
+        time_travel : boolean, optional
+            Boolean to determine if there will be time travels or not. Default `False`
+        min_timeout : int, optional
+            Minimum timeout. Default `1`
+        options : set, optional
+            Set with all the checkers. Default `None`
+        triggers_event : boolean, optional
+            Boolean to determine if the event should be raised or not. Default `True`
+        triggers_event_add: boolean, optional
+            Boolean to determine if the added event should be raised.
+            If triggers_event is false, this parameter is ignored.
+        triggers_event_modified: boolean, optional
+            Boolean to determine if the modified event should be raised.
+            If triggers_event is false, this parameter is ignored.
+        triggers_event_delete: boolean, optional
+            Boolean to determine if the delete event should be raised.
+            If triggers_event is false, this parameter is ignored.
+        encoding : str, optional
+            String to determine the encoding of the registry value name. Default `None`
+        callback : callable, optional
+            Callback to use with the log monitor. Default `callback_detect_event`
+        validators_after_create : list, optional
+            List of functions that validates an event triggered when a new registry value is created. Each function must
+            accept a param to receive the event to be validated. Default `None`
+        validators_after_update : list, optional
+            List of functions that validates an event triggered when a new registry value is modified. Each function
+            must accept a param to receive the event to be validated. Default `None`
+        validators_after_delete : list, optional
+            List of functions that validates an event triggered when a new registry value is deleted. Each function must
+            accept a param to receive the event to be validated. Default `None`
+        validators_after_cud : list, optional
+            List of functions that validates an event triggered when a new registry value is created, modified or
+            deleted. Each function must accept a param to receive the event to be validated. Default `None`
+        """
+        # Transform registry list
+        if root_key not in registry_parser:
+            raise ValueError("Registry_key not valid")
+
+        registry_path = os.path.join(root_key, registry_sub_key)
+
+        if not isinstance(key_list, list) and not isinstance(key_list, dict):
+            raise ValueError('Value error. It can only be list or dict')
+        elif isinstance(key_list, list):
+            aux_dict = {registry_path: ('', callback_detect_event)}
+
+            for elem in key_list:
+                aux_dict[elem] = ('', callback)
+
+            key_list = aux_dict
+        elif isinstance(key_list, dict):
+            aux_dict = {registry_path: ('', callback_detect_event)}
+
+            for key, elem in key_list.items():
+                aux_dict[key] = (elem, callback)
+
+            key_list = aux_dict
+
+        options_set = REQUIRED_REG_KEY_ATTRIBUTES[CHECK_ALL]
+        if options is not None:
+            options_set = options_set.intersection(options)
+
+        if options_set is not None and CHECK_MTIME not in options_set:
+            key_list[registry_path] = ('', None)
+
+        triggers_event_add = triggers_event and triggers_event_add
+        triggers_event_modified = triggers_event and triggers_event_modified
+        triggers_event_delete = triggers_event and triggers_event_delete
+
+        custom_validator = CustomValidator(validators_after_create, validators_after_update,
+                                           validators_after_delete, validators_after_cud)
+
+        registry_event_checker = RegistryEventChecker(log_monitor=log_monitor, registry_key=registry_path,
+                                                      registry_dict=key_list, options=options_set,
+                                                      custom_validator=custom_validator, encoding=encoding,
+                                                      callback=callback, is_value=False)
+
+        # Open the desired key
+        create_registry(registry_parser[root_key], registry_sub_key, arch)
+
+        # Create registry subkeys
+        for name, _ in key_list.items():
+            if name in registry_path:
+                continue
+
+            create_registry(registry_parser[root_key], os.path.join(registry_sub_key, name), arch)
+
+        check_time_travel(time_travel, monitor=log_monitor)
+        registry_event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event_add)
+
+        if triggers_event_add:
+            logger.info("'added' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
+
+        # Modify previous registry subkeys
+        for name, _ in key_list.items():
+            if name in registry_path:
+                continue
+
+            modify_registry(registry_parser[root_key], os.path.join(registry_sub_key, name), arch)
+
+        check_time_travel(time_travel, monitor=log_monitor)
+        registry_event_checker.fetch_and_check('modified', min_timeout=min_timeout,
+                                               triggers_event=triggers_event_modified)
+
+        if triggers_event_modified:
+            logger.info("'modified' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
+
+        # Delete previous registry subkeys
+        for name, _ in key_list.items():
+            if name in registry_path:
+                continue
+
+            delete_registry(registry_parser[root_key], os.path.join(registry_sub_key, name), arch)
+
+        check_time_travel(time_travel, monitor=log_monitor)
+        registry_event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event_delete)
+
+        if triggers_event_delete:
+            logger.info("'deleted' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
 
 
 class CustomValidator:
@@ -1254,6 +2292,32 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         logger.info("'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
 
+def calculate_registry_diff_paths(reg_key, reg_subkey, arch, value_name):
+    """
+    Calculate the diff folder path of a value.
+    Parameters
+    ---------
+    reg_key: str
+        Registry name (HKEY_* constants).
+    reg_subkey: str
+        Path of the subkey.
+    arch: int
+        architecture of the registry.
+    value_name: str
+        name of the value.
+
+    Returns
+    -------
+    A tuple with the diff folder path of the key and the path of the value.
+    """
+    key_path = os.path.join(reg_key, reg_subkey)
+    folder_path = "{} {}".format("[x32]" if arch == KEY_WOW64_32KEY else "[x64]",
+                                 sha1(key_path.encode()).hexdigest())
+    diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'registry', folder_path,
+                             sha1(value_name.encode()).hexdigest(), 'last-entry.gz')
+    return (folder_path, diff_file)
+
+
 def detect_initial_scan(file_monitor):
     """
     Detect initial scan when restarting Wazuh.
@@ -1267,6 +2331,33 @@ def detect_initial_scan(file_monitor):
                        error_message='Did not receive expected "File integrity monitoring scan ended" event')
 
 
+def detect_realtime_start(file_monitor):
+    """
+    Detect realtime engine start when restarting Wazuh.
+
+    Parameters
+    ----------
+    file_monitor : FileMonitor
+        File log monitor to detect events
+    """
+    file_monitor.start(timeout=60, callback=callback_num_inotify_watches,
+                       error_message='Did not receive expected "Folders monitored with real-time engine..." event')
+
+
+def detect_whodata_start(file_monitor):
+    """
+    Detect whodata engine start when restarting Wazuh.
+
+    Parameters
+    ----------
+    file_monitor : FileMonitor
+        File log monitor to detect events
+    """
+    file_monitor.start(timeout=60, callback=callback_real_time_whodata_started,
+                       error_message='Did not receive expected'
+                                     '"File integrity monitoring real-time Whodata engine started" event')
+
+
 def generate_params(extra_params: dict = None, apply_to_all: Union[Sequence[Any], Generator[dict, None, None]] = None,
                     modes: list = None):
     """
@@ -1274,7 +2365,8 @@ def generate_params(extra_params: dict = None, apply_to_all: Union[Sequence[Any]
 
     extra_params = {'WILDCARD': {'attribute': ['list', 'of', 'values']}} - Max. 3 elements in the list of values
                         or
-                   {'WILDCARD': {'attribute': 'value'}} - It will have the same value for scheduled, realtime and whodata
+                   {'WILDCARD': {'attribute': 'value'}} - It will have the same value for scheduled, realtime and
+                                                          whodata
                         or
                    {'WILDCARD': 'value'} - Valid when param is not an attribute. (ex: 'MODULE_NAME': __name__)
                         or
@@ -1406,6 +2498,10 @@ def get_fim_mode_param(mode, key='FIM_MODE'):
         Params: The key is `key` and the value is the string to be replaced in the target configuration.
         Metadata: The key is `key` in lowercase and the value is always `mode`.
     """
+
+    if mode not in global_parameters.fim_mode:
+        return None, None
+
     metadata = {key.lower(): mode}
     if mode == 'scheduled':
         return {key: ''}, metadata

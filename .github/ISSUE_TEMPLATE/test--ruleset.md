@@ -16,9 +16,9 @@ assignees: ''
 ## Analysisd performance
 
 - [ ] Check the manager starts with an empty `ossec.conf`.
-- [ ] Change the number of threads used by analysisd in the internal options. Check the performance at `var/run/ossec-analysisd.state` depending on the threads.
+- [ ] Change the number of threads used by analysisd in the internal options. Check the performance at `var/run/wazuh-analysisd.state` depending on the threads.
 - [ ] Change the value of the queues size of analysisd. Check its behavior when flooded.
-- [ ] Check the refresh interval of `ossec-analysisd.state` matches with the defined `analysisd.state_interval` at internal options.
+- [ ] Check the refresh interval of `wazuh-analysisd.state` matches with the defined `analysisd.state_interval` at internal options.
 - [ ] Check every file is written correctly when enabling/disabling `alerts_log`, `jsonout_output`, `logall` and `logall_json` options.
 
 ## Ruleset
@@ -34,7 +34,7 @@ assignees: ''
 - [ ] Make the manager fails when starting by setting a duplicated rule ID, as well as other invalid fields.
 - [ ] Decode static and dynamic fields and use them into a rule.
 - [ ] Trigger a rule depending on a CDB list.
-- [ ] Trigger an alert by using `ossec-logtest`.
+- [ ] Trigger an alert by using `wazuh-logtest`.
 
 https://documentation.wazuh.com/current/user-manual/ruleset/ruleset-xml-syntax/rules.html
 

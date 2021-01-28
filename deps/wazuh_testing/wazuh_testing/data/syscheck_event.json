@@ -265,7 +265,6 @@
             "group_id",
             "group_name",
             "process_name",
-            "path",
             "audit_uid",
             "audit_name",
             "effective_uid",
@@ -320,15 +319,6 @@
                 "/usr/bin/touch"
               ],
               "pattern": "^(.*)$"
-            },
-            "path": {
-              "$id": "#/properties/data/properties/audit/properties/path",
-              "type": "string",
-              "default": "",
-              "examples": [
-                "/testdir1/example"
-              ],
-              "pattern": "^(?:\\/[^\\/]+)*$"
             },
             "audit_uid": {
               "$id": "#/properties/data/properties/audit/properties/audit_uid",

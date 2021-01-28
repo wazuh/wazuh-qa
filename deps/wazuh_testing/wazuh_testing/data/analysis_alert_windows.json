@@ -73,6 +73,63 @@
           ],
           "pattern": "^(.*)$"
         },
+        "mitre": {
+          "$id": "#/properties/rule/properties/mitre",
+          "type": "object",
+          "title": "The Mitre Schema",
+          "required": [
+            "id",
+            "tactic",
+            "technique"
+          ],
+          "properties": {
+            "id": {
+              "$id": "#/properties/rule/properties/mitre/properties/id",
+              "type": "array",
+              "title": "The Id Schema",
+              "items": {
+                "$id": "#/properties/rule/properties/mitre/properties/id/items",
+                "type": "string",
+                "title": "The Items Schema",
+                "default": "",
+                "examples": [
+                  "T1120"
+                ],
+                "pattern": "^(.*)$"
+              }
+            },
+            "tactic": {
+              "$id": "#/properties/rule/properties/mitre/properties/tactic",
+              "type": "array",
+              "title": "The Tactic Schema",
+              "items": {
+                "$id": "#/properties/rule/properties/mitre/properties/tactic/items",
+                "type": "string",
+                "title": "The Items Schema",
+                "default": "",
+                "examples": [
+                  "Discovery"
+                ],
+                "pattern": "^(.*)$"
+              }
+            },
+            "technique": {
+              "$id": "#/properties/rule/properties/mitre/properties/technique",
+              "type": "array",
+              "title": "The technique Schema",
+              "items": {
+                "$id": "#/properties/rule/properties/mitre/properties/technique/items",
+                "type": "string",
+                "title": "The Items Schema",
+                "default": "",
+                "examples": [
+                  "Stored Data Manipulation"
+                ],
+                "pattern": "^(.*)$"
+              }
+            }
+          }
+        },
         "firedtimes": {
           "$id": "#/properties/rule/properties/firedtimes",
           "type": "integer",
@@ -118,6 +175,22 @@
             "default": "",
             "examples": [
               "11.5"
+            ],
+            "pattern": "^(.*)$"
+          }
+        },
+        "tsc": {
+          "$id": "#/properties/rule/properties/tsc",
+          "type": "array",
+          "title": "The TSC Schema",
+          "items": {
+            "$id": "#/properties/rule/properties/tsc/items",
+            "type": "string",
+            "title": "The Items Schema",
+            "default": "",
+            "examples": [
+              "PI1.4",
+              "CC6.1"
             ],
             "pattern": "^(.*)$"
           }
@@ -313,9 +386,42 @@
           "title": "The Path Schema",
           "default": "",
           "examples": [
-            "c:\\testdir0\\example"
+            "c:\\testdir0\\example",
+            "HKEY_LOCAL_MACHINE\\SOFTWARE\\testkey"
           ],
-          "pattern": "^[a-zA-Z]:\\\\(((?![<>:\"/\\\\|?*]).)+((?<![ .])\\\\)?)*$"
+          "pattern": "(^(?:([a-zA-Z]\\:|\\/)[^\\/]+)*$)|(^HKEY_[a-zA-Z_]+\\\\.+$)"
+        },
+        "arch": {
+          "$id": "#/properties/data/properties/arch",
+          "type": "string",
+          "enum": ["[x32]", "[x64]"],
+          "examples": [
+            "[x32]",
+            "[x64]"
+          ],
+          "pattern": "^\\[x(32|64)\\]$"
+        },
+        "value_name": {
+          "$id": "#/properties/data/properties/value_name",
+          "type": "string",
+          "default": "",
+          "examples": [
+            "New Value #1",
+            "Some_value"
+          ],
+          "pattern": "^(.*)$"
+        },
+        "value_type": {
+          "$id": "#/properties/data/properties/attributes/properties/type",
+          "type": "string",
+          "enum": ["REG_NONE", "REG_SZ", "REG_EXPAND_SZ", "REG_BINARY", "REG_DWORD", "REG_DWORD_BIG_ENDIAN",
+                   "REG_LINK", "REG_MULTI_SZ", "REG_RESOURCE_LIST", "REG_FULL_RESOURCE_DESCRIPTOR",
+                   "REG_RESOURCE_REQUIREMENTS_LIST", "REG_QWORD"],
+          "examples": [
+            "REG_SZ"
+          ],
+          "pattern": "^(.*)$"
+
         },
         "size_before": {
           "$id": "#/properties/syscheck/properties/size_before",
@@ -457,6 +563,26 @@
           "$id": "#/properties/syscheck/properties/uid_after",
           "type": "string",
           "title": "The Uid_after Schema",
+          "default": "",
+          "examples": [
+            "S-1-5-21-3527455827-79240758-596275861-1001"
+          ],
+          "pattern": "^[0-9a-fA-FS\\-]+$"
+        },
+        "gid_before": {
+          "$id": "#/properties/syscheck/properties/gid_before",
+          "type": "string",
+          "title": "The Gid_before Schema",
+          "default": "",
+          "examples": [
+            "S-1-5-21-3527455827-79240758-596275861-1001"
+          ],
+          "pattern": "^[0-9a-fA-FS\\-]+$"
+        },
+        "gid_after": {
+          "$id": "#/properties/syscheck/properties/gid_after",
+          "type": "string",
+          "title": "The Gid_after Schema",
           "default": "",
           "examples": [
             "S-1-5-21-3527455827-79240758-596275861-1001"
@@ -617,6 +743,17 @@
             ],
             "pattern": "^(.*)$"
           }
+        },
+        "mode": {
+          "$id": "#/properties/syscheck/properties/mode",
+          "type": "string",
+          "enum": ["realtime", "whodata", "scheduled"],
+          "title": "The Mode Schema",
+          "default": "",
+          "examples": [
+            "realtime"
+          ],
+          "pattern": "^(.*)$"
         },
         "changed_attributes": {
           "$id": "#/properties/syscheck/properties/changed_attributes",

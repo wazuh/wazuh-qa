@@ -7,6 +7,7 @@ import os
 import shutil
 import subprocess
 import sys
+import re
 import uuid
 from datetime import datetime
 
@@ -15,23 +16,28 @@ from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, WAZUH_SERVICE
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, WAZUH_SERVICE, ALERT_FILE_PATH
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController
+from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
+
+if sys.platform == 'win32':
+    from wazuh_testing.fim import KEY_WOW64_64KEY, KEY_WOW64_32KEY, delete_registry, registry_parser, create_registry
 
 PLATFORMS = set("darwin linux win32 sunos5".split())
 HOST_TYPES = set("server agent".split())
 
 catalog = list()
+results = dict()
 
 
 def pytest_runtest_setup(item):
     # Find if platform applies
     supported_platforms = PLATFORMS.intersection(mark.name for mark in item.iter_markers())
     plat = sys.platform
+
     if supported_platforms and plat not in supported_platforms:
         pytest.skip("Cannot run on platform {}".format(plat))
 
@@ -39,7 +45,6 @@ def pytest_runtest_setup(item):
     supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())
     if supported_types and host_type not in supported_types:
         pytest.skip("Cannot run on wazuh {}".format(host_type))
-
     # Consider only first mark
     levels = [mark.kwargs['level'] for mark in item.iter_markers(name="tier")]
     if levels and len(levels) > 0:
@@ -72,6 +77,20 @@ def reset_ossec_log(get_configuration, request):
     truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
+
+
+@pytest.fixture(scope='module')
+def restart_wazuh_alerts(get_configuration, request):
+    # Stop Wazuh
+    control_service('stop')
+
+    # Reset alerts.json and start a new monitor
+    truncate_file(ALERT_FILE_PATH)
+    file_monitor = FileMonitor(ALERT_FILE_PATH)
+    setattr(request.module, 'wazuh_alert_monitor', file_monitor)
+
+    # Start Wazuh
+    control_service('start')
 
 
 def pytest_addoption(parser):
@@ -146,6 +165,22 @@ def pytest_addoption(parser):
         type=str,
         help="run tests using Google Cloud topic name"
     )
+    parser.addoption(
+        "--fim_mode",
+        action="append",
+        metavar="fim_mode",
+        default=None,
+        type=str,
+        help="run tests using a specific FIM mode"
+    )
+    parser.addoption(
+        "--wpk_version",
+        action="append",
+        metavar="wpk_version",
+        default=None,
+        type=str,
+        help="run tests using a specific WPK package version"
+    )
 
 
 def pytest_configure(config):
@@ -184,6 +219,14 @@ def pytest_configure(config):
     if gcp_topic_name:
         global_parameters.gcp_topic_name = gcp_topic_name
 
+    # Set fim_mode only if it is passed through command line args
+    mode = config.getoption("--fim_mode")
+    if not mode:
+        mode = ["scheduled", "whodata", "realtime"]
+    global_parameters.fim_mode = mode
+
+    # Set WPK package version
+    global_parameters.wpk_version = config.getoption("--wpk_version")  
 
 def pytest_html_results_table_header(cells):
     cells.insert(4, html.th('Tier', class_='sortable tier', col='tier'))
@@ -240,6 +283,9 @@ def pytest_runtest_makereport(item, call):
     report.markers = ', '.join(mark.name for mark in item.iter_markers() if
                                mark.name != 'tier' and mark.name != 'parametrize')
 
+    if report.location[0] not in results:
+        results[report.location[0]] = {'passed': 0, 'failed': 0, 'skipped': 0, 'xfailed': 0, 'error': 0}
+
     extra = getattr(report, 'extra', [])
     if report.when == 'call':
         # Apply hack to fix length filename problem
@@ -272,6 +318,47 @@ def pytest_runtest_makereport(item, call):
 
         if not report.passed and not report.skipped:
             report.extra = extra
+
+        if report.longrepr is not None and report.longreprtext.split()[-1] == 'XFailed':
+            results[report.location[0]]['xfailed'] += 1
+        else:
+            results[report.location[0]][report.outcome] += 1
+
+    elif report.outcome == 'failed':
+        results[report.location[0]]['error'] += 1
+
+
+class SummaryTable(html):
+    class table(html.table):
+        style = html.Style(border='1px solid #e6e6e6', margin='16px 0px', color='#999', font_size='12px')
+
+    class td(html.td):
+        style = html.Style(padding='5px', border='1px solid #E6E6E6', text_align='left')
+
+    class th(html.th):
+        style = html.Style(padding='5px', border='1px solid #E6E6E6', text_align='left', font_weight='bold')
+
+
+def pytest_html_results_summary(prefix, summary, postfix):
+    postfix.extend([SummaryTable.table(
+        html.thead(
+            html.tr([
+                SummaryTable.th("Tests"),
+                SummaryTable.th("Failed"),
+                SummaryTable.th("Success"),
+                SummaryTable.th("XFail"),
+                SummaryTable.th("Error")]
+            ),
+        ),
+        [html.tbody(
+            html.tr([
+                SummaryTable.td(k),
+                SummaryTable.td(v['failed']),
+                SummaryTable.td(v['passed']),
+                SummaryTable.td(v['xfailed']),
+                SummaryTable.td(v['error']),
+            ])
+        ) for k, v in results.items()])])
 
 
 def connect_to_sockets(request):
@@ -335,6 +422,16 @@ def configure_environment(get_configuration, request):
         for test_dir in test_directories:
             os.makedirs(test_dir, exist_ok=True, mode=0o777)
 
+    # Create test registry keys
+    if sys.platform == 'win32':
+        if hasattr(request.module, 'test_regs'):
+            test_regs = getattr(request.module, 'test_regs')
+
+            for reg in test_regs:
+                match = re.match(r"(^HKEY_[a-zA-Z_]+)\\+(.+$)", reg)
+                create_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_32KEY)
+                create_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_64KEY)
+
     # Set new configuration
     write_wazuh_conf(test_config)
 
@@ -364,6 +461,13 @@ def configure_environment(get_configuration, request):
             shutil.rmtree(test_dir, ignore_errors=True)
 
     if sys.platform == 'win32':
+        if hasattr(request.module, 'test_regs'):
+            for reg in test_regs:
+                match = re.match(r"(^HKEY_[a-zA-Z_]+)\\+(.+$)", reg)
+                delete_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_32KEY)
+                delete_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_64KEY)
+
+    if sys.platform == 'win32':
         control_service('start')
 
     # Restore previous configuration
@@ -380,7 +484,7 @@ def configure_environment(get_configuration, request):
 
 
 @pytest.fixture(scope='module')
-def configure_mitm_environment(request):
+def configure_sockets_environment(request):
     """Configure environment for sockets and MITM"""
     monitored_sockets_params = getattr(request.module, 'monitored_sockets_params')
     log_monitor_paths = getattr(request.module, 'log_monitor_paths')
@@ -431,3 +535,24 @@ def configure_mitm_environment(request):
     delete_dbs()
 
     control_service('start')
+
+
+@pytest.fixture(scope='module')
+def put_env_variables(get_configuration, request):
+    """
+    Create environment variables
+    """
+    if hasattr(request.module, 'environment_variables'):
+        environment_variables = getattr(request.module, 'environment_variables')
+        for env, value in environment_variables:
+            if sys.platform == 'win32':
+                subprocess.call(['setx.exe', env, value, '/m'])
+            else:
+                os.putenv(env, value)
+
+    yield
+
+    if hasattr(request.module, 'environment_variables'):
+        for env in environment_variables:
+            if sys.platform != 'win32':
+                os.unsetenv(env[0])

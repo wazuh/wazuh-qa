@@ -110,7 +110,7 @@ sed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time-
 echo 'monitord.rotate_log=0' >> $wazuh_path/etc/local_internal_options.conf
 
 # Restart Wazuh
-/var/ossec/bin/ossec-control restart
+/var/ossec/bin/wazuh-control restart
 ```
 
 ### MacOS
@@ -146,7 +146,7 @@ gsed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time
 echo 'monitord.rotate_log=0' >> /Library/Ossec/etc/local_internal_options.conf
 
 # Restart Wazuh
-/Library/Ossec/bin/ossec-control restart
+/Library/Ossec/bin/wazuh-control restart
 ```
 
 Finally, copy your `wazuh-qa` repository within your testing environment and you are set.

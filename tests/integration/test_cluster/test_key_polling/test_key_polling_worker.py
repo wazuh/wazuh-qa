@@ -55,11 +55,12 @@ def get_configuration(request):
 # Tests
 
 
+@pytest.mark.skip(reason='Development in progress: https://github.com/wazuh/wazuh/issues/4387')
 @pytest.mark.parametrize('cmd, counter, payload', [
     (b'run_keypoll', 1, b'{"message": "id:001"}'),
     (b'run_keypoll', 2, b'{"message": "ip:124.0.0.1"}')
 ])
-def test_key_polling_worker(cmd, counter, payload, configure_environment, configure_mitm_environment,
+def test_key_polling_worker(cmd, counter, payload, configure_environment, configure_sockets_environment,
                             detect_initial_worker_connected, connect_to_sockets_function):
     """
     Test worker behaviour with agent key-polling.

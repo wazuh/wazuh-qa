@@ -40,7 +40,7 @@ mitm_analysisd = ManInTheMiddle(address=analysis_path, family='AF_UNIX', connect
 #                daemon_first: bool))
 # Example1 -> ('wazuh-clusterd', None)              Only start wazuh-clusterd with no MITM
 # Example2 -> ('wazuh-clusterd', (my_mitm, True))   Start MITM and then wazuh-clusterd
-monitored_sockets_params = [('wazuh-db', mitm_wdb, True), ('ossec-analysisd', mitm_analysisd, True)]
+monitored_sockets_params = [('wazuh-db', mitm_wdb, True), ('wazuh-analysisd', mitm_analysisd, True)]
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
@@ -50,7 +50,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 @pytest.mark.parametrize('test_case',
                          [test_case['test_case'] for test_case in test_cases],
                          ids=[test_case['name'] for test_case in test_cases])
-def test_event_messages(configure_mitm_environment, connect_to_sockets_module, wait_for_analysisd_startup,
+def test_event_messages(configure_sockets_environment, connect_to_sockets_module, wait_for_analysisd_startup,
                         test_case: list):
     """Check that every input message in analysisd socket generates the adequate output to wazuh-db socket.
 

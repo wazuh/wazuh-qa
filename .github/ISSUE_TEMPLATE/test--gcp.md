@@ -66,7 +66,7 @@ Fields project_id, subscription_name and credentials_file are required to run th
 
 **Expected outputs**
 ```
-# /var/ossec/bin/ossec-control restart
+# /var/ossec/bin/wazuh-control restart
 ```
 > 2019/11/26 10:21:05 wazuh-modulesd: ERROR: No value defined for tag 'project_id' in module 'gcp-pubsub'
 > 2019/11/26 10:21:05 wazuh-modulesd: ERROR: (1202): Configuration error at '/var/ossec/etc/ossec.conf'.

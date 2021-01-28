@@ -55,5 +55,5 @@ def test_experimental_features(tags_to_apply, get_configuration, configure_api_e
         assert get_response.status_code == 200, f'Expected status code was 200, ' \
             f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
     else:
-        assert get_response.status_code == 400, f'Expected status code was 400, ' \
+        assert get_response.status_code == 404, f'Expected status code was 404, ' \
             f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'

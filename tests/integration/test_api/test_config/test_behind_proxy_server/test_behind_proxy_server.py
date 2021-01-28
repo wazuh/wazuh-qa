@@ -7,7 +7,6 @@ import time
 from secrets import token_hex
 import random
 from ipaddress import IPv4Address
-from requests.packages.urllib3.util.retry import Retry
 
 import pytest
 import requests
@@ -36,6 +35,7 @@ def get_configuration(request):
 
 # Tests
 
+@pytest.mark.xfail(reason='To be deprecated in https://github.com/wazuh/wazuh/issues/7006')
 @pytest.mark.parametrize('tags_to_apply', [
     {'bps_enabled'},
     {'bps_disabled'},
@@ -80,8 +80,9 @@ def test_behind_proxy_server(insert_agent, tags_to_apply, get_configuration, con
     api_details['base_url'] += '/agents'
 
     # Delete previous agents to avoid duplicate data error.
-    delete_url = api_details['base_url'] + f"?purge=true&status=&older_than=0s"
-    requests.delete(delete_url, headers=api_details['auth_headers'], verify=False)
+    delete_url = api_details['base_url'] + f"?agents_list=all&purge=true&status=&older_than=0s&status=all"
+    delete_response = requests.delete(delete_url, headers=api_details['auth_headers'], verify=False)
+    assert delete_response.status_code == 200, f'Delete response was not 200. Response: {delete_response.text}'
 
     # Add agent
     post_url = api_details['base_url'] + '/insert' if insert_agent else api_details['base_url']
@@ -91,7 +92,7 @@ def test_behind_proxy_server(insert_agent, tags_to_apply, get_configuration, con
         agent_id = post_response.json()['data']['id']
 
         # Get the agent to check its IP
-        api_details['base_url'] += f"?list_agents={agent_id}"
+        api_details['base_url'] += f"?agents_list={agent_id}"
 
         # It is necessary to wait a bit after adding the agent before querying it.
         retries = 0
@@ -111,7 +112,7 @@ def test_behind_proxy_server(insert_agent, tags_to_apply, get_configuration, con
             assert register_ip != proxy_ip, 'IP should not be equal to the one in "X-Forwarded-For" header, but it is.'
 
         # Delete the agent
-        api_details['base_url'] += f"&purge=true&status=&older_than=0s"
+        api_details['base_url'] += f"&purge=true&status=&older_than=0s&status=all"
         requests.delete(api_details['base_url'], headers=api_details['auth_headers'], verify=False)
 
     else:

@@ -13,7 +13,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
-pytestmark = [pytest.mark.tier(level=1)]
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
 # variables
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -39,7 +39,7 @@ def get_configuration(request):
 # Tests
 
 
-def test_sync_disabled(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
+def test_sync_disabled(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """
     Verify that synchronization is disabled when enabled is set to no in the configuration.
     """
