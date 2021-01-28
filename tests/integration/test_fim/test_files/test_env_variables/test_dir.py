@@ -19,8 +19,13 @@ pytestmark = pytest.mark.tier(level=2)
 # Variables and configuration
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
+if sys.platform == 'win32':
+    long_path = 'a' * 234 + '\\'
+else:
+    long_path = os.path.join(*[('a' * 255) for i in range(15)], 'a' * 230) + '\\'
+
 test_directories = [os.path.join(PREFIX, 'testdir1'),
-                    os.path.join(PREFIX, 'testdir2'),
+                    os.path.join(PREFIX, long_path),
                     os.path.join(PREFIX, 'testdir3'),
                     os.path.join(PREFIX, 'testdir4')
                     ]
