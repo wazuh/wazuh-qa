@@ -213,11 +213,11 @@ def wait_ar_line(line):
     return None
 
 
-def validate_old_ar_message(id, name, message, extra_args, timeout, all_agents):
+def validate_old_ar_message(id, message, extra_args, timeout, all_agents):
     args = message.split()
 
-    assert args[0] == f'({name})', 'Agent name did not match expected!'
-    assert args[1] == LOG_LOCATION, 'Event location did not match expected!'
+    assert args[0] == f'(local_source)', 'Event location did not match expected!'
+    assert args[1] == '[]', 'Source IP did not match expected!'
     if all_agents == 'yes':
         assert args[2] == 'NNS', 'AR flags did not match expected!'
         assert args[3] in id, 'Agent ID did not match expected!'
@@ -237,11 +237,11 @@ def validate_old_ar_message(id, name, message, extra_args, timeout, all_agents):
         assert args[13] == ARG2, 'ARG2 did not match expected!'
 
 
-def validate_new_ar_message(id, name, message, extra_args, timeout, all_agents):
+def validate_new_ar_message(id, message, extra_args, timeout, all_agents):
     args = message.split(' ', 4)
 
-    assert args[0] == f'({name})', 'Agent name did not match expected!'
-    assert args[1] == LOG_LOCATION, 'Event location did not match expected!'
+    assert args[0] == f'(local_source)', 'Event location did not match expected!'
+    assert args[1] == '[]', 'Source IP did not match expected!'
     if all_agents == 'yes':
         assert args[2] == 'NNS', 'AR flags did not match expected!'
         assert args[3] in id, 'Agent ID did not match expected!'
@@ -316,10 +316,10 @@ def test_os_exec(set_debug_mode, get_configuration, configure_environment, resta
 
             if agent.os == 'ubuntu20.04':
                 # Version 4.2
-                validate_new_ar_message(agents_id, SERVER_NAME, last_log, extra_args, timeout, all_agents)
+                validate_new_ar_message(agents_id, last_log, extra_args, timeout, all_agents)
             else:
                 # Version < 4.2
-                validate_old_ar_message(agents_id, SERVER_NAME, last_log, extra_args, timeout, all_agents)
+                validate_old_ar_message(agents_id, last_log, extra_args, timeout, all_agents)
 
     else:
         for agent in agents:
@@ -336,10 +336,10 @@ def test_os_exec(set_debug_mode, get_configuration, configure_environment, resta
 
             if agent.os == 'ubuntu20.04':
                 # Version 4.2
-                validate_new_ar_message(agent.id, agent.name, last_log, extra_args, timeout, all_agents)
+                validate_new_ar_message(agent.id, last_log, extra_args, timeout, all_agents)
             else:
                 # Version < 4.2
-                validate_old_ar_message(agent.id, agent.name, last_log, extra_args, timeout, all_agents)
+                validate_old_ar_message(agent.id, last_log, extra_args, timeout, all_agents)
 
     for injector in injectors:
         injector.stop_receive()
