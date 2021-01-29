@@ -36,6 +36,9 @@ Temporary Items
 .vscode/*
 .mypy_cache/
 
+## Pycharm
+.idea/*
+
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
 .history

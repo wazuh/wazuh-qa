@@ -13,7 +13,6 @@ from multiprocessing import Process, Manager
 
 import pandas as pd
 import pytest
-
 from wazuh_testing import logger
 from wazuh_testing.fim import callback_realtime_added_directory
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_CONF, LOG_FILE_PATH

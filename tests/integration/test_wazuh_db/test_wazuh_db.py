@@ -8,9 +8,7 @@ import time
 
 import pytest
 import yaml
-
 from wazuh_testing.tools import WAZUH_PATH
-from wazuh_testing.tools.monitoring import ManInTheMiddle
 
 # Marks
 
@@ -64,7 +62,7 @@ def regex_match(regex, string):
 def pre_insert_agents():
     AGENTS_CANT = 14000
     AGENTS_OFFSET = 20
-    for id in range(AGENTS_OFFSET, AGENTS_OFFSET+AGENTS_CANT):
+    for id in range(AGENTS_OFFSET, AGENTS_OFFSET + AGENTS_CANT):
         command = f'global insert-agent {{"id":{id},"name":"TestName{id}","date_add":1599223378}}'
         receiver_sockets[0].send(command, size=True)
         response = receiver_sockets[0].receive(size=True).decode()
@@ -76,6 +74,7 @@ def pre_insert_agents():
         response = receiver_sockets[0].receive(size=True).decode()
         data = response.split(" ", 1)
         assert data[0] == 'ok', f'Unable to update agent {id}'
+
 
 @pytest.mark.parametrize('test_case',
                          [case['test_case'] for module_data in module_tests for case in module_data[0]],
@@ -103,8 +102,8 @@ def test_wazuh_db_messages(configure_sockets_environment, connect_to_sockets_mod
             match = True if regex_match(expected, response) else False
         else:
             match = (expected == response)
-        assert match, 'Failed test case stage {}: {}. Expected: {}. Response: {}'\
-               .format(index + 1, stage['stage'], expected, response)
+        assert match, 'Failed test case stage {}: {}. Expected: {}. Response: {}' \
+            .format(index + 1, stage['stage'], expected, response)
 
 
 def test_wazuh_db_create_agent(configure_sockets_environment, connect_to_sockets_module):
@@ -127,8 +126,8 @@ def test_wazuh_db_chunks(configure_sockets_environment, connect_to_sockets_modul
         response = receiver_sockets[0].receive(size=True).decode()
 
         status = response.split(" ", 1)[0]
-        assert status == 'due', 'Failed chunks check on < {} >. Expected: {}. Response: {}'\
-               .format(command, 'due', status)
+        assert status == 'due', 'Failed chunks check on < {} >. Expected: {}. Response: {}' \
+            .format(command, 'due', status)
 
     # Check get-all-agents chunk limit
     send_chunk_command('global get-all-agents last_id 0')
@@ -137,4 +136,4 @@ def test_wazuh_db_chunks(configure_sockets_environment, connect_to_sockets_modul
     # Check get-agents-by-connection-status chunk limit
     send_chunk_command('global get-agents-by-connection-status 0 active')
     # Check disconnect-agents chunk limit
-    send_chunk_command('global disconnect-agents 0 {} syncreq'.format(str(int(time.time())+1)))
+    send_chunk_command('global disconnect-agents 0 {} syncreq'.format(str(int(time.time()) + 1)))

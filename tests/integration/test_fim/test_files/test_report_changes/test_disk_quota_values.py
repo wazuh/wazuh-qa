@@ -6,19 +6,16 @@ import os
 import sys
 
 import pytest
-
+from test_fim.test_files.test_report_changes.common import disable_file_max_size, restore_file_max_size
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_disk_quota_limit_reached, generate_params
-from test_fim.test_files.test_report_changes.common import disable_file_max_size, restore_file_max_size
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
-
 # Marks
 
 pytestmark = [pytest.mark.tier(level=1)]
-
 
 # Variables
 
@@ -39,7 +36,6 @@ directory_str = ','.join(test_dirs)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_dirs[0]
-
 
 # Configurations
 
@@ -99,6 +95,6 @@ def test_disk_quota_values(tags_to_apply, get_configuration, configure_environme
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout*25, callback=callback_disk_quota_limit_reached,
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 25, callback=callback_disk_quota_limit_reached,
                             error_message='Did not receive expected '
-                            '"The maximum configured size for the ... folder has been reached, ..." event.')
+                                          '"The maximum configured size for the ... folder has been reached, ..." event.')

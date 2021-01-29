@@ -6,7 +6,6 @@ import os
 
 import pytest
 import yaml
-
 from wazuh_testing import global_parameters
 from wazuh_testing.analysis import callback_analysisd_message, callback_wazuh_db_message
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH

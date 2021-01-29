@@ -6,7 +6,6 @@ import os
 
 import pytest
 import yaml
-
 from wazuh_testing import global_parameters
 from wazuh_testing.analysis import callback_analysisd_message, validate_analysis_integrity_state, \
     callback_wazuh_db_integrity

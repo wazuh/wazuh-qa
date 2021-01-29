@@ -6,7 +6,6 @@ import os
 import sys
 
 import pytest
-
 from wazuh_testing.fim import LOG_FILE_PATH, callback_configuration_error
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test

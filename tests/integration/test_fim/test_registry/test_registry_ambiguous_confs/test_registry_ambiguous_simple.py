@@ -5,12 +5,11 @@
 import os
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, registry_value_cud, registry_key_cud, CHECK_GROUP, \
-                              CHECK_ALL, CHECK_MTIME, CHECK_OWNER, CHECK_SIZE, CHECK_SUM, KEY_WOW64_32KEY, \
-                              KEY_WOW64_64KEY, REQUIRED_REG_KEY_ATTRIBUTES, REQUIRED_REG_VALUE_ATTRIBUTES, \
-                              generate_params
+    CHECK_ALL, CHECK_MTIME, CHECK_OWNER, CHECK_SIZE, CHECK_SUM, KEY_WOW64_32KEY, \
+    KEY_WOW64_64KEY, REQUIRED_REG_KEY_ATTRIBUTES, REQUIRED_REG_VALUE_ATTRIBUTES, \
+    generate_params
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -73,6 +72,7 @@ p, m = generate_params(extra_params=conf_params, modes=['scheduled'])
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
+
 # Fixtures
 
 
@@ -85,8 +85,8 @@ def get_configuration(request):
 # Tests
 
 @pytest.mark.parametrize('key, sub_keys, is_key, name', [
-                        (key, (subkey_1, os.path.join(subkey_1, key_name)), True, "onekey"),
-                        (key, (subkey_2, os.path.join(subkey_2, key_name)), False, "other_value")
+    (key, (subkey_1, os.path.join(subkey_1, key_name)), True, "onekey"),
+    (key, (subkey_2, os.path.join(subkey_2, key_name)), False, "other_value")
 ])
 def test_ambiguous_restrict(key, sub_keys, is_key, name,
                             get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
@@ -122,9 +122,9 @@ def test_ambiguous_restrict(key, sub_keys, is_key, name,
 
 
 @pytest.mark.parametrize('key, sub_keys, arch', [
-                        (key, (subkey_1, os.path.join(subkey_1, key_name)), KEY_WOW64_64KEY),
-                        (key, (subkey_2, os.path.join(subkey_2, key_name)), KEY_WOW64_64KEY),
-                        (key, (subkey_2, os.path.join(subkey_2, key_name)), KEY_WOW64_32KEY)
+    (key, (subkey_1, os.path.join(subkey_1, key_name)), KEY_WOW64_64KEY),
+    (key, (subkey_2, os.path.join(subkey_2, key_name)), KEY_WOW64_64KEY),
+    (key, (subkey_2, os.path.join(subkey_2, key_name)), KEY_WOW64_32KEY)
 ])
 def test_ambiguous_tags(key, sub_keys, arch,
                         get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
@@ -162,9 +162,9 @@ def test_ambiguous_tags(key, sub_keys, arch,
 
 
 @pytest.mark.parametrize('key, subkey, arch', [
-                        (key, os.path.join(subkey_1, recursion_key), KEY_WOW64_64KEY),
-                        (key, os.path.join(subkey_2, recursion_key), KEY_WOW64_64KEY),
-                        (key, os.path.join(subkey_2, recursion_key), KEY_WOW64_32KEY)
+    (key, os.path.join(subkey_1, recursion_key), KEY_WOW64_64KEY),
+    (key, os.path.join(subkey_2, recursion_key), KEY_WOW64_64KEY),
+    (key, os.path.join(subkey_2, recursion_key), KEY_WOW64_32KEY)
 ])
 def test_ambiguous_recursion(key, subkey, arch,
                              get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
@@ -201,8 +201,8 @@ def test_ambiguous_recursion(key, subkey, arch,
 
 
 @pytest.mark.parametrize('key, subkey, key_checkers, subkey_checkers', [
-                        (key, (subkey_1, os.path.join(subkey_1, key_name)), checkers_key_case1, checkers_subkey_case1),
-                        (key, (subkey_2, os.path.join(subkey_2, key_name)), checkers_key_case2, checkers_subkey_case2)
+    (key, (subkey_1, os.path.join(subkey_1, key_name)), checkers_key_case1, checkers_subkey_case1),
+    (key, (subkey_2, os.path.join(subkey_2, key_name)), checkers_key_case2, checkers_subkey_case2)
 ])
 def test_ambiguous_checks(key, subkey, key_checkers, subkey_checkers,
                           get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):

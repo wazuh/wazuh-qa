@@ -3,13 +3,14 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+
 import pytest
+from test_fim.test_files.test_report_changes.common import generate_string
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, registry_value_cud, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, \
-                              calculate_registry_diff_paths
+    calculate_registry_diff_paths
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from test_fim.test_files.test_report_changes.common import generate_string
 
 # Marks
 
@@ -29,7 +30,6 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 reg1, reg2 = test_regs
 size_limit_configured = 10 * 1024
 
-
 # Configurations
 
 p, m = generate_params(modes=['scheduled'], extra_params={'WINDOWS_REGISTRY_1': reg1,
@@ -42,6 +42,7 @@ p, m = generate_params(modes=['scheduled'], extra_params={'WINDOWS_REGISTRY_1': 
 configurations_path = os.path.join(test_data_path, 'wazuh_registry_report_changes_limits_quota.yaml')
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+
 
 # Fixtures
 

@@ -10,20 +10,19 @@ import shutil
 import socket
 import subprocess
 import sys
-import time
 import tempfile
+import time
 from collections import Counter
 from copy import deepcopy
 from datetime import datetime
 from datetime import timedelta
+from hashlib import sha1
 from json import JSONDecodeError
 from stat import ST_ATIME, ST_MTIME
 from typing import Sequence, Union, Generator, Any
-from hashlib import sha1
 
 import pytest
 from jsonschema import validate
-
 from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -104,7 +103,7 @@ if sys.platform == 'win32':
         'HKEY_LOCAL_MACHINE': win32con.HKEY_LOCAL_MACHINE,
         'HKEY_USERS': win32con.HKEY_USERS,
         'HKEY_CURRENT_CONFIG': win32con.HKEY_CURRENT_CONFIG
-        }
+    }
 
     registry_class_name = {
         win32con.HKEY_CLASSES_ROOT: 'HKEY_CLASSES_ROOT',
@@ -168,14 +167,18 @@ else:
     REG_QWORD = 0
     KEY_ALL_ACCESS = 0
 
+
     def registry_value_cud():
         pass
+
 
     def registry_key_cud():
         pass
 
+
     def validate_registry_event():
         pass
+
 
     RegOpenKeyEx = 0
     RegCloseKey = 0
@@ -458,7 +461,7 @@ def create_registry(key, subkey, arch):
 
             key = win32api.RegCreateKeyEx(key, subkey, win32con.KEY_ALL_ACCESS | arch)
 
-            return key[0]   # Ignore the flag that RegCreateKeyEx returns
+            return key[0]  # Ignore the flag that RegCreateKeyEx returns
         except OSError as e:
             logger.warning(f"Registry could not be created: {e}")
         except pywintypes.error as e:
@@ -867,6 +870,7 @@ def modify_file_owner(path, name):
     name : str, bytes
         Name of the file to be modified.
     """
+
     def modify_file_owner_windows():
         cmd = f"takeown /S 127.0.0.1 /U {os.getlogin()} /F " + path_to_file
         subprocess.call(cmd)
@@ -919,6 +923,7 @@ def modify_file_permission(path, name):
     name : str, bytes
         Name of the file to be modified.
     """
+
     def modify_file_permission_windows():
         user, _, _ = win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")
         sd = win32sec.GetFileSecurity(path_to_file, win32sec.DACL_SECURITY_INFORMATION)
@@ -1518,6 +1523,7 @@ class EventChecker:
         error_message : str
             Message to explain a possible timeout error
         """
+
         def clean_results(event_list):
             """Iterate the event_list provided and check if the 'modified' events contained should be merged to fix
             whodata's bug that raise more than one modification event when a file is modified. If some 'modified' event
@@ -1527,7 +1533,7 @@ class EventChecker:
                 return event_list
             result_list = list()
             previous = None
-            while(len(event_list) > 0):
+            while (len(event_list) > 0):
                 current = event_list.pop(0)
                 if current['data']['type'] == "modified":
                     if not previous:
@@ -1571,6 +1577,7 @@ class EventChecker:
         event_type : {'added', 'modified', 'deleted'}
             Expected type of the raised event.
         """
+
         def validate_checkers_per_event(events, options, mode):
             """Check if each event is properly formatted according to some checks.
 
@@ -1739,6 +1746,7 @@ if sys.platform == 'win32':
             check_parent_key : Boolean, optional
                 Check the event raised by the parent key. Default `False`
             """
+
             def validate_checkers_per_event(events, options, mode):
                 """Check if each event is properly formatted according to some checks.
 
@@ -1855,6 +1863,7 @@ if sys.platform == 'win32':
                 result_list.append(expected_elem_path)
 
             return result_list
+
 
     def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, value_list=['test_value'],
                            time_travel=False, min_timeout=1, options=None, triggers_event=True, triggers_event_add=True,
@@ -2004,6 +2013,7 @@ if sys.platform == 'win32':
         if triggers_event_delete:
             logger.info("'deleted' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
 
+
     def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, key_list=['test_key'],
                          time_travel=False, min_timeout=1, options=None, triggers_event=True, triggers_event_add=True,
                          triggers_event_modified=True, triggers_event_delete=True, encoding=None,
@@ -2148,6 +2158,7 @@ if sys.platform == 'win32':
 
 class CustomValidator:
     """Enable using user-defined validators over the events when validating them with EventChecker"""
+
     def __init__(self, validators_after_create=None, validators_after_update=None,
                  validators_after_delete=None, validators_after_cud=None):
         self.validators_create = validators_after_create
@@ -2415,14 +2426,15 @@ def generate_params(extra_params: dict = None, apply_to_all: Union[Sequence[Any]
     tuple (list, list)
         Tuple with the list of parameters and the list of metadata.
     """
+
     def transform_param(mutable_object: dict):
         """Transform `mutable_object` into a valid data structure."""
         for k, v in mutable_object.items():
             if isinstance(v, dict):
                 for v_key, v_value in v.items():
-                    mutable_object[k][v_key] = v_value if isinstance(v_value, list) else [v_value]*len(modes)
+                    mutable_object[k][v_key] = v_value if isinstance(v_value, list) else [v_value] * len(modes)
             elif not isinstance(v, list):
-                mutable_object[k] = [v]*len(modes)
+                mutable_object[k] = [v] * len(modes)
 
     fim_param = []
     fim_metadata = []

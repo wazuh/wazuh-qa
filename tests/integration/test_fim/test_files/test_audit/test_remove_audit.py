@@ -9,7 +9,6 @@ import subprocess
 
 import pytest
 from distro import id
-
 from wazuh_testing.fim import LOG_FILE_PATH, callback_audit_cannot_start
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor

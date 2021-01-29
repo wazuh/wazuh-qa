@@ -5,7 +5,6 @@
 import os
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, REGULAR, callback_detect_event, create_file)
 from wazuh_testing.tools import PREFIX

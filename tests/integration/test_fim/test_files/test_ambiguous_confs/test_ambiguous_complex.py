@@ -6,7 +6,6 @@ import os
 import sys
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, create_file, WAZUH_PATH, callback_restricted, REGULAR, \
     generate_params, check_time_travel

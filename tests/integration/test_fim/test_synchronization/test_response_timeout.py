@@ -8,7 +8,6 @@ from datetime import datetime, timedelta
 
 import psutil
 import pytest
-
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, callback_detect_synchronization, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -38,7 +37,6 @@ for response in response_timeouts:
         if time_to_timedelta(sync) > time_to_timedelta(response):
             list_.append({'RESPONSE_TIMEOUT': response, 'INTERVAL': sync})
 
-
 # configurations
 p, m = generate_params(apply_to_all=list_, modes=['scheduled'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
@@ -67,6 +65,7 @@ def test_response_timeout(num_files, get_configuration, configure_environment, r
     num_files : int
         Number of files to create within the test
     """
+
     def overwrite_agent_conf_file():
         cmd = "sudo sed -i ':a;N;$!ba;s|<synchronization>.*</synchronization>|<synchronization>\
             <enabled>yes</enabled>\

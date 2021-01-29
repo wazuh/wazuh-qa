@@ -3,22 +3,19 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-
-import pytest
-import socket
 import ssl
-import yaml
 import time
 
-from wazuh_testing import global_parameters
+import pytest
+import yaml
 from wazuh_testing.fim import generate_params
-from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
+from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.configuration import set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import SocketController, FileMonitor
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service, check_daemon_status
+
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -35,6 +32,7 @@ def load_tests(path):
     with open(path) as f:
         return yaml.safe_load(f)
 
+
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 ssl_configuration_tests = load_tests(os.path.join(test_data_path, 'enroll_ssl_options_tests.yaml'))
@@ -42,13 +40,13 @@ ssl_configuration_tests = load_tests(os.path.join(test_data_path, 'enroll_ssl_op
 # Ossec.conf configurations
 DEFAULT_CIPHERS = "HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH"
 DEFAULT_AUTO_NEGOTIATE = 'no'
-conf_params = {'CIPHERS' : [], 'SSL_AUTO_NEGOTIATE' : []}
+conf_params = {'CIPHERS': [], 'SSL_AUTO_NEGOTIATE': []}
 
 for case in ssl_configuration_tests:
     conf_params['CIPHERS'].append(case.get('CIPHERS', DEFAULT_CIPHERS))
     conf_params['SSL_AUTO_NEGOTIATE'].append(case.get('SSL_AUTO_NEGOTIATE', DEFAULT_AUTO_NEGOTIATE))
 
-p, m = generate_params(extra_params=conf_params, modes=['scheduled']*len(ssl_configuration_tests))
+p, m = generate_params(extra_params=conf_params, modes=['scheduled'] * len(ssl_configuration_tests))
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 # Certifcates configurations
@@ -66,16 +64,19 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 test_index = 0
 
+
 def get_current_test():
     global test_index
     current = test_index
-    test_index+=1
+    test_index += 1
     return current
+
 
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
     """Get configurations from the module"""
     return request.param
+
 
 def override_wazuh_conf(configuration):
     # Stop Wazuh
@@ -84,7 +85,7 @@ def override_wazuh_conf(configuration):
     check_daemon_status(running=False, daemon='wazuh-authd')
     truncate_file(LOG_FILE_PATH)
 
-     # Configuration for testing
+    # Configuration for testing
     test_config = set_section_wazuh_conf(configuration.get('sections'))
     # Set new configuration
     write_wazuh_conf(test_config)
@@ -94,6 +95,7 @@ def override_wazuh_conf(configuration):
     control_service('start', daemon='wazuh-authd')
 
     """Wait until agentd has begun"""
+
     def callback_agentd_startup(line):
         if 'Accepting connections on port 1515' in line:
             return line
@@ -102,7 +104,8 @@ def override_wazuh_conf(configuration):
     log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=30, callback=callback_agentd_startup)
     time.sleep(1)
-    
+
+
 def test_ossec_auth_configurations(get_configuration, configure_environment, configure_sockets_environment):
     """Check that every input message in authd port generates the adequate output
 
@@ -117,10 +120,10 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
             - protocol: Value for ssl protocol
             - input: message that will be tried to send to the manager
             - output: expected response (if any)
-    """ 
+    """
     current_test = get_current_test()
 
-    test_case = ssl_configuration_tests[current_test ]['test_case']
+    test_case = ssl_configuration_tests[current_test]['test_case']
     override_wazuh_conf(get_configuration)
     for config in test_case:
         address, family, connection_protocol = receiver_sockets_params[0]
@@ -148,6 +151,6 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
                 response = SSL_socket.receive().decode()
                 assert response, 'Failed connection stage {}: {}'.format(test_case.index(config) + 1, config['stage'])
                 assert response[:len(expected)] == expected, \
-                       'Failed test case stage {}: {}'.format(test_case.index(config) + 1, config['stage'])
+                    'Failed test case stage {}: {}'.format(test_case.index(config) + 1, config['stage'])
 
     return

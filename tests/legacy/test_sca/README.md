@@ -1,14 +1,19 @@
 # SCA tests
 
-
-These tests are not part of the current testing framework for Wazuh, so they have to be executed manually. The necessary instructions are described below.
+These tests are not part of the current testing framework for Wazuh, so they have to be executed manually. The necessary
+instructions are described below.
 
 ## Introduction
 ---------------
 
-A brief knowledge of SCA is recommended, the documentation covers it in detail in [How SCA works](https://documentation.wazuh.com/4.2/user-manual/capabilities/sec-config-assessment/how_it_works.html). Also, there is a blog post about [Security Configuration Assessment](https://wazuh.com/blog/security-configuration-assessment/).
+A brief knowledge of SCA is recommended, the documentation covers it in detail
+in [How SCA works](https://documentation.wazuh.com/4.2/user-manual/capabilities/sec-config-assessment/how_it_works.html)
+. Also, there is a blog post
+about [Security Configuration Assessment](https://wazuh.com/blog/security-configuration-assessment/).
 
-Basically, the tests inside **data** folder contain different _.yml_ policies that will test the general capabilities of **SCA**. It will be necessary to install a Manager and register an agent. There is more information about this part of the process in the [Installation Guide](https://documentation.wazuh.com/4.0/installation-guide/index.html).
+Basically, the tests inside **data** folder contain different _.yml_ policies that will test the general capabilities
+of **SCA**. It will be necessary to install a Manager and register an agent. There is more information about this part
+of the process in the [Installation Guide](https://documentation.wazuh.com/4.0/installation-guide/index.html).
 
 ## Directory structure
 ----------------------
@@ -43,8 +48,8 @@ The **SCA** module has to be enabled in the agent
   </sca>
 ```
 
-And the test policies have to copied to __INSTALL_DIR/ruleset/sca__.
-Then, restart the agent to force the policy evaluation.
+And the test policies have to copied to __INSTALL_DIR/ruleset/sca__. Then, restart the agent to force the policy
+evaluation.
 
 ## Results
 ----------
@@ -56,7 +61,8 @@ The agent will log to __ossec.log__ these type of messages
  sca: INFO: Evaluation finished for policy: 'policy.yml'
 ```
 
-Some scans will not be performed, because there are some policies that have the same ID on purpose to test this situation. For example:
+Some scans will not be performed, because there are some policies that have the same ID on purpose to test this
+situation. For example:
 
 ```
 sca: WARNING: Found duplicated check ID: 200100. First appearance at policy 'sca_files_test_suite'
@@ -68,6 +74,7 @@ After all the scans finish, the results can be checked in the manager with this 
 ```
 curl -k -X GET "https://localhost:55000/sca/001?pretty=true" -H "Authorization: Bearer $TOKEN"
 ```
+
 ```
     ...
     {
@@ -107,4 +114,5 @@ The scan results and those described in the test must be equal
 ## Compliance script
 --------------------
 
-The _set_linux_config_to_compliance.sh_ script modifies some configurations in a Linux environment to improve the tests scores for policies like _cis_debian9_L1.yml_ and _cis_debian9_L2.yml_.
+The _set_linux_config_to_compliance.sh_ script modifies some configurations in a Linux environment to improve the tests
+scores for policies like _cis_debian9_L1.yml_ and _cis_debian9_L2.yml_.

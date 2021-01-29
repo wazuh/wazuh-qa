@@ -6,7 +6,6 @@ import os
 import time
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
     modify_file, delete_file, callback_detect_event, validate_event

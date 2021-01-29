@@ -6,7 +6,6 @@ import os
 from collections import Counter
 
 import pytest
-
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, create_file, generate_params, callback_event_message, \
     check_time_travel
 from wazuh_testing.tools import PREFIX
@@ -65,7 +64,7 @@ def test_max_eps(get_configuration, configure_environment, restart_syscheckd, wa
     check_time_travel(mode == "scheduled")
     n_results = max_eps * 5
 
-    result = wazuh_log_monitor.start(timeout=(n_results/max_eps)*6,
+    result = wazuh_log_monitor.start(timeout=(n_results / max_eps) * 6,
                                      accum_results=n_results,
                                      callback=callback_event_message,
                                      error_message=f'Received less results than expected ({n_results})').result()

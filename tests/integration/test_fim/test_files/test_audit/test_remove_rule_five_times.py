@@ -7,7 +7,6 @@ import os
 import subprocess
 
 import pytest
-
 from wazuh_testing.fim import (LOG_FILE_PATH,
                                callback_audit_rules_manipulation,
                                callback_audit_deleting_rule)

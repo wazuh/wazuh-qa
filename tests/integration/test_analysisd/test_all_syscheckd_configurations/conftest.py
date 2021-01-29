@@ -9,7 +9,6 @@ import time
 from collections import defaultdict
 
 import pytest
-
 from wazuh_testing.analysis import callback_fim_alert
 from wazuh_testing.tools import WAZUH_LOGS_PATH
 from wazuh_testing.tools.monitoring import wait_mtime

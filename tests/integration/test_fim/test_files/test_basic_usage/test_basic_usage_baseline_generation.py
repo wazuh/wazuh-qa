@@ -6,7 +6,6 @@ import os
 from time import time
 
 import pytest
-
 from wazuh_testing.fim import (LOG_FILE_PATH, REGULAR, callback_detect_event, callback_detect_end_scan, create_file,
                                generate_params)
 from wazuh_testing.tools import PREFIX

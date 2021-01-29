@@ -4,11 +4,10 @@
 import os
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, create_registry, modify_registry_value, registry_parser, KEY_WOW64_32KEY, \
-        KEY_WOW64_64KEY, callback_restricted, generate_params, callback_detect_event, delete_registry_value, \
-        check_time_travel, delete_registry, REG_SZ
+    KEY_WOW64_64KEY, callback_restricted, generate_params, callback_detect_event, delete_registry_value, \
+    check_time_travel, delete_registry, REG_SZ
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -41,6 +40,7 @@ conf_params = {'WINDOWS_REGISTRY_1': reg1,
 configurations_path = os.path.join(test_data_path, 'wazuh_restrict_conf.yaml')
 p, m = generate_params(extra_params=conf_params, modes=['scheduled'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+
 
 # Fixtures
 
@@ -142,7 +142,7 @@ def test_restrict_value(key, subkey, arch, value_name, triggers_event, tags_to_a
     (key, sub_key_1, no_valid_subkey, KEY_WOW64_64KEY, False, {'key_restrict'}),
     (key, sub_key_2, no_valid_subkey, KEY_WOW64_64KEY, False, {'key_restrict'}),
     (key, sub_key_2, no_valid_subkey, KEY_WOW64_32KEY, False, {'key_restrict'})
-    ])
+])
 def test_restrict_key(key, subkey, test_subkey, arch, triggers_event, tags_to_apply,
                       get_configuration, configure_environment, restart_syscheckd,
                       wait_for_fim_start):

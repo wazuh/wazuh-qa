@@ -5,9 +5,7 @@
 import os
 
 import pytest
-from test_fim.test_files.test_follow_symbolic_link.common import test_directories, testdir_target, testdir1,\
-    extra_configuration_before_yield, extra_configuration_after_yield
-
+from test_fim.test_files.test_follow_symbolic_link.common import testdir_target, testdir1
 from wazuh_testing import logger
 from wazuh_testing.fim import (LOG_FILE_PATH,
                                generate_params, create_file, REGULAR, callback_detect_event,

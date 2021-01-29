@@ -8,7 +8,6 @@ import shutil
 import subprocess
 
 import pytest
-
 from wazuh_testing.fim import (LOG_FILE_PATH,
                                callback_audit_reloaded_rule,
                                callback_audit_removed_rule,

@@ -5,18 +5,15 @@
 import os
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_disk_quota_default, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
-
 # Marks
 
 pytestmark = [pytest.mark.tier(level=1)]
-
 
 # Variables
 
@@ -27,7 +24,6 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories[0]
 DEFAULT_SIZE = 1 * 1024 * 1024
-
 
 # Configurations
 
@@ -65,7 +61,7 @@ def test_disk_quota_default(tags_to_apply, get_configuration, configure_environm
     disk_quota_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                callback=callback_disk_quota_default,
                                                error_message='Did not receive expected '
-                                               '"Maximum disk quota size limit configured to \'... KB\'." event'
+                                                             '"Maximum disk quota size limit configured to \'... KB\'." event'
                                                ).result()
 
     if disk_quota_value:

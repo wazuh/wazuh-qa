@@ -2,12 +2,11 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import pytest
 import os
 import re
 
+import pytest
 from wazuh_testing.tools import WAZUH_PATH
-from wazuh_testing.tools.monitoring import SocketController
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 
 # Marks

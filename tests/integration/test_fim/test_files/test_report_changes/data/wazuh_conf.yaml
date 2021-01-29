@@ -1,99 +1,99 @@
 ---
 # conf 1
 - tags:
-  - ossec_conf_report
+    - ossec_conf_report
   apply_to_modules:
-  - MODULE_NAME
+    - MODULE_NAME
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-        - check_all: 'yes'
-        - FIM_MODE
-        - REPORT_CHANGES
-    - nodiff:
-        value: NODIFF_FILE
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: TEST_DIRECTORIES
+            attributes:
+              - check_all: 'yes'
+              - FIM_MODE
+              - REPORT_CHANGES
+        - nodiff:
+            value: NODIFF_FILE
 
 # conf 2
 - tags:
-  - ossec_conf_diff
+    - ossec_conf_diff
   apply_to_modules:
-  - MODULE_NAME
+    - MODULE_NAME
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-        - check_all: 'yes'
-        - FIM_MODE
-        - REPORT_CHANGES
-    - diff:
-        elements:
-        - file_size:
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: TEST_DIRECTORIES
+            attributes:
+              - check_all: 'yes'
+              - FIM_MODE
+              - REPORT_CHANGES
+        - diff:
             elements:
-            - enabled:
-                value: FILE_SIZE_ENABLED
-            - limit:
-                value: FILE_SIZE_LIMIT
-        - disk_quota:
-            elements:
-            - enabled:
-                value: DISK_QUOTA_ENABLED
-            - limit:
-                value: DISK_QUOTA_LIMIT
+              - file_size:
+                  elements:
+                    - enabled:
+                        value: FILE_SIZE_ENABLED
+                    - limit:
+                        value: FILE_SIZE_LIMIT
+              - disk_quota:
+                  elements:
+                    - enabled:
+                        value: DISK_QUOTA_ENABLED
+                    - limit:
+                        value: DISK_QUOTA_LIMIT
 
 # conf 3
 - tags:
-  - ossec_conf_diff_default
+    - ossec_conf_diff_default
   apply_to_modules:
-  - MODULE_NAME
+    - MODULE_NAME
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-        - check_all: 'yes'
-        - FIM_MODE
-        - REPORT_CHANGES
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: TEST_DIRECTORIES
+            attributes:
+              - check_all: 'yes'
+              - FIM_MODE
+              - REPORT_CHANGES
 
 # conf 4
 - tags:
-  - ossec_conf_diff_size_limit
+    - ossec_conf_diff_size_limit
   apply_to_modules:
-  - MODULE_NAME
+    - MODULE_NAME
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-        - check_all: 'yes'
-        - FIM_MODE
-        - REPORT_CHANGES
-        - DIFF_SIZE_LIMIT
-    - diff:
-        elements:
-        - file_size:
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: TEST_DIRECTORIES
+            attributes:
+              - check_all: 'yes'
+              - FIM_MODE
+              - REPORT_CHANGES
+              - DIFF_SIZE_LIMIT
+        - diff:
             elements:
-            - enabled:
-                value: FILE_SIZE_ENABLED
-            - limit:
-                value: FILE_SIZE_LIMIT
-        - disk_quota:
-            elements:
-            - enabled:
-                value: DISK_QUOTA_ENABLED
-            - limit:
-                value: DISK_QUOTA_LIMIT
+              - file_size:
+                  elements:
+                    - enabled:
+                        value: FILE_SIZE_ENABLED
+                    - limit:
+                        value: FILE_SIZE_LIMIT
+              - disk_quota:
+                  elements:
+                    - enabled:
+                        value: DISK_QUOTA_ENABLED
+                    - limit:
+                        value: DISK_QUOTA_LIMIT

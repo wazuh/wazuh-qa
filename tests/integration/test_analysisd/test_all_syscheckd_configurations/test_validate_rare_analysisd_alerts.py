@@ -6,7 +6,6 @@ import os
 
 import pytest
 import yaml
-
 from wazuh_testing.analysis import validate_analysis_alert_complex
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, ALERT_FILE_PATH
 from wazuh_testing.tools.monitoring import ManInTheMiddle
@@ -44,12 +43,14 @@ events_dict = {}
 alerts_list = []
 analysisd_injections_per_second = 200
 
+
 # Fixtures
 
 
 @pytest.fixture(scope='module', params=range(len(test_cases)))
 def get_alert(request):
     return alerts_list[request.param]
+
 
 # Tests
 

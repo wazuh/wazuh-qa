@@ -7,7 +7,6 @@ import subprocess
 
 import distro
 import pytest
-
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor

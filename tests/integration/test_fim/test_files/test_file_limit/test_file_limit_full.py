@@ -6,10 +6,9 @@ import os
 import sys
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_file_limit_capacity, generate_params, create_file, REGULAR, \
-                                callback_file_limit_full_database, check_time_travel, callback_entries_path_count
+    callback_file_limit_full_database, callback_entries_path_count
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -38,6 +37,7 @@ p, m = generate_params(extra_params=conf_params,
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
+
 # Fixtures
 
 
@@ -46,6 +46,7 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
+
 # Functions
 
 
@@ -53,6 +54,7 @@ def extra_configuration_before_yield():
     """Generate files to fill database"""
     for i in range(0, NUM_FILES):
         create_file(REGULAR, testdir1, f'test{i}', content='content')
+
 
 # Tests
 
@@ -74,7 +76,7 @@ def test_file_limit_full(tags_to_apply, get_configuration, configure_environment
     database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                              callback=callback_file_limit_capacity,
                                              error_message='Did not receive expected '
-                                             '"DEBUG: ...: Sending DB 100% full alert." event').result()
+                                                           '"DEBUG: ...: Sending DB 100% full alert." event').result()
 
     if database_state:
         assert database_state == '100', 'Wrong value for full database alert'
@@ -83,7 +85,7 @@ def test_file_limit_full(tags_to_apply, get_configuration, configure_environment
 
     wazuh_log_monitor.start(timeout=40, callback=callback_file_limit_full_database,
                             error_message='Did not receive expected '
-                            '"DEBUG: ...: Couldn\'t insert \'...\' entry into DB. The DB is full, ..." event')
+                                          '"DEBUG: ...: Couldn\'t insert \'...\' entry into DB. The DB is full, ..." event')
 
     entries, path_count = wazuh_log_monitor.start(timeout=40, callback=callback_entries_path_count,
                                                   error_message='Did not receive expected '

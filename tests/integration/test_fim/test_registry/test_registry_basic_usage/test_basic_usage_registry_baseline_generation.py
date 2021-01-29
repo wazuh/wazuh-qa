@@ -3,21 +3,20 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_detect_event, \
     modify_registry_value, callback_detect_end_scan, registry_parser, create_registry, KEY_WOW64_64KEY, \
     KEY_WOW64_32KEY, REG_SZ
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.file import truncate_file
-
 
 # Marks
 
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=0)]
-
 
 # Variables
 
@@ -32,7 +31,6 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 reg1, reg2 = test_regs
 
 monitoring_modes = ['scheduled']
-
 
 # Configurations
 

@@ -5,14 +5,13 @@
 import os
 
 import pytest
-from wazuh_testing import global_parameters
-
 from test_fim.test_files.test_multiple_dirs.common import multiple_dirs_test
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_warn_max_dir_monitored, \
-                               detect_initial_scan, detect_realtime_start, detect_whodata_start
+    detect_initial_scan, detect_realtime_start, detect_whodata_start
+from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import PREFIX
 
 # Marks
 
@@ -34,6 +33,7 @@ conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
 p, m = generate_params(extra_params=conf_params)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
+
 # fixtures
 
 
@@ -41,6 +41,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
+
 
 # functions
 
@@ -52,6 +53,7 @@ def wait_for_event():
                                         error_message='Did not receive expected "Maximum number of directories to be '
                                                       'monitored in the same tag reached" event').result()
     return discarded
+
 
 # tests
 
@@ -83,7 +85,7 @@ def test_multiple_dirs(dir_list, tags_to_apply, get_configuration, configure_env
         detect_realtime_start(wazuh_log_monitor)
     elif get_configuration['metadata']['fim_mode'] == 'whodata':
         detect_whodata_start(wazuh_log_monitor)
-    else:   # scheduled
+    else:  # scheduled
         detect_initial_scan(wazuh_log_monitor)
 
     file = 'regular'

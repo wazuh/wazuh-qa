@@ -5,14 +5,12 @@
 import os
 
 import pytest
-
 from wazuh_testing.tools.system import HostManager
 
 test_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                               'provisioning', 'agentless_cluster', 'inventory.yml')
 default_api_conf = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'api_configurations', 'default.yaml')
-
 
 host_manager = HostManager(inventory_path)
 
@@ -32,6 +30,7 @@ def test_revoke_all_tokens_with_api(login_endpoint, revoke_host, set_default_api
     host : str
         Host where the test will be run.
     """
+
     def default_api_call(token_dikt, expected_code=200):
         for host, token in token_dikt.items():
             response = host_manager.make_api_call(host, endpoint='/agents', token=token)
@@ -49,4 +48,3 @@ def test_revoke_all_tokens_with_api(login_endpoint, revoke_host, set_default_api
 
     # Assert our tokens are invalid now
     default_api_call(tokens, expected_code=401)
-

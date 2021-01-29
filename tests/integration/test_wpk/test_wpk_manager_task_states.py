@@ -4,16 +4,14 @@
 
 import json
 import os
-import pytest
 import socket
-import subprocess
 import struct
 import time
-import requests
 
+import pytest
 from wazuh_testing.tools import WAZUH_PATH
-from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.agent_simulator import Sender, Injector
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -93,7 +91,7 @@ cases = [
             'status': ['Updating', 'In queue'],
             'upgrade_after_change_name': True,
             'change_node_name': True,
-            'new_expected_response': [f'Upgrade procedure could not start. '\
+            'new_expected_response': [f'Upgrade procedure could not start. ' \
                                       f'Agent already upgrading', 'Success']
         }
     },
@@ -118,7 +116,7 @@ cases = [
             'status': ['Updating'],
             'change_node_name': True,
             'upgrade_after_change_name': True,
-            'new_expected_response': [f'Upgrade procedure could not start. '\
+            'new_expected_response': [f'Upgrade procedure could not start. ' \
                                       f'Agent already upgrading', 'Success']
         }
     },
@@ -147,7 +145,6 @@ cases = [
         }
     }
 ]
-
 
 params = [case['params'] for case in cases]
 metadata = [case['metadata'] for case in cases]
@@ -288,7 +285,7 @@ def test_wpk_manager_task_states(get_configuration, configure_environment,
     if upgrade_after_change_name:
         injectors = []
         sender = Sender(manager_address=SERVER_ADDRESS,
-                                protocol=protocol)
+                        protocol=protocol)
         for index, agent in enumerate(agents):
             injector = Injector(sender, agent)
             injectors.append(injector)
@@ -337,7 +334,7 @@ def test_wpk_manager_task_states(get_configuration, configure_environment,
 
             # Chech that result of first attempt is Success
             assert new_expected_response[agents_id.index(agent_id)] == \
-                response['data'][0]['message'], \
+                   response['data'][0]['message'], \
                 f'New upgrade response did not match expected! ' \
                 f'Expected {new_expected_response} obtained ' \
                 f'{response["data"][0]["message"]}'

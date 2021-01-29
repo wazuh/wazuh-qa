@@ -7,13 +7,11 @@ import time
 
 import pytest
 import requests
-
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 
 # Marks
 
 pytestmark = pytest.mark.server
-
 
 # Configurations
 
@@ -53,7 +51,7 @@ def test_jwt_token_exp_timeout(tags_to_apply, get_configuration, configure_api_e
     # Request manager info before token expires.
     get_response = requests.get(api_details['base_url'], headers=api_details['auth_headers'], verify=False)
     assert get_response.status_code == 200, f'Expected status code was 200, ' \
-        f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
+                                            f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
 
     # Request manager info after token expires.
     time.sleep(min(get_configuration['security_config']['auth_token_exp_timeout'] + 2, 10))
@@ -62,7 +60,7 @@ def test_jwt_token_exp_timeout(tags_to_apply, get_configuration, configure_api_e
     # If token has expired, user can't access that information.
     if short_exp:
         assert get_response.status_code == 401, f'Expected status code was 401, ' \
-            f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
+                                                f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
     else:
         assert get_response.status_code == 200, f'Expected status code was 200, ' \
-            f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
+                                                f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'

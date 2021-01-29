@@ -4,11 +4,9 @@
 
 import os
 import subprocess
-import time
 
 import psutil
 import pytest
-
 from wazuh_testing import logger
 from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_added_rule,
                                callback_audit_connection,

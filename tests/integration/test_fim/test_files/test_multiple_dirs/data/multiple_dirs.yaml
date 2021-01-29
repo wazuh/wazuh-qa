@@ -1,15 +1,15 @@
 ---
 # conf 1
 - tags:
-  - multiple_dirs
+    - multiple_dirs
   apply_to_modules:
-  - test_multiple_dirs
+    - test_multiple_dirs
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-          - FIM_MODE
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: TEST_DIRECTORIES
+            attributes:
+              - FIM_MODE

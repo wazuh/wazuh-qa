@@ -5,7 +5,6 @@
 import os
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_real_time_whodata_started
 from wazuh_testing.tools import PREFIX
@@ -33,6 +32,7 @@ p, m = generate_params(extra_params={"TEST_DIRECTORIES": testdir1}, modes=['whod
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
+
 # Fixtures
 
 
@@ -40,6 +40,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
+
 
 # Tests
 

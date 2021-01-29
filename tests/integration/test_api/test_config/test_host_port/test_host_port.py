@@ -6,7 +6,6 @@ import os
 
 import pytest
 import requests
-
 from wazuh_testing import global_parameters
 from wazuh_testing.api import callback_detect_api_start
 from wazuh_testing.tools import API_LOG_FILE_PATH
@@ -16,7 +15,6 @@ from wazuh_testing.tools.monitoring import FileMonitor
 # Marks
 
 pytestmark = pytest.mark.server
-
 
 # Configurations
 
@@ -75,5 +73,3 @@ def test_host_port(expected_exception, tags_to_apply,
         assert r.status_code == 200, f'Expected status code was 200, but {r.status_code} was received.'
     except (requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError):
         assert expected_exception, 'Request got unexpected exception.'
-
-
