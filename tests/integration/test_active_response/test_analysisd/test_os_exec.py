@@ -20,6 +20,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 ANALYSISD_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'ossec', 'queue')
 
 SERVER_ADDRESS = 'localhost'
+SERVER_NAME = 'vm-test'
 CRYPTO = 'aes'
 
 AR_NAME = 'restart-wazuh'
@@ -30,7 +31,7 @@ DST_USR = 'root'
 ARG1 = '--argv1'
 ARG2 = '--argv2'
 AR_TIMEOUT = 10
-LOG_MESSAGE = 'Jan 27 11:52:25 vm-test sshd[32046]: Accepted password for ' + DST_USR + ' from ' + SRC_IP + ' port 62300 ssh2'
+LOG_MESSAGE = 'Jan 27 11:52:25 ' + SERVER_NAME + ' sshd[32046]: Accepted password for ' + DST_USR + ' from ' + SRC_IP + ' port 62300 ssh2'
 
 cases = [
     # Case 1: Local AR, new agent (version 4.2)
@@ -48,7 +49,8 @@ cases = [
             'agents_os': ['ubuntu20.04'],
             'protocol': 'tcp',
             'extra_args': 'no',
-            'timeout': 'no'
+            'timeout': 'no',
+            'all_agents': 'no'
         }
     },
     # Case 2: Local AR, old agent (version < 4.2)
@@ -66,7 +68,8 @@ cases = [
             'agents_os': ['debian8'],
             'protocol': 'tcp',
             'extra_args': 'no',
-            'timeout': 'no'
+            'timeout': 'no',
+            'all_agents': 'no'
         }
     },
     # Case 3: Local AR, old and new agent
@@ -84,7 +87,8 @@ cases = [
             'agents_os': ['debian8', 'ubuntu20.04'],
             'protocol': 'tcp',
             'extra_args': 'no',
-            'timeout': 'no'
+            'timeout': 'no',
+            'all_agents': 'no'
         }
     },
     # Case 4: Local AR, old and new agent with extra_args
@@ -102,7 +106,8 @@ cases = [
             'agents_os': ['debian8', 'ubuntu20.04'],
             'protocol': 'tcp',
             'extra_args': 'yes',
-            'timeout': 'no'
+            'timeout': 'no',
+            'all_agents': 'no'
         }
     },
     # Case 5: Local AR, old and new agent with timeout
@@ -120,7 +125,27 @@ cases = [
             'agents_os': ['debian8', 'ubuntu20.04'],
             'protocol': 'tcp',
             'extra_args': 'no',
-            'timeout': 'yes'
+            'timeout': 'yes',
+            'all_agents': 'no'
+        }
+    },
+    # Case 6: All AR, old and new agent
+    {
+        'params': {
+            'AR_LOCATION': 'all',
+            'AR_NAME': AR_NAME,
+            'RULE_ID': RULE_ID,
+            'EXTRA_ARGS': '',
+            'TIMEOUT_ALLOWED': 'no',
+            'TIMEOUT': 0
+        },
+        'metadata': {
+            'agents_number': 2,
+            'agents_os': ['debian8', 'ubuntu20.04'],
+            'protocol': 'tcp',
+            'extra_args': 'no',
+            'timeout': 'no',
+            'all_agents': 'yes'
         }
     }
 ]
@@ -188,12 +213,18 @@ def wait_ar_line(line):
     return None
 
 
-def validate_old_ar_message(agent, message, extra_args, timeout):
+def validate_old_ar_message(id, name, message, extra_args, timeout, all_agents):
     args = message.split()
-    assert args[0] == f'({agent.name})', 'Agent name did not match expected!'
+
+    assert args[0] == f'({name})', 'Agent name did not match expected!'
     assert args[1] == LOG_LOCATION, 'Event location did not match expected!'
-    assert args[2] == 'NRN', 'AR flags did not match expected!'
-    assert args[3] == agent.id, 'Agent ID did not match expected!'
+    if all_agents == 'yes':
+        assert args[2] == 'NNS', 'AR flags did not match expected!'
+        assert args[3] in id, 'Agent ID did not match expected!'
+    else:
+        assert args[2] == 'NRN', 'AR flags did not match expected!'
+        assert args[3] == id, 'Agent ID did not match expected!'
+
     if timeout == 'yes':
         assert args[4] == f'{AR_NAME}{AR_TIMEOUT}', 'AR name did not match expected!'
     else:
@@ -206,12 +237,17 @@ def validate_old_ar_message(agent, message, extra_args, timeout):
         assert args[13] == ARG2, 'ARG2 did not match expected!'
 
 
-def validate_new_ar_message(agent, message, extra_args, timeout):
+def validate_new_ar_message(id, name, message, extra_args, timeout, all_agents):
     args = message.split(' ', 4)
-    assert args[0] == f'({agent.name})', 'Agent name did not match expected!'
+
+    assert args[0] == f'({name})', 'Agent name did not match expected!'
     assert args[1] == LOG_LOCATION, 'Event location did not match expected!'
-    assert args[2] == 'NRN', 'AR flags did not match expected!'
-    assert args[3] == agent.id, 'Agent ID did not match expected!'
+    if all_agents == 'yes':
+        assert args[2] == 'NNS', 'AR flags did not match expected!'
+        assert args[3] in id, 'Agent ID did not match expected!'
+    else:
+        assert args[2] == 'NRN', 'AR flags did not match expected!'
+        assert args[3] == id, 'Agent ID did not match expected!'
 
     json_alert = json.loads(args[4]) # Alert in JSON
     assert json_alert['version'], 'Missing version in JSON message'
@@ -247,6 +283,7 @@ def test_os_exec(set_debug_mode, get_configuration, configure_environment, resta
     protocol = metadata['protocol']
     extra_args = metadata['extra_args']
     timeout = metadata['timeout']
+    all_agents = metadata['all_agents']
     sender = Sender(SERVER_ADDRESS, protocol=protocol)
     log_monitor = FileMonitor(LOG_FILE_PATH)
     injectors = []
@@ -259,27 +296,50 @@ def test_os_exec(set_debug_mode, get_configuration, configure_environment, resta
         if protocol == "tcp":
             sender = Sender(manager_address=SERVER_ADDRESS, protocol=protocol)
 
-    # Give time for registration key to be available and send a few heartbeats
-    time.sleep(15)
+    agents_id = [x.id for x in agents]
 
-    for agent in agents:
-        message = "1:[" + str(agent.id) + "] (" + agent.name + ") " + LOG_LOCATION + ":" + LOG_MESSAGE
+    # Give time for registration key to be available and send a few heartbeats
+    time.sleep(30)
+
+    if all_agents == 'yes':
+        message = "1:(" + SERVER_NAME + ") " + LOG_LOCATION + ":" + LOG_MESSAGE
         send_message(message, ANALYSISD_SOCKET)
 
-        # Checking AR in logs
-        try:
-            log_monitor.start(timeout=10, callback=wait_ar_line)
-        except TimeoutError as err:
-            raise AssertionError("AR message tooks too much!")
+        for agent in agents:
+            # Checking AR in logs
+            try:
+                log_monitor.start(timeout=60, callback=wait_ar_line)
+            except TimeoutError as err:
+                raise AssertionError("AR message tooks too much!")
 
-        last_log = log_monitor.result()
+            last_log = log_monitor.result()
 
-        if agent.os == 'ubuntu20.04':
-            # Version 4.2
-            validate_new_ar_message(agent, last_log, extra_args, timeout)
-        else:
-            # Version < 4.2
-            validate_old_ar_message(agent, last_log, extra_args, timeout)
+            if agent.os == 'ubuntu20.04':
+                # Version 4.2
+                validate_new_ar_message(agents_id, SERVER_NAME, last_log, extra_args, timeout, all_agents)
+            else:
+                # Version < 4.2
+                validate_old_ar_message(agents_id, SERVER_NAME, last_log, extra_args, timeout, all_agents)
+
+    else:
+        for agent in agents:
+            message = "1:[" + str(agent.id) + "] (" + agent.name + ") " + LOG_LOCATION + ":" + LOG_MESSAGE
+            send_message(message, ANALYSISD_SOCKET)
+
+            # Checking AR in logs
+            try:
+                log_monitor.start(timeout=60, callback=wait_ar_line)
+            except TimeoutError as err:
+                raise AssertionError("AR message tooks too much!")
+
+            last_log = log_monitor.result()
+
+            if agent.os == 'ubuntu20.04':
+                # Version 4.2
+                validate_new_ar_message(agent.id, agent.name, last_log, extra_args, timeout, all_agents)
+            else:
+                # Version < 4.2
+                validate_old_ar_message(agent.id, agent.name, last_log, extra_args, timeout, all_agents)
 
     for injector in injectors:
         injector.stop_receive()
