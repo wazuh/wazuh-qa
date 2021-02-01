@@ -77,7 +77,8 @@ def get_configuration(request):
     (testdir1, 'mytest', "test", True, {'negation_regex'}),
     (testdir1, 'othername', "test", False, {'negation_regex'}),
     (testdir1, 'file1', "test", False, {'incomplete_regex'}),
-    (testdir1_ignore_folder, 'file2', "test", False, {'incomplete_regex'})
+    (testdir1_ignore_folder, 'file2', "test", False, {'incomplete_regex'}),
+    (testdir1, 'file1', "test", False, {'ignore_disk'})
 ])
 def test_ignore_subdirectory(folder, filename, content, triggers_event,
                              tags_to_apply, get_configuration,
@@ -114,8 +115,8 @@ def test_ignore_subdirectory(folder, filename, content, triggers_event,
                                         callback=callback_detect_event,
                                         error_message='Did not receive expected '
                                                       '"Sending FIM event: ..." event').result()
-        assert event['data']['type'] == 'added', f'Event type not equal'
-        assert event['data']['path'] == os.path.join(folder, filename), f'Event path not equal'
+        assert event['data']['type'] == 'added', 'Event type not equal'
+        assert event['data']['path'] == os.path.join(folder, filename), 'Event path not equal'
     else:
         while True:
             ignored_file = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 2,
