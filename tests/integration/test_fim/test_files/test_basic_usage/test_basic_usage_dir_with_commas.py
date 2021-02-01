@@ -10,7 +10,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, regular_file_cud
-from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 
 # Marks
 pytestmark = pytest.mark.tier(level=2)
@@ -52,6 +52,8 @@ def test_directories_with_commas(directory, get_configuration, put_env_variables
     """
     Test alerts are generated when monitor environment variables
     """
+    check_apply_test({'ossec_conf'}, get_configuration['tags'])
+
     regular_file_cud(directory, wazuh_log_monitor, file_list=["testing_env_variables"],
                      min_timeout=global_parameters.default_timeout,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled')
