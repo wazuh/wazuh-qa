@@ -89,7 +89,7 @@ def test_load_rules_decoders(test_case):
         shutil.chown('/var/ossec/etc/decoders/local_decoder.xml', "ossec", "ossec")
 
     # Create session token
-    if 'same_session' in test_case and test_case['same_session'] is True:
+    if 'same_session' in test_case and test_case['same_session']:
         session_token = create_dummy_session()
 
     for stage in test_case['test_case']:
@@ -98,7 +98,7 @@ def test_load_rules_decoders(test_case):
 
             connection = create_connection()
             # Generate logtest request
-            if 'same_session' in test_case and test_case['same_session'] is True:
+            if 'same_session' in test_case and test_case['same_session']:
                 request_pattern = """{{ "version":1,
                     "origin":{{"name":"Integration Test","module":"api"}},
                     "command":"log_processing",

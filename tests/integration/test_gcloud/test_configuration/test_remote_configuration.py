@@ -10,7 +10,7 @@ import sys
 
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import generate_params
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH, WAZUH_SERVICE
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH, get_service
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, SocketController
 

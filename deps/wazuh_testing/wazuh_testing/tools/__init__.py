@@ -4,6 +4,7 @@
 
 import os
 import sys
+import platform
 import subprocess
 
 if sys.platform == 'win32':
@@ -30,7 +31,6 @@ else:
         GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
         PREFIX = os.sep
 
-
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
     WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
@@ -46,11 +46,31 @@ else:
     except (ImportError, KeyError, ModuleNotFoundError):
         pass
 
-if sys.platform == 'darwin' or sys.platform == 'win32' or sys.platform == 'sunos5':
-    WAZUH_SERVICE = 'wazuh.agent'
-else:
-    type_ = subprocess.check_output([f"{WAZUH_PATH}/bin/wazuh-control", "info", "-t"], stderr=subprocess.PIPE).decode('utf-8')
-    WAZUH_SERVICE = 'wazuh-manager' if type_ == 'server' else 'wazuh-agent'
+
+def get_version():
+
+    if platform.system() in ['Windows', 'win32']:
+        with open(os.path.join(WAZUH_PATH, 'VERSION'), 'r') as f:
+            version = f.read()
+            return version[:version.rfind('\n')]
+
+    else:  # Linux, sunos5, darwin, aix...
+        return subprocess.check_output([
+          f"{WAZUH_PATH}/bin/wazuh-control", "info", "-v"
+        ], stderr=subprocess.PIPE).decode('utf-8')
+
+
+def get_service():
+    if platform.system() in ['Windows', 'win32']:
+        return 'wazuh-agent'
+
+    else:  # Linux, sunos5, darwin, aix...
+        service = subprocess.check_output([
+          f"{WAZUH_PATH}/bin/wazuh-control", "info", "-t"
+        ], stderr=subprocess.PIPE).decode('utf-8')
+
+    return 'wazuh-manager' if service == 'server' else 'wazuh-agent'
+
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
@@ -62,7 +82,7 @@ QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 CLUSTER_SOCKET_PATH = os.path.join(WAZUH_PATH, 'queue', 'cluster')
 
 WAZUH_SOCKETS = {
-    'wazuh-agentd'   : [],
+    'wazuh-agentd': [],
     'wazuh-analysisd': [os.path.join(QUEUE_OSSEC_PATH, 'analysis'),
                         os.path.join(QUEUE_OSSEC_PATH, 'queue')],
     'wazuh-authd': [os.path.join(QUEUE_OSSEC_PATH, 'auth')],
@@ -84,3 +104,5 @@ WAZUH_OPTIONAL_SOCKETS = [
     os.path.join(QUEUE_OSSEC_PATH, 'krequest'),
     os.path.join(QUEUE_OSSEC_PATH, 'auth')
 ]
+
+

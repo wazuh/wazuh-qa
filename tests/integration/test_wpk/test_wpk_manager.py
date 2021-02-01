@@ -15,7 +15,7 @@ import requests
 import platform
 
 from configobj import ConfigObj
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
+from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, get_version
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.agent_simulator import Sender, Injector
 from wazuh_testing.tools.services import control_service
@@ -41,12 +41,7 @@ if global_parameters.wpk_version is None:
     raise ValueError("The WPK package version must be defined by parameter. See README.md")
 version_to_upgrade = global_parameters.wpk_version[0]
 
-def get_current_version():
-    if platform.system() == 'Linux':
-        _version = subprocess.check_output([f"{WAZUH_PATH}/bin/wazuh-control", "info", "-v"], stderr=subprocess.PIPE).decode('utf-8')stderr=subprocess.PIPE).decode('utf-8')
-        return _version
-
-MANAGER_VERSION = get_current_version()
+MANAGER_VERSION = get_version()
 
 cases = [
     # 0. Single Agent - success
@@ -133,13 +128,13 @@ cases = [
             'agents_number': 3,
             'protocol': 'tcp',
             'agents_os': ['debian7', 'ubuntu12.04', 'debian10'],
-            'agents_version': ['v3.12.0','v3.12.0','v3.12.0'],
+            'agents_version': ['v3.12.0', 'v3.12.0', 'v3.12.0'],
             'stage_disconnect': [None, None, None],
             'sha_list': ['VALIDSHA1', 'INVALIDSHA', 'VALIDSHA1'],
             'upgrade_exec_result': ['0', '0', '0'],
             'upgrade_script_result': [0, 0, 2],
             'status': ['Updated', 'Error', 'Error'],
-            'error_msg': ['', 'Send verify sha1 error','Upgrade procedure exited with error code'],
+            'error_msg': ['', 'Send verify sha1 error', 'Upgrade procedure exited with error code'],
             'upgrade_notification': [True, False, True],
             'expected_response': 'Success'
         }
@@ -354,7 +349,8 @@ cases = [
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Legacy upgrade: check the result manually since the agent cannot report the result of the task'],
+            'status': ['Legacy upgrade:' + \
+                       'check the result manually since the agent cannot report the result of the task'],
             'upgrade_notification': [False],
             'message_params': {'version': 'v3.13.1'},
             'expected_response': 'Success'
@@ -833,7 +829,7 @@ def get_sha_list(metadata):
         agent_version = MANAGER_VERSION
 
     if metadata.get('message_params') and metadata.get('message_params').get('use_http'):
-        protocol = 'http://' if metadata.get('message_params').get('use_http') == True else 'https://'
+        protocol = 'http://' if metadata.get('message_params').get('use_http') else 'https://'
 
     # Generating file name
     wpk_file = "wazuh_agent_{0}_linux_{1}.wpk".format(agent_version, architecture)
@@ -945,7 +941,7 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
         if 'use_http' in metadata.get('checks'):
             if metadata.get('message_params') and \
                 metadata.get('message_params').get('use_http') and \
-                    metadata.get('message_params').get('use_http') == True:
+                    metadata.get('message_params').get('use_http'):
                 assert "'http://" in last_log, "Use http protocol did not match expected! Expected 'http://'"
             else:
                 assert "'https://" in last_log, "Use http protocol did not match expected! Expected 'https://'"
@@ -954,7 +950,8 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
             if metadata.get('message_params') and \
                     metadata.get('message_params').get('version'):
                 assert metadata.get('message_params').get('version') in \
-                    last_log, f'Versions did not match expected! Expected {metadata.get("message_params").get("version")}'
+                    last_log, f'Versions did not match expected! \
+                                Expected {metadata.get("message_params").get("version")}'
             else:
                 assert MANAGER_VERSION in last_log, \
                     f'Versions did not match expected! Expected {MANAGER_VERSION}'
@@ -1063,4 +1060,4 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
     for injector in injectors:
         injector.stop_receive()
 
-    time.sleep(3) # Wait for agents threads to stop
+    time.sleep(3)  # Wait for agents threads to stop

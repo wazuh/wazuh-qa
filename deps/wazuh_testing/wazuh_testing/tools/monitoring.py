@@ -300,7 +300,7 @@ class SocketController:
         """
         msg_bytes = message.encode() if isinstance(message, str) else message
         try:
-            msg_bytes = wazuh_pack(len(msg_bytes)) + msg_bytes if size is True else msg_bytes
+            msg_bytes = wazuh_pack(len(msg_bytes)) + msg_bytes if size else msg_bytes
             if self.protocol == socket.SOCK_STREAM:  # TCP
                 output = self.sock.sendall(msg_bytes)
             else:  # UDP
@@ -324,7 +324,7 @@ class SocketController:
         bytes
             Socket message.
         """
-        if size is True:
+        if size:
             size = wazuh_unpack(self.sock.recv(4, socket.MSG_WAITALL))
             output = self.sock.recv(size, socket.MSG_WAITALL)
         else:
