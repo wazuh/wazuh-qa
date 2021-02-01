@@ -18,6 +18,10 @@ ubuntu18.04
 #!-Linux |agent-ubuntu18 |4.15.0-76-generic |#220-Ubuntu SMP Thu May 9 12:40:49 UTC 2019 |x86_64 [Ubuntu|ubuntu: 18.04.4 LTS (Bionic Beaver)] - Wazuh <VERSION> / ab73af41699f13fdd81903b5f23d8d00
 d6e3ac3e75ca0319af3e7c262776f331 merged.mg
 #"_agent_ip":172.16.5.9
+ubuntu20.04
+#!-Linux |agent-ubuntu20 |5.4.0-62-generic |#220-Ubuntu SMP Thu May 9 12:40:49 UTC 2019 |x86_64 [Ubuntu|ubuntu: 20.04.4 LTS (Focal Fossa)] - Wazuh v4.2.0 / ab73af41699f13fdd81903b5f23d8d00
+d6e3ac3e75ca0319af3e7c262776f331 merged.mg
+#"_agent_ip":172.16.5.10
 debian7
 #!-Linux |agent-debian7 |3.16.0-9-amd64 |#1 SMP Debian 3.16.68-1 (2019-05-22) |x86_64 [Debian GNU/Linux|debian: 7 (wheezy)] - Wazuh <VERSION> / ab73af41699f13fdd81903b5f23d8d00
 d6e3ac3e75ca0319af3e7c262776f331 merged.mg
