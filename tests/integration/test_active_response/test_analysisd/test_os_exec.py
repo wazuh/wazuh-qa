@@ -249,7 +249,7 @@ def validate_new_ar_message(id, message, extra_args, timeout, all_agents):
         assert args[2] == 'NRN', 'AR flags did not match expected!'
         assert args[3] == id, 'Agent ID did not match expected!'
 
-    json_alert = json.loads(args[4]) # Alert in JSON
+    json_alert = json.loads(args[4])  # Alert in JSON
     assert json_alert['version'], 'Missing version in JSON message'
     assert json_alert['version'] == 1, 'Invalid version in JSON message'
     assert json_alert['origin'], 'Missing origin in JSON message'
@@ -276,8 +276,7 @@ def validate_new_ar_message(id, message, extra_args, timeout, all_agents):
         assert json_alert['parameters']['extra_args'][1] == ARG2, 'Missing arg1 in JSON message'
 
 
- # TESTS
-
+# TESTS
 def test_os_exec(set_debug_mode, get_configuration, configure_environment, restart_service, configure_agents):
     metadata = get_configuration.get('metadata')
     protocol = metadata['protocol']
