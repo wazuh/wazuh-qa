@@ -52,7 +52,7 @@ test_metadata = [
     {
         'command': 'firewall-drop15',
         'rule_id': '5715',
-        'ip': '5.5.5.5',
+        'ip': '2.2.2.2',
         'results': {
             'success': True,
         }
@@ -92,7 +92,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 @pytest.fixture(scope="session")
 def set_ar_conf_mode():
     local_int_conf_path = os.path.join(WAZUH_PATH, 'etc/shared', 'ar.conf')
-    debug_line = 'firewall-drop15 - firewall-drop - 15\n'
+    debug_line = 'firewall-drop0 - firewall-drop - 0\nfirewall-drop15 - firewall-drop - 15\n'
     with open(local_int_conf_path, 'w') as local_file_write:
         local_file_write.write('\n'+debug_line)
     with open(local_int_conf_path, 'r') as local_file_read:
@@ -213,7 +213,7 @@ def test_1(set_debug_mode, set_ar_conf_mode, get_configuration, test_version, co
 
     ##### Checking AR in active-response logs ####
     try:
-        ar_log_monitor.start(timeout=10, callback=wait_start_message_line)
+        ar_log_monitor.start(timeout=20, callback=wait_start_message_line)
     except TimeoutError as err:
         raise AssertionError("Start message tooks too much!")
 
@@ -232,12 +232,9 @@ def test_1(set_debug_mode, set_ar_conf_mode, get_configuration, test_version, co
             except TimeoutError as err:
                 raise AssertionError("Ended message tooks too much!")
 
-            time.sleep(5)
-
             mystring = os.popen('iptables -L')
             flag = False
             for process in mystring:
-                print(process)
                 if metadata['ip'] in process:
                     flag = True
 
@@ -245,6 +242,8 @@ def test_1(set_debug_mode, set_ar_conf_mode, get_configuration, test_version, co
                 raise AssertionError("IP was not added to iptable")
             elif flag == True and x == 1:
                 raise AssertionError("IP was not deleted to iptable")
+
+            time.sleep(10)
     else:
         try:
             ar_log_monitor.start(timeout=10, callback=wait_invalid_input_message_line)
