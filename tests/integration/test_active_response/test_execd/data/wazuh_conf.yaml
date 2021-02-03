@@ -3,6 +3,7 @@
   apply_to_modules:
   - test_execd_restart
   - test_execd_firewall_drop
+  - conftest
   sections:
   - section: client
     elements:
@@ -22,7 +23,3 @@
             value: REMOTED_PORT
         - protocol:
             value: PROTOCOL
-  #- section: agent-upgrade
-  #  elements:
-  #  - enabled:
-  #      value: 'yes'

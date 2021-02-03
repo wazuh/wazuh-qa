@@ -13,42 +13,22 @@ import yaml
 import json
 import socket
 
-from configobj import ConfigObj
-from datetime import datetime
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_SOCKETS, LOG_FILE_PATH
-from wazuh_testing.tools.authd_sim import AuthdSimulator
+from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.remoted_sim import RemotedSimulator
-from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.monitoring import FileMonitor
-
+from wazuh_testing.tools.authd_sim import AuthdSimulator
+from wazuh_testing.tools.remoted_sim import RemotedSimulator
+from conftest import *
+from subprocess import Popen, PIPE, STDOUT
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
 
-AR_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs/active-responses.log')
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 SERVER_KEY_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.key')
 SERVER_CERT_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.cert')
 CRYPTO = "aes"
 SERVER_ADDRESS = 'localhost'
 PROTOCOL = "tcp"
-
-def get_current_version():
-    if platform.system() == 'Linux':
-        config_file_path = os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')
-        _config = ConfigObj(config_file_path)
-        return _config['VERSION']
-
-    else:
-        version = None
-        with open(os.path.join(WAZUH_PATH, 'VERSION'), 'r') as f:
-            version = f.read()
-            version = version[:version.rfind('\n')]
-        return version
-
-
-_agent_version = get_current_version()
 
 test_metadata = [
     {
@@ -61,6 +41,7 @@ test_metadata = [
     },
     {
         'command': 'firewall-drop0',
+        'ip': '3.3.3.3',
         'rule_id': '5715',
         'results': {
             'success': False,
@@ -76,16 +57,6 @@ params = [
         'PROTOCOL': PROTOCOL
     } for _ in range(0, len(test_metadata))
 ]
-
-
-def load_tests(path):
-    """ Loads a yaml file from a path
-    Return
-    ----------
-    yaml structure
-    """
-    with open(path) as f:
-        return yaml.safe_load(f)
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
@@ -126,29 +97,25 @@ def start_agent(request, get_configuration):
     remoted_simulator.stop()
     authd_simulator.shutdown()
 
-@pytest.fixture(scope="session")
-def set_ar_conf_mode():
-    local_int_conf_path = os.path.join(WAZUH_PATH, 'etc/shared', 'ar.conf')
-    debug_line = 'firewall-drop0 - firewall-drop - 0\nfirewall-drop5 - firewall-drop - 5\n'
-    with open(local_int_conf_path, 'w') as local_file_write:
-        local_file_write.write('\n'+debug_line)
-    with open(local_int_conf_path, 'r') as local_file_read:
-        lines = local_file_read.readlines()
-        for line in lines:
-            if line == debug_line:
-                return
+@pytest.fixture(scope="function")
+def remove_ip_from_iptables(request, get_configuration):
+    metadata = get_configuration['metadata']
+    param = "{\"version\":1,\"origin\":{\"name\":\"\",\"module\":\"wazuh-execd\"},\"command\":\"delete\",\"parameters\":{\"extra_args\":[],\"alert\":{\"data\":{\"srcip\":\"" + metadata['ip'] + "\",\"dstuser\":\"Test\"}},\"program\":\"/var/ossec/active-response/bin/firewall-drop\"}}"
+    firewall_drop_script_path = os.path.join(WAZUH_PATH, 'active-response/bin', 'firewall-drop')
 
-@pytest.fixture(scope="session")
-def set_debug_mode():
-    local_int_conf_path = os.path.join(WAZUH_PATH, 'etc', 'local_internal_options.conf')
-    debug_line = 'execd.debug=2\n'
-    with open(local_int_conf_path, 'r') as local_file_read:
-        lines = local_file_read.readlines()
-        for line in lines:
-            if line == debug_line:
-                return
-    with open(local_int_conf_path, 'a') as local_file_write:
-        local_file_write.write('\n'+debug_line)
+    iptables_file = os.popen('iptables -L')
+    for iptables_line in iptables_file:
+        if metadata['ip'] in iptables_line:
+            p = Popen([firewall_drop_script_path], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+            p.stdin.write('{}\n\0'.format(param).encode('utf-8'))
+            p.stdin.close()
+
+    time.sleep(1)
+
+    iptables_file = os.popen('iptables -L')
+    for iptables_line in iptables_file:
+        if metadata['ip']  in iptables_line:
+            raise AssertionError("Unable to remove IP from iptables")
 
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
@@ -165,16 +132,6 @@ def validate_ar_message(message, x):
     assert json_alert['command'], 'Missing command in JSON message'
     assert json_alert['command'] == command, 'Invalid command in JSON message'
 
-def wait_received_message_line(line):
-    if ("DEBUG: Received message: " in line):
-        return True
-    return None
-
-def wait_start_message_line(line):
-    if ("Starting" in line):
-        return True
-    return None
-
 def wait_message_line(line):
     if ("{\"version\"" in line):
         return line.split("/ossec/active-response/bin/firewall-drop: ", 1)[1]
@@ -185,11 +142,6 @@ def wait_invalid_input_message_line(line):
         return True
     return None
 
-def wait_ended_message_line(line):
-    if ("Ended" in line):
-        return True
-    return None
-
 def build_message(metadata, expected):
     origin = "\"name\":\"\",\"module\":\"wazuh-analysisd\""
     rules = "\"level\":5,\"description\":\"Test.\",\"id\":" + metadata['rule_id']
@@ -197,18 +149,9 @@ def build_message(metadata, expected):
     if expected['success'] == False:
         return "{\"version\":1,\"origin\":{" + origin + "},\"command\":\"" + metadata['command'] + "\",\"parameters\":{\"extra_args\":[],\"alert\":{\"rule\":{" + rules + "},\"data\":{\"dstuser\":\"Test.\"}}}}"
 
-    return "{\"version\":1,\"origin\":{" + origin + "},\"command\":\"" + metadata['command'] + "\",\"parameters\":{\"extra_args\":[],\"alert\":{\"rule\":{" + rules + "},\"data\":{\"dstuser\":\"Test.\", \"srcip\":\"" + metadata['ip'] + "\"}}}}"
+    return "{\"version\":1,\"origin\":{" + origin + "},    \"command\":\"" + metadata['command'] + "\",\"parameters\":{\"extra_args\":[],\"alert\":{\"rule\":{" + rules + "},\"data\":{\"dstuser\":\"Test.\", \"srcip\":\"" + metadata['ip'] + "\"}}}}"
 
-def clean_logs():
-    truncate_file(LOG_FILE_PATH)
-    truncate_file(AR_LOG_FILE_PATH)
-
-@pytest.fixture(scope="session")
-def test_version():
-    if _agent_version < "v4.2.0":
-        raise AssertionError("The version of the agent is < 4.2.0")
-
-def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, configure_environment, start_agent, set_ar_conf_mode):
+def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, configure_environment, remove_ip_from_iptables, start_agent, set_ar_conf_mode):
     metadata = get_configuration['metadata']
     expected = metadata['results']
     ossec_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -241,10 +184,11 @@ def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, co
             except TimeoutError as err:
                 raise AssertionError("Ended message tooks too much!")
 
-            mystring = os.popen('iptables -L')
+            # Checking if the IP was added/removed in iptables
+            iptables_file = os.popen('iptables -L')
             flag = False
-            for process in mystring:
-                if metadata['ip'] in process:
+            for iptables_line in iptables_file:
+                if metadata['ip'] in iptables_line:
                     flag = True
 
             if flag == False and x == 0:
