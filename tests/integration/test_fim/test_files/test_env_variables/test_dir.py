@@ -19,20 +19,18 @@ pytestmark = pytest.mark.tier(level=2)
 # Variables and configuration
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-if sys.platform == 'win32':
-    long_path = 'a' * 234 + '\\'
-else:
-    long_path = os.path.join(*[('a' * 255) for i in range(15)], 'a' * 230) + '\\'
-
 test_directories = [os.path.join(PREFIX, 'testdir1'),
-                    os.path.join(PREFIX, long_path),
+                    os.path.join(PREFIX, 'testdir2'),
                     os.path.join(PREFIX, 'testdir3'),
                     os.path.join(PREFIX, 'testdir4')
                     ]
 dir1, dir2, dir3, dir4 = test_directories
 
-multiples_paths = "{1}{0}{2}{0}{3}".format(os.pathsep, dir2, dir3, dir4)
-environment_variables = [("TEST_ENV_ONE_PATH", dir1), ("TEST_ENV_MULTIPLES_PATH", multiples_paths)]
+# Check big environment variables ending with backslash
+paths = [os.path.join(PREFIX, 'a' * 50 + '\\') for i in range(100)] + [dir2, dir3, dir4]
+multiple_env_var = os.pathsep.join(paths)
+
+environment_variables = [("TEST_ENV_ONE_PATH", dir1), ("TEST_ENV_MULTIPLES_PATH", multiple_env_var)]
 
 if sys.platform == 'win32':
     test_env = "%TEST_ENV_ONE_PATH%, %TEST_ENV_MULTIPLES_PATH%"

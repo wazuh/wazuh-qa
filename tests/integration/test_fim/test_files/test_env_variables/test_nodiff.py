@@ -19,26 +19,25 @@ pytestmark = pytest.mark.tier(level=2)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 test_directories = [os.path.join(PREFIX, 'testdir1'),
-                    os.path.join(PREFIX, 'testdir2\\'),
+                    os.path.join(PREFIX, 'testdir2'),
                     os.path.join(PREFIX, 'testdir3'),
                     os.path.join(PREFIX, 'testdir4')
                     ]
 dir1, dir2, dir3, dir4 = test_directories
 
-multiples_paths = "{1}{0}{2}".format(os.pathsep, dir2, dir3)
-environment_variables = [("TEST_IGN_ENV", multiples_paths)]
+# Check big environment variables ending with backslash
+paths = [os.path.join(PREFIX, 'a' * 50 + '\\') for i in range(100)] + [os.path.join(dir2, "test.txt"),
+                                                                       os.path.join(dir3, "test.txt")]
+multiple_env_var = os.pathsep.join(paths)
+
+environment_variables = [("TEST_NODIFF_ENV", multiple_env_var)]
+
+dir_config = ",".join(test_directories)
 
 if sys.platform == 'win32':
-    dir2 = os.path.join(PREFIX, 'testdir2')
+    test_env = "%TEST_NODIFF_ENV%"
 else:
-    dir2 = dir2 + '\\'
-
-dir_config = "{1}{0}{2}{0}{3}{0}{4}".format(", ", dir1, dir2, dir3, dir4)
-
-if sys.platform == 'win32':
-    test_env = "%TEST_IGN_ENV%"
-else:
-    test_env = "$TEST_IGN_ENV"
+    test_env = "$TEST_NODIFF_ENV"
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_nodiff.yaml')
@@ -75,8 +74,6 @@ def test_tag_nodiff(directory, filename, hidden_content, get_configuration, put_
     hidden_content : bool
         True if content must be truncated,, False otherwise.
     """
-
-    pytest.xfail(reason='Xfailed due to issue: https://github.com/wazuh/wazuh/issues/7344')
 
     files = {filename: b'Hello word!'}
 

@@ -20,27 +20,20 @@ pytestmark = pytest.mark.tier(level=2)
 # Variables and configuration
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-if sys.platform == 'win32':
-    long_path = 'a' * 234 + '\\'
-else:
-    long_path = os.path.join(*[('a' * 255) for i in range(15)], 'a' * 230) + '\\'
-
 test_directories = [os.path.join(PREFIX, 'testdir1'),
-                    os.path.join(PREFIX, long_path),
+                    os.path.join(PREFIX, 'testdir2'),
                     os.path.join(PREFIX, 'testdir3'),
                     os.path.join(PREFIX, 'testdir4')
                     ]
 dir1, dir2, dir3, dir4 = test_directories
 
-multiples_paths = "{1}{0}{2}".format(os.pathsep, dir2, dir3)
-environment_variables = [("TEST_IGN_ENV", multiples_paths)]
+# Check big environment variables ending with backslash
+paths = [os.path.join(PREFIX, 'a' * 50 + '\\') for i in range(100)] + [dir2, dir3]
+multiple_env_var = os.pathsep.join(paths)
 
-if sys.platform == 'win32':
-    dir2 = os.path.join(PREFIX, 'a' * 234)
-else:
-    dir2 = dir2 + '\\'
+environment_variables = [("TEST_IGN_ENV", multiple_env_var)]
 
-dir_config = "{1}{0}{2}{0}{3}{0}{4}".format(", ", dir1, dir2, dir3, dir4)
+dir_config = ",".join(test_directories)
 
 if sys.platform == 'win32':
     test_env = "%TEST_IGN_ENV%"
@@ -75,8 +68,6 @@ def test_tag_ignore(directory, event_generated, get_configuration, configure_env
     """
     Test environment variables are ignored
     """
-
-    pytest.xfail(reason='Xfailed due to issue: https://github.com/wazuh/wazuh/issues/7344')
 
     # Create text files
     filename = "test"
