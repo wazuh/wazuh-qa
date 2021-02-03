@@ -52,7 +52,7 @@ test_metadata = [
     {
         'command': 'firewall-drop15',
         'rule_id': '5715',
-        'ip': '2.2.2.2',
+        'ip': '3.3.3.3',
         'results': {
             'success': True,
         }
@@ -173,13 +173,12 @@ def wait_ended_message_line(line):
 
 def build_message(metadata, expected):
     origin = "\"name\":\"\",\"module\":\"wazuh-analysisd\""
-    command = "\"" + metadata['command'] + "\""
     rules = "\"level\":5,\"description\":\"Test.\",\"id\":" + metadata['rule_id']
 
     if expected['success'] == False:
-        return "{\"version\":1,\"origin\":{" + origin + "},\"command\":" + command + ",\"parameters\":{\"extra_args\":[],\"alert\":{\"timestamp\":\"2021-01-27T19:39:22.918+0000\",\"rule\":{" + rules + "},\"data\":{\"dstuser\":\"Test.\"},\"id\":\"1611776362.714178\"}}}"
+        return "{\"version\":1,\"origin\":{" + origin + "},\"command\":\"" + metadata['command'] + "\",\"parameters\":{\"extra_args\":[],\"alert\":{\"rule\":{" + rules + "},\"data\":{\"dstuser\":\"Test.\"}}}}"
 
-    return "{\"version\":1,\"origin\":{" + origin + "},\"command\":" + command + ",\"parameters\":{\"extra_args\":[],\"alert\":{\"timestamp\":\"2021-01-27T19:39:22.918+0000\",\"rule\":{" + rules + "},\"data\":{\"dstuser\":\"Test.\", \"srcip\":\"" + metadata['ip'] + "\"},\"id\":\"1611776362.714178\"}}}"
+    return "{\"version\":1,\"origin\":{" + origin + "},\"command\":\"" + metadata['command'] + "\",\"parameters\":{\"extra_args\":[],\"alert\":{\"rule\":{" + rules + "},\"data\":{\"dstuser\":\"Test.\", \"srcip\":\"" + metadata['ip'] + "\"}}}}"
 
 def clean_logs():
     truncate_file(LOG_FILE_PATH)
@@ -196,7 +195,7 @@ def restart_service():
     control_service('restart')
     yield
 
-def test_1(set_debug_mode, set_ar_conf_mode, get_configuration, test_version, configure_environment, restart_service):
+def test_execd_firewall_drop(set_debug_mode, set_ar_conf_mode, get_configuration, test_version, configure_environment, restart_service):
     metadata = get_configuration['metadata']
     expected = metadata['results']
     ossec_log_monitor = FileMonitor(LOG_FILE_PATH)

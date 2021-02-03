@@ -163,28 +163,6 @@ def wait_shutdown_message_line(line):
         return True
     return None
 
-def validate_new_ar_message(message, expected):
-    json_alert = json.loads(message) # Alert in JSON
-    assert json_alert['version'], 'Missing version in JSON message'
-    assert json_alert['version'] == 1, 'Invalid version in JSON message'
-    assert json_alert['origin'], 'Missing origin in JSON message'
-    assert json_alert['origin']['module'], 'Missing module in JSON message'
-    assert json_alert['origin']['module'] == expected['module'], 'Invalid module in JSON message'
-    assert json_alert['command'], 'Missing command in JSON message'
-    assert json_alert['command'] == expected['command'], 'Invalid command in JSON message'
-    assert json_alert['parameters'], 'Missing parameters in JSON message'
-    assert json_alert['parameters']['alert'], 'Missing alert in JSON message'
-    assert json_alert['parameters']['alert']['rule'], 'Missing rule in JSON message'
-    assert json_alert['parameters']['alert']['rule']['id'], 'Missing rule ID in JSON message'
-    assert json_alert['parameters']['alert']['rule']['id'] == expected['rule_id'], 'Invalid rule ID in JSON message'
-
-    if expected['ar_name'] != 'restart-wazuh':
-        assert json_alert['parameters']['alert']['data'], 'Missing data in JSON message'
-        assert json_alert['parameters']['alert']['data']['srcip'], 'Missing source IP in JSON message'
-        assert json_alert['parameters']['alert']['data']['srcip'] == SRC_IP, 'Invalid source IP in JSON message'
-        assert json_alert['parameters']['alert']['data']['dstuser'], 'Missing destination user in JSON message'
-        assert json_alert['parameters']['alert']['data']['dstuser'] == DST_USR, 'Invalid destination user in JSON message'
-
 def build_message(metadata, expected):
     origin = "\"name\":\"\",\"module\":\"wazuh-analysisd\""
     command = "\"" + metadata['command'] + "\""
