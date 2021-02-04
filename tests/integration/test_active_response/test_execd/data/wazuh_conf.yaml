@@ -23,3 +23,9 @@
             value: REMOTED_PORT
         - protocol:
             value: PROTOCOL
+  - section: active-response
+    attributes:
+      - name: 'active-response'
+    elements:
+    - disabled:
+        value: 'no'
