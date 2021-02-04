@@ -12,7 +12,6 @@ import subprocess
 import yaml
 import json
 import socket
-import psutil
 
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -156,15 +155,6 @@ def test_execd_restart(set_debug_mode, get_configuration, test_version, configur
             ossec_log_monitor.start(timeout=60, callback=wait_shutdown_message_line)
         except TimeoutError as err:
             raise AssertionError("Shutdown message tooks too much!")
-
-        # Checking if the restart-wazuh process is running
-        flag = False
-        for proc in psutil.process_iter():
-            if 'restart-wazuh' in proc.name():
-                flag = True
-
-        if flag == False:
-            raise AssertionError("The script is not running")
 
         try:
             ar_log_monitor.start(timeout=60, callback=wait_ended_message_line)
