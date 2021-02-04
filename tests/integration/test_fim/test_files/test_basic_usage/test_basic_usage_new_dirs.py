@@ -8,7 +8,6 @@ import sys
 import time
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import detect_initial_scan
 from wazuh_testing.fim import generate_params, regular_file_cud, callback_non_existing_monitored_dir
@@ -95,7 +94,7 @@ def test_new_directory(tags_to_apply, get_configuration, configure_environment, 
         wazuh_log_monitor.start(timeout=10, callback=callback_non_existing_monitored_dir,
                                 error_message='Monitoring discarded message not found')
         os.makedirs(directory_str, exist_ok=True, mode=0o777)
-        time.sleep(windows_audit_interval+0.5)
+        time.sleep(windows_audit_interval + 0.5)
 
     # Assert that events of new CUD actions are raised after next scheduled scan
     regular_file_cud(directory_str, wazuh_log_monitor, file_list=['file4', 'file5', 'file6'],

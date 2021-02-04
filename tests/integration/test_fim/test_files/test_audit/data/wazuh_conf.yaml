@@ -1,71 +1,71 @@
 ---
 # conf 1
 - tags:
-  - config1
+    - config1
   apply_to_modules:
-  - test_audit
-  - test_audit_after_initial_scan
-  - test_remove_rule_five_times
-  - test_remove_audit
+    - test_audit
+    - test_audit_after_initial_scan
+    - test_remove_rule_five_times
+    - test_remove_audit
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: "/testdir1,/testdir2,/testdir3"
-        attributes:
-        - whodata: 'yes'
-- tags:
-  - audit_key
-  apply_to_modules:
-  - test_audit
-  sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - whodata:
-        elements:
-        - restart_audit:
-            value: 'yes'
-        - audit_key:
-            value: "custom_audit_key"
-        - startup_healthcheck:
-            value: 'yes'
-    - directories:
-        value: "/testdir1"
-        attributes:
-        - whodata: 'yes'
-- tags:
-  - restart_audit_false
-  apply_to_modules:
-  - test_audit
-  sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - whodata:
-        elements:
-        - restart_audit:
+    - section: syscheck
+      elements:
+        - disabled:
             value: 'no'
-    - directories:
-        value: "/testdir1"
-        attributes:
-        - whodata: 'yes'
+        - directories:
+            value: "/testdir1,/testdir2,/testdir3"
+            attributes:
+              - whodata: 'yes'
 - tags:
-  - audit_no_dir
+    - audit_key
   apply_to_modules:
-  - test_audit_no_dir
+    - test_audit
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-        - FIM_MODE
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - whodata:
+            elements:
+              - restart_audit:
+                  value: 'yes'
+              - audit_key:
+                  value: "custom_audit_key"
+              - startup_healthcheck:
+                  value: 'yes'
+        - directories:
+            value: "/testdir1"
+            attributes:
+              - whodata: 'yes'
+- tags:
+    - restart_audit_false
+  apply_to_modules:
+    - test_audit
+  sections:
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - whodata:
+            elements:
+              - restart_audit:
+                  value: 'no'
+        - directories:
+            value: "/testdir1"
+            attributes:
+              - whodata: 'yes'
+- tags:
+    - audit_no_dir
+  apply_to_modules:
+    - test_audit_no_dir
+  sections:
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: TEST_DIRECTORIES
+            attributes:
+              - FIM_MODE
 
 

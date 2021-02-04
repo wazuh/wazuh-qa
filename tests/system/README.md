@@ -1,4 +1,5 @@
 # wazuh-qa
+
 Wazuh - System quality assurance automation templates
 
 ## Setting up a test environment
@@ -10,7 +11,8 @@ To run these tests we need to use a **Linux** machine and install the following 
 
 ### Dependencies
 
-In addition, we need the Wazuh-testing package. So first, we need to install all these Python dependencies, we can use this command:
+In addition, we need the Wazuh-testing package. So first, we need to install all these Python dependencies, we can use
+this command:
 
 ```shell script
 pip3 install -r requirements.txt
@@ -20,7 +22,9 @@ _**NOTE:** `jq` library can only be installed with `pip` on **Linux**_
 
 ### Wazuh-Testing package
 
-We have a Python package at `wazuh-qa/deps/` with all the tools needed to run these tests. From file monitoring classes to callbacks or functions to create the test environment. Without installing this package, we cannot run these tests. It has the following structure:
+We have a Python package at `wazuh-qa/deps/` with all the tools needed to run these tests. From file monitoring classes
+to callbacks or functions to create the test environment. Without installing this package, we cannot run these tests. It
+has the following structure:
 
 ```bash
 wazuh_testing
@@ -55,7 +59,8 @@ Python module with the needed code to install this package into our Python inter
 
 ##### Python modules
 
-These are _analysis.py_, _fim.py_, _mitre.py_ and _wazuh_db.py_. They have very specific tools needed for each capability.
+These are _analysis.py_, _fim.py_, _mitre.py_ and _wazuh_db.py_. They have very specific tools needed for each
+capability.
 
 ##### data
 
@@ -86,7 +91,8 @@ cd wazuh-qa/deps/wazuh_testing
 pip3 install .
 ```
 
-_**NOTE:** It is important to reinstall this package every time we modify anything from `wazuh-qa/packages/wazuh_testing`_
+_**NOTE:** It is important to reinstall this package every time we modify anything
+from `wazuh-qa/packages/wazuh_testing`_
 
 ```shell script
 cd wazuh-qa/deps/wazuh_testing
@@ -95,9 +101,11 @@ pip3 uninstall -y wazuh_testing && pip3 install .
 
 ## System tests
 
-**DISCLAIMER:** this guide assumes you have a proper testing environment. If you do not, please check our [testing environment guide](#setting-up-a-test-environment).
+**DISCLAIMER:** this guide assumes you have a proper testing environment. If you do not, please check
+our [testing environment guide](#setting-up-a-test-environment).
 
-Our cluster system tests are located in `wazuh-qa/tests/system/`. They are organized by functionalities and each one may required an specific testing environment located in `wazuh-qa/tests/system/provisioning`:
+Our cluster system tests are located in `wazuh-qa/tests/system/`. They are organized by functionalities and each one may
+required an specific testing environment located in `wazuh-qa/tests/system/provisioning`:
 
 | Functionality                       | Required environment |
 |-------------------------------------|----------------------|
@@ -124,13 +132,16 @@ Every group will have the following structure:
 
 #### conftest
 
-Our conftests file will give us the path to the inventory file so that we can run the different instances of our system tests.
+Our conftests file will give us the path to the inventory file so that we can run the different instances of our system
+tests.
 
 #### data
 
-Folder which includes the configuration that will be applied to our environment. It also contains a file where you specify which messages are expected in each of the nodes.
+Folder which includes the configuration that will be applied to our environment. It also contains a file where you
+specify which messages are expected in each of the nodes.
 
 ##### messages.yml
+
 ```yaml
 ---
 # sample messages
@@ -146,6 +157,7 @@ node_name:
 - **timeout**: Deadline for message to be shown.
 
 ##### config.yml
+
 ```yaml
 ---
 # sample configuration
@@ -171,13 +183,17 @@ node_name:
 
 ### Pytest
 
-First, we need to start our Ansible environment. To do this, we must execute this command in `system/provisioning/<specified_cluster_environment>` path:
+First, we need to start our Ansible environment. To do this, we must execute this command
+in `system/provisioning/<specified_cluster_environment>` path:
 
 ```shell script
 ansible-playbook -i inventory.yml playbook.yml
 ```
 
-We use [pytest](https://docs.pytest.org/en/latest/contents.html) to run our cluster system tests. Pytest will recursively look for the closest `conftest` to import all the variables and fixtures needed for every test. If something is lacking from the closest one, it will look for the next one (if possible) until reaching the current directory. This means we need to run every test from the following path, where the general _conftest_ for cluster system tests is:
+We use [pytest](https://docs.pytest.org/en/latest/contents.html) to run our cluster system tests. Pytest will
+recursively look for the closest `conftest` to import all the variables and fixtures needed for every test. If something
+is lacking from the closest one, it will look for the next one (if possible) until reaching the current directory. This
+means we need to run every test from the following path, where the general _conftest_ for cluster system tests is:
 
 ```shell script
 cd wazuh-qa/tests/system/cluster
@@ -193,13 +209,14 @@ python3 -m pytest [options] [file_or_dir] [file_or_dir] [...]
 
 - `v`: verbosity level (-v or -vv. Highly recommended to use -vv when tests are failing)
 - `s`: shortcut for --capture=no. This will show the output in real time
-- `x`: instantly exit after the first error. Very helpful when using a log truncate since it will keep the last failed result
+- `x`: instantly exit after the first error. Very helpful when using a log truncate since it will keep the last failed
+  result
 - `m`: only run tests matching given expression (-m MARKEXPR)
 - `--tier`: only run tests with given tier (ex. --tier 2)
 - `--html`: generates a HTML report for the test results. (ex. --html=report.html)
-- `--default-timeout`: overwrites the default timeout (in seconds). This value is used to make a test fail if a condition 
-is not met before the given time lapse. Some tests make use of this value and other has other fixed timeout that cannot be 
-modified.
+- `--default-timeout`: overwrites the default timeout (in seconds). This value is used to make a test fail if a
+  condition is not met before the given time lapse. Some tests make use of this value and other has other fixed timeout
+  that cannot be modified.
 
 _Use `-h` to see the rest or check its [documentation](https://docs.pytest.org/en/latest/usage.html)._
 

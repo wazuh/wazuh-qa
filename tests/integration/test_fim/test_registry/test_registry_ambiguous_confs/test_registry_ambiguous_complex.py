@@ -4,19 +4,17 @@
 
 
 import os
+from hashlib import sha1
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import CHECK_OWNER, LOG_FILE_PATH, registry_value_cud, registry_key_cud, \
-                              generate_params, CHECK_SUM, CHECK_TYPE, CHECK_GROUP, \
-                              CHECK_ALL, CHECK_MTIME, CHECK_SIZE, \
-                              REQUIRED_REG_KEY_ATTRIBUTES, REQUIRED_REG_VALUE_ATTRIBUTES
+    generate_params, CHECK_SUM, CHECK_TYPE, CHECK_GROUP, \
+    CHECK_ALL, CHECK_MTIME, CHECK_SIZE, \
+    REQUIRED_REG_KEY_ATTRIBUTES, REQUIRED_REG_VALUE_ATTRIBUTES
+from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-
-from wazuh_testing.tools import WAZUH_PATH
-from hashlib import sha1
 
 # Marks
 
@@ -50,7 +48,6 @@ confs_params = {'KEY1': test_regs[0],
                 'TAG_3': tag_3
                 }
 
-
 key_all_attrs = REQUIRED_REG_KEY_ATTRIBUTES[CHECK_ALL].union(REQUIRED_REG_VALUE_ATTRIBUTES[CHECK_ALL])
 
 checkers_key = key_all_attrs
@@ -65,6 +62,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 p, m = generate_params(extra_params=confs_params, modes=['scheduled'])
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+
 
 # Fixtures
 
@@ -81,10 +79,10 @@ def get_configuration(request):
     key
 ])
 @pytest.mark.parametrize('subkey, key_checkers', [
-                        (registry, checkers_key),
-                        (subkey_1, checkers_subkey1),
-                        (subkey_2, checkers_subkey2),
-                        (subkey_3, checkers_subkey3)
+    (registry, checkers_key),
+    (subkey_1, checkers_subkey1),
+    (subkey_2, checkers_subkey2),
+    (subkey_3, checkers_subkey3)
 ])
 def test_ambiguous_complex_checks(key, subkey, key_checkers,
                                   get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
@@ -114,10 +112,10 @@ def test_ambiguous_complex_checks(key, subkey, key_checkers,
     key
 ])
 @pytest.mark.parametrize('subkey, value_list, report,', [
-                        (registry, ['test_value'], True),
-                        (subkey_1, ['test_value'], False),
-                        (subkey_2, ['test_value'], False),
-                        (subkey_3, ['test_value'], True)
+    (registry, ['test_value'], True),
+    (subkey_1, ['test_value'], False),
+    (subkey_2, ['test_value'], False),
+    (subkey_3, ['test_value'], True)
 ])
 def test_ambiguous_report_changes(key, subkey, value_list, report,
                                   get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
@@ -160,10 +158,10 @@ def test_ambiguous_report_changes(key, subkey, value_list, report,
     key
 ])
 @pytest.mark.parametrize('subkey, tag', [
-                        (registry, None),
-                        (subkey_1, tag_1),
-                        (subkey_2, tag_2),
-                        (subkey_3, tag_3)
+    (registry, None),
+    (subkey_1, tag_1),
+    (subkey_2, tag_2),
+    (subkey_3, tag_3)
 ])
 def test_ambiguous_report_tags(key, subkey, tag,
                                get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):

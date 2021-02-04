@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, registry_value_cud, registry_key_cud, KEY_WOW64_64KEY, \
@@ -13,7 +14,6 @@ from wazuh_testing.tools.monitoring import FileMonitor
 # Marks
 
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=0)]
-
 
 # Variables
 
@@ -28,7 +28,6 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 reg1, reg2 = test_regs
 
 monitoring_modes = ['scheduled']
-
 
 # Configurations
 

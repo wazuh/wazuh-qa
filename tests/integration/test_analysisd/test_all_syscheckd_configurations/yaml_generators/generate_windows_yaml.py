@@ -10,7 +10,6 @@ import subprocess
 import time
 
 import yaml
-
 from wazuh_testing import logger
 from wazuh_testing.analysis import callback_analysisd_agent_id, callback_analysisd_event
 from wazuh_testing.tools import WAZUH_LOGS_PATH, LOG_FILE_PATH, WAZUH_PATH

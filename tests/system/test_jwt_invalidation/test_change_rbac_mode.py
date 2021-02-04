@@ -7,8 +7,8 @@ import time
 
 import pytest
 import yaml
-from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools import WAZUH_SECURITY_CONF
+from wazuh_testing.tools.system import HostManager
 
 test_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),

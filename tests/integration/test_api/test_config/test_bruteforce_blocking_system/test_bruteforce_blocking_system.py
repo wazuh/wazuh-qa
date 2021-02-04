@@ -6,10 +6,7 @@ import os
 import time
 
 import pytest
-import requests
-
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
-from wazuh_testing.tools.services import control_service
 
 # Marks
 

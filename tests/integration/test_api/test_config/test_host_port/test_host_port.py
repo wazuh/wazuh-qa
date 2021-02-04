@@ -6,7 +6,6 @@ import os
 
 import pytest
 import requests
-
 from wazuh_testing import global_parameters
 from wazuh_testing.api import callback_detect_api_start
 from wazuh_testing.tools import API_LOG_FILE_PATH
@@ -16,7 +15,6 @@ from wazuh_testing.tools.monitoring import FileMonitor
 # Marks
 
 pytestmark = pytest.mark.server
-
 
 # Configurations
 

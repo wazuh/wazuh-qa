@@ -3,22 +3,20 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import json
-import pytest
-import socket
-import ssl
 import subprocess
 import time
-import yaml
 
+import pytest
+import yaml
 from wazuh_testing.cluster import FERNET_KEY, CLUSTER_DATA_HEADER_SIZE, cluster_msg_build
-from wazuh_testing import global_parameters
 from wazuh_testing.tools import WAZUH_PATH, CLUSTER_LOGS_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import ManInTheMiddle
+
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
+
 
 # Configurations
 
@@ -31,13 +29,13 @@ def load_tests(path):
     with open(path) as f:
         return yaml.safe_load(f)
 
+
 class WorkerMID(ManInTheMiddle):
 
     def __init__(self, address, family='AF_UNIX', connection_protocol='TCP', func: callable = None):
         self.cluster_input = None
         self.cluster_output = None
         super().__init__(address, family, connection_protocol, self.verify_message)
-
 
     def set_cluster_messages(self, cluster_input, cluster_output):
         self.cluster_input = cluster_input
@@ -61,6 +59,7 @@ class WorkerMID(ManInTheMiddle):
     def restart(self):
         self.event.clear()
 
+
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 message_tests = load_tests(os.path.join(test_data_path, 'worker_messages.yaml'))
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
@@ -72,13 +71,15 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 log_monitor_paths = [CLUSTER_LOGS_PATH]
 cluster_socket_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'cluster', 'c-internal.sock'))
 ossec_authd_socket_path = ("localhost", 1515)
-receiver_sockets_params = [(ossec_authd_socket_path , 'AF_INET', 'SSL_TLSv1_2')]
+receiver_sockets_params = [(ossec_authd_socket_path, 'AF_INET', 'SSL_TLSv1_2')]
 
 mitm_master = WorkerMID(address=cluster_socket_path, family='AF_UNIX', connection_protocol='TCP')
 
 monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True),
                             ('wazuh-clusterd', mitm_master, True), ('wazuh-authd', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
+
+
 # Tests
 
 @pytest.fixture(scope="function", params=message_tests)
@@ -90,10 +91,12 @@ def set_up_groups(request):
     for group in groups:
         subprocess.call(['/var/ossec/bin/agent_groups', '-r', '-g', f'{group}', '-q'])
 
+
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
     """Get configurations from the module"""
     yield request.param
+
 
 def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environment, configure_sockets_environment,
                              connect_to_sockets_module, wait_for_agentd_startup):
@@ -125,7 +128,7 @@ def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environ
         results = clusterd_queue.get_results(callback=(lambda y: [x[CLUSTER_DATA_HEADER_SIZE:].decode() for x in y]),
                                              timeout=1, accum_results=1)
         assert response[:len(expected)] == expected, \
-               'Failed test case {}: Response was: {} instead of: {}'.format(set_up_groups['name'], response, expected)
+            'Failed test case {}: Response was: {} instead of: {}'.format(set_up_groups['name'], response, expected)
         # Assert monitored sockets
         assert results[0] == stage['cluster_input'], 'Expected clusterd input message does not match'
         assert results[1] == stage['cluster_output'], 'Expected clusterd output message does not match'

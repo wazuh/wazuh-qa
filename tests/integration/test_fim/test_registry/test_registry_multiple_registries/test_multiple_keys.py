@@ -6,11 +6,11 @@ import os
 import time
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_max_registry_monitored, detect_initial_scan
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+
 from common import multiple_keys_and_entries_keys, multiple_keys_and_entries_values
 
 # Marks
@@ -40,6 +40,7 @@ conf_params = {'WINDOWS_REGISTRY': registry_str}
 p, m = generate_params(extra_params=conf_params, modes=['scheduled'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
+
 # Fixtures
 
 
@@ -47,6 +48,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
+
 
 # Test
 
@@ -69,7 +71,7 @@ def test_multiple_keys(tags_to_apply, get_configuration, configure_environment, 
     discarded = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_max_registry_monitored,
                                         error_message='Did not receive expected '
-                                        '"Maximum number of registries to be monitored..." event.').result()
+                                                      '"Maximum number of registries to be monitored..." event.').result()
 
     assert discarded == expected_discarded, f'Discarded registry keys are not the expected ones.'
 
@@ -77,6 +79,6 @@ def test_multiple_keys(tags_to_apply, get_configuration, configure_environment, 
 
     multiple_keys_and_entries_keys(MAX_MONITORED_ONE_TAG, subkeys, wazuh_log_monitor, KEY,
                                    timeout=global_parameters.default_timeout)
-    time.sleep(2)   # These 2 seconds are needed to avoid overlapping between keys and values
+    time.sleep(2)  # These 2 seconds are needed to avoid overlapping between keys and values
     multiple_keys_and_entries_values(MAX_MONITORED_ONE_TAG, subkeys, wazuh_log_monitor, KEY,
                                      timeout=global_parameters.default_timeout)

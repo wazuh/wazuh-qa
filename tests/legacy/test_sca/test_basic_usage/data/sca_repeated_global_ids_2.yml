@@ -14,14 +14,14 @@ policy:
 
 checks:
 
- - id: 300101
-   title: PASS -- existing file exists
-   condition: any
-   rules:
-     - f:/var/ossec/etc/ossec.conf
+  - id: 300101
+    title: PASS -- existing file exists
+    condition: any
+    rules:
+      - f:/var/ossec/etc/ossec.conf
 
- - id: 300102
-   title: FAIL -- a non-existing file file should exist
-   condition: any
-   rules:
-     - f:/var/ossec/etc/ossec.conf_FAKE
+  - id: 300102
+    title: FAIL -- a non-existing file file should exist
+    condition: any
+    rules:
+      - f:/var/ossec/etc/ossec.conf_FAKE

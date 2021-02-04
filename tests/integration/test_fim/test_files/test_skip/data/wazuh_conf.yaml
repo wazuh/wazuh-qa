@@ -1,57 +1,57 @@
 ---
 # conf 1
 - tags:
-  - skip_proc
+    - skip_proc
   apply_to_modules:
-  - test_skip
+    - test_skip
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: DIRECTORY
-    - skip_proc:
-        value: SKIP
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: DIRECTORY
+        - skip_proc:
+            value: SKIP
 # conf 2
 - tags:
-  - skip_sys
+    - skip_sys
   apply_to_modules:
-  - test_skip
+    - test_skip
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: "/sys/module/isofs"
-    - skip_sys:
-        value: SKIP
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: "/sys/module/isofs"
+        - skip_sys:
+            value: SKIP
 # conf 3
 - tags:
     - skip_dev
   apply_to_modules:
     - test_skip
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: "/dev"
-    - skip_dev:
-        value: SKIP
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: "/dev"
+        - skip_dev:
+            value: SKIP
 # conf 4
 - tags:
     - skip_nfs
   apply_to_modules:
     - test_skip
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: "/nfs-mount-point"
-    - skip_nfs:
-        value: SKIP
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: "/nfs-mount-point"
+        - skip_nfs:
+            value: SKIP

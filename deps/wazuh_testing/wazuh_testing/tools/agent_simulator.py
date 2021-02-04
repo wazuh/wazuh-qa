@@ -12,7 +12,6 @@
 # Dependencies
 # pip3 install pycryptodome
 
-import base64
 import hashlib
 import json
 import os
@@ -20,12 +19,12 @@ import socket
 import ssl
 import threading
 import zlib
-
 from random import randint, sample, choice
 from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
 from string import ascii_letters, digits
 from struct import pack
 from time import mktime, localtime, sleep, time
+
 from wazuh_testing.tools.remoted_sim import Cipher
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..',
@@ -38,7 +37,7 @@ agent_count = 1
 
 class Agent:
     def __init__(self, manager_address, cypher="aes", os=None,
-                 inventory_sample=None, rootcheck_sample= None,
+                 inventory_sample=None, rootcheck_sample=None,
                  id=None, name=None, key=None, version="v3.12.0",
                  fim_eps=None, fim_integrity_eps=None,
                  authd_password=None):
@@ -47,7 +46,7 @@ class Agent:
         self.key = key
         if version is not None:
             self.long_version = version
-            ver_split = version.replace("v","").split(".")
+            ver_split = version.replace("v", "").split(".")
             self.short_version = f"{'.'.join(ver_split[:2])}"
         self.cypher = cypher
         self.os = os
@@ -158,7 +157,7 @@ class Agent:
         name = self.name.encode()
         key = self.key.encode()
         sum1 = (hashlib.md5((hashlib.md5(name).hexdigest().encode()
-                + hashlib.md5(id).hexdigest().encode())).hexdigest().encode())
+                             + hashlib.md5(id).hexdigest().encode())).hexdigest().encode())
         sum1 = sum1[:15]
         sum2 = hashlib.md5(key).hexdigest().encode()
         key = sum2 + sum1
@@ -173,7 +172,7 @@ class Agent:
         split = b':'
         local_counter = b'5555'
         msg = random_number + global_counter + split + local_counter \
-            + split + message
+              + split + message
         msg_md5 = hashlib.md5(msg).hexdigest()
         event = msg_md5.encode() + msg
         return event
@@ -219,9 +218,9 @@ class Agent:
                 rcv = sender.socket.recv(4)
                 if len(rcv) == 4:
                     data_len = ((rcv[3] & 0xFF) << 24) | \
-                                ((rcv[2] & 0xFF) << 16) | \
-                                ((rcv[1] & 0xFF) << 8) | \
-                                (rcv[0] & 0xFF)
+                               ((rcv[2] & 0xFF) << 16) | \
+                               ((rcv[1] & 0xFF) << 8) | \
+                               (rcv[0] & 0xFF)
 
                     buffer_array = sender.socket.recv(data_len)
 
@@ -234,18 +233,18 @@ class Agent:
             index = buffer_array.find(b'!')
             if index == 0:
                 index = buffer_array[1:].find(b'!')
-                buffer_array = buffer_array[index+2:]
+                buffer_array = buffer_array[index + 2:]
             if self.cypher == "aes":
                 msg_removeheader = bytes(buffer_array[5:])
                 msg_decrypted = Cipher(msg_removeheader, self.encryption_key) \
                     .decrypt_aes()
             else:
                 msg_removeheader = bytes(buffer_array[1:])
-                msg_decrypted = Cipher(msg_removeheader, self.encryption_key)\
+                msg_decrypted = Cipher(msg_removeheader, self.encryption_key) \
                     .decrypt_blowfish()
 
             padding = 0
-            while(msg_decrypted):
+            while (msg_decrypted):
                 if msg_decrypted[padding] == 33:
                     padding += 1
                 else:
@@ -267,15 +266,15 @@ class Agent:
         command = None
         if 'com' in message_list:
             com_index = message_list.index('com')
-            command = message_list[com_index+1]
+            command = message_list[com_index + 1]
         else:
             com_index = message_list.index('upgrade')
-            json_command = json.loads(message_list[com_index+1])
+            json_command = json.loads(message_list[com_index + 1])
             command = json_command['command']
         if command in ['lock_restart', 'open', 'write', 'close',
                        'clear_upgrade_result']:
             if command == 'lock_restart' and \
-                          self.stage_disconnect == 'lock_restart':
+                    self.stage_disconnect == 'lock_restart':
                 self.stop_receive = 1
             elif command == 'open' and self.stage_disconnect == 'open':
                 self.stop_receive = 1
@@ -284,7 +283,7 @@ class Agent:
             elif command == 'close' and self.stage_disconnect == 'close':
                 self.stop_receive = 1
             elif command == 'clear_upgrade_result' and \
-                            self.stage_disconnect == 'clear_upgrade_result':
+                    self.stage_disconnect == 'clear_upgrade_result':
                 self.stop_receive = 1
             else:
                 if self.short_version < "4.1" or command == 'lock_restart':
@@ -313,13 +312,13 @@ class Agent:
                 else:
                     if self.short_version < "4.1":
                         sender.sendEvent(self.createEvent(
-                                         f'#!-req {message_list[1]} ok '
-                                         f'{self.upgrade_exec_result}'))
+                            f'#!-req {message_list[1]} ok '
+                            f'{self.upgrade_exec_result}'))
                     else:
                         sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} {{"error":0, '
                                                           f'"message":"{self.upgrade_exec_result}", "data":[]}}'))
                     if self.send_upgrade_notification:
-                        message = 'Upgrade was successful'if self.upgrade_script_result == 0 else 'Upgrade failed'
+                        message = 'Upgrade was successful' if self.upgrade_script_result == 0 else 'Upgrade failed'
                         status = 'Done' if self.upgrade_script_result == 0 else 'Failed'
                         upgrade_update_status_message = {
                             'command': 'upgrade_update_status',
@@ -330,8 +329,8 @@ class Agent:
                             }
                         }
                         sender.sendEvent(self.createEvent("u:upgrade_module:"
-                                         + json.dumps(
-                                            upgrade_update_status_message)))
+                                                          + json.dumps(
+                            upgrade_update_status_message)))
             else:
                 raise ValueError(f'Execution result should be configured \
                                  in agent')
@@ -350,11 +349,11 @@ class Agent:
                     msg = fp.readline()
                     line = fp.readline()
                     while line and line.strip("\n") not in os_list:
-                        msg = msg+line
+                        msg = msg + line
                         line = fp.readline()
                     break
                 line = fp.readline()
-        msg = msg.replace("<VERSION>",self.long_version)
+        msg = msg.replace("<VERSION>", self.long_version)
         self.keep_alive_msg = self.createEvent(msg)
 
     def initializeModules(self):
@@ -383,10 +382,10 @@ class Inventory:
         if self.inventory_sample is None:
             inventory_files = os.listdir("inventory/{}".format(self.os))
             self.inventory_path = "inventory/{}/{}" \
-                                  .format(self.os, choice(inventory_files))
+                .format(self.os, choice(inventory_files))
         else:
             self.inventory_path = "inventory/{}/{}" \
-                                  .format(self.os, self.inventory_sample)
+                .format(self.os, self.inventory_sample)
         with open(self.inventory_path) as fp:
             line = fp.readline()
             while line:
@@ -443,8 +442,8 @@ class GeneratorIntegrityFIM:
     def generateMessage(self):
         data = None
         if self.event_type == "integrity_check_global" or \
-                              self.event_type == "integrity_check_left" or \
-                              self.event_type == "integrity_check_right":
+                self.event_type == "integrity_check_left" or \
+                self.event_type == "integrity_check_right":
             id = int(time())
             data = {"id": id,
                     "begin": self.fim_generator.randfile(),
@@ -612,21 +611,21 @@ class GeneratorFIM:
 
     def getAttributes(self):
         attributes = {
-                    "type": "file", "size": self._size,
-                    "perm": self._permissions, "uid": str(self._uid),
-                    "gid": str(self._gid), "user_name": self._uname,
-                    "group_name": self._gname, "inode": self._inode,
-                    "mtime": self._mdate, "hash_md5": self._md5,
-                    "hash_sha1": self._sha1, "hash_sha256": self._sha256,
-                    "checksum": self._checksum
-                    }
+            "type": "file", "size": self._size,
+            "perm": self._permissions, "uid": str(self._uid),
+            "gid": str(self._gid), "user_name": self._uname,
+            "group_name": self._gname, "inode": self._inode,
+            "mtime": self._mdate, "hash_md5": self._md5,
+            "hash_sha1": self._sha1, "hash_sha256": self._sha256,
+            "checksum": self._checksum
+        }
         return attributes
 
     def formatMessage(self, message):
         if self.agent_version >= "3.12":
             return '{0}:[{1}] ({2}) any->syscheck:{3}' \
-                    .format(self.SYSCHECK_MQ, self.agent_id,
-                            self.agent_name, message)
+                .format(self.SYSCHECK_MQ, self.agent_id,
+                        self.agent_name, message)
         else:
             # If first time generating. Send control message to simulate
             # end of FIM baseline.
@@ -672,9 +671,9 @@ class GeneratorFIM:
         else:
             self.generateAttributes()
             message = '{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8}:{9} {10}'.format(
-                   self._size, self._mode, self._uid, self._gid, self._md5,
-                   self._sha1, self._uname, self._gname, self._mdate,
-                   self._inode, self._file)
+                self._size, self._mode, self._uid, self._gid, self._md5,
+                self._sha1, self._uname, self._gname, self._mdate,
+                self._inode, self._file)
 
         return self.formatMessage(message)
 
@@ -706,7 +705,7 @@ class Sender:
     def sendEvent(self, event):
         if self.protocol == "tcp":
             length = pack('<I', len(event))
-            self.socket.send(length+event)
+            self.socket.send(length + event)
             # return(self.socket.recv(2048))
             # self.socket.close() # Not closing.
             # It will close the socket on Ctrl+C.
@@ -743,7 +742,7 @@ class Injector:
         self.sender.socket.close()
 
 
-class InjectorThread (threading.Thread):
+class InjectorThread(threading.Thread):
     def __init__(self, threadID, name, sender, agent, module):
         threading.Thread.__init__(self)
         self.threadID = threadID
@@ -791,8 +790,8 @@ class InjectorThread (threading.Thread):
             self.sender.sendEvent(event)
             self.totalMessages += 1
             if self.totalMessages % \
-               self.agent.modules["fim_integrity"]["eps"] \
-               == 0:
+                    self.agent.modules["fim_integrity"]["eps"] \
+                    == 0:
                 sleep(1.0 - ((time() - starttime) % 1.0))
 
     def inventory(self):
@@ -808,11 +807,11 @@ class InjectorThread (threading.Thread):
             scan_id = int(time())  # Random start scan ID
             for item in self.agent.inventory.inventory:
                 event = self.agent.createEvent(item.replace("<scan_id>",
-                                               str(scan_id)))
+                                                            str(scan_id)))
                 self.sender.sendEvent(event)
                 self.totalMessages += 1
                 if self.totalMessages % \
-                   self.agent.modules["syscollector"]["eps"] == 0:
+                        self.agent.modules["syscollector"]["eps"] == 0:
                     self.totalMessages = 0
                     sleep(1.0 - ((time() - starttime) % 1.0))
             print("Scan ended - {}({}) - {}({})"
@@ -838,7 +837,7 @@ class InjectorThread (threading.Thread):
                 self.sender.sendEvent(self.agent.createEvent(item))
                 self.totalMessages += 1
                 if self.totalMessages % \
-                   self.agent.modules["rootcheck"]["eps"] == 0:
+                        self.agent.modules["rootcheck"]["eps"] == 0:
                     self.totalMessages = 0
                     sleep(1.0 - ((time() - starttime) % 1.0))
             print("Scan ended - {}({}) - {}({})"

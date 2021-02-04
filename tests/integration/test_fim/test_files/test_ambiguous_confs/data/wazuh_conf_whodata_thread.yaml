@@ -1,38 +1,38 @@
 ---
 # conf 1
 - tags:
-  - whodata_disabled_conf
+    - whodata_disabled_conf
   apply_to_modules:
-  - test_ambiguous_whodata_thread
+    - test_ambiguous_whodata_thread
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-        - whodata: 'yes'
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-        - whodata: 'no'
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: TEST_DIRECTORIES
+            attributes:
+              - whodata: 'yes'
+        - directories:
+            value: TEST_DIRECTORIES
+            attributes:
+              - whodata: 'no'
 
 # conf 2
 - tags:
-  - whodata_enabled_conf
+    - whodata_enabled_conf
   apply_to_modules:
-  - test_ambiguous_whodata_thread
+    - test_ambiguous_whodata_thread
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-        - whodata: 'no'
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-        - whodata: 'yes'
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: TEST_DIRECTORIES
+            attributes:
+              - whodata: 'no'
+        - directories:
+            value: TEST_DIRECTORIES
+            attributes:
+              - whodata: 'yes'

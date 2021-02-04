@@ -3,10 +3,9 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+
 import pwd
-
 import pytest
-
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 from wazuh_testing.tools.services import get_process_cmd
 
@@ -14,12 +13,12 @@ from wazuh_testing.tools.services import get_process_cmd
 
 pytestmark = pytest.mark.server
 
-
 # Configurations
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'conf.yaml')
 configuration = get_api_conf(configurations_path)
+
 
 # Fixtures
 

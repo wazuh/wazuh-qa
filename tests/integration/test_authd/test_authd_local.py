@@ -3,20 +3,15 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import subprocess
 
 import pytest
-import socket
-import ssl
-import subprocess
 import yaml
-
-from wazuh_testing import global_parameters
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-#TODO Move to utils
-from wazuh_testing.tools import LOG_FILE_PATH
+# TODO Move to utils
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.monitoring import FileMonitor
+
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -33,6 +28,7 @@ def load_tests(path):
     with open(path) as f:
         return yaml.safe_load(f)
 
+
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 message_tests = load_tests(os.path.join(test_data_path, 'local_enroll_messages.yaml'))
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
@@ -43,10 +39,12 @@ log_monitor_paths = []
 ls_sock_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'auth'))
 receiver_sockets_params = [(ls_sock_path, 'AF_UNIX', 'TCP')]
 
-#TODO Replace or delete
+# TODO Replace or delete
 monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
+
+
 # Tests
 
 @pytest.fixture(scope="function", params=message_tests)
@@ -58,10 +56,12 @@ def set_up_groups(request):
     for group in groups:
         subprocess.call(['/var/ossec/bin/agent_groups', '-r', '-g', f'{group}', '-q'])
 
+
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
     """Get configurations from the module"""
     yield request.param
+
 
 @pytest.fixture(scope="module")
 def clean_client_keys_file():
@@ -98,5 +98,5 @@ def test_ossec_auth_messages(clean_client_keys_file, get_configuration, set_up_g
         receiver_sockets[0].send(stage['input'], size=True)
         response = receiver_sockets[0].receive(size=True).decode()
         assert response[:len(expected)] == expected, \
-               'Failed test case {}: Response was: {} instead of: {}'.format \
-               (test_case.index(stage) + 1, response, expected)
+            'Failed test case {}: Response was: {} instead of: {}'.format \
+                (test_case.index(stage) + 1, response, expected)

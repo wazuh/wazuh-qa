@@ -6,29 +6,24 @@ import os
 from shutil import rmtree
 
 import pytest
-
+from test_fim.test_files.test_follow_symbolic_link.common import wait_for_symlink_check, symlink_interval, testdir_link, \
+    testdir_target
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import SYMLINK, REGULAR, LOG_FILE_PATH, generate_params, create_file, change_internal_options,\
+from wazuh_testing.fim import SYMLINK, REGULAR, LOG_FILE_PATH, generate_params, create_file, change_internal_options, \
     check_time_travel, callback_detect_event
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
-from test_fim.test_files.test_follow_symbolic_link.common import wait_for_symlink_check, symlink_interval, testdir_link, \
-    testdir_target
-
-
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.sunos5, pytest.mark.darwin, pytest.mark.tier(level=1)]
-
 
 # Variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
 
 # Configurations
 
@@ -97,7 +92,7 @@ def test_symlink_to_dir_between_scans(tags_to_apply, get_configuration, configur
 
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                     error_message='Did not receive expected '
-                                    '"Sending FIM event: ..." event').result()
+                                                  '"Sending FIM event: ..." event').result()
 
     assert 'added' in event['data']['type'] and regular2 in event['data']['path'], \
         f'"added" event not matching for {event}'

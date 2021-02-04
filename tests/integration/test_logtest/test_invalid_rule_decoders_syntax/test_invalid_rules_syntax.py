@@ -2,14 +2,13 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import json
 import os
+import shutil
+
 import pytest
 import yaml
-import shutil
-import json
-
 from wazuh_testing.tools import WAZUH_PATH
-
 
 # Marks
 
@@ -44,7 +43,7 @@ def configure_local_rules(get_configuration, request):
     yield
 
     # restore previous configuration
-    shutil.copy('/var/ossec/etc/rules/local_rules.xml.cpy','/var/ossec/etc/rules/local_rules.xml')
+    shutil.copy('/var/ossec/etc/rules/local_rules.xml.cpy', '/var/ossec/etc/rules/local_rules.xml')
 
 
 @pytest.fixture(scope='module', params=test_cases, ids=[test_case['name'] for test_case in test_cases])

@@ -7,7 +7,6 @@ import os
 from pathlib import Path
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing import logger
 from wazuh_testing.fim import LOG_FILE_PATH, modify_file_group, modify_file_content, modify_file_owner, \

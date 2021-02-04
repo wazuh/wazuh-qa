@@ -8,7 +8,6 @@ import sys
 import time
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, WAZUH_PATH, callback_detect_event,
                                REGULAR, create_file, generate_params, detect_initial_scan, check_time_travel)

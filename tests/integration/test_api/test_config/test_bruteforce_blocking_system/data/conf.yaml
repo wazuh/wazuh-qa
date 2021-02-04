@@ -1,13 +1,13 @@
 ---
 - tags:
-  - config1
+    - config1
   configuration:
     access:
       block_time: 10
       max_login_attempts: 10
       max_request_per_minute: 300
 - tags:
-  - config2
+    - config2
   configuration:
     access:
       block_time: 6

@@ -15,23 +15,21 @@ import queue
 import re
 import socket
 import socketserver
+import ssl
 import sys
 import threading
 import time
-import ssl
 from collections import defaultdict
 from copy import copy
+from datetime import datetime
 from multiprocessing import Process, Manager
 from struct import pack, unpack
-from datetime import datetime
 
 import yaml
 from lockfile import FileLock
-
 from wazuh_testing import logger
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.system import HostManager
-from wazuh_testing.tools.time import Timer
 
 
 def wazuh_unpack(data, format_: str = "<I"):
@@ -246,7 +244,7 @@ class SocketController:
             raise TypeError(f'Invalid connection protocol detected: {connection_protocol.lower()}. '
                             f'Valid ones are TCP, UDP or SSL versions')
 
-        if(open_at_start):
+        if (open_at_start):
             self.open()
 
     def open(self):
@@ -256,14 +254,15 @@ class SocketController:
 
         if 'ssl' in self.connection_protocol.lower():
             versions_maps = {
-                "ssl_v2_3"    : ssl.PROTOCOL_SSLv23,
-                "ssl_tls"     : ssl.PROTOCOL_TLS,
-                "ssl_tlsv1_1" : ssl.PROTOCOL_TLSv1,
-                "ssl_tlsv1_2" : ssl.PROTOCOL_TLSv1_2,
+                "ssl_v2_3": ssl.PROTOCOL_SSLv23,
+                "ssl_tls": ssl.PROTOCOL_TLS,
+                "ssl_tlsv1_1": ssl.PROTOCOL_TLSv1,
+                "ssl_tlsv1_2": ssl.PROTOCOL_TLSv1_2,
             }
             ssl_version = versions_maps.get(self.connection_protocol.lower(), None)
             if ssl_version is None:
-                raise TypeError(f'Invalid or unsupported SSL version specified, valid versions are: {list(versions_maps.keys())}')
+                raise TypeError(
+                    f'Invalid or unsupported SSL version specified, valid versions are: {list(versions_maps.keys())}')
             # Wrap socket into ssl
             self.sock = ssl.wrap_socket(self.sock, ssl_version=ssl_version, ciphers=self.ciphers,
                                         certfile=self.certificate, keyfile=self.keyfile)
@@ -530,7 +529,6 @@ class StreamServerPort(socketserver.ThreadingTCPServer):
 
 
 class SSLStreamServerPort(socketserver.ThreadingTCPServer):
-
     ciphers = "HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH"
     ssl_version = ssl.PROTOCOL_TLSv1_2
     certfile = None
@@ -622,11 +620,11 @@ class DatagramServerPort(socketserver.ThreadingUDPServer):
 
 
 if hasattr(socketserver, 'ThreadingUnixStreamServer'):
-
     class StreamServerUnix(socketserver.ThreadingUnixStreamServer):
 
         def shutdown_request(self, request):
             pass
+
 
     class DatagramServerUnix(socketserver.ThreadingUnixDatagramServer):
 

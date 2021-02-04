@@ -1,11 +1,13 @@
-import random
 import os
 import platform
+import random
 import stat
-from OpenSSL import crypto, SSL
 
-if platform.system() == 'Windows': #Windows
+from OpenSSL import crypto
+
+if platform.system() == 'Windows':  # Windows
     import win32api, win32con
+
 
 class CertificateController(object):
 
@@ -71,18 +73,18 @@ class CertificateController(object):
         ca_cert : X509 Object
              Created ca certificate 
         """
-        
+
         ca_cert = crypto.X509()
-        ca_cert.set_serial_number(random.randint(50000000,100000000))
+        ca_cert.set_serial_number(random.randint(50000000, 100000000))
 
         xt = crypto.X509Extension(b"basicConstraints", 1, b"CA:TRUE")
         ca_cert.add_extensions((xt,))
 
         ca_cert.gmtime_adj_notBefore(0)
-        ca_cert.gmtime_adj_notAfter(10*365*24*60*60)
+        ca_cert.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
 
         ca_cert.set_version(2)
-        
+
         ca_issuer = ca_cert.get_issuer()
         ca_issuer.commonName = issuer
 
@@ -112,7 +114,7 @@ class CertificateController(object):
             Name of the message digest to use
         """
         self.ca_cert.sign(key, digest)
-        return 
+        return
 
     def store_ca_certificate(self, ca_cert, ca_path):
         """
@@ -149,7 +151,7 @@ class CertificateController(object):
         """
         if os.path.exists(private_key_path):
             if platform.system() == 'Windows':
-                win32api.SetFileAttributes(private_key_path, win32con.FILE_ATTRIBUTE_NORMAL) 
+                win32api.SetFileAttributes(private_key_path, win32con.FILE_ATTRIBUTE_NORMAL)
             os.remove(private_key_path)
         with open(private_key_path, "wb+") as f:
             data = crypto.dump_privatekey(crypto.FILETYPE_PEM, key)

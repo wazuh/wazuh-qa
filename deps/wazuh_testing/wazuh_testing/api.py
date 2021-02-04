@@ -2,10 +2,11 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import json
 import re
 from base64 import b64encode
+
 import requests
-import json
 
 # Variables
 

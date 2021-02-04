@@ -8,7 +8,6 @@ import shutil
 import sys
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import generate_params, callback_audit_unable_dir, callback_audit_added_rule
 from wazuh_testing.tools import PREFIX, LOG_FILE_PATH, ALERT_FILE_PATH
@@ -19,7 +18,6 @@ from wazuh_testing.tools.monitoring import FileMonitor
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
-
 # Variables
 
 test_directories = []
@@ -29,7 +27,6 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 wazuh_alert_monitor = FileMonitor(ALERT_FILE_PATH)
-
 
 # Configurations
 

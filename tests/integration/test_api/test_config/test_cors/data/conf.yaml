@@ -1,6 +1,6 @@
 ---
 - tags:
-  - cors
+    - cors
   configuration:
     cors:
       enabled: yes
