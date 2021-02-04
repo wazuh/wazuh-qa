@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -27,8 +27,8 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 
 def load_tests(path):
-    """ Loads a yaml file from a path 
-    Retrun 
+    """ Loads a yaml file from a path
+    Retrun
     ----------
     yaml structure
     """
@@ -102,7 +102,7 @@ def override_wazuh_conf(configuration):
     log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=30, callback=callback_agentd_startup)
     time.sleep(1)
-    
+
 def test_ossec_auth_configurations(get_configuration, configure_environment, configure_sockets_environment):
     """Check that every input message in authd port generates the adequate output
 
@@ -117,7 +117,7 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
             - protocol: Value for ssl protocol
             - input: message that will be tried to send to the manager
             - output: expected response (if any)
-    """ 
+    """
     current_test = get_current_test()
 
     test_case = ssl_configuration_tests[current_test ]['test_case']

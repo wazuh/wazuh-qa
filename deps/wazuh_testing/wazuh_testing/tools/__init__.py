@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -31,7 +31,7 @@ else:
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
     if sys.platform == 'darwin':
-        PREFIX = os.path.join('/', 'private', 'var', 'root') 
+        PREFIX = os.path.join('/', 'private', 'var', 'root')
         GEN_OSSEC = None
     else:
         PREFIX = os.sep

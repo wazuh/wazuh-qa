@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -40,7 +40,7 @@ INPUT_MESSAGE = f"OSSEC A:'{AGENT_NAME}'"
 OUPUT_MESSAGE = "OSSEC K:'"
 # Ossec.conf configurations
 params = [{
-    'SSL_AGENT_CA' : SSL_AGENT_CA, 
+    'SSL_AGENT_CA' : SSL_AGENT_CA,
     'SSL_VERIFY_HOST': ssl_verify_host,
 } for ssl_verify_host in SSL_VERIFY_HOSTS for option in SIM_OPTIONS]
 metadata = [{'sim_option' : option, 'verify_host' : ssl_verify_host } for ssl_verify_host in SSL_VERIFY_HOSTS for option in SIM_OPTIONS]
@@ -111,7 +111,7 @@ def override_wazuh_conf(configuration):
 
 def test_authd_ssl_certs(get_configuration, generate_ca_certificate):
     """
-    """   
+    """
     verify_host = (get_configuration['metadata']['verify_host'] == 'yes')
     option = get_configuration['metadata']['sim_option']
     override_wazuh_conf(get_configuration)
@@ -135,7 +135,7 @@ def test_authd_ssl_certs(get_configuration, generate_ca_certificate):
         timeout = time.time() + 10
         while response == '':
             response = SSL_socket.receive().decode()
-            if time.time() > timeout: 
+            if time.time() > timeout:
                 raise ConnectionResetError('Manager did not respond to sent message!')
         if option in ['INCORRECT HOST'] and verify_host:
             raise AssertionError(f'An incorrect host was able to register using the verify_host option')

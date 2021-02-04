@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -226,7 +226,7 @@ def pytest_configure(config):
     global_parameters.fim_mode = mode
 
     # Set WPK package version
-    global_parameters.wpk_version = config.getoption("--wpk_version")  
+    global_parameters.wpk_version = config.getoption("--wpk_version")
 
 def pytest_html_results_table_header(cells):
     cells.insert(4, html.th('Tier', class_='sortable tier', col='tier'))

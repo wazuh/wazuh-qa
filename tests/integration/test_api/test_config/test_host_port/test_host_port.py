@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -75,5 +75,3 @@ def test_host_port(expected_exception, tags_to_apply,
         assert r.status_code == 200, f'Expected status code was 200, but {r.status_code} was received.'
     except (requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError):
         assert expected_exception, 'Request got unexpected exception.'
-
-

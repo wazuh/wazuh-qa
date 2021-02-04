@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -23,21 +23,21 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 
 def load_tests(path):
-    """ Loads a yaml file from a path 
-    Retrun 
+    """ Loads a yaml file from a path
+    Retrun
     ----------
     yaml structure
     """
     with open(path) as f:
         return yaml.safe_load(f)
-        
+
 class WorkerMID(ManInTheMiddle):
-    
+
     def __init__(self, address, family='AF_UNIX', connection_protocol='TCP', func: callable = None):
         self.cluster_input = None
         self.cluster_output = None
         super().__init__(address, family, connection_protocol, self.verify_message)
-        
+
 
     def set_cluster_messages(self, cluster_input, cluster_output):
         self.cluster_input = cluster_input
@@ -50,13 +50,13 @@ class WorkerMID(ManInTheMiddle):
                                          encrypt=False)
             print(f'Received message from wazuh-authd: {message}')
             print(f'Response to send: {self.cluster_output}')
-            self.pause()            
+            self.pause()
             return response
         else:
             raise ConnectionResetError('Invalid cluster message!')
 
     def pause(self):
-        self.event.set()    
+        self.event.set()
 
     def restart(self):
         self.event.clear()
@@ -103,26 +103,26 @@ def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environ
     ----------
     test_case : list
         List of test_case stages (dicts with input, output and stage keys).
-    """    
+    """
     test_case = set_up_groups['test_case']
-    for stage in test_case:        
+    for stage in test_case:
         # Push expected info to mitm queue
         mitm_master.set_cluster_messages(stage['cluster_input'], stage['cluster_output'])
         # Reopen socket (socket is closed by maanger after sending message with client key)
         mitm_master.restart()
         receiver_sockets[0].open()
-        expected = stage['port_output']       
+        expected = stage['port_output']
         message = stage['port_input']
         receiver_sockets[0].send(stage['port_input'], size=False)
         timeout = time.time() + 10
         response = ''
         while response == '':
             response = receiver_sockets[0].receive().decode()
-            if time.time() > timeout: 
+            if time.time() > timeout:
                 raise ConnectionResetError('Manager did not respond to sent message!')
         clusterd_queue = monitored_sockets[0]
         # callback lambda function takes out tcp header and decodes binary to string
-        results = clusterd_queue.get_results(callback=(lambda y: [x[CLUSTER_DATA_HEADER_SIZE:].decode() for x in y]), 
+        results = clusterd_queue.get_results(callback=(lambda y: [x[CLUSTER_DATA_HEADER_SIZE:].decode() for x in y]),
                                              timeout=1, accum_results=1)
         assert response[:len(expected)] == expected, \
                'Failed test case {}: Response was: {} instead of: {}'.format(set_up_groups['name'], response, expected)

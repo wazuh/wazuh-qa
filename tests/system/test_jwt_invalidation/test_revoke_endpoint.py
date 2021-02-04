@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -49,4 +49,3 @@ def test_revoke_all_tokens_with_api(login_endpoint, revoke_host, set_default_api
 
     # Assert our tokens are invalid now
     default_api_call(tokens, expected_code=401)
-

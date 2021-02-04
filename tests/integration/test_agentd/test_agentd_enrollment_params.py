@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -30,8 +30,8 @@ PROTOCOL = 'tcp'
 INSTALLATION_FOLDER = WAZUH_PATH
 
 def load_tests(path):
-    """ Loads a yaml file from a path 
-    Retrun 
+    """ Loads a yaml file from a path
+    Retrun
     ----------
     yaml structure
     """
@@ -76,10 +76,10 @@ def configure_authd_server(request):
 
     authd_server.shutdown()
 
-def clean_log_file(): 
+def clean_log_file():
     try:
         client_file = open(LOG_FILE_PATH, 'w')
-        client_file.close()        
+        client_file.close()
     except IOError as exception:
         raise
 
@@ -91,18 +91,18 @@ def override_wazuh_conf(configuration):
     temp = get_temp_yaml(configuration)
     conf = load_wazuh_configurations(temp, __name__,)
     os.remove(temp)
-    
+
     test_config = set_section_wazuh_conf(conf[0]['sections'])
     # Set new configuration
     write_wazuh_conf(test_config)
-    
+
     #reset_client_keys
     clean_client_keys_file()
     clean_log_file()
     clean_password_file()
     if configuration.get('password'):
         parser = AgentAuthParser()
-        parser.add_password(password = configuration['password']['value'], isFile = True, 
+        parser.add_password(password = configuration['password']['value'], isFile = True,
                             path = configuration.get('authorization_pass_path'))
 
     try:
@@ -132,13 +132,13 @@ def check_time_to_connect(timeout):
         if 'Trying to connect to server' in line:
             return line
         return None
-        
+
     log_monitor = FileMonitor(LOG_FILE_PATH)
     try:
         log_monitor.start(timeout=timeout + 2, callback=wait_connect)
     except TimeoutError:
         return -1
-    
+
     final_line = log_monitor.result()
     initial_line = None
     elapsed_time = None
@@ -150,7 +150,7 @@ def check_time_to_connect(timeout):
             if "INFO: Valid key received" in line:
                 initial_line = line
                 break
-    
+
     if initial_line != None and final_line != None:
         form = '%H:%M:%S'
         initial_time = datetime.datetime.strptime(initial_line.split()[1], form).time()
@@ -159,7 +159,7 @@ def check_time_to_connect(timeout):
                                            seconds=initial_time.second)
         final_delta = datetime.timedelta(hours=final_time.hour, minutes=final_time.minute, seconds=final_time.second)
         elapsed_time = (final_delta - initial_delta).total_seconds()
-        
+
     return elapsed_time
 
 def check_log_error_conf(msg):
@@ -178,9 +178,9 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
     print(f'Test: {test_case["name"]}')
     if 'wazuh-agentd' in test_case.get("skips", []):
         pytest.skip("This test does not apply to wazuh-agentd")
-    
+
     remoted_server = RemotedSimulator(protocol=PROTOCOL, mode='CONTROLED_ACK', client_keys=CLIENT_KEYS_PATH)
-    
+
     configuration = test_case.get('configuration', {})
     parse_configuration_string(configuration)
     configure_enrollment(test_case.get('enrollment'), authd_server, configuration.get('agent_name'))
@@ -194,7 +194,7 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
             return
         else:
             raise AssertionError(f'Configuration error at ossec.conf file')
-    
+
     results = monitored_sockets.get_results(callback=(lambda y: [x.decode() for x in y]), timeout=20, accum_results=1)
     if test_case.get('enrollment') and test_case['enrollment'].get('response'):
         assert results[0] == build_expected_request(configuration), 'Expected enrollment request message does not match'
@@ -206,11 +206,11 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
         assert check_log_error_conf(test_case.get('expected_error')) != None, \
                'Expected configuration error at ossec.conf file, fail log_check'
         assert len(results) == 0, 'Enrollment message was not expected!'
-    
+
     if configuration.get('delay_after_enrollment') and test_case.get('enrollment',{}).get('response'):
         time_delay = configuration.get('delay_after_enrollment')
         elapsed = check_time_to_connect(time_delay)
         assert ((time_delay-2) < elapsed) and (elapsed < (time_delay+2)), \
                f'Expected elapsed time between enrollment and connect does not match, should be around {time_delay} sec'
-    
+
     return

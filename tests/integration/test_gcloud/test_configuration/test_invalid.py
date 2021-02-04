@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -65,7 +65,7 @@ def test_invalid(get_configuration, configure_environment, reset_ossec_log):
     """
     Checks if an invalid configuration is detected
 
-    Using invalid configurations with different attributes, 
+    Using invalid configurations with different attributes,
     expect an error message and gcp-pubsub unable to start.
     """
     # Configuration error -> ValueError raised

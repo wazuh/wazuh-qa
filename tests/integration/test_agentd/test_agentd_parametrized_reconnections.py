@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import pytest
@@ -190,33 +190,33 @@ This test covers different options of delays between server connection attempts:
 """
 def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, stop_agent, set_keys, configure_environment, get_configuration):
     DELTA = 1
-    RECV_TIMEOUT = 5    
+    RECV_TIMEOUT = 5
     ENROLLMENT_SLEEP = 20
     LOG_TIMEOUT=30
-   
+
     global remoted_server
-    
+
     PROTOCOL = protocol=get_configuration['metadata']['PROTOCOL']
     RETRIES = get_configuration['metadata']['MAX_RETRIES']
     INTERVAL = get_configuration['metadata']['RETRY_INTERVAL']
     ENROLL = get_configuration['metadata']['ENROLL']
-        
+
     control_service('stop')
     clean_logs()
     log_monitor = FileMonitor(LOG_FILE_PATH)
     remoted_server = RemotedSimulator(protocol=PROTOCOL, client_keys=CLIENT_KEYS_PATH)
     control_service('start')
-   
+
     # 2 Check for unsuccesful connection retries in Agentd initialization
     interval = INTERVAL
     if PROTOCOL == 'udp':
         interval += RECV_TIMEOUT
-    
+
     if ENROLL == 'yes':
         total_retries = RETRIES + 1
     else :
         total_retries = RETRIES
-   
+
     for retry in range(total_retries):
         # 3 If auto enrollment is enabled, retry check enrollment and retries after that
         if ENROLL == 'yes' and retry == total_retries-1:
@@ -225,18 +225,18 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
                 log_monitor.start(timeout=20, callback=wait_enrollment)
             except TimeoutError as err:
                 raise AssertionError("No succesful enrollment after retries!")
-            last_log = parse_time_from_log_line(log_monitor.result())               
-            
-            #Next retry will be after enrollment sleep                
+            last_log = parse_time_from_log_line(log_monitor.result())
+
+            #Next retry will be after enrollment sleep
             interval = ENROLLMENT_SLEEP
-        
+
         try:
             log_monitor.start(timeout=interval+LOG_TIMEOUT, callback=wait_connect)
         except TimeoutError as err:
             raise AssertionError("Connection attempts tooks too much!")
         actual_retry = parse_time_from_log_line(log_monitor.result())
         if retry > 0:
-            delta_retry = actual_retry - last_log 
+            delta_retry = actual_retry - last_log
             #Check if delay was aplied
             assert delta_retry >= timedelta(seconds=interval-DELTA), "Retries to quick"
             assert delta_retry <= timedelta(seconds=interval+DELTA), "Retries to slow"
@@ -247,7 +247,7 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
         log_monitor.start(timeout=30, callback=wait_server_rollback)
     except TimeoutError as err:
         raise AssertionError("Server rollback tooks too much!")
-    
+
     # 5 Check ammount of retriesand enrollment
     (connect, enroll) = count_retry_mesages()
     assert connect == total_retries

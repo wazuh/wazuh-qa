@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -25,8 +25,8 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 
 def load_tests(path):
-    """ Loads a yaml file from a path 
-    Retrun 
+    """ Loads a yaml file from a path
+    Retrun
     ----------
     yaml structure
     """
@@ -72,13 +72,13 @@ def clean_client_keys_file():
     # Clean client.keys
     try:
         with open(client_keys_path, 'w') as client_file:
-            client_file.close()        
+            client_file.close()
     except IOError as exception:
         raise
 
     # Start Wazuh
     control_service('start')
-    
+
 
 def test_ossec_auth_messages(clean_client_keys_file, get_configuration, set_up_groups, configure_environment,
                              configure_sockets_environment, connect_to_sockets_module, wait_for_agentd_startup):
@@ -88,12 +88,12 @@ def test_ossec_auth_messages(clean_client_keys_file, get_configuration, set_up_g
     ----------
     test_case : list
         List of test_case stages (dicts with input, output and stage keys).
-    """       
+    """
     test_case = set_up_groups['test_case']
     for stage in test_case:
-        # Reopen socket (socket is closed by maanger after sending message with client key)        
-        receiver_sockets[0].open()        
-        expected = stage['output']       
+        # Reopen socket (socket is closed by maanger after sending message with client key)
+        receiver_sockets[0].open()
+        expected = stage['output']
         message = stage['input']
         receiver_sockets[0].send(stage['input'], size=True)
         response = receiver_sockets[0].receive(size=True).decode()
