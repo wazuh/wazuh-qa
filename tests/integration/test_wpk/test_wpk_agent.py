@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import hashlib
@@ -21,7 +21,7 @@ from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
 from wazuh_testing import global_parameters
 
-pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), 
+pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0),
               pytest.mark.agent]
 
 folder = 'etc' if platform.system() == 'Linux' else ''
@@ -234,7 +234,7 @@ def start_agent(request, get_configuration):
 
     remoted_simulator.start(custom_listener=remoted_simulator.upgrade_listener,
                             args=(metadata['filename'], metadata['filepath'],
-                                  metadata['chunk_size'], 
+                                  metadata['chunk_size'],
                                   metadata['upgrade_script'],
                                   metadata['sha1'],
                                   metadata['simulate_interruption'],

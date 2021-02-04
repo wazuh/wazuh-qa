@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -6,7 +6,7 @@ import os
 import pytest
 import ssl
 import subprocess
-import yaml 
+import yaml
 
 from OpenSSL import crypto, SSL
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -21,8 +21,8 @@ SERVER_ADDRESS = '127.0.0.1'
 REMOTED_PORT = 1514
 
 def load_tests(path):
-    """ Loads a yaml file from a path 
-    Retrun 
+    """ Loads a yaml file from a path
+    Retrun
     ----------
     yaml structure
     """
@@ -61,8 +61,8 @@ def configure_authd_server(request):
 def test_agent_auth_enrollment(configure_authd_server, configure_environment, test_case: list):
     print(f'Test: {test_case["name"]}')
     if 'agent-auth' in test_case.get("skips", []):
-        pytest.skip("This test does not apply to agent-auth") 
-    parser = AgentAuthParser(server_address=SERVER_ADDRESS, BINARY_PATH=AGENT_AUTH_BINARY_PATH, 
+        pytest.skip("This test does not apply to agent-auth")
+    parser = AgentAuthParser(server_address=SERVER_ADDRESS, BINARY_PATH=AGENT_AUTH_BINARY_PATH,
                              sudo=True if platform.system() == 'Linux' else False)
     configuration = test_case.get('configuration', {})
     parse_configuration_string(configuration)

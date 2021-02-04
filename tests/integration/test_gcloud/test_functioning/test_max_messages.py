@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -78,9 +78,9 @@ def get_configuration(request):
 def test_max_messages(nmessages, get_configuration, configure_environment,
                       restart_wazuh, wait_for_gcp_start):
     """
-    Verify the module gcp-pubsub pull a number of messages less than or equal to max_messages. 
+    Verify the module gcp-pubsub pull a number of messages less than or equal to max_messages.
     If the number of messages is greater than max_messages, the module will only pull max_messages
-    and the rest will be pulled in the next iteration. 
+    and the rest will be pulled in the next iteration.
     """
     str_interval = get_configuration['sections'][0]['elements'][4]['interval']['value']
     time_interval = int(''.join(filter(str.isdigit, str_interval)))

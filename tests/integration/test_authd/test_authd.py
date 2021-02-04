@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -23,8 +23,8 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 
 def load_tests(path):
-    """ Loads a yaml file from a path 
-    Retrun 
+    """ Loads a yaml file from a path
+    Retrun
     ----------
     yaml structure
     """
@@ -59,7 +59,7 @@ def set_up_groups(request):
 def get_configuration(request):
     """Get configurations from the module"""
     yield request.param
-    
+
 @pytest.fixture(scope="module")
 def clean_client_keys_file():
     client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
@@ -69,7 +69,7 @@ def clean_client_keys_file():
     # Clean client.keys
     try:
         with open(client_keys_path, 'w') as client_file:
-            client_file.close()        
+            client_file.close()
     except IOError as exception:
         raise
 
@@ -84,19 +84,19 @@ def test_ossec_auth_messages(clean_client_keys_file, get_configuration, set_up_g
     ----------
     test_case : list
         List of test_case stages (dicts with input, output and stage keys).
-    """    
+    """
     test_case = set_up_groups['test_case']
     for stage in test_case:
         # Reopen socket (socket is closed by maanger after sending message with client key)
         receiver_sockets[0].open()
-        expected = stage['output']       
+        expected = stage['output']
         message = stage['input']
         receiver_sockets[0].send(stage['input'], size=False)
         timeout = time.time() + 10
         response = ''
         while response == '':
             response = receiver_sockets[0].receive().decode()
-            if time.time() > timeout: 
+            if time.time() > timeout:
                 raise ConnectionResetError('Manager did not respond to sent message!')
         assert response[:len(expected)] == expected, \
                'Failed test case {}: Response was: {} instead of: {}'.format(set_up_groups['name'], response, expected)

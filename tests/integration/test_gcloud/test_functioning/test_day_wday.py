@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -94,7 +94,7 @@ def get_configuration(request):
 def test_day_wday(tags_to_apply, get_configuration, configure_environment,
                   restart_wazuh, wait_for_gcp_start):
     """
-    These tests verify the module starts to pull according to the day of the week 
+    These tests verify the module starts to pull according to the day of the week
     or month and time.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])

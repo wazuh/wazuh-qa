@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # Wazuh agents load simulator
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # January 28, 2020.
 #
 # This program is free software; you can redistribute it
