@@ -12,9 +12,10 @@ from wazuh_testing.fim import generate_params, create_file, REGULAR, SYMLINK, ca
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing import global_parameters
+from wazuh_testing.tools import PREFIX
 
 from test_fim.test_files.test_follow_symbolic_link.common import configurations_path, testdir1, \
-    modify_symlink, testdir_not_target, test_directories, wait_for_audit
+    modify_symlink, testdir_not_target, test_directories, wait_for_audit, wait_for_symlink_check
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
@@ -23,7 +24,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 # Variables
 
 fname = "testfile"
-symlink_root_path = "/"
+symlink_root_path = PREFIX
 symlink_name = "symlink"
 symlink_path = os.path.join(symlink_root_path, symlink_name)
 link_interval = 2
@@ -94,8 +95,9 @@ def test_audit_rules_removed_after_change_link(replaced_target, new_target, file
     # Change the target of the symlink and expect events while there's no syscheck scan
 
     modify_symlink(new_target, symlink_path)
-
+    wait_for_symlink_check(wazuh_log_monitor)
     wait_for_audit(True, wazuh_log_monitor)
+
     rules_paths = str(subprocess.check_output(['auditctl', '-l']))
     create_file(REGULAR, new_target, file_name)
     ev = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
