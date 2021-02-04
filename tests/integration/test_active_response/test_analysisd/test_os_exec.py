@@ -47,6 +47,7 @@ cases = [
         'metadata': {
             'agents_number': 1,
             'agents_os': ['ubuntu20.04'],
+            'agents_version': ['v4.2.0'],
             'protocol': 'tcp',
             'extra_args': 'no',
             'timeout': 'no',
@@ -66,6 +67,7 @@ cases = [
         'metadata': {
             'agents_number': 1,
             'agents_os': ['debian8'],
+            'agents_version': ['v4.1.0'],
             'protocol': 'tcp',
             'extra_args': 'no',
             'timeout': 'no',
@@ -85,6 +87,7 @@ cases = [
         'metadata': {
             'agents_number': 2,
             'agents_os': ['debian8', 'ubuntu20.04'],
+            'agents_version': ['v4.1.0', 'v4.2.0'],
             'protocol': 'tcp',
             'extra_args': 'no',
             'timeout': 'no',
@@ -104,6 +107,7 @@ cases = [
         'metadata': {
             'agents_number': 2,
             'agents_os': ['debian8', 'ubuntu20.04'],
+            'agents_version': ['v4.1.0', 'v4.2.0'],
             'protocol': 'tcp',
             'extra_args': 'yes',
             'timeout': 'no',
@@ -123,6 +127,7 @@ cases = [
         'metadata': {
             'agents_number': 2,
             'agents_os': ['debian8', 'ubuntu20.04'],
+            'agents_version': ['v4.1.0', 'v4.2.0'],
             'protocol': 'tcp',
             'extra_args': 'no',
             'timeout': 'yes',
@@ -142,6 +147,7 @@ cases = [
         'metadata': {
             'agents_number': 2,
             'agents_os': ['debian8', 'ubuntu20.04'],
+            'agents_version': ['v4.1.0', 'v4.2.0'],
             'protocol': 'tcp',
             'extra_args': 'no',
             'timeout': 'no',
@@ -192,7 +198,8 @@ def configure_agents(request, get_configuration):
     metadata = get_configuration.get('metadata')
     agents_number = metadata['agents_number']
     agents_os = metadata['agents_os']
-    agents_created = create_agents(agents_number, SERVER_ADDRESS, CRYPTO, os=agents_os)
+    agents_version = metadata['agents_version']
+    agents_created = create_agents(agents_number, SERVER_ADDRESS, CRYPTO, os=agents_os, version=agents_version)
     setattr(request.module, 'agents', agents_created)
 
 
