@@ -69,6 +69,7 @@ class RemotedSimulator:
         self.upgrade_success = False
         self.upgrade_notification = None
         self.wcom_message_version = None
+        self.active_response_message = None
         self.listener_thread = None
         if start_on_init:
             self.start()
@@ -102,6 +103,9 @@ class RemotedSimulator:
 
     def setWcomMessageVersion(self, version):
         self.wcom_message_version = version
+
+    def setActiveResponseMessage(self, ar_message):
+        self.active_response_message = ar_message
 
     """
     Stop socket and listener thread
@@ -388,6 +392,12 @@ class RemotedSimulator:
                             self.send(connection, ret)
                         else:
                             pass
+
+                        # Active response message
+                        if self.active_response_message:
+                            msg = self.create_sec_message("#!-execd " + self.active_response_message, "aes")
+                            self.active_response_message = None
+                            self.send(connection, msg)
                 except Exception:
                     continue
 
