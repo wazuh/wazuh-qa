@@ -68,10 +68,10 @@ class CertificateController(object):
             Name or hostname for the ceritifcate subject. If none will be same
         as issuer
 
-        Retruns
+        Returns
         ------
         ca_cert : X509 Object
-             Created ca certificate 
+             Created ca certificate
         """
 
         ca_cert = crypto.X509()

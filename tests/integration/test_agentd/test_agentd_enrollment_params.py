@@ -28,7 +28,7 @@ INSTALLATION_FOLDER = WAZUH_PATH
 
 def load_tests(path):
     """ Loads a yaml file from a path
-    Retrun
+    Returns
     ----------
     yaml structure
     """
