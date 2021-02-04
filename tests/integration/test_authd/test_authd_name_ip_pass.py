@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -25,8 +25,8 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 
 def load_tests(path):
-    """ Loads a yaml file from a path 
-    Retrun 
+    """ Loads a yaml file from a path
+    Retrun
     ----------
     yaml structure
     """
@@ -220,14 +220,14 @@ def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, confi
     test_case : list
         List of test_cases, dict with following keys:
             - input: message that will be tried to send to the manager
-            - output: expected response 
+            - output: expected response
             - insert_prev_agent: yes or no (for duplicated ip or name cases)
                 1) if insert_prev_agent_custom is present: previous input message is overwrite by the custom message
                     (insert_prev_agent_custom: "OSSEC A:'user0' IP:'10.10.10.10'")
                 2) if insert_prev_agent_custom is not present: send the masage equals to input
-            - insert_random_pass_in_query: 
+            - insert_random_pass_in_query:
               "yes" if is needed add random pass to input query (for register with random pass cases)
-            - insert_hostname_in_query: 
+            - insert_hostname_in_query:
               "yes" if is present add host name to input message
     """
     current_test = get_current_test()

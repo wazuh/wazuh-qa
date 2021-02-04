@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -160,7 +160,7 @@ def search_error_messages():
     return None
 
 
-# Tests 
+# Tests
 """
 This test covers the scenario of Agent starting with keys,
 when misses comunication with Remoted and a new enrollment is sent to Authd.
@@ -405,7 +405,7 @@ def test_agentd_initial_enrollment_retries(configure_authd_server, stop_authd, s
 
 
 """
-This test covers and check the scenario of Agent starting with keys but Remoted is not reachable during some seconds 
+This test covers and check the scenario of Agent starting with keys but Remoted is not reachable during some seconds
 and multiple connection retries are required prior to requesting a new enrollment
 """
 

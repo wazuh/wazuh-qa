@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -36,8 +36,8 @@ def get_configuration(request):
 def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_api_environment, restart_api,
                                     wait_for_start, get_api_details):
     """Check that the blocking time for IPs detected as brute-force attack works.
-   
-    Provoke a block, make a request before the blocking 
+
+    Provoke a block, make a request before the blocking
     time finishes and one after the blocking time.
 
     Parameters

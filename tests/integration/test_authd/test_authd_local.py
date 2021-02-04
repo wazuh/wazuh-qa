@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -20,8 +20,8 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 
 def load_tests(path):
-    """ Loads a yaml file from a path 
-    Retrun 
+    """ Loads a yaml file from a path
+    Retrun
     ----------
     yaml structure
     """
@@ -91,7 +91,7 @@ def test_ossec_auth_messages(clean_client_keys_file, get_configuration, set_up_g
     """
     test_case = set_up_groups['test_case']
     for stage in test_case:
-        # Reopen socket (socket is closed by maanger after sending message with client key)        
+        # Reopen socket (socket is closed by maanger after sending message with client key)
         receiver_sockets[0].open()
         expected = stage['output']
         message = stage['input']
