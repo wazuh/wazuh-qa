@@ -17,4 +17,3 @@ Closes #`<YOUR_ISSUE_NUMBER>`
 Important: Don't remove this check if your PR modifies Python code.
 -->
 - [ ] Python codebase satisfies PEP-8 style style guide. `pycodestyle --max-line-length=120 --show-source --show-pep8 file.py`
-- [ ] Update CHANGELOG.md file
