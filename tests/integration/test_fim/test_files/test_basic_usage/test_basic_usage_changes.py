@@ -27,9 +27,11 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2 = test_directories
 
+
 # configurations
 
-conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
+conf_params = {'TEST_DIRECTORIES': directory_str, 'TEST_WILDCARDS': os.path.join(PREFIX, 'testdir?'),
+               'MODULE_NAME': __name__}
 p, m = generate_params(extra_params=conf_params)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
@@ -51,7 +53,8 @@ def get_configuration(request):
 @pytest.mark.parametrize('name, encoding, checkers,  tags_to_apply', [
     ('regular0', None, {CHECK_ALL}, {'ossec_conf'}),
     pytest.param('檔案', 'cp950', {CHECK_ALL}, {'ossec_conf'}, marks=(pytest.mark.linux,
-                                                                    pytest.mark.darwin, pytest.mark.sunos5)),
+                                                                    pytest.mark.darwin,
+                                                                    pytest.mark.sunos5)),
     pytest.param('Образецтекста', 'koi8-r', {CHECK_ALL}, {'ossec_conf'}, marks=(pytest.mark.linux,
                                                                                 pytest.mark.darwin,
                                                                                 pytest.mark.sunos5)),
@@ -59,11 +62,14 @@ def get_configuration(request):
                                                                                 pytest.mark.darwin,
                                                                                 pytest.mark.sunos5)),
     pytest.param('نصبسيط', 'cp720', {CHECK_ALL}, {'ossec_conf'}, marks=(pytest.mark.linux,
-                                                                        pytest.mark.darwin, pytest.mark.sunos5)),
-    pytest.param('Ξ³ΞµΞΉΞ±', None, {CHECK_ALL}, {'ossec_conf'},
-                 marks=(pytest.mark.win32,
-                        pytest.mark.xfail(reason='Xfail due to issue: https://github.com/wazuh/wazuh/issues/4612')))
-
+                                                                        pytest.mark.darwin,
+                                                                        pytest.mark.sunos5)),
+    pytest.param('Ξ³ΞµΞΉΞ±', None, {CHECK_ALL}, {'ossec_conf'}, marks=(pytest.mark.win32,
+                                                                       pytest.mark.xfail(reason='Xfail due to issue: \
+                                                                       https://github.com/wazuh/wazuh/issues/4612'))),
+    pytest.param('regular1', None, {CHECK_ALL}, {'ossec_conf_wildcards'}, marks=(pytest.mark.linux,
+                                                                                 pytest.mark.darwin,
+                                                                                 pytest.mark.sunos5))
 ])
 def test_regular_file_changes(folder, name, encoding, checkers, tags_to_apply,
                               get_configuration, configure_environment,
