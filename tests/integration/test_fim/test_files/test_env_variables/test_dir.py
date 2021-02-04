@@ -27,15 +27,15 @@ test_directories = [os.path.join(PREFIX, 'testdir1'),
 dir1, dir2, dir3, dir4 = test_directories
 
 # Check big environment variables ending with backslash
-paths = [os.path.join(PREFIX, 'a' * 50 + '\\') for i in range(100)] + [dir2, dir3, dir4]
-multiple_env_var = os.pathsep.join(paths)
-
-environment_variables = [("TEST_ENV_ONE_PATH", dir1), ("TEST_ENV_MULTIPLES_PATH", multiple_env_var)]
-
 if sys.platform == 'win32':
+    paths = [os.path.join(PREFIX, 'a' * 50 + '\\') for i in range(10)] + [dir2, dir3, dir4]
     test_env = "%TEST_ENV_ONE_PATH%, %TEST_ENV_MULTIPLES_PATH%"
 else:
+    paths = [os.path.join(PREFIX, 'a' * 50 + '\\') for i in range(100)] + [dir2, dir3, dir4]
     test_env = "$TEST_ENV_ONE_PATH, $TEST_ENV_MULTIPLES_PATH"
+
+multiple_env_var = os.pathsep.join(paths)
+environment_variables = [("TEST_ENV_ONE_PATH", dir1), ("TEST_ENV_MULTIPLES_PATH", multiple_env_var)]
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_dir.yaml')
