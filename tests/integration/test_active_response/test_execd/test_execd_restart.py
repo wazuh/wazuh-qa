@@ -135,25 +135,25 @@ def test_execd_restart(set_debug_mode, get_configuration, test_version, configur
 
     ##### Checking AR in ossec logs ####
     try:
-        ossec_log_monitor.start(timeout=30, callback=wait_received_message_line)
+        ossec_log_monitor.start(timeout=60, callback=wait_received_message_line)
     except TimeoutError as err:
         raise AssertionError("Received message tooks too much!")
 
     ##### Checking AR in active-response logs ####
     try:
-        ar_log_monitor.start(timeout=30, callback=wait_start_message_line)
+        ar_log_monitor.start(timeout=60, callback=wait_start_message_line)
     except TimeoutError as err:
         raise AssertionError("Start message tooks too much!")
 
     if expected['success'] == True:
         try:
-            ar_log_monitor.start(timeout=30, callback=wait_message_line)
+            ar_log_monitor.start(timeout=60, callback=wait_message_line)
         except TimeoutError as err:
             raise AssertionError("AR message tooks too much!")
 
         # Checking shutdown message in ossec logs
         try:
-            ossec_log_monitor.start(timeout=30, callback=wait_shutdown_message_line)
+            ossec_log_monitor.start(timeout=60, callback=wait_shutdown_message_line)
         except TimeoutError as err:
             raise AssertionError("Shutdown message tooks too much!")
 
@@ -167,12 +167,12 @@ def test_execd_restart(set_debug_mode, get_configuration, test_version, configur
             raise AssertionError("The script is not running")
 
         try:
-            ar_log_monitor.start(timeout=30, callback=wait_ended_message_line)
+            ar_log_monitor.start(timeout=60, callback=wait_ended_message_line)
         except TimeoutError as err:
             raise AssertionError("Ended message tooks too much!")
 
     else:
         try:
-            ar_log_monitor.start(timeout=30, callback=wait_invalid_input_message_line)
+            ar_log_monitor.start(timeout=60, callback=wait_invalid_input_message_line)
         except TimeoutError as err:
             raise AssertionError("Invalid input message tooks too much!")

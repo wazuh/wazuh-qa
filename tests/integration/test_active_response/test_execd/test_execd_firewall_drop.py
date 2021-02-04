@@ -159,20 +159,20 @@ def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, co
 
     ##### Checking AR in ossec logs ####
     try:
-        ossec_log_monitor.start(timeout=30, callback=wait_received_message_line)
+        ossec_log_monitor.start(timeout=60, callback=wait_received_message_line)
     except TimeoutError as err:
         raise AssertionError("Received message tooks too much!")
 
     ##### Checking AR in active-response logs ####
     try:
-        ar_log_monitor.start(timeout=30, callback=wait_start_message_line)
+        ar_log_monitor.start(timeout=60, callback=wait_start_message_line)
     except TimeoutError as err:
         raise AssertionError("Start message tooks too much!")
 
     if expected['success'] == True:
         for x in range(2):
             try:
-                ar_log_monitor.start(timeout=30, callback=wait_message_line)
+                ar_log_monitor.start(timeout=60, callback=wait_message_line)
             except TimeoutError as err:
                 raise AssertionError("AR message tooks too much!")
 
@@ -180,7 +180,7 @@ def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, co
             validate_ar_message(last_log, x)
 
             try:
-                ar_log_monitor.start(timeout=30, callback=wait_ended_message_line)
+                ar_log_monitor.start(timeout=60, callback=wait_ended_message_line)
             except TimeoutError as err:
                 raise AssertionError("Ended message tooks too much!")
 
@@ -199,6 +199,6 @@ def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, co
             time.sleep(10)
     else:
         try:
-            ar_log_monitor.start(timeout=30, callback=wait_invalid_input_message_line)
+            ar_log_monitor.start(timeout=60, callback=wait_invalid_input_message_line)
         except TimeoutError as err:
             raise AssertionError("Invalid input message tooks too much!")
