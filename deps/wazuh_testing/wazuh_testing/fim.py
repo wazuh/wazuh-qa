@@ -941,7 +941,7 @@ def change_internal_options(param, value, opt_path=None):
     with open(local_conf_path, "w") as sources:
         for line in lines:
             sources.write(
-                re.sub(f'{param}=[0-9]*', f'{param}={value}', line))
+                re.sub(f'{param}=.*', f'{param}={value}', line))
             if param in line:
                 add_pattern = False
 

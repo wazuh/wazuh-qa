@@ -138,3 +138,14 @@
                     value: MAX_RETRIES
                 - retry_interval:
                     value: RETRY_INTERVAL
+    - tags:
+      - all
+      apply_to_modules:
+      - test_agentd_state_config
+      sections:
+      - section: client
+        elements:
+            - server:
+                elements:
+                - address: 
+                    value: '127.0.0.1'
