@@ -76,23 +76,6 @@ checks:
 ###########################
 # Complex directory rules #
 ###########################
- - id: 100300
-   title: PASS -- Full rule regex match
-   condition: any
-   rules:
-     - d:/etc -> ossec-init.conf -> r:^DIRECTORY
-
- - id: 100301
-   title: FAIL -- Full rule regex does not match
-   condition: any
-   rules:
-     - d:/etc -> ossec-init.conf -> r:^FAKE
-
- - id: 100302
-   title: INVALID -- Directory does not exist
-   condition: any
-   rules:
-     - d:/var/ossec/fakedir -> ossec-init.conf -> r:^FAKE
 # This check is pass instead of invalid because the existence of the file is optional (not mandatory)
  - id: 100303
    title: FAIL -- File does not exist

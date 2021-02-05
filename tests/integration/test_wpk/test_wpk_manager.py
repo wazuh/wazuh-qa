@@ -2,24 +2,26 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import hashlib
 import json
 import os
-import platform
-import socket
-import struct
-import time
-
 import pytest
+import socket
+import subprocess
+import struct
+import threading
+import time
+import hashlib
 import requests
+import platform
+
 from configobj import ConfigObj
-from wazuh_testing import global_parameters
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
-from wazuh_testing.tools.agent_simulator import Sender, Injector
+from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, get_version
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.agent_simulator import Sender, Injector
+from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.services import control_service
+from wazuh_testing import global_parameters
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
@@ -39,15 +41,7 @@ if global_parameters.wpk_version is None:
     raise ValueError("The WPK package version must be defined by parameter. See README.md")
 version_to_upgrade = global_parameters.wpk_version[0]
 
-
-def get_current_version():
-    if platform.system() == 'Linux':
-        config_file_path = os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')
-        _config = ConfigObj(config_file_path)
-        return _config['VERSION']
-
-
-MANAGER_VERSION = get_current_version()
+MANAGER_VERSION = get_version()
 
 cases = [
     # 0. Single Agent - success
@@ -355,8 +349,8 @@ cases = [
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': [
-                'Legacy upgrade: check the result manually since the agent cannot report the result of the task'],
+            'status': ['Legacy upgrade:' + \
+                       'check the result manually since the agent cannot report the result of the task'],
             'upgrade_notification': [False],
             'message_params': {'version': 'v3.13.1'},
             'expected_response': 'Success'
@@ -734,6 +728,7 @@ cases = [
     }
 ]
 
+
 params = [case['params'] for case in cases]
 metadata = [case['metadata'] for case in cases]
 
@@ -755,7 +750,7 @@ def set_debug_mode():
             if line == debug_line:
                 return
     with open(local_int_conf_path, 'a') as local_file_write:
-        local_file_write.write('\n' + debug_line)
+        local_file_write.write('\n'+debug_line)
 
 
 @pytest.fixture(scope="module", params=configurations)
@@ -818,7 +813,7 @@ def remove_wpk_package():
 
 def create_wpk_custom_file(file):
     with open(file, 'wb') as f:
-        f.seek(1024 * 128)
+        f.seek(1024*128)
         f.write(b'\0')
 
 
@@ -834,7 +829,7 @@ def get_sha_list(metadata):
         agent_version = MANAGER_VERSION
 
     if metadata.get('message_params') and metadata.get('message_params').get('use_http'):
-        protocol = 'http://' if metadata.get('message_params').get('use_http') == True else 'https://'
+        protocol = 'http://' if metadata.get('message_params').get('use_http') else 'https://'
 
     # Generating file name
     wpk_file = "wazuh_agent_{0}_linux_{1}.wpk".format(agent_version, architecture)
@@ -945,8 +940,8 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
         last_log = log_monitor.result()
         if 'use_http' in metadata.get('checks'):
             if metadata.get('message_params') and \
-                    metadata.get('message_params').get('use_http') and \
-                    metadata.get('message_params').get('use_http') == True:
+                metadata.get('message_params').get('use_http') and \
+                    metadata.get('message_params').get('use_http'):
                 assert "'http://" in last_log, "Use http protocol did not match expected! Expected 'http://'"
             else:
                 assert "'https://" in last_log, "Use http protocol did not match expected! Expected 'https://'"
@@ -955,7 +950,8 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
             if metadata.get('message_params') and \
                     metadata.get('message_params').get('version'):
                 assert metadata.get('message_params').get('version') in \
-                       last_log, f'Versions did not match expected! Expected {metadata.get("message_params").get("version")}'
+                    last_log, f'Versions did not match expected! \
+                                Expected {metadata.get("message_params").get("version")}'
             else:
                 assert MANAGER_VERSION in last_log, \
                     f'Versions did not match expected! Expected {MANAGER_VERSION}'
