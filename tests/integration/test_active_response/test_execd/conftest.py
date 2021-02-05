@@ -5,29 +5,12 @@ import ssl
 import platform
 
 from configobj import ConfigObj
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH, get_version
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.file import truncate_file
 
 AR_FOLDER = 'active-response' if platform.system() == 'Windows' else 'logs'
 AR_LOG_FILE_PATH = os.path.join(WAZUH_PATH, AR_FOLDER, 'active-responses.log')
-
-
-def get_current_version():
-    """
-    Get version of Wazuh installed
-    """
-    if platform.system() == 'Linux':
-        config_file_path = os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')
-        _config = ConfigObj(config_file_path)
-        return _config['VERSION']
-
-    else:
-        version = None
-        with open(os.path.join(WAZUH_PATH, 'VERSION'), 'r') as f:
-            version = f.read()
-            version = version[:version.rfind('\n')]
-        return version
 
 
 @pytest.fixture(scope="session")
@@ -99,7 +82,7 @@ def test_version():
     """
     Validate Wazuh version
     """
-    if get_current_version() < "v4.2.0":
+    if get_version() < "v4.2.0":
         raise AssertionError("The version of the agent is < 4.2.0")
 
 
