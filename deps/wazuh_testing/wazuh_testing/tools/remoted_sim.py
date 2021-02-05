@@ -1,17 +1,16 @@
-import os
+import base64
 import hashlib
 import json
-import zlib
 import socket
-import sys
-import threading
 import struct
+import threading
 import time
-import base64
-from wazuh_testing.tools import WAZUH_PATH
-from Crypto.Cipher import AES, Blowfish
-from Crypto.Util.Padding import pad, unpad
+import zlib
 from struct import pack
+
+from Crypto.Cipher import AES, Blowfish
+from Crypto.Util.Padding import pad
+from wazuh_testing.tools import WAZUH_PATH
 
 
 class Cipher:
@@ -50,10 +49,9 @@ class RemotedSimulator:
     """
     Create an AF_INET server socket for simulating remoted connection
     """
-    def __init__(self, server_address='127.0.0.1', remoted_port=1514,
-                 protocol='udp', mode='REJECT',
-                 client_keys=WAZUH_PATH+'/etc/client.keys',
-                 start_on_init=True):
+
+    def __init__(self, server_address='127.0.0.1', remoted_port=1514, protocol='udp', mode='REJECT',
+                 client_keys=WAZUH_PATH + '/etc/client.keys', start_on_init=True):
         self.protocol = protocol
         self.global_count = 1234567891
         self.local_count = 5555
@@ -80,6 +78,7 @@ class RemotedSimulator:
     """
     Start socket and listener thread
     """
+
     def start(self, custom_listener=None, args=[]):
         if self.running is False:
             self._start_socket()
@@ -119,6 +118,7 @@ class RemotedSimulator:
     """
     Stop socket and listener thread
     """
+
     def stop(self):
         if self.running is True:
             self.running = False
@@ -128,14 +128,17 @@ class RemotedSimulator:
     """
     Generate encryption key (using agent metadata and key)
     """
+
     def create_encryption_key(self, id, name, key):
-        sum1 = (hashlib.md5((hashlib.md5(name.encode()).hexdigest().encode() + hashlib.md5(id.encode()).hexdigest().encode())).hexdigest().encode())[:15]
+        sum1 = (hashlib.md5((hashlib.md5(name.encode()).hexdigest().encode() + hashlib.md5(
+            id.encode()).hexdigest().encode())).hexdigest().encode())[:15]
         sum2 = hashlib.md5(key.encode()).hexdigest().encode()
         self.encryption_key = sum2 + sum1
 
     """
     Compose event from raw message
     """
+
     def compose_sec_message(self, message, binary_data=None):
         message = message.encode()
         if binary_data:
@@ -153,6 +156,7 @@ class RemotedSimulator:
     """
     Add the Wazuh custom padding to each sec_message sent
     """
+
     def wazuh_padding(self, compressed_sec_message):
         padding = 8
         extra = len(compressed_sec_message) % padding
@@ -165,6 +169,7 @@ class RemotedSimulator:
     """
     Encrypt sec_message AES or Blowfish
     """
+
     def encrypt(self, padded_sec_message, crypto_method):
         if crypto_method == "aes":
             encrypted_sec_message = Cipher(padded_sec_message, self.encryption_key).encrypt_aes()
@@ -175,6 +180,7 @@ class RemotedSimulator:
     """
     Add sec_message headers for AES or Blowfish Cyphers
     """
+
     def headers(self, encrypted_sec_message, crypto_method):
         if crypto_method == "aes":
             header = "#AES:".encode()
@@ -186,6 +192,7 @@ class RemotedSimulator:
     """
     Create a sec_message to Agent
     """
+
     def create_sec_message(self, message, crypto_method, binary_data=None):
         # Compose sec_message
         sec_message = self.compose_sec_message(message, binary_data)
@@ -202,41 +209,43 @@ class RemotedSimulator:
     """
     Create an ACK message
     """
+
     def createACK(self, crypto_method):
         return self.create_sec_message("#!-agent ack ", crypto_method)
 
     """
     Build com message with new format
     """
+
     def buildNewComMessage(self, command, payload=None):
         list_command = command.split(' ')
         message = None
         if list_command[0] == 'open':
             message = json.dumps({"command": list_command[0],
                                   "parameters": {
-                                    "file": list_command[2],
-                                    "mode": list_command[1]
-                                    }})
+                                      "file": list_command[2],
+                                      "mode": list_command[1]
+                                  }})
         elif list_command[0] == 'write':
             payload_b64 = base64.b64encode(payload)
             payload_b64 = payload_b64.decode('ascii')
             message = json.dumps({"command": list_command[0],
                                   "parameters": {
-                                    "file": list_command[2],
-                                    "buffer": payload_b64,
-                                    "length": (len(payload_b64) * 3) / 4 - payload_b64.count('=', -2)
-                                    }})
+                                      "file": list_command[2],
+                                      "buffer": payload_b64,
+                                      "length": (len(payload_b64) * 3) / 4 - payload_b64.count('=', -2)
+                                  }})
         elif list_command[0] == 'close' or list_command[0] == 'sha1':
             message = json.dumps({"command": list_command[0],
                                   "parameters": {
-                                    "file": list_command[1]
-                                    }})
+                                      "file": list_command[1]
+                                  }})
         elif list_command[0] == 'upgrade':
             message = json.dumps({"command": list_command[0],
                                   "parameters": {
-                                    "file": list_command[1],
-                                    "installer": list_command[2]
-                                    }})
+                                      "file": list_command[1],
+                                      "installer": list_command[2]
+                                  }})
         else:
             pass
         return message
@@ -248,11 +257,13 @@ class RemotedSimulator:
     - payload: Optional binary data to add to the message
     - interruption_time: Time that will be added in between connections
     """
+
     def sendComMessage(self, client_address, connection, command, payload=None, interruption_time=None):
         self.request_counter += 1
         message = None
-        if command == 'lock_restart -1' or self.wcom_message_version is None:
-            message = self.create_sec_message(f"#!-req {self.request_counter} com {command}", 'aes', binary_data=payload)
+        if command == 'lock_restart -1' or self.wcom_message_version == None:
+            message = self.create_sec_message(f"#!-req {self.request_counter} com {command}", 'aes',
+                                              binary_data=payload)
         else:
             msg = self.buildNewComMessage(command, payload=payload)
             message = self.create_sec_message(f"#!-req {self.request_counter} upgrade {msg}", 'aes', None)
@@ -302,12 +313,14 @@ class RemotedSimulator:
     """
     Create an invalid message, without encryption and headers
     """
+
     def createINVALID(self):
         return "INVALID".encode()
 
     """
     Update message counters, used inside secure messages
     """
+
     def update_counters(self):
         if self.local_count >= 9997:
             self.local_count = 0
@@ -318,6 +331,7 @@ class RemotedSimulator:
     """
     Decrypt a message received from Agent
     """
+
     def decrypt_message(self, data, crypto_method):
         if crypto_method == 'aes':
             msg_removeheader = bytes(data[5:])
@@ -327,7 +341,7 @@ class RemotedSimulator:
             msg_decrypted = Cipher(msg_removeheader, self.encryption_key).decrypt_blowfish()
 
         padding = 0
-        while(msg_decrypted):
+        while (msg_decrypted):
             if msg_decrypted[padding] == 33:
                 padding += 1
             else:
@@ -341,12 +355,14 @@ class RemotedSimulator:
     """
     Receive message from connection
     """
+
     def receiveMessage(self, connection):
         while True:
             if self.protocol == 'tcp':
                 rcv = connection.recv(4)
                 if len(rcv) == 4:
-                    data_len = ((rcv[3] & 0xFF) << 24) | ((rcv[2] & 0xFF) << 16) | ((rcv[1] & 0xFF) << 8) | (rcv[0] & 0xFF)
+                    data_len = ((rcv[3] & 0xFF) << 24) | ((rcv[2] & 0xFF) << 16) | ((rcv[1] & 0xFF) << 8) | (
+                            rcv[0] & 0xFF)
 
                     buffer_array = connection.recv(data_len)
 
@@ -359,6 +375,7 @@ class RemotedSimulator:
     """
     Recvall with known size of the message
     """
+
     def recv_all(self, connection, size: int):
         buffer = bytearray()
         while len(buffer) < size:
@@ -374,6 +391,7 @@ class RemotedSimulator:
     """
     Listener thread to read every received package from the socket and process it
     """
+
     def listener(self):
         while self.running:
             if self.protocol == 'tcp':
@@ -423,6 +441,7 @@ class RemotedSimulator:
     """
     Established connection and receives startup message
     """
+
     def start_connection(self):
         self.encryption_key = ""
         while not self.encryption_key and self.running:
@@ -460,6 +479,7 @@ class RemotedSimulator:
     """
     Listener thread that will finish when encryption_keys are obtained
     """
+
     def upgrade_listener(self, filename, filepath, chunk_size, installer,
                          sha1hash, simulate_interruption=False,
                          simulate_connection_error=False):
@@ -507,12 +527,13 @@ class RemotedSimulator:
     """
     send method to write on the socket
     """
+
     def send(self, dst, data):
         self.update_counters()
         if self.protocol == "tcp":
             try:
                 length = pack('<I', len(data))
-                dst.send(length+data)
+                dst.send(length + data)
             except:
                 pass
         elif self.protocol == "udp":
@@ -524,6 +545,7 @@ class RemotedSimulator:
     """
     Process a received message and answer according to the simulator mode
     """
+
     def process_message(self, source, received):
         # handle ping pong response
         if received == b'#ping':
@@ -534,8 +556,8 @@ class RemotedSimulator:
         if index == 0:
             agent_identifier_type = "by_id"
             index = received[1:].find(b'!')
-            agent_identifier = received[1:index+1].decode()
-            received = received[index+2:]
+            agent_identifier = received[1:index + 1].decode()
+            received = received[index + 2:]
         else:
             agent_identifier_type = "by_ip"
             agent_identifier = source[0]
@@ -550,7 +572,7 @@ class RemotedSimulator:
         self.update_keys()
         # TODO: Ask for specific keys depending on Agent Identifier
         keys = self.get_key()
-        if keys is None:
+        if keys == None:
             # No valid keys
             return -1
         (id, name, ip, key) = keys
@@ -571,7 +593,7 @@ class RemotedSimulator:
             hash_message = False
 
         if rcv_msg.find('upgrade_update_status') != -1:
-            self.upgrade_notification = json.loads(rcv_msg[rcv_msg.find('\"parameters\":')+13:-1])
+            self.upgrade_notification = json.loads(rcv_msg[rcv_msg.find('\"parameters\":') + 13:-1])
 
         # Save context of received message for future asserts
         self.last_message_ctx = '{} {} {}'.format(agent_identifier_type, agent_identifier, crypto_method)
@@ -587,21 +609,22 @@ class RemotedSimulator:
             else:
                 msg = None
         elif self.mode == "WRONG_KEY":
-            self.create_encryption_key(id+'inv', name+'inv', key+'inv')
+            self.create_encryption_key(id + 'inv', name + 'inv', key + 'inv')
             msg = self.createACK(crypto_method)
         elif self.mode == "INVALID_MSG":
             msg = self.createINVALID()
 
-        return(msg)
+        return (msg)
 
     """
     Update keys table with keys read from client.keys
     """
+
     def update_keys(self):
         with open(self.client_keys_path) as client_file:
             client_lines = client_file.read().splitlines()
 
-            self.keys = ({},{})
+            self.keys = ({}, {})
             for line in client_lines:
                 (id, name, ip, key) = line.split(" ")
                 self.keys[0][id] = (id, name, ip, key)
@@ -612,9 +635,10 @@ class RemotedSimulator:
     keys can be found in two dictionaries: by_id and by_ip
     If no key is provided, the first item will be returned.
     """
+
     def get_key(self, key=None, dictionary="by_id"):
         try:
-            if key is None:
+            if key == None:
                 return next(iter(self.keys[0].values()))
 
             if dictionary == "by_ip":
@@ -634,6 +658,7 @@ class RemotedSimulator:
     -WRONG_KEY: Any received package will be answered with an ACK created with incorrect keys.
     -INVALID_MSG: Any received package will be answered with a message that is not encrypted and without header.
     """
+
     def set_mode(self, mode):
         self.mode = mode
 
@@ -641,6 +666,7 @@ class RemotedSimulator:
     Wait for upgrade process to run
     timeout: Max timeout in seconds
     """
+
     def wait_upgrade_process(self, timeout=None):
         while not self.upgrade_success and not self.upgrade_errors and (timeout is None or timeout > 0):
             time.sleep(1)
@@ -652,6 +678,7 @@ class RemotedSimulator:
     Wait for the arrival of the agent notification
     timeout: Max timeout in seconds
     """
+
     def wait_upgrade_notification(self, timeout=None):
         while (self.upgrade_notification is None) and (timeout is None or timeout > 0):
             time.sleep(1)

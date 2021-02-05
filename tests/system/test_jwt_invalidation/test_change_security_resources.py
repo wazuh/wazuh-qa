@@ -1,18 +1,16 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
 
 import pytest
-
 from wazuh_testing.tools.system import HostManager
 
 test_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                               'provisioning', 'agentless_cluster', 'inventory.yml')
 default_api_conf = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'api_configurations', 'default.yaml')
-
 
 # Testing credentials
 test_user = None
@@ -45,7 +43,8 @@ def set_role_to_user():
     (test_hosts[0], test_hosts[1]),
     (test_hosts[1], test_hosts[2])
 ])
-def test_change_user_policy_and_role(login_endpoint, node1, node2, set_default_api_conf, create_testing_api_user, create_security_resources,
+def test_change_user_policy_and_role(login_endpoint, node1, node2, set_default_api_conf, create_testing_api_user,
+                                     create_security_resources,
                                      set_role_to_user):
     """Test that the obtained token is invalid after changing a role or policy related to the user.
 
@@ -56,6 +55,7 @@ def test_change_user_policy_and_role(login_endpoint, node1, node2, set_default_a
     node2 : str
         Node from the cluster.
     """
+
     def check_revoked_token(node, current_token):
         # Check that the token was revoked
         resp = host_manager.make_api_call(node, endpoint='/agents', token=current_token)

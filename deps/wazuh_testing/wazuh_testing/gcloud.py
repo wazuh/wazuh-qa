@@ -1,14 +1,14 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import json
 import os
 import re
-import json
 
+from google.cloud import pubsub_v1
 from jsonschema import validate
 from wazuh_testing.tools import WAZUH_PATH
-from google.cloud import pubsub_v1
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -6,11 +6,11 @@ import os
 import time
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+
 from common import multiple_keys_and_entries_keys, multiple_keys_and_entries_values
 
 # Marks
@@ -40,6 +40,7 @@ conf_params['MODULE_NAME'] = __name__
 p, m = generate_params(extra_params=conf_params, modes=['scheduled'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
+
 # Fixtures
 
 
@@ -47,6 +48,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
+
 
 # Test
 
@@ -68,5 +70,5 @@ def test_multiple_entries(tags_to_apply, get_configuration, configure_environmen
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     multiple_keys_and_entries_keys(n_regs, subkeys, wazuh_log_monitor, KEY, timeout=global_parameters.default_timeout)
-    time.sleep(2)   # These 2 seconds are needed to avoid overlapping between keys and values
+    time.sleep(2)  # These 2 seconds are needed to avoid overlapping between keys and values
     multiple_keys_and_entries_values(n_regs, subkeys, wazuh_log_monitor, KEY, timeout=global_parameters.default_timeout)

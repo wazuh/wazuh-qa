@@ -1,16 +1,16 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+
 import pytest
+from test_fim.test_files.test_report_changes.common import generate_string
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, calculate_registry_diff_paths, registry_value_cud, KEY_WOW64_32KEY, \
-                              KEY_WOW64_64KEY, generate_params
-
+    KEY_WOW64_64KEY, generate_params
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from test_fim.test_files.test_report_changes.common import generate_string
 
 MAX_STR_MORE_CHANGES = 59391
 MORE_CHANGES_STR = "More changes..."
@@ -31,7 +31,6 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 reg1, reg2 = test_regs
 
-
 # Configurations
 
 conf_params = {'WINDOWS_REGISTRY_1': reg1,
@@ -41,6 +40,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_registry_report_change
 p, m = generate_params(extra_params=conf_params, modes=['scheduled'])
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+
 
 # Fixtures
 
@@ -76,7 +76,7 @@ def test_report_changes_more_changes(key, subkey, arch, value_name, tags_to_appl
         Run test if match with a configuration identifier, skip otherwise.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    values = {value_name:  generate_string(MAX_STR_MORE_CHANGES, '0')}
+    values = {value_name: generate_string(MAX_STR_MORE_CHANGES, '0')}
     error_str = 'Expected {} in event'.format(MORE_CHANGES_STR)
 
     def report_changes_validator(event):

@@ -1,18 +1,18 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, \
-                              callback_disk_quota_default, create_registry, registry_parser, modify_registry_value, \
-                              check_time_travel, validate_registry_value_event, callback_detect_event, REG_SZ
+    callback_disk_quota_default, create_registry, registry_parser, modify_registry_value, \
+    check_time_travel, validate_registry_value_event, callback_detect_event, REG_SZ
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.file import truncate_file
-
 
 # Marks
 
@@ -31,7 +31,6 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 reg1, reg2 = test_regs
 DEFAULT_SIZE = 1024 * 1024
-
 
 # Configurations
 
@@ -91,7 +90,7 @@ def test_disk_quota_default(key, subkey, arch, value_name, tags_to_apply,
     disk_quota_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                callback=callback_disk_quota_default,
                                                error_message='Did not receive expected '
-                                               '"Maximum disk quota size limit configured to \'... KB\'." event'
+                                                             '"Maximum disk quota size limit configured to \'... KB\'." event'
                                                ).result()
     if disk_quota_value:
         assert disk_quota_value == str(DEFAULT_SIZE), 'Wrong value for disk_quota'
@@ -104,6 +103,6 @@ def test_disk_quota_default(key, subkey, arch, value_name, tags_to_apply,
     check_time_travel(True, monitor=wazuh_log_monitor)
     events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                      accum_results=2, error_message='Did not receive expected '
-                                     '"Sending FIM event: ..." event').result()
+                                                                    '"Sending FIM event: ..." event').result()
     for ev in events:
         validate_registry_value_event(ev, mode=mode)

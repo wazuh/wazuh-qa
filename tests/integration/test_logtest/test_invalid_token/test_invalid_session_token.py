@@ -1,22 +1,19 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import json
 import os
 
 import pytest
 import yaml
-import json
-
+from wazuh_testing.logtest import callback_session_initialized, callback_invalid_token
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.monitoring import SocketController
-from wazuh_testing.logtest import callback_session_initialized, callback_invalid_token
-
 
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
-
 
 # Configurations
 
@@ -25,7 +22,6 @@ messages_path = os.path.join(test_data_path, 'invalid_session_token.yaml')
 with open(messages_path) as f:
     test_cases = yaml.safe_load(f)
     tc = list(test_cases)
-
 
 # Variables
 

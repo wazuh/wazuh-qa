@@ -4,7 +4,7 @@ It is important to have Wazuh running beforehand and the package `wazuh_testing`
 
 ## Linux
 
-On Linux you just have to run the script `generate_linux_yaml.py` to generate it. 
+On Linux you just have to run the script `generate_linux_yaml.py` to generate it.
 
 ```
 # python3 generate_linux_yaml.py -h
@@ -23,7 +23,8 @@ optional arguments:
                         Specify debug level. Default "ERROR".
 ```
 
-In linux, we currently have 4096 possible configurations. This means we are expecting 4096 "added" and "deleted" events. From these, 8 are not generating "modified" events due to their _check\_*_ configuration.
+In linux, we currently have 4096 possible configurations. This means we are expecting 4096 "added" and "deleted" events.
+From these, 8 are not generating "modified" events due to their _check\_*_ configuration.
 
 **Example:**
 
@@ -33,7 +34,8 @@ python3 generate_linux_yaml.py -e 4098 -m 4088 -d DEBUG
 
 ## Windows
 
-On Windows you need to run two scripts: one that will generate all the events on Windows (agent) and the other one, that will recollect all the alerts on Linux (manager).
+On Windows you need to run two scripts: one that will generate all the events on Windows (agent) and the other one, that
+will recollect all the alerts on Linux (manager).
 
 Having Wazuh running on Windows and Linux, first run `generate_windows_events.py`.
 
@@ -94,4 +96,5 @@ python3 generate_windows_yaml.py -e 4096 -m 4080 -d DEBUG
 
 ----
 
-These scripts will generate their respective YAMLs on the same path under the names of `syscheck_events.yaml` (Linux) and `syscheck_events_win32.yaml` (Windows).
+These scripts will generate their respective YAMLs on the same path under the names of `syscheck_events.yaml` (Linux)
+and `syscheck_events_win32.yaml` (Windows).

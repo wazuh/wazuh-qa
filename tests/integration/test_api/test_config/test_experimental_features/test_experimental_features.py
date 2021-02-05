@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -6,13 +6,11 @@ import os
 
 import pytest
 import requests
-
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 
 # Marks
 
 pytestmark = pytest.mark.server
-
 
 # Configurations
 
@@ -53,7 +51,7 @@ def test_experimental_features(tags_to_apply, get_configuration, configure_api_e
 
     if experimental:
         assert get_response.status_code == 200, f'Expected status code was 200, ' \
-            f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
+                                                f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
     else:
         assert get_response.status_code == 404, f'Expected status code was 404, ' \
-            f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
+                                                f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'

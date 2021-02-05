@@ -1,24 +1,19 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import json
 import os
+import shutil
 
 import pytest
 import yaml
-import json
-import shutil
-import time
-
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.monitoring import SocketController
-from wazuh_testing.tools.services import control_service
-
 
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
-
 
 # Configurations
 
@@ -27,7 +22,6 @@ messages_path = os.path.join(test_data_path, 'load_rules_decoders.yaml')
 with open(messages_path) as f:
     test_cases = yaml.safe_load(f)
     tc = list(test_cases)
-
 
 # Variables
 
@@ -45,7 +39,6 @@ def close_connection(connection):
 
 
 def create_dummy_session():
-
     connection = create_connection()
     dummy_request = """{ "version": 1,
             "origin":{"name":"Integration Test","module":"api"},
@@ -64,7 +57,6 @@ def create_dummy_session():
                          list(test_cases),
                          ids=[test_case['name'] for test_case in test_cases])
 def test_load_rules_decoders(test_case):
-
     # List to store assert messages
     errors = []
 

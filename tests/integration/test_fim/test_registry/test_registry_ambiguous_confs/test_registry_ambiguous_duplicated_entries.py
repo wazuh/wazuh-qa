@@ -1,19 +1,18 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 
 import os
-
-import pytest
 from hashlib import sha1
 
-from wazuh_testing.tools import WAZUH_PATH
+import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, registry_value_cud, registry_key_cud, \
-                              generate_params, CHECK_GROUP, CHECK_TYPE, \
-                              CHECK_ALL, CHECK_MTIME, CHECK_SIZE, CHECK_SUM, KEY_WOW64_32KEY, \
-                              KEY_WOW64_64KEY, REQUIRED_REG_KEY_ATTRIBUTES, REQUIRED_REG_VALUE_ATTRIBUTES
+    generate_params, CHECK_GROUP, CHECK_TYPE, \
+    CHECK_ALL, CHECK_MTIME, CHECK_SIZE, CHECK_SUM, KEY_WOW64_32KEY, \
+    KEY_WOW64_64KEY, REQUIRED_REG_KEY_ATTRIBUTES, REQUIRED_REG_VALUE_ATTRIBUTES
+from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -43,7 +42,6 @@ conf_params = {'WINDOWS_REGISTRY_1': test_regs[0],
                'RESTRICT_1': "overwritten_restrict$",
                'RESTRICT_2': "restrict_test_|test_key"
                }
-
 
 key_all_attrs = REQUIRED_REG_KEY_ATTRIBUTES[CHECK_ALL].union(REQUIRED_REG_VALUE_ATTRIBUTES[CHECK_ALL])
 
@@ -126,8 +124,8 @@ def test_duplicate_entries(key, subkey, arch, key_list, value_list, checkers, ta
     key
 ])
 @pytest.mark.parametrize('subkey, arch, value_list, tags_to_apply, report_changes', [
-                        (subkey_1, KEY_WOW64_64KEY, ['test_value'], {'duplicate_report_entries'}, True),
-                        (subkey_2, KEY_WOW64_64KEY, ['test_value'], {'duplicate_report_entries'}, False),
+    (subkey_1, KEY_WOW64_64KEY, ['test_value'], {'duplicate_report_entries'}, True),
+    (subkey_2, KEY_WOW64_64KEY, ['test_value'], {'duplicate_report_entries'}, False),
 ])
 def test_duplicate_entries_rc(key, subkey, arch, value_list, tags_to_apply, report_changes,
                               get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):

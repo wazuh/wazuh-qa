@@ -1,20 +1,18 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
 
 import pytest
-
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import CHECK_GROUP, CHECK_MTIME, CHECK_OWNER, CHECK_PERM, \
-                              CHECK_SHA256SUM, CHECK_SIZE, CHECK_MD5SUM, CHECK_SHA1SUM, CHECK_SUM, CHECK_ALL, \
-                              CHECK_TYPE, LOG_FILE_PATH, REQUIRED_REG_VALUE_ATTRIBUTES, KEY_WOW64_32KEY, \
-                              KEY_WOW64_64KEY, REQUIRED_REG_KEY_ATTRIBUTES, generate_params, registry_value_cud, \
-                              registry_key_cud
-
+    CHECK_SHA256SUM, CHECK_SIZE, CHECK_MD5SUM, CHECK_SHA1SUM, CHECK_SUM, CHECK_ALL, \
+    CHECK_TYPE, LOG_FILE_PATH, REQUIRED_REG_VALUE_ATTRIBUTES, KEY_WOW64_32KEY, \
+    KEY_WOW64_64KEY, REQUIRED_REG_KEY_ATTRIBUTES, generate_params, registry_value_cud, \
+    registry_key_cud
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing import global_parameters
 
 # Marks
 
@@ -29,7 +27,6 @@ sub_key_3 = "SOFTWARE\\testkey3"
 sub_key_4 = "SOFTWARE\\testkey4"
 sub_key_5 = "SOFTWARE\\testkey5"
 sub_key_6 = "SOFTWARE\\testkey6"
-
 
 test_regs = [os.path.join(key, sub_key_1),
              os.path.join(key, sub_key_2),
@@ -63,7 +60,6 @@ attrs_value_sum_2 = value_attrs - {CHECK_MD5SUM} - {CHECK_SHA256SUM}
 attrs_value_sum_3 = value_attrs - {CHECK_MD5SUM} - {CHECK_SHA1SUM}
 attrs_value_sum_4 = value_attrs - {CHECK_SHA256SUM} - {CHECK_SHA1SUM}
 
-
 # Configurations
 
 conf_params = {'WINDOWS_REGISTRY_1': test_regs[0],
@@ -77,6 +73,7 @@ conf_params = {'WINDOWS_REGISTRY_1': test_regs[0],
 configurations_path = os.path.join(test_data_path, 'wazuh_check_all.yaml')
 p, m = generate_params(extra_params=conf_params, modes=['scheduled'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+
 
 # Fixtures
 

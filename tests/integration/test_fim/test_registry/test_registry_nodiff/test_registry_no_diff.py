@@ -1,12 +1,12 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import pytest
 from hashlib import sha1
 from time import sleep
 
+import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, registry_value_cud, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params
 from wazuh_testing.tools import WAZUH_PATH
@@ -32,7 +32,6 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 reg1, reg2 = test_regs
 
-
 # Configurations
 
 conf_params = {'WINDOWS_REGISTRY_1': reg1,
@@ -46,6 +45,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 p, m = generate_params(extra_params=conf_params, modes=['scheduled'])
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+
 
 # Fixtures
 
@@ -168,6 +168,7 @@ def test_no_diff_regex(key, subkey, arch, value_name, truncated, tags_to_apply,
         else:
             assert '<Diff truncated because nodiff option>' not in event['data'].get('content_changes'), \
                 'content_changes is truncated'
+
     registry_value_cud(key, subkey, wazuh_log_monitor, arch=arch, value_list=values,
                        time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
                        min_timeout=global_parameters.default_timeout, triggers_event=True,

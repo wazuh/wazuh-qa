@@ -1,20 +1,20 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import os
-import pytest
 import datetime
+import os
 import sys
+from datetime import timedelta
 
+import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.gcloud import callback_detect_start_fetching_logs, callback_detect_start_gcp_sleep
 from wazuh_testing.fim import generate_params
+from wazuh_testing.gcloud import callback_detect_start_fetching_logs, callback_detect_start_gcp_sleep
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.time import TimeMachine
-from datetime import timedelta
 
 # Marks
 
@@ -94,7 +94,7 @@ def get_configuration(request):
 def test_day_wday(tags_to_apply, get_configuration, configure_environment,
                   restart_wazuh, wait_for_gcp_start):
     """
-    These tests verify the module starts to pull according to the day of the week 
+    These tests verify the module starts to pull according to the day of the week
     or month and time.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])

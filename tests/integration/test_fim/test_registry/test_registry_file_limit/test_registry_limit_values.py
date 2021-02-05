@@ -1,16 +1,14 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_value_file_limit, generate_params, \
     callback_registry_count_entries, modify_registry_value, registry_parser, KEY_WOW64_64KEY, REG_SZ, KEY_ALL_ACCESS, \
     RegOpenKeyEx, RegCloseKey
-
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -43,6 +41,7 @@ p, m = generate_params(extra_params=conf_params,
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
+
 # Fixtures
 
 
@@ -50,6 +49,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
+
 
 # Functions
 
@@ -62,6 +62,7 @@ def extra_configuration_before_yield():
         modify_registry_value(reg1_handle, f'value_{i}', REG_SZ, 'added')
 
     RegCloseKey(reg1_handle)
+
 
 # Tests
 
@@ -83,7 +84,7 @@ def test_file_limit_values(tags_to_apply, get_configuration, configure_environme
     file_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                callback=callback_value_file_limit,
                                                error_message='Did not receive expected '
-                                               '"DEBUG: ...: Maximum number of entries to be monitored: ..." event'
+                                                             '"DEBUG: ...: Maximum number of entries to be monitored: ..." event'
                                                ).result()
 
     if file_limit_value:
@@ -94,7 +95,7 @@ def test_file_limit_values(tags_to_apply, get_configuration, configure_environme
     entries = wazuh_log_monitor.start(timeout=40,
                                       callback=callback_registry_count_entries,
                                       error_message='Did not receive expected '
-                                      '"Fim inode entries: ..., path count: ..." event'
+                                                    '"Fim inode entries: ..., path count: ..." event'
                                       ).result()
 
     if entries:

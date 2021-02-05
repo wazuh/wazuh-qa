@@ -1,10 +1,10 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import sys
 import re
+import sys
 
 from wazuh_testing.fim import WAZUH_PATH
 
@@ -50,7 +50,7 @@ def translate_size(configured_size='1KB'):
         Configured value in bytes.
     """
     translated_size = 0
-    configured_value = int(configured_size[:-2])     # Store value ignoring the data unit
+    configured_value = int(configured_size[:-2])  # Store value ignoring the data unit
     data_unit = str(configured_size[-2:])
 
     if data_unit == 'KB':
