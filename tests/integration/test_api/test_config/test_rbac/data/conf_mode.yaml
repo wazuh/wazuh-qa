@@ -1,9 +1,9 @@
 ---
 - tags:
-    - rbac_white
+  - rbac_white
   security_config:
     rbac_mode: white
 - tags:
-    - rbac_black
+  - rbac_black
   security_config:
     rbac_mode: black

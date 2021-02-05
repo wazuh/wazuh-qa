@@ -1,79 +1,79 @@
 ---
 # conf 1
 - tags:
-    - default_conf
+  - default_conf
   apply_to_modules:
-    - MODULE_NAME
+  - MODULE_NAME
   sections:
-    - section: gcp-pubsub
-      elements:
-        - project_id:
-            value: 'PROJECT_ID'
-        - subscription_name:
-            value: 'SUBSCRIPTION_NAME'
-        - credentials_file:
-            value: 'CREDENTIALS_FILE'
+  - section: gcp-pubsub
+    elements:
+    - project_id:
+        value: 'PROJECT_ID'
+    - subscription_name:
+        value: 'SUBSCRIPTION_NAME'
+    - credentials_file:
+        value: 'CREDENTIALS_FILE'
 # conf 2
 - tags:
-    - complete_conf
+  - complete_conf
   apply_to_modules:
-    - MODULE_NAME
+  - MODULE_NAME
   sections:
-    - section: gcp-pubsub
-      elements:
-        - project_id:
-            value: 'PROJECT_ID'
-        - subscription_name:
-            value: 'SUBSCRIPTION_NAME'
-        - credentials_file:
-            value: 'CREDENTIALS_FILE'
-        - enabled:
-            value: 'ENABLED'
-        - pull_on_start:
-            value: 'PULL_ON_START'
-        - max_messages:
-            value: 'MAX_MESSAGES'
-        - logging:
-            value: 'LOGGING'
-        - interval:
-            value: 'INTERVAL'
-        - day:
-            value: 7
-        - time:
-            value: 'TIME'
+  - section: gcp-pubsub
+    elements:
+    - project_id:
+        value: 'PROJECT_ID'
+    - subscription_name:
+        value: 'SUBSCRIPTION_NAME'
+    - credentials_file:
+        value: 'CREDENTIALS_FILE'
+    - enabled:
+        value: 'ENABLED'
+    - pull_on_start:
+        value: 'PULL_ON_START'
+    - max_messages:
+        value: 'MAX_MESSAGES'
+    - logging:
+        value: 'LOGGING'
+    - interval:
+        value: 'INTERVAL'
+    - day:
+        value: 7
+    - time:
+        value: 'TIME'
 # conf 3
 - tags:
-    - repeat_conf
+  - repeat_conf
   apply_to_modules:
-    - MODULE_NAME
+  - MODULE_NAME
   sections:
-    - section: gcp-pubsub
-      elements:
-        - project_id:
-            value: 'PROJECT_ID'
-        - subscription_name:
-            value: 'SUBSCRIPTION_NAME'
-        - credentials_file:
-            value: 'CREDENTIALS_FILE'
-        - enabled:
-            value: 'ENABLED'
-        - pull_on_start:
-            value: 'PULL_ON_START'
-        - pull_on_start:
-            value: 'no'
-        - interval:
-            value: 'INTERVAL'
-        - max_messages:
-            value: 'MAX_MESSAGES'
-        - max_messages:
-            value: 50
-        - logging:
-            value: 'LOGGING'
-        - wday:
-            value: 'WDAY'
-        - wday:
-            value: 'sunday'
-        - time:
-            value: 'TIME'
+  - section: gcp-pubsub
+    elements:
+    - project_id:
+        value: 'PROJECT_ID'
+    - subscription_name:
+        value: 'SUBSCRIPTION_NAME'
+    - credentials_file:
+        value: 'CREDENTIALS_FILE'
+    - enabled:
+        value: 'ENABLED'
+    - pull_on_start:
+        value: 'PULL_ON_START'
+    - pull_on_start:
+        value: 'no'
+    - interval:
+        value: 'INTERVAL'
+    - max_messages:
+        value: 'MAX_MESSAGES'
+    - max_messages:
+        value: 50
+    - logging:
+        value: 'LOGGING'
+    - wday:
+        value: 'WDAY'
+    - wday:
+        value: 'sunday'
+    - time:
+        value: 'TIME'
 
 

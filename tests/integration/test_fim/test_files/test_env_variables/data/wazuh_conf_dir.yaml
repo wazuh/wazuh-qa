@@ -1,14 +1,14 @@
 # conf 1
 - tags:
-    - ossec_conf
+  - ossec_conf
   apply_to_modules:
-    - MODULE_NAME
+  - MODULE_NAME
   sections:
-    - section: syscheck
-      elements:
-        - disabled:
-            value: 'no'
-        - directories:
-            value: TEST_ENV_VARIABLES
-            attributes:
-              - FIM_MODE
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_ENV_VARIABLES
+        attributes:
+        - FIM_MODE

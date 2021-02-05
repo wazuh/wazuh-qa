@@ -30,18 +30,12 @@
       ],
       "if": {
         "properties": {
-          "mode": {
-            "const": "whodata"
-          }
+           "mode": {"const": "whodata"}
         },
-        "required": [
-          "mode"
-        ]
+        "required": ["mode"]
       },
       "then": {
-        "required": [
-          "audit"
-        ]
+        "required": ["audit"]
       },
       "properties": {
         "path": {
@@ -58,11 +52,7 @@
         "mode": {
           "$id": "#/properties/data/properties/mode",
           "type": "string",
-          "enum": [
-            "realtime",
-            "whodata",
-            "scheduled"
-          ],
+          "enum": ["realtime", "whodata", "scheduled"],
           "examples": [
             "whodata"
           ],
@@ -71,11 +61,7 @@
         "type": {
           "$id": "#/properties/data/properties/type",
           "type": "string",
-          "enum": [
-            "added",
-            "modified",
-            "deleted"
-          ],
+          "enum": ["added", "modified", "deleted"],
           "examples": [
             "added"
           ],
@@ -84,10 +70,7 @@
         "arch": {
           "$id": "#/properties/data/properties/arch",
           "type": "string",
-          "enum": [
-            "[x32]",
-            "[x64]"
-          ],
+          "enum": ["[x32]", "[x64]"],
           "examples": [
             "[x32]",
             "[x64]"
@@ -138,11 +121,7 @@
             "type": {
               "$id": "#/properties/data/properties/attributes/properties/type",
               "type": "string",
-              "enum": [
-                "file",
-                "registry_key",
-                "registry_value"
-              ],
+              "enum": ["file", "registry_key", "registry_value"],
               "examples": [
                 "file"
               ],
@@ -151,24 +130,14 @@
             "value_type": {
               "$id": "#/properties/data/properties/attributes/properties/type",
               "type": "string",
-              "enum": [
-                "REG_NONE",
-                "REG_SZ",
-                "REG_EXPAND_SZ",
-                "REG_BINARY",
-                "REG_DWORD",
-                "REG_DWORD_BIG_ENDIAN",
-                "REG_LINK",
-                "REG_MULTI_SZ",
-                "REG_RESOURCE_LIST",
-                "REG_FULL_RESOURCE_DESCRIPTOR",
-                "REG_RESOURCE_REQUIREMENTS_LIST",
-                "REG_QWORD"
-              ],
+              "enum": ["REG_NONE", "REG_SZ", "REG_EXPAND_SZ", "REG_BINARY", "REG_DWORD", "REG_DWORD_BIG_ENDIAN",
+                       "REG_LINK", "REG_MULTI_SZ", "REG_RESOURCE_LIST", "REG_FULL_RESOURCE_DESCRIPTOR",
+                       "REG_RESOURCE_REQUIREMENTS_LIST", "REG_QWORD"],
               "examples": [
                 "REG_SZ"
               ],
               "pattern": "^(.*)$"
+
             },
             "size": {
               "$id": "#/properties/data/properties/attributes/properties/size",
@@ -307,7 +276,7 @@
               "group_name",
               "inode",
               "attributes"
-            ],
+              ],
             "examples": [
               "size",
               "mtime",
@@ -327,14 +296,11 @@
           }
         },
         "old_attributes": {
-          "required": [
-            "type"
-          ],
+          "required": ["type"
+                      ],
           "allOf": [
-            {
-              "$ref": "#/properties/data/properties/attributes"
-            }
-          ]
+              {"$ref": "#/properties/data/properties/attributes"}
+            ]
         },
         "audit": {
           "$id": "#/properties/data/properties/audit",

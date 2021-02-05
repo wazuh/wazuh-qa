@@ -169,11 +169,7 @@
         "mode": {
           "$id": "#/properties/syscheck/properties/mode",
           "type": "string",
-          "enum": [
-            "realtime",
-            "whodata",
-            "scheduled"
-          ],
+          "enum": ["realtime", "whodata", "scheduled"],
           "title": "The Mode Schema",
           "default": "",
           "examples": [

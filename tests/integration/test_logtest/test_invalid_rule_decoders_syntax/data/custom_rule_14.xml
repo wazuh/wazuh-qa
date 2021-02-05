@@ -2,8 +2,8 @@
 <group name="testing">
 
     <rule id="100001" level="3">
-        <decoded_as>non_existing_decoder</decoded_as>
-        <description>example_description</description>
+    <decoded_as>non_existing_decoder</decoded_as>
+    <description>example_description</description>
     </rule>
 
 </group>
