@@ -1,17 +1,17 @@
 - tags:
-    - sync_disabled
+  - sync_disabled
   apply_to_modules:
-    - test_sync_disabled
+  - test_sync_disabled
   sections:
-    - section: syscheck
-      elements:
-        - disabled:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - synchronization:
+        elements:
+        - enabled:
             value: 'no'
-        - synchronization:
-            elements:
-              - enabled:
-                  value: 'no'
-        - directories:
-            value: TEST_DIRECTORIES
-            attributes:
-              - FIM_MODE
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - FIM_MODE
