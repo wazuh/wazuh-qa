@@ -141,13 +141,15 @@ def build_message(metadata, expected):
     """
     Build Active Response message to be used in tests
     """
-    origin = "\"name\":\"\",\"module\":\"wazuh-analysisd\""
-    rules = "\"level\":5,\"description\":\"Test.\",\"id\":" + metadata['rule_id']
+    origin = '"name":"","module":"wazuh-analysisd"'
+    rules = f'"level":5,"description":"Test.","id":{metadata["rule_id"]}'
 
     if not expected['success']:
-        return "{\"origin\":{" + origin + "},\"command\":\"" + metadata['command'] + "\",\"parameters\":{\"extra_args\":[],\"alert\":{\"rule\":{" + rules + "}}}}"
+        return '{"origin":{' + origin + '},"command":"' + metadata['command'] + \
+               '","parameters":{"extra_args":[],"alert":{"rule":{' + rules + '}}}}'
 
-    return "{\"version\":1,\"origin\":{" + origin + "},\"command\":\"" + metadata['command'] + "\",\"parameters\":{\"extra_args\":[],\"alert\":{\"rule\":{" + rules + "}}}}"
+    return '{"version":1,"origin":{' + origin + '},"command":"' + metadata['command'] + \
+           '","parameters":{"extra_args":[],"alert":{"rule":{' + rules + '}}}}'
 
 
 def test_execd_restart(set_debug_mode, get_configuration, test_version, configure_environment, start_agent, set_ar_conf_mode):

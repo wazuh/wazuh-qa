@@ -39,7 +39,7 @@ def set_debug_mode():
     folder = '' if platform.system() == 'Windows' else 'etc'
     local_int_conf_path = os.path.join(WAZUH_PATH, folder, 'local_internal_options.conf')
     debug_line = 'windows.debug=2\n' if platform.system() == 'Windows' else 'execd.debug=2\n'
-    with open(local_int_conf_path, 'r') as local_file_read:
+    with open(local_int_conf_path) as local_file_read:
         lines = local_file_read.readlines()
         for line in lines:
             if line == debug_line:

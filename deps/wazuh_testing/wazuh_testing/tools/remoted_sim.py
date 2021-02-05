@@ -80,7 +80,7 @@ class RemotedSimulator:
     """
 
     def start(self, custom_listener=None, args=[]):
-        if self.running is False:
+        if not self.running:
             self._start_socket()
             self.listener_thread = threading.Thread(target=(self.listener
                                                     if not custom_listener
@@ -120,7 +120,7 @@ class RemotedSimulator:
     """
 
     def stop(self):
-        if self.running is True:
+        if self.running:
             self.running = False
             self.listener_thread.join()
             self.sock.close()

@@ -112,7 +112,9 @@ def remove_ip_from_iptables(request, get_configuration):
     Remove the test IP from iptables if it exist
     """
     metadata = get_configuration['metadata']
-    param = "{\"version\":1,\"origin\":{\"name\":\"\",\"module\":\"wazuh-execd\"},\"command\":\"delete\",\"parameters\":{\"extra_args\":[],\"alert\":{\"data\":{\"srcip\":\"" + metadata['ip'] + "\",\"dstuser\":\"Test\"}},\"program\":\"/var/ossec/active-response/bin/firewall-drop\"}}"
+    param = '{"version":1,"origin":{"name":"","module":"wazuh-execd"},"command":"delete",' \
+            '"parameters":{"extra_args":[],"alert":{"data":{"srcip":"' + metadata['ip'] + \
+            '","dstuser":"Test"}},"program":"/var/ossec/active-response/bin/firewall-drop"}}'
     firewall_drop_script_path = os.path.join(WAZUH_PATH, 'active-response/bin', 'firewall-drop')
 
     iptables_file = os.popen('iptables -L')
@@ -169,13 +171,16 @@ def build_message(metadata, expected):
     """
     Build Active Response message to be used in tests
     """
-    origin = "\"name\":\"\",\"module\":\"wazuh-analysisd\""
-    rules = "\"level\":5,\"description\":\"Test.\",\"id\":" + metadata['rule_id']
+    origin = '"name":"","module":"wazuh-analysisd"'
+    rules = f'"level":5,"description":"Test.","id":{metadata["rule_id"]}'
 
     if not expected['success']:
-        return "{\"version\":1,\"origin\":{" + origin + "},\"command\":\"" + metadata['command'] + "\",\"parameters\":{\"extra_args\":[],\"alert\":{\"rule\":{" + rules + "},\"data\":{\"dstuser\":\"Test.\"}}}}"
+        return '{"version":1,"origin":{' + origin + '},"command":"' + metadata['command'] + \
+               '","parameters":{"extra_args":[],"alert":{"rule":{' + rules + '},"data":{"dstuser":"Test."}}}}'
 
-    return "{\"version\":1,\"origin\":{" + origin + "},    \"command\":\"" + metadata['command'] + "\",\"parameters\":{\"extra_args\":[],\"alert\":{\"rule\":{" + rules + "},\"data\":{\"dstuser\":\"Test.\", \"srcip\":\"" + metadata['ip'] + "\"}}}}"
+    return '{"version":1,"origin":{' + origin + '},"command":"' + metadata['command'] + \
+           '","parameters":{"extra_args":[],"alert":{"rule":{' + rules + \
+           '},"data":{"dstuser":"Test.","srcip":"' + metadata['ip'] + '"}}}}'
 
 
 def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, configure_environment, remove_ip_from_iptables, start_agent, set_ar_conf_mode):
