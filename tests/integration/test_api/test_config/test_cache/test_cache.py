@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -7,7 +7,6 @@ import time
 
 import pytest
 import requests
-
 from wazuh_testing.fim import create_file, delete_file, REGULAR, WAZUH_PATH
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 
@@ -15,12 +14,10 @@ from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 
 pytestmark = pytest.mark.server
 
-
 # Variables
 
 rules_directory = os.path.join(WAZUH_PATH, 'ruleset', 'rules')
 test_file = 'api_test.xml'
-
 
 # Configurations
 

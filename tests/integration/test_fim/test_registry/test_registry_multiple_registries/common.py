@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -26,6 +26,7 @@ def multiple_keys_and_entries_keys(num_entries, subkeys, log_monitor, root_key, 
     timeout: int, optional
         Maximum timeout to raise a TimeoutError. Default `10`
     """
+
     def perform_and_validate_events(func):
         for reg in subkeys:
             func(registry_parser[root_key], os.path.join(reg, 'test_key'), KEY_WOW64_32KEY)
@@ -62,6 +63,7 @@ def multiple_keys_and_entries_values(num_entries, subkeys, log_monitor, root_key
     timeout: int, optional
         Maximum timeout to raise a TimeoutError. Default `10`
     """
+
     def perform_and_validate_events(func, content='added', is_delete=False):
         for reg in subkeys:
             key_handle = create_registry(registry_parser[root_key], reg, KEY_WOW64_32KEY)

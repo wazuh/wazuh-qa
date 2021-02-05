@@ -1,20 +1,18 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-from datetime import timedelta
 import os
+from datetime import timedelta
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, create_registry, generate_params, \
-        create_file, modify_registry_value, REGULAR, callback_detect_event, callback_real_time_whodata_started, \
-        KEY_WOW64_64KEY, registry_parser, REG_SZ
+    create_file, modify_registry_value, REGULAR, callback_detect_event, callback_real_time_whodata_started, \
+    KEY_WOW64_64KEY, registry_parser, REG_SZ
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-
 from wazuh_testing.tools.time import TimeMachine
 
 # Marks

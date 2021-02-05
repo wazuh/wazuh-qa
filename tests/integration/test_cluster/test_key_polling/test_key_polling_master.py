@@ -2,7 +2,6 @@ import os
 import re
 
 import pytest
-
 from wazuh_testing.cluster import FERNET_KEY, cluster_msg_build
 from wazuh_testing.tools import WAZUH_PATH, CLUSTER_LOGS_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -39,6 +38,7 @@ monitored_sockets_params = [('wazuh-clusterd', None, None), ('wazuh-modulesd', m
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
+
 # Functions
 
 
@@ -48,6 +48,7 @@ def callback_krequest(item):
     match = re.match(reg, item.decode())
     if match:
         return item.decode()
+
 
 # Fixtures
 

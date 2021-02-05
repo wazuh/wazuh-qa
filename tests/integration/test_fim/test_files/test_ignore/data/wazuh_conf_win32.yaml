@@ -198,3 +198,20 @@
         attributes:
         - check_all: 'yes'
         - FIM_MODE
+# conf 12
+- tags:
+  - ignore_disk
+  apply_to_modules:
+  - test_ignore_valid
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: "c:\\testdir1,c:\\testdir2"
+        attributes:
+        - check_all: 'yes'
+        - FIM_MODE
+    - ignore:
+        value: "c:\\."

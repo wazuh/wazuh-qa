@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
@@ -220,10 +220,10 @@ def time_to_human_readable(time_):
     time_unit = time_[-1]
 
     human_readable_string = {
-      's': ' seconds',
-      'm': ' minutes',
-      'h': ' houres',
-      'd': ' days'
+        's': ' seconds',
+        'm': ' minutes',
+        'h': ' houres',
+        'd': ' days'
     }
 
     human_readable_time = time_.replace(time_unit, human_readable_string[time_unit])
@@ -247,10 +247,10 @@ def unit_to_seconds(time_):
     """
 
     seconds_equivalent = {
-      's': 1,
-      'm': 60,
-      'h': 3600,
-      'd': 86400
+        's': 1,
+        'm': 60,
+        'h': 3600,
+        'd': 86400
     }
 
     time_unit = time_[-1]

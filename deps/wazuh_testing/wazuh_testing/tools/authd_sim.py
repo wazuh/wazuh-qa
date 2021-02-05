@@ -1,13 +1,15 @@
+import ssl
+import time
+
 from wazuh_testing.tools.monitoring import ManInTheMiddle
 from wazuh_testing.tools.security import CertificateController
-import time
-import ssl
 
 
 class AuthdSimulator:
     """
     Create an SSL server socket for simulating authd connection
     """
+
     def __init__(self, server_address='127.0.0.1', enrollment_port=1515, key_path='/etc/manager.key',
                  cert_path='/etc/manager.cert', initial_mode='ACCEPT'):
         self.mitm_enrollment = ManInTheMiddle(address=(server_address, enrollment_port), family='AF_INET',
@@ -82,7 +84,7 @@ class AuthdSimulator:
             return b'ERROR'
 
         agent_info = {
-            'id' : self.id_count,
+            'id': self.id_count,
             'name': None,
             'ip': None
         }

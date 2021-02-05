@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import json
@@ -7,7 +7,6 @@ import xml.dom.minidom as minidom
 
 import testinfra
 import yaml
-
 from wazuh_testing.tools import WAZUH_CONF, WAZUH_API_CONF, API_LOG_FILE_PATH
 from wazuh_testing.tools.configuration import set_section_wazuh_conf
 
@@ -239,8 +238,8 @@ class HostManager:
 
         try:
             token_response = self.get_host(host).ansible('uri', f'url=https://localhost:{port}{login_endpoint} '
-                                                         f'user={user} password={password} method={login_method} '
-                                                         f'{login_body} validate_certs=no force_basic_auth=yes',
+                                                                f'user={user} password={password} method={login_method} '
+                                                                f'{login_body} validate_certs=no force_basic_auth=yes',
                                                          check=check)
             return token_response['json']['data']['token']
         except KeyError:

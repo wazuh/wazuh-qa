@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -7,7 +7,6 @@ import shutil
 from collections import Counter
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
     callback_detect_event, check_time_travel, validate_event
@@ -81,8 +80,8 @@ def test_delete_folder(folder, file_list, filetype, tags_to_apply,
 
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
     events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                            accum_results=len(file_list), error_message='Did not receive expected '
-                                                                        '"Sending FIM event: ..." event').result()
+                                     accum_results=len(file_list), error_message='Did not receive expected '
+                                                                                 '"Sending FIM event: ..." event').result()
     for ev in events:
         validate_event(ev, mode=mode)
 

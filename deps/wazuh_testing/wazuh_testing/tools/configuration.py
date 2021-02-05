@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import itertools
@@ -11,7 +11,6 @@ from typing import List, Any, Set
 
 import pytest
 import yaml
-
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX
 
@@ -493,6 +492,7 @@ def set_correct_prefix(configurations, new_prefix):
         added in the directories and ignore sections.
 
     """
+
     def inserter(path):
         """Insert new_prefix inside path, right before the first '/'."""
         result = path
@@ -526,7 +526,8 @@ def set_correct_prefix(configurations, new_prefix):
                                 # Insert the prefix in every path/regex and add a comma if directories.
                                 for path in paths_list:
                                     modified_paths += inserter(path)
-                                    modified_paths += ',' if (element.get('directories') and modified_paths != '') else ''
+                                    modified_paths += ',' if (
+                                            element.get('directories') and modified_paths != '') else ''
                                 modified_paths = modified_paths.rstrip(',')
 
                                 # Insert the prefix in every path inside restrict

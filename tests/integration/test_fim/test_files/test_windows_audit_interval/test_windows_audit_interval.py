@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -7,7 +7,6 @@ import re
 import sys
 
 import pytest
-
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -15,7 +14,8 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 
 if sys.platform == 'win32':
-    from test_fim.test_files.test_windows_audit_interval.manage_acl import Privilege, get_file_security_descriptor, modify_sacl, \
+    from test_fim.test_files.test_windows_audit_interval.manage_acl import Privilege, get_file_security_descriptor, \
+        modify_sacl, \
         get_sacl
 
 # Marks

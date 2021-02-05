@@ -1,12 +1,12 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
 import sys
 import time
-import pytest
 
+import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (HARDLINK, LOG_FILE_PATH, REGULAR, EventChecker,
                                check_time_travel, create_file, modify_file_content, generate_params)
@@ -76,6 +76,7 @@ def test_hard_link(path_file, file_name, path_link, link_name, num_links, get_co
     num_links : int
         Number of hard links to create. All of them will be pointing to the same regular file.
     """
+
     def detect_and_validate_event(expected_file, mode, expected_hard_links):
         event_checker.events = event_checker.fetch_events(min_timeout=global_parameters.default_timeout)
 
@@ -87,7 +88,7 @@ def test_hard_link(path_file, file_name, path_link, link_name, num_links, get_co
                     event_checker.check_events("modified", mode=mode)
                     break
                 except AssertionError:
-                    if i == len(expected_file)-1:
+                    if i == len(expected_file) - 1:
                         raise
         else:
             event_checker.file_list = [expected_file]

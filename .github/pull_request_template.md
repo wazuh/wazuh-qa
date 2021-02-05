@@ -1,54 +1,38 @@
-Hello team,
+|Related issue|
+|---|
+||
 
-`<YOUR_INTRODUCTION_TEXT>`
+<!--
+This template reflects sections that must be included in new Pull requests.
+Contributions from the community are really appreciated. If this is the case, please add the
+"contribution" to properly track the Pull Request.
 
-Closes #`<YOUR_ISSUE_NUMBER>`
+Please fill the table above. Feel free to extend it at your convenience.
+-->
 
-# Tests logic
+## Description
 
-`<YOUR_LOGIC_TEST_DESCRIPTION>`
+<!--
+Add a clear description of how the problem has been solved.
+-->
 
-# Tests checks
+## Configuration options
 
-- [ ] Proven that tests **pass** when they have to pass
-- [ ] Proven that tests **fail** when they have to fail
-- [ ] Proven that tests have the expected behavior in **RPM and DEB**
-- [ ] Checked that **all vulnerability detector tests work correctly** (my changes don't break anything)
-- [ ] Tested and passed in Jenkins. Build URL: `<YOUR_JENKINS_BUILD_URL>`
+<!--
+When proceed, this section should include new configuration parameters.
+-->
 
-## RPM manager
+## Logs example
 
-- When the expected behavior occurs:
+<!--
+Paste here related logs and alerts
+-->
 
-```
-<PYTEST_RESULT>
-```
+## Tests
 
-- When the module fails because of `<YOUR_CAUSE>`:
-
-```
-<PYTEST_RESULT>
-```
-
-## DEB manager
-
-- When the expected behavior occurs:
-
-```
-<PYTEST_RESULT>
-```
-
-- When the module fails because of `<YOUR_CAUSE>`:
-
-```
-<PYTEST_RESULT>
-```
-
-## Integrity check with other tests
-
-
-```
-<PYTEST_RESULT>
-```
-
-Best regards.
+- [ ] Proven that tests **pass** when they have to pass.
+- [ ] Proven that tests **fail** when they have to fail.
+<!--
+Important: Don't remove this check if your PR modifies Python code.
+-->
+- [ ] Python codebase satisfies PEP-8 style style guide. `pycodestyle --max-line-length=120 --show-source --show-pep8 file.py`

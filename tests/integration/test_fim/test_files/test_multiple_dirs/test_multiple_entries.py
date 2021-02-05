@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -6,13 +6,12 @@ import os
 
 import pytest
 import yaml
-from wazuh_testing import global_parameters
-
 from test_fim.test_files.test_multiple_dirs.common import multiple_dirs_test
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
+from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import PREFIX
 
 # Marks
 
@@ -44,9 +43,9 @@ def create_yaml(n_dirs=0):
                 'sections': [
                     {'section': 'syscheck',
                      'elements':
-                        [
-                            {'disabled': {'value': 'no'}},
-                        ]
+                         [
+                             {'disabled': {'value': 'no'}},
+                         ]
                      }
                 ]
             }
