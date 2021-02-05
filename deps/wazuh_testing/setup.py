@@ -6,7 +6,7 @@
 from setuptools import setup, find_packages
 
 setup(name='wazuh_testing',
-      version='4.0.0',
+      version='4.2.0',
       description='Wazuh testing utilites to help programmers automate tests',
       url='https://github.com/wazuh',
       author='Wazuh',
