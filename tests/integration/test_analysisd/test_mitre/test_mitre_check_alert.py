@@ -1,10 +1,10 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import pytest
 
+import pytest
 from wazuh_testing.mitre import (callback_detect_mitre_event, validate_mitre_event)
 from wazuh_testing.tools import ALERT_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor

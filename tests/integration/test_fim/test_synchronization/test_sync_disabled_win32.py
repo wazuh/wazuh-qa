@@ -1,10 +1,9 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_integrity_event, generate_params
 from wazuh_testing.tools import PREFIX
@@ -36,6 +35,7 @@ p, m = generate_params(extra_params=conf_params, modes=['scheduled', 'realtime',
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
+
 # fixtures
 
 
@@ -44,13 +44,14 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
+
 # Tests
 
 
 @pytest.mark.parametrize('tags_to_apply, file_sync, registry_sync, ', [
-                        ({'sync_disabled'}, False, False),
-                        ({'sync_registry_disabled'}, True, False),
-                        ({'sync_registry_enabled'}, True, True)
+    ({'sync_disabled'}, False, False),
+    ({'sync_registry_disabled'}, True, False),
+    ({'sync_registry_enabled'}, True, True)
 ])
 def test_sync_disabled(tags_to_apply, file_sync, registry_sync,
                        get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start_sync_disabled):

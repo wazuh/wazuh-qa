@@ -1,18 +1,18 @@
 ---
 # conf 2
 - tags:
-  - ossec_conf_2
+    - ossec_conf_2
   apply_to_modules:
-  - test_basic_usage_entries_match_key_count
-  - test_basic_usage_registry_new_key
-  - test_long_registry_path
+    - test_basic_usage_entries_match_key_count
+    - test_basic_usage_registry_new_key
+    - test_long_registry_path
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - windows_registry:
-        value: WINDOWS_REGISTRY_1
-        attributes:
-          - ATTRIBUTE
-          - arch: "64bit"
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - windows_registry:
+            value: WINDOWS_REGISTRY_1
+            attributes:
+              - ATTRIBUTE
+              - arch: "64bit"

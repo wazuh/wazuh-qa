@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -11,8 +11,6 @@ from unittest.mock import patch
 
 import distro
 import pytest
-
-from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, detect_initial_scan, callback_detect_event,
                                generate_params, callback_detect_integrity_state, check_time_travel, delete_file)
 from wazuh_testing.tools import PREFIX
@@ -176,7 +174,8 @@ def test_skip_sys(get_configuration, configure_environment, restart_syscheckd, w
     (os.path.join('/', 'dev'), {'skip_dev'})
 ])
 @patch('wazuh_testing.fim.modify_file_inode')
-def test_skip_dev(modify_inode_mock, directory, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
+def test_skip_dev(modify_inode_mock, directory, tags_to_apply, get_configuration, configure_environment,
+                  restart_syscheckd,
                   wait_for_fim_start):
     """Check if syscheckd skips /dev when setting 'skip_dev="yes"'.
 
@@ -210,6 +209,7 @@ def test_skip_nfs(modify_inode_mock, directory, tags_to_apply, configure_nfs, ge
     directory : str
         Directory that will be monitored.
     """
+
     def custom_callback(filename):
         def callback(line):
             match = callback_detect_event(line)

@@ -1,22 +1,22 @@
 ---
 # conf 1
 - tags:
-  - non_monitored_dir
+    - non_monitored_dir
   apply_to_modules:
-  - test_not_following_symbolic_link
+    - test_not_following_symbolic_link
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: '/testdir_link'
-        attributes:
-        - FIM_MODE
-        - follow_symbolic_link: FOLLOW_MODE
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: '/testdir_link'
+            attributes:
+              - FIM_MODE
+              - follow_symbolic_link: FOLLOW_MODE
 # conf 2
 - tags:
-  - monitored_file
+    - monitored_file
   apply_to_modules:
     - test_change_target
     - test_change_target_inside_folder
@@ -26,20 +26,20 @@
     - test_revert_symlink
     - test_follow_symbolic_disabled
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: '/testdir_link/symlink'
-        attributes:
-        - FIM_MODE
-        - follow_symbolic_link: FOLLOW_MODE
-    - directories:
-        value: '/testdir2'
-        attributes:
-        - FIM_MODE
-        - follow_symbolic_link: FOLLOW_MODE
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: '/testdir_link/symlink'
+            attributes:
+              - FIM_MODE
+              - follow_symbolic_link: FOLLOW_MODE
+        - directories:
+            value: '/testdir2'
+            attributes:
+              - FIM_MODE
+              - follow_symbolic_link: FOLLOW_MODE
 # conf 3
 - tags:
     - monitored_dir
@@ -51,107 +51,107 @@
     - test_monitor_symlink
     - test_follow_symbolic_disabled
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: '/testdir_link/symlink2'
-        attributes:
-          - FIM_MODE
-          - follow_symbolic_link: FOLLOW_MODE
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: '/testdir_link/symlink2'
+            attributes:
+              - FIM_MODE
+              - follow_symbolic_link: FOLLOW_MODE
 # conf 4
 - tags:
     - replace_with_directory
   apply_to_modules:
     - test_symlink_to_dir_between_scans
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: '/testdir_link'
-        attributes:
-        - FIM_MODE
-        - follow_symbolic_link: FOLLOW_MODE
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: '/testdir_link'
+            attributes:
+              - FIM_MODE
+              - follow_symbolic_link: FOLLOW_MODE
 # conf 5
 - tags:
     - symlink_within_directory
   apply_to_modules:
     - test_symlink_within_dir
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: '/testdir'
-        attributes:
-        - FIM_MODE
-        - check_all: 'yes'
-    - directories:
-        value: '/testdir/testdir_link'
-        attributes:
-        - FIM_MODE
-        - follow_symbolic_link: FOLLOW_MODE
-        - check_size: 'no'
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: '/testdir'
+            attributes:
+              - FIM_MODE
+              - check_all: 'yes'
+        - directories:
+            value: '/testdir/testdir_link'
+            attributes:
+              - FIM_MODE
+              - follow_symbolic_link: FOLLOW_MODE
+              - check_size: 'no'
 # conf 6
 - tags:
     - symlink_dir_inside_monitored_dir
   apply_to_modules:
     - test_symlink_dir_inside_monitored_dir
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: '/testdir'
-        attributes:
-        - FIM_MODE
-        - check_all: 'yes'
-    - directories:
-        value: '/testdir_link'
-        attributes:
-        - FIM_MODE
-        - follow_symbolic_link: FOLLOW_MODE
-        - check_size: 'no'
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: '/testdir'
+            attributes:
+              - FIM_MODE
+              - check_all: 'yes'
+        - directories:
+            value: '/testdir_link'
+            attributes:
+              - FIM_MODE
+              - follow_symbolic_link: FOLLOW_MODE
+              - check_size: 'no'
 # conf 8
 - tags:
     - symlink_and_dir
   apply_to_modules:
     - test_symlink_and_dir
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: '/testdir'
-        attributes:
-        - FIM_MODE
-    - directories:
-        value: '/testdir_link'
-        attributes:
-        - FIM_MODE
-        - follow_symbolic_link: FOLLOW_MODE
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: '/testdir'
+            attributes:
+              - FIM_MODE
+        - directories:
+            value: '/testdir_link'
+            attributes:
+              - FIM_MODE
+              - follow_symbolic_link: FOLLOW_MODE
 # conf 9
 - tags:
     - nested_dir
   apply_to_modules:
     - test_change_target_with_nested_directory
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: '/testdir1/subdir'
-        attributes:
-          - FIM_MODE
-    - directories:
-        value: '/testdir_link/symlink3'
-        attributes:
-          - FIM_MODE
-          - follow_symbolic_link: FOLLOW_MODE
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: '/testdir1/subdir'
+            attributes:
+              - FIM_MODE
+        - directories:
+            value: '/testdir_link/symlink3'
+            attributes:
+              - FIM_MODE
+              - follow_symbolic_link: FOLLOW_MODE

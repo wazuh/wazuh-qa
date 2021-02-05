@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -7,14 +7,13 @@ import shutil as sh
 import sys
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_num_inotify_watches, generate_params, detect_initial_scan
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.file import truncate_file
 
 # Marks
 
@@ -48,6 +47,7 @@ configurations2 = load_wazuh_configurations(configurations_path, __name__, param
 
 configurations = configurations1 + configurations2
 
+
 # Fixtures
 
 
@@ -71,12 +71,14 @@ def restart_syscheckd_each_time(request):
     control_service('start', daemon='wazuh-syscheckd')
     detect_initial_scan(file_monitor)
 
+
 # Functions
 
 
 def extra_configuration_after_yield():
     """Make sure to delete the directory after performing the test"""
     sh.rmtree(os.path.join(PREFIX, 'changed_name'), ignore_errors=True)
+
 
 # Tests
 
@@ -115,7 +117,7 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
         num_watches = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                               callback=callback_num_inotify_watches,
                                               error_message='Did not receive expected '
-                                              '"Folders monitored with real-time engine: ..." event'
+                                                            '"Folders monitored with real-time engine: ..." event'
                                               ).result()
     except TimeoutError:
         if not realtime_enabled:
@@ -128,11 +130,11 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
                         'event in scheduled mode')
 
         if num_watches:
-            if decreases_num_watches and not rename_folder:   # Delete folder
+            if decreases_num_watches and not rename_folder:  # Delete folder
                 assert num_watches == str(EXPECTED_WATCHES), 'Wrong number of inotify watches before deleting folder'
-            elif decreases_num_watches and rename_folder:   # Rename folder
+            elif decreases_num_watches and rename_folder:  # Rename folder
                 assert num_watches == str(EXPECTED_WATCHES), 'Wrong number of inotify watches before renaming folder'
-            elif not decreases_num_watches and not rename_folder:   # Not modifying the folder
+            elif not decreases_num_watches and not rename_folder:  # Not modifying the folder
                 error_msg = 'Wrong number of inotify watches when not modifying the folder'
                 assert num_watches == str(EXPECTED_WATCHES), error_msg
         else:
@@ -149,7 +151,7 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
         num_watches = wazuh_log_monitor.start(timeout=40,
                                               callback=callback_num_inotify_watches,
                                               error_message='Did not receive expected '
-                                              '"Folders monitored with real-time engine: ..." event'
+                                                            '"Folders monitored with real-time engine: ..." event'
                                               ).result()
     except TimeoutError:
         if not realtime_enabled:
@@ -162,11 +164,11 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
                         'event in scheduled mode')
 
         if num_watches:
-            if decreases_num_watches and not rename_folder:   # Delete folder
+            if decreases_num_watches and not rename_folder:  # Delete folder
                 assert num_watches == str(NO_WATCHES), 'Wrong number of inotify watches after deleting folder'
-            elif decreases_num_watches and rename_folder:   # Rename folder
+            elif decreases_num_watches and rename_folder:  # Rename folder
                 assert num_watches == str(NO_WATCHES), 'Wrong number of inotify watches after renaming folder'
-            elif not decreases_num_watches and not rename_folder:   # Not modifying the folder
+            elif not decreases_num_watches and not rename_folder:  # Not modifying the folder
                 error_msg = 'Wrong number of inotify watches when not modifying the folder'
                 assert num_watches == str(EXPECTED_WATCHES), error_msg
         else:
@@ -180,7 +182,7 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
         num_watches = wazuh_log_monitor.start(timeout=40,
                                               callback=callback_num_inotify_watches,
                                               error_message='Did not receive expected '
-                                              '"Folders monitored with real-time engine: ..." event'
+                                                            '"Folders monitored with real-time engine: ..." event'
                                               ).result()
 
         assert (num_watches and num_watches != EXPECTED_WATCHES), 'Watches not added'

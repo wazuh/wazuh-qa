@@ -2,8 +2,8 @@
 <group name="testing">
 
     <rule id="100001" level="20">
-    <program_name>example</program_name>
-    <description>example_description</description>
+        <program_name>example</program_name>
+        <description>example_description</description>
     </rule>
 
 </group>

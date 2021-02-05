@@ -3,99 +3,73 @@
   name: "AddAgent default"
   description: "Add an agent with name and IP"
   test_case:
-  -    
-    input: '{"arguments":{"name":"user1","ip":"any"},"function":"add"}'
-    output: '{"error":0,"data":{"id":"001","name":"user1","ip":"any","key":'
-  -    
-    input: '{"arguments":{"name":"user2","ip":"any"},"function":"add"}'
-    output: '{"error":0,"data":{"id":"002","name":"user2","ip":"any","key":'
-  -    
-    input: '{"arguments":{"name":"user3","ip":"192.0.0.0"},"function":"add"}'
-    output: '{"error":0,"data":{"id":"003","name":"user3","ip":"192.0.0.0","key":'
--
-  name: "AddAgent ID"
+    - input: '{"arguments":{"name":"user1","ip":"any"},"function":"add"}'
+      output: '{"error":0,"data":{"id":"001","name":"user1","ip":"any","key":'
+    - input: '{"arguments":{"name":"user2","ip":"any"},"function":"add"}'
+      output: '{"error":0,"data":{"id":"002","name":"user2","ip":"any","key":'
+    - input: '{"arguments":{"name":"user3","ip":"192.0.0.0"},"function":"add"}'
+      output: '{"error":0,"data":{"id":"003","name":"user3","ip":"192.0.0.0","key":'
+- name: "AddAgent ID"
   description: "Add an agent with specific ID"
   test_case:
-  - 
-    input: '{"arguments":{"id":"100","name":"user100","ip":"any"},"function":"add"}'
-    output: '{"error":0,"data":{"id":"100","name":"user100","ip":"any","key":'
--
-  name: "AddAgent KEY"
+    - input: '{"arguments":{"id":"100","name":"user100","ip":"any"},"function":"add"}'
+      output: '{"error":0,"data":{"id":"100","name":"user100","ip":"any","key":'
+- name: "AddAgent KEY"
   description: "Add an agent with specific ID"
   test_case:
-  -  
-    input: '{"arguments":{"name":"user4","ip":"any","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c915"},"function":"add"}'
-    output: '{"error":0,"data":{"id":"101","name":"user4","ip":"any","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c915"'
--
-  name: "ERROR Duplicate Name"
+    - input: '{"arguments":{"name":"user4","ip":"any","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c915"},"function":"add"}'
+      output: '{"error":0,"data":{"id":"101","name":"user4","ip":"any","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c915"'
+- name: "ERROR Duplicate Name"
   description: "Try to add an agent with an existent name"
   test_case:
-  -    
-    input: '{"arguments":{"name":"user1","ip":"any"},"function":"add"}'
-    output: '{"error":9008,"message":"Duplicated name"}'
--
-  name: "ERROR Duplicate IP"
+    - input: '{"arguments":{"name":"user1","ip":"any"},"function":"add"}'
+      output: '{"error":9008,"message":"Duplicated name"}'
+- name: "ERROR Duplicate IP"
   description: "Try to add an agent with an existent IP"
   test_case:
-  -    
-    input: '{"arguments":{"name":"user_","ip":"192.0.0.0"},"function":"add"}'
-    output: '{"error":9007,"message":"Duplicated IP"}'
--
-  name: "ERROR Duplicate ID"
+    - input: '{"arguments":{"name":"user_","ip":"192.0.0.0"},"function":"add"}'
+      output: '{"error":9007,"message":"Duplicated IP"}'
+- name: "ERROR Duplicate ID"
   description: "Try to add an agent with an existent ID"
   test_case:
-  -    
-    input: '{"arguments":{"id":"001","name":"user_","ip":"any"},"function":"add"}'
-    output: '{"error":9012,"message":"Duplicated ID"}'
--
-  name: "Force"
+    - input: '{"arguments":{"id":"001","name":"user_","ip":"any"},"function":"add"}'
+      output: '{"error":9012,"message":"Duplicated ID"}'
+- name: "Force"
   description: "Add duplicate agents with force option"
   test_case:
-  -    
-    input: '{"arguments":{"force":1,"name":"user1","ip":"any"},"function":"add"}'
-    output: '{"error":0,"data":{"id":"102","name":"user1","ip":"any","key":'
-  -    
-    input: '{"arguments":{"force":1,"name":"user10","ip":"192.0.0.0"},"function":"add"}'
-    output: '{"error":0,"data":{"id":"103","name":"user10","ip":"192.0.0.0","key":'
-  -    
-    input: '{"arguments":{"force":1,"id":"001","name":"user11","ip":"any"},"function":"add"}'
-    output: '{"error":0,"data":{"id":"001","name":"user11","ip":"any","key":'
--
-  name: "Single Group"
+    - input: '{"arguments":{"force":1,"name":"user1","ip":"any"},"function":"add"}'
+      output: '{"error":0,"data":{"id":"102","name":"user1","ip":"any","key":'
+    - input: '{"arguments":{"force":1,"name":"user10","ip":"192.0.0.0"},"function":"add"}'
+      output: '{"error":0,"data":{"id":"103","name":"user10","ip":"192.0.0.0","key":'
+    - input: '{"arguments":{"force":1,"id":"001","name":"user11","ip":"any"},"function":"add"}'
+      output: '{"error":0,"data":{"id":"001","name":"user11","ip":"any","key":'
+- name: "Single Group"
   description: "Try to add an agent with group"
-  groups: 
+  groups:
     - 'Group1'
   test_case:
-  -
-    input: '{"arguments":{"name":"user21","ip":"any","groups":"Group1"},"function":"add"}'
-    output: '{"error":0,"data":{"id":"104","name":"user21","ip":"any","key":'
-  -
-    input: '{"arguments":{"name":"user_","ip":"any","groups":"Group2"},"function":"add"}'
-    output: '{"error":9014,"message":"Invalid Group(s) Name(s)"}'
--
-  name: "Multi Group"
+    - input: '{"arguments":{"name":"user21","ip":"any","groups":"Group1"},"function":"add"}'
+      output: '{"error":0,"data":{"id":"104","name":"user21","ip":"any","key":'
+    - input: '{"arguments":{"name":"user_","ip":"any","groups":"Group2"},"function":"add"}'
+      output: '{"error":9014,"message":"Invalid Group(s) Name(s)"}'
+- name: "Multi Group"
   description: "Try to add an agent with multiplegroup"
-  groups: 
+  groups:
     - 'Group1'
     - 'Group2'
   test_case:
-  -
-    input: '{"arguments":{"name":"user22","ip":"any","groups":"Group1,Group2"},"function":"add"}'
-    output: '{"error":0,"data":{"id":"105","name":"user22","ip":"any","key":'
-  -
-    input: '{"arguments":{"name":"user_","ip":"any","groups":"Group1,Group2,Group3"},"function":"add"}'
-    output: '{"error":9014,"message":"Invalid Group(s) Name(s)"}'
+    - input: '{"arguments":{"name":"user22","ip":"any","groups":"Group1,Group2"},"function":"add"}'
+      output: '{"error":0,"data":{"id":"105","name":"user22","ip":"any","key":'
+    - input: '{"arguments":{"name":"user_","ip":"any","groups":"Group1,Group2,Group3"},"function":"add"}'
+      output: '{"error":9014,"message":"Invalid Group(s) Name(s)"}'
 
 - #REMOVE
   name: "Remove agent"
   description: "Remove an agent default (no save_removed, no purge)"
   test_case:
-  -    
-    input: '{"arguments":{"id":"001"},"function":"remove"}'
-    output: '{"error":0,"data":"Agent deleted successfully."}'
-  -    
-    input: '{"arguments":{"id":"002", "purge":true},"function":"remove"}'
-    output: '{"error":0,"data":"Agent deleted successfully."}'
-  -    
-    input: '{"arguments":{"id":"200"},"function":"remove"}'
-    output: '{"error":9011,"message":"Agent ID not found"}'
+    - input: '{"arguments":{"id":"001"},"function":"remove"}'
+      output: '{"error":0,"data":"Agent deleted successfully."}'
+    - input: '{"arguments":{"id":"002", "purge":true},"function":"remove"}'
+      output: '{"error":0,"data":"Agent deleted successfully."}'
+    - input: '{"arguments":{"id":"200"},"function":"remove"}'
+      output: '{"error":9011,"message":"Agent ID not found"}'

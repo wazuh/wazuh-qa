@@ -32,6 +32,9 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+### Pycharm ###
+.idea/*
+
 ### VisualStudioCode ###
 .vscode/*
 .mypy_cache/

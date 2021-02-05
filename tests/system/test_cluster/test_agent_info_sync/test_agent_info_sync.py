@@ -1,14 +1,13 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
 
 import pytest
-
-from wazuh_testing.tools.system import HostManager
-from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
+from wazuh_testing.tools.monitoring import HostMonitor
+from wazuh_testing.tools.system import HostManager
 
 # Hosts
 testinfra_hosts = ["wazuh-master", "wazuh-worker1", "wazuh-agent1"]
@@ -31,7 +30,7 @@ deleted_agent = "wazuh-agent3"
 
 @pytest.fixture(scope='function')
 def clean_cluster_logs():
-    host_manager.clear_file(host='wazuh-master',  file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
+    host_manager.clear_file(host='wazuh-master', file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
     host_manager.clear_file(host='wazuh-worker1', file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
     host_manager.clear_file(host='wazuh-worker2', file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
     # Its required to restart each node after clearing the log files

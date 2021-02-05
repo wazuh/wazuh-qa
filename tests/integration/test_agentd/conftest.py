@@ -1,29 +1,29 @@
 import os
-import pytest
+import platform
 import socket
 import ssl
-import platform
+
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 
 DEFAULT_VALUES = {
-    'enabled' : 'yes', 
-    'manager_address' : None, 
-    'port' : 1515, 
-    'agent_name' : socket.gethostname(), 
-    'groups' : None, 
-    'agent_address' : '127.0.0.1', 
-    'use_source_ip' : 'no',
+    'enabled': 'yes',
+    'manager_address': None,
+    'port': 1515,
+    'agent_name': socket.gethostname(),
+    'groups': None,
+    'agent_address': '127.0.0.1',
+    'use_source_ip': 'no',
     'ssl_cipher': None,
     'server_ca_path': None,
-    'agent_certificate_path' : None,
-    'agent_key_path' : None,
+    'agent_certificate_path': None,
+    'agent_key_path': None,
     'authorization_pass_path': None
 }
 
 folder = 'etc' if platform.system() == 'Linux' else ''
 
-CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, folder,'client.keys') #for unix add 'etc'
+CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, folder, 'client.keys')  # for unix add 'etc'
 AUTHDPASS_PATH = os.path.join(WAZUH_PATH, folder, 'authd.pass')
 SERVER_KEY_PATH = os.path.join(WAZUH_PATH, folder, 'manager.key')
 SERVER_CERT_PATH = os.path.join(WAZUH_PATH, folder, 'manager.cert')
@@ -33,26 +33,29 @@ AGENT_CERT_PATH = os.path.join(WAZUH_PATH, folder, 'agent.cert')
 AGENT_PEM_PATH = os.path.join(WAZUH_PATH, folder, 'agent.pem')
 AUTHDPASS_PATH = os.path.join(WAZUH_PATH, folder, 'authd.pass')
 AGENT_AUTH_BINARY_PATH = '/var/ossec/bin/agent-auth' if platform.system() == 'Linux' else \
-                         os.path.join(WAZUH_PATH, 'agent-auth.exe')
+    os.path.join(WAZUH_PATH, 'agent-auth.exe')
 
 CONFIG_PATHS = {
-    'SERVER_PEM_PATH' : SERVER_PEM_PATH,
-    'AGENT_CERT_PATH' : AGENT_CERT_PATH,
-    'AGENT_PEM_PATH'  : AGENT_PEM_PATH,
-    'AGENT_KEY_PATH'  : AGENT_KEY_PATH,
-    'PASSWORD_PATH'   : AUTHDPASS_PATH
+    'SERVER_PEM_PATH': SERVER_PEM_PATH,
+    'AGENT_CERT_PATH': AGENT_CERT_PATH,
+    'AGENT_PEM_PATH': AGENT_PEM_PATH,
+    'AGENT_KEY_PATH': AGENT_KEY_PATH,
+    'PASSWORD_PATH': AUTHDPASS_PATH
 
 }
 
-def clean_client_keys_file(): 
+
+def clean_client_keys_file():
     try:
         client_file = open(CLIENT_KEYS_PATH, 'w')
-        client_file.close()        
+        client_file.close()
     except IOError as exception:
         raise
 
+
 def check_client_keys_file():
     """Wait until client key has been written"""
+
     def wait_key_changes(line):
         if 'Valid key received' in line:
             return line
@@ -66,7 +69,7 @@ def check_client_keys_file():
     try:
         with open(CLIENT_KEYS_PATH) as client_file:
             client_line = client_file.readline()
-            #check format key 4 items (id name ip key)
+            # check format key 4 items (id name ip key)
             if len(client_line.split(" ")) != 4:
                 client_file.close()
                 return False
@@ -76,6 +79,7 @@ def check_client_keys_file():
         raise
     client_file.close()
     return False
+
 
 def build_expected_request(configuration):
     expec_req = "OSSEC"
@@ -95,12 +99,14 @@ def build_expected_request(configuration):
         expec_req += " IP:'src'"
     return expec_req + '\n'
 
-def clean_password_file(): 
+
+def clean_password_file():
     try:
         client_file = open(AUTHDPASS_PATH, 'w')
-        client_file.close()        
+        client_file.close()
     except IOError as exception:
         raise
+
 
 def configure_enrollment(enrollment, enrollment_server, agent_name=socket.gethostname()):
     enrollment_server.clear()
@@ -109,31 +115,36 @@ def configure_enrollment(enrollment, enrollment_server, agent_name=socket.gethos
             enrollment_server.agent_id = enrollment.get('id')
         if enrollment.get('protocol') == 'TLSv1_1':
             enrollment_server.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLS,
-                options=(ssl.OP_ALL | ssl.OP_NO_TLSv1_2 | (ssl.OP_NO_TLSv1_3 if hasattr(ssl, 'OP_NO_TLSv1_3') else 0) |
-                ssl.OP_CIPHER_SERVER_PREFERENCE | ssl.OP_NO_COMPRESSION),
-                cert_reqs=ssl.CERT_NONE)
+                                                                             options=(ssl.OP_ALL | ssl.OP_NO_TLSv1_2 | (
+                                                                                 ssl.OP_NO_TLSv1_3 if hasattr(ssl,
+                                                                                                              'OP_NO_TLSv1_3') else 0) |
+                                                                                      ssl.OP_CIPHER_SERVER_PREFERENCE | ssl.OP_NO_COMPRESSION),
+                                                                             cert_reqs=ssl.CERT_NONE)
         else:
             enrollment_server.mitm_enrollment.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2,
                                                                              options=None)
         if enrollment.get('check_certificate'):
             if enrollment['check_certificate']['valid'] == 'yes':
                 # Store valid certificate
-                enrollment_server.cert_controller.store_ca_certificate(enrollment_server.cert_controller.get_root_ca_cert(),
-                                                                       SERVER_PEM_PATH)
+                enrollment_server.cert_controller.store_ca_certificate(
+                    enrollment_server.cert_controller.get_root_ca_cert(),
+                    SERVER_PEM_PATH)
             else:
                 # Create another certificate
                 enrollment_server.cert_controller.generate_agent_certificates(AGENT_KEY_PATH, SERVER_PEM_PATH,
                                                                               agent_name)
         if enrollment.get('agent_certificate'):
-            enrollment_server.cert_controller.generate_agent_certificates(AGENT_KEY_PATH, AGENT_CERT_PATH, agent_name, 
-                signed=(enrollment['agent_certificate']['valid'] == 'yes')
-            )
+            enrollment_server.cert_controller.generate_agent_certificates(AGENT_KEY_PATH, AGENT_CERT_PATH, agent_name,
+                                                                          signed=(enrollment['agent_certificate'][
+                                                                                      'valid'] == 'yes')
+                                                                          )
             enrollment_server.mitm_enrollment.listener.set_ssl_configuration(cert_reqs=ssl.CERT_REQUIRED,
                                                                              ca_cert=SERVER_PEM_PATH)
             enrollment_server.cert_controller.store_ca_certificate(enrollment_server.cert_controller.get_root_ca_cert(),
                                                                    SERVER_PEM_PATH)
         else:
             enrollment_server.mitm_enrollment.listener.set_ssl_configuration(cert_reqs=ssl.CERT_OPTIONAL)
+
 
 def parse_configuration_string(configuration):
     for key, value in configuration.items():
@@ -150,7 +161,7 @@ class AgentAuthParser:
         self._command += [BINARY_PATH]
         if server_address:
             self._command += ['-m', server_address]
-    
+
     def get_command(self):
         return self._command
 
@@ -171,7 +182,7 @@ class AgentAuthParser:
 
     def add_manager_ca(self, ca_cert):
         self._command += ['-v', ca_cert]
-    
+
     def use_source_ip(self):
         self._command += ['-i']
 

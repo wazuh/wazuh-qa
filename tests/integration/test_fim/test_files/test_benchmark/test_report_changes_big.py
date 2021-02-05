@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -10,7 +10,6 @@ from statistics import mean, median
 import pandas
 import psutil
 import pytest
-
 from wazuh_testing.fim import LOG_FILE_PATH, WAZUH_PATH, REGULAR, generate_params, create_file, \
     callback_detect_event, check_time_travel
 from wazuh_testing.tools import PREFIX
@@ -20,7 +19,6 @@ from wazuh_testing.tools.monitoring import FileMonitor
 # Marks
 
 pytestmark = pytest.mark.tier(level=3)
-
 
 # Variables
 
@@ -191,7 +189,7 @@ def write_csv(data):
     10, 100, 1000, 2000
 ])
 @pytest.mark.parametrize('file_size', [
-    0, 1024*59
+    0, 1024 * 59
 ])
 def test_report_changes_big(file_size, n_files, tags_to_apply, get_configuration, configure_environment,
                             restart_syscheckd, wait_for_fim_start):
@@ -221,7 +219,7 @@ def test_report_changes_big(file_size, n_files, tags_to_apply, get_configuration
     # Create the list of files
     folder = testdir1
     file_list = [f'regular_{fim_mode}_{n_files}_{i}_{file_size}' for i in range(n_files)]
-    create_files(file_list, folder, b'0'*file_size)
+    create_files(file_list, folder, b'0' * file_size)
 
     # Get events generated when creating files
     check_time_travel(fim_mode == 'scheduled', monitor=wazuh_log_monitor)
@@ -240,7 +238,7 @@ def test_report_changes_big(file_size, n_files, tags_to_apply, get_configuration
                  *calculate_metrics(folder, event_list, fim_mode)])
 
     # Modify all the files and check if they are still on diff folder
-    create_files(file_list, folder, b'1'*file_size)
+    create_files(file_list, folder, b'1' * file_size)
 
     # Get events generated when modifying files
     check_time_travel(fim_mode == 'scheduled', monitor=wazuh_log_monitor)

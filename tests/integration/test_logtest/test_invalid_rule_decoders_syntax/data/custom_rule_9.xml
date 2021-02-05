@@ -2,9 +2,9 @@
 <group name="testing">
 
     <rule id="100001" level="3">
-    <program_name>example</program_name>
-    <madeup_attr>example</madeup_attr>
-    <description>example_description</description>
+        <program_name>example</program_name>
+        <madeup_attr>example</madeup_attr>
+        <description>example_description</description>
     </rule>
 
 </group>

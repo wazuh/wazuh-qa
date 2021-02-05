@@ -1,11 +1,10 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
 
 import pytest
-
 from wazuh_testing.cluster import FERNET_KEY, master_simulator, cluster_msg_build, callback_clusterd_keypoll
 from wazuh_testing.tools import WAZUH_PATH, CLUSTER_LOGS_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -44,6 +43,7 @@ monitored_sockets_params = [('wazuh-clusterd', mitm_master, False)]
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
+
 # Fixtures
 
 
@@ -51,6 +51,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
+
 
 # Tests
 

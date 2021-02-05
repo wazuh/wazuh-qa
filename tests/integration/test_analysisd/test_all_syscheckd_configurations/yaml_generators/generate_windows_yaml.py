@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -10,7 +10,6 @@ import subprocess
 import time
 
 import yaml
-
 from wazuh_testing import logger
 from wazuh_testing.analysis import callback_analysisd_agent_id, callback_analysisd_event
 from wazuh_testing.tools import WAZUH_LOGS_PATH, LOG_FILE_PATH, WAZUH_PATH

@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -8,7 +8,7 @@ from time import sleep
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, callback_file_limit_capacity, delete_file, \
-                              generate_params, create_file, REGULAR
+    generate_params, create_file, REGULAR
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -40,6 +40,7 @@ p, m = generate_params(extra_params=conf_params, modes=['realtime', 'whodata'])
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
+
 # Fixtures
 
 
@@ -47,6 +48,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
+
 
 # Functions
 
@@ -58,12 +60,13 @@ def extra_configuration_before_yield():
     for i in range(2, NUM_FILES_TO_CREATE):
         create_file(REGULAR, testdir1, f'{base_file_name}{i}', content='content')
 
+
 # Tests
 
 
 @pytest.mark.parametrize('folder, file_name, tags_to_apply', [
-                         (testdir1, f'{base_file_name}{1}', {'tags_delete_full'})
-                         ])
+    (testdir1, f'{base_file_name}{1}', {'tags_delete_full'})
+])
 def test_file_limit_delete_full(folder, file_name, tags_to_apply,
                                 get_configuration, configure_environment, restart_syscheckd):
     """
@@ -85,7 +88,7 @@ def test_file_limit_delete_full(folder, file_name, tags_to_apply,
     database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                              callback=callback_file_limit_capacity,
                                              error_message='Did not receive expected '
-                                             '"DEBUG: ...: Sending DB 100% full alert." event').result()
+                                                           '"DEBUG: ...: Sending DB 100% full alert." event').result()
 
     if database_state:
         assert database_state == '100', 'Wrong value for full database alert'

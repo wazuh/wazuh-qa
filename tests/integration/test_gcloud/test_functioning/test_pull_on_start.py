@@ -1,14 +1,14 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import pytest
 import sys
 
+import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.gcloud import callback_detect_start_fetching_logs, callback_detect_start_gcp_sleep
 from wazuh_testing.fim import generate_params
+from wazuh_testing.gcloud import callback_detect_start_fetching_logs, callback_detect_start_gcp_sleep
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -71,9 +71,9 @@ def get_configuration(request):
 def test_pull_on_start(get_configuration, configure_environment,
                        restart_wazuh, wait_for_gcp_start):
     """
-    Verify the module gcp-pubsub starts if pull_on_start is set to yes and 
+    Verify the module gcp-pubsub starts if pull_on_start is set to yes and
     the module sleeps if pull_on_start is set to no.
-    In the second case, the module will start to pull messages after time interval.  
+    In the second case, the module will start to pull messages after time interval.
     """
     pull_start = get_configuration['sections'][0]['elements'][3]['pull_on_start']['value'] == 'yes'
     str_interval = get_configuration['sections'][0]['elements'][4]['interval']['value']

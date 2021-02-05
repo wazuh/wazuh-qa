@@ -1,17 +1,16 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
 
 import pytest
-
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, callback_detect_event,
                                REGULAR, create_file, delete_file)
+from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 pytestmark = pytest.mark.tier(level=2)

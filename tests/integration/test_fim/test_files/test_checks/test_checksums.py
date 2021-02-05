@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -6,7 +6,6 @@ import os
 import sys
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (CHECK_ALL, CHECK_MD5SUM, CHECK_SHA1SUM, CHECK_SHA256SUM, CHECK_SUM, LOG_FILE_PATH,
                                REQUIRED_ATTRIBUTES, regular_file_cud, generate_params)

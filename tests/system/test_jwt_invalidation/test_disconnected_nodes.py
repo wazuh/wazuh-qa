@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -6,14 +6,12 @@ import os
 import time
 
 import pytest
-
 from wazuh_testing.tools.system import HostManager
 
 test_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                               'provisioning', 'agentless_cluster', 'inventory.yml')
 default_api_conf = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'api_configurations', 'default.yaml')
-
 
 host_manager = HostManager(inventory_path)
 

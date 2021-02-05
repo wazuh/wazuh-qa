@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -7,7 +7,6 @@ import sqlite3
 
 import pytest
 import requests
-
 from wazuh_testing.fim import WAZUH_PATH
 from wazuh_testing.tools.configuration import check_apply_test
 from wazuh_testing.tools.configuration import get_api_conf
@@ -16,14 +15,12 @@ from wazuh_testing.tools.configuration import get_api_conf
 
 pytestmark = pytest.mark.server
 
-
 # Variables
 
 path = os.path.dirname(os.path.abspath(__file__))
 rbac_sql_path = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'rbac.db')
 con = sqlite3.connect(rbac_sql_path)
 cur = con.cursor()
-
 
 # Configurations
 
@@ -88,7 +85,7 @@ def test_rbac_mode(tags_to_apply, get_configuration, configure_api_environment, 
     # If white mode, user can't access that information.
     if rbac_white:
         assert get_response.status_code == 403, f'Expected status code was 403, ' \
-            f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
+                                                f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
     else:
         assert get_response.status_code == 200, f'Expected status code was 200, ' \
-            f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
+                                                f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'

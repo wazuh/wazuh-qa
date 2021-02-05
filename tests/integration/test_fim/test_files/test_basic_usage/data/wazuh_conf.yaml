@@ -1,16 +1,32 @@
 ---
 # conf 1
 - tags:
-  - ossec_conf
+    - ossec_conf
   apply_to_modules:
-  - MODULE_NAME
+    - MODULE_NAME
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-        - check_all: 'yes'
-        - FIM_MODE
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: TEST_DIRECTORIES
+            attributes:
+              - check_all: 'yes'
+              - FIM_MODE
+
+# conf 2
+- tags:
+    - ossec_conf_wildcards
+  apply_to_modules:
+    - MODULE_NAME
+  sections:
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: TEST_WILDCARDS
+            attributes:
+              - check_all: 'yes'
+              - FIM_MODE

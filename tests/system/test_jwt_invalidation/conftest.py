@@ -1,7 +1,7 @@
 import os
+
 import pytest
 import yaml
-
 from wazuh_testing.tools import WAZUH_API_CONF
 
 

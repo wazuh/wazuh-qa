@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -6,7 +6,6 @@ import os
 import shutil
 
 import pytest
-
 from wazuh_testing.api import callback_detect_api_start, get_api_details_dict
 from wazuh_testing.tools import API_LOG_FILE_PATH, WAZUH_API_CONF, WAZUH_SECURITY_CONF
 from wazuh_testing.tools.configuration import get_api_conf, write_api_conf, write_security_conf

@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -35,7 +35,7 @@ def wait_for_fim_start(get_configuration, request):
             detect_realtime_start(file_monitor)
         elif get_configuration['metadata'][mode_key] == 'whodata':
             detect_whodata_start(file_monitor)
-        else:   # scheduled
+        else:  # scheduled
             detect_initial_scan(file_monitor)
     except KeyError:
         detect_initial_scan(file_monitor)

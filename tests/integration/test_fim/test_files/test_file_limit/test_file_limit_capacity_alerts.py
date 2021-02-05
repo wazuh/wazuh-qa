@@ -1,5 +1,4 @@
-
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -7,11 +6,10 @@ import os
 import sys
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_file_limit_capacity, generate_params, create_file, \
-                               check_time_travel, REGULAR, delete_file, callback_file_limit_back_to_normal, \
-                               callback_entries_path_count
+    check_time_travel, REGULAR, delete_file, callback_file_limit_back_to_normal, \
+    callback_entries_path_count
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -40,6 +38,7 @@ p, m = generate_params(extra_params=conf_params, modes=['scheduled'],
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
+
 # Fixtures
 
 
@@ -47,6 +46,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
+
 
 # Tests
 
@@ -73,31 +73,31 @@ def test_file_limit_capacity_alert(percentage, tags_to_apply, get_configuration,
     if percentage == 0:
         NUM_FILES = 0
 
-    if percentage >= 80:    # Percentages 80 and 90
+    if percentage >= 80:  # Percentages 80 and 90
         for i in range(NUM_FILES):
             create_file(REGULAR, testdir1, f'test{i}')
-    else:   # Database back to normal
+    else:  # Database back to normal
         for i in range(91):
             delete_file(testdir1, f'test{i}')
 
     check_time_travel(True, monitor=wazuh_log_monitor)
 
-    if percentage >= 80:    # Percentages 80 and 90
+    if percentage >= 80:  # Percentages 80 and 90
         file_limit_capacity = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                       callback=callback_file_limit_capacity,
                                                       error_message='Did not receive expected '
-                                                      '"DEBUG: ...: Sending DB ...% full alert." event'
+                                                                    '"DEBUG: ...: Sending DB ...% full alert." event'
                                                       ).result()
 
         if file_limit_capacity:
             assert file_limit_capacity == str(percentage), 'Wrong capacity log for DB file_limit'
         else:
             raise AssertionError('Wrong capacity log for DB file_limit')
-    else:   # Database back to normal
+    else:  # Database back to normal
         event_found = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                               callback=callback_file_limit_back_to_normal,
                                               error_message='Did not receive expected '
-                                              '"DEBUG: ...: Sending DB back to normal alert." event'
+                                                            '"DEBUG: ...: Sending DB back to normal alert." event'
                                               ).result()
 
         assert event_found, 'Event "Sending DB back to normal alert." not found'
@@ -105,7 +105,7 @@ def test_file_limit_capacity_alert(percentage, tags_to_apply, get_configuration,
     entries, path_count = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                   callback=callback_entries_path_count,
                                                   error_message='Did not receive expected '
-                                                  '"Fim inode entries: ..." event'
+                                                                '"Fim inode entries: ..." event'
                                                   ).result()
 
     check_time_travel(True, monitor=wazuh_log_monitor)

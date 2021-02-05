@@ -1,15 +1,15 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, \
-     create_registry, registry_parser, registry_value_cud, KEY_WOW64_64KEY
+    create_registry, registry_parser, registry_value_cud, KEY_WOW64_64KEY
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
-
 
 # Marks
 
@@ -29,7 +29,6 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 reg1 = os.path.join(key, sub_key_1)
 
 monitoring_modes = ['scheduled']
-
 
 # Configurations
 

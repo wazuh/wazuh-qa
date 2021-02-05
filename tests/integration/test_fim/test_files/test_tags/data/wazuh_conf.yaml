@@ -1,18 +1,18 @@
 ---
 # conf 1
 - tags:
-  - invalid_no_regex
-  - invalid_no_regex1
+    - invalid_no_regex
+    - invalid_no_regex1
   apply_to_modules:
-  - test_tags
+    - test_tags
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-        - check_all: 'yes'
-        - FIM_MODE
-        - tags: FIM_TAGS
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: TEST_DIRECTORIES
+            attributes:
+              - check_all: 'yes'
+              - FIM_MODE
+              - tags: FIM_TAGS

@@ -1,19 +1,19 @@
 ---
 # conf 1
 - tags:
-  - monitoring_realtime
+    - monitoring_realtime
   apply_to_modules:
-  - test_moving_files
+    - test_moving_files
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: "/testdir1"
-        attributes:
-        - whodata: 'yes'
-    - directories:
-        value: "/testdir2"
-        attributes:
-        - realtime: 'yes'
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: "/testdir1"
+            attributes:
+              - whodata: 'yes'
+        - directories:
+            value: "/testdir2"
+            attributes:
+              - realtime: 'yes'

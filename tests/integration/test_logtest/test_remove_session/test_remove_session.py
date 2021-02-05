@@ -1,16 +1,15 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import json
 import os
 
 import pytest
 import yaml
-import json
-
 from wazuh_testing.tools import WAZUH_PATH
-from wazuh_testing.tools.monitoring import close_sockets
 from wazuh_testing.tools.monitoring import SocketController
+from wazuh_testing.tools.monitoring import close_sockets
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]

@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -6,7 +6,6 @@ import os
 
 import pytest
 import requests
-
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 
@@ -14,11 +13,9 @@ from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 
 pytestmark = pytest.mark.server
 
-
 # Variables
 
 test_directories = [os.path.join(PREFIX, 'test_cert')]
-
 
 # Configurations
 

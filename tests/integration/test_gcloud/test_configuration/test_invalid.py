@@ -1,17 +1,17 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
 import sys
-import pytest
 
+import pytest
 from wazuh_testing import global_parameters
+from wazuh_testing.fim import generate_params
 from wazuh_testing.gcloud import callback_detect_schedule_validate_parameters_err, callback_detect_gcp_read_err, \
     callback_detect_gcp_wmodule_err, callback_detect_schedule_read_err
-from wazuh_testing.fim import generate_params
 from wazuh_testing.tools import LOG_FILE_PATH
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 
@@ -65,7 +65,7 @@ def test_invalid(get_configuration, configure_environment, reset_ossec_log):
     """
     Checks if an invalid configuration is detected
 
-    Using invalid configurations with different attributes, 
+    Using invalid configurations with different attributes,
     expect an error message and gcp-pubsub unable to start.
     """
     # Configuration error -> ValueError raised
