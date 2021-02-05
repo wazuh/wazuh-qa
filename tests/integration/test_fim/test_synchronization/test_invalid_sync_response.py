@@ -4,7 +4,6 @@
 import os
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_configuration_warning
 from wazuh_testing.tools import PREFIX

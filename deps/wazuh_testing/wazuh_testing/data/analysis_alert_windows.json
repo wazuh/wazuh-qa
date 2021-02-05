@@ -394,7 +394,10 @@
         "arch": {
           "$id": "#/properties/data/properties/arch",
           "type": "string",
-          "enum": ["[x32]", "[x64]"],
+          "enum": [
+            "[x32]",
+            "[x64]"
+          ],
           "examples": [
             "[x32]",
             "[x64]"
@@ -414,14 +417,24 @@
         "value_type": {
           "$id": "#/properties/data/properties/attributes/properties/type",
           "type": "string",
-          "enum": ["REG_NONE", "REG_SZ", "REG_EXPAND_SZ", "REG_BINARY", "REG_DWORD", "REG_DWORD_BIG_ENDIAN",
-                   "REG_LINK", "REG_MULTI_SZ", "REG_RESOURCE_LIST", "REG_FULL_RESOURCE_DESCRIPTOR",
-                   "REG_RESOURCE_REQUIREMENTS_LIST", "REG_QWORD"],
+          "enum": [
+            "REG_NONE",
+            "REG_SZ",
+            "REG_EXPAND_SZ",
+            "REG_BINARY",
+            "REG_DWORD",
+            "REG_DWORD_BIG_ENDIAN",
+            "REG_LINK",
+            "REG_MULTI_SZ",
+            "REG_RESOURCE_LIST",
+            "REG_FULL_RESOURCE_DESCRIPTOR",
+            "REG_RESOURCE_REQUIREMENTS_LIST",
+            "REG_QWORD"
+          ],
           "examples": [
             "REG_SZ"
           ],
           "pattern": "^(.*)$"
-
         },
         "size_before": {
           "$id": "#/properties/syscheck/properties/size_before",
@@ -747,7 +760,11 @@
         "mode": {
           "$id": "#/properties/syscheck/properties/mode",
           "type": "string",
-          "enum": ["realtime", "whodata", "scheduled"],
+          "enum": [
+            "realtime",
+            "whodata",
+            "scheduled"
+          ],
           "title": "The Mode Schema",
           "default": "",
           "examples": [

@@ -5,7 +5,6 @@ import os
 from datetime import datetime, timedelta
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, generate_params, check_time_travel
 from wazuh_testing.tools import PREFIX

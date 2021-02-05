@@ -3,14 +3,14 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import pytest
 
+import pytest
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_ignore, create_registry, registry_parser, \
-        KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, callback_detect_event, check_time_travel, \
-        modify_registry_value, REG_SZ
+    KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, callback_detect_event, check_time_travel, \
+    modify_registry_value, REG_SZ
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing import global_parameters
 
 # Marks
 

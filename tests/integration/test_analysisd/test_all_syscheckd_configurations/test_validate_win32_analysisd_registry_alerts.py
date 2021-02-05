@@ -6,7 +6,6 @@ import os
 
 import pytest
 import yaml
-
 from wazuh_testing.analysis import validate_analysis_alert_complex
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, ALERT_FILE_PATH
 from wazuh_testing.tools.monitoring import ManInTheMiddle
@@ -44,6 +43,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 events_dict = {}
 alerts_list = []
 analysisd_injections_per_second = 200
+
 
 # Fixtures
 

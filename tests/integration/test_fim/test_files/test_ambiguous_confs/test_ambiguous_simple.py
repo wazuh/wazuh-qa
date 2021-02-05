@@ -6,7 +6,6 @@ import os
 import sys
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, WAZUH_PATH,
                                CHECK_ALL, CHECK_GROUP, CHECK_INODE,
@@ -175,6 +174,7 @@ def test_ambiguous_report(folders, tags_to_apply, get_configuration, configure_e
     tags_to_apply : set
         Run test if matches with a configuration identifier, skip otherwise
     """
+
     def report_changes_validator(event):
         """Validate content_changes event property exists in the event."""
         for file in file_list:

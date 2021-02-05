@@ -5,12 +5,11 @@
 import os
 
 import pytest
-
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, regular_file_cud
+from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=2)]

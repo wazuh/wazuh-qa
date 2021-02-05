@@ -3,13 +3,10 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+from struct import pack
 
 import pytest
 import yaml
-from string import ascii_uppercase
-import random
-from struct import pack
-
 from wazuh_testing.tools import WAZUH_PATH
 
 # Marks

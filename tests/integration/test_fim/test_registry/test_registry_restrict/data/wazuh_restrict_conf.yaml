@@ -1,43 +1,43 @@
 ---
 # Registry values configuration
 - tags:
-  - value_restrict
+    - value_restrict
   apply_to_modules:
-  - test_registry_restrict
+    - test_registry_restrict
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - windows_registry:
-        value: WINDOWS_REGISTRY_1
-        attributes:
-        - check_all: 'yes'
-        - arch: "64bit"
-        - restrict_value: RESTRICT_VALUE
-    - windows_registry:
-        value: WINDOWS_REGISTRY_2
-        attributes:
-        - arch: "both"
-        - restrict_value: RESTRICT_VALUE
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - windows_registry:
+            value: WINDOWS_REGISTRY_1
+            attributes:
+              - check_all: 'yes'
+              - arch: "64bit"
+              - restrict_value: RESTRICT_VALUE
+        - windows_registry:
+            value: WINDOWS_REGISTRY_2
+            attributes:
+              - arch: "both"
+              - restrict_value: RESTRICT_VALUE
 # Registry keys configuration
 - tags:
-  - key_restrict
+    - key_restrict
   apply_to_modules:
-  - test_registry_restrict
+    - test_registry_restrict
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - windows_registry:
-        value: WINDOWS_REGISTRY_1
-        attributes:
-        - check_all: 'yes'
-        - arch: "64bit"
-        - restrict_key: RESTRICT_KEY
-    - windows_registry:
-        value: WINDOWS_REGISTRY_2
-        attributes:
-        - arch: "both"
-        - restrict_key: RESTRICT_KEY
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - windows_registry:
+            value: WINDOWS_REGISTRY_1
+            attributes:
+              - check_all: 'yes'
+              - arch: "64bit"
+              - restrict_key: RESTRICT_KEY
+        - windows_registry:
+            value: WINDOWS_REGISTRY_2
+            attributes:
+              - arch: "both"
+              - restrict_key: RESTRICT_KEY

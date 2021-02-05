@@ -1,19 +1,19 @@
 ---
 # conf 1
 - tags:
-  - synchronize_events_conf
+    - synchronize_events_conf
   apply_to_modules:
-  - test_synchronize_integrity_win32
+    - test_synchronize_integrity_win32
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-        - FIM_MODE
-    - windows_registry:
-        value: TEST_REGS
-        attributes:
-        - arch: "both"
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: TEST_DIRECTORIES
+            attributes:
+              - FIM_MODE
+        - windows_registry:
+            value: TEST_REGS
+            attributes:
+              - arch: "both"

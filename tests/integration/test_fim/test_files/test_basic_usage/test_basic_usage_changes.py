@@ -6,7 +6,6 @@ import os
 import sys
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import CHECK_ALL, LOG_FILE_PATH, regular_file_cud, generate_params
 from wazuh_testing.tools import PREFIX
@@ -26,7 +25,6 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2 = test_directories
-
 
 # configurations
 

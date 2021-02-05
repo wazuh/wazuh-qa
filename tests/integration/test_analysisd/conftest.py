@@ -3,8 +3,8 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import shutil
-import pytest
 
+import pytest
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -30,6 +30,7 @@ def configure_local_rules(get_configuration, request):
 @pytest.fixture(scope='module')
 def wait_for_analysisd_startup(request):
     """Wait until analysisd has begun and alerts.json is created."""
+
     def callback_analysisd_startup(line):
         if 'Input message handler thread started.' in line:
             return line

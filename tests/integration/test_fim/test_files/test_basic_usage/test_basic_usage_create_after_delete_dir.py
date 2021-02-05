@@ -8,7 +8,6 @@ import sys
 import time
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import generate_params, regular_file_cud
 from wazuh_testing.tools import PREFIX, LOG_FILE_PATH

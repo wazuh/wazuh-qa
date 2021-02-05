@@ -1,17 +1,17 @@
 ---
 # conf 1
 - tags:
-  - audit_interval
+    - audit_interval
   apply_to_modules:
-  - test_windows_audit_interval
+    - test_windows_audit_interval
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - windows_audit_interval:
-        value: WINDOWS_AUDIT_INTERVAL
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-        - FIM_MODE
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - windows_audit_interval:
+            value: WINDOWS_AUDIT_INTERVAL
+        - directories:
+            value: TEST_DIRECTORIES
+            attributes:
+              - FIM_MODE

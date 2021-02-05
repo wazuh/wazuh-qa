@@ -1,71 +1,71 @@
 ---
 # Configuration for sync disabled
 - tags:
-  - sync_disabled
+    - sync_disabled
   apply_to_modules:
-  - test_sync_disabled_win32
+    - test_sync_disabled_win32
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - synchronization:
-        elements:
-        - enabled:
+    - section: syscheck
+      elements:
+        - disabled:
             value: 'no'
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-        - FIM_MODE
-    - windows_registry:
-        value: TEST_REGISTRIES
-        attributes:
-        - arch: "both"
+        - synchronization:
+            elements:
+              - enabled:
+                  value: 'no'
+        - directories:
+            value: TEST_DIRECTORIES
+            attributes:
+              - FIM_MODE
+        - windows_registry:
+            value: TEST_REGISTRIES
+            attributes:
+              - arch: "both"
 # Configuration for registry sync disabled
 - tags:
-  - sync_registry_disabled
+    - sync_registry_disabled
   apply_to_modules:
-  - test_sync_disabled_win32
+    - test_sync_disabled_win32
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - synchronization:
-        elements:
-        - enabled:
-            value: 'yes'
-        - registry_enabled:
+    - section: syscheck
+      elements:
+        - disabled:
             value: 'no'
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-        - FIM_MODE
-    - windows_registry:
-        value: TEST_REGISTRIES
-        attributes:
-        - arch: "both"
+        - synchronization:
+            elements:
+              - enabled:
+                  value: 'yes'
+              - registry_enabled:
+                  value: 'no'
+        - directories:
+            value: TEST_DIRECTORIES
+            attributes:
+              - FIM_MODE
+        - windows_registry:
+            value: TEST_REGISTRIES
+            attributes:
+              - arch: "both"
 # Configuration for registry sync enabled
 - tags:
-  - sync_registry_enabled
+    - sync_registry_enabled
   apply_to_modules:
-  - test_sync_disabled_win32
+    - test_sync_disabled_win32
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - synchronization:
-        elements:
-        - enabled:
-            value: 'yes'
-        - registry_enabled:
-            value: 'yes'
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-        - FIM_MODE
-    - windows_registry:
-        value: TEST_REGISTRIES
-        attributes:
-        - arch: "both"
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - synchronization:
+            elements:
+              - enabled:
+                  value: 'yes'
+              - registry_enabled:
+                  value: 'yes'
+        - directories:
+            value: TEST_DIRECTORIES
+            attributes:
+              - FIM_MODE
+        - windows_registry:
+            value: TEST_REGISTRIES
+            attributes:
+              - arch: "both"

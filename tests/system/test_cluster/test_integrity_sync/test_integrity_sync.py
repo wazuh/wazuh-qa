@@ -7,7 +7,6 @@ import time
 from secrets import token_hex
 
 import pytest
-
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.system import HostManager
 
@@ -168,7 +167,7 @@ def test_extra_valid_files(clean_files):
         worker_client_keys = host_manager.run_command(host, f'cat {client_keys_path}')
         assert master_client_keys == worker_client_keys, f'The client.keys file is not the same in the master and' \
                                                          f'ind the {host} ->' \
-                                                         f'\nMaster client keys:\n{master_client_keys}'\
+                                                         f'\nMaster client keys:\n{master_client_keys}' \
                                                          f'\nWorker client keys:\n{worker_client_keys}'
 
         # Create an 'agent-groups' file in each worker, using the ID of the agent registered above.

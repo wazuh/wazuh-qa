@@ -5,7 +5,6 @@
 import os
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_value_file_limit, generate_params
 from wazuh_testing.tools import PREFIX
@@ -32,6 +31,7 @@ p, m = generate_params(extra_params={"TEST_DIRECTORIES": testdir1})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
+
 # Fixtures
 
 
@@ -39,6 +39,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
+
 
 # Tests
 
@@ -60,7 +61,7 @@ def test_file_limit_default(tags_to_apply, get_configuration, configure_environm
     file_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                callback=callback_value_file_limit,
                                                error_message='Did not receive expected '
-                                               '"DEBUG: ...: Maximum number of entries to be monitored: ..." event'
+                                                             '"DEBUG: ...: Maximum number of entries to be monitored: ..." event'
                                                ).result()
 
     if file_limit_value:

@@ -3,13 +3,13 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import pytest
 import sys
 
+import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.gcloud import callback_detect_gcp_alert, validate_gcp_event, publish
 from wazuh_testing.fim import generate_params
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
+from wazuh_testing.gcloud import callback_detect_gcp_alert, validate_gcp_event, publish
+from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 

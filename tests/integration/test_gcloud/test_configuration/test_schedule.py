@@ -3,14 +3,14 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import pytest
 import sys
 
+import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.gcloud import callback_detect_schedule_validate_parameters_warn
 from wazuh_testing.fim import generate_params
+from wazuh_testing.gcloud import callback_detect_schedule_validate_parameters_warn
 from wazuh_testing.tools import LOG_FILE_PATH
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks

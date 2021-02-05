@@ -11,7 +11,6 @@ import sys
 import time
 
 import yaml
-
 from wazuh_testing import logger
 from wazuh_testing.analysis import callback_analysisd_agent_id, callback_analysisd_event
 from wazuh_testing.fim import REGULAR, create_file, modify_file, delete_file, detect_initial_scan

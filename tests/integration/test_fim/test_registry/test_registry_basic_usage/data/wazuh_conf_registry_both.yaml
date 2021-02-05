@@ -1,23 +1,23 @@
 ---
 # conf 2
 - tags:
-  - ossec_conf_2
+    - ossec_conf_2
   apply_to_modules:
-  - test_basic_usage_delete_registry
-  - test_basic_usage_registry_baseline_generation
-  - test_basic_usage_registry_changes
+    - test_basic_usage_delete_registry
+    - test_basic_usage_registry_baseline_generation
+    - test_basic_usage_registry_changes
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - windows_registry:
-        value: WINDOWS_REGISTRY_1
-        attributes:
-          - ATTRIBUTE
-          - arch: "64bit"
-    - windows_registry:
-        value: WINDOWS_REGISTRY_2
-        attributes:
-          - ATTRIBUTE
-          - arch: "both"
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - windows_registry:
+            value: WINDOWS_REGISTRY_1
+            attributes:
+              - ATTRIBUTE
+              - arch: "64bit"
+        - windows_registry:
+            value: WINDOWS_REGISTRY_2
+            attributes:
+              - ATTRIBUTE
+              - arch: "both"

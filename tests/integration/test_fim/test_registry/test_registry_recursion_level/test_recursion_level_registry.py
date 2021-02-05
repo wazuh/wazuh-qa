@@ -3,12 +3,11 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import pytest
 
+import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, registry_value_cud, registry_parser, generate_params, \
-     create_registry, KEY_WOW64_64KEY
-
+    create_registry, KEY_WOW64_64KEY
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -71,6 +70,7 @@ def extra_configuration_before_yield():
         for n in range(int(rl)):
             path = os.path.join(path, '' + str(n + 1))
         create_registry(registry_parser[key], path, KEY_WOW64_64KEY)
+
 
 # Tests
 

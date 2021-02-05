@@ -4,12 +4,10 @@
 import os
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, registry_value_cud, generate_params, KEY_WOW64_64KEY, KEY_WOW64_32KEY
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
-
 
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
@@ -32,6 +30,7 @@ p, m = generate_params(extra_params=conf_params,
                        modes=['scheduled'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
+
 # Fixtures
 
 
@@ -42,10 +41,10 @@ def get_configuration(request):
 
 
 @pytest.mark.parametrize('key, subkey, arch', [
-                         (key, sub_key, KEY_WOW64_32KEY),
-                         (key, sub_key, KEY_WOW64_64KEY),
-                         (key, sub_key_2, KEY_WOW64_64KEY)
-                         ])
+    (key, sub_key, KEY_WOW64_32KEY),
+    (key, sub_key, KEY_WOW64_64KEY),
+    (key, sub_key_2, KEY_WOW64_64KEY)
+])
 def test_tags(key, subkey, arch,
               get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """

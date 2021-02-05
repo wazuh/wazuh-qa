@@ -6,7 +6,6 @@ import os
 import sys
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, WAZUH_PATH, generate_params
 from wazuh_testing.tools import PREFIX

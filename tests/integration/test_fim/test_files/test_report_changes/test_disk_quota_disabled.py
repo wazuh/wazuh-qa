@@ -5,20 +5,17 @@
 import os
 
 import pytest
-
+from test_fim.test_files.test_report_changes.common import generate_string
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_disk_quota_limit_reached, generate_params, create_file, \
     check_time_travel
-from test_fim.test_files.test_report_changes.common import generate_string
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
-
 # Marks
 
 pytestmark = [pytest.mark.tier(level=1)]
-
 
 # Variables
 
@@ -28,7 +25,6 @@ directory_str = ','.join(test_directories)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories[0]
-
 
 # Configurations
 

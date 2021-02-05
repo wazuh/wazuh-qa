@@ -2,20 +2,14 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import json
 import os
-import pytest
-import sqlite3
 import time
+
 import psutil
-
-
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
+import pytest
+from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools.agent_simulator import Sender, Injector, create_agents
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.agent_simulator import Sender, Injector, Agent, \
-                    create_agents
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import SocketController
 from wazuh_testing.tools.services import control_service
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -25,7 +19,6 @@ RIDS_DIR = os.path.join(WAZUH_PATH, 'queue', 'rids')
 SERVER_ADDRESS = 'localhost'
 CRYPTO = 'aes'
 PROTOCOL = 'tcp'
-
 
 metadata = [
     {

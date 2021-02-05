@@ -3,20 +3,18 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import time
-from secrets import token_hex
 import random
+import time
 from ipaddress import IPv4Address
+from secrets import token_hex
 
 import pytest
 import requests
-
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 
 # Marks
 
 pytestmark = pytest.mark.server
-
 
 # Configurations
 

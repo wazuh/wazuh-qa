@@ -1,20 +1,20 @@
 # conf 1
 - tags:
-  - ossec_conf
+    - ossec_conf
   apply_to_modules:
-  - MODULE_NAME
+    - MODULE_NAME
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: TEST_DIR1
-        attributes:
-        - realtime: 'yes'
-        - whodata: 'yes'
-    - directories:
-        value: TEST_DIR2
-        attributes:
-        - whodata: 'yes'
-        - realtime: 'yes'
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: TEST_DIR1
+            attributes:
+              - realtime: 'yes'
+              - whodata: 'yes'
+        - directories:
+            value: TEST_DIR2
+            attributes:
+              - whodata: 'yes'
+              - realtime: 'yes'

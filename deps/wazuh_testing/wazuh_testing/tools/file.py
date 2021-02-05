@@ -2,16 +2,17 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import bz2
-import random
-import string
+import gzip
 import json
 import os
+import random
+import string
 import xml.etree.ElementTree as ET
-import filetype
-import requests
-import gzip
 import zipfile
 from os.path import exists
+
+import filetype
+import requests
 
 
 def read_json(file_path):

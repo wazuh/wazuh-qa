@@ -6,12 +6,12 @@ import os
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, check_time_travel, delete_registry, detect_initial_scan, \
-                              registry_value_cud, KEY_WOW64_32KEY, KEY_WOW64_64KEY, registry_parser, generate_params, \
-                              create_registry, modify_registry_value, calculate_registry_diff_paths, REG_SZ
-from wazuh_testing.tools.services import restart_wazuh_with_new_conf
-
+    registry_value_cud, KEY_WOW64_32KEY, KEY_WOW64_64KEY, registry_parser, generate_params, \
+    create_registry, modify_registry_value, calculate_registry_diff_paths, REG_SZ
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test, set_section_wazuh_conf
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.services import restart_wazuh_with_new_conf
+
 # Marks
 
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
@@ -29,7 +29,6 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 reg1, reg2 = test_regs
 
-
 # Configurations
 
 conf_params = {'WINDOWS_REGISTRY_1': reg1,
@@ -41,6 +40,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_registry_report_change
 p, m = generate_params(extra_params=conf_params, modes=['scheduled'])
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+
 
 # Functions
 
@@ -70,6 +70,7 @@ def reload_new_conf(report_value, reg1, reg2):
     # Wait for FIM scan to finish
     detect_initial_scan(wazuh_log_monitor)
 
+
 # Fixtures
 
 
@@ -77,6 +78,7 @@ def reload_new_conf(report_value, reg1, reg2):
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
+
 
 # Tests
 

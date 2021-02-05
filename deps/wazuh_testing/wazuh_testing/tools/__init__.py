@@ -21,7 +21,7 @@ else:
         with open("/etc/ossec-init.conf") as ossec_init:
             WAZUH_PATH = os.path.join(
                 [item.rstrip().replace("DIRECTORY=", "").replace("\"", "")
-                for item in ossec_init.readlines() if "DIRECTORY" in item][0])
+                 for item in ossec_init.readlines() if "DIRECTORY" in item][0])
     else:
         WAZUH_PATH = os.path.join("/", "var", "ossec")
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
@@ -68,7 +68,7 @@ QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 CLUSTER_SOCKET_PATH = os.path.join(WAZUH_PATH, 'queue', 'cluster')
 
 WAZUH_SOCKETS = {
-    'wazuh-agentd'   : [],
+    'wazuh-agentd': [],
     'wazuh-analysisd': [os.path.join(QUEUE_OSSEC_PATH, 'analysis'),
                         os.path.join(QUEUE_OSSEC_PATH, 'queue')],
     'wazuh-authd': [os.path.join(QUEUE_OSSEC_PATH, 'auth')],

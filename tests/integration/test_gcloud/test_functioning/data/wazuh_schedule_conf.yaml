@@ -1,141 +1,141 @@
 ---
 # conf 1
 - tags:
-  - ossec_day_conf
+    - ossec_day_conf
   apply_to_modules:
-  - MODULE_NAME
+    - MODULE_NAME
   sections:
-  - section: gcp-pubsub
-    elements:
-    - project_id:
-        value: 'PROJECT_ID'
-    - subscription_name:
-        value: 'SUBSCRIPTION_NAME'
-    - credentials_file:
-        value: 'CREDENTIALS_FILE'
-    - pull_on_start:
-        value: 'PULL_ON_START'
-    - day:
-        value: 'DAY'
-    - interval:
-        value: 'INTERVAL'
-    - time:
-        value: 'DAY_TIME'
-    - max_messages:
-        value: 'MAX_MESSAGES'
-    - logging:
-        value: 'LOGGING'
+    - section: gcp-pubsub
+      elements:
+        - project_id:
+            value: 'PROJECT_ID'
+        - subscription_name:
+            value: 'SUBSCRIPTION_NAME'
+        - credentials_file:
+            value: 'CREDENTIALS_FILE'
+        - pull_on_start:
+            value: 'PULL_ON_START'
+        - day:
+            value: 'DAY'
+        - interval:
+            value: 'INTERVAL'
+        - time:
+            value: 'DAY_TIME'
+        - max_messages:
+            value: 'MAX_MESSAGES'
+        - logging:
+            value: 'LOGGING'
 # conf 2
 - tags:
-  - ossec_wday_conf
+    - ossec_wday_conf
   apply_to_modules:
-  - MODULE_NAME
+    - MODULE_NAME
   sections:
-  - section: gcp-pubsub
-    elements:
-    - project_id:
-        value: 'PROJECT_ID'
-    - subscription_name:
-        value: 'SUBSCRIPTION_NAME'
-    - credentials_file:
-        value: 'CREDENTIALS_FILE'
-    - pull_on_start:
-        value: 'PULL_ON_START'
-    - wday:
-        value: 'WDAY'
-    - interval:
-        value: 'INTERVAL'
-    - time:
-        value: 'WDAY_TIME'
-    - max_messages:
-        value: 'MAX_MESSAGES'
-    - logging:
-        value: 'LOGGING'
+    - section: gcp-pubsub
+      elements:
+        - project_id:
+            value: 'PROJECT_ID'
+        - subscription_name:
+            value: 'SUBSCRIPTION_NAME'
+        - credentials_file:
+            value: 'CREDENTIALS_FILE'
+        - pull_on_start:
+            value: 'PULL_ON_START'
+        - wday:
+            value: 'WDAY'
+        - interval:
+            value: 'INTERVAL'
+        - time:
+            value: 'WDAY_TIME'
+        - max_messages:
+            value: 'MAX_MESSAGES'
+        - logging:
+            value: 'LOGGING'
 # conf 3
 - tags:
-  - ossec_time_conf
+    - ossec_time_conf
   apply_to_modules:
-  - MODULE_NAME
+    - MODULE_NAME
   sections:
-  - section: gcp-pubsub
-    elements:
-    - project_id:
-        value: 'PROJECT_ID'
-    - subscription_name:
-        value: 'SUBSCRIPTION_NAME'
-    - credentials_file:
-        value: 'CREDENTIALS_FILE'
-    - pull_on_start:
-        value: 'PULL_ON_START'
-    - time:
-        value: 'TIME'
-    - interval:
-        value: 'INTERVAL'
-    - max_messages:
-        value: 'MAX_MESSAGES'
-    - logging:
-        value: 'LOGGING'
+    - section: gcp-pubsub
+      elements:
+        - project_id:
+            value: 'PROJECT_ID'
+        - subscription_name:
+            value: 'SUBSCRIPTION_NAME'
+        - credentials_file:
+            value: 'CREDENTIALS_FILE'
+        - pull_on_start:
+            value: 'PULL_ON_START'
+        - time:
+            value: 'TIME'
+        - interval:
+            value: 'INTERVAL'
+        - max_messages:
+            value: 'MAX_MESSAGES'
+        - logging:
+            value: 'LOGGING'
 # conf 4
 - tags:
-  - ossec_day_multiple_conf
+    - ossec_day_multiple_conf
   apply_to_modules:
-  - MODULE_NAME
+    - MODULE_NAME
   sections:
-  - section: gcp-pubsub
-    elements:
-    - project_id:
-        value: 'PROJECT_ID'
-    - subscription_name:
-        value: 'SUBSCRIPTION_NAME'
-    - credentials_file:
-        value: 'CREDENTIALS_FILE'
-    - day:
-        value: 'DAY'
-    - interval:
-        value: '2M'
-    - max_messages:
-        value: 'MAX_MESSAGES'
-    - logging:
-        value: 'LOGGING'
+    - section: gcp-pubsub
+      elements:
+        - project_id:
+            value: 'PROJECT_ID'
+        - subscription_name:
+            value: 'SUBSCRIPTION_NAME'
+        - credentials_file:
+            value: 'CREDENTIALS_FILE'
+        - day:
+            value: 'DAY'
+        - interval:
+            value: '2M'
+        - max_messages:
+            value: 'MAX_MESSAGES'
+        - logging:
+            value: 'LOGGING'
 # conf 5
 - tags:
-  - ossec_wday_multiple_conf
+    - ossec_wday_multiple_conf
   apply_to_modules:
-  - MODULE_NAME
+    - MODULE_NAME
   sections:
-  - section: gcp-pubsub
-    elements:
-    - project_id:
-        value: 'PROJECT_ID'
-    - subscription_name:
-        value: 'SUBSCRIPTION_NAME'
-    - credentials_file:
-        value: 'CREDENTIALS_FILE'
-    - wday:
-        value: 'WDAY'
-    - interval:
-        value: '3w'
-    - max_messages:
-        value: 'MAX_MESSAGES'
-    - logging:
-        value: 'LOGGING'
+    - section: gcp-pubsub
+      elements:
+        - project_id:
+            value: 'PROJECT_ID'
+        - subscription_name:
+            value: 'SUBSCRIPTION_NAME'
+        - credentials_file:
+            value: 'CREDENTIALS_FILE'
+        - wday:
+            value: 'WDAY'
+        - interval:
+            value: '3w'
+        - max_messages:
+            value: 'MAX_MESSAGES'
+        - logging:
+            value: 'LOGGING'
 # conf 6
 - tags:
-  - ossec_time_multiple_conf
+    - ossec_time_multiple_conf
   apply_to_modules:
-  - MODULE_NAME
+    - MODULE_NAME
   sections:
-  - section: gcp-pubsub
-    elements:
-    - project_id:
-        value: 'PROJECT_ID'
-    - subscription_name:
-        value: 'SUBSCRIPTION_NAME'
-    - credentials_file:
-        value: 'CREDENTIALS_FILE'
-    - max_messages:
-        value: 'MAX_MESSAGES'
-    - interval:
-        value: '4d'
-    - logging:
-        value: 'LOGGING'
+    - section: gcp-pubsub
+      elements:
+        - project_id:
+            value: 'PROJECT_ID'
+        - subscription_name:
+            value: 'SUBSCRIPTION_NAME'
+        - credentials_file:
+            value: 'CREDENTIALS_FILE'
+        - max_messages:
+            value: 'MAX_MESSAGES'
+        - interval:
+            value: '4d'
+        - logging:
+            value: 'LOGGING'

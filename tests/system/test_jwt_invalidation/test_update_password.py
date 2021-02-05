@@ -5,14 +5,12 @@
 import os
 
 import pytest
-
 from wazuh_testing.tools.system import HostManager
 
 test_hosts = ['wazuh-master', 'wazuh-worker1']
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                               'provisioning', 'agentless_cluster', 'inventory.yml')
 default_api_conf = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'api_configurations', 'default.yaml')
-
 
 # Testing credentials
 test_user = None
@@ -30,7 +28,8 @@ host_manager = HostManager(inventory_path)
     ({"auth_context": {"username": "testing"}}, 'wazuh-master', 'Newpass2*', 'Newpass1*'),
     ({"auth_context": {"username": "testing"}}, 'wazuh-worker1', 'Newpass1*', 'Newpass2*')
 ])
-def test_update_password(login_endpoint, host, old_password, new_password, set_default_api_conf, create_testing_api_user,
+def test_update_password(login_endpoint, host, old_password, new_password, set_default_api_conf,
+                         create_testing_api_user,
                          create_security_resources):
     """Test that the obtained token is invalid after updating the password from its user.
 

@@ -4,23 +4,21 @@
 
 import argparse
 import os
+import platform
 import re
 import sys
 import time
 from datetime import timedelta
-import platform
 
 from wazuh_testing import logger
 from wazuh_testing.fim import KEY_WOW64_64KEY, create_registry, delete_registry, registry_parser, \
     modify_registry_value, modify_key_perms, modify_registry_owner
 from wazuh_testing.tools import WAZUH_CONF
 from wazuh_testing.tools.configuration import generate_syscheck_registry_config
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.time import TimeMachine
-
-from win32con import KEY_ALL_ACCESS, REG_SZ
 from win32api import RegOpenKeyEx
+from win32con import KEY_ALL_ACCESS, REG_SZ
 from win32security import LookupAccountName
 
 n_windows_registry = 0

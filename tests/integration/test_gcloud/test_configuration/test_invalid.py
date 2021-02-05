@@ -4,14 +4,14 @@
 
 import os
 import sys
-import pytest
 
+import pytest
 from wazuh_testing import global_parameters
+from wazuh_testing.fim import generate_params
 from wazuh_testing.gcloud import callback_detect_schedule_validate_parameters_err, callback_detect_gcp_read_err, \
     callback_detect_gcp_wmodule_err, callback_detect_schedule_read_err
-from wazuh_testing.fim import generate_params
 from wazuh_testing.tools import LOG_FILE_PATH
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 

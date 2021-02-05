@@ -4,17 +4,16 @@
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
-import re
 import uuid
 from datetime import datetime
 
 import pytest
 from numpydoc.docscrape import FunctionDoc
 from py.xml import html
-
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, WAZUH_SERVICE, ALERT_FILE_PATH
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
@@ -227,6 +226,7 @@ def pytest_configure(config):
 
     # Set WPK package version
     global_parameters.wpk_version = config.getoption("--wpk_version")
+
 
 def pytest_html_results_table_header(cells):
     cells.insert(4, html.th('Tier', class_='sortable tier', col='tier'))
