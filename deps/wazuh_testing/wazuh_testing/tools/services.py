@@ -9,7 +9,8 @@ import time
 from subprocess import check_call
 
 import psutil
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_SERVICE, WAZUH_SOCKETS, QUEUE_DB_PATH, WAZUH_OPTIONAL_SOCKETS
+
+from wazuh_testing.tools import WAZUH_PATH, get_service, WAZUH_SOCKETS, QUEUE_DB_PATH, WAZUH_OPTIONAL_SOCKETS
 from wazuh_testing.tools.configuration import write_wazuh_conf
 
 
@@ -113,7 +114,7 @@ def control_service(action, daemon=None, debug_mode=False):
             if sys.platform == 'darwin' or sys.platform == 'sunos5':
                 result = subprocess.run([f'{WAZUH_PATH}/bin/wazuh-control', action]).returncode
             else:
-                result = subprocess.run(['service', WAZUH_SERVICE, action]).returncode
+                result = subprocess.run(['service', get_service(), action]).returncode
             action == 'stop' and delete_sockets()
         else:
             if action == 'restart':
@@ -199,8 +200,8 @@ def check_daemon_status(daemon=None, running=True, timeout=10, extra_sockets=Non
         extra_sockets = []
     for _ in range(3):
         # Check specified daemon/s status
-        daemon_status = subprocess.run(['service', WAZUH_SERVICE, 'status'], stdout=subprocess.PIPE).stdout.decode()
-        if f"{daemon if daemon is not None else ''} {'not' if running is True else 'is'} running" not in daemon_status:
+        daemon_status = subprocess.run(['service', get_service(), 'status'], stdout=subprocess.PIPE).stdout.decode()
+        if f"{daemon if daemon is not None else ''} {'not' if running else 'is'} running" not in daemon_status:
             # Construct set of socket paths to check
             if daemon is None:
                 socket_set = {path for array in WAZUH_SOCKETS.values() for path in array}
@@ -217,10 +218,10 @@ def check_daemon_status(daemon=None, running=True, timeout=10, extra_sockets=Non
                 # Finish main for loop if both daemon and socket checks are ok
                 break
 
-        time.sleep(timeout / 3)
+        time.sleep(timeout/3)
     else:
         raise TimeoutError(f"{'wazuh-service' if daemon is None else daemon} "
-                           f"{'is not' if running is True else 'is'} running")
+                           f"{'is not' if running else 'is'} running")
 
 
 def delete_dbs():

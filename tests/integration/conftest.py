@@ -15,7 +15,7 @@ import pytest
 from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, WAZUH_SERVICE, ALERT_FILE_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
@@ -40,7 +40,7 @@ def pytest_runtest_setup(item):
     if supported_platforms and plat not in supported_platforms:
         pytest.skip("Cannot run on platform {}".format(plat))
 
-    host_type = 'agent' if 'agent' in WAZUH_SERVICE else 'server'
+    host_type = 'agent' if 'agent' in get_service() else 'server'
     supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())
     if supported_types and host_type not in supported_types:
         pytest.skip("Cannot run on wazuh {}".format(host_type))
