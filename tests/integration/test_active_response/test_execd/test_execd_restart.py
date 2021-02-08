@@ -60,7 +60,7 @@ params = [
     } for _ in range(len(test_metadata))
 ]
 
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),'data')
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=test_metadata)
 
@@ -82,11 +82,11 @@ def start_agent(request, get_configuration):
     remoted_simulator = RemotedSimulator(server_address=SERVER_ADDRESS,
                                          remoted_port=1514,
                                          protocol=PROTOCOL,
-                                         mode='CONTROLED_ACK',
+                                         mode='CONTROLLED_ACK',
                                          start_on_init=True,
                                          client_keys=CLIENT_KEYS_PATH)
 
-    remoted_simulator.setActiveResponseMessage(build_message(metadata, metadata['results']))
+    remoted_simulator.set_active_response_message(build_message(metadata, metadata['results']))
 
     # Clean client.keys file
     truncate_file(CLIENT_KEYS_PATH)

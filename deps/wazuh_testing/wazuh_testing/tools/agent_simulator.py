@@ -27,8 +27,7 @@ from time import mktime, localtime, sleep, time
 
 from wazuh_testing.tools.remoted_sim import Cipher
 
-_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..',
-                          'data')
+_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 
 os_list = ["debian7", "debian8", "debian9", "debian10", "ubuntu12.04",
            "ubuntu14.04", "ubuntu16.04", "ubuntu18.04", "mojave"]
@@ -36,10 +35,8 @@ agent_count = 1
 
 
 class Agent:
-    def __init__(self, manager_address, cypher="aes", os=None,
-                 inventory_sample=None, rootcheck_sample=None,
-                 id=None, name=None, key=None, version="v3.12.0",
-                 fim_eps=None, fim_integrity_eps=None,
+    def __init__(self, manager_address, cypher="aes", os=None, inventory_sample=None, rootcheck_sample=None,
+                 id=None, name=None, key=None, version="v3.12.0", fim_eps=None, fim_integrity_eps=None,
                  authd_password=None):
         self.id = id
         self.name = name
@@ -80,34 +77,41 @@ class Agent:
         self.stage_disconnect = None
         self.setup()
 
-    # Set up agent: Keep alive, encryption key and start up msg.
     def setup(self):
+        """
+        Set up agent: Keep alive, encryption key and start up msg.
+        """
         self.set_os()
         if self.id is None and self.name is None and self.key is None:
             self.set_name()
             self.register()
         self.create_encryption_key()
-        self.createKeepAlive()
-        self.createHCStartup()
-        self.initializeModules()
+        self.create_keep_alive()
+        self.create_hc_startup()
+        self.initialize_modules()
 
-    # Pick random OS
     def set_os(self):
+        """
+        Pick random OS
+        """
         if self.os is None:
             self.os = os_list[agent_count % len(os_list) - 1]
 
-    # Set variables related to wpk simulated responses
-    def set_wpk_variables(self, sha=None, upgrade_exec_result=None,
-                          upgrade_notification=False, upgrade_script_result=0,
+    def set_wpk_variables(self, sha=None, upgrade_exec_result=None, upgrade_notification=False, upgrade_script_result=0,
                           stage_disconnect=None):
+        """
+        Set variables related to wpk simulated responses
+        """
         self.sha_key = sha
         self.upgrade_exec_result = upgrade_exec_result
         self.send_upgrade_notification = upgrade_notification
         self.upgrade_script_result = upgrade_script_result
         self.stage_disconnect = stage_disconnect
 
-    # Set agent name
     def set_name(self):
+        """
+        Set agent name
+        """
         random_string = ''.join(sample('0123456789abcdef' * 2, 8))
         if self.inventory_sample is None:
             self.name = "{}-{}-{}".format(agent_count, random_string, self.os)
@@ -117,8 +121,10 @@ class Agent:
                                              random_string, self.os,
                                              inventory_string)
 
-    # Request agent key
     def register(self):
+        """
+        Request agent key
+        """
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
         context.check_hostname = False
@@ -140,9 +146,11 @@ class Agent:
         sock.close()
         print("Registration - {}({})".format(self.name, self.id))
 
-    # Add the Wazuh custom padding to each event sent
     @staticmethod
     def wazuh_padding(compressed_event):
+        """
+        Add the Wazuh custom padding to each event sent
+        """
         padding = 8
         extra = len(compressed_event) % padding
         if extra > 0:
@@ -151,34 +159,39 @@ class Agent:
             padded_event = (b'!' * padding) + compressed_event
         return padded_event
 
-    # Generate encryption key (using agent metadata and key)
     def create_encryption_key(self):
-        id = self.id.encode()
+        """
+        Generate encryption key (using agent metadata and key)
+        """
+        agent_id = self.id.encode()
         name = self.name.encode()
         key = self.key.encode()
         sum1 = (hashlib.md5((hashlib.md5(name).hexdigest().encode()
-                             + hashlib.md5(id).hexdigest().encode())).hexdigest().encode())
+                             + hashlib.md5(agent_id).hexdigest().encode())).hexdigest().encode())
         sum1 = sum1[:15]
         sum2 = hashlib.md5(key).hexdigest().encode()
         key = sum2 + sum1
         self.encryption_key = key
 
-    # Compose event from raw message
     @staticmethod
     def compose_event(message):
+        """
+        Compose event from raw message
+        """
         message = message.encode()
         random_number = b'55555'
         global_counter = b'1234567891'
         split = b':'
         local_counter = b'5555'
-        msg = random_number + global_counter + split + local_counter \
-              + split + message
+        msg = random_number + global_counter + split + local_counter + split + message
         msg_md5 = hashlib.md5(msg).hexdigest()
         event = msg_md5.encode() + msg
         return event
 
-    # Encrypt event AES or Blowfish
     def encrypt(self, padded_event):
+        """
+        Encrypt event AES or Blowfish
+        """
         encrypted_event = None
         if self.cypher == "aes":
             encrypted_event = Cipher(padded_event,
@@ -188,17 +201,17 @@ class Agent:
                                      self.encryption_key).encrypt_blowfish()
         return encrypted_event
 
-    # Add event headers for AES or Blowfish Cyphers
-    def headers(self, agentid, encrypted_event):
-        headers_event = None
+    def headers(self, agent_id, encrypted_event):
+        """
+        Add event headers for AES or Blowfish Cyphers
+        """
         if self.cypher == "aes":
-            header = "!{0}!#AES:".format(agentid).encode()
+            header = "!{0}!#AES:".format(agent_id).encode()
         if self.cypher == "blowfish":
-            header = "!{0}!:".format(agentid).encode()
-        headers_event = header + encrypted_event
-        return headers_event
+            header = "!{0}!:".format(agent_id).encode()
+        return header + encrypted_event
 
-    def createEvent(self, message):
+    def create_event(self, message):
         # Compose event
         event = self.compose_event(message)
         # Compress
@@ -211,9 +224,8 @@ class Agent:
         headers_event = self.headers(self.id, encrypted_event)
         return headers_event
 
-    def receiveMessage(self, sender):
+    def receive_message(self, sender):
         while self.stop_receive == 0:
-            buffer_array = None
             if sender.protocol == 'tcp':
                 rcv = sender.socket.recv(4)
                 if len(rcv) == 4:
@@ -235,35 +247,34 @@ class Agent:
                 index = buffer_array[1:].find(b'!')
                 buffer_array = buffer_array[index + 2:]
             if self.cypher == "aes":
-                msg_removeheader = bytes(buffer_array[5:])
-                msg_decrypted = Cipher(msg_removeheader, self.encryption_key) \
+                msg_remove_header = bytes(buffer_array[5:])
+                msg_decrypted = Cipher(msg_remove_header, self.encryption_key) \
                     .decrypt_aes()
             else:
-                msg_removeheader = bytes(buffer_array[1:])
-                msg_decrypted = Cipher(msg_removeheader, self.encryption_key) \
+                msg_remove_header = bytes(buffer_array[1:])
+                msg_decrypted = Cipher(msg_remove_header, self.encryption_key) \
                     .decrypt_blowfish()
 
             padding = 0
-            while (msg_decrypted):
+            while msg_decrypted:
                 if msg_decrypted[padding] == 33:
                     padding += 1
                 else:
                     break
-            msg_removepadding = msg_decrypted[padding:]
-            msg_decompress = zlib.decompress(msg_removepadding)
+            msg_remove_padding = msg_decrypted[padding:]
+            msg_decompress = zlib.decompress(msg_remove_padding)
             msg_decoded = msg_decompress.decode('ISO-8859-1')
-            self.processMessage(sender, msg_decoded)
+            self.process_message(sender, msg_decoded)
 
     def stop_receiver(self):
         self.stop_receive = 1
 
-    def processMessage(self, sender, message):
+    def process_message(self, sender, message):
         msg_decoded_list = message.split(' ')
         if 'com' in msg_decoded_list or 'upgrade' in msg_decoded_list:
-            self.processCommand(sender, msg_decoded_list)
+            self.process_command(sender, msg_decoded_list)
 
-    def processCommand(self, sender, message_list):
-        command = None
+    def process_command(self, sender, message_list):
         if 'com' in message_list:
             com_index = message_list.index('com')
             command = message_list[com_index + 1]
@@ -287,10 +298,10 @@ class Agent:
                 self.stop_receive = 1
             else:
                 if self.short_version < "4.1" or command == 'lock_restart':
-                    sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} ok '))
+                    sender.send_event(self.create_event(f'#!-req {message_list[1]} ok '))
                 else:
-                    sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} '
-                                                      f'{{"error":0, "message":"ok", "data":[]}} '))
+                    sender.send_event(self.create_event(f'#!-req {message_list[1]} '
+                                                        f'{{"error":0, "message":"ok", "data":[]}} '))
         elif command == 'sha1':
             # !-req num ok {sha}
             if self.sha_key:
@@ -298,25 +309,26 @@ class Agent:
                     self.stop_receive = 1
                 else:
                     if self.short_version < "4.1":
-                        sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} '
-                                                          f'ok {self.sha_key}'))
+                        sender.send_event(self.create_event(f'#!-req {message_list[1]} '
+                                                            f'ok {self.sha_key}'))
                     else:
-                        sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} {{"error":0, '
-                                                          f'"message":"{self.sha_key}", "data":[]}}'))
+                        sender.send_event(self.create_event(f'#!-req {message_list[1]} {{"error":0, '
+                                                            f'"message":"{self.sha_key}", "data":[]}}'))
             else:
                 raise ValueError(f'WPK SHA key should be configured in agent')
+
         elif command == 'upgrade':
             if self.upgrade_exec_result:
                 if command == 'upgrade' and self.stage_disconnect == 'upgrade':
                     self.stop_receive = 1
                 else:
                     if self.short_version < "4.1":
-                        sender.sendEvent(self.createEvent(
+                        sender.send_event(self.create_event(
                             f'#!-req {message_list[1]} ok '
                             f'{self.upgrade_exec_result}'))
                     else:
-                        sender.sendEvent(self.createEvent(f'#!-req {message_list[1]} {{"error":0, '
-                                                          f'"message":"{self.upgrade_exec_result}", "data":[]}}'))
+                        sender.send_event(self.create_event(f'#!-req {message_list[1]} {{"error":0, '
+                                                            f'"message":"{self.upgrade_exec_result}", "data":[]}}'))
                     if self.send_upgrade_notification:
                         message = 'Upgrade was successful' if self.upgrade_script_result == 0 else 'Upgrade failed'
                         status = 'Done' if self.upgrade_script_result == 0 else 'Failed'
@@ -328,8 +340,8 @@ class Agent:
                                 'status': status,
                             }
                         }
-                        sender.sendEvent(self.createEvent("u:upgrade_module:"
-                                                          + json.dumps(
+                        sender.send_event(self.create_event("u:upgrade_module:"
+                                                            + json.dumps(
                             upgrade_update_status_message)))
             else:
                 raise ValueError(f'Execution result should be configured \
@@ -337,11 +349,11 @@ class Agent:
         else:
             raise ValueError(f'Unrecongnized command {command}')
 
-    def createHCStartup(self):
+    def create_hc_startup(self):
         msg = "#!-agent startup "
-        self.startup_msg = self.createEvent(msg)
+        self.startup_msg = self.create_event(msg)
 
-    def createKeepAlive(self):
+    def create_keep_alive(self):
         with open(os.path.join(_data_path, 'keepalives.txt'), 'r') as fp:
             line = fp.readline()
             while line:
@@ -354,9 +366,9 @@ class Agent:
                     break
                 line = fp.readline()
         msg = msg.replace("<VERSION>", self.long_version)
-        self.keep_alive_msg = self.createEvent(msg)
+        self.keep_alive_msg = self.create_event(msg)
 
-    def initializeModules(self):
+    def initialize_modules(self):
         if self.modules["syscollector"]["status"] == "enabled":
             self.inventory = Inventory(self.os, self.inventory_sample)
         if self.modules["rootcheck"]["status"] == "enabled":
@@ -380,19 +392,15 @@ class Inventory:
 
     def setup(self):
         if self.inventory_sample is None:
-            inventory_files = os.listdir("inventory/{}".format(self.os))
-            self.inventory_path = "inventory/{}/{}" \
-                .format(self.os, choice(inventory_files))
+            inventory_files = os.listdir(f"inventory/{self.os}")
+            self.inventory_path = f"inventory/{self.os}/{choice(inventory_files)}"
         else:
-            self.inventory_path = "inventory/{}/{}" \
-                .format(self.os, self.inventory_sample)
+            self.inventory_path = f"inventory/{self.os}/{self.inventory_sample}"
         with open(self.inventory_path) as fp:
             line = fp.readline()
             while line:
                 if not line.startswith("#"):
-                    msg = "{0}:{1}:{2}".format(self.SYSCOLLECTOR_MQ,
-                                               self.SYSCOLLECTOR,
-                                               line.strip("\n"))
+                    msg = "{0}:{1}:{2}".format(self.SYSCOLLECTOR_MQ, self.SYSCOLLECTOR, line.strip("\n"))
                     self.inventory.append(msg)
                 line = fp.readline()
 
@@ -416,9 +424,7 @@ class Rootcheck:
             line = fp.readline()
             while line:
                 if not line.startswith("#"):
-                    msg = "{0}:{1}:{2}".format(self.ROOTCHECK_MQ,
-                                               self.ROOTCHECK,
-                                               line.strip("\n"))
+                    msg = "{0}:{1}:{2}".format(self.ROOTCHECK_MQ, self.ROOTCHECK, line.strip("\n"))
                     self.rootcheck.append(msg)
                 line = fp.readline()
 
@@ -433,22 +439,19 @@ class GeneratorIntegrityFIM:
         self.fim_generator = GeneratorFIM(self.agent_id, self.agent_name,
                                           self.agent_version)
 
-    def formatMessage(self, message):
-        return '{0}:[{1}] ({2}) any->syscheck:{3}'.format(self.INTEGRITY_MQ,
-                                                          self.agent_id,
-                                                          self.agent_name,
-                                                          message)
+    def format_message(self, message):
+        return '{0}:[{1}] ({2}) any->syscheck:{3}'.format(self.INTEGRITY_MQ, self.agent_id, self.agent_name, message)
 
-    def generateMessage(self):
+    def generate_message(self):
         data = None
         if self.event_type == "integrity_check_global" or \
                 self.event_type == "integrity_check_left" or \
                 self.event_type == "integrity_check_right":
             id = int(time())
             data = {"id": id,
-                    "begin": self.fim_generator.randfile(),
-                    "end": self.fim_generator.randfile(),
-                    "checksum": self.fim_generator.randsha1()}
+                    "begin": self.fim_generator.random_file(),
+                    "end": self.fim_generator.random_file(),
+                    "checksum": self.fim_generator.random_sha1()}
 
         if self.event_type == "integrity_clear":
             id = int(time())
@@ -456,18 +459,16 @@ class GeneratorIntegrityFIM:
 
         if self.event_type == "state":
             timestamp = int(time())
-            self.fim_generator.generateAttributes()
-            attributes = self.fim_generator.getAttributes()
+            self.fim_generator.generate_attributes()
+            attributes = self.fim_generator.get_attributes()
             data = {"path": self.fim_generator._file,
                     "timestamp": timestamp,
                     "attributes": attributes}
 
-        message = json.dumps({"component": "syscheck",
-                              "type": self.event_type,
-                              "data": data})
-        return self.formatMessage(message)
+        message = json.dumps({"component": "syscheck", "type": self.event_type, "data": data})
+        return self.format_message(message)
 
-    def getMessage(self, event_type=None):
+    def get_message(self, event_type=None):
         if event_type is not None:
             self.event_type = event_type
         else:
@@ -476,9 +477,8 @@ class GeneratorIntegrityFIM:
                                       "integrity_check_right",
                                       "integrity_clear",
                                       "state"])
-            # self.event_type = choice(["state"])
 
-        return self.generateMessage()
+        return self.generate_message()
 
 
 class GeneratorFIM:
@@ -512,16 +512,15 @@ class GeneratorFIM:
         self.event_mode = None
         self.event_type = None
 
-    def randfile(self):
-        self._file = self.FILE_ROOT + ''.join(sample(ascii_letters + digits,
-                                                     self.DEFAULT_FILE_LENGTH))
+    def random_file(self):
+        self._file = self.FILE_ROOT + ''.join(sample(ascii_letters + digits, self.DEFAULT_FILE_LENGTH))
         return self._file
 
-    def randsize(self):
+    def random_size(self):
         self._size = randint(-1, self.MAX_SIZE)
         return self._size
 
-    def randmode(self):
+    def random_mode(self):
         self._mode = choice((S_IFREG, S_IFLNK))
 
         if self._mode == S_IFLNK:
@@ -534,55 +533,55 @@ class GeneratorFIM:
 
         return self._mode
 
-    def randuid(self):
+    def random_uid(self):
         self._uid = choice(list(self.USERS.keys()))
         self._uname = self.USERS[self._uid]
         return self._uid, self._uname
 
-    def randgid(self):
+    def random_gid(self):
         self._gid = choice(list(self.USERS.keys()))
         self._gname = self.USERS[self._gid]
         return self._gid, self._gname
 
-    def randmd5(self):
+    def random_md5(self):
         if self._mode & S_IFREG == S_IFREG:
             self._md5 = ''.join(sample('0123456789abcdef' * 2, 32))
 
         return self._md5
 
-    def randsha1(self):
+    def random_sha1(self):
         if self._mode & S_IFREG == S_IFREG:
             self._sha1 = ''.join(sample('0123456789abcdef' * 3, 40))
 
         return self._sha1
 
-    def randsha256(self):
+    def random_sha256(self):
         if self._mode & S_IFREG == S_IFREG:
             self._sha256 = ''.join(sample('0123456789abcdef' * 4, 64))
 
         return self._sha256
 
-    def randtime(self):
+    def random_time(self):
         self._mdate += randint(1, self.MAX_TIMEDIFF)
         return self._mdate
 
-    def randinode(self):
+    def random_inode(self):
         self._inode = randint(1, self.MAX_INODE)
         return self._inode
 
-    def generateAttributes(self):
-        self.randfile()
-        self.randsize()
-        self.randmode()
-        self.randuid()
-        self.randgid()
-        self.randmd5()
-        self.randsha1()
-        self.randsha256()
-        self.randtime()
-        self.randinode()
+    def generate_attributes(self):
+        self.random_file()
+        self.random_size()
+        self.random_mode()
+        self.random_uid()
+        self.random_gid()
+        self.random_md5()
+        self.random_sha1()
+        self.random_sha256()
+        self.random_time()
+        self.random_inode()
 
-    def checkChangedAttributes(self, attributes, old_attributes):
+    def check_changed_attributes(self, attributes, old_attributes):
         changed_attributes = []
         if attributes["size"] != old_attributes["size"]:
             changed_attributes.append("size")
@@ -609,7 +608,7 @@ class GeneratorFIM:
 
         return changed_attributes
 
-    def getAttributes(self):
+    def get_attributes(self):
         attributes = {
             "type": "file", "size": self._size,
             "perm": self._permissions, "uid": str(self._uid),
@@ -621,7 +620,7 @@ class GeneratorFIM:
         }
         return attributes
 
-    def formatMessage(self, message):
+    def format_message(self, message):
         if self.agent_version >= "3.12":
             return '{0}:[{1}] ({2}) any->syscheck:{3}' \
                 .format(self.SYSCHECK_MQ, self.agent_id,
@@ -640,19 +639,19 @@ class GeneratorFIM:
         if self.agent_version >= "3.12":
             if self.event_type == "added":
                 timestamp = int(time())
-                self.generateAttributes()
-                attributes = self.getAttributes()
+                self.generate_attributes()
+                attributes = self.get_attributes()
                 data = {"path": self._file, "mode": self.event_mode,
                         "type": self.event_type, "timestamp": timestamp,
                         "attributes": attributes}
             elif self.event_type == "modified":
                 timestamp = int(time())
-                self.generateAttributes()
-                attributes = self.getAttributes()
-                self.generateAttributes()
-                old_attributes = self.getAttributes()
+                self.generate_attributes()
+                attributes = self.get_attributes()
+                self.generate_attributes()
+                old_attributes = self.get_attributes()
                 changed_attributes = \
-                    self.checkChangedAttributes(attributes, old_attributes)
+                    self.check_changed_attributes(attributes, old_attributes)
                 data = {"path": self._file, "mode": self.event_mode,
                         "type": self.event_type, "timestamp": timestamp,
                         "attributes": attributes,
@@ -660,8 +659,8 @@ class GeneratorFIM:
                         "changed_attributes": changed_attributes}
             else:
                 timestamp = int(time())
-                self.generateAttributes()
-                attributes = self.getAttributes()
+                self.generate_attributes()
+                attributes = self.get_attributes()
                 data = {"path": self._file, "mode": self.event_mode,
                         "type": self.event_type, "timestamp": timestamp,
                         "attributes": attributes}
@@ -669,15 +668,15 @@ class GeneratorFIM:
             message = json.dumps({"type": "event", "data": data})
 
         else:
-            self.generateAttributes()
+            self.generate_attributes()
             message = '{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8}:{9} {10}'.format(
                 self._size, self._mode, self._uid, self._gid, self._md5,
                 self._sha1, self._uname, self._gname, self._mdate,
                 self._inode, self._file)
 
-        return self.formatMessage(message)
+        return self.format_message(message)
 
-    def getMessage(self, event_mode=None, event_type=None):
+    def get_message(self, event_mode=None, event_type=None):
         if event_mode is not None:
             self.event_mode = event_mode
         else:
@@ -702,13 +701,10 @@ class Sender:
         if self.protocol == "udp":
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    def sendEvent(self, event):
+    def send_event(self, event):
         if self.protocol == "tcp":
             length = pack('<I', len(event))
             self.socket.send(length + event)
-            # return(self.socket.recv(2048))
-            # self.socket.close() # Not closing.
-            # It will close the socket on Ctrl+C.
         if self.protocol == "udp":
             self.socket.sendto(event, (self.manager_address,
                                        int(self.manager_port)))
@@ -722,12 +718,8 @@ class Injector:
         self.threads = []
         for module, config in self.agent.modules.items():
             if config["status"] == "enabled":
-                self.threads.append(InjectorThread(self.thread_number,
-                                                   "Thread-"
-                                                   + str(self.agent.id)
-                                                   + str(module),
-                                                   self.sender,
-                                                   self.agent, module))
+                self.threads.append(InjectorThread(self.thread_number, "Thread-" + str(self.agent.id) + str(module),
+                                                   self.sender, self.agent, module))
                 self.thread_number += 1
 
     def run(self):
@@ -753,101 +745,79 @@ class InjectorThread(threading.Thread):
         self.module = module
         self.stop_thread = 0
 
-    def keepalive(self):
+    def keep_alive(self):
         sleep(10)
         print("Startup - {}({})".format(self.agent.name, self.agent.id))
-        self.sender.sendEvent(self.agent.startup_msg)
-        self.sender.sendEvent(self.agent.keep_alive_msg)
-        starttime = time()
+        self.sender.send_event(self.agent.startup_msg)
+        self.sender.send_event(self.agent.keep_alive_msg)
+        start_time = time()
         while self.stop_thread == 0:
             # Send agent keep alive
             print("KeepAlive - {}({})".format(self.agent.name, self.agent.id))
-            self.sender.sendEvent(self.agent.keep_alive_msg)
+            self.sender.send_event(self.agent.keep_alive_msg)
             sleep(self.agent.modules["keepalive"]["frequency"] -
-                  ((time() - starttime) %
+                  ((time() - start_time) %
                    self.agent.modules["keepalive"]["frequency"]))
 
     def fim(self):
         sleep(10)
-        starttime = time()
+        start_time = time()
         # Loop events
         while self.stop_thread == 0:
-            # event = self.agent.createEvent(
-            #  self.agent.fim.getMessage(event_type="added"))
-            event = self.agent.createEvent(self.agent.fim.getMessage())
-            self.sender.sendEvent(event)
+            event = self.agent.create_event(self.agent.fim.get_message())
+            self.sender.send_event(event)
             self.totalMessages += 1
             if self.totalMessages % self.agent.modules["fim"]["eps"] == 0:
-                sleep(1.0 - ((time() - starttime) % 1.0))
+                sleep(1.0 - ((time() - start_time) % 1.0))
 
     def fim_integrity(self):
         sleep(10)
-        starttime = time()
+        start_time = time()
         # Loop events
         while self.stop_thread == 0:
-            event = \
-                self.agent.createEvent(self.agent.fim_integrity.getMessage())
-            self.sender.sendEvent(event)
+            event = self.agent.create_event(self.agent.fim_integrity.get_message())
+            self.sender.send_event(event)
             self.totalMessages += 1
-            if self.totalMessages % \
-                    self.agent.modules["fim_integrity"]["eps"] \
-                    == 0:
-                sleep(1.0 - ((time() - starttime) % 1.0))
+            if self.totalMessages % self.agent.modules["fim_integrity"]["eps"] == 0:
+                sleep(1.0 - ((time() - start_time) % 1.0))
 
     def inventory(self):
         sleep(10)
-        starttime = time()
+        start_time = time()
         while self.stop_thread == 0:
             # Send agent inventory scan
-            print("Scan started - {}({}) - {}({})"
-                  .format(self.agent.name,
-                          self.agent.id,
-                          "syscollector",
-                          self.agent.inventory.inventory_path))
+            print("Scan started - {}({}) - {}({})".format(self.agent.name, self.agent.id, "syscollector",
+                                                          self.agent.inventory.inventory_path))
             scan_id = int(time())  # Random start scan ID
             for item in self.agent.inventory.inventory:
-                event = self.agent.createEvent(item.replace("<scan_id>",
-                                                            str(scan_id)))
-                self.sender.sendEvent(event)
+                event = self.agent.create_event(item.replace("<scan_id>", str(scan_id)))
+                self.sender.send_event(event)
                 self.totalMessages += 1
-                if self.totalMessages % \
-                        self.agent.modules["syscollector"]["eps"] == 0:
+                if self.totalMessages % self.agent.modules["syscollector"]["eps"] == 0:
                     self.totalMessages = 0
-                    sleep(1.0 - ((time() - starttime) % 1.0))
-            print("Scan ended - {}({}) - {}({})"
-                  .format(self.agent.name,
-                          self.agent.id,
-                          "syscollector",
-                          self.agent.inventory.inventory_path))
-            sleep(self.agent.modules["syscollector"]["frequency"]
-                  - ((time() - starttime)
-                     % self.agent.modules["syscollector"]["frequency"]))
+                    sleep(1.0 - ((time() - start_time) % 1.0))
+            print("Scan ended - {}({}) - {}({})".format(self.agent.name, self.agent.id, "syscollector",
+                                                        self.agent.inventory.inventory_path))
+            sleep(self.agent.modules["syscollector"]["frequency"] - ((time() - start_time)
+                                                                     % self.agent.modules["syscollector"]["frequency"]))
 
     def rootcheck(self):
         sleep(10)
-        starttime = time()
+        start_time = time()
         while self.stop_thread == 0:
             # Send agent rootcheck scan
-            print("Scan started - {}({}) - {}({})"
-                  .format(self.agent.name,
-                          self.agent.id,
-                          "rootcheck",
-                          self.agent.rootcheck.rootcheck_path))
+            print("Scan started - {}({}) - {}({})".format(self.agent.name, self.agent.id, "rootcheck",
+                                                          self.agent.rootcheck.rootcheck_path))
             for item in self.agent.rootcheck.rootcheck:
-                self.sender.sendEvent(self.agent.createEvent(item))
+                self.sender.send_event(self.agent.create_event(item))
                 self.totalMessages += 1
-                if self.totalMessages % \
-                        self.agent.modules["rootcheck"]["eps"] == 0:
+                if self.totalMessages % self.agent.modules["rootcheck"]["eps"] == 0:
                     self.totalMessages = 0
-                    sleep(1.0 - ((time() - starttime) % 1.0))
-            print("Scan ended - {}({}) - {}({})"
-                  .format(self.agent.name,
-                          self.agent.id,
-                          "rootcheck",
-                          self.agent.rootcheck.rootcheck_path))
-            sleep(self.agent.modules["rootcheck"]["frequency"]
-                  - ((time() - starttime)
-                     % self.agent.modules["rootcheck"]["frequency"]))
+                    sleep(1.0 - ((time() - start_time) % 1.0))
+            print("Scan ended - {}({}) - {}({})".format(self.agent.name, self.agent.id, "rootcheck",
+                                                        self.agent.rootcheck.rootcheck_path))
+            sleep(self.agent.modules["rootcheck"]["frequency"] - ((time() - start_time)
+                                                                  % self.agent.modules["rootcheck"]["frequency"]))
 
     def run(self):
         # message = "1:/var/log/syslog:Jan 29 10:03:41 master sshd[19635]:
@@ -857,7 +827,7 @@ class InjectorThread(threading.Thread):
               .format(self.agent.name, self.agent.id,
                       self.agent.os, self.module))
         if self.module == "keepalive":
-            self.keepalive()
+            self.keep_alive()
         elif self.module == "fim":
             self.fim()
         elif self.module == "syscollector":
@@ -867,7 +837,7 @@ class InjectorThread(threading.Thread):
         elif self.module == "fim_integrity":
             self.fim_integrity()
         elif self.module == "receive_messages":
-            self.agent.receiveMessage(self.sender)
+            self.agent.receive_message(self.sender)
         else:
             print("Module unknown: {}".format(self.module))
             pass
@@ -879,8 +849,7 @@ class InjectorThread(threading.Thread):
             self.stop_thread = 1
 
 
-def create_agents(agents_number, manager_address, cypher, fim_eps=None,
-                  authd_password=None, os=None, version=None):
+def create_agents(agents_number, manager_address, cypher, fim_eps=None, authd_password=None, os=None, version=None):
     global agent_count
     # Read client.keys and create virtual agents
     agents = []

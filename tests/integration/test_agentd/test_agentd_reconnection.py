@@ -171,7 +171,7 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_a
                                                  configure_environment, get_configuration):
     global remoted_server
 
-    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK',
+    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLLED_ACK',
                                       client_keys=CLIENT_KEYS_PATH)
 
     # Stop target Agent
@@ -208,7 +208,7 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_a
         raise AssertionError("Agent never enrolled after rejecting connection!")
 
     # Start responding to Agent
-    remoted_server.set_mode('CONTROLED_ACK')
+    remoted_server.set_mode('CONTROLLED_ACK')
     # Wait until Agent is notifing Manager
     try:
         log_monitor.start(timeout=120, callback=wait_notify)
@@ -229,7 +229,7 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, star
                                                     configure_environment, get_configuration):
     global remoted_server
 
-    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK',
+    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLLED_ACK',
                                       client_keys=CLIENT_KEYS_PATH)
 
     # Stop target Agent
@@ -269,7 +269,7 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, star
         raise AssertionError("Agent never enrolled after rejecting connection!")
 
     # Start responding to Agent
-    remoted_server.set_mode('CONTROLED_ACK')
+    remoted_server.set_mode('CONTROLLED_ACK')
     # Wait until Agent is notifing Manager
     try:
         log_monitor.start(timeout=120, callback=wait_notify)
@@ -290,7 +290,7 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, start_aut
                                                configure_environment, get_configuration):
     global remoted_server
 
-    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK',
+    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLLED_ACK',
                                       client_keys=CLIENT_KEYS_PATH)
 
     # Stop target Agent
@@ -330,7 +330,7 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, start_aut
         raise AssertionError("Agent never enrolled after rejecting connection!")
 
     # Start responding to Agent
-    remoted_server.set_mode('CONTROLED_ACK')
+    remoted_server.set_mode('CONTROLLED_ACK')
     # Wait until Agent is notifing Manager
     try:
         log_monitor.start(timeout=120, callback=wait_notify)
@@ -351,7 +351,7 @@ def test_agentd_initial_enrollment_retries(configure_authd_server, stop_authd, s
                                            configure_environment, get_configuration):
     global remoted_server
 
-    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLED_ACK',
+    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLLED_ACK',
                                       client_keys=CLIENT_KEYS_PATH)
 
     # Stop target Agent
@@ -429,7 +429,7 @@ def test_agentd_connection_retries_pre_enrollment(configure_authd_server, stop_a
 
     # Simulate time of Remoted to synchronize keys by waiting previous to start responding
     sleep(REMOTED_KEYS_SYNC_TIME)
-    remoted_server.set_mode('CONTROLED_ACK')
+    remoted_server.set_mode('CONTROLLED_ACK')
 
     # Check Agentd is finally comunicating
     try:

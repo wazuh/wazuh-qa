@@ -2,28 +2,24 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import hashlib
+import json
 import os
 import platform
-import pytest
-import time
-import requests
 import subprocess
-import yaml
-import json
-import socket
+import time
+from subprocess import Popen, PIPE
 
+import pytest
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.authd_sim import AuthdSimulator
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
-from conftest import AR_LOG_FILE_PATH, set_ar_conf_mode, set_debug_mode, \
-    wait_received_message_line, wait_start_message_line, \
-    wait_ended_message_line, test_version, start_log_monitoring
-from subprocess import Popen, PIPE, STDOUT
+from wazuh_testing.tools.services import control_service
+
+from conftest import AR_LOG_FILE_PATH, wait_received_message_line, wait_start_message_line, \
+    wait_ended_message_line, start_log_monitoring
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
 
@@ -62,7 +58,7 @@ params = [
     } for _ in range(len(test_metadata))
 ]
 
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),'data')
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=test_metadata)
 
@@ -84,11 +80,11 @@ def start_agent(request, get_configuration):
     remoted_simulator = RemotedSimulator(server_address=SERVER_ADDRESS,
                                          remoted_port=1514,
                                          protocol=PROTOCOL,
-                                         mode='CONTROLED_ACK',
+                                         mode='CONTROLLED_ACK',
                                          start_on_init=True,
                                          client_keys=CLIENT_KEYS_PATH)
 
-    remoted_simulator.setActiveResponseMessage(build_message(metadata, metadata['results']))
+    remoted_simulator.set_active_response_message(build_message(metadata, metadata['results']))
 
     # Clean client.keys file
     truncate_file(CLIENT_KEYS_PATH)
@@ -97,7 +93,7 @@ def start_agent(request, get_configuration):
     control_service('stop')
     agent_auth_pat = 'bin' if platform.system() == 'Linux' else ''
     subprocess.call([f'{WAZUH_PATH}/{agent_auth_pat}/agent-auth', '-m',
-                    SERVER_ADDRESS])
+                     SERVER_ADDRESS])
     control_service('start')
 
     yield
@@ -183,7 +179,8 @@ def build_message(metadata, expected):
            '},"data":{"dstuser":"Test.","srcip":"' + metadata['ip'] + '"}}}}'
 
 
-def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, configure_environment, remove_ip_from_iptables, start_agent, set_ar_conf_mode):
+def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, configure_environment,
+                             remove_ip_from_iptables, start_agent, set_ar_conf_mode):
     """
     Check if firewall-drop Active Response is executed correctly
     """

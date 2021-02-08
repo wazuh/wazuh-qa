@@ -70,7 +70,7 @@ metadata = [
         'SIMULATOR_MODES': {
             0: ['REJECT', 'REJECT'],
             1: ['REJECT', 'REJECT'],
-            2: ['CONTROLED_ACK', 'CONTROLED_ACK'],
+            2: ['CONTROLLED_ACK', 'CONTROLLED_ACK'],
             'AUTHD': ['ACCEPT', 'REJECT'],
         },
         'LOG_MONITOR_STR': [
@@ -96,9 +96,9 @@ metadata = [
         'CLEAN_KEYS': True,
         'SIMULATOR_NUMBER': 3,
         'SIMULATOR_MODES': {
-            0: ['CONTROLED_ACK', 'CLOSE'],
-            1: ['CONTROLED_ACK', 'CONTROLED_ACK'],
-            2: ['CONTROLED_ACK', 'CONTROLED_ACK'],
+            0: ['CONTROLLED_ACK', 'CLOSE'],
+            1: ['CONTROLLED_ACK', 'CONTROLLED_ACK'],
+            2: ['CONTROLLED_ACK', 'CONTROLLED_ACK'],
             'AUTHD': ['ACCEPT', 'REJECT'],
         },
         'LOG_MONITOR_STR': [
@@ -125,9 +125,9 @@ metadata = [
         'CLEAN_KEYS': True,
         'SIMULATOR_NUMBER': 3,
         'SIMULATOR_MODES': {
-            0: ['CONTROLED_ACK', 'REJECT'],
-            1: ['CONTROLED_ACK', 'CONTROLED_ACK'],
-            2: ['CONTROLED_ACK', 'CONTROLED_ACK'],
+            0: ['CONTROLLED_ACK', 'REJECT'],
+            1: ['CONTROLLED_ACK', 'CONTROLLED_ACK'],
+            2: ['CONTROLLED_ACK', 'CONTROLLED_ACK'],
             'AUTHD': ['ACCEPT', 'REJECT'],
         },
         'LOG_MONITOR_STR': [
@@ -156,7 +156,7 @@ metadata = [
         'SIMULATOR_MODES': {
             0: ['CLOSE', 'CLOSE', 'CLOSE'],
             1: ['CLOSE', 'CLOSE', 'CLOSE'],
-            2: ['CONTROLED_ACK', 'CONTROLED_ACK', 'CONTROLED_ACK'],
+            2: ['CONTROLLED_ACK', 'CONTROLLED_ACK', 'CONTROLLED_ACK'],
             'AUTHD': ['REJECT', 'REJECT', 'ACCEPT'],
         },
         'LOG_MONITOR_STR': [
@@ -181,7 +181,7 @@ metadata = [
         'CLEAN_KEYS': False,
         'SIMULATOR_NUMBER': 3,
         'SIMULATOR_MODES': {
-            0: ['CONTROLED_ACK', 'CLOSE', 'CONTROLED_ACK'],
+            0: ['CONTROLLED_ACK', 'CLOSE', 'CONTROLLED_ACK'],
             1: ['CLOSE', 'CLOSE', 'CLOSE'],
             2: ['CLOSE', 'CLOSE', 'CLOSE'],
             'AUTHD': ['ACCEPT', 'ACCEPT', 'ACCEPT'],
@@ -268,7 +268,7 @@ def configure_authd_server(request, get_configuration):
     for i in range(0, get_configuration['metadata']['SIMULATOR_NUMBER']):
         remoted_servers.append(RemotedSimulator(server_address=SERVER_ADDRESS, remoted_port=REMOTED_PORTS[i],
                                                 protocol=get_configuration['metadata']['PROTOCOL'],
-                                                mode='CONTROLED_ACK', client_keys=CLIENT_KEYS_PATH))
+                                                mode='CONTROLLED_ACK', client_keys=CLIENT_KEYS_PATH))
         # Set simulator mode for that stage
         if get_configuration['metadata']['SIMULATOR_MODES'][i][0] != 'CLOSE':
             remoted_servers[i].set_mode(get_configuration['metadata']['SIMULATOR_MODES'][i][0])
