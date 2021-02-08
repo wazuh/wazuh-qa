@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -48,7 +48,7 @@ def test_max_files_per_second(get_configuration, configure_environment, restart_
     """
     Check that FIM sleeps for one second when the option max_files_per_second is enabled
     """
-    # Create the files in an empty folder to get check realtime and whodata modes
+    # Create the files in an empty folder to check realtime and whodata.
     for i in range(n_files_to_create):
         create_file(REGULAR, test_directories[0], f'test_{i}', content='')
 
@@ -57,8 +57,8 @@ def test_max_files_per_second(get_configuration, configure_environment, restart_
     try:
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 2,
                                 callback=callback_detect_max_files_per_second)
-    except TimeoutError:
+    except TimeoutError as e:
         if get_configuration['metadata']['max_files_per_sec'] == 0:
             pass
         else:
-            raise TimeoutError
+            raise e
