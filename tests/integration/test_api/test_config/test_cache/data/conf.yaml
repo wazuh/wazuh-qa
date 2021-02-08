@@ -1,12 +1,12 @@
 ---
 - tags:
-    - cache_enabled
+  - cache_enabled
   configuration:
     cache:
       enabled: yes
       time: 10
 - tags:
-    - cache_disabled
+  - cache_disabled
   configuration:
     cache:
       enabled: no

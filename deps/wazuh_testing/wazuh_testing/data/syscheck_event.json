@@ -30,18 +30,12 @@
       ],
       "if": {
         "properties": {
-          "mode": {
-            "const": "whodata"
-          }
+           "mode": {"const": "whodata"}
         },
-        "required": [
-          "mode"
-        ]
+        "required": ["mode"]
       },
       "then": {
-        "required": [
-          "audit"
-        ]
+        "required": ["audit"]
       },
       "properties": {
         "path": {
@@ -56,11 +50,7 @@
         "mode": {
           "$id": "#/properties/data/properties/mode",
           "type": "string",
-          "enum": [
-            "realtime",
-            "whodata",
-            "scheduled"
-          ],
+          "enum": ["realtime", "whodata", "scheduled"],
           "examples": [
             "whodata"
           ],
@@ -69,11 +59,7 @@
         "type": {
           "$id": "#/properties/data/properties/type",
           "type": "string",
-          "enum": [
-            "added",
-            "modified",
-            "deleted"
-          ],
+          "enum": ["added", "modified", "deleted"],
           "examples": [
             "added"
           ],
@@ -113,10 +99,7 @@
             "type": {
               "$id": "#/properties/data/properties/attributes/properties/type",
               "type": "string",
-              "enum": [
-                "file",
-                "registry"
-              ],
+              "enum": ["file", "registry"],
               "examples": [
                 "file"
               ],
@@ -249,7 +232,7 @@
               "user_name",
               "group_name",
               "inode"
-            ],
+              ],
             "examples": [
               "size",
               "mtime",
@@ -268,14 +251,10 @@
           }
         },
         "old_attributes": {
-          "required": [
-            "type"
-          ],
+          "required": ["type"],
           "allOf": [
-            {
-              "$ref": "#/properties/data/properties/attributes"
-            }
-          ]
+              {"$ref": "#/properties/data/properties/attributes"}
+            ]
         },
         "audit": {
           "$id": "#/properties/data/properties/audit",

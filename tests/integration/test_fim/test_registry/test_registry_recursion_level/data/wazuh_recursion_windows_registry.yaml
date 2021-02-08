@@ -1,29 +1,29 @@
 ---
 # Configuration for recursion level
 - apply_to_modules:
-    - test_recursion_level_registry
+  - test_recursion_level_registry
   sections:
-    - section: syscheck
-      elements:
-        - disabled:
-            value: 'no'
-        - windows_registry:
-            value: REGISTRY_0
-            attributes:
-              - recursion_level: LEVEL_0
-              - arch: '64bit'
-        - windows_registry:
-            value: REGISTRY_1
-            attributes:
-              - recursion_level: LEVEL_1
-              - arch: '64bit'
-        - windows_registry:
-            value: REGISTRY_2
-            attributes:
-              - recursion_level: LEVEL_2
-              - arch: '64bit'
-        - windows_registry:
-            value: REGISTRY_3
-            attributes:
-              - recursion_level: LEVEL_3
-              - arch: '64bit'
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - windows_registry:
+        value: REGISTRY_0
+        attributes:
+        - recursion_level: LEVEL_0
+        - arch: '64bit'
+    - windows_registry:
+        value: REGISTRY_1
+        attributes:
+        - recursion_level: LEVEL_1
+        - arch: '64bit'
+    - windows_registry:
+        value: REGISTRY_2
+        attributes:
+        - recursion_level: LEVEL_2
+        - arch: '64bit'
+    - windows_registry:
+        value: REGISTRY_3
+        attributes:
+        - recursion_level: LEVEL_3
+        - arch: '64bit'

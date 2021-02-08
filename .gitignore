@@ -3,6 +3,7 @@ __pycache__
 
 # Python bytecode files
 *.pyc
+.idea
 
 ### macOS ###
 # General

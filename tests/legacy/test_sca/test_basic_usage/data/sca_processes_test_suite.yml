@@ -18,32 +18,32 @@ policy:
 # Total checks = 5
 
 checks:
-  - id: 400100
-    title: PASS -- Look for systemd
-    condition: any
-    rules:
-      - p:systemd
+ - id: 400100
+   title: PASS -- Look for systemd
+   condition: any
+   rules:
+     - p:systemd
 
-  - id: 400101
-    title: FAIL -- Negate look for systemd
-    condition: any
-    rules:
-      - not p:systemd
+ - id: 400101
+   title: FAIL -- Negate look for systemd
+   condition: any
+   rules:
+     - not p:systemd
 
-  - id: 400102
-    title: FAIL -- Look for systemd_FAKE
-    condition: any
-    rules:
-      - p:systemd_FAKE
+ - id: 400102
+   title: FAIL -- Look for systemd_FAKE
+   condition: any
+   rules:
+     - p:systemd_FAKE
 
-  - id: 400103
-    title: PASS -- Negate look for systemd_FAKE
-    condition: any
-    rules:
-      - not p:systemd_FAKE
+ - id: 400103
+   title: PASS -- Negate look for systemd_FAKE
+   condition: any
+   rules:
+     - not p:systemd_FAKE
 
-  - id: 400104
-    title: PASS -- Look for systemd using regex
-    condition: any
-    rules:
-      - p:r:systemd
+ - id: 400104
+   title: PASS -- Look for systemd using regex
+   condition: any
+   rules:
+     - p:r:systemd
