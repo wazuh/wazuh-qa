@@ -197,15 +197,15 @@ def start_agent(request, get_configuration):
     remoted_simulator = RemotedSimulator(server_address=SERVER_ADDRESS,
                                          remoted_port=1514,
                                          protocol=metadata['protocol'],
-                                         mode='CONTROLED_ACK',
+                                         mode='CONTROLLED_ACK',
                                          start_on_init=False,
                                          client_keys=CLIENT_KEYS_PATH)
 
     ver_split = _agent_version.replace("v", "").split(".")
     if int(ver_split[0]) >= 4 and int(ver_split[1]) >= 1:
-        remoted_simulator.setWcomMessageVersion('4.1')
+        remoted_simulator.set_wcom_message_version('4.1')
     else:
-        remoted_simulator.setWcomMessageVersion(None)
+        remoted_simulator.set_wcom_message_version(None)
 
     # Clean client.keys file
     truncate_file(CLIENT_KEYS_PATH)

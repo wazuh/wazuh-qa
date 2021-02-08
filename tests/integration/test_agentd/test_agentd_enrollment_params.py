@@ -184,7 +184,7 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
     if 'wazuh-agentd' in test_case.get("skips", []):
         pytest.skip("This test does not apply to wazuh-agentd")
 
-    remoted_server = RemotedSimulator(protocol=PROTOCOL, mode='CONTROLED_ACK', client_keys=CLIENT_KEYS_PATH)
+    remoted_server = RemotedSimulator(protocol=PROTOCOL, mode='CONTROLLED_ACK', client_keys=CLIENT_KEYS_PATH)
 
     configuration = test_case.get('configuration', {})
     parse_configuration_string(configuration)
