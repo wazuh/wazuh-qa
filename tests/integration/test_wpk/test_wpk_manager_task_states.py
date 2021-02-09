@@ -1,19 +1,17 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import json
 import os
-import pytest
 import socket
-import subprocess
 import struct
 import time
-import requests
 
+import pytest
 from wazuh_testing.tools import WAZUH_PATH
-from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.agent_simulator import Sender, Injector
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -42,6 +40,7 @@ cases = [
             'agents_number': 2,
             'protocol': 'tcp',
             'agents_os': ['debian7', 'debian7'],
+            'agents_version': ['v3.11.3', 'v3.11.3'],
             'stage_disconnect': ['lock_restart', None],
             'first_status': ['Updating', 'In queue'],
             'expected_response': 'Success',
@@ -63,6 +62,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'agents_version': ['v3.11.3'],
             'stage_disconnect': ['write'],
             'first_status': ['Updating'],
             'expected_response': 'Success',
@@ -84,13 +84,14 @@ cases = [
             'agents_number': 2,
             'protocol': 'tcp',
             'agents_os': ['debian7', 'debian7'],
+            'agents_version': ['v3.11.3', 'v3.11.3'],
             'stage_disconnect': ['lock_restart', None],
             'first_status': ['Updating', 'In queue'],
             'expected_response': 'Success',
             'status': ['Updating', 'In queue'],
             'upgrade_after_change_name': True,
             'change_node_name': True,
-            'new_expected_response': [f'Upgrade procedure could not start. '\
+            'new_expected_response': [f'Upgrade procedure could not start. ' \
                                       f'Agent already upgrading', 'Success']
         }
     },
@@ -108,13 +109,14 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'agents_version': ['v3.11.3'],
             'stage_disconnect': ['write'],
             'first_status': ['Updating'],
             'expected_response': 'Success',
             'status': ['Updating'],
             'change_node_name': True,
             'upgrade_after_change_name': True,
-            'new_expected_response': [f'Upgrade procedure could not start. '\
+            'new_expected_response': [f'Upgrade procedure could not start. ' \
                                       f'Agent already upgrading', 'Success']
         }
     },
@@ -132,6 +134,7 @@ cases = [
             'agents_number': 1,
             'protocol': 'tcp',
             'agents_os': ['debian7'],
+            'agents_version': ['v3.11.3'],
             'stage_disconnect': ['write'],
             'first_status': ['Updating'],
             'expected_response': 'Success',
@@ -142,7 +145,6 @@ cases = [
         }
     }
 ]
-
 
 params = [case['params'] for case in cases]
 metadata = [case['metadata'] for case in cases]
@@ -283,7 +285,7 @@ def test_wpk_manager_task_states(get_configuration, configure_environment,
     if upgrade_after_change_name:
         injectors = []
         sender = Sender(manager_address=SERVER_ADDRESS,
-                                protocol=protocol)
+                        protocol=protocol)
         for index, agent in enumerate(agents):
             injector = Injector(sender, agent)
             injectors.append(injector)
@@ -332,7 +334,7 @@ def test_wpk_manager_task_states(get_configuration, configure_environment,
 
             # Chech that result of first attempt is Success
             assert new_expected_response[agents_id.index(agent_id)] == \
-                response['data'][0]['message'], \
+                   response['data'][0]['message'], \
                 f'New upgrade response did not match expected! ' \
                 f'Expected {new_expected_response} obtained ' \
                 f'{response["data"][0]["message"]}'

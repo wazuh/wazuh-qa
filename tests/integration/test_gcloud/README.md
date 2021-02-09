@@ -1,17 +1,25 @@
 # gcp-pubsub
+
 Google Cloud: Pub/Sub integration
+
 ## Description
+
 It is a _wodle based_ module that has a capability to pull logs from Google Cloud Pub/Sub.
+
 ## Requirements
+
 - It should work on both manager and agents
 - The only dependency must be the Python module google-cloud-pubsub
 - Python 3.6 compatible (since 2.7 will be deprecated by Google Pub/Sub in January 2020)
 - The module will assume there is already a sink, topic, and a subscription created in GCP.
 - No temporal files are needed. It must write directly into agentd/analysisd socket.
+
 ## Configuration settings
+
 - project_id: String. Google Cloud Project ID. Required.
 - subscription_name: String. Name of the subscription to read from. Required.
-- credentials_file: String. The path to the Google Cloud credentials file. JWT Tokens. It must allow both relative (to $HOME_INSTALLATION) and absolute paths. Required.
+- credentials_file: String. The path to the Google Cloud credentials file. JWT Tokens. It must allow both relative (to
+  $HOME_INSTALLATION) and absolute paths. Required.
 - interval: String. The amount of time between each pull. Default: 1h. (It must allow the format: 1h, 1d, 20m, 1405s).
 - max_messages: Integer. The number of maximum messages pulled in each iteration. Default: 100.
 - enabled: String. Enable or disabled the module. Values: yes/no.
@@ -19,15 +27,21 @@ It is a _wodle based_ module that has a capability to pull logs from Google Clou
 - logging: String. Toggle between the different logging levels. Values: disabled/info/debug/trace. Default: info.
 
 Also, there are optional parameters related to schedule:
+
 - day: Int. Day of the month when the module starts to pull messages. It can be used with _time_ parameter.
-- wday: String. Day of the week when the module starts to pull messages. It cannot be used with _day_ parameter but _time_ parameter.
+- wday: String. Day of the week when the module starts to pull messages. It cannot be used with _day_ parameter but _
+  time_ parameter.
 - time: String. Time when the module starts to pull messages.
 
 ## First steps
+
 - Create a Google Cloud project.
 - Create a publisher/topic in Google Cloud Pub/Sub.
 - Create a subscriber in Google Cloud Pub/Sub.
-- Generate a credentials json file. It can be done going to project settings >> Service Accounts. Then choose the Service Account >> Actions >> Create key. The default path for the credential file is /var/ossec/ but another path is allowed. The json file has the following structure:
+- Generate a credentials json file. It can be done going to project settings >> Service Accounts. Then choose the
+  Service Account >> Actions >> Create key. The default path for the credential file is /var/ossec/ but another path is
+  allowed. The json file has the following structure:
+
 ```shell script
 {
   "type": "service_account",
@@ -44,7 +58,9 @@ Also, there are optional parameters related to schedule:
 ```
 
 ## Configuration example
+
 To use this integration, it is necessary to add the configuration to ossec.conf:
+
 ```shell script
 <gcp-pubsub>
   <project_id>wazuh-project-123</project_id>
@@ -54,24 +70,31 @@ To use this integration, it is necessary to add the configuration to ossec.conf:
   <interval>2h</interval>
 </gcp-pubsub>
 ```
+
 _credentials_file_ option accepts relative and absolute path.
+
 ## Setting up a test environment
 
-You will need a proper environment to run the integration tests. You can use any virtual machine you wish. If you have one already, go to the [integration tests section](#integration-tests)
+You will need a proper environment to run the integration tests. You can use any virtual machine you wish. If you have
+one already, go to the [integration tests section](#integration-tests)
 
-If you use [Vagrant](https://www.vagrantup.com/downloads.html) or [VirtualBox](https://www.virtualbox.org/wiki/Downloads), it is important to install the `vbguest` plugin since some tests modify the system date and there could be some synchronization issues.
+If you use [Vagrant](https://www.vagrantup.com/downloads.html)
+or [VirtualBox](https://www.virtualbox.org/wiki/Downloads), it is important to install the `vbguest` plugin since some
+tests modify the system date and there could be some synchronization issues.
 
 This guide will cover the following platforms: [Linux](#linux) and [MacOS](#macos).
 
-You can run these tests on a manager or an agent. In case you are using an agent, please remember to register it and use the correct version (Wazuh branch).
+You can run these tests on a manager or an agent. In case you are using an agent, please remember to register it and use
+the correct version (Wazuh branch).
 
-_We are skipping Wazuh installation steps. For further information, check [Wazuh documentation](https://documentation.wazuh.com/3.11/installation-guide/index.html)._
+_We are skipping Wazuh installation steps. For further information,
+check [Wazuh documentation](https://documentation.wazuh.com/3.11/installation-guide/index.html)._
 
 ### Linux
 
 _We are using **CentOS** for this example:_
 
-- Install **Wazuh** 
+- Install **Wazuh**
 
 - Disable firewall (only for **CentOS**)
 
@@ -115,7 +138,7 @@ echo 'monitord.rotate_log=0' >> $wazuh_path/etc/local_internal_options.conf
 
 ### MacOS
 
-- Install **Wazuh** 
+- Install **Wazuh**
 
 - Install Python and its dependencies
 
@@ -153,11 +176,15 @@ Finally, copy your `wazuh-qa` repository within your testing environment and you
 
 ## Integration tests
 
-**DISCLAIMER:** this guide assumes you have a proper testing environment. If you do not, please check our [testing environment guide](#setting-up-a-test-environment).
+**DISCLAIMER:** this guide assumes you have a proper testing environment. If you do not, please check
+our [testing environment guide](#setting-up-a-test-environment).
 
 ### Pytest
 
-We use [pytest](https://docs.pytest.org/en/latest/contents.html) to run our integrity tests. Pytest will recursively look for the closest `conftest` to import all the variables and fixtures needed for every test. If something is lacking from the closest one, it will look for the next one (if possible) until reaching the current directory. This means we need to run every test from the following path, where the general _conftest_ is:
+We use [pytest](https://docs.pytest.org/en/latest/contents.html) to run our integrity tests. Pytest will recursively
+look for the closest `conftest` to import all the variables and fixtures needed for every test. If something is lacking
+from the closest one, it will look for the next one (if possible) until reaching the current directory. This means we
+need to run every test from the following path, where the general _conftest_ is:
 
 ```shell script
 cd wazuh-qa/tests/integration
@@ -173,21 +200,24 @@ python3 -m pytest [options] [file_or_dir] [file_or_dir] [...]
 
 - `v`: verbosity level (-v or -vv. Highly recommended to use -vv when tests are failing)
 - `s`: shortcut for --capture=no. This will show the output in real time
-- `x`: instantly exit after the first error. Very helpful when using a log truncate since it will keep the last failed result
+- `x`: instantly exit after the first error. Very helpful when using a log truncate since it will keep the last failed
+  result
 - `m`: only run tests matching given expression (-m MARKEXPR)
 - `--tier`: only run tests with given tier (ex. --tier 2)
 - `--html`: generates a HTML report for the test results. (ex. --html=report.html)
-- `--default-timeout`: overwrites the default timeout (in seconds). This value is used to make a test fail if a condition 
-is not met before the given time lapse. Some tests make use of this value and other has other fixed timeout that cannot be 
-modified.
-- `--gcp-project-id`: required. It sets the Google Cloud project id. 
+- `--default-timeout`: overwrites the default timeout (in seconds). This value is used to make a test fail if a
+  condition is not met before the given time lapse. Some tests make use of this value and other has other fixed timeout
+  that cannot be modified.
+- `--gcp-project-id`: required. It sets the Google Cloud project id.
 - `--gcp-subscription-name`: required. It sets the subscription name.
 - `--gcp-credentials-file`: required. It indicates the path to the credentials file.
-- `--gcp-topic-name`: optional. It sets the topic name. Some tests will fail if this option is not used although the topic name can be written in the tests.
+- `--gcp-topic-name`: optional. It sets the topic name. Some tests will fail if this option is not used although the
+  topic name can be written in the tests.
 
 _Use `-h` to see the rest or check its [documentation](https://docs.pytest.org/en/latest/usage.html)._
 
-Also, these integration tests are heavily based on [fixtures](https://docs.pytest.org/en/latest/fixture.html), so please check its documentation for further information.
+Also, these integration tests are heavily based on [fixtures](https://docs.pytest.org/en/latest/fixture.html), so please
+check its documentation for further information.
 
 #### gcp-pubsub integration tests example
 

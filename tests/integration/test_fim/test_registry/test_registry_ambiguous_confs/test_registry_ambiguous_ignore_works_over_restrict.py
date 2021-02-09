@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -6,10 +6,9 @@
 import os
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, registry_value_cud, registry_key_cud, \
-                              KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params
+    KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -47,6 +46,7 @@ p, m = generate_params(extra_params=conf_params, modes=['scheduled'])
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
+
 # Fixtures
 
 
@@ -59,10 +59,10 @@ def get_configuration(request):
 # Tests
 
 @pytest.mark.parametrize('key, subkey, arch, key_name', [
-                        (key, subkey_1, KEY_WOW64_64KEY, 'restrict_key'),
-                        (key, subkey_1, KEY_WOW64_64KEY, 'key_restrict'),
-                        (key, subkey_2, KEY_WOW64_64KEY, 'key_restrict'),
-                        (key, subkey_2, KEY_WOW64_32KEY, 'key_restrict')
+    (key, subkey_1, KEY_WOW64_64KEY, 'restrict_key'),
+    (key, subkey_1, KEY_WOW64_64KEY, 'key_restrict'),
+    (key, subkey_2, KEY_WOW64_64KEY, 'key_restrict'),
+    (key, subkey_2, KEY_WOW64_32KEY, 'key_restrict')
 ])
 def test_ignore_over_restrict_key(key, subkey, key_name, arch,
                                   get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
@@ -86,10 +86,10 @@ def test_ignore_over_restrict_key(key, subkey, key_name, arch,
 
 
 @pytest.mark.parametrize('key, subkey, arch, value_name', [
-                        (key, subkey_1, KEY_WOW64_64KEY, 'restrict_value'),
-                        (key, subkey_1, KEY_WOW64_64KEY, 'value_restrict'),
-                        (key, subkey_2, KEY_WOW64_64KEY, 'value_restrict'),
-                        (key, subkey_2, KEY_WOW64_32KEY, 'value_restrict')
+    (key, subkey_1, KEY_WOW64_64KEY, 'restrict_value'),
+    (key, subkey_1, KEY_WOW64_64KEY, 'value_restrict'),
+    (key, subkey_2, KEY_WOW64_64KEY, 'value_restrict'),
+    (key, subkey_2, KEY_WOW64_32KEY, 'value_restrict')
 ])
 def test_ignore_over_restrict_values(key, subkey, value_name, arch,
                                      get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):

@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -9,7 +9,6 @@ from copy import deepcopy
 from datetime import datetime
 
 from jsonschema import validate, exceptions
-
 from wazuh_testing import logger
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -156,6 +155,7 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
     schema : str, optional
         String with the schema to apply. Default `linux`
     """
+
     def validate_attributes(syscheck_alert, syscheck_event, event_field, suffix):
         for attribute, value in syscheck_event['data'][event_field].items():
             # Skip certain attributes since their alerts will not have them
@@ -195,6 +195,7 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
 
         if 'content_changes' in event['data']:
             assert event['data']['content_changes'] == syscheck_alert['diff']
+
     try:
         validate_analysis_alert(alert, schema)
     except exceptions.ValidationError as e:

@@ -156,3 +156,23 @@
         attributes:
           - report_changes: "no"
           - arch: "64bit"
+# Single registry and a list of registries
+- tags:
+  - single_registry_and_list
+  apply_to_modules:
+  - test_registry_ambiguous_duplicated_entries
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - windows_registry:
+        value: WINDOWS_REGISTRY_1
+        attributes:
+          - check_all: "yes"
+          - arch: "64bit"
+    - windows_registry:
+        value: WINDOWS_REGISTRY_LIST
+        attributes:
+          - check_all: "yes"
+          - arch: "64bit"

@@ -1,10 +1,10 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import shutil
-import pytest
 
+import pytest
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -30,6 +30,7 @@ def configure_local_rules(get_configuration, request):
 @pytest.fixture(scope='module')
 def wait_for_analysisd_startup(request):
     """Wait until analysisd has begun and alerts.json is created."""
+
     def callback_analysisd_startup(line):
         if 'Input message handler thread started.' in line:
             return line

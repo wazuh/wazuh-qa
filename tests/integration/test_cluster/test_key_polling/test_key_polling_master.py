@@ -2,7 +2,6 @@ import os
 import re
 
 import pytest
-
 from wazuh_testing.cluster import FERNET_KEY, cluster_msg_build
 from wazuh_testing.tools import WAZUH_PATH, CLUSTER_LOGS_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -39,6 +38,7 @@ monitored_sockets_params = [('wazuh-clusterd', None, None), ('wazuh-modulesd', m
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
+
 # Functions
 
 
@@ -48,6 +48,7 @@ def callback_krequest(item):
     match = re.match(reg, item.decode())
     if match:
         return item.decode()
+
 
 # Fixtures
 
@@ -60,6 +61,7 @@ def get_configuration(request):
 
 # Tests
 
+@pytest.mark.skip(reason='Development in progress: https://github.com/wazuh/wazuh/issues/4387')
 @pytest.mark.parametrize('cmd, counter, payload, expected', [
     (b'run_keypoll', 1, b'{"message": "id:001"}', "id:001"),
     (b'run_keypoll', 2, b'{"message": "ip:124.0.0.1"}', "ip:124.0.0.1")
@@ -85,7 +87,6 @@ def test_key_polling_master(cmd, counter, payload, expected, configure_environme
     expected : str
         Expected message in krequest socket
     """
-    pytest.xfail("Development in progress: https://github.com/wazuh/wazuh/issues/4387")
     # Build message and send it to the master
     message = cluster_msg_build(cmd=cmd, counter=counter, payload=payload, encrypt=True)
     receiver_sockets[0].send(message)

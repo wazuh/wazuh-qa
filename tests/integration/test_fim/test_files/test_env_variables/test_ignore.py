@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -6,13 +6,12 @@ import os
 import sys
 
 import pytest
-
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import PREFIX
 from wazuh_testing import global_parameters
-from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_event, callback_ignore, create_file,
                                REGULAR, generate_params, check_time_travel)
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 pytestmark = pytest.mark.tier(level=2)
@@ -23,18 +22,22 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_directories = [os.path.join(PREFIX, 'testdir1'),
                     os.path.join(PREFIX, 'testdir2'),
                     os.path.join(PREFIX, 'testdir3'),
-                    os.path.join(PREFIX, 'testdir4'),
+                    os.path.join(PREFIX, 'testdir4')
                     ]
 dir1, dir2, dir3, dir4 = test_directories
-dir_config = "{1}{0}{2}{0}{3}{0}{4}".format(", ", dir1, dir2, dir3, dir4)
 
-multiples_paths = "{1}{0}{2}".format(os.pathsep, dir2, dir3)
-environment_variables = [("TEST_IGN_ENV", multiples_paths)]
-
+# Check big environment variables ending with backslash
 if sys.platform == 'win32':
+    paths = [os.path.join(PREFIX, 'a' * 50 + '\\') for i in range(10)] + [dir2, dir3]
     test_env = "%TEST_IGN_ENV%"
 else:
+    paths = [os.path.join(PREFIX, 'a' * 50 + '\\') for i in range(100)] + [dir2, dir3]
     test_env = "$TEST_IGN_ENV"
+
+multiple_env_var = os.pathsep.join(paths)
+environment_variables = [("TEST_IGN_ENV", multiple_env_var)]
+
+dir_config = ",".join(test_directories)
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_ignore.yaml')

@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import itertools
@@ -11,7 +11,6 @@ from typing import List, Any, Set
 
 import pytest
 import yaml
-
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX
 
@@ -315,12 +314,46 @@ def set_section_wazuh_conf(sections, template=None):
         """
         return ET.tostringlist(elementTree.getroot(), encoding="unicode")
 
+    def find_module_config(wazuh_conf: ET.ElementTree, section: str, attributes: List[dict]) -> ET.ElementTree:
+        """
+        Check if a certain configuration section exists in ossec.conf and returns the corresponding block if exists.
+        (This extra function has been necessary to implement it to configure the wodle blocks, since they have the same
+        section but different attributes).
+
+        Parameters
+        ----------
+        wazuh_conf: ElementTree
+            An ElementTree object with all the data of the ossec.conf
+        section: str
+            Name of the tag or configuration section to search for. For example: vulnerability_detector
+        attributes: list<dict>
+            List with section attributes. Needed to check if the section exists with all the searched attributes
+            and values. For example (wodle section) [{'name': 'syscollector'}]
+
+        Returns
+        -------
+        ElementTree
+            An ElementTree object with the section data found in ossec.conf. None if nothing was found.
+        """
+        if attributes is None:
+            return wazuh_conf.find(section)
+        else:
+            attributes_query = ''.join([f"[@{attribute}='{value}']" for index, _ in enumerate(attributes)
+                                        for attribute, value in attributes[index].items()])
+            query = f"{section}{attributes_query}"
+
+            try:
+                return wazuh_conf.find(query)
+            except AttributeError:
+                return None
+
     # Get Wazuh configuration as a list of str
     raw_wazuh_conf = get_wazuh_conf() if template is None else template
     # Generate a ElementTree representation of the previous list to work with its sections
     wazuh_conf = to_elementTree(purge_multiple_root_elements(raw_wazuh_conf))
     for section in sections:
-        section_conf = wazuh_conf.find(section['section'])
+        attributes = section.get('attributes')
+        section_conf = find_module_config(wazuh_conf, section['section'], attributes)
         # Create section if it does not exist, clean otherwise
         if not section_conf:
             section_conf = ET.SubElement(wazuh_conf.getroot(), section['section'])
@@ -334,7 +367,6 @@ def set_section_wazuh_conf(sections, template=None):
             section_conf.tail = prev_tail
 
         # Insert section attributes
-        attributes = section.get('attributes')
         if attributes:
             for attribute in attributes:
                 if attribute is not None and isinstance(attribute, dict):  # noqa: E501
@@ -493,6 +525,7 @@ def set_correct_prefix(configurations, new_prefix):
         added in the directories and ignore sections.
 
     """
+
     def inserter(path):
         """Insert new_prefix inside path, right before the first '/'."""
         result = path
@@ -526,7 +559,8 @@ def set_correct_prefix(configurations, new_prefix):
                                 # Insert the prefix in every path/regex and add a comma if directories.
                                 for path in paths_list:
                                     modified_paths += inserter(path)
-                                    modified_paths += ',' if (element.get('directories') and modified_paths != '') else ''
+                                    modified_paths += ',' if (
+                                            element.get('directories') and modified_paths != '') else ''
                                 modified_paths = modified_paths.rstrip(',')
 
                                 # Insert the prefix in every path inside restrict

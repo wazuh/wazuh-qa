@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
@@ -6,7 +6,6 @@ from calendar import monthrange
 from datetime import datetime, timedelta
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, generate_params, check_time_travel
 from wazuh_testing.tools import PREFIX
@@ -27,8 +26,8 @@ test_directories = [os.path.join(PREFIX, 'testdir1')]
 
 directory_str = ','.join(test_directories)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-scan_days = ['thursday', 'wednesday']
-scan_times = ['9PM', '20:00']
+scan_days = ['thursday', 'wednesday', 'saturday', 'monday']
+scan_times = ['9PM', '20:00', '12am', '12pm']
 
 # configurations
 

@@ -1,19 +1,18 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 
 import os
-
-import pytest
 from hashlib import sha1
 
-from wazuh_testing.tools import WAZUH_PATH
+import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, registry_value_cud, registry_key_cud, \
-                              generate_params, CHECK_GROUP, CHECK_TYPE, \
-                              CHECK_ALL, CHECK_MTIME, CHECK_SIZE, CHECK_SUM, KEY_WOW64_32KEY, \
-                              KEY_WOW64_64KEY, REQUIRED_REG_KEY_ATTRIBUTES, REQUIRED_REG_VALUE_ATTRIBUTES
+    generate_params, CHECK_GROUP, CHECK_TYPE, \
+    CHECK_ALL, CHECK_MTIME, CHECK_SIZE, CHECK_SUM, KEY_WOW64_32KEY, \
+    KEY_WOW64_64KEY, REQUIRED_REG_KEY_ATTRIBUTES, REQUIRED_REG_VALUE_ATTRIBUTES
+from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -26,17 +25,23 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=2)]
 key = "HKEY_LOCAL_MACHINE"
 subkey_1 = "SOFTWARE\\test_key1"
 subkey_2 = "SOFTWARE\\test_key2"
+subkey_3 = "SOFTWARE\\test_key3"
+subkey_4 = "SOFTWARE\\test_key4"
 
 test_regs = [os.path.join(key, subkey_1),
-             os.path.join(key, subkey_2)
+             os.path.join(key, subkey_2),
+             os.path.join(key, subkey_3),
+             os.path.join(key, subkey_4)
              ]
+
+registry_list = "{},{},{},{}".format(test_regs[0], test_regs[1], test_regs[2], test_regs[3])
 
 conf_params = {'WINDOWS_REGISTRY_1': test_regs[0],
                'WINDOWS_REGISTRY_2': test_regs[1],
+               'WINDOWS_REGISTRY_LIST': registry_list,
                'RESTRICT_1': "overwritten_restrict$",
                'RESTRICT_2': "restrict_test_|test_key"
                }
-
 
 key_all_attrs = REQUIRED_REG_KEY_ATTRIBUTES[CHECK_ALL].union(REQUIRED_REG_VALUE_ATTRIBUTES[CHECK_ALL])
 
@@ -77,6 +82,11 @@ def get_configuration(request):
     (subkey_1, KEY_WOW64_64KEY, ['restrict_test_key'], ['restrict_test_value'], checkers_key_1, {'complex_entries'}),
     (subkey_2, KEY_WOW64_64KEY, ['random_key'], ['random_value'], checkers_key_2, {'complex_entries'}),
     (subkey_2, KEY_WOW64_32KEY, ['random_key'], ['random_value'], checkers_key_2, {'complex_entries'}),
+    (subkey_1, KEY_WOW64_64KEY, ['random_key'], ['test_value'], key_all_attrs, {'single_registry_and_list'}),
+    (subkey_2, KEY_WOW64_64KEY, ['random_key'], ['test_value'], key_all_attrs, {'single_registry_and_list'}),
+    (subkey_3, KEY_WOW64_64KEY, ['random_key'], ['test_value'], key_all_attrs, {'single_registry_and_list'}),
+    (subkey_4, KEY_WOW64_64KEY, ['random_key'], ['test_value'], key_all_attrs, {'single_registry_and_list'}),
+
 ])
 def test_duplicate_entries(key, subkey, arch, key_list, value_list, checkers, tags_to_apply,
                            get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
@@ -114,8 +124,8 @@ def test_duplicate_entries(key, subkey, arch, key_list, value_list, checkers, ta
     key
 ])
 @pytest.mark.parametrize('subkey, arch, value_list, tags_to_apply, report_changes', [
-                        (subkey_1, KEY_WOW64_64KEY, ['test_value'], {'duplicate_report_entries'}, True),
-                        (subkey_2, KEY_WOW64_64KEY, ['test_value'], {'duplicate_report_entries'}, False),
+    (subkey_1, KEY_WOW64_64KEY, ['test_value'], {'duplicate_report_entries'}, True),
+    (subkey_2, KEY_WOW64_64KEY, ['test_value'], {'duplicate_report_entries'}, False),
 ])
 def test_duplicate_entries_rc(key, subkey, arch, value_list, tags_to_apply, report_changes,
                               get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):

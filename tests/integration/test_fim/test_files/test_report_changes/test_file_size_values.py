@@ -1,25 +1,22 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
 
 import pytest
-
+from test_fim.test_files.test_report_changes.common import generate_string, translate_size, disable_file_max_size, \
+    restore_file_max_size, make_diff_file_path, disable_rt_delay, restore_rt_delay
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_file_size_limit_reached, generate_params, create_file, \
     check_time_travel, callback_detect_event, modify_file_content, callback_deleted_diff_folder
-from test_fim.test_files.test_report_changes.common import generate_string, translate_size, disable_file_max_size, \
-    restore_file_max_size, make_diff_file_path, disable_rt_delay, restore_rt_delay
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
-
 # Marks
 
 pytestmark = [pytest.mark.tier(level=1)]
-
 
 # Variables
 
@@ -29,7 +26,6 @@ directory_str = ','.join(test_directories)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories[0]
-
 
 # Configurations
 
@@ -118,7 +114,7 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
 
     # Increase the size of the file over the configured value
     to_write = generate_string(size_limit, '0')
-    modify_file_content(folder, filename, new_content=to_write*3)
+    modify_file_content(folder, filename, new_content=to_write * 3)
 
     check_time_travel(scheduled)
 
@@ -131,4 +127,4 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                             callback=callback_file_size_limit_reached,
                             error_message='Did not receive expected '
-                            '"File ... is too big for configured maximum size to perform diff operation" event.')
+                                          '"File ... is too big for configured maximum size to perform diff operation" event.')

@@ -1,22 +1,21 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
-import re
 import uuid
 from datetime import datetime
 
 import pytest
 from numpydoc.docscrape import FunctionDoc
 from py.xml import html
-
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, WAZUH_SERVICE, ALERT_FILE_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
@@ -41,7 +40,7 @@ def pytest_runtest_setup(item):
     if supported_platforms and plat not in supported_platforms:
         pytest.skip("Cannot run on platform {}".format(plat))
 
-    host_type = 'agent' if 'agent' in WAZUH_SERVICE else 'server'
+    host_type = 'agent' if 'agent' in get_service() else 'server'
     supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())
     if supported_types and host_type not in supported_types:
         pytest.skip("Cannot run on wazuh {}".format(host_type))
@@ -173,6 +172,14 @@ def pytest_addoption(parser):
         type=str,
         help="run tests using a specific FIM mode"
     )
+    parser.addoption(
+        "--wpk_version",
+        action="append",
+        metavar="wpk_version",
+        default=None,
+        type=str,
+        help="run tests using a specific WPK package version"
+    )
 
 
 def pytest_configure(config):
@@ -216,6 +223,9 @@ def pytest_configure(config):
     if not mode:
         mode = ["scheduled", "whodata", "realtime"]
     global_parameters.fim_mode = mode
+
+    # Set WPK package version
+    global_parameters.wpk_version = config.getoption("--wpk_version")
 
 
 def pytest_html_results_table_header(cells):

@@ -1,15 +1,15 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import pytest
 import sys
 
+import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.gcloud import callback_detect_gcp_alert, validate_gcp_event, publish
 from wazuh_testing.fim import generate_params
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
+from wazuh_testing.gcloud import callback_detect_gcp_alert, validate_gcp_event, publish
+from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -84,11 +84,9 @@ def test_rules(get_configuration, configure_environment,
     rules_id = []
     file_ind = 0
 
-    for number in range(65004, 65037):
-        rules_id.append(number)
-
-    for number in range(65039, 65045):
-        rules_id.append(number)
+    rules_id = [id for id in range(65005, 65011)]
+    rules_id += [id for id in range(65012, 65039)]
+    rules_id += [id for id in range(65041, 65047)]
 
     events_file = open(file_path, 'r')
     for line in events_file:

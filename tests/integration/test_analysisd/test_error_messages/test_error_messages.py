@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -6,7 +6,6 @@ import os
 
 import pytest
 import yaml
-
 from wazuh_testing import global_parameters
 from wazuh_testing.analysis import callback_fim_error
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
@@ -58,7 +57,7 @@ def test_error_messages(configure_sockets_environment, connect_to_sockets_module
     """
     for stage in test_case:
         receiver_sockets[0].send(stage['input'])
-        result = log_monitors[0].start(timeout=4*global_parameters.default_timeout,
+        result = log_monitors[0].start(timeout=4 * global_parameters.default_timeout,
                                        callback=callback_fim_error).result()
         assert result == stage['output'], 'Failed test case stage {}: {}'.format(test_case.index(stage) + 1,
                                                                                  stage['stage'])

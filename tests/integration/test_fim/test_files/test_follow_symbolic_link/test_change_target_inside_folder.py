@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
@@ -9,7 +9,6 @@ from test_fim.test_files.test_follow_symbolic_link.common import configurations_
 # noinspection PyUnresolvedReferences
 from test_fim.test_files.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
     extra_configuration_after_yield
-
 from wazuh_testing import logger
 from wazuh_testing.fim import (generate_params, create_file, REGULAR, callback_detect_event,
                                check_time_travel, modify_file_content, LOG_FILE_PATH)

@@ -1,13 +1,12 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 
 from setuptools import setup, find_packages
 
-
 setup(name='wazuh_testing',
-      version='4.0.0',
+      version='4.2.0',
       description='Wazuh testing utilites to help programmers automate tests',
       url='https://github.com/wazuh',
       author='Wazuh',
@@ -27,13 +26,13 @@ setup(name='wazuh_testing',
                     },
       include_package_data=True,
       install_requires=[
-            'lockfile==0.12.2',
-            'testinfra==5.0.0',
-            'filetype==1.0.7',
-            'requests==2.23.0',
-            'pyOpenSSL==19.1.0',
-            'pycryptodome==3.9.8',
-            'configobj==5.0.6'
+          'lockfile==0.12.2',
+          'testinfra==5.0.0',
+          'filetype==1.0.7',
+          'requests==2.23.0',
+          'pyOpenSSL==19.1.0',
+          'pycryptodome==3.9.8',
+          'configobj==5.0.6'
       ],
       zip_safe=False
       )

@@ -1,19 +1,20 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import pytest
-import os
+from time import sleep
 
-from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
+import pytest
+from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.authd_sim import AuthdSimulator
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
+
 from conftest import *
-from time import sleep
+
 # Marks
 
 SERVER_ADDRESS = '127.0.0.1'
@@ -29,27 +30,27 @@ How does this test work:
 - PROTOCOL: tcp/udp
 - CLEAN_KEYS: whetever start with an empty client.keys file or not
 - SIMULATOR_NUMBERS: Number of simulator to be instantiated, this should match wazuh_conf.yaml
-- SIMULATOR MODES: for each number of simulator will define a list of "stages" 
+- SIMULATOR MODES: for each number of simulator will define a list of "stages"
   that defines the state that remoted simulator should have in that state
 Lenght of the stages should be the same for all simulators. Authd simulator will only accept one enrollment for stage
 - LOG_MONITOR_STR: (list of lists) Expected string to be monitored in all stages
 """
 metadata = [
     {
-        # 1. 3 Servers - (TCP/UDP) protocol all servers will refuse the connection to remoted but will accept enrollment 
-        # Starting with an empty clients.key. 
+        # 1. 3 Servers - (TCP/UDP) protocol all servers will refuse the connection to remoted but will accept enrollment
+        # Starting with an empty clients.key.
         # We should verify that the agent tries to connect and enroll to each one of them.
         'PROTOCOL': 'tcp',
-        'CLEAN_KEYS' : True,
-        'SIMULATOR_NUMBER' : 3,
-        'SIMULATOR_MODES' : {
+        'CLEAN_KEYS': True,
+        'SIMULATOR_NUMBER': 3,
+        'SIMULATOR_MODES': {
             0: ['REJECT'],
             1: ['REJECT'],
             2: ['REJECT'],
-            'AUTHD' : ['ACCEPT'],
+            'AUTHD': ['ACCEPT'],
         },
-        'LOG_MONITOR_STR' : [
-            [ # Stage 1
+        'LOG_MONITOR_STR': [
+            [  # Stage 1
                 f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f'Requesting a key from server: {SERVER_HOSTS[0]}/{SERVER_ADDRESS}',
                 f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
@@ -60,25 +61,25 @@ metadata = [
         ]
     },
     {
-        # 2. 3 Servers - (TCP/UDP) protocol. 
+        # 2. 3 Servers - (TCP/UDP) protocol.
         # First server only has enrollment available and third server only has remoted available.
         # Agent should enroll to the first server and connect to the third one.
         'PROTOCOL': 'tcp',
-        'CLEAN_KEYS' : True,
-        'SIMULATOR_NUMBER' : 3,
-        'SIMULATOR_MODES' : {
+        'CLEAN_KEYS': True,
+        'SIMULATOR_NUMBER': 3,
+        'SIMULATOR_MODES': {
             0: ['REJECT', 'REJECT'],
             1: ['REJECT', 'REJECT'],
-            2: ['CONTROLED_ACK', 'CONTROLED_ACK'],
-            'AUTHD' : ['ACCEPT', 'REJECT'],
+            2: ['CONTROLLED_ACK', 'CONTROLLED_ACK'],
+            'AUTHD': ['ACCEPT', 'REJECT'],
         },
-        'LOG_MONITOR_STR' : [
-            [ # Stage 1 - Enroll to first server
+        'LOG_MONITOR_STR': [
+            [  # Stage 1 - Enroll to first server
                 f'Requesting a key from server: {SERVER_HOSTS[0]}',
                 f'Valid key received',
                 f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
             ],
-            [ # Stage 2 - Pass second server and connect to third
+            [  # Stage 2 - Pass second server and connect to third
                 f'Requesting a key from server: {SERVER_HOSTS[0]}',
                 f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
                 f'Requesting a key from server: {SERVER_HOSTS[1]}/{SERVER_ADDRESS}',
@@ -92,23 +93,23 @@ metadata = [
         # 3. 3 Server - TCP protocol. Agent should enroll and connect to first server,
         # and then the first server will disconnect, agent should connect to the second server with the same key
         'PROTOCOL': 'tcp',
-        'CLEAN_KEYS' : True,
-        'SIMULATOR_NUMBER' : 3,
-        'SIMULATOR_MODES' : {
-            0: ['CONTROLED_ACK', 'CLOSE'],
-            1: ['CONTROLED_ACK', 'CONTROLED_ACK'],
-            2: ['CONTROLED_ACK', 'CONTROLED_ACK'],
-            'AUTHD' : ['ACCEPT', 'REJECT'],
+        'CLEAN_KEYS': True,
+        'SIMULATOR_NUMBER': 3,
+        'SIMULATOR_MODES': {
+            0: ['CONTROLLED_ACK', 'CLOSE'],
+            1: ['CONTROLLED_ACK', 'CONTROLLED_ACK'],
+            2: ['CONTROLLED_ACK', 'CONTROLLED_ACK'],
+            'AUTHD': ['ACCEPT', 'REJECT'],
         },
-        'LOG_MONITOR_STR' : [
-            [ # Stage 1 - Enroll and connect to first server
+        'LOG_MONITOR_STR': [
+            [  # Stage 1 - Enroll and connect to first server
                 f'Requesting a key from server: {SERVER_HOSTS[0]}',
                 f'Valid key received',
                 f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f'Connected to the server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f"Received message: '#!-agent ack '"
             ],
-            [ 
+            [
                 f'Lost connection with manager. Setting lock.',
                 f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
@@ -118,26 +119,26 @@ metadata = [
         ]
     },
     {
-        # 4. 3 Server - UDP protocol. Agent should enroll and connect to first server, 
+        # 4. 3 Server - UDP protocol. Agent should enroll and connect to first server,
         # and then the first server will disconnect, agent should try to enroll to the first server again and then after failure, move to the second server and connect.
         'PROTOCOL': 'udp',
-        'CLEAN_KEYS' : True,
-        'SIMULATOR_NUMBER' : 3,
-        'SIMULATOR_MODES' : {
-            0: ['CONTROLED_ACK', 'REJECT'],
-            1: ['CONTROLED_ACK', 'CONTROLED_ACK'],
-            2: ['CONTROLED_ACK', 'CONTROLED_ACK'],
-            'AUTHD' : ['ACCEPT', 'REJECT'],
+        'CLEAN_KEYS': True,
+        'SIMULATOR_NUMBER': 3,
+        'SIMULATOR_MODES': {
+            0: ['CONTROLLED_ACK', 'REJECT'],
+            1: ['CONTROLLED_ACK', 'CONTROLLED_ACK'],
+            2: ['CONTROLLED_ACK', 'CONTROLLED_ACK'],
+            'AUTHD': ['ACCEPT', 'REJECT'],
         },
-        'LOG_MONITOR_STR' : [
-            [ # Stage 1 - Enroll and connect to first server
+        'LOG_MONITOR_STR': [
+            [  # Stage 1 - Enroll and connect to first server
                 f'Requesting a key from server: {SERVER_HOSTS[0]}',
                 f'Valid key received',
                 f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f'Connected to the server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f"Received message: '#!-agent ack '"
             ],
-            [ 
+            [
                 f'Server unavailable. Setting lock.',
                 f'Requesting a key from server: {SERVER_HOSTS[0]}',
                 f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
@@ -150,52 +151,52 @@ metadata = [
         # 5. 3 Servers / (TCP/UDP) protocol only the last one is available.
         # Agent should enroll and connect to the last server.
         'PROTOCOL': 'tcp',
-        'CLEAN_KEYS' : False,
-        'SIMULATOR_NUMBER' : 3,
-        'SIMULATOR_MODES' : {
+        'CLEAN_KEYS': False,
+        'SIMULATOR_NUMBER': 3,
+        'SIMULATOR_MODES': {
             0: ['CLOSE', 'CLOSE', 'CLOSE'],
             1: ['CLOSE', 'CLOSE', 'CLOSE'],
-            2: ['CONTROLED_ACK', 'CONTROLED_ACK', 'CONTROLED_ACK'],
-            'AUTHD' : ['REJECT', 'REJECT', 'ACCEPT'],
+            2: ['CONTROLLED_ACK', 'CONTROLLED_ACK', 'CONTROLLED_ACK'],
+            'AUTHD': ['REJECT', 'REJECT', 'ACCEPT'],
         },
-        'LOG_MONITOR_STR' : [
+        'LOG_MONITOR_STR': [
             [
                 f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f"Unable to connect to '{SERVER_ADDRESS}:{REMOTED_PORTS[0]}",
             ],
-            [ 
+            [
                 f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
                 f"Unable to connect to '{SERVER_ADDRESS}:{REMOTED_PORTS[1]}",
             ],
-            [ 
+            [
                 f'Connected to the server ({SERVER_HOSTS[2]}/{SERVER_ADDRESS}:{REMOTED_PORTS[2]}',
                 f"Received message: '#!-agent ack '"
             ]
         ]
     },
     {
-        # 6. 3 Servers / (TCP/UDP) protocol. Server 1 is available but it disconnects, 2 and 3 are not responding. 
+        # 6. 3 Servers / (TCP/UDP) protocol. Server 1 is available but it disconnects, 2 and 3 are not responding.
         # Agent on disconnection should try server 2 and 3 and go back to 1.
         'PROTOCOL': 'tcp',
-        'CLEAN_KEYS' : False,
-        'SIMULATOR_NUMBER' : 3,
-        'SIMULATOR_MODES' : {
-            0: ['CONTROLED_ACK', 'CLOSE', 'CONTROLED_ACK'],
+        'CLEAN_KEYS': False,
+        'SIMULATOR_NUMBER': 3,
+        'SIMULATOR_MODES': {
+            0: ['CONTROLLED_ACK', 'CLOSE', 'CONTROLLED_ACK'],
             1: ['CLOSE', 'CLOSE', 'CLOSE'],
             2: ['CLOSE', 'CLOSE', 'CLOSE'],
-            'AUTHD' : ['ACCEPT', 'ACCEPT', 'ACCEPT'],
+            'AUTHD': ['ACCEPT', 'ACCEPT', 'ACCEPT'],
         },
-        'LOG_MONITOR_STR' : [
+        'LOG_MONITOR_STR': [
             [
                 f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f'Connected to the server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f"Received message: '#!-agent ack '",
             ],
-            [ 
+            [
                 f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
                 f"Unable to connect to '{SERVER_ADDRESS}:{REMOTED_PORTS[1]}",
             ],
-            [ 
+            [
                 f'Trying to connect to server ({SERVER_HOSTS[2]}/{SERVER_ADDRESS}:{REMOTED_PORTS[2]}',
                 f"Unable to connect to '{SERVER_ADDRESS}:{REMOTED_PORTS[2]}",
                 f'Connected to the server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
@@ -206,18 +207,18 @@ metadata = [
     },
 ]
 
-#metadata = metadata[:] # 0,2 Run only one test
+# metadata = metadata[:] # 0,2 Run only one test
 
 params = [
-{
-    'SERVER_ADDRESS_1': SERVER_HOSTS[0],
-    'SERVER_ADDRESS_2': SERVER_HOSTS[1],
-    'SERVER_ADDRESS_3': SERVER_HOSTS[2],
-    'REMOTED_PORT_1': REMOTED_PORTS[0],
-    'REMOTED_PORT_2': REMOTED_PORTS[1],
-    'REMOTED_PORT_3': REMOTED_PORTS[2],
-    'PROTOCOL' : test['PROTOCOL']
-} for test in metadata]
+    {
+        'SERVER_ADDRESS_1': SERVER_HOSTS[0],
+        'SERVER_ADDRESS_2': SERVER_HOSTS[1],
+        'SERVER_ADDRESS_3': SERVER_HOSTS[2],
+        'REMOTED_PORT_1': REMOTED_PORTS[0],
+        'REMOTED_PORT_2': REMOTED_PORTS[1],
+        'REMOTED_PORT_3': REMOTED_PORTS[2],
+        'PROTOCOL': test['PROTOCOL']
+    } for test in metadata]
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
@@ -232,16 +233,18 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 authd_server = AuthdSimulator(SERVER_ADDRESS, key_path=SERVER_KEY_PATH, cert_path=SERVER_CERT_PATH)
 remoted_servers = []
 
+
 # fixtures
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
     """Get configurations from the module"""
     return request.param
 
+
 @pytest.fixture(scope="module")
 def add_hostnames(request):
     HOSTFILE_PATH = os.path.join(os.environ['SystemRoot'], 'system32', 'drivers', 'etc', 'hosts') \
-                    if os.sys.platform == 'win32' else '/etc/hosts' 
+        if os.sys.platform == 'win32' else '/etc/hosts'
     hostfile = None
     with open(HOSTFILE_PATH, "r") as f:
         hostfile = f.read()
@@ -256,7 +259,7 @@ def add_hostnames(request):
 
 
 @pytest.fixture(scope="module")
-def configure_authd_server(request, get_configuration):    
+def configure_authd_server(request, get_configuration):
     global monitored_sockets
     monitored_sockets = QueueMonitor(authd_server.queue)
     authd_server.start()
@@ -265,21 +268,23 @@ def configure_authd_server(request, get_configuration):
     for i in range(0, get_configuration['metadata']['SIMULATOR_NUMBER']):
         remoted_servers.append(RemotedSimulator(server_address=SERVER_ADDRESS, remoted_port=REMOTED_PORTS[i],
                                                 protocol=get_configuration['metadata']['PROTOCOL'],
-                                                mode='CONTROLED_ACK', client_keys=CLIENT_KEYS_PATH))
+                                                mode='CONTROLLED_ACK', client_keys=CLIENT_KEYS_PATH))
         # Set simulator mode for that stage
         if get_configuration['metadata']['SIMULATOR_MODES'][i][0] != 'CLOSE':
             remoted_servers[i].set_mode(get_configuration['metadata']['SIMULATOR_MODES'][i][0])
 
     yield
-    #hearing on enrollment server   
-    for i in range(0, get_configuration['metadata']['SIMULATOR_NUMBER']):  
+    # hearing on enrollment server
+    for i in range(0, get_configuration['metadata']['SIMULATOR_NUMBER']):
         remoted_servers[i].stop()
     remoted_servers = []
     authd_server.shutdown()
 
+
 @pytest.fixture(scope="function")
 def set_authd_id(request):
-    authd_server.agent_id = 101    
+    authd_server.agent_id = 101
+
 
 @pytest.fixture(scope="function")
 def clean_keys(request, get_configuration):
@@ -291,17 +296,20 @@ def clean_keys(request, get_configuration):
             f.write("100 ubuntu-agent any TopSecret")
         sleep(1)
 
+
 def restart_agentd():
     control_service('stop', daemon="wazuh-agentd")
     truncate_file(LOG_FILE_PATH)
     control_service('start', daemon="wazuh-agentd", debug_mode=True)
+
 
 # Tests
 def wait_until(x, log_str):
     print(x)
     return x if log_str in x else None
 
-#@pytest.mark.parametrize('test_case', [case for case in tests])
+
+# @pytest.mark.parametrize('test_case', [case for case in tests])
 def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id, clean_keys, configure_environment,
                              get_configuration):
     log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -310,7 +318,6 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
 
         authd_server.set_mode(get_configuration['metadata']['SIMULATOR_MODES']['AUTHD'][stage])
         authd_server.clear()
-            
 
         for i in range(0, get_configuration['metadata']['SIMULATOR_NUMBER']):
             # Set simulator mode for that stage
@@ -325,10 +332,9 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
 
         for index, log_str in enumerate(get_configuration['metadata']['LOG_MONITOR_STR'][stage]):
             try:
-                log_monitor.start(timeout=120, callback=lambda x: wait_until(x, log_str)) 
+                log_monitor.start(timeout=120, callback=lambda x: wait_until(x, log_str))
             except TimeoutError as err:
-                assert False, f'Expected message {log_str} never arrived! Stage: {stage}, message number: {index}'     
-        
+                assert False, f'Expected message {log_str} never arrived! Stage: {stage}, message number: {index}'
 
         for i in range(0, get_configuration['metadata']['SIMULATOR_NUMBER']):
             # Clean after every stage

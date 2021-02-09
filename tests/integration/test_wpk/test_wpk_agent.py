@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import hashlib
@@ -13,21 +13,25 @@ import json
 
 from configobj import ConfigObj
 from datetime import datetime
-from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools import WAZUH_PATH, get_version
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
+from wazuh_testing import global_parameters
 
-pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), 
+
+pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0),
               pytest.mark.agent]
 
-folder = 'etc' if platform.system() == 'Linux' else ''
+sys_platform = platform.system()
 
-upgrade_result_folder = 'var/upgrade' if platform.system() == 'Linux' else 'upgrade'
+folder = 'etc' if sys_platform == 'Linux' else 'upgrade'
 
-DEFAULT_UPGRADE_SCRIPT = 'upgrade.sh' if platform.system() == 'Linux' \
+upgrade_result_folder = 'var/upgrade' if sys_platform == 'Linux' else 'upgrade'
+
+DEFAULT_UPGRADE_SCRIPT = 'upgrade.sh' if sys_platform == 'Linux' \
                                       else 'upgrade.bat'
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, folder, 'client.keys')
 SERVER_KEY_PATH = os.path.join(WAZUH_PATH, folder, 'manager.key')
@@ -36,41 +40,27 @@ UPGRADE_RESULT_PATH = os.path.join(WAZUH_PATH, upgrade_result_folder, 'upgrade_r
 CRYPTO = "aes"
 SERVER_ADDRESS = 'localhost'
 PROTOCOL = "tcp"
-version_to_upgrade = 'v4.1.0'
+
+if not global_parameters.wpk_version:
+    raise Exception("The WPK package version must be defined by parameter. See README.md")
+version_to_upgrade = global_parameters.wpk_version[0]
 
 
-# Test will varying according to agent version. This test should be tried
-# with at least:
-# 1. v3.13.2
-# 2. v4.1.0
-def get_current_version():
-    if platform.system() == 'Linux':
-        config_file_path = os.path.join(WAZUH_PATH, 'etc', 'ossec-init.conf')
-        _config = ConfigObj(config_file_path)
-        return _config['VERSION']
-
-    else:
-        version = None
-        with open(os.path.join(WAZUH_PATH, 'VERSION'), 'r') as f:
-            version = f.read()
-            version = version[:version.rfind('\n')]
-        return version
-
-
-_agent_version = get_current_version()
+_agent_version = get_version()
 
 error_msg = ''
-if _agent_version == version_to_upgrade:
+ver_split = _agent_version.replace("v", "").split(".")
+if int(ver_split[0]) >= 4 and int(ver_split[1]) >= 1:
     error_msg = 'Could not chmod' \
-        if platform.system() == 'Linux' else \
+        if sys_platform == 'Linux' else \
         'Error executing command'
 else:
     error_msg = 'err Could not chmod' \
-        if platform.system() == 'Linux' else \
+        if sys_platform == 'Linux' else \
         'err Cannot execute installer'
 
 test_metadata = [
-    # 1. Upgrade from initial_version to v4.1.0
+    # 1. Upgrade from initial_version to new version
     {
         'protocol': PROTOCOL,
         'initial_version': _agent_version,
@@ -140,9 +130,9 @@ if _agent_version == 'v3.13.2':
     }]
 elif _agent_version == version_to_upgrade:
     test_metadata += [{
-        # 5. Simulate a rollback (v4.1.0)
+        # 5. Simulate a rollback (new version)
         'protocol': PROTOCOL,
-        'initial_version': 'v4.1.0',
+        'initial_version': version_to_upgrade,
         'agent_version': version_to_upgrade,
         'use_http': False,
         'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
@@ -207,27 +197,29 @@ def start_agent(request, get_configuration):
     remoted_simulator = RemotedSimulator(server_address=SERVER_ADDRESS,
                                          remoted_port=1514,
                                          protocol=metadata['protocol'],
-                                         mode='CONTROLED_ACK',
+                                         mode='CONTROLLED_ACK',
                                          start_on_init=False,
                                          client_keys=CLIENT_KEYS_PATH)
-    if _agent_version == 'v4.1.0':
-        remoted_simulator.setWcomMessageVersion('4.1')
+
+    ver_split = _agent_version.replace("v", "").split(".")
+    if int(ver_split[0]) >= 4 and int(ver_split[1]) >= 1:
+        remoted_simulator.set_wcom_message_version('4.1')
     else:
-        remoted_simulator.setWcomMessageVersion(None)
+        remoted_simulator.set_wcom_message_version(None)
 
     # Clean client.keys file
     truncate_file(CLIENT_KEYS_PATH)
     time.sleep(1)
 
     control_service('stop')
-    agent_auth_pat = 'bin' if platform.system() == 'Linux' else ''
+    agent_auth_pat = 'bin' if sys_platform == 'Linux' else ''
     subprocess.call([f'{WAZUH_PATH}/{agent_auth_pat}/agent-auth', '-m',
                     SERVER_ADDRESS])
     control_service('start')
 
     remoted_simulator.start(custom_listener=remoted_simulator.upgrade_listener,
                             args=(metadata['filename'], metadata['filepath'],
-                                  metadata['chunk_size'], 
+                                  metadata['chunk_size'],
                                   metadata['upgrade_script'],
                                   metadata['sha1'],
                                   metadata['simulate_interruption'],
@@ -243,7 +235,7 @@ def start_agent(request, get_configuration):
 def download_wpk(get_configuration):
     metadata = get_configuration['metadata']
     agent_version = metadata['agent_version']
-    current_plaform = platform.system().lower()
+    current_plaform = sys_platform.lower()
     protocol = 'http://' if metadata['use_http'] else 'https://'
     wpk_repo = 'packages-dev.wazuh.com/trash/wpk/'
     architecture = 'x86_64'
@@ -288,8 +280,8 @@ def prepare_agent_version(get_configuration):
     if os.path.exists(UPGRADE_RESULT_PATH):
         os.remove(UPGRADE_RESULT_PATH)
 
-    if get_current_version() != metadata["initial_version"]:
-        if platform.system() == 'Windows':
+    if get_version() != metadata["initial_version"]:
+        if sys_platform in ['Windows', 'win32']:
             try:
                 control_service('stop')
             except ValueError:
@@ -317,7 +309,7 @@ def prepare_agent_version(get_configuration):
 
     yield
 
-    if platform.system() == 'Windows':
+    if sys_platform in ['Windows', 'win32']:
         try:
             control_service('stop')
         except ValueError:
@@ -332,18 +324,18 @@ def prepare_agent_version(get_configuration):
         backups_files = [x for x in sorted(os.listdir(os.path.join(WAZUH_PATH,
                                                                    'backup')))
                          if backup_file_start in x]
-
-        subprocess.call(['tar', 'xzf', f'{WAZUH_PATH}/backup/{backups_files[-1]}',
-                         '-C', '/'])
+        if len(backups_files) > 0:
+            subprocess.call(['tar', 'xzf', f'{WAZUH_PATH}/backup/{backups_files[-1]}',
+                            '-C', '/'])
 
 
 def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
-                    configure_environment, start_agent):
+                   configure_environment, start_agent):
     metadata = get_configuration['metadata']
     expected = metadata['results']
 
     # Extract initial Wazuh Agent version
-    assert get_current_version() == metadata["initial_version"], \
+    assert get_version() == metadata["initial_version"], \
            'Initial version does not match Expected for agent'
 
     upgrade_process_result, upgrade_exec_message = \
@@ -377,8 +369,8 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
                    'Notification was expected but was not received'
 
     if expected['upgrade_ok'] and not metadata['simulate_rollback']:
-        assert get_current_version() == metadata['agent_version'], \
+        assert get_version() == metadata['agent_version'], \
                 'End version does not match expected!'
     else:
-        assert get_current_version() == metadata['initial_version'], \
+        assert get_version() == metadata['initial_version'], \
                 'End version does not match expected!'

@@ -1,10 +1,11 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import pytest
 from collections import Counter
+
+import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_registry, modify_registry_value, delete_registry, \
     callback_detect_event, check_time_travel, validate_registry_value_event, registry_parser, KEY_WOW64_32KEY, \
@@ -15,7 +16,6 @@ from wazuh_testing.tools.monitoring import FileMonitor
 # Marks
 
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=0)]
-
 
 # Variables
 key = "HKEY_LOCAL_MACHINE"
@@ -28,7 +28,6 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 reg1, reg2 = test_regs
 
 monitoring_modes = ['scheduled']
-
 
 # Configurations
 
@@ -90,7 +89,7 @@ def test_delete_registry(key, subkey, arch, value_list,
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
     events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                      accum_results=len(value_list) + 1, error_message='Did not receive expected '
-                                     '"Sending FIM event: ..." event').result()
+                                                                                      '"Sending FIM event: ..." event').result()
     for ev in events:
         validate_registry_value_event(ev, mode=mode)
 
