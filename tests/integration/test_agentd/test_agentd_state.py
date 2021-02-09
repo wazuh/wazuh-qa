@@ -36,16 +36,19 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
 test_data_file = os.path.join(test_data_path, 'wazuh_state_tests.yaml')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__)
+
+# Open test cases description file
 with open(test_data_file) as f:
     test_cases = yaml.safe_load(f)
 
+# Global RemotedSimulator variable
 remoted_server = None
-configurations = load_wazuh_configurations(configurations_path, __name__)
+# Global FileMonitor variable to watch ossec.log
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # Variables
 if sys.platform == 'win32':
-    state_file_path = os.path.join(WAZUH_PATH, 'wazuh-agentd.state')
+    state_file_path = os.path.join(WAZUH_PATH, 'wazuh-agent.state')
     internal_options = os.path.join(WAZUH_PATH, 'internal_options.conf')
 else:
     state_file_path = os.path.join(WAZUH_PATH, 'var', 'run',
@@ -53,7 +56,7 @@ else:
     internal_options = os.path.join(WAZUH_PATH, 'etc', 'internal_options.conf')
 
 
-# fixtures
+# Fixtures
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
     """Get configurations from the module"""
@@ -62,6 +65,15 @@ def get_configuration(request):
 
 # Functions
 def control_service_unconditionally(action, daemon=None):
+    """Control services avoiding handling exception
+
+    Args:
+        action : {'stop', 'start', 'restart'}
+            Action to be done with the service/daemon.
+        daemon : str, optional
+            Name of the daemon to be controlled.
+                None to control the whole Wazuh service. Default `None`.
+    """
     try:
         control_service(action, daemon=daemon)
     except Exception:
@@ -73,19 +85,31 @@ def extra_configuration_before_yield():
 
 
 def extra_configuration_after_yield():
-    change_internal_options('agent.debug', '0')
     global remoted_server
     if remoted_server is not None:
         remoted_server.stop()
 
+    # Set default values
+    change_internal_options('agent.debug', '0')
+    set_state_interval(5)
+    truncate_file(CLIENT_KEYS_PATH)
+
 
 def set_state_interval(interval):
+    """Set agent.state_interval value on internal_options.conf
+    Args:
+        interval:
+            - Different than `None`: set agent.state_interval
+                                     value on internal_options.conf
+            - `None`: agent.state_interval will be removed
+                      from internal_options.conf
+    """
     if interval is not None:
         change_internal_options('agent.state_interval', interval,
                                 opt_path=internal_options)
     else:
         new_content = ''
-        with open(internal_options, 'r') as f:
+        with open(internal_options) as f:
             lines = f.readlines()
 
         for line in lines:
@@ -97,11 +121,13 @@ def set_state_interval(interval):
 
 
 def files_setup():
+    """Truncate ossec.log and remote state file"""
     truncate_file(LOG_FILE_PATH)
     os.remove(state_file_path) if os.path.exists(state_file_path) else None
 
 
-def set_keys():
+def set_test_key():
+    """Set test client.keys file"""
     with open(CLIENT_KEYS_PATH, 'w+') as f:
         f.write("100 ubuntu-agent any TopSecret")
 
@@ -114,7 +140,7 @@ def test_agentd_state(configure_environment, test_case: list):
     global remoted_server
     if remoted_server is not None:
         remoted_server.stop()
-
+    # Stop service
     control_service_unconditionally('stop')
 
     if 'interval' in test_case['input']:
@@ -123,44 +149,63 @@ def test_agentd_state(configure_environment, test_case: list):
         set_state_interval(1)
 
     files_setup()
-    set_keys()
+    set_test_key()
 
+    # Start service
     control_service_unconditionally('start')
 
+    # Start RemotedSimulator if test case need it
     if('remoted' in test_case['input'] and
-       test_case['input']['remoted'] == True):
+       test_case['input']['remoted']):
         remoted_server = RemotedSimulator(protocol='tcp', mode='DUMMY_ACK',
                                           client_keys=CLIENT_KEYS_PATH)
 
+    # Check fields for every expected output type
     for expected_output in test_case['output']:
         check_fields(expected_output)
 
 
 def parse_state_file():
+    """Parse state file and return the content as dict"""
+
+    # Wait until state file is dumped
     wait_state_update()
     state = {}
-    with open(state_file_path, 'r') as f:
+    with open(state_file_path) as f:
         lines = f.readlines()
 
     for line in lines:
         line = line.rstrip('\n')
+        # Remove empty lines or comments
         if not line or line.startswith('#'):
             continue
         (key, value) = line.split('=', 1)
+        # Remove value's quotes
         state[key] = value.strip("'")
+
     return state
 
 
 def remoted_get_state():
+    """Send getstate request to agent (via RemotedSimulator)
+        and return state info as dict.
+
+    Returns:
+        dict: state info
+    """
     global remoted_server
-    remoted_server.request("agent getstate")
+    remoted_server.request('agent getstate')
     sleep(2)
     response = json.loads(remoted_server.request_answer)
     return response['data']
 
 
 def check_fields(expected_output):
+    """Check every field agains expected data
 
+    Args:
+        expected_output (dict): expected output block
+    """
     checks = {
         'last_ack': {'handler': check_last_ack, 'precondition': [wait_ack]},
         'last_keepalive': {'handler': check_last_keepalive,
@@ -186,12 +231,23 @@ def check_fields(expected_output):
 
 
 def check_last_ack(expected_value=None, get_state_callback=None):
+    """Check `field` status
+
+    Args:
+        expected_value (string, optional): value to check against.
+                                           Defaults to None.
+        get_state_callback (function, optional): callback to get state.
+                                                 Defaults to None.
+
+    Returns:
+        boolean: `True` if check was successfull. `False` otherwise
+    """
     if get_state_callback:
         current_value = get_state_callback()['last_ack']
         if expected_value == '':
             return expected_value == current_value
 
-    with open(LOG_FILE_PATH, 'r') as f:
+    with open(LOG_FILE_PATH) as f:
         lines = f.readlines()
 
     for line in lines:
@@ -202,39 +258,72 @@ def check_last_ack(expected_value=None, get_state_callback=None):
 
 
 def check_last_keepalive(expected_value=None, get_state_callback=None):
+    """Check `field` status
+
+    Args:
+        expected_value (string, optional): value to check against.
+                                           Defaults to None.
+        get_state_callback (function, optional): callback to get state.
+                                                 Defaults to None.
+
+    Returns:
+        boolean: `True` if check was successfull. `False` otherwise
+    """
     if get_state_callback:
         current_value = get_state_callback()['last_keepalive']
         if expected_value == '':
             return expected_value == current_value
 
-    with open(LOG_FILE_PATH, 'r') as f:
+    with open(LOG_FILE_PATH) as f:
         lines = f.readlines()
 
     for line in lines:
-        if(current_value.replace("-", "/") in line and
-           ("Sending keep alive" in line or
-           "Sending agent notification" in line)):
+        if(current_value.replace('-', '/') in line and
+           ('Sending keep alive' in line or
+           'Sending agent notification' in line)):
             return True
     return False
 
 
 def check_msg_count(expected_value=None, get_state_callback=None):
+    """Check `field` status
+
+    Args:
+        expected_value (string, optional): value to check against.
+                                           Defaults to None.
+        get_state_callback (function, optional): callback to get state.
+                                                 Defaults to None.
+
+    Returns:
+        boolean: `True` if check was successfull. `False` otherwise
+    """
     if get_state_callback:
         current_value = get_state_callback()['msg_count']
         if expected_value == '':
             return expected_value == current_value
     sent_messages = 0
-    with open(LOG_FILE_PATH, 'r') as f:
+    with open(LOG_FILE_PATH) as f:
         lines = f.readlines()
 
     for line in lines:
-        if "Sending keep alive" in line:
+        if 'Sending keep alive' in line:
             sent_messages += 1
 
     return sent_messages >= current_value
 
 
 def check_status(expected_value=None, get_state_callback=None):
+    """Check `field` status
+
+    Args:
+        expected_value (string, optional): value to check against.
+                                           Defaults to None.
+        get_state_callback (function, optional): callback to get state.
+                                                 Defaults to None.
+
+    Returns:
+        boolean: `True` if check was successfull. `False` otherwise
+    """
     if expected_value != 'pending':
         wait_keepalive(True)
         if get_state_callback == parse_state_file:
@@ -244,6 +333,12 @@ def check_status(expected_value=None, get_state_callback=None):
 
 
 def wait_connect(update_position=False):
+    """ Watch ossec.conf until `callback_connected_to_server` is triggered
+
+    Args:
+        update_position (bool, optional): update position after reading.
+                                          Defaults to False.
+    """
     global wazuh_log_monitor
     wazuh_log_monitor.start(timeout=120,
                             callback=callback_connected_to_server,
@@ -252,6 +347,12 @@ def wait_connect(update_position=False):
 
 
 def wait_ack(update_position=False):
+    """ Watch ossec.conf until `callback_ack` is triggered
+
+    Args:
+        update_position (bool, optional): update position after reading.
+                                          Defaults to False.
+    """
     global wazuh_log_monitor
     wazuh_log_monitor.start(timeout=120,
                             callback=callback_ack,
@@ -260,6 +361,12 @@ def wait_ack(update_position=False):
 
 
 def wait_keepalive(update_position=False):
+    """ Watch ossec.conf until `callback_keepalive` is triggered
+
+    Args:
+        update_position (bool, optional): update position after reading.
+                                          Defaults to False.
+    """
     global wazuh_log_monitor
     wazuh_log_monitor.start(timeout=120,
                             callback=callback_keepalive,
@@ -268,6 +375,12 @@ def wait_keepalive(update_position=False):
 
 
 def wait_state_update(update_position=True):
+    """ Watch ossec.conf until `callback_state_file_updated` is triggered
+
+    Args:
+        update_position (bool, optional): update position after reading.
+                                          Defaults to True.
+    """
     global wazuh_log_monitor
     wazuh_log_monitor.start(timeout=120,
                             callback=callback_state_file_updated,

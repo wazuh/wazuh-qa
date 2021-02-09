@@ -664,12 +664,14 @@ class RemotedSimulator:
             if timeout is not None:
                 timeout -= 1
         return self.upgrade_notification
-    """
-    Send request to agent
-    message: Request content
-    """
+
     def request(self, message):
+        """
+        Send request to agent using current request counter
+        message: Request content
+        """
+
         if self.last_client:
-            message = "#!-req 111 " + message
-            request = self.create_sec_message(message, 'aes')
+            request_message = f'#!-req {self.request_counter} {message}'
+            request = self.create_sec_message(request_message, 'aes')
             self.send(self.last_client, request)
