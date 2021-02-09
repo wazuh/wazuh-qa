@@ -22,7 +22,8 @@ from wazuh_testing.tools.services import (control_service,
                                           check_if_process_is_running)
 
 # Marks
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
+pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0),
+              pytest.mark.agent]
 
 # Configurations
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -106,9 +107,6 @@ def test_agentd_state_config(configure_environment, test_case: list):
     set_state_interval(test_case['interval'])
     control_agentd_unconditionally('start')
 
-    if 'agentd_ends' in test_case:
-        assert (test_case['agentd_ends']
-                is not check_if_process_is_running('wazuh-agentd'))
     if 'state_file_exist' in test_case:
         if test_case['state_file_exist'] is True:
             time.sleep(test_case['interval'])
@@ -118,5 +116,7 @@ def test_agentd_state_config(configure_environment, test_case: list):
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                             callback=callbacks.get(test_case['log_expect']),
                             error_message='Event not found')
-
+    if 'agentd_ends' in test_case:
+        assert (test_case['agentd_ends']
+                is not check_if_process_is_running('wazuh-agentd'))
     assert wazuh_log_monitor.result()

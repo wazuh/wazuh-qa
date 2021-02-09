@@ -33,3 +33,30 @@ def callback_state_file_enabled(line):
     if match:
         return True
     return None
+
+
+def callback_state_file_updated(line):
+    match = re.match(r'.*Updating state file', line)
+    if match:
+        return True
+    return None
+
+
+def callback_ack(line):
+    match = re.match(r".*Received message: '#!-agent ack ", line)
+    if match:
+        return True
+    return None
+
+
+def callback_keepalive(line):
+    match = re.match(r'.*Sending keep alive', line)
+    if match:
+        return True
+    return None
+
+def callback_connected_to_server(line):
+    match = re.match(r'.*Connected to the server', line)
+    if match:
+        return True
+    return None

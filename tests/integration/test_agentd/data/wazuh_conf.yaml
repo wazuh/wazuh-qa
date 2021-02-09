@@ -142,6 +142,7 @@
       - all
       apply_to_modules:
       - test_agentd_state_config
+      - test_agentd_state
       sections:
       - section: client
         elements:
@@ -149,3 +150,8 @@
                 elements:
                 - address: 
                     value: '127.0.0.1'
+                - port:
+                    value: '1514'
+                - protocol:
+                    value: 'tcp'
+        
