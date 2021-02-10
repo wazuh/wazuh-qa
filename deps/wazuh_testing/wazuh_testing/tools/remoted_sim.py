@@ -241,10 +241,12 @@ class RemotedSimulator:
     def send_com_message(self, client_address, connection, command, payload=None, interruption_time=None):
         """
         Create a COM message
-        - client_address: client of the connection
-        - connection: established connection (tcp only)
-        - payload: Optional binary data to add to the message
-        - interruption_time: Time that will be added in between connections
+        
+        Args:
+            - client_address: client of the connection
+            - connection: established connection (tcp only)
+            - payload: Optional binary data to add to the message
+            - interruption_time: Time that will be added in between connections
         """
         self.request_counter += 1
         if command == 'lock_restart -1' or self.wcom_message_version is None:

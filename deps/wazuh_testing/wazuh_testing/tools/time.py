@@ -18,10 +18,8 @@ class TimeMachine:
         """
         Save time frame given by user.
 
-        Parameters
-        ----------
-        timedelta_ : timedelta
-            Time frame.
+        Args:
+            timedelta_ : Time frame.
         """
         self.time_delta = timedelta_
 
@@ -38,10 +36,8 @@ class TimeMachine:
         """
         Change date and time in a Linux system.
 
-        Parameters
-        ----------
-        datetime_ : datetime
-            New date and time to set.
+        Args: 
+            datetime_ : New date and time to set.
         """
         import shlex
         subprocess.call(shlex.split("timedatectl set-ntp false"))
@@ -53,10 +49,8 @@ class TimeMachine:
         """
         Change date and time in a Windows system.
 
-        Parameters
-        ----------
-        datetime_ : datetime
-            New date and time to set.
+        Args:
+            datetime_ : New date and time to set.
         """
         subprocess.call(["powershell.exe", "Set-Date", "-Date", f'"{datetime_.strftime("%d/%m/%Y %H:%M:%S")}"'])
 
@@ -65,10 +59,8 @@ class TimeMachine:
         """
         Change date and time in a Linux system.
 
-        Parameters
-        ----------
-        datetime_ : datetime
-            New date and time to set.
+        Args:
+            datetime_ : New date and time to set.
         """
         solaris_time_format = "%m%d%H%M%Y.%S"
         os.system("date '%s'" % datetime_.strftime(solaris_time_format))
@@ -78,10 +70,8 @@ class TimeMachine:
         """
         Change date and time in a MacOS system.
 
-        Parameters
-        ----------
-        datetime_ : datetime
-            New date and time to set.
+        Args:     
+            datetime_ : New date and time to set.
         """
         # {month}{day}{hour}{minute}{year}.{seconds}
         os.system('date ' + '-u ' + datetime_.strftime("%m%d%H%M%Y.%S"))
@@ -91,12 +81,9 @@ class TimeMachine:
         """
         Check which system are we running this code in and calls its proper function.
 
-        Parameters
-        ----------
-        time_delta : timedelta
-            Time frame we want to skip. It can have a negative value.
-        back_in_time : bool, optional
-            Go back in time the same time_delta interval. Default value is False.
+        Args:
+            time_delta : Time frame we want to skip. It can have a negative value.
+            back_in_time (bool,optional): Go back in time the same time_delta interval. Default value is False.
         """
         # Save timedelta to be able to  travel back in time after the tests
         TimeMachine.total_time_spent += time_delta.total_seconds()
@@ -146,15 +133,11 @@ def reformat_time(scan_time):
     """
     Transform scan_time to readable time.
 
-    Parameters
-    ----------
-    scan_time : str
-        Time string.
+    Args:
+        scan_time (str): Time string.
 
-    Returns
-    -------
-    datetime
-        Datetime object with the string translated.
+    Returns:
+        datetime: Datetime object with the string translated.
     """
     hour_format = '%H'
     colon = ''
@@ -173,15 +156,10 @@ def time_to_timedelta(time_):
     """
     Convert a string with time in seconds with `smhdw` suffixes allowed to `datetime.timedelta`.
 
-    Parameters
-    ----------
-    time_ : str
-        String with time in seconds.
-
-    Returns
-    -------
-    timedelta
-        Timedelta object.
+    Args:
+        time_ (str): String with time in seconds.
+    Returns:
+        timedelta: Timedelta object.
     """
     time_unit = time_[len(time_) - 1:]
 
@@ -206,15 +184,12 @@ def time_to_human_readable(time_):
     """
     Convert a time string like 5s or 2d into a human-readable string such as 5 seconds or 2 days
 
-    Parameters
-    ----------
-    time_ : str
-      String with the time and the measurement unit
+    Args:
+    
+    time_ (str): String with the time and the measurement unit
 
-    Returns
-    -------
-    human_readable_time
-      String in the new format, for example: 5 seconds
+    Returns:
+        human_readable_time (str): String in the new format, for example: 5 seconds
     """
 
     time_unit = time_[-1]
@@ -235,15 +210,11 @@ def unit_to_seconds(time_):
     """
     Convert a time string like 9m or 2d into another similar string in seconds
 
-    Parameters
-    ----------
-    time_ : str
-      String with the time and the measurement unit
+    Args:
+        time_ (str): String with the time and the measurement unit
 
-    Returns
-    -------
-    seconds_time
-      String in the same format with units converted to seconds
+    Returns:
+        seconds_time: String in the same format with units converted to seconds
     """
 
     seconds_equivalent = {
@@ -267,15 +238,11 @@ def time_to_seconds(time_):
     """
     Convert a string with format (1s, 1m, 1h, 1d, 1w) in number of seconds.
 
-    Parameters
-    ----------
-    time_ : str
-        String (1s, 1m, 1h, 1d, 1w).
+    Args:
+        time_ (str): String (1s, 1m, 1h, 1d, 1w).
 
     Returns
-    -------
-    time_value: int
-        Number of seconds.
+        time_value (int): Number of seconds.
     """
     time_unit = time_[len(time_) - 1:]
 

@@ -4,20 +4,14 @@ theme:
 
 plugins:
   - search
-  - mkdocstrings:
-      handlers:
-        python:
-          setup_commands:
-            - import sys
-            # - from unittest.mock import MagicMock as mock
-            # - sys.modules["wazuh_testing.vulnerability_detector"] = mock()
-
-
+  - mkdocstrings
 nav:
     - Home: index.md
     - Deps: 
-      - Index: deps/deps.md
-      - Wazuh Testing: deps/wazuh_testing.md
+      - Dependencies: deps/deps.md
+      - Wazuh Testing: 
+        - Wazuh Testing: deps/wazuh-testing/wazuh_testing.md
+        - Tools: deps/wazuh-testing/tools.md
     - Tests: 
       - Index: tests/tests.md
       - Integration: 

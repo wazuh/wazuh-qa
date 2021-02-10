@@ -28,16 +28,11 @@ class CertificateController(object):
         """
         Generates and stores all required certificate for an agent
 
-        Parameters
-        ----------
-        signed : boolean
-            Whetever the CA certificate will be signed by the agent key or not
-        agentname : string
-            String to be set for common name to agent certificate
-        agent_key_path : string
-            Path to store agent private key
-        agent_cert_path : string
-            Path to store agent certificate
+        Args:
+            signed (boolean): Whetever the CA certificate will be signed by the agent key or not
+            agentname (string): String to be set for common name to agent certificate
+            agent_key_path (string): Path to store agent private key
+            agent_cert_path (string): Path to store agent certificate
         """
         # Generate agent keys
         key = crypto.PKey()
@@ -58,20 +53,13 @@ class CertificateController(object):
         """
         Create a CA Certificate that will be signed with each agent key
 
-        Parameters
-        ----------
-        pub_key : PKey()
-            Key to be set in certificate
-        issuer: str
-            Name or hostname for the certificate issuer
-        subject: str
-            Name or hostname for the ceritifcate subject. If none will be same
-        as issuer
+        Args:
+        pub_key (PKey): Key to be set in certificate
+        issuer (str): Name or hostname for the certificate issuer
+        subject (str): Name or hostname for the ceritifcate subject. If none will be same as issuer
 
-        Returns
-        ------
-        ca_cert : X509 Object
-             Created ca certificate
+        Returns:
+            ca_cert : X509 Object. Created ca certificate
         """
 
         ca_cert = crypto.X509()
@@ -106,26 +94,19 @@ class CertificateController(object):
         """
         Signs ca certificate with the input key
 
-        Parameters
-        ----------
-        key : Pkey Object
-            key that will sign the certificate
-        algorithm : str
-            Name of the message digest to use
+        Args:
+            key (Pkey Object): Key that will sign the certificate
+            algorithm (str): Name of the message digest to use
         """
         self.ca_cert.sign(key, digest)
         return
 
     def store_ca_certificate(self, ca_cert, ca_path):
         """
-        Saves a certificate in the stored path
-        in PEM format
-        Parameters
-        ----------
-        ca_cert : X509 Object
-            Certifiate to store
-        ca_path : string
-            Path to store the ca certificate
+        Saves a certificate in the stored path in PEM format
+        Args:
+            ca_cert (X509 Object):  Certifiate to store
+            ca_path (str): Path to store the ca certificate
         """
         if os.path.exists(ca_path):
             os.remove(ca_path)
@@ -142,12 +123,9 @@ class CertificateController(object):
         """
         Stores a private key pair into the specified paths
 
-        Parameters
-        ----------
-        key : PKey
-            Keys to be stored
-        private_key_path : string
-            Path to store the private key
+        Args:
+            key (PKey): Keys to be stored
+            rivate_key_path (str): Path to store the private key
         """
         if os.path.exists(private_key_path):
             if platform.system() == 'Windows':
@@ -163,12 +141,9 @@ class CertificateController(object):
         """
         Stores a private key pair into the specified paths
 
-        Parameters
-        ----------
-        key : PKey
-            Keys to be stored
-        public_key_path : string
-            Path to store the private key
+        Args:
+            key (PKey): Keys to be stored
+            public_key_path (str) : Path to store the private key
         """
         if os.path.exists(public_key_path):
             os.remove(public_key_path)

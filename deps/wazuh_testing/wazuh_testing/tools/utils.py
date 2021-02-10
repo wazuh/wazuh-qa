@@ -8,21 +8,14 @@ def replace_regex(pattern, new_value, data, replace_group=False):
     """
     Function to replace a pattern string in a data text
 
-    Parameters
-    ----------
-    pattern: str
-        Regular expresion pattern
-    new_value: str
-        New replaced string
-    data: str
-        String to search and replace
-    replace_group: bool
-        Flag to replace a plain expression or to replace it in a group
+    Args:
+        pattern (str): Regular expresion pattern
+        new_value (str): New replaced string
+        data (str): String to search and replace
+        replace_group (bool): Flag to replace a plain expression or to replace it in a group
 
-    Returns
-    -------
-    str:
-        New replaced text
+    Returns:
+        str: New replaced text
     """
     compiled_pattern = re.compile(pattern, re.DOTALL)
     replace_value = rf"\g<1>{new_value}\g<3>" if replace_group else new_value
@@ -34,28 +27,20 @@ def insert_xml_tag(pattern, tag, value, data):
     """
     Function to insert a xml tag in a string data.
 
-    Parameters
-    ----------
-    pattern: str
-        regex pattern.
-        Important: the regex must be composed of 3 groups. The inserted data will be added between group 1 and group 2.
-        Example:
-            r'(.*</tag1>)(<my_custom_tag>)(<tag2>)
-                </tag1>
-                <my_custom_tag>custom_value</my_custom_tag>
-                <tag2>
-                ...
-    tag: str
-        new xml tag
-    value: str
-        value of new xml tag
-    data: str
-        XML string data
-
-    Returns
-    -------
-    str:
-        new XML string data
+    Args:
+        pattern (str): regex pattern. The regex must be composed of 3 groups. The inserted data will be added between group 1 and group 2.
+            Example:
+                r'(.*\</tag1\>)(\<my_custom_tag\>)(\<tag2\>)
+                    \</tag1\>
+                    \<my_custom_tag\>custom_value\</my_custom_tag\>
+                    \<tag2\>
+                    ...
+        tag (str): new xml tag
+        value (str): value of new xml tag
+        data (str): XML string data
+    
+    Returns:
+        str: new XML string data
     """
     xml_tag = f"\n  <{tag}>{value}</{tag}>"
     compiled_pattern = re.compile(pattern, re.DOTALL)

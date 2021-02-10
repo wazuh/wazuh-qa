@@ -35,17 +35,12 @@ from wazuh_testing.tools.system import HostManager
 def wazuh_unpack(data, format_: str = "<I"):
     """Unpack data with a given header. Using Wazuh header by default.
 
-    Parameters
-    ----------
-    data : bytes
-        Binary data to unpack
-    format_ : str, optional
-        Format used to unpack data. Default "<I"
+    Args:
+        data (bytes): Binary data to unpack
+        format_ (str): Optional - Format used to unpack data. Default "<I"
 
-    Returns
-    -------
-    int
-        Unpacked value
+    Returns:
+        int : Unpacked value
     """
     return unpack(format_, data)[0]
 
@@ -53,17 +48,12 @@ def wazuh_unpack(data, format_: str = "<I"):
 def wazuh_pack(data, format_: str = "<I"):
     """Pack data with a given header. Using Wazuh header by default.
 
-    Parameters
-    ----------
-    data : int
-        Int number to pack
-    format_ : str, optional
-        Format used to pack data. Default "<I"
+    Args:
+        data (int): Int number to pack
+        format_ (str): Optional - Format used to pack data. Default "<I"
 
-    Returns
-    -------
-    bytes
-        Packed value
+    Returns:
+        (bytes) : Packed value
     """
     return pack(format_, data)
 
@@ -71,21 +61,14 @@ def wazuh_pack(data, format_: str = "<I"):
 def wait_for_condition(condition_checker, args=None, kwargs=None, timeout=-1):
     """Wait for a given condition to check.
 
-    Parameters
-    ----------
-    condition_checker : callable
-        Function that checks a condition.
-    args :  list, optional
-        List of positional arguments. Default `None`
-    kwargs : dict, optional
-        Dict of non positional arguments. Default `None`
-    timeout : int, optional
-        Time to wait. Default `-1`
+    Args:
+        condition_checker (callable): Function that checks a condition.
+        args (list): Optional - List of positional arguments. Default `None`
+        kwargs (dict): Optional - Dict of non positional arguments. Default `None`
+        timeout (int): Optional - Time to wait. Default `-1`
 
-    Raises
-    ------
-    TimeoutError
-        If `timeout` is not -1 and there have been more iterations that the max allowed.
+    Raises:
+        TimeoutError - If `timeout` is not -1 and there have been more iterations that the max allowed.
     """
     args = [] if args is None else args
     kwargs = {} if kwargs is None else kwargs
@@ -199,24 +182,16 @@ class SocketController:
     def __init__(self, address, family='AF_UNIX', connection_protocol='TCP', timeout=30, open_at_start=True):
         """Create a new unix socket or connect to a existing one.
 
-        Parameters
-        ----------
-        address : str or Tuple(str, int)
-            Address of the socket, the format of the address depends on the type. A regular file path for AF_UNIX or a
-            Tuple(HOST, PORT) for AF_INET
-        family : str
-            Family type of socket to connect to, AF_UNIX for unix sockets or AF_INET for port sockets.
-        connection_protocol : str
-            Flag that indicates if the connection is TCP (SOCK_STREAM), UDP (SOCK_DGRAM) or SSL_TLSv1_2.
-        timeout : int, optional
-            Socket's timeout, 0 for non-blocking mode.
-        open_at_start : boolean
-            Defines if the socket is opened at start or not. Default True
+        Args:
+        
+            address (str or Tuple(str, int)): Address of the socket, the format of the address depends on the type. A regular file path for AF_UNIX or a Tuple(HOST, PORT) for AF_INET
+            family (str): Family type of socket to connect to, AF_UNIX for unix sockets or AF_INET for port sockets.
+            connection_protocol (str): Flag that indicates if the connection is TCP (SOCK_STREAM), UDP (SOCK_DGRAM) or SSL_TLSv1_2.
+            timeout (int): Optional - Socket's timeout, 0 for non-blocking mode.
+            open_at_start (boolean): Defines if the socket is opened at start or not. Default True
 
-        Raises
-        ------
-        Exception
-            If the socket connection failed.
+        Raises:
+            Exception: If the socket connection failed.
         """
         self.address = address
         self.ssl = False
@@ -284,18 +259,11 @@ class SocketController:
     def send(self, message, size=False):
         """Send a message to the socket.
 
-        Parameters
-        ----------
-        message : str or bytes
-            Message to be sent.
-        size : bool, optional
-            Flag that indicates if the header of the message includes the size of the message.
-            (For example, Analysis doesn't need the size, wazuh-db does). Default `False`
-
-        Returns
-        -------
-        int
-            Size of the sent message
+        Args:
+            message (str or bytes): Message to be sent.
+            size (bool) : Optional - Flag that indicates if the header of the message includes the size of the message (For example, Analysis doesn't need the size, wazuh-db does). Default `False`
+        Returns:
+            (int) : Size of the sent message
         """
         msg_bytes = message.encode() if isinstance(message, str) else message
         try:
@@ -312,16 +280,10 @@ class SocketController:
     def receive(self, size=False):
         """Receive a message from the socket.
 
-        Parameters
-        ----------
-        size : bool, optional
-            Flag that indicates if the header of the message includes the size of the message.
-            (For example, Analysis doesn't need the size, wazuh-db does). Default `False`
-
-        Returns
-        -------
-        bytes
-            Socket message.
+        Args:
+            size (bool): Flag that indicates if the header of the message includes the size of the message (For example, Analysis doesn't need the size, wazuh-db does). Default `False`
+        Returns:
+            bytes: Socket message.
         """
         if size:
             size = wazuh_unpack(self.sock.recv(4, socket.MSG_WAITALL))
@@ -341,16 +303,11 @@ class SocketController:
                               connection_protocol="SSL_TLSv1_2", certificate=None, keyfile=None):
         """Set SSL configurations (use on SSL socket only). Should be set before opening the socket
 
-        Parameters
-        ----------
-        ciphers: string
-            String with supported ciphers
-        connection_protocol: string
-            ssl version to be used
-        certificate (optional): path
-            Path to the ssl certificate
-        keyfile (optional): path
-            Path to the ssl key
+        Args:
+            ciphers (str): String with supported ciphers
+            connection_protocol (str): ssl version to be used
+            certificate: Optional - Path to the ssl certificate
+            keyfile: Optional - Path to the ssl key
         """
         self.ciphers = ciphers
         self.connection_protocol = connection_protocol
@@ -384,12 +341,9 @@ class QueueMonitor:
     def __init__(self, queue_item, time_step=0.5):
         """Create a new instance to monitor any given queue.
 
-        Parameters
-        ----------
-        queue_item : Queue
-            Queue to monitor.
-        time_step : float, optional
-            Fraction of time to wait in every get. Default `0.5`
+        Args:
+            queue_item (queue): Queue to monitor
+            time_step (float,optiona) : Fraction of time to wait in every get. Default `0.5`
         """
         self._queue = queue_item
         self._continue = False
@@ -401,23 +355,15 @@ class QueueMonitor:
                     timeout_extra=0):
         """Get as many matched results as `accum_results`.
 
-        Parameters
-        ----------
-        callback : callable, optional
-            Callback function to filter results.
-        accum_results : int, optional
-            Number of results to get. Default `1`
-        timeout : int, optional
-            Maximum timeout. Default `-1`
-        update_position : bool, optional
-            True if we pop items from the queue once they are read. False otherwise. Default `True`
-        timeout_extra : int, optional
-            Grace period to fetch more events than specified in `accum_results`. Default: 0.
+        Args:
+            callback (callable,optional) : Callback function to filter results.
+            accum_results (int,optional) : Number of results to get. Default `1`
+            timeout (int,optional): Maximum timeout. Default `-1`
+            update_position (bool,optional) : True if we pop items from the queue once they are read. False otherwise. Default `True`
+            timeout_extra (int,optional): Grace period to fetch more events than specified in `accum_results`. Default: 0.
 
-        Returns
-        -------
-        list of any or any
-            It can return either a list of any type or simply any type. If `accum_results > 1`, it will be a list.
+        Returns:
+            (list of any): It can return either a list of any type or simply any type. If `accum_results > 1`, it will be a list.
         """
         result_list = []
         timer = 0.0
@@ -507,15 +453,11 @@ class Queue(queue.Queue):
 
         The difference between `peek` and `get` is `peek` pops the item and `get` does not.
 
-        Parameters
-        ----------
-        position : int, optional
-            Element of the queue to return. Default `0`
+        Args:
+            position (int,optional) : Element of the queue to return. Default `0`
 
-        Returns
-        -------
-        any
-            Any item in the given position.
+        Returns:
+            (any): Any item in the given position.
         """
         aux_queue = queue.Queue()
         aux_queue.queue = copy(self.queue)
@@ -541,22 +483,14 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
                               cert_reqs=None, ca_cert=None, options=None):
         """Overrides SSL  default configurations.
 
-        Parameters
-        ----------
-        ciphers: string
-            String with supported ciphers
-        connection_protocol: string
-            ssl version to be used
-        certificate (optional): path
-            Path to the ssl certificate
-        keyfile (optional): path
-            Path to the ssl key
-        cert_reqs (optional): ssl.CERT_NONE, ssl.CERT_OPTIONAL, ssl.CERT_REQUIRED
-            Whetever or not a cert is required
-        ca_cert(optional):
-            If cert is required show accepted certs
-        options(optional):
-            Add adinitional options
+        Args:
+            ciphers(string):  String with supported ciphers
+            connection_protocol(string): ssl version to be used
+            certificate (str,optional): Path to the ssl certificate
+            keyfile (str,optional): Path to the ssl key
+            cert_reqs (str,optional): ssl.CERT_NONE, ssl.CERT_OPTIONAL, ssl.CERT_REQUIRED. Whetever or not a cert is required
+            ca_cert(str,optional): If cert is required show accepted certs
+            options(str,optional): Add adinitional options
         """
         if ciphers:
             self.ciphers = ciphers
@@ -731,18 +665,11 @@ class ManInTheMiddle:
     def __init__(self, address, family='AF_UNIX', connection_protocol='TCP', func: callable = None):
         """Create a MITM server for the socket `socket_address`.
 
-        Parameters
-        ----------
-        address : str or Tuple(str, int)
-            Address of the socket, the format of the address depends on the type. A regular file path for AF_UNIX or
-            a Tuple(HOST, PORT) for AF_INET
-        family : str
-            Family type of socket to connect to, AF_UNIX for unix sockets or AF_INET for port sockets.
-            Default `'AF_UNIX'`
-        connection_protocol : str
-            It can be either 'TCP', 'UDP' or SSL. Default `'TCP'`
-        func : callable
-            Function to be applied to every received data before sending it.
+        Args:
+            address (str or Tuple(str, int) ): Address of the socket, the format of the address depends on the type. A regular file path for AF_UNIX or a Tuple(HOST, PORT) for AF_INET
+            family (str): Family type of socket to connect to, AF_UNIX for unix sockets or AF_INET for port sockets. Default `'AF_UNIX'`
+            connection_protocol (str) : It can be either 'TCP', 'UDP' or SSL. Default `'TCP'`
+            func (callable): Function to be applied to every received data before sending it.
         """
         if isinstance(address, str) or (isinstance(address, tuple) and len(address) == 2
                                         and isinstance(address[0], str) and isinstance(address[1], int)):
@@ -839,14 +766,11 @@ class ManInTheMiddle:
 def new_process(fn):
     """Wrapper for enable multiprocessing inside a class
 
-    Parameters
-    ----------
-    fn : callable
-        Function to be executed in a new thread
+    Args:
+        fn (callable) : Function to be executed in a new thread
 
-    Returns
-    -------
-    wrapper
+    Returns:
+        wrapper
     """
 
     def wrapper(*args, **kwargs):
@@ -880,16 +804,11 @@ class HostMonitor:
     def __init__(self, inventory_path, messages_path, tmp_path, time_step=0.5):
         """Create a new instance to monitor any given file in any specified host.
 
-        Parameters
-        ----------
-        inventory_path : str
-            Path to the hosts's inventory file.
-        messages_path : str
-            Path to the file where the callbacks, paths and hosts to be monitored are specified.
-        tmp_path : str
-            Path to the temporal files.
-        time_step : float, optional
-            Fraction of time to wait in every get. Default `0.5`.
+        Args:
+            inventory_path (str): Path to the hosts's inventory file.
+            messages_path (str):  Path to the file where the callbacks, paths and hosts to be monitored are specified.
+            tmp_path (str) : Path to the temporal files.
+            time_step (float,optional) : Fraction of time to wait in every get. Default `0.5`.
         """
         self.host_manager = HostManager(inventory_path=inventory_path)
         self._queue = Manager().Queue()
@@ -938,14 +857,10 @@ class HostMonitor:
         """Collects the file content of the specified path in the desired host and append it to the output_path file.
         Simulates the behavior of tail -f and redirect the output to output_path.
 
-        Parameters
-        ----------
-        host : str
-            Hostname.
-        path : str
-            Host file path to be collect.
-        output_path : str
-            Output path of the content collected from the remote host path.
+        Args:
+            host (str): Hostname.
+            path (str): Host file path to be collect.
+            output_path (str) : Output path of the content collected from the remote host path.
         """
         try:
             truncate_file(os.path.join(self._tmp_path, output_path))
@@ -970,22 +885,14 @@ class HostMonitor:
     def _start(self, host, payload, path, encoding=None, error_messages_per_host=None):
         """Start the file monitoring until the QueueMonitor returns an string or TimeoutError.
 
-        Parameters
-        ----------
-        host : str
-            Hostname
-        payload : list of dict
-            Contains the message to be found and the timeout for it.
-        path : str
-            Path where it must search for the message.
-        encoding : str
-            Encoding of the file.
-        error_messages_per_host : dict
-            Dictionary with hostnames as keys and desired error messages as values
-
-        Returns
-        -------
-        instance of HostMonitor
+        Args:
+            host (str): Hostname
+            payload (list,dict): Contains the message to be found and the timeout for it.
+            path (str): Path where it must search for the message.
+            encoding (str): Encoding of the file.
+            error_messages_per_host (dict): Dictionary with hostnames as keys and desired error messages as values
+        Returns:
+            Instance of HostMonitor
         """
         tailer = FileTailer(os.path.join(self._tmp_path, path), time_step=self._time_step)
         try:
@@ -1015,10 +922,8 @@ class HostMonitor:
     def result(self):
         """Get the result of HostMonitor
 
-        Returns
-        -------
-        dict
-            Dict that contains the host as the key and a list of messages as the values
+        Args:
+            dict (dict): Dict that contains the host as the key and a list of messages as the values
         """
         return self._result
 
@@ -1044,21 +949,14 @@ def wait_mtime(path, time_step=5, timeout=-1):
     """
     Wait until the monitored log is not being modified.
 
-    Parameters
-    ----------
-    path : str
-        Path to the file.
-    time_step : int, optional
-        Time step between checks of mtime. Default `5`
-    timeout : int, optional
-        Timeout for function to fail. Default `-1`
+    Args:
+        path (str) : Path to the file.
+        time_step (int,optional): Time step between checks of mtime. Default `5`
+        timeout (int,optional) : Timeout for function to fail. Default `-1`
 
-    Raises
-    ------
-    FileNotFoundError
-        Raised when the file does not exist.
-    TimeoutError
-        Raised when timeout is reached.
+    Raises:
+        FileNotFoundError: Raised when the file does not exist.
+        TimeoutError: Raised when timeout is reached.
     """
     if not os.path.exists(path):
         raise FileNotFoundError(f"{path} not found.")
