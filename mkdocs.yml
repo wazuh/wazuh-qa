@@ -1,0 +1,43 @@
+site_name: My Docs
+theme:
+  name: "material"
+
+plugins:
+  - search
+  - mkdocstrings
+nav:
+    - Home: index.md
+    - Deps: 
+      - Index: deps/deps.md
+      - Wazuh Testing: deps/wazuh_testing.md
+    - Tests: 
+      - Index: tests/tests.md
+      - Integration: 
+        - Index: tests/integration/integration.md
+        - Vulnerability Detector: 
+          - Index: tests/integration/vulnerability-detector/vulnerability-detector.md
+          - Tests feeds: 
+            - Index: tests/integration/vulnerability-detector/feeds/feeds.md
+            - Debian:
+              - tests/vulnerability-detector/feeds/debian/debian.md
+            - RedHat:
+              - tests/vulnerability-detector
+            - MSU:
+              - tests/vulnerability-detector
+            - Canonical:
+              - Tests: tests/integration/vulnerability-detector/feeds/canonical/canonical.md
+            - Download Feeds: tests/integration/vulnerability-detector/feeds/download-feed.md
+          - Tests general settings: 
+            - Index: tests/integration/vulnerability-detector/general-settings/general-settings.md
+          - Tests providers: 
+            - Index: tests/integration/vulnerability-detector/tests-providers/tests-providers.md
+          - Tests SCAN results: 
+            - Index: tests/integration/vulnerability-detector/scan-results/scan-results.md
+          - Tests Windows: 
+            - Index: tests/integration/vulnerability-detector/windows/windows.md
+
+
+
+
+
+
