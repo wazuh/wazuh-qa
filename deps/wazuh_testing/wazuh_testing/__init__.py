@@ -24,186 +24,145 @@ class Parameters:
 
     @property
     def default_timeout(self):
-        """
-        Getter method for the default timeout property
+        """Getter method for the default timeout property
 
-        Returns
-        -------
-        int representing the default timeout in seconds
+        Returns:
+            int: representing the default timeout in seconds
         """
         return self._default_timeout
 
     @default_timeout.setter
     def default_timeout(self, value):
-        """
-        Setter method for the default timeout property
+        """Setter method for the default timeout property
 
-        Parameters
-        ----------
-        value : int
-            New value for the default timeout. Must be in seconds.
+        Args:
+            value (int): New value for the default timeout. Must be in seconds.
         """
         self._default_timeout = value
 
     @property
     def fim_database_memory(self):
-        """
-        Getter method for the `fim_database_memory` property
+        """Getter method for the `fim_database_memory` property
 
-        Returns
-        -------
-        boolean representing if `fim_database_memory` is activated
+        Returns:
+            bool: representing if `fim_database_memory` is activated
         """
         return self._fim_database_memory
 
     @fim_database_memory.setter
     def fim_database_memory(self, value):
-        """
-        Setter method for the `fim_database_memory` property
+        """Setter method for the `fim_database_memory` property
 
-        Parameters
-        ----------
-        value : bool
-            New value for the `fim_database_memory`.
+        Args:
+            value (bool): New value for the `fim_database_memory`.
         """
         self._fim_database_memory = value
 
     @property
     def current_configuration(self):
-        """
-        Getter method for the current configuration property
+        """Getter method for the current configuration property
 
-        Returns
-        -------
-        dict
-            A dictionary containing the current configuration.
+        Returns:
+            dict: A dictionary containing the current configuration.
         """
         return self._current_configuration
 
     @current_configuration.setter
     def current_configuration(self, value):
-        """
-        Setter method for the current configuration property
+        """Setter method for the current configuration property
 
-        Parameters
-        ----------
-        value : dict
-            New value for the currenct configuration.
+        Args:
+            value (dict): New value for the current configuration.
         """
         self._current_configuration = value
 
     @property
     def gcp_project_id(self):
-        """
-        Getter method for the `gcp_project_id` property
+        """Getter method for the `gcp_project_id` property
 
-        Returns
-        -------
-        str Google Cloud project id `gcp_project_id`.
+        Returns:
+            str: Google Cloud project id `gcp_project_id`.
         """
         return self._gcp_project_id
 
     @gcp_project_id.setter
     def gcp_project_id(self, value):
-        """
-        Setter method for the `gcp_project_id` property
+        """Setter method for the `gcp_project_id` property
 
-        Parameters
-        ----------
-        value : string
-            New value for the `gcp_project_id`.
+        Args:
+            value (string): New value for the `gcp_project_id`.
         """
         self._gcp_project_id = value
 
     @property
     def gcp_subscription_name(self):
-        """
-        Getter method for the `gcp_subscription_name` property
+        """Getter method for the `gcp_subscription_name` property
 
-        Returns
-        -------
-        str Google Cloud subscription name `gcp_subscription_name`.
+        Returns:
+           str: Google Cloud subscription name `gcp_subscription_name`.
         """
         return self._gcp_subscription_name
 
     @gcp_subscription_name.setter
     def gcp_subscription_name(self, value):
-        """
-        Setter method for the `gcp_subscription_name` property
+        """Setter method for the `gcp_subscription_name` property
 
-        Parameters
-        ----------
-        value : string
-            New value for the `gcp_subscription_name`.
+        Args:
+            value (string): New value for the `gcp_subscription_name`.
         """
         self._gcp_subscription_name = value
 
     @property
     def gcp_credentials_file(self):
-        """
-        Getter method for the `gcp_credentials_file` property
+        """Getter method for the `gcp_credentials_file` property
 
-        Returns
-        -------
-        str path of `gcp_credentials_file`.
+        Returns:
+            str: path of `gcp_credentials_file`.
         """
         return self._gcp_credentials_file
 
     @gcp_credentials_file.setter
     def gcp_credentials_file(self, value):
-        """
-        Setter method for the `gcp_credentials_file` property
+        """Setter method for the `gcp_credentials_file` property
 
-        Parameters
-        ----------
-        value : string
-            New value for the `gcp_credentials_file`.
+        Args:
+            value (string): New value for the `gcp_credentials_file`.
         """
         self._gcp_credentials_file = value
 
     @property
     def gcp_topic_name(self):
-        """
-        Getter method for the `gcp_topic_name` property
+        """Getter method for the `gcp_topic_name` property
 
-        Returns
-        -------
-        str Google Cloud topic name `gcp_topic_name`.
+        Returns:
+            str: Google Cloud topic name `gcp_topic_name`.
         """
         return self._gcp_topic_name
 
     @gcp_topic_name.setter
     def gcp_topic_name(self, value):
-        """
-        Setter method for the `gcp_topic_name` property
+        """Setter method for the `gcp_topic_name` property
 
-        Parameters
-        ----------
-        value : string
-            New value for the `gcp_topic_name`.
+        Args:
+            value (string): New value for the `gcp_topic_name`.
         """
         self._gcp_topic_name = value
 
     @property
     def fim_mode(self):
-        """
-        Getter method for the `fim_mode` property
+        """Getter method for the `fim_mode` property
 
-        Returns
-        -------
-        list FIM modes that will be used.
+        Returns:
+            list: FIM modes that will be used.
         """
         return self._fim_mode
 
     @fim_mode.setter
     def fim_mode(self, value):
-        """
-        Setter method for the `fim_mode` property
+        """Setter method for the `fim_mode` property
 
-        Parameters
-        ----------
-        value : list
-            New value for the `fim_mode`.
+        Args:
+            value (list): New value for the `fim_mode`.
         """
         self._fim_mode = value
 
