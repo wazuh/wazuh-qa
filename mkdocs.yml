@@ -4,7 +4,15 @@ theme:
 
 plugins:
   - search
-  - mkdocstrings
+  - mkdocstrings:
+      handlers:
+        python:
+          setup_commands:
+            - import sys
+            # - from unittest.mock import MagicMock as mock
+            # - sys.modules["wazuh_testing.vulnerability_detector"] = mock()
+
+
 nav:
     - Home: index.md
     - Deps: 
@@ -18,23 +26,19 @@ nav:
           - Index: tests/integration/vulnerability-detector/vulnerability-detector.md
           - Tests feeds: 
             - Index: tests/integration/vulnerability-detector/feeds/feeds.md
-            - Debian:
-              - tests/vulnerability-detector/feeds/debian/debian.md
-            - RedHat:
-              - tests/vulnerability-detector
-            - MSU:
-              - tests/vulnerability-detector
-            - Canonical:
-              - Tests: tests/integration/vulnerability-detector/feeds/canonical/canonical.md
-            - Download Feeds: tests/integration/vulnerability-detector/feeds/download-feed.md
-          - Tests general settings: 
-            - Index: tests/integration/vulnerability-detector/general-settings/general-settings.md
-          - Tests providers: 
-            - Index: tests/integration/vulnerability-detector/tests-providers/tests-providers.md
-          - Tests SCAN results: 
-            - Index: tests/integration/vulnerability-detector/scan-results/scan-results.md
-          - Tests Windows: 
-            - Index: tests/integration/vulnerability-detector/windows/windows.md
+            - Debian: tests/integration/vulnerability-detector/feeds/debian/debian.md
+            - RedHat: tests/integration/vulnerability-detector/feeds/redhat/redhat.md
+            - MSU: tests/integration/vulnerability-detector/feeds/msu/msu.md
+            - Canonical: tests/integration/vulnerability-detector/feeds/canonical/canonical.md
+            - Download feeds: tests/integration/vulnerability-detector/feeds/download-feed.md
+            - Invalid type custom feeds: tests/integration/vulnerability-detector/feeds/invalid-type-custom-feeds.md
+            - Invalid type url feeds: tests/integration/vulnerability-detector/feeds/invalid-type-url-feeds.md
+            - Validate feed content: tests/integration/vulnerability-detector/feeds/validate-feed-content.md
+          - Tests general settings:  tests/integration/vulnerability-detector/general-settings/general-settings.md
+          - Tests providers: tests/integration/vulnerability-detector/providers/test-providers.md
+          - Tests SCAN results: tests/integration/vulnerability-detector/scan-results/scan-results.md
+          - Tests Windows: tests/integration/vulnerability-detector/windows/windows.md
+
 
 
 
