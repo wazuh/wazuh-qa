@@ -2,37 +2,31 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import pytest
-import os
-import yaml
-import sys
 import json
+import os
+import sys
+from time import sleep
 
+import pytest
+import yaml
+from wazuh_testing.agent import (set_state_interval, callback_ack, callback_keepalive,
+                                 callback_connected_to_server, callback_state_file_updated)
+from wazuh_testing.fim import change_internal_options
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.fim import (change_internal_options)
+
 from conftest import CLIENT_KEYS_PATH
-from time import sleep
-from wazuh_testing.agent import (callback_ack,
-                                 callback_keepalive,
-                                 callback_connected_to_server,
-                                 callback_state_file_updated
-                                 )
-from wazuh_testing.tools.services import (control_service,
-                                          check_if_process_is_running)
 
 
 # Marks
-pytestmark = [pytest.mark.linux, pytest.mark.win32,
-              pytest.mark.tier(level=0), pytest.mark.agent]
+pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]
 
 # Configurations
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                              'data')
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_data_file = os.path.join(test_data_path, 'wazuh_state_tests.yaml')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__)
@@ -51,8 +45,7 @@ if sys.platform == 'win32':
     state_file_path = os.path.join(WAZUH_PATH, 'wazuh-agent.state')
     internal_options = os.path.join(WAZUH_PATH, 'internal_options.conf')
 else:
-    state_file_path = os.path.join(WAZUH_PATH, 'var', 'run',
-                                   'wazuh-agentd.state')
+    state_file_path = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-agentd.state')
     internal_options = os.path.join(WAZUH_PATH, 'etc', 'internal_options.conf')
 
 
@@ -64,22 +57,6 @@ def get_configuration(request):
 
 
 # Functions
-def control_service_unconditionally(action, daemon=None):
-    """Control services avoiding handling exception
-
-    Args:
-        action : {'stop', 'start', 'restart'}
-            Action to be done with the service/daemon.
-        daemon : str, optional
-            Name of the daemon to be controlled.
-                None to control the whole Wazuh service. Default `None`.
-    """
-    try:
-        control_service(action, daemon=daemon)
-    except Exception:
-        pass
-
-
 def extra_configuration_before_yield():
     change_internal_options('agent.debug', '2')
 
@@ -91,45 +68,14 @@ def extra_configuration_after_yield():
 
     # Set default values
     change_internal_options('agent.debug', '0')
-    set_state_interval(5)
+    set_state_interval(5, internal_options)
     truncate_file(CLIENT_KEYS_PATH)
 
 
-def set_state_interval(interval):
-    """Set agent.state_interval value on internal_options.conf
-    Args:
-        interval:
-            - Different than `None`: set agent.state_interval
-                                     value on internal_options.conf
-            - `None`: agent.state_interval will be removed
-                      from internal_options.conf
-    """
-    if interval is not None:
-        change_internal_options('agent.state_interval', interval,
-                                opt_path=internal_options)
-    else:
-        new_content = ''
-        with open(internal_options) as f:
-            lines = f.readlines()
-
-        for line in lines:
-            new_line = line if 'agent.state_interval' not in line else ''
-            new_content += new_line
-
-        with open(internal_options, 'w') as f:
-            f.write(new_content)
-
-
-def files_setup():
-    """Truncate ossec.log and remote state file"""
-    truncate_file(LOG_FILE_PATH)
-    os.remove(state_file_path) if os.path.exists(state_file_path) else None
-
-
-def set_test_key():
+def add_custom_key():
     """Set test client.keys file"""
-    with open(CLIENT_KEYS_PATH, 'w+') as f:
-        f.write("100 ubuntu-agent any TopSecret")
+    with open(CLIENT_KEYS_PATH, 'w+') as client_keys:
+        client_keys.write("100 ubuntu-agent any TopSecret")
 
 
 # Tests
@@ -141,24 +87,28 @@ def test_agentd_state(configure_environment, test_case: list):
     if remoted_server is not None:
         remoted_server.stop()
     # Stop service
-    control_service_unconditionally('stop')
+    control_service('stop')
 
     if 'interval' in test_case['input']:
-        set_state_interval(test_case['input']['interval'])
+        set_state_interval(test_case['input']['interval'], internal_options)
     else:
-        set_state_interval(1)
+        set_state_interval(1, internal_options)
 
-    files_setup()
-    set_test_key()
+    # Truncate ossec.log in order to watch it correctly
+    truncate_file(LOG_FILE_PATH)
+
+    # Remove state file to check if agent behavior is as expected
+    os.remove(state_file_path) if os.path.exists(state_file_path) else None
+
+    # Add dummy key in order to communicate with RemotedSimulator
+    add_custom_key()
 
     # Start service
-    control_service_unconditionally('start')
+    control_service('start')
 
     # Start RemotedSimulator if test case need it
-    if('remoted' in test_case['input'] and
-       test_case['input']['remoted']):
-        remoted_server = RemotedSimulator(protocol='tcp', mode='DUMMY_ACK',
-                                          client_keys=CLIENT_KEYS_PATH)
+    if 'remoted' in test_case['input'] and test_case['input']['remoted']:
+        remoted_server = RemotedSimulator(protocol='tcp', mode='DUMMY_ACK', client_keys=CLIENT_KEYS_PATH)
 
     # Check fields for every expected output type
     for expected_output in test_case['output']:
@@ -166,29 +116,31 @@ def test_agentd_state(configure_environment, test_case: list):
 
 
 def parse_state_file():
-    """Parse state file and return the content as dict"""
+    """
+    Parse state file and return the content as dict
 
+    Returns:
+        dict: state info
+    """
     # Wait until state file is dumped
     wait_state_update()
     state = {}
-    with open(state_file_path) as f:
-        lines = f.readlines()
-
-    for line in lines:
-        line = line.rstrip('\n')
-        # Remove empty lines or comments
-        if not line or line.startswith('#'):
-            continue
-        (key, value) = line.split('=', 1)
-        # Remove value's quotes
-        state[key] = value.strip("'")
+    with open(state_file_path) as state_file:
+        for line in state_file:
+            line = line.rstrip('\n')
+            # Remove empty lines or comments
+            if not line or line.startswith('#'):
+                continue
+            (key, value) = line.split('=', 1)
+            # Remove value's quotes
+            state[key] = value.strip("'")
 
     return state
 
 
 def remoted_get_state():
-    """Send getstate request to agent (via RemotedSimulator)
-        and return state info as dict.
+    """
+    Send getstate request to agent (via RemotedSimulator) and return state info as dict.
 
     Returns:
         dict: state info
@@ -226,8 +178,7 @@ def check_fields(expected_output):
         if expected_value != '':
             for precondition in checks[field].get('precondition'):
                 precondition()
-        assert checks[field].get('handler')(expected_value,
-                                            get_state_callback=get_state)
+        assert checks[field].get('handler')(expected_value, get_state_callback=get_state)
 
 
 def check_last_ack(expected_value=None, get_state_callback=None):
@@ -247,13 +198,12 @@ def check_last_ack(expected_value=None, get_state_callback=None):
         if expected_value == '':
             return expected_value == current_value
 
-    with open(LOG_FILE_PATH) as f:
-        lines = f.readlines()
+    received_msg = "Received message: '#!-agent ack '"
 
-    for line in lines:
-        if(current_value.replace("-", "/") in line
-           and "Received message: '#!-agent ack '" in line):
-            return True
+    with open(LOG_FILE_PATH) as log:
+        for line in log:
+            if current_value.replace('-', '/') in line and received_msg in line:
+                return True
     return False
 
 
@@ -274,14 +224,13 @@ def check_last_keepalive(expected_value=None, get_state_callback=None):
         if expected_value == '':
             return expected_value == current_value
 
-    with open(LOG_FILE_PATH) as f:
-        lines = f.readlines()
+    keep_alive_msg = 'Sending keep alive'
+    agent_notification_msg = 'Sending agent notification'
 
-    for line in lines:
-        if(current_value.replace('-', '/') in line and
-           ('Sending keep alive' in line or
-           'Sending agent notification' in line)):
-            return True
+    with open(LOG_FILE_PATH, 'r') as log:
+        for line in log:
+            if current_value.replace('-', '/') in line and (keep_alive_msg in line or agent_notification_msg in line):
+                return True
     return False
 
 
@@ -301,13 +250,13 @@ def check_msg_count(expected_value=None, get_state_callback=None):
         current_value = get_state_callback()['msg_count']
         if expected_value == '':
             return expected_value == current_value
-    sent_messages = 0
-    with open(LOG_FILE_PATH) as f:
-        lines = f.readlines()
 
-    for line in lines:
-        if 'Sending keep alive' in line:
-            sent_messages += 1
+    sent_messages = 0
+
+    with open(LOG_FILE_PATH, 'r') as log:
+        for line in log:
+            if 'Sending keep alive' in line:
+                sent_messages += 1
 
     return sent_messages >= current_value
 

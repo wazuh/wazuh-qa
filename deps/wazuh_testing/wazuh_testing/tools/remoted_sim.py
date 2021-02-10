@@ -670,8 +670,6 @@ class RemotedSimulator:
         Send request to agent using current request counter
         message: Request content
         """
-
         if self.last_client:
-            request_message = f'#!-req {self.request_counter} {message}'
-            request = self.create_sec_message(request_message, 'aes')
+            request = self.create_sec_message(f'#!-req {self.request_counter} {message}', 'aes')
             self.send(self.last_client, request)
