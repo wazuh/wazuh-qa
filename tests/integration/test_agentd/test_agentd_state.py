@@ -62,7 +62,6 @@ def extra_configuration_before_yield():
 
 
 def extra_configuration_after_yield():
-    global remoted_server
     if remoted_server is not None:
         remoted_server.stop()
 
@@ -116,11 +115,10 @@ def test_agentd_state(configure_environment, test_case: list):
 
 
 def parse_state_file():
-    """
-    Parse state file and return the content as dict
+    """Parse state file
 
     Returns:
-        dict: state info
+        state info
     """
     # Wait until state file is dumped
     wait_state_update()
@@ -139,13 +137,13 @@ def parse_state_file():
 
 
 def remoted_get_state():
-    """
+    """Get state via remoted
+
     Send getstate request to agent (via RemotedSimulator) and return state info as dict.
 
     Returns:
-        dict: state info
+        state info
     """
-    global remoted_server
     remoted_server.request('agent getstate')
     sleep(2)
     response = json.loads(remoted_server.request_answer)
@@ -288,8 +286,7 @@ def wait_connect(update_position=False):
         update_position (bool, optional): update position after reading.
                                           Defaults to False.
     """
-    global wazuh_log_monitor
-    wazuh_log_monitor.start(timeout=120,
+    wazuh_log_monitor.start(timeout=240,
                             callback=callback_connected_to_server,
                             update_position=update_position,
                             error_message='Agent connected not found')
@@ -302,8 +299,7 @@ def wait_ack(update_position=False):
         update_position (bool, optional): update position after reading.
                                           Defaults to False.
     """
-    global wazuh_log_monitor
-    wazuh_log_monitor.start(timeout=120,
+    wazuh_log_monitor.start(timeout=240,
                             callback=callback_ack,
                             update_position=update_position,
                             error_message='Ack not found')
@@ -316,8 +312,7 @@ def wait_keepalive(update_position=False):
         update_position (bool, optional): update position after reading.
                                           Defaults to False.
     """
-    global wazuh_log_monitor
-    wazuh_log_monitor.start(timeout=120,
+    wazuh_log_monitor.start(timeout=240,
                             callback=callback_keepalive,
                             update_position=update_position,
                             error_message='Keepalive not found')
@@ -330,8 +325,7 @@ def wait_state_update(update_position=True):
         update_position (bool, optional): update position after reading.
                                           Defaults to True.
     """
-    global wazuh_log_monitor
-    wazuh_log_monitor.start(timeout=120,
+    wazuh_log_monitor.start(timeout=240,
                             callback=callback_state_file_updated,
                             update_position=update_position,
                             error_message='State file update not found')

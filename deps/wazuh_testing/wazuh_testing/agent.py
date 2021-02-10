@@ -58,7 +58,7 @@ def set_state_interval(interval, internal_file_path):
                       from internal_options.conf
     """
     if interval is not None:
-        change_internal_options('agent.state_interval', interval, opt_path=internal_file_path)
+        change_internal_options('agent.state_interval', interval, internal_file_path, '.*')
     else:
         new_content = ''
         with open(internal_file_path) as opts:
