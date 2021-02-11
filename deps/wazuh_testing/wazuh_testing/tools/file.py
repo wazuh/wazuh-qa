@@ -9,6 +9,9 @@ import random
 import string
 import xml.etree.ElementTree as ET
 import zipfile
+import stat
+import shutil
+
 from os.path import exists
 
 import filetype
@@ -234,3 +237,15 @@ def compress_gzip_file(src_path, dest_path):
     with gzip.open(dest_path, 'wb') as dest:
         with open(src_path, 'rb') as source:
             dest.write(source.read())
+
+
+def copy(source, destination):
+    """
+    Copy file with metadata and ownership to a specific destination
+    Args:
+        source (str): Source file path to copy
+        destination (str): Destination file
+    """
+    shutil.copy2(source, destination)
+    source_stats = os.stat(source)
+    os.chown(destination, source_stats[stat.ST_UID], source_stats[stat.ST_GID])
