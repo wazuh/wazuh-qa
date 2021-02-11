@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
@@ -15,7 +15,9 @@ from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 
 from test_fim.test_files.test_follow_symbolic_link.common import configurations_path, testdir1, \
-    modify_symlink, testdir_not_target, test_directories, wait_for_audit, wait_for_symlink_check
+    modify_symlink, testdir_not_target, wait_for_audit, wait_for_symlink_check
+# noinspection PyUnresolvedReferences
+from test_fim.test_files.test_follow_symbolic_link.common import test_directories
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
