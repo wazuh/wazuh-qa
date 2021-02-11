@@ -3,16 +3,20 @@ theme:
   name: "material"
   palette:
     primary: light blue
+  logo: assets/wazuh_logo_w.png
+  features:
+    - navigation.indexes
+  plugins:
+    - search
+    - mkdocstrings
+extra_css:
+    - stylesheets/logo.css
 
-plugins:
-  - search
-  - mkdocstrings
 
 # Repository
 repo_name: wazuh/wazuh-qa
 repo_url: https://github.com/wazuh/wazuh-qa
 edit_uri: ""
-  
 nav:
     - Home: index.md
     - Deps: 
@@ -21,29 +25,70 @@ nav:
         - Wazuh Testing: deps/wazuh-testing/wazuh_testing.md
         - Tools: deps/wazuh-testing/tools.md
     - Tests: 
-      - Index: tests/tests.md
+      - tests/index.md
       - Integration: 
-        - Index: tests/integration/integration.md
+        - tests/integration/index.md
         - Vulnerability Detector:   
-          - Index: tests/integration/vulnerability-detector/vulnerability-detector.md
+          - tests/integration/test_vulnerability_detector/index.md
           - Tests feeds: 
-            - Index: tests/integration/vulnerability-detector/feeds/feeds.md
-            - Debian: tests/integration/vulnerability-detector/feeds/debian/debian.md
-            - RedHat: tests/integration/vulnerability-detector/feeds/redhat/redhat.md
-            - MSU: tests/integration/vulnerability-detector/feeds/msu/msu.md
-            - Canonical: tests/integration/vulnerability-detector/feeds/canonical/canonical.md
-            - Download feeds: tests/integration/vulnerability-detector/feeds/download-feed.md
-            - Invalid type custom feeds: tests/integration/vulnerability-detector/feeds/invalid-type-custom-feeds.md
-            - Invalid type url feeds: tests/integration/vulnerability-detector/feeds/invalid-type-url-feeds.md
-            - Validate feed content: tests/integration/vulnerability-detector/feeds/validate-feed-content.md
-          - Tests general settings:  tests/integration/vulnerability-detector/general-settings/general-settings.md
-          - Tests providers: tests/integration/vulnerability-detector/providers/test-providers.md
-          - Tests SCAN results: tests/integration/vulnerability-detector/scan-results/scan-results.md
-          - Tests Windows: tests/integration/vulnerability-detector/windows/windows.md
-
-
-
-
-
-
-
+            - tests/integration/test_vulnerability_detector/test_feeds/index.md
+            - Debian: 
+              - tests/integration/test_vulnerability_detector/test_feeds/debian/index.md
+              - Extra tags debian feed: tests/integration/test_vulnerability_detector/test_feeds/debian/test_extra_tags_debian_feed.md
+              - Invalid syntax debian feed: tests/integration/test_vulnerability_detector/test_feeds/debian/test_invalid_syntax_debian_feed.md
+              - Invalid values debian feed: tests/integration/test_vulnerability_detector/test_feeds/debian/test_invalid_values_debian_feed.md
+              - Missing tags debian feed: tests/integration/test_vulnerability_detector/test_feeds/debian/test_missing_tags_debian_feed.md
+            - RedHat: 
+              - tests/integration/.test_vulnerability_detector/test_feeds/redhat/redhat.md
+              - Extra fields redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_extra_fields_redhat_feed.md
+              - Invalid syntax redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_invalid_syntax_redhat_feed.md
+              - Invalid values redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_invalid_values_redhat_feed.md
+              - Missing fileds redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_missing_fields_redhat_feed.md
+            - MSU: 
+              - tests/integration/.test_vulnerability_detector/test_feeds/msu/msu.md
+              - Feeds: tests/integration/test_vulnerability_detector/test_feeds/msu
+              - Extra fields feed: tests/integration/test_vulnerability_detector/test_feeds/msu/test_extra_fields_msu_feed.md
+              - Invalid syntax msu feed: tests/integration/test_vulnerability_detector/test_feeds/msu/test_invalid_syntax_msu_feed.md
+              - Invalid values msu feed: tests/integration/test_vulnerability_detector/test_feeds/msu/test_invalid_values_msu_feed.md
+              - Missing fields msu feed: tests/integration/test_vulnerability_detector/test_feeds/msu/test_missing_fields_msu_feed.md
+            - Canonical: 
+              - tests/integration/.test_vulnerability_detector/test_feeds/canonical/canonical.md
+              - Missing tags canonical feed: tests/integration/test_vulnerability_detector/test_feeds/canonical/test_missing_tags_canonical_feed.md
+              - Invalid values canonical feed: tests/integration/test_vulnerability_detector/test_feeds/canonical/test_invalid_values_canonical_feed.md
+              - Invalid syntax canonical feed: tests/integration/test_vulnerability_detector/test_feeds/canonical/test_invalid_syntax_canonical_feed.md
+              - Extra tags canonical feed: tests/integration/test_vulnerability_detector/test_feeds/canonical/test_extra_tags_canonical_feed.md
+            - Download feeds: tests/integration/test_vulnerability_detector/test_feeds/test_download_feed.md
+            - Invalid type custom feeds: tests/integration/test_vulnerability_detector/test_feeds/test_invalid_type_custom_feeds.md
+            - Invalid type url feeds: tests/integration/test_vulnerability_detector/test_feeds/test_invalid_type_url_feeds.md
+            - Validate feed content: tests/integration/test_vulnerability_detector/test_feeds/test_validate_feed_content.md
+          - Tests general settings: 
+            -  tests/integration/.test_vulnerability_detector/general-settings/index.md
+            - Enabled: tests/integration/.test_vulnerability_detector/general-settings/test_general_settings_enabled.md
+            - Ignore time: tests/integration/.test_vulnerability_detector/general-settings/test_general_settings_ignore_time.md
+            - Intervals: tests/integration/.test_vulnerability_detector/general-settings/test_general_settings_interval.md
+            - Run on start: tests/integration/.test_vulnerability_detector/general-settings/test_general_settings_run_on_start.md
+          - Tests providers: 
+            - tests/integration/.test_vulnerability_detector/providers/test-providers.md
+            - Enabled: tests/integration/test_vulnerability_detector/test_providers/test_providers_enabled.md
+            - Update intervals: tests/integration/test_vulnerability_detector/test_providers/test_providers_update_interval.md
+            - Update from year: tests/integration/test_vulnerability_detector/test_providers/test_providers_update_from_year.md
+            - OS: tests/integration/test_vulnerability_detector/test_providers/test_providers_os.md
+            - No OS: tests/integration/test_vulnerability_detector/test_providers/test_providers_no_os.md
+            - Multiple providers: tests/integration/test_vulnerability_detector/test_providers/test_providers_multiple_providers.md
+          - Tests SCAN results: 
+            - tests/integration/.test_vulnerability_detector/scan-results/index.md
+            - Test debian inventory with debian feed: tests/integration/test_vulnerability_detector/test_scan_results/test_debian_inventory_debian_feed.md
+            - Test macos inventory: tests/integration/test_vulnerability_detector/test_scan_results/test_macos_inventory.md
+            - Test msu inventory with msu feed: tests/integration/test_vulnerability_detector/test_scan_results/test_msu_inventory_msu_feed.md
+            - Test redhat inventory with redhat feed: tests/integration/test_vulnerability_detector/test_scan_results/test_redhat_inventory_redhat_feed.md
+            - Test ubuntu inventory with canonical feed:  tests/integration/test_vulnerability_detector/test_scan_results/test_ubuntu_inventory_canonical_feed.md
+            - Test scan different cves:  tests/integration/test_vulnerability_detector/test_scan_results/test_scan_different_cves.md
+            - Test scan nvd feed: tests/integration/test_vulnerability_detector/test_scan_results/test_scan_nvd_feed.md
+            - Test scan providers and nvd feed: tests/integration/test_vulnerability_detector/test_scan_results/test_scan_providers_and_nvd_feed.md
+          - Tests Windows: 
+            - tests/integration/.test_vulnerability_detector/windows/index.md
+            - CPE indexing: tests/integration/.test_vulnerability_detector/windows/windows.md
+      - System:
+        - tests/system/index.md
+      - Legacy:
+        - tests/legacy/index.md
