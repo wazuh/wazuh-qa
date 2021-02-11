@@ -56,7 +56,7 @@ def random_string_unicode(length, encode=None):
 
     Args:
         length (int) : String length.
-        encode (str,optional) : Encoding type. Default `None`
+        encode (str, optional) : Encoding type. Default `None`
 
     Returns:
         (str or binary): Random unicode string.
@@ -76,7 +76,7 @@ def random_string(length, encode=None):
 
     Args:
         length (int): String length.
-        encode (str,optional): Encoding type. Default `None`
+        encode (str, optional): Encoding type. Default `None`
 
     Returns:
         str or binary: Random string.

@@ -61,27 +61,43 @@ Folder with all the general tools that could be used in every test. They are gro
 - **Utils**: General behavior tools.
 
 
+## __init__
+
+::: deps.wazuh_testing.wazuh_testing.__init__
+
+
+## API
+
 ::: deps.wazuh_testing.wazuh_testing.api
+
+## FIM
 
 ::: deps.wazuh_testing.wazuh_testing.fim
 
+## Cluster
+
 ::: deps.wazuh_testing.wazuh_testing.cluster
+
+## GCloud
 
 ::: deps.wazuh_testing.wazuh_testing.gcloud
 
+## Logtest
 
 ::: deps.wazuh_testing.wazuh_testing.logtest
 
+## Mitre
 
 ::: deps.wazuh_testing.wazuh_testing.mitre
 
+## Vulnerability detector
 
 ::: deps.wazuh_testing.wazuh_testing.vulnerability_detector
 
+## WazuhDB
 
 ::: deps.wazuh_testing.wazuh_testing.wazuh_db
 
+## Analysis
+
 ::: deps.wazuh_testing.wazuh_testing.analysis
-
-
-::: deps.wazuh_testing.wazuh_testing.__init__

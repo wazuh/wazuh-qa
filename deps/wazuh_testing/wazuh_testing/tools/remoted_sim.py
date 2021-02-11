@@ -630,13 +630,14 @@ class RemotedSimulator:
     def set_mode(self, mode):
         """
         Set Remoted simulator work mode:
-        -REJECT: Any connection will be rejected. UDP will ignore incoming connection, TCP will actively
-         close incoming connection.
-        -DUMMY_ACK: Any received package will be answered with an ACK
-        -CONTROLLED_ACK: Received package will be processed and decrypted. Only valid decrypted messages
-         starting with #!- will receive an ACK
-        -WRONG_KEY: Any received package will be answered with an ACK created with incorrect keys.
-        -INVALID_MSG: Any received package will be answered with a message that is not encrypted and without header.
+
+            -REJECT: Any connection will be rejected. UDP will ignore incoming connection, TCP will actively
+            close incoming connection.
+            -DUMMY_ACK: Any received package will be answered with an ACK
+            -CONTROLLED_ACK: Received package will be processed and decrypted. Only valid decrypted messages
+            starting with #!- will receive an ACK
+            -WRONG_KEY: Any received package will be answered with an ACK created with incorrect keys.
+            -INVALID_MSG: Any received package will be answered with a message that is not encrypted and without header.
         """
         self.mode = mode
 

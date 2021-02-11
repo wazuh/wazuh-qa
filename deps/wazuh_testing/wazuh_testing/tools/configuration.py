@@ -176,8 +176,8 @@ def set_section_wazuh_conf(sections, template=None):
 
     Args:
         sections (list): List of dicts with section and new elements
-        section (str,optional): Section of Wazuh configuration to replace. Default `'syscheck'`
-        new_elements (list,optional) : List with dictionaries for settings elements in the section. Default `None`
+        section (str, optional): Section of Wazuh configuration to replace. Default `'syscheck'`
+        new_elements (list, optional) : List with dictionaries for settings elements in the section. Default `None`
         template (list of string, optional): File content template
 
     Returns:
@@ -381,7 +381,7 @@ def process_configuration(config, placeholders=None, metadata=None):
     Args:
         config (dict): Config to be enriched.
         placeholders (dict, optional): Dict with the replacements.
-        metadata (list of dict,optional): List of dicts with the metadata keys to include in config.
+        metadata (list of dict, optional): List of dicts with the metadata keys to include in config.
 
     Returns:
         dict: Dict with enriched configuration.

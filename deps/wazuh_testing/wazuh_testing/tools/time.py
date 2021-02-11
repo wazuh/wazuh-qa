@@ -83,7 +83,7 @@ class TimeMachine:
 
         Args:
             time_delta : Time frame we want to skip. It can have a negative value.
-            back_in_time (bool,optional): Go back in time the same time_delta interval. Default value is False.
+            back_in_time (bool, optional): Go back in time the same time_delta interval. Default value is False.
         """
         # Save timedelta to be able to  travel back in time after the tests
         TimeMachine.total_time_spent += time_delta.total_seconds()

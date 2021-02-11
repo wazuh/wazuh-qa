@@ -37,7 +37,7 @@ def restart_wazuh_with_new_conf(new_conf, daemon='wazuh-syscheckd'):
 
     Args:
         new_conf ( ET.ElementTree) : New config file.
-        daemon (str,optional): Daemon to restart when applying the configuration.
+        daemon (str, optional): Daemon to restart when applying the configuration.
     """
     write_wazuh_conf(new_conf)
     control_service('restart', daemon=daemon)
@@ -47,7 +47,7 @@ def delete_sockets(path=None):
     """Delete a list of Wazuh socket files or all of them if None is specified.
 
     Args:
-        path (list,optional): Absolute socket path. Default `None`
+        path (list, optional): Absolute socket path. Default `None`
     """
     try:
         if path is None:
@@ -126,10 +126,10 @@ def get_process(search_name):
     Search process by its name.
 
     Args:
-    search_name (str): Name of the process to be fetched.
+        search_name (str): Name of the process to be fetched.
 
     Returns:
-    `psutil.Process` or None: First occurrence of the process object matching the `search_name` or None if no process has been found.
+        `psutil.Process` or None: First occurrence of the process object matching the `search_name` or None if no process has been found.
     """
     for proc in psutil.process_iter(attrs=['name']):
         if proc.name() == search_name:
@@ -143,10 +143,10 @@ def get_process_cmd(search_cmd):
     Search process by its command line.
 
     Args:
-    search_cmd (str): Name of the command to be fetched.
+        search_cmd (str): Name of the command to be fetched.
 
     Returns:
-    `psutil.Process` or None: First occurrence of the process object matching the `search_cmd` or None if no process has been found.
+        `psutil.Process` or None: First occurrence of the process object matching the `search_cmd` or None if no process has been found.
     """
     for proc in psutil.process_iter(attrs=['pid', 'name', 'cmdline']):
         command = next((command for command in proc.cmdline() if search_cmd in command), None)
@@ -158,10 +158,10 @@ def check_daemon_status(daemon=None, running=True, timeout=10, extra_sockets=Non
     """Check Wazuh daemon status.
 
     Args:
-    daemon (str, optional):  Wazuh daemon to check. Default `None`
-    running (bool, optional): True if the daemon is expected to be running False if it is expected to be stopped. Default `True`
-    timeout (int, optional): Timeout value for the check. Default `10`
-    extra_sockets (list, optional): Additional sockets to check. They may not be present in default configuration
+        daemon (str, optional):  Wazuh daemon to check. Default `None`
+        running (bool, optional): True if the daemon is expected to be running False if it is expected to be stopped. Default `True`
+        timeout (int, optional): Timeout value for the check. Default `10`
+        extra_sockets (list, optional): Additional sockets to check. They may not be present in default configuration
 
     Raises:
         TimeoutError: If the daemon status is wrong after timeout seconds.

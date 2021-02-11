@@ -1,10 +1,18 @@
-site_name: My Docs
+site_name: Wazuh-QA Documentation
 theme:
   name: "material"
+  palette:
+    primary: light blue
 
 plugins:
   - search
   - mkdocstrings
+
+# Repository
+repo_name: wazuh/wazuh-qa
+repo_url: https://github.com/wazuh/wazuh-qa
+edit_uri: ""
+  
 nav:
     - Home: index.md
     - Deps: 
@@ -16,7 +24,7 @@ nav:
       - Index: tests/tests.md
       - Integration: 
         - Index: tests/integration/integration.md
-        - Vulnerability Detector: 
+        - Vulnerability Detector:   
           - Index: tests/integration/vulnerability-detector/vulnerability-detector.md
           - Tests feeds: 
             - Index: tests/integration/vulnerability-detector/feeds/feeds.md

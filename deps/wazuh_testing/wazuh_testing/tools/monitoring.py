@@ -356,11 +356,11 @@ class QueueMonitor:
         """Get as many matched results as `accum_results`.
 
         Args:
-            callback (callable,optional) : Callback function to filter results.
-            accum_results (int,optional) : Number of results to get. Default `1`
-            timeout (int,optional): Maximum timeout. Default `-1`
-            update_position (bool,optional) : True if we pop items from the queue once they are read. False otherwise. Default `True`
-            timeout_extra (int,optional): Grace period to fetch more events than specified in `accum_results`. Default: 0.
+            callback (callable, optional) : Callback function to filter results.
+            accum_results (int, optional) : Number of results to get. Default `1`
+            timeout (int, optional): Maximum timeout. Default `-1`
+            update_position (bool, optional) : True if we pop items from the queue once they are read. False otherwise. Default `True`
+            timeout_extra (int, optional): Grace period to fetch more events than specified in `accum_results`. Default: 0.
 
         Returns:
             (list of any): It can return either a list of any type or simply any type. If `accum_results > 1`, it will be a list.
@@ -454,7 +454,7 @@ class Queue(queue.Queue):
         The difference between `peek` and `get` is `peek` pops the item and `get` does not.
 
         Args:
-            position (int,optional) : Element of the queue to return. Default `0`
+            position (int, optional) : Element of the queue to return. Default `0`
 
         Returns:
             (any): Any item in the given position.
@@ -486,11 +486,11 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
         Args:
             ciphers(string):  String with supported ciphers
             connection_protocol(string): ssl version to be used
-            certificate (str,optional): Path to the ssl certificate
-            keyfile (str,optional): Path to the ssl key
-            cert_reqs (str,optional): ssl.CERT_NONE, ssl.CERT_OPTIONAL, ssl.CERT_REQUIRED. Whetever or not a cert is required
-            ca_cert(str,optional): If cert is required show accepted certs
-            options(str,optional): Add adinitional options
+            certificate (str, optional): Path to the ssl certificate
+            keyfile (str, optional): Path to the ssl key
+            cert_reqs (str, optional): ssl.CERT_NONE, ssl.CERT_OPTIONAL, ssl.CERT_REQUIRED. Whetever or not a cert is required
+            ca_cert(str, optional): If cert is required show accepted certs
+            options(str, optional): Add adinitional options
         """
         if ciphers:
             self.ciphers = ciphers
@@ -668,7 +668,7 @@ class ManInTheMiddle:
         Args:
             address (str or Tuple(str, int) ): Address of the socket, the format of the address depends on the type. A regular file path for AF_UNIX or a Tuple(HOST, PORT) for AF_INET
             family (str): Family type of socket to connect to, AF_UNIX for unix sockets or AF_INET for port sockets. Default `'AF_UNIX'`
-            connection_protocol (str) : It can be either 'TCP', 'UDP' or SSL. Default `'TCP'`
+            connection_protocol (str): It can be either 'TCP', 'UDP' or SSL. Default `'TCP'`
             func (callable): Function to be applied to every received data before sending it.
         """
         if isinstance(address, str) or (isinstance(address, tuple) and len(address) == 2
@@ -767,7 +767,7 @@ def new_process(fn):
     """Wrapper for enable multiprocessing inside a class
 
     Args:
-        fn (callable) : Function to be executed in a new thread
+        fn (callable): Function to be executed in a new thread
 
     Returns:
         wrapper
@@ -807,8 +807,8 @@ class HostMonitor:
         Args:
             inventory_path (str): Path to the hosts's inventory file.
             messages_path (str):  Path to the file where the callbacks, paths and hosts to be monitored are specified.
-            tmp_path (str) : Path to the temporal files.
-            time_step (float,optional) : Fraction of time to wait in every get. Default `0.5`.
+            tmp_path (str): Path to the temporal files.
+            time_step (float, optional): Fraction of time to wait in every get. Defaults to `0.5`
         """
         self.host_manager = HostManager(inventory_path=inventory_path)
         self._queue = Manager().Queue()
@@ -860,7 +860,7 @@ class HostMonitor:
         Args:
             host (str): Hostname.
             path (str): Host file path to be collect.
-            output_path (str) : Output path of the content collected from the remote host path.
+            output_path (str): Output path of the content collected from the remote host path.
         """
         try:
             truncate_file(os.path.join(self._tmp_path, output_path))
@@ -950,9 +950,9 @@ def wait_mtime(path, time_step=5, timeout=-1):
     Wait until the monitored log is not being modified.
 
     Args:
-        path (str) : Path to the file.
-        time_step (int,optional): Time step between checks of mtime. Default `5`
-        timeout (int,optional) : Timeout for function to fail. Default `-1`
+        path (str): Path to the file.
+        time_step (int, optional): Time step between checks of mtime. Default `5`
+        timeout (int, optional): Timeout for function to fail. Default `-1`
 
     Raises:
         FileNotFoundError: Raised when the file does not exist.

@@ -1,48 +1,48 @@
-
-# __init__
+## __init__
 
 ::: deps.wazuh_testing.wazuh_testing.tools.__init__
 
-# Agent simulator
+## Agent simulator
 
 ::: deps.wazuh_testing.wazuh_testing.tools.agent_simulator
 
-# Authd sim
+##  Authd SIM
 
 ::: deps.wazuh_testing.wazuh_testing.tools.authd_sim
 
-#  Monitoring
+## Monitoring
 
 ::: deps.wazuh_testing.wazuh_testing.tools.monitoring
 
-# Remoted SIM
+## Remoted SIM
 
 ::: deps.wazuh_testing.wazuh_testing.tools.remoted_sim
 
-# Security
+## Security
 
 ::: deps.wazuh_testing.wazuh_testing.tools.security
 
-# Services
+## Services
 
 ::: deps.wazuh_testing.wazuh_testing.tools.services
 
-# System
+## System
 
 ::: deps.wazuh_testing.wazuh_testing.tools.system
 
-# Time
+## Time
 
 ::: deps.wazuh_testing.wazuh_testing.tools.time
 
-# File
+## File
 
 ::: deps.wazuh_testing.wazuh_testing.tools.file
 
-# Utils
+## Utils
 
 ::: deps.wazuh_testing.wazuh_testing.tools.utils 
 
-# Configuration
+## Configuration
+
 
 ::: deps.wazuh_testing.wazuh_testing.tools.configuration

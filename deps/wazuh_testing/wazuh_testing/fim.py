@@ -2179,44 +2179,46 @@ def detect_whodata_start(file_monitor):
 
 def generate_params(extra_params: dict = None, apply_to_all: Union[Sequence[Any], Generator[dict, None, None]] = None,
                     modes: list = None):
-    """Expand params and metadata with optional FIM modes.
+    """
+    Expand params and metadata with optional FIM modes .
 
-    extra_params = {'WILDCARD': {'attribute': ['list', 'of', 'values']}} - Max. 3 elements in the list of values
-                        or
-                   {'WILDCARD': {'attribute': 'value'}} - It will have the same value for scheduled, realtime and
-                                                          whodata
-                        or
-                   {'WILDCARD': 'value'} - Valid when param is not an attribute. (ex: 'MODULE_NAME': __name__)
-                        or
-                   {'WILDCARD': ['list', 'of', 'values']} - Same as above with multiple values. The length of the list
-                                                            must be the same as the length of the mode list.
+        extra_params = {'WILDCARD': {'attribute': ['list', 'of', 'values']}} - Max. 3 elements in the list of values
+                            or
+                    {'WILDCARD': {'attribute': 'value'}} - It will have the same value for scheduled, realtime and
+                                                            whodata
+                            or
+                    {'WILDCARD': 'value'} - Valid when param is not an attribute. (ex: 'MODULE_NAME': __name__)
+                            or
+                    {'WILDCARD': ['list', 'of', 'values']} - Same as above with multiple values. The length of the list
+                                                                must be the same as the length of the mode list.
 
-    apply_to_all = Same structure as above. The difference is, these params will be applied for every existing
-                    configuration. They are applied after the `extra_params`.
+
+        apply_to_all = Same structure as above. The difference is, these params will be applied for every existing
+                        configuration. They are applied after the `extra_params`.
 
     Examples:
-    >>> generate_params(extra_params={'REPORT_CHANGES': {'report_changes': ['yes', 'no']}, 'MODULE_NAME': 'name'},
-    ...                 modes=['realtime', 'whodata'])
-    ([{'FIM_MODE': {'realtime': 'yes'}, 'REPORT_CHANGES': {'report_changes': 'yes'}, 'MODULE_NAME': 'name'},
-      {'FIM_MODE': {'whodata': 'yes'}, 'REPORT_CHANGES': {'report_changes': 'no'}, 'MODULE_NAME': 'name'}],
-     [{'fim_mode': 'realtime', 'report_changes': 'yes', 'module_name': 'name'},
-      {'fim_mode': 'whodata', 'report_changes': 'no', 'module_name': 'name'}])
+        >>> generate_params(extra_params={'REPORT_CHANGES': {'report_changes': ['yes', 'no']}, 'MODULE_NAME': 'name'},
+        ...                 modes=['realtime', 'whodata'])
+        ([{'FIM_MODE': {'realtime': 'yes'}, 'REPORT_CHANGES': {'report_changes': 'yes'}, 'MODULE_NAME': 'name'},
+        {'FIM_MODE': {'whodata': 'yes'}, 'REPORT_CHANGES': {'report_changes': 'no'}, 'MODULE_NAME': 'name'}],
+        [{'fim_mode': 'realtime', 'report_changes': 'yes', 'module_name': 'name'},
+        {'fim_mode': 'whodata', 'report_changes': 'no', 'module_name': 'name'}])
 
-    >>> generate_params(extra_params={'MODULE_NAME': 'name'}, apply_to_all={'FREQUENCY': {'frequency': [1, 2]}},
-    ...                 modes=['scheduled', 'realtime'])
-    ([{'FIM_MODE': '', 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 1}},
-      {'FIM_MODE': {'realtime': 'yes'}, 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 1}},
-      {'FIM_MODE': '', 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 2}},
-      {'FIM_MODE': {'realtime': 'yes'}, 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 2}}],
-     [{'fim_mode': 'scheduled', 'module_name': 'name', 'frequency': {'frequency': 1}},
-      {'fim_mode': 'realtime', 'module_name': 'name', 'frequency': {'frequency': 1}},
-      {'fim_mode': 'scheduled', 'module_name': 'name', 'frequency': {'frequency': 2}},
-      {'fim_mode': 'realtime', 'module_name': 'name', 'frequency': {'frequency': 2}}])
+        >>> generate_params(extra_params={'MODULE_NAME': 'name'}, apply_to_all={'FREQUENCY': {'frequency': [1, 2]}},
+        ...                 modes=['scheduled', 'realtime'])
+        ([{'FIM_MODE': '', 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 1}},
+        {'FIM_MODE': {'realtime': 'yes'}, 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 1}},
+        {'FIM_MODE': '', 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 2}},
+        {'FIM_MODE': {'realtime': 'yes'}, 'MODULE_NAME': 'name', 'FREQUENCY': {'frequency': 2}}],
+        [{'fim_mode': 'scheduled', 'module_name': 'name', 'frequency': {'frequency': 1}},
+        {'fim_mode': 'realtime', 'module_name': 'name', 'frequency': {'frequency': 1}},
+        {'fim_mode': 'scheduled', 'module_name': 'name', 'frequency': {'frequency': 2}},
+        {'fim_mode': 'realtime', 'module_name': 'name', 'frequency': {'frequency': 2}}])
 
-    >>> generate_params(extra_params={'LIST_OF_VALUES': {'list': [[1,2,3]]}, 'MODULE_NAME': 'name'},
-    ...                 modes=['scheduled'])
-    ([{'FIM_MODE': '', 'LIST_OF_VALUES': {'list': [1, 2, 3]}, 'MODULE_NAME': 'name'}],
-     [{'fim_mode': 'scheduled', 'list_of_values': [1, 2, 3], 'module_name': 'name'}])
+        >>> generate_params(extra_params={'LIST_OF_VALUES': {'list': [[1,2,3]]}, 'MODULE_NAME': 'name'},
+        ...                 modes=['scheduled'])
+        ([{'FIM_MODE': '', 'LIST_OF_VALUES': {'list': [1, 2, 3]}, 'MODULE_NAME': 'name'}],
+        [{'fim_mode': 'scheduled', 'list_of_values': [1, 2, 3], 'module_name': 'name'}])
 
     Args:
         extra_params (dict, optional): Dictionary with all the extra parameters to add for every mode. Default `None`

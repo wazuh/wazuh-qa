@@ -54,9 +54,9 @@ class CertificateController(object):
         Create a CA Certificate that will be signed with each agent key
 
         Args:
-        pub_key (PKey): Key to be set in certificate
-        issuer (str): Name or hostname for the certificate issuer
-        subject (str): Name or hostname for the ceritifcate subject. If none will be same as issuer
+            pub_key (PKey): Key to be set in certificate
+            issuer (str): Name or hostname for the certificate issuer
+            subject (str): Name or hostname for the ceritifcate subject. If none will be same as issuer
 
         Returns:
             ca_cert : X509 Object. Created ca certificate
