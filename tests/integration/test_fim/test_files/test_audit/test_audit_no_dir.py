@@ -84,6 +84,6 @@ def test_audit_no_dir(tags_to_apply, get_configuration, configure_environment, r
 
     # Create the directory and verify that it is added to the audit rules. It is checked every 30 seconds.
     os.makedirs(testdir)
-    result = wazuh_log_monitor.start(timeout=30, callback=callback_audit_added_rule,
+    result = wazuh_log_monitor.start(timeout=32, callback=callback_audit_added_rule,
                                      error_message='Folders were not added to Audit rules list').result()
     assert result == testdir, f'{testdir} not in "Added audit rule for monitoring directory: {result}" message'
