@@ -7,12 +7,6 @@ import ssl
 import subprocess
 import yaml
 
-r"""
-
-Testing in test_agent_auth_enrollment
-
-"""
-
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.monitoring import QueueMonitor
