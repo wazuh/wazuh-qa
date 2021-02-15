@@ -1,6 +1,6 @@
 # Overview
 
-**[wazuh_testing](wazuh_testing#wazuh_testing-package)** is a python package tool which contains a set of utilities and dependencies imported by the tests in order to facilitate testing.
+**[wazuh_testing](deps/wazuh_testing)** is a python package tool which contains a set of utilities and dependencies imported by the tests in order to facilitate testing.
 
 > **Important**: It is necessary to install this package in order to launch the tests.
 

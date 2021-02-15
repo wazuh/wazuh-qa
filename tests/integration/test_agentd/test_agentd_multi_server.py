@@ -13,7 +13,7 @@ from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
 
-from conftest import *
+from .conftest import *
 
 # Marks
 
@@ -25,15 +25,16 @@ pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), p
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-r"""
+"""
 How does this test work:
-- PROTOCOL: tcp/udp
-- CLEAN_KEYS: whetever start with an empty client.keys file or not
-- SIMULATOR_NUMBERS: Number of simulator to be instantiated, this should match wazuh_conf.yaml
-- SIMULATOR MODES: for each number of simulator will define a list of "stages"
-  that defines the state that remoted simulator should have in that state
-Lenght of the stages should be the same for all simulators. Authd simulator will only accept one enrollment for stage
-- LOG_MONITOR_STR: (list of lists) Expected string to be monitored in all stages
+
+    - PROTOCOL: tcp/udp
+    - CLEAN_KEYS: whetever start with an empty client.keys file or not
+    - SIMULATOR_NUMBERS: Number of simulator to be instantiated, this should match wazuh_conf.yaml
+    - SIMULATOR MODES: for each number of simulator will define a list of "stages"
+    that defines the state that remoted simulator should have in that state
+    Lenght of the stages should be the same for all simulators. Authd simulator will only accept one enrollment for stage
+    - LOG_MONITOR_STR: (list of lists) Expected string to be monitored in all stages
 """
 metadata = [
     {

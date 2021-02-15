@@ -16,8 +16,7 @@ Wazuh solution consists of an endpoint security agent, deployed to the monitored
 
 In this repository you will find the tests used in the CI environment to test Wazuh's capabilities and daemons. This is the structure of the repository:
 
-- **[deps](deps/deps)**:  Contains a Python's framework used to automatize tasks and interact with Wazuh.
-
+- **[deps](deps/)**:  Contains a Python's framework used to automatize tasks and interact with Wazuh.
 - **[tests](tests/integration/integration)**: Directory containing the test suite. These are tests developed using Pytest.
     -  **[integration](tests/integration/integration)**: Integration tests of the different daemons/components.
     -  **[system](tests/integration/system)**: System tests of Wazuh.

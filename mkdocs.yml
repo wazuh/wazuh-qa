@@ -88,20 +88,20 @@ nav:
             - Test CPE indexing: tests/integration/test_vulnerability_detector/test_windows/test_cpe_indexing.md
         - Active response:   
           - tests/integration/test_active_response/index.md
-          - Analysisd: 
-            - tests/integration/test_active_response/analysisd/index.md
-            - Test OS exec: tests/integration/test_active_response/analysisd/test_os_exec.md
-          - Execd:
-            - tests/integration/test_active_response/execd/index.md
-            - Test execd restart: tests/integration/test_active_response/execd/test_execd_restart.md
+          - Test analysisd: 
+            - tests/integration/test_active_response/test_analysisd/index.md
+            - Test OS exec: tests/integration/test_active_response/test_analysisd/test_os_exec.md
+          - Test execd:
+            - tests/integration/test_active_response/test_execd/index.md
+            - Test execd restart: tests/integration/test_active_response/test_execd/test_execd_restart.md
             - Test execd firewall drop: tests/integration/test_active_response/test_execd/test_execd_firewall_drop.md
         - Agentd:   
           - tests/integration/test_agentd/index.md
-          - Test agentd reconnection: tests/integration/test_agentd/test_agentd_reconnection.py
-          - Test agentd parametrized reconnection: tests/integration/test_agentd/test_agentd_parametrized_reconnections.py
-          - Test agentd multi server: tests/integration/test_agentd/test_agentd_multi_server.py
-          - Test agentd enrollment param: tests/integration/test_agentd/test_agentd_enrollment_params.py
-          - Test agentd auth enrollment: tests/integration/test_agentd/test_agent_auth_enrollment.py
+          - Test agentd reconnection: tests/integration/test_agentd/test_agentd_reconnection.md
+          - Test agentd parametrized reconnection: tests/integration/test_agentd/test_agentd_parametrized_reconnections.md
+          - Test agentd multi server: tests/integration/test_agentd/test_agentd_multi_server.md
+          - Test agentd enrollment param: tests/integration/test_agentd/test_agentd_enrollment_params.md
+          - Test agentd auth enrollment: tests/integration/test_agentd/test_agent_auth_enrollment.md
         - Analysisd:   
           - tests/integration/test_analysisd/index.md
           - Test integrity messages: tests/integration/test_analysisd/test_integrity_messages/test_integrity_messages.md
@@ -115,7 +115,7 @@ nav:
             - Test validate linux analysisd alerts: tests/integration/test_analysisd/test_all_syscheckd_configurations/test_validate_linux_analysisd_alerts.md
             - Test check socket responses: tests/integration/test_analysisd/test_all_syscheckd_configurations/test_check_socket_responses.md
             - Test check rare socket_responses: tests/integration/test_analysisd/test_all_syscheckd_configurations/test_check_rare_socket_responses.md
-          - Test mitre: tests/integration/test_analysisd/test_mitre/test_mitre.md
+          - Test mitre: tests/integration/test_analysisd/test_mitre/test_mitre_check_alert.md
           - Test scan messages: tests/integration/test_analysisd/test_scan_messages/test_scan_messages.md
         - API:   
           - tests/integration/test_api/index.md
@@ -131,30 +131,29 @@ nav:
             - Test host port:  tests/integration/test_api/test_config/test_host_port/test_host_port.md
             - Test https:  tests/integration/test_api/test_config/test_https/test_https.md
             - Test jwt token exp timeout:  tests/integration/test_api/test_config/test_jwt_token_exp_timeout/test_jwt_token_exp_timeout.md
-            - Test drop privileges: tests/integration/test_api/test_config/test_drop_privileges/test_drop_privileges.md
             - Test logs:  tests/integration/test_api/test_config/test_logs/test_logs.md
             - Test rbac: tests/integration/test_api/test_config/test_rbac/test_rbac.md
             - Test use only authd: tests/integration/test_api/test_config/test_use_only_authd/test_use_only_authd.md
           - RBAC:
-            - tests/integration/test_api/rbac/index.md
-            - Test add old resource: tests/integration/test_api/rbac/test_add_old_resource.md
-            - Test admin resources: tests/integration/test_api/rbac/test_admin_resources.md
-            - Test policy position: tests/integration/test_api/rbac/test_policy_position.md
-            - Test remove relationship: tests/integration/test_api/rbac/test_remove_relationship.md
-            - Test remove resource: tests/integration/test_api/rbac/test_remove_resource.md
+            - tests/integration/test_api/test_rbac/index.md
+            - Test add old resource: tests/integration/test_api/test_rbac/test_add_old_resource.md
+            - Test admin resources: tests/integration/test_api/test_rbac/test_admin_resources.md
+            - Test policy position: tests/integration/test_api/test_rbac/test_policy_position.md
+            - Test remove relationship: tests/integration/test_api/test_rbac/test_remove_relationship.md
+            - Test remove resource: tests/integration/test_api/test_rbac/test_remove_resource.md
         - Authd:   
           - tests/integration/test_authd/index.md
           - Test authd: tests/integration/test_authd/test_authd.md
-          - Test authd worker: tests/integration/test_authd/test_authd_worker.py
-          - Test authd ssl options:  tests/integration/test_authd/test_authd_ssl_options.py
-          - Test authd ssl certs:  tests/integration/test_authd/test_authd_ssl_certs.py
-          - Test authd name ip pass:  tests/integration/test_authd/test_authd_name_ip_pass.py
-          - Test authd local:  tests/integration/test_authd/test_authd_local.py
-          - Test authd agents ctx:  tests/integration/test_authd/test_authd_agents_ctx.py
+          - Test authd worker: tests/integration/test_authd/test_authd_worker.md
+          - Test authd ssl options:  tests/integration/test_authd/test_authd_ssl_options.md
+          - Test authd ssl certs:  tests/integration/test_authd/test_authd_ssl_certs.md
+          - Test authd name ip pass:  tests/integration/test_authd/test_authd_name_ip_pass.md
+          - Test authd local:  tests/integration/test_authd/test_authd_local.md
+          - Test authd agents ctx:  tests/integration/test_authd/test_authd_agents_ctx.md
         - Cluster:   
           - tests/integration/test_cluster/index.md
           - Test key polling:
-            - tests/integration/test_cluster/test_key_polling_index.md
+            - tests/integration/test_cluster/test_key_polling/index.md
             - Test key polling master: tests/integration/test_cluster/test_key_polling/test_key_polling_master.md
             - Test key polling worker: tests/integration/test_cluster/test_key_polling/test_key_polling_worker.md
         - FIM:   
