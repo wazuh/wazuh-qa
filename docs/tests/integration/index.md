@@ -1,5 +1,5 @@
 
-# Integration tests
+# Overview
 
 Our newest integration tests are located in `wazuh-qa/tests/integration/`. They are organized by capabilities:
 

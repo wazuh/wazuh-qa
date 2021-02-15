@@ -1,4 +1,4 @@
-# Wazuh_testing
+# Overview
 
 **[wazuh_testing](wazuh_testing#wazuh_testing-package)** is a python package tool which contains a set of utilities and dependencies imported by the tests in order to facilitate testing.
 
