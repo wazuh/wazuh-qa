@@ -1,0 +1,11 @@
+- tags:
+  - test_connection
+  apply_to_modules:
+  - test_connection
+  sections:
+  - section: remote
+    elements:
+    - connection:
+        value: CONNECTION
+    -  allowed-ips:
+         value: 127.0.0.1
