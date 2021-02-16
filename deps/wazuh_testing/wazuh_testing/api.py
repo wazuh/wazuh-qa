@@ -7,6 +7,8 @@ import re
 from base64 import b64encode
 
 import requests
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Variables
 
