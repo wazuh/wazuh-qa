@@ -4,6 +4,7 @@
 
 import json
 import re
+import time
 from base64 import b64encode
 
 import requests
@@ -52,12 +53,16 @@ def get_token_login_api(protocol, host, port, user, password, login_endpoint, ti
     """Get API login token"""
 
     login_url = f"{get_base_url(protocol, host, port)}{login_endpoint}"
-    response = requests.get(login_url, headers=get_login_headers(user, password), verify=False, timeout=timeout)
 
-    if response.status_code == 200:
-        return json.loads(response.content.decode())['data']['token']
-    else:
-        raise Exception(f"Error obtaining login token: {response.json()}")
+    response = None
+    for _ in range(10):
+        response = requests.get(login_url, headers=get_login_headers(user, password), verify=False, timeout=timeout)
+
+        if response.status_code == 200:
+            return json.loads(response.content.decode())['data']['token']
+        time.sleep(1)
+
+    raise Exception(f"Error obtaining login token: {response.json()}")
 
 
 def get_api_details_dict(protocol=API_PROTOCOL, host=API_HOST, port=API_PORT, user=API_USER, password=API_PASS,

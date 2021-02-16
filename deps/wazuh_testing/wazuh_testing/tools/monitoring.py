@@ -2,6 +2,8 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+REMOTED_DETECTOR_PREFIX = r'.*wazuh-remoted.*'
+
 # Unix only modules
 
 try:
@@ -164,8 +166,25 @@ class FileTailer:
                 self._position = f.tell()
 
 
-class FileMonitor:
+def make_callback(pattern, prefix="wazuh"):
+    """
+    Creates a callback function from a text pattern.
 
+    Args:
+    pattern (str): String to match on the log
+    prefix  (str): String prefix (modulesd, remoted, ...)
+
+    Returns:
+        lambda function with the callback
+    """
+
+    pattern = r'\s+'.join(pattern.split())
+    regex = re.compile(r'{}{}'.format(prefix, pattern))
+
+    return lambda line: regex.match(line) is not None
+
+
+class FileMonitor:
     def __init__(self, file_path, time_step=0.5):
         self.tailer = FileTailer(file_path, time_step=time_step)
         self._result = None
