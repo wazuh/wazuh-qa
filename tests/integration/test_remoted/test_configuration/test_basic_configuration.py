@@ -19,23 +19,24 @@ pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_connection.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
 parameters = [
-    {'CONNECTION': 'secure'},
-    {'CONNECTION': 'syslog'},
-    {'CONNECTION': 'invalid_option'}
+    {'PROTOCOL': 'UDP', 'CONNECTION': 'secure', 'PORT': '1514'},
+    {'PROTOCOL': 'UDP', 'CONNECTION': 'syslog', 'PORT': '514'},
+    {'PROTOCOL': 'TCP', 'CONNECTION': 'syslog', 'PORT': '514'},
+    {'PROTOCOL': 'TCP', 'CONNECTION': 'secure', 'PORT': '1514'}
 ]
+
 metadata = [
-    {'connection': 'secure'},
-    {'connection': 'syslog'},
-    {'connection': 'invalid_option'},
+    {'protocol': 'UDP', 'connection': 'secure', 'port': '1514'},
+    {'protocol': 'UDP', 'connection': 'syslog', 'port': '514'},
+    {'protocol': 'TCP', 'connection': 'syslog', 'port': '514'},
+    {'protocol': 'TCP', 'connection': 'secure', 'port': '1514'}
 ]
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-configuration_ids = ['secure', 'syslog', 'invalid']
-
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+configuration_ids = [f"{x['PROTOCOL']}_{x['CONNECTION']}_{x['PORT']}" for x in parameters]
 
 
 # fixtures
@@ -53,21 +54,20 @@ def test_connection(get_configuration, configure_environment):
     Checks that the API answer for manager connection coincides with the option selected on ossec.conf
     """
 
-    control_service('restart', daemon='wazuh-remoted')
     truncate_file(LOG_FILE_PATH)
+    control_service('restart', daemon='wazuh-remoted')
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    error_callback = make_callback('ERROR:|CRITICAL:', REMOTED_DETECTOR_PREFIX)
+    cfg = get_configuration['metadata']
 
-    selected_connection = get_configuration['metadata']['connection']
+    log_callback = make_callback(
+        fr"Started \(pid: \d+\). Listening on port {cfg['port']}\/{cfg['protocol']} \({cfg['connection']}\).",
+        REMOTED_DETECTOR_PREFIX
+    )
 
-    if selected_connection == 'invalid_option':
-        wazuh_log_monitor.start(timeout=5, callback=error_callback,
-                                error_message='remoted started with invalid configuration')
-        return
+    wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message="Wazuh remoted didn't start as expected.")
 
-    with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=3, callback=error_callback)
-        raise SystemError('Error starting remoted with a valid configuration!')
-
-    api_answer_connection = api.get_manager_configuration(section="remote", field="connection")
-    assert api_answer_connection == selected_connection
+    # Check that API query return the selected configuration
+    for field in cfg.keys():
+        api_answer = api.get_manager_configuration(section="remote", field=field)
+        assert cfg[field] == api_answer, "Wazuh API answer different from introduced configuration"
