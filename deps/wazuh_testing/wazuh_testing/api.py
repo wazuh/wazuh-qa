@@ -94,3 +94,40 @@ def get_security_resource_information(**kwargs):
         return response.json()['data']['affected_items'][0]
     else:
         return {}
+
+
+def get_manager_configuration(section=None, field=None):
+    """ Get Wazuh manager configuration response from API using GET /manager/configuration
+        https://documentation.wazuh.com/current/user-manual/api/reference.html#operation/api.controllers.manager_controller.get_configuration
+
+        Args:
+        section (str): Indicates the wazuh configuration section, for example: "active-response", "alerts"...
+        field   (str): Indicate a section child. E.g, fields for ruleset section are: decoder_dir, rule_dir, etc
+
+        Returns:
+            map: API response as a map
+    """
+    api_details = get_api_details_dict()
+    api_query = f"{api_details['base_url']}/manager/configuration?"
+
+    if section is not None:
+        api_query += f"section={section}"
+        if field is not None:
+            api_query += f"&field={field}"
+
+    response = requests.get(api_query, headers=api_details['auth_headers'], verify=False)
+
+    try:
+        assert response.json()['error'] == 0, f"Wazuh API response error not 0: {response.json()}"
+        answer = response.json()['data']['affected_items'][0]
+
+        if section is not None:
+            answer = answer[section]
+            if isinstance(answer, list) and len(answer) == 1:
+                answer = answer[0]
+            if field is not None:
+                answer = answer[field]
+        return answer
+
+    except KeyError:
+        raise Exception(f"Wazuh API request failed: {response.json()}")
