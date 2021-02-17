@@ -33,6 +33,8 @@ Paste here related logs and alerts
 - [ ] Proven that tests **pass** when they have to pass.
 - [ ] Proven that tests **fail** when they have to fail.
 <!--
-Important: Don't remove this check if your PR modifies Python code.
+Important: Don't remove these checks if your PR modifies Python code.
 -->
 - [ ] Python codebase satisfies PEP-8 style style guide. `pycodestyle --max-line-length=120 --show-source --show-pep8 file.py`
+- [ ] Python codebase is documented following the Google Style for Python docstrings.
+- [ ] The test is documented in wazuh-qa/docs
