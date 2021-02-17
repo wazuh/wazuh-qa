@@ -8,6 +8,7 @@ configobj==5.0.6
 psutil==5.8.0
 PyYAML==5.4.1
 jq==1.1.2
+jsonschema==3.2.0
 google==3.0.0
 google-api-core==1.25.1
 google-api-python-client==1.12.8

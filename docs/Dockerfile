@@ -1,11 +1,9 @@
 FROM python
 
-ADD ./requirements.txt ./run-documentation.sh  /
+COPY ./requirements.txt /
+COPY ./run-documentation.sh /usr/bin
 
 RUN pip install mkdocs mkdocstrings mkdocs-material
-
-ENV PYTHONPATH=/wazuh-qa/deps/wazuh_testing
 RUN pip install -r requirements.txt 
 
-ENTRYPOINT ["bash","/run-documentation.sh"] 
-
+ENTRYPOINT ["/usr/bin/run-documentation.sh"] 
