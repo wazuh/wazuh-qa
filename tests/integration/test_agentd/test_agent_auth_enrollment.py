@@ -10,7 +10,7 @@ import yaml
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.monitoring import QueueMonitor
-from .conftest import *
+from conftest import *
 
 # Marks
 
