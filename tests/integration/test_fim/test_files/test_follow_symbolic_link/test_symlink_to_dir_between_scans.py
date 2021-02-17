@@ -6,8 +6,8 @@ import os
 from shutil import rmtree
 
 import pytest
-from test_fim.test_files.test_follow_symbolic_link.common import wait_for_symlink_check, symlink_interval, testdir_link, \
-    testdir_target
+from test_fim.test_files.test_follow_symbolic_link.common import wait_for_symlink_check, symlink_interval, \
+    testdir_link, testdir_target
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import SYMLINK, REGULAR, LOG_FILE_PATH, generate_params, create_file, change_internal_options, \
     check_time_travel, callback_detect_event

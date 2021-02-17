@@ -1,0 +1,18 @@
+---
+# conf 1
+- tags:
+  - max_files_per_second
+  apply_to_modules:
+  - test_max_files_per_second
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - FIM_MODE
+        - check_all: 'yes'
+    - max_files_per_second:
+        value: MAX_FILES_PER_SEC
