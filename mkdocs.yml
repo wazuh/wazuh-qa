@@ -1,0 +1,435 @@
+site_name: Wazuh-QA Documentation
+theme:
+  name: "material"
+  palette:
+    primary: light blue
+  logo: assets/wazuh_logo_w.png
+  features:
+    - navigation.indexes
+    - navigation.tabs
+    - navigation.tabs.sticky
+plugins:
+  - search
+  - mkdocstrings
+extra_css:
+    - stylesheets/logo.css
+
+# Repository
+repo_name: wazuh/wazuh-qa
+repo_url: https://github.com/wazuh/wazuh-qa
+edit_uri: ""
+nav:
+    - Home: index.md
+    - Deps: 
+      - Dependencies: deps/index.md
+      - Wazuh Testing: 
+        - Wazuh Testing: deps/wazuh-testing/wazuh_testing.md
+        - Tools: deps/wazuh-testing/tools.md
+    - Tests: 
+      - tests/index.md
+      - Integration: 
+        - tests/integration/index.md
+        - Integration tests structure: tests/integration/help.md
+        - Setting up a test environment: tests/integration/setting_up_test_environment.md
+        - Vulnerability Detector:   
+          - tests/integration/test_vulnerability_detector/index.md
+          - Tests feeds: 
+            - tests/integration/test_vulnerability_detector/test_feeds/index.md
+            - Debian: 
+              - Test extra tags debian feed: tests/integration/test_vulnerability_detector/test_feeds/debian/test_extra_tags_debian_feed.md
+              - Test invalid syntax debian feed: tests/integration/test_vulnerability_detector/test_feeds/debian/test_invalid_syntax_debian_feed.md
+              - Test invalid values debian feed: tests/integration/test_vulnerability_detector/test_feeds/debian/test_invalid_values_debian_feed.md
+              - Test missing tags debian feed: tests/integration/test_vulnerability_detector/test_feeds/debian/test_missing_tags_debian_feed.md
+            - RedHat: 
+              - Test extra fields redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_extra_fields_redhat_feed.md
+              - Test invalid syntax redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_invalid_syntax_redhat_feed.md
+              - Test invalid values redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_invalid_values_redhat_feed.md
+              - Test missing fileds redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_missing_fields_redhat_feed.md
+            - MSU: 
+              - Test extra fields feed: tests/integration/test_vulnerability_detector/test_feeds/msu/test_extra_fields_msu_feed.md
+              - Test invalid syntax msu feed: tests/integration/test_vulnerability_detector/test_feeds/msu/test_invalid_syntax_msu_feed.md
+              - Test invalid values msu feed: tests/integration/test_vulnerability_detector/test_feeds/msu/test_invalid_values_msu_feed.md
+              - Test missing fields msu feed: tests/integration/test_vulnerability_detector/test_feeds/msu/test_missing_fields_msu_feed.md
+            - Canonical: 
+              - Test missing tags canonical feed: tests/integration/test_vulnerability_detector/test_feeds/canonical/test_missing_tags_canonical_feed.md
+              - Test invalid values canonical feed: tests/integration/test_vulnerability_detector/test_feeds/canonical/test_invalid_values_canonical_feed.md
+              - Test invalid syntax canonical feed: tests/integration/test_vulnerability_detector/test_feeds/canonical/test_invalid_syntax_canonical_feed.md
+              - Test extra tags canonical feed: tests/integration/test_vulnerability_detector/test_feeds/canonical/test_extra_tags_canonical_feed.md
+            - Test download feeds: tests/integration/test_vulnerability_detector/test_feeds/test_download_feed.md
+            - Test invalid type custom feeds: tests/integration/test_vulnerability_detector/test_feeds/test_invalid_type_custom_feeds.md
+            - Test invalid type url feeds: tests/integration/test_vulnerability_detector/test_feeds/test_invalid_type_url_feeds.md
+            - Test validate feed content: tests/integration/test_vulnerability_detector/test_feeds/test_validate_feed_content.md
+          - Tests general settings: 
+            -  tests/integration/test_vulnerability_detector/test_general_settings/index.md
+            - Test general settings enabled: tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_enabled.md
+            - Test general settings ignore time: tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_ignore_time.md
+            - Test general settings intervals: tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_interval.md
+            - Test general settings run on start: tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_run_on_start.md
+          - Tests providers: 
+            - tests/integration/test_vulnerability_detector/test_providers/index.md
+            - Test providers enabled: tests/integration/test_vulnerability_detector/test_providers/test_providers_enabled.md
+            - Test providers update intervals: tests/integration/test_vulnerability_detector/test_providers/test_providers_update_interval.md
+            - Update from year: tests/integration/test_vulnerability_detector/test_providers/test_providers_update_from_year.md
+            - Test providers OS: tests/integration/test_vulnerability_detector/test_providers/test_providers_os.md
+            - Test providers no OS: tests/integration/test_vulnerability_detector/test_providers/test_providers_no_os.md
+            - Test providers multiple providers: tests/integration/test_vulnerability_detector/test_providers/test_providers_multiple_providers.md
+          - Tests SCAN results: 
+            - tests/integration/test_vulnerability_detector/test_scan_results/index.md
+            - Test debian inventory with debian feed: tests/integration/test_vulnerability_detector/test_scan_results/test_debian_inventory_debian_feed.md
+            - Test macos inventory: tests/integration/test_vulnerability_detector/test_scan_results/test_macos_inventory.md
+            - Test msu inventory with msu feed: tests/integration/test_vulnerability_detector/test_scan_results/test_msu_inventory_msu_feed.md
+            - Test redhat inventory with redhat feed: tests/integration/test_vulnerability_detector/test_scan_results/test_redhat_inventory_redhat_feed.md
+            - Test ubuntu inventory with canonical feed:  tests/integration/test_vulnerability_detector/test_scan_results/test_ubuntu_inventory_canonical_feed.md
+            - Test scan different cves:  tests/integration/test_vulnerability_detector/test_scan_results/test_scan_different_cves.md
+            - Test scan nvd feed: tests/integration/test_vulnerability_detector/test_scan_results/test_scan_nvd_feed.md
+            - Test scan providers and nvd feed: tests/integration/test_vulnerability_detector/test_scan_results/test_scan_providers_and_nvd_feed.md
+          - Tests Windows: 
+            - tests/integration/test_vulnerability_detector/test_windows/index.md
+            - Test CPE indexing: tests/integration/test_vulnerability_detector/test_windows/test_cpe_indexing.md
+        - Active response:   
+          - tests/integration/test_active_response/index.md
+          - Test analysisd: 
+            - tests/integration/test_active_response/test_analysisd/index.md
+            - Test OS exec: tests/integration/test_active_response/test_analysisd/test_os_exec.md
+          - Test execd:
+            - tests/integration/test_active_response/test_execd/index.md
+            - Test execd restart: tests/integration/test_active_response/test_execd/test_execd_restart.md
+            - Test execd firewall drop: tests/integration/test_active_response/test_execd/test_execd_firewall_drop.md
+        - Agentd:   
+          - tests/integration/test_agentd/index.md
+          - Test agentd reconnection: tests/integration/test_agentd/test_agentd_reconnection.md
+          - Test agentd parametrized reconnection: tests/integration/test_agentd/test_agentd_parametrized_reconnections.md
+          - Test agentd multi server: tests/integration/test_agentd/test_agentd_multi_server.md
+          - Test agentd enrollment param: tests/integration/test_agentd/test_agentd_enrollment_params.md
+          - Test agentd auth enrollment: tests/integration/test_agentd/test_agent_auth_enrollment.md
+        - Analysisd:   
+          - tests/integration/test_analysisd/index.md
+          - Test integrity messages: tests/integration/test_analysisd/test_integrity_messages/test_integrity_messages.md
+          - Test event messages: tests/integration/test_analysisd/test_event_messages/test_event_messages.md
+          - Test error messages: tests/integration/test_analysisd/test_error_messages/test_error_messages.md
+          - Test all syscheckd configurations: 
+            - tests/integration/test_analysisd/test_all_syscheckd_configurations/index.md
+            - Test validate win32 analysisd registry alerts: tests/integration/test_analysisd/test_all_syscheckd_configurations/test_validate_win32_analysisd_registry_alerts.md
+            - Test validate win32 analysisd alerts: tests/integration/test_analysisd/test_all_syscheckd_configurations/test_validate_win32_analysisd_alerts.md
+            - Test validate rare analysisd alerts: tests/integration/test_analysisd/test_all_syscheckd_configurations/test_validate_rare_analysisd_alerts.md
+            - Test validate linux analysisd alerts: tests/integration/test_analysisd/test_all_syscheckd_configurations/test_validate_linux_analysisd_alerts.md
+            - Test check socket responses: tests/integration/test_analysisd/test_all_syscheckd_configurations/test_check_socket_responses.md
+            - Test check rare socket_responses: tests/integration/test_analysisd/test_all_syscheckd_configurations/test_check_rare_socket_responses.md
+          - Test mitre: tests/integration/test_analysisd/test_mitre/test_mitre_check_alert.md
+          - Test scan messages: tests/integration/test_analysisd/test_scan_messages/test_scan_messages.md
+        - API:   
+          - tests/integration/test_api/index.md
+          - Test config:
+            - tests/integration/test_api/test_config/index.md
+            - Test behind proxy server: tests/integration/test_api/test_config/test_behind_proxy_server/test_behind_proxy_server.md
+            - Test bruteforce blocking system: tests/integration/test_api/test_config/test_bruteforce_blocking_system/test_bruteforce_blocking_system.md
+            - Test cache: tests/integration/test_api/test_config/test_cache/test_cache.md
+            - Test cors: tests/integration/test_api/test_config/test_cors/test_cors.md
+            - Test DOS blocking system: tests/integration/test_api/test_config/test_DOS_blocking_system/test_DOS_blocking_system.md
+            - Test drop privileges:  tests/integration/test_api/test_config/test_drop_privileges/test_drop_privileges.md
+            - Test experimental features:  tests/integration/test_api/test_config/test_experimental_features/test_experimental_features 
+            - Test host port:  tests/integration/test_api/test_config/test_host_port/test_host_port.md
+            - Test https:  tests/integration/test_api/test_config/test_https/test_https.md
+            - Test jwt token exp timeout:  tests/integration/test_api/test_config/test_jwt_token_exp_timeout/test_jwt_token_exp_timeout.md
+            - Test logs:  tests/integration/test_api/test_config/test_logs/test_logs.md
+            - Test rbac: tests/integration/test_api/test_config/test_rbac/test_rbac.md
+            - Test use only authd: tests/integration/test_api/test_config/test_use_only_authd/test_use_only_authd.md
+          - Test RBAC:
+            - tests/integration/test_api/test_rbac/index.md
+            - Test add old resource: tests/integration/test_api/test_rbac/test_add_old_resource.md
+            - Test admin resources: tests/integration/test_api/test_rbac/test_admin_resources.md
+            - Test policy position: tests/integration/test_api/test_rbac/test_policy_position.md
+            - Test remove relationship: tests/integration/test_api/test_rbac/test_remove_relationship.md
+            - Test remove resource: tests/integration/test_api/test_rbac/test_remove_resource.md
+        - Authd:   
+          - tests/integration/test_authd/index.md
+          - Test authd: tests/integration/test_authd/test_authd.md
+          - Test authd worker: tests/integration/test_authd/test_authd_worker.md
+          - Test authd ssl options:  tests/integration/test_authd/test_authd_ssl_options.md
+          - Test authd ssl certs:  tests/integration/test_authd/test_authd_ssl_certs.md
+          - Test authd name ip pass:  tests/integration/test_authd/test_authd_name_ip_pass.md
+          - Test authd local:  tests/integration/test_authd/test_authd_local.md
+          - Test authd agents ctx:  tests/integration/test_authd/test_authd_agents_ctx.md
+        - Cluster:   
+          - tests/integration/test_cluster/index.md
+          - Test key polling:
+            - tests/integration/test_cluster/test_key_polling/index.md
+            - Test key polling master: tests/integration/test_cluster/test_key_polling/test_key_polling_master.md
+            - Test key polling worker: tests/integration/test_cluster/test_key_polling/test_key_polling_worker.md
+        - FIM:   
+          - tests/integration/test_fim/index.md
+          - Test files:
+            - tests/integration/test_fim/test_files/index.md    
+            - Test ambiguous conf: 
+              - tests/integration/test_fim/test_files/test_ambiguous_confs/index.md
+              - Test ambiguous complex: tests/integration/test_fim/test_files/test_ambiguous_confs/test_ambiguous_complex.md
+              - Test ambiguous simple: tests/integration/test_fim/test_files/test_ambiguous_confs/test_ambiguous_simple.md
+              - Test ambiguous whodata thread: tests/integration/test_fim/test_files/test_ambiguous_confs/test_ambiguous_whodata_thread.md
+              - Test duplicate entries: tests/integration/test_fim/test_files/test_ambiguous_confs/test_duplicate_entries.md
+              - Test ignore works over restrict: tests/integration/test_fim/test_files/test_ambiguous_confs/test_ignore_works_over_restrict.md
+              - Test whodata prevails over realtime: tests/integration/test_fim/test_files/test_ambiguous_confs/test_whodata_prevails_over_realtime.md
+            - Test audit:
+              - tests/integration/test_fim/test_files/test_audit/index.md
+              - tests/integration/test_fim/test_files/test_audit/test_audit_after_initial_scan.md
+            - Test basic usage:
+              - tests/integration/test_fim/test_files/test_basic_usage/index.md
+              - Test basic usage baseline generation: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_baseline_generation.md
+              - Test basic usage changes: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_changes.md
+              - Test basic usage create after delete dir: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_create_after_delete_dir.md
+              - Test basic usage create rt wd: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_create_rt_wd.md
+              - Test basic usage create scheduled: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_create_scheduled.md
+              - Test basic usage delete folder: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_delete_folder.md
+              - Test basic usage dir with commas: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_dir_with_commas.md
+              - Test basic usage disabled: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_disabled.md
+              - Test basic usage entries match patch count: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_entries_match_path_count.md
+              - Test basic usage move dir: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_move_dir.md
+              - Test basic usage move file:  tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_move_file.md
+              - Test basic usage new dirs: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_new_dirs.md
+              - Test basic usage no dir: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_no_dir.md
+              - Test basic usage quick changes: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_quick_changes.md
+              - Test basic usage rename: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_rename.md
+              - Test basic usage starting agent: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_starting_agent.md
+            - Test benchmark:
+              - tests/integration/test_fim/test_files/test_benchmark/index.md
+              - Test benchmark:  tests/integration/test_fim/test_files/test_benchmark/test_benchmark.md
+              - Test report changes big: tests/integration/test_fim/test_files/test_benchmark/test_report_changes_big.md
+            - Test checks:
+              - tests/integration/test_fim/test_files/test_checks/index.md
+              - Test check all: tests/integration/test_fim/test_files/test_checks/test_check_all.md
+              - Test check other: tests/integration/test_fim/test_files/test_checks/test_check_others.md
+              - Test checksums: tests/integration/test_fim/test_files/test_checks/test_checksums.md
+              - Test hard link: tests/integration/test_fim/test_files/test_checks/test_hard_link.md
+            - Test env variables:
+              - tests/integration/test_fim/test_files/test_env_variables/index.md
+              - Test dir win32: tests/integration/test_fim/test_files/test_env_variables/test_dir_win32.md
+              - Test dir: tests/integration/test_fim/test_files/test_env_variables/test_dir.md
+              - Test ignore: tests/integration/test_fim/test_files/test_env_variables/test_ignore.md
+              - Test nodiff: tests/integration/test_fim/test_files/test_env_variables/test_nodiff.md
+            - Test file limit:
+              - tests/integration/test_fim/test_files/test_file_limit/index.md
+              - Test file limit capacity alerts: tests/integration/test_fim/test_files/test_file_limit/test_file_limit_capacity_alerts.md
+              - Test file limit default: tests/integration/test_fim/test_files/test_file_limit/test_file_limit_default.md
+              - Test file limit delete full: tests/integration/test_fim/test_files/test_file_limit/test_file_limit_delete_full.md
+              - Test file limit full: tests/integration/test_fim/test_files/test_file_limit/test_file_limit_full.md
+              - Test file limit no limit: tests/integration/test_fim/test_files/test_file_limit/test_file_limit_no_limit.md
+              - Test file limit values: tests/integration/test_fim/test_files/test_file_limit/test_file_limit_values.md
+            - Test follow symbolic link:
+              - tests/integration/test_fim/test_files/test_follow_symbolic_link/index.md
+              - Test change target inside folder: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_change_target_inside_folder.md
+              - Test cahnge target with nested directory: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_change_target_with_nested_directory.md
+              - Test change target: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_change_target.md
+              - Test delete symlink: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_delete_symlink.md
+              - Test delete target: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_delete_target.md
+              - Test follow symbolic link: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_follow_symbolic_disabled.md
+              - Test monitor symlink: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_monitor_symlink.md
+              - Test not following symbolic link: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_not_following_symbolic_link.md
+              - Test revert symlink: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_revert_symlink.md
+              - Test symlink and dir: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_symlink_and_dir.md
+              - Test symlink dir inside monitored dir: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_symlink_dir_inside_monitored_dir.md
+              - Test symlink to dir between scans: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_symlink_to_dir_between_scans.md
+              - Test symlink within dir: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_symlink_within_dir.md
+            - Test ignore:
+              - tests/integration/test_fim/test_files/test_ignore/index.md
+              - Test file limit capacity alerts: tests/integration/test_fim/test_files/test_ignore/test_file_limit/test_file_limit_capacity_alerts.md
+              - Test file limit default: tests/integration/test_fim/test_files/test_ignore/test_file_limit/test_file_limit_default.md
+              - Test file limit delete full: tests/integration/test_fim/test_files/test_ignore/test_file_limit/test_file_limit_delete_full.md
+              - Test file limit full: tests/integration/test_fim/test_files/test_ignore/test_file_limit/test_file_limit_full.md
+              - Test file limit no limit: tests/integration/test_fim/test_files/test_ignore/test_file_limit/test_file_limit_no_limit.md
+              - Test file limit values: tests/integration/test_fim/test_files/test_ignore/test_file_limit/test_file_limit_values.md
+            - Test inotify:
+              - tests/integration/test_fim/test_files/test_inotify/index.md
+              - Test num watches: tests/integration/test_fim/test_files/test_inotify/test_num_watches.md
+              - Test remove rename folder: tests/integration/test_fim/test_files/test_inotify/test_remove_rename_folder.md
+            - Test invalid:
+              - tests/integration/test_fim/test_files/test_invalid/index.md
+              - Test invalid: tests/integration/test_fim/test_files/test_invalid/test_invalid.md
+            - Test max eps:
+              - tests/integration/test_fim/test_files/test_max_eps/index.md
+              - Test max eps synchronization:  tests/integration/test_fim/test_files/test_max_eps/test_max_eps_synchronization.md
+              - Test max eps: tests/integration/test_fim/test_files/test_max_eps/test_max_eps.md
+            - Test multiple dirs:
+              - tests/integration/test_fim/test_files/test_multiple_dirs/index.md
+              - Test multiple dirs: tests/integration/test_fim/test_files/test_multiple_dirs/test_multiple_dirs.md
+              - Test multiple entries: tests/integration/test_fim/test_files/test_multiple_dirs/test_multiple_entries.md
+            - Test moving files:
+              - tests/integration/test_fim/test_files/test_moving_files/index.md
+              - Test moving files: tests/integration/test_fim/test_files/test_moving_files/test_moving_files.md
+            - Test nodiff:
+              - tests/integration/test_fim/test_files/test_nodiff/index.md
+              - Test no diff valid: tests/integration/test_fim/test_files/test_nodiff/test_no_diff_valid.md
+            - Test prefilter cmd:
+              - tests/integration/test_fim/test_files/test_prefilter_cmd/index.md
+              - Test prefilter cmd: tests/integration/test_fim/test_files/test_prefilter_cmd/test_prefilter_cmd.md
+            - Test process priority:
+              - tests/integration/test_fim/test_files/test_process_priority/index.md
+              - Test process priority: tests/integration/test_fim/test_files/test_process_priority/test_process_priority.md
+            - Test recursion level:
+              - tests/integration/test_fim/test_files/test_recursion_level/index.md
+              - Test recursion level: tests/integration/test_fim/test_files/test_recursion_level/test_recursion_level.md
+            - Test report changes:
+              - tests/integration/test_fim/test_files/test_report_changes/index.md
+              - Test diff size limit configured: tests/integration/test_fim/test_files/test_report_changes/test_diff_size_limit_configured.md
+              - Test diff size limit default: tests/integration/test_fim/test_files/test_report_changes/test_diff_size_limit_default.md
+              - Test diff quota default: tests/integration/test_fim/test_files/test_report_changes/test_disk_quota_default.md
+              - Test disk quota disabled: tests/integration/test_fim/test_files/test_report_changes/test_disk_quota_disabled.md
+              - Test disk quota values: tests/integration/test_fim/test_files/test_report_changes/test_disk_quota_values.md
+              - Test file size default: tests/integration/test_fim/test_files/test_report_changes/test_file_size_default.md
+              - Test file size disabled: tests/integration/test_fim/test_files/test_report_changes/test_file_size_disabled.md
+              - Test file size values: tests/integration/test_fim/test_files/test_report_changes/test_file_size_values.md
+              - Test large changes: tests/integration/test_fim/test_files/test_report_changes/test_large_changes.md
+              - Test report changes and diff: tests/integration/test_fim/test_files/test_report_changes/test_report_changes_and_diff.md
+              - Test report deleted diff: tests/integration/test_fim/test_files/test_report_changes/test_report_deleted_diff.md
+            - Test restrict:
+              - tests/integration/test_fim/test_files/test_restrict/index.md
+              - Test restrict valid: tests/integration/test_fim/test_files/test_restrict/test_restrict_valid.md
+            - Test scan:
+              - tests/integration/test_fim/test_files/test_scan/index.md
+              - Test scan day and time: tests/integration/test_fim/test_files/test_scan/test_scan_day_and_time.md
+              - Test scan day: tests/integration/test_fim/test_files/test_scan/test_scan_day.md
+              - Test scan time: tests/integration/test_fim/test_files/test_scan/test_scan_time.md
+            - Test skip:
+              - tests/integration/test_fim/test_files/test_skip/index.md
+              - Test skip: tests/integration/test_fim/test_files/test_skip/test_skip.md
+            - Test stats integrity sync:
+              - tests/integration/test_fim/test_files/test_stats_integrity_sync/index.md
+              - Test FIM performance: tests/integration/test_fim/test_files/test_stats_integrity_sync/test_FIM_performance.md
+              - Test stats integrity sync: tests/integration/test_fim/test_files/test_stats_integrity_sync/test_stats_integrity_sync.md
+            - Test tags:
+              - tests/integration/test_fim/test_files/test_tags/index.md
+              - Test tags: tests/integration/test_fim/test_files/test_tags/test_tags.md
+            - Test timezone changes:
+              - tests/integration/test_fim/test_files/test_timezone_changes/index.md  
+              - Test timezone changes: tests/integration/test_fim/test_files/test_timezone_changes/test_timezone_changes.md
+            - Test windows audit interval:
+              - tests/integration/test_fim/test_files/test_windows_audit_interval/index.md
+              - Manage acl: tests/integration/test_fim/test_files/test_windows_audit_interval/manage_acl.md
+              - Test windows audit interval: tests/integration/test_fim/test_files/test_windows_audit_interval/test_windows_audit_interval.md
+          - Test registry:
+            - tests/integration/test_fim/test_registry/index.md
+            - Test registry ambiguous confs:
+              - tests/integration/test_fim/test_registry/test_registry_ambiguous_confs/index.md
+              - Test registry ambiguous simple: tests/integration/test_fim/test_registry/test_registry_ambiguous_confs/test_registry_ambiguous_simple.md
+              - Test registry ambiguous ignore works over restrict: tests/integration/test_fim/test_registry/test_registry_ambiguous_confs/test_registry_ambiguous_ignore_works_over_restrict.md
+              - Test registry ambiguous duplicated entries: tests/integration/test_fim/test_registry/test_registry_ambiguous_confs/test_registry_ambiguous_duplicated_entries.md
+              - Test registry ambiguous conf: tests/integration/test_fim/test_registry/test_registry_ambiguous_confs/test_registry_ambiguous_confs.md
+              - Test registry ambiguous complex: tests/integration/test_fim/test_registry/test_registry_ambiguous_confs/test_registry_ambiguous_complex.md
+            - Test registry basic usage:
+              - tests/integration/test_fim/test_registry/test_registry_basic_usage/index.md
+              - Test basic usage delete registry: tests/integration/test_fim/test_registry/test_registry_basic_usage/test_basic_usage_delete_registry.md
+              - Test basic usage entries match key count: tests/integration/test_fim/test_registry/test_registry_basic_usage/test_basic_usage_entries_match_key_count.md
+              - Test basic usage registry baseline generation: tests/integration/test_fim/test_registry/test_registry_basic_usage/test_basic_usage_registry_baseline_generation.md
+              - Test basic usage registry changes: tests/integration/test_fim/test_registry/test_registry_basic_usage/test_basic_usage_registry_changes.md
+              - Test basic new key: tests/integration/test_fim/test_registry/test_registry_basic_usage/test_basic_usage_registry_new_key.md
+              - Test long registry path: tests/integration/test_fim/test_registry/test_registry_basic_usage/test_long_registry_path.md
+            - Test registry checks:
+              - tests/integration/test_fim/test_registry/test_registry_checks/index.md
+              - Test registry checks others: tests/integration/test_fim/test_registry/test_registry_checks/test_registry_check_others.md
+              - Test registry checkers: tests/integration/test_fim/test_registry/test_registry_checks/test_registry_checkers.md
+            - Test registry file limit:
+              - tests/integration/test_fim/test_registry/test_registry_file_limit/index.md
+              - Test registry limit capacity alerts: tests/integration/test_fim/test_registry/test_registry_file_limit/test_registry_limit_capacity_alerts.md
+              - Test registry limit full: tests/integration/test_fim/test_registry/test_registry_file_limit/test_registry_limit_full.md
+              - Test registry limit values: tests/integration/test_fim/test_registry/test_registry_file_limit/test_registry_limit_values.md
+            - Test registry ignore:
+              - tests/integration/test_fim/test_registry/test_registry_ignore/index.md
+              - Test ignore registry: tests/integration/test_fim/test_registry/test_registry_ignore/test_ignore_registry.md
+            - Test registry multiple registries:
+              - tests/integration/test_fim/test_registry/test_registry_multiple_registries/index.md
+              - Test multiple keys: tests/integration/test_fim/test_registry/test_registry_multiple_registries/test_multiple_keys.md
+              - Test multiple registry entries: tests/integration/test_fim/test_registry/test_registry_multiple_registries/test_multiple_registry_entries.md
+              - Test registry multiple registries: tests/integration/test_fim/test_registry/test_registry_multiple_registries/test_registry_multiple_registries.md
+            - Test registry nodiff:
+              - tests/integration/test_fim/test_registry/test_registry_nodiff/index.md
+              - Test registry no diff: tests/integration/test_fim/test_registry/test_registry_nodiff/test_registry_no_diff.md
+            - Test registry recursion level:
+              - tests/integration/test_fim/test_registry/test_registry_recursion_level/index.md
+              - Test recursion level registry: tests/integration/test_fim/test_registry/test_registry_recursion_level/test_recursion_level_registry.md # This fails
+            - Test registry report changes: 
+              - tests/integration/test_fim/test_registry/test_registry_report_changes/index.md
+              - Test registry all limits disabled: tests/integration/test_fim/test_registry/test_registry_report_changes/test_registry_all_limits_disabled.md
+              - Test registry diff size limit values: tests/integration/test_fim/test_registry/test_registry_report_changes/test_registry_diff_size_limit_values.md
+              - Test registry disk quota default: tests/integration/test_fim/test_registry/test_registry_report_changes/test_registry_disk_quota_default.md
+              - Test registry disk quota values: tests/integration/test_fim/test_registry/test_registry_report_changes/test_registry_disk_quota_values.md
+              - Test registry file size default: tests/integration/test_fim/test_registry/test_registry_report_changes/test_registry_file_size_default.md
+              - Test registry file size values: tests/integration/test_fim/test_registry/test_registry_report_changes/test_registry_file_size_values.md
+              - Test registry report changes deleted: tests/integration/test_fim/test_registry/test_registry_report_changes/test_registry_report_changes_deleted.md
+              - Test registry report changes more changes: tests/integration/test_fim/test_registry/test_registry_report_changes/test_registry_report_changes_more_changes.md
+              - Test registry report changes: tests/integration/test_fim/test_registry/test_registry_report_changes/test_registry_report_changes.md
+              - Test registry restrict: tests/integration/test_fim/test_registry/test_registry_restrict
+              - Test registry restrict: tests/integration/test_fim/test_registry/test_registry_restrict/test_registry_restrict.md
+            - Test registry tags: 
+              - tests/integration/test_fim/test_registry/test_registry_tags/index.md
+              - Test registry tags: tests/integration/test_fim/test_registry/test_registry_tags/test_registry_tags.md
+          - Test synchronization:
+            - tests/integration/test_fim/test_synchronization/index.md
+            - Test invalid sync response: tests/integration/test_fim/test_synchronization/test_invalid_sync_response.md
+            - Test response timeout: tests/integration/test_fim/test_synchronization/test_response_timeout.md
+            - Test sync disabled win32: tests/integration/test_fim/test_synchronization/test_sync_disabled_win32.md
+            - Test sync disabled: tests/integration/test_fim/test_synchronization/test_sync_disabled.md
+            - Test sync interval win32: tests/integration/test_fim/test_synchronization/test_sync_interval_win32.md
+            - Test sync interval: tests/integration/test_fim/test_synchronization/test_sync_interval.md
+            - Test synchronize integrity scan: tests/integration/test_fim/test_synchronization/test_synchronize_integrity_scan.md
+            - Test synchronize integrity win32: tests/integration/test_fim/test_synchronization/test_synchronize_integrity_win32.md
+        - gCloud:   
+          - tests/integration/test_gcloud/index.md
+          - Test configuration:
+            - tests/integration/test_gcloud/test_configuration/test_invalid.md
+            - tests/integration/test_gcloud/test_configuration/test_remote_configuration.md
+            - tests/integration/test_gcloud/test_configuration/test_schedule.md
+          - Test functioning:
+            - tests/integration/test_gcloud/test_functioning/test_day_wday.md
+            - tests/integration/test_gcloud/test_functioning/test_interval.md
+            - tests/integration/test_gcloud/test_functioning/test_logging.md
+            - tests/integration/test_gcloud/test_functioning/test_max_messages.md
+            - tests/integration/test_gcloud/test_functioning/test_pull_on_start.md
+            - tests/integration/test_gcloud/test_functioning/test_rules.md
+        - Logtest:   
+          - tests/integration/test_logtest/index.md
+          - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md
+          - Test rules and decoders load: tests/integration/test_logtest/test_rules_decoders_load/test_load_rules_decoders.md
+          - Test remove session: tests/integration/test_logtest/test_remove_session/test_remove_session.md
+          - Test remove old session: 
+            - Test remove old session: tests/integration/test_logtest/test_remove_old_sessions/test_remove_old_sessions.md
+            - Test remove old session for inactivity: tests/integration/test_logtest/test_remove_old_sessions/test_remove_old_session_for_inactivity.md
+          - Test invalid socket input: tests/integration/test_logtest/test_invalid_socket_input/test_invalid_socket_input.md
+          - Test configuration:
+            - Test configuration file: tests/integration/test_logtest/test_configuration/test_configuration_file.md
+            - Test get configuration sock: tests/integration/test_logtest/test_configuration/test_get_configuration_sock.md
+          - Test invalid rule decoders syntax:
+            - Test invalid decoder syntax: tests/integration/test_logtest/test_invalid_rule_decoders_syntax/test_invalid_decoder_syntax.md
+            - Test invalid rules syntax: tests/integration/test_logtest/test_invalid_rule_decoders_syntax/test_invalid_rules_syntax.md
+        - RIDS:   
+          - tests/integration/test_rids/index.md
+          - Test rids conf:  tests/integration/test_rids/test_rids.md
+          - Test rids:  tests/integration/test_rids/test_rids_conf.md
+        - Rootcheck:   
+          - tests/integration/test_rootcheck/index.md
+          - Test rootcheck: tests/integration/test_rootcheck/test_rootcheck.md
+        - WazuhDB: 
+          - tests/integration/test_wazuh_db/index.md
+          - Test WazuhDB: tests/integration/test_wazuh_db/test_wazuh_db.md
+        - WPK:   
+          - tests/integration/test_wpk/index.md
+          - Test wpk manager:  tests/integration/test_wpk/test_wpk_manager.md
+          - Test wpk manager task states:  tests/integration/test_wpk/test_wpk_manager_task_states.md
+          - Test wpk agent: tests/integration/test_wpk/test_wpk_agent.md
+      - System:
+        - tests/system/index.md
+        - Test cluster: 
+          - tests/system/test_cluster/index.md
+          - Test agent info sync: tests/system/test_cluster/test_agent_info_sync/test_agent_info_sync.md
+          - Test agent enrollment:  tests/system/test_cluster/test_agent_enrollment/test_agent_enrollment.md
+          - Test agent key polling: tests/system/test_cluster/test_agent_key_polling/test_agent_key_polling.md
+          - Test integrity sync: tests/system/test_cluster/test_integrity_sync/test_integrity_sync.md
+        - Test JWT invalidation: 
+          - tests/system/test_jwt_invalidation/index.md
+          - Test change RBAC mode: tests/system/test_jwt_invalidation/test_change_rbac_mode.md
+          - Tet change security resources: tests/system/test_jwt_invalidation/test_change_security_resources.md
+          - Test disconnected nodes: tests/system/test_jwt_invalidation/test_disconnected_nodes.md
+          - Test revoke endpoint: tests/system/test_jwt_invalidation/test_revoke_endpoint.md
+          - Test update password:  tests/system/test_jwt_invalidation/test_update_password.md
+      - Legacy:
+        - tests/legacy/index.md
+
+
+

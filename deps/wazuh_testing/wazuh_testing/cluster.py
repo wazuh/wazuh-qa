@@ -34,58 +34,40 @@ def callback_clusterd_keypoll(item):
 
 
 def detect_initial_worker_connected(file_monitor):
-    """
-    Detect worker node is connected to master after restarting clusterd.
+    """Detect worker node is connected to master after restarting clusterd.
 
-    Parameters
-    ----------
-    file_monitor : FileMonitor
-        Wazuh log monitor to cluster.log
+    Args:
+        file_monitor (FileMonitor): Wazuh log monitor to cluster.log
 
-    Raises
-    ------
-    TimeoutError
-        If no worker connection is detected before 'timeout' seconds
+    Raises:
+        TimeoutError: If no worker connection is detected before 'timeout' seconds
     """
     file_monitor.start(timeout=5, callback=callback_detect_worker_connected)
 
 
 def detect_initial_master_serving(file_monitor):
-    """
-    Detect master node is TCP serving on localhost:PORT after restarting clusterd.
+    """Detect master node is TCP serving on localhost:PORT after restarting clusterd.
 
-    Parameters
-    ----------
-    file_monitor : FileMonitor
-        Wazuh log monitor to cluster.log
+    Args:
+        file_monitor (FileMonitor): Wazuh log monitor to cluster.log
 
-    Raises
-    ------
-    TimeoutError
-        If no master serving message is detected before 'timeout' seconds
+    Raises:
+        TimeoutError: If no master serving message is detected before 'timeout' seconds
     """
     file_monitor.start(timeout=5, callback=callback_detect_master_serving)
 
 
 def cluster_msg_build(cmd: bytes = None, counter: int = None, payload: bytes = None, encrypt=True) -> bytes:
-    """
-    Build a message using cluster protocol.
+    """Build a message using cluster protocol.
 
-    Parameters
-    ----------
-    cmd : bytes
-        command to send
-    counter : int
-        message id
-    payload : bytes
-        data to send
-    encrypt : bool
-        whether to use fernet encryption or not
+    Args:
+        cmd (bytes): command to send
+        counter (int): message id
+        payload (bytes): data to send
+        encrypt (bool): whether to use fernet encryption or not
 
-    Returns
-    -------
-    bytes
-        built message
+    Returns:
+        bytes: built message
     """
     cmd_len = len(cmd)
     if cmd_len > CLUSTER_CMD_HEADER_SIZE:
@@ -105,22 +87,15 @@ def cluster_msg_build(cmd: bytes = None, counter: int = None, payload: bytes = N
 
 
 def _master_action(counter: int = None, cmd: bytes = None, payload: bytes = None, **kwargs):
-    """
-    Define and handle master related actions.
+    """Define and handle master related actions.
 
-    Parameters
-    ----------
-    counter : int
-        message id
-    cmd : bytes
-        received command
-    payload : bytes
-        received payload
+    Args:
+        counter (int): message id
+        cmd (bytes): received command
+        payload (bytes): received payload
 
-    Returns
-    -------
-    dict
-        cmd, counter and payload to respond
+    Returns:
+        dict: cmd, counter and payload to respond
     """
     # Available commands to handle from master side
     if cmd == b'hello':
@@ -141,18 +116,13 @@ def _master_action(counter: int = None, cmd: bytes = None, payload: bytes = None
 
 
 def _get_info_from_header(data: bytes):
-    """
-    Get information contained in the message's header.
+    """Get information contained in the message's header.
 
-    Parameters
-    ----------
-    data
-        raw data to process
+    Args:
+        data (bytes): raw data to process
 
-    Returns
-    -------
-    dict
-        counter, cmd, total extracted from header
+    Returns:
+        dict: counter, cmd, total extracted from header
     """
     counter, total, cmd = struct.unpack(CLUSTER_HEADER_FORMAT, data[0:CLUSTER_DATA_HEADER_SIZE])
     cmd = cmd.split(b' ')[0]
@@ -161,18 +131,13 @@ def _get_info_from_header(data: bytes):
 
 
 def _cluster_message_decompose(data: bytes):
-    """
-    Get all information contained in the cluster message.
+    """Get all information contained in the cluster message.
 
-    Parameters
-    ----------
-    data
-        raw cluster data to process
+    Args:
+        data (bytes): raw cluster data to process
 
-    Returns
-    -------
-    dict
-        header + decrypted payload from data
+    Returns:
+        dict: header + decrypted payload from data
     """
     decomposed_message = _get_info_from_header(data)
     decomposed_message['payload'] = _my_fernet.decrypt(data[CLUSTER_DATA_HEADER_SIZE:])
@@ -184,15 +149,11 @@ def master_simulator(data: bytes):
     """
     Handler to simulate a wazuh master node behaviour.
 
-    Parameters
-    ----------
-    data
-        received data to handle
+    Args:
+        data (bytes): received data to handle
 
-    Returns
-    -------
-    bytes
-        response for the worker node
+    Returns:
+        bytes: response for the worker node
     """
     header = data[0:CLUSTER_DATA_HEADER_SIZE]
     if header != b'':
@@ -205,17 +166,12 @@ def _process_clusterd_message(tup, command: bytes = None):
     """
     Process a clusterd message that matches the given command.
 
-    Parameters
-    ----------
-    tup
-        messages to process
-    command
-        command to look for in the tup
+    Args:
+        tup: messages to process
+        command (bytes): command to look for in the tup
 
-    Returns
-    -------
-    dict
-        dictionary with counter, total, cmd and payload data
+    Returns:
+        dict: dictionary with counter, total, cmd and payload data
     """
     if isinstance(tup, tuple):
         decomposed_data = _cluster_message_decompose(tup[0])

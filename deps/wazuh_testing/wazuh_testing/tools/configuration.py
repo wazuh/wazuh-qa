@@ -74,10 +74,8 @@ def set_wazuh_conf(wazuh_conf: List[str]):
     """
     Set up Wazuh configuration. Wazuh will be restarted to apply it.
 
-    Parameters
-    ----------
-    wazuh_conf : ET.ElementTree
-        ElementTree with a custom Wazuh configuration.
+    Args:
+        wazuh_conf (ET.ElementTree): ElementTree with a custom Wazuh configuration.
     """
     write_wazuh_conf(wazuh_conf)
     print("Restarting Wazuh...")
@@ -90,15 +88,11 @@ def generate_wazuh_conf(args: List = None) -> ET.ElementTree:
     """
     Generate a configuration file for Wazuh.
 
-    Parameters
-    ----------
-    args : list, optional
-        Arguments to generate ossec.conf (install_type, distribuition, version). Default `None`
+    Args:
+        args (list, optional): Arguments to generate ossec.conf (install_type, distribuition, version). Default `None`
 
-    Returns
-    -------
-    ET.ElementTree
-        New Wazuh configuration generated from 'gen_ossec.sh'.
+    Returns:
+        (ET.ElementTree): New Wazuh configuration generated from 'gen_ossec.sh'.
     """
     gen_ossec_args = args if args else ['conf', 'manager', 'rhel', '7']
     wazuh_config = check_output([GEN_OSSEC] + gen_ossec_args).decode(encoding='utf-8', errors='ignore')
@@ -111,9 +105,7 @@ def get_wazuh_conf() -> List[str]:
     Get current `ossec.conf` file content.
 
     Returns
-    -------
-    List of str
-        A list containing all the lines of the `ossec.conf` file.
+        List of str: A list containing all the lines of the `ossec.conf` file.
     """
     with open(WAZUH_CONF) as f:
         lines = f.readlines()
@@ -123,15 +115,11 @@ def get_wazuh_conf() -> List[str]:
 def get_api_conf(path) -> dict:
     """Get current `api.yaml` file content.
 
-    Parameters
-    ----------
-    path : str
-        Path of config file.
+    Args:
+        path (str): Path of config file.
 
-    Returns
-    -------
-    current_conf : dict
-        A dict containing all content of the `api.yaml` file.
+    Returns:
+        current_conf (dict): A dict containing all content of the `api.yaml` file.
     """
     current_conf = {}
 
@@ -146,10 +134,8 @@ def write_wazuh_conf(wazuh_conf: List[str]):
     """
     Write a new configuration in 'ossec.conf' file.
 
-    Parameters
-    ----------
-    wazuh_conf : List of str
-        Lines to be written in the ossec.conf file.
+    Args:
+        wazuh_conf (list or str): Lines to be written in the ossec.conf file.
     """
     with open(WAZUH_CONF, 'w') as f:
         f.writelines(wazuh_conf)
@@ -159,12 +145,10 @@ def write_api_conf(path: str, api_conf: dict):
     """
     Write a new configuration in 'api.yaml' file.
 
-    Parameters
+    Args:
     ----------
-    path : str
-        Path of config file.
-    api_conf : dict
-        Dictionary to be written in the api.yaml file.
+    path (str): Path of config file.
+    api_conf (dicst): Dictionary to be written in the api.yaml file.
     """
     with open(path, 'w+') as f:
         yaml.dump(api_conf, f)
@@ -174,12 +158,9 @@ def write_security_conf(path: str, security_conf: dict):
     """
     Write a new configuration in 'security.yaml' file.
 
-    Parameters
-    ----------
-    path : str
-        Path of config file.
-    security_conf : dict
-        Dictionary to be written in the security.yaml file.
+    Args:
+        path (str): Path of config file.
+        security_conf (dict): Dictionary to be written in the security.yaml file.
     """
     if not os.path.exists(path):
         from wazuh_testing.tools import OSSEC_UID, OSSEC_GID
@@ -193,38 +174,25 @@ def set_section_wazuh_conf(sections, template=None):
     """
     Set a configuration in a section of Wazuh. It replaces the content if it exists.
 
-    Parameters
-    ----------
-    sections : list
-        list of dicts with section and new elements
-        section : str, optional
-            Section of Wazuh configuration to replace. Default `'syscheck'`
-        new_elements : list, optional
-            List with dictionaries for settings elements in the section. Default `None`
-    template : list of string, optional
-        File content template
+    Args:
+        sections (list): List of dicts with section and new elements
+        section (str, optional): Section of Wazuh configuration to replace. Default `'syscheck'`
+        new_elements (list, optional) : List with dictionaries for settings elements in the section. Default `None`
+        template (list of string, optional): File content template
 
-    Returns
-    -------
-    List of str
-        List of str with the custom Wazuh configuration.
+    Returns:
+        List of str: List of str with the custom Wazuh configuration.
     """
 
     def create_elements(section: ET.Element, elements: List):
         """
         Insert new elements in a Wazuh configuration section.
 
-        Parameters
-        ----------
-        section : ET.Element
-            Section where the element will be inserted.
-        elements : list
-            List with the new elements to be inserted.
-
-        Returns
-        -------
-        ET.ElementTree
-            Modified Wazuh configuration.
+        Args:
+            section (ET.Element): Section where the element will be inserted.
+            elements (list): List with the new elements to be inserted.
+        Returns:
+            ET.ElementTree: Modified Wazuh configuration.
         """
         tag = None
         for element in elements:
@@ -257,18 +225,12 @@ def set_section_wazuh_conf(sections, template=None):
         This operation is needed before attempting to convert the list to ElementTree because if the ossec.conf had more
         than one `<ossec_config>` element as root the conversion would fail.
 
-        Parameters
-        ----------
-        str_list : list of str
-            The content of the ossec.conf file in a list of str.
-        root_delimeter : str, optional
-            The expected string to identify when the first root element ends, by default "</ossec_config>"
+        Args:
+            str_list (list or str): The content of the ossec.conf file in a list of str.
+            root_delimeter (str, optional: The expected string to identify when the first root element ends, by default "</ossec_config>"
 
-        Returns
-        -------
-        list of str
-            The first N lines of the specified str_list until the root_delimeter is found. The rest of the list will be
-            ignored.
+        Returns:
+            list of str : The first N lines of the specified str_list until the root_delimeter is found. The rest of the list will be ignored.
         """
         line_counter = 0
         for line in str_list:
@@ -285,15 +247,11 @@ def set_section_wazuh_conf(sections, template=None):
         As ElementTree does not support xml with more than one root element this function will parse the list first with
         `purge_multiple_root_elements` to ensure there is only one root element.
 
-        Parameters
-        ----------
-        str_list : list of str
-            A list of strings with every line of the ossec conf.
+        Args:
+            str_list (list of str): A list of strings with every line of the ossec conf.
 
-        Returns
-        -------
-        ElementTree
-            A ElementTree object with the data of the `str_list`
+        Returns:
+            ElementTree: A ElementTree object with the data of the `str_list`
         """
         str_list = purge_multiple_root_elements(str_list)
         return ET.ElementTree(ET.fromstringlist(str_list))
@@ -302,15 +260,11 @@ def set_section_wazuh_conf(sections, template=None):
         """
         Turn an ElementTree object into a list of str.
 
-        Parameters
-        ----------
-        elementTree : ElementTree
-            A ElementTree object with all the data of the ossec.conf.
+        Args:
+            elementTree (ElementTree): A ElementTree object with all the data of the ossec.conf.
 
-        Returns
-        -------
-        list of str
-            A list of str containing all the lines of the ossec.conf.
+        Returns:
+            (list of str): A list of str containing all the lines of the ossec.conf.
         """
         return ET.tostringlist(elementTree.getroot(), encoding="unicode")
 
@@ -320,20 +274,12 @@ def set_section_wazuh_conf(sections, template=None):
         (This extra function has been necessary to implement it to configure the wodle blocks, since they have the same
         section but different attributes).
 
-        Parameters
-        ----------
-        wazuh_conf: ElementTree
-            An ElementTree object with all the data of the ossec.conf
-        section: str
-            Name of the tag or configuration section to search for. For example: vulnerability_detector
-        attributes: list<dict>
-            List with section attributes. Needed to check if the section exists with all the searched attributes
-            and values. For example (wodle section) [{'name': 'syscollector'}]
-
-        Returns
-        -------
-        ElementTree
-            An ElementTree object with the section data found in ossec.conf. None if nothing was found.
+        Args:
+            wazuh_conf (ElementTree): An ElementTree object with all the data of the ossec.conf
+            section (str): Name of the tag or configuration section to search for. For example: vulnerability_detector
+            attributes (list\<dict\> ): List with section attributes. Needed to check if the section exists with all the searched attributes and values. For example (wodle section) [{'name': 'syscollector'}]
+        Returns:
+            ElementTree: An ElementTree object with the section data found in ossec.conf. None if nothing was found.
         """
         if attributes is None:
             return wazuh_conf.find(section)
@@ -387,17 +333,12 @@ def expand_placeholders(mutable_obj, placeholders=None):
     """
     Search for placeholders and replace them by a value inside mutable_obj.
 
-    Parameters
-    ----------
-    mutable_obj : mutable object
-        Target object where the replacements are performed.
-    placeholders : dict
-        Each key is a placeholder and its value is the replacement. Default `None`
+    Args:
+        mutable_obj (mutable object):  Target object where the replacements are performed.
+        placeholders (dict): Each key is a placeholder and its value is the replacement. Default `None`
 
-    Returns
-    -------
-    Reference
-        Reference to `mutable_obj`
+    Returns:
+        Reference: Reference to `mutable_obj`
     """
     placeholders = {} if placeholders is None else placeholders
     if isinstance(mutable_obj, list):
@@ -421,12 +362,9 @@ def add_metadata(dikt, metadata=None):
     """
     Create a new key 'metadata' in dikt if not already exists and updates it with metadata content.
 
-    Parameters
-    ----------
-    dikt : dict
-        Target dict to update metadata in.
-    metadata : dict, optional
-        Dict including the new properties to be saved in the metadata key.
+    Args:
+        dikt (dict):  Target dict to update metadata in.
+        metadata (dict, optional):  Dict including the new properties to be saved in the metadata key.
     """
     if metadata is not None:
         new_metadata = dikt['metadata'] if 'metadata' in dikt else {}
@@ -440,19 +378,13 @@ def process_configuration(config, placeholders=None, metadata=None):
 
     Both placeholders and metadata should have equal length.
 
-    Parameters
-    ----------
-    config : dict
-        Config to be enriched.
-    placeholders : dict, optional
-        Dict with the replacements.
-    metadata : list of dict, optional
-        List of dicts with the metadata keys to include in config.
+    Args:
+        config (dict): Config to be enriched.
+        placeholders (dict, optional): Dict with the replacements.
+        metadata (list of dict, optional): List of dicts with the metadata keys to include in config.
 
-    Returns
-    -------
-    dict
-        Dict with enriched configuration.
+    Returns:
+        dict: Dict with enriched configuration.
     """
     new_config = expand_placeholders(deepcopy(config), placeholders=placeholders)
     add_metadata(new_config, metadata=metadata)
@@ -464,25 +396,16 @@ def load_wazuh_configurations(yaml_file_path: str, test_name: str, params: list 
     """
     Load different configurations of Wazuh from a YAML file.
 
-    Parameters
-    ----------
-    yaml_file_path : str
-        Full path of the YAML file to be loaded.
-    test_name : str
-        Name of the file which contains the test that will be executed.
-    params : list, optional
-        List of dicts where each dict represents a replacement MATCH -> REPLACEMENT. Default `None`
-    metadata : list, optional
-        Custom metadata to be inserted in the configuration. Default `None`
+    Args:
+        yaml_file_path (str): Full path of the YAML file to be loaded.
+        test_name (str): Name of the file which contains the test that will be executed.
+        params (list, optional) : List of dicts where each dict represents a replacement MATCH -\> REPLACEMENT. Default `None`
+        metadata (list, optional): Custom metadata to be inserted in the configuration. Default `None`
 
-    Returns
-    -------
-    Python object with the YAML file content
-
-    Raises
-    ------
-    ValueError
-        If the length of `params` and `metadata` are not equal.
+    Returns:
+        Python object with the YAML file content
+    Raises:
+        ValueError: If the length of `params` and `metadata` are not equal.
     """
     params = [{}] if params is None else params
     metadata = [{}] if metadata is None else metadata
@@ -511,19 +434,12 @@ def set_correct_prefix(configurations, new_prefix):
     This function checks if the path inside directories, ignore, nodiff and restrict sections
     contains a certain prefix, and if it does not contain it, it inserts it.
 
-    Parameters
-    ----------
-    configurations : list
-        List of configurations loaded from the YAML.
-    new_prefix : str
-        Prefix to be inserted before every path.
+    Args:
+        configurations (list): List of configurations loaded from the YAML.
+        new_prefix (str): Prefix to be inserted before every path.
 
-    Returns
-    -------
-    configurations : list
-        List of configurations with the correct prefix
-        added in the directories and ignore sections.
-
+    Returns:
+        configurations (list): List of configurations with the correct prefix added in the directories and ignore sections.
     """
 
     def inserter(path):
@@ -584,12 +500,9 @@ def check_apply_test(apply_to_tags: Set, tags: List):
     """
     Skip test if intersection between the two parameters is empty.
 
-    Parameters
-    ----------
-    apply_to_tags : set
-        Tags that the tests will run.
-    tags : list
-        List with the tags that identifies a configuration.
+    Args:
+        apply_to_tags (set): Tags that the tests will run.
+        tags (list): List with the tags that identifies a configuration.
     """
     if not (apply_to_tags.intersection(tags) or
             'all' in apply_to_tags):
@@ -599,7 +512,7 @@ def check_apply_test(apply_to_tags: Set, tags: List):
 def generate_syscheck_config():
     """Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags'.
 
-    Every configuration is ready to be applied in the tag <directories>.
+    Every configuration is ready to be applied in the tag \<directories\>.
     """
     check_platform = 'check_attrs' if sys.platform == 'win32' else 'check_inode'
     check_names = ['check_all', 'check_sha1sum', 'check_md5sum', 'check_sha256sum', 'check_size', 'check_owner',
@@ -616,7 +529,7 @@ def generate_syscheck_config():
 def generate_syscheck_registry_config():
     """Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags' for Windowsregistries.
 
-    Every configuration is ready to be applied in the tag <directories>.
+    Every configuration is ready to be applied in the tag \<directories\>.
     """
     check_names = ['check_all', 'check_sha1sum', 'check_md5sum', 'check_sha256sum', 'check_size', 'check_owner',
                    'check_group', 'check_perm', 'check_mtime', 'check_type', 'report_changes']

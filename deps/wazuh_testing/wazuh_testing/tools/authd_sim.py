@@ -64,19 +64,21 @@ class AuthdSimulator:
     def set_mode(self, mode):
         """
         Sets a mode:
-        ACCEPT: Accepts connection and produces enrollment
-        REJECT: Waits 2 seconds and anwsers with an empty message
+
+            ACCEPT: Accepts connection and produces enrollment
+            REJECT: Waits 2 seconds and anwsers with an empty message
         """
         self.mode = mode
 
     def _process_enrollment_message(self, received):
         """ 
         Reads a message received at the SSL socket, and parses to emulate a authd response
+        
         Expected message:
-        OSSEC A:'{name}' G:'{groups}' IP:'{ip}'\n
+            OSSEC A:'{name}' G:'{groups}' IP:'{ip}'\n
 
         Key response:
-        OSSEC K: {id} {name} {ip} {key:64}
+            OSSEC K: {id} {name} {ip} {key:64}
         """
         if self.mode == 'REJECT':
             time.sleep(2)

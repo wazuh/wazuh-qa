@@ -19,42 +19,30 @@ class HostManager:
     def __init__(self, inventory_path: str):
         """Constructor of host manager class.
 
-        Parameters
-        ----------
-        inventory_path : str
-            Ansible inventory path
+        Args:
+            inventory_path (str): Ansible inventory path
         """
         self.inventory_path = inventory_path
 
     def get_host(self, host: str):
         """Get the Ansible object for communicating with the specified host.
 
-        Parameters
-        ----------
-        host : str
-            Hostname
+        Args:
+            host (str): Hostname
 
-        Returns
-        -------
-        testinfra.modules.base.Ansible
-            Host instance from hostspec
+        Returns:
+            testinfra.modules.base.Ansible: Host instance from hostspec
         """
         return testinfra.get_host(f"ansible://{host}?ansible_inventory={self.inventory_path}")
 
     def move_file(self, host: str, src_path: str, dest_path: str = '/var/ossec/etc/ossec.conf', check: bool = False):
         """Move from src_path to the desired location dest_path for the specified host.
 
-        Parameters
-        ----------
-        host : str
-            Hostname
-        src_path : str
-            Source path
-        dest_path :
-            Destination path
-        check : bool, optional
-            Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html),
-            by default it is enabled so no changes will be applied. Default `False`
+        Args:
+        host (str): Hostname
+        src_path (str): Source path
+        dest_path (str): Destination path
+        check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
         """
         self.get_host(host).ansible("copy", f"src={src_path} dest={dest_path} owner=ossec group=ossec mode=0775",
                                     check=check)
@@ -62,21 +50,13 @@ class HostManager:
     def add_block_to_file(self, host: str, path: str, replace: str, before: str, after, check: bool = False):
         """Add text block to desired file.
 
-        Parameters
-        ----------
-        host : str
-            Hostname
-        path : str
-            Path of the file
-        replace : str
-            Text to be inserted in the file
-        before : str
-            Lower stop of the block to be replaced
-        after : str
-            Upper stop of the block to be replaced
-        check : bool, optional
-            Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html),
-            by default it is enabled so no changes will be applied. Default `False`
+        Args:
+            host (str): Hostname
+            path (str): Path of the file
+            replace (str): Text to be inserted in the file
+            before (str): Lower stop of the block to be replaced
+            after (str): Upper stop of the block to be replaced
+            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
         """
         replace = f'{after}{replace}{before}'
         self.get_host(host).ansible("replace", f"path={path} regexp='{after}[\s\S]+{before}' replace='{replace}'",
@@ -92,17 +72,11 @@ class HostManager:
     def control_service(self, host: str, service: str = 'wazuh', state: str = "started", check: bool = False):
         """Control the specified service.
 
-        Parameters
-        ----------
-        host : str
-            Hostname
-        service : str
-            Service to be controlled
-        state : str
-            Final state in which service must end
-        check : bool, optional
-            Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html),
-            by default it is enabled so no changes will be applied. Default `False`
+        Args:
+            host (str): Hostname
+            service (str): Service to be controlled
+            state (str): Final state in which service must end
+            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
         """
         if service == 'wazuh':
             service = 'wazuh-agent' if 'agent' in host else 'wazuh-manager'
@@ -111,27 +85,19 @@ class HostManager:
     def clear_file(self, host: str, file_path: str, check: bool = False):
         """Truncate the specified file.
 
-        Parameters
-        ----------
-        host : str
-            Hostname
-        file_path : str
-            File path to be truncated
-        check : bool, optional
-            Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html),
-            by default it is enabled so no changes will be applied. Default `False`
+        Args:
+            host (str): Hostname
+            file_path (str): File path to be truncated
+            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
         """
         self.get_host(host).ansible("copy", f"dest={file_path} content='' force=yes", check=check)
 
     def get_file_content(self, host: str, file_path: str):
         """Get the content of the specified file.
 
-        Parameters
-        ----------
-        host : str
-            Hostname
-        file_path : str
-            Path of the file
+        Args:
+            host (str): Hostname
+            file_path (str) : Path of the file
         """
         return self.get_host(host).file(file_path).content_string
 
@@ -139,16 +105,11 @@ class HostManager:
                      restart_services: list = None):
         """Apply the configuration described in the config_yml_path to the environment.
 
-        Parameters
-        ----------
-        config_yml_path : str
-            Path to the yml file that contains the configuration to be applied
-        dest_path : str
-            Destination file
-        clear_files : list
-            List of files to be truncated
-        restart_services : list
-            List of services to be restarted
+        Args:
+            config_yml_path (str): Path to the yml file that contains the configuration to be applied
+            dest_path (str): Destination file
+            clear_files (list): List of files to be truncated
+            restart_services (list): List of services to be restarted
         """
         with open(config_yml_path, mode='r') as config_yml:
             config = yaml.safe_load(config_yml)
@@ -176,17 +137,11 @@ class HostManager:
                          clear_log: bool = False):
         """Apply the API configuration described in the yaml file or in the dictionary.
 
-        Parameters
-        ----------
-        api_config : str or dict
-            Configuration to be applied. If it is a string, it will try to load the YAML in that path.
-            If it is a dictionary, it will apply that configuration to every host in `host_list`.
-        host_list : list, optional
-            List of hosts to apply the configuration in. Default `None`
-        dest_path : str, optional
-            Path where the API configuration is. Default `/var/ossec/api/configuration/api.yaml`
-        clear_log : bool, optional
-            Boolean to decide if it must truncate the 'api.log' after restarting the API or not.
+        Args:
+            api_config (str,dict): Configuration to be applied. If it is a string, it will try to load the YAML in that path. If it is a dictionary, it will apply that configuration to every host in `host_list`.
+            host_list (list, optional): List of hosts to apply the configuration in. Default `None`
+            dest_path (str, optional): Path where the API configuration is. Default `/var/ossec/api/configuration/api.yaml`
+            clear_log (bool, optional): Boolean to decide if it must truncate the 'api.log' after restarting the API or not.
         """
         if isinstance(api_config, str):
             with open(api_config, 'r') as config_yml:
@@ -206,26 +161,17 @@ class HostManager:
     def get_api_token(self, host, user='wazuh', password='wazuh', auth_context=None, port=55000, check=False):
         """Return an API token for the specified user.
 
-        Parameters
-        ----------
-        host : str
-            Hostname.
-        user : str, optional
-            API username. Default `wazuh`
-        password : str, optional
-            API password. Default `wazuh`
-        auth_context : dict, optional
-            Authorization context body. Default `None`
-        port : int, optional
-            API port. Default `55000`
-        check : bool, optional
-            Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html),
-            by default it is enabled so no changes will be applied. Default `False`
+        Args:
+            host (str): Hostname.
+            user (str, optional): API username. Default `wazuh`
+            password (str, optional): API password. Default `wazuh`
+            auth_context (dict, optional): Authorization context body. Default `None`
+            port (int, optional): API port. Default `55000`
+            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html),
+                by default it is enabled so no changes will be applied. Default `False`
 
-        Returns
-        -------
-        API token : str
-            Usable API token.
+        Returns:
+            API token (str): Usable API token.
         """
         if auth_context is not None:
             login_endpoint = '/security/user/authenticate/run_as'
@@ -248,28 +194,17 @@ class HostManager:
     def make_api_call(self, host, port=55000, method='GET', endpoint='/', request_body=None, token=None, check=False):
         """Make an API call to the specified host.
 
-        Parameters
-        ----------
-        host : str
-            Hostname.
-        port : int, optional
-            API port. Default `55000`
-        method : str, optional
-            Request method. Default `GET`
-        endpoint : str, optional
-            Request endpoint. It must start with '/'.. Default `/`
-        request_body : dict, optional
-            Request body. Default `None`
-        token : str, optional
-            Request token. Default `None`
-        check : bool, optional
-            Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html),
-            by default it is enabled so no changes will be applied. Default `False`
+        Args:
+            host (str): Hostname.
+            port (int, optional): API port. Default `55000`
+            method (str, optional): Request method. Default `GET`
+            endpoint (str, optional): Request endpoint. It must start with '/'.. Default `/`
+            request_body ( dict, optional) : Request body. Default `None`
+            token (str, optional):  Request token. Default `None`
+            check ( bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
 
-        Returns
-        -------
-        API response : dict
-            Return the response in JSON format.
+        Returns: 
+            API response (dict) : Return the response in JSON format.
         """
         request_body = 'body="{}"'.format(
             json.dumps(request_body).replace('"', '\\"').replace(' ', '')) if request_body else ''
@@ -285,19 +220,12 @@ class HostManager:
     def run_command(self, host: str, cmd: str, check: bool = False):
         """Run a command on the specified host and return its stdout.
 
-        Parameters
-        ----------
-        host : str
-            Hostname
-        cmd : str
-            Command to execute
-        check : bool, optional
-            Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html),
-            by default it is enabled so no changes will be applied. Default `False`
+        Args:
+            host (str) : Hostname
+            cmd (str): Command to execute
+            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
 
-        Returns
-        -------
-        stdout : str
-            The output of the command execution.
+        Returns:
+            stdout (str): The output of the command execution.
         """
         return self.get_host(host).ansible("command", cmd, check=check)["stdout"]
