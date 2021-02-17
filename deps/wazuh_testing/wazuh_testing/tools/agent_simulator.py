@@ -351,7 +351,7 @@ class Agent:
                 raise ValueError(f'Execution result should be configured \
                                  in agent')
         else:
-            raise ValueError(f'Unrecongnized command {command}')
+            raise ValueError(f'Unrecognized command {command}')
 
     def create_hc_startup(self):
         msg = "#!-agent startup "
@@ -639,7 +639,7 @@ class GeneratorFIM:
             return '{0}:{1}:{2}'.format(self.SYSCHECK_MQ, self.SYSCHECK,
                                         message)
 
-    def generateMessage(self):
+    def generate_message(self):
         if self.agent_version >= "3.12":
             if self.event_type == "added":
                 timestamp = int(time())
@@ -654,8 +654,7 @@ class GeneratorFIM:
                 attributes = self.get_attributes()
                 self.generate_attributes()
                 old_attributes = self.get_attributes()
-                changed_attributes = \
-                    self.check_changed_attributes(attributes, old_attributes)
+                changed_attributes = self.check_changed_attributes(attributes, old_attributes)
                 data = {"path": self._file, "mode": self.event_mode,
                         "type": self.event_type, "timestamp": timestamp,
                         "attributes": attributes,
@@ -673,11 +672,8 @@ class GeneratorFIM:
 
         else:
             self.generate_attributes()
-            message = '{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8}:{9} {10}'.format(
-                self._size, self._mode, self._uid, self._gid, self._md5,
-                self._sha1, self._uname, self._gname, self._mdate,
-                self._inode, self._file)
-
+            message = f'{self._size}:{self._mode}:{self._uid}:{self._gid}:{self._md5}:{self._sha1}:{self._uname}:' \
+                      f'{self._gname}:{self._mdate}:{self._inode} {self._file}'
         return self.format_message(message)
 
     def get_message(self, event_mode=None, event_type=None):
@@ -691,10 +687,18 @@ class GeneratorFIM:
         else:
             self.event_type = choice(["added", "modified", "deleted"])
 
-        return self.generateMessage()
+        return self.generate_message()
 
 
 class Sender:
+    """This class is sends events to the manager through a socket
+
+    Attributes:
+        manager_address (str): IP of the manager
+        manager_port (str, optional): port used by remoted in the manager
+        protocol (str, optional): protocol used by remoted. tcp or udp
+        socket (socket): sock_stream used to connect with remoted
+    """
     def __init__(self, manager_address, manager_port="1514", protocol="tcp"):
         self.manager_address = manager_address
         self.manager_port = manager_port
@@ -735,8 +739,9 @@ class Injector:
         self.threads = []
         for module, config in self.agent.modules.items():
             if config["status"] == "enabled":
-                self.threads.append(InjectorThread(self.thread_number, "Thread-" + str(self.agent.id) + str(module),
-                                                   self.sender, self.agent, module))
+                self.threads.append(
+                    InjectorThread(self.thread_number, f"Thread-{self.agent.id}{module}", self.sender,
+                                   self.agent, module))
                 self.thread_number += 1
 
     def run(self):
@@ -754,9 +759,23 @@ class Injector:
 
 
 class InjectorThread(threading.Thread):
-    def __init__(self, threadID, name, sender, agent, module):
-        threading.Thread.__init__(self)
-        self.threadID = threadID
+    """This class creates a thread who will create and send the events to the manager for each module
+
+    Each `Agent` needs an injector and a sender to be able to communicate with the manager. This class will create
+    a thread using `InjectorThread` which will behave similarly to an UNIX daemon. The `InjectorThread` will
+    send and receive the messages using the `Sender`
+
+    Attributes:
+        thread_id (int): ID of the thread
+        name (str): name of the thread. It is composed as Thread-{agent.id}{module}
+        sender (Sender): sender used to connect to the sockets and send messages
+        agent (agent): agent owner of the injector and the sender
+        module (str): module used to send events (fim, syscollector, etc)
+        stop_thread (int): 0 if the thread is running, 1 if it is stopped
+    """
+    def __init__(self, thread_id, name, sender, agent, module):
+        super(InjectorThread, self).__init__()
+        self.thread_id = thread_id
         self.name = name
         self.sender = sender
         self.agent = agent
@@ -765,6 +784,7 @@ class InjectorThread(threading.Thread):
         self.stop_thread = 0
 
     def keep_alive(self):
+        """Send a keep alive message from the agent to the manager"""
         sleep(10)
         print("Startup - {}({})".format(self.agent.name, self.agent.id))
         self.sender.send_event(self.agent.startup_msg)
@@ -772,13 +792,14 @@ class InjectorThread(threading.Thread):
         start_time = time()
         while self.stop_thread == 0:
             # Send agent keep alive
-            print("KeepAlive - {}({})".format(self.agent.name, self.agent.id))
+            print(f"KeepAlive - {self.agent.name}({self.agent.id})")
             self.sender.send_event(self.agent.keep_alive_msg)
             sleep(self.agent.modules["keepalive"]["frequency"] -
                   ((time() - start_time) %
                    self.agent.modules["keepalive"]["frequency"]))
 
     def fim(self):
+        """Send a File Integrity Monitoring message from the agent to the manager"""
         sleep(10)
         start_time = time()
         # Loop events
@@ -790,6 +811,7 @@ class InjectorThread(threading.Thread):
                 sleep(1.0 - ((time() - start_time) % 1.0))
 
     def fim_integrity(self):
+        """Send an integrity FIM message from the agent to the manager"""
         sleep(10)
         start_time = time()
         # Loop events
@@ -801,12 +823,13 @@ class InjectorThread(threading.Thread):
                 sleep(1.0 - ((time() - start_time) % 1.0))
 
     def inventory(self):
+        """Send an inventory message of syscollector from the agent to the manager"""
         sleep(10)
         start_time = time()
         while self.stop_thread == 0:
             # Send agent inventory scan
-            print("Scan started - {}({}) - {}({})".format(self.agent.name, self.agent.id, "syscollector",
-                                                          self.agent.inventory.inventory_path))
+            print(f"Scan started - {self.agent.name}({self.agent.id}) - "
+                  f"syscollector({self.agent.inventory.inventory_path})")
             scan_id = int(time())  # Random start scan ID
             for item in self.agent.inventory.inventory:
                 event = self.agent.create_event(item.replace("<scan_id>", str(scan_id)))
@@ -815,36 +838,35 @@ class InjectorThread(threading.Thread):
                 if self.totalMessages % self.agent.modules["syscollector"]["eps"] == 0:
                     self.totalMessages = 0
                     sleep(1.0 - ((time() - start_time) % 1.0))
-            print("Scan ended - {}({}) - {}({})".format(self.agent.name, self.agent.id, "syscollector",
-                                                        self.agent.inventory.inventory_path))
+            print("Scan ended - {self.agent.name}({self.agent.id}) - "
+                  f"syscollector({self.agent.inventory.inventory_path})")
             sleep(self.agent.modules["syscollector"]["frequency"] - ((time() - start_time)
                                                                      % self.agent.modules["syscollector"]["frequency"]))
 
     def rootcheck(self):
+        """Send a rootcheck message from the agent to the manager"""
         sleep(10)
         start_time = time()
         while self.stop_thread == 0:
             # Send agent rootcheck scan
-            print("Scan started - {}({}) - {}({})".format(self.agent.name, self.agent.id, "rootcheck",
-                                                          self.agent.rootcheck.rootcheck_path))
+            print(f"Scan started - {self.agent.name}({self.agent.id}) "
+                  f"- rootcheck({self.agent.rootcheck.rootcheck_path})")
             for item in self.agent.rootcheck.rootcheck:
                 self.sender.send_event(self.agent.create_event(item))
                 self.totalMessages += 1
                 if self.totalMessages % self.agent.modules["rootcheck"]["eps"] == 0:
                     self.totalMessages = 0
                     sleep(1.0 - ((time() - start_time) % 1.0))
-            print("Scan ended - {}({}) - {}({})".format(self.agent.name, self.agent.id, "rootcheck",
-                                                        self.agent.rootcheck.rootcheck_path))
+            print(f"Scan ended - {self.agent.name}({self.agent.id}) - rootcheck({self.agent.rootcheck.rootcheck_path})")
             sleep(self.agent.modules["rootcheck"]["frequency"] - ((time() - start_time)
                                                                   % self.agent.modules["rootcheck"]["frequency"]))
 
     def run(self):
+        """Starts the thread that will send messages to the manager"""
         # message = "1:/var/log/syslog:Jan 29 10:03:41 master sshd[19635]:
         #   pam_unix(sshd:session): session opened for user vagrant by (uid=0)
         #   uid: 0"
-        print("Starting - {}({})({}) - {}"
-              .format(self.agent.name, self.agent.id,
-                      self.agent.os, self.module))
+        print(f"Starting - {self.agent.name}({self.agent.id})({self.agent.os}) - {self.module}")
         if self.module == "keepalive":
             self.keep_alive()
         elif self.module == "fim":
@@ -862,6 +884,7 @@ class InjectorThread(threading.Thread):
             pass
 
     def stop_rec(self):
+        """Stops the thread to avoid sending any more messages"""
         if self.module == "receive_messages":
             self.agent.stop_receiver()
         else:
