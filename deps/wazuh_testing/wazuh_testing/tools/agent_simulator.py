@@ -82,9 +82,13 @@ class Agent:
         Set up agent: Keep alive, encryption key and start up msg.
         """
         self.set_os()
+
         if self.id is None and self.name is None and self.key is None:
             self.set_name()
             self.register()
+        elif any([self.id, self.name, self.key]) and not all([self.id, self.name, self.key]):
+            raise ValueError("All the parameters [id, name, key] have to be specified together")
+
         self.create_encryption_key()
         self.create_keep_alive()
         self.create_hc_startup()
