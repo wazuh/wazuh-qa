@@ -715,6 +715,19 @@ class Sender:
 
 
 class Injector:
+    """This class simulates a daemon used to send and receive messages with the manager
+
+    Each `Agent` needs an injector and a sender to be able to communicate with the manager. This class will create
+    a thread using `InjectorThread` which will behave similarly to an UNIX daemon. The `InjectorThread` will
+    send and receive the messages using the `Sender`
+
+    Attributes:
+        sender (Sender): sender used to connect to the sockets and send messages
+        agent (agent): agent owner of the injector and the sender
+        thread_number (int): total number of threads created. This may change depending on the modules used in the agent
+        threads (list): list containing all the threads created.
+    """
+
     def __init__(self, sender, agent):
         self.sender = sender
         self.agent = agent
@@ -727,11 +740,13 @@ class Injector:
                 self.thread_number += 1
 
     def run(self):
+        """Start the daemon to send and receive messages for all the threads"""
         for thread in range(self.thread_number):
             self.threads[thread].setDaemon(True)
             self.threads[thread].start()
 
     def stop_receive(self):
+        """Stop the daemon for all the threads"""
         for thread in range(self.thread_number):
             self.threads[thread].stop_rec()
         sleep(2)
