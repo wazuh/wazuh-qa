@@ -211,7 +211,8 @@ def configure_agents(request, get_configuration):
     agents_number = metadata['agents_number']
     agents_os = metadata['agents_os']
     agents_version = metadata['agents_version']
-    agents_created = ag.create_agents(agents_number, SERVER_ADDRESS, CRYPTO, os=agents_os, version=agents_version)
+    agents_created = ag.create_agents(agents_number, SERVER_ADDRESS, CRYPTO, agents_os=agents_os,
+                                      agents_version=agents_version)
     setattr(request.module, 'agents', agents_created)
 
 

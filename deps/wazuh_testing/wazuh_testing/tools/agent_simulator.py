@@ -853,23 +853,34 @@ class InjectorThread(threading.Thread):
             self.stop_thread = 1
 
 
-def create_agents(agents_number, manager_address, cypher, fim_eps=None, authd_password=None, os=None, version=None):
+def create_agents(agents_number, manager_address, cypher, fim_eps=None, authd_password=None, agents_os=None,
+                  agents_version=None):
+    """Create a list of generic agents
+
+    This will create a list with `agents_number` amount of agents. All of them will be registered in the same address.
+
+    Args:
+        agents_number (int): total number of agents
+        manager_address (str): IP address of the manager
+        cypher (str): cypher used for the communications. It may be aes or blowfish
+        fim_eps (int, optional): total number of EPS produced by FIM.
+        authd_password (str, optional): password to enroll an agent.
+        agents_os (list, optional): list containing different operative systems for the agents.
+        agents_version (list, optional): list containing different version of the agent
+
+    Returns:
+        list: list of the new virtual agents
+    """
     global agent_count
     # Read client.keys and create virtual agents
     agents = []
     for agent in range(agents_number):
-        if os is not None:
-            agent_os = os[agent]
-        else:
-            agent_os = None
+        agent_os = agents_os[agent] if agents_os is not None else None
+        agent_version = agents_version[agent] if agents_version is not None else None
 
-        agent_version = version[agent] if version is not None else None
+        agents.append(Agent(manager_address, cypher, fim_eps=fim_eps, authd_password=authd_password,
+                            os=agent_os, version=agent_version))
 
-        if authd_password is not None:
-            agents.append(Agent(manager_address, cypher, fim_eps=fim_eps,
-                                authd_password=authd_password, os=agent_os, version=agent_version))
-        else:
-            agents.append(Agent(manager_address, cypher, fim_eps=fim_eps,
-                                os=agent_os, version=agent_version))
         agent_count = agent_count + 1
+
     return agents
