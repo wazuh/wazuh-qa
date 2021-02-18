@@ -154,8 +154,8 @@ def make_callback(pattern, prefix="wazuh"):
     Creates a callback function from a text pattern.
 
     Args:
-    pattern (str): String to match on the log
-    prefix  (str): String prefix (modulesd, remoted, ...)
+        pattern (str): String to match on the log
+        prefix  (str): String prefix (modulesd, remoted, ...)
 
     Returns:
         lambda function with the callback

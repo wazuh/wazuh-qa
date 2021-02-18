@@ -8,8 +8,8 @@ import time
 from base64 import b64encode
 
 import requests
-import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+from urllib3 import disable_warnings, exceptions
+disable_warnings(exceptions.InsecureRequestWarning)
 
 # Variables
 
@@ -54,15 +54,14 @@ def get_token_login_api(protocol, host, port, user, password, login_endpoint, ti
 
     login_url = f"{get_base_url(protocol, host, port)}{login_endpoint}"
 
-    response = None
     for _ in range(10):
         response = requests.get(login_url, headers=get_login_headers(user, password), verify=False, timeout=timeout)
 
         if response.status_code == 200:
             return json.loads(response.content.decode())['data']['token']
         time.sleep(1)
-
-    raise Exception(f"Error obtaining login token: {response.json()}")
+    else:
+        raise RuntimeError(f"Error obtaining login token: {response.json()}")
 
 
 def get_api_details_dict(protocol=API_PROTOCOL, host=API_HOST, port=API_PORT, user=API_USER, password=API_PASS,
@@ -103,17 +102,17 @@ def get_security_resource_information(**kwargs):
 
 
 def get_manager_configuration(section=None, field=None):
-    """
-        Get Wazuh manager configuration response from API using GET /manager/configuration
-        https://documentation.wazuh.com/current/user-manual/api/reference.html#operation/api.controllers.manager_controller.get_configuration
+    """Get Wazuh manager configuration response from API using GET /manager/configuration
+        
+    References: https://documentation.wazuh.com/current/user-manual/api/reference.html#operation/api.controllers.manager_controller.get_configuration
 
-        Args:
-        section (str): Indicates the wazuh configuration section, for example: "active-response", "alerts"...
-        field   (str): Indicate a section child. E.g, fields for ruleset section are: decoder_dir, rule_dir, etc
+    Args:
+        section (str): wazuh configuration section, E.g: "active-response", "ruleset"...
+        field   (str): section child. E.g, fields for ruleset section are: decoder_dir, rule_dir, etc
 
-        Returns:
-            active configuration indicated by Wazuh API. If section and field are selected, it will return a String,
-            if not, it will return a map for the section/entire configurations with fields/sections as keys
+    Returns:
+        `obj`(str or map): active configuration indicated by Wazuh API. If section and field are selected, it will return a String,
+        if not, it will return a map for the section/entire configurations with fields/sections as keys
     """
     api_details = get_api_details_dict()
     api_query = f"{api_details['base_url']}/manager/configuration?"
@@ -125,17 +124,13 @@ def get_manager_configuration(section=None, field=None):
 
     response = requests.get(api_query, headers=api_details['auth_headers'], verify=False)
 
-    try:
-        assert response.json()['error'] == 0, f"Wazuh API response status different from 0: {response.json()}"
-        answer = response.json()['data']['affected_items'][0]
+    assert response.json()['error'] == 0, f"Wazuh API response status different from 0: {response.json()}"
+    answer = response.json()['data']['affected_items'][0]
 
-        if section is not None:
-            answer = answer[section]
-            if isinstance(answer, list) and len(answer) == 1:
-                answer = answer[0]
-            if field is not None:
-                answer = answer[field]
-        return answer
-
-    except KeyError:
-        raise Exception(f"Wazuh API request failed: {response.json()}")
+    if section is not None:
+        answer = answer[section]
+        if isinstance(answer, list) and len(answer) == 1:
+            answer = answer[0]
+        if field is not None:
+            answer = answer[field]
+    return answer
