@@ -19,17 +19,19 @@ import ssl
 import sys
 import threading
 import time
+import yaml
+
 from collections import defaultdict
 from copy import copy
 from datetime import datetime
 from multiprocessing import Process, Manager
 from struct import pack, unpack
-
-import yaml
 from lockfile import FileLock
 from wazuh_testing import logger
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.system import HostManager
+
+REMOTED_DETECTOR_PREFIX = r'.*wazuh-remoted.*'
 
 
 def wazuh_unpack(data, format_: str = "<I"):
@@ -147,8 +149,25 @@ class FileTailer:
                 self._position = f.tell()
 
 
-class FileMonitor:
+def make_callback(pattern, prefix="wazuh"):
+    """
+    Creates a callback function from a text pattern.
 
+    Args:
+        pattern (str): String to match on the log
+        prefix  (str): String prefix (modulesd, remoted, ...)
+
+    Returns:
+        lambda function with the callback
+    """
+
+    pattern = r'\s+'.join(pattern.split())
+    regex = re.compile(r'{}{}'.format(prefix, pattern))
+
+    return lambda line: regex.match(line) is not None
+
+
+class FileMonitor:
     def __init__(self, file_path, time_step=0.5):
         self.tailer = FileTailer(file_path, time_step=time_step)
         self._result = None
@@ -558,7 +577,6 @@ if hasattr(socketserver, 'ThreadingUnixStreamServer'):
 
         def shutdown_request(self, request):
             pass
-
 
     class DatagramServerUnix(socketserver.ThreadingUnixDatagramServer):
 
