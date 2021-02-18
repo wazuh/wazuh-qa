@@ -454,9 +454,7 @@ class Agent:
                     self.stop_receive = 1
                 else:
                     if self.short_version < "4.1":
-                        sender.send_event(self.create_event(
-                            f'#!-req {message_list[1]} ok '
-                            f'{self.upgrade_exec_result}'))
+                        sender.send_event(self.create_event(f'#!-req {message_list[1]} ok {self.upgrade_exec_result}'))
                     else:
                         sender.send_event(self.create_event(f'#!-req {message_list[1]} {{"error":0, '
                                                             f'"message":"{self.upgrade_exec_result}", "data":[]}}'))
@@ -471,12 +469,10 @@ class Agent:
                                 'status': status,
                             }
                         }
-                        sender.send_event(self.create_event("u:upgrade_module:"
-                                                            + json.dumps(
-                            upgrade_update_status_message)))
+                        sender.send_event(self.create_event("u:upgrade_module:" +
+                                                            json.dumps(upgrade_update_status_message)))
             else:
-                raise ValueError(f'Execution result should be configured \
-                                 in agent')
+                raise ValueError(f'Execution result should be configured in agent')
         else:
             raise ValueError(f'Unrecognized command {command}')
 
@@ -510,8 +506,7 @@ class Agent:
         if self.modules["fim"]["status"] == "enabled":
             self.fim = GeneratorFIM(self.id, self.name, self.short_version)
         if self.modules["fim_integrity"]["status"] == "enabled":
-            self.fim_integrity = GeneratorIntegrityFIM(self.id, self.name,
-                                                       self.short_version)
+            self.fim_integrity = GeneratorIntegrityFIM(self.id, self.name, self.short_version)
 
 class Inventory:
     def __init__(self, os, inventory_sample=None):
@@ -569,17 +564,14 @@ class GeneratorIntegrityFIM:
         self.agent_version = agent_version
         self.INTEGRITY_MQ = "5"
         self.event_type = None
-        self.fim_generator = GeneratorFIM(self.agent_id, self.agent_name,
-                                          self.agent_version)
+        self.fim_generator = GeneratorFIM(self.agent_id, self.agent_name, self.agent_version)
 
     def format_message(self, message):
         return '{0}:[{1}] ({2}) any->syscheck:{3}'.format(self.INTEGRITY_MQ, self.agent_id, self.agent_name, message)
 
     def generate_message(self):
         data = None
-        if self.event_type == "integrity_check_global" or \
-                self.event_type == "integrity_check_left" or \
-                self.event_type == "integrity_check_right":
+        if self.event_type in ["integrity_check_global", "integrity_check_left", "integrity_check_right"]:
             id = int(time())
             data = {"id": id,
                     "begin": self.fim_generator.random_file(),
@@ -605,11 +597,8 @@ class GeneratorIntegrityFIM:
         if event_type is not None:
             self.event_type = event_type
         else:
-            self.event_type = choice(["integrity_check_global",
-                                      "integrity_check_left",
-                                      "integrity_check_right",
-                                      "integrity_clear",
-                                      "state"])
+            self.event_type = choice(["integrity_check_global", "integrity_check_left", "integrity_check_right",
+                                      "integrity_clear", "state"])
 
         return self.generate_message()
 
@@ -821,13 +810,21 @@ class GeneratorFIM:
 
 class Sender:
     """
-    This class is sends events to the manager through a socket
+    This class sends events to the manager through a socket
 
     Attributes:
         manager_address (str): IP of the manager
         manager_port (str, optional): port used by remoted in the manager
         protocol (str, optional): protocol used by remoted. tcp or udp
         socket (socket): sock_stream used to connect with remoted
+
+    Examples:
+        To create a Sender, you need to create an agent first, and then, create the sender. Finally, to send messages
+        you will need to use both agent and sender to create an injector
+        >>> import wazuh_testing.tools.agent_simulator as ag
+        >>> manager_address = "172.17.0.2"
+        >>> agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0")
+        >>> sender = ag.Sender(manager_address, protocol="tcp")
     """
     def __init__(self, manager_address, manager_port="1514", protocol="tcp"):
         self.manager_address = manager_address
@@ -860,6 +857,15 @@ class Injector:
         agent (agent): agent owner of the injector and the sender
         thread_number (int): total number of threads created. This may change depending on the modules used in the agent
         threads (list): list containing all the threads created.
+
+    Examples:
+        To create an Injector, you need to create an agent, a sender and then, create the injector using both of them.
+        >>> import wazuh_testing.tools.agent_simulator as ag
+        >>> manager_address = "172.17.0.2"
+        >>> agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0")
+        >>> sender = ag.Sender(manager_address, protocol="tcp")
+        >>> injector = ag.Injector(sender, agent)
+        >>> injector.run()
     """
 
     def __init__(self, sender, agent):
