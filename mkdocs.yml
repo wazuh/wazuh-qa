@@ -383,6 +383,10 @@ nav:
             - tests/integration/test_gcloud/test_functioning/test_max_messages.md
             - tests/integration/test_gcloud/test_functioning/test_pull_on_start.md
             - tests/integration/test_gcloud/test_functioning/test_rules.md
+        - Remoted:
+            - tests/integration/test_remoted/index.md
+            - Test configuration:
+                - tests/integration/test_remoted/test_configuration/test_basic_configuration.md
         - Logtest:   
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md

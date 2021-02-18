@@ -21,3 +21,9 @@ In this repository you will find the tests used in the CI environment to test Wa
     -  **[integration](tests/integration/integration)**: integration tests of the different daemons/components.
     -  **[system](tests/integration/system)**: system tests of Wazuh.
 - **[docs](link/to/docs)**: contains the technical documentation about the code and documentation about the tests.
+
+## Builds docs locally
+
+To build Wazuh QA documentation simply clone this repository and run `/provision_documentation.sh` script on `docs` folder.
+
+The docs should be available on localhost: `http://localhost:8080`
