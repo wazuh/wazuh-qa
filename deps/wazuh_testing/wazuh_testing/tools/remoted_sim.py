@@ -241,10 +241,12 @@ class RemotedSimulator:
     def send_com_message(self, client_address, connection, command, payload=None, interruption_time=None):
         """
         Create a COM message
-        - client_address: client of the connection
-        - connection: established connection (tcp only)
-        - payload: Optional binary data to add to the message
-        - interruption_time: Time that will be added in between connections
+        
+        Args:
+            - client_address: client of the connection
+            - connection: established connection (tcp only)
+            - payload: Optional binary data to add to the message
+            - interruption_time: Time that will be added in between connections
         """
         self.request_counter += 1
         if command == 'lock_restart -1' or self.wcom_message_version is None:
@@ -628,13 +630,14 @@ class RemotedSimulator:
     def set_mode(self, mode):
         """
         Set Remoted simulator work mode:
-        -REJECT: Any connection will be rejected. UDP will ignore incoming connection, TCP will actively
-         close incoming connection.
-        -DUMMY_ACK: Any received package will be answered with an ACK
-        -CONTROLLED_ACK: Received package will be processed and decrypted. Only valid decrypted messages
-         starting with #!- will receive an ACK
-        -WRONG_KEY: Any received package will be answered with an ACK created with incorrect keys.
-        -INVALID_MSG: Any received package will be answered with a message that is not encrypted and without header.
+
+            -REJECT: Any connection will be rejected. UDP will ignore incoming connection, TCP will actively
+            close incoming connection.
+            -DUMMY_ACK: Any received package will be answered with an ACK
+            -CONTROLLED_ACK: Received package will be processed and decrypted. Only valid decrypted messages
+            starting with #!- will receive an ACK
+            -WRONG_KEY: Any received package will be answered with an ACK created with incorrect keys.
+            -INVALID_MSG: Any received package will be answered with a message that is not encrypted and without header.
         """
         self.mode = mode
 

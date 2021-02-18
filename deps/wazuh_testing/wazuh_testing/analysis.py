@@ -127,12 +127,9 @@ def callback_fim_error(line):
 def validate_analysis_alert(alert, schema='linux'):
     """Check if an Analysis event is properly formatted.
 
-    Parameters
-    ----------
-    alert : dict
-        Dictionary that represent an alert
-    schema : str, optional
-        String with the platform to validate the alert from. Default `linux`
+    Args:
+        alert (dict): Dictionary that represent an alert
+        schema (str, optional): String with the platform to validate the alert from. Default `linux`
     """
     if schema == 'win32':
         _schema = win32_schema
@@ -144,16 +141,11 @@ def validate_analysis_alert(alert, schema='linux'):
 def validate_analysis_alert_complex(alert, event, schema='linux'):
     """Check if an Analysis alert is properly formatted in reference to its Syscheck event.
 
-    Parameters
-    ----------
-    alert : dict
-        Dictionary that represents an alert
-    event : dict
-        Dictionary that represents an event
-    event : dict
-        Dictionary that represent an event
-    schema : str, optional
-        String with the schema to apply. Default `linux`
+    Args:
+        alert (dict): Dictionary that represents an alert
+        event (dict): Dictionary that represents an event
+        event (dict): Dictionary that represent an event
+        schema (str, optional): String with the schema to apply. Default `linux`
     """
 
     def validate_attributes(syscheck_alert, syscheck_event, event_field, suffix):
@@ -221,9 +213,7 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
 def validate_analysis_integrity_state(event):
     """Check if an Analysis integrity message is properly formatted.
 
-    Parameters
-    ----------
-    event : dict
-        Candidate event to be validated against the state integrity schema
+    Args:
+        event (dict): Candidate event to be validated against the state integrity schema
     """
     validate(schema=state_integrity_analysis_schema, instance=event)

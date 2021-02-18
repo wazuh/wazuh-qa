@@ -22,10 +22,8 @@ def read_json(file_path):
     """
     Read a JSON file from a given path, return a dictionary with the json data
 
-    Parameters
-    ----------
-    file_path : str
-        Path of the JSON file to be readed
+    Args:
+        file_path (str): Path of the JSON file to be readed
     """
     # Read JSON data templates
     with open(file_path, 'r') as f:
@@ -38,10 +36,8 @@ def truncate_file(file_path):
     """
     Truncate a file to reset its content.
 
-    Parameters
-    ----------
-    file_path : str
-        Path of the file to be truncated.
+    Args:
+        file_path (str): Path of the file to be truncated.
     """
     with open(file_path, 'w'):
         pass
@@ -51,10 +47,8 @@ def random_unicode_char():
     """
     Generate a random unicode char from 0x0000 to 0xD7FF.
 
-    Returns
-    -------
-    str
-        Random unicode char.
+    Returns:
+        str: Random unicode char.
     """
     return chr(random.randrange(0xD7FF))
 
@@ -63,17 +57,12 @@ def random_string_unicode(length, encode=None):
     """
     Generate a random unicode string with variable size and optionally encoded.
 
-    Parameters
-    ----------
-    length : int
-        String length.
-    encode : str, optional
-        Encoding type. Default `None`
+    Args:
+        length (int) : String length.
+        encode (str, optional) : Encoding type. Default `None`
 
-    Returns
-    -------
-    str or binary
-        Random unicode string.
+    Returns:
+        (str or binary): Random unicode string.
     """
     st = str(''.join(format(random_unicode_char()) for i in range(length)))
     st = u"".join(st)
@@ -88,17 +77,12 @@ def random_string(length, encode=None):
     """
     Generate a random alphanumeric string with variable size and optionally encoded.
 
-    Parameters
-    ----------
-    length : int
-        String length.
-    encode : str, optional
-        Encoding type. Default `None`
+    Args:
+        length (int): String length.
+        encode (str, optional): Encoding type. Default `None`
 
-    Returns
-    -------
-    str or binary
-        Random string.
+    Returns:
+        str or binary: Random string.
     """
     letters = string.ascii_letters + string.digits
     st = str(''.join(random.choice(letters) for i in range(length)))
@@ -128,15 +112,10 @@ def write_json_file(file_path, data, ensure_ascii=False):
     """
     Write dict data to JSON file
 
-    Parameters
-    ----------
-    file_path : str
-        File path where is located the JSON file to write
-    data : dict
-        Data to write
-    ensure_ascii : boolean
-        If ensure_ascii is true, the output is guaranteed to have all incoming non-ASCII characters
-        escaped. If ensure_ascii is false, these characters will be output as-is.
+    Args:
+    file_path (str): File path where is located the JSON file to write
+    data (dict): Data to write
+    ensure_ascii (boolean) : If ensure_ascii is true, the output is guaranteed to have all incoming non-ASCII characters escaped. If ensure_ascii is false, these characters will be output as-is.
     """
     write_file(file_path, json.dumps(data, indent=4, ensure_ascii=ensure_ascii))
 
@@ -194,17 +173,12 @@ def read_xml_file(file_path, namespaces=None, xml_header=False):
     """
     Function to read XML file as string
 
-    Parameters
-    ----------
-    file_path: str
-        File path where is the XML file
-    namespaces: list
-        List with data {name: namespace, url: url_namespace}
+    Args:
+        file_path (str): File path where is the XML file
+        namespaces (list): List with data {name: namespace, url: url_namespace}
 
-    Returns
-    -------
-    str:
-        XML string data
+    Returns:
+        str: XML string data
     """
     xml_root = ET.parse(file_path).getroot()
 
@@ -227,12 +201,9 @@ def compress_gzip_file(src_path, dest_path):
     """
     Compresses a text file into a .gz one
 
-    Parameters
-    ----------
-    src_path : path
-        Path to source file.
-    dest_path : path
-        Destination path of the output file.
+    Args:
+        src_path : Path to source file.
+        dest_path : Destination path of the output file.
     """
     with gzip.open(dest_path, 'wb') as dest:
         with open(src_path, 'rb') as source:
