@@ -2,8 +2,6 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-REMOTED_DETECTOR_PREFIX = r'.*wazuh-remoted.*'
-
 # Unix only modules
 
 try:
@@ -21,17 +19,19 @@ import ssl
 import sys
 import threading
 import time
+import yaml
+
 from collections import defaultdict
 from copy import copy
 from datetime import datetime
 from multiprocessing import Process, Manager
 from struct import pack, unpack
-
-import yaml
 from lockfile import FileLock
 from wazuh_testing import logger
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.system import HostManager
+
+REMOTED_DETECTOR_PREFIX = r'.*wazuh-remoted.*'
 
 
 def wazuh_unpack(data, format_: str = "<I"):
@@ -577,7 +577,6 @@ if hasattr(socketserver, 'ThreadingUnixStreamServer'):
 
         def shutdown_request(self, request):
             pass
-
 
     class DatagramServerUnix(socketserver.ThreadingUnixDatagramServer):
 

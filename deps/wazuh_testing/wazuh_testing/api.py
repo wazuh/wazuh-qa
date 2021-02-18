@@ -67,12 +67,13 @@ def get_token_login_api(protocol, host, port, user, password, login_endpoint, ti
 
 def get_api_details_dict(protocol=API_PROTOCOL, host=API_HOST, port=API_PORT, user=API_USER, password=API_PASS,
                          login_endpoint=API_LOGIN_ENDPOINT, timeout=10):
+    login_token = get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout)
     """Get API details"""
     return {
         'base_url': get_base_url(protocol, host, port),
         'auth_headers': {
             'Content-Type': 'application/json',
-            'Authorization': f'Bearer {get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout)}'
+            'Authorization': f'Bearer {login_token}'
         }
     }
 
@@ -102,7 +103,8 @@ def get_security_resource_information(**kwargs):
 
 
 def get_manager_configuration(section=None, field=None):
-    """ Get Wazuh manager configuration response from API using GET /manager/configuration
+    """
+        Get Wazuh manager configuration response from API using GET /manager/configuration
         https://documentation.wazuh.com/current/user-manual/api/reference.html#operation/api.controllers.manager_controller.get_configuration
 
         Args:
@@ -110,7 +112,8 @@ def get_manager_configuration(section=None, field=None):
         field   (str): Indicate a section child. E.g, fields for ruleset section are: decoder_dir, rule_dir, etc
 
         Returns:
-            map: API response as a map
+            active configuration indicated by Wazuh API. If section and field are selected, it will return a String,
+            if not, it will return a map for the section/entire configurations with fields/sections as keys
     """
     api_details = get_api_details_dict()
     api_query = f"{api_details['base_url']}/manager/configuration?"
@@ -123,7 +126,7 @@ def get_manager_configuration(section=None, field=None):
     response = requests.get(api_query, headers=api_details['auth_headers'], verify=False)
 
     try:
-        assert response.json()['error'] == 0, f"Wazuh API response error not 0: {response.json()}"
+        assert response.json()['error'] == 0, f"Wazuh API response status different from 0: {response.json()}"
         answer = response.json()['data']['affected_items'][0]
 
         if section is not None:

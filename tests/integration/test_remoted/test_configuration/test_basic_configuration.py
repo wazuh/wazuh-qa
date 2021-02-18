@@ -55,8 +55,9 @@ def test_connection(get_configuration, configure_environment):
     """
 
     truncate_file(LOG_FILE_PATH)
-    control_service('restart', daemon='wazuh-remoted')
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+
+    control_service('restart', daemon='wazuh-remoted')
 
     cfg = get_configuration['metadata']
 
