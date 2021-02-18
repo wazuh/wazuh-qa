@@ -79,13 +79,17 @@ def get_configuration(request):
 def test_audit_rules_removed_after_change_link(replaced_target, new_target, file_name, tags_to_apply,
                                                get_configuration, configure_environment,
                                                restart_syscheckd, wait_for_fim_start):
-    """
-    Parameters
-    ----------
-    main_folder : str
-        Directory that is being pointed at or contains the pointed file.
-    aux_folder : str
-        Directory that will be pointed at or will contain the future pointed file.
+    """ Test that checks if the audit rules are removed when the symlink target's is changed.
+
+    Args:
+        replaced_target (str): Directory where the link is pointing.
+        new_target (str): Directory where the link will be pointed after it's updated.
+        file_name (str): Name of the file that will be created inside the folders.
+
+    Raises:
+        TimeoutError: If an expected event couldn't be captured.
+        ValueError: If the event type isn't added or if the audit rule for ``replaced_target`` isn't removed.
+
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     create_file(REGULAR, replaced_target, file_name)

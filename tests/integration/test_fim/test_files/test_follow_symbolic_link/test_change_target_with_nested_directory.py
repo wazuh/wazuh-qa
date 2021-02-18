@@ -46,18 +46,19 @@ def get_configuration(request):
 ])
 def test_symbolic_change_target_inside_folder(tags_to_apply, previous_target, new_target, get_configuration,
                                               configure_environment, restart_syscheckd, wait_for_fim_start):
-    """
-    Check if syscheck stops detecting events from previous target when pointing to a new folder
+    """Check if syscheck stops detecting events from previous target when pointing to a new folder
 
-    CHECK: Having a symbolic link pointing to a folder which contains another monitored directory. Changing the target
+    Having a symbolic link pointing to a folder which contains another monitored directory. Changing the target
     should not trigger 'added' events for the monitored subdirectory on the next scan.
 
-    Parameters
-    ----------
-    previous_target : str
-        Previous symlink target (path)
-    new_target : str
-        New symlink target (path).
+    Args:
+        previous_target (str): Previous symlink target (path)
+        new_target (str): New symlink target (path).
+
+    Raises:
+        TimeoutError: If a expected event wasn't triggered.
+        AttributeError: If a unexpected event was captured.
+
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'

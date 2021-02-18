@@ -66,16 +66,18 @@ def extra_configuration_after_yield():
 ])
 def test_symlink_to_dir_between_scans(tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                                       wait_for_fim_start):
-    """
-    Replace a link with a directory between scans.
+    """Replace a link with a directory between scans.
 
-    This test monitors a link with `follow_symblic_link` enabled. After the first scan, it is replaced with a directory,
+    This test monitors a link with `follow_symbolic_link` enabled. After the first scan, it is replaced with a directory,
     the new directory should send alerts during a second scan.
 
-    Parameters
-    ----------
-    tags_to_apply : set
-        Run test if matches with a configuration identifier, skip otherwise.
+    Args:
+      tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
+
+    Raises:
+        TimeoutError: If a expected event wasn't triggered.
+        AttributeError: If a unexpected event was captured.
+        ValueError: If the event's type and path are not the expected.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'

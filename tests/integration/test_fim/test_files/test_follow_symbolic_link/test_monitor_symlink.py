@@ -45,16 +45,17 @@ def get_configuration(request):
 ])
 def test_symbolic_monitor_symlink(tags_to_apply, main_folder, get_configuration, configure_environment,
                                   restart_syscheckd, wait_for_fim_start):
-    """
-    Check what happens with a symlink and its target when syscheck monitors it.
+    """Check what happens with a symlink and its target when syscheck monitors it.
 
     CHECK: Having a symbolic link pointing to a file/folder, modify and delete the file. Check that alerts are
     being raised.
 
-    Parameters
-    ----------
-    main_folder : str
-        Directory that is being pointed at or contains the pointed file.
+    Args:
+        main_folder (str): Directory that is being pointed at or contains the pointed file.
+
+    Raises:
+        TimeoutError: If a expected event wasn't triggered.
+        ValueError: If the event's type and path are not the expected.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
@@ -66,7 +67,7 @@ def test_symbolic_monitor_symlink(tags_to_apply, main_folder, get_configuration,
         check_time_travel(scheduled, monitor=wazuh_log_monitor)
         add = wazuh_log_monitor.start(timeout=3, callback=callback_detect_event).result()
         assert 'added' in add['data']['type'] and file1 in add['data']['path'], \
-            f"'added' event not matching"
+            "'added' event not matching"
 
     # Modify the linked file and expect an event
     modify_file_content(main_folder, file1, 'Sample modification')
@@ -75,7 +76,7 @@ def test_symbolic_monitor_symlink(tags_to_apply, main_folder, get_configuration,
                                      error_message='Did not receive expected '
                                                    '"Sending FIM event: ..." event').result()
     assert 'modified' in modify['data']['type'] and file1 in modify['data']['path'], \
-        f"'modified' event not matching"
+        "'modified' event not matching"
 
     # Delete the linked file and expect an event
     delete_f(main_folder, file1)
@@ -84,4 +85,4 @@ def test_symbolic_monitor_symlink(tags_to_apply, main_folder, get_configuration,
                                      error_message='Did not receive expected '
                                                    '"Sending FIM event: ..." event').result()
     assert 'deleted' in delete['data']['type'] and file1 in delete['data']['path'], \
-        f"'deleted' event not matching"
+        "'deleted' event not matching"

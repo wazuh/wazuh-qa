@@ -45,12 +45,16 @@ def get_configuration(request):
 ])
 def test_symbolic_revert_symlink(tags_to_apply, get_configuration, configure_environment,
                                  restart_syscheckd, wait_for_fim_start):
-    """
-    Check if syscheck detects new targets properly
+    """Check if syscheck detects new targets properly
 
-    CHECK: Having a symbolic link pointing to a file/folder, change its target to a folder. Check that the old file
+    Having a symbolic link pointing to a file/folder, change its target to a folder. Check that the old file
     is not being monitored anymore and the new folder is. Revert the target change and ensure the file is
     being monitored and the folder is not.
+
+    Raises:
+        TimeoutError: If a expected event wasn't triggered.
+        AttributeError: If a unexpected event was captured.
+        ValueError: If the event's type and path are not the expected.
     """
 
     def modify_and_assert(file):

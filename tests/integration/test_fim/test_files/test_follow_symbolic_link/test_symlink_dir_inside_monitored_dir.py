@@ -61,18 +61,19 @@ def extra_configuration_after_yield():
 ])
 def test_symlink_dir_inside_monitored_dir(tags_to_apply, checkers, get_configuration, configure_environment,
                                           restart_syscheckd, wait_for_fim_start):
-    """
-    Monitor a directory within a directory monitored through a symbolic link with `follow_symbolic_link` enabled.
+    """Monitor a directory within a directory monitored through a symbolic link with `follow_symbolic_link` enabled.
 
     The monitored directory configuration should prevail over the configuration of the symbolic link (checks,
     follow_symbolic_link, etc...)
 
-    Parameters
-    ----------
-    tags_to_apply : set
-        Run test if matches with a configuration identifier, skip otherwise.
-    checkers : dict
-        Check options to be used.
+    Args:
+      tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
+      checkers (dict): Check options to be used.
+
+    Raises:
+        TimeoutError: If a expected event wasn't triggered.
+        AttributeError: If a unexpected event was captured.
+        ValueError: If the event's type and path are not the expected.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'

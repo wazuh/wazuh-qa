@@ -56,10 +56,12 @@ def test_follow_symbolic_disabled(path, tags_to_apply, get_configuration, config
     Ensure that the monitored symbolic link is considered a regular file and it will not follow its target path. It will
     only generate events if it changes somehow, not its target (file or directory)
 
-    Parameters
-    ----------
-    path : str
-        Path of the target file or directory
+    Args:
+        path (str): Path of the target file or directory
+
+    Raises:
+        TimeoutError: If a expected event wasn't triggered.
+        AttributeError: If a unexpected event was captured.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'

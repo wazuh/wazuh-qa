@@ -44,19 +44,19 @@ def get_configuration(request):
 ])
 def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_configuration, configure_environment,
                                 restart_syscheckd, wait_for_fim_start):
-    """
-    Check if syscheck updates the symlink target properly
+    """Check if syscheck updates the symlink target properly
 
-    CHECK: Having a symbolic link pointing to a file/folder, change the target of the link to another file/folder.
+    Having a symbolic link pointing to a file/folder, change the target of the link to another file/folder.
     Ensure that the old file is being monitored and the new one is not before symlink_checker runs.
     Wait until symlink_checker runs and ensure that the new file is being monitored and the old one is not.
 
-    Parameters
-    ----------
-    main_folder : str
-        Directory that is being pointed at or contains the pointed file.
-    aux_folder : str
-        Directory that will be pointed at or will contain the future pointed file.
+    Args:
+        main_folder (str): Directory that is being pointed at or contains the pointed file.
+        aux_folder (str): Directory that will be pointed at or will contain the future pointed file.
+
+    Raises:
+        TimeoutError: If a expected event wasn't triggered.
+        AttributeError: If a unexpected event was captured.
     """
 
     def modify_and_check_events(f1, f2, text):
