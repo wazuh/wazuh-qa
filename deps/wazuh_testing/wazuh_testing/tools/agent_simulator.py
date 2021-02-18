@@ -8,7 +8,7 @@
 # License (version 2) as published by the FSF - Free Software
 # Foundation.
 
-# Python 3.7 or superior
+# Python 3.7 or greater
 # Dependencies
 # pip3 install pycryptodome
 
@@ -35,6 +35,55 @@ agent_count = 1
 
 
 class Agent:
+    """ Class that allows us to simulate an agent registered in a manager.
+
+    This simulated agent also allows sending and receiving messages and commands, in addition to simulating the
+    syscollector, FIM and rootcheck modules by making use of other classes such as Inventory, Rootcheck, GeneratorFIM
+    and GeneratorIntegrityFIM.
+
+    Args:
+        manager_address (str): Manager IP address.
+        cypher (str): Cypher method. It can be [aes, blowfish]. Default aes.
+        os (str): Agent operating system. Default None for choosing randomly.
+        inventory_sample (str): File where are sample inventory messages.
+        rootcheck_sample (str): File where are sample rootcheck messages.
+        id (str): Agent id. Specify only if it already exists. Default None.
+        name (str): Agent name. Specify only if it already exists. Default None.
+        key (str): Client key. Specify only if it already exists. Default None.
+        version (str): Wazuh agent version.
+        fim_eps (int): Set the maximum event reporting throughput. Events are messages that will produce an alert.
+        fim_integrity_eps (int): Set the maximum database synchronization message throughput.
+        authd_password (str): Password for registration if needed. Default None.
+
+    Attributes:
+        id (str): Agent id.
+        name (str): Agent name.
+        key (str): Agent key. Used for creating an encryption_key.
+        long_version (str): Agent version in format x.y.z
+        short_version (str): Agent version in format x.y
+        cypher (str): Encryption method for message communication.
+        os (str): Agent operating system.
+        fim_eps (int): Set the maximum event reporting throughput. Events are messages that will produce an alert.
+        fim_integrity_eps (int): Set the maximum database synchronization message throughput.
+        manager_address (str): Manager IP address.
+        encryption_key (bytes): Encryption key used for encrypt and decrypt the message.
+        keep_alive_msg (bytes): Keep alive event (read from template data according to OS and parsed to an event).
+        startup_msg (bytes): Startup event sent before the first keep alive event.
+        authd_password (str): Password for manager registration.
+        inventory_sample (str): File where are sample inventory messages
+        rootcheck_sample (str): File where are sample rootcheck messages
+        inventory (Inventory): Object to simulate syscollector message events.
+        rootcheck (Rootcheck): Object to simulate rootcheck message events.
+        fim (GeneratorFIM): Object to simulate FIM message events.
+        fim_integrity (GeneratorIntegrityFIM): Object to simulate FIM integrity message events.
+        modules (dict): Agent modules with their associated info.
+        sha_key (str): Shared key between manager and agent for remote upgrading.
+        upgrade_exec_result (int): Upgrade result status code.
+        send_upgrade_notification (boolean): If True, it will be sent the upgrade status message after "upgrading".
+        upgrade_script_result (int): Variable to mock the upgrade script result. Used for simulating a remote upgrade.
+        stop_receive (int): Flag to determine when to activate and deactivate the agent event listener.
+        stage_disconnect (str): WPK process state variable.
+    """
     def __init__(self, manager_address, cypher="aes", os=None, inventory_sample=None, rootcheck_sample=None,
                  id=None, name=None, key=None, version="v3.12.0", fim_eps=None, fim_integrity_eps=None,
                  authd_password=None):
@@ -78,9 +127,7 @@ class Agent:
         self.setup()
 
     def setup(self):
-        """
-        Set up agent: Keep alive, encryption key and start up msg.
-        """
+        """Set up agent: os, registration, encryption key, start up msg and activate modules"""
         self.set_os()
 
         if self.id is None and self.name is None and self.key is None:
@@ -95,16 +142,20 @@ class Agent:
         self.initialize_modules()
 
     def set_os(self):
-        """
-        Pick random OS
-        """
+        """Pick random OS from a custom os list"""
         if self.os is None:
             self.os = os_list[agent_count % len(os_list) - 1]
 
     def set_wpk_variables(self, sha=None, upgrade_exec_result=None, upgrade_notification=False, upgrade_script_result=0,
                           stage_disconnect=None):
-        """
-        Set variables related to wpk simulated responses
+        """Set variables related to wpk simulated responses
+
+        Args:
+            sha
+            upgrade_exec_result
+            upgrade_notification
+            upgrade_script_result
+            stage_disconnect
         """
         self.sha_key = sha
         self.upgrade_exec_result = upgrade_exec_result
@@ -113,9 +164,7 @@ class Agent:
         self.stage_disconnect = stage_disconnect
 
     def set_name(self):
-        """
-        Set agent name
-        """
+        """Set a random agent name"""
         random_string = ''.join(sample('0123456789abcdef' * 2, 8))
         if self.inventory_sample is None:
             self.name = "{}-{}-{}".format(agent_count, random_string, self.os)
@@ -126,8 +175,9 @@ class Agent:
                                              inventory_string)
 
     def register(self):
-        """
-        Request agent key
+        """Request to register the agent in the manager
+
+        In addition, it sets the agent id and agent key with the response data
         """
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
@@ -152,8 +202,21 @@ class Agent:
 
     @staticmethod
     def wazuh_padding(compressed_event):
-        """
-        Add the Wazuh custom padding to each event sent
+        """Add the Wazuh custom padding to each event sent
+
+        Args:
+            compressed_event (bytes): Compressed event with zlib.
+
+        Returns:
+            bytes: Padded event
+
+        Examples:
+            >>> wazuh_padding(b'x\\x9c\\x15\\xc7\\xc9\\r\\x00 \\x08\\x04\\xc0\\x96\\\\\\x94\\xcbn0H\\x03\\xda\\x7f
+                               \\x8c\\xf3\\x1b\\xd9e\\xec\\nJ[\\x04N\\xcf\\xa8\\xa6\\xa8\\x12\\x8d\\x08!\\xfe@}\\xb0
+                               \\xa89\\xe6\\xef\\xbc\\xfb\\xdc\\x07\\xb7E\\x0f\\x1b)
+                b'!!!!!!!!x\\x9c\\x15\\xc7\\xc9\\r\\x00 \\x08\\x04\\xc0\\x96\\\\\\x94\\xcbn0H\\x03\\xda\\x7f\\x8c\\xf3
+                \\x1b\\xd9e\\xec\\nJ[\\x04N\\xcf\\xa8\\xa6\\xa8\\x12\\x8d\\x08!\\xfe@}\\xb0\\xa89\\xe6\\xef\\xbc\\xfb
+                \\xdc\\x07\\xb7E\\x0f\\x1b'
         """
         padding = 8
         extra = len(compressed_event) % padding
@@ -164,9 +227,7 @@ class Agent:
         return padded_event
 
     def create_encryption_key(self):
-        """
-        Generate encryption key (using agent metadata and key)
-        """
+        """Generate encryption key (using agent metadata and key)"""
         agent_id = self.id.encode()
         name = self.name.encode()
         key = self.key.encode()
@@ -179,8 +240,14 @@ class Agent:
 
     @staticmethod
     def compose_event(message):
-        """
-        Compose event from raw message
+        """Compose event from raw message
+
+        Returns:
+            bytes: Composed event
+
+        Examples:
+            >>> compose_event('test')
+            b'6ef859712d8b215d9daf071ff67aaa62555551234567891:5555:test'
         """
         message = message.encode()
         random_number = b'55555'
@@ -193,8 +260,21 @@ class Agent:
         return event
 
     def encrypt(self, padded_event):
-        """
-        Encrypt event AES or Blowfish
+        """Encrypt event using AES or Blowfish encryption
+
+        Args:
+            padded_event (bytes): Padded event
+
+        Returns:
+            bytes: Encrypted event
+
+        Examples:
+            >>> agent.encrypt(b'!!!!!!!!x\\x9c\\x15\\xc7\\xc9\\r\\x00 \\x08\\x04\\xc0\\x96\\\\\\x94\\xcbn0H\\x03\\xda
+                               \\x7f\\x8c\\xf3\\x1b\\xd9e\\xec\\nJ[\\x04N\\xcf\\xa8\\xa6\\xa8\\x12\\x8d\\x08!\\xfe@}
+                               \\xb0\\xa89\\xe6\\xef\\xbc\\xfb\\xdc\\x07\\xb7E\\x0f\\x1b')
+                b"\\xf8\\x8af[\\xfc'\\xf6j&1\\xd5\\xe1t|\\x810\\xe70G\\xe3\\xbc\\x8a\\xdbV\\x94y\\xa3A\\xb5q\\xf7
+                \\xb52<\\x9d\\xc8\\x83=o1U\\x1a\\xb3\\xf1\\xf5\\xde\\xe0\\x8bV\\xe99\\x9ej}#\\xf1\\x99V\\x12NP^T
+                \\xa0\\rYs\\xa2n\\xe8\\xa5\\xb1\\r[<V\\x16%q\\xfc"
         """
         encrypted_event = None
         if self.cypher == "aes":
@@ -208,6 +288,13 @@ class Agent:
     def headers(self, agent_id, encrypted_event):
         """
         Add event headers for AES or Blowfish Cyphers
+
+        Args:
+            agent_id (str): Agent id
+            encrypted_event (str): Encrypted event
+
+        Returns:
+            bytes: Encrypted event with headers
         """
         if self.cypher == "aes":
             header = "!{0}!#AES:".format(agent_id).encode()
@@ -216,6 +303,20 @@ class Agent:
         return header + encrypted_event
 
     def create_event(self, message):
+        """Build an event from a raw string message
+
+        Args:
+            message (str): Raw message
+
+        Returns:
+            bytes: Built event (compressed, padded, enceypted and with headers)
+
+        Examples:
+            >>> create_event('test message)
+            b'!005!#AES:\\xab\\xfa\\xcc2;\\x87\\xab\\x7fUH\\x03>_J\\xda=I\\x96\\xb5\\xa4\\x89\\xbe\\xbf`\\xd0\\xad
+            \\x03\\x06\\x1aN\\x86 \\xc2\\x98\\x93U\\xcc\\xf5\\xe3@%\\xabS!\\xd3\\x9d!\\xea\\xabR\\xf9\\xd3\\x0b\\
+            xcc\\xe8Y\\xe31*c\\x17g\\xa6M\\x0b&\\xc0>\\xc64\\x815\\xae\\xb8[bg\\xe3\\x83\\x0e'
+        """
         # Compose event
         event = self.compose_event(message)
         # Compress
@@ -226,9 +327,15 @@ class Agent:
         encrypted_event = self.encrypt(padded_event)
         # Add headers
         headers_event = self.headers(self.id, encrypted_event)
+
         return headers_event
 
     def receive_message(self, sender):
+        """Agent listener to receive messages and process the accepted commands.
+
+        Args:
+            sender (Sender): Object to establish connection with the manager socket and receive/send information
+        """
         while self.stop_receive == 0:
             if sender.protocol == 'tcp':
                 rcv = sender.socket.recv(4)
@@ -271,14 +378,34 @@ class Agent:
             self.process_message(sender, msg_decoded)
 
     def stop_receiver(self):
+        """Stop Agent listener"""
         self.stop_receive = 1
 
     def process_message(self, sender, message):
+        """Process agent received messages.
+
+        If the message cointains reserved words, then it will be proceed as command.
+
+        Args:
+            sender (Sender): Object to establish connection with the manager socket and receive/send information
+            message (str): Decoder message in ISO-8859-1 format
+        """
         msg_decoded_list = message.split(' ')
         if 'com' in msg_decoded_list or 'upgrade' in msg_decoded_list:
             self.process_command(sender, msg_decoded_list)
 
     def process_command(self, sender, message_list):
+        """Process agent received commands through the socket
+
+        Args:
+            sender (Sender): Object to establish connection with the manager socket and receive/send information
+            message_list (list): Message splitted by white spaces
+
+        Raises:
+            ValueError: if 'sha1' command and sha_key Agent value is not defined
+            ValueError: if execution result is not configured in the Agent
+            ValueError: if command is not recognized
+        """
         if 'com' in message_list:
             com_index = message_list.index('com')
             command = message_list[com_index + 1]
@@ -354,10 +481,12 @@ class Agent:
             raise ValueError(f'Unrecognized command {command}')
 
     def create_hc_startup(self):
+        """Set the agent startup event"""
         msg = "#!-agent startup "
         self.startup_msg = self.create_event(msg)
 
     def create_keep_alive(self):
+        """Set the keep alive event from keepalives operating systemd data"""
         with open(os.path.join(_data_path, 'keepalives.txt'), 'r') as fp:
             line = fp.readline()
             while line:
@@ -373,6 +502,7 @@ class Agent:
         self.keep_alive_msg = self.create_event(msg)
 
     def initialize_modules(self):
+        """Initialize and enable agent modules"""
         if self.modules["syscollector"]["status"] == "enabled":
             self.inventory = Inventory(self.os, self.inventory_sample)
         if self.modules["rootcheck"]["status"] == "enabled":
@@ -382,7 +512,6 @@ class Agent:
         if self.modules["fim_integrity"]["status"] == "enabled":
             self.fim_integrity = GeneratorIntegrityFIM(self.id, self.name,
                                                        self.short_version)
-
 
 class Inventory:
     def __init__(self, os, inventory_sample=None):
@@ -691,7 +820,8 @@ class GeneratorFIM:
 
 
 class Sender:
-    """This class is sends events to the manager through a socket
+    """
+    This class is sends events to the manager through a socket
 
     Attributes:
         manager_address (str): IP of the manager
