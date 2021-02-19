@@ -35,7 +35,14 @@ configurations = load_wazuh_configurations(configurations_path, __name__)
 
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
-    """Get configurations from the module."""
+    """Get configurations from the module.
+
+    Args:
+      request:
+
+    Returns:
+
+    """
     return request.param
 
 
@@ -48,14 +55,11 @@ def test_remove_rule_five_times(tags_to_apply, folder, audit_key,
                                 get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """Remove auditd rule using auditctl five times and check Wazuh ignores folder.
 
-    Parameters
-    ----------
-    tags_to_apply : set
-        Configuration tag to apply in the test
-    folder : str
-        The folder to remove and read
-    audit_key : str
-        The key which Wazuh put.
+    Args:
+      tags_to_apply (set): Configuration tag to apply in the test.
+
+    Raises:
+      TimeoutError: If an expected event couldn't be captured.
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])

@@ -54,12 +54,12 @@ def test_remove_and_read_folder(tags_to_apply, folder, get_configuration,
                                 wait_for_fim_start):
     """Remove folder which is monitored with auditd and then create it again.
 
-    Parameters
-    ----------
-    tags_to_apply : set
-        Configuration tag to apply in the test
-    folder : str
-        The folder to remove and read
+    Args:
+      tags_to_apply (set): Configuration tag to apply in the test.
+      folder (str): The folder to remove and read.
+
+    Raises:
+      TimeoutError: If an expected event couldn't be captured.
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
@@ -81,10 +81,11 @@ def test_reconnect_to_audit(tags_to_apply, get_configuration, configure_environm
                             restart_syscheckd, wait_for_fim_start):
     """Restart auditd and check Wazuh reconnect to auditd
 
-    Parameters
-    ----------
-    tags_to_apply : set
-        Configuration tag to apply in the test
+    Args:
+      tags_to_apply (set): Configuration tag to apply in the test
+
+    Raises:
+      TimeoutError: If an expected event couldn't be captured.
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])

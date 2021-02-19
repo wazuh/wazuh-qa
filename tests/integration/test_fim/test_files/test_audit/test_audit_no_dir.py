@@ -69,11 +69,14 @@ def test_audit_no_dir(tags_to_apply, get_configuration, configure_environment, r
     is up, the audit rules are reloaded every 30 seconds (not configurable), so
     when the directory is created, it starts to be monitored.
 
-    Parameters
-    ----------
-    tags_to_apply : set
-        Configuration tag to apply in the test
+    Args:
+      tags_to_apply (set): Configuration tag to apply in the test.
+
+    Raises:
+      TimeoutError: If an expected event couldn't be captured.
+      ValueError: If the path of the event is wrong.
     """
+
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Assert message is generated: Unable to add audit rule for ....

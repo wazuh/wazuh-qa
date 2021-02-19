@@ -76,10 +76,11 @@ def test_move_folders_to_realtime(tags_to_apply, get_configuration, uninstall_in
                                   configure_environment, restart_syscheckd):
     """Check folders monitored with Whodata change to Real-time if auditd is not installed
 
-    Parameters
-    ----------
-    tags_to_apply : set
-        Configuration tag to apply
+    Args:
+      tags_to_apply (set): Configuration tag to apply in the test.
+
+    Raises:
+      TimeoutError: If an expected event couldn't be captured.
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
