@@ -9,8 +9,7 @@
 # Foundation.
 
 # Python 3.7 or greater
-# Dependencies
-# pip3 install pycryptodome
+# Dependencies: pip3 install pycryptodome
 
 import hashlib
 import json
@@ -37,26 +36,27 @@ agent_count = 1
 class Agent:
     """ Class that allows us to simulate an agent registered in a manager.
 
-    This simulated agent also allows sending and receiving messages and commands, in addition to simulating the
+    This simulated agent also allows sending-receiving messages and commands, in addition to simulating the
     syscollector, FIM and rootcheck modules by making use of other classes such as Inventory, Rootcheck, GeneratorFIM
     and GeneratorIntegrityFIM.
 
     Args:
         manager_address (str): Manager IP address.
-        cypher (str): Cypher method. It can be [aes, blowfish]. Default aes.
-        os (str): Agent operating system. Default None for choosing randomly.
-        inventory_sample (str): File where are sample inventory messages.
-        rootcheck_sample (str): File where are sample rootcheck messages.
-        id (str): Agent id. Specify only if it already exists. Default None.
-        name (str): Agent name. Specify only if it already exists. Default None.
-        key (str): Client key. Specify only if it already exists. Default None.
-        version (str): Wazuh agent version.
-        fim_eps (int): Set the maximum event reporting throughput. Events are messages that will produce an alert.
-        fim_integrity_eps (int): Set the maximum database synchronization message throughput.
-        authd_password (str): Password for registration if needed. Default None.
+        cypher (str, optional): Cypher method. It can be [aes, blowfish]. Default aes.
+        os (str, optional): Agent operating system. Default None for choosing randomly.
+        inventory_sample (str, optional): File where are sample inventory messages.
+        rootcheck_sample (str, optional): File where are sample rootcheck messages.
+        id (str, optional): ID of the agent. Specify only if it already exists.
+        name (str, optional): Agent name. Specify only if it already exists.
+        key (str, optional): Client key. Specify only if it already exists.
+        version (str, optional): Wazuh agent version. Default v3.12.0.
+        fim_eps (int, optional): Set the maximum event reporting throughput. Events are messages that will produce an
+                                 alert.
+        fim_integrity_eps (int, optional): Set the maximum database synchronization message throughput.
+        authd_password (str), optional: Password for registration if needed.
 
     Attributes:
-        id (str): Agent id.
+        id (str): ID of the agent.
         name (str): Agent name.
         key (str): Agent key. Used for creating an encryption_key.
         long_version (str): Agent version in format x.y.z
@@ -70,13 +70,13 @@ class Agent:
         keep_alive_msg (bytes): Keep alive event (read from template data according to OS and parsed to an event).
         startup_msg (bytes): Startup event sent before the first keep alive event.
         authd_password (str): Password for manager registration.
-        inventory_sample (str): File where are sample inventory messages
-        rootcheck_sample (str): File where are sample rootcheck messages
+        inventory_sample (str): File where are sample inventory messages.
+        rootcheck_sample (str): File where are sample rootcheck messages.
         inventory (Inventory): Object to simulate syscollector message events.
         rootcheck (Rootcheck): Object to simulate rootcheck message events.
         fim (GeneratorFIM): Object to simulate FIM message events.
         fim_integrity (GeneratorIntegrityFIM): Object to simulate FIM integrity message events.
-        modules (dict): Agent modules with their associated info.
+        modules (dict): Agent modules with their associated configuration info.
         sha_key (str): Shared key between manager and agent for remote upgrading.
         upgrade_exec_result (int): Upgrade result status code.
         send_upgrade_notification (boolean): If True, it will be sent the upgrade status message after "upgrading".
@@ -127,7 +127,7 @@ class Agent:
         self.setup()
 
     def setup(self):
-        """Set up agent: os, registration, encryption key, start up msg and activate modules"""
+        """Set up agent: os, registration, encryption key, start up msg and activate modules."""
         self.set_os()
 
         if self.id is None and self.name is None and self.key is None:
@@ -142,20 +142,21 @@ class Agent:
         self.initialize_modules()
 
     def set_os(self):
-        """Pick random OS from a custom os list"""
+        """Pick random OS from a custom os list."""
         if self.os is None:
             self.os = os_list[agent_count % len(os_list) - 1]
 
     def set_wpk_variables(self, sha=None, upgrade_exec_result=None, upgrade_notification=False, upgrade_script_result=0,
                           stage_disconnect=None):
-        """Set variables related to wpk simulated responses
+        """Set variables related to wpk simulated responses.
 
         Args:
-            sha
-            upgrade_exec_result
-            upgrade_notification
-            upgrade_script_result
-            stage_disconnect
+            sha (str): Shared key between manager and agent for remote upgrading.
+            upgrade_exec_result (int): Upgrade result status code.
+            upgrade_notification (boolean): If True, it will be sent the upgrade status message after "upgrading".
+            upgrade_script_result (int): Variable to mock the upgrade script result. Used for simulating a remote
+                                         upgrade.
+            stage_disconnect (str): WPK process state variable.
         """
         self.sha_key = sha
         self.upgrade_exec_result = upgrade_exec_result
@@ -164,7 +165,7 @@ class Agent:
         self.stage_disconnect = stage_disconnect
 
     def set_name(self):
-        """Set a random agent name"""
+        """Set a random agent name."""
         random_string = ''.join(sample('0123456789abcdef' * 2, 8))
         if self.inventory_sample is None:
             self.name = "{}-{}-{}".format(agent_count, random_string, self.os)
@@ -175,9 +176,9 @@ class Agent:
                                              inventory_string)
 
     def register(self):
-        """Request to register the agent in the manager
+        """Request to register the agent in the manager.
 
-        In addition, it sets the agent id and agent key with the response data
+        In addition, it sets the agent id and agent key with the response data.
         """
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
@@ -202,13 +203,13 @@ class Agent:
 
     @staticmethod
     def wazuh_padding(compressed_event):
-        """Add the Wazuh custom padding to each event sent
+        """Add the Wazuh custom padding to each event sent.
 
         Args:
             compressed_event (bytes): Compressed event with zlib.
 
         Returns:
-            bytes: Padded event
+            bytes: Padded event.
 
         Examples:
             >>> wazuh_padding(b'x\\x9c\\x15\\xc7\\xc9\\r\\x00 \\x08\\x04\\xc0\\x96\\\\\\x94\\xcbn0H\\x03\\xda\\x7f
@@ -227,7 +228,7 @@ class Agent:
         return padded_event
 
     def create_encryption_key(self):
-        """Generate encryption key (using agent metadata and key)"""
+        """Generate encryption key (using agent metadata and key)."""
         agent_id = self.id.encode()
         name = self.name.encode()
         key = self.key.encode()
@@ -240,10 +241,10 @@ class Agent:
 
     @staticmethod
     def compose_event(message):
-        """Compose event from raw message
+        """Compose event from raw message.
 
         Returns:
-            bytes: Composed event
+            bytes: Composed event.
 
         Examples:
             >>> compose_event('test')
@@ -260,13 +261,13 @@ class Agent:
         return event
 
     def encrypt(self, padded_event):
-        """Encrypt event using AES or Blowfish encryption
+        """Encrypt event using AES or Blowfish encryption.
 
         Args:
-            padded_event (bytes): Padded event
+            padded_event (bytes): Padded event.
 
         Returns:
-            bytes: Encrypted event
+            bytes: Encrypted event.
 
         Examples:
             >>> agent.encrypt(b'!!!!!!!!x\\x9c\\x15\\xc7\\xc9\\r\\x00 \\x08\\x04\\xc0\\x96\\\\\\x94\\xcbn0H\\x03\\xda
@@ -287,14 +288,14 @@ class Agent:
 
     def headers(self, agent_id, encrypted_event):
         """
-        Add event headers for AES or Blowfish Cyphers
+        Add event headers for AES or Blowfish Cyphers.
 
         Args:
-            agent_id (str): Agent id
-            encrypted_event (str): Encrypted event
+            agent_id (str): Agent id.
+            encrypted_event (str): Encrypted event.
 
         Returns:
-            bytes: Encrypted event with headers
+            bytes: Encrypted event with headers.
         """
         if self.cypher == "aes":
             header = "!{0}!#AES:".format(agent_id).encode()
@@ -303,13 +304,13 @@ class Agent:
         return header + encrypted_event
 
     def create_event(self, message):
-        """Build an event from a raw string message
+        """Build an event from a raw string message.
 
         Args:
-            message (str): Raw message
+            message (str): Raw message.
 
         Returns:
-            bytes: Built event (compressed, padded, enceypted and with headers)
+            bytes: Built event (compressed, padded, enceypted and with headers).
 
         Examples:
             >>> create_event('test message)
@@ -334,7 +335,7 @@ class Agent:
         """Agent listener to receive messages and process the accepted commands.
 
         Args:
-            sender (Sender): Object to establish connection with the manager socket and receive/send information
+            sender (Sender): Object to establish connection with the manager socket and receive/send information.
         """
         while self.stop_receive == 0:
             if sender.protocol == 'tcp':
@@ -378,7 +379,7 @@ class Agent:
             self.process_message(sender, msg_decoded)
 
     def stop_receiver(self):
-        """Stop Agent listener"""
+        """Stop Agent listener."""
         self.stop_receive = 1
 
     def process_message(self, sender, message):
@@ -387,24 +388,24 @@ class Agent:
         If the message cointains reserved words, then it will be proceed as command.
 
         Args:
-            sender (Sender): Object to establish connection with the manager socket and receive/send information
-            message (str): Decoder message in ISO-8859-1 format
+            sender (Sender): Object to establish connection with the manager socket and receive/send information.
+            message (str): Decoder message in ISO-8859-1 format.
         """
         msg_decoded_list = message.split(' ')
         if 'com' in msg_decoded_list or 'upgrade' in msg_decoded_list:
             self.process_command(sender, msg_decoded_list)
 
     def process_command(self, sender, message_list):
-        """Process agent received commands through the socket
+        """Process agent received commands through the socket.
 
         Args:
-            sender (Sender): Object to establish connection with the manager socket and receive/send information
-            message_list (list): Message splitted by white spaces
+            sender (Sender): Object to establish connection with the manager socket and receive/send information.
+            message_list (list): Message splitted by white spaces.
 
         Raises:
-            ValueError: if 'sha1' command and sha_key Agent value is not defined
-            ValueError: if execution result is not configured in the Agent
-            ValueError: if command is not recognized
+            ValueError: if 'sha1' command and sha_key Agent value is not defined.
+            ValueError: if execution result is not configured in the Agent.
+            ValueError: if command is not recognized.
         """
         if 'com' in message_list:
             com_index = message_list.index('com')
@@ -477,12 +478,12 @@ class Agent:
             raise ValueError(f'Unrecognized command {command}')
 
     def create_hc_startup(self):
-        """Set the agent startup event"""
+        """Set the agent startup event."""
         msg = "#!-agent startup "
         self.startup_msg = self.create_event(msg)
 
     def create_keep_alive(self):
-        """Set the keep alive event from keepalives operating systemd data"""
+        """Set the keep alive event from keepalives operating systemd data."""
         with open(os.path.join(_data_path, 'keepalives.txt'), 'r') as fp:
             line = fp.readline()
             while line:
@@ -498,7 +499,7 @@ class Agent:
         self.keep_alive_msg = self.create_event(msg)
 
     def initialize_modules(self):
-        """Initialize and enable agent modules"""
+        """Initialize and enable agent modules."""
         if self.modules["syscollector"]["status"] == "enabled":
             self.inventory = Inventory(self.os, self.inventory_sample)
         if self.modules["rootcheck"]["status"] == "enabled":
@@ -809,18 +810,17 @@ class GeneratorFIM:
 
 
 class Sender:
-    """
-    This class sends events to the manager through a socket
+    """This class sends events to the manager through a socket.
 
     Attributes:
-        manager_address (str): IP of the manager
-        manager_port (str, optional): port used by remoted in the manager
-        protocol (str, optional): protocol used by remoted. tcp or udp
-        socket (socket): sock_stream used to connect with remoted
+        manager_address (str): IP of the manager.
+        manager_port (str, optional): port used by remoted in the manager.
+        protocol (str, optional): protocol used by remoted. tcp or udp.
+        socket (socket): sock_stream used to connect with remoted.
 
     Examples:
         To create a Sender, you need to create an agent first, and then, create the sender. Finally, to send messages
-        you will need to use both agent and sender to create an injector
+        you will need to use both agent and sender to create an injector.
         >>> import wazuh_testing.tools.agent_simulator as ag
         >>> manager_address = "172.17.0.2"
         >>> agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0")
@@ -846,16 +846,17 @@ class Sender:
 
 
 class Injector:
-    """This class simulates a daemon used to send and receive messages with the manager
+    """This class simulates a daemon used to send and receive messages with the manager.
 
     Each `Agent` needs an injector and a sender to be able to communicate with the manager. This class will create
     a thread using `InjectorThread` which will behave similarly to an UNIX daemon. The `InjectorThread` will
     send and receive the messages using the `Sender`
 
     Attributes:
-        sender (Sender): sender used to connect to the sockets and send messages
-        agent (agent): agent owner of the injector and the sender
-        thread_number (int): total number of threads created. This may change depending on the modules used in the agent
+        sender (Sender): sender used to connect to the sockets and send messages.
+        agent (agent): agent owner of the injector and the sender.
+        thread_number (int): total number of threads created. This may change depending on the modules used in the
+                             agent.
         threads (list): list containing all the threads created.
 
     Examples:
@@ -881,13 +882,13 @@ class Injector:
                 self.thread_number += 1
 
     def run(self):
-        """Start the daemon to send and receive messages for all the threads"""
+        """Start the daemon to send and receive messages for all the threads."""
         for thread in range(self.thread_number):
             self.threads[thread].setDaemon(True)
             self.threads[thread].start()
 
     def stop_receive(self):
-        """Stop the daemon for all the threads"""
+        """Stop the daemon for all the threads."""
         for thread in range(self.thread_number):
             self.threads[thread].stop_rec()
         sleep(2)
@@ -895,19 +896,15 @@ class Injector:
 
 
 class InjectorThread(threading.Thread):
-    """This class creates a thread who will create and send the events to the manager for each module
-
-    Each `Agent` needs an injector and a sender to be able to communicate with the manager. This class will create
-    a thread using `InjectorThread` which will behave similarly to an UNIX daemon. The `InjectorThread` will
-    send and receive the messages using the `Sender`
+    """This class creates a thread who will create and send the events to the manager for each module.
 
     Attributes:
-        thread_id (int): ID of the thread
-        name (str): name of the thread. It is composed as Thread-{agent.id}{module}
-        sender (Sender): sender used to connect to the sockets and send messages
-        agent (agent): agent owner of the injector and the sender
-        module (str): module used to send events (fim, syscollector, etc)
-        stop_thread (int): 0 if the thread is running, 1 if it is stopped
+        thread_id (int): ID of the thread.
+        name (str): name of the thread. It is composed as Thread-{agent.id}{module}.
+        sender (Sender): sender used to connect to the sockets and send messages.
+        agent (Agent): agent owner of the injector and the sender.
+        module (str): module used to send events (fim, syscollector, etc).
+        stop_thread (int): 0 if the thread is running, 1 if it is stopped.
     """
     def __init__(self, thread_id, name, sender, agent, module):
         super(InjectorThread, self).__init__()
@@ -920,7 +917,7 @@ class InjectorThread(threading.Thread):
         self.stop_thread = 0
 
     def keep_alive(self):
-        """Send a keep alive message from the agent to the manager"""
+        """Send a keep alive message from the agent to the manager."""
         sleep(10)
         print("Startup - {}({})".format(self.agent.name, self.agent.id))
         self.sender.send_event(self.agent.startup_msg)
@@ -935,7 +932,7 @@ class InjectorThread(threading.Thread):
                    self.agent.modules["keepalive"]["frequency"]))
 
     def fim(self):
-        """Send a File Integrity Monitoring message from the agent to the manager"""
+        """Send a File Integrity Monitoring message from the agent to the manager."""
         sleep(10)
         start_time = time()
         # Loop events
@@ -959,7 +956,7 @@ class InjectorThread(threading.Thread):
                 sleep(1.0 - ((time() - start_time) % 1.0))
 
     def inventory(self):
-        """Send an inventory message of syscollector from the agent to the manager"""
+        """Send an inventory message of syscollector from the agent to the manager."""
         sleep(10)
         start_time = time()
         while self.stop_thread == 0:
@@ -980,7 +977,7 @@ class InjectorThread(threading.Thread):
                                                                      % self.agent.modules["syscollector"]["frequency"]))
 
     def rootcheck(self):
-        """Send a rootcheck message from the agent to the manager"""
+        """Send a rootcheck message from the agent to the manager."""
         sleep(10)
         start_time = time()
         while self.stop_thread == 0:
@@ -998,7 +995,7 @@ class InjectorThread(threading.Thread):
                                                                   % self.agent.modules["rootcheck"]["frequency"]))
 
     def run(self):
-        """Starts the thread that will send messages to the manager"""
+        """Start the thread that will send messages to the manager."""
         # message = "1:/var/log/syslog:Jan 29 10:03:41 master sshd[19635]:
         #   pam_unix(sshd:session): session opened for user vagrant by (uid=0)
         #   uid: 0"
@@ -1020,7 +1017,7 @@ class InjectorThread(threading.Thread):
             pass
 
     def stop_rec(self):
-        """Stops the thread to avoid sending any more messages"""
+        """Stop the thread to avoid sending any more messages."""
         if self.module == "receive_messages":
             self.agent.stop_receiver()
         else:
@@ -1031,19 +1028,19 @@ def create_agents(agents_number, manager_address, cypher, fim_eps=None, authd_pa
                   agents_version=None):
     """Create a list of generic agents
 
-    This will create a list with `agents_number` amount of agents. All of them will be registered in the same address.
+    This will create a list with `agents_number` amount of agents. All of them will be registered in the same manager.
 
     Args:
-        agents_number (int): total number of agents
-        manager_address (str): IP address of the manager
-        cypher (str): cypher used for the communications. It may be aes or blowfish
+        agents_number (int): total number of agents.
+        manager_address (str): IP address of the manager.
+        cypher (str): cypher used for the communications. It may be aes or blowfish.
         fim_eps (int, optional): total number of EPS produced by FIM.
         authd_password (str, optional): password to enroll an agent.
         agents_os (list, optional): list containing different operative systems for the agents.
-        agents_version (list, optional): list containing different version of the agent
+        agents_version (list, optional): list containing different version of the agent.
 
     Returns:
-        list: list of the new virtual agents
+        list: list of the new virtual agents.
     """
     global agent_count
     # Read client.keys and create virtual agents
