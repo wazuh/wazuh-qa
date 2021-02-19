@@ -4,22 +4,20 @@
 
 import os
 import pytest
-import time
 import wazuh_testing.api as api
 from wazuh_testing.tools import LOG_FILE_PATH
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.monitoring import make_callback, REMOTED_DETECTOR_PREFIX
+from wazuh_testing.tools.monitoring import FileMonitor, make_callback, REMOTED_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '')
+configurations_path = os.path.join(test_data_path, 'data/wazuh_basic_configuration.yaml')
 
 parameters = [
     {'PROTOCOL': 'UDP', 'CONNECTION': 'secure', 'PORT': '1514'},

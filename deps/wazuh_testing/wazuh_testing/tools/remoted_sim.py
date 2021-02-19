@@ -345,8 +345,7 @@ class RemotedSimulator:
             if self.protocol == 'tcp':
                 rcv = connection.recv(4)
                 if len(rcv) == 4:
-                    data_len = ((rcv[3] & 0xFF) << 24) | ((rcv[2] & 0xFF) << 16) \
-                               | ((rcv[1] & 0xFF) << 8) | (rcv[0] & 0xFF)
+                    data_len = ((rcv[3] & 0xFF) << 24) | ((rcv[2] & 0xFF) << 16) | ((rcv[1] & 0xFF) << 8) | (rcv[0] & 0xFF)
 
                     buffer_array = connection.recv(data_len)
 
