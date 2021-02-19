@@ -217,7 +217,7 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
     ("custom_audit_key", "/testdir1")
 ])
 def test_audit_key(audit_key, path, get_configuration, configure_environment, restart_syscheckd):
-    """Check <audit_key> functionality by adding a audit rule and checking if alerts with that key are triggered when
+    """Check `<audit_key>` functionality by adding a audit rule and checking if alerts with that key are triggered when
     a file is created.
 
     Args:
@@ -261,7 +261,7 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
     ({'restart_audit_false'}, False)
 ])
 def test_restart_audit(tags_to_apply, should_restart, get_configuration, configure_environment, restart_syscheckd):
-    """Check <restart_audit> functionality by removing the plugin and monitoring audit to see if it restart and create
+    """Check `<restart_audit>` functionality by removing the plugin and monitoring audit to see if it restart and create
     the file again.
 
     Args:
