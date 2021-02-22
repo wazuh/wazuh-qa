@@ -4,35 +4,38 @@
 
 import os
 import pytest
-import time
 import wazuh_testing.api as api
-from wazuh_testing.tools import LOG_FILE_PATH
 
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.monitoring import make_callback, REMOTED_DETECTOR_PREFIX
-from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import FileMonitor, make_callback, REMOTED_DETECTOR_PREFIX
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '')
+configurations_path = os.path.join(test_data_path, 'data', 'wazuh_basic_configuration.yaml')
 
 parameters = [
     {'PROTOCOL': 'UDP', 'CONNECTION': 'secure', 'PORT': '1514'},
     {'PROTOCOL': 'UDP', 'CONNECTION': 'syslog', 'PORT': '514'},
     {'PROTOCOL': 'TCP', 'CONNECTION': 'syslog', 'PORT': '514'},
-    {'PROTOCOL': 'TCP', 'CONNECTION': 'secure', 'PORT': '1514'}
+    {'PROTOCOL': 'TCP', 'CONNECTION': 'secure', 'PORT': '1514'},
+    {'PROTOCOL': 'UDP', 'CONNECTION': 'secure', 'PORT': '56660'},
+    {'PROTOCOL': 'UDP', 'CONNECTION': 'syslog', 'PORT': '18000'},
+    {'PROTOCOL': 'TCP', 'CONNECTION': 'syslog', 'PORT': '18000'},
+    {'PROTOCOL': 'TCP', 'CONNECTION': 'secure', 'PORT': '56660'}
 ]
 
 metadata = [
     {'protocol': 'UDP', 'connection': 'secure', 'port': '1514'},
     {'protocol': 'UDP', 'connection': 'syslog', 'port': '514'},
     {'protocol': 'TCP', 'connection': 'syslog', 'port': '514'},
-    {'protocol': 'TCP', 'connection': 'secure', 'port': '1514'}
+    {'protocol': 'TCP', 'connection': 'secure', 'port': '1514'},
+    {'protocol': 'UDP', 'connection': 'secure', 'port': '56660'},
+    {'protocol': 'UDP', 'connection': 'syslog', 'port': '18000'},
+    {'protocol': 'TCP', 'connection': 'syslog', 'port': '18000'},
+    {'protocol': 'TCP', 'connection': 'secure', 'port': '56660'}
 ]
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
@@ -46,19 +49,13 @@ def get_configuration(request):
     return request.param
 
 
-def test_connection(get_configuration, configure_environment):
+def test_connection(get_configuration, configure_environment, restart_remoted):
     """
     Checks that "connection" option could be configured as "secure" or "syslog" without errors
         this option specifies a type of incoming connection to accept: secure or syslog.
 
     Checks that the API answer for manager connection coincides with the option selected on ossec.conf
     """
-
-    truncate_file(LOG_FILE_PATH)
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
-    control_service('restart', daemon='wazuh-remoted')
-
     cfg = get_configuration['metadata']
 
     log_callback = make_callback(
