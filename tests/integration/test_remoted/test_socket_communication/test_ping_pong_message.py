@@ -45,11 +45,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_ping_pong_message(get_configuration, configure_environment):
-    truncate_file(LOG_FILE_PATH)
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
-    control_service('restart', daemon='wazuh-remoted')
+def test_ping_pong_message(get_configuration, configure_environment, restart_remoted):
     config = get_configuration['metadata']
 
     log_callback = make_callback(

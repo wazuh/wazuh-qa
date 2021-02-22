@@ -44,19 +44,13 @@ def get_configuration(request):
     return request.param
 
 
-def test_connection(get_configuration, configure_environment):
+def test_connection(get_configuration, configure_environment, restart_remoted):
     """
     Checks that "connection" option could be configured as "secure" or "syslog" without errors
         this option specifies a type of incoming connection to accept: secure or syslog.
 
     Checks that the API answer for manager connection coincides with the option selected on ossec.conf
     """
-
-    truncate_file(LOG_FILE_PATH)
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
-    control_service('restart', daemon='wazuh-remoted')
-
     cfg = get_configuration['metadata']
 
     log_callback = make_callback(
