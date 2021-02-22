@@ -4,15 +4,15 @@
   description: "Checks the commands insert and clear"
   test_case:
   -
-    input: 'agent 000 vuln_cve insert {"name":"test_package","version":"1.0","architecture":"x86","cve":"1001"}'
+    input: 'agent 000 vuln_cve insert {"name":"test_package","version":"1.0","architecture":"x86","cve":"CVE-2021-1001"}'
     output: "ok"
     stage: "agent vuln_cve insert test package"
   -
     input: 'agent 000 sql SELECT * FROM vuln_cves'
-    output: 'ok [{"name":"test_package","version":"1.0","architecture":"x86","cve":"1001"}]'
+    output: 'ok [{"name":"test_package","version":"1.0","architecture":"x86","cve":"CVE-2021-1001"}]'
     stage: "agent vuln_cve checking test package"
   -
-    input: 'agent 000 vuln_cve insert {"name":"test_package","version":"1.0","architecture":"x86","cve":"1001"}'
+    input: 'agent 000 vuln_cve insert {"name":"test_package","version":"1.0","architecture":"x86","cve":"CVE-2021-1001"}'
     output: "err Cannot execute vuln_cve insert command; SQL err: UNIQUE constraint failed: vuln_cves.name, vuln_cves.version, vuln_cves.architecture, vuln_cves.cve"
     stage: "agent vuln_cve insert duplicated entry"
   -
@@ -24,7 +24,7 @@
     output: 'ok []'
     stage: "agent vuln_cve checking empty table"
   -
-    input: 'agent 000 vuln_cve insert {"name":"test_package","cve":"1001"}'
+    input: 'agent 000 vuln_cve insert {"name":"test_package","cve":"CVE-2021-1001"}'
     output: "err Invalid JSON data, missing required fields"
     stage: "agent vuln_cve insert incomplete package"
   -
@@ -36,28 +36,28 @@
     output: "err Invalid vuln_cve query syntax, near 'vuln_cve'"
     stage: "agent vuln_cve missing command "
   -
-    input: 'agent 000 vuln_cve insert {"name":"test_package2","version":"1.0","architecture":"x86","cve":"1001"}'
+    input: 'agent 000 vuln_cve insert {"name":"test_package2","version":"1.0","architecture":"x86","cve":"CVE-2021-1001"}'
     output: "ok"
     stage: "agent vuln_cve insert another package"
   -
     input: 'agent 000 sql SELECT * FROM vuln_cves'
-    output: 'ok [{"name":"test_package2","version":"1.0","architecture":"x86","cve":"1001"}]'
+    output: 'ok [{"name":"test_package2","version":"1.0","architecture":"x86","cve":"CVE-2021-1001"}]'
     stage: "agent vuln_cve checking another package"
   -
-    input: 'agent 000 vuln_cve insert {"name":"test_package3","version":"3.0","architecture":"x86","cve":"1001"}'
+    input: 'agent 000 vuln_cve insert {"name":"test_package3","version":"3.0","architecture":"x86","cve":"CVE-2021-1001"}'
     output: "ok"
     stage: "agent vuln_cve insert package with same CVE"
   -
     input: 'agent 000 sql SELECT * FROM vuln_cves WHERE name = "test_package3"'
-    output: 'ok [{"name":"test_package3","version":"3.0","architecture":"x86","cve":"1001"}]'
+    output: 'ok [{"name":"test_package3","version":"3.0","architecture":"x86","cve":"CVE-2021-1001"}]'
     stage: "agent vuln_cve checking package insertion with same CVE"
   -
-    input: 'agent 000 vuln_cve insert {"name":"test_package3","version":"3.0","architecture":"x86","cve":"1002"}'
+    input: 'agent 000 vuln_cve insert {"name":"test_package3","version":"3.0","architecture":"x86","cve":"CVE-2021-1002"}'
     output: "ok"
     stage: "agent vuln_cve insert same package with different CVE"
   -
-    input: 'agent 000 sql SELECT * FROM vuln_cves WHERE name = "test_package3" AND cve = "1002"'
-    output: 'ok [{"name":"test_package3","version":"3.0","architecture":"x86","cve":"1002"}]'
+    input: 'agent 000 sql SELECT * FROM vuln_cves WHERE name = "test_package3" AND cve = "CVE-2021-1002"'
+    output: 'ok [{"name":"test_package3","version":"3.0","architecture":"x86","cve":"CVE-2021-1002"}]'
     stage: "agent vuln_cve checking package with different CVE"
   -
     input: 'agent 000 vuln_cve clear'
