@@ -5,11 +5,8 @@
 import os
 import pytest
 
-from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor, make_callback, REMOTED_DETECTOR_PREFIX
-from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.monitoring import make_callback, REMOTED_DETECTOR_PREFIX
 from wazuh_testing.tools.agent_simulator import send_ping_pong_messages
 
 

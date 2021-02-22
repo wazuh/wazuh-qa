@@ -5,12 +5,9 @@
 import os
 import pytest
 import wazuh_testing.api as api
-from wazuh_testing.tools import LOG_FILE_PATH
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, make_callback, REMOTED_DETECTOR_PREFIX
-from wazuh_testing.tools.services import control_service
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -23,14 +20,22 @@ parameters = [
     {'PROTOCOL': 'UDP', 'CONNECTION': 'secure', 'PORT': '1514'},
     {'PROTOCOL': 'UDP', 'CONNECTION': 'syslog', 'PORT': '514'},
     {'PROTOCOL': 'TCP', 'CONNECTION': 'syslog', 'PORT': '514'},
-    {'PROTOCOL': 'TCP', 'CONNECTION': 'secure', 'PORT': '1514'}
+    {'PROTOCOL': 'TCP', 'CONNECTION': 'secure', 'PORT': '1514'},
+    {'PROTOCOL': 'UDP', 'CONNECTION': 'secure', 'PORT': '56660'},
+    {'PROTOCOL': 'UDP', 'CONNECTION': 'syslog', 'PORT': '18000'},
+    {'PROTOCOL': 'TCP', 'CONNECTION': 'syslog', 'PORT': '18000'},
+    {'PROTOCOL': 'TCP', 'CONNECTION': 'secure', 'PORT': '56660'}
 ]
 
 metadata = [
     {'protocol': 'UDP', 'connection': 'secure', 'port': '1514'},
     {'protocol': 'UDP', 'connection': 'syslog', 'port': '514'},
     {'protocol': 'TCP', 'connection': 'syslog', 'port': '514'},
-    {'protocol': 'TCP', 'connection': 'secure', 'port': '1514'}
+    {'protocol': 'TCP', 'connection': 'secure', 'port': '1514'},
+    {'protocol': 'UDP', 'connection': 'secure', 'port': '56660'},
+    {'protocol': 'UDP', 'connection': 'syslog', 'port': '18000'},
+    {'protocol': 'TCP', 'connection': 'syslog', 'port': '18000'},
+    {'protocol': 'TCP', 'connection': 'secure', 'port': '56660'}
 ]
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
