@@ -16,7 +16,7 @@ Confirm `wazuh-remoted` keeps sending the `#pong` message for different ports an
 
 |Tier | Number of tests | Time spent |
 |:--:|:--:|:--:|
-| 0 | 4 | 8s |
+| 0 | 12 | 27s |
 
 ## Expected behavior
 
@@ -30,7 +30,15 @@ Checks executed in this test
 - **UDP and port 1514**: `wazuh-remoted` must response `b'#pong'`.
 - **UDP and port 56000**: `wazuh-remoted` must response `b'#pong'`. 
 - **TCP and port 1514**: `wazuh-remoted` must response `b'\x05\x00\x00\x00#pong'`
-- **TCP and port 56000**: `wazuh-remoted` must response `b'\x05\x00\x00\x00#pong'`
+- **TCP and port 56000**: `wazuh-remoted` must response `b'\x05\x00\x00\x00#pong'`.
+- **UDP,TCP and port 1514**: `wazuh-remoted` must response with `b'#pong'` for a ping message sent using UDP and `b'\x05\x00\x00\x00#pong'` using TCP. 
+- **UDP,TCP and port 56000**: `wazuh-remoted` must response with `b'#pong'` for a ping message sent using UDP and `b'\x05\x00\x00\x00#pong'` using TCP.
+- **TCP,UDP and port 1514**: `wazuh-remoted` must response with `b'#pong'` for a ping message sent using UDP and `b'\x05\x00\x00\x00#pong'` using TCP. 
+- **TCP,UDP and port 56000**: `wazuh-remoted` must response with `b'#pong'` for a ping message sent using UDP and `b'\x05\x00\x00\x00#pong'` using TCP.
+- **UDP,UDP and port 1514**: `wazuh-remoted` must response `b'#pong'`. This is transformed by `wazuh-remoted` to `UDP`.
+- **UDP,UDP and port 56000**: `wazuh-remoted` must response `b'#pong'`. This is transformed by `wazuh-remoted` to `UDP`. 
+- **TCP,TCP and port 1514**: `wazuh-remoted` must response `b'\x05\x00\x00\x00#pong'`. This is transformed by `wazuh-remoted` to `TCP`.
+- **TCP,TCP and port 56000**: `wazuh-remoted` must response `b'\x05\x00\x00\x00#pong'`. This is transformed by `wazuh-remoted` to `TCP`.
 
 ## Code documentation
 ::: tests.integration.test_remoted.test_socket_communication.test_ping_pong_message
