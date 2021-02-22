@@ -6,7 +6,7 @@ import os
 import pytest
 
 from wazuh_testing.tools import LOG_FILE_PATH
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, make_callback, REMOTED_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
@@ -21,27 +21,29 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_socket_communication.yaml')
 
 parameters = [
-    {'PROTOCOL': 'UDP', 'CONNECTION': 'secure', 'PORT': 1514},
-    {'PROTOCOL': 'UDP', 'CONNECTION': 'secure', 'PORT': 56000},
-    {'PROTOCOL': 'TCP', 'CONNECTION': 'secure', 'PORT': 1514},
-    {'PROTOCOL': 'TCP', 'CONNECTION': 'secure', 'PORT': 56000}
+    {'PROTOCOL': 'UDP', 'PORT': 1514},
+    {'PROTOCOL': 'UDP', 'PORT': 56000},
+    {'PROTOCOL': 'TCP', 'PORT': 1514},
+    {'PROTOCOL': 'TCP', 'PORT': 56000}
 ]
 
 metadata = [
-    {'protocol': 'UDP', 'connection': 'secure', 'port': 1514},
-    {'protocol': 'UDP', 'connection': 'secure', 'port': 56000},
-    {'protocol': 'TCP', 'connection': 'secure', 'port': 1514},
-    {'protocol': 'TCP', 'connection': 'secure', 'port': 56000}
+    {'protocol': 'UDP', 'port': 1514},
+    {'protocol': 'UDP', 'port': 56000},
+    {'protocol': 'TCP', 'port': 1514},
+    {'protocol': 'TCP', 'port': 56000}
 ]
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-configuration_ids = [f"{x['PROTOCOL']}_{x['CONNECTION']}_{x['PORT']}" for x in parameters]
+configuration_ids = [f"{x['PROTOCOL']}_{x['PORT']}" for x in parameters]
+
 
 # fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
+
 
 def test_ping_pong_message(get_configuration, configure_environment):
     truncate_file(LOG_FILE_PATH)
@@ -51,7 +53,7 @@ def test_ping_pong_message(get_configuration, configure_environment):
     config = get_configuration['metadata']
 
     log_callback = make_callback(
-        fr"Started \(pid: \d+\). Listening on port {config['port']}\/{config['protocol']} \({config['connection']}\).",
+        fr"Started \(pid: \d+\). Listening on port {config['port']}\/{config['protocol']} \(secure\).",
         REMOTED_DETECTOR_PREFIX
     )
 
