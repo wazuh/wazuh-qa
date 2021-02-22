@@ -36,4 +36,4 @@ test_files/test_follow_symbolic_link/test_not_following_symbolic_link.py . [ 16%
 
 ## Code documentation
 
-<!-- ::: tests.integration.test_fim.test_files.test_follow_symbolic_link.test_not_following_symbolic_link -->
+::: tests.integration.test_fim.test_files.test_follow_symbolic_link.test_not_following_symbolic_link

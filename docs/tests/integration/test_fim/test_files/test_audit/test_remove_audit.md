@@ -35,4 +35,4 @@ test_files/test_audit/test_remove_audit.py .                                    
 
 ## Code documentation
 
-<!-- ::: tests.integration.test_fim.test_files.test_audit.test_remove_audit -->
+::: tests.integration.test_fim.test_files.test_audit.test_remove_audit

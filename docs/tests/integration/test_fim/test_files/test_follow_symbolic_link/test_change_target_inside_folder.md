@@ -36,4 +36,4 @@ test_files/test_follow_symbolic_link/test_change_target_inside_folder.py .ss..ss
 
 ## Code documentation
 
-<!-- ::: tests.integration.test_fim.test_files.test_follow_symbolic_link.test_change_target_inside_folder -->
+::: tests.integration.test_fim.test_files.test_follow_symbolic_link.test_change_target_inside_folder

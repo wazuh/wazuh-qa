@@ -37,4 +37,4 @@ test_files/test_follow_symbolic_link/test_audit_rules_removed_after_change_link.
 
 ## Code documentation
 
-<!-- ::: tests.integration.test_fim.test_files.test_follow_symbolic_link.test_audit_rules_removed_after_change_link -->
+::: tests.integration.test_fim.test_files.test_follow_symbolic_link.test_audit_rules_removed_after_change_link

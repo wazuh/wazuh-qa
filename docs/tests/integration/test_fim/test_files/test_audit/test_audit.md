@@ -5,7 +5,7 @@ This test file has several tests:
 - `test_readded_rules`: Checks that FIM is able to re-add the rule of a directory if it's removed.
 - `test_readded_rules_on_restart`: Check if FIM is able to add the audit rules when auditd is restarted.
 - `test_move_rules_to_realtime`: Checks that FIM moves the monitored directories using `whodata` to realtime when auditd is stopped.
-- `test_audit_key`: Checks that the `audit_key` functionality works.
+- `test_audit_key`: Checks that the `<audit_key>` functionality works.
 - `test_restart_audit`: Checks that the `<restart_audit>` functionality works.
 ## General info
 
@@ -72,4 +72,4 @@ test_files/test_audit/test_audit.py .....sssssssss.ssssssss.                    
 
 ## Code documentation
 
-<!-- ::: tests.integration.test_fim.test_files.test_audit.test_audit -->
+::: tests.integration.test_fim.test_files.test_audit.test_audit

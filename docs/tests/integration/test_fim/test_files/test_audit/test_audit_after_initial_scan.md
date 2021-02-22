@@ -44,4 +44,4 @@ test_files/test_audit/test_audit_after_initial_scan.py ....                     
 
 ## Code documentation
 
-<!-- ::: tests.integration.test_fim.test_files.test_audit.test_audit_after_initial_scan -->
+::: tests.integration.test_fim.test_files.test_audit.test_audit_after_initial_scan

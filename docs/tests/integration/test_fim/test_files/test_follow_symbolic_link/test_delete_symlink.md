@@ -39,4 +39,4 @@ test_files/test_follow_symbolic_link/test_delete_symlink.py .ss..ss..ss.        
 
 ## Code documentation
 
-<!-- ::: tests.integration.test_fim.test_files.test_follow_symbolic_link.test_delete_symlink -->
+::: tests.integration.test_fim.test_files.test_follow_symbolic_link.test_delete_symlink

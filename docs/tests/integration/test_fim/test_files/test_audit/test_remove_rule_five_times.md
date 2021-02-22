@@ -34,4 +34,4 @@ test_files/test_audit/test_remove_rule_five_times.py .                          
 
 ## Code documentation
 
-<!-- ::: tests.integration.test_fim.test_files.test_audit.test_remove_rule_five_times -->
+::: tests.integration.test_fim.test_files.test_audit.test_remove_rule_five_times
