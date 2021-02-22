@@ -43,6 +43,11 @@ def get_configuration(request):
 
 
 def test_ping_pong_message(get_configuration, configure_environment, restart_remoted):
+    """Test if wazuh-remoted sends the #pong message
+
+    Raises:
+        AssertionError: if `wazuh-remoted` doesn't respond `#pong`
+    """
     config = get_configuration['metadata']
 
     log_callback = make_callback(
