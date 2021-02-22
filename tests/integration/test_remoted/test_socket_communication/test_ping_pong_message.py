@@ -21,14 +21,30 @@ parameters = [
     {'PROTOCOL': 'UDP', 'PORT': 1514},
     {'PROTOCOL': 'UDP', 'PORT': 56000},
     {'PROTOCOL': 'TCP', 'PORT': 1514},
-    {'PROTOCOL': 'TCP', 'PORT': 56000}
+    {'PROTOCOL': 'TCP', 'PORT': 56000},
+    {'PROTOCOL': 'UDP,TCP', 'PORT': 1514},
+    {'PROTOCOL': 'UDP,TCP', 'PORT': 56000},
+    {'PROTOCOL': 'TCP,UDP', 'PORT': 1514},
+    {'PROTOCOL': 'TCP,UDP', 'PORT': 56000},
+    {'PROTOCOL': 'TCP,TCP', 'PORT': 1514},
+    {'PROTOCOL': 'UDP,UDP', 'PORT': 1514},
+    {'PROTOCOL': 'TCP,TCP', 'PORT': 56000},
+    {'PROTOCOL': 'UDP,UDP', 'PORT': 56000},
 ]
 
 metadata = [
     {'protocol': 'UDP', 'port': 1514},
     {'protocol': 'UDP', 'port': 56000},
     {'protocol': 'TCP', 'port': 1514},
-    {'protocol': 'TCP', 'port': 56000}
+    {'protocol': 'TCP', 'port': 56000},
+    {'protocol': 'UDP,TCP', 'port': 1514},
+    {'protocol': 'UDP,TCP', 'port': 56000},
+    {'protocol': 'TCP,UDP', 'port': 1514},
+    {'protocol': 'TCP,UDP', 'port': 56000},
+    {'protocol': 'TCP,TCP', 'port': 1514},
+    {'protocol': 'UDP,UDP', 'port': 1514},
+    {'protocol': 'TCP,TCP', 'port': 56000},
+    {'protocol': 'UDP,UDP', 'port': 56000},
 ]
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
@@ -50,13 +66,23 @@ def test_ping_pong_message(get_configuration, configure_environment, restart_rem
     """
     config = get_configuration['metadata']
 
-    log_callback = make_callback(
-        fr"Started \(pid: \d+\). Listening on port {config['port']}\/{config['protocol']} \(secure\).",
-        REMOTED_DETECTOR_PREFIX
-    )
+    test_multiple_pings = False
+
+    if config['protocol'] in ['TCP,UDP', 'UDP,TCP']:
+        protocol, test_multiple_pings = "TCP,UDP", True
+    elif config['protocol'] in ['TCP,TCP', 'UDP,UDP']:
+        protocol = config['protocol'].split(',')[0]
+    else:
+        protocol = config['protocol']
+    callback = fr"Started \(pid: \d+\). Listening on port {config['port']}\/{protocol} \(secure\)."
+
+    log_callback = make_callback(callback, REMOTED_DETECTOR_PREFIX)
 
     wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message="Wazuh remoted didn't start as expected.")
 
-    assert b'#pong' == send_ping_pong_messages(manager_address="localhost", protocol=config['protocol'],
-                                               port=config['port'])
+    if test_multiple_pings:
+        assert b'#pong' == send_ping_pong_messages(manager_address="localhost", protocol='UDP', port=config['port'])
+        assert b'#pong' == send_ping_pong_messages(manager_address="localhost", protocol='TCP', port=config['port'])
+    else:
+        assert b'#pong' == send_ping_pong_messages(manager_address="localhost", protocol=protocol, port=config['port'])
 
