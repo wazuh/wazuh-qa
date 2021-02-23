@@ -156,7 +156,7 @@ class RemotedSimulator:
         if extra > 0:
             padded_sec_message = (b'!' * (padding - extra)) + compressed_sec_message
         else:
-            padded_sec_message = (b'!' * (padding)) + compressed_sec_message
+            padded_sec_message = (b'!' * padding) + compressed_sec_message
         return padded_sec_message
 
     def encrypt(self, padded_sec_message, crypto_method):
