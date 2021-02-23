@@ -5,13 +5,13 @@ import os
 
 import pytest
 from test_fim.test_files.test_follow_symbolic_link.common import configurations_path, testdir1, \
-    testdir_link, wait_for_symlink_check, testdir_target, testdir_not_target, delete_f, wait_for_audit
+    testdir_link, wait_for_symlink_check, testdir_target, testdir_not_target, delete_f
 # noinspection PyUnresolvedReferences
 from test_fim.test_files.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
     extra_configuration_after_yield
 from wazuh_testing import logger
 from wazuh_testing.fim import (generate_params, create_file, REGULAR, SYMLINK, callback_detect_event,
-                               check_time_travel, modify_file_content, LOG_FILE_PATH)
+                               check_time_travel, modify_file_content, LOG_FILE_PATH, wait_for_audit)
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 

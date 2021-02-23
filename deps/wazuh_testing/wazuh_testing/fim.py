@@ -2192,6 +2192,17 @@ def detect_whodata_start(file_monitor):
                                      '"File integrity monitoring real-time Whodata engine started" event')
 
 
+def wait_for_audit(whodata, monitor):
+    """Wait for the audit callback if we are using whodata monitoring.
+    Args:
+        whodata (boolean): True if whodata is active.
+        monitor (FileMonitor): LogMonitor to use.
+    """
+    if whodata:
+        monitor.start(timeout=30, callback=callback_end_audit_reload_rules, update_position=False,
+                      error_message='Did not receive expected "Audit rules reloaded..." event')
+
+
 def generate_params(extra_params: dict = None, apply_to_all: Union[Sequence[Any], Generator[dict, None, None]] = None,
                     modes: list = None):
     """

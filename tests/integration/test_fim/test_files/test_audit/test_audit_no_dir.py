@@ -9,7 +9,7 @@ import sys
 
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import generate_params, callback_audit_unable_dir, callback_audit_added_rule
+from wazuh_testing.fim import wait_for_audit, generate_params, callback_audit_unable_dir, callback_audit_added_rule
 from wazuh_testing.tools import PREFIX, LOG_FILE_PATH, ALERT_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -87,6 +87,7 @@ def test_audit_no_dir(tags_to_apply, get_configuration, configure_environment, r
 
     # Create the directory and verify that it is added to the audit rules. It is checked every 30 seconds.
     os.makedirs(testdir)
-    result = wazuh_log_monitor.start(timeout=32, callback=callback_audit_added_rule,
+    wait_for_audit(True, wazuh_log_monitor)
+    result = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_audit_added_rule,
                                      error_message='Folders were not added to Audit rules list').result()
     assert result == testdir, f'{testdir} not in "Added audit rule for monitoring directory: {result}" message'

@@ -43,13 +43,6 @@ def modify_symlink(target, path, file=None):
         subprocess.call(['ln', '-sfn', target, path])
 
 
-def wait_for_audit(whodata, monitor):
-    """Wait for the audit callback if we are using whodata monitoring"""
-    if whodata:
-        monitor.start(timeout=30, callback=callback_end_audit_reload_rules,
-                      error_message='Did not receive expected "Audit rules reloaded..." event')
-
-
 def delete_f(path, file=None):
     """Delete given path. Directory or file"""
     if file is None:

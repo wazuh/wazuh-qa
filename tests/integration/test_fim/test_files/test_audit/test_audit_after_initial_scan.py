@@ -9,12 +9,13 @@ import subprocess
 
 import pytest
 from wazuh_testing.fim import (LOG_FILE_PATH,
-                               callback_audit_reloaded_rule,
+                               callback_audit_added_rule,
                                callback_audit_removed_rule,
                                callback_audit_connection_close,
-                               callback_audit_connection)
+                               callback_audit_connection, wait_for_audit)
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing import global_parameters
 
 # Marks
 
@@ -65,13 +66,14 @@ def test_remove_and_read_folder(tags_to_apply, folder, get_configuration,
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     shutil.rmtree(folder, ignore_errors=True)
-    wazuh_log_monitor.start(timeout=20, callback=callback_audit_removed_rule,
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_audit_removed_rule,
                             error_message=f'Did not receive expected "removed" event '
                                           f'removing the folder {folder}')
 
     os.makedirs(folder, mode=0o777)
-    wazuh_log_monitor.start(timeout=30, callback=callback_audit_reloaded_rule,
-                            error_message='Did not receive expected "reload" event')
+    wait_for_audit(True, wazuh_log_monitor)
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_audit_added_rule,
+                            error_message='Did not receive expected "added" event')
 
 
 @pytest.mark.parametrize('tags_to_apply', [
