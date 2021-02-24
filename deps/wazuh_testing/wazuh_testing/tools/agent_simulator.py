@@ -405,7 +405,7 @@ class Agent:
             message (str): Decoder message in ISO-8859-1 format.
         """
         msg_decoded_list = message.split(' ')
-        if 'com' in msg_decoded_list or 'upgrade' in msg_decoded_list:
+        if '#!-req' in msg_decoded_list[0]:
             self.process_command(sender, msg_decoded_list)
 
     def process_command(self, sender, message_list):
@@ -420,20 +420,32 @@ class Agent:
             ValueError: if execution result is not configured in the Agent.
             ValueError: if command is not recognized.
         """
-        logging
+
         if 'com' in message_list:
-            try:
-                com_index = message_list.index('com')
-                command = message_list[com_index + 1]
-            except IndexError:
-                return
+            """ Examples:
+            ['12d95abf04334f90f8dc3140031b3e7b342680000000130:5489:#!-req', '81d15486', 'com', 'close',
+                'wazuh_agent_v4.2.0_linux_x86_64.wpk']
+            ['dff5324c331a37d56978f7f034f2634e599120000000130:5490:#!-req', '81d15487', 'com', 'sha1',
+                'wazuh_agent_v4.2.0_linux_x86_64.wpk']
+            ['8c0e7a8d75fea76016040ce436f9fb41193290000000130:5491:#!-req', '81d15488', 'com', 'upgrade',
+                'wazuh_agent_v4.2.0_linux_x86_64.wpk', 'upgrade.sh']
+            """
+            com_index = message_list.index('com')
+            command = message_list[com_index + 1]
+
+        elif 'upgrade' in message_list:
+            """ Examples:
+            ['5e085e566814750136f3926f758349cb232030000000130:5492:#!-req', '81d15489', 'upgrade',
+                '{"command":"clear_upgrade_result","parameters":{}}']
+            """
+            com_index = message_list.index('upgrade')
+            json_command = json.loads(message_list[com_index + 1])
+            command = json_command['command']
         else:
-            try:
-                com_index = message_list.index('upgrade')
-                json_command = json.loads(message_list[com_index + 1])
-                command = json_command['command']
-            except IndexError:
-                return
+            return
+
+        logging.debug(f"Processing command: {message_list}")
+
         if command in ['lock_restart', 'open', 'write', 'close',
                        'clear_upgrade_result']:
             if command == 'lock_restart' and \
