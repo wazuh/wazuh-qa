@@ -920,13 +920,14 @@ def modify_file(path, name, new_content=None, is_binary=False):
     modify_file_win_attributes(path, name)
 
 
-def change_internal_options(param, value, opt_path=None):
+def change_internal_options(param, value, opt_path=None, value_regex='[0-9]*'):
     """Change the value of a given parameter in local_internal_options.
 
     Args:
         param (str): parameter to change.
         value (obj): new value.
         opt_path (str, optional): local_internal_options.conf path. Defaults `None`
+        value_regex (str, optional): regex to match value in local_internal_options.conf. Default '[0-9]*'
     """
     if opt_path is None:
         local_conf_path = os.path.join(WAZUH_PATH, 'local_internal_options.conf') if sys.platform == 'win32' else \
@@ -941,7 +942,7 @@ def change_internal_options(param, value, opt_path=None):
     with open(local_conf_path, "w") as sources:
         for line in lines:
             sources.write(
-                re.sub(f'{param}=[0-9]*', f'{param}={value}', line))
+                re.sub(f'{param}={value_regex}', f'{param}={value}', line))
             if param in line:
                 add_pattern = False
 
