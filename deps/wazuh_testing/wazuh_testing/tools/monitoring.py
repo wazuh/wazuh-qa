@@ -162,7 +162,8 @@ def make_callback(pattern, prefix="wazuh"):
     """
 
     pattern = r'\s+'.join(pattern.split())
-    regex = re.compile(r'{}{}'.format(prefix, pattern))
+    full_pattern = pattern if prefix is None else fr'{prefix}{pattern}'
+    regex = re.compile(full_pattern)
 
     return lambda line: regex.match(line) is not None
 
