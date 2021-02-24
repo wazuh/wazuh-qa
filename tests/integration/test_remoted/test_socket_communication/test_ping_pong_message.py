@@ -5,8 +5,8 @@
 import os
 import pytest
 
+from wazuh_testing.remote import callback_detect_remoted_started
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import make_callback, REMOTED_DETECTOR_PREFIX
 from wazuh_testing.tools.agent_simulator import send_ping_pong_messages
 
 
@@ -74,9 +74,8 @@ def test_ping_pong_message(get_configuration, configure_environment, restart_rem
         protocol = config['protocol'].split(',')[0]
     else:
         protocol = config['protocol']
-    callback = fr"Started \(pid: \d+\). Listening on port {config['port']}\/{protocol} \(secure\)."
 
-    log_callback = make_callback(callback, REMOTED_DETECTOR_PREFIX)
+    log_callback = callback_detect_remoted_started(port=config['port'], protocol=protocol)
 
     wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message="Wazuh remoted didn't start as expected.")
 
