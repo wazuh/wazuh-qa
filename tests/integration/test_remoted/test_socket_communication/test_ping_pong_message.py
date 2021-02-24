@@ -5,9 +5,8 @@
 import os
 import pytest
 
-from wazuh_testing.remote import callback_detect_remoted_started
+from wazuh_testing.remote import callback_detect_remoted_started, send_ping_pong_messages
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.agent_simulator import send_ping_pong_messages
 
 
 # Marks
