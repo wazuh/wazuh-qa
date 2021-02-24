@@ -46,7 +46,6 @@ def test_syslog_message(get_configuration, configure_environment, restart_wazuh)
 
     Raises:
         TimeoutError: if `wazuh-remoted` doesn't show the log message for syslog
-        AssertionError: if `wazuh-remoted` doesn't respond `#pong`
     """
     config = get_configuration['metadata']
     port, protocol = config['port'], config['protocol']

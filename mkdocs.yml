@@ -389,6 +389,7 @@ nav:
                 - tests/integration/test_remoted/test_configuration/test_basic_configuration.md
             - Test communications through the sockets:
                 - tests/integration/test_remoted/test_socket_communication/test_ping_pong_message.md
+                - tests/integration/test_remoted/test_socket_communication/test_syslog_message.md
         - Logtest:   
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md
