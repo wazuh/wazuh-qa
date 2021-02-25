@@ -8,6 +8,10 @@ from wazuh_testing.tools import ARCHIVES_LOG_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, make_callback, REMOTED_DETECTOR_PREFIX
 
+UDP = "UDP"
+TCP = "TCP"
+TCP_UDP = "TCP,UDP"
+
 
 def callback_detect_remoted_started(port, protocol, connection_type="secure"):
     """Creates a callback to detect if remoted was correctly started
@@ -23,7 +27,7 @@ def callback_detect_remoted_started(port, protocol, connection_type="secure"):
     Returns:
         callable: callback to detect this event
     """
-    msg = fr"Started \(pid: \d+\). Listening on port {port}\/{protocol} \({connection_type}\)."
+    msg = fr"Started \(pid: \d+\). Listening on port {port}\/{protocol.upper()} \({connection_type}\)."
 
     return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
 
@@ -53,7 +57,7 @@ def send_syslog_message(message, port, protocol, manager_address="127.0.0.1"):
     Raises:
         ConnectionRefusedError: if there's a problem while sending messages to the manager
     """
-    if protocol == "UDP":
+    if protocol.upper() == UDP:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     else:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -96,18 +100,20 @@ def detect_archives_log_event(archives_monitor, callback, error_message, update_
                            error_message=error_message)
 
 
-def check_syslog_event(wazuh_archives_log_monitor, message, port, protocol):
-    """Check if a syslog event is properly receive by the manager.
+def check_syslog_event(wazuh_archives_log_monitor, message, port, protocol, timeout=10):
+    """Check if a syslog event is properly received by the manager.
 
     Args:
         wazuh_archives_log_monitor (FileMonitor): FileMonitor object to monitor the archives.log.
         message (str): Message sent for syslog that must appear in the archives.log.
         protocol (str): it can be UDP or TCP.
-        port (int): port where the manager has bound the remoted port
+        port (int): port where the manager has bound the remoted port.
+        timeout (int): maximum time to expect the syslog event in the log file.
     """
     send_syslog_message(message, port, protocol)
     detect_archives_log_event(archives_monitor=wazuh_archives_log_monitor,
                               callback=callback_detect_syslog_event(message),
+                              timeout=timeout,
                               error_message="Syslog message wasn't received or took too much time.")
 
 
@@ -128,18 +134,19 @@ def send_ping_pong_messages(protocol, manager_address, port):
     Raises:
         ConnectionRefusedError: if there's a problem while sending messages to the manager
     """
-    if protocol == "UDP":
+    protocol = protocol.upper()
+    if protocol == UDP:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         ping_msg = b'#ping'
     else:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         msg = '#ping'
         msg_size = len(bytearray(msg, 'utf-8'))
-        # Since the message size's is represented as an uint32, you need to use 4 bytes to represent it
+        # Since the message size's is represented as an unsigned int32, you need to use 4 bytes to represent it
         ping_msg = msg_size.to_bytes(4, 'little') + msg.encode()
 
     sock.connect((manager_address, port))
     sock.send(ping_msg)
     response = sock.recv(len(ping_msg))
     sock.close()
-    return response if protocol == "UDP" else response[-5:]
+    return response if protocol == UDP else response[-5:]

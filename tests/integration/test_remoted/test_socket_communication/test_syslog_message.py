@@ -20,14 +20,22 @@ parameters = [
     {'PROTOCOL': 'UDP', 'PORT': 514},
     {'PROTOCOL': 'UDP', 'PORT': 51000},
     {'PROTOCOL': 'TCP', 'PORT': 514},
-    {'PROTOCOL': 'TCP', 'PORT': 51000}
+    {'PROTOCOL': 'TCP', 'PORT': 51000},
+    {'PROTOCOL': 'udp', 'PORT': 514},
+    {'PROTOCOL': 'udp', 'PORT': 51000},
+    {'PROTOCOL': 'tcp', 'PORT': 514},
+    {'PROTOCOL': 'tcp', 'PORT': 51000}
 ]
 
 metadata = [
     {'protocol': 'UDP', 'port': 514},
     {'protocol': 'UDP', 'port': 51000},
     {'protocol': 'TCP', 'port': 514},
-    {'protocol': 'TCP', 'port': 51000}
+    {'protocol': 'TCP', 'port': 51000},
+    {'protocol': 'udp', 'port': 514},
+    {'protocol': 'udp', 'port': 51000},
+    {'protocol': 'tcp', 'port': 514},
+    {'protocol': 'tcp', 'port': 51000}
 ]
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
