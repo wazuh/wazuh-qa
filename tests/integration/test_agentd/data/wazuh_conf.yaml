@@ -138,3 +138,20 @@
                     value: MAX_RETRIES
                 - retry_interval:
                     value: RETRY_INTERVAL
+    - tags:
+      - all
+      apply_to_modules:
+      - test_agentd_state_config
+      - test_agentd_state
+      sections:
+      - section: client
+        elements:
+            - server:
+                elements:
+                - address: 
+                    value: '127.0.0.1'
+                - port:
+                    value: '1514'
+                - protocol:
+                    value: 'tcp'
+        

@@ -72,6 +72,7 @@ class RemotedSimulator:
         self.wcom_message_version = None
         self.active_response_message = None
         self.listener_thread = None
+        self.last_client = None
         if start_on_init:
             self.start()
 
@@ -379,21 +380,23 @@ class RemotedSimulator:
                 # Wait for a connection
                 try:
                     connection, client_address = self.sock.accept()
+                    self.last_client = connection
                     while self.running:
                         data = self.recv_all(connection, 4)
                         data_size = struct.unpack('<I', data[0:4])[0]
                         data = self.recv_all(connection, data_size)
-
                         try:
                             ret = self.process_message(client_address, data)
                         except Exception:
                             time.sleep(1)
                             connection.close()
+                            self.last_client = None
 
                         # Response -1 means connection have to be closed
                         if ret == -1:
                             time.sleep(0.1)
                             connection.close()
+                            self.last_client = None
                             break
                         # If there is a response, answer it
                         elif ret:
@@ -661,3 +664,12 @@ class RemotedSimulator:
             if timeout is not None:
                 timeout -= 1
         return self.upgrade_notification
+
+    def request(self, message):
+        """
+        Send request to agent using current request counter
+        message: Request content
+        """
+        if self.last_client:
+            request = self.create_sec_message(f'#!-req {self.request_counter} {message}', 'aes')
+            self.send(self.last_client, request)
