@@ -13,11 +13,20 @@ TCP = "TCP"
 TCP_UDP = "TCP,UDP"
 
 
+def callback_detect_syslog_allowed_ips(syslog_ips):
+    msg = fr"Remote syslog allowed from: \'{syslog_ips}\'"
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
+
+
+def callback_detect_syslog_denied_ips(syslog_ips):
+    msg = fr"Message from \'{syslog_ips}\' not allowed. Cannot find the ID of the agent.""
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
+
+
 def callback_detect_remoted_started(port, protocol, connection_type="secure"):
     """Creates a callback to detect if remoted was correctly started
 
-    wazuh-remoted logs if it has correctly started for each connection type, the port and
-    the protocol in the ossec.log
+    wazuh-remoted logs if it has correctly started for each connection type, the port and the protocol in the ossec.log
 
     Args:
         port (int): port configured for wazuh-remoted.
