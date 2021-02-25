@@ -162,7 +162,8 @@ def make_callback(pattern, prefix="wazuh"):
     """
 
     pattern = r'\s+'.join(pattern.split())
-    regex = re.compile(r'{}{}'.format(prefix, pattern))
+    full_pattern = pattern if prefix is None else fr'{prefix}{pattern}'
+    regex = re.compile(full_pattern)
 
     return lambda line: regex.match(line) is not None
 
@@ -362,7 +363,7 @@ class QueueMonitor:
 
         Args:
             queue_item (queue): Queue to monitor
-            time_step (float,optiona) : Fraction of time to wait in every get. Default `0.5`
+            time_step (float,optional) : Fraction of time to wait in every get. Default `0.5`
         """
         self._queue = queue_item
         self._continue = False

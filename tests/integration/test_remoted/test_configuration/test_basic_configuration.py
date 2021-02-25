@@ -6,8 +6,8 @@ import os
 import pytest
 import wazuh_testing.api as api
 
+from wazuh_testing.remote import callback_detect_remoted_started
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor, make_callback, REMOTED_DETECTOR_PREFIX
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -58,10 +58,8 @@ def test_connection(get_configuration, configure_environment, restart_remoted):
     """
     cfg = get_configuration['metadata']
 
-    log_callback = make_callback(
-        fr"Started \(pid: \d+\). Listening on port {cfg['port']}\/{cfg['protocol']} \({cfg['connection']}\).",
-        REMOTED_DETECTOR_PREFIX
-    )
+    log_callback = callback_detect_remoted_started(port=cfg['port'], protocol=cfg['protocol'],
+                                                   connection_type=cfg['connection'])
 
     wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message="Wazuh remoted didn't start as expected.")
 

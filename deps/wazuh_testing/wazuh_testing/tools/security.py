@@ -125,7 +125,7 @@ class CertificateController(object):
 
         Args:
             key (PKey): Keys to be stored
-            rivate_key_path (str): Path to store the private key
+            private_key_path (str): Path to store the private key
         """
         if os.path.exists(private_key_path):
             if platform.system() == 'Windows':
