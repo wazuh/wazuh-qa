@@ -42,10 +42,7 @@ def callback_detect_syslog_event(message):
 
 
 def send_syslog_message(message, port, protocol, manager_address="127.0.0.1"):
-    """This function sends the ping message to the manager
-
-    This message is the first of many between the manager and the agents. It is used to check if both of them are ready
-    to send and receive other messages
+    """This function sends a message to the syslog server of wazuh-remoted
 
     Args:
         message (str): string to send as a syslog event.
@@ -83,6 +80,18 @@ def create_archives_log_monitor():
 
 
 def detect_archives_log_event(archives_monitor, callback, error_message, update_position=True, timeout=5):
+    """Monitors the archives.log to detect a certain event
+
+    Args:
+        archives_monitor (FileMonitor): FileMonitor bound to the archives.log.
+        callback (callable): lambda function used to detect the event.
+        error_message (str): String used as human readable error if the event is not found.
+        update_position (bool): bool value used to update the position of `archives_monitor`.
+        timeout (int): maximum time in seconds to expect the event.
+
+    Raises:
+        TimeoutError: if the event is not found in the file.
+    """
     archives_monitor.start(timeout=timeout, update_position=update_position, callback=callback,
                            error_message=error_message)
 
