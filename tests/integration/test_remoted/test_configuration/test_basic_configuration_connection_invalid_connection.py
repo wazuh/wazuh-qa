@@ -4,16 +4,14 @@
 
 import os
 import pytest
-import time
-import numpy as np
+
 from wazuh_testing.tools import LOG_FILE_PATH
 
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.monitoring import make_callback, REMOTED_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
-import wazuh_testing.api as api
 
 
 # Marks
@@ -58,18 +56,18 @@ def test_invalid_connection(get_configuration, configure_environment):
             REMOTED_DETECTOR_PREFIX
         )
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="Wazuh remoted didn't start as expected.")
+                                error_message="The expected error output has not been produced")
 
         log_callback = make_callback(
             fr"ERROR: \(\d+\): Configuration error at '/var/ossec/etc/ossec.conf'.",
             REMOTED_DETECTOR_PREFIX
         )
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="Wazuh remoted didn't start as expected.")
+                                error_message="The expected error output has not been produced")
 
         log_callback = make_callback(
             fr"CRITICAL: \(\d+\): Configuration error at '/var/ossec/etc/ossec.conf'.",
             REMOTED_DETECTOR_PREFIX
         )
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="Wazuh remoted didn't start as expected.")
+                                error_message="The expected error output has not been produced")

@@ -4,12 +4,10 @@
 
 import os
 import pytest
-import time
-import socket
 import wazuh_testing.api as api
 from wazuh_testing.tools import LOG_FILE_PATH
 
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.monitoring import make_callback, REMOTED_DETECTOR_PREFIX

@@ -9,7 +9,7 @@ import numpy as np
 import wazuh_testing.api as api
 from wazuh_testing.tools import LOG_FILE_PATH
 
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.monitoring import make_callback, REMOTED_DETECTOR_PREFIX
@@ -79,7 +79,7 @@ def test_connection(get_configuration, configure_environment):
             REMOTED_DETECTOR_PREFIX
         )
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="Wazuh remoted didn't start as expected.")
+                                error_message="The expected warning output has not been produced.")
         log_message_connection = "Started \(pid: \d+\). Listening on port {cfg['port']}\/TCP \({cfg['connection']}\)."
 
     log_callback = make_callback(
@@ -87,7 +87,7 @@ def test_connection(get_configuration, configure_environment):
         REMOTED_DETECTOR_PREFIX
     )
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="Wazuh remoted didn't start as expected.")
+                            error_message="The expected output has not been produced.")
 
     # Check that API query return the selected configuration
     for field in cfg.keys():

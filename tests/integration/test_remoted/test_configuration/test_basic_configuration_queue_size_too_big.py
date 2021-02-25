@@ -4,7 +4,6 @@
 
 import os
 import pytest
-import numpy as np
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
@@ -56,7 +55,7 @@ def test_big_queue_size(get_configuration, configure_environment):
         REMOTED_DETECTOR_PREFIX
     )
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="Wazuh remoted didn't start as expected.")
+                            error_message="The expected warning output has not been produced.")
 
     for field in cfg.keys():
         api_answer = api.get_manager_configuration(section="remote", field=field)

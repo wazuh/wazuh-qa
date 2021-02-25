@@ -8,7 +8,7 @@ import time
 import numpy as np
 from wazuh_testing.tools import LOG_FILE_PATH
 
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.monitoring import make_callback, REMOTED_DETECTOR_PREFIX
@@ -83,7 +83,7 @@ def test_invalid_protocol(get_configuration, configure_environment):
             REMOTED_DETECTOR_PREFIX
         )
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="Wazuh remoted didn't start as expected.")
+                                error_message="The expected warning output has not been produced")
 
     if len(valid_protocol) == 0:
         log_callback = make_callback(
@@ -91,117 +91,27 @@ def test_invalid_protocol(get_configuration, configure_environment):
             REMOTED_DETECTOR_PREFIX
         )
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="Wazuh remoted didn't start as expected.")
+                                error_message="The expected warning output has not been produced")
     elif len(valid_protocol) == 1:
         log_callback = make_callback(
             fr"Started \(pid: \d+\). Listening on port {cfg['port']}\/{cfg['protocol']} \({cfg['connection']}\).",
             REMOTED_DETECTOR_PREFIX
         )
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="Wazuh remoted didn't start as expected.")
+                                error_message="The expected output has not been produced")
     else:
         log_callback = make_callback(
             fr"Started \(pid: \d+\). Listening on port {cfg['port']}\/TCP,UDP \({cfg['connection']}\).",
             REMOTED_DETECTOR_PREFIX
         )
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="Wazuh remoted didn't start as expected.")
+                                error_message="The expected output has not been produced")
 
     # Check that API query return the selected configuration
     for field in cfg.keys():
         api_answer = api.get_manager_configuration(section="remote", field=field)
         if field == 'protocol':
             array_protocol = np.array(cfg[field].split(","))
-            assert (array_protocol == api_answer).all(), "Wazuh API answer different from introduced configuration"
+            assert (array_protocol == api_answer).all(), "Wazuh API answer different from introduced configuration for protocol value"
         else:
             assert cfg[field] == api_answer, "Wazuh API answer different from introduced configuration"
-
-
-
-
-""" 
-parameters = [
-    {'PROTOCOL': 'TCP', 'CONNECTION': 'Testing', 'PORT': '1514'}
-]
-metadata = [
-    {'protocol': 'TCP', 'connection': 'Testing', 'port': '1514'}
-]
-
-configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-
-def test_invalid_connection(get_configuration, configure_environment):
-    """
-
-    """
-    truncate_file(LOG_FILE_PATH)
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-    cfg = get_configuration['metadata']
-    try:
-        control_service('restart', daemon='wazuh-remoted')
-
-    except:
-
-        log_callback = make_callback(
-            fr"ERROR: \(\d+\): Invalid value for element 'connection': {cfg['connection']}.",
-            REMOTED_DETECTOR_PREFIX
-        )
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="Wazuh remoted didn't start as expected.")
-
-        log_callback = make_callback(
-            fr"ERROR: \(\d+\): Configuration error at '/var/ossec/etc/ossec.conf'.",
-            REMOTED_DETECTOR_PREFIX
-        )
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="Wazuh remoted didn't start as expected.")
-
-        log_callback = make_callback(
-            fr"CRITICAL: \(\d+\): Configuration error at '/var/ossec/etc/ossec.conf'.",
-            REMOTED_DETECTOR_PREFIX
-        )
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="Wazuh remoted didn't start as expected.")
-
-
-parameters = [
-    {'PROTOCOL': 'TCP', 'CONNECTION': 'secure', 'PORT': '99999'}
-]
-metadata = [
-    {'protocol': 'TCP', 'connection': 'secure', 'port': '99999'}
-]
-
-configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-
-def test_invalid_port(get_configuration, configure_environment):
-    """
-
-    """
-    truncate_file(LOG_FILE_PATH)
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-    cfg = get_configuration['metadata']
-    try:
-        control_service('restart', daemon='wazuh-remoted')
-
-    except:
-
-        log_callback = make_callback(
-            fr"ERROR: \(\d+\): Invalid port number: '{cfg['port']}'.",
-            REMOTED_DETECTOR_PREFIX
-        )
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="Wazuh remoted didn't start as expected.")
-
-        log_callback = make_callback(
-            fr"ERROR: \(\d+\): Configuration error at '/var/ossec/etc/ossec.conf'.",
-            REMOTED_DETECTOR_PREFIX
-        )
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="Wazuh remoted didn't start as expected.")
-
-        log_callback = make_callback(
-            fr"CRITICAL: \(\d+\): Configuration error at '/var/ossec/etc/ossec.conf'.",
-            REMOTED_DETECTOR_PREFIX
-        )
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="Wazuh remoted didn't start as expected.")
-"""

@@ -55,4 +55,4 @@ def test_rids_closing_time_invalid(get_configuration, configure_environment):
             REMOTED_DETECTOR_PREFIX
         )
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="Wazuh remoted didn't start as expected.")
+                                error_message="The expected error output has not been produced.")

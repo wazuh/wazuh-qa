@@ -5,11 +5,10 @@
 import os
 import pytest
 import time
-import socket
 import wazuh_testing.api as api
 from wazuh_testing.tools import LOG_FILE_PATH
 
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.monitoring import make_callback, REMOTED_DETECTOR_PREFIX
@@ -57,7 +56,7 @@ def test_ipv6(get_configuration, configure_environment):
             fr"WARNING: \(\d+\): Secure connection does not support IPv6. IPv4 will be used instead.",
             REMOTED_DETECTOR_PREFIX
         )
-        wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message="Wazuh remoted didn't start as expected.")
+        wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message="The expected warning output has not been produced.")
 
     # Check that API query return the selected configuration
     for field in cfg.keys():

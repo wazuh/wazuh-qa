@@ -4,9 +4,7 @@
 
 import os
 import pytest
-import time
-import socket
-import wazuh_testing.api as api
+
 from wazuh_testing.tools import LOG_FILE_PATH
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -66,14 +64,14 @@ def test_allowed_denied_ips_syslog(get_configuration, configure_environment):
             REMOTED_DETECTOR_PREFIX
         )
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="Wazuh remoted didn't start as expected.")
+                                error_message="The expected error output has not been produced..")
 
         log_callback = make_callback(
             fr"ERROR: \(\d+\): Configuration error at '/var/ossec/etc/ossec.conf'.",
             REMOTED_DETECTOR_PREFIX
         )
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="Wazuh remoted didn't start as expected.")
+                                error_message="The expected error output has not been produced.")
 
 
         log_callback = make_callback(
@@ -81,4 +79,4 @@ def test_allowed_denied_ips_syslog(get_configuration, configure_environment):
             REMOTED_DETECTOR_PREFIX
         )
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="Wazuh remoted didn't start as expected.")
+                                error_message="The expected error output has not been produced..")

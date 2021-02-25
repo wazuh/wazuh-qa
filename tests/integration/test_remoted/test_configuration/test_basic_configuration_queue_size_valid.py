@@ -4,7 +4,6 @@
 
 import os
 import pytest
-import numpy as np
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
 import wazuh_testing.api as api
