@@ -10,6 +10,6 @@ def configure_agents(request, get_configuration):
     SERVER_ADDRESS = getattr(request.module, 'SERVER_ADDRESS')
     CRYPTO = getattr(request.module, 'CRYPTO')
 
-    agents = create_agents(agents_number, SERVER_ADDRESS, CRYPTO, os=metadata['agents_os'],
-                           version=metadata['agents_version'])
+    agents = create_agents(agents_number, SERVER_ADDRESS, CRYPTO, agents_os=metadata['agents_os'],
+                           agents_version=metadata['agents_version'])
     setattr(request.module, 'agents', agents)

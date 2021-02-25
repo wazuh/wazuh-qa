@@ -217,10 +217,10 @@ def delete_dbs():
 
 def check_if_process_is_running(process_name):
     """
-    Check if proccess is running
+    Check if process is running
 
     Args:
-        proccess_name (str): Name of process
+        process_name (str): Name of process
 
     Returns
         boolean: True if process is running, False otherwise

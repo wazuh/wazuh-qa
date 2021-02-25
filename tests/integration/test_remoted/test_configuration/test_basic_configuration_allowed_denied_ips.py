@@ -7,7 +7,6 @@ import pytest
 import time
 import socket
 import wazuh_testing.api as api
-from wazuh_testing.tools import LOG_FILE_PATH
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
@@ -19,8 +18,8 @@ from wazuh_testing.tools.services import control_service
 pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '')
+configurations_path = os.path.join(test_data_path, 'data', 'wazuh_basic_configuration.yaml')
 
 parameters = [
     {'ALLOWED': '127.0.0.0/24','DENIED': '127.0.0.1'}
@@ -45,12 +44,6 @@ def test_allowed_denied_ips_syslog(get_configuration, configure_environment):
     """
     Checks that "allowed-ips" and "denied-ips" could be configured without errors for syslog connection
     """
-
-    truncate_file(LOG_FILE_PATH)
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
-    control_service('restart', daemon='wazuh-remoted')
-
     cfg = get_configuration['metadata']
 
     time.sleep(1)
