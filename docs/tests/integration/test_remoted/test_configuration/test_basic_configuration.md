@@ -1,5 +1,5 @@
-# Overview
-
+# Test basic configuration
+## Overview 
 Configuration tests check that the introduced configuration on ossec.conf works as expected and no valid option generates errors. 
 Also, it checks that the API answer for configuration requests coincides with the configuration introduced in ossec.conf
 

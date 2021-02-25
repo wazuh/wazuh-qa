@@ -289,11 +289,9 @@ class Agent:
         """
         encrypted_event = None
         if self.cypher == "aes":
-            encrypted_event = Cipher(padded_event,
-                                     self.encryption_key).encrypt_aes()
+            encrypted_event = Cipher(padded_event, self.encryption_key).encrypt_aes()
         if self.cypher == "blowfish":
-            encrypted_event = Cipher(padded_event,
-                                     self.encryption_key).encrypt_blowfish()
+            encrypted_event = Cipher(padded_event, self.encryption_key).encrypt_blowfish()
         return encrypted_event
 
     def headers(self, agent_id, encrypted_event):
@@ -324,7 +322,7 @@ class Agent:
             bytes: Built event (compressed, padded, enceypted and with headers).
 
         Examples:
-            $>>> create_event('test message)
+            >>> create_event('test message')
             b'!005!#AES:\\xab\\xfa\\xcc2;\\x87\\xab\\x7fUH\\x03>_J\\xda=I\\x96\\xb5\\xa4\\x89\\xbe\\xbf`\\xd0\\xad
             \\x03\\x06\\x1aN\\x86 \\xc2\\x98\\x93U\\xcc\\xf5\\xe3@%\\xabS!\\xd3\\x9d!\\xea\\xabR\\xf9\\xd3\\x0b\\
             xcc\\xe8Y\\xe31*c\\x17g\\xa6M\\x0b&\\xc0>\\xc64\\x815\\xae\\xb8[bg\\xe3\\x83\\x0e'
@@ -373,12 +371,10 @@ class Agent:
                 buffer_array = buffer_array[index + 2:]
             if self.cypher == "aes":
                 msg_remove_header = bytes(buffer_array[5:])
-                msg_decrypted = Cipher(msg_remove_header, self.encryption_key) \
-                    .decrypt_aes()
+                msg_decrypted = Cipher(msg_remove_header, self.encryption_key).decrypt_aes()
             else:
                 msg_remove_header = bytes(buffer_array[1:])
-                msg_decrypted = Cipher(msg_remove_header, self.encryption_key) \
-                    .decrypt_blowfish()
+                msg_decrypted = Cipher(msg_remove_header, self.encryption_key).decrypt_blowfish()
 
             padding = 0
             while msg_decrypted:
@@ -398,7 +394,7 @@ class Agent:
     def process_message(self, sender, message):
         """Process agent received messages.
 
-        If the message cointains reserved words, then it will be proceed as command.
+        If the message contains reserved words, then it will be proceed as command.
 
         Args:
             sender (Sender): Object to establish connection with the manager socket and receive/send information.
@@ -446,8 +442,7 @@ class Agent:
 
         logging.debug(f"Processing command: {message_list}")
 
-        if command in ['lock_restart', 'open', 'write', 'close',
-                       'clear_upgrade_result']:
+        if command in ['lock_restart', 'open', 'write', 'close', 'clear_upgrade_result']:
             if command == 'lock_restart' and \
                     self.stage_disconnect == 'lock_restart':
                 self.stop_receive = 1
@@ -457,8 +452,7 @@ class Agent:
                 self.stop_receive = 1
             elif command == 'close' and self.stage_disconnect == 'close':
                 self.stop_receive = 1
-            elif command == 'clear_upgrade_result' and \
-                    self.stage_disconnect == 'clear_upgrade_result':
+            elif command == 'clear_upgrade_result' and self.stage_disconnect == 'clear_upgrade_result':
                 self.stop_receive = 1
             else:
                 if self.short_version < "4.1" or command == 'lock_restart':
@@ -540,6 +534,7 @@ class Agent:
             self.fim = GeneratorFIM(self.id, self.name, self.short_version)
         if self.modules["fim_integrity"]["status"] == "enabled":
             self.fim_integrity = GeneratorIntegrityFIM(self.id, self.name, self.short_version)
+
 
 class Inventory:
     def __init__(self, os, inventory_sample=None):
@@ -1087,36 +1082,3 @@ def create_agents(agents_number, manager_address, cypher, fim_eps=None, authd_pa
         agent_count = agent_count + 1
 
     return agents
-
-
-def send_ping_pong_messages(protocol, manager_address, port):
-    """This function sends the ping message to the manager
-
-    This message is the first of many between the manager and the agents. It is used to check if both of them are ready
-    to send and receive other messages
-
-    Args:
-        protocol (str): it can be UDP or TCP
-        manager_address (str): address of the manager. IP and hostname are valid options
-        port (int): port where the manager has bound the remoted port
-
-    Returns:
-        bytes: returns the #pong message from the manager
-
-    Raises:
-        ConnectionRefusedError: if there's a problem while sending messages to the manager
-    """
-    if protocol == "UDP":
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        ping_msg = b'#ping'
-    else:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        msg = '#ping'
-        msg_size = len(bytearray(msg, 'utf-8'))
-        ping_msg = msg_size.to_bytes(4, 'little') + msg.encode()
-
-    sock.connect((manager_address, port))
-    sock.send(ping_msg)
-    response = sock.recv(len(ping_msg))
-    sock.close()
-    return response if protocol == "UDP" else response[-5:]
