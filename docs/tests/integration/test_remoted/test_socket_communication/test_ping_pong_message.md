@@ -1,5 +1,5 @@
-# Overview
-
+# Test ping-pong messages
+## Overview
 These tests will check if `wazuh-remoted` sends the message `#pong` through the socket after receiving the `#ping` message.
 
 This message will be received in the port configured in the `remote` section, using the `secure` connection. Also, depending on the protocol used, these messages may vary:
