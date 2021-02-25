@@ -5,6 +5,7 @@
 import os
 import pytest
 import time
+import socket
 import wazuh_testing.api as api
 from wazuh_testing.tools import LOG_FILE_PATH
 
@@ -21,22 +22,25 @@ pytestmark = pytest.mark.tier(level=0)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
+
 parameters = [
-    {'PROTOCOL': 'UDP', 'CONNECTION': 'secure', 'PORT': '1514'},
-    {'PROTOCOL': 'UDP', 'CONNECTION': 'syslog', 'PORT': '514'},
-    {'PROTOCOL': 'TCP', 'CONNECTION': 'syslog', 'PORT': '514'},
-    {'PROTOCOL': 'TCP', 'CONNECTION': 'secure', 'PORT': '1514'}
+    {'ALLOWED': '127.0.0.0/24', 'DENIED': '192.168.1.1/24'},
+    {'ALLOWED': '127.0.0.0/25', 'DENIED': '192.168.1.1/25'},
+    {'ALLOWED': '127.0.0.0/26', 'DENIED': '192.168.1.1/26'},
+    {'ALLOWED': '127.0.0.0/27', 'DENIED': '192.168.1.1/27'},
+    {'ALLOWED': '127.0.0.0/30', 'DENIED': '192.168.1.1/30'}
 ]
 
 metadata = [
-    {'protocol': 'UDP', 'connection': 'secure', 'port': '1514'},
-    {'protocol': 'UDP', 'connection': 'syslog', 'port': '514'},
-    {'protocol': 'TCP', 'connection': 'syslog', 'port': '514'},
-    {'protocol': 'TCP', 'connection': 'secure', 'port': '1514'}
+    {'allowed-ips': '127.0.0.0/24', 'denied-ips': '192.168.1.1/24'},
+    {'allowed-ips': '127.0.0.0/25', 'denied-ips': '192.168.1.1/25'},
+    {'allowed-ips': '127.0.0.0/26', 'denied-ips': '192.168.1.1/26'},
+    {'allowed-ips': '127.0.0.0/27', 'denied-ips': '192.168.1.1/27'},
+    {'allowed-ips': '127.0.0.0/30', 'denied-ips': '192.168.1.1/30'}
 ]
 
-configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-configuration_ids = [f"{x['PROTOCOL']}_{x['CONNECTION']}_{x['PORT']}" for x in parameters]
+configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_allowed_denied_ips", params=parameters, metadata=metadata)
+configuration_ids = [f"{x['ALLOWED']}_{x['DENIED']}" for x in parameters]
 
 
 # fixtures
@@ -46,29 +50,29 @@ def get_configuration(request):
     return request.param
 
 
-def test_connection(get_configuration, configure_environment):
+def test_allowed_denied_ips_syslog(get_configuration, configure_environment):
     """
-    Checks that "connection" option could be configured as "secure" or "syslog" without errors
-        this option specifies a type of incoming connection to accept: secure or syslog.
-
-    Checks that the API answer for manager connection coincides with the option selected on ossec.conf
+    Checks that "allowed-ips" and "denied-ips" could be configured without errors for syslog connection
     """
 
     truncate_file(LOG_FILE_PATH)
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     control_service('restart', daemon='wazuh-remoted')
-
     cfg = get_configuration['metadata']
 
     log_callback = make_callback(
-        fr"Started \(pid: \d+\). Listening on port {cfg['port']}\/{cfg['protocol']} \({cfg['connection']}\).",
+        fr"INFO: Remote syslog allowed from: '{cfg['allowed-ips']}'",
         REMOTED_DETECTOR_PREFIX
     )
 
     wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message="Wazuh remoted didn't start as expected.")
 
-    # Check that API query return the selected configuration
     for field in cfg.keys():
         api_answer = api.get_manager_configuration(section="remote", field=field)
-        assert cfg[field] == api_answer, "Wazuh API answer different from introduced configuration"
+        if field == 'protocol':
+            array_protocol = np.array(cfg[field].split(","))
+            assert (array_protocol == api_answer).all(), "Wazuh API answer different from introduced configuration"
+        else:
+            assert cfg[field] == api_answer, "Wazuh API answer different from introduced configuration"
+

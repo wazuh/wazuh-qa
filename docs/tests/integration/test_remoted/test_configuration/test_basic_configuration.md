@@ -1,1 +1,1 @@
-::: tests.integration.test_remoted.test_configuration.test_basic_configuration
+::: tests.integration.test_remoted.test_configuration.test_basic_configuration_connection
