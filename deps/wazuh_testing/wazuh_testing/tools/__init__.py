@@ -58,7 +58,7 @@ def get_version():
     else:  # Linux, sunos5, darwin, aix...
         return subprocess.check_output([
           f"{WAZUH_PATH}/bin/wazuh-control", "info", "-v"
-        ], stderr=subprocess.PIPE).decode('utf-8')
+        ], stderr=subprocess.PIPE).decode('utf-8').rstrip()
 
 
 def get_service():
