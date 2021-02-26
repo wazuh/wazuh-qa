@@ -24,8 +24,8 @@ from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
 from string import ascii_letters, digits
 from struct import pack
 from time import mktime, localtime, sleep, time
-
 from wazuh_testing.tools.remoted_sim import Cipher
+from wazuh_testing import wazuh_db as wdb
 
 logging.basicConfig(
     level=logging.INFO,
@@ -350,13 +350,11 @@ class Agent:
             if sender.protocol == 'tcp':
                 rcv = sender.socket.recv(4)
                 if len(rcv) == 4:
-                    data_len = ((rcv[3] & 0xFF) << 24) | \
-                               ((rcv[2] & 0xFF) << 16) | \
-                               ((rcv[1] & 0xFF) << 8) | \
-                               (rcv[0] & 0xFF)
+                    data_len = int.from_bytes(rcv, 'little')
                     try:
                         buffer_array = sender.socket.recv(data_len)
                     except MemoryError:
+                        logging.critical(f"Memory error, trying to allocate {data_len}")
                         return
 
                     if data_len != len(buffer_array):
@@ -417,6 +415,8 @@ class Agent:
             ValueError: if command is not recognized.
         """
 
+        req_code = message_list[1]
+
         if 'com' in message_list:
             """ Examples:
             ['12d95abf04334f90f8dc3140031b3e7b342680000000130:5489:#!-req', '81d15486', 'com', 'close',
@@ -437,6 +437,16 @@ class Agent:
             com_index = message_list.index('upgrade')
             json_command = json.loads(message_list[com_index + 1])
             command = json_command['command']
+        elif 'getconfig' in message_list:
+            """ Examples:
+            ['ececac937b8e5dead15e9096e8bd5215214970000000002:3090:#!-req', 'c2b2c9e3', 'agent', 'getconfig', 'client']
+            """
+            command = 'getconfig'
+        elif 'getstate' in message_list:
+            """ Examples:
+            ['ececac937b8e5dead15e9096e8bd5215214970000000002:3090:#!-req', 'c2b2c9e3', 'logcollector', 'getstate']
+            """
+            command = 'getstate'
         else:
             return
 
@@ -460,6 +470,12 @@ class Agent:
                 else:
                     sender.send_event(self.create_event(f'#!-req {message_list[1]} '
                                                         f'{{"error":0, "message":"ok", "data":[]}} '))
+        elif command == 'getconfig':
+            response_json = '{"client":{"config-profile":"centos8","notify_time":10,"time-reconnect":60}}'
+            sender.send_event(self.create_event(f'#!-req {req_code} ok {response_json}'))
+        elif command == 'getstate':
+            response_json = '{"error":0,"data":{"global":{"start":"2021-02-26, 06:41:26","end":"2021-02-26 08:49:19"}}}'
+            sender.send_event(self.create_event(f'#!-req {req_code} ok {response_json}'))
         elif command == 'sha1':
             # !-req num ok {sha}
             if self.sha_key:
@@ -534,6 +550,27 @@ class Agent:
             self.fim = GeneratorFIM(self.id, self.name, self.short_version)
         if self.modules["fim_integrity"]["status"] == "enabled":
             self.fim_integrity = GeneratorIntegrityFIM(self.id, self.name, self.short_version)
+
+    def get_connection_status(self):
+        numeric_id = int(self.id)
+        connection_status_query = f'select connection_status from agent where id={numeric_id} limit 1'
+        result = wdb.get_query_result(connection_status_query)
+        if type(result) is list and len(result) > 0:
+            result = result[0]
+        else:
+            result = "Not in global.db"
+        return result
+
+    def wait_status_active(self):
+        check_status_retries = 10
+        while check_status_retries > 0:
+            check_status_retries -= 1
+            status = self.get_connection_status()
+            if status == 'active':
+                return
+            logging.warning(f"Retrying: {check_status_retries}, {status}")
+            sleep(10)
+        logging.error(f"Waiting for status active aborted. Max retries reached.")
 
 
 class Inventory:
@@ -952,13 +989,14 @@ class InjectorThread(threading.Thread):
         start_time = time()
         while self.stop_thread == 0:
             # Send agent keep alive
-            logging.info(f"KeepAlive - {self.agent.name}({self.agent.id})")
+            logging.debug(f"KeepAlive - {self.agent.name}({self.agent.id})")
             self.sender.send_event(self.agent.keep_alive_msg)
             sleep(self.agent.modules["keepalive"]["frequency"] -
                   ((time() - start_time) %
                    self.agent.modules["keepalive"]["frequency"]))
 
     def fim(self):
+        """Send a File Integrity Monitoring message from the agent to the manager."""
         """Send a File Integrity Monitoring message from the agent to the manager."""
         sleep(10)
         start_time = time()
