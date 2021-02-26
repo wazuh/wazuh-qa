@@ -1,27 +1,28 @@
 # Test agent communication
 ## Overview 
-Configuration tests check that the introduced configuration on ossec.conf works as expected and no valid option generates errors. 
-Also, it checks that the API answer for configuration requests coincides with the configuration introduced in ossec.conf
+Check that manager-agent communication through remoted socket works as expected.
 
 ## Objective
 
-Confirm that the different options for remoted configuration work and are correctly loaded.
+Confirm that there are no problems when the manager tries to communicate with an agent to ask for configuration or 
+state files using the remoted socket.
 
 ## General info
 
 |Tier | Number of tests | Time spent |
 |:--:|:--:|:--:|
-| 0 | 1 | 10s |
+| 0 | 1 |  |
 
 ## Expected behavior
 
-- Fail if remoted doesn't start with a valid configuration
-- Fail if remoted fails with a valid configuration (error|critical)
-- Fail if API query `{protocol}://{host}:{port}/manager/configuration?section=remote` doesn't match the introduced configuration on ossec.conf 
-
+- Fail if remoted doesn't return the requested data
+- Fail if remoted doesn't return an error message when the agent is disconnected
+- Fail if remoted couldn't connect with an active agent
 ## Testing
 
-- Basic configuration: connection, port, protocol
+- Test getconfig request
+- Test getstate request
+- Test getconfig request for a disconnected agent
 
 ## Code documentation
-::: tests.integration.test_remoted.test_configuration.test_basic_configuration
+::: tests.integration.test_remoted.test_agent_communication.test_agent_communication

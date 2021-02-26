@@ -390,7 +390,9 @@ nav:
             - Test communications through the sockets:
                 - tests/integration/test_remoted/test_socket_communication/test_ping_pong_message.md
                 - tests/integration/test_remoted/test_socket_communication/test_syslog_message.md
-        - Logtest:   
+            - Test communications with agent:
+                - tests/integration/test_remoted/test_agent_communication/test_agent_communication.md
+        - Logtest:
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md
           - Test rules and decoders load: tests/integration/test_logtest/test_rules_decoders_load/test_load_rules_decoders.md
