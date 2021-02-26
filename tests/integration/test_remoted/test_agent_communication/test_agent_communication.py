@@ -1,13 +1,12 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-import time
 import os
 import pytest
-import logging
+import time
+
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.services import wait_for_remote_connection
 from wazuh_testing.tools.sockets import send_request
 
 # Marks
@@ -48,9 +47,7 @@ config_ids = [x['PROTOCOL'] for x in parameters]
 manager_address = "localhost"
 
 
-def create_agent(protocol="tcp"):
-    wait_for_remote_connection(protocol=protocol)
-    agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0")
+def connect(agent, protocol="tcp"):
     sender = ag.Sender(manager_address, protocol=protocol)
     injector = ag.Injector(sender, agent)
     injector.run()
@@ -75,16 +72,19 @@ def test_request(get_configuration, configure_environment, restart_remoted, comm
     cfg = get_configuration['metadata']
     protocols = cfg['PROTOCOL'].split(',')
 
-    for protocol in protocols:
-        logging.critical(protocol)
-        if "disconnected" in command_request:
-            agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0")
-            wait_for_remote_connection(manager_address, protocol=protocol)
+    agents = [ag.Agent(manager_address, "aes", os="debian8", version="4.2.0") for _ in range(len(protocols))]
+    for agn, protocol in zip(agents, protocols):
+        if "disconnected" not in command_request:
+            agent = connect(agn, protocol)
         else:
-            agent = create_agent(protocol)
+            agent = agn
+            # wazuh-remoted needs time to create the sockets.
+            # Otherwise, the test won't be able to connect to them to send the requests
+            time.sleep(5)
 
         msg_request = f'{agent.id} {command_request}'
 
         response = send_request(msg_request)
 
         assert expected_answer in response, "Remoted unexpected answer"
+
