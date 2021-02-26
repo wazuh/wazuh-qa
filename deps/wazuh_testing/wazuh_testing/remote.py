@@ -6,12 +6,15 @@ import os
 import socket
 
 import wazuh_testing.tools.agent_simulator as ag
+import wazuh_testing.api as api
 
 from wazuh_testing.tools import ARCHIVES_LOG_FILE_PATH
 from wazuh_testing.tools import file
 from wazuh_testing.tools import monitoring
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools import QUEUE_SOCKETS_PATH
+from wazuh_testing.tools import WAZUH_CONF
+
 
 UDP = "UDP"
 TCP = "TCP"
@@ -23,11 +26,106 @@ EXAMPLE_MESSAGE_PATTERN = 'Accepted publickey for root from 192.168.0.5 port 480
 QUEUE_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'queue')
 
 
+def callback_detect_syslog_allowed_ips(syslog_ips):
+    msg = fr"Remote syslog allowed from: \'{syslog_ips}\'"
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+
+
+def callback_detect_syslog_denied_ips(syslog_ips):
+    msg = fr"Message from \'{syslog_ips}\' not allowed. Cannot find the ID of the agent."
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+
+
+def callback_invalid_value(option, value):
+    msg = fr"ERROR: \(\d+\): Invalid value for element '{option}': {value}."
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+
+
+def callback_error_in_configuration(severity):
+    msg = fr"{severity}: \(\d+\): Configuration error at '{WAZUH_CONF}'."
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+
+
+def callback_error_invalid_port(port):
+    msg = fr"ERROR: \(\d+\): Invalid port number: '{port}'."
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+
+
+def callback_ignored_invalid_protocol(protocol):
+    msg = fr"WARNING: \(\d+\): Ignored invalid value '{protocol}' for 'protocol'"
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+
+
+def callback_error_getting_protocol():
+    msg = fr"WARNING: \(\d+\): Error getting protocol. Default value \(TCP\) will be used."
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+
+
+def callback_warning_syslog_tcp_udp():
+    msg = fr"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time. Default value \(TCP\) will be used."
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+
+
+def callback_warning_secure_ipv6():
+    msg = fr"WARNING: \(\d+\): Secure connection does not support IPv6. IPv4 will be used instead."
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+
+
+def callback_error_bind_port():
+    msg = fr"CRITICAL: \(\d+\): Unable to Bind port '1514' due to \[\(\d+\)\-\(Cannot assign requested address\)\]"
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+
+
+def callback_error_queue_size_syslog():
+    msg = fr"ERROR: Invalid option \<queue_size\> for Syslog remote connection."
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+
+
+def callback_queue_size_too_big():
+    msg = fr"WARNING: Queue size is very high. The application may run out of memory."
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+
+
+def callback_error_invalid_value_for(option):
+    msg = fr"ERROR: Invalid value for option '\<{option}\>'"
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+
+
+def callback_error_invalid_ip(ip):
+    msg = fr"ERROR: \(\d+\): Invalid ip address: '{ip}'."
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+
+
+def callback_info_no_allowed_ips():
+    msg = fr"INFO: \(\d+\): IP or network must be present in syslog access list \(allowed-ips\). Syslog server disabled."
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+
+
+def compare_config_api_response(configuration):
+    # Check that API query return the selected configuration
+    for field in configuration.keys():
+        api_answer = api.get_manager_configuration(section="remote", field=field)
+        if field == 'protocol':
+            assert all(map(lambda x, y: x == y, configuration[field].split(","), api_answer))
+        else:
+            assert configuration[field] == api_answer, "Wazuh API answer different from introduced configuration"
+
+
+def get_protocols(all_protocols):
+    valid_protocols = []
+    invalid_protocols = []
+    for protocol in all_protocols:
+        if protocol == 'UDP' or protocol == 'TCP':
+            valid_protocols.append(protocol)
+        else:
+            invalid_protocols.append(protocol)
+    return [valid_protocols, invalid_protocols]
+
+
 def callback_detect_remoted_started(port, protocol, connection_type="secure"):
     """Creates a callback to detect if remoted was correctly started
 
-    wazuh-remoted logs if it has correctly started for each connection type, the port and
-    the protocol in the ossec.log
+    wazuh-remoted logs if it has correctly started for each connection type, the port and the protocol in the ossec.log
 
     Args:
         port (int): port configured for wazuh-remoted.
@@ -37,8 +135,15 @@ def callback_detect_remoted_started(port, protocol, connection_type="secure"):
     Returns:
         callable: callback to detect this event
     """
-    msg = fr"Started \(pid: \d+\). Listening on port {port}\/{protocol.upper()} \({connection_type}\)."
+    protocol_array = protocol.split(',')
+    protocol_array.sort()
 
+    protocol_string = protocol
+
+    if len(protocol_array) > 1:
+        protocol_string = protocol_array[0] + ',' + protocol_array[1]
+
+    msg = fr"Started \(pid: \d+\). Listening on port {port}\/{protocol_string.upper()} \({connection_type}\)."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
