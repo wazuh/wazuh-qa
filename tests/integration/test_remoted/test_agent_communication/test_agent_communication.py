@@ -86,6 +86,5 @@ def test_request(get_configuration, configure_environment, restart_remoted, comm
         msg_request = f'{agent.id} {command_request}'
 
         response = send_request(msg_request)
-        logging.critical(f"Response: {response}")
 
         assert expected_answer in response, "Remoted unexpected answer"
