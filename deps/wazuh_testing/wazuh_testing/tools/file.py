@@ -11,6 +11,9 @@ import xml.etree.ElementTree as ET
 import zipfile
 import stat
 import shutil
+import pwd
+import grp
+import socket
 
 from os.path import exists
 
@@ -220,3 +223,53 @@ def copy(source, destination):
     shutil.copy2(source, destination)
     source_stats = os.stat(source)
     os.chown(destination, source_stats[stat.ST_UID], source_stats[stat.ST_GID])
+
+
+def bind_unix_socket(socket_path, protocol='TCP'):
+    """Allow to create a unix socket if it does not exist.
+
+    By default it is assigned owner and group ossec and permissions 660.
+
+    Args:
+        socket_path (str): Path where create the unix socket.
+        protocol (str): It can be TCP or UDP.
+    """
+    if not os.path.exists(socket_path):
+        sock_type = socket.SOCK_STREAM if protocol.upper() == 'TCP' else socket.SOCK_DGRAM
+        new_socket = socket.socket(socket.AF_UNIX, sock_type)
+        new_socket.bind(socket_path)
+
+        set_file_owner_and_group(socket_path, 'ossec', 'ossec')
+        os.chmod(socket_path, 0o660)
+
+
+def is_socket(socket_path):
+    """Allow to check if a file path is a socket.
+
+    Args:
+        socket_path (str): File path to check.
+
+    Returns:
+        boolean: True if is a socket, False otherwhise.
+    """
+    mode = os.stat(socket_path).st_mode
+
+    return stat.S_ISSOCK(mode)
+
+
+def set_file_owner_and_group(file_path, owner, group):
+    """Allow to change the owner and group of a directory or file.
+
+    Args:
+        file_path (str): Path to update owner and group.
+        owner (str): Owner user name.
+        group (str): Group name.
+
+    Raises:
+        KeyError: If owner or group does not exist.
+    """
+    if os.path.exists(file_path):
+        uid = pwd.getpwnam(owner).pw_uid
+        gid = grp.getgrnam(group).gr_gid
+
+        os.chown(file_path, uid, gid)

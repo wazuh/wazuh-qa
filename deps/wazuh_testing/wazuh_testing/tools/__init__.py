@@ -78,32 +78,31 @@ WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
 ALERT_FILE_PATH = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.json')
 CLUSTER_LOGS_PATH = os.path.join(WAZUH_LOGS_PATH, 'cluster.log')
 
-QUEUE_OSSEC_PATH = os.path.join(WAZUH_PATH, 'queue', 'ossec')
+QUEUE_SOCKETS_PATH = os.path.join(WAZUH_PATH, 'queue', 'sockets')
+
 QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 CLUSTER_SOCKET_PATH = os.path.join(WAZUH_PATH, 'queue', 'cluster')
 
 WAZUH_SOCKETS = {
     'wazuh-agentd': [],
-    'wazuh-analysisd': [os.path.join(QUEUE_OSSEC_PATH, 'analysis'),
-                        os.path.join(QUEUE_OSSEC_PATH, 'queue')],
-    'wazuh-authd': [os.path.join(QUEUE_OSSEC_PATH, 'auth')],
-    'wazuh-execd': [os.path.join(QUEUE_OSSEC_PATH, 'com')],
-    'wazuh-logcollector': [os.path.join(QUEUE_OSSEC_PATH, 'logcollector')],
-    'wazuh-monitord': [os.path.join(QUEUE_OSSEC_PATH, 'monitor')],
-    'wazuh-remoted': [os.path.join(QUEUE_OSSEC_PATH, 'request')],
-    'wazuh-syscheckd': [os.path.join(QUEUE_OSSEC_PATH, 'syscheck')],
+    'wazuh-analysisd': [os.path.join(QUEUE_SOCKETS_PATH, 'analysis'),
+                        os.path.join(QUEUE_SOCKETS_PATH, 'queue')],
+    'wazuh-authd': [os.path.join(QUEUE_SOCKETS_PATH, 'auth')],
+    'wazuh-execd': [os.path.join(QUEUE_SOCKETS_PATH, 'com')],
+    'wazuh-logcollector': [os.path.join(QUEUE_SOCKETS_PATH, 'logcollector')],
+    'wazuh-monitord': [os.path.join(QUEUE_SOCKETS_PATH, 'monitor')],
+    'wazuh-remoted': [os.path.join(QUEUE_SOCKETS_PATH, 'request')],
+    'wazuh-syscheckd': [os.path.join(QUEUE_SOCKETS_PATH, 'syscheck')],
     'wazuh-db': [os.path.join(QUEUE_DB_PATH, 'wdb')],
-    'wazuh-modulesd': [os.path.join(QUEUE_OSSEC_PATH, 'wmodules'),
-                       os.path.join(QUEUE_OSSEC_PATH, 'download'),
-                       os.path.join(QUEUE_OSSEC_PATH, 'control'),
-                       os.path.join(QUEUE_OSSEC_PATH, 'krequest')],
+    'wazuh-modulesd': [os.path.join(QUEUE_SOCKETS_PATH, 'wmodules'),
+                       os.path.join(QUEUE_SOCKETS_PATH, 'download'),
+                       os.path.join(QUEUE_SOCKETS_PATH, 'control'),
+                       os.path.join(QUEUE_SOCKETS_PATH, 'krequest')],
     'wazuh-clusterd': [os.path.join(CLUSTER_SOCKET_PATH, 'c-internal.sock')]
 }
 
 # These sockets do not exist with default Wazuh configuration
 WAZUH_OPTIONAL_SOCKETS = [
-    os.path.join(QUEUE_OSSEC_PATH, 'krequest'),
-    os.path.join(QUEUE_OSSEC_PATH, 'auth')
+    os.path.join(QUEUE_SOCKETS_PATH, 'krequest'),
+    os.path.join(QUEUE_SOCKETS_PATH, 'auth')
 ]
-
-
