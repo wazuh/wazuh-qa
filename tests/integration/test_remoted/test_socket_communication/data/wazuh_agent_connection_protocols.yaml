@@ -1,0 +1,15 @@
+- tags:
+  - test_agent_connection_protocols
+  apply_to_modules:
+  - test_agent_connection_protocols
+  sections:
+  - section: remote
+    elements:
+    - connection:
+        value: secure
+    - port:
+         value: PORT
+    - protocol:
+         value: PROTOCOL
+    - queue_size:
+         value: 131072
