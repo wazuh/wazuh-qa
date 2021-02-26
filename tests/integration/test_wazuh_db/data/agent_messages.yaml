@@ -1,6 +1,6 @@
 ---
 -
-  name: "Agents' CVEs table: vuln_cves "
+  name: "Agents' CVEs table: vuln_cves"
   description: "Checks the commands insert and clear"
   test_case:
   -
@@ -16,6 +16,10 @@
     output: "err Cannot execute vuln_cve insert command; SQL err: UNIQUE constraint failed: vuln_cves.name, vuln_cves.version, vuln_cves.architecture, vuln_cves.cve"
     stage: "agent vuln_cve insert duplicated entry"
   -
+    input: 'agent 001 vuln_cve insert {"name":"test package","version":"1.0","architecture":"x86","cve":"1001"}'
+    output: "ok"
+    stage: "agent vuln_cve insert with spaces in json payload"
+  -
     input: 'agent 000 vuln_cve clear'
     output: "ok"
     stage: "agent vuln_cve clear table"
@@ -30,11 +34,15 @@
   -
     input: 'agent 000 vuln_cve insert {"name":"test_package",'
     output: "err Invalid JSON syntax, near '{\"name\":\"test_package\",'"
-    stage: "agent vuln_cve insert invalid JSON "
+    stage: "agent vuln_cve insert invalid JSON"
   -
     input: 'agent 000 vuln_cve'
     output: "err Invalid vuln_cve query syntax, near 'vuln_cve'"
-    stage: "agent vuln_cve missing command "
+    stage: "agent vuln_cve missing command"
+  -
+    input: 'agent 000 vuln_cve insert'
+    output: "err Invalid JSON syntax, near ''"
+    stage: "agent vuln_cve missing payload"
   -
     input: 'agent 000 vuln_cve insert {"name":"test_package2","version":"1.0","architecture":"x86","cve":"CVE-2021-1001"}'
     output: "ok"
