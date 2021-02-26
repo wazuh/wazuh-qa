@@ -36,4 +36,4 @@ test_files/test_follow_symbolic_link/test_change_target_with_nested_directory.py
 
 ## Code documentation
 
-::: tests.integration.test_fim.test_files.test_follow_symbolic_link.test_change_target_with_nested_directory
+<!-- ::: tests.integration.test_fim.test_files.test_follow_symbolic_link.test_change_target_with_nested_directory -->

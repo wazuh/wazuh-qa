@@ -35,4 +35,4 @@ test_files/test_follow_symbolic_link/test_revert_symlink.py ...                 
 
 ## Code documentation
 
-::: tests.integration.test_fim.test_files.test_follow_symbolic_link.test_revert_symlink
+<!-- ::: tests.integration.test_fim.test_files.test_follow_symbolic_link.test_revert_symlink -->

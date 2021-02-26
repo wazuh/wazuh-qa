@@ -33,4 +33,4 @@ test_files/test_follow_symbolic_link/test_symlink_to_dir_between_scans.py .     
 
 ## Code documentation
 
-::: tests.integration.test_fim.test_files.test_follow_symbolic_link.test_symlink_to_dir_between_scans
+<!-- ::: tests.integration.test_fim.test_files.test_follow_symbolic_link.test_symlink_to_dir_between_scans -->

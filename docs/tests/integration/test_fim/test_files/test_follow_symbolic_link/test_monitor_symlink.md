@@ -35,4 +35,4 @@ root@ubuntu1:/vagrant/wazuh-qa/tests/integration/test_fim#
 
 ## Code documentation
 
-::: tests.integration.test_fim.test_files.test_follow_symbolic_link.test_monitor_symlink
+<!-- ::: tests.integration.test_fim.test_files.test_follow_symbolic_link.test_monitor_symlink -->

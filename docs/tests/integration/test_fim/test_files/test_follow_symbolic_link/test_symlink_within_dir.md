@@ -33,4 +33,4 @@ test_files/test_follow_symbolic_link/test_symlink_within_dir.py ...             
 
 ## Code documentation
 
-::: tests.integration.test_fim.test_files.test_follow_symbolic_link.test_symlink_within_dir
+<!-- ::: tests.integration.test_fim.test_files.test_follow_symbolic_link.test_symlink_within_dir -->

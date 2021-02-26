@@ -35,4 +35,4 @@ test_files/test_follow_symbolic_link/test_follow_symbolic_disabled.py .ss..ss..s
 
 ## Code documentation
 
-::: tests.integration.twest_fim.test_files.test_follow_symbolic_link.test_follow_symbolic_disabled
+<!-- ::: tests.integration.test_fim.test_files.test_follow_symbolic_link.test_follow_symbolic_disabled -->

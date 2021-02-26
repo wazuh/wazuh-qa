@@ -2199,7 +2199,7 @@ def wait_for_audit(whodata, monitor):
         monitor (FileMonitor): LogMonitor to use.
     """
     if whodata:
-        monitor.start(timeout=30, callback=callback_end_audit_reload_rules, update_position=False,
+        monitor.start(timeout=35, callback=callback_end_audit_reload_rules, update_position=False,
                       error_message='Did not receive expected "Audit rules reloaded..." event')
 
 

@@ -35,4 +35,4 @@ test_files/test_audit/test_audit_no_dir.py .                                    
 
 ## Code documentation
 
-::: tests.integration.test_fim.test_files.test_audit.test_audit_no_dir
+<!-- ::: tests.integration.test_fim.test_files.test_audit.test_audit_no_dir -->
