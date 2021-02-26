@@ -11,7 +11,7 @@ from wazuh_testing.tools import ARCHIVES_LOG_FILE_PATH
 from wazuh_testing.tools import file
 from wazuh_testing.tools import monitoring
 from wazuh_testing.tools.services import control_service
-
+from wazuh_testing.tools import QUEUE_SOCKETS_PATH
 
 UDP = "UDP"
 TCP = "TCP"
@@ -20,8 +20,7 @@ REMOTED_GLOBAL_TIMEOUT = 10
 EXAMPLE_MESSAGE_EVENT = '1:/root/test.log:Feb 23 17:18:20 35-u20-manager4 sshd[40657]: Accepted publickey for root' \
                         ' from 192.168.0.5 port 48044 ssh2: RSA SHA256:IZT11YXRZoZfuGlj/K/t3tT8OdolV58hcCOJFZLIW2Y'
 EXAMPLE_MESSAGE_PATTERN = 'Accepted publickey for root from 192.168.0.5 port 48044'
-SOCKETS_PATH = '/var/ossec/queue/sockets'
-QUEUE_SOCKET_PATH = os.path.join(SOCKETS_PATH, 'queue')
+QUEUE_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'queue')
 
 
 def callback_detect_remoted_started(port, protocol, connection_type="secure"):
