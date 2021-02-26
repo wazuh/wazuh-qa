@@ -994,7 +994,6 @@ class InjectorThread(threading.Thread):
 
     def fim(self):
         """Send a File Integrity Monitoring message from the agent to the manager."""
-        """Send a File Integrity Monitoring message from the agent to the manager."""
         sleep(10)
         start_time = time()
         # Loop events

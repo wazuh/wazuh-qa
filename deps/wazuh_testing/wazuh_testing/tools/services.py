@@ -236,20 +236,3 @@ def check_if_process_is_running(process_name):
         pass
 
     return is_running
-
-
-def wait_for_remote_connection(host="localhost", port=1514, protocol="tcp"):
-    connection_retries = 10
-    while connection_retries > 0:
-        connection_retries -= 1
-        if remote_available(host, port, protocol):
-            return
-        time.sleep(2)
-
-
-def remote_available(host="localhost", port=1514, protocol="tcp"):
-    if protocol == "UDP":
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    else:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    return sock.connect_ex((host, port)) == 0
