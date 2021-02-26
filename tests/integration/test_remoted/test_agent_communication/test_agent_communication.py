@@ -37,7 +37,7 @@ test_case = {
     'get_config': ('agent getconfig client',
                    '{"client":{"config-profile":"centos8","notify_time":10,"time-reconnect":60}}'),
     'get_state': ('logcollector getstate',
-                   '{"error":0,"data":{"global":{"start":"2021-02-26, 06:41:26","end":"2021-02-26 08:49:19"}}}')
+                  '{"error":0,"data":{"global":{"start":"2021-02-26, 06:41:26","end":"2021-02-26 08:49:19"}}}')
 }
 
 
@@ -89,4 +89,3 @@ def test_request(get_configuration, configure_environment, restart_remoted, comm
         logging.critical(f"Response: {response}")
 
         assert expected_answer in response, "Remoted unexpected answer"
-

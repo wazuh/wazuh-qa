@@ -73,7 +73,7 @@ def control_service(action, daemon=None, debug_mode=False):
 
     Args:
         action ({'stop', 'start', 'restart'}): Action to be done with the service/daemon.
-        daemon (str, optional): Name of the daemon to be controlled. None to control the whole Wazuh service. Default `None`
+        daemon (str, optional): Name of the daemon to be controlled. None for the whole Wazuh service. Default `None`
         debug_mode (bool, optional) : Run the specified daemon in debug mode. Default `False`
     Raises:
         ValueError: If `action` is not contained in {'start', 'stop', 'restart'}.
@@ -144,7 +144,8 @@ def get_process(search_name):
         search_name (str): Name of the process to be fetched.
 
     Returns:
-        `psutil.Process` or None: First occurrence of the process object matching the `search_name` or None if no process has been found.
+        `psutil.Process` or None: First occurrence of the process object matching the `search_name` or
+            None if no process has been found.
     """
     for proc in psutil.process_iter(attrs=['name']):
         if proc.name() == search_name:
@@ -161,7 +162,8 @@ def get_process_cmd(search_cmd):
         search_cmd (str): Name of the command to be fetched.
 
     Returns:
-        `psutil.Process` or None: First occurrence of the process object matching the `search_cmd` or None if no process has been found.
+        `psutil.Process` or None: First occurrence of the process object matching the `search_cmd` or
+            None if no process has been found.
     """
     for proc in psutil.process_iter(attrs=['pid', 'name', 'cmdline']):
         command = next((command for command in proc.cmdline() if search_cmd in command), None)
@@ -174,7 +176,8 @@ def check_daemon_status(daemon=None, running=True, timeout=10, extra_sockets=Non
 
     Args:
         daemon (str, optional):  Wazuh daemon to check. Default `None`
-        running (bool, optional): True if the daemon is expected to be running False if it is expected to be stopped. Default `True`
+        running (bool, optional): True if the daemon is expected to be running False if it is expected to be stopped.
+            Default `True`
         timeout (int, optional): Timeout value for the check. Default `10`
         extra_sockets (list, optional): Additional sockets to check. They may not be present in default configuration
 

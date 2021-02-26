@@ -444,7 +444,7 @@ class Agent:
 
         logging.debug(f"Processing command: {message_list}")
 
-        if command in ['lock_restart', 'open', 'write', 'close','clear_upgrade_result']:
+        if command in ['lock_restart', 'open', 'write', 'close', 'clear_upgrade_result']:
             if command == 'lock_restart' and self.stage_disconnect == 'lock_restart':
                 self.stop_receive = 1
             elif command == 'open' and self.stage_disconnect == 'open':
@@ -1018,7 +1018,7 @@ class InjectorThread(threading.Thread):
         while self.stop_thread == 0:
             # Send agent inventory scan
             logging.debug(f"Scan started - {self.agent.name}({self.agent.id}) - "
-                  f"syscollector({self.agent.inventory.inventory_path})")
+                          f"syscollector({self.agent.inventory.inventory_path})")
             scan_id = int(time())  # Random start scan ID
             for item in self.agent.inventory.inventory:
                 event = self.agent.create_event(item.replace("<scan_id>", str(scan_id)))
@@ -1027,8 +1027,8 @@ class InjectorThread(threading.Thread):
                 if self.totalMessages % self.agent.modules["syscollector"]["eps"] == 0:
                     self.totalMessages = 0
                     sleep(1.0 - ((time() - start_time) % 1.0))
-            logging.debug("Scan ended - {self.agent.name}({self.agent.id}) - "
-                  f"syscollector({self.agent.inventory.inventory_path})")
+            logging.debug(f"Scan ended - {self.agent.name}({self.agent.id}) - "
+                          f"syscollector({self.agent.inventory.inventory_path})")
             sleep(self.agent.modules["syscollector"]["frequency"] - ((time() - start_time)
                                                                      % self.agent.modules["syscollector"]["frequency"]))
 
@@ -1039,14 +1039,16 @@ class InjectorThread(threading.Thread):
         while self.stop_thread == 0:
             # Send agent rootcheck scan
             logging.debug(f"Scan started - {self.agent.name}({self.agent.id}) "
-                  f"- rootcheck({self.agent.rootcheck.rootcheck_path})")
+                          f"- rootcheck({self.agent.rootcheck.rootcheck_path})")
             for item in self.agent.rootcheck.rootcheck:
                 self.sender.send_event(self.agent.create_event(item))
                 self.totalMessages += 1
                 if self.totalMessages % self.agent.modules["rootcheck"]["eps"] == 0:
                     self.totalMessages = 0
                     sleep(1.0 - ((time() - start_time) % 1.0))
-            logging.debug(f"Scan ended - {self.agent.name}({self.agent.id}) - rootcheck({self.agent.rootcheck.rootcheck_path})")
+            logging.debug(
+                f"Scan ended - {self.agent.name}({self.agent.id}) - rootcheck({self.agent.rootcheck.rootcheck_path})"
+            )
             sleep(self.agent.modules["rootcheck"]["frequency"] - ((time() - start_time)
                                                                   % self.agent.modules["rootcheck"]["frequency"]))
 

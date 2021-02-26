@@ -41,13 +41,15 @@ def mock_db(func):
     return magic
 
 
-def mock_agent(agent_id, name="centos8-agent", ip="127.0.0.1", register_ip="127.0.0.1", internal_key="",
-                     os_name="CentOS Linux", os_version="7.1", os_major="7", os_minor="1", os_codename="centos-8",
-                     os_build="4.18.0-147.8.1.el8_1.x86_64", os_platform="#1 SMP Thu Apr 9 13:49:54 UTC 2020",
-                     os_uname="x86_64", os_arch="x86_64", version="4.2", config_sum="", merged_sum="",
-                     manager_host="centos-8", node_name="node01", date_add="1612942494",
-                     last_keepalive="253402300799", group="", sync_status="synced", connection_status="active",
-                     client_key_secret=None):
+def mock_agent(
+        agent_id, name="centos8-agent", ip="127.0.0.1", register_ip="127.0.0.1", internal_key="",
+        os_name="CentOS Linux", os_version="7.1", os_major="7", os_minor="1", os_codename="centos-8",
+        os_build="4.18.0-147.8.1.el8_1.x86_64", os_platform="#1 SMP Thu Apr 9 13:49:54 UTC 2020",
+        os_uname="x86_64", os_arch="x86_64", version="4.2", config_sum="", merged_sum="",
+        manager_host="centos-8", node_name="node01", date_add="1612942494",
+        last_keepalive="253402300799", group="", sync_status="synced", connection_status="active",
+        client_key_secret=None):
+
     create_agent_query = f'''INSERT INTO AGENT
                    (id, name, ip, register_ip, internal_key, os_name, os_version, os_major, os_minor,
                     os_codename, os_build, os_platform, os_uname, os_arch, version, config_sum, merged_sum,

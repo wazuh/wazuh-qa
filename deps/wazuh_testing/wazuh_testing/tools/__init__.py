@@ -105,5 +105,3 @@ WAZUH_OPTIONAL_SOCKETS = [
     os.path.join(QUEUE_OSSEC_PATH, 'krequest'),
     os.path.join(QUEUE_OSSEC_PATH, 'auth')
 ]
-
-
