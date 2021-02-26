@@ -535,7 +535,8 @@ class Agent:
 
     def initialize_modules(self, disable_all_modules):
         for module in ['syscollector', 'rootcheck', 'fim', 'fim_integrity', 'receive_messages', 'keepalive']:
-            self.modules[module]['status'] = 'disabled' if disable_all_modules else 'enabled'
+            if disable_all_modules:
+                self.modules[module]['status'] = 'disabled'
 
         if self.modules['syscollector']['status'] == 'enabled':
             self.inventory = Inventory(self.os, self.inventory_sample)

@@ -8,7 +8,7 @@ import time
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.sockets import send_request
-
+import logging
 # Marks
 pytestmark = pytest.mark.tier(level=0)
 
@@ -76,6 +76,7 @@ def test_request(get_configuration, configure_environment, restart_remoted, comm
     for agn, protocol in zip(agents, protocols):
         if "disconnected" not in command_request:
             agent = connect(agn, protocol)
+
         else:
             agent = agn
             # wazuh-remoted needs time to create the sockets.
