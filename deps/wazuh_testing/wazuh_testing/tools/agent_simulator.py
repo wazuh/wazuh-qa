@@ -341,7 +341,7 @@ class Agent:
             sender (Sender): Object to establish connection with the manager socket and receive/send information.
         """
         while self.stop_receive == 0:
-            if sender.protocol == 'tcp':
+            if sender.protocol == 'tcp' or sender.protocol == 'TCP':
                 rcv = sender.socket.recv(4)
                 if len(rcv) == 4:
                     data_len = int.from_bytes(rcv, 'little')
