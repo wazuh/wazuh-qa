@@ -457,9 +457,9 @@ class Agent:
                 self.stop_receive = 1
             else:
                 if self.short_version < "4.1" or command == 'lock_restart':
-                    sender.send_event(self.create_event(f'#!-req {message_list[1]} ok '))
+                    sender.send_event(self.create_event(f'#!-req {req_code} ok '))
                 else:
-                    sender.send_event(self.create_event(f'#!-req {message_list[1]} '
+                    sender.send_event(self.create_event(f'#!-req {req_code} '
                                                         f'{{"error":0, "message":"ok", "data":[]}} '))
         elif command == 'getconfig':
             response_json = '{"client":{"config-profile":"centos8","notify_time":10,"time-reconnect":60}}'
@@ -474,10 +474,10 @@ class Agent:
                     self.stop_receive = 1
                 else:
                     if self.short_version < "4.1":
-                        sender.send_event(self.create_event(f'#!-req {message_list[1]} '
+                        sender.send_event(self.create_event(f'#!-req {req_code} '
                                                             f'ok {self.sha_key}'))
                     else:
-                        sender.send_event(self.create_event(f'#!-req {message_list[1]} {{"error":0, '
+                        sender.send_event(self.create_event(f'#!-req {req_code} {{"error":0, '
                                                             f'"message":"{self.sha_key}", "data":[]}}'))
             else:
                 raise ValueError(f'WPK SHA key should be configured in agent')
@@ -488,9 +488,9 @@ class Agent:
                     self.stop_receive = 1
                 else:
                     if self.short_version < "4.1":
-                        sender.send_event(self.create_event(f'#!-req {message_list[1]} ok {self.upgrade_exec_result}'))
+                        sender.send_event(self.create_event(f'#!-req {req_code} ok {self.upgrade_exec_result}'))
                     else:
-                        sender.send_event(self.create_event(f'#!-req {message_list[1]} {{"error":0, '
+                        sender.send_event(self.create_event(f'#!-req {req_code}]} {{"error":0, '
                                                             f'"message":"{self.upgrade_exec_result}", "data":[]}}'))
                     if self.send_upgrade_notification:
                         message = 'Upgrade was successful' if self.upgrade_script_result == 0 else 'Upgrade failed'
