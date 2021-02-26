@@ -165,7 +165,7 @@ def make_callback(pattern, prefix="wazuh"):
     full_pattern = pattern if prefix is None else fr'{prefix}{pattern}'
     regex = re.compile(full_pattern)
 
-    return lambda line: regex.match(line) is not None
+    return lambda line: regex.match(line.decode() if isinstance(line, bytes) else line) is not None
 
 
 class FileMonitor:
@@ -203,7 +203,7 @@ class SocketController:
         """Create a new unix socket or connect to a existing one.
 
         Args:
-        
+
             address (str or Tuple(str, int)): Address of the socket, the format of the address depends on the type. A regular file path for AF_UNIX or a Tuple(HOST, PORT) for AF_INET
             family (str): Family type of socket to connect to, AF_UNIX for unix sockets or AF_INET for port sockets.
             connection_protocol (str): Flag that indicates if the connection is TCP (SOCK_STREAM), UDP (SOCK_DGRAM) or SSL_TLSv1_2.
