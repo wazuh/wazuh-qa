@@ -19,19 +19,13 @@ import ssl
 import threading
 import zlib
 import logging
+import wazuh_testing.wazuh_db as wdb
 from random import randint, sample, choice
 from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
 from string import ascii_letters, digits
 from struct import pack
 from time import mktime, localtime, sleep, time
-
 from wazuh_testing.tools.remoted_sim import Cipher
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s:%(levelname)s:AGENT_SIMULATOR:%(message)s"
-)
-
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 
@@ -347,16 +341,14 @@ class Agent:
             sender (Sender): Object to establish connection with the manager socket and receive/send information.
         """
         while self.stop_receive == 0:
-            if sender.protocol == 'tcp':
+            if sender.protocol == 'tcp' or sender.protocol == 'TCP':
                 rcv = sender.socket.recv(4)
                 if len(rcv) == 4:
-                    data_len = ((rcv[3] & 0xFF) << 24) | \
-                               ((rcv[2] & 0xFF) << 16) | \
-                               ((rcv[1] & 0xFF) << 8) | \
-                               (rcv[0] & 0xFF)
+                    data_len = int.from_bytes(rcv, 'little')
                     try:
                         buffer_array = sender.socket.recv(data_len)
                     except MemoryError:
+                        logging.critical(f"Memory error, trying to allocate {data_len}")
                         return
 
                     if data_len != len(buffer_array):
@@ -417,6 +409,8 @@ class Agent:
             ValueError: if command is not recognized.
         """
 
+        req_code = message_list[1]
+
         if 'com' in message_list:
             """ Examples:
             ['12d95abf04334f90f8dc3140031b3e7b342680000000130:5489:#!-req', '81d15486', 'com', 'close',
@@ -437,12 +431,22 @@ class Agent:
             com_index = message_list.index('upgrade')
             json_command = json.loads(message_list[com_index + 1])
             command = json_command['command']
+        elif 'getconfig' in message_list:
+            """ Examples:
+            ['ececac937b8e5dead15e9096e8bd5215214970000000002:3090:#!-req', 'c2b2c9e3', 'agent', 'getconfig', 'client']
+            """
+            command = 'getconfig'
+        elif 'getstate' in message_list:
+            """ Examples:
+            ['ececac937b8e5dead15e9096e8bd5215214970000000002:3090:#!-req', 'c2b2c9e3', 'logcollector', 'getstate']
+            """
+            command = 'getstate'
         else:
             return
 
         logging.debug(f"Processing command: {message_list}")
 
-        if command in ['lock_restart', 'open', 'write', 'close','clear_upgrade_result']:
+        if command in ['lock_restart', 'open', 'write', 'close', 'clear_upgrade_result']:
             if command == 'lock_restart' and self.stage_disconnect == 'lock_restart':
                 self.stop_receive = 1
             elif command == 'open' and self.stage_disconnect == 'open':
@@ -455,10 +459,16 @@ class Agent:
                 self.stop_receive = 1
             else:
                 if self.short_version < "4.1" or command == 'lock_restart':
-                    sender.send_event(self.create_event(f'#!-req {message_list[1]} ok '))
+                    sender.send_event(self.create_event(f'#!-req {req_code} ok '))
                 else:
-                    sender.send_event(self.create_event(f'#!-req {message_list[1]} '
+                    sender.send_event(self.create_event(f'#!-req {req_code} '
                                                         f'{{"error":0, "message":"ok", "data":[]}} '))
+        elif command == 'getconfig':
+            response_json = '{"client":{"config-profile":"centos8","notify_time":10,"time-reconnect":60}}'
+            sender.send_event(self.create_event(f'#!-req {req_code} ok {response_json}'))
+        elif command == 'getstate':
+            response_json = '{"error":0,"data":{"global":{"start":"2021-02-26, 06:41:26","end":"2021-02-26 08:49:19"}}}'
+            sender.send_event(self.create_event(f'#!-req {req_code} ok {response_json}'))
         elif command == 'sha1':
             # !-req num ok {sha}
             if self.sha_key:
@@ -466,10 +476,10 @@ class Agent:
                     self.stop_receive = 1
                 else:
                     if self.short_version < "4.1":
-                        sender.send_event(self.create_event(f'#!-req {message_list[1]} '
+                        sender.send_event(self.create_event(f'#!-req {req_code} '
                                                             f'ok {self.sha_key}'))
                     else:
-                        sender.send_event(self.create_event(f'#!-req {message_list[1]} {{"error":0, '
+                        sender.send_event(self.create_event(f'#!-req {req_code} {{"error":0, '
                                                             f'"message":"{self.sha_key}", "data":[]}}'))
             else:
                 raise ValueError(f'WPK SHA key should be configured in agent')
@@ -480,9 +490,9 @@ class Agent:
                     self.stop_receive = 1
                 else:
                     if self.short_version < "4.1":
-                        sender.send_event(self.create_event(f'#!-req {message_list[1]} ok {self.upgrade_exec_result}'))
+                        sender.send_event(self.create_event(f'#!-req {req_code} ok {self.upgrade_exec_result}'))
                     else:
-                        sender.send_event(self.create_event(f'#!-req {message_list[1]} {{"error":0, '
+                        sender.send_event(self.create_event(f'#!-req {req_code} {{"error":0, '
                                                             f'"message":"{self.upgrade_exec_result}", "data":[]}}'))
                     if self.send_upgrade_notification:
                         message = 'Upgrade was successful' if self.upgrade_script_result == 0 else 'Upgrade failed'
@@ -525,7 +535,8 @@ class Agent:
 
     def initialize_modules(self, disable_all_modules):
         for module in ['syscollector', 'rootcheck', 'fim', 'fim_integrity', 'receive_messages', 'keepalive']:
-            self.modules[module]['status'] = 'disabled' if disable_all_modules else 'enabled'
+            if disable_all_modules:
+                self.modules[module]['status'] = 'disabled'
 
         if self.modules['syscollector']['status'] == 'enabled':
             self.inventory = Inventory(self.os, self.inventory_sample)
@@ -535,6 +546,27 @@ class Agent:
             self.fim = GeneratorFIM(self.id, self.name, self.short_version)
         if self.modules['fim_integrity']['status'] == 'enabled':
             self.fim_integrity = GeneratorIntegrityFIM(self.id, self.name, self.short_version)
+
+    def get_connection_status(self):
+        numeric_id = int(self.id)
+        connection_status_query = f'select connection_status from agent where id={numeric_id} limit 1'
+        result = wdb.get_query_result(connection_status_query)
+        if type(result) is list and len(result) > 0:
+            result = result[0]
+        else:
+            result = "Not in global.db"
+        return result
+
+    def wait_status_active(self):
+        check_status_retries = 10
+        while check_status_retries > 0:
+            check_status_retries -= 1
+            status = self.get_connection_status()
+            if status == 'active':
+                return
+            logging.warning(f"Retrying: {check_status_retries}, {status}")
+            sleep(10)
+        logging.error(f"Waiting for status active aborted. Max retries reached.")
 
     def set_module_status(self, module_name, status):
         self.modules[module_name]['status'] = status
@@ -991,7 +1023,7 @@ class InjectorThread(threading.Thread):
         while self.stop_thread == 0:
             # Send agent inventory scan
             logging.debug(f"Scan started - {self.agent.name}({self.agent.id}) - "
-                  f"syscollector({self.agent.inventory.inventory_path})")
+                          f"syscollector({self.agent.inventory.inventory_path})")
             scan_id = int(time())  # Random start scan ID
             for item in self.agent.inventory.inventory:
                 event = self.agent.create_event(item.replace("<scan_id>", str(scan_id)))
@@ -1000,8 +1032,8 @@ class InjectorThread(threading.Thread):
                 if self.totalMessages % self.agent.modules["syscollector"]["eps"] == 0:
                     self.totalMessages = 0
                     sleep(1.0 - ((time() - start_time) % 1.0))
-            logging.debug("Scan ended - {self.agent.name}({self.agent.id}) - "
-                  f"syscollector({self.agent.inventory.inventory_path})")
+            logging.debug(f"Scan ended - {self.agent.name}({self.agent.id}) - "
+                          f"syscollector({self.agent.inventory.inventory_path})")
             sleep(self.agent.modules["syscollector"]["frequency"] - ((time() - start_time)
                                                                      % self.agent.modules["syscollector"]["frequency"]))
 
@@ -1012,14 +1044,16 @@ class InjectorThread(threading.Thread):
         while self.stop_thread == 0:
             # Send agent rootcheck scan
             logging.debug(f"Scan started - {self.agent.name}({self.agent.id}) "
-                  f"- rootcheck({self.agent.rootcheck.rootcheck_path})")
+                          f"- rootcheck({self.agent.rootcheck.rootcheck_path})")
             for item in self.agent.rootcheck.rootcheck:
                 self.sender.send_event(self.agent.create_event(item))
                 self.totalMessages += 1
                 if self.totalMessages % self.agent.modules["rootcheck"]["eps"] == 0:
                     self.totalMessages = 0
                     sleep(1.0 - ((time() - start_time) % 1.0))
-            logging.debug(f"Scan ended - {self.agent.name}({self.agent.id}) - rootcheck({self.agent.rootcheck.rootcheck_path})")
+            logging.debug(
+                f"Scan ended - {self.agent.name}({self.agent.id}) - rootcheck({self.agent.rootcheck.rootcheck_path})"
+            )
             sleep(self.agent.modules["rootcheck"]["frequency"] - ((time() - start_time)
                                                                   % self.agent.modules["rootcheck"]["frequency"]))
 
