@@ -183,6 +183,13 @@ def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, co
                              remove_ip_from_iptables, start_agent, set_ar_conf_mode):
     """
     Check if firewall-drop Active Response is executed correctly
+
+    Args:
+        set_debug_mode (fixture): Set execd daemon in debug mode.
+        test_version (fixture): Validate Wazuh version.
+        set_ar_conf_mode (fixture): Configure Active Responses used in tests.
+        start_agent (fixture): Create Remoted and Authd simulators, register agent and start it.
+        remove_ip_from_iptables (fixture): Remove the test IP from iptables if it exist
     """
     metadata = get_configuration['metadata']
     expected = metadata['results']

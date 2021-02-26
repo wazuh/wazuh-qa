@@ -155,6 +155,12 @@ def build_message(metadata, expected):
 def test_execd_restart(set_debug_mode, get_configuration, test_version, configure_environment, start_agent, set_ar_conf_mode):
     """
     Check if restart-wazuh Active Response is executed correctly
+
+    Args:
+        set_debug_mode (fixture): Set execd daemon in debug mode.
+        test_version (fixture): Validate Wazuh version.
+        set_ar_conf_mode (fixture): Configure Active Responses used in tests.
+        start_agent (fixture): Create Remoted and Authd simulators, register agent and start it.
     """
     metadata = get_configuration['metadata']
     expected = metadata['results']

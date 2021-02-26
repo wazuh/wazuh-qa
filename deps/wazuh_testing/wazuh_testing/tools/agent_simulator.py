@@ -25,7 +25,7 @@ from string import ascii_letters, digits
 from struct import pack
 from time import mktime, localtime, sleep, time
 from wazuh_testing.tools.remoted_sim import Cipher
-from wazuh_testing import wazuh_db as wdb
+
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 
@@ -201,7 +201,7 @@ class Agent:
         self.key = registration_info[3]
         ssl_socket.close()
         sock.close()
-        logging.info("Registration - {}({})".format(self.name, self.id))
+        logging.debug("Registration - {}({})".format(self.name, self.id))
 
     @staticmethod
     def wazuh_padding(compressed_event):
@@ -214,7 +214,7 @@ class Agent:
             bytes: Padded event.
 
         Examples:
-            $>>> wazuh_padding(b'x\\x9c\\x15\\xc7\\xc9\\r\\x00 \\x08\\x04\\xc0\\x96\\\\\\x94\\xcbn0H\\x03\\xda\\x7f
+            >>> wazuh_padding(b'x\\x9c\\x15\\xc7\\xc9\\r\\x00 \\x08\\x04\\xc0\\x96\\\\\\x94\\xcbn0H\\x03\\xda\\x7f
                                \\x8c\\xf3\\x1b\\xd9e\\xec\\nJ[\\x04N\\xcf\\xa8\\xa6\\xa8\\x12\\x8d\\x08!\\xfe@}\\xb0
                                \\xa89\\xe6\\xef\\xbc\\xfb\\xdc\\x07\\xb7E\\x0f\\x1b)
                 b'!!!!!!!!x\\x9c\\x15\\xc7\\xc9\\r\\x00 \\x08\\x04\\xc0\\x96\\\\\\x94\\xcbn0H\\x03\\xda\\x7f\\x8c\\xf3
@@ -249,7 +249,7 @@ class Agent:
             bytes: Composed event.
 
         Examples:
-            $>>> compose_event('test')
+            >>> compose_event('test')
             b'6ef859712d8b215d9daf071ff67aaa62555551234567891:5555:test'
         """
         message = message.encode()
@@ -272,7 +272,7 @@ class Agent:
             bytes: Encrypted event.
 
         Examples:
-            $>>> agent.encrypt(b'!!!!!!!!x\\x9c\\x15\\xc7\\xc9\\r\\x00 \\x08\\x04\\xc0\\x96\\\\\\x94\\xcbn0H\\x03\\xda
+            >>> agent.encrypt(b'!!!!!!!!x\\x9c\\x15\\xc7\\xc9\\r\\x00 \\x08\\x04\\xc0\\x96\\\\\\x94\\xcbn0H\\x03\\xda
                                \\x7f\\x8c\\xf3\\x1b\\xd9e\\xec\\nJ[\\x04N\\xcf\\xa8\\xa6\\xa8\\x12\\x8d\\x08!\\xfe@}
                                \\xb0\\xa89\\xe6\\xef\\xbc\\xfb\\xdc\\x07\\xb7E\\x0f\\x1b')
                 b"\\xf8\\x8af[\\xfc'\\xf6j&1\\xd5\\xe1t|\\x810\\xe70G\\xe3\\xbc\\x8a\\xdbV\\x94y\\xa3A\\xb5q\\xf7
@@ -444,9 +444,8 @@ class Agent:
 
         logging.debug(f"Processing command: {message_list}")
 
-        if command in ['lock_restart', 'open', 'write', 'close', 'clear_upgrade_result']:
-            if command == 'lock_restart' and \
-                    self.stage_disconnect == 'lock_restart':
+        if command in ['lock_restart', 'open', 'write', 'close','clear_upgrade_result']:
+            if command == 'lock_restart' and self.stage_disconnect == 'lock_restart':
                 self.stop_receive = 1
             elif command == 'open' and self.stage_disconnect == 'open':
                 self.stop_receive = 1
@@ -975,7 +974,7 @@ class InjectorThread(threading.Thread):
     def keep_alive(self):
         """Send a keep alive message from the agent to the manager."""
         sleep(10)
-        logging.info("Startup - {}({})".format(self.agent.name, self.agent.id))
+        logging.debug("Startup - {}({})".format(self.agent.name, self.agent.id))
         self.sender.send_event(self.agent.startup_msg)
         self.sender.send_event(self.agent.keep_alive_msg)
         start_time = time()
@@ -1018,7 +1017,7 @@ class InjectorThread(threading.Thread):
         start_time = time()
         while self.stop_thread == 0:
             # Send agent inventory scan
-            logging.info(f"Scan started - {self.agent.name}({self.agent.id}) - "
+            logging.debug(f"Scan started - {self.agent.name}({self.agent.id}) - "
                   f"syscollector({self.agent.inventory.inventory_path})")
             scan_id = int(time())  # Random start scan ID
             for item in self.agent.inventory.inventory:
@@ -1028,7 +1027,7 @@ class InjectorThread(threading.Thread):
                 if self.totalMessages % self.agent.modules["syscollector"]["eps"] == 0:
                     self.totalMessages = 0
                     sleep(1.0 - ((time() - start_time) % 1.0))
-            logging.info("Scan ended - {self.agent.name}({self.agent.id}) - "
+            logging.debug("Scan ended - {self.agent.name}({self.agent.id}) - "
                   f"syscollector({self.agent.inventory.inventory_path})")
             sleep(self.agent.modules["syscollector"]["frequency"] - ((time() - start_time)
                                                                      % self.agent.modules["syscollector"]["frequency"]))
@@ -1039,7 +1038,7 @@ class InjectorThread(threading.Thread):
         start_time = time()
         while self.stop_thread == 0:
             # Send agent rootcheck scan
-            logging.info(f"Scan started - {self.agent.name}({self.agent.id}) "
+            logging.debug(f"Scan started - {self.agent.name}({self.agent.id}) "
                   f"- rootcheck({self.agent.rootcheck.rootcheck_path})")
             for item in self.agent.rootcheck.rootcheck:
                 self.sender.send_event(self.agent.create_event(item))
@@ -1047,7 +1046,7 @@ class InjectorThread(threading.Thread):
                 if self.totalMessages % self.agent.modules["rootcheck"]["eps"] == 0:
                     self.totalMessages = 0
                     sleep(1.0 - ((time() - start_time) % 1.0))
-            logging.info(f"Scan ended - {self.agent.name}({self.agent.id}) - rootcheck({self.agent.rootcheck.rootcheck_path})")
+            logging.debug(f"Scan ended - {self.agent.name}({self.agent.id}) - rootcheck({self.agent.rootcheck.rootcheck_path})")
             sleep(self.agent.modules["rootcheck"]["frequency"] - ((time() - start_time)
                                                                   % self.agent.modules["rootcheck"]["frequency"]))
 
@@ -1056,7 +1055,7 @@ class InjectorThread(threading.Thread):
         # message = "1:/var/log/syslog:Jan 29 10:03:41 master sshd[19635]:
         #   pam_unix(sshd:session): session opened for user vagrant by (uid=0)
         #   uid: 0"
-        logging.info(f"Starting - {self.agent.name}({self.agent.id})({self.agent.os}) - {self.module}")
+        logging.debug(f"Starting - {self.agent.name}({self.agent.id})({self.agent.os}) - {self.module}")
         if self.module == "keepalive":
             self.keep_alive()
         elif self.module == "fim":
@@ -1070,7 +1069,7 @@ class InjectorThread(threading.Thread):
         elif self.module == "receive_messages":
             self.agent.receive_message(self.sender)
         else:
-            logging.info("Module unknown: {}".format(self.module))
+            logging.debug("Module unknown: {}".format(self.module))
             pass
 
     def stop_rec(self):
