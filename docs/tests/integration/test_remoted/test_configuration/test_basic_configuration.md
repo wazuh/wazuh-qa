@@ -24,4 +24,4 @@ Confirm that the different options for remoted configuration work and are correc
 - Basic configuration: connection, port, protocol
 
 ## Code documentation
-::: tests.integration.test_remoted.test_configuration.test_basic_configuration
+::: tests.integration.test_remoted.test_configuration.test_basic_configuration_connection_valid

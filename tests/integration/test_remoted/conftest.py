@@ -9,6 +9,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 
 DAEMON_NAME = "wazuh-remoted"
+import subprocess as sb
 
 
 @pytest.fixture(scope='module')
@@ -20,5 +21,5 @@ def restart_remoted(get_configuration, request):
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
     try:
         control_service('start', daemon=DAEMON_NAME)
-    except ValueError:
+    except sb.CalledProcessError:
         pass

@@ -1,7 +1,7 @@
 - tags:
-  - test_basic_configuration
+  - test_basic_configuration_connection
   apply_to_modules:
-  - test_basic_configuration
+  - test_basic_configuration_connection
   sections:
   - section: remote
     elements:
@@ -13,3 +13,103 @@
         value: PORT
     - protocol:
         value: PROTOCOL
+
+- tags:
+  - test_basic_configuration_allowed_denied_ips
+  apply_to_modules:
+  - test_basic_configuration_allowed_denied_ips
+  sections:
+  - section: remote
+    elements:
+    - connection:
+        value: syslog
+    -  allowed-ips:
+         value: ALLOWED
+    -  denied-ips:
+         value: DENIED
+    - port:
+        value: 514
+    - protocol:
+        value: UDP
+
+- tags:
+  - test_basic_configuration_ipv6
+  apply_to_modules:
+  - test_basic_configuration_ipv6
+  sections:
+  - section: remote
+    elements:
+    - connection:
+        value: CONNECTION
+    -  allowed-ips:
+         value: 127.0.0.0/24
+    - port:
+        value: 1514
+    - ipv6:
+        value: 'yes'
+    - protocol:
+        value: TCP
+
+- tags:
+  - test_basic_configuration_local_ip
+  apply_to_modules:
+  - test_basic_configuration_local_ip
+  sections:
+  - section: remote
+    elements:
+    - connection:
+        value: secure
+    - port:
+        value: 1514
+    - local_ip:
+        value: LOCAL_IP
+    - protocol:
+        value: TCP
+
+- tags:
+  - test_basic_configuration_syslog_no_allowed_ips
+  apply_to_modules:
+  - test_basic_configuration_syslog_no_allowed_ips
+  sections:
+  - section: remote
+    elements:
+    - connection:
+        value: CONNECTION
+    - port:
+        value: 514
+    - protocol:
+        value: UDP
+
+- tags:
+  - test_basic_configuration_queue_size
+  apply_to_modules:
+  - test_basic_configuration_queue_size
+  sections:
+  - section: remote
+    elements:
+    - connection:
+        value: CONNECTION
+    - port:
+        value: PORT
+    - allowed-ips:
+        value: 192.145.1.2
+    - protocol:
+        value: TCP
+    - queue_size:
+        value: QUEUE_SIZE
+
+- tags:
+  - test_basic_configuration_rids_closing_time
+  apply_to_modules:
+  - test_basic_configuration_rids_closing_time
+  sections:
+  - section: remote
+    elements:
+    - connection:
+        value: CONNECTION
+    - port:
+        value: PORT
+    - protocol:
+        value: TCP
+    - rids_closing_time:
+        value: RIDS_CLOSING_TIME
