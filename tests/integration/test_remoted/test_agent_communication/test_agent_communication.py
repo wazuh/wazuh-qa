@@ -4,15 +4,13 @@
 import time
 import os
 import pytest
-import socket
-
+import logging
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from deps.wazuh_testing.wazuh_testing.tools.services import wait_for_remote_connection
-from wazuh_testing import wazuh_db as wdb
+from wazuh_testing.tools.services import wait_for_remote_connection
+from wazuh_testing.tools.sockets import send_request
 
 # Marks
-
 pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
@@ -20,15 +18,33 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_agent_communication.yaml')
 
 parameters = [
+    {'PROTOCOL': 'udp,tcp'},
     {'PROTOCOL': 'tcp'},
-    {'PROTOCOL': 'udp'}
+    {'PROTOCOL': 'udp'},
 ]
 
-configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=parameters)
+metadata = [
+    {'PROTOCOL': 'udp,tcp'},
+    {'PROTOCOL': 'tcp'},
+    {'PROTOCOL': 'udp'},
+]
+
+# test cases
+
+test_case = {
+    'disconnected': ('agent getconfig disconnected',
+                     'Cannot send request'),
+    'get_config': ('agent getconfig client',
+                   '{"client":{"config-profile":"centos8","notify_time":10,"time-reconnect":60}}'),
+    'get_state': ('logcollector getstate',
+                   '{"error":0,"data":{"global":{"start":"2021-02-26, 06:41:26","end":"2021-02-26 08:49:19"}}}')
+}
+
+
+configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 config_ids = [x['PROTOCOL'] for x in parameters]
 
 # Utils
-request_socket = '/var/ossec/queue/ossec/request'
 manager_address = "localhost"
 
 
@@ -49,54 +65,26 @@ def get_configuration(request):
     return request.param
 
 
-def test_disconnected_agent(get_configuration, configure_environment, restart_remoted):
-    cfg = get_configuration['metadata']
-    protocol = cfg['PROTOCOL']
-
-    agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0", debug=True)
-
-    msg_request = f'{agent.id} {command_request}'
-
-    if protocol == "UDP":
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-        request_msg = msg_request.encode()
-    else:
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        request_size = len(bytearray(msg_request, 'utf-8'))
-        request_msg = request_size.to_bytes(4, 'little') + msg_request.encode()
-
-    sock.connect(request_socket)
-    sock.send(request_msg)
-    response = sock.recv(100).decode()
-
-
-@pytest.mark.parametrize("command_request", ['agent getconfig client'])
-def test_message(get_configuration, configure_environment, restart_remoted):
+@pytest.mark.parametrize("command_request,expected_answer", test_case.values(), ids=test_case.keys())
+def test_request(get_configuration, configure_environment, restart_remoted, command_request, expected_answer):
     """
-    Writes a statistics request in $DIR/queue/ossec/request and check if remoted forwards it to the agent,
-    collects the response, and writes it in the socket.
+    Writes (config/state) requests in $DIR/queue/ossec/request and check if remoted forwards it to the agent,
+    collects the response, and writes it in the socket or returns an error message if the queried
+    agent is disconnected.
     """
-
     cfg = get_configuration['metadata']
-    protocol = cfg['PROTOCOL']
+    protocols = cfg['PROTOCOL'].split(',')
 
-    agent = create_agent(protocol)
+    for protocol in protocols:
+        logging.critical(protocol)
+        if "disconnected" in command_request:
+            agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0", debug=True)
+            wait_for_remote_connection(manager_address, protocol=protocol)
+        else:
+            agent = create_agent(protocol)
 
-    msg_request = f'{agent.id} {command_request}'
+        msg_request = f'{agent.id} {command_request}'
+        response = send_request(msg_request)
 
-    if protocol == "UDP":
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-        request_msg = msg_request.encode()
-    else:
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        request_size = len(bytearray(msg_request, 'utf-8'))
-        request_msg = request_size.to_bytes(4, 'little') + msg_request.encode()
-
-    sock.connect(request_socket)
-    sock.send(request_msg)
-    response = sock.recv(100).decode()
-
-    assert 'ok' in response, "Error in remoted response"
-    assert '{"client":{"config-profile":"centos8","notify_time":10,"time-reconnect":60}}' in response
-
+        assert expected_answer in response, "Remoted unexpected answer"
 
