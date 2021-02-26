@@ -26,7 +26,7 @@ with open(messages_path) as f:
 
 log_monitor_paths = [LOG_FILE_PATH]
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
-analysis_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'queue'))
+analysis_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'queue'))
 
 receiver_sockets_params = [(analysis_path, 'AF_UNIX', 'UDP')]
 

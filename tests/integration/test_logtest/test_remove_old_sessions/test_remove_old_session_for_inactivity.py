@@ -25,7 +25,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__)
 # Variables
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-logtest_sock = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'logtest'))
+logtest_sock = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'logtest'))
 receiver_sockets_params = [(logtest_sock, 'AF_UNIX', 'TCP')]
 receiver_sockets = None
 

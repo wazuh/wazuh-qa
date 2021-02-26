@@ -17,7 +17,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
-ANALYSISD_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'ossec', 'queue')
+ANALYSISD_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'sockets', 'queue')
 
 SERVER_ADDRESS = 'localhost'
 SERVER_NAME = 'vm-test'

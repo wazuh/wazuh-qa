@@ -23,7 +23,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__)
 
 # Variables
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-logtest_sock = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'logtest'))
+logtest_sock = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'logtest'))
 
 msg_create_session = """{"version":1, "command":"log_processing", "parameters":{
 "event": "Oct 15 21:07:56 linux-agent sshd[29205]: Invalid user blimey from 18.18.18.18 port 48928",

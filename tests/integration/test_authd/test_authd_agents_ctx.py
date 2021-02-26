@@ -40,7 +40,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 # Variables
 log_monitor_paths = []
 
-ls_sock_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'auth'))
+ls_sock_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'auth'))
 receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2'), (ls_sock_path, 'AF_UNIX', 'TCP')]
 
 monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]

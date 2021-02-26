@@ -22,7 +22,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 # Variables
 
 log_monitor_paths = [CLUSTER_LOGS_PATH]
-modulesd_socket_path = os.path.join(WAZUH_PATH, 'queue', 'ossec', 'krequest')
+modulesd_socket_path = os.path.join(WAZUH_PATH, 'queue', 'sockets', 'krequest')
 cluster_socket_address = ('localhost', 1516)
 
 receiver_sockets_params = [(cluster_socket_address, 'AF_INET', 'TCP')]  # SocketController items
