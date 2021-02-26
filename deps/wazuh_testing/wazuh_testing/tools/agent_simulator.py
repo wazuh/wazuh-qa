@@ -490,7 +490,7 @@ class Agent:
                     if self.short_version < "4.1":
                         sender.send_event(self.create_event(f'#!-req {req_code} ok {self.upgrade_exec_result}'))
                     else:
-                        sender.send_event(self.create_event(f'#!-req {req_code}]} {{"error":0, '
+                        sender.send_event(self.create_event(f'#!-req {req_code} {{"error":0, '
                                                             f'"message":"{self.upgrade_exec_result}", "data":[]}}'))
                     if self.send_upgrade_notification:
                         message = 'Upgrade was successful' if self.upgrade_script_result == 0 else 'Upgrade failed'
