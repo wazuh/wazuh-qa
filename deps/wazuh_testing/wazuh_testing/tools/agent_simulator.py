@@ -28,7 +28,7 @@ from time import mktime, localtime, sleep, time
 from wazuh_testing.tools.remoted_sim import Cipher
 
 logging.basicConfig(
-    level=logging.info,
+    level=logging.INFO,
     format="%(asctime)s:%(levelname)s:AGENT_SIMULATOR:%(message)s"
 )
 
@@ -41,7 +41,7 @@ agent_count = 1
 
 
 class Agent:
-    """ Class that allows us to simulate an agent registered in a manager.
+    """Class that allows us to simulate an agent registered in a manager.
 
     This simulated agent also allows sending-receiving messages and commands, in addition to simulating the
     syscollector, FIM and rootcheck modules by making use of other classes such as Inventory, Rootcheck, GeneratorFIM
@@ -94,7 +94,7 @@ class Agent:
     """
     def __init__(self, manager_address, cypher="aes", os=None, inventory_sample=None, rootcheck_sample=None,
                  id=None, name=None, key=None, version="v3.12.0", fim_eps=None, fim_integrity_eps=None,
-                 authd_password=None, debug=True):
+                 authd_password=None, debug=True, disable_all_modules=False):
         self.id = id
         self.name = name
         self.key = key
@@ -132,11 +132,11 @@ class Agent:
         self.upgrade_script_result = 0
         self.stop_receive = 0
         self.stage_disconnect = None
-        self.setup()
+        self.setup(disable_all_modules=disable_all_modules)
         if debug:
             logging.getLogger().setLevel(logging.DEBUG)
 
-    def setup(self):
+    def setup(self, disable_all_modules):
         """Set up agent: os, registration, encryption key, start up msg and activate modules."""
         self.set_os()
 
@@ -149,7 +149,7 @@ class Agent:
         self.create_encryption_key()
         self.create_keep_alive()
         self.create_hc_startup()
-        self.initialize_modules()
+        self.initialize_modules(disable_all_modules)
 
     def set_os(self):
         """Pick random OS from a custom os list."""
@@ -523,17 +523,21 @@ class Agent:
         msg = msg.replace("<VERSION>", self.long_version)
         self.keep_alive_msg = self.create_event(msg)
 
-    def initialize_modules(self):
-        """Initialize and enable agent modules."""
-        if self.modules["syscollector"]["status"] == "enabled":
+    def initialize_modules(self, disable_all_modules):
+        for module in ['syscollector', 'rootcheck', 'fim', 'fim_integrity', 'receive_messages', 'keepalive']:
+            self.modules[module]['status'] = 'disabled' if disable_all_modules else 'enabled'
+
+        if self.modules['syscollector']['status'] == 'enabled':
             self.inventory = Inventory(self.os, self.inventory_sample)
-        if self.modules["rootcheck"]["status"] == "enabled":
+        if self.modules['rootcheck']['status'] == 'enabled':
             self.rootcheck = Rootcheck(self.rootcheck_sample)
-        if self.modules["fim"]["status"] == "enabled":
+        if self.modules['fim']['status'] == 'enabled':
             self.fim = GeneratorFIM(self.id, self.name, self.short_version)
-        if self.modules["fim_integrity"]["status"] == "enabled":
+        if self.modules['fim_integrity']['status'] == 'enabled':
             self.fim_integrity = GeneratorIntegrityFIM(self.id, self.name, self.short_version)
 
+    def set_module_status(self, module_name, status):
+        self.modules[module_name]['status'] = status
 
 class Inventory:
     def __init__(self, os, inventory_sample=None):
@@ -841,7 +845,7 @@ class Sender:
     Attributes:
         manager_address (str): IP of the manager.
         manager_port (str, optional): port used by remoted in the manager.
-        protocol (str, optional): protocol used by remoted. tcp or udp.
+        protocol (str, optional): protocol used by remoted. TCP or UDP.
         socket (socket): sock_stream used to connect with remoted.
 
     Examples:
@@ -852,23 +856,22 @@ class Sender:
         >>> agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0")
         >>> sender = ag.Sender(manager_address, protocol="tcp")
     """
-    def __init__(self, manager_address, manager_port="1514", protocol="tcp"):
+    def __init__(self, manager_address, manager_port='1514', protocol='TCP'):
         self.manager_address = manager_address
         self.manager_port = manager_port
-        self.protocol = protocol
-        if self.protocol == "tcp":
+        self.protocol = protocol.upper()
+        if self.protocol == 'TCP':
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect((self.manager_address, int(self.manager_port)))
-        if self.protocol == "udp":
+        if self.protocol == 'UDP':
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def send_event(self, event):
-        if self.protocol == "tcp":
+        if self.protocol == 'TCP':
             length = pack('<I', len(event))
             self.socket.send(length + event)
-        if self.protocol == "udp":
-            self.socket.sendto(event, (self.manager_address,
-                                       int(self.manager_port)))
+        if self.protocol == 'UDP':
+            self.socket.sendto(event, (self.manager_address, int(self.manager_port)))
 
 
 class Injector:
