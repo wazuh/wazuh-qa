@@ -50,7 +50,7 @@ manager_address = "localhost"
 
 def create_agent(protocol="tcp"):
     wait_for_remote_connection(protocol=protocol)
-    agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0", debug=True)
+    agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0")
     sender = ag.Sender(manager_address, protocol=protocol)
     injector = ag.Injector(sender, agent)
     injector.run()
@@ -78,13 +78,15 @@ def test_request(get_configuration, configure_environment, restart_remoted, comm
     for protocol in protocols:
         logging.critical(protocol)
         if "disconnected" in command_request:
-            agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0", debug=True)
+            agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0")
             wait_for_remote_connection(manager_address, protocol=protocol)
         else:
             agent = create_agent(protocol)
 
         msg_request = f'{agent.id} {command_request}'
+
         response = send_request(msg_request)
+        logging.critical(f"Response: {response}")
 
         assert expected_answer in response, "Remoted unexpected answer"
 

@@ -27,12 +27,6 @@ from time import mktime, localtime, sleep, time
 from wazuh_testing.tools.remoted_sim import Cipher
 from wazuh_testing import wazuh_db as wdb
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s:%(levelname)s:AGENT_SIMULATOR:%(message)s"
-)
-
-
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 
 os_list = ["debian7", "debian8", "debian9", "debian10", "ubuntu12.04",
@@ -94,7 +88,7 @@ class Agent:
     """
     def __init__(self, manager_address, cypher="aes", os=None, inventory_sample=None, rootcheck_sample=None,
                  id=None, name=None, key=None, version="v3.12.0", fim_eps=None, fim_integrity_eps=None,
-                 authd_password=None, debug=True):
+                 authd_password=None):
         self.id = id
         self.name = name
         self.key = key
@@ -133,8 +127,6 @@ class Agent:
         self.stop_receive = 0
         self.stage_disconnect = None
         self.setup()
-        if debug:
-            logging.getLogger().setLevel(logging.DEBUG)
 
     def setup(self):
         """Set up agent: os, registration, encryption key, start up msg and activate modules."""
