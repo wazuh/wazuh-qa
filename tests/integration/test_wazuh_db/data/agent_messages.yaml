@@ -13,7 +13,7 @@
     stage: "agent vuln_cve checking test package"
   -
     input: 'agent 000 vuln_cve insert {"name":"test_package","version":"1.0","architecture":"x86","cve":"CVE-2021-1001"}'
-    output: "err Cannot execute vuln_cve insert command; SQL err: UNIQUE constraint failed: vuln_cves.name, vuln_cves.version, vuln_cves.architecture, vuln_cves.cve"
+    output: "ok"
     stage: "agent vuln_cve insert duplicated entry"
   -
     input: 'agent 001 vuln_cve insert {"name":"test package","version":"1.0","architecture":"x86","cve":"1001"}'
