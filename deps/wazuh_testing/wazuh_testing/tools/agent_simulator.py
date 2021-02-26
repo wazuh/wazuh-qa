@@ -19,6 +19,7 @@ import ssl
 import threading
 import zlib
 import logging
+import wazuh_testing.wazuh_db as wdb
 from random import randint, sample, choice
 from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
 from string import ascii_letters, digits
