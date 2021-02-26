@@ -5,7 +5,6 @@
 import os
 import pytest
 
-import wazuh_testing.api as api
 import wazuh_testing.remote as remote
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 

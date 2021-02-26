@@ -4,11 +4,9 @@
 
 import os
 import pytest
-import numpy as np
 
 import wazuh_testing.remote as remote
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-import wazuh_testing.api as api
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -86,11 +84,4 @@ def test_invalid_protocol(get_configuration, configure_environment, restart_remo
                                 error_message="The expected error output has not been produced")
 
     # Check that API query return the selected configuration
-    for field in cfg.keys():
-        api_answer = api.get_manager_configuration(section="remote", field=field)
-        if field == 'protocol':
-            array_protocol = np.array(cfg[field].split(","))
-            assert (array_protocol == api_answer).all(), \
-                "Wazuh API answer different from introduced configuration for protocol value"
-        else:
-            assert cfg[field] == api_answer, "Wazuh API answer different from introduced configuration"
+    remote.compare_config_api_response(cfg)

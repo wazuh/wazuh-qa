@@ -4,9 +4,11 @@
 
 import socket
 
+from wazuh_testing.tools import WAZUH_CONF
 from wazuh_testing.tools import ARCHIVES_LOG_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, make_callback, REMOTED_DETECTOR_PREFIX
+import wazuh_testing.api as api
 
 UDP = "UDP"
 TCP = "TCP"
@@ -29,7 +31,7 @@ def callback_invalid_value(option, value):
 
 
 def callback_error_in_configuration(severity):
-    msg = fr"{severity}: \(\d+\): Configuration error at '/var/ossec/etc/ossec.conf'."
+    msg = fr"{severity}: \(\d+\): Configuration error at '{WAZUH_CONF}'."
     return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
 
 
@@ -49,8 +51,7 @@ def callback_error_getting_protocol():
 
 
 def callback_warning_syslog_tcp_udp():
-    msg = fr"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time.\
-     Default value \(TCP\) will be used."
+    msg = fr"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time. Default value \(TCP\) will be used."
     return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
 
 
@@ -87,6 +88,16 @@ def callback_error_invalid_ip(ip):
 def callback_info_no_allowed_ips():
     msg = fr"INFO: \(\d+\): IP or network must be present in syslog access list \(allowed-ips\). Syslog server disabled."
     return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
+
+
+def compare_config_api_response(configuration):
+    # Check that API query return the selected configuration
+    for field in configuration.keys():
+        api_answer = api.get_manager_configuration(section="remote", field=field)
+        if field == 'protocol':
+            assert all(map(lambda x, y: x == y, configuration[field].split(","), api_answer))
+        else:
+            assert configuration[field] == api_answer, "Wazuh API answer different from introduced configuration"
 
 
 def get_protocols(all_protocols):

@@ -4,9 +4,7 @@
 
 import os
 import pytest
-import numpy as np
 
-import wazuh_testing.api as api
 import wazuh_testing.remote as remote
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 
@@ -20,22 +18,22 @@ configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.ya
 parameters = [
     {'PROTOCOL': 'UDP', 'CONNECTION': 'secure', 'PORT': '1514'},
     {'PROTOCOL': 'UDP', 'CONNECTION': 'syslog', 'PORT': '514'},
-    {'PROTOCOL': 'TCP', 'CONNECTION': 'syslog', 'PORT': '514'},
-    {'PROTOCOL': 'TCP', 'CONNECTION': 'secure', 'PORT': '1514'},
-    {'PROTOCOL': 'TCP,UDP', 'CONNECTION': 'secure', 'PORT': '1514'},
-    {'PROTOCOL': 'TCP,UDP', 'CONNECTION': 'syslog', 'PORT': '514'},
-    {'PROTOCOL': 'UDP,TCP', 'CONNECTION': 'secure', 'PORT': '1514'},
-    {'PROTOCOL': 'UDP,TCP', 'CONNECTION': 'syslog', 'PORT': '514'}
+    {'PROTOCOL': 'TCP', 'CONNECTION': 'syslog', 'PORT': '553'},
+    {'PROTOCOL': 'TCP', 'CONNECTION': 'secure', 'PORT': '23467'},
+    {'PROTOCOL': 'TCP,UDP', 'CONNECTION': 'secure', 'PORT': '1209'},
+    {'PROTOCOL': 'TCP,UDP', 'CONNECTION': 'syslog', 'PORT': '2134'},
+    {'PROTOCOL': 'UDP,TCP', 'CONNECTION': 'secure', 'PORT': '55632'},
+    {'PROTOCOL': 'UDP,TCP', 'CONNECTION': 'syslog', 'PORT': '2134'}
 ]
 metadata = [
     {'protocol': 'UDP', 'connection': 'secure', 'port': '1514'},
     {'protocol': 'UDP', 'connection': 'syslog', 'port': '514'},
-    {'protocol': 'TCP', 'connection': 'syslog', 'port': '514'},
-    {'protocol': 'TCP', 'connection': 'secure', 'port': '1514'},
-    {'protocol': 'TCP,UDP', 'connection': 'secure', 'port': '1514'},
-    {'protocol': 'TCP,UDP', 'connection': 'syslog', 'port': '514'},
-    {'protocol': 'UDP,TCP', 'connection': 'secure', 'port': '1514'},
-    {'protocol': 'UDP,TCP', 'connection': 'syslog', 'port': '514'}
+    {'protocol': 'TCP', 'connection': 'syslog', 'port': '553'},
+    {'protocol': 'TCP', 'connection': 'secure', 'port': '23467'},
+    {'protocol': 'TCP,UDP', 'connection': 'secure', 'port': '1209'},
+    {'protocol': 'TCP,UDP', 'connection': 'syslog', 'port': '2134'},
+    {'protocol': 'UDP,TCP', 'connection': 'secure', 'port': '55632'},
+    {'protocol': 'UDP,TCP', 'connection': 'syslog', 'port': '2134'}
 ]
 
 configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_connection",
@@ -73,11 +71,4 @@ def test_connection_valid(get_configuration, configure_environment, restart_remo
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
 
-    # Check that API query return the selected configuration
-    for field in cfg.keys():
-        api_answer = api.get_manager_configuration(section="remote", field=field)
-        if field == 'protocol':
-            array_protocol = np.array(cfg[field].split(","))
-            assert (array_protocol == api_answer).all(), "Wazuh API answer different from introduced configuration"
-        else:
-            assert cfg[field] == api_answer, "Wazuh API answer different from introduced configuration"
+    remote.compare_config_api_response(cfg)

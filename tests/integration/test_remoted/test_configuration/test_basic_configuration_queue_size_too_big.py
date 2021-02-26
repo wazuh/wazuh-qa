@@ -5,7 +5,6 @@
 import os
 import pytest
 
-import wazuh_testing.api as api
 import wazuh_testing.remote as remote
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 
@@ -46,6 +45,4 @@ def test_big_queue_size(get_configuration, configure_environment, restart_remote
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
 
-    for field in cfg.keys():
-        api_answer = api.get_manager_configuration(section="remote", field=field)
-        assert cfg[field] == api_answer, "Wazuh API answer different from introduced configuration"
+    remote.compare_config_api_response(cfg)
