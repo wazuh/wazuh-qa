@@ -51,7 +51,7 @@ def delete_sockets(path=None):
     """
     try:
         if path is None:
-            path = os.path.join(WAZUH_PATH, 'queue', 'ossec')
+            path = os.path.join(WAZUH_PATH, 'queue', 'sockets')
             for file in os.listdir(path):
                 os.remove(os.path.join(path, file))
             if os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb')):

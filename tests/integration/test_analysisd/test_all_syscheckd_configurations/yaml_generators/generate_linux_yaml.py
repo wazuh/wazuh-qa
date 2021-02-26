@@ -21,7 +21,7 @@ from wazuh_testing.tools.monitoring import ManInTheMiddle, QueueMonitor, FileMon
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_sockets
 
 alerts_json = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.json')
-analysis_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'queue'))
+analysis_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'queue'))
 
 # Syscheck variables
 n_directories = 0
