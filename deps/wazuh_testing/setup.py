@@ -33,7 +33,7 @@ setup(name='wazuh_testing',
           'pyOpenSSL==19.1.0',
           'pycryptodome==3.9.8',
           'configobj==5.0.6',
-          'netifaces=0.10.0'
+          'netifaces==0.10.9'
       ],
       zip_safe=False
       )

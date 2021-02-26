@@ -4,14 +4,10 @@
 
 import os
 import pytest
-import wazuh_testing.api as api
-from wazuh_testing.tools import LOG_FILE_PATH
 
+import wazuh_testing.api as api
+import wazuh_testing.remote as remote
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.monitoring import make_callback, REMOTED_DETECTOR_PREFIX
-from wazuh_testing.tools.services import control_service
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -19,7 +15,6 @@ pytestmark = pytest.mark.tier(level=0)
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
-
 
 parameters = [
     {'ALLOWED': '127.0.0.0/24', 'DENIED': '192.168.1.1/24'},
@@ -37,7 +32,8 @@ metadata = [
     {'allowed-ips': '127.0.0.0/30', 'denied-ips': '192.168.1.1/30'}
 ]
 
-configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_allowed_denied_ips", params=parameters, metadata=metadata)
+configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_allowed_denied_ips",
+                                           params=parameters, metadata=metadata)
 configuration_ids = [f"{x['ALLOWED']}_{x['DENIED']}" for x in parameters]
 
 
@@ -48,22 +44,14 @@ def get_configuration(request):
     return request.param
 
 
-def test_allowed_denied_ips_syslog(get_configuration, configure_environment):
+def test_allowed_denied_ips_syslog(get_configuration, configure_environment, restart_remoted):
     """
     Checks that "allowed-ips" and "denied-ips" could be configured without errors for syslog connection
     """
 
-    truncate_file(LOG_FILE_PATH)
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
-    control_service('restart', daemon='wazuh-remoted')
     cfg = get_configuration['metadata']
 
-    log_callback = make_callback(
-        fr"INFO: Remote syslog allowed from: '{cfg['allowed-ips']}'",
-        REMOTED_DETECTOR_PREFIX
-    )
-
+    log_callback = remote.callback_detect_syslog_allowed_ips(cfg['allowed-ips'])
     wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message="Wazuh remoted didn't start as expected.")
 
     for field in cfg.keys():
@@ -73,4 +61,3 @@ def test_allowed_denied_ips_syslog(get_configuration, configure_environment):
             assert (array_protocol == api_answer).all(), "Wazuh API answer different from introduced configuration"
         else:
             assert cfg[field] == api_answer, "Wazuh API answer different from introduced configuration"
-

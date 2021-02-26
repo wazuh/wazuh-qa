@@ -4,10 +4,10 @@
 
 import os
 import pytest
-from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.services import control_service
-import wazuh_testing.api as api
 
+import wazuh_testing.api as api
+import wazuh_testing.remote as remote
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -15,7 +15,6 @@ pytestmark = pytest.mark.tier(level=0)
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
-
 
 parameters = [
     {'CONNECTION': 'secure', 'PORT': '1514', 'QUEUE_SIZE': '1'},
@@ -29,9 +28,10 @@ metadata = [
     {'connection': 'secure', 'port': '1514', 'queue_size': '262144'}
 ]
 
-configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_queue_size" , params=parameters,
+configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_queue_size",
+                                           params=parameters,
                                            metadata=metadata)
-configuration_ids = [f"{x['CONNECTION'],x['PORT'],x['QUEUE_SIZE']}" for x in parameters]
+configuration_ids = [f"{x['CONNECTION'], x['PORT'], x['QUEUE_SIZE']}" for x in parameters]
 
 
 # fixtures
@@ -41,16 +41,12 @@ def get_configuration(request):
     return request.param
 
 
-
-def test_queue_size_valid(get_configuration, configure_environment):
+def test_queue_size_valid(get_configuration, configure_environment, restart_remoted):
     """
 
     """
-    control_service('restart', daemon='wazuh-remoted')
     cfg = get_configuration['metadata']
 
     for field in cfg.keys():
         api_answer = api.get_manager_configuration(section="remote", field=field)
-        assert cfg[field] == api_answer , "Wazuh API answer different from introduced configuration"
-
-
+        assert cfg[field] == api_answer, "Wazuh API answer different from introduced configuration"

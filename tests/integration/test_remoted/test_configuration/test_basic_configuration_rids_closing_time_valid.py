@@ -5,10 +5,9 @@
 import os
 import pytest
 
-from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.services import control_service
 import wazuh_testing.api as api
-import numpy as np
+import wazuh_testing.remote as remote
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -39,9 +38,10 @@ metadata = [
     {'connection': 'secure', 'port': '1514', 'rids_closing_time': '30d'}
 ]
 
-configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_rids_closing_time" , params=parameters,
+configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_rids_closing_time",
+                                           params=parameters,
                                            metadata=metadata)
-configuration_ids = [f"{x['CONNECTION'],x['PORT'],x['RIDS_CLOSING_TIME']}" for x in parameters]
+configuration_ids = [f"{x['CONNECTION'], x['PORT'], x['RIDS_CLOSING_TIME']}" for x in parameters]
 
 
 # fixtures
@@ -51,11 +51,11 @@ def get_configuration(request):
     return request.param
 
 
-def test_rids_closing_time_valid(get_configuration, configure_environment):
+def test_rids_closing_time_valid(get_configuration, configure_environment, restart_remoted):
     """
 
     """
-    control_service('restart', daemon='wazuh-remoted')
+
     cfg = get_configuration['metadata']
 
     # Check that API query return the selected configuration
@@ -66,4 +66,3 @@ def test_rids_closing_time_valid(get_configuration, configure_environment):
             assert (array_protocol == api_answer).all(), "Wazuh API answer different from introduced configuration"
         else:
             assert cfg[field] == api_answer, "Wazuh API answer different from introduced configuration"
-

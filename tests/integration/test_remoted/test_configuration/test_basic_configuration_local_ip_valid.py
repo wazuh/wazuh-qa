@@ -4,11 +4,12 @@
 
 import os
 import pytest
-import wazuh_testing.api as api
 import netifaces
 
+import wazuh_testing.api as api
+
+import wazuh_testing.remote as remote
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.services import control_service
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -32,8 +33,10 @@ for local_ip in array_interfaces_ip:
     parameters.append({'LOCAL_IP': local_ip})
     metadata.append({'local_ip': local_ip})
 
-configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_local_ip" , params=parameters, metadata=metadata)
+configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_local_ip", params=parameters,
+                                           metadata=metadata)
 configuration_ids = [f"{x['LOCAL_IP']}" for x in parameters]
+
 
 # fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
@@ -41,16 +44,15 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
-def test_local_ip_valid(get_configuration, configure_environment):
+
+def test_local_ip_valid(get_configuration, configure_environment, restart_remoted):
     """
 
     """
-    control_service('restart', daemon='wazuh-remoted')
+
     cfg = get_configuration['metadata']
 
     # Check that API query return the selected configuration
     for field in cfg.keys():
         api_answer = api.get_manager_configuration(section="remote", field=field)
         assert cfg[field] == api_answer, "Wazuh API answer different from introduced configuration"
-
-

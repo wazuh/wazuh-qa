@@ -4,17 +4,11 @@
 
 import os
 import pytest
-import time
 import numpy as np
-from wazuh_testing.tools import LOG_FILE_PATH
 
+import wazuh_testing.remote as remote
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.monitoring import make_callback, REMOTED_DETECTOR_PREFIX
-from wazuh_testing.tools.services import control_service
 import wazuh_testing.api as api
-
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -44,7 +38,8 @@ metadata = [
     {'protocol': 'TCP,UDP,Testing', 'connection': 'syslog', 'port': '514'}
 ]
 
-configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_connection", params=parameters, metadata=metadata)
+configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_connection",
+                                           params=parameters, metadata=metadata)
 configuration_ids = [f"{x['PROTOCOL']}_{x['CONNECTION']}_{x['PORT']}" for x in parameters]
 
 
@@ -55,63 +50,47 @@ def get_configuration(request):
     return request.param
 
 
-def test_invalid_protocol(get_configuration, configure_environment):
+def test_invalid_protocol(get_configuration, configure_environment, restart_remoted):
     """
     """
-
-    truncate_file(LOG_FILE_PATH)
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
-    control_service('restart', daemon='wazuh-remoted')
 
     cfg = get_configuration['metadata']
-
-    time.sleep(1)
-
     protocol_field = cfg['protocol'].split(',')
-    valid_protocol=[]
-    invalid_protocol_list=[]
-    for protocol in protocol_field:
-        if protocol == 'UDP' or protocol == 'TCP':
-            valid_protocol.append(protocol)
-        else:
-            invalid_protocol_list.append(protocol)
+
+    valid_invalid_protocols = remote.get_protocols(protocol_field)
+
+    valid_protocol = valid_invalid_protocols[0]
+    invalid_protocol_list = valid_invalid_protocols[1]
 
     for invalid_protocol in invalid_protocol_list:
-        log_callback = make_callback(
-            fr"WARNING: \(\d+\): Ignored invalid value '{invalid_protocol}' for 'protocol",
-            REMOTED_DETECTOR_PREFIX
-        )
+        log_callback = remote.callback_ignored_invalid_protocol(invalid_protocol)
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="The expected warning output has not been produced")
+                                error_message="The expected error output has not been produced")
 
     if len(valid_protocol) == 0:
-        log_callback = make_callback(
-            fr"WARNING: \(\d+\): Error getting protocol. Default value \(TCP\) will be used.",
-            REMOTED_DETECTOR_PREFIX
-        )
+        log_callback = remote.callback_error_getting_protocol()
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="The expected warning output has not been produced")
+                                error_message="The expected error output has not been produced")
+
     elif len(valid_protocol) == 1:
-        log_callback = make_callback(
-            fr"Started \(pid: \d+\). Listening on port {cfg['port']}\/{cfg['protocol']} \({cfg['connection']}\).",
-            REMOTED_DETECTOR_PREFIX
-        )
+        log_callback = remote.callback_detect_remoted_started(cfg['port'], valid_protocol[0], cfg['connection'])
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="The expected output has not been produced")
+                                error_message="The expected error output has not been produced")
+
     else:
-        log_callback = make_callback(
-            fr"Started \(pid: \d+\). Listening on port {cfg['port']}\/TCP,UDP \({cfg['connection']}\).",
-            REMOTED_DETECTOR_PREFIX
-        )
+        used_protocol = 'TCP,UDP'
+        if cfg['connection'] == 'syslog':
+            used_protocol = 'TCP'
+        log_callback = remote.callback_detect_remoted_started(cfg['port'], used_protocol, cfg['connection'])
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="The expected output has not been produced")
+                                error_message="The expected error output has not been produced")
 
     # Check that API query return the selected configuration
     for field in cfg.keys():
         api_answer = api.get_manager_configuration(section="remote", field=field)
         if field == 'protocol':
             array_protocol = np.array(cfg[field].split(","))
-            assert (array_protocol == api_answer).all(), "Wazuh API answer different from introduced configuration for protocol value"
+            assert (array_protocol == api_answer).all(), \
+                "Wazuh API answer different from introduced configuration for protocol value"
         else:
             assert cfg[field] == api_answer, "Wazuh API answer different from introduced configuration"

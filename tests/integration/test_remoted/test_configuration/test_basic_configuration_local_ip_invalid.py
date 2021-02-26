@@ -5,12 +5,8 @@
 import os
 import pytest
 
-from wazuh_testing.tools import LOG_FILE_PATH
+import wazuh_testing.remote as remote
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.monitoring import make_callback, REMOTED_DETECTOR_PREFIX
-from wazuh_testing.tools.services import control_service
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -38,6 +34,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.ya
 
 configuration_ids = [f"{x['LOCAL_IP']}" for x in parameters]
 
+
 # fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
@@ -45,22 +42,11 @@ def get_configuration(request):
     return request.param
 
 
-def test_local_ip_invalid(get_configuration, configure_environment):
+def test_local_ip_invalid(get_configuration, configure_environment, restart_remoted):
     """
 
     """
-    truncate_file(LOG_FILE_PATH)
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-    try:
-        control_service('restart', daemon='wazuh-remoted')
-        assert 0
-    except:
 
-        log_callback = make_callback(
-            fr"CRITICAL: \(\d+\): Unable to Bind port '1514' due to \[\(\d+\)\-\(Cannot assign requested address\)\]",
-            REMOTED_DETECTOR_PREFIX
-        )
-
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="The expected error output has not been produced.")
-
+    log_callback = remote.callback_error_bind_port()
+    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                            error_message="The expected error output has not been produced")

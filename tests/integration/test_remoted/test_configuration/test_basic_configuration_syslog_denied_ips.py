@@ -24,7 +24,7 @@ metadata = [
     {'allowed-ips': '127.0.0.0/24', 'denied-ips': '127.0.0.1'}
 ]
 
-configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
+configurations = load_wazuh_configurations(configurations_path, 'test_basic_configuration_allowed_denied_ips' , params=parameters, metadata=metadata)
 configuration_ids = [f"{x['ALLOWED']}_{x['DENIED']}" for x in parameters]
 
 
@@ -35,7 +35,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_allowed_denied_ips_syslog(get_configuration, configure_environment, restart_remoted):
+def test_denied_ips_syslog(get_configuration, configure_environment, restart_remoted):
     """Checks that "allowed-ips" and "denied-ips" could be configured without errors for syslog connection"""
     cfg = get_configuration['metadata']
 
@@ -54,4 +54,3 @@ def test_allowed_denied_ips_syslog(get_configuration, configure_environment, res
     for field in cfg.keys():
         api_answer = api.get_manager_configuration(section='remote', field=field)
         assert cfg[field] == api_answer, "Wazuh API answer different from introduced configuration"
-

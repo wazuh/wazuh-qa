@@ -5,12 +5,9 @@
 import os
 import pytest
 
-from wazuh_testing.tools import LOG_FILE_PATH
+import wazuh_testing.api as api
+import wazuh_testing.remote as remote
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.monitoring import make_callback, REMOTED_DETECTOR_PREFIX
-from wazuh_testing.tools.services import control_service
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -29,9 +26,10 @@ metadata = [
     {'connection': 'secure', 'port': '1514', 'rids_closing_time': '4S'}
 ]
 
-configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_rids_closing_time" , params=parameters,
+configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_rids_closing_time",
+                                           params=parameters,
                                            metadata=metadata)
-configuration_ids = [f"{x['CONNECTION'],x['PORT'],x['RIDS_CLOSING_TIME']}" for x in parameters]
+configuration_ids = [f"{x['CONNECTION'], x['PORT'], x['RIDS_CLOSING_TIME']}" for x in parameters]
 
 
 # fixtures
@@ -41,18 +39,11 @@ def get_configuration(request):
     return request.param
 
 
-def test_rids_closing_time_invalid(get_configuration, configure_environment):
-    truncate_file(LOG_FILE_PATH)
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+def test_rids_closing_time_invalid(get_configuration, configure_environment, restart_remoted):
+    """
 
-    try:
-        control_service('restart', daemon='wazuh-remoted')
-        assert 0
-    except:
+    """
 
-        log_callback = make_callback(
-            fr"ERROR: Invalid value for option '\<rids_closing_time\>'",
-            REMOTED_DETECTOR_PREFIX
-        )
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="The expected error output has not been produced.")
+    log_callback = remote.callback_error_invalid_value_for('rids_closing_time')
+    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                            error_message="The expected error output has not been produced")

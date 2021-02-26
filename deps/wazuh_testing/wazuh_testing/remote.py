@@ -19,8 +19,85 @@ def callback_detect_syslog_allowed_ips(syslog_ips):
 
 
 def callback_detect_syslog_denied_ips(syslog_ips):
-    msg = fr"Message from \'{syslog_ips}\' not allowed. Cannot find the ID of the agent.""
+    msg = fr"Message from \'{syslog_ips}\' not allowed. Cannot find the ID of the agent."
     return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
+
+
+def callback_invalid_value(option, value):
+    msg = fr"ERROR: \(\d+\): Invalid value for element '{option}': {value}."
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
+
+
+def callback_error_in_configuration(severity):
+    msg = fr"{severity}: \(\d+\): Configuration error at '/var/ossec/etc/ossec.conf'."
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
+
+
+def callback_error_invalid_port(port):
+    msg = fr"ERROR: \(\d+\): Invalid port number: '{port}'."
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
+
+
+def callback_ignored_invalid_protocol(protocol):
+    msg = fr"WARNING: \(\d+\): Ignored invalid value '{protocol}' for 'protocol'"
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
+
+
+def callback_error_getting_protocol():
+    msg = fr"WARNING: \(\d+\): Error getting protocol. Default value \(TCP\) will be used."
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
+
+
+def callback_warning_syslog_tcp_udp():
+    msg = fr"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time.\
+     Default value \(TCP\) will be used."
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
+
+
+def callback_warning_secure_ipv6():
+    msg = fr"WARNING: \(\d+\): Secure connection does not support IPv6. IPv4 will be used instead."
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
+
+
+def callback_error_bind_port():
+    msg = fr"CRITICAL: \(\d+\): Unable to Bind port '1514' due to \[\(\d+\)\-\(Cannot assign requested address\)\]"
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
+
+
+def callback_error_queue_size_syslog():
+    msg = fr"ERROR: Invalid option \<queue_size\> for Syslog remote connection."
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
+
+
+def callback_queue_size_too_big():
+    msg = fr"WARNING: Queue size is very high. The application may run out of memory."
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
+
+
+def callback_error_invalid_value_for(option):
+    msg = fr"ERROR: Invalid value for option '\<{option}\>'"
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
+
+
+def callback_error_invalid_ip(ip):
+    msg = fr"ERROR: \(\d+\): Invalid ip address: '{ip}'."
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
+
+
+def callback_info_no_allowed_ips():
+    msg = fr"INFO: \(\d+\): IP or network must be present in syslog access list \(allowed-ips\). Syslog server disabled."
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
+
+
+def get_protocols(all_protocols):
+    valid_protocols = []
+    invalid_protocols = []
+    for protocol in all_protocols:
+        if protocol == 'UDP' or protocol == 'TCP':
+            valid_protocols.append(protocol)
+        else:
+            invalid_protocols.append(protocol)
+    return [valid_protocols, invalid_protocols]
 
 
 def callback_detect_remoted_started(port, protocol, connection_type="secure"):
@@ -36,8 +113,15 @@ def callback_detect_remoted_started(port, protocol, connection_type="secure"):
     Returns:
         callable: callback to detect this event
     """
-    msg = fr"Started \(pid: \d+\). Listening on port {port}\/{protocol.upper()} \({connection_type}\)."
+    protocol_array = protocol.split(',')
+    protocol_array.sort()
 
+    protocol_string = protocol
+
+    if len(protocol_array) > 1:
+        protocol_string = protocol_array[0] + ',' + protocol_array[1]
+
+    msg = fr"Started \(pid: \d+\). Listening on port {port}\/{protocol_string.upper()} \({connection_type}\)."
     return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
 
 

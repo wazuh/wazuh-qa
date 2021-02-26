@@ -4,12 +4,9 @@
 
 import os
 import pytest
-from wazuh_testing.tools import LOG_FILE_PATH
+
+import wazuh_testing.remote as remote
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.monitoring import make_callback, REMOTED_DETECTOR_PREFIX
-from wazuh_testing.tools.services import control_service
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -27,7 +24,8 @@ metadata = [
     {'connection': 'syslog', 'port': '514', 'queue_size': '1200'}
 ]
 
-configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_queue_size", params=parameters,
+configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_queue_size",
+                                           params=parameters,
                                            metadata=metadata)
 
 configuration_ids = [f"{x['CONNECTION'], x['PORT'], x['QUEUE_SIZE']}" for x in parameters]
@@ -39,17 +37,12 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
-def test_queue_size_syslog(get_configuration, configure_environment):
-    truncate_file(LOG_FILE_PATH)
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    try:
-        control_service('restart', daemon='wazuh-remoted')
-        assert 0
-    except:
-        log_callback = make_callback(
-            fr"ERROR: Invalid option \<queue_size\> for Syslog remote connection.",
-            REMOTED_DETECTOR_PREFIX
-        )
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="The expected warning output has not been produced.")
+def test_queue_size_syslog(get_configuration, configure_environment, restart_remoted):
+    """
+
+    """
+
+    log_callback = remote.callback_error_queue_size_syslog()
+    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                            error_message="The expected error output has not been produced")

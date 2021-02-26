@@ -4,16 +4,11 @@
 
 import os
 import pytest
-import time
 import numpy as np
-import wazuh_testing.api as api
-from wazuh_testing.tools import LOG_FILE_PATH
 
+import wazuh_testing.api as api
+import wazuh_testing.remote as remote
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.monitoring import make_callback, REMOTED_DETECTOR_PREFIX
-from wazuh_testing.tools.services import control_service
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -43,7 +38,8 @@ metadata = [
     {'protocol': 'UDP,TCP', 'connection': 'syslog', 'port': '514'}
 ]
 
-configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_connection", params=parameters, metadata=metadata)
+configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_connection",
+                                           params=parameters, metadata=metadata)
 configuration_ids = [f"{x['PROTOCOL']}_{x['CONNECTION']}_{x['PORT']}" for x in parameters]
 
 
@@ -54,7 +50,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_connection(get_configuration, configure_environment):
+def test_connection_valid(get_configuration, configure_environment, restart_remoted):
     """
     Checks that "connection" option could be configured as "secure" or "syslog" without errors
         this option specifies a type of incoming connection to accept: secure or syslog.
@@ -62,32 +58,20 @@ def test_connection(get_configuration, configure_environment):
     Checks that the API answer for manager connection coincides with the option selected on ossec.conf
     """
 
-    truncate_file(LOG_FILE_PATH)
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
-    control_service('restart', daemon='wazuh-remoted')
-
     cfg = get_configuration['metadata']
 
-    time.sleep(1)
-
-    log_message_connection = "Started \(pid: \d+\). Listening on port {cfg['port']}\/{cfg['protocol']} \({cfg['connection']}\)."
+    used_protocol = cfg['protocol']
 
     if (cfg['protocol'] == 'TCP,UDP' or cfg['protocol'] == 'UDP,TCP') and cfg['connection'] == 'syslog':
-        log_callback = make_callback(
-            fr"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time. Default value \(TCP\) will be used.",
-            REMOTED_DETECTOR_PREFIX
-        )
+        log_callback = remote.callback_warning_syslog_tcp_udp()
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="The expected warning output has not been produced.")
-        log_message_connection = "Started \(pid: \d+\). Listening on port {cfg['port']}\/TCP \({cfg['connection']}\)."
+                                error_message="The expected error output has not been produced")
 
-    log_callback = make_callback(
-        fr"{log_message_connection}",
-        REMOTED_DETECTOR_PREFIX
-    )
+        used_protocol = 'TCP'
+
+    log_callback = remote.callback_detect_remoted_started(cfg['port'], used_protocol, cfg['connection'])
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected output has not been produced.")
+                            error_message="The expected error output has not been produced")
 
     # Check that API query return the selected configuration
     for field in cfg.keys():
@@ -97,4 +81,3 @@ def test_connection(get_configuration, configure_environment):
             assert (array_protocol == api_answer).all(), "Wazuh API answer different from introduced configuration"
         else:
             assert cfg[field] == api_answer, "Wazuh API answer different from introduced configuration"
-

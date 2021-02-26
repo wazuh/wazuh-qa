@@ -4,15 +4,11 @@
 
 import os
 import pytest
-import time
-import wazuh_testing.api as api
-from wazuh_testing.tools import LOG_FILE_PATH
+import numpy as np
 
+import wazuh_testing.api as api
+import wazuh_testing.remote as remote
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.monitoring import make_callback, REMOTED_DETECTOR_PREFIX
-from wazuh_testing.tools.services import control_service
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -31,7 +27,7 @@ metadata = [
     {'connection': 'syslog'}
 ]
 
-configurations = load_wazuh_configurations(configurations_path, __name__ , params=parameters, metadata=metadata)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 configuration_ids = [f"{x['CONNECTION']}" for x in parameters]
 
 
@@ -42,21 +38,16 @@ def get_configuration(request):
     return request.param
 
 
-def test_ipv6(get_configuration, configure_environment):
+def test_ipv6(get_configuration, configure_environment, restart_remoted):
     """
     """
-    truncate_file(LOG_FILE_PATH)
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    control_service('restart', daemon='wazuh-remoted')
-    time.sleep(1)
     cfg = get_configuration['metadata']
+
     if cfg['connection'] == 'secure':
-        log_callback = make_callback(
-            fr"WARNING: \(\d+\): Secure connection does not support IPv6. IPv4 will be used instead.",
-            REMOTED_DETECTOR_PREFIX
-        )
-        wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message="The expected warning output has not been produced.")
+        log_callback = remote.callback_warning_secure_ipv6()
+        wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                error_message="The expected error output has not been produced")
 
     # Check that API query return the selected configuration
     for field in cfg.keys():
@@ -66,4 +57,3 @@ def test_ipv6(get_configuration, configure_environment):
             assert (array_protocol == api_answer).all(), "Wazuh API answer different from introduced configuration"
         else:
             assert cfg[field] == api_answer, "Wazuh API answer different from introduced configuration"
-
