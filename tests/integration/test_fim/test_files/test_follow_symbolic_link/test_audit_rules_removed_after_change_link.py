@@ -5,10 +5,8 @@ import os
 import subprocess
 
 import pytest
+import wazuh_testing.fim as fim
 
-
-from wazuh_testing.fim import generate_params, create_file, REGULAR, SYMLINK, callback_detect_event, \
-                              LOG_FILE_PATH, change_internal_options, wait_for_audit
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing import global_parameters
@@ -21,7 +19,7 @@ from test_fim.test_files.test_follow_symbolic_link.common import test_directorie
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
 
 # Variables
 
@@ -38,7 +36,7 @@ param_dir = {
 
 # Configurations
 
-conf_params, conf_metadata = generate_params(extra_params=param_dir, modes=['whodata'])
+conf_params, conf_metadata = fim.generate_params(extra_params=param_dir, modes=['whodata'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
 # Functions
@@ -49,9 +47,9 @@ def extra_configuration_before_yield():
     Setup the symlink to one folder
     """
     # Symlink pointing to testdir1
-    create_file(SYMLINK, symlink_root_path, symlink_name, target=testdir1)
+    fim.create_file(fim.SYMLINK, symlink_root_path, symlink_name, target=testdir1)
     # Set symlink_scan_interval to a given value
-    change_internal_options(param='syscheck.symlink_scan_interval', value=link_interval)
+    fim.change_internal_options(param='syscheck.symlink_scan_interval', value=link_interval)
 
 
 def extra_configuration_after_yield():
@@ -60,7 +58,7 @@ def extra_configuration_after_yield():
     """
     # Symlink pointing to testdir1
     os.remove(symlink_path)
-    change_internal_options(param='syscheck.symlink_scan_interval', value=600)
+    fim.change_internal_options(param='syscheck.symlink_scan_interval', value=600)
 
 
 # fixtures
@@ -85,6 +83,11 @@ def test_audit_rules_removed_after_change_link(replaced_target, new_target, file
         replaced_target (str): Directory where the link is pointing.
         new_target (str): Directory where the link will be pointed after it's updated.
         file_name (str): Name of the file that will be created inside the folders.
+        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
+        get_configuration (fixture): Gets the current configuration of the test.
+        configure_environment (fixture): Configure the environment for the execution of the test.
+        restart_syscheckd (fixture): Restarts syscheck.
+        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
 
     Raises:
         TimeoutError: If an expected event couldn't be captured.
@@ -92,8 +95,8 @@ def test_audit_rules_removed_after_change_link(replaced_target, new_target, file
 
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    create_file(REGULAR, replaced_target, file_name)
-    ev = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+    fim.create_file(fim.REGULAR, replaced_target, file_name)
+    ev = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_detect_event,
                                  error_message='Did not receive expected "Sending FIM event: ..." event').result()
 
     assert ev['data']['type'] == 'added' and ev['data']['path'] == os.path.join(replaced_target, file_name)
@@ -102,11 +105,11 @@ def test_audit_rules_removed_after_change_link(replaced_target, new_target, file
 
     modify_symlink(new_target, symlink_path)
     wait_for_symlink_check(wazuh_log_monitor)
-    wait_for_audit(True, wazuh_log_monitor)
+    fim.wait_for_audit(True, wazuh_log_monitor)
 
     rules_paths = str(subprocess.check_output(['auditctl', '-l']))
-    create_file(REGULAR, new_target, file_name)
-    ev = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+    fim.create_file(fim.REGULAR, new_target, file_name)
+    ev = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_detect_event,
                                  error_message='Did not receive expected "Sending FIM event: ..." event').result()
 
     assert ev['data']['type'] == 'added' and ev['data']['path'] == os.path.join(new_target, file_name)

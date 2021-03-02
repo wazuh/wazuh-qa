@@ -7,16 +7,9 @@ import subprocess
 
 import psutil
 import pytest
+import wazuh_testing.fim as fim
+
 from wazuh_testing import logger
-from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_added_rule,
-                               callback_audit_connection,
-                               callback_audit_health_check,
-                               callback_audit_reloaded_rule,
-                               callback_audit_rules_manipulation,
-                               callback_realtime_added_directory,
-                               callback_audit_key,
-                               create_file, REGULAR,
-                               detect_initial_scan)
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -33,7 +26,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2'), os.path.join('/', 'testdir3')]
 testdir1, testdir2, testdir3 = test_directories
 
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
 
 # configurations
 
@@ -58,16 +51,20 @@ def test_audit_health_check(tags_to_apply, get_configuration,
     """Check if the health check is passed.
 
     Args:
-      tags_to_apply (set): Configuration tag to apply in the test.
+        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
+        get_configuration (fixture): Gets the current configuration of the test.
+        configure_environment (fixture): Configure the environment for the execution of the test.
+        restart_syscheckd (fixture): Restarts syscheck.
+        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
 
     Raises:
-      TimeoutError: If an expected event couldn't be captured.
+        TimeoutError: If an expected event couldn't be captured.
     """
 
     logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    wazuh_log_monitor.start(timeout=20, callback=callback_audit_health_check,
+    wazuh_log_monitor.start(timeout=20, callback=fim.callback_audit_health_check,
                             error_message='Health check failed')
 
 
@@ -79,18 +76,22 @@ def test_added_rules(tags_to_apply, get_configuration,
     """Check if the specified folders are added to Audit rules list.
 
     Args:
-      tags_to_apply (set): Configuration tag to apply in the test.
+        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
+        get_configuration (fixture): Gets the current configuration of the test.
+        configure_environment (fixture): Configure the environment for the execution of the test.
+        restart_syscheckd (fixture): Restarts syscheck.
+        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
 
     Raises:
-      TimeoutError: If an expected event couldn't be captured.
-      ValueError: If the path of the event is wrong.
+        TimeoutError: If an expected event couldn't be captured.
+        ValueError: If the path of the event is wrong.
     """
 
     logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
     logger.info('Checking the event...')
     events = wazuh_log_monitor.start(timeout=20,
-                                     callback=callback_audit_added_rule,
+                                     callback=fim.callback_audit_added_rule,
                                      accum_results=3,
                                      error_message='Folders were not added to Audit rules list'
                                      ).result()
@@ -108,11 +109,15 @@ def test_readded_rules(tags_to_apply, get_configuration,
     """Check if the removed rules are added to Audit rules list.
 
     Args:
-      tags_to_apply (set): Configuration tag to apply in the test.
+        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
+        get_configuration (fixture): Gets the current configuration of the test.
+        configure_environment (fixture): Configure the environment for the execution of the test.
+        restart_syscheckd (fixture): Restarts syscheck.
+        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
 
     Raises:
-      TimeoutError: If an expected event couldn't be captured.
-      ValueError: If the path of the event is wrong.
+        TimeoutError: If an expected event couldn't be captured.
+        ValueError: If the path of the event is wrong.
     """
 
     logger.info('Applying the test configuration')
@@ -124,12 +129,12 @@ def test_readded_rules(tags_to_apply, get_configuration,
         os.system(command)
 
         wazuh_log_monitor.start(timeout=20,
-                                callback=callback_audit_rules_manipulation,
+                                callback=fim.callback_audit_rules_manipulation,
                                 error_message=f'Did not receive expected "manipulation" event with the '
                                               f'command {command}')
 
         events = wazuh_log_monitor.start(timeout=10,
-                                         callback=callback_audit_added_rule,
+                                         callback=fim.callback_audit_added_rule,
                                          error_message='Did not receive expected "added" event with the rule '
                                                        'modification').result()
 
@@ -144,11 +149,15 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
     """Check if the rules are added to Audit when it restarts.
 
     Args:
-      tags_to_apply (set): Configuration tag to apply in the test.
+        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
+        get_configuration (fixture): Gets the current configuration of the test.
+        configure_environment (fixture): Configure the environment for the execution of the test.
+        restart_syscheckd (fixture): Restarts syscheck.
+        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
 
     Raises:
-      TimeoutError: If an expected event couldn't be captured.
-      ValueError: If the path of the event is wrong.
+        TimeoutError: If an expected event couldn't be captured.
+        ValueError: If the path of the event is wrong.
     """
 
     logger.info('Applying the test configuration')
@@ -160,12 +169,12 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
     p.wait()
 
     wazuh_log_monitor.start(timeout=10,
-                            callback=callback_audit_connection,
+                            callback=fim.callback_audit_connection,
                             error_message=f'Did not receive expected "connect" event with the command '
                                           f'{" ".join(restart_command)}')
 
     events = wazuh_log_monitor.start(timeout=30,
-                                     callback=callback_audit_added_rule,
+                                     callback=fim.callback_audit_added_rule,
                                      accum_results=3,
                                      error_message=f'Did not receive expected "load" event with the command '
                                                    f'{" ".join(restart_command)}').result()
@@ -183,11 +192,14 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
     """Check if the rules are changed to realtime when Audit stops.
 
     Args:
-      tags_to_apply (set): Configuration tag to apply in the test.
-
+        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
+        get_configuration (fixture): Gets the current configuration of the test.
+        configure_environment (fixture): Configure the environment for the execution of the test.
+        restart_syscheckd (fixture): Restarts syscheck.
+        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
     Raises:
-      TimeoutError: If an expected event couldn't be captured.
-      ValueError: If the path of the event is wrong.
+        TimeoutError: If an expected event couldn't be captured.
+        ValueError: If the path of the event is wrong.
     """
 
     logger.info('Applying the test configuration')
@@ -199,7 +211,7 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
     p.wait()
 
     events = wazuh_log_monitor.start(timeout=30,
-                                     callback=callback_realtime_added_directory,
+                                     callback=fim.callback_realtime_added_directory,
                                      accum_results=3,
                                      error_message=f'Did not receive expected "directory added" for monitoring '
                                                    f'with the command {" ".join(stop_command)}').result()
@@ -221,12 +233,16 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
     a file is created.
 
     Args:
-      audit_key (str): Name of the audit_key to monitor.
-      tags_to_apply (set): Configuration tag to apply in the test.
+        audit_key (str): Name of the audit_key to monitor.
+        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
+        get_configuration (fixture): Gets the current configuration of the test.
+        configure_environment (fixture): Configure the environment for the execution of the test.
+        restart_syscheckd (fixture): Restarts syscheck.
+        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
 
     Raises:
-      TimeoutError: If an expected event couldn't be captured.
-      ValueError: If the path of the event is wrong.
+        TimeoutError: If an expected event couldn't be captured.
+        ValueError: If the path of the event is wrong.
     """
 
     logger.info('Applying the test configuration')
@@ -238,15 +254,15 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
 
     # Restart and for wazuh
     control_service('stop')
-    truncate_file(LOG_FILE_PATH)
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    truncate_file(fim.LOG_FILE_PATH)
+    wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
     control_service('start')
-    detect_initial_scan(wazuh_log_monitor)
+    fim.detect_initial_scan(wazuh_log_monitor)
 
     # Look for audit_key word
-    create_file(REGULAR, path, "testfile")
+    fim.create_file(fim.REGULAR, path, "testfile")
     events = wazuh_log_monitor.start(timeout=30,
-                                     callback=callback_audit_key,
+                                     callback=fim.callback_audit_key,
                                      accum_results=1,
                                      error_message=f'Did not receive expected "Match audit_key ..." event '
                                                    f'with the command {" ".join(add_rule_command)}').result()
@@ -265,13 +281,17 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
     the file again.
 
     Args:
-      tags_to_apply (set): Configuration tag to apply in the test.
-      should_restart (boolean): True if Auditd should restart, False otherwise
+        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
+        should_restart (boolean): True if Auditd should restart, False otherwise
+        get_configuration (fixture): Gets the current configuration of the test.
+        configure_environment (fixture): Configure the environment for the execution of the test.
+        restart_syscheckd (fixture): Restarts syscheck.
+        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
 
     Raises:
-      TimeoutError: If an expected event couldn't be captured.
-      ValueError: If the time before the and after the restart are equal when auditd has been restarted or if the time
-                  before and after the restart are different when auditd hasn't been restarted
+        TimeoutError: If an expected event couldn't be captured.
+        ValueError: If the time before the and after the restart are equal when auditd has been restarted or if the time
+                    before and after the restart are different when auditd hasn't been restarted
     """
 
     def get_audit_creation_time():
