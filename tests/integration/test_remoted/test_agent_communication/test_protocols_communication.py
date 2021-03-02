@@ -93,7 +93,8 @@ def validate_agent_manager_protocol_communication(protocol, manager_port):
 
     # Wait until the threads end
     monitor_thread.join()
-    send_message_thread.join()
+    _, sender = send_message_thread.join()
+    sender.socket.close()
 
 
 # Fixtures

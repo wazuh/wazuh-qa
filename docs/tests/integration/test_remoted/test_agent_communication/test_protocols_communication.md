@@ -19,7 +19,7 @@ protocols simultaneously.
 ## Expected behavior
 
 Success if the event has been found in the manager's `archives.log` after sending it from the agent, using different
-protocols and ports. Failure otherwise
+protocols and ports. Failure otherwise.
 
 ## Testing
 
@@ -37,13 +37,10 @@ a difference of 2 seconds.
 
 ### Checks
 
-**Block 1**
 - **TCP and port 1514**
 - **UDP and port 1514**
 - **TCP,UDP and port 1514**
 - **UDP,TCP and port 1514**
-
-**Block 2**
 - **TCP and port 56000**
 - **UDP and port 56000**
 - **TCP,UDP and port 56000**
