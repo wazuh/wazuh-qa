@@ -52,10 +52,12 @@ def test_max_files_per_second(get_configuration, configure_environment, restart_
     for i in range(n_files_to_create):
         create_file(REGULAR, test_directories[0], f'test_{i}', content='')
 
+    extra_timeout = n_files_to_create / max_files_per_second
+
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
-    check_time_travel(scheduled, monitor=wazuh_log_monitor)
+    check_time_travel(scheduled)
     try:
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 2,
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout + extra_timeout,
                                 callback=callback_detect_max_files_per_second)
     except TimeoutError as e:
         if get_configuration['metadata']['max_files_per_sec'] == 0:

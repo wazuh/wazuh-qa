@@ -261,7 +261,7 @@ def create_asset(
     if not os.path.exists(os.path.dirname(asset_path)):
         os.makedirs(os.path.dirname(asset_path))
 
-    relative_path = f"assets/{asset_file_name}"
+    relative_path = os.path.join("assets", asset_file_name)
 
     kwargs = {"encoding": "utf-8"} if "b" not in mode else {}
 
