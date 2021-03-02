@@ -25,6 +25,8 @@ from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
 from string import ascii_letters, digits
 from struct import pack
 from time import mktime, localtime, sleep, time
+
+from wazuh_testing.tools.monitoring import wazuh_unpack
 from wazuh_testing.tools.remoted_sim import Cipher
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
@@ -117,7 +119,7 @@ class Agent:
             "fim": {"status": "enabled", "eps": self.fim_eps},
             "fim_integrity": {"status": "disabled", "eps": self.fim_integrity_eps},
             "syscollector": {"status": "disabled", "frequency": 60.0, "eps": 200},
-            "rootcheck": {"status": "enabled", "frequency": 60.0, "eps": 200},
+            "rootcheck": {"status": "disabled", "frequency": 60.0, "eps": 200},
             "receive_messages": {"status": "enabled"},
         }
         self.sha_key = None
@@ -344,7 +346,7 @@ class Agent:
             if sender.protocol == 'tcp' or sender.protocol == 'TCP':
                 rcv = sender.socket.recv(4)
                 if len(rcv) == 4:
-                    data_len = int.from_bytes(rcv, 'little')
+                    data_len = wazuh_unpack(rcv)
                     try:
                         buffer_array = sender.socket.recv(data_len)
                     except MemoryError:
