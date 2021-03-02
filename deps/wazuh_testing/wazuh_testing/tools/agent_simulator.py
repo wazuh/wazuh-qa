@@ -70,7 +70,9 @@ class Agent:
         fim_integrity_eps (int): Set the maximum database synchronization message throughput.
         manager_address (str): Manager IP address.
         encryption_key (bytes): Encryption key used for encrypt and decrypt the message.
-        keep_alive_msg (bytes): Keep alive event (read from template data according to OS and parsed to an event).
+        keep_alive_event (bytes): Keep alive event (read from template data according to OS and parsed to an event).
+        keep_alive_msg (string): Keep alive event in plain text.
+        merged_checksum (string): Checksum of agent's merge.mg file.
         startup_msg (bytes): Startup event sent before the first keep alive event.
         authd_password (str): Password for manager registration.
         inventory_sample (str): File where are sample inventory messages.
@@ -105,7 +107,9 @@ class Agent:
             else fim_integrity_eps
         self.manager_address = manager_address
         self.encryption_key = ""
+        self.keep_alive_event = ""
         self.keep_alive_msg = ""
+        self.merged_checksum = 'd6e3ac3e75ca0319af3e7c262776f331'
         self.startup_msg = ""
         self.authd_password = authd_password
         self.inventory_sample = inventory_sample
@@ -395,8 +399,15 @@ class Agent:
             message (str): Decoder message in ISO-8859-1 format.
         """
         msg_decoded_list = message.split(' ')
+        logging.critical(msg_decoded_list)
         if '#!-req' in msg_decoded_list[0]:
             self.process_command(sender, msg_decoded_list)
+        elif '#!-up' in msg_decoded_list[0]:
+            kind, checksum, name = msg_decoded_list[1:4]
+            if kind == 'file' and "merged.mg" in name:
+                self.keep_alive_msg = self.keep_alive_msg.replace(self.merged_checksum, checksum)
+                self.keep_alive_event = self.create_event(self.keep_alive_msg)
+                self.merged_checksum = checksum
 
     def process_command(self, sender, message_list):
         """Process agent received commands through the socket.
@@ -533,7 +544,9 @@ class Agent:
                     break
                 line = fp.readline()
         msg = msg.replace("<VERSION>", self.long_version)
-        self.keep_alive_msg = self.create_event(msg)
+        msg = msg.replace("<MERGED_CHECKSUM>", self.merged_checksum)
+        self.keep_alive_event = self.create_event(msg)
+        self.keep_alive_msg = msg
 
     def initialize_modules(self, disable_all_modules):
         for module in ['syscollector', 'rootcheck', 'fim', 'fim_integrity', 'receive_messages', 'keepalive']:
@@ -984,12 +997,12 @@ class InjectorThread(threading.Thread):
         sleep(10)
         logging.debug("Startup - {}({})".format(self.agent.name, self.agent.id))
         self.sender.send_event(self.agent.startup_msg)
-        self.sender.send_event(self.agent.keep_alive_msg)
+        self.sender.send_event(self.agent.keep_alive_event)
         start_time = time()
         while self.stop_thread == 0:
             # Send agent keep alive
             logging.debug(f"KeepAlive - {self.agent.name}({self.agent.id})")
-            self.sender.send_event(self.agent.keep_alive_msg)
+            self.sender.send_event(self.agent.keep_alive_event)
             sleep(self.agent.modules["keepalive"]["frequency"] -
                   ((time() - start_time) %
                    self.agent.modules["keepalive"]["frequency"]))
