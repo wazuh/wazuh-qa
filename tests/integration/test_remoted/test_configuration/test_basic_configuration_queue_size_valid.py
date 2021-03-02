@@ -41,8 +41,14 @@ def get_configuration(request):
 
 
 def test_queue_size_valid(get_configuration, configure_environment, restart_remoted):
-    """
+    """Check that `queue_size` option could be configured with valid values (any number between 1 and 262144) without
+    errors.
 
+    Check if the API answer for manager connection coincides with the option selected on `ossec.conf` and expected
+    warning message is shown in `ossec.log`.
+
+    Raises:
+        AssertionError: if API answer is different of expected configuration.
     """
     cfg = get_configuration['metadata']
 

@@ -15,7 +15,6 @@ from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools import QUEUE_SOCKETS_PATH
 from wazuh_testing.tools import WAZUH_CONF
 
-
 UDP = "UDP"
 TCP = "TCP"
 TCP_UDP = "TCP,UDP"
@@ -27,81 +26,189 @@ QUEUE_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'queue')
 
 
 def callback_detect_syslog_allowed_ips(syslog_ips):
+    """Creates a callback to detect syslog allowed-ips.
+
+    Args:
+        syslog_ips (str): syslog allowed-ips.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+
     msg = fr"Remote syslog allowed from: \'{syslog_ips}\'"
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
 def callback_detect_syslog_denied_ips(syslog_ips):
+    """Creates a callback to detect syslog denied-ips.
+
+    Args:
+        syslog_ips (str): syslog denied-ips.
+
+    Returns:
+        callable: callback to detect this event.
+    """
     msg = fr"Message from \'{syslog_ips}\' not allowed. Cannot find the ID of the agent."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
 def callback_invalid_value(option, value):
+    """Creates a callback to detect invalid values in ossec.conf file.
+
+    Args:
+        option (str): Wazuh manager configuration option.
+        value (str): Value of the configuration option.
+
+    Returns:
+        callable: callback to detect this event.
+    """
     msg = fr"ERROR: \(\d+\): Invalid value for element '{option}': {value}."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
 def callback_error_in_configuration(severity):
+    """Creates a callback to detect configuration error in ossec.conf file.
+
+    Args:
+        severity (str): ERROR or CRITICAL.
+
+    Returns:
+        callable: callback to detect this event.
+    """
     msg = fr"{severity}: \(\d+\): Configuration error at '{WAZUH_CONF}'."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
 def callback_error_invalid_port(port):
+    """Creates a callback to detect invalid port.
+
+    Args:
+        port (str): Wazuh manager port.
+
+    Returns:
+        callable: callback to detect this event.
+    """
     msg = fr"ERROR: \(\d+\): Invalid port number: '{port}'."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
 def callback_ignored_invalid_protocol(protocol):
+    """Creates a callback to detect invalid protocol.
+
+    Args:
+        protocol (str): Wazuh manager protocol.
+
+    Returns:
+        callable: callback to detect this event.
+    """
     msg = fr"WARNING: \(\d+\): Ignored invalid value '{protocol}' for 'protocol'"
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
 def callback_error_getting_protocol():
+    """Creates a callback to detect if warning message is created when no valid protocol is provided.
+
+    Returns:
+        callable: callback to detect this event.
+    """
     msg = fr"WARNING: \(\d+\): Error getting protocol. Default value \(TCP\) will be used."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
 def callback_warning_syslog_tcp_udp():
-    msg = fr"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time. Default value \(TCP\) will be used."
+    """Creates a callback to detect if warning message is created when multiple protocol are provided using syslog.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time. "
+    msg += "Default value \(TCP\) will be used."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
 def callback_warning_secure_ipv6():
+    """Creates a callback to detect if warning message is created when ipv6 is used along with secure connection.
+
+    Returns:
+        callable: callback to detect this event.
+    """
     msg = fr"WARNING: \(\d+\): Secure connection does not support IPv6. IPv4 will be used instead."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
 def callback_error_bind_port():
+    """Creates a callback to detect if critical error is created when invalid local ip value is provided.
+
+    Returns:
+        callable: callback to detect this event.
+    """
     msg = fr"CRITICAL: \(\d+\): Unable to Bind port '1514' due to \[\(\d+\)\-\(Cannot assign requested address\)\]"
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
 def callback_error_queue_size_syslog():
+    """Creates a callback to detect if error is created when queue_size is used along with syslog connection.
+
+    Returns:
+        callable: callback to detect this event.
+    """
     msg = fr"ERROR: Invalid option \<queue_size\> for Syslog remote connection."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
 def callback_queue_size_too_big():
+    """Creates a callback to detect if warning message is created when queue_size is too big.
+
+    Returns:
+        callable: callback to detect this event.
+    """
     msg = fr"WARNING: Queue size is very high. The application may run out of memory."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
 def callback_error_invalid_value_for(option):
+    """Creates a callback to detect invalid values in ossec.conf file.
+
+    Args:
+        option (str): Wazuh manager configuration option.
+
+    Returns:
+        callable: callback to detect this event.
+    """
     msg = fr"ERROR: Invalid value for option '\<{option}\>'"
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
 def callback_error_invalid_ip(ip):
+    """Creates a callback to detect if error is created when invalid local ip value is provided.
+
+    Args:
+        ip (str): IP address.
+
+    Returns:
+        callable: callback to detect this event.
+    """
     msg = fr"ERROR: \(\d+\): Invalid ip address: '{ip}'."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
 def callback_info_no_allowed_ips():
-    msg = fr"INFO: \(\d+\): IP or network must be present in syslog access list \(allowed-ips\). Syslog server disabled."
+    """Creates a callback to detect if error message is syslog server is disabled when no allowed ips is provided.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"INFO: \(\d+\): IP or network must be present in syslog access list \(allowed-ips\). "
+    msg += "Syslog server disabled."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
 def compare_config_api_response(configuration):
+    """Assert if configuration values provided are the same that configuration provided for API response.
+
+    Args:
+        configuration (dict): Dictionary with wazuh manager configuration.
+    """
     # Check that API query return the selected configuration
     for field in configuration.keys():
         api_answer = api.get_manager_configuration(section="remote", field=field)
@@ -112,6 +219,14 @@ def compare_config_api_response(configuration):
 
 
 def get_protocols(all_protocols):
+    """Creates a pair of arrays with valid protocols (TCP and UDP) in element 0 and invalid protocols in element 1.
+
+    Args:
+        all_protocols (list): List of strings with valid and invalid protocols.
+
+    Returns:
+        array: Array with valid protocol list in element 0 and invalid protocols in element 1.
+    """
     valid_protocols = []
     invalid_protocols = []
     for protocol in all_protocols:
@@ -123,7 +238,7 @@ def get_protocols(all_protocols):
 
 
 def callback_detect_remoted_started(port, protocol, connection_type="secure"):
-    """Creates a callback to detect if remoted was correctly started
+    """Creates a callback to detect if remoted was correctly started.
 
     wazuh-remoted logs if it has correctly started for each connection type, the port and the protocol in the ossec.log
 
@@ -133,7 +248,7 @@ def callback_detect_remoted_started(port, protocol, connection_type="secure"):
         connection_type (str): it can be secure or syslog.
 
     Returns:
-        callable: callback to detect this event
+        callable: callback to detect this event.
     """
     protocol_array = protocol.split(',')
     protocol_array.sort()
@@ -148,29 +263,29 @@ def callback_detect_remoted_started(port, protocol, connection_type="secure"):
 
 
 def callback_detect_syslog_event(message):
-    """Creates a callback to detect the syslog messages in the archives.log
+    """Creates a callback to detect the syslog messages in the archives.log.
 
     Args:
-        message (str): syslog message sent through the socket
+        message (str): syslog message sent through the socket.
 
     Returns:
-        callable: callback to detect this event
+        callable: callback to detect this event.
     """
     expr = fr".*->\d+\.\d+\.\d+\.\d+\s{message}"
     return monitoring.make_callback(pattern=expr, prefix=None)
 
 
 def send_syslog_message(message, port, protocol, manager_address="127.0.0.1"):
-    """This function sends a message to the syslog server of wazuh-remoted
+    """This function sends a message to the syslog server of wazuh-remoted.
 
     Args:
         message (str): string to send as a syslog event.
         protocol (str): it can be UDP or TCP.
-        port (int): port where the manager has bound the remoted port
+        port (int): port where the manager has bound the remoted port.
         manager_address (str): address of the manager.
 
     Raises:
-        ConnectionRefusedError: if there's a problem while sending messages to the manager
+        ConnectionRefusedError: if there's a problem while sending messages to the manager.
     """
     if protocol.upper() == UDP:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -186,10 +301,10 @@ def send_syslog_message(message, port, protocol, manager_address="127.0.0.1"):
 
 
 def create_archives_log_monitor():
-    """Creates a FileMonitor for the archives.log file
+    """Creates a FileMonitor for the archives.log file.
 
     Returns:
-        FileMonitor: object to monitor the archives.log
+        FileMonitor: object to monitor the archives.log.
     """
     # Reset ossec.log and start a new monitor
     file.truncate_file(ARCHIVES_LOG_FILE_PATH)
@@ -199,7 +314,7 @@ def create_archives_log_monitor():
 
 
 def detect_archives_log_event(archives_monitor, callback, error_message, update_position=True, timeout=5):
-    """Monitors the archives.log to detect a certain event
+    """Monitors the archives.log to detect a certain event.
 
     Args:
         archives_monitor (FileMonitor): FileMonitor bound to the archives.log.
@@ -233,21 +348,21 @@ def check_syslog_event(wazuh_archives_log_monitor, message, port, protocol, time
 
 
 def send_ping_pong_messages(protocol, manager_address, port):
-    """This function sends the ping message to the manager
+    """This function sends the ping message to the manager.
 
     This message is the first of many between the manager and the agents. It is used to check if both of them are ready
-    to send and receive other messages
+    to send and receive other messages.
 
     Args:
-        protocol (str): it can be UDP or TCP
-        manager_address (str): address of the manager. IP and hostname are valid options
-        port (int): port where the manager has bound the remoted port
+        protocol (str): it can be UDP or TCP.
+        manager_address (str): address of the manager. IP and hostname are valid options.
+        port (int): port where the manager has bound the remoted port.
 
     Returns:
-        bytes: returns the #pong message from the manager
+        bytes: returns the #pong message from the manager.
 
     Raises:
-        ConnectionRefusedError: if there's a problem while sending messages to the manager
+        ConnectionRefusedError: if there's a problem while sending messages to the manager.
     """
     protocol = protocol.upper()
     if protocol == UDP:
@@ -309,7 +424,7 @@ def check_tcp_connection_established_log(wazuh_log_monitor, update_position=Fals
 
 
 def wait_to_remoted_key_update(wazuh_log_monitor):
-    """Allow to detect when remoted has updated its info with the client.keys
+    """Allow to detect when remoted has updated its info with the client.keys.
 
     This is necessary for remoted to correctly recognize the agent, and to be able to decrypt its messages.
 
@@ -369,13 +484,14 @@ def check_queue_socket_event(raw_event=EXAMPLE_MESSAGE_PATTERN, timeout=30):
     """Allow searching for an expected event in the queue socket.
 
     Args:
-        raw_event (str): Pattern regex to be found in the socket
+        raw_event (str): Pattern regex to be found in the socket.
         timeout (int): Maximum search time of the event in the socket. Default is 30 to allow enough time for the
                        other thread to send messages.
 
     Raises:
         TimeoutError: if could not find the pattern regex event in the queue socket.
     """
+
     # Do not delete. Function required for MITM to work
     def intercept_socket_data(data):
         return data
