@@ -18,7 +18,7 @@ pytestmark = pytest.mark.tier(level=0)
 # Variables
 current_test_path = os.path.dirname(os.path.realpath(__file__))
 test_data_path = os.path.join(current_test_path, 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_agent_connection_protocols.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_protocols_communication.yaml')
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 wazuh_archives_monitor = rd.create_archives_log_monitor()
@@ -103,7 +103,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_agent_connection_protocols(get_configuration, configure_environment, restart_remoted):
+def test_protocols_communication(get_configuration, configure_environment, restart_remoted):
     protocol = get_configuration['metadata']['protocol']
     manager_port = get_configuration['metadata']['port']
 
