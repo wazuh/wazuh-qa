@@ -4,8 +4,9 @@ import threading
 
 from wazuh_testing.tools.thread_executor import ThreadExecutor
 import wazuh_testing.tools.agent_simulator as ag
-from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, ARCHIVES_LOG_FILE_PATH
 from wazuh_testing.tools import file
+from wazuh_testing.tools import monitoring
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing import remote as rd
@@ -20,6 +21,7 @@ test_data_path = os.path.join(current_test_path, 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_agent_connection_protocols.yaml')
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+wazuh_archives_monitor = rd.create_archives_log_monitor()
 
 # Set configuration
 parameters = [
@@ -58,20 +60,39 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 
 def validate_agent_manager_protocol_communication(protocol, manager_port):
-    file.truncate_file(LOG_FILE_PATH)
+    """ Allow to validate if the agent-manager communication using a certain protocol has been successfull.
 
-    socket_monitor_thread = ThreadExecutor(rd.check_queue_socket_event)
+    For this purpose, two jobs are launched concurrently. One for monitoring the archives.log and one for sending the
+    message.
+
+    Args:
+        protocol (str): Message sending protocol. It can be TCP or UDP.
+        manager_port (int): Manager port when remoted is listening.
+
+    Raises:
+        TimeoutError: If the expected event could not be found in archives.log after sending it.
+    """
+    file.truncate_file(LOG_FILE_PATH)
+    file.truncate_file(ARCHIVES_LOG_FILE_PATH)
+
+    monitor_thread = ThreadExecutor(
+        rd.detect_archives_log_event, {'archives_monitor': wazuh_archives_monitor, 'timeout': 20,
+                                       'callback': rd.callback_detect_example_archives_event(),
+                                       'update_position': False})
+
     send_message_thread = ThreadExecutor(rd.send_agent_event, {'wazuh_log_monitor': wazuh_log_monitor,
                                                                'protocol': protocol, 'manager_port': manager_port})
-    socket_monitor_thread.start()
+    # Start log monitoring
+    monitor_thread.start()
 
-    # Time to wait until starting the socket monitor
-    sleep(5)
+    # Time to wait until starting the log monitoring
+    sleep(2)
 
+    # Send agent message
     send_message_thread.start()
 
     # Wait until the threads end
-    socket_monitor_thread.join()
+    monitor_thread.join()
     send_message_thread.join()
 
 
