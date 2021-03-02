@@ -368,6 +368,8 @@ def send_agent_event(wazuh_log_monitor, message=EXAMPLE_MESSAGE_EVENT, protocol=
     # Wait until remoted has loaded the new agent key
     wait_to_remoted_key_update(wazuh_log_monitor)
 
+    sleep(1)
+
     # Build the event message and send it to the manager as an agent event
     event = agent.create_event(message)
 
