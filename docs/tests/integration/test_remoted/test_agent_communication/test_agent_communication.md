@@ -11,7 +11,7 @@ state files using the remoted socket.
 
 |Tier | Number of tests | Time spent |
 |:--:|:--:|:--:|
-| 0 | 1 | 12min |
+| 0 | 1 | 3min |
 
 **We need to find a way to reduce testing time**
 

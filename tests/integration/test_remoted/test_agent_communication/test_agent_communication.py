@@ -62,7 +62,7 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.parametrize("command_request,expected_answer", test_case.values(), ids=test_case.keys())
+@pytest.mark.parametrize("command_request,expected_answer", test_case.values(), ids=list(test_case.keys()))
 def test_request(get_configuration, configure_environment, restart_remoted, command_request, expected_answer):
     """
     Writes (config/state) requests in $DIR/queue/ossec/request and check if remoted forwards it to the agent,
