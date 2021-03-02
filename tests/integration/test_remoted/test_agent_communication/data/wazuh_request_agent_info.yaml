@@ -1,7 +1,7 @@
 - tags:
-  - test_agent_communication
+  - test_request_agent_info
   apply_to_modules:
-  - test_agent_communication
+  - test_request_agent_info
   sections:
   - section: remote
     elements:

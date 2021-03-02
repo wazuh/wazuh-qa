@@ -20,11 +20,12 @@ class ThreadExecutor(threading.Thread):
         self.function = function
         self.exception = None
         self.parameters = parameters
+        self._return = None
 
 
     def _run(self):
         """Run the target function with its parameters in the thread"""
-        self.function(**self.parameters)
+        self._return = self.function(**self.parameters)
 
 
     def run(self):
@@ -49,3 +50,5 @@ class ThreadExecutor(threading.Thread):
         super(ThreadExecutor, self).join()
         if self.exception:
             raise self.exception
+
+        return self._return
