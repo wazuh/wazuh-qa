@@ -248,7 +248,7 @@ nav:
               - Test max eps synchronization:  tests/integration/test_fim/test_files/test_max_eps/test_max_eps_synchronization.md
               - Test max eps: tests/integration/test_fim/test_files/test_max_eps/test_max_eps.md
             - Test max files per second:
-              - test max files per second: tests/integration/test_fim/test_files/test_max_files_per_second/test_max_files_per_second.md
+              - tests/integration/test_fim/test_files/test_max_files_per_second/test_max_files_per_second.md
             - Test multiple dirs:
               - tests/integration/test_fim/test_files/test_multiple_dirs/index.md
               - Test multiple dirs: tests/integration/test_fim/test_files/test_multiple_dirs/test_multiple_dirs.md

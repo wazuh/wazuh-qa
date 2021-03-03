@@ -46,7 +46,7 @@ def get_configuration(request):
 def test_max_files_per_second(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """ Check that FIM sleeps for one second when the option max_files_per_second is enabled
 
-    Args
+    Args:
         tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
         get_configuration (fixture): Gets the current configuration of the test.
         configure_environment (fixture): Configure the environment for the execution of the test.
