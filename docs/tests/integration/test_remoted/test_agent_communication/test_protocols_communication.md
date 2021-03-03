@@ -14,11 +14,11 @@ protocols simultaneously.
 
 |Tier | Number of tests | Time spent |
 |:--:|:--:|:--:|
-| 0 | 8 | 60s |
+| 0 | 8 | 2m 23s |
 
 ## Expected behavior
 
-Success if the event has been found in the manager's `archives.log` after sending it from the agent, using different
+Success if the event has been found in the manager's `queue` socket after sending it from the agent, using different
 protocols and ports. Failure otherwise.
 
 ## Testing
@@ -28,7 +28,7 @@ as using the default port and a custom port.
 
 After this, two jobs are launched:
 
-- A monitoring job that is based on monitoring the manager's  `archives.log` to see the events received.
+- A monitoring job that is based on monitoring the manager's  `queue` socket to see the events received.
 
 - A job that creates, registers an agent and sends a defined message to the manager.
 
@@ -45,6 +45,19 @@ a difference of 2 seconds.
 - **UDP and port 56000**
 - **TCP,UDP and port 56000**
 - **UDP,TCP and port 56000**
+
+## Comments
+
+An important aspect to take into account is the time needed by wazuh-remoted to reload the `client.keys`.
+By default it is **10 seconds**, but this option is configurable in the `internal_options.conf`, using the
+following directive:
+
+```
+remoted.keyupdate_interval=2
+```
+
+The test itself waits until the info is loaded, so reducing this time will also reduce the test time.
+It is recommended to set this time between 2 and 5 seconds.
 
 ## Code documentation
 ::: tests.integration.test_remoted.test_agent_communication.test_protocols_communication
