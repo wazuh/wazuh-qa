@@ -37,6 +37,7 @@ os_list = ["debian7", "debian8", "debian9", "debian10", "ubuntu12.04",
            "ubuntu14.04", "ubuntu16.04", "ubuntu18.04", "mojave"]
 agent_count = 1
 
+
 class Agent:
     """Class that allows us to simulate an agent registered in a manager.
 
@@ -593,6 +594,7 @@ class Agent:
 
     def set_module_status(self, module_name, status):
         self.modules[module_name]['status'] = status
+
 
 class Inventory:
     def __init__(self, os, inventory_sample=None):
