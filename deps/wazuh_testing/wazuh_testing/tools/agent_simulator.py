@@ -93,10 +93,11 @@ class Agent:
         stage_disconnect (str): WPK process state variable.
         rcv_msg_limit (int): max elements for the received message queue.
         rcv_msg_queue (deque): Doubly Ended Queue to store received messages in the agent.
+        disable_all_modules (boolean): Disable all simulated modules for this agent
     """
     def __init__(self, manager_address, cypher="aes", os=None, inventory_sample=None, rootcheck_sample=None,
                  id=None, name=None, key=None, version="v3.12.0", fim_eps=None, fim_integrity_eps=None,
-                 authd_password=None, debug=True, disable_all_modules=False, rcv_msg_limit=100):
+                 authd_password=None, disable_all_modules=False, rcv_msg_limit=100):
         self.id = id
         self.name = name
         self.key = key
@@ -138,8 +139,6 @@ class Agent:
         self.stage_disconnect = None
         self.setup(disable_all_modules=disable_all_modules)
         self.rcv_msg_queue = deque([], maxlen=rcv_msg_limit)
-        if debug:
-            logging.getLogger().setLevel(logging.DEBUG)
 
     def setup(self, disable_all_modules):
         """Set up agent: os, registration, encryption key, start up msg and activate modules."""
@@ -934,6 +933,7 @@ class Sender:
                 sleep(5)
                 self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.socket.connect((self.manager_address, int(self.manager_port)))
+                self.socket.send(length + event)
         if is_udp(self.protocol):
             self.socket.sendto(event, (self.manager_address, int(self.manager_port)))
 
