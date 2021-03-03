@@ -337,6 +337,8 @@ def wait_to_remoted_key_update(wazuh_log_monitor):
     Raises:
         TimeoutError: if could not find the remoted key loading log.
     """
+    # We have to make sure that remoted has correctly loaded the client key agent info. The log is truncated to
+    # ensure that the information has been loaded after the agent has been registered.
     file.truncate_file(LOG_FILE_PATH)
 
     callback_pattern = '.*rem_keyupdate_main().*Checking for keys file changes.'

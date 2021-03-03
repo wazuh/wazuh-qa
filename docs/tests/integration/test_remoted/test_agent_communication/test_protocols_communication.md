@@ -48,7 +48,7 @@ a difference of 2 seconds.
 
 ## Comments
 
-An important aspect to take into account is the time in which remoted makes a reload of the `client.keys` info.
+An important aspect to take into account is the time needed by wazuh-remoted to reload the `client.keys`.
 By default it is **10 seconds**, but this option is configurable in the `internal_options.conf`, using the
 following directive:
 
