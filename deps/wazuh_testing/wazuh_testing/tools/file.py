@@ -11,8 +11,6 @@ import xml.etree.ElementTree as ET
 import zipfile
 import stat
 import shutil
-import pwd
-import grp
 import socket
 
 from os.path import exists
@@ -268,8 +266,11 @@ def set_file_owner_and_group(file_path, owner, group):
     Raises:
         KeyError: If owner or group does not exist.
     """
+    from pwd import getpwnam
+    from grp import getgrnam
+
     if os.path.exists(file_path):
-        uid = pwd.getpwnam(owner).pw_uid
-        gid = grp.getgrnam(group).gr_gid
+        uid = getpwnam(owner).pw_uid
+        gid = getgrnam(group).gr_gid
 
         os.chown(file_path, uid, gid)

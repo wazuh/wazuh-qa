@@ -549,6 +549,11 @@ class Agent:
         self.keep_alive_msg = msg
 
     def initialize_modules(self, disable_all_modules):
+        """Initialize and enable agent modules.
+
+        Args:
+            disable_all_modules (boolean): True to disable all modules, False to leave the default ones enabled.
+        """
         for module in ['syscollector', 'rootcheck', 'fim', 'fim_integrity', 'receive_messages', 'keepalive']:
             if disable_all_modules:
                 self.modules[module]['status'] = 'disabled'
