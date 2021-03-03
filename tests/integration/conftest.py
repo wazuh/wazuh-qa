@@ -168,7 +168,7 @@ def pytest_addoption(parser):
         "--fim_mode",
         action="append",
         metavar="fim_mode",
-        default=None,
+        default=list(),
         type=str,
         help="run tests using a specific FIM mode"
     )
