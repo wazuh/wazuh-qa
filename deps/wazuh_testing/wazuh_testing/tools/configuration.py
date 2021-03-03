@@ -163,10 +163,10 @@ def write_security_conf(path: str, security_conf: dict):
         security_conf (dict): Dictionary to be written in the security.yaml file.
     """
     if not os.path.exists(path):
-        from wazuh_testing.tools import OSSEC_UID, OSSEC_GID
+        from wazuh_testing.tools import WAZUH_UID, WAZUH_GID
 
         open(path, mode='w').close()
-        os.chown(uid=OSSEC_UID, gid=OSSEC_GID, path=path)
+        os.chown(uid=WAZUH_UID, gid=WAZUH_GID, path=path)
     write_api_conf(path, security_conf)
 
 

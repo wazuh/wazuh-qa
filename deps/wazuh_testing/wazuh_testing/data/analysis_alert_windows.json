@@ -158,7 +158,7 @@
             "title": "The Items Schema",
             "default": "",
             "examples": [
-              "ossec",
+              "wazuh",
               "syscheck"
             ],
             "pattern": "^(.*)$"

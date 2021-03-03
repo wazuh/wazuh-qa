@@ -68,7 +68,7 @@ def test_load_rules_decoders(test_case):
         file_test = test_case['local_rules']
         # copy test rules
         shutil.copy(test_data_path + file_test, '/var/ossec/etc/rules/local_rules.xml')
-        shutil.chown('/var/ossec/etc/rules/local_rules.xml', "ossec", "ossec")
+        shutil.chown('/var/ossec/etc/rules/local_rules.xml', "wazuh", "wazuh")
 
     if 'local_decoders' in test_case:
         # save current decoders
@@ -78,7 +78,7 @@ def test_load_rules_decoders(test_case):
         file_test = test_case['local_decoders']
         # copy test decoder
         shutil.copy(test_data_path + file_test, '/var/ossec/etc/decoders/local_decoder.xml')
-        shutil.chown('/var/ossec/etc/decoders/local_decoder.xml', "ossec", "ossec")
+        shutil.chown('/var/ossec/etc/decoders/local_decoder.xml', "wazuh", "wazuh")
 
     # Create session token
     if 'same_session' in test_case and test_case['same_session']:
@@ -142,12 +142,12 @@ def test_load_rules_decoders(test_case):
         # restore previous rules
         shutil.move('/var/ossec/etc/rules/local_rules.xml.cpy',
                     '/var/ossec/etc/rules/local_rules.xml')
-    shutil.chown('/var/ossec/etc/rules/local_rules.xml', "ossec", "ossec")
+    shutil.chown('/var/ossec/etc/rules/local_rules.xml', "wazuh", "wazuh")
 
     if 'local_decoders' in test_case:
         # restore previous decoders
         shutil.move('/var/ossec/etc/decoders/local_decoder.xml.cpy',
                     '/var/ossec/etc/decoders/local_decoder.xml')
-        shutil.chown('/var/ossec/etc/decoders/local_decoder.xml', "ossec", "ossec")
+        shutil.chown('/var/ossec/etc/decoders/local_decoder.xml', "wazuh", "wazuh")
 
     assert not errors, "Failed stage(s) :{}".format("\n".join(errors))
