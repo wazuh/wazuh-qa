@@ -73,7 +73,7 @@ def get_configuration(request):
 # tests
 
 def get_remote_configuration(component_name, config):
-    socket_path = os.path.join(WAZUH_PATH, 'queue', 'ossec')
+    socket_path = os.path.join(WAZUH_PATH, 'queue', 'sockets')
     dest_socket = os.path.join(socket_path, component_name)
     command = f"getconfig {config}"
 

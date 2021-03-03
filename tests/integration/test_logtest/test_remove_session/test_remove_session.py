@@ -22,7 +22,7 @@ with open(messages_path) as f:
     test_cases = yaml.safe_load(f)
 
 # Variables
-logtest_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'logtest'))
+logtest_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'logtest'))
 receiver_sockets_params = [(logtest_path, 'AF_UNIX', 'TCP')]
 receiver_sockets = None  # Set in the fixtures
 

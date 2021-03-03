@@ -18,7 +18,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__)
 
 # Variables
-logtest_sock = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'analysis'))
+logtest_sock = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'analysis'))
 receiver_sockets_params = [(logtest_sock, 'AF_UNIX', 'TCP')]
 receiver_sockets = None
 msg_get_config = "getconfig rule_test"

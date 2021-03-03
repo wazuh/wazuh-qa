@@ -8,7 +8,7 @@ import socket
 import wazuh_testing.tools.agent_simulator as ag
 import wazuh_testing.api as api
 
-from wazuh_testing.tools import ARCHIVES_LOG_FILE_PATH
+from wazuh_testing.tools import ARCHIVES_LOG_FILE_PATH, LOG_FILE_PATH
 from wazuh_testing.tools import file
 from wazuh_testing.tools import monitoring
 from wazuh_testing.tools.services import control_service
@@ -275,6 +275,15 @@ def callback_detect_syslog_event(message):
     return monitoring.make_callback(pattern=expr, prefix=None)
 
 
+def callback_detect_example_archives_event():
+    """Creates a callback to detect the example message in the archives.log
+
+    Returns:
+        callable: callback to detect this event
+    """
+    return monitoring.make_callback(pattern=fr".*{EXAMPLE_MESSAGE_PATTERN}.*", prefix=None)
+
+
 def send_syslog_message(message, port, protocol, manager_address="127.0.0.1"):
     """This function sends a message to the syslog server of wazuh-remoted.
 
@@ -313,7 +322,7 @@ def create_archives_log_monitor():
     return wazuh_archives_log_monitor
 
 
-def detect_archives_log_event(archives_monitor, callback, error_message, update_position=True, timeout=5):
+def detect_archives_log_event(archives_monitor, callback, error_message=None, update_position=True, timeout=5):
     """Monitors the archives.log to detect a certain event.
 
     Args:
@@ -326,6 +335,9 @@ def detect_archives_log_event(archives_monitor, callback, error_message, update_
     Raises:
         TimeoutError: if the event is not found in the file.
     """
+    if error_message is None:
+        error_message = 'Could not detect the expected event in archives.log'
+
     archives_monitor.start(timeout=timeout, update_position=update_position, callback=callback,
                            error_message=error_message)
 
@@ -440,6 +452,10 @@ def wait_to_remoted_key_update(wazuh_log_monitor):
     Raises:
         TimeoutError: if could not find the remoted key loading log.
     """
+    # We have to make sure that remoted has correctly loaded the client key agent info. The log is truncated to
+    # ensure that the information has been loaded after the agent has been registered.
+    file.truncate_file(LOG_FILE_PATH)
+
     callback_pattern = '.*rem_keyupdate_main().*Checking for keys file changes.'
     error_message = 'Could not find the remoted key loading log'
 

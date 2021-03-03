@@ -25,7 +25,7 @@ with open(messages_path) as f:
 
 # Variables
 
-logtest_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'logtest'))
+logtest_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'logtest'))
 
 
 # Functions used on the test
