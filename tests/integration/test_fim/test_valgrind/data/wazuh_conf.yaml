@@ -1,0 +1,94 @@
+---
+# conf 1
+- tags:
+  - test_valgrind_big_case
+  apply_to_modules:
+  - MODULE_NAME
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - check_all: 'yes'
+        - tags: 'example'
+        - restrict: '.restricted$'
+        - recursion_level: '4'
+        - report_changes: 'yes'
+        - FIM_MODE
+
+# conf 2
+- tags:
+  - test_valgrind_ignore
+  apply_to_modules:
+  - MODULE_NAME
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - check_all: 'yes'
+        - FIM_MODE
+    - ignore:
+        value: ".ignored$"
+        attributes:
+        - type: sregex
+
+# conf 3
+- tags:
+  - test_valgrind_rename
+  apply_to_modules:
+  - MODULE_NAME
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - check_all: 'yes'
+        - FIM_MODE
+
+# conf 4
+- tags:
+  - test_valgrind_follow_symbolic
+  apply_to_modules:
+  - MODULE_NAME
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - check_all: 'yes'
+        - follow_symbolic_link: 'yes'
+        - FIM_MODE
+
+# conf 5
+- tags:
+  - test_valgrind_rename
+  apply_to_modules:
+  - MODULE_NAME
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - nodiff:
+        value: ".nodiff$"
+        attributes:
+        - type: sregex
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - check_all: 'yes'
+        - report_changes: 'yes'
+        - FIM_MODE
