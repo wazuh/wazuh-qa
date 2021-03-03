@@ -6,9 +6,9 @@ import logging
 import sys
 from collections import defaultdict
 
-UDP = "UDP"
-TCP = "TCP"
-TCP_UDP = "TCP,UDP"
+UDP = 'UDP'
+TCP = 'TCP'
+TCP_UDP = 'TCP,UDP'
 
 
 def is_udp(protocol):

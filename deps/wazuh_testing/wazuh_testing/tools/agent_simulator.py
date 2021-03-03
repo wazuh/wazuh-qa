@@ -13,23 +13,24 @@
 
 import hashlib
 import json
+import logging
 import os
 import socket
 import ssl
 import threading
 import zlib
-import logging
-import wazuh_testing.wazuh_db as wdb
 from collections import deque
 from random import randint, sample, choice
 from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
 from string import ascii_letters, digits
 from struct import pack
 from time import mktime, localtime, sleep, time
-from wazuh_testing import TCP, UDP, TCP_UDP
+
+import wazuh_testing.wazuh_db as wdb
+from wazuh_testing import TCP
+from wazuh_testing import is_udp, is_tcp
 from wazuh_testing.tools.monitoring import wazuh_unpack
 from wazuh_testing.tools.remoted_sim import Cipher
-from wazuh_testing import is_udp, is_tcp
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 
