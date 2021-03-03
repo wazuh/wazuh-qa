@@ -25,16 +25,16 @@ from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
 from string import ascii_letters, digits
 from struct import pack
 from time import mktime, localtime, sleep, time
-
+from wazuh_testing import TCP, UDP, TCP_UDP
 from wazuh_testing.tools.monitoring import wazuh_unpack
 from wazuh_testing.tools.remoted_sim import Cipher
+from wazuh_testing import is_udp, is_tcp
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 
 os_list = ["debian7", "debian8", "debian9", "debian10", "ubuntu12.04",
            "ubuntu14.04", "ubuntu16.04", "ubuntu18.04", "mojave"]
 agent_count = 1
-
 
 class Agent:
     """Class that allows us to simulate an agent registered in a manager.
@@ -71,7 +71,7 @@ class Agent:
         manager_address (str): Manager IP address.
         encryption_key (bytes): Encryption key used for encrypt and decrypt the message.
         keep_alive_event (bytes): Keep alive event (read from template data according to OS and parsed to an event).
-        keep_alive_msg (string): Keep alive event in plain text.
+        keep_alive_raw_msg (string): Keep alive event in plain text.
         merged_checksum (string): Checksum of agent's merge.mg file.
         startup_msg (bytes): Startup event sent before the first keep alive event.
         authd_password (str): Password for manager registration.
@@ -88,7 +88,6 @@ class Agent:
         upgrade_script_result (int): Variable to mock the upgrade script result. Used for simulating a remote upgrade.
         stop_receive (int): Flag to determine when to activate and deactivate the agent event listener.
         stage_disconnect (str): WPK process state variable.
-        debug (boolean): enable debug logging level.
     """
     def __init__(self, manager_address, cypher="aes", os=None, inventory_sample=None, rootcheck_sample=None,
                  id=None, name=None, key=None, version="v3.12.0", fim_eps=None, fim_integrity_eps=None,
@@ -96,19 +95,19 @@ class Agent:
         self.id = id
         self.name = name
         self.key = key
-        if version is not None:
-            self.long_version = version
-            ver_split = version.replace("v", "").split(".")
-            self.short_version = f"{'.'.join(ver_split[:2])}"
+        if version is None:
+            version = "v3.13.2"
+        self.long_version = version
+        ver_split = version.replace("v", "").split(".")
+        self.short_version = f"{'.'.join(ver_split[:2])}"
         self.cypher = cypher
         self.os = os
         self.fim_eps = 1000 if fim_eps is None else fim_eps
-        self.fim_integrity_eps = 10 if fim_integrity_eps is None \
-            else fim_integrity_eps
+        self.fim_integrity_eps = 10 if fim_integrity_eps is None else fim_integrity_eps
         self.manager_address = manager_address
         self.encryption_key = ""
         self.keep_alive_event = ""
-        self.keep_alive_msg = ""
+        self.keep_alive_raw_msg = ""
         self.merged_checksum = 'd6e3ac3e75ca0319af3e7c262776f331'
         self.startup_msg = ""
         self.authd_password = authd_password
@@ -347,7 +346,7 @@ class Agent:
             sender (Sender): Object to establish connection with the manager socket and receive/send information.
         """
         while self.stop_receive == 0:
-            if sender.protocol == 'tcp' or sender.protocol == 'TCP':
+            if is_tcp(sender.protocol):
                 rcv = sender.socket.recv(4)
                 if len(rcv) == 4:
                     data_len = wazuh_unpack(rcv)
@@ -405,8 +404,8 @@ class Agent:
         elif '#!-up' in msg_decoded_list[0]:
             kind, checksum, name = msg_decoded_list[1:4]
             if kind == 'file' and "merged.mg" in name:
-                self.keep_alive_msg = self.keep_alive_msg.replace(self.merged_checksum, checksum)
-                self.keep_alive_event = self.create_event(self.keep_alive_msg)
+                self.keep_alive_raw_msg = self.keep_alive_raw_msg.replace(self.merged_checksum, checksum)
+                self.keep_alive_event = self.create_event(self.keep_alive_raw_msg)
                 self.merged_checksum = checksum
 
     def process_command(self, sender, message_list):
@@ -414,7 +413,7 @@ class Agent:
 
         Args:
             sender (Sender): Object to establish connection with the manager socket and receive/send information.
-            message_list (list): Message splitted by white spaces.
+            message_list (list): Message split by white spaces.
 
         Raises:
             ValueError: if 'sha1' command and sha_key Agent value is not defined.
@@ -546,7 +545,7 @@ class Agent:
         msg = msg.replace("<VERSION>", self.long_version)
         msg = msg.replace("<MERGED_CHECKSUM>", self.merged_checksum)
         self.keep_alive_event = self.create_event(msg)
-        self.keep_alive_msg = msg
+        self.keep_alive_raw_msg = msg
 
     def initialize_modules(self, disable_all_modules):
         """Initialize and enable agent modules.
@@ -906,23 +905,29 @@ class Sender:
         >>> import wazuh_testing.tools.agent_simulator as ag
         >>> manager_address = "172.17.0.2"
         >>> agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0")
-        >>> sender = ag.Sender(manager_address, protocol="tcp")
+        >>> sender = ag.Sender(manager_address, protocol=TCP)
     """
-    def __init__(self, manager_address, manager_port='1514', protocol='TCP'):
+    def __init__(self, manager_address, manager_port='1514', protocol=TCP):
         self.manager_address = manager_address
         self.manager_port = manager_port
         self.protocol = protocol.upper()
-        if self.protocol == 'TCP':
+        if is_tcp(self.protocol):
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect((self.manager_address, int(self.manager_port)))
-        if self.protocol == 'UDP':
+        if is_udp(self.protocol):
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def send_event(self, event):
-        if self.protocol == 'TCP':
+        if is_tcp(self.protocol):
             length = pack('<I', len(event))
-            self.socket.send(length + event)
-        if self.protocol == 'UDP':
+            try:
+                self.socket.send(length + event)
+            except BrokenPipeError:
+                logging.critical(f"Broken Pipe error while sending event: {event}")
+                sleep(5)
+                self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.socket.connect((self.manager_address, int(self.manager_port)))
+        if is_udp(self.protocol):
             self.socket.sendto(event, (self.manager_address, int(self.manager_port)))
 
 
@@ -945,7 +950,7 @@ class Injector:
         >>> import wazuh_testing.tools.agent_simulator as ag
         >>> manager_address = "172.17.0.2"
         >>> agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0")
-        >>> sender = ag.Sender(manager_address, protocol="tcp")
+        >>> sender = ag.Sender(manager_address, protocol=TCP)
         >>> injector = ag.Injector(sender, agent)
         >>> injector.run()
     """

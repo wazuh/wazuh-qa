@@ -52,7 +52,7 @@ def connect(agent, protocol="tcp"):
     injector = ag.Injector(sender, agent)
     injector.run()
     agent.wait_status_active()
-    return agent
+    return agent, sender, injector
 
 
 # fixtures
@@ -75,8 +75,7 @@ def test_request(get_configuration, configure_environment, restart_remoted, comm
     agents = [ag.Agent(manager_address, "aes", os="debian8", version="4.2.0") for _ in range(len(protocols))]
     for agn, protocol in zip(agents, protocols):
         if "disconnected" not in command_request:
-            agent = connect(agn, protocol)
-
+            agent, sender, injector = connect(agn, protocol)
         else:
             agent = agn
             # wazuh-remoted needs time to create the sockets.
@@ -88,4 +87,7 @@ def test_request(get_configuration, configure_environment, restart_remoted, comm
         response = send_request(msg_request)
 
         assert expected_answer in response, "Remoted unexpected answer"
+
+        if "disconnected" not in command_request:
+            injector.stop_receive()
 
