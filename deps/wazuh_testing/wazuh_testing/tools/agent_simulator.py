@@ -20,6 +20,7 @@ import threading
 import zlib
 import logging
 import wazuh_testing.wazuh_db as wdb
+from collections import deque
 from random import randint, sample, choice
 from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
 from string import ascii_letters, digits
@@ -88,10 +89,12 @@ class Agent:
         upgrade_script_result (int): Variable to mock the upgrade script result. Used for simulating a remote upgrade.
         stop_receive (int): Flag to determine when to activate and deactivate the agent event listener.
         stage_disconnect (str): WPK process state variable.
+        rcv_msg_limit (int): max elements for the received message queue.
+        rcv_msg_queue (deque): Doubly Ended Queue to store received messages in the agent.
     """
     def __init__(self, manager_address, cypher="aes", os=None, inventory_sample=None, rootcheck_sample=None,
                  id=None, name=None, key=None, version="v3.12.0", fim_eps=None, fim_integrity_eps=None,
-                 authd_password=None, debug=True, disable_all_modules=False):
+                 authd_password=None, debug=True, disable_all_modules=False, rcv_msg_limit=100):
         self.id = id
         self.name = name
         self.key = key
@@ -132,6 +135,7 @@ class Agent:
         self.stop_receive = 0
         self.stage_disconnect = None
         self.setup(disable_all_modules=disable_all_modules)
+        self.rcv_msg_queue = deque([], maxlen=rcv_msg_limit)
         if debug:
             logging.getLogger().setLevel(logging.DEBUG)
 
@@ -398,7 +402,7 @@ class Agent:
             message (str): Decoder message in ISO-8859-1 format.
         """
         msg_decoded_list = message.split(' ')
-        logging.critical(msg_decoded_list)
+        self.rcv_msg_queue.append(message)
         if '#!-req' in msg_decoded_list[0]:
             self.process_command(sender, msg_decoded_list)
         elif '#!-up' in msg_decoded_list[0]:
@@ -923,7 +927,7 @@ class Sender:
             try:
                 self.socket.send(length + event)
             except BrokenPipeError:
-                logging.critical(f"Broken Pipe error while sending event: {event}")
+                logging.warning(f"Broken Pipe error while sending event. Creating new socket...")
                 sleep(5)
                 self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.socket.connect((self.manager_address, int(self.manager_port)))

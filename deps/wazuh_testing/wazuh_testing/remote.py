@@ -15,8 +15,7 @@ from wazuh_testing.tools import monitoring
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools import QUEUE_SOCKETS_PATH
 from wazuh_testing.tools import WAZUH_CONF
-
-from deps.wazuh_testing.wazuh_testing import UDP, TCP
+from wazuh_testing import UDP, TCP
 
 REMOTED_GLOBAL_TIMEOUT = 10
 EXAMPLE_MESSAGE_EVENT = '1:/root/test.log:Feb 23 17:18:20 35-u20-manager4 sshd[40657]: Accepted publickey for root' \
