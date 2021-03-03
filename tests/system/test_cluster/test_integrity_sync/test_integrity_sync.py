@@ -60,12 +60,12 @@ def test_missing_file(clean_files):
     # Create subdirectories in the master node.
     for subdir in directories_to_create:
         host_manager.run_command(test_hosts[0], f'mkdir {subdir}')
-        host_manager.run_command(test_hosts[0], f'chown ossec:ossec {subdir}')
+        host_manager.run_command(test_hosts[0], f'chown wazuh:wazuh {subdir}')
 
     # Create all specified files inside the master node.
     for file in files_to_sync + files_not_to_sync:
         host_manager.run_command(test_hosts[0], f'touch {file}')
-        host_manager.run_command(test_hosts[0], f'chown ossec:ossec {file}')
+        host_manager.run_command(test_hosts[0], f'chown wazuh:wazuh {file}')
 
     # Wait until synchronization is completed. Master -> worker1 & worker2.
     time.sleep(time_to_sync)
@@ -129,10 +129,10 @@ def test_extra_files(clean_files):
     for host in worker_hosts:
         for subdir in directories_to_create:
             host_manager.run_command(test_hosts[0], f'mkdir {subdir}')
-            host_manager.run_command(test_hosts[0], f'chown ossec:ossec {subdir}')
+            host_manager.run_command(test_hosts[0], f'chown wazuh:wazuh {subdir}')
         for file in files_to_sync:
             host_manager.run_command(host, f'touch {file}')
-            host_manager.run_command(test_hosts[0], f'chown ossec:ossec {file}')
+            host_manager.run_command(test_hosts[0], f'chown wazuh:wazuh {file}')
 
     time.sleep(time_to_sync)
 
@@ -173,7 +173,7 @@ def test_extra_valid_files(clean_files):
         # Create an 'agent-groups' file in each worker, using the ID of the agent registered above.
         agent_groups_file = os.path.join(WAZUH_PATH, "queue", "agent-groups", registered_ids[i])
         host_manager.run_command(host, f'touch {agent_groups_file}')
-        host_manager.run_command(host, f'chown ossec:ossec {agent_groups_file}')
+        host_manager.run_command(host, f'chown wazuh:wazuh {agent_groups_file}')
 
     time.sleep(time_to_sync)
 

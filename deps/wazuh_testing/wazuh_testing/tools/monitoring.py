@@ -753,8 +753,8 @@ class ManInTheMiddle:
 
         # Give proper permissions to socket
         if isinstance(self.listener_socket_address, str):
-            uid = pwd.getpwnam('ossec').pw_uid
-            gid = grp.getgrnam('ossec').gr_gid
+            uid = pwd.getpwnam('wazuh').pw_uid
+            gid = grp.getgrnam('wazuh').gr_gid
             os.chown(self.listener_socket_address, uid, gid)
             os.chmod(self.listener_socket_address, 0o660)
 

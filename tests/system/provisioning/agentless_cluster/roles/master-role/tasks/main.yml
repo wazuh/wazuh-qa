@@ -44,8 +44,8 @@
   copy:
     src: ../files/ossec.conf
     dest: /var/ossec/etc/ossec.conf
-    owner: ossec
-    group: ossec
+    owner: wazuh
+    group: wazuh
     mode: '0644'
 
 - name: Set cluster key

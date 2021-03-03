@@ -39,7 +39,7 @@ def test_drop_privileges(tags_to_apply, get_configuration, configure_api_environ
     """Check if drop_privileges affects the user of the API process.
 
     In this test, the PID of the API process is obtained. After that,
-    it gets the user (root or ossec) and checks if it matches the
+    it gets the user (root or wazuh) and checks if it matches the
     drop_privileges setting.
 
     Parameters
@@ -61,6 +61,6 @@ def test_drop_privileges(tags_to_apply, get_configuration, configure_api_environ
     username = pwd.getpwuid(uid)[0]
 
     if drop_privileges:
-        assert username == 'ossec', f'Expected user was "ossec", but the real one is {username}'
+        assert username == 'wazuh', f'Expected user was "wazuh", but the real one is {username}'
     else:
         assert username == 'root', f'Expected user was "root", but the real one is {username}'

@@ -40,11 +40,11 @@ def get_configuration(request):
 # Functions
 
 def extra_configuration_before_yield():
-    # Create the log file with 'ossec' as owner.
+    # Create the log file with 'wazuh' as owner.
     with open(new_log_file, 'w+'):
         pass
     os.chmod(new_log_file, 0o777)
-    os.chown(new_log_file, getpwnam("ossec").pw_uid, getgrnam("ossec").gr_gid)
+    os.chown(new_log_file, getpwnam("wazuh").pw_uid, getgrnam("wazuh").gr_gid)
 
 
 # Tests
