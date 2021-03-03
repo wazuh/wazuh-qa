@@ -8,7 +8,6 @@ import socket
 import wazuh_testing.tools.agent_simulator as ag
 import wazuh_testing.api as api
 
-from time import sleep
 from wazuh_testing.tools import ARCHIVES_LOG_FILE_PATH, LOG_FILE_PATH
 from wazuh_testing.tools import file
 from wazuh_testing.tools import monitoring
@@ -338,6 +337,10 @@ def wait_to_remoted_key_update(wazuh_log_monitor):
     Raises:
         TimeoutError: if could not find the remoted key loading log.
     """
+    # We have to make sure that remoted has correctly loaded the client key agent info. The log is truncated to
+    # ensure that the information has been loaded after the agent has been registered.
+    file.truncate_file(LOG_FILE_PATH)
+
     callback_pattern = '.*rem_keyupdate_main().*Checking for keys file changes.'
     error_message = 'Could not find the remoted key loading log'
 
@@ -367,8 +370,6 @@ def send_agent_event(wazuh_log_monitor, message=EXAMPLE_MESSAGE_EVENT, protocol=
 
     # Wait until remoted has loaded the new agent key
     wait_to_remoted_key_update(wazuh_log_monitor)
-
-    sleep(1)
 
     # Build the event message and send it to the manager as an agent event
     event = agent.create_event(message)
