@@ -1,16 +1,14 @@
 import pytest
 import os
-import threading
 
+from time import sleep
 from wazuh_testing.tools.thread_executor import ThreadExecutor
-import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools import file
-from wazuh_testing.tools import monitoring
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing import remote as rd
-from time import sleep
+
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -59,13 +57,17 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 
 def validate_agent_manager_protocol_communication(protocol, manager_port):
-    """
+    """Allow to validate if the agent-manager communication using a certain protocol has been successfull.
+
+    For this purpose, two jobs are launched concurrently. One for monitoring the queue socket and other for sending the
+    message.
+
     Args:
         protocol (str): Message sending protocol. It can be TCP or UDP.
         manager_port (int): Manager port when remoted is listening.
 
     Raises:
-        TimeoutError: If the expected event could not be found in
+        TimeoutError: If the expected event could not be found in queue socket.
     """
     file.truncate_file(LOG_FILE_PATH)
 
@@ -98,6 +100,7 @@ def get_configuration(request):
 
 
 def test_protocols_communication(get_configuration, configure_environment, restart_remoted):
+    """Validate agent-manager communication using different protocols and ports"""
     protocol = get_configuration['metadata']['protocol']
     manager_port = get_configuration['metadata']['port']
 

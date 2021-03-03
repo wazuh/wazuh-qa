@@ -18,7 +18,7 @@ protocols simultaneously.
 
 ## Expected behavior
 
-Success if the event has been found in the manager's `archives.log` after sending it from the agent, using different
+Success if the event has been found in the manager's `queue` socket after sending it from the agent, using different
 protocols and ports. Failure otherwise.
 
 ## Testing
@@ -28,7 +28,7 @@ as using the default port and a custom port.
 
 After this, two jobs are launched:
 
-- A monitoring job that is based on monitoring the manager's  `archives.log` to see the events received.
+- A monitoring job that is based on monitoring the manager's  `queue` socket to see the events received.
 
 - A job that creates, registers an agent and sends a defined message to the manager.
 
