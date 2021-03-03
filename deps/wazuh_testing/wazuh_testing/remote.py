@@ -5,20 +5,16 @@
 import os
 import socket
 
-import wazuh_testing.tools.agent_simulator as ag
 import wazuh_testing.api as api
-
+import wazuh_testing.tools.agent_simulator as ag
+from wazuh_testing import UDP, TCP
 from wazuh_testing.tools import ARCHIVES_LOG_FILE_PATH, LOG_FILE_PATH
+from wazuh_testing.tools import QUEUE_SOCKETS_PATH
+from wazuh_testing.tools import WAZUH_CONF
 from wazuh_testing.tools import file
 from wazuh_testing.tools import monitoring
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools import QUEUE_SOCKETS_PATH
-from wazuh_testing.tools import WAZUH_CONF
 
-
-UDP = "UDP"
-TCP = "TCP"
-TCP_UDP = "TCP,UDP"
 REMOTED_GLOBAL_TIMEOUT = 10
 EXAMPLE_MESSAGE_EVENT = '1:/root/test.log:Feb 23 17:18:20 35-u20-manager4 sshd[40657]: Accepted publickey for root' \
                         ' from 192.168.0.5 port 48044 ssh2: RSA SHA256:IZT11YXRZoZfuGlj/K/t3tT8OdolV58hcCOJFZLIW2Y'
@@ -62,7 +58,8 @@ def callback_error_getting_protocol():
 
 
 def callback_warning_syslog_tcp_udp():
-    msg = fr"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time. Default value \(TCP\) will be used."
+    msg = fr"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time. Default value \(TCP\) \
+             will be used. "
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
@@ -97,7 +94,8 @@ def callback_error_invalid_ip(ip):
 
 
 def callback_info_no_allowed_ips():
-    msg = fr"INFO: \(\d+\): IP or network must be present in syslog access list \(allowed-ips\). Syslog server disabled."
+    msg = fr'INFO: \(\d+\): IP or network must be present \
+             in syslog access list \(allowed-ips\). Syslog server disabled.'
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
