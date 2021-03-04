@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import re
 import socket
 
 import wazuh_testing.api as api
@@ -18,6 +19,10 @@ from wazuh_testing.tools.services import control_service
 REMOTED_GLOBAL_TIMEOUT = 10
 EXAMPLE_MESSAGE_EVENT = '1:/root/test.log:Feb 23 17:18:20 35-u20-manager4 sshd[40657]: Accepted publickey for root' \
                         ' from 192.168.0.5 port 48044 ssh2: RSA SHA256:IZT11YXRZoZfuGlj/K/t3tT8OdolV58hcCOJFZLIW2Y'
+EXAMPLE_INVALID_USER_LOG_EVENT = 'Feb  4 16:39:29 ip-10-142-167-43 sshd[6787]: ' \
+                                 'Invalid user single-log-w-header from 127.0.0.1 port 41328'
+EXAMPLE_VALID_USER_LOG_EVENT = '2021-03-04T02:16:16.998693-05:00 centos-8 su - - [timeQuality tzKnown="1" ' \
+                               'isSynced="0"] pam_unix(su:session): session opened for user wazuh_qa by (uid=0)'
 EXAMPLE_MESSAGE_PATTERN = 'Accepted publickey for root from 192.168.0.5 port 48044'
 QUEUE_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'queue')
 
@@ -120,6 +125,7 @@ def callback_warning_syslog_tcp_udp():
     """
     msg = fr"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time. "
     msg += "Default value \(TCP\) will be used."
+
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
@@ -268,8 +274,7 @@ def callback_detect_syslog_event(message):
     Returns:
         callable: callback to detect this event.
     """
-    expr = fr".*->\d+\.\d+\.\d+\.\d+\s{message}"
-    return monitoring.make_callback(pattern=expr, prefix=None)
+    return monitoring.make_callback(pattern=message, prefix=r".*->\d+\.\d+\.\d+\.\d+\s", escape=True)
 
 
 def callback_detect_example_archives_event():
@@ -312,7 +317,7 @@ def create_archives_log_monitor():
     Returns:
         FileMonitor: object to monitor the archives.log.
     """
-    # Reset ossec.log and start a new monitor
+    # Reset archives.log and start a new monitor
     file.truncate_file(ARCHIVES_LOG_FILE_PATH)
     wazuh_archives_log_monitor = monitoring.FileMonitor(ARCHIVES_LOG_FILE_PATH)
 
@@ -350,10 +355,17 @@ def check_syslog_event(wazuh_archives_log_monitor, message, port, protocol, time
         timeout (int): maximum time to expect the syslog event in the log file.
     """
     send_syslog_message(message, port, protocol)
-    detect_archives_log_event(archives_monitor=wazuh_archives_log_monitor,
-                              callback=callback_detect_syslog_event(message),
-                              timeout=timeout,
-                              error_message="Syslog message wasn't received or took too much time.")
+
+    # Syslog events may contain a PRI header at the beginning of the message <1>. If wazuh-remoted receives a message
+    # with this header, it parses the message and removes the header. That's why we remove the header to search the
+    # event in the archives.log. More info about PRI headers at: https://tools.ietf.org/html/rfc3164#section-4.1.1
+    parsed_msg = re.sub(r"<\d+>", '', message)
+
+    for msg in parsed_msg.split("\n"):
+        detect_archives_log_event(archives_monitor=wazuh_archives_log_monitor,
+                                  callback=callback_detect_syslog_event(msg),
+                                  timeout=timeout,
+                                  error_message="Syslog message wasn't received or took too much time.")
 
 
 def send_ping_pong_messages(protocol, manager_address, port):
