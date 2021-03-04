@@ -6,6 +6,7 @@ import os
 import pytest
 
 import wazuh_testing.remote as remote
+from wazuh_testing import is_udp
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 
 
@@ -18,10 +19,12 @@ configurations_path = os.path.join(test_data_path, 'wazuh_syslog.yaml')
 
 syslog_messages = {
     'dummy': "Syslog message sent by wazuh-qa to test remoted syslog",
-    'sshd': remote.EXAMPLE_SYSLOG_EVENT,
-    'sshd_pri_header': f"<1>{remote.EXAMPLE_SYSLOG_EVENT}",
-    'multi_log': f"{remote.EXAMPLE_SYSLOG_EVENT}\n{remote.EXAMPLE_SYSLOG_EVENT}",
-    'multi_log_pri_header': f"<1>{remote.EXAMPLE_SYSLOG_EVENT}\n<2>{remote.EXAMPLE_SYSLOG_EVENT}"
+    'failed_login_sshd': remote.EXAMPLE_INVALID_USER_LOG_EVENT,
+    'failed_login_sshd_pri_header': f"<1>{remote.EXAMPLE_INVALID_USER_LOG_EVENT}",
+    'multi_log_failed_login_sshd_logon_success':
+        f"{remote.EXAMPLE_INVALID_USER_LOG_EVENT}\n{remote.EXAMPLE_VALID_USER_LOG_EVENT}",
+    'multi_log_failed_login_sshd_logon_success_pri_header':
+        f"<1>{remote.EXAMPLE_INVALID_USER_LOG_EVENT}\n<2>{remote.EXAMPLE_VALID_USER_LOG_EVENT}"
 }
 
 parameters = [
@@ -57,8 +60,8 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.parametrize("syslog_message", syslog_messages.values())
-def test_syslog_message(syslog_message, get_configuration, configure_environment, restart_wazuh):
+@pytest.mark.parametrize("message", syslog_messages.keys())
+def test_syslog_message(message, get_configuration, configure_environment, restart_wazuh):
     """Test if remoted can receive syslog messages with PRI header through the socket
 
     Raises:
@@ -66,6 +69,9 @@ def test_syslog_message(syslog_message, get_configuration, configure_environment
     """
     config = get_configuration['metadata']
     port, protocol = config['port'], config['protocol']
+
+    if is_udp(protocol) and "\n" in syslog_messages[message]:
+        pytest.skip("UDP only supports one message per datagram.")
 
     # Monitor the archives.log
     wazuh_archives_log_monitor = remote.create_archives_log_monitor()
@@ -76,4 +82,4 @@ def test_syslog_message(syslog_message, get_configuration, configure_environment
                             error_message="Wazuh remoted didn't start as expected.")
 
     # Check if wazuh-remoted receives syslog messages
-    remote.check_syslog_event(wazuh_archives_log_monitor, syslog_message, port, protocol)
+    remote.check_syslog_event(wazuh_archives_log_monitor, syslog_messages[message], port, protocol)
