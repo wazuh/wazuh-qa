@@ -44,10 +44,11 @@ def get_configuration(request):
 
 
 def test_allowed_denied_ips_syslog(get_configuration, configure_environment, restart_remoted):
-    """
-    Checks that "allowed-ips" and "denied-ips" could be configured without errors for syslog connection
-    """
+    """Check that "allowed-ips" and "denied-ips" could be configured without errors for syslog connection.
 
+    Raises:
+        AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected error message.
+    """
     cfg = get_configuration['metadata']
 
     log_callback = remote.callback_detect_syslog_allowed_ips(cfg['allowed-ips'])

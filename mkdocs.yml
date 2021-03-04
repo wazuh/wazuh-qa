@@ -386,7 +386,24 @@ nav:
         - Remoted:
             - tests/integration/test_remoted/index.md
             - Test configuration:
-                - tests/integration/test_remoted/test_configuration/test_basic_configuration.md
+                - Overview: tests/integration/test_remoted/test_configuration/index.md
+                - Test invalid connection: tests/integration/test_remoted/test_configuration/test_basic_configuration_connection_invalid_connection.md
+                - Test invalid port: tests/integration/test_remoted/test_configuration/test_basic_configuration_connection_invalid_port.md
+                - Test invalid protocol: tests/integration/test_remoted/test_configuration/test_basic_configuration_connection_invalid_protocol.md
+                - Test connection valid: tests/integration/test_remoted/test_configuration/test_basic_configuration_connection_valid.md
+                - Test ipv6: tests/integration/test_remoted/test_configuration/test_basic_configuration_ipv6.md
+                - Test invalid local_ip: tests/integration/test_remoted/test_configuration/test_basic_configuration_local_ip_invalid.md
+                - Test valid local_ip: tests/integration/test_remoted/test_configuration/test_basic_configuration_local_ip_valid.md
+                - Test configuration queue_size syslog: tests/integration/test_remoted/test_configuration/test_basic_configuration_queue_size_syslog.md
+                - Test configuration queue_size too big: tests/integration/test_remoted/test_configuration/test_basic_configuration_queue_size_too_big.md
+                - Test configuration queue_size valid: tests/integration/test_remoted/test_configuration/test_basic_configuration_queue_size_valid.md
+                - Test configuration rids_closing_time valid: tests/integration/test_remoted/test_configuration/test_basic_configuration_rids_closing_time_valid.md
+                - Test configuration rids_closing_time invalid: tests/integration/test_remoted/test_configuration/test_basic_configuration_rids_closing_time_invalid.md
+                - Test configuration allowed ips invalid: tests/integration/test_remoted/test_configuration/test_basic_configuration_syslog_allowed_ips_invalid.md
+                - Test configuration denied ips invalid: tests/integration/test_remoted/test_configuration/test_basic_configuration_syslog_denied_ips_invalid.md
+                - Test configuration allowed and denied ips valids: tests/integration/test_remoted/test_configuration/test_basic_configuration_syslog_allowed_denied_ips_valid.md
+                - Test configuration denied ips: tests/integration/test_remoted/test_configuration/test_basic_configuration_syslog_denied_ips.md
+                - Test configuration syslog no allowed ips provided: tests/integration/test_remoted/test_configuration/test_basic_configuration_syslog_no_allowed_ips.md
             - Test communications through the sockets:
                 - tests/integration/test_remoted/test_socket_communication/test_ping_pong_message.md
                 - tests/integration/test_remoted/test_socket_communication/test_syslog_message.md

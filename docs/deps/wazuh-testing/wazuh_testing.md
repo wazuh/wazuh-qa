@@ -90,6 +90,10 @@ Folder with all the general tools that could be used in every test. They are gro
 
 ::: deps.wazuh_testing.wazuh_testing.mitre
 
+## Remote
+
+::: deps.wazuh_testing.wazuh_testing.remote
+
 ## Vulnerability detector
 
 ::: deps.wazuh_testing.wazuh_testing.vulnerability_detector
