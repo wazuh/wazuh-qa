@@ -387,6 +387,8 @@ nav:
             - tests/integration/test_remoted/index.md
             - Test configuration:
                 - tests/integration/test_remoted/test_configuration/test_basic_configuration.md
+            - Test manager messages:
+                - tests/integration/test_remoted/test_manager_messages/test_manager_ack.md
             - Test communications through the sockets:
                 - tests/integration/test_remoted/test_socket_communication/test_ping_pong_message.md
                 - tests/integration/test_remoted/test_socket_communication/test_syslog_message.md
