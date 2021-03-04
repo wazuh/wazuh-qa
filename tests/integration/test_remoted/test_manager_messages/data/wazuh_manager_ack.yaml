@@ -1,0 +1,11 @@
+- tags:
+  - test_protocols_communication
+  apply_to_modules:
+  - test_protocols_communication
+  sections:
+  - section: remote
+    elements:
+    - connection:
+        value: secure
+    - protocol:
+         value: PROTOCOL
