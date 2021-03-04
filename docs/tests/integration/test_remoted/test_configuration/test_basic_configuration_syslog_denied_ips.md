@@ -6,7 +6,7 @@ Check if `wazuh-remoted` correctly denied ip for `syslog` connection.
 
 ## Objective
 
-TO Confirm `wazuh-remoted` denied the connection of the ip specified in `denied-ips` option.
+To confirm `wazuh-remoted` denied the connection of the ip specified in `denied-ips` option.
 
 ## General info
 

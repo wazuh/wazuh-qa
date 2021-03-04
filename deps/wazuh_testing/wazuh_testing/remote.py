@@ -23,7 +23,7 @@ QUEUE_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'queue')
 
 
 def callback_detect_syslog_allowed_ips(syslog_ips):
-    """Creates a callback to detect syslog allowed-ips.
+    """Create a callback to detect syslog allowed-ips.
 
     Args:
         syslog_ips (str): syslog allowed-ips.
@@ -37,7 +37,7 @@ def callback_detect_syslog_allowed_ips(syslog_ips):
 
 
 def callback_detect_syslog_denied_ips(syslog_ips):
-    """Creates a callback to detect syslog denied-ips.
+    """Create a callback to detect syslog denied-ips.
 
     Args:
         syslog_ips (str): syslog denied-ips.
@@ -50,7 +50,7 @@ def callback_detect_syslog_denied_ips(syslog_ips):
 
 
 def callback_invalid_value(option, value):
-    """Creates a callback to detect invalid values in ossec.conf file.
+    """Create a callback to detect invalid values in ossec.conf file.
 
     Args:
         option (str): Wazuh manager configuration option.
@@ -64,7 +64,7 @@ def callback_invalid_value(option, value):
 
 
 def callback_error_in_configuration(severity):
-    """Creates a callback to detect configuration error in ossec.conf file.
+    """Create a callback to detect configuration error in ossec.conf file.
 
     Args:
         severity (str): ERROR or CRITICAL.
@@ -77,7 +77,7 @@ def callback_error_in_configuration(severity):
 
 
 def callback_error_invalid_port(port):
-    """Creates a callback to detect invalid port.
+    """Create a callback to detect invalid port.
 
     Args:
         port (str): Wazuh manager port.
@@ -90,7 +90,7 @@ def callback_error_invalid_port(port):
 
 
 def callback_ignored_invalid_protocol(protocol):
-    """Creates a callback to detect invalid protocol.
+    """Create a callback to detect invalid protocol.
 
     Args:
         protocol (str): Wazuh manager protocol.
@@ -103,7 +103,7 @@ def callback_ignored_invalid_protocol(protocol):
 
 
 def callback_error_getting_protocol():
-    """Creates a callback to detect if warning message is created when no valid protocol is provided.
+    """Create a callback to detect if warning message is created when no valid protocol is provided.
 
     Returns:
         callable: callback to detect this event.
@@ -113,7 +113,7 @@ def callback_error_getting_protocol():
 
 
 def callback_warning_syslog_tcp_udp():
-    """Creates a callback to detect if warning message is created when multiple protocol are provided using syslog.
+    """Create a callback to detect if warning message is created when multiple protocol are provided using syslog.
 
     Returns:
         callable: callback to detect this event.
@@ -124,7 +124,7 @@ def callback_warning_syslog_tcp_udp():
 
 
 def callback_warning_secure_ipv6():
-    """Creates a callback to detect if warning message is created when ipv6 is used along with secure connection.
+    """Create a callback to detect if warning message is created when ipv6 is used along with secure connection.
 
     Returns:
         callable: callback to detect this event.
@@ -134,7 +134,7 @@ def callback_warning_secure_ipv6():
 
 
 def callback_error_bind_port():
-    """Creates a callback to detect if critical error is created when invalid local ip value is provided.
+    """Create a callback to detect if critical error is created when invalid local ip value is provided.
 
     Returns:
         callable: callback to detect this event.
@@ -144,7 +144,7 @@ def callback_error_bind_port():
 
 
 def callback_error_queue_size_syslog():
-    """Creates a callback to detect if error is created when queue_size is used along with syslog connection.
+    """Create a callback to detect if error is created when queue_size is used along with syslog connection.
 
     Returns:
         callable: callback to detect this event.
@@ -154,7 +154,7 @@ def callback_error_queue_size_syslog():
 
 
 def callback_queue_size_too_big():
-    """Creates a callback to detect if warning message is created when queue_size is too big.
+    """Create a callback to detect if warning message is created when queue_size is too big.
 
     Returns:
         callable: callback to detect this event.
@@ -164,7 +164,7 @@ def callback_queue_size_too_big():
 
 
 def callback_error_invalid_value_for(option):
-    """Creates a callback to detect invalid values in ossec.conf file.
+    """Create a callback to detect invalid values in ossec.conf file.
 
     Args:
         option (str): Wazuh manager configuration option.
@@ -177,7 +177,7 @@ def callback_error_invalid_value_for(option):
 
 
 def callback_error_invalid_ip(ip):
-    """Creates a callback to detect if error is created when invalid local ip value is provided.
+    """Create a callback to detect if error is created when invalid local ip value is provided.
 
     Args:
         ip (str): IP address.
@@ -190,7 +190,7 @@ def callback_error_invalid_ip(ip):
 
 
 def callback_info_no_allowed_ips():
-    """Creates a callback to detect if error message is syslog server is disabled when no allowed ips is provided.
+    """Create a callback to detect if error message is syslog server is disabled when no allowed ips is provided.
 
     Returns:
         callable: callback to detect this event.
@@ -216,7 +216,7 @@ def compare_config_api_response(configuration):
 
 
 def get_protocols(all_protocols):
-    """Creates a pair of arrays with valid protocols (TCP and UDP) in element 0 and invalid protocols in element 1.
+    """Create a pair of arrays with valid protocols (TCP and UDP) in element 0 and invalid protocols in element 1.
 
     Args:
         all_protocols (list): List of strings with valid and invalid protocols.
@@ -235,7 +235,7 @@ def get_protocols(all_protocols):
 
 
 def callback_detect_remoted_started(port, protocol, connection_type="secure"):
-    """Creates a callback to detect if remoted was correctly started.
+    """Create a callback to detect if remoted was correctly started.
 
     wazuh-remoted logs if it has correctly started for each connection type, the port and the protocol in the ossec.log
 
@@ -260,7 +260,7 @@ def callback_detect_remoted_started(port, protocol, connection_type="secure"):
 
 
 def callback_detect_syslog_event(message):
-    """Creates a callback to detect the syslog messages in the archives.log.
+    """Create a callback to detect the syslog messages in the archives.log.
 
     Args:
         message (str): syslog message sent through the socket.
@@ -273,7 +273,7 @@ def callback_detect_syslog_event(message):
 
 
 def callback_detect_example_archives_event():
-    """Creates a callback to detect the example message in the archives.log
+    """Create a callback to detect the example message in the archives.log
 
     Returns:
         callable: callback to detect this event
@@ -282,7 +282,7 @@ def callback_detect_example_archives_event():
 
 
 def send_syslog_message(message, port, protocol, manager_address="127.0.0.1"):
-    """This function sends a message to the syslog server of wazuh-remoted.
+    """Send a message to the syslog server of wazuh-remoted.
 
     Args:
         message (str): string to send as a syslog event.
@@ -307,7 +307,7 @@ def send_syslog_message(message, port, protocol, manager_address="127.0.0.1"):
 
 
 def create_archives_log_monitor():
-    """Creates a FileMonitor for the archives.log file.
+    """Create a FileMonitor for the archives.log file.
 
     Returns:
         FileMonitor: object to monitor the archives.log.
@@ -320,7 +320,7 @@ def create_archives_log_monitor():
 
 
 def detect_archives_log_event(archives_monitor, callback, error_message=None, update_position=True, timeout=5):
-    """Monitors the archives.log to detect a certain event.
+    """Monitor the archives.log to detect a certain event.
 
     Args:
         archives_monitor (FileMonitor): FileMonitor bound to the archives.log.
@@ -357,7 +357,7 @@ def check_syslog_event(wazuh_archives_log_monitor, message, port, protocol, time
 
 
 def send_ping_pong_messages(protocol, manager_address, port):
-    """This function sends the ping message to the manager.
+    """Send the ping message to the manager.
 
     This message is the first of many between the manager and the agents. It is used to check if both of them are ready
     to send and receive other messages.
