@@ -39,10 +39,11 @@ def get_configuration(request):
 
 
 def test_queue_size_syslog(get_configuration, configure_environment, restart_remoted):
-    """
+    """Test if `wazuh-remoted` fails when `queue_size` tag is used at the same time that `syslog` connection.
 
+    Raises:
+        AssertionError: if `wazuh-remoted` doesn't respond error message.
     """
-
     log_callback = remote.callback_error_queue_size_syslog()
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")

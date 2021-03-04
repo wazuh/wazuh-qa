@@ -45,10 +45,13 @@ def get_configuration(request):
 
 
 def test_local_ip_valid(get_configuration, configure_environment, restart_remoted):
-    """
+    """Check if the `local_ip` option could be configured using different valid IPs without errors.
 
-    """
+    Check if the API answer for manager connection coincides with the option selected on `ossec.conf`.
 
+    Raises:
+        AssertionError: if API answer is different of expected configuration.
+    """
     cfg = get_configuration['metadata']
 
     # Check that API query return the selected configuration

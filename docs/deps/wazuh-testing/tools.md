@@ -44,5 +44,4 @@
 
 ## Configuration
 
-
 ::: deps.wazuh_testing.wazuh_testing.tools.configuration

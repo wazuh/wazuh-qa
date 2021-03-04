@@ -36,10 +36,15 @@ def get_configuration(request):
     return request.param
 
 
-def test_ipv6(get_configuration, configure_environment, restart_remoted):
-    """
-    """
+def test_ipv6_secure(get_configuration, configure_environment, restart_remoted):
+    """Check that when `ipv6` can be configured to `yes` without errors.
 
+    In case of `secure` connection IPv4 should be used. Also, check if the API answer for
+    manager connection coincides with the option selected on `ossec.conf`.
+
+    Raises:
+        AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected warning message or
+        if API answer is different of expected configuration."""
     cfg = get_configuration['metadata']
 
     if cfg['connection'] == 'secure':

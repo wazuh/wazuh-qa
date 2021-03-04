@@ -1,4 +1,5 @@
 # Test syslog messages
+
 ## Overview
 These tests will check if `wazuh-remoted` can receive messages to its syslog server. This message will be received in the port configured in the `remote` section, using the `syslog` connection. The `syslog` functionality accepts these protocols `UDP` and `TCP` connections, but not at the same time.
 
@@ -34,8 +35,6 @@ Confirm `wazuh-remoted` can receive messages to its syslog server. This confirma
 
 ## Testing
 
-### Checks
-
 The test will send the following messages to `wazuh-remoted` syslog server:
 - Dummy value: `Syslog message sent by wazuh-qa to test remoted syslog`.
 - Failed login SSHD: 
@@ -55,6 +54,8 @@ These logs will generate events that will appear in the `archives.log` file with
 With all of this, the test will apply a custom configuration for `wazuh-remoted`, send the message and search the event 
 in the `archives.log`. 
 
+### Checks
+
 The configuration applied to the test is this one:
 
 - **UDP and port 514**.
@@ -67,4 +68,5 @@ The configuration applied to the test is this one:
 - **tcp and port 51000**.
 
 ## Code documentation
+
 ::: tests.integration.test_remoted.test_socket_communication.test_syslog_message
