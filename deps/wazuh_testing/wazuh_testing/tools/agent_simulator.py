@@ -1150,3 +1150,11 @@ def create_agents(agents_number, manager_address, cypher, fim_eps=None, authd_pa
         agent_count = agent_count + 1
 
     return agents
+
+
+def connect(agent,  manager_address="localhost", protocol="tcp"):
+    sender = Sender(manager_address, protocol=protocol)
+    injector = Injector(sender, agent)
+    injector.run()
+    agent.wait_status_active()
+    return agent, sender, injector

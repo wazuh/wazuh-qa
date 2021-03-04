@@ -46,15 +46,6 @@ config_ids = [x['PROTOCOL'] for x in parameters]
 # Utils
 manager_address = "localhost"
 
-
-def connect(agent, protocol="tcp"):
-    sender = ag.Sender(manager_address, protocol=protocol)
-    injector = ag.Injector(sender, agent)
-    injector.run()
-    agent.wait_status_active()
-    return agent, sender, injector
-
-
 # fixtures
 @pytest.fixture(scope="module", params=configurations, ids=config_ids)
 def get_configuration(request):
@@ -75,12 +66,9 @@ def test_request(get_configuration, configure_environment, restart_remoted, comm
     agents = [ag.Agent(manager_address, "aes", os="debian8", version="4.2.0") for _ in range(len(protocols))]
     for agn, protocol in zip(agents, protocols):
         if "disconnected" not in command_request:
-            agent, sender, injector = connect(agn, protocol)
+            agent, sender, injector = ag.connect(agn, manager_address, protocol)
         else:
             agent = agn
-            # wazuh-remoted needs time to create the sockets.
-            # Otherwise, the test won't be able to connect to them to send the requests
-            time.sleep(5)
 
         msg_request = f'{agent.id} {command_request}'
 
