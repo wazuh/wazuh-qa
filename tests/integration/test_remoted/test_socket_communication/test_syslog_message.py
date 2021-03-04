@@ -3,12 +3,11 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import pytest
 
+import pytest
 import wazuh_testing.remote as remote
 from wazuh_testing import is_udp
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)

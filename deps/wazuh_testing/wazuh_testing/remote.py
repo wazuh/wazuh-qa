@@ -20,7 +20,7 @@ REMOTED_GLOBAL_TIMEOUT = 10
 EXAMPLE_MESSAGE_EVENT = '1:/root/test.log:Feb 23 17:18:20 35-u20-manager4 sshd[40657]: Accepted publickey for root' \
                         ' from 192.168.0.5 port 48044 ssh2: RSA SHA256:IZT11YXRZoZfuGlj/K/t3tT8OdolV58hcCOJFZLIW2Y'
 EXAMPLE_INVALID_USER_LOG_EVENT = 'Feb  4 16:39:29 ip-10-142-167-43 sshd[6787]: ' \
-                       'Invalid user single-log-w-header from 127.0.0.1 port 41328'
+                                 'Invalid user single-log-w-header from 127.0.0.1 port 41328'
 EXAMPLE_VALID_USER_LOG_EVENT = '2021-03-04T02:16:16.998693-05:00 centos-8 su - - [timeQuality tzKnown="1" ' \
                                'isSynced="0"] pam_unix(su:session): session opened for user wazuh_qa by (uid=0)'
 EXAMPLE_MESSAGE_PATTERN = 'Accepted publickey for root from 192.168.0.5 port 48044'
@@ -63,8 +63,8 @@ def callback_error_getting_protocol():
 
 
 def callback_warning_syslog_tcp_udp():
-    msg = fr"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time. Default value \(TCP\) \
-             will be used. "
+    msg = fr"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time. \
+        Default value \(TCP\) will be used."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
@@ -401,6 +401,7 @@ def check_queue_socket_event(raw_event=EXAMPLE_MESSAGE_PATTERN, timeout=30):
     Raises:
         TimeoutError: if could not find the pattern regex event in the queue socket.
     """
+
     # Do not delete. Function required for MITM to work
     def intercept_socket_data(data):
         return data
