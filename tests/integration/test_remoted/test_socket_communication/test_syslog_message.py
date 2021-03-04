@@ -23,7 +23,13 @@ syslog_messages = {
     'multi_log_failed_login_sshd_logon_success':
         f"{remote.EXAMPLE_INVALID_USER_LOG_EVENT}\n{remote.EXAMPLE_VALID_USER_LOG_EVENT}",
     'multi_log_failed_login_sshd_logon_success_pri_header':
-        f"<1>{remote.EXAMPLE_INVALID_USER_LOG_EVENT}\n<2>{remote.EXAMPLE_VALID_USER_LOG_EVENT}"
+        f"<1>{remote.EXAMPLE_INVALID_USER_LOG_EVENT}\n<2>{remote.EXAMPLE_VALID_USER_LOG_EVENT}",
+    'multi_log_failed_login_sshd_logon_success_pri_header_mix_with_without':
+        f"<1>{remote.EXAMPLE_INVALID_USER_LOG_EVENT}\n{remote.EXAMPLE_VALID_USER_LOG_EVENT}",
+    'multi_log_failed_login_sshd_logon_success_pri_header_mix_without_with':
+        f"{remote.EXAMPLE_INVALID_USER_LOG_EVENT}\n{remote.EXAMPLE_VALID_USER_LOG_EVENT}",
+    'dummy_pri_header': f"<dummy>{remote.EXAMPLE_INVALID_USER_LOG_EVENT}",
+    'dummy_bad_formatted_pri_header': f"<dummy_header{remote.EXAMPLE_INVALID_USER_LOG_EVENT}"
 }
 
 parameters = [
@@ -61,16 +67,16 @@ def get_configuration(request):
 
 @pytest.mark.parametrize("message", syslog_messages.keys())
 def test_syslog_message(message, get_configuration, configure_environment, restart_wazuh):
-    """Test if remoted can receive syslog messages with PRI header through the socket
+    """Test if remoted can receive syslog messages through the socket.
 
     Raises:
-        TimeoutError: if `wazuh-remoted` doesn't show the log message for syslog
+        TimeoutError: if `wazuh-remoted` doesn't show the log message for syslog.
     """
     config = get_configuration['metadata']
     port, protocol = config['port'], config['protocol']
 
-    if is_udp(protocol) and "\n" in syslog_messages[message]:
-        pytest.skip("UDP only supports one message per datagram.")
+    if is_udp(protocol) and '\n' in syslog_messages[message]:
+        pytest.skip('UDP only supports one message per datagram.')
 
     # Monitor the archives.log
     wazuh_archives_log_monitor = remote.create_archives_log_monitor()

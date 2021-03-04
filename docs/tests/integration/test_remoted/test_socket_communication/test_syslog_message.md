@@ -45,6 +45,8 @@ The test will send the following messages to `wazuh-remoted` syslog server:
 - Multiple logs at once: the failed login sshd attempt and a logon success.
 - Multiple logs at once with [PRI headers](https://tools.ietf.org/html/rfc3164#section-4.1.1): 
   the failed login sshd attempt and a logon success.
+- Combination of all the messages from above. 
+- Messages with a bad formatted PRI header.
   
 These logs will generate events that will appear in the `archives.log` file with this format:
 ```
