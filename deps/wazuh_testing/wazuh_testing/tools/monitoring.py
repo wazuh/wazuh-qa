@@ -471,7 +471,7 @@ class Queue(queue.Queue):
     def peek(self, *args, position=0, **kwargs):
         """Peek any given position without modifying the queue status.
 
-        The difference between `peek` and `get` is `peek` pops the item and `get` does not.
+        The difference between `peek` and `get` is `get` pops the item and `peek` does not.
 
         Args:
             position (int, optional) : Element of the queue to return. Default `0`
