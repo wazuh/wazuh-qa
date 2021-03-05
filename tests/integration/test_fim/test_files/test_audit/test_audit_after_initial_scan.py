@@ -8,13 +8,11 @@ import shutil
 import subprocess
 
 import pytest
-from wazuh_testing.fim import (LOG_FILE_PATH,
-                               callback_audit_reloaded_rule,
-                               callback_audit_removed_rule,
-                               callback_audit_connection_close,
-                               callback_audit_connection)
+import wazuh_testing.fim as fim
+
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing import global_parameters
 
 # Marks
 
@@ -27,7 +25,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2'), os.path.join('/', 'testdir3')]
 testdir1, testdir2, testdir3 = test_directories
 
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
 
 # Configurations
 
@@ -54,24 +52,29 @@ def test_remove_and_read_folder(tags_to_apply, folder, get_configuration,
                                 wait_for_fim_start):
     """Remove folder which is monitored with auditd and then create it again.
 
-    Parameters
-    ----------
-    tags_to_apply : set
-        Configuration tag to apply in the test
-    folder : str
-        The folder to remove and read
+    Args:
+        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
+        folder (str): The folder to remove and read.
+        get_configuration (fixture): Gets the current configuration of the test.
+        configure_environment (fixture): Configure the environment for the execution of the test.
+        restart_syscheckd (fixture): Restarts syscheck.
+        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
+
+    Raises:
+        TimeoutError: If an expected event couldn't be captured.
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     shutil.rmtree(folder, ignore_errors=True)
-    wazuh_log_monitor.start(timeout=20, callback=callback_audit_removed_rule,
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_audit_removed_rule,
                             error_message=f'Did not receive expected "removed" event '
                                           f'removing the folder {folder}')
 
     os.makedirs(folder, mode=0o777)
-    wazuh_log_monitor.start(timeout=30, callback=callback_audit_reloaded_rule,
-                            error_message='Did not receive expected "reload" event')
+    fim.wait_for_audit(True, wazuh_log_monitor)
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_audit_added_rule,
+                            error_message='Did not receive expected "added" event')
 
 
 @pytest.mark.parametrize('tags_to_apply', [
@@ -81,10 +84,15 @@ def test_reconnect_to_audit(tags_to_apply, get_configuration, configure_environm
                             restart_syscheckd, wait_for_fim_start):
     """Restart auditd and check Wazuh reconnect to auditd
 
-    Parameters
-    ----------
-    tags_to_apply : set
-        Configuration tag to apply in the test
+    Args:
+        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
+        get_configuration (fixture): Gets the current configuration of the test.
+        configure_environment (fixture): Configure the environment for the execution of the test.
+        restart_syscheckd (fixture): Restarts syscheck.
+        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
+
+    Raises:
+        TimeoutError: If an expected event couldn't be captured.
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
@@ -92,7 +100,7 @@ def test_reconnect_to_audit(tags_to_apply, get_configuration, configure_environm
     restart_command = ["service", "auditd", "restart"]
     subprocess.run(restart_command, check=True)
 
-    wazuh_log_monitor.start(timeout=20, callback=callback_audit_connection_close,
+    wazuh_log_monitor.start(timeout=20, callback=fim.callback_audit_connection_close,
                             error_message='Did not receive expected "audit connection close" event')
-    wazuh_log_monitor.start(timeout=20, callback=callback_audit_connection,
+    wazuh_log_monitor.start(timeout=20, callback=fim.callback_audit_connection,
                             error_message='Did not receive expected "audit connection" event')

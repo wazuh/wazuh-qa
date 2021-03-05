@@ -7,9 +7,8 @@ import os
 import subprocess
 
 import pytest
-from wazuh_testing.fim import (LOG_FILE_PATH,
-                               callback_audit_rules_manipulation,
-                               callback_audit_deleting_rule)
+import wazuh_testing.fim as fim
+
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -24,7 +23,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2'), os.path.join('/', 'testdir3')]
 testdir1, testdir2, testdir3 = test_directories
 
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
 
 # Configurations
 
@@ -48,23 +47,28 @@ def test_remove_rule_five_times(tags_to_apply, folder, audit_key,
                                 get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """Remove auditd rule using auditctl five times and check Wazuh ignores folder.
 
-    Parameters
-    ----------
-    tags_to_apply : set
-        Configuration tag to apply in the test
-    folder : str
-        The folder to remove and read
-    audit_key : str
-        The key which Wazuh put.
+    Args:
+        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
+        folder (str): Path whose rule will be removed.
+        audit_key (str): Name of the configured audit key.
+        get_configuration (fixture): Gets the current configuration of the test.
+        uninstall_install_audit (fixture): Uninstall auditd before the test and install auditd again after the test is
+                                           executed.
+        configure_environment (fixture): Configure the environment for the execution of the test.
+        restart_syscheckd (fixture): Restarts syscheck.
+        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
+
+    Raises:
+        TimeoutError: If an expected event couldn't be captured.
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     for _ in range(0, 5):
         subprocess.run(["auditctl", "-W", folder, "-p", "wa", "-k", audit_key], check=True)
-        wazuh_log_monitor.start(timeout=20, callback=callback_audit_rules_manipulation,
+        wazuh_log_monitor.start(timeout=20, callback=fim.callback_audit_rules_manipulation,
                                 error_message='Did not receive expected '
                                               '"Detected Audit rules manipulation" event')
 
-    wazuh_log_monitor.start(timeout=20, callback=callback_audit_deleting_rule,
+    wazuh_log_monitor.start(timeout=20, callback=fim.callback_audit_deleting_rule,
                             error_message='Did not receive expected "Deleting Audit rules" event')

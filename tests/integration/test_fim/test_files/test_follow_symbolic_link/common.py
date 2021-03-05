@@ -4,8 +4,7 @@ import shutil
 import subprocess
 import sys
 
-from wazuh_testing.fim import callback_audit_loaded_rule, create_file, REGULAR, SYMLINK, callback_symlink_scan_ended, \
-    change_internal_options
+from wazuh_testing.fim import create_file, REGULAR, SYMLINK, callback_symlink_scan_ended, change_internal_options
 from wazuh_testing.tools import PREFIX
 
 # variables
@@ -41,13 +40,6 @@ def modify_symlink(target, path, file=None):
         os.symlink(target, path)
     else:
         subprocess.call(['ln', '-sfn', target, path])
-
-
-def wait_for_audit(whodata, monitor):
-    """Wait for the audit callback if we are using whodata monitoring"""
-    if whodata:
-        monitor.start(timeout=30, callback=callback_audit_loaded_rule,
-                      error_message='Did not receive expected "Audit rule loaded: -w ... -p" event')
 
 
 def delete_f(path, file=None):
