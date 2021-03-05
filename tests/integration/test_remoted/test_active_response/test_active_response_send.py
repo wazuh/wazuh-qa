@@ -64,7 +64,7 @@ def test_active_response_send(get_configuration, configure_environment, restart_
     a, sender, injector = connect(agent, cfg['protocol'])
     time.sleep(20)
 
-    send_ar_message('(local_source) [] NRN 001 restart-wazuh0 admin 1.1.1.1 1.1 44 (agente-cualquiera) any->/carpeta/testing - -')
+    send_ar_message(b'(local_source) [] NRN 001 restart-wazuh0 admin 1.1.1.1 1.1 44 (agente-cualquiera) any->/carpeta/testing - -')
 
     log_callback = remote.callback_active_response_received()
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
@@ -80,8 +80,7 @@ def test_active_response_send(get_configuration, configure_environment, restart_
 
 
 """
-El agent recibe esto 
-
+agent message
 
 2021/03/05 09:01:42 ossec-agentd[71402] receiver.c:92 at receive_msg(): DEBUG: Received message: '#!-execd restart-wazuh0 admin 1.1.1.1 1.1 44 (agente-cualquiera) any->/carpeta/testing - -
 

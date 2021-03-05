@@ -240,7 +240,7 @@ def get_protocols(all_protocols):
     return [valid_protocols, invalid_protocols]
 
 def callback_active_response_received():
-    msg = fr"DEBUG: Active response request received: (local_source) [] NRN 002 restart-wazuh0 admin 1.1.1.1 1.1 44 (agente-cualquiera) any->/carpeta/testing - -"
+    msg = fr"DEBUG: Active response request received: (local_source) \[\] NRN 002 restart-wazuh0 admin 1.1.1.1 1.1 44 (agente-cualquiera) any->/carpeta/testing - -"
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
