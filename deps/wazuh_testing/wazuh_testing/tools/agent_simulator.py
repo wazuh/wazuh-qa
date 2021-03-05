@@ -586,7 +586,7 @@ class Agent:
             result = "Not in global.db"
         return result
 
-    @retry(AttributeError, attempts=6, delay=1, delay_multiplier=2)
+    @retry(AttributeError, attempts=10, delay=5, delay_multiplier=1)
     def wait_status_active(self):
         status = self.get_connection_status()
         if status == 'active':
@@ -595,6 +595,9 @@ class Agent:
 
     def set_module_status(self, module_name, status):
         self.modules[module_name]['status'] = status
+
+    def set_module_attribute(self, module_name, attribute, value):
+        self.modules[module_name][attribute] = value
 
 
 class Inventory:

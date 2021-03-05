@@ -3,9 +3,9 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import re
-
 from wazuh_testing.fim import change_internal_options
-
+from wazuh_testing.tools import WAZUH_PATH
+DEFAULT_GROUP_CONF_PATH = f"{WAZUH_PATH}/etc/shared/default/agent.conf"
 
 # Callbacks
 def callback_state_interval_not_valid(line):

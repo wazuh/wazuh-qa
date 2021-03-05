@@ -34,7 +34,8 @@ def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
                 except excepts as exception:
                     wait_time *= wait_multiplier
                     attempt -= 1
-                    msg = f'Exception: "{exception}" caught. {attempt}/{attempts}. Retrying after {wait_time} seconds.'
+                    msg = f'Exception: "{exception}". {attempt}/{attempts} remaining attempts. ' \
+                          f'Waiting {wait_time} seconds.'
                     logging.warning(msg)
                     sleep(wait_time)
             return func(*args, **kwargs)  # final attempt
@@ -84,3 +85,15 @@ def insert_xml_tag(pattern, tag, value, data):
     compiled_pattern = re.compile(pattern, re.DOTALL)
 
     return re.sub(compiled_pattern, rf"\g<1>{xml_tag}\n  \g<2>\g<3>", data)
+
+
+def replace_in_file(filename, to_replace, replacement):
+    """ Replaces <to_replace> with <replacement> in <filename> file.
+    This helper performs a search and replacement similat to `sed -i` to a desired file.
+    """
+    with open(filename) as f:
+        replace_content = f.read().replace(to_replace, replacement)
+
+    with open(filename, "w") as f:
+        f.write(replace_content)
+

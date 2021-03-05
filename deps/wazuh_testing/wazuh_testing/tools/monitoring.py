@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 # Unix only modules
+import logging
 
 try:
     import grp
@@ -401,10 +402,11 @@ class QueueMonitor:
             tic = time.time()
             try:
                 if update_position:
-                    item = callback(self._queue.get(block=True, timeout=self._time_step))
+                    msg = self._queue.get(block=True, timeout=self._time_step)
                 else:
-                    item = callback(self._queue.peek(position=position, block=True, timeout=self._time_step))
+                    msg = self._queue.peek(position=position, block=True, timeout=self._time_step)
                     position += 1
+                item = callback(msg)
                 if item is not None and item:
                     result_list.append(item)
                     if len(result_list) == accum_results and timeout_extra > 0 and not extra_timer_is_running:
@@ -438,7 +440,7 @@ class QueueMonitor:
                         logger.error(f"Results accumulated: "
                                      f"{len(result) if isinstance(result, list) else 0}")
                         logger.error(f"Results expected: {accum_results}")
-                    raise TimeoutError()
+                    raise TimeoutError(error_message)
                 result = self.get_results(callback=callback, accum_results=accum_results, timeout=timeout,
                                           update_position=update_position, timeout_extra=timeout_extra)
                 if result and not self._abort:
@@ -484,6 +486,9 @@ class Queue(queue.Queue):
         for _ in range(position):
             aux_queue.get(*args, **kwargs)
         return aux_queue.get(*args, **kwargs)
+
+    def __repr__(self):
+        return str(self.queue)
 
 
 class StreamServerPort(socketserver.ThreadingTCPServer):
