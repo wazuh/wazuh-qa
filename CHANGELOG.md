@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 ## [v4.2.0]
 ### Added
+- Add the tier 0 integration tests for wazuh-remoted [#1024](https://github.com/wazuh/wazuh-qa/issues/1024)
+- Add new features to the Agent simulator [#1106](https://github.com/wazuh/wazuh-qa/pull/1106)
+- Add new integration tests to cover the stats of wazuh-agentd [#1039](https://github.com/wazuh/wazuh-qa/pull/1039)
 - Add the documentation of Wazuh-QA repository [#1066](https://github.com/wazuh/wazuh-qa/pull/1066)
 - Add new functionality for mocking agents [#1054](https://github.com/wazuh/wazuh-qa/pull/1054)
 - Add support to `wodle` sections for ossec.conf generator tool [#1048](https://github.com/wazuh/wazuh-qa/pull/1048)
@@ -14,6 +17,7 @@ All notable changes to this project will be documented in this file.
 - Add some cases in test_ignore_valid, to check entire disk ignore [#1000](https://github.com/wazuh/wazuh-qa/pull/1000)
 - Add new test case for duplicate registry entries [#998](https://github.com/wazuh/wazuh-qa/pull/998)
 ### Changed
+- Rename sockets directory according to the product [#1090](https://github.com/wazuh/wazuh-qa/pull/1090)
 - Improve the stop/start behavior of DB's related functions [#1068](https://github.com/wazuh/wazuh-qa/pull/1068)
 - Update mock_vulnerability_scan fixture from vulnerability scan tests [#1058](https://github.com/wazuh/wazuh-qa/pull/1058)
 - Update insert_vulnerability to meet new constrains [#1059](https://github.com/wazuh/wazuh-qa/pull/1059)
@@ -23,6 +27,9 @@ All notable changes to this project will be documented in this file.
 - Change names of daemons in integration tests [#973](https://github.com/wazuh/wazuh-qa/pull/973)
 - Rename all ossec-control references [#965](https://github.com/wazuh/wazuh-qa/pull/965)
 ### Fixed
+- Fix an error in the Active Response tests related to the configuration file [#1080](https://github.com/wazuh/wazuh-qa/pull/1080)
+- Fix an error in the Agent simulator while parsing the messages received from the manager [#1084](https://github.com/wazuh/wazuh-qa/pull/1084).
+- Fix msu tests for Windows 10 [#1075](https://github.com/wazuh/wazuh-qa/pull/1075)
 - Fix sqlite3.OperationalError: no such table: VULNERABILITIES error [#1067](https://github.com/wazuh/wazuh-qa/pull/1067)
 - Fix test_general_settings_ignore_time test [#1056](https://github.com/wazuh/wazuh-qa/pull/1056)
 - Avoid problematic race-condition on VD integration tests for Windows [#1047](https://github.com/wazuh/wazuh-qa/pull/1047)
