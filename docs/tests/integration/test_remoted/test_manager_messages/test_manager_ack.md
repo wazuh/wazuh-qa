@@ -25,7 +25,19 @@ The testing is based on configuring the manager to receive messages via `TCP`, `
 First, the simulated agent will send the `start-up` message to the manager, and then, the agent will save all the
 incoming messages from the agent in a buffer.
 
+The `start-up` message sent by the agent is as follows:
+
+```
+#!-agent startup
+```
+
 Next, the test will search the ACK message in the agent buffer (it contains the string `#!-agent ack`).
+
+An example of the `ACK` message is as follows:
+
+```
+4112dbb63510267c613d5b6da095b4ea274310000000010:2203:#!-agent ack
+```
 
 ### Checks
 
@@ -33,7 +45,6 @@ Next, the test will search the ACK message in the agent buffer (it contains the 
 - Manager sends the ACK message using `UDP` protocol.
 - Manager sends the ACK message using `TCP,UDP` configuration.
 - Manager sends the ACK message using `UDP,TCP` configuration.
-
 
 ## Comments
 
