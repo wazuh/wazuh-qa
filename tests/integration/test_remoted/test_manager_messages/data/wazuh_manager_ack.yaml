@@ -1,11 +1,13 @@
 - tags:
-  - test_protocols_communication
+  - test_manager_ack
   apply_to_modules:
-  - test_protocols_communication
+  - test_manager_ack
   sections:
   - section: remote
     elements:
     - connection:
         value: secure
+    - port:
+        value: 1514
     - protocol:
-         value: PROTOCOL
+        value: PROTOCOL

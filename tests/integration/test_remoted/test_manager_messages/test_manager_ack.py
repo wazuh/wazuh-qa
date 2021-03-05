@@ -1,9 +1,13 @@
 import pytest
 import os
-
-from wazuh_testing.tools.configuration import load_wazuh_configurations
 import wazuh_testing.tools.agent_simulator as ag
+
+from time import sleep
 from wazuh_testing import remote as rd
+from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import FileMonitor
+
 
 # Marks
 pytestmark = pytest.mark.tier(level=1)
@@ -12,6 +16,8 @@ pytestmark = pytest.mark.tier(level=1)
 current_test_path = os.path.dirname(os.path.realpath(__file__))
 test_data_path = os.path.join(current_test_path, 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_manager_ack.yaml')
+
+wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # Set configuration
 parameters = [
@@ -40,10 +46,23 @@ configuration_ids = [item['PROTOCOL'].upper() for item in parameters]
 # Configuration data
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
+
 def check_manager_ack(protocol):
+    """Allow to check if the manager sends the ACK message after receiving the start-up message from agent.
+
+    Args:
+        protocol (str): It can be UDP or TCP.
+
+    Raises:
+        TimeoutError: If agent does not receive the manager ACK message in the expected time.
+    """
 
     # Create agent and sender object with default parameters
     agent = ag.Agent(**agent_info)
+
+    # Sleep to avoid ConnectionRefusedError
+    sleep(1)
+
     sender = ag.Sender(agent_info['manager_address'], protocol=protocol)
 
     # Activate receives_messages modules in simulated agent.
@@ -51,16 +70,21 @@ def check_manager_ack(protocol):
 
     # Run injector with only receive messages module enabled
     injector = ag.Injector(sender, agent)
-    injector.run()
+    try:
+        injector.run()
 
-    # Send the start-up message
-    sender.send_event(agent.startup_msg)
+        # Wait until remoted has loaded the new agent key
+        rd.wait_to_remoted_key_update(wazuh_log_monitor)
 
-    # Check that the manager sends the ACK message
-    event_monitor = 'todo'
+        # Send the start-up message
+        sender.send_event(agent.startup_msg)
+
+        # Check ACK manager message
+        rd.check_agent_received_message(agent.rcv_msg_queue, '#!-agent ack')
+    finally:
+        injector.stop_receive()
 
 
-# Fixtures
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -68,6 +92,7 @@ def get_configuration(request):
 
 
 def test_manager_ack(get_configuration, configure_environment, restart_remoted):
+    """Allow to check if the manager sends the ACK message after receiving the start-up message from agent."""
     protocol = get_configuration['metadata']['protocol']
 
     if protocol in ['udp,tcp', 'tcp,udp']:
