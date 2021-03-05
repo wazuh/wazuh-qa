@@ -346,7 +346,7 @@ class Agent:
                 if len(rcv) == 4:
                     data_len = int.from_bytes(rcv, 'little')
                     try:
-                        buffer_array = sender.socket.recv(data_len)
+                        buffprocess_commander_array = sender.socket.recv(data_len)
                     except MemoryError:
                         logging.critical(f"Memory error, trying to allocate {data_len}")
                         return

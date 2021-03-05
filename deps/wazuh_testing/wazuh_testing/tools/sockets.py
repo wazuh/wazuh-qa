@@ -21,3 +21,8 @@ def send_request(msg_request, response_size=100):
 
     return response
 
+def send_ar_message(ar_command):
+
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+    sock.connect("/var/ossec/queue/alerts/ar")
+    sock.send(b"{ar_command}")
