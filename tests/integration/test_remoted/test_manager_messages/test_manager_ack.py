@@ -4,7 +4,7 @@ import wazuh_testing.tools.agent_simulator as ag
 
 from time import sleep
 from wazuh_testing import remote as rd
-from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, is_tcp_udp
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -92,10 +92,10 @@ def get_configuration(request):
 
 
 def test_manager_ack(get_configuration, configure_environment, restart_remoted):
-    """Allow to check if the manager sends the ACK message after receiving the start-up message from agent."""
+    """Check if the manager sends the ACK message after receiving the start-up message from the agent."""
     protocol = get_configuration['metadata']['protocol']
 
-    if protocol in ['udp,tcp', 'tcp,udp']:
+    if is_tcp_udp(protocol):
         check_manager_ack(rd.TCP)
         check_manager_ack(rd.UDP)
     else:
