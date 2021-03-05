@@ -4,7 +4,7 @@
 import socket
 import struct
 from os import path
-from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools import WAZUH_PATH, WAZUH_SOCKETS
 
 request_socket = path.join(WAZUH_PATH, 'queue', 'sockets', 'request')
 request_protocol = "tcp"
@@ -22,7 +22,10 @@ def send_request(msg_request, response_size=100):
     return response
 
 def send_ar_message(ar_command):
-
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-    sock.connect("/var/ossec/queue/alerts/ar")
-    sock.send(b"{ar_command}")
+    ar_socket = WAZUH_SOCKETS['wazuh-ar'][0]
+
+    sock.connect(ar_socket)
+    sock.send(f"{ar_command}".encode())
+    sock.close()
+

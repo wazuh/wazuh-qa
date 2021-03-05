@@ -32,16 +32,6 @@ configuration_ids = [f"{x['PROTOCOL']}_{x['PORT']}" for x in parameters]
 
 manager_address = "localhost"
 
-
-
-def connect(agent, protocol):
-    sender = ag.Sender(manager_address, protocol=protocol)
-    injector = ag.Injector(sender, agent)
-    injector.run()
-    agent.wait_status_active()
-    return agent, sender, injector
-
-
 # fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
@@ -57,32 +47,27 @@ def test_active_response_send(get_configuration, configure_environment, restart_
         AssertionError: if `wazuh-remoted` does not send correctly active response command.
     """
 
-    cfg = get_configuration['metadata']
+    protocol = get_configuration['metadata']['protocol']
 
-    agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0")
+    agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0", disable_all_modules= True)
+    agent.set_module_status("receive_messages", "enabled")
+    agent.set_module_status("keepalive", "enabled")
 
-    a, sender, injector = connect(agent, cfg['protocol'])
-    time.sleep(20)
+    time.sleep(1)
 
-    send_ar_message(b'(local_source) [] NRN 001 restart-wazuh0 admin 1.1.1.1 1.1 44 (agente-cualquiera) any->/carpeta/testing - -')
+    sender = ag.Sender(manager_address, protocol=protocol)
 
-    log_callback = remote.callback_active_response_received()
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
+    injector = ag.Injector(sender, agent)
 
-    log_callback = remote.callback_active_response_sent()
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
+    try:
 
+        injector.run()
+        time.sleep(20)
 
+        send_ar_message(f"(local_source) [] NRN {agent.id} dummy-ar admin 1.1.1.1 1.1 44 (any-agent) any->/testing/testing.txt - -")
 
+        remote.check_agent_received_message(agent.rcv_msg_queue,"DEBUG: Received message: '#!-execd dummy-ar admin 1.1.1.1 1.1 44 (agente-cualquiera) any->/testing/testing.txt - -")
 
+    finally:
+        injector.stop_receive()
 
-
-"""
-agent message
-
-2021/03/05 09:01:42 ossec-agentd[71402] receiver.c:92 at receive_msg(): DEBUG: Received message: '#!-execd restart-wazuh0 admin 1.1.1.1 1.1 44 (agente-cualquiera) any->/carpeta/testing - -
-
-
-"""

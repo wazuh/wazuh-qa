@@ -79,7 +79,7 @@ ALERT_FILE_PATH = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.json')
 CLUSTER_LOGS_PATH = os.path.join(WAZUH_LOGS_PATH, 'cluster.log')
 
 QUEUE_SOCKETS_PATH = os.path.join(WAZUH_PATH, 'queue', 'sockets')
-
+QUEUE_ALERTS_PATH = os.path.join(WAZUH_PATH, 'queue', 'alerts')
 QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 CLUSTER_SOCKET_PATH = os.path.join(WAZUH_PATH, 'queue', 'cluster')
 
@@ -87,6 +87,7 @@ WAZUH_SOCKETS = {
     'wazuh-agentd': [],
     'wazuh-analysisd': [os.path.join(QUEUE_SOCKETS_PATH, 'analysis'),
                         os.path.join(QUEUE_SOCKETS_PATH, 'queue')],
+    'wazuh-ar': [os.path.join(QUEUE_ALERTS_PATH, 'ar')],
     'wazuh-authd': [os.path.join(QUEUE_SOCKETS_PATH, 'auth')],
     'wazuh-execd': [os.path.join(QUEUE_SOCKETS_PATH, 'com')],
     'wazuh-logcollector': [os.path.join(QUEUE_SOCKETS_PATH, 'logcollector')],
