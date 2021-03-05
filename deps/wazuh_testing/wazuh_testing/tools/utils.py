@@ -34,7 +34,7 @@ def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
                 except excepts as exception:
                     wait_time *= wait_multiplier
                     attempt -= 1
-                    msg = f'{exception} caught. {attempt}/{attempts}. Retrying after {wait_time} seconds.'
+                    msg = f'Exception: "{exception}" caught. {attempt}/{attempts}. Retrying after {wait_time} seconds.'
                     logging.warning(msg)
                     sleep(wait_time)
             return func(*args, **kwargs)  # final attempt
