@@ -42,10 +42,11 @@ def get_configuration(request):
 
 
 def test_allowed_ips_invalid(get_configuration, configure_environment, restart_remoted):
-    """
-    Checks that "allowed-ips" and "denied-ips" could be configured without errors for syslog connection
-    """
+    """Test if `wazuh-remoted` fails when invalid `allowed-ips` label value is set.
 
+    Raises:
+        AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected error message.
+    """
     cfg = get_configuration['metadata']
 
     log_callback = remote.callback_error_invalid_ip(cfg['allowed-ips'])

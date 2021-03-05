@@ -49,13 +49,13 @@ def get_configuration(request):
 
 
 def test_connection_valid(get_configuration, configure_environment, restart_remoted):
-    """
-    Checks that "connection" option could be configured as "secure" or "syslog" without errors
-        this option specifies a type of incoming connection to accept: secure or syslog.
+    """Check that "connection" option could be configured as "secure" or "syslog" without errors.
 
-    Checks that the API answer for manager connection coincides with the option selected on ossec.conf
-    """
+    This option specifies a type of incoming connection to accept: secure or syslog. Also, check if multiple
+    ports can be used with all valid connection values. Also, check if the API answer for manager connection coincides with the option selected on `ossec.conf`.
 
+    Raises:
+        AssertionError: if API answer is different of expected configuration."""
     cfg = get_configuration['metadata']
 
     used_protocol = cfg['protocol']
