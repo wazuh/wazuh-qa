@@ -4,7 +4,8 @@ import wazuh_testing.tools.agent_simulator as ag
 
 from time import sleep
 from wazuh_testing import remote as rd
-from wazuh_testing.tools import LOG_FILE_PATH, is_tcp_udp
+from wazuh_testing import is_tcp_udp
+from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
