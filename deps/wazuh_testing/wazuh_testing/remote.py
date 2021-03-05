@@ -544,3 +544,22 @@ def check_queue_socket_event(raw_event=EXAMPLE_MESSAGE_PATTERN, timeout=30):
     finally:
         mitm.shutdown()
         control_service('start', daemon='wazuh-analysisd')
+
+
+def check_agent_received_message(message_queue, search_pattern, timeout=5, update_position=True):
+    """Allow to monitor the agent received messages to search a pattern regex.
+
+    Args:
+        message_queue (monitoring.Queue): Queue containing the messages received in the agent.
+        search_pattern (str): Regex to search in agent received messages.
+        timeout (int): Maximum time in seconds to search the event.
+        update_position (boolean): True to search in the entire queue, False to search in the current position of the
+                                   queue.
+
+    Raises:
+        TimeoutError: if the search pattern isn't found in the queue in the expected time.
+    """
+    queue_monitor = monitoring.QueueMonitor(message_queue)
+
+    queue_monitor.start(timeout=timeout, callback=monitoring.make_callback(search_pattern, '.*'),
+                        update_position=update_position)

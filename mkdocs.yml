@@ -404,6 +404,8 @@ nav:
                 - Test configuration allowed and denied ips valids: tests/integration/test_remoted/test_configuration/test_basic_configuration_syslog_allowed_denied_ips_valid.md
                 - Test configuration denied ips: tests/integration/test_remoted/test_configuration/test_basic_configuration_syslog_denied_ips.md
                 - Test configuration syslog no allowed ips provided: tests/integration/test_remoted/test_configuration/test_basic_configuration_syslog_no_allowed_ips.md
+            - Test manager messages:
+                - tests/integration/test_remoted/test_manager_messages/test_manager_ack.md
             - Test communications through the sockets:
                 - tests/integration/test_remoted/test_socket_communication/test_ping_pong_message.md
                 - tests/integration/test_remoted/test_socket_communication/test_syslog_message.md

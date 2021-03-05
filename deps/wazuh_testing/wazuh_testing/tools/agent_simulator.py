@@ -19,7 +19,7 @@ import socket
 import ssl
 import threading
 import zlib
-from collections import deque
+
 from random import randint, sample, choice
 from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
 from string import ascii_letters, digits
@@ -29,8 +29,9 @@ from time import mktime, localtime, sleep, time
 import wazuh_testing.wazuh_db as wdb
 from wazuh_testing import TCP
 from wazuh_testing import is_udp, is_tcp
-from wazuh_testing.tools.monitoring import wazuh_unpack
+from wazuh_testing.tools.monitoring import wazuh_unpack, Queue
 from wazuh_testing.tools.remoted_sim import Cipher
+
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 
@@ -92,7 +93,7 @@ class Agent:
         stop_receive (int): Flag to determine when to activate and deactivate the agent event listener.
         stage_disconnect (str): WPK process state variable.
         rcv_msg_limit (int): max elements for the received message queue.
-        rcv_msg_queue (deque): Doubly Ended Queue to store received messages in the agent.
+        rcv_msg_queue (monitoring.Queue): Queue to store received messages in the agent.
         disable_all_modules (boolean): Disable all simulated modules for this agent
     """
     def __init__(self, manager_address, cypher="aes", os=None, inventory_sample=None, rootcheck_sample=None,
@@ -138,7 +139,7 @@ class Agent:
         self.stop_receive = 0
         self.stage_disconnect = None
         self.setup(disable_all_modules=disable_all_modules)
-        self.rcv_msg_queue = deque([], maxlen=rcv_msg_limit)
+        self.rcv_msg_queue = Queue(rcv_msg_limit)
 
     def setup(self, disable_all_modules):
         """Set up agent: os, registration, encryption key, start up msg and activate modules."""
@@ -403,7 +404,7 @@ class Agent:
             message (str): Decoder message in ISO-8859-1 format.
         """
         msg_decoded_list = message.split(' ')
-        self.rcv_msg_queue.append(message)
+        self.rcv_msg_queue.put(message)
         if '#!-req' in msg_decoded_list[0]:
             self.process_command(sender, msg_decoded_list)
         elif '#!-up' in msg_decoded_list[0]:
