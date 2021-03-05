@@ -12,7 +12,7 @@ The objective is to check that the manager sends the ACK message using the diffe
 
 |Tier | Number of tests | Time spent |
 |:--:|:--:|:--:|
-| 0 | x | x |
+| 0 | 4 | 1m 15s |
 
 ## Expected behavior
 
@@ -33,6 +33,20 @@ Next, the test will search the ACK message in the agent buffer (it contains the 
 - Manager sends the ACK message using `UDP` protocol.
 - Manager sends the ACK message using `TCP,UDP` configuration.
 - Manager sends the ACK message using `UDP,TCP` configuration.
+
+
+## Comments
+
+An important aspect to take into account is the time needed by wazuh-remoted to reload the `client.keys`.
+By default it is **10 seconds**, but this option is configurable in the `internal_options.conf`, using the
+following directive:
+
+```
+remoted.keyupdate_interval=2
+```
+
+The test itself waits until the info is loaded, so reducing this time will also reduce the test time.
+It is recommended to set this time between 2 and 5 seconds.
 
 ## Code documentation
 ::: tests.integration.test_remoted.test_manager_messages.test_manager_ack
