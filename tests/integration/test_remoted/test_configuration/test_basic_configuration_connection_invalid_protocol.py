@@ -49,9 +49,17 @@ def get_configuration(request):
 
 
 def test_invalid_protocol(get_configuration, configure_environment, restart_remoted):
-    """
-    """
+    """Test if `wazuh-remoted` set properly protocol values.
 
+    For a secure connection, if a pair of protocols is provided, in case one of them is invalid, it should be used
+    the valid protocol. Otherwise, if none of them is valid, TCP should be used.
+
+    For a syslog connection if more than one protocol is provided only TCP should be used.
+
+    Raises:
+        AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected warning messages or does not
+        set properly protocol values.
+    """
     cfg = get_configuration['metadata']
     protocol_field = cfg['protocol'].split(',')
 

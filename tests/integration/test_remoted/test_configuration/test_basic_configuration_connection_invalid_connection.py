@@ -35,10 +35,11 @@ def get_configuration(request):
 
 
 def test_invalid_connection(get_configuration, configure_environment, restart_remoted):
-    """
+    """Test if `wazuh-remoted` fails when invalid configuration for `connection` label is set.
 
+    Raises:
+        AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected error message.
     """
-
     cfg = get_configuration['metadata']
 
     log_callback = remote.callback_invalid_value('connection', cfg['connection'])
@@ -52,3 +53,4 @@ def test_invalid_connection(get_configuration, configure_environment, restart_re
     log_callback = remote.callback_error_in_configuration('CRITICAL')
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
+
