@@ -499,8 +499,13 @@ class Queue(queue.Queue):
         return aux_queue.get(*args, **kwargs)
 
     def __repr__(self):
-        return str(self.queue)
+        """ returns the object representation in string format.
 
+        This method is called when repr() function is invoked on the object. If possible, the string returned should
+            be a valid Python expression that can be used to reconstruct the object again. This is used to define how
+            an object of this class should be printed.
+        """
+        return str(self.queue)
 
 class StreamServerPort(socketserver.ThreadingTCPServer):
     pass
