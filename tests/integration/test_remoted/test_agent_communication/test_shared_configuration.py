@@ -78,7 +78,6 @@ def check_push_shared_config(protocol):
 
     # Activate receives_messages modules in simulated agent.
     agent.set_module_status('receive_messages', 'enabled')
-    agent.set_module_status('keepalive', 'enabled')
 
     # Run injector with only receive messages module enabled
     injector = ag.Injector(sender, agent)
@@ -90,6 +89,7 @@ def check_push_shared_config(protocol):
 
         # Send the start-up message
         sender.send_event(agent.startup_msg)
+        sender.send_event(agent.keep_alive_event)
 
         # Check up file (push start) message
         rd.check_agent_received_message(agent.rcv_msg_queue, r'#!-up file \w+ merged.mg', timeout=10,
@@ -102,12 +102,15 @@ def check_push_shared_config(protocol):
         rd.check_agent_received_message(agent.rcv_msg_queue, 'close', timeout=10,
                                         error_message="initial close message not received")
 
+        sender.send_event(agent.keep_alive_event)
+
         # Check that push message doesn't appear again
         with pytest.raises(TimeoutError):
             rd.check_agent_received_message(agent.rcv_msg_queue, r'#!-up file \w+ merged.mg', timeout=5)
 
         # Add agent to group and check if the configuration is pushed.
         subprocess.run(["/var/ossec/bin/agent_groups", "-q", "-a", "-i", agent.id, "-g", "testing_group"])
+        sender.send_event(agent.keep_alive_event)
         rd.check_agent_received_message(agent.rcv_msg_queue, '#!-up file .* merged.mg', timeout=10,
                                         error_message="New group shared config not received")
 
