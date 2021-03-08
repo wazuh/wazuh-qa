@@ -8,8 +8,9 @@ import re
 import subprocess
 
 import pytest
+import wazuh_testing.fim as fim
+
 from distro import id
-from wazuh_testing.fim import LOG_FILE_PATH, callback_audit_cannot_start
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -24,7 +25,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2'), os.path.join('/', 'testdir3')]
 testdir1, testdir2, testdir3 = test_directories
 
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
 
 # Configurations
 
@@ -76,14 +77,20 @@ def test_move_folders_to_realtime(tags_to_apply, get_configuration, uninstall_in
                                   configure_environment, restart_syscheckd):
     """Check folders monitored with Whodata change to Real-time if auditd is not installed
 
-    Parameters
-    ----------
-    tags_to_apply : set
-        Configuration tag to apply
+    Args:
+        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
+        get_configuration (fixture): Gets the current configuration of the test.
+        uninstall_install_audit (fixture): Uninstall auditd before the test and install auditd again after the test is
+                                           executed.
+        configure_environment (fixture): Configure the environment for the execution of the test.
+        restart_syscheckd (fixture): Restarts syscheck.
+        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
+    Raises:
+        TimeoutError: If an expected event couldn't be captured.
     """
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    wazuh_log_monitor.start(timeout=20, callback=callback_audit_cannot_start,
+    wazuh_log_monitor.start(timeout=20, callback=fim.callback_audit_cannot_start,
                             error_message='Did not receive expected "Who-data engine could not start. '
                                           'Switching who-data to real-time" event')
