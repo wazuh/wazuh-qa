@@ -9,6 +9,7 @@ import time
 import wazuh_testing.remote as remote
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import wait_until_agent_active
 from wazuh_testing.tools.sockets import send_ar_message
 
 
@@ -21,9 +22,12 @@ configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.ya
 
 parameters = [
     {'PROTOCOL': 'TCP', 'PORT': '1514'},
+    {'PROTOCOL': 'UDP', 'PORT': '1514'},
+
 ]
 metadata = [
-    {'protocol': 'TCP', 'port': '1514'}
+    {'protocol': 'tcp', 'port': '1514'},
+    {'protocol': 'udp', 'port': '1514'}
 ]
 
 configurations = load_wazuh_configurations(configurations_path, __name__ ,
@@ -60,14 +64,10 @@ def test_active_response_send(get_configuration, configure_environment, restart_
     injector = ag.Injector(sender, agent)
 
     try:
-
         injector.run()
-        time.sleep(20)
-
+        wait_until_agent_active(agent.id)
         send_ar_message(f"(local_source) [] NRN {agent.id} dummy-ar admin 1.1.1.1 1.1 44 (any-agent) any->/testing/testing.txt - -")
-
-        remote.check_agent_received_message(agent.rcv_msg_queue,"DEBUG: Received message: '#!-execd dummy-ar admin 1.1.1.1 1.1 44 (agente-cualquiera) any->/testing/testing.txt - -")
+        remote.check_agent_received_message(agent.rcv_msg_queue,f'#!-execd dummy-ar admin 1.1.1.1 1.1 44 \(any-agent\) any->/testing/testing.txt - -')
 
     finally:
         injector.stop_receive()
-
