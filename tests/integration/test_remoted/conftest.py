@@ -29,15 +29,15 @@ def restart_remoted(get_configuration, request):
 
 
 @pytest.fixture(scope="module")
-def create_agent_group():
+def create_agent_group(group_name='testing_group'):
     """Temporary creates a new agent group for testing purpose, must be run only on Managers."""
 
-    sb.run([f"{WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-g", "testing_group"])
+    sb.run([f"{WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-g", group_name])
 
-    with open(f"{WAZUH_PATH}/etc/shared/testing_group/agent.conf", "w") as agent_conf_file:
+    with open(f"{WAZUH_PATH}/etc/shared/{group_name}/agent.conf", "w") as agent_conf_file:
         with open(default_agent_conf_path, 'r') as configuration:
             agent_conf_file.write(configuration.read())
 
     yield
 
-    sb.run([f"{WAZUH_PATH}/bin/agent_groups", "-q", "-r", "-g", "testing"])
+    sb.run([f"{WAZUH_PATH}/bin/agent_groups", "-q", "-r", "-g", group_name])
