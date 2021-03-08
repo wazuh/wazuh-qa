@@ -100,12 +100,11 @@ def check_push_shared_config(protocol):
         # Check close file (push end) message
         rd.check_agent_received_message(agent.rcv_msg_queue, 'close', timeout=10,
                                         error_message="initial close message not received")
-
         sender.send_event(agent.keep_alive_event)
-
         # Check that push message doesn't appear again
         with pytest.raises(TimeoutError):
             rd.check_agent_received_message(agent.rcv_msg_queue, r'#!-up file \w+ merged.mg', timeout=5)
+            raise AssertionError("Same shared configuration pushed twice!")
 
         # Add agent to group and check if the configuration is pushed.
         subprocess.run(["/var/ossec/bin/agent_groups", "-q", "-a", "-i", agent.id, "-g", "testing_group"])
