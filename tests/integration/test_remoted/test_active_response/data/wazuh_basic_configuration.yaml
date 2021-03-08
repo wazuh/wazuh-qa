@@ -1,7 +1,7 @@
 - tags:
-  - test_active_response_send
+  - test_active_response
   apply_to_modules:
-  - test_active_response_send
+  - test_active_response
   sections:
   - section: remote
     elements:

@@ -239,6 +239,7 @@ def get_protocols(all_protocols):
             invalid_protocols.append(protocol)
     return [valid_protocols, invalid_protocols]
 
+
 def callback_active_response_received():
     msg = fr"DEBUG: Active response request received: (local_source) \[\] NRN 002 restart-wazuh0 admin 1.1.1.1 1.1 44 (agente-cualquiera) any->/carpeta/testing - -"
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
@@ -247,6 +248,7 @@ def callback_active_response_received():
 def callback_active_response_sent():
     msg = fr"DEBUG: Active response sent: #!-execd restart-wazuh0 admin 1.1.1.1 1.1 44 (agente-cualquiera) any->/carpeta/testing - -"
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+
 
 def callback_detect_remoted_started(port, protocol, connection_type="secure"):
     """Create a callback to detect if remoted was correctly started.

@@ -49,13 +49,18 @@ def get_configuration(request):
 def test_active_response_send(get_configuration, configure_environment, restart_remoted):
     """Test if `wazuh-remoted` send correctly active response commands.
 
-    Raises:
-        AssertionError: if `wazuh-remoted` does not send correctly active response command.
-    """
+    Check if execd sent active response command to the remoted module. Also it ensure that agent receives active command
+    message from manager's remoted module.
 
+    Raises:
+        AssertionError: if `wazuh-remoted` does not send correctly active response command or some of debug messages
+        is not created in the process
+    """
     protocol_array = (get_configuration['metadata']['protocol']).split(",")
     for protocol in protocol_array:
-        agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0", disable_all_modules= True, rcv_msg_limit = 1000)
+        # Is necessary for UDP test set rcv_msg_limit to 1000
+        agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0",
+                         disable_all_modules=True, rcv_msg_limit=1000)
         agent.set_module_status("receive_messages", "enabled")
         agent.set_module_status("keepalive", "enabled")
 
@@ -68,8 +73,11 @@ def test_active_response_send(get_configuration, configure_environment, restart_
         try:
             injector.run()
             wait_until_agent_active(agent.id)
-            send_ar_message(f"(local_source) [] NRN {agent.id} dummy-ar admin 1.1.1.1 1.1 44 (any-agent) any->/testing/testing.txt - -")
-            remote.check_agent_received_message(agent.rcv_msg_queue,f'#!-execd dummy-ar admin 1.1.1.1 1.1 44 \(any-agent\) any->/testing/testing.txt - -')
-
+            send_ar_message(f"(local_source) [] NRN {agent.id} dummy-ar admin 1.1.1.1 1.1 44 (any-agent) any->/testing/"
+                            f"testing.txt - -")
+            remote.callback_active_response_received()
+            remote.callback_active_response_sent()
+            remote.check_agent_received_message(agent.rcv_msg_queue,f'#!-execd dummy-ar admin 1.1.1.1 1.1 44 '
+                                                                    f'\(any-agent\) any->/testing/testing.txt - -')
         finally:
             injector.stop_receive()
