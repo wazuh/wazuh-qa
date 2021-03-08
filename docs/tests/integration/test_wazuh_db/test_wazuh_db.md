@@ -1,6 +1,7 @@
 # Test Wazuh DB
 
-All these tests are meant to send a specific command to the socket (valid or not) and compare the resulting output with the expected result.
+All these tests are meant to send a specific command (valid or not) to the socket and compare the resulting output with the expected result.
+
 ## Overview
 
 Lets consider an example:
@@ -19,6 +20,7 @@ All similar test are grouped by a name, like `Update commands`. Then, every test
 - **input**: the command that will be sent to the socket
 - **output**: the expected result
 - **stage**: the name of that particular test
+
 ## Objective
 
 Confirm that `wazuh-db` is able to save, update and erase the necessary information into the corresponding databases, using the proper commands and response strings.
@@ -37,7 +39,7 @@ Confirm that `wazuh-db` is able to save, update and erase the necessary informat
 Tests description according to its classification
 ### Checks agent_messages
 
-Currently, only **insert** and **clear** commands for `vuln_cves` table are tested
+The **insert** and **clear** commands for `vuln_cves` table are tested:
 
 - Right insertion of a vulnerability that affects a package
 - Attempt to insert a duplicated vulnerability in the database, resulting in no error message
