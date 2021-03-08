@@ -4,7 +4,7 @@ Check if the manager pushes shared configuration to agents as expected.
 
 ## Objective
 
-Confirm that there are no problems when the manager is supposed to push shared configuration to agents.
+To confirm there are no problems when the manager is supposed to push shared configuration to agents.
 
 By default, agents send a keep alive message to the manager every 10 seconds. For each one of these messages,
 the Manager needs to check if the configuration for agent's groups have changed. If so, then the Wazuh Manager 
