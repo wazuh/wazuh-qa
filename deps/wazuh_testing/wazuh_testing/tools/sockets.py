@@ -16,16 +16,16 @@ def send_request(msg_request, response_size=100):
     request_msg = struct.pack('<I', len(msg_request)) + msg_request.encode()
 
     @retry(socket.error)
-    def connection(s, request):
-        s.connect(request)
+    def connection(_socket, request):
+        _socket.connect(request)
 
     @retry(socket.error)
-    def send_msg(s, msg):
-        s.send(msg)
+    def send_msg(_socket, msg):
+        _socket.send(msg)
 
     @retry(ValueError)
-    def recv_response(s, size):
-        answer = s.recv(size).decode()
+    def recv_response(_socket, size):
+        answer = _socket.recv(size).decode()
         if answer == '':
             raise ValueError
         return answer
