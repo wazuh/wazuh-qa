@@ -1,6 +1,6 @@
 # Test shared configuration push
 ## Overview
-Check that manager push shared configuration to agents as expected.
+Check if the manager pushes shared configuration to agents as expected.
 
 ## Objective
 
