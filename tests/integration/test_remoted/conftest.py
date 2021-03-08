@@ -6,13 +6,14 @@ import os
 import subprocess
 import pytest
 import subprocess as sb
-from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 
 DAEMON_NAME = "wazuh-remoted"
-
+data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+default_agent_conf_path = os.path.join(data_path, 'agent.conf')
 
 @pytest.fixture(scope='module')
 def restart_remoted(get_configuration, request):
@@ -31,20 +32,12 @@ def restart_remoted(get_configuration, request):
 def create_agent_group():
     """Temporary creates a new agent group for testing purpose, must be run only on Managers."""
 
-    subprocess.run(["/var/ossec/bin/agent_groups", "-q", "-a", "-g", "testing_group"])
+    sb.run([f"{WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-g", "testing_group"])
 
-    with open("/var/ossec/etc/shared/testing_group/agent.conf", "w") as f:
-        f.write('''
-                <!-- custom configuration file
-                    example for agents! -->
-                <agent_config>
-                    <localfile>
-                        <location>/var/log/my_test.log</location>
-                        <log_format>syslog</log_format>
-                    </localfile>
-                </agent_config>
-                ''')
+    with open(f"{WAZUH_PATH}/etc/shared/testing_group/agent.conf", "w") as agent_conf_file:
+        with open(default_agent_conf_path, 'r') as configuration:
+            agent_conf_file.write(configuration.read())
 
     yield
 
-    subprocess.run(["/var/ossec/bin/agent_groups", "-q", "-r", "-g", "testing"])
+    sb.run([f"{WAZUH_PATH}/bin/agent_groups", "-q", "-r", "-g", "testing"])
