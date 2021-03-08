@@ -3,7 +3,9 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import re
+
 from wazuh_testing.fim import change_internal_options
+
 
 # Callbacks
 def callback_state_interval_not_valid(line):

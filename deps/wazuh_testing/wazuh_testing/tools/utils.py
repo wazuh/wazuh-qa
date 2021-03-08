@@ -67,7 +67,8 @@ def insert_xml_tag(pattern, tag, value, data):
     Function to insert a xml tag in a string data.
 
     Args:
-        pattern (str): regex pattern. The regex must be composed of 3 groups. The inserted data will be added between group 1 and group 2.
+        pattern (str): regex pattern. The regex must be composed of 3 groups. The inserted data will be added
+            between group 1 and group 2.
             Example:
                 r'(.*\</tag1\>)(\<my_custom_tag\>)(\<tag2\>)
                     \</tag1\>
@@ -77,7 +78,6 @@ def insert_xml_tag(pattern, tag, value, data):
         tag (str): new xml tag
         value (str): value of new xml tag
         data (str): XML string data
-    
     Returns:
         str: new XML string data
     """
@@ -96,4 +96,3 @@ def replace_in_file(filename, to_replace, replacement):
 
     with open(filename, "w") as f:
         f.write(replace_content)
-

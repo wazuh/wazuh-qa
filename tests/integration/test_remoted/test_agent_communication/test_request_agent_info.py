@@ -46,6 +46,7 @@ config_ids = [x['PROTOCOL'] for x in parameters]
 # Utils
 manager_address = "localhost"
 
+
 # fixtures
 @pytest.fixture(scope="module", params=configurations, ids=config_ids)
 def get_configuration(request):
@@ -78,4 +79,3 @@ def test_request(get_configuration, configure_environment, restart_remoted, comm
 
         if "disconnected" not in command_request:
             injector.stop_receive()
-

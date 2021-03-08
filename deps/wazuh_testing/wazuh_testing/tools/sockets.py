@@ -37,4 +37,3 @@ def send_request(msg_request, response_size=100):
     sock.close()
 
     return response
-

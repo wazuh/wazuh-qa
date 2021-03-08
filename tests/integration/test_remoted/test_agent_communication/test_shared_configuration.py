@@ -1,15 +1,14 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-import logging
 import os
 import subprocess
+from time import sleep
 
 import pytest
 import wazuh_testing.tools.agent_simulator as ag
-from wazuh_testing import remote as rd
-from time import sleep
 from wazuh_testing import UDP, TCP, TCP_UDP
+from wazuh_testing import remote as rd
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -129,4 +128,3 @@ def test_push_shared_config(get_configuration, configure_environment, restart_re
 
     for protocol in protocols.split(","):
         check_push_shared_config(protocol)
-
