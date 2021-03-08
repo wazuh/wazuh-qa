@@ -1,11 +1,10 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-import logging
 import os
-import subprocess
-import pytest
 import subprocess as sb
+
+import pytest
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -14,6 +13,7 @@ from wazuh_testing.tools.services import control_service
 DAEMON_NAME = "wazuh-remoted"
 data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 default_agent_conf_path = os.path.join(data_path, 'agent.conf')
+
 
 @pytest.fixture(scope='module')
 def restart_remoted(get_configuration, request):
