@@ -29,10 +29,11 @@ from time import mktime, localtime, sleep, time
 import wazuh_testing.wazuh_db as wdb
 from wazuh_testing import TCP
 from wazuh_testing import is_udp, is_tcp
-from wazuh_testing.tools.monitoring import wazuh_unpack
+from wazuh_testing.tools.monitoring import wazuh_unpack, Queue
 from wazuh_testing.tools.remoted_sim import Cipher
 from wazuh_testing.tools.utils import retry
 from wazuh_testing.tools.monitoring import Queue
+
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 

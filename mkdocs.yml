@@ -171,6 +171,10 @@ nav:
             - Test audit:
               - tests/integration/test_fim/test_files/test_audit/index.md
               - tests/integration/test_fim/test_files/test_audit/test_audit_after_initial_scan.md
+              - tests/integration/test_fim/test_files/test_audit/test_audit_no_dir.md
+              - tests/integration/test_fim/test_files/test_audit/test_audit.md
+              - tests/integration/test_fim/test_files/test_audit/test_remove_audit.md
+              - tests/integration/test_fim/test_files/test_audit/test_remove_rule_five_times.md
             - Test basic usage:
               - tests/integration/test_fim/test_files/test_basic_usage/index.md
               - Test basic usage baseline generation: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_baseline_generation.md
@@ -215,8 +219,9 @@ nav:
               - Test file limit values: tests/integration/test_fim/test_files/test_file_limit/test_file_limit_values.md
             - Test follow symbolic link:
               - tests/integration/test_fim/test_files/test_follow_symbolic_link/index.md
+              - Test audit rules removed after link update: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_audit_rules_removed_after_change_link.md
               - Test change target inside folder: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_change_target_inside_folder.md
-              - Test cahnge target with nested directory: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_change_target_with_nested_directory.md
+              - Test change target with nested directory: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_change_target_with_nested_directory.md
               - Test change target: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_change_target.md
               - Test delete symlink: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_delete_symlink.md
               - Test delete target: tests/integration/test_fim/test_files/test_follow_symbolic_link/test_delete_target.md
@@ -386,7 +391,26 @@ nav:
         - Remoted:
             - tests/integration/test_remoted/index.md
             - Test configuration:
-                - tests/integration/test_remoted/test_configuration/test_basic_configuration.md
+                - Overview: tests/integration/test_remoted/test_configuration/index.md
+                - Test invalid connection: tests/integration/test_remoted/test_configuration/test_basic_configuration_connection_invalid_connection.md
+                - Test invalid port: tests/integration/test_remoted/test_configuration/test_basic_configuration_connection_invalid_port.md
+                - Test invalid protocol: tests/integration/test_remoted/test_configuration/test_basic_configuration_connection_invalid_protocol.md
+                - Test connection valid: tests/integration/test_remoted/test_configuration/test_basic_configuration_connection_valid.md
+                - Test ipv6: tests/integration/test_remoted/test_configuration/test_basic_configuration_ipv6.md
+                - Test invalid local_ip: tests/integration/test_remoted/test_configuration/test_basic_configuration_local_ip_invalid.md
+                - Test valid local_ip: tests/integration/test_remoted/test_configuration/test_basic_configuration_local_ip_valid.md
+                - Test configuration queue_size syslog: tests/integration/test_remoted/test_configuration/test_basic_configuration_queue_size_syslog.md
+                - Test configuration queue_size too big: tests/integration/test_remoted/test_configuration/test_basic_configuration_queue_size_too_big.md
+                - Test configuration queue_size valid: tests/integration/test_remoted/test_configuration/test_basic_configuration_queue_size_valid.md
+                - Test configuration rids_closing_time valid: tests/integration/test_remoted/test_configuration/test_basic_configuration_rids_closing_time_valid.md
+                - Test configuration rids_closing_time invalid: tests/integration/test_remoted/test_configuration/test_basic_configuration_rids_closing_time_invalid.md
+                - Test configuration allowed ips invalid: tests/integration/test_remoted/test_configuration/test_basic_configuration_syslog_allowed_ips_invalid.md
+                - Test configuration denied ips invalid: tests/integration/test_remoted/test_configuration/test_basic_configuration_syslog_denied_ips_invalid.md
+                - Test configuration allowed and denied ips valids: tests/integration/test_remoted/test_configuration/test_basic_configuration_syslog_allowed_denied_ips_valid.md
+                - Test configuration denied ips: tests/integration/test_remoted/test_configuration/test_basic_configuration_syslog_denied_ips.md
+                - Test configuration syslog no allowed ips provided: tests/integration/test_remoted/test_configuration/test_basic_configuration_syslog_no_allowed_ips.md
+            - Test manager messages:
+                - tests/integration/test_remoted/test_manager_messages/test_manager_ack.md
             - Test communications through the sockets:
                 - tests/integration/test_remoted/test_socket_communication/test_ping_pong_message.md
                 - tests/integration/test_remoted/test_socket_communication/test_syslog_message.md

@@ -1096,6 +1096,13 @@ def callback_audit_loaded_rule(line):
     return None
 
 
+def callback_end_audit_reload_rules(line):
+    match = re.match(r'.*Audit rules reloaded\. Rules loaded: (.+)', line)
+    if match:
+        return match.group(1)
+    return None
+
+
 def callback_audit_event_too_long(line):
     if 'Caching Audit message: event too long' in line:
         return True
@@ -1109,7 +1116,7 @@ def callback_audit_reloading_rules(line):
 
 
 def callback_audit_reloaded_rule(line):
-    match = re.match(r'.*Reloaded audit rule for monitoring directory: \'(.+)\'', line)
+    match = re.match(r'.*Already added audit rule for monitoring directory: \'(.+)\'', line)
     if match:
         return match.group(1)
     return None
@@ -2183,6 +2190,17 @@ def detect_whodata_start(file_monitor):
     file_monitor.start(timeout=60, callback=callback_real_time_whodata_started,
                        error_message='Did not receive expected'
                                      '"File integrity monitoring real-time Whodata engine started" event')
+
+
+def wait_for_audit(whodata, monitor):
+    """Wait for the audit callback if we are using whodata monitoring.
+    Args:
+        whodata (boolean): True if whodata is active.
+        monitor (FileMonitor): LogMonitor to use.
+    """
+    if whodata:
+        monitor.start(timeout=35, callback=callback_end_audit_reload_rules, update_position=False,
+                      error_message='Did not receive expected "Audit rules reloaded..." event')
 
 
 def generate_params(extra_params: dict = None, apply_to_all: Union[Sequence[Any], Generator[dict, None, None]] = None,

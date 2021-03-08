@@ -39,6 +39,14 @@ def get_configuration(request):
 
 
 def test_big_queue_size(get_configuration, configure_environment, restart_remoted):
+    """Test if warning message appears in case `queue_size` is greater than 262144.
+
+    Check that the API answer for manager connection coincides with the option selected on `ossec.conf`.
+
+    Raises:
+        AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected warning messages or if API answer is
+        different of expected configuration.
+    """
     cfg = get_configuration['metadata']
 
     log_callback = remote.callback_queue_size_too_big()
