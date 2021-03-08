@@ -36,7 +36,7 @@ metadata = [
 ]
 
 agent_info = {
-    'server_address': '127.0.0.1',
+    'manager_address': '127.0.0.1',
     'os': 'debian7',
     'version': '4.2.0',
     'disable_all_modules': True
@@ -53,8 +53,9 @@ def validate_agent_manager_protocol_communication(manager_port, num_agents=2):
         agent_custom_message = f"test message from agent {agent.id}"
         event = agent.create_event(f"1:/test.log:Feb 23 17:18:20 manager sshd[40657]: {agent_custom_message}")
 
+        sender = ag.Sender(agent_info['manager_address'], protocol=protocol, manager_port=manager_port)
+
         try:
-            sender = ag.Sender(agent_info['manager_address'], protocol=protocol, manager_port=manager_port)
             print("Sending event...")
             sender.send_event(event)
             print("Waiting..")
@@ -68,16 +69,24 @@ def validate_agent_manager_protocol_communication(manager_port, num_agents=2):
     file.truncate_file(LOG_FILE_PATH)
 
     # Create two agents
-    agents = ag.create_agents(agents_number=num_agents, manager_address=agent_info['server_address'],
-                              agents_version=agent_info['server_address'],agents_os= agent_info['server_address'],
+    agents = ag.create_agents(agents_number=num_agents, manager_address=agent_info['manager_address'],
+                              agents_version=agent_info['version'],agents_os= agent_info['os'],
                               disable_all_modules=agent_info['disable_all_modules'])
+
+    threads = []
 
     for idx, agent in enumerate(agents):
         protocol = TCP if idx % 2 == 0 else UDP
         print(f"LAUNCHING {idx} THREAD")
-        ThreadExecutor(rd.check_queue_socket_event, {'agent': agent, 'protocol': protocol,
-                                                     'manager_port': manager_port})
+        threads.append(ThreadExecutor(validate_communication, {'agent': agent, 'protocol': protocol,
+                                                               'manager_port': manager_port}))
+    for thread in threads:
+        thread.start()
 
+    for thread in threads:
+        thread.join()
+
+    print("Join")
 
 # Fixtures
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
