@@ -15,7 +15,7 @@ If the agent is added to a new group, a new `merged.mg` file must be generated f
 ## General info
 
 To avoid race conditions problems, the keep_alive module module on agent_simulator is disabled and the keep_alive 
-messages are sent manually. This way we avoid the scenario where keep_alive thread sends two messages with the same
+messages are sent manually. This avoids the scenario where keep_alive thread sends two messages with the same
 deprecated checksum while the process_message thread updates such checksum. This would cause an error because the
 manager would send to the agent the shared configuration twice and it shouldn't.
 
