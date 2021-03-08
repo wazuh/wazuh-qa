@@ -23,11 +23,13 @@ configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.ya
 parameters = [
     {'PROTOCOL': 'TCP', 'PORT': '1514'},
     {'PROTOCOL': 'UDP', 'PORT': '1514'},
+    {'PROTOCOL': 'TCP,UDP', 'PORT': '1514'}
 
 ]
 metadata = [
     {'protocol': 'tcp', 'port': '1514'},
-    {'protocol': 'udp', 'port': '1514'}
+    {'protocol': 'udp', 'port': '1514'},
+    {'protocol': 'tcp,udp', 'port': '1514'}
 ]
 
 configurations = load_wazuh_configurations(configurations_path, __name__ ,
@@ -51,23 +53,23 @@ def test_active_response_send(get_configuration, configure_environment, restart_
         AssertionError: if `wazuh-remoted` does not send correctly active response command.
     """
 
-    protocol = get_configuration['metadata']['protocol']
+    protocol_array = (get_configuration['metadata']['protocol']).split(",")
+    for protocol in protocol_array:
+        agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0", disable_all_modules= True, rcv_msg_limit = 1000)
+        agent.set_module_status("receive_messages", "enabled")
+        agent.set_module_status("keepalive", "enabled")
 
-    agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0", disable_all_modules= True)
-    agent.set_module_status("receive_messages", "enabled")
-    agent.set_module_status("keepalive", "enabled")
+        time.sleep(1)
 
-    time.sleep(1)
+        sender = ag.Sender(manager_address, protocol=protocol)
 
-    sender = ag.Sender(manager_address, protocol=protocol)
+        injector = ag.Injector(sender, agent)
 
-    injector = ag.Injector(sender, agent)
+        try:
+            injector.run()
+            wait_until_agent_active(agent.id)
+            send_ar_message(f"(local_source) [] NRN {agent.id} dummy-ar admin 1.1.1.1 1.1 44 (any-agent) any->/testing/testing.txt - -")
+            remote.check_agent_received_message(agent.rcv_msg_queue,f'#!-execd dummy-ar admin 1.1.1.1 1.1 44 \(any-agent\) any->/testing/testing.txt - -')
 
-    try:
-        injector.run()
-        wait_until_agent_active(agent.id)
-        send_ar_message(f"(local_source) [] NRN {agent.id} dummy-ar admin 1.1.1.1 1.1 44 (any-agent) any->/testing/testing.txt - -")
-        remote.check_agent_received_message(agent.rcv_msg_queue,f'#!-execd dummy-ar admin 1.1.1.1 1.1 44 \(any-agent\) any->/testing/testing.txt - -')
-
-    finally:
-        injector.stop_receive()
+        finally:
+            injector.stop_receive()

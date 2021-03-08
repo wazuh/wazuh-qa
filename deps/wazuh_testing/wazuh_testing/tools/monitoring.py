@@ -1020,3 +1020,6 @@ def wait_until_agent_active( agent_id ):
             time.sleep(1)
             cursor.execute(f"select connection_status from agent where id={agent_id}")
             agent_status = cursor.fetchone()[0]
+
+    cursor.close()
+    con.close()
