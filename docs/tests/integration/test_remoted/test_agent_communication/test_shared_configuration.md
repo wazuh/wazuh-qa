@@ -31,6 +31,7 @@ manager would send to the agent the shared configuration twice and it shouldn't.
   Fail if remoted doesn't push a new shared configuration after adding the agent to a new group.
 - Fail if remoted doesn't return an error message when the agent is disconnected.
 - Fail if remoted couldn't connect with an active agent.
+
 ## Testing
 
 The testing is based on configuring the manager to receive messages via `TCP`, `UDP` and `TCP-UDP` using default ports.
