@@ -1,17 +1,16 @@
 # Test shared configuration push
 ## Overview
-Check that manager push shared configuration to agents as expected.
+Check if the manager pushes shared configuration to agents as expected.
 
 ## Objective
 
-Confirm that there are no problems when the manager is supposed to push shared configuration to agents.
+To confirm there are no problems when the manager is supposed to push shared configuration to agents.
 
 By default, agents send a keep alive message to the manager every 10 seconds. For each one of these messages,
 the Manager needs to check if the configuration for agent's groups have changed. If so, then the Wazuh Manager 
-needs to push the new effective configuration (`merge.mg` file) for the agent. One `merge.mg` must be pushed only once.
+must push the new effective configuration (`merged.mg` file) for the agent. It must be pushed only once.
 
-If the agent is added to a new group, a new `merge.mg` file must be generated for this agent and the configuration
-must be pushed as well.
+If the agent is added to a new group, a new `merged.mg` file must be generated for this agent and pushed as well.
 
 ## General info
 

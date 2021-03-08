@@ -40,6 +40,7 @@ def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
                     sleep(wait_time)
             return func(*args, **kwargs)  # final attempt
         return to_retry  # actual decorator
+        
     return retry_function
 
 
