@@ -54,7 +54,7 @@ def get_configuration(request):
 
 
 def check_push_shared_config(protocol):
-    """Allow to check if the manager sends the shared configuration to agents through remoted
+    """Allow to check if the manager sends the shared configuration to agents through remoted.
 
     First, check if the default group configuration file is completely pushed (up message, configuration
     and close message). Then add the agent to a new group and check if the new configuration is pushed.
