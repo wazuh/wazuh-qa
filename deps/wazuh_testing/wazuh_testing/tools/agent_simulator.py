@@ -553,7 +553,7 @@ class Agent:
             msg = msg.replace("<VERSION>", self.long_version)
             msg = msg.replace("<MERGED_CHECKSUM>", self.merged_checksum)
         except UnboundLocalError:
-            logging.critical("Error creating keep alive for agent. Check if the introduced OS is on keepalives.txt")
+            logging.critical("Error creating keep alive for the agent. Check if the OS is in the keepalives.txt")
         self.keep_alive_event = self.create_event(msg)
         self.keep_alive_raw_msg = msg
 
