@@ -1,20 +1,26 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
+import logging
 import os
 import re
 import socket
+import subprocess as sb
+import time
 
+import pytest
 import wazuh_testing.api as api
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing import UDP, TCP
+from wazuh_testing import remote as rd
 from wazuh_testing.tools import ARCHIVES_LOG_FILE_PATH, LOG_FILE_PATH
 from wazuh_testing.tools import QUEUE_SOCKETS_PATH
 from wazuh_testing.tools import WAZUH_CONF
 from wazuh_testing.tools import file
 from wazuh_testing.tools import monitoring
 from wazuh_testing.tools.services import control_service
+
+from deps.wazuh_testing.wazuh_testing.tools.monitoring import FileMonitor
 
 REMOTED_GLOBAL_TIMEOUT = 10
 EXAMPLE_MESSAGE_EVENT = '1:/root/test.log:Feb 23 17:18:20 35-u20-manager4 sshd[40657]: Accepted publickey for root' \
@@ -565,3 +571,68 @@ def check_agent_received_message(message_queue, search_pattern, timeout=5, updat
 
     queue_monitor.start(timeout=timeout, callback=monitoring.make_callback(search_pattern, '.*'),
                         update_position=update_position, error_message=error_message)
+
+
+def check_push_shared_config(protocol, agent, sender):
+    """Allow to check if the manager sends the shared configuration to agents through remoted.
+
+    First, check if the default group configuration file is completely pushed (up message, configuration
+    and close message). Then add the agent to a new group and check if the new configuration is pushed.
+    Also it checks that the same config isn't pushed two times.
+
+    Args:
+        protocol (str): It can be UDP or TCP.
+
+    Raises:
+        TimeoutError: If agent does not receive the manager ACK message in the expected time.
+    """
+
+    # Activate receives_messages modules in simulated agent.
+    agent.set_module_status('receive_messages', 'enabled')
+
+    # Run injector with only receive messages module enabled
+    injector = ag.Injector(sender, agent)
+    try:
+        injector.run()
+
+        wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+
+        # Wait until remoted has loaded the new agent key
+        rd.wait_to_remoted_key_update(wazuh_log_monitor)
+
+        # Send the start-up message
+        sender.send_event(agent.startup_msg)
+        sender.send_event(agent.keep_alive_event)
+
+        # Check up file (push start) message
+        rd.check_agent_received_message(agent.rcv_msg_queue, r'#!-up file \w+ merged.mg', timeout=10,
+                                        error_message="initial up file message not received")
+
+        # Check agent.conf message
+        rd.check_agent_received_message(agent.rcv_msg_queue, '#default', timeout=10,
+                                        error_message="agent.conf message not received")
+        # Check close file (push end) message
+        rd.check_agent_received_message(agent.rcv_msg_queue, 'close', timeout=10,
+                                        error_message="initial close message not received")
+
+        sender.send_event(agent.keep_alive_event)
+
+        # Check that push message doesn't appear again
+        with pytest.raises(TimeoutError):
+            rd.check_agent_received_message(agent.rcv_msg_queue, r'#!-up file \w+ merged.mg', timeout=5)
+            raise AssertionError("Same shared configuration pushed twice!")
+
+        # Add agent to group and check if the configuration is pushed.
+        sb.run(["/var/ossec/bin/agent_groups", "-q", "-a", "-i", agent.id, "-g", "testing_group"])
+
+        for i in range(3):
+            # send some keep alive messages until manager push the new group configuration
+            logging.critical(agent.keep_alive_raw_msg)
+            sender.send_event(agent.keep_alive_event)
+            time.sleep(1)
+
+        rd.check_agent_received_message(agent.rcv_msg_queue, '#!-up file .* merged.mg', timeout=10,
+                                        error_message="New group shared config not received")
+
+    finally:
+        injector.stop_receive()
