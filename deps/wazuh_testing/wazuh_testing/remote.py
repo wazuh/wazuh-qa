@@ -535,7 +535,7 @@ def send_agent_event(wazuh_log_monitor, message=EXAMPLE_MESSAGE_EVENT, protocol=
     return agent, sender
 
 
-def check_queue_socket_event(raw_event=EXAMPLE_MESSAGE_PATTERN, timeout=30):
+def check_queue_socket_event(raw_events=EXAMPLE_MESSAGE_PATTERN, timeout=30):
     """Allow searching for an expected event in the queue socket.
 
     Args:
@@ -554,10 +554,8 @@ def check_queue_socket_event(raw_event=EXAMPLE_MESSAGE_PATTERN, timeout=30):
     error_message = 'Could not find the expected event in queue socket'
 
     # Cast str to str list
-    if isinstance(raw_event, str):
-        raw_event = [raw_event]
-
-    # raw_event = ([raw_event] if isinstance(raw_event, str) else raw_event)
+    if isinstance(raw_events, str):
+        raw_events = [raw_events]
 
     # Stop analysisd daemon to free the socket. Important note: control_service(stop) deletes the daemon sockets.
     control_service('stop', daemon='wazuh-analysisd')
@@ -575,10 +573,9 @@ def check_queue_socket_event(raw_event=EXAMPLE_MESSAGE_PATTERN, timeout=30):
 
     try:
         # Start socket monitoring
-        for event in raw_event:
+        for event in raw_events:
             socket_monitor.start(timeout=timeout, callback=monitoring.make_callback(event, '.*'),
                                  error_message=error_message, update_position=False)
-            print(f"{event} found")
     finally:
         mitm.shutdown()
         control_service('start', daemon='wazuh-analysisd')
@@ -669,3 +666,24 @@ def check_push_shared_config(protocol, agent, sender):
 
     finally:
         injector.stop_receive()
+
+
+def check_active_agents(num_agents=1, manager_address='127.0.0.1', agent_version='4.2.0', agent_os='debian7',
+                        manager_port=1514):
+    # Create num_agents (parameter) agents
+    agents = ag.create_agents(agents_number=num_agents, manager_address=manager_address, agents_version=agent_version,
+                              agents_os=agent_os, disable_all_modules=True)
+
+    for idx, agent in enumerate(agents):
+        # Round robin to select the protocol
+        protocol = TCP if idx % 2 == 0 else UDP
+
+        sender = ag.Sender(manager_address, protocol=protocol, manager_port=manager_port)
+
+        try:
+            sender.send_event(agent.create_keep_alive)
+        finally:
+            sender.socket.close()
+
+    for agent in agents:
+        agent.wait_status_active()

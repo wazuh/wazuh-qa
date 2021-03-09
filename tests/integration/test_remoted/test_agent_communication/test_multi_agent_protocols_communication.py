@@ -5,34 +5,29 @@ import wazuh_testing.tools.agent_simulator as ag
 
 from time import sleep
 from wazuh_testing.tools.thread_executor import ThreadExecutor
-from wazuh_testing.tools import LOG_FILE_PATH
-from wazuh_testing.tools import file
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing import remote as rd
-from wazuh_testing import TCP, UDP
+from wazuh_testing import TCP, UDP, TCP_UDP
 
 
 
 # Marks
-pytestmark = pytest.mark.tier(level=0)
+pytestmark = pytest.mark.tier(level=2)
 
 # Variables
 current_test_path = os.path.dirname(os.path.realpath(__file__))
 test_data_path = os.path.join(current_test_path, 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_multi_agent_protocols_communication.yaml')
 
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
 # Set configuration
 parameters = [
-    {'PROTOCOL': 'tcp,udp', 'PORT': 1514},
-    {'PROTOCOL': 'tcp,udp', 'PORT': 56000}
+    {'PROTOCOL': TCP_UDP, 'PORT': 1514},
+    {'PROTOCOL': TCP_UDP, 'PORT': 56000}
 ]
 
 metadata = [
-    {'protocol': 'tcp,udp', 'port': 1514},
-    {'protocol': 'tcp,udp', 'port': 56000}
+    {'protocol': TCP_UDP, 'port': 1514},
+    {'protocol': TCP_UDP, 'port': 56000}
 ]
 
 agent_info = {
@@ -54,40 +49,51 @@ def validate_agent_manager_protocol_communication(manager_port, num_agents=2):
         sender = ag.Sender(agent_info['manager_address'], protocol=protocol, manager_port=manager_port)
 
         try:
-            print("Sending event...")
             sender.send_event(event)
         finally:
-            print("Closing..")
             sender.socket.close()
 
-    # Create two agents
+    send_event_threads = []
+    search_patterns = []
+
+    # Create num_agents (parameter) agents
     agents = ag.create_agents(agents_number=num_agents, manager_address=agent_info['manager_address'],
                               agents_version=agent_info['version'],agents_os= agent_info['os'],
                               disable_all_modules=agent_info['disable_all_modules'])
 
-    threads = []
-    search_patterns = []
-
     for idx, agent in enumerate(agents):
+        # Round robin to select the protocol
         protocol = TCP if idx % 2 == 0 else UDP
 
+        # Generate custom events for each agent
         search_pattern = f"test message from agent {agent.id}"
         agent_custom_message = f"1:/test.log:Feb 23 17:18:20 manager sshd[40657]: {search_pattern}"
         event = agent.create_event(agent_custom_message)
+
+        # Save the search pattern to check it later
         search_patterns.append(search_pattern)
 
-        print(f"CREATING {idx} THREAD")
-        threads.append(ThreadExecutor(send_event, {'event': event, 'protocol': protocol,
-                                                   'manager_port': manager_port}))
-    for thread in threads:
+        # Create sender event threads
+        send_event_threads.append(ThreadExecutor(send_event, {'event': event, 'protocol': protocol,
+                                                              'manager_port': manager_port}))
+
+    # Create socket monitor thread and start it
+    socket_monitor_thread = ThreadExecutor(rd.check_queue_socket_event, {'raw_events': search_patterns})
+    socket_monitor_thread.start()
+
+    # Wait 3 seconds until socket monitor is fully initialized
+    sleep(3)
+
+    # Start sender event threads
+    for thread in send_event_threads:
         thread.start()
 
-    for thread in threads:
+    # Wait until sender event threads finish
+    for thread in send_event_threads:
         thread.join()
 
-    print("Waiting...")
-    rd.check_queue_socket_event(search_patterns)
-
+    # Wait until socket monitor thread finishes
+    socket_monitor_thread.join()
 
 
 # Fixtures
@@ -101,4 +107,7 @@ def test_protocols_communication(get_configuration, configure_environment, resta
     """Validate agent-manager communication using different protocols and ports"""
     manager_port = get_configuration['metadata']['port']
 
+    # Case 1: Send events from agents and monitor queue socket
     validate_agent_manager_protocol_communication(manager_port)
+
+    # Case 2: Send keep-alive messages and monitor the agent's status in the global DB
