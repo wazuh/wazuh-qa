@@ -240,14 +240,14 @@ def get_protocols(all_protocols):
     return [valid_protocols, invalid_protocols]
 
 
-def callback_active_response_received():
-    msg = fr"DEBUG: Active response request received: (local_source) \[\] NRN 002 restart-wazuh0 admin 1.1.1.1 1.1 44 (agente-cualquiera) any->/carpeta/testing - -"
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+def callback_active_response_received(ar_message):
+    msg = fr"DEBUG: Active response request received: {ar_message}"
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX, escape=True)
 
 
-def callback_active_response_sent():
-    msg = fr"DEBUG: Active response sent: #!-execd restart-wazuh0 admin 1.1.1.1 1.1 44 (agente-cualquiera) any->/carpeta/testing - -"
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+def callback_active_response_sent(ar_message):
+    msg = fr"DEBUG: Active response sent: #!-execd {ar_message[26:]}"
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX, escape=True)
 
 
 def callback_detect_remoted_started(port, protocol, connection_type="secure"):
@@ -556,7 +556,7 @@ def check_queue_socket_event(raw_event=EXAMPLE_MESSAGE_PATTERN, timeout=30):
         control_service('start', daemon='wazuh-analysisd')
 
 
-def check_agent_received_message(message_queue, search_pattern, timeout=5, update_position=True):
+def check_agent_received_message(message_queue, search_pattern, timeout=5, escape=False, update_position=True):
     """Allow to monitor the agent received messages to search a pattern regex.
 
     Args:
@@ -565,11 +565,13 @@ def check_agent_received_message(message_queue, search_pattern, timeout=5, updat
         timeout (int): Maximum time in seconds to search the event.
         update_position (boolean): True to search in the entire queue, False to search in the current position of the
                                    queue.
+        escape (bool): Flag to escape special characters in the pattern
+
 
     Raises:
         TimeoutError: if the search pattern isn't found in the queue in the expected time.
     """
     queue_monitor = monitoring.QueueMonitor(message_queue)
 
-    queue_monitor.start(timeout=timeout, callback=monitoring.make_callback(search_pattern, '.*'),
+    queue_monitor.start(timeout=timeout, callback=monitoring.make_callback(search_pattern, '.*', escape),
                         update_position=update_position)

@@ -20,7 +20,6 @@ import sys
 import threading
 import time
 import yaml
-import sqlite3
 
 from collections import defaultdict
 from copy import copy
@@ -994,32 +993,3 @@ def wait_mtime(path, time_step=5, timeout=-1):
         if last_mtime - tic >= timeout:
             logger.error(f"{len(open(path, 'r').readlines())} lines within the file.")
             raise TimeoutError("Reached timeout.")
-
-
-def wait_until_agent_active( agent_id ):
-    con = sqlite3.connect('/var/ossec/queue/db/global.db')
-
-    cursor = con.cursor()
-    cursor.execute(f"select connection_status from agent where id={agent_id}")
-
-    agent_registered = -1
-
-    while agent_registered == -1:
-        try:
-            time.sleep(1)
-
-            cursor.execute(f"select connection_status from agent where id={agent_id}")
-
-            agent_status = cursor.fetchone()[0]
-
-            agent_registered = 0
-        except TypeError:
-            agent_registered = -1
-
-    while agent_status != 'active':
-            time.sleep(1)
-            cursor.execute(f"select connection_status from agent where id={agent_id}")
-            agent_status = cursor.fetchone()[0]
-
-    cursor.close()
-    con.close()
