@@ -18,6 +18,10 @@ from wazuh_testing.tools import WAZUH_PATH
 
 
 class Cipher:
+    """ Algorithm to perform encryption/decryption of manager-agent secure messages
+
+    Ref: https://documentation.wazuh.com/current/development/message-format.html#secure-message-format
+    """
     def __init__(self, data, key):
         self.block_size = 16
         self.data = data

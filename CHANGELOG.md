@@ -34,3 +34,5 @@ All notable changes to this project will be documented in this file.
 - Fix test_general_settings_ignore_time test [#1056](https://github.com/wazuh/wazuh-qa/pull/1056)
 - Avoid problematic race-condition on VD integration tests for Windows [#1047](https://github.com/wazuh/wazuh-qa/pull/1047)
 - QA Integration tests stabilization [#1002](https://github.com/wazuh/wazuh-qa/pull/1002)
+### Deleted
+- Deleted `behind_proxy_server` API config test. ([#1065](https://github.com/wazuh/wazuh-qa/pull/1065))

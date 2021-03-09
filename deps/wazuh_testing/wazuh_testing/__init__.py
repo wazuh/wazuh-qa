@@ -38,7 +38,7 @@ class Parameters:
         self._gcp_subscription_name = None
         self._gcp_credentials_file = None
         self._gcp_topic_name = None
-        self._fim_mode = None
+        self._fim_mode = []
 
     @property
     def default_timeout(self):

@@ -252,6 +252,8 @@ nav:
               - tests/integration/test_fim/test_files/test_max_eps/index.md
               - Test max eps synchronization:  tests/integration/test_fim/test_files/test_max_eps/test_max_eps_synchronization.md
               - Test max eps: tests/integration/test_fim/test_files/test_max_eps/test_max_eps.md
+            - Test max files per second:
+              - tests/integration/test_fim/test_files/test_max_files_per_second/test_max_files_per_second.md
             - Test multiple dirs:
               - tests/integration/test_fim/test_files/test_multiple_dirs/index.md
               - Test multiple dirs: tests/integration/test_fim/test_files/test_multiple_dirs/test_multiple_dirs.md
@@ -418,6 +420,7 @@ nav:
             - Test communications with agent:
                 - tests/integration/test_remoted/test_agent_communication/test_protocols_communication.md
                 - tests/integration/test_remoted/test_agent_communication/test_request_agent_info.md
+                - tests/integration/test_remoted/test_agent_communication/test_shared_configuration.md
         - Logtest:
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md
