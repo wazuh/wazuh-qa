@@ -43,8 +43,8 @@ The following message is written in active response socket (`/var/ossec/queue/al
 ## Expected behaviour
 
 - Fail if wazuh-execd does not send to remoted the active response.
-- Fail if remoted does not receive the active response sent by execd.
-- Fail if the agent does not receive the active response message.
+- Fail if wazuh-remoted does not receive the active response sent by wazuh-execd.
+- Fail if the agent does not receive an active response message.
 
 ## Code documentation
 
