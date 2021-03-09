@@ -31,6 +31,7 @@ from wazuh_testing import TCP
 from wazuh_testing import is_udp, is_tcp
 from wazuh_testing.tools.monitoring import wazuh_unpack, Queue
 from wazuh_testing.tools.remoted_sim import Cipher
+from wazuh_testing.tools.utils import retry
 
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
@@ -548,8 +549,11 @@ class Agent:
                         line = fp.readline()
                     break
                 line = fp.readline()
-        msg = msg.replace("<VERSION>", self.long_version)
-        msg = msg.replace("<MERGED_CHECKSUM>", self.merged_checksum)
+        try:
+            msg = msg.replace("<VERSION>", self.long_version)
+            msg = msg.replace("<MERGED_CHECKSUM>", self.merged_checksum)
+        except UnboundLocalError:
+            logging.critical("Error creating keep alive for the agent. Check if the OS is in the keepalives.txt")
         self.keep_alive_event = self.create_event(msg)
         self.keep_alive_raw_msg = msg
 
@@ -582,19 +586,18 @@ class Agent:
             result = "Not in global.db"
         return result
 
+    @retry(AttributeError, attempts=10, delay=5, delay_multiplier=1)
     def wait_status_active(self):
-        check_status_retries = 10
-        while check_status_retries > 0:
-            check_status_retries -= 1
-            status = self.get_connection_status()
-            if status == 'active':
-                return
-            logging.warning(f"Retrying: {check_status_retries}, {status}")
-            sleep(10)
-        logging.error(f"Waiting for status active aborted. Max retries reached.")
+        status = self.get_connection_status()
+        if status == 'active':
+            return
+        raise AttributeError("Agent is not active yet")
 
     def set_module_status(self, module_name, status):
         self.modules[module_name]['status'] = status
+
+    def set_module_attribute(self, module_name, attribute, value):
+        self.modules[module_name][attribute] = value
 
 
 class Inventory:
@@ -1151,3 +1154,11 @@ def create_agents(agents_number, manager_address, cypher, fim_eps=None, authd_pa
         agent_count = agent_count + 1
 
     return agents
+
+
+def connect(agent,  manager_address='localhost', protocol=TCP):
+    sender = Sender(manager_address, protocol=protocol)
+    injector = Injector(sender, agent)
+    injector.run()
+    agent.wait_status_active()
+    return agent, sender, injector
