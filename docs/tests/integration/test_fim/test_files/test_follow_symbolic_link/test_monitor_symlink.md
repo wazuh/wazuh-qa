@@ -1,5 +1,5 @@
 # Test change target
-Checks the behaviour when monitoring a link that points to a file or a directory.
+Checks the behavior when monitoring a link that points to a file or a directory.
 
 ## General info
 

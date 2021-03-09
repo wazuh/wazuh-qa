@@ -586,7 +586,8 @@ def check_queue_socket_event(raw_event=EXAMPLE_MESSAGE_PATTERN, timeout=30):
         control_service('start', daemon='wazuh-analysisd')
 
 
-def check_agent_received_message(message_queue, search_pattern, escape=False, timeout=5, update_position=True, error_message=''):
+def check_agent_received_message(message_queue, search_pattern, timeout=5, update_position=True, error_message='',
+                                 escape=False):
     """Allow to monitor the agent received messages to search a pattern regex.
 
     Args:

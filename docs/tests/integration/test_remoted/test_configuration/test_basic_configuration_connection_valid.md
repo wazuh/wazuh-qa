@@ -14,7 +14,7 @@ To confirm `protocol` option allows valid values.
 |:--:|:--:|:--:|
 | 0 | 8 | 17 |
 
-## Expected behaviour
+## Expected behavior
 
 - Fail if remoted does not start correctly.
 - Fail if remoted does not show expected warning if use more than one protocol for syslog connection.

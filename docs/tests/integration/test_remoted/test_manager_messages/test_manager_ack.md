@@ -14,7 +14,7 @@ The objective is to check that the manager sends the ACK message using the diffe
 |:--:|:--:|:--:|
 | 0 | 4 | 1m 15s |
 
-## Expected behaviour
+## Expected behavior
 
 Success if the agent receives the ACK message from the manager after sending the `start-up` message. Failure otherwise.
 

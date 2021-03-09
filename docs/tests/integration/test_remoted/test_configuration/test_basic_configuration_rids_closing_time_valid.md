@@ -14,7 +14,7 @@ To confirm `rids_closing_time` option allows valid values.
 |:--:|:--:|:--:|
 | 0 | 8 | 24 |
 
-## Expected behaviour
+## Expected behavior
 
 - Fail if remoted does not start correctly.
 - Fail if API query `{protocol}://{host}:{port}/manager/configuration?section=remote` doesn't match 

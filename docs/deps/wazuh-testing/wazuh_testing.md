@@ -58,7 +58,7 @@ Folder with all the general tools that could be used in every test. They are gro
 
 - **Time**: Classes and functions to 'travel in time' (needed for scheduled monitoring) and manage dates.
 
-- **Utils**: General behaviour tools.
+- **Utils**: General behavior tools.
 
 
 ## __init__

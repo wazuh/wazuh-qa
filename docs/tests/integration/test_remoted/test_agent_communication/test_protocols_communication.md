@@ -16,7 +16,7 @@ protocols simultaneously.
 |:--:|:--:|:--:|
 | 0 | 8 | 2m 23s |
 
-## Expected behaviour
+## Expected behavior
 
 Success if the event has been found in the manager's `queue` socket after sending it from the agent, using different
 protocols and ports. Failure otherwise.

@@ -1,6 +1,6 @@
 # Test audit
 This test file has several tests:
-- `test_audit_health_check`: Checks the behaviour of the FIM audit health check.
+- `test_audit_health_check`: Checks the behavior of the FIM audit health check.
 - `test_added_rules`: Checks if FIM adds the rules for monitored directories using whodata.
 - `test_readded_rules`: Checks that FIM is able to re-add the rule of a directory if it's removed.
 - `test_readded_rules_on_restart`: Check if FIM is able to add the audit rules when auditd is restarted.
@@ -51,7 +51,7 @@ This test file has several tests:
 - [X] Checks that FIM adds audit rules for monitored directories.
 - [X] Checks that FIM is able to re-add audit rules.
 - [X] Checks that FIM moves the directories to realtime when whodata is not available.
-- [X] Checks the FIM behaviour of the `audit_key` and `restart_audit` options.
+- [X] Checks the FIM behavior of the `audit_key` and `restart_audit` options.
 
 
 ## Execution result

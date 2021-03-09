@@ -82,7 +82,7 @@ def get_configuration(request):
 def test_check_others(key, subkey, key_attr, value_attr, triggers_key_modification, triggers_value_modification,
                       get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """
-    Test the behaviour disabling different check options over the same key with check_all enabled.
+    Test the behavior disabling different check options over the same key with check_all enabled.
 
     Example:
         check_all: "yes" check_size: "no" check_sum: "no".

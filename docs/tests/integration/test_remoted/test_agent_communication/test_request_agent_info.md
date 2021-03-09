@@ -13,7 +13,7 @@ state files using the remoted socket.
 |:--:|:--:|:--:|
 | 0 | 1 | 3m |
 
-## Expected behaviour
+## Expected behavior
 
 - Fail if remoted doesn't return the requested data
 - Fail if remoted doesn't return an error message when the agent is disconnected

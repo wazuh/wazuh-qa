@@ -14,7 +14,7 @@ To confirm `wazuh-remoted` denied the connection of the ip specified in `denied-
 |:--:|:--:|:--:|
 | 0 | 1 | 4 |
 
-## Expected behaviour
+## Expected behavior
 
 - Fail if remoted does not start correctly.
 - Fail if remoted does not show expected warning when receive a message from a denied ip.

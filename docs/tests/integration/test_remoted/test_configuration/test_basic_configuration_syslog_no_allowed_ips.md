@@ -14,7 +14,7 @@ To confirm `wazuh-remoted` fails when no `allowed_ips` are provided in syslog co
 |:--:|:--:|:--:|
 | 0 | 1 | 3s |
 
-## Expected behaviour
+## Expected behavior
 
 - Fail if remoted start correctly.
 - Fail if remoted debug does not show expected error output (error|critical).

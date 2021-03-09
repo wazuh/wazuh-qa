@@ -40,7 +40,7 @@ The following message is written in active response socket (`/var/ossec/queue/al
 |:--:|:--:|:--:|
 | 0 | 8 | 4m 16s |
 
-## Expected behaviour
+## Expected behavior
 
 - Fail if wazuh-execd does not send to remoted the active response.
 - Fail if wazuh-remoted does not receive the active response sent by wazuh-execd.
