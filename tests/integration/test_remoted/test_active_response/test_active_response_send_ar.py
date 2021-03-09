@@ -10,6 +10,7 @@ import wazuh_testing.remote as remote
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.sockets import send_ar_message
+from wazuh_testing import UDP, TCP, TCP_UDP
 
 # Marks
 pytestmark = pytest.mark.tier(level=1)
@@ -19,29 +20,28 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_test_active_response.yaml')
 
 parameters = [
-    {'PROTOCOL': 'TCP', 'PORT': '1514'},
-    {'PROTOCOL': 'UDP', 'PORT': '1514'},
-    {'PROTOCOL': 'TCP,UDP', 'PORT': '1514'}
+    {'PROTOCOL': TCP, 'PORT': '1514'},
+    {'PROTOCOL': UDP, 'PORT': '1514'},
+    {'PROTOCOL': TCP_UDP, 'PORT': '1514'}
 
 ]
 metadata = [
-    {'protocol': 'tcp', 'port': '1514'},
-    {'protocol': 'udp', 'port': '1514'},
-    {'protocol': 'tcp,udp', 'port': '1514'}
+    {'protocol': TCP, 'port': '1514'},
+    {'protocol': UDP, 'port': '1514'},
+    {'protocol': TCP_UDP, 'port': '1514'}
 ]
 
 configurations = load_wazuh_configurations(configurations_path, __name__ ,
                                            params=parameters, metadata=metadata)
 configuration_ids = [f"{x['PROTOCOL']}_{x['PORT']}" for x in parameters]
 
-manager_address = "localhost"
+manager_address = 'localhost'
 
 # fixtures
-@pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
+@pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
-
 
 
 def test_active_response_ar_sending(get_configuration, configure_environment, restart_remoted):
@@ -56,14 +56,12 @@ def test_active_response_ar_sending(get_configuration, configure_environment, re
     protocol_array = (get_configuration['metadata']['protocol']).split(",")
     for protocol in protocol_array:
         # rcv_msg_limit of 1000 is necessary for UDP test
-        agent = ag.Agent(manager_address, "aes", os="debian8", version="4.2.0",
+        agent = ag.Agent(manager_address, 'aes', os='debian8', version='4.2.0',
                          disable_all_modules=True, rcv_msg_limit=1000)
-        agent.set_module_status("receive_messages", "enabled")
-        agent.set_module_status("keepalive", "enabled")
+        agent.set_module_status('receive_messages', 'enabled')
+        agent.set_module_status('keepalive', 'enabled')
 
-        # time.sleep for 1 second is necessary because is necessary because the manager needs 
-        # this time to create the required sockets for the creation of the sender
-
+        # Time necessary until socket creation
         time.sleep(1)
 
         sender = ag.Sender(manager_address, protocol=protocol)
@@ -81,14 +79,12 @@ def test_active_response_ar_sending(get_configuration, configure_environment, re
 
             log_callback = remote.callback_active_response_received(ar_message)
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                    error_message="The expected received active response for execd module "
-                                                  "debug has not been produced")
+                                    error_message='The expected event has not been found in ossec.log')
 
             log_callback = remote.callback_active_response_sent(ar_message)
 
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                    error_message="The expected sent active response for execd module "
-                                                  "debug has not been produced")
+                                    error_message='The expected event has not been found in ossec.log')
 
             remote.check_agent_received_message(agent.rcv_msg_queue, f'#!-execd dummy-ar admin 1.1.1.1 1.1 44 '
                                                                      f'(any-agent) any->/testing/testing.txt - -',
