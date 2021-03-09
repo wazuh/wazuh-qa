@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 # Unix only modules
+import logging
 
 try:
     import grp
@@ -207,9 +208,11 @@ class SocketController:
 
         Args:
 
-            address (str or Tuple(str, int)): Address of the socket, the format of the address depends on the type. A regular file path for AF_UNIX or a Tuple(HOST, PORT) for AF_INET
+            address (str or Tuple(str, int)): Address of the socket, the format of the address depends on the type.
+                A regular file path for AF_UNIX or a Tuple(HOST, PORT) for AF_INET
             family (str): Family type of socket to connect to, AF_UNIX for unix sockets or AF_INET for port sockets.
-            connection_protocol (str): Flag that indicates if the connection is TCP (SOCK_STREAM), UDP (SOCK_DGRAM) or SSL_TLSv1_2.
+            connection_protocol (str): Flag that indicates if the connection is TCP (SOCK_STREAM), UDP (SOCK_DGRAM)
+                or SSL_TLSv1_2.
             timeout (int): Optional - Socket's timeout, 0 for non-blocking mode.
             open_at_start (boolean): Defines if the socket is opened at start or not. Default True
 
@@ -284,7 +287,8 @@ class SocketController:
 
         Args:
             message (str or bytes): Message to be sent.
-            size (bool) : Optional - Flag that indicates if the header of the message includes the size of the message (For example, Analysis doesn't need the size, wazuh-db does). Default `False`
+            size (bool, optional) : Flag that indicates if the header of the message includes the size of the message
+                (For example, Analysis doesn't need the size, wazuh-db does). Default `False`
         Returns:
             (int) : Size of the sent message
         """
@@ -304,7 +308,8 @@ class SocketController:
         """Receive a message from the socket.
 
         Args:
-            size (bool): Flag that indicates if the header of the message includes the size of the message (For example, Analysis doesn't need the size, wazuh-db does). Default `False`
+            size (bool): Flag that indicates if the header of the message includes the size of the message
+                (For example, Analysis doesn't need the size, wazuh-db does). Default `False`
         Returns:
             bytes: Socket message.
         """
@@ -382,11 +387,14 @@ class QueueMonitor:
             callback (callable, optional) : Callback function to filter results.
             accum_results (int, optional) : Number of results to get. Default `1`
             timeout (int, optional): Maximum timeout. Default `-1`
-            update_position (bool, optional) : True if we pop items from the queue once they are read. False otherwise. Default `True`
-            timeout_extra (int, optional): Grace period to fetch more events than specified in `accum_results`. Default: 0.
+            update_position (bool, optional) : True if we pop items from the queue once they are read. False otherwise.
+                Default `True`
+            timeout_extra (int, optional): Grace period to fetch more events than specified in `accum_results`.
+                Default: 0.
 
         Returns:
-            (list of any): It can return either a list of any type or simply any type. If `accum_results > 1`, it will be a list.
+            (list of any): It can return either a list of any type or simply any type.
+                If `accum_results > 1`, it will be a list.
         """
         result_list = []
         timer = 0.0
@@ -404,10 +412,12 @@ class QueueMonitor:
             tic = time.time()
             try:
                 if update_position:
-                    item = callback(self._queue.get(block=True, timeout=self._time_step))
+                    msg = self._queue.get(block=True, timeout=self._time_step)
                 else:
-                    item = callback(self._queue.peek(position=position, block=True, timeout=self._time_step))
+                    msg = self._queue.peek(position=position, block=True, timeout=self._time_step)
                     position += 1
+                item = callback(msg)
+                logging.debug(msg)
                 if item is not None and item:
                     result_list.append(item)
                     if len(result_list) == accum_results and timeout_extra > 0 and not extra_timer_is_running:
@@ -441,7 +451,7 @@ class QueueMonitor:
                         logger.error(f"Results accumulated: "
                                      f"{len(result) if isinstance(result, list) else 0}")
                         logger.error(f"Results expected: {accum_results}")
-                    raise TimeoutError()
+                    raise TimeoutError(error_message)
                 result = self.get_results(callback=callback, accum_results=accum_results, timeout=timeout,
                                           update_position=update_position, timeout_extra=timeout_extra)
                 if result and not self._abort:
@@ -488,6 +498,14 @@ class Queue(queue.Queue):
             aux_queue.get(*args, **kwargs)
         return aux_queue.get(*args, **kwargs)
 
+    def __repr__(self):
+        """ Returns the object representation in string format.
+
+        This method is called when repr() function is invoked on the object. If possible, the string returned should
+            be a valid Python expression that can be used to reconstruct the object again. This is used to define how
+            an object of this class should be printed.
+        """
+        return str(self.queue)
 
 class StreamServerPort(socketserver.ThreadingTCPServer):
     pass
@@ -511,9 +529,10 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
             connection_protocol(string): ssl version to be used
             certificate (str, optional): Path to the ssl certificate
             keyfile (str, optional): Path to the ssl key
-            cert_reqs (str, optional): ssl.CERT_NONE, ssl.CERT_OPTIONAL, ssl.CERT_REQUIRED. Whetever or not a cert is required
+            cert_reqs (str, optional): ssl.CERT_NONE, ssl.CERT_OPTIONAL, ssl.CERT_REQUIRED. Whenever or not
+                a cert is required
             ca_cert(str, optional): If cert is required show accepted certs
-            options(str, optional): Add adinitional options
+            options(str, optional): Add additional options
         """
         if ciphers:
             self.ciphers = ciphers
@@ -688,8 +707,10 @@ class ManInTheMiddle:
         """Create a MITM server for the socket `socket_address`.
 
         Args:
-            address (str or Tuple(str, int) ): Address of the socket, the format of the address depends on the type. A regular file path for AF_UNIX or a Tuple(HOST, PORT) for AF_INET
-            family (str): Family type of socket to connect to, AF_UNIX for unix sockets or AF_INET for port sockets. Default `'AF_UNIX'`
+            address (str or Tuple(str, int) ): Address of the socket, the format of the address depends on the type.
+                A regular file path for AF_UNIX or a Tuple(HOST, PORT) for AF_INET
+            family (str): Family type of socket to connect to, AF_UNIX for unix sockets or AF_INET for port sockets.
+                Default `'AF_UNIX'`
             connection_protocol (str): It can be either 'TCP', 'UDP' or SSL. Default `'TCP'`
             func (callable): Function to be applied to every received data before sending it.
         """
