@@ -5,14 +5,13 @@ import os
 import subprocess as sb
 
 import pytest
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
+from wazuh_testing.remote import remove_agent_group, new_agent_group
+from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 
 DAEMON_NAME = "wazuh-remoted"
-data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-default_agent_conf_path = os.path.join(data_path, 'agent.conf')
 
 
 @pytest.fixture(scope='module')
@@ -32,12 +31,8 @@ def restart_remoted(get_configuration, request):
 def create_agent_group(group_name='testing_group'):
     """Temporary creates a new agent group for testing purpose, must be run only on Managers."""
 
-    sb.run([f"{WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-g", group_name])
-
-    with open(f"{WAZUH_PATH}/etc/shared/{group_name}/agent.conf", "w") as agent_conf_file:
-        with open(default_agent_conf_path, 'r') as configuration:
-            agent_conf_file.write(configuration.read())
+    new_agent_group(group_name)
 
     yield
 
-    sb.run([f"{WAZUH_PATH}/bin/agent_groups", "-q", "-r", "-g", group_name])
+    remove_agent_group(group_name)

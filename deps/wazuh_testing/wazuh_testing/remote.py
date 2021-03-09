@@ -13,7 +13,7 @@ import wazuh_testing.api as api
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing import UDP, TCP
 from wazuh_testing import remote as rd
-from wazuh_testing.tools import ARCHIVES_LOG_FILE_PATH, LOG_FILE_PATH
+from wazuh_testing.tools import ARCHIVES_LOG_FILE_PATH, LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools import QUEUE_SOCKETS_PATH
 from wazuh_testing.tools import WAZUH_CONF
 from wazuh_testing.tools import file
@@ -31,6 +31,30 @@ EXAMPLE_VALID_USER_LOG_EVENT = '2021-03-04T02:16:16.998693-05:00 centos-8 su - -
                                'isSynced="0"] pam_unix(su:session): session opened for user wazuh_qa by (uid=0)'
 EXAMPLE_MESSAGE_PATTERN = 'Accepted publickey for root from 192.168.0.5 port 48044'
 QUEUE_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'queue')
+
+DEFAULT_TESTING_GROUP_NAME = 'testing_group'
+
+data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+
+
+def new_agent_group(group_name=DEFAULT_TESTING_GROUP_NAME, configuration_file='agent.conf'):
+    """Create a new agent group for testing purpose, must be run only on Managers."""
+
+    sb.run([f"{WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-g", group_name])
+
+    agent_conf_path = os.path.join(data_path, configuration_file)
+
+    with open(f"{WAZUH_PATH}/etc/shared/{group_name}/agent.conf", "w") as agent_conf_file:
+        with open(agent_conf_path, 'r') as configuration:
+            agent_conf_file.write(configuration.read())
+
+
+def remove_agent_group(group_name):
+    sb.run([f"{WAZUH_PATH}/bin/agent_groups", "-q", "-r", "-g", group_name])
+
+
+def add_agent_to_group(group_name, agent_id):
+    sb.run([f"{WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-i", agent_id, "-g", group_name])
 
 
 def callback_detect_syslog_allowed_ips(syslog_ips):
@@ -625,9 +649,9 @@ def check_push_shared_config(protocol, agent, sender):
             raise AssertionError("Same shared configuration pushed twice!")
 
         # Add agent to group and check if the configuration is pushed.
-        sb.run(["{WAZUH_PATH}/agent_groups", "-q", "-a", "-i", agent.id, "-g", "testing_group"])
+        add_agent_to_group(DEFAULT_TESTING_GROUP_NAME, agent.id)
 
-        for _ in range(3):
+        for _ in range(5):
             # send some keep alive messages until manager push the new group configuration
             sender.send_event(agent.keep_alive_event)
             time.sleep(1)
