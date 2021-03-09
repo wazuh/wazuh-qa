@@ -13,7 +13,7 @@ pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '')
-configurations_path = os.path.join(test_data_path, 'data', 'wazuh_test_active_response.yaml')
+configurations_path = os.path.join(test_data_path, 'data', 'wazuh_basic_configuration.yaml')
 
 parameters = [
     {'ALLOWED': '127.0.0.0/24', 'DENIED': '127.0.0.1'}

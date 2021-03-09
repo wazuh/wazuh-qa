@@ -48,4 +48,4 @@ The following message is written in active response socket (`/var/ossec/queue/al
 
 ## Code documentation
 
-::: tests.integration.test_remoted.test_active_response.test_active_response
+::: tests.integration.test_remoted.test_active_response.test_active_response_ar_sending

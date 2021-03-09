@@ -13,7 +13,7 @@ pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_test_active_response.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
 parameters = [
     {'CONNECTION': 'secure', 'PORT': '1514', 'RIDS_CLOSING_TIME': '0s'},

@@ -15,7 +15,7 @@ pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_test_active_response.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
 parameters = []
 metadata = []
@@ -25,15 +25,18 @@ array_interfaces_ip = []
 network_interfaces = netifaces.interfaces()
 
 for interface in network_interfaces:
-    ip = netifaces.ifaddresses(interface)[netifaces.AF_INET][0]['addr']
-    array_interfaces_ip.append(ip)
+    try:
+        ip = netifaces.ifaddresses(interface)[netifaces.AF_INET][0]['addr']
+        array_interfaces_ip.append(ip)
+    except KeyError:
+        pass
 
 for local_ip in array_interfaces_ip:
     parameters.append({'LOCAL_IP': local_ip})
     metadata.append({'local_ip': local_ip})
 
-configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_local_ip", params=parameters,
-                                           metadata=metadata)
+configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_local_ip",
+                                           params=parameters, metadata=metadata)
 configuration_ids = [f"{x['LOCAL_IP']}" for x in parameters]
 
 
