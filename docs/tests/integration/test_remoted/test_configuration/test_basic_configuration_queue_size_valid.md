@@ -14,7 +14,7 @@ To confirm that `queue_size` option allow correct values.
 |:--:|:--:|:--:|
 | 0 | 3 | 9 |
 
-## Expected behavior
+## Expected behaviour
 
 - Fail if remoted does not start correctly.
 - Fail if API query `{protocol}://{host}:{port}/manager/configuration?section=remote` doesn't 

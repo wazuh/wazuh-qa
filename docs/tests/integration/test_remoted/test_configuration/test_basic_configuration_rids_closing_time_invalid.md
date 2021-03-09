@@ -15,7 +15,7 @@ To confirm `rids_closing_time` option does not allow invalid values.
 |:--:|:--:|:--:|
 | 0 | 1 | 3s |
 
-## Expected behavior
+## Expected behaviour
 
 - Fail if remoted start correctly.
 - Fail if remoted debug does not show expected error output (error|critical).

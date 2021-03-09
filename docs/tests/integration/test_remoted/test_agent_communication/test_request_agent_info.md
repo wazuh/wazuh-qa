@@ -15,7 +15,7 @@ state files using the remoted socket.
 
 **We need to find a way to reduce testing time**
 
-## Expected behavior
+## Expected behaviour
 
 - Fail if remoted doesn't return the requested data
 - Fail if remoted doesn't return an error message when the agent is disconnected

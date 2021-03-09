@@ -14,7 +14,7 @@ To confirm `allowed-ips` option does not allow invalid values.
 |:--:|:--:|:--:|
 | 0 | 4 | 8s |
 
-## Expected behavior
+## Expected behaviour
 
 - Fail if remoted start correctly.
 - Fail if remoted debug does not show expected error output (error|critical).

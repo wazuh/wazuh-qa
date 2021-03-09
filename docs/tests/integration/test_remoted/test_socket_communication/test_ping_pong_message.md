@@ -20,7 +20,7 @@ Confirm `wazuh-remoted` keeps sending the `#pong` message for different ports an
 |:--:|:--:|:--:|
 | 0 | 12 | 27s |
 
-## Expected behavior
+## Expected behaviour
 
 - Fail if `wazuh-remoted` doesn't start with a valid configuration.
 

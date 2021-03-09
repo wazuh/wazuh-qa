@@ -14,7 +14,7 @@ To confirm `ipv6` can be configured to `yes` without errors. In case of `secure`
 |:--:|:--:|:--:|
 | 0 | 2 | 4 |
 
-## Expected behavior
+## Expected behaviour
 
 - Fail if remoted does not start correctly.
 - Fail if remoted does not show expected warning if use secure connection with ipv6 with value `yes`.

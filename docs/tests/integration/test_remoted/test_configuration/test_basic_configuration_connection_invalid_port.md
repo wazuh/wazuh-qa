@@ -14,7 +14,7 @@ To confirm `port` option does not allow invalid values.
 |:--:|:--:|:--:|
 | 0 | 1 | 2.5s |
 
-## Expected behavior
+## Expected behaviour
 
 - Fail if remoted start correctly.
 - Fail if remoted debug does not show expected error output (error|critical).

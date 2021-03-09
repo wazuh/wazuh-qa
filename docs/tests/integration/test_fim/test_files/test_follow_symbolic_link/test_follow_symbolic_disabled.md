@@ -1,6 +1,6 @@
 # Test change target
 
-Check the FIM behavior when the option `follow_symbolic_link` is set to `no`.
+Check the FIM behaviour when the option `follow_symbolic_link` is set to `no`.
 
 ## General info
 

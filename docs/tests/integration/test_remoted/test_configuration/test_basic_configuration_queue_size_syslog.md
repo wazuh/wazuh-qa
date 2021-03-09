@@ -14,7 +14,7 @@ To confirm that `wazuh-remoted` fails when `queue_size` tag is used at the same 
 |:--:|:--:|:--:|
 | 0 | 1 | 2 |
 
-## Expected behavior
+## Expected behaviour
 
 - Fail if remoted start correctly.
 - Fail if remoted debug does not show expected error output (error|critical).

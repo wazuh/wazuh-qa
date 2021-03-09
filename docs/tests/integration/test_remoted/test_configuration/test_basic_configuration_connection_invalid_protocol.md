@@ -14,7 +14,7 @@ To confirm that `protocol` option allow multiple values and works correctly when
 |:--:|:--:|:--:|
 | 0 | 8 | 20s |
 
-## Expected behavior
+## Expected behaviour
 
 - Fail if remoted does not start correctly.
 - Fail if remoted does not use TCP in case of every value in the `protocol` option is invalid.

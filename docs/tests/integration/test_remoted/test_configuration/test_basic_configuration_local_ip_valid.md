@@ -14,7 +14,7 @@ To confirm `local_ip` can be configured to any ip address of all available netwo
 |:--:|:--:|:--:|
 | 0 | 1 | 7 |
 
-## Expected behavior
+## Expected behaviour
 
 - Fail if remoted does not start correctly.
 - Fail if API query `{protocol}://{host}:{port}/manager/configuration?section=remote` doesn't match the introduced 

@@ -26,7 +26,7 @@ Confirm `wazuh-remoted` can receive messages to its syslog server. This confirma
 |:--:|:--:|:--:|
 | 0 | 40 | 4 m 11 s |
 
-## Expected behavior
+## Expected behaviour
 
 - Fail if `wazuh-remoted` doesn't start with a valid configuration.
 - Fail if `wazuh-remoted` doesn't receive the syslog message.

@@ -14,7 +14,7 @@ To confirm that `wazuh-remoted` shows expected warning if a `queue_size` value i
 |:--:|:--:|:--:|
 | 0 | 1 | 3 |
 
-## Expected behavior
+## Expected behaviour
 
 - Fail if remoted does not start correctly.
 - Fail if API query `{protocol}://{host}:{port}/manager/configuration?section=remote` doesn't 
