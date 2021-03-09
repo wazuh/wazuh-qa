@@ -11,7 +11,7 @@ from subprocess import check_call
 
 import psutil
 
-from wazuh_testing.tools import WAZUH_PATH, get_service, WAZUH_SOCKETS, QUEUE_DB_PATH, WAZUH_OPTIONAL_SOCKETS
+from wazuh_testing.tools import WAZUH_PATH, get_service, WAZUH_DAEMONS_SOCKETS, QUEUE_DB_PATH, WAZUH_OPTIONAL_SOCKETS
 from wazuh_testing.tools.configuration import write_wazuh_conf
 
 
@@ -126,7 +126,7 @@ def control_service(action, daemon=None, debug_mode=False):
                 except psutil.NoSuchProcess:
                     pass
 
-                delete_sockets(WAZUH_SOCKETS[daemon])
+                delete_sockets(WAZUH_DAEMONS_SOCKETS[daemon])
             else:
                 daemon_path = os.path.join(WAZUH_PATH, 'bin')
                 check_call([f'{daemon_path}/{daemon}', '' if not debug_mode else '-dd'])
@@ -192,9 +192,9 @@ def check_daemon_status(daemon=None, running=True, timeout=10, extra_sockets=Non
         if f"{daemon if daemon is not None else ''} {'not' if running else 'is'} running" not in daemon_status:
             # Construct set of socket paths to check
             if daemon is None:
-                socket_set = {path for array in WAZUH_SOCKETS.values() for path in array}
+                socket_set = {path for array in WAZUH_DAEMON_SOCKETS.values() for path in array}
             else:
-                socket_set = {path for path in WAZUH_SOCKETS[daemon]}
+                socket_set = {path for path in WAZUH_DAEMON_SOCKETS[daemon]}
             # We remove optional sockets and add extra sockets to the set to check
             socket_set.difference_update(WAZUH_OPTIONAL_SOCKETS)
             socket_set.update(extra_sockets)

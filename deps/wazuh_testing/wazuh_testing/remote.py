@@ -593,11 +593,11 @@ def check_agent_received_message(message_queue, search_pattern, timeout=5, updat
     Args:
         message_queue (monitoring.Queue): Queue containing the messages received in the agent.
         search_pattern (str): Regex to search in agent received messages.
-        escape (bool): Flag to escape special characters in the pattern
         timeout (int): Maximum time in seconds to search the event.
         update_position (boolean): True to search in the entire queue, False to search in the current position of the
                                    queue.
         error_message (string): Message to explain the exception.
+        escape (bool): Flag to escape special characters in the pattern
 
     Raises:
         TimeoutError: if search pattern is not found in agent received messages queue in the expected time.

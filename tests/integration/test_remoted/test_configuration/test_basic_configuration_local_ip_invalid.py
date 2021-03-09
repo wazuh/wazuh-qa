@@ -13,7 +13,7 @@ pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_test_active_response.yaml')
 
 # Set invalid local_ip configuration
 parameters = [
@@ -30,7 +30,7 @@ configurations = load_wazuh_configurations(configurations_path, "test_basic_conf
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_test_active_response.yaml')
 
 configuration_ids = [f"{x['LOCAL_IP']}" for x in parameters]
 

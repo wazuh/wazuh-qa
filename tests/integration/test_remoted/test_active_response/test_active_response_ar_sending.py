@@ -16,7 +16,7 @@ pytestmark = pytest.mark.tier(level=1)
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_test_active_response.yaml')
 
 parameters = [
     {'PROTOCOL': 'TCP', 'PORT': '1514'},
@@ -44,7 +44,7 @@ def get_configuration(request):
 
 
 
-def test_active_response_send(get_configuration, configure_environment, restart_remoted):
+def test_active_response_ar_sending(get_configuration, configure_environment, restart_remoted):
     """Test if `wazuh-remoted` sends active response commands.
 
     Check if execd sends active response command to remoted module and agent receives an active command
@@ -60,6 +60,9 @@ def test_active_response_send(get_configuration, configure_environment, restart_
                          disable_all_modules=True, rcv_msg_limit=1000)
         agent.set_module_status("receive_messages", "enabled")
         agent.set_module_status("keepalive", "enabled")
+
+        # time.sleep for 1 second is necessary because is necessary because the manager needs 
+        # this time to create the required sockets for the creation of the sender
 
         time.sleep(1)
 
@@ -78,12 +81,14 @@ def test_active_response_send(get_configuration, configure_environment, restart_
 
             log_callback = remote.callback_active_response_received(ar_message)
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                    error_message="The expected debug output has not been produced")
+                                    error_message="The expected received active response for execd module "
+                                                  "debug has not been produced")
 
             log_callback = remote.callback_active_response_sent(ar_message)
 
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                    error_message="The expected debug output has not been produced")
+                                    error_message="The expected sent active response for execd module "
+                                                  "debug has not been produced")
 
             remote.check_agent_received_message(agent.rcv_msg_queue, f'#!-execd dummy-ar admin 1.1.1.1 1.1 44 '
                                                                      f'(any-agent) any->/testing/testing.txt - -',
