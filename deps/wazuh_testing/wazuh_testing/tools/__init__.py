@@ -101,7 +101,7 @@ WAZUH_DAEMONS_SOCKETS = {
     'wazuh-clusterd': [os.path.join(CLUSTER_SOCKET_PATH, 'c-internal.sock')]
 }
 
-WAZUH_SOCKET = {
+WAZUH_SOCKETS = {
     'wazuh-ar': [os.path.join(QUEUE_ALERTS_PATH, 'ar')]
 }
 

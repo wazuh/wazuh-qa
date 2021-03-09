@@ -1,7 +1,7 @@
 - tags:
   - test_active_response_ar_sending
   apply_to_modules:
-  - test_active_response
+  - test_active_response_ar_sending
   sections:
   - section: remote
     elements:

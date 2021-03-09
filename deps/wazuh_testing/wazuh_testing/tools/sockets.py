@@ -38,11 +38,12 @@ def send_request(msg_request, response_size=100):
 
     return response
 
+
 def send_ar_message(ar_command):
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-    ar_socket = WAZUH_SOCKETS['wazuh-ar']
+    active_response_socket = WAZUH_SOCKETS['wazuh-ar']
 
-    for socket in ar_socket:
-        sock.connect(socket)
+    for ar_socket in active_response_socket:
+        sock.connect(ar_socket)
         sock.send(f"{ar_command}".encode())
         sock.close()
