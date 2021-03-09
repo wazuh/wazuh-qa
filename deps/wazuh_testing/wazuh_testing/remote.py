@@ -582,6 +582,8 @@ def check_push_shared_config(protocol, agent, sender):
 
     Args:
         protocol (str): It can be UDP or TCP.
+        agent (Agent): Agent to check if the shared configuration is pushed.
+        sender (Sender): Sender object associated to the agent and used to send messages to the manager.
 
     Raises:
         TimeoutError: If agent does not receive the manager ACK message in the expected time.
@@ -623,11 +625,10 @@ def check_push_shared_config(protocol, agent, sender):
             raise AssertionError("Same shared configuration pushed twice!")
 
         # Add agent to group and check if the configuration is pushed.
-        sb.run(["/var/ossec/bin/agent_groups", "-q", "-a", "-i", agent.id, "-g", "testing_group"])
+        sb.run(["{WAZUH_PATH}/agent_groups", "-q", "-a", "-i", agent.id, "-g", "testing_group"])
 
-        for i in range(3):
+        for _ in range(3):
             # send some keep alive messages until manager push the new group configuration
-            logging.critical(agent.keep_alive_raw_msg)
             sender.send_event(agent.keep_alive_event)
             time.sleep(1)
 

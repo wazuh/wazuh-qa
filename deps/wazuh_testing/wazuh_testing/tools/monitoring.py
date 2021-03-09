@@ -499,7 +499,7 @@ class Queue(queue.Queue):
         return aux_queue.get(*args, **kwargs)
 
     def __repr__(self):
-        """ returns the object representation in string format.
+        """ Returns the object representation in string format.
 
         This method is called when repr() function is invoked on the object. If possible, the string returned should
             be a valid Python expression that can be used to reconstruct the object again. This is used to define how
@@ -529,7 +529,7 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
             connection_protocol(string): ssl version to be used
             certificate (str, optional): Path to the ssl certificate
             keyfile (str, optional): Path to the ssl key
-            cert_reqs (str, optional): ssl.CERT_NONE, ssl.CERT_OPTIONAL, ssl.CERT_REQUIRED. Whatever or not
+            cert_reqs (str, optional): ssl.CERT_NONE, ssl.CERT_OPTIONAL, ssl.CERT_REQUIRED. Whenever or not
                 a cert is required
             ca_cert(str, optional): If cert is required show accepted certs
             options(str, optional): Add additional options
