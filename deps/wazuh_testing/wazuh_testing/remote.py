@@ -509,7 +509,7 @@ def check_queue_socket_event(raw_event=EXAMPLE_MESSAGE_PATTERN, timeout=30):
     """Allow searching for an expected event in the queue socket.
 
     Args:
-        raw_event (str): Pattern regex to be found in the socket.
+        raw_event (str or list<str>): Pattern/s regex to be found in the socket.
         timeout (int): Maximum search time of the event in the socket. Default is 30 to allow enough time for the
                        other thread to send messages.
 
@@ -522,7 +522,12 @@ def check_queue_socket_event(raw_event=EXAMPLE_MESSAGE_PATTERN, timeout=30):
         return data
 
     error_message = 'Could not find the expected event in queue socket'
-    callback = monitoring.make_callback(raw_event, '.*')
+
+    # Cast str to str list
+    if isinstance(raw_event, str):
+        raw_event = [raw_event]
+
+    # raw_event = ([raw_event] if isinstance(raw_event, str) else raw_event)
 
     # Stop analysisd daemon to free the socket. Important note: control_service(stop) deletes the daemon sockets.
     control_service('stop', daemon='wazuh-analysisd')
@@ -540,7 +545,10 @@ def check_queue_socket_event(raw_event=EXAMPLE_MESSAGE_PATTERN, timeout=30):
 
     try:
         # Start socket monitoring
-        socket_monitor.start(timeout=timeout, callback=callback, error_message=error_message, update_position=False)
+        for event in raw_event:
+            socket_monitor.start(timeout=timeout, callback=monitoring.make_callback(event, '.*'),
+                                 error_message=error_message, update_position=False)
+            print(f"{event} found")
     finally:
         mitm.shutdown()
         control_service('start', daemon='wazuh-analysisd')

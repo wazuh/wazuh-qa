@@ -49,24 +49,16 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 
 def validate_agent_manager_protocol_communication(manager_port, num_agents=2):
-    def validate_communication(agent, protocol, manager_port):
-        agent_custom_message = f"test message from agent {agent.id}"
-        event = agent.create_event(f"1:/test.log:Feb 23 17:18:20 manager sshd[40657]: {agent_custom_message}")
 
+    def send_event(event, protocol, manager_port):
         sender = ag.Sender(agent_info['manager_address'], protocol=protocol, manager_port=manager_port)
 
         try:
             print("Sending event...")
             sender.send_event(event)
-            print("Waiting..")
-            rd.check_queue_socket_event(agent_custom_message)
-            print("Passed..")
         finally:
             print("Closing..")
             sender.socket.close()
-
-
-    file.truncate_file(LOG_FILE_PATH)
 
     # Create two agents
     agents = ag.create_agents(agents_number=num_agents, manager_address=agent_info['manager_address'],
@@ -74,19 +66,29 @@ def validate_agent_manager_protocol_communication(manager_port, num_agents=2):
                               disable_all_modules=agent_info['disable_all_modules'])
 
     threads = []
+    search_patterns = []
 
     for idx, agent in enumerate(agents):
         protocol = TCP if idx % 2 == 0 else UDP
-        print(f"LAUNCHING {idx} THREAD")
-        threads.append(ThreadExecutor(validate_communication, {'agent': agent, 'protocol': protocol,
-                                                               'manager_port': manager_port}))
+
+        search_pattern = f"test message from agent {agent.id}"
+        agent_custom_message = f"1:/test.log:Feb 23 17:18:20 manager sshd[40657]: {search_pattern}"
+        event = agent.create_event(agent_custom_message)
+        search_patterns.append(search_pattern)
+
+        print(f"CREATING {idx} THREAD")
+        threads.append(ThreadExecutor(send_event, {'event': event, 'protocol': protocol,
+                                                   'manager_port': manager_port}))
     for thread in threads:
         thread.start()
 
     for thread in threads:
         thread.join()
 
-    print("Join")
+    print("Waiting...")
+    rd.check_queue_socket_event(search_patterns)
+
+
 
 # Fixtures
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
