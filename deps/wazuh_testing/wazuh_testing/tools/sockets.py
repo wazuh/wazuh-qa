@@ -40,7 +40,7 @@ def send_request(msg_request, response_size=100):
 
 
 def send_active_response_message(active_response_command):
-    """ Send active response messsage to /var/ossec/queue/alerts/ar socket.
+    """ Send active response message to /var/ossec/queue/alerts/ar socket.
 
     Args:
         active_response_command (str): Active response message.

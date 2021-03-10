@@ -7,7 +7,7 @@ import logging
 import socket
 import sqlite3
 
-from wazuh_testing.tools import WAZUH_PATH, WAZUHDB_SOCKET_PATH
+from wazuh_testing.tools import WAZUH_PATH, WAZUH_DB_SOCKET_PATH
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.monitoring import wazuh_pack, wazuh_unpack
 
@@ -138,7 +138,7 @@ def query_wdb(command):
         list: Query response data
     """
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    sock.connect(WAZUHDB_SOCKET_PATH)
+    sock.connect(WAZUH_DB_SOCKET_PATH)
 
     data = []
 
