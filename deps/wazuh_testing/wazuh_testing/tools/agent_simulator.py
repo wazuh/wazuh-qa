@@ -580,7 +580,7 @@ class Agent:
     def get_connection_status(self):
         result = wdb.query_wdb(f"global get-agent-info {self.id}")
 
-        if type(result) is list and len(result) > 0:
+        if len(result) > 0:
             result = result[0]['connection_status']
         else:
             result = "Not in global.db"
