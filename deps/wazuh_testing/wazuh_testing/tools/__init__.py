@@ -83,6 +83,8 @@ QUEUE_SOCKETS_PATH = os.path.join(WAZUH_PATH, 'queue', 'sockets')
 QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 CLUSTER_SOCKET_PATH = os.path.join(WAZUH_PATH, 'queue', 'cluster')
 
+WDB_SOCKET_PATH = os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb')
+
 WAZUH_SOCKETS = {
     'wazuh-agentd': [],
     'wazuh-analysisd': [os.path.join(QUEUE_SOCKETS_PATH, 'analysis'),
