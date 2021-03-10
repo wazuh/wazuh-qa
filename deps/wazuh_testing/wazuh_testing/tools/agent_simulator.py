@@ -1124,7 +1124,7 @@ class InjectorThread(threading.Thread):
             self.stop_thread = 1
 
 
-def create_agents(agents_number, manager_address, cypher, fim_eps=None, authd_password=None, agents_os=None,
+def create_agents(agents_number, manager_address, cypher='aes', fim_eps=None, authd_password=None, agents_os=None,
                   agents_version=None):
     """Create a list of generic agents
 
@@ -1157,9 +1157,9 @@ def create_agents(agents_number, manager_address, cypher, fim_eps=None, authd_pa
     return agents
 
 
-def connect(agent,  manager_address='localhost', protocol=TCP):
-    sender = Sender(manager_address, protocol=protocol)
+def connect(agent,  manager_address='localhost', protocol=TCP, port=1514):
+    sender = Sender(manager_address, protocol=protocol, manager_port=port)
     injector = Injector(sender, agent)
     injector.run()
     agent.wait_status_active()
-    return agent, sender, injector
+    return sender, injector
