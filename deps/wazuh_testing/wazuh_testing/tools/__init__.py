@@ -83,7 +83,10 @@ QUEUE_ALERTS_PATH = os.path.join(WAZUH_PATH, 'queue', 'alerts')
 QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 CLUSTER_SOCKET_PATH = os.path.join(WAZUH_PATH, 'queue', 'cluster')
 
-WAZUH_DAEMONS_SOCKETS = {
+WDB_SOCKET_PATH = os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb')
+WAZUH_ACTIVE_RESPONSE_SOCKET_PATH = os.path.join(QUEUE_ALERTS_PATH,'ar')
+
+WAZUH_SOCKETS = {
     'wazuh-agentd': [],
     'wazuh-analysisd': [os.path.join(QUEUE_SOCKETS_PATH, 'analysis'),
                         os.path.join(QUEUE_SOCKETS_PATH, 'queue')],
@@ -99,10 +102,6 @@ WAZUH_DAEMONS_SOCKETS = {
                        os.path.join(QUEUE_SOCKETS_PATH, 'control'),
                        os.path.join(QUEUE_SOCKETS_PATH, 'krequest')],
     'wazuh-clusterd': [os.path.join(CLUSTER_SOCKET_PATH, 'c-internal.sock')]
-}
-
-WAZUH_SOCKETS = {
-    'wazuh-ar': [os.path.join(QUEUE_ALERTS_PATH, 'ar')]
 }
 
 # These sockets do not exist with default Wazuh configuration

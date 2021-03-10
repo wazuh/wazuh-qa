@@ -576,17 +576,18 @@ class Agent:
         if self.modules['fim_integrity']['status'] == 'enabled':
             self.fim_integrity = GeneratorIntegrityFIM(self.id, self.name, self.short_version)
 
+
     def get_connection_status(self):
-        numeric_id = int(self.id)
-        connection_status_query = f'select connection_status from agent where id={numeric_id} limit 1'
-        result = wdb.get_query_result(connection_status_query)
-        if type(result) is list and len(result) > 0:
-            result = result[0]
+        result = wdb.query_wdb(f"global get-agent-info {self.id}")
+
+        if len(result) > 0:
+            result = result[0]['connection_status']
         else:
             result = "Not in global.db"
         return result
 
-    @retry(AttributeError, attempts=10, delay=5, delay_multiplier=1)
+
+    @retry(AttributeError, attempts=10, delay=2, delay_multiplier=1)
     def wait_status_active(self):
         status = self.get_connection_status()
         if status == 'active':
