@@ -39,9 +39,14 @@ def send_request(msg_request, response_size=100):
     return response
 
 
-def send_ar_message(ar_command):
+def send_active_response_message(active_response_command):
+    """ Send active response messsage to /var/ossec/queue/alerts/ar socket.
+
+    Args:
+        active_response_command (str): Active response message.
+    """
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
 
     sock.connect(ACTIVE_RESPONSE_SOCKET_PATH)
-    sock.send(f"{ar_command}".encode())
+    sock.send(f"{active_response_command}".encode())
     sock.close()

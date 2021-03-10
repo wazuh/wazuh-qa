@@ -38,7 +38,7 @@ The following message is written in active response socket (`/var/ossec/queue/al
 
 |Tier | Number of tests | Time spent |
 |:--:|:--:|:--:|
-| 0 | 8 | 4m 16s |
+| 0 | 8 | 1m 5.7s |
 
 ## Expected behavior
 

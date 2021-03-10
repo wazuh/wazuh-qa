@@ -9,7 +9,7 @@ import time
 import wazuh_testing.remote as remote
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.sockets import send_ar_message
+from wazuh_testing.tools.sockets import send_active_response_message
 from wazuh_testing import UDP, TCP, TCP_UDP
 
 # Marks
@@ -72,16 +72,16 @@ def test_active_response_ar_sending(get_configuration, configure_environment, re
             injector.run()
             agent.wait_status_active()
 
-            ar_message = f"(local_source) [] NRN {agent.id} dummy-ar admin 1.1.1.1 1.1 44 (any-agent) " \
+            active_response_message = f"(local_source) [] NRN {agent.id} dummy-ar admin 1.1.1.1 1.1 44 (any-agent) " \
                          "any->/testing/testing.txt - -"
 
-            send_ar_message(ar_message)
+            send_active_response_message(active_response_message)
 
-            log_callback = remote.callback_active_response_received(ar_message)
+            log_callback = remote.callback_active_response_received(active_response_message)
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                     error_message='The expected event has not been found in ossec.log')
 
-            log_callback = remote.callback_active_response_sent(ar_message)
+            log_callback = remote.callback_active_response_sent(active_response_message)
 
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                     error_message='The expected event has not been found in ossec.log')
