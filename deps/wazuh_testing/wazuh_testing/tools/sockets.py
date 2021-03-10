@@ -4,7 +4,7 @@
 import socket
 import struct
 from os import path
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_ACTIVE_RESPONSE_SOCKET_PATH
+from wazuh_testing.tools import WAZUH_PATH, ACTIVE_RESPONSE_SOCKET_PATH
 from wazuh_testing.tools.utils import retry
 
 request_socket = path.join(WAZUH_PATH, 'queue', 'sockets', 'request')
@@ -42,6 +42,6 @@ def send_request(msg_request, response_size=100):
 def send_ar_message(ar_command):
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
 
-    sock.connect(WAZUH_ACTIVE_RESPONSE_SOCKET_PATH)
+    sock.connect(ACTIVE_RESPONSE_SOCKET_PATH)
     sock.send(f"{ar_command}".encode())
     sock.close()
