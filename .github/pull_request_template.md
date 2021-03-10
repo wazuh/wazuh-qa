@@ -35,6 +35,7 @@ Paste here related logs and alerts
 <!--
 Important: Don't remove these checks if your PR modifies Python code.
 -->
-- [ ] Python codebase satisfies PEP-8 style style guide. `pycodestyle --max-line-length=120 --show-source --show-pep8 file.py`
+- [ ] Python codebase satisfies PEP-8 style style guide. `pycodestyle --max-line-length=120 --show-source --show-pep8 file.py`.
 - [ ] Python codebase is documented following the Google Style for Python docstrings.
-- [ ] The test is documented in wazuh-qa/docs
+- [ ] The test is documented in wazuh-qa/docs.
+- [ ] `provision_documentation.sh` generate the docs without errors.
