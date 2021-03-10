@@ -4,9 +4,14 @@
 import functools
 import sqlite3
 import logging
+import socket
+import struct
+import json
 
-from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools import WAZUH_PATH, WDB_SOCKET_PATH
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.monitoring import wazuh_unpack
+
 
 GLOBAL_DB_PATH = f"{WAZUH_PATH}/queue/db/global.db"
 
@@ -122,3 +127,38 @@ def get_query_result(query, db_path=GLOBAL_DB_PATH):
     finally:
         cursor.close()
         db.close()
+
+
+def query_wdb(command):
+    """ Make queries to wazuh-db using the wdb socket.
+
+    Args:
+        command (str): wazuh-db command alias. For example `global get-agent-info 000`.
+
+    Returns:
+        list: Query response data
+    """
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sock.connect(WDB_SOCKET_PATH)
+
+    length = struct.pack('<I', len(command))
+    data = []
+
+    try:
+        sock.send(length + command.encode())
+
+        rcv = sock.recv(4)
+
+        if len(rcv) == 4:
+            data_len = wazuh_unpack(rcv)
+
+            data = sock.recv(data_len).decode()
+
+            # Remove response header and cast str to list of dictionaries
+            # From --> 'ok [ {data1}, {data2}...]' To--> [ {data1}, data2}...]
+            if len(data.split(' ')) > 1:
+                data = json.loads(' '.join(data.split(' ')[1:]))
+    finally:
+        sock.close()
+
+    return data
