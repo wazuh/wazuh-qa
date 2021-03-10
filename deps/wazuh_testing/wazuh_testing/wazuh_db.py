@@ -2,15 +2,14 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import functools
-import sqlite3
+import json
 import logging
 import socket
-import struct
-import json
+import sqlite3
 
 from wazuh_testing.tools import WAZUH_PATH, WDB_SOCKET_PATH
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.monitoring import wazuh_unpack
+from wazuh_testing.tools.monitoring import wazuh_pack, wazuh_unpack
 
 
 GLOBAL_DB_PATH = f"{WAZUH_PATH}/queue/db/global.db"
@@ -130,7 +129,7 @@ def get_query_result(query, db_path=GLOBAL_DB_PATH):
 
 
 def query_wdb(command):
-    """ Make queries to wazuh-db using the wdb socket.
+    """Make queries to wazuh-db using the wdb socket.
 
     Args:
         command (str): wazuh-db command alias. For example `global get-agent-info 000`.
@@ -141,11 +140,10 @@ def query_wdb(command):
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     sock.connect(WDB_SOCKET_PATH)
 
-    length = struct.pack('<I', len(command))
     data = []
 
     try:
-        sock.send(length + command.encode())
+        sock.send(wazuh_pack(len(command)) + command.encode())
 
         rcv = sock.recv(4)
 
