@@ -53,7 +53,7 @@ def test_active_response_ar_sending(get_configuration, configure_environment, re
     Raises:
         AssertionError: if `wazuh-remoted` does not send active response command or some of debug messages.
     """
-    protocol_array = (get_configuration['metadata']['protocol']).split(",")
+    protocol_array = (get_configuration['metadata']['protocol']).split(',')
     for protocol in protocol_array:
         # rcv_msg_limit of 1000 is necessary for UDP test
         agent = ag.Agent(manager_address, 'aes', os='debian8', version='4.2.0',
