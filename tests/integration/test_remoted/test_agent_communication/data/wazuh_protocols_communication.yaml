@@ -1,9 +1,7 @@
 - tags:
   - test_protocols_communication
-  - test_agents_switching_protocols
   apply_to_modules:
   - test_protocols_communication
-  - test_agents_switching_protocols
   sections:
   - section: remote
     elements:
