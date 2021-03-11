@@ -709,7 +709,7 @@ Check links:
 ## Opened issues:
 ### General
 - [ ] Daylight saving induced false positives: https://github.com/wazuh/wazuh/issues/4167
-- [ ] Syscheck frequency values under 10 seconds behaviour: https://github.com/wazuh/wazuh/issues/4003
+- [ ] Syscheck frequency values under 10 seconds behavior: https://github.com/wazuh/wazuh/issues/4003
 - [ ] Information message number 6022 can flood the Windows agent log file: https://github.com/wazuh/wazuh/issues/3998
 - [ ] Simple and sregex syscheck <registry_ignore> stanzas are incompatible: https://github.com/wazuh/wazuh/issues/3990 (When combining <registry_ignore> and <registry_ignore type="sregex"> stanzas, only the non-sregex ones will be taken into account at the registry ignore process.)
 - [ ] Different behavior in configuration while monitoring a drive in whodata and realtime: https://github.com/wazuh/wazuh/issues/3934

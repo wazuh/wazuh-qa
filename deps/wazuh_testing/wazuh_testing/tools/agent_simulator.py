@@ -1157,8 +1157,8 @@ def create_agents(agents_number, manager_address, cypher, fim_eps=None, authd_pa
     return agents
 
 
-def connect(agent,  manager_address='localhost', protocol=TCP):
-    sender = Sender(manager_address, protocol=protocol)
+def connect(agent,  manager_address='localhost', protocol=TCP, manager_port='1514'):
+    sender = Sender(manager_address, protocol=protocol, manager_port=manager_port)
     injector = Injector(sender, agent)
     injector.run()
     agent.wait_status_active()
