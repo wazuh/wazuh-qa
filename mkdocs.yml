@@ -413,6 +413,7 @@ nav:
                 - Test configuration syslog no allowed ips provided: tests/integration/test_remoted/test_configuration/test_basic_configuration_syslog_no_allowed_ips.md
             - Test manager messages:
                 - tests/integration/test_remoted/test_manager_messages/test_manager_ack.md
+            - Test active response: tests/integration/test_remoted/test_active_response/test_active_response_ar_sending.md
             - Test communications through the sockets:
                 - tests/integration/test_remoted/test_socket_communication/test_ping_pong_message.md
                 - tests/integration/test_remoted/test_socket_communication/test_syslog_message.md

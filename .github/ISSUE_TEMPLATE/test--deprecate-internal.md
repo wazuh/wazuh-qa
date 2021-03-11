@@ -330,7 +330,7 @@ Also, remember to active all needed modules (like `mail`, `cluster` or `integrat
 
 **Test**
 - [ ] No configuration error thrown by any option.
-- [ ] Check the values are correct. It can be tested checking the on demand configuration and/or the expected behaviour of every option. The on demand configuration is also defined in the Wazuh documentation.
+- [ ] Check the values are correct. It can be tested checking the on demand configuration and/or the expected behavior of every option. The on demand configuration is also defined in the Wazuh documentation.
 
 ## INT003
 

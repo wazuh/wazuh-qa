@@ -1,0 +1,14 @@
+- tags:
+  - test_active_response_send_ar
+  apply_to_modules:
+  - test_active_response_send_ar
+  sections:
+  - section: remote
+    elements:
+    - connection:
+        value: secure
+    - port:
+        value: PORT
+    - protocol:
+        value: PROTOCOL
+

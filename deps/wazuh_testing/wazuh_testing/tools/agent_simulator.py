@@ -1155,8 +1155,16 @@ def create_agents(agents_number, manager_address, cypher='aes', fim_eps=None, au
     return agents
 
 
-def connect(agent,  manager_address='localhost', protocol=TCP, port=1514):
-    sender = Sender(manager_address, protocol=protocol, manager_port=port)
+def connect(agent,  manager_address='localhost', protocol=TCP, manager_port='1514'):
+    """Connects an agent to the manager
+    
+    Args:
+        agent (Agent): agent to connect.
+        manager_address (str): address of the manager. It can be an IP or a DNS.
+        protocol (str): protocol used to connect with the manager. Defaults to 'TCP'.
+        manager_port (str): port used to connect with the manager. Defaults to '1514'.
+    """
+    sender = Sender(manager_address, protocol=protocol, manager_port=manager_port)
     injector = Injector(sender, agent)
     injector.run()
     agent.wait_status_active()
