@@ -80,8 +80,7 @@ def test_active_response_ar_sending(get_configuration, configure_environment, re
             injector.run()
             agent.wait_status_active()
 
-            active_response_message = f"(local_source) [] NRN {agent.id} dummy-ar admin 1.1.1.1 1.1 44 (any-agent) " \
-                         "any->/testing/testing.txt - -"
+            active_response_message = f"(local_source) [] NRN {agent.id} {remote.ACTIVE_RESPONSE_EXAMPLE_COMMAND}"
 
             send_active_response_message(active_response_message)
 
@@ -94,7 +93,7 @@ def test_active_response_ar_sending(get_configuration, configure_environment, re
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                     error_message='The expected event has not been found in ossec.log')
 
-            remote.check_agent_received_message(agent.rcv_msg_queue, remote.ACTIVE_RESPONSE_EXECD_EXAMPLE_COMMAND,
+            remote.check_agent_received_message(agent.rcv_msg_queue, f"#!-execd {remote.ACTIVE_RESPONSE_EXAMPLE_COMMAND}",
                                                                      escape=True)
         finally:
             injector.stop_receive()
