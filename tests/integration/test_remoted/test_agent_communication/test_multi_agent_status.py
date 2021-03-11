@@ -64,12 +64,7 @@ def check_active_agents(num_agents=1, manager_address='127.0.0.1', agent_version
         AttributeError: If the agent status is not active.
     """
     def send_initialization_events(agent, sender):
-        """Auxiliary function for sending start-up and keep-alive messages
-
-        Args:
-            agent (Agent): Agent that sends the events.
-            sender (Sender): Sender object to send the agent events.
-        """
+        """Auxiliary function for sending start-up and keep-alive messages"""
         try:
             sender.send_event(agent.startup_msg)
             # Wait 1 second between start-up message and keep_alive

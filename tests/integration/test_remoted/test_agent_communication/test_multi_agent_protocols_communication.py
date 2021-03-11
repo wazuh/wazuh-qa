@@ -1,9 +1,10 @@
-import pytest
 import os
+import pytest
 
 import wazuh_testing.tools.agent_simulator as ag
 
 from time import sleep
+
 from wazuh_testing.tools.thread_executor import ThreadExecutor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing import remote as rd
@@ -50,9 +51,19 @@ configuration_ids = [f"{item['PROTOCOL'].upper()}_{item['PORT']}" for item in pa
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
 
-def validate_agent_manager_protocol_communication(manager_port, protocol, num_agents=2):
+def validate_agent_manager_protocol_communication(num_agents=2, manager_port=1514, protocol=TCP):
+    """Check the communication between the manager and several agents using different protocols and ports.
 
+    Args:
+        num_agents (int): Number of agents to send events and to validate the communication.
+        manager_port (int): Manager remote communication port.
+        protocol (str): It can be TCP, UDP or TCP_UDP (both).
+
+    Raises:
+        TimeoutError: If the event has not been found in the queue socket after the agents have been sent.
+    """
     def send_event(event, protocol, manager_port):
+        """Auxiliary function for sending an event to the manager"""
         sender = ag.Sender(agent_info['manager_address'], protocol=protocol, manager_port=manager_port)
 
         try:
@@ -65,7 +76,7 @@ def validate_agent_manager_protocol_communication(manager_port, protocol, num_ag
 
     # Create num_agents (parameter) agents
     agents = ag.create_agents(agents_number=num_agents, manager_address=agent_info['manager_address'],
-                              agents_version=agent_info['version'],agents_os= agent_info['os'],
+                              agents_version=agent_info['version'], agents_os=agent_info['os'],
                               disable_all_modules=agent_info['disable_all_modules'])
 
     for idx, agent in enumerate(agents):
@@ -112,8 +123,8 @@ def get_configuration(request):
 
 
 def test_multi_agents_protocols_communication(get_configuration, configure_environment, restart_remoted):
-    """Validate agent-manager communication using different protocols and ports"""
+    """Validate agent-manager communication with several agents using different protocols and ports"""
     manager_port = get_configuration['metadata']['port']
     protocol = get_configuration['metadata']['protocol']
 
-    validate_agent_manager_protocol_communication(manager_port, protocol)
+    validate_agent_manager_protocol_communication(manager_port=manager_port, protocol=protocol)
