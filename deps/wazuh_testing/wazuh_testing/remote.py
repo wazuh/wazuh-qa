@@ -16,11 +16,12 @@ from wazuh_testing import remote as rd
 from wazuh_testing.tools import ARCHIVES_LOG_FILE_PATH, LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools import QUEUE_SOCKETS_PATH
 from wazuh_testing.tools import WAZUH_CONF
+from wazuh_testing.tools.thread_executor import ThreadExecutor
+from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools import file
 from wazuh_testing.tools import monitoring
 from wazuh_testing.tools.services import control_service
 
-from deps.wazuh_testing.wazuh_testing.tools.monitoring import FileMonitor
 
 REMOTED_GLOBAL_TIMEOUT = 10
 EXAMPLE_MESSAGE_EVENT = '1:/root/test.log:Feb 23 17:18:20 35-u20-manager4 sshd[40657]: Accepted publickey for root' \
@@ -670,20 +671,45 @@ def check_push_shared_config(protocol, agent, sender):
 
 def check_active_agents(num_agents=1, manager_address='127.0.0.1', agent_version='4.2.0', agent_os='debian7',
                         manager_port=1514):
-    # Create num_agents (parameter) agents
-    agents = ag.create_agents(agents_number=num_agents, manager_address=manager_address, agents_version=agent_version,
-                              agents_os=agent_os, disable_all_modules=True)
+    def send_initialization_events(agent, sender):
+        try:
+            sender.send_event(agent.startup_msg)
+            # Wait 1 second between start-up message and keep_alive
+            time.sleep(1)
+            sender.send_event(agent.keep_alive_event)
+            # Wait 1 seconds to ensure that the message has ben sent before closing the socket.
+            time.sleep(1)
+        finally:
+            sender.socket.close()
 
+
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+
+    # Create num_agents (parameter) agents
+    agents = ag.create_agents(agents_number=num_agents, manager_address=manager_address, disable_all_modules=True,
+                              agents_version=[agent_version]*num_agents, agents_os=[agent_os]*num_agents)
+    send_event_threads = []
+
+    # Wait until remoted has loaded the new agent key
+    rd.wait_to_remoted_key_update(wazuh_log_monitor)
+
+    # Create sender threads. One for each agent
     for idx, agent in enumerate(agents):
         # Round robin to select the protocol
         protocol = TCP if idx % 2 == 0 else UDP
 
-        sender = ag.Sender(manager_address, protocol=protocol, manager_port=manager_port)
+        sender = ag.Sender(manager_address, manager_port, protocol)
 
-        try:
-            sender.send_event(agent.create_keep_alive)
-        finally:
-            sender.socket.close()
+        send_event_threads.append(ThreadExecutor(send_initialization_events, {'agent': agent, 'sender': sender}))
 
+    # Run sender threads
+    for thread in send_event_threads:
+        thread.start()
+
+    # Wait until sender threads finish
+    for thread in send_event_threads:
+        thread.join()
+
+    # Check agent active status for earch agent
     for agent in agents:
         agent.wait_status_active()
