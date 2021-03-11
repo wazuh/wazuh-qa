@@ -1,7 +1,6 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-import logging
 import os
 import re
 import socket
@@ -12,11 +11,9 @@ import pytest
 import wazuh_testing.api as api
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing import UDP, TCP
-from wazuh_testing import remote as rd
 from wazuh_testing.tools import ARCHIVES_LOG_FILE_PATH, LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools import QUEUE_SOCKETS_PATH
 from wazuh_testing.tools import WAZUH_CONF
-from wazuh_testing.tools.thread_executor import ThreadExecutor
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools import file
 from wazuh_testing.tools import monitoring
@@ -632,28 +629,28 @@ def check_push_shared_config(protocol, agent, sender):
         wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
         # Wait until remoted has loaded the new agent key
-        rd.wait_to_remoted_key_update(wazuh_log_monitor)
+        wait_to_remoted_key_update(wazuh_log_monitor)
 
         # Send the start-up message
         sender.send_event(agent.startup_msg)
         sender.send_event(agent.keep_alive_event)
 
         # Check up file (push start) message
-        rd.check_agent_received_message(agent.rcv_msg_queue, r'#!-up file \w+ merged.mg', timeout=10,
+        check_agent_received_message(agent.rcv_msg_queue, r'#!-up file \w+ merged.mg', timeout=10,
                                         error_message="initial up file message not received")
 
         # Check agent.conf message
-        rd.check_agent_received_message(agent.rcv_msg_queue, '#default', timeout=10,
+        check_agent_received_message(agent.rcv_msg_queue, '#default', timeout=10,
                                         error_message="agent.conf message not received")
         # Check close file (push end) message
-        rd.check_agent_received_message(agent.rcv_msg_queue, 'close', timeout=10,
+        check_agent_received_message(agent.rcv_msg_queue, 'close', timeout=10,
                                         error_message="initial close message not received")
 
         sender.send_event(agent.keep_alive_event)
 
         # Check that push message doesn't appear again
         with pytest.raises(TimeoutError):
-            rd.check_agent_received_message(agent.rcv_msg_queue, r'#!-up file \w+ merged.mg', timeout=5)
+            check_agent_received_message(agent.rcv_msg_queue, r'#!-up file \w+ merged.mg', timeout=5)
             raise AssertionError("Same shared configuration pushed twice!")
 
         # Add agent to group and check if the configuration is pushed.
@@ -664,54 +661,8 @@ def check_push_shared_config(protocol, agent, sender):
             sender.send_event(agent.keep_alive_event)
             time.sleep(1)
 
-        rd.check_agent_received_message(agent.rcv_msg_queue, '#!-up file .* merged.mg', timeout=10,
-                                        error_message="New group shared config not received")
+        check_agent_received_message(agent.rcv_msg_queue, '#!-up file .* merged.mg', timeout=10,
+                                     error_message="New group shared config not received")
 
     finally:
         injector.stop_receive()
-
-
-def check_active_agents(num_agents=1, manager_address='127.0.0.1', agent_version='4.2.0', agent_os='debian7',
-                        manager_port=1514):
-    def send_initialization_events(agent, sender):
-        try:
-            sender.send_event(agent.startup_msg)
-            # Wait 1 second between start-up message and keep_alive
-            time.sleep(1)
-            sender.send_event(agent.keep_alive_event)
-            # Wait 1 seconds to ensure that the message has ben sent before closing the socket.
-            time.sleep(1)
-        finally:
-            sender.socket.close()
-
-
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
-    # Create num_agents (parameter) agents
-    agents = ag.create_agents(agents_number=num_agents, manager_address=manager_address, disable_all_modules=True,
-                              agents_version=[agent_version]*num_agents, agents_os=[agent_os]*num_agents)
-    send_event_threads = []
-
-    # Wait until remoted has loaded the new agent key
-    rd.wait_to_remoted_key_update(wazuh_log_monitor)
-
-    # Create sender threads. One for each agent
-    for idx, agent in enumerate(agents):
-        # Round robin to select the protocol
-        protocol = TCP if idx % 2 == 0 else UDP
-
-        sender = ag.Sender(manager_address, manager_port, protocol)
-
-        send_event_threads.append(ThreadExecutor(send_initialization_events, {'agent': agent, 'sender': sender}))
-
-    # Run sender threads
-    for thread in send_event_threads:
-        thread.start()
-
-    # Wait until sender threads finish
-    for thread in send_event_threads:
-        thread.join()
-
-    # Check agent active status for earch agent
-    for agent in agents:
-        agent.wait_status_active()
