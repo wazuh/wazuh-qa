@@ -8,9 +8,9 @@ import time
 
 import wazuh_testing.remote as remote
 import wazuh_testing.tools.agent_simulator as ag
+from wazuh_testing import UDP, TCP, TCP_UDP
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.sockets import send_active_response_message
-from wazuh_testing import UDP, TCP, TCP_UDP
 
 # Marks
 pytestmark = pytest.mark.tier(level=1)
@@ -22,13 +22,19 @@ configurations_path = os.path.join(test_data_path, 'wazuh_test_active_response.y
 parameters = [
     {'PROTOCOL': TCP, 'PORT': '1514'},
     {'PROTOCOL': UDP, 'PORT': '1514'},
-    {'PROTOCOL': TCP_UDP, 'PORT': '1514'}
+    {'PROTOCOL': TCP_UDP, 'PORT': '1514'},
+    {'PROTOCOL': TCP, 'PORT': '4565'},
+    {'PROTOCOL': UDP, 'PORT': '4565'},
+    {'PROTOCOL': TCP_UDP, 'PORT': '4565'}
 
 ]
 metadata = [
     {'protocol': TCP, 'port': '1514'},
     {'protocol': UDP, 'port': '1514'},
-    {'protocol': TCP_UDP, 'port': '1514'}
+    {'protocol': TCP_UDP, 'port': '1514'},
+    {'protocol': TCP, 'port': '4565'},
+    {'protocol': UDP, 'port': '4565'},
+    {'protocol': TCP_UDP, 'port': '4565'}
 ]
 
 configurations = load_wazuh_configurations(configurations_path, __name__ ,
@@ -45,13 +51,13 @@ def get_configuration(request):
 
 
 def test_active_response_ar_sending(get_configuration, configure_environment, restart_remoted):
-    """Test if `wazuh-remoted` sends active response commands.
+    """Test if `wazuh-remoted` sends active response commands to the agent.
 
-    Check if execd sends active response command to remoted module and agent receives an active command
-    message from the manager.
+    Check if execd sends active response command to the remoted module in the manager. Then, it ensures that the agent receives 
+    the active command message from the manager.
 
     Raises:
-        AssertionError: if `wazuh-remoted` does not send active response command or some of debug messages.
+        AssertionError: if `wazuh-remoted` does not send the active response command to the agent.
     """
     protocol_array = (get_configuration['metadata']['protocol']).split(',')
     for protocol in protocol_array:
@@ -86,8 +92,7 @@ def test_active_response_ar_sending(get_configuration, configure_environment, re
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                     error_message='The expected event has not been found in ossec.log')
 
-            remote.check_agent_received_message(agent.rcv_msg_queue, f'#!-execd dummy-ar admin 1.1.1.1 1.1 44 '
-                                                                     f'(any-agent) any->/testing/testing.txt - -',
+            remote.check_agent_received_message(agent.rcv_msg_queue, remote.ACTIVE_RESPONSE_DUMMY_COMMAND,
                                                                      escape=True)
         finally:
             injector.stop_receive()
