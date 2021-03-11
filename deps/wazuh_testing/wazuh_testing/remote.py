@@ -154,8 +154,8 @@ def callback_warning_syslog_tcp_udp():
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"WARNING: (\d+): Only secure connection supports TCP and UDP at the same time. \
-    Default value (TCP) will be used."
+    msg = r"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time. " \
+          r"Default value \(TCP\) will be used."
 
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
