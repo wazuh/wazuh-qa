@@ -28,6 +28,7 @@ EXAMPLE_INVALID_USER_LOG_EVENT = 'Feb  4 16:39:29 ip-10-142-167-43 sshd[6787]: '
 EXAMPLE_VALID_USER_LOG_EVENT = '2021-03-04T02:16:16.998693-05:00 centos-8 su - - [timeQuality tzKnown="1" ' \
                                'isSynced="0"] pam_unix(su:session): session opened for user wazuh_qa by (uid=0)'
 EXAMPLE_MESSAGE_PATTERN = 'Accepted publickey for root from 192.168.0.5 port 48044'
+ACTIVE_RESPONSE_EXAMPLE_COMMAND = 'dummy-ar admin 1.1.1.1 1.1 44 (any-agent) any->/testing/testing.txt - -'
 QUEUE_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'queue')
 
 DEFAULT_TESTING_GROUP_NAME = 'testing_group'
@@ -266,6 +267,16 @@ def get_protocols(all_protocols):
         else:
             invalid_protocols.append(protocol)
     return [valid_protocols, invalid_protocols]
+
+
+def callback_active_response_received(ar_message):
+    msg = fr"DEBUG: Active response request received: {ar_message}"
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX, escape=True)
+
+
+def callback_active_response_sent(ar_message):
+    msg = fr"DEBUG: Active response sent: #!-execd {ar_message[26:]}"
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX, escape=True)
 
 
 def callback_detect_remoted_started(port, protocol, connection_type="secure"):
@@ -581,7 +592,8 @@ def check_queue_socket_event(raw_events=EXAMPLE_MESSAGE_PATTERN, timeout=30, upd
         control_service('start', daemon='wazuh-analysisd')
 
 
-def check_agent_received_message(message_queue, search_pattern, timeout=5, update_position=True, error_message=''):
+def check_agent_received_message(message_queue, search_pattern, timeout=5, update_position=True, error_message='',
+                                 escape=False):
     """Allow to monitor the agent received messages to search a pattern regex.
 
     Args:
@@ -591,6 +603,7 @@ def check_agent_received_message(message_queue, search_pattern, timeout=5, updat
         update_position (boolean): True to search in the entire queue, False to search in the current position of the
                                    queue.
         error_message (string): Message to explain the exception.
+        escape (bool): Flag to escape special characters in the pattern
 
     Raises:
         TimeoutError: if search pattern is not found in agent received messages queue in the expected time.
@@ -598,7 +611,7 @@ def check_agent_received_message(message_queue, search_pattern, timeout=5, updat
     """
     queue_monitor = monitoring.QueueMonitor(message_queue)
 
-    queue_monitor.start(timeout=timeout, callback=monitoring.make_callback(search_pattern, '.*'),
+    queue_monitor.start(timeout=timeout, callback=monitoring.make_callback(search_pattern, '.*', escape),
                         update_position=update_position, error_message=error_message)
 
 
