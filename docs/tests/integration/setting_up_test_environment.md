@@ -30,13 +30,13 @@ systemctl stop firewalld
 systemctl disable firewalld
 ```
 
-- Install Python and development tools
+- Install Python and the development tools
 
 ```
 # Install dependencies
 yum install make gcc policycoreutils-python-utils automake autoconf libtool epel-release git which sudo wget -y
 
-# Install development dependencies for jq library
+# Install the development dependencies for jq library
 yum groupinstall "Development Tools" -y
 
 # Install Python3
@@ -62,13 +62,13 @@ echo 'monitord.rotate_log=0' >> $wazuh_path/etc/local_internal_options.conf
 /var/ossec/bin/ossec-control restart
 ```
 
-- Download wazuh-qa repository , install requirements and package dependencies.
+- Download wazuh-qa repository, install the requirements and the package dependencies..
 
 ```
 # Download wazuh-qa repository
 git clone https://github.com/wazuh/wazuh-qa.git
 
-# Install requirements
+# Install the requirements
 python3 -m pip install -r wazuh-qa/requirements.txt
 
 # Install wazuh_testing package
@@ -116,7 +116,7 @@ echo 'monitord.rotate_log=0' >> "C:\Program Files (x86)\ossec-agent\local_intern
 
 - Restart **Wazuh** using the GUI
 
-- Download wazuh-qa repository , install requirements and package dependencies.
+- Download wazuh-qa repository, install the requirements and the package dependencies.
 
 ```
 # Download wazuh-qa repository
@@ -137,7 +137,7 @@ python3 wazuh-qa/deps/wazuh_testing/setup.py install
 
 - Disable all components in `ossec.conf`
 
-- Install Python and its development tools
+- Install Python and the development tools
 
 ```
 # Install Python
@@ -169,7 +169,7 @@ echo 'monitord.rotate_log=0' >> /Library/Ossec/etc/local_internal_options.conf
 /Library/Ossec/bin/ossec-control restart
 ```
 
-- Download wazuh-qa repository, install requirements and package dependencies.
+- Download wazuh-qa repository, install the requirements and the package dependencies..
 
 ```
 # Download wazuh-qa repository

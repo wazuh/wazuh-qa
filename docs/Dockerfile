@@ -1,6 +1,6 @@
 FROM python
 
-COPY ../../requirements.txt /
+COPY ../requirements.txt /
 COPY ./run-documentation.sh /usr/bin
 
 RUN pip install mkdocs mkdocstrings mkdocs-material
