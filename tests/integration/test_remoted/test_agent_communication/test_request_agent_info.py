@@ -65,6 +65,8 @@ def test_request(get_configuration, configure_environment, restart_remoted, comm
     protocols = cfg['PROTOCOL'].split(',')
 
     agents = [ag.Agent(manager_address, "aes", os="debian8", version="4.2.0") for _ in range(len(protocols))]
+
+
     for agn, protocol in zip(agents, protocols):
         if "disconnected" not in command_request:
             agent, sender, injector = ag.connect(agn, manager_address, protocol)
