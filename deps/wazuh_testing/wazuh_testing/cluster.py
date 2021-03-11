@@ -147,7 +147,7 @@ def _cluster_message_decompose(data: bytes):
 
 def master_simulator(data: bytes):
     """
-    Handler to simulate a wazuh master node behaviour.
+    Handler to simulate a wazuh master node behavior.
 
     Args:
         data (bytes): received data to handle
