@@ -94,7 +94,7 @@ def test_active_response_ar_sending(get_configuration, configure_environment, re
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                     error_message='The expected event has not been found in ossec.log')
 
-            remote.check_agent_received_message(agent.rcv_msg_queue, remote.ACTIVE_RESPONSE_DUMMY_COMMAND,
+            remote.check_agent_received_message(agent.rcv_msg_queue, remote.ACTIVE_RESPONSE_EXECD_EXAMPLE_COMMAND,
                                                                      escape=True)
         finally:
             injector.stop_receive()

@@ -30,7 +30,7 @@ EXAMPLE_INVALID_USER_LOG_EVENT = 'Feb  4 16:39:29 ip-10-142-167-43 sshd[6787]: '
 EXAMPLE_VALID_USER_LOG_EVENT = '2021-03-04T02:16:16.998693-05:00 centos-8 su - - [timeQuality tzKnown="1" ' \
                                'isSynced="0"] pam_unix(su:session): session opened for user wazuh_qa by (uid=0)'
 EXAMPLE_MESSAGE_PATTERN = 'Accepted publickey for root from 192.168.0.5 port 48044'
-ACTIVE_RESPONSE_DUMMY_COMMAND = '#!-execd dummy-ar admin 1.1.1.1 1.1 44 (any-agent) any->/testing/testing.txt - -'
+ACTIVE_RESPONSE_EXECD_EXAMPLE_COMMAND = '#!-execd dummy-ar admin 1.1.1.1 1.1 44 (any-agent) any->/testing/testing.txt - -'
 QUEUE_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'queue')
 
 DEFAULT_TESTING_GROUP_NAME = 'testing_group'
