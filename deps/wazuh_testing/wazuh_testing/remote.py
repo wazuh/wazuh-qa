@@ -546,11 +546,11 @@ def check_queue_socket_event(raw_events=EXAMPLE_MESSAGE_PATTERN, timeout=30, upd
     """Allow searching for an expected event in the queue socket.
 
     Args:
-        raw_event (str or list<str>): Pattern/s regex to be found in the socket.
+        raw_events (str or list<str>): Pattern/s regex to be found in the socket.
         timeout (int): Maximum search time of the event in the socket. Default is 30 to allow enough time for the
                        other thread to send messages.
         update_position (boolean): True to search in the entire queue, False to search in the current position of the
-                            queue.
+                                   queue.
 
     Raises:
         TimeoutError: if could not find the pattern regex event in the queue socket.
@@ -562,9 +562,8 @@ def check_queue_socket_event(raw_events=EXAMPLE_MESSAGE_PATTERN, timeout=30, upd
 
     error_message = 'Could not find the expected event in queue socket'
 
-    # Cast str to str list
-    if isinstance(raw_events, str):
-        raw_events = [raw_events]
+    # Get the event list
+    event_list = [raw_events] if isinstance(raw_events, str) else raw_events
 
     # Stop analysisd daemon to free the socket. Important note: control_service(stop) deletes the daemon sockets.
     control_service('stop', daemon='wazuh-analysisd')
@@ -582,7 +581,7 @@ def check_queue_socket_event(raw_events=EXAMPLE_MESSAGE_PATTERN, timeout=30, upd
 
     try:
         # Start socket monitoring
-        for event in raw_events:
+        for event in event_list:
             socket_monitor.start(timeout=timeout, callback=monitoring.make_callback(event, '.*'),
                                  error_message=error_message, update_position=update_position)
     finally:
