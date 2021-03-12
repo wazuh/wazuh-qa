@@ -18,5 +18,4 @@ pyyaml==5.3
 requests==2.23.0
 testinfra==5.0.0
 jq==0.1.6; platform_system == "Linux" or platform_system == "MacOS"
-pypiwin32==223; platform_system == "Windows"
-pywin32==300; platform_system == "Windows"
+cryptography; platform_system == "Windows"
