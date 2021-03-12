@@ -1,7 +1,6 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-import logging
 import os
 import re
 import socket
@@ -11,16 +10,13 @@ import time
 import pytest
 import wazuh_testing.api as api
 import wazuh_testing.tools.agent_simulator as ag
-from wazuh_testing import UDP, TCP
-from wazuh_testing import remote as rd
-from wazuh_testing.tools import ARCHIVES_LOG_FILE_PATH, LOG_FILE_PATH, WAZUH_PATH
-from wazuh_testing.tools import QUEUE_SOCKETS_PATH
-from wazuh_testing.tools import WAZUH_CONF
+import wazuh_testing.tools as tools
+from wazuh_testing import UDP, TCP, TCP_UDP
+from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools import file
 from wazuh_testing.tools import monitoring
 from wazuh_testing.tools.services import control_service
 
-from wazuh_testing.tools.monitoring import FileMonitor
 
 REMOTED_GLOBAL_TIMEOUT = 10
 EXAMPLE_MESSAGE_EVENT = '1:/root/test.log:Feb 23 17:18:20 35-u20-manager4 sshd[40657]: Accepted publickey for root' \
@@ -31,7 +27,7 @@ EXAMPLE_VALID_USER_LOG_EVENT = '2021-03-04T02:16:16.998693-05:00 centos-8 su - -
                                'isSynced="0"] pam_unix(su:session): session opened for user wazuh_qa by (uid=0)'
 EXAMPLE_MESSAGE_PATTERN = 'Accepted publickey for root from 192.168.0.5 port 48044'
 ACTIVE_RESPONSE_EXAMPLE_COMMAND = 'dummy-ar admin 1.1.1.1 1.1 44 (any-agent) any->/testing/testing.txt - -'
-QUEUE_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'queue')
+QUEUE_SOCKET_PATH = os.path.join(tools.QUEUE_SOCKETS_PATH, 'queue')
 
 DEFAULT_TESTING_GROUP_NAME = 'testing_group'
 
@@ -41,21 +37,21 @@ data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 def new_agent_group(group_name=DEFAULT_TESTING_GROUP_NAME, configuration_file='agent.conf'):
     """Create a new agent group for testing purpose, must be run only on Managers."""
 
-    sb.run([f"{WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-g", group_name])
+    sb.run([f"{tools.WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-g", group_name])
 
     agent_conf_path = os.path.join(data_path, configuration_file)
 
-    with open(f"{WAZUH_PATH}/etc/shared/{group_name}/agent.conf", "w") as agent_conf_file:
+    with open(f"{tools.WAZUH_PATH}/etc/shared/{group_name}/agent.conf", "w") as agent_conf_file:
         with open(agent_conf_path, 'r') as configuration:
             agent_conf_file.write(configuration.read())
 
 
 def remove_agent_group(group_name):
-    sb.run([f"{WAZUH_PATH}/bin/agent_groups", "-q", "-r", "-g", group_name])
+    sb.run([f"{tools.WAZUH_PATH}/bin/agent_groups", "-q", "-r", "-g", group_name])
 
 
 def add_agent_to_group(group_name, agent_id):
-    sb.run([f"{WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-i", agent_id, "-g", group_name])
+    sb.run([f"{tools.WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-i", agent_id, "-g", group_name])
 
 
 def callback_detect_syslog_allowed_ips(syslog_ips):
@@ -108,7 +104,7 @@ def callback_error_in_configuration(severity):
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"{severity}: \(\d+\): Configuration error at '{WAZUH_CONF}'."
+    msg = fr"{severity}: \(\d+\): Configuration error at '{tools.WAZUH_CONF}'."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
@@ -154,8 +150,8 @@ def callback_warning_syslog_tcp_udp():
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time. \
-          Default value \(TCP\) will be used."
+    msg = r"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time. " \
+          r"Default value \(TCP\) will be used."
 
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
@@ -359,8 +355,8 @@ def create_archives_log_monitor():
         FileMonitor: object to monitor the archives.log.
     """
     # Reset archives.log and start a new monitor
-    file.truncate_file(ARCHIVES_LOG_FILE_PATH)
-    wazuh_archives_log_monitor = monitoring.FileMonitor(ARCHIVES_LOG_FILE_PATH)
+    file.truncate_file(tools.ARCHIVES_LOG_FILE_PATH)
+    wazuh_archives_log_monitor = monitoring.FileMonitor(tools.ARCHIVES_LOG_FILE_PATH)
 
     return wazuh_archives_log_monitor
 
@@ -504,7 +500,7 @@ def wait_to_remoted_key_update(wazuh_log_monitor):
     """
     # We have to make sure that remoted has correctly loaded the client key agent info. The log is truncated to
     # ensure that the information has been loaded after the agent has been registered.
-    file.truncate_file(LOG_FILE_PATH)
+    file.truncate_file(tools.LOG_FILE_PATH)
 
     callback_pattern = '.*rem_keyupdate_main().*Checking for keys file changes.'
     error_message = 'Could not find the remoted key loading log'
@@ -546,13 +542,15 @@ def send_agent_event(wazuh_log_monitor, message=EXAMPLE_MESSAGE_EVENT, protocol=
     return agent, sender
 
 
-def check_queue_socket_event(raw_event=EXAMPLE_MESSAGE_PATTERN, timeout=30):
+def check_queue_socket_event(raw_events=EXAMPLE_MESSAGE_PATTERN, timeout=30, update_position=False):
     """Allow searching for an expected event in the queue socket.
 
     Args:
-        raw_event (str): Pattern regex to be found in the socket.
+        raw_event (str or list<str>): Pattern/s regex to be found in the socket.
         timeout (int): Maximum search time of the event in the socket. Default is 30 to allow enough time for the
                        other thread to send messages.
+        update_position (boolean): True to search in the entire queue, False to search in the current position of the
+                            queue.
 
     Raises:
         TimeoutError: if could not find the pattern regex event in the queue socket.
@@ -563,7 +561,10 @@ def check_queue_socket_event(raw_event=EXAMPLE_MESSAGE_PATTERN, timeout=30):
         return data
 
     error_message = 'Could not find the expected event in queue socket'
-    callback = monitoring.make_callback(raw_event, '.*')
+
+    # Cast str to str list
+    if isinstance(raw_events, str):
+        raw_events = [raw_events]
 
     # Stop analysisd daemon to free the socket. Important note: control_service(stop) deletes the daemon sockets.
     control_service('stop', daemon='wazuh-analysisd')
@@ -581,7 +582,9 @@ def check_queue_socket_event(raw_event=EXAMPLE_MESSAGE_PATTERN, timeout=30):
 
     try:
         # Start socket monitoring
-        socket_monitor.start(timeout=timeout, callback=callback, error_message=error_message, update_position=False)
+        for event in raw_events:
+            socket_monitor.start(timeout=timeout, callback=monitoring.make_callback(event, '.*'),
+                                 error_message=error_message, update_position=update_position)
     finally:
         mitm.shutdown()
         control_service('start', daemon='wazuh-analysisd')
@@ -633,31 +636,31 @@ def check_push_shared_config(agent, sender):
     try:
         injector.run()
 
-        wazuh_log_monitor = monitoring.FileMonitor(LOG_FILE_PATH)
+        wazuh_log_monitor = FileMonitor(tools.LOG_FILE_PATH)
 
         # Wait until remoted has loaded the new agent key
-        rd.wait_to_remoted_key_update(wazuh_log_monitor)
+        wait_to_remoted_key_update(wazuh_log_monitor)
 
         # Send the start-up message
         sender.send_event(agent.startup_msg)
         sender.send_event(agent.keep_alive_event)
 
         # Check up file (push start) message
-        rd.check_agent_received_message(agent.rcv_msg_queue, r'#!-up file \w+ merged.mg', timeout=10,
+        check_agent_received_message(agent.rcv_msg_queue, r'#!-up file \w+ merged.mg', timeout=10,
                                         error_message="initial up file message not received")
 
         # Check agent.conf message
-        rd.check_agent_received_message(agent.rcv_msg_queue, '#default', timeout=10,
+        check_agent_received_message(agent.rcv_msg_queue, '#default', timeout=10,
                                         error_message="agent.conf message not received")
         # Check close file (push end) message
-        rd.check_agent_received_message(agent.rcv_msg_queue, 'close', timeout=10,
+        check_agent_received_message(agent.rcv_msg_queue, 'close', timeout=10,
                                         error_message="initial close message not received")
 
         sender.send_event(agent.keep_alive_event)
 
         # Check that push message doesn't appear again
         with pytest.raises(TimeoutError):
-            rd.check_agent_received_message(agent.rcv_msg_queue, r'#!-up file \w+ merged.mg', timeout=5)
+            check_agent_received_message(agent.rcv_msg_queue, r'#!-up file \w+ merged.mg', timeout=5)
             raise AssertionError("Same shared configuration pushed twice!")
 
         # Add agent to group and check if the configuration is pushed.
@@ -668,8 +671,8 @@ def check_push_shared_config(agent, sender):
             sender.send_event(agent.keep_alive_event)
             time.sleep(1)
 
-        rd.check_agent_received_message(agent.rcv_msg_queue, '#!-up file .* merged.mg', timeout=10,
-                                        error_message="New group shared config not received")
+        check_agent_received_message(agent.rcv_msg_queue, '#!-up file .* merged.mg', timeout=10,
+                                     error_message="New group shared config not received")
 
     finally:
         injector.stop_receive()
