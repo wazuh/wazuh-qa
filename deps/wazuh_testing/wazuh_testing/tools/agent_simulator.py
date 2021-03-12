@@ -95,7 +95,7 @@ class Agent:
         stage_disconnect (str): WPK process state variable.
         rcv_msg_limit (int): max elements for the received message queue.
         rcv_msg_queue (monitoring.Queue): Queue to store received messages in the agent.
-        disable_all_modules (boolean): Disable all simulated modules for this agent
+        disable_all_modules (boolean): Disable all simulated modules for this agent.
     """
     def __init__(self, manager_address, cypher="aes", os=None, inventory_sample=None, rootcheck_sample=None,
                  id=None, name=None, key=None, version="v3.12.0", fim_eps=None, fim_integrity_eps=None,
@@ -1124,8 +1124,8 @@ class InjectorThread(threading.Thread):
             self.stop_thread = 1
 
 
-def create_agents(agents_number, manager_address, cypher, fim_eps=None, authd_password=None, agents_os=None,
-                  agents_version=None):
+def create_agents(agents_number, manager_address, cypher='aes', fim_eps=None, authd_password=None, agents_os=None,
+                  agents_version=None, disable_all_modules=False):
     """Create a list of generic agents
 
     This will create a list with `agents_number` amount of agents. All of them will be registered in the same manager.
@@ -1138,7 +1138,7 @@ def create_agents(agents_number, manager_address, cypher, fim_eps=None, authd_pa
         authd_password (str, optional): password to enroll an agent.
         agents_os (list, optional): list containing different operative systems for the agents.
         agents_version (list, optional): list containing different version of the agent.
-
+        disable_all_modules (boolean): Disable all simulated modules for this agent.
     Returns:
         list: list of the new virtual agents.
     """
@@ -1150,7 +1150,7 @@ def create_agents(agents_number, manager_address, cypher, fim_eps=None, authd_pa
         agent_version = agents_version[agent] if agents_version is not None else None
 
         agents.append(Agent(manager_address, cypher, fim_eps=fim_eps, authd_password=authd_password,
-                            os=agent_os, version=agent_version))
+                            os=agent_os, version=agent_version, disable_all_modules=disable_all_modules))
 
         agent_count = agent_count + 1
 

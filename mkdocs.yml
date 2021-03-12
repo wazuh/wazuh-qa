@@ -418,6 +418,8 @@ nav:
                 - tests/integration/test_remoted/test_socket_communication/test_ping_pong_message.md
                 - tests/integration/test_remoted/test_socket_communication/test_syslog_message.md
             - Test communications with agent:
+                - tests/integration/test_remoted/test_agent_communication/test_multi_agent_protocols_communication.md
+                - tests/integration/test_remoted/test_agent_communication/test_multi_agent_status.md
                 - tests/integration/test_remoted/test_agent_communication/test_protocols_communication.md
                 - tests/integration/test_remoted/test_agent_communication/test_request_agent_info.md
                 - tests/integration/test_remoted/test_agent_communication/test_shared_configuration.md
