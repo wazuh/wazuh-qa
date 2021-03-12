@@ -11,7 +11,7 @@ import time
 import pytest
 import wazuh_testing.api as api
 import wazuh_testing.tools.agent_simulator as ag
-from wazuh_testing import UDP, TCP
+from wazuh_testing import UDP, TCP, TCP_UDP
 from wazuh_testing import remote as rd
 from wazuh_testing.tools import ARCHIVES_LOG_FILE_PATH, LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools import QUEUE_SOCKETS_PATH
@@ -154,8 +154,8 @@ def callback_warning_syslog_tcp_udp():
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time. \
-          Default value \(TCP\) will be used."
+    msg = r"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time. " \
+          r"Default value \(TCP\) will be used."
 
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
