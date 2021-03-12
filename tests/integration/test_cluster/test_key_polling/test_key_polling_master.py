@@ -69,9 +69,9 @@ def get_configuration(request):
 def test_key_polling_master(cmd, counter, payload, expected, configure_environment, configure_sockets_environment,
                             detect_initial_master_serving, connect_to_sockets_module, send_initial_worker_hello):
     """
-    Test master behaviour with agent key-polling.
+    Test master behavior with agent key-polling.
 
-    This test uses a fictional worker node to test wazuh master behaviour against agent-key-polling messages. After
+    This test uses a fictional worker node to test wazuh master behavior against agent-key-polling messages. After
     connecting the fictional worker to the master and sending the initial hello, the test sends another worker simulated
     message representing a key-polling request. Then, we ensure that the master completed his duty by checking the
     received message in the other end, in this case, krequest socket handled by modulesd.

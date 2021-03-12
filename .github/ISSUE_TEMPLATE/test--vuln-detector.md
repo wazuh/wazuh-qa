@@ -177,7 +177,7 @@ Database updates
 
 **Description**
 
-Vulnerability-detector is able to check if a vulnerability feed is outdated or not, to update it if it is necessary. The tests consist on to verify that the feeds are not being updated if the remote database has not changed. We will observe different behaviour depending on what feed is updating.
+Vulnerability-detector is able to check if a vulnerability feed is outdated or not, to update it if it is necessary. The tests consist on to verify that the feeds are not being updated if the remote database has not changed. We will observe different behavior depending on what feed is updating.
 
 - For **Canonical** and **Debian** feeds, Vulnerability Detector will download the entire OVAL file, but it won't try to index it if that version has already been updated.
 - For the **National Vulnerability Database** feed, Vulnerability Detector will download lightweight metadata files that will be used to evaluate if the database (heavier file) must be fetched too. This is checked for each file, as this feed divides the vulnerabilities into annual files which can be updated at different times.

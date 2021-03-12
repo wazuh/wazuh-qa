@@ -64,9 +64,9 @@ def get_configuration(request):
 def test_key_polling_worker(cmd, counter, payload, configure_environment, configure_sockets_environment,
                             detect_initial_worker_connected, connect_to_sockets_function):
     """
-    Test worker behaviour with agent key-polling.
+    Test worker behavior with agent key-polling.
 
-    This test uses a fictional master node to test wazuh worker behaviour against agent-key-polling messages. After
+    This test uses a fictional master node to test wazuh worker behavior against agent-key-polling messages. After
     connecting the worker to the simulated master, the test simulates a key-polling request message from remoted by
     sending a message to the worker local socket. Then, we ensure that the worker completed his duty by checking the
     received message in the other end, in this case, the fictional master node.

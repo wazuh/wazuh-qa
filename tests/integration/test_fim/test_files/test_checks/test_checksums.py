@@ -68,7 +68,7 @@ def get_configuration(request):
 def test_checksums_checkall(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                             wait_for_fim_start):
     """
-    Test the behaviour of check_all="yes" when using it with one or more check_sum options (checksum, sha1sum,
+    Test the behavior of check_all="yes" when using it with one or more check_sum options (checksum, sha1sum,
     sha256sum and md5sum) set to "no".
 
     Example:
@@ -107,7 +107,7 @@ def test_checksums(path, checkers, get_configuration, configure_environment, res
                    wait_for_fim_start):
     """
     Test the checksum options (checksum, sha1sum, sha256sum and md5sum)
-    behaviour when is used alone or in conjunction.
+    behavior when is used alone or in conjunction.
     Check_all option will be set to "no" in order to avoid using the default check_all configuration.
 
     Example:
