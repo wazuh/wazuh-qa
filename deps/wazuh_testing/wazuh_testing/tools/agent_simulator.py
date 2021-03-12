@@ -538,7 +538,6 @@ class Agent:
 
     def create_keep_alive(self):
         """Set the keep alive event from keepalives operating systemd data."""
-        msg = ''
         with open(os.path.join(_data_path, 'keepalives.txt'), 'r') as fp:
             line = fp.readline()
             while line:

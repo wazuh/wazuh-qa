@@ -1,14 +1,14 @@
 import os
 import pytest
 
+import wazuh_testing.remote as rd
 import wazuh_testing.tools.agent_simulator as ag
 
 from time import sleep
-
-from wazuh_testing.tools.thread_executor import ThreadExecutor
-from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing import remote as rd
 from wazuh_testing import TCP, UDP, TCP_UDP
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.thread_executor import ThreadExecutor
+
 
 
 # Marks
@@ -63,7 +63,7 @@ def validate_agent_manager_protocol_communication(num_agents=2, manager_port=151
         TimeoutError: If the event has not been found in the queue socket after the agents have been sent.
     """
     def send_event(event, protocol, manager_port):
-        """Auxiliary function for sending an event to the manager"""
+        """Send an event to the manager"""
         sender = ag.Sender(agent_info['manager_address'], protocol=protocol, manager_port=manager_port)
 
         try:
@@ -76,7 +76,8 @@ def validate_agent_manager_protocol_communication(num_agents=2, manager_port=151
 
     # Create num_agents (parameter) agents
     agents = ag.create_agents(agents_number=num_agents, manager_address=agent_info['manager_address'],
-                              agents_version=agent_info['version'], agents_os=agent_info['os'],
+                              agents_version=[agent_info['version']]*num_agents,
+                              agents_os=[agent_info['os']]*num_agents,
                               disable_all_modules=agent_info['disable_all_modules'])
 
     for idx, agent in enumerate(agents):

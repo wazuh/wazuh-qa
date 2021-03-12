@@ -7,7 +7,7 @@ These tests will check if there is a correct communication between the manager a
 
 ## Objective
 
-The objective is to check that the manager correctly receives information from the agents via TCP, UDP and both
+The objective is to check the manager correctly receives information from the agents via TCP, UDP and both
 protocols simultaneously.
 
 ## General info
@@ -26,7 +26,7 @@ protocols and ports. Failure otherwise.
 The testing is based on configuring the manager to receive messages via `TCP`, `UDP` and `TCP-UDP` as well
 as using the default port and a custom port.
 
-The process carried out is as follows:
+The process that is carried out is as follows:
 
 - Create and register `n` agents in the manager.
 - Launch two jobs in separate threads:
@@ -35,12 +35,12 @@ The process carried out is as follows:
 
 ### Checks
 
-- TCP and port 1514
-- UDP and port 1514
-- TCP,UDP and port 1514
-- TCP and port 56000
-- UDP and port 56000
-- TCP,UDP and port 56000
+- TCP and port 1514.
+- UDP and port 1514.
+- TCP,UDP and port 1514.
+- TCP and port 56000.
+- UDP and port 56000.
+- TCP,UDP and port 56000.
 
 ## Comments
 
