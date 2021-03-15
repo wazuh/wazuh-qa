@@ -46,7 +46,7 @@ def get_configuration(request):
 
 
 def connect_and_check_agents_status(agents, agents_connections, port, use_tcp):
-    """Connect a list of agents changing the protocol used and checks its status
+    """Connect a list of agents changing the protocol used and checks their status
 
     Args:
         agents (list): list containing the agents.

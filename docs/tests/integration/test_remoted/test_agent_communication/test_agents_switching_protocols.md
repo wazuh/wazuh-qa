@@ -15,7 +15,7 @@ All of this means the agents can switch from one protocol to another and reconne
 and without errors and keep appearing as active agents.
 
 The objective of these tests is to ensure the agents will be able to reconnect without issues in an infrastructure where
-the agents may change its protocols on the fly.
+the agents may change their protocols on the fly.
 
 
 ## General info
