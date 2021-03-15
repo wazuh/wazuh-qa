@@ -25,4 +25,5 @@ To confirm that there are no problems in the following:
 - Fail if the agent does not send the startup message to the manager.
 
 ## Code documentation
+
 ::: tests.integration.test_remoted.test_agent_communication.test_agent_version_shared_configuration_startup_message
