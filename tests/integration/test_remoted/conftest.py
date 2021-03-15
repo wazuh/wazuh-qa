@@ -61,4 +61,3 @@ def remove_shared_files():
             shutil.move(os.path.join(target_dir, file_name), source_dir)
 
     os.removedirs(target_dir)
-
