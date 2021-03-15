@@ -1157,7 +1157,6 @@ def create_agents(agents_number, manager_address, cypher='aes', fim_eps=None, au
 
 def connect(agent,  manager_address='localhost', protocol=TCP, manager_port='1514'):
     """Connects an agent to the manager
-    
     Args:
         agent (Agent): agent to connect.
         manager_address (str): address of the manager. It can be an IP or a DNS.

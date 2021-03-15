@@ -646,14 +646,14 @@ def check_push_shared_config(agent, sender):
 
         # Check up file (push start) message
         check_agent_received_message(agent.rcv_msg_queue, r'#!-up file \w+ merged.mg', timeout=10,
-                                        error_message="initial up file message not received")
+                                     error_message="initial up file message not received")
 
         # Check agent.conf message
         check_agent_received_message(agent.rcv_msg_queue, '#default', timeout=10,
-                                        error_message="agent.conf message not received")
+                                     error_message="agent.conf message not received")
         # Check close file (push end) message
         check_agent_received_message(agent.rcv_msg_queue, 'close', timeout=35,
-                                        error_message="initial close message not received")
+                                     error_message="initial close message not received")
 
         sender.send_event(agent.keep_alive_event)
 
