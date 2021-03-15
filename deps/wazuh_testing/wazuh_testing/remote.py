@@ -145,7 +145,7 @@ def callback_error_getting_protocol():
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"WARNING: \(\d+\): Error getting protocol. Default value \(TCP\) will be used."
+    msg = r"WARNING: \(\d+\): Error getting protocol. Default value \(TCP\) will be used."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
@@ -155,7 +155,7 @@ def callback_warning_syslog_tcp_udp():
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time. \
+    msg = r"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time. \
           Default value \(TCP\) will be used."
 
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
@@ -167,7 +167,7 @@ def callback_warning_secure_ipv6():
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"WARNING: \(\d+\): Secure connection does not support IPv6. IPv4 will be used instead."
+    msg = r"WARNING: \(\d+\): Secure connection does not support IPv6. IPv4 will be used instead."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
@@ -177,7 +177,7 @@ def callback_error_bind_port():
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"CRITICAL: \(\d+\): Unable to Bind port '1514' due to \[\(\d+\)\-\(Cannot assign requested address\)\]"
+    msg = r"CRITICAL: \(\d+\): Unable to Bind port '1514' due to \[\(\d+\)\-\(Cannot assign requested address\)\]"
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
@@ -187,7 +187,7 @@ def callback_error_queue_size_syslog():
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"ERROR: Invalid option \<queue_size\> for Syslog remote connection."
+    msg = r"ERROR: Invalid option \<queue_size\> for Syslog remote connection."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
@@ -197,7 +197,7 @@ def callback_queue_size_too_big():
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"WARNING: Queue size is very high. The application may run out of memory."
+    msg = r"WARNING: Queue size is very high. The application may run out of memory."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
@@ -233,7 +233,7 @@ def callback_info_no_allowed_ips():
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"INFO: \(\d+\): IP or network must be present in syslog access list \(allowed-ips\). "
+    msg = r"INFO: \(\d+\): IP or network must be present in syslog access list \(allowed-ips\). "
     msg += "Syslog server disabled."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
