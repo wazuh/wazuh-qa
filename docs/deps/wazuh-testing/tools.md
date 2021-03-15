@@ -26,6 +26,10 @@
 
 ::: deps.wazuh_testing.wazuh_testing.tools.services
 
+## Sockets
+
+::: deps.wazuh_testing.wazuh_testing.tools.sockets
+
 ## System
 
 ::: deps.wazuh_testing.wazuh_testing.tools.system

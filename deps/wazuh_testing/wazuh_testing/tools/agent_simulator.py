@@ -577,11 +577,11 @@ class Agent:
             self.fim_integrity = GeneratorIntegrityFIM(self.id, self.name, self.short_version)
 
 
-    def get_connection_status(self):
+    def get_agent_db_data(self, field):
         result = wdb.query_wdb(f"global get-agent-info {self.id}")
 
         if len(result) > 0:
-            result = result[0]['connection_status']
+            result = result[0][field]
         else:
             result = "Not in global.db"
         return result
@@ -589,7 +589,7 @@ class Agent:
 
     @retry(AttributeError, attempts=10, delay=2, delay_multiplier=1)
     def wait_status_active(self):
-        status = self.get_connection_status()
+        status = self.get_agent_db_data('connection_status')
         if status == 'active':
             return
         raise AttributeError("Agent is not active yet")

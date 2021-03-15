@@ -19,6 +19,7 @@ from wazuh_testing.tools import WAZUH_CONF
 from wazuh_testing.tools import file
 from wazuh_testing.tools import monitoring
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.utils import retry
 
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -278,6 +279,11 @@ def callback_active_response_received(ar_message):
 
 def callback_active_response_sent(ar_message):
     msg = fr"DEBUG: Active response sent: #!-execd {ar_message[26:]}"
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX, escape=True)
+
+
+def callback_start_up(agent_name):
+    msg = fr"DEBUG: Agent {agent_name} sent HC_STARTUP from 127.0.0.1"
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX, escape=True)
 
 
