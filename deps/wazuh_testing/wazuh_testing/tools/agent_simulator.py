@@ -576,7 +576,6 @@ class Agent:
         if self.modules['fim_integrity']['status'] == 'enabled':
             self.fim_integrity = GeneratorIntegrityFIM(self.id, self.name, self.short_version)
 
-
     def get_connection_status(self):
         result = wdb.query_wdb(f"global get-agent-info {self.id}")
 
@@ -585,7 +584,6 @@ class Agent:
         else:
             result = "Not in global.db"
         return result
-
 
     @retry(AttributeError, attempts=10, delay=2, delay_multiplier=1)
     def wait_status_active(self):
@@ -1158,8 +1156,16 @@ def create_agents(agents_number, manager_address, cypher='aes', fim_eps=None, au
 
 
 def connect(agent,  manager_address='localhost', protocol=TCP, manager_port='1514'):
+    """Connects an agent to the manager
+    
+    Args:
+        agent (Agent): agent to connect.
+        manager_address (str): address of the manager. It can be an IP or a DNS.
+        protocol (str): protocol used to connect with the manager. Defaults to 'TCP'.
+        manager_port (str): port used to connect with the manager. Defaults to '1514'.
+    """
     sender = Sender(manager_address, protocol=protocol, manager_port=manager_port)
     injector = Injector(sender, agent)
     injector.run()
     agent.wait_status_active()
-    return agent, sender, injector
+    return sender, injector

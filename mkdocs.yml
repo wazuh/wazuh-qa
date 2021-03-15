@@ -424,6 +424,7 @@ nav:
                 - tests/integration/test_remoted/test_agent_communication/test_protocols_communication.md
                 - tests/integration/test_remoted/test_agent_communication/test_request_agent_info.md
                 - tests/integration/test_remoted/test_agent_communication/test_shared_configuration.md
+                - tests/integration/test_remoted/test_agent_communication/test_agents_switching_protocols.md
         - Logtest:
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md

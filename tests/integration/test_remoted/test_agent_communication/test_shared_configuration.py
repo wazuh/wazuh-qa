@@ -63,4 +63,4 @@ def test_push_shared_config(get_configuration, configure_environment, restart_re
         # Sleep to avoid ConnectionRefusedError
         sleep(1)
         sender = ag.Sender(agent_info['manager_address'], protocol=protocol)
-        check_push_shared_config(protocol, agent, sender)
+        check_push_shared_config(agent, sender)

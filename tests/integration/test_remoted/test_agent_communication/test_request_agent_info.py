@@ -3,12 +3,12 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
 import pytest
-import time
 
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.sockets import send_request
-import logging
+
+
 # Marks
 pytestmark = pytest.mark.tier(level=0)
 
@@ -65,11 +65,9 @@ def test_request(get_configuration, configure_environment, restart_remoted, comm
     protocols = cfg['PROTOCOL'].split(',')
 
     agents = [ag.Agent(manager_address, "aes", os="debian8", version="4.2.0") for _ in range(len(protocols))]
-    for agn, protocol in zip(agents, protocols):
+    for agent, protocol in zip(agents, protocols):
         if "disconnected" not in command_request:
-            agent, sender, injector = ag.connect(agn, manager_address, protocol)
-        else:
-            agent = agn
+            sender, injector = ag.connect(agent, manager_address, protocol)
 
         msg_request = f'{agent.id} {command_request}'
 

@@ -612,7 +612,7 @@ def check_agent_received_message(message_queue, search_pattern, timeout=5, updat
                         update_position=update_position, error_message=error_message)
 
 
-def check_push_shared_config(protocol, agent, sender):
+def check_push_shared_config(agent, sender):
     """Allow to check if the manager sends the shared configuration to agents through remoted.
 
     First, check if the default group configuration file is completely pushed (up message, configuration
@@ -620,7 +620,6 @@ def check_push_shared_config(protocol, agent, sender):
     Also it checks that the same config isn't pushed two times.
 
     Args:
-        protocol (str): It can be UDP or TCP.
         agent (Agent): Agent to check if the shared configuration is pushed.
         sender (Sender): Sender object associated to the agent and used to send messages to the manager.
 
