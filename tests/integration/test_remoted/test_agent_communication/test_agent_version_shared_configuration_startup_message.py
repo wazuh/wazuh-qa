@@ -36,16 +36,14 @@ agent_info = {
         'manager_address': '127.0.0.1',
         'os': 'debian7',
         'version': 'v4.2.0',
-        'disable_all_modules': True,
-        'rcv_msg_limit': 1000
+        'disable_all_modules': True
     },
     'debian9_4.4.0': {
         'manager_address': '127.0.0.1',
         'os': 'debian9',
         'version': 'v4.4.0',
-        'disable_all_modules': True,
-        'rcv_msg_limit': 1000
-    },
+        'disable_all_modules': True
+    }
 }
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
@@ -90,7 +88,6 @@ def test_agent_remote_configuration(agent_name, get_configuration, configure_env
             # Uses [3:] substring to avoid #!- characters
             keep_alive_log = monitoring.make_callback(pattern=agent.keep_alive_raw_msg[3:],
                                                       prefix=monitoring.REMOTED_DETECTOR_PREFIX)
-
             wazuh_log_monitor.start(timeout=5, callback=keep_alive_log,
                                     error_message='The expected event has not been found in ossec.log')
 
