@@ -652,7 +652,7 @@ def check_push_shared_config(agent, sender):
         check_agent_received_message(agent.rcv_msg_queue, '#default', timeout=10,
                                         error_message="agent.conf message not received")
         # Check close file (push end) message
-        check_agent_received_message(agent.rcv_msg_queue, 'close', timeout=10,
+        check_agent_received_message(agent.rcv_msg_queue, 'close', timeout=35,
                                         error_message="initial close message not received")
 
         sender.send_event(agent.keep_alive_event)
