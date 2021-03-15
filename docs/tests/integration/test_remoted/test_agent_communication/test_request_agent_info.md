@@ -7,11 +7,14 @@ Check that manager-agent communication through remoted socket works as expected.
 Confirm that there are no problems when the manager tries to communicate with an agent to ask for configuration or
 state files using the remoted socket.
 
+As the test has nothing to do with shared configuration files, we removed those rootcheck txt files from default agent 
+group to reduce the time required by the test to make the checks.
+
 ## General info
 
 |Tier | Number of tests | Time spent |
 |:--:|:--:|:--:|
-| 0 | 1 | 3m |
+| 0 | 1 | 126.41s |
 
 ## Expected behavior
 
