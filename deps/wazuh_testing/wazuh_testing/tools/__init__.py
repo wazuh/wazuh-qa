@@ -17,6 +17,10 @@ if sys.platform == 'win32':
     WAZUH_API_CONF = None
     WAZUH_SECURITY_CONF = None
     API_LOG_FILE_PATH = None
+    AGENT_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'wazuh-agent.state')
+    LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'wazuh-logcollector.state')
+    REMOTE_STATISTICS_FILE = None
+    ANALYSIS_STATISTICS_FILE = None
 
 else:
 
@@ -37,6 +41,10 @@ else:
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
     ARCHIVES_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'archives', 'archives.log')
+    AGENT_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-agentd.state')
+    LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-logcollector.state')
+    REMOTE_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-remoted.state')
+    ANALYSIS_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
 
     try:
         import grp
