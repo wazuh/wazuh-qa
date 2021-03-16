@@ -15,6 +15,7 @@ import psutil
 MONITOR_LIST = []
 
 logger = logging.getLogger('wazuh-monitor')
+logger.setLevel(logging.INFO)
 
 
 class Monitor:
