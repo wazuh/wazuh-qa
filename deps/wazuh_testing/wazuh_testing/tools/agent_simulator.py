@@ -95,11 +95,11 @@ class Agent:
         stage_disconnect (str): WPK process state variable.
         rcv_msg_limit (int): max elements for the received message queue.
         rcv_msg_queue (monitoring.Queue): Queue to store received messages in the agent.
-        disable_all_modules (boolean): Disable all simulated modules for this agent
+        disable_all_modules (boolean): Disable all simulated modules for this agent.
     """
     def __init__(self, manager_address, cypher="aes", os=None, inventory_sample=None, rootcheck_sample=None,
                  id=None, name=None, key=None, version="v3.12.0", fim_eps=None, fim_integrity_eps=None,
-                 authd_password=None, disable_all_modules=False, rcv_msg_limit=100):
+                 authd_password=None, disable_all_modules=False, rcv_msg_limit=999):
         self.id = id
         self.name = name
         self.key = key
@@ -586,13 +586,12 @@ class Agent:
             result = "Not in global.db"
         return result
 
-
     @retry(AttributeError, attempts=10, delay=2, delay_multiplier=1)
     def wait_status_active(self):
         status = self.get_agent_db_data('connection_status')
         if status == 'active':
             return
-        raise AttributeError("Agent is not active yet")
+        raise AttributeError(f"Agent is not active yet: {status}")
 
     def set_module_status(self, module_name, status):
         self.modules[module_name]['status'] = status
@@ -1124,8 +1123,8 @@ class InjectorThread(threading.Thread):
             self.stop_thread = 1
 
 
-def create_agents(agents_number, manager_address, cypher, fim_eps=None, authd_password=None, agents_os=None,
-                  agents_version=None):
+def create_agents(agents_number, manager_address, cypher='aes', fim_eps=None, authd_password=None, agents_os=None,
+                  agents_version=None, disable_all_modules=False):
     """Create a list of generic agents
 
     This will create a list with `agents_number` amount of agents. All of them will be registered in the same manager.
@@ -1138,7 +1137,7 @@ def create_agents(agents_number, manager_address, cypher, fim_eps=None, authd_pa
         authd_password (str, optional): password to enroll an agent.
         agents_os (list, optional): list containing different operative systems for the agents.
         agents_version (list, optional): list containing different version of the agent.
-
+        disable_all_modules (boolean): Disable all simulated modules for this agent.
     Returns:
         list: list of the new virtual agents.
     """
@@ -1150,7 +1149,7 @@ def create_agents(agents_number, manager_address, cypher, fim_eps=None, authd_pa
         agent_version = agents_version[agent] if agents_version is not None else None
 
         agents.append(Agent(manager_address, cypher, fim_eps=fim_eps, authd_password=authd_password,
-                            os=agent_os, version=agent_version))
+                            os=agent_os, version=agent_version, disable_all_modules=disable_all_modules))
 
         agent_count = agent_count + 1
 
@@ -1158,8 +1157,15 @@ def create_agents(agents_number, manager_address, cypher, fim_eps=None, authd_pa
 
 
 def connect(agent,  manager_address='localhost', protocol=TCP, manager_port='1514'):
+    """Connects an agent to the manager
+    Args:
+        agent (Agent): agent to connect.
+        manager_address (str): address of the manager. It can be an IP or a DNS.
+        protocol (str): protocol used to connect with the manager. Defaults to 'TCP'.
+        manager_port (str): port used to connect with the manager. Defaults to '1514'.
+    """
     sender = Sender(manager_address, protocol=protocol, manager_port=manager_port)
     injector = Injector(sender, agent)
     injector.run()
     agent.wait_status_active()
-    return agent, sender, injector
+    return sender, injector

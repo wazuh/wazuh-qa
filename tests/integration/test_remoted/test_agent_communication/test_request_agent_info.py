@@ -2,13 +2,15 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
-import pytest
 import time
+
+import pytest
 
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.sockets import send_request
-import logging
+
+
 # Marks
 pytestmark = pytest.mark.tier(level=0)
 
@@ -55,7 +57,8 @@ def get_configuration(request):
 
 
 @pytest.mark.parametrize("command_request,expected_answer", test_case.values(), ids=list(test_case.keys()))
-def test_request(get_configuration, configure_environment, restart_remoted, command_request, expected_answer):
+def test_request(get_configuration, configure_environment, remove_shared_files,
+                 restart_remoted, command_request, expected_answer):
     """
     Writes (config/state) requests in $DIR/queue/ossec/request and check if remoted forwards it to the agent,
     collects the response, and writes it in the socket or returns an error message if the queried
@@ -65,11 +68,9 @@ def test_request(get_configuration, configure_environment, restart_remoted, comm
     protocols = cfg['PROTOCOL'].split(',')
 
     agents = [ag.Agent(manager_address, "aes", os="debian8", version="4.2.0") for _ in range(len(protocols))]
-    for agn, protocol in zip(agents, protocols):
+    for agent, protocol in zip(agents, protocols):
         if "disconnected" not in command_request:
-            agent, sender, injector = ag.connect(agn, manager_address, protocol)
-        else:
-            agent = agn
+            sender, injector = ag.connect(agent, manager_address, protocol)
 
         msg_request = f'{agent.id} {command_request}'
 

@@ -1,12 +1,12 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-import os
+import shutil
 import subprocess as sb
-
+import os
 import pytest
 from wazuh_testing.remote import remove_agent_group, new_agent_group
-from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
@@ -36,3 +36,27 @@ def create_agent_group(group_name='testing_group'):
     yield
 
     remove_agent_group(group_name)
+
+
+@pytest.fixture(scope="module")
+def remove_shared_files():
+    """Temporary removes txt files from default agent group shared files"""
+
+    source_dir = os.path.join(WAZUH_PATH, 'etc', 'shared', 'default')
+    target_dir = os.path.join(WAZUH_PATH, 'etc', 'default.backup')
+
+    os.mkdir(target_dir)
+
+    file_names = os.listdir(source_dir)
+
+    for file_name in file_names:
+        if 'txt' in file_name:
+            shutil.move(os.path.join(source_dir, file_name), target_dir)
+
+    yield
+
+    for file_name in file_names:
+        if 'txt' in file_name:
+            shutil.move(os.path.join(target_dir, file_name), source_dir)
+
+    os.removedirs(target_dir)
