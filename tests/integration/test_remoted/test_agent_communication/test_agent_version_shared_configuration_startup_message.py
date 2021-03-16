@@ -94,7 +94,7 @@ def test_agent_remote_configuration(agent_name, get_configuration, configure_env
             result = agent.get_agent_db_data('version')
             assert result == fr"Wazuh {agent_info[agent_name]['version']}"
 
-            check_push_shared_config(protocol, agent, sender)
+            check_push_shared_config(agent, sender)
 
             injector.stop_receive()
             agent.set_module_status('keepalive', 'disabled')
