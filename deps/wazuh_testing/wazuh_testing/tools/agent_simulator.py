@@ -99,7 +99,7 @@ class Agent:
     """
     def __init__(self, manager_address, cypher="aes", os=None, inventory_sample=None, rootcheck_sample=None,
                  id=None, name=None, key=None, version="v3.12.0", fim_eps=None, fim_integrity_eps=None,
-                 authd_password=None, disable_all_modules=False, rcv_msg_limit=999):
+                 authd_password=None, disable_all_modules=False, rcv_msg_limit=-1):
         self.id = id
         self.name = name
         self.key = key

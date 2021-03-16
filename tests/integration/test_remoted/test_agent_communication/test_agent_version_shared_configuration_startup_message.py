@@ -58,8 +58,8 @@ def get_configuration(request):
 
 
 @pytest.mark.parametrize("agent_name", agent_info.keys())
-def test_agent_remote_configuration(agent_name, get_configuration, configure_environment, restart_remoted,
-                                    create_agent_group):
+def test_agent_remote_configuration(agent_name, get_configuration, configure_environment, remove_shared_files,
+                                    restart_remoted, create_agent_group):
     """ Check agents send its version, receives correctly shared configuration and that startup message
     is sent to the manager.
 
