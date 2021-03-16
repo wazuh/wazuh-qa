@@ -28,6 +28,7 @@ setup(name='wazuh_testing',
         'console_scripts': [
             'simulate-agents=wazuh_testing.scripts.simulate_agents:main',
             'wazuh-metrics=wazuh_testing.scripts.wazuh_metrics:main',
+            'wazuh-statistics=wazuh_testing.scripts.wazuh_statistics:main',
         ],
       },
       include_package_data=True,

@@ -7,9 +7,9 @@ from signal import signal, SIGTERM, SIGINT
 from tempfile import gettempdir
 from time import time
 
-from wazuh_testing.tools.performance.binary import Monitor, logger
+from wazuh_testing.tools.performance.statistic import StatisticMonitor, logger
 
-METRICS_FOLDER = join(gettempdir(), 'process_metrics')
+METRICS_FOLDER = join(gettempdir(), 'wazuh_statistics')
 CURRENT_SESSION = join(METRICS_FOLDER, datetime.now().strftime('%d-%m-%Y'), str(int(time())))
 MONITOR_LIST = []
 
@@ -22,14 +22,13 @@ def shutdown_threads(signal_number, frame):
 
 
 def get_script_arguments():
-    parser = argparse.ArgumentParser(usage="%(prog)s [options]", description="Wazuh processes metrics",
+    parser = argparse.ArgumentParser(usage="%(prog)s [options]", description="Wazuh statistics collector",
                                      formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-p', '--processes', dest='process_list', required=True, type=str, nargs='+', action='store',
-                        help='Type the processes name to monitor separated by whitespace.')
-    parser.add_argument('-s', '--sleep', dest='sleep_time', type=float, default=1, action='store',
+    parser.add_argument('-t', '--target', dest='target_list', required=True, type=str, nargs='+', action='store',
+                        help='Type the statistics target to collect separated by whitespace. '
+                             'Targets: agent, logcollector, remote and analysis.')
+    parser.add_argument('-s', '--sleep', dest='sleep_time', type=float, default=5, action='store',
                         help='Type the time in seconds between each entry.')
-    parser.add_argument('-u', '--units', dest='data_unit', default='B', choices=['B', 'KB', 'MB'],
-                        help='Type unit for the bytes-related values. Default bytes.')
     parser.add_argument('-d', '--debug', dest='debug', action='store_true', default=False,
                         help='Enable debug level logging.')
 
@@ -41,19 +40,18 @@ def main():
     signal(SIGINT, shutdown_threads)
 
     options = get_script_arguments()
-    process_list = options.process_list
-    data_unit = options.data_unit
+    target_list = options.target_list
     sleep_time = options.sleep_time
 
     makedirs(CURRENT_SESSION)
-    logging.basicConfig(filename=join(METRICS_FOLDER, 'wazuh-metrics.log'), filemode='a',
+    logging.basicConfig(filename=join(METRICS_FOLDER, 'wazuh-statistics.log'), filemode='a',
                         format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y/%m/%d %H:%M:%S',
                         level=logging.INFO)
     options.debug and logger.setLevel(logging.DEBUG)
     logger.info(f'Started new session: {CURRENT_SESSION}')
 
-    for process in process_list:
-        monitor = Monitor(process_name=process, value_unit=data_unit, time_step=sleep_time)
+    for target in target_list:
+        monitor = StatisticMonitor(target=target, time_step=sleep_time)
         monitor.start()
         MONITOR_LIST.append(monitor)
 
