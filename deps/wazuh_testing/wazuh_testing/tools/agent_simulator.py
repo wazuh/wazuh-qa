@@ -58,6 +58,7 @@ class Agent:
         name (str, optional): Agent name. Specify only if it already exists.
         key (str, optional): Client key. Specify only if it already exists.
         version (str, optional): Wazuh agent version. Default v3.12.0.
+        labels (dict, optional): Wazuh agent labels. Each dict key will be a new label.
         fim_eps (int, optional): Set the maximum event reporting throughput. Events are messages that will produce an
                                  alert.
         fim_integrity_eps (int, optional): Set the maximum database synchronization message throughput.
@@ -98,7 +99,7 @@ class Agent:
         disable_all_modules (boolean): Disable all simulated modules for this agent.
     """
     def __init__(self, manager_address, cypher="aes", os=None, inventory_sample=None, rootcheck_sample=None,
-                 id=None, name=None, key=None, version="v3.12.0", fim_eps=None, fim_integrity_eps=None,
+                 id=None, name=None, key=None, version="v3.12.0", labels=None, fim_eps=None, fim_integrity_eps=None,
                  authd_password=None, disable_all_modules=False, rcv_msg_limit=999):
         self.id = id
         self.name = name
@@ -108,6 +109,7 @@ class Agent:
         self.long_version = version
         ver_split = version.replace("v", "").split(".")
         self.short_version = f"{'.'.join(ver_split[:2])}"
+        self.labels = labels
         self.cypher = cypher
         self.os = os
         self.fim_eps = 1000 if fim_eps is None else fim_eps
@@ -554,6 +556,13 @@ class Agent:
             msg = msg.replace("<MERGED_CHECKSUM>", self.merged_checksum)
         except UnboundLocalError:
             logging.critical("Error creating keep alive for the agent. Check if the OS is in the keepalives.txt")
+
+        if self.labels:
+            msg_as_list = msg.split('\n')
+            for key, value in self.labels.items():
+                msg_as_list.insert(1, f'"{key}":{value}')
+            msg = '\n'.join(msg_as_list)
+
         self.keep_alive_event = self.create_event(msg)
         self.keep_alive_raw_msg = msg
 
