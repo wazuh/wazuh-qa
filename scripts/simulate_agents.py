@@ -22,6 +22,8 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
         agent_os (str): Agents os, some examples: debian8, ubuntu18.04, mojave...
         eps (int): Total events per second sent by each agent to the manager.
         run_duration (int): duration in seconds of the agents run.
+        active_modules (list): list with active modules names.
+        modules_eps (list): list with eps for each active modules.
     """
 
     logger = logging.getLogger(f"P{os.getpid()}")
