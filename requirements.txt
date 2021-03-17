@@ -19,4 +19,4 @@ pyyaml==5.3
 requests==2.23.0
 testinfra==5.0.0
 jq==1.1.2; platform_system == "Linux" or platform_system == "MacOS"
-cryptography==2.5
+cryptography==3.3.2
