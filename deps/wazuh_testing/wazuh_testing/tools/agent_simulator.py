@@ -99,7 +99,8 @@ class Agent:
     """
     def __init__(self, manager_address, cypher="aes", os=None, inventory_sample=None, rootcheck_sample=None,
                  id=None, name=None, key=None, version="v3.12.0", fim_eps=None, fim_integrity_eps=None,
-                 authd_password=None, disable_all_modules=False, rcv_msg_limit=0):
+                 syscollector_eps=None, rootcheck_eps=None, authd_password=None, disable_all_modules=False,
+                 rcv_msg_limit=0):
         self.id = id
         self.name = name
         self.key = key
@@ -111,7 +112,9 @@ class Agent:
         self.cypher = cypher
         self.os = os
         self.fim_eps = 1000 if fim_eps is None else fim_eps
-        self.fim_integrity_eps = 10 if fim_integrity_eps is None else fim_integrity_eps
+        self.fim_integrity_eps = 100 if fim_integrity_eps is None else fim_integrity_eps
+        self.syscollector_eps = 100 if syscollector_eps is None else syscollector_eps
+        self.rootcheck_eps = 100 if rootcheck_eps is None else rootcheck_eps
         self.manager_address = manager_address
         self.encryption_key = ""
         self.keep_alive_event = ""
@@ -129,8 +132,8 @@ class Agent:
             "keepalive": {"status": "enabled", "frequency": 10.0},
             "fim": {"status": "enabled", "eps": self.fim_eps},
             "fim_integrity": {"status": "disabled", "eps": self.fim_integrity_eps},
-            "syscollector": {"status": "disabled", "frequency": 60.0, "eps": 200},
-            "rootcheck": {"status": "disabled", "frequency": 60.0, "eps": 200},
+            "syscollector": {"status": "disabled", "frequency": 60.0, "eps": self.syscollector_eps},
+            "rootcheck": {"status": "disabled", "frequency": 60.0, "eps": self.rootcheck_eps},
             "receive_messages": {"status": "enabled"},
         }
         self.sha_key = None
@@ -568,13 +571,30 @@ class Agent:
                 self.modules[module]['status'] = 'disabled'
 
         if self.modules['syscollector']['status'] == 'enabled':
-            self.inventory = Inventory(self.os, self.inventory_sample)
+            self.init_syscollector()
         if self.modules['rootcheck']['status'] == 'enabled':
-            self.rootcheck = Rootcheck(self.rootcheck_sample)
+            self.init_rootcheck()
         if self.modules['fim']['status'] == 'enabled':
-            self.fim = GeneratorFIM(self.id, self.name, self.short_version)
+            self.init_fim()
         if self.modules['fim_integrity']['status'] == 'enabled':
+            self.init_fim_integrity()
+
+    def init_syscollector(self):
+        if self.inventory is None:
+            self.inventory = Inventory(self.os, self.inventory_sample)
+
+    def init_rootcheck(self):
+        if self.rootcheck is None:
+            self.rootcheck = Rootcheck(self.rootcheck_sample)
+
+    def init_fim(self):
+        if self.fim is None:
+            self.fim = GeneratorFIM(self.id, self.name, self.short_version)
+
+    def init_fim_integrity(self):
+        if self.fim_integrity is None:
             self.fim_integrity = GeneratorIntegrityFIM(self.id, self.name, self.short_version)
+
 
     def get_connection_status(self):
         result = wdb.query_wdb(f"global get-agent-info {self.id}")
@@ -1043,6 +1063,7 @@ class InjectorThread(threading.Thread):
         """Send an integrity FIM message from the agent to the manager"""
         sleep(10)
         start_time = time()
+        self.agent.init_fim_integrity()
         # Loop events
         while self.stop_thread == 0:
             event = self.agent.create_event(self.agent.fim_integrity.get_message())
@@ -1055,6 +1076,7 @@ class InjectorThread(threading.Thread):
         """Send an inventory message of syscollector from the agent to the manager."""
         sleep(10)
         start_time = time()
+        self.agent.init_syscollector()
         while self.stop_thread == 0:
             # Send agent inventory scan
             logging.debug(f"Scan started - {self.agent.name}({self.agent.id}) - "
@@ -1076,6 +1098,7 @@ class InjectorThread(threading.Thread):
         """Send a rootcheck message from the agent to the manager."""
         sleep(10)
         start_time = time()
+        self.agent.init_rootcheck()
         while self.stop_thread == 0:
             # Send agent rootcheck scan
             logging.debug(f"Scan started - {self.agent.name}({self.agent.id}) "
