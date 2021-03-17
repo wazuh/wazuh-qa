@@ -1,6 +1,8 @@
 # Python cache
 __pycache__
 
+venv
+
 # Python bytecode files
 *.pyc
 .idea
