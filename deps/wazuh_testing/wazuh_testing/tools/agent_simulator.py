@@ -1104,7 +1104,6 @@ class InjectorThread(threading.Thread):
             logging.debug(f"Scan started - {self.agent.name}({self.agent.id}) "
                           f"- rootcheck({self.agent.rootcheck.rootcheck_path})")
             for item in self.agent.rootcheck.rootcheck:
-                print(self.agent.create_event(item))
                 self.sender.send_event(self.agent.create_event(item))
                 self.totalMessages += 1
                 if self.totalMessages % self.agent.modules["rootcheck"]["eps"] == 0:
