@@ -986,8 +986,38 @@ def callback_detect_event(line):
     match = re.match(msg, line)
 
     try:
-        if json.loads(match.group(1))['type'] == 'event':
-            return json.loads(match.group(1))
+        json_event = json.loads(match.group(1))
+        if json_event['type'] == 'event':
+            return json_event
+    except (AttributeError, JSONDecodeError, KeyError):
+        pass
+
+    return None
+
+
+def callback_detect_modified_event(line):
+    msg = r'.*Sending FIM event: (.+)$'
+    match = re.match(msg, line)
+
+    try:
+        json_event = json.loads(match.group(1))
+        if (json_event['type'] == 'event') and (json_event['data']['type'] == 'modified'):
+            return json_event
+    except (AttributeError, JSONDecodeError, KeyError):
+        pass
+
+    return None
+
+
+def callback_detect_modified_event_with_inode_mtime(line):
+    msg = r'.*Sending FIM event: (.+)$'
+    match = re.match(msg, line)
+
+    try:
+        json_event = json.loads(match.group(1))
+        if (json_event['type'] == 'event') and (json_event['data']['type'] == 'modified'):
+            if {'inode', 'mtime'}.symmetric_difference(set(json_event['data']['changed_attributes'])):
+                return json_event
     except (AttributeError, JSONDecodeError, KeyError):
         pass
 
