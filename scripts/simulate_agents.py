@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent_version='v4.0.0',
-               agent_os='debian8', eps=1000, run_duration=20, active_modules=None, modules_eps=None):
+               agent_os='debian8', eps=1000, run_duration=20, active_modules=[], modules_eps=None):
     """Run a batch of agents connected to a manager with the same parameters.
 
     Args:
