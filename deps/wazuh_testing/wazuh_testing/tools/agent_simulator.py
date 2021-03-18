@@ -71,8 +71,10 @@ class Agent:
         short_version (str): Agent version in format x.y
         cypher (str): Encryption method for message communication.
         os (str): Agent operating system.
-        fim_eps (int): Set the maximum event reporting throughput. Events are messages that will produce an alert.
-        fim_integrity_eps (int): Set the maximum database synchronization message throughput.
+        fim_eps (int): Fim's maximum event reporting throughput. Default `1000`.
+        fim_integrity_eps (int): Fim integrity's maximum event reporting throughput. Default `100`.
+        syscollector_eps (int): Syscollector's maximum event reporting throughput. Default `100`.
+        rootcheck_eps (float): Rootcheck's maximum event reporting throughput. Default `60.0`.
         manager_address (str): Manager IP address.
         encryption_key (bytes): Encryption key used for encrypt and decrypt the message.
         keep_alive_event (bytes): Keep alive event (read from template data according to OS and parsed to an event).
@@ -96,11 +98,12 @@ class Agent:
         rcv_msg_limit (int): max elements for the received message queue.
         rcv_msg_queue (monitoring.Queue): Queue to store received messages in the agent.
         disable_all_modules (boolean): Disable all simulated modules for this agent.
+        rootcheck_frequency (int): frequency to run rootcheck scans. 0 to continuously send rootcheck events.
     """
     def __init__(self, manager_address, cypher="aes", os=None, inventory_sample=None, rootcheck_sample=None,
-                 id=None, name=None, key=None, version="v3.12.0", fim_eps=None, fim_integrity_eps=None,
-                 syscollector_eps=None, rootcheck_eps=None, authd_password=None, disable_all_modules=False,
-                 rcv_msg_limit=0):
+                 id=None, name=None, key=None, version="v3.12.0", fim_eps=1000, fim_integrity_eps=100,
+                 syscollector_eps=100, rootcheck_eps=100, authd_password=None, disable_all_modules=False,
+                 rcv_msg_limit=0, rootcheck_frequency=60.0):
         self.id = id
         self.name = name
         self.key = key
@@ -111,10 +114,11 @@ class Agent:
         self.short_version = f"{'.'.join(ver_split[:2])}"
         self.cypher = cypher
         self.os = os
-        self.fim_eps = 1000 if fim_eps is None else fim_eps
-        self.fim_integrity_eps = 100 if fim_integrity_eps is None else fim_integrity_eps
-        self.syscollector_eps = 100 if syscollector_eps is None else syscollector_eps
-        self.rootcheck_eps = 100 if rootcheck_eps is None else rootcheck_eps
+        self.fim_eps = fim_eps
+        self.fim_integrity_eps = fim_integrity_eps
+        self.syscollector_eps = syscollector_eps
+        self.rootcheck_eps = rootcheck_eps
+        self.rootcheck_frequency = rootcheck_frequency
         self.manager_address = manager_address
         self.encryption_key = ""
         self.keep_alive_event = ""
@@ -133,7 +137,7 @@ class Agent:
             "fim": {"status": "enabled", "eps": self.fim_eps},
             "fim_integrity": {"status": "disabled", "eps": self.fim_integrity_eps},
             "syscollector": {"status": "disabled", "frequency": 60.0, "eps": self.syscollector_eps},
-            "rootcheck": {"status": "disabled", "frequency": 60.0, "eps": self.rootcheck_eps},
+            "rootcheck": {"status": "disabled", "frequency": self.rootcheck_frequency, "eps": self.rootcheck_eps},
             "receive_messages": {"status": "enabled"},
         }
         self.sha_key = None
@@ -1099,21 +1103,26 @@ class InjectorThread(threading.Thread):
         sleep(10)
         start_time = time()
         self.agent.init_rootcheck()
+        frequency = self.agent.modules["rootcheck"]["frequency"]
+        eps = self.agent.modules["rootcheck"]["eps"]
+        events_to_send = 0.5 * eps * frequency
         while self.stop_thread == 0:
+            events_sent = 0
             # Send agent rootcheck scan
             logging.debug(f"Scan started - {self.agent.name}({self.agent.id}) "
                           f"- rootcheck({self.agent.rootcheck.rootcheck_path})")
-            for item in self.agent.rootcheck.rootcheck:
-                self.sender.send_event(self.agent.create_event(item))
-                self.totalMessages += 1
-                if self.totalMessages % self.agent.modules["rootcheck"]["eps"] == 0:
-                    self.totalMessages = 0
-                    sleep(1.0 - ((time() - start_time) % 1.0))
+            while events_sent < events_to_send:
+                for item in self.agent.rootcheck.rootcheck:
+                    self.sender.send_event(self.agent.create_event(item))
+                    self.totalMessages += 1
+                    if self.totalMessages % eps == 0:
+                        self.totalMessages = 0
+                        sleep(1.0 - ((time() - start_time) % 1.0))
             logging.debug(
                 f"Scan ended - {self.agent.name}({self.agent.id}) - rootcheck({self.agent.rootcheck.rootcheck_path})"
             )
-            sleep(self.agent.modules["rootcheck"]["frequency"] - ((time() - start_time)
-                                                                  % self.agent.modules["rootcheck"]["frequency"]))
+            if frequency > 1:
+                sleep(self.agent.modules["rootcheck"]["frequency"] - ((time() - start_time) % frequency))
 
     def run(self):
         """Start the thread that will send messages to the manager."""
