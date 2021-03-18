@@ -41,7 +41,7 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
         for index, module in enumerate(available_modules):
             if module in active_modules:
                 agent.modules[module]['status'] = 'enabled'
-                if modules_eps is not None:
+                if modules_eps is not None and 'eps' in agent.modules[module]:
                     agent.modules[module]['eps'] = modules_eps[index]
                 else:
                     agent.modules[module]['eps'] = eps/sending_modules
@@ -119,8 +119,7 @@ if __name__ == "__main__":
                         "the same process.")
 
     # Calculate modules EPS
-    if args.modules is not None:
-        if args.modules_eps is not None:
+    if args.modules is not None and args.modules_eps is not None:
             len_mod = len(args.modules)
             len_eps = len(args.modules_eps)
             if len_mod != len_eps:
