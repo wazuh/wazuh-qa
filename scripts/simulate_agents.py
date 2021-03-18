@@ -46,7 +46,7 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
                 if modules_eps is not None:
                     agent.modules[module]['eps'] = modules_eps[index]
                 else:
-                    agent.modules[module]['eps'] = eps//sending_modules
+                    agent.modules[module]['eps'] = eps/sending_modules
             else:
                 agent.modules[module]['status'] = 'disabled'
                 agent.modules[module]['eps'] = 0
