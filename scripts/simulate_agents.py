@@ -38,13 +38,16 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
         sending_modules = len(active_modules)
         if 'receive_messages' in active_modules:
             sending_modules -= 1
+            
         for index, module in enumerate(available_modules):
             if module in active_modules:
                 agent.modules[module]['status'] = 'enabled'
+                
                 if modules_eps is not None and 'eps' in agent.modules[module]:
                     agent.modules[module]['eps'] = modules_eps[index]
                 else:
                     agent.modules[module]['eps'] = eps/sending_modules
+                    
             else:
                 agent.modules[module]['status'] = 'disabled'
                 agent.modules[module]['eps'] = 0
