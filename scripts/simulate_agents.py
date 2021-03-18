@@ -21,7 +21,7 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
         agent_version (str): Agents version p.e: v4.0.0
         agent_os (str): Agents os, some examples: debian8, ubuntu18.04, mojave...
         eps (int): Total events per second sent by each agent to the manager.
-        run_duration (int): duration in seconds of the agents run.
+        run_duration (int): Agent life time.
         active_modules (list): list with active modules names.
         modules_eps (list): list with eps for each active modules.
     """
@@ -31,8 +31,6 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
 
     active_agents, injectors = [], []
 
-    if active_modules is None:
-        active_modules = []
 
     for _ in range(agents_number):
         agent = ag.Agent(manager_address, "aes", os=agent_os, version=agent_version, fim_eps=eps)
