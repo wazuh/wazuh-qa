@@ -81,7 +81,7 @@ def stop(agent_injectors):
         injector.stop_receive()
 
 
-if __name__ == "__main__":
+def main():
     arg_parser = argparse.ArgumentParser()
 
     arg_parser.add_argument('-a', '--manager', metavar='<manager_ip_address>', type=str, required=False,
@@ -151,3 +151,7 @@ if __name__ == "__main__":
 
     for p in processes:
         p.join()
+
+
+if __name__ == "__main__":
+    main()
