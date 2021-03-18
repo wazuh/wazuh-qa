@@ -71,10 +71,10 @@ class Agent:
         short_version (str): Agent version in format x.y
         cypher (str): Encryption method for message communication.
         os (str): Agent operating system.
-        fim_eps (int): Set the fim's maximum event reporting throughput.
-        fim_integrity_eps (int): Set the fim_integrity's maximum event reporting throughput.
-        syscollector_eps (int): Set the syscollector's maximum event reporting throughput.
-        rootcheck_eps (int): Set the rootcheck's maximum event reporting throughput.
+        fim_eps (int): Fim's maximum event reporting throughput. Default `1000`.
+        fim_integrity_eps (int): Fim integrity's maximum event reporting throughput. Default `100`.
+        syscollector_eps (int): Syscollector's maximum event reporting throughput. Default `100`.
+        rootcheck_eps (float): Rootcheck's maximum event reporting throughput. Default `60.0`.
         manager_address (str): Manager IP address.
         encryption_key (bytes): Encryption key used for encrypt and decrypt the message.
         keep_alive_event (bytes): Keep alive event (read from template data according to OS and parsed to an event).
@@ -137,7 +137,7 @@ class Agent:
             "fim": {"status": "enabled", "eps": self.fim_eps},
             "fim_integrity": {"status": "disabled", "eps": self.fim_integrity_eps},
             "syscollector": {"status": "disabled", "frequency": 60.0, "eps": self.syscollector_eps},
-            "rootcheck": {"status": "disabled", "frequency": rootcheck_frequency, "eps": self.rootcheck_eps},
+            "rootcheck": {"status": "disabled", "frequency": self.rootcheck_frequency, "eps": self.rootcheck_eps},
             "receive_messages": {"status": "enabled"},
         }
         self.sha_key = None
