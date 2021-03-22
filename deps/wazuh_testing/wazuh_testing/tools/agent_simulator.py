@@ -1193,7 +1193,7 @@ class InjectorThread(threading.Thread):
                 sleep(frequency - ((time() - start_time) % frequency))
 
     def hostinfo(self):
-        """ """
+        """Send a hostinfo message from the agent to the manager."""
         sleep(10)
         start_time = time()
         self.agent.init_hostinfo()
