@@ -19,9 +19,8 @@ import socket
 import ssl
 import threading
 import zlib
-import random
 import string
-from datetime import date, timedelta
+from datetime import date
 
 from random import randint, sample, choice
 from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
@@ -102,8 +101,8 @@ class Agent:
         rootcheck_frequency (int): frequency to run rootcheck scans. 0 to continuously send rootcheck events.
     """
     def __init__(self, manager_address, cypher="aes", os=None, syscollector_batch_size=10, rootcheck_sample=None,
-                 id=None, name=None, key=None, version="v3.12.0", fim_eps=None, fim_integrity_eps=None,
-                 syscollector_eps=None, rootcheck_eps=None, authd_password=None, disable_all_modules=False,
+                 id=None, name=None, key=None, version="v3.12.0", fim_eps=1000, fim_integrity_eps=1000,
+                 syscollector_eps=1000, rootcheck_eps=100, authd_password=None, disable_all_modules=False,
                  rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, syscollector_frequency=60.0):
         self.id = id
         self.name = name
@@ -1134,7 +1133,7 @@ class InjectorThread(threading.Thread):
             logging.debug(f"Scan ended - {self.agent.name}({self.agent.id}) - ")
 
             if frequency > 1:
-                sleep(frequency- ((time() - start_time) % frequency))
+                sleep(frequency - ((time() - start_time) % frequency))
 
 
     def rootcheck(self):
@@ -1161,7 +1160,7 @@ class InjectorThread(threading.Thread):
                 f"Scan ended - {self.agent.name}({self.agent.id}) - rootcheck({self.agent.rootcheck.rootcheck_path})"
             )
             if frequency > 1:
-                sleep(self.agent.modules["rootcheck"]["frequency"] - ((time() - start_time) % frequency))
+                sleep(frequency - ((time() - start_time) % frequency))
 
     def run(self):
         """Start the thread that will send messages to the manager."""
