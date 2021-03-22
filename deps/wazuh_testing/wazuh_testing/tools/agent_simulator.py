@@ -606,7 +606,7 @@ class Agent:
 
     def init_hostinfo(self):
         if self.hostinfo is None:
-            self.hostinfo = GeneratorHostinfo(self.name, self.id)
+            self.hostinfo = GeneratorHostinfo()
 
     def get_connection_status(self):
         result = wdb.query_wdb(f"global get-agent-info {self.id}")
@@ -763,12 +763,11 @@ class GeneratorIntegrityFIM:
 
 
 class GeneratorHostinfo:
-    def __init__(self, agent_id, agent_name):
+    def __init__(self):
         self.HOSTINFO_MQ = 3
         self.hostinfo_basic_template = 'Host: <random_ip> (), open ports: '
         self.protocols_list = ['udp', 'tcp']
         self.localfile = '/var/log/nmap.log'
-        self.agent_name = agent_name
 
     def generate_event(self):
         number_open_ports = randint(1, 10)
