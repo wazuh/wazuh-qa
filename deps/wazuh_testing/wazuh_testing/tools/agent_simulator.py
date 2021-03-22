@@ -99,11 +99,15 @@ class Agent:
         rcv_msg_queue (monitoring.Queue): Queue to store received messages in the agent.
         disable_all_modules (boolean): Disable all simulated modules for this agent.
         rootcheck_frequency (int): frequency to run rootcheck scans. 0 to continuously send rootcheck events.
+        syscollector_frequency (int): frequency to run syscollector scans. 0 to continuously send syscollector events.
+        keepalive_frequency (int): frequency to send keepalive messages. 0 to continuously send keepalive messages.
+        syscollector_batch_size (int): Size of the syscollector type batch events.
     """
-    def __init__(self, manager_address, cypher="aes", os=None, syscollector_batch_size=10, rootcheck_sample=None,
+    def __init__(self, manager_address, cypher="aes", os=None, rootcheck_sample=None,
                  id=None, name=None, key=None, version="v3.12.0", fim_eps=1000, fim_integrity_eps=1000,
                  syscollector_eps=1000, rootcheck_eps=100, authd_password=None, disable_all_modules=False,
-                 rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, syscollector_frequency=60.0):
+                 rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, syscollector_frequency=60.0,
+                 syscollector_batch_size=10):
         self.id = id
         self.name = name
         self.key = key
@@ -1111,7 +1115,7 @@ class InjectorThread(threading.Thread):
                 sleep(1.0 - ((time() - start_time) % 1.0))
 
     def syscollector(self):
-        """"""
+        """Send a syscollector message from the agent to the manager."""
         sleep(10)
         start_time = time()
         self.agent.init_syscollector()
