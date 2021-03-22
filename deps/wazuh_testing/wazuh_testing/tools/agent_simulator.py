@@ -22,7 +22,7 @@ import zlib
 import string
 from datetime import date
 
-from random import randint, sample, choice
+from random import randint, sample, choice, SystemRandom
 from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
 from string import ascii_letters, digits
 from struct import pack
@@ -658,8 +658,8 @@ class GeneratorSyscollector:
         timestamp = today.strftime("%Y/%m/%d %H:%M:%S")
 
         event_map = [
-                        ('<agent_name>', self.agent_name), ('<random_int>', str(random.randint(1, 10 * 10))),
-                        ('<random_string>', ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits)
+                        ('<agent_name>', self.agent_name), ('<random_int>', str(randint(1, 10 * 10))),
+                        ('<random_string>', ''.join(SystemRandom().choice(string.ascii_uppercase + string.digits)
                                             for _ in range(10))),
                         ('<timestamp>', timestamp), ('<syscollector_type>', message_type)
                     ]
