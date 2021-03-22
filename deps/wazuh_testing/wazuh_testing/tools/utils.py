@@ -5,6 +5,7 @@ import logging
 import re
 from functools import wraps
 from time import sleep
+from random import randint
 
 
 def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
@@ -97,3 +98,7 @@ def replace_in_file(filename, to_replace, replacement):
 
     with open(filename, "w") as f:
         f.write(replace_content)
+
+
+def random_ip():
+    return fr"{randint(0,255)}.{randint(0,255)}.{randint(0,255)}.{randint(0,255)}"

@@ -103,7 +103,7 @@ class Agent:
     def __init__(self, manager_address, cypher="aes", os=None, inventory_sample=None, rootcheck_sample=None,
                  id=None, name=None, key=None, version="v3.12.0", fim_eps=1000, fim_integrity_eps=100,
                  syscollector_eps=100, rootcheck_eps=100, authd_password=None, disable_all_modules=False,
-                 rcv_msg_limit=0, rootcheck_frequency=60.0):
+                 rcv_msg_limit=0, rootcheck_frequency=60.0, hostinfo_eps=100):
         self.id = id
         self.name = name
         self.key = key
@@ -119,6 +119,7 @@ class Agent:
         self.syscollector_eps = syscollector_eps
         self.rootcheck_eps = rootcheck_eps
         self.rootcheck_frequency = rootcheck_frequency
+        self.hostinfo_eps = hostinfo_eps
         self.manager_address = manager_address
         self.encryption_key = ""
         self.keep_alive_event = ""
@@ -130,6 +131,7 @@ class Agent:
         self.inventory = None
         self.rootcheck_sample = rootcheck_sample
         self.rootcheck = None
+        self.hostinfo = None
         self.fim = None
         self.fim_integrity = None
         self.modules = {
@@ -138,6 +140,7 @@ class Agent:
             "fim_integrity": {"status": "disabled", "eps": self.fim_integrity_eps},
             "syscollector": {"status": "disabled", "frequency": 60.0, "eps": self.syscollector_eps},
             "rootcheck": {"status": "disabled", "frequency": self.rootcheck_frequency, "eps": self.rootcheck_eps},
+            "hostinfo": {"status": "disabled", "eps": self.hostinfo_eps},
             "receive_messages": {"status": "enabled"},
         }
         self.sha_key = None
@@ -582,6 +585,8 @@ class Agent:
             self.init_fim()
         if self.modules['fim_integrity']['status'] == 'enabled':
             self.init_fim_integrity()
+        if self.modules['hostinfo']['status'] == 'enabled':
+            self.init_hostinfo()
 
     def init_syscollector(self):
         if self.inventory is None:
@@ -599,6 +604,9 @@ class Agent:
         if self.fim_integrity is None:
             self.fim_integrity = GeneratorIntegrityFIM(self.id, self.name, self.short_version)
 
+    def init_hostinfo(self):
+        if self.hostinfo is None:
+            self.hostinfo = GeneratorHostinfo(self.name, self.id)
 
     def get_connection_status(self):
         result = wdb.query_wdb(f"global get-agent-info {self.id}")
@@ -716,6 +724,29 @@ class GeneratorIntegrityFIM:
                                       "integrity_clear", "state"])
 
         return self.generate_message()
+
+
+class GeneratorHostinfo:
+    def __init__(self, agent_id, agent_name):
+        self.HOSTINFO = 'hostinfo'
+        self.HOSTINFO_MQ = 3
+        self.hostinfo_basic_template = 'Host: <random_ip> (), open ports: '
+        self.avaible_protocols = ['udp', 'tcp']
+        self.localfile = '/var/log/nmap.log'
+        self.agent_name = agent_name
+        self.agent_id = agent_id
+
+    def generate_event(self):
+        number_open_ports = randint(1,10)
+        host_ip = fr"{randint(1,255)}.{randint(1,255)}.{randint(1,255)}.{randint(1,255)}"
+        message_open_port_list = ''
+        for i in range(number_open_ports):
+            message_open_port_list += fr"{randint(1,65535)} ({choice(self.avaible_protocols)}) "
+
+        message = self.hostinfo_basic_template.replace('<random_ip>', host_ip)
+        message += message_open_port_list
+        message = fr"{self.HOSTINFO_MQ}:{self.HOSTINFO}:{message}"
+        return message
 
 
 class GeneratorFIM:
@@ -1124,6 +1155,19 @@ class InjectorThread(threading.Thread):
             if frequency > 1:
                 sleep(self.agent.modules["rootcheck"]["frequency"] - ((time() - start_time) % frequency))
 
+    def hostinfo(self):
+        """ """
+        sleep(10)
+        start_time = time()
+        self.agent.init_hostinfo()
+        # Loop events
+        while self.stop_thread == 0:
+            event = self.agent.create_event(self.agent.hostinfo.generate_event())
+            self.sender.send_event(event)
+            self.totalMessages += 1
+            if self.totalMessages % self.agent.modules["hostinfo"]["eps"] == 0:
+                sleep(1.0 - ((time() - start_time) % 1.0))
+
     def run(self):
         """Start the thread that will send messages to the manager."""
         # message = "1:/var/log/syslog:Jan 29 10:03:41 master sshd[19635]:
@@ -1142,6 +1186,8 @@ class InjectorThread(threading.Thread):
             self.fim_integrity()
         elif self.module == "receive_messages":
             self.agent.receive_message(self.sender)
+        elif self.module == 'hostinfo':
+            self.hostinfo()
         else:
             logging.debug("Module unknown: {}".format(self.module))
             pass
