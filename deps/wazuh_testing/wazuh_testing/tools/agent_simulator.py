@@ -764,24 +764,22 @@ class GeneratorIntegrityFIM:
 
 class GeneratorHostinfo:
     def __init__(self, agent_id, agent_name):
-        self.HOSTINFO = 'hostinfo'
         self.HOSTINFO_MQ = 3
         self.hostinfo_basic_template = 'Host: <random_ip> (), open ports: '
-        self.avaible_protocols = ['udp', 'tcp']
+        self.protocols_list = ['udp', 'tcp']
         self.localfile = '/var/log/nmap.log'
         self.agent_name = agent_name
-        self.agent_id = agent_id
 
     def generate_event(self):
-        number_open_ports = randint(1,10)
+        number_open_ports = randint(1, 10)
         host_ip = random_ip()
         message_open_port_list = ''
         for i in range(number_open_ports):
-            message_open_port_list += fr"{randint(1,65535)} ({choice(self.avaible_protocols)}) "
+            message_open_port_list += fr"{randint(1,65535)} ({choice(self.protocols_list)}) "
 
         message = self.hostinfo_basic_template.replace('<random_ip>', host_ip)
         message += message_open_port_list
-        message = fr"{self.HOSTINFO_MQ}:{self.HOSTINFO}:{message}"
+        message = fr"{self.HOSTINFO_MQ}:{self.localfile}:{message}"
         return message
 
 
