@@ -19,10 +19,9 @@ import socket
 import ssl
 import threading
 import zlib
-import string
 from datetime import date
+from random import randint, sample, choice
 
-from random import randint, sample, choice, SystemRandom
 from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
 from string import ascii_letters, digits
 from struct import pack
@@ -35,7 +34,7 @@ from wazuh_testing import TCP
 from wazuh_testing import is_udp, is_tcp
 from wazuh_testing.tools.monitoring import wazuh_unpack, Queue
 from wazuh_testing.tools.remoted_sim import Cipher
-from wazuh_testing.tools.utils import retry
+from wazuh_testing.tools.utils import retry, random_ip, random_string
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 
@@ -107,7 +106,7 @@ class Agent:
                  id=None, name=None, key=None, version="v3.12.0", fim_eps=1000, fim_integrity_eps=1000,
                  syscollector_eps=1000, rootcheck_eps=100, authd_password=None, disable_all_modules=False,
                  rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, syscollector_frequency=60.0,
-                 syscollector_batch_size=10):
+                 syscollector_batch_size=10, hostinfo_eps = 100):
         self.id = id
         self.name = name
         self.key = key
@@ -123,6 +122,7 @@ class Agent:
         self.syscollector_eps = syscollector_eps
         self.rootcheck_eps = rootcheck_eps
         self.rootcheck_frequency = rootcheck_frequency
+        self.hostinfo_eps = hostinfo_eps
         self.keepalive_frequency = keepalive_frequency
         self.syscollector_frequency = syscollector_frequency
 
@@ -136,6 +136,7 @@ class Agent:
         self.syscollector_batch_size = syscollector_batch_size
         self.rootcheck_sample = rootcheck_sample
         self.rootcheck = None
+        self.hostinfo = None
         self.fim = None
         self.fim_integrity = None
         self.syscollector = None
@@ -145,6 +146,7 @@ class Agent:
             "fim_integrity": {"status": "disabled", "eps": self.fim_integrity_eps},
             "syscollector": {"status": "disabled", "frequency": self.syscollector_frequency, "eps": self.syscollector_eps},
             "rootcheck": {"status": "disabled", "frequency": self.rootcheck_frequency, "eps": self.rootcheck_eps},
+            "hostinfo": {"status": "disabled", "eps": self.hostinfo_eps},
             "receive_messages": {"status": "enabled"},
         }
         self.sha_key = None
@@ -583,6 +585,8 @@ class Agent:
             self.init_fim()
         if self.modules['fim_integrity']['status'] == 'enabled':
             self.init_fim_integrity()
+        if self.modules['hostinfo']['status'] == 'enabled':
+            self.init_hostinfo()
 
     def init_syscollector(self):
         if self.syscollector is None:
@@ -599,6 +603,10 @@ class Agent:
     def init_fim_integrity(self):
         if self.fim_integrity is None:
             self.fim_integrity = GeneratorIntegrityFIM(self.id, self.name, self.short_version)
+
+    def init_hostinfo(self):
+        if self.hostinfo is None:
+            self.hostinfo = GeneratorHostinfo()
 
     def get_connection_status(self):
         result = wdb.query_wdb(f"global get-agent-info {self.id}")
@@ -659,8 +667,7 @@ class GeneratorSyscollector:
 
         event_map = [
                         ('<agent_name>', self.agent_name), ('<random_int>', str(randint(1, 10 * 10))),
-                        ('<random_string>', ''.join(SystemRandom().choice(string.ascii_uppercase + string.digits)
-                                            for _ in range(10))),
+                        ('<random_string>', random_string(10)),
                         ('<timestamp>', timestamp), ('<syscollector_type>', message_type)
                     ]
 
@@ -753,6 +760,26 @@ class GeneratorIntegrityFIM:
                                       "integrity_clear", "state"])
 
         return self.generate_message()
+
+
+class GeneratorHostinfo:
+    def __init__(self):
+        self.HOSTINFO_MQ = 3
+        self.hostinfo_basic_template = 'Host: <random_ip> (), open ports: '
+        self.protocols_list = ['udp', 'tcp']
+        self.localfile = '/var/log/nmap.log'
+
+    def generate_event(self):
+        number_open_ports = randint(1, 10)
+        host_ip = random_ip()
+        message_open_port_list = ''
+        for i in range(number_open_ports):
+            message_open_port_list += fr"{randint(1,65535)} ({choice(self.protocols_list)}) "
+
+        message = self.hostinfo_basic_template.replace('<random_ip>', host_ip)
+        message += message_open_port_list
+        message = fr"{self.HOSTINFO_MQ}:{self.localfile}:{message}"
+        return message
 
 
 class GeneratorFIM:
@@ -1165,6 +1192,19 @@ class InjectorThread(threading.Thread):
             if frequency > 1:
                 sleep(frequency - ((time() - start_time) % frequency))
 
+    def hostinfo(self):
+        """Send a hostinfo message from the agent to the manager."""
+        sleep(10)
+        start_time = time()
+        self.agent.init_hostinfo()
+        # Loop events
+        while self.stop_thread == 0:
+            event = self.agent.create_event(self.agent.hostinfo.generate_event())
+            self.sender.send_event(event)
+            self.totalMessages += 1
+            if self.totalMessages % self.agent.modules["hostinfo"]["eps"] == 0:
+                sleep(1.0 - ((time() - start_time) % 1.0))
+
     def run(self):
         """Start the thread that will send messages to the manager."""
         # message = "1:/var/log/syslog:Jan 29 10:03:41 master sshd[19635]:
@@ -1183,6 +1223,8 @@ class InjectorThread(threading.Thread):
             self.fim_integrity()
         elif self.module == "receive_messages":
             self.agent.receive_message(self.sender)
+        elif self.module == 'hostinfo':
+            self.hostinfo()
         else:
             logging.debug("Module unknown: {}".format(self.module))
             pass
