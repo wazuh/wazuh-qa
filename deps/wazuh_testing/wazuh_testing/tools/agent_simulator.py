@@ -19,10 +19,9 @@ import socket
 import ssl
 import threading
 import zlib
-import string
 from datetime import date
+from random import randint, sample, choice
 
-from random import randint, sample, choice, SystemRandom
 from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
 from string import ascii_letters, digits
 from struct import pack
@@ -35,7 +34,7 @@ from wazuh_testing import TCP
 from wazuh_testing import is_udp, is_tcp
 from wazuh_testing.tools.monitoring import wazuh_unpack, Queue
 from wazuh_testing.tools.remoted_sim import Cipher
-from wazuh_testing.tools.utils import retry
+from wazuh_testing.tools.utils import retry, random_ip, random_string
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 
@@ -668,8 +667,7 @@ class GeneratorSyscollector:
 
         event_map = [
                         ('<agent_name>', self.agent_name), ('<random_int>', str(randint(1, 10 * 10))),
-                        ('<random_string>', ''.join(SystemRandom().choice(string.ascii_uppercase + string.digits)
-                                            for _ in range(10))),
+                        ('<random_string>', random_string(10)),
                         ('<timestamp>', timestamp), ('<syscollector_type>', message_type)
                     ]
 
@@ -776,7 +774,7 @@ class GeneratorHostinfo:
 
     def generate_event(self):
         number_open_ports = randint(1,10)
-        host_ip = fr"{randint(1,255)}.{randint(1,255)}.{randint(1,255)}.{randint(1,255)}"
+        host_ip = random_ip()
         message_open_port_list = ''
         for i in range(number_open_ports):
             message_open_port_list += fr"{randint(1,65535)} ({choice(self.avaible_protocols)}) "
