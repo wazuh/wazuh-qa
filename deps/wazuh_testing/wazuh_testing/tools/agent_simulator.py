@@ -19,20 +19,23 @@ import socket
 import ssl
 import threading
 import zlib
+import string
+from datetime import date
 
-from random import randint, sample, choice
+from random import randint, sample, choice, SystemRandom
 from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
 from string import ascii_letters, digits
 from struct import pack
 from time import mktime, localtime, sleep, time
 
 import wazuh_testing.wazuh_db as wdb
+import wazuh_testing.tools.syscollector as syscollector
+
 from wazuh_testing import TCP
 from wazuh_testing import is_udp, is_tcp
 from wazuh_testing.tools.monitoring import wazuh_unpack, Queue
 from wazuh_testing.tools.remoted_sim import Cipher
 from wazuh_testing.tools.utils import retry
-
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 
@@ -45,14 +48,13 @@ class Agent:
     """Class that allows us to simulate an agent registered in a manager.
 
     This simulated agent also allows sending-receiving messages and commands, in addition to simulating the
-    syscollector, FIM and rootcheck modules by making use of other classes such as Inventory, Rootcheck, GeneratorFIM
+    syscollector, FIM and rootcheck modules by making use of other classes such as GeneratorSyscollector, Rootcheck, GeneratorFIM
     and GeneratorIntegrityFIM.
 
     Args:
         manager_address (str): Manager IP address.
         cypher (str, optional): Cypher method. It can be [aes, blowfish]. Default aes.
         os (str, optional): Agent operating system. Default None for choosing randomly.
-        inventory_sample (str, optional): File where are sample inventory messages.
         rootcheck_sample (str, optional): File where are sample rootcheck messages.
         id (str, optional): ID of the agent. Specify only if it already exists.
         name (str, optional): Agent name. Specify only if it already exists.
@@ -82,9 +84,7 @@ class Agent:
         merged_checksum (string): Checksum of agent's merge.mg file.
         startup_msg (bytes): Startup event sent before the first keep alive event.
         authd_password (str): Password for manager registration.
-        inventory_sample (str): File where are sample inventory messages.
         rootcheck_sample (str): File where are sample rootcheck messages.
-        inventory (Inventory): Object to simulate syscollector message events.
         rootcheck (Rootcheck): Object to simulate rootcheck message events.
         fim (GeneratorFIM): Object to simulate FIM message events.
         fim_integrity (GeneratorIntegrityFIM): Object to simulate FIM integrity message events.
@@ -99,11 +99,15 @@ class Agent:
         rcv_msg_queue (monitoring.Queue): Queue to store received messages in the agent.
         disable_all_modules (boolean): Disable all simulated modules for this agent.
         rootcheck_frequency (int): frequency to run rootcheck scans. 0 to continuously send rootcheck events.
+        syscollector_frequency (int): frequency to run syscollector scans. 0 to continuously send syscollector events.
+        keepalive_frequency (int): frequency to send keepalive messages. 0 to continuously send keepalive messages.
+        syscollector_batch_size (int): Size of the syscollector type batch events.
     """
-    def __init__(self, manager_address, cypher="aes", os=None, inventory_sample=None, rootcheck_sample=None,
-                 id=None, name=None, key=None, version="v3.12.0", fim_eps=1000, fim_integrity_eps=100,
-                 syscollector_eps=100, rootcheck_eps=100, authd_password=None, disable_all_modules=False,
-                 rcv_msg_limit=0, rootcheck_frequency=60.0, hostinfo_eps=100):
+    def __init__(self, manager_address, cypher="aes", os=None, rootcheck_sample=None,
+                 id=None, name=None, key=None, version="v3.12.0", fim_eps=1000, fim_integrity_eps=1000,
+                 syscollector_eps=1000, rootcheck_eps=100, authd_password=None, disable_all_modules=False,
+                 rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, syscollector_frequency=60.0,
+                 syscollector_batch_size=10, hostinfo_eps = 100):
         self.id = id
         self.name = name
         self.key = key
@@ -120,6 +124,9 @@ class Agent:
         self.rootcheck_eps = rootcheck_eps
         self.rootcheck_frequency = rootcheck_frequency
         self.hostinfo_eps = hostinfo_eps
+        self.keepalive_frequency = keepalive_frequency
+        self.syscollector_frequency = syscollector_frequency
+
         self.manager_address = manager_address
         self.encryption_key = ""
         self.keep_alive_event = ""
@@ -127,18 +134,18 @@ class Agent:
         self.merged_checksum = 'd6e3ac3e75ca0319af3e7c262776f331'
         self.startup_msg = ""
         self.authd_password = authd_password
-        self.inventory_sample = inventory_sample
-        self.inventory = None
+        self.syscollector_batch_size = syscollector_batch_size
         self.rootcheck_sample = rootcheck_sample
         self.rootcheck = None
         self.hostinfo = None
         self.fim = None
         self.fim_integrity = None
+        self.syscollector = None
         self.modules = {
-            "keepalive": {"status": "enabled", "frequency": 10.0},
+            "keepalive": {"status": "enabled", "frequency": self.keepalive_frequency},
             "fim": {"status": "enabled", "eps": self.fim_eps},
             "fim_integrity": {"status": "disabled", "eps": self.fim_integrity_eps},
-            "syscollector": {"status": "disabled", "frequency": 60.0, "eps": self.syscollector_eps},
+            "syscollector": {"status": "disabled", "frequency": self.syscollector_frequency, "eps": self.syscollector_eps},
             "rootcheck": {"status": "disabled", "frequency": self.rootcheck_frequency, "eps": self.rootcheck_eps},
             "hostinfo": {"status": "disabled", "eps": self.hostinfo_eps},
             "receive_messages": {"status": "enabled"},
@@ -193,13 +200,7 @@ class Agent:
     def set_name(self):
         """Set a random agent name."""
         random_string = ''.join(sample('0123456789abcdef' * 2, 8))
-        if self.inventory_sample is None:
-            self.name = "{}-{}-{}".format(agent_count, random_string, self.os)
-        else:
-            inventory_string = self.inventory_sample.replace(".", "")
-            self.name = "{}-{}-{}-{}".format(agent_count,
-                                             random_string, self.os,
-                                             inventory_string)
+        self.name = random_string
 
     def register(self):
         """Request to register the agent in the manager.
@@ -589,8 +590,8 @@ class Agent:
             self.init_hostinfo()
 
     def init_syscollector(self):
-        if self.inventory is None:
-            self.inventory = Inventory(self.os, self.inventory_sample)
+        if self.syscollector is None:
+            self.syscollector = GeneratorSyscollector(self.name, self.syscollector_batch_size)
 
     def init_rootcheck(self):
         if self.rootcheck is None:
@@ -631,29 +632,66 @@ class Agent:
         self.modules[module_name][attribute] = value
 
 
-class Inventory:
-    def __init__(self, os, inventory_sample=None):
-        self.os = os
+class GeneratorSyscollector:
+
+    def __init__(self, agent_name, batch_size):
+        self.current_batch_events = -1
+        self.current_batch_events_size = 0
+        self.list_events = ['network', 'port', 'hotfix',
+                            'process', 'packages', 'OS', 'hardware']
+        self.agent_name = agent_name
+        self.batch_size = batch_size
         self.SYSCOLLECTOR = 'syscollector'
         self.SYSCOLLECTOR_MQ = 'd'
-        self.inventory = []
-        self.inventory_path = ""
-        self.inventory_sample = inventory_sample
-        self.setup()
 
-    def setup(self):
-        if self.inventory_sample is None:
-            inventory_files = os.listdir(f"inventory/{self.os}")
-            self.inventory_path = f"inventory/{self.os}/{choice(inventory_files)}"
+    def format_event(self, message_type):
+        message = syscollector.SYSCOLLECTOR_HEADER
+        if message_type == 'network':
+            message += syscollector.SYSCOLLECTOR_NETWORK_EVENT_TEMPLATE
+        elif message_type == 'process':
+            message += syscollector.SYSCOLLECTOR_PROCESS_EVENT_TEMPLATE
+        elif message_type == 'port':
+            message += syscollector.SYSCOLLECTOR_PORT_EVENT_TEMPLATE
+        elif message_type == 'packages':
+            message += syscollector.SYSCOLLECTOR_PACKAGES_EVENT_TEMPLATE
+        elif message_type == 'os':
+            message += syscollector.SYSCOLLECTOR_OS_EVENT_TEMPLATE
+        elif message_type == 'hardware':
+            message += syscollector.SYSCOLLECTOR_HARDWARE_EVENT_TEMPLATE
+        elif message_type == 'hotfix':
+            message += syscollector.SYSCOLLECTOR_HOTFIX_EVENT_TEMPLATE
+        elif 'end' in message_type:
+            message += '}'
+
+        today = date.today()
+        timestamp = today.strftime("%Y/%m/%d %H:%M:%S")
+
+        event_map = [
+                        ('<agent_name>', self.agent_name), ('<random_int>', str(randint(1, 10 * 10))),
+                        ('<random_string>', ''.join(SystemRandom().choice(string.ascii_uppercase + string.digits)
+                                            for _ in range(10))),
+                        ('<timestamp>', timestamp), ('<syscollector_type>', message_type)
+                    ]
+
+        for variable, value in event_map:
+            message = message.replace(variable, value)
+        message = f"{self.SYSCOLLECTOR_MQ}:{self.SYSCOLLECTOR}:{message}"
+        return message
+
+    def generate_event(self):
+        event = ''
+        if self.current_batch_events_size == 0:
+            self.current_batch_events = (self.current_batch_events + 1) % len(self.list_events)
+            self.current_batch_events_size = self.batch_size
+
+        if self.list_events[self.current_batch_events] not in ['network', 'port', 'process'] \
+                or self.current_batch_events_size > 1:
+            event = self.list_events[self.current_batch_events]
         else:
-            self.inventory_path = f"inventory/{self.os}/{self.inventory_sample}"
-        with open(self.inventory_path) as fp:
-            line = fp.readline()
-            while line:
-                if not line.startswith("#"):
-                    msg = "{0}:{1}:{2}".format(self.SYSCOLLECTOR_MQ, self.SYSCOLLECTOR, line.strip("\n"))
-                    self.inventory.append(msg)
-                line = fp.readline()
+            event = self.list_events[self.current_batch_events] + '_end'
+
+        self.current_batch_events_size = self.current_batch_events_size - 1
+        return self.format_event(event)
 
 
 class Rootcheck:
@@ -1107,27 +1145,31 @@ class InjectorThread(threading.Thread):
             if self.totalMessages % self.agent.modules["fim_integrity"]["eps"] == 0:
                 sleep(1.0 - ((time() - start_time) % 1.0))
 
-    def inventory(self):
-        """Send an inventory message of syscollector from the agent to the manager."""
+    def syscollector(self):
+        """Send a syscollector message from the agent to the manager."""
         sleep(10)
         start_time = time()
         self.agent.init_syscollector()
+        frequency = self.agent.modules["syscollector"]["frequency"]
+        eps = self.agent.modules["syscollector"]["eps"]
+        events_to_send = 0.5 * eps * frequency
         while self.stop_thread == 0:
-            # Send agent inventory scan
-            logging.debug(f"Scan started - {self.agent.name}({self.agent.id}) - "
-                          f"syscollector({self.agent.inventory.inventory_path})")
-            scan_id = int(time())  # Random start scan ID
-            for item in self.agent.inventory.inventory:
-                event = self.agent.create_event(item.replace("<scan_id>", str(scan_id)))
+            events_sent = 0
+            logging.debug(f"Scan started - {self.agent.name}({self.agent.id}) - ")
+            while events_sent < events_to_send:
+                syscollector_event = self.agent.syscollector.generate_event()
+                event = self.agent.create_event(syscollector_event)
                 self.sender.send_event(event)
                 self.totalMessages += 1
-                if self.totalMessages % self.agent.modules["syscollector"]["eps"] == 0:
+                if self.totalMessages % eps == 0:
                     self.totalMessages = 0
                     sleep(1.0 - ((time() - start_time) % 1.0))
-            logging.debug(f"Scan ended - {self.agent.name}({self.agent.id}) - "
-                          f"syscollector({self.agent.inventory.inventory_path})")
-            sleep(self.agent.modules["syscollector"]["frequency"] - ((time() - start_time)
-                                                                     % self.agent.modules["syscollector"]["frequency"]))
+
+            logging.debug(f"Scan ended - {self.agent.name}({self.agent.id}) - ")
+
+            if frequency > 1:
+                sleep(frequency - ((time() - start_time) % frequency))
+
 
     def rootcheck(self):
         """Send a rootcheck message from the agent to the manager."""
@@ -1153,7 +1195,7 @@ class InjectorThread(threading.Thread):
                 f"Scan ended - {self.agent.name}({self.agent.id}) - rootcheck({self.agent.rootcheck.rootcheck_path})"
             )
             if frequency > 1:
-                sleep(self.agent.modules["rootcheck"]["frequency"] - ((time() - start_time) % frequency))
+                sleep(frequency - ((time() - start_time) % frequency))
 
     def hostinfo(self):
         """ """
@@ -1179,7 +1221,7 @@ class InjectorThread(threading.Thread):
         elif self.module == "fim":
             self.fim()
         elif self.module == "syscollector":
-            self.inventory()
+            self.syscollector()
         elif self.module == "rootcheck":
             self.rootcheck()
         elif self.module == "fim_integrity":
