@@ -666,9 +666,8 @@ class GeneratorSyscollector:
 
         for variable, value in event_map:
             message = message.replace(variable, value)
-
-        message = "{0}:{1}:{2}".format(self.SYSCOLLECTOR_MQ, self.SYSCOLLECTOR, message)
-        return f"{message}"
+        message = f"{self.SYSCOLLECTOR_MQ}:{self.SYSCOLLECTOR}:{message}"
+        return message
 
     def generate_event(self):
         event = ''
