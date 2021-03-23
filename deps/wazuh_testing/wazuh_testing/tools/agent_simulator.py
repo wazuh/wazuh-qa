@@ -801,31 +801,31 @@ class GeneratorWinevt:
     def format_event(self):
         message = f"{{\"Message\":\"{random_string(500)}\"," \
                   f"\"Event\":" \
-                  f"\"<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'>"\
+                  f"\"<Event xmlns='{random_string(50)}'>"\
                   f"<System>" \
-                  f"<Provider Name='Microsoft-Windows-Security-Auditing' Guid='{{54849625-5478-4994-a5ba-3e3b0328c30d}}'/>" \
-                  f"<EventID>4719</EventID>" \
-                  f"<Version>0</Version>" \
-                  f"<Level>0</Level>" \
-                  f"<Task>13568</Task>" \
-                  f"<Opcode>0</Opcode>" \
-                  f"<Keywords>0x8020000000000000</Keywords>" \
+                  f"<Provider Name='Microsoft-Windows-Security-Auditing' Guid='{random_string(36)}'/>" \
+                  f"<EventID>{randint(0,10*6)}</EventID>" \
+                  f"<Version>{randint(0,10)}</Version>" \
+                  f"<Level>{randint(0,10)}</Level>" \
+                  f"<Task>{randint(0,10*5)}</Task>" \
+                  f"<Opcode>{randint(0,10)}</Opcode>" \
+                  f"<Keywords>{hex(randint(0,1000))}</Keywords>" \
                   f"<TimeCreated SystemTime='2019-05-28T09:29:41.443963000Z'/>" \
-                  f"<EventRecordID>965047</EventRecordID>" \
-                  f"<Correlation ActivityID='{{1115b961-1535-0000-8bbb-15113515d501}}'/>" \
-                  f"<Execution ProcessID='556' ThreadID='6024'/>" \
-                  f"<Channel>Security</Channel>" \
-                  f"<Computer>WIN-ACL01C4DS88</Computer>" \
+                  f"<EventRecordID>{randint(0,10*5)}</EventRecordID>" \
+                  f"<Correlation ActivityID='{random_string(36)}'/>" \
+                  f"<Execution ProcessID='{randint(0,10*3)}' ThreadID='{randint(0,10*3)}'/>" \
+                  f"<Channel>{choice(['Security', 'System', 'Application'])}</Channel>" \
+                  f"<Computer>{random_string(15)}</Computer>" \
                   f"<Security/></System>" \
                   f"<EventData>" \
-                  f"<Data Name='SubjectUserSid'>S-1-5-21-1331263578-1683884876-2739179494-500</Data>" \
-                  f"<Data Name='SubjectUserName'>Administrator</Data>" \
-                  f"<Data Name='SubjectDomainName'>WIN-ACL01C4DS88</Data>" \
-                  f"<Data Name='SubjectLogonId'>0x372c7</Data>" \
-                  f"<Data Name='CategoryId'>%%8277</Data>" \
-                  f"<Data Name='SubcategoryId'>%%13572</Data>" \
-                  f"<Data Name='SubcategoryGuid'>{{0cce9233-69ae-11d9-bed3-505054503030}}</Data>" \
-                  f"<Data Name='AuditPolicyChanges'>%%8449, %%8451</Data>" \
+                  f"<Data Name='SubjectUserSid'>{random_string(45)}</Data>" \
+                  f"<Data Name='SubjectUserName'>{random_string(40)}</Data>" \
+                  f"<Data Name='SubjectDomainName'>{random_string(45)}</Data>" \
+                  f"<Data Name='SubjectLogonId'>{hex(randint(0,10*4))}</Data>" \
+                  f"<Data Name='CategoryId'>%%{randint(0,10*5)}</Data>" \
+                  f"<Data Name='SubcategoryId'>%%{randint(0,10*5)}</Data>" \
+                  f"<Data Name='SubcategoryGuid'>{random_string(40)}</Data>" \
+                  f"<Data Name='AuditPolicyChanges'>%%{randint(0,10)}, %%{randint(0,10)}</Data>" \
                   f"</EventData>" \
                   f"</Event>\"}}"
         return message
