@@ -102,7 +102,7 @@ class Agent:
         syscollector_frequency (int): frequency to run syscollector scans. 0 to continuously send syscollector events.
         keepalive_frequency (int): frequency to send keepalive messages. 0 to continuously send keepalive messages.
         syscollector_batch_size (int): Size of the syscollector type batch events.
-	    sca_frequency (int): frequency to run SCA scans. 0 to continuously send SCA events.
+	  sca_frequency (int): frequency to run SCA scans. 0 to continuously send SCA events.
     """
     def __init__(self, manager_address, cypher="aes", os=None, rootcheck_sample=None,
                  id=None, name=None, key=None, version="v3.12.0", fim_eps=1000, fim_integrity_eps=1000,sca_eps=100,
@@ -746,8 +746,7 @@ class SCA:
             event_data['total_checks'] = total_checks
             event_data['score'] = 20
             event_data['start_time'] = self.started_time
-            sleep(1)
-            self.started_time = int(time())
+            self.started_time = int(time() + 1)
             event_data['end_time'] = self.started_time
             event_data['hash'] = getrandbits(256)
             event_data['hash_file'] = getrandbits(256)
@@ -1225,7 +1224,10 @@ class InjectorThread(threading.Thread):
 
 
     def run_module(self, module):
-        """Send a module message from the agent to the manager."""
+        """Send a module message from the agent to the manager.
+         Args:
+                module (str): Module name 
+        """
         module_info = self.agent.modules[module]
         eps = module_info['eps'] if 'eps' in module_info else 1
         frequency = module_info["frequency"] if 'frequency' in module_info else 1
