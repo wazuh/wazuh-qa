@@ -116,8 +116,8 @@ def main():
 
     args = arg_parser.parse_args()
 
-    if args.agent_batch > 2:
-        logging.warning("Launching more than 2 agents per process is not advisable as Python's GIL dramatically "
+    if args.agent_batch > 1:
+        logging.warning("Launching more than 1 agents per process is not advisable as Python's GIL dramatically "
                         "reduces the performance of the agent_simulator tool when there are multiple agents running in "
                         "the same process.")
 
