@@ -19,10 +19,11 @@ logger.setLevel(logging.INFO)
 
 
 class Monitor:
-    def __init__(self, process_name, value_unit='B', time_step=1, dst_dir=gettempdir()):
+    def __init__(self, process_name, value_unit='KB', time_step=1, version=None, dst_dir=gettempdir()):
         self.process_name = process_name
         self.value_unit = value_unit
         self.time_step = time_step
+        self.version = version
         self.data_units = {'B': 0, 'KB': 1, 'MB': 2}
         self.platform = platform
         self.dst_dir = dst_dir
@@ -55,6 +56,8 @@ class Monitor:
             return x / (1024 ** self.data_units[self.value_unit])
 
         with proc.oneshot():
+            info['Daemon'] = self.process_name
+            info['Version'] = self.version
             info['Timestamp'] = datetime.now().strftime('%H:%M:%S')
             info['CPU(%)'] = proc.cpu_percent(interval=0.1)
 
