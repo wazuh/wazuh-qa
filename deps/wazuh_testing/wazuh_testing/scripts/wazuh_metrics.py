@@ -28,8 +28,9 @@ def get_script_arguments():
                         help='Type the processes name to monitor separated by whitespace.')
     parser.add_argument('-s', '--sleep', dest='sleep_time', type=float, default=1, action='store',
                         help='Type the time in seconds between each entry.')
-    parser.add_argument('-u', '--units', dest='data_unit', default='B', choices=['B', 'KB', 'MB'],
+    parser.add_argument('-u', '--units', dest='data_unit', default='KB', choices=['B', 'KB', 'MB'],
                         help='Type unit for the bytes-related values. Default bytes.')
+    parser.add_argument('-v', '--version', dest='version', default=None, help='Version of the binaries. Default none.')
     parser.add_argument('-d', '--debug', dest='debug', action='store_true', default=False,
                         help='Enable debug level logging.')
 
