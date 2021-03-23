@@ -45,6 +45,7 @@ def main():
     process_list = options.process_list
     data_unit = options.data_unit
     sleep_time = options.sleep_time
+    version = options.version
 
     makedirs(CURRENT_SESSION)
     logging.basicConfig(filename=join(METRICS_FOLDER, 'wazuh-metrics.log'), filemode='a',
@@ -54,7 +55,7 @@ def main():
     logger.info(f'Started new session: {CURRENT_SESSION}')
 
     for process in process_list:
-        monitor = Monitor(process_name=process, value_unit=data_unit, time_step=sleep_time)
+        monitor = Monitor(process_name=process, value_unit=data_unit, time_step=sleep_time, version=version)
         monitor.start()
         MONITOR_LIST.append(monitor)
 
