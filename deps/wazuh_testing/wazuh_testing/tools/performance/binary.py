@@ -48,41 +48,45 @@ class Monitor:
             raise ValueError(f"The process {process_name} is not running.")
 
     def get_process_info(self, proc):
-        # Since these values may not be computed in SunOS or BSD, they are set to 0 as default value
-        info = {'Read_Ops': 0, 'Write_Ops': 0, f'Disk_Read({self.value_unit})': 0.0,
-                f'Disk_Written({self.value_unit})': 0.0, 'Disk(%)': 0.0, 'PID': self.pid}
+        # Pre-initialize the info dictionary. If there's a problem while taking metrics of the binary (i.e. it crashed)
+        # the CSV will set all its values to 0 to easily identify if there was a problem or not
+        info = {'Daemon': self.process_name, 'Version': self.version, 'Timestamp': datetime.now().strftime('%H:%M:%S'),
+                'Read_Ops': 0, 'Write_Ops': 0, f'Disk_Read({self.value_unit})': 0.0,
+                f'Disk_Written({self.value_unit})': 0.0, 'Disk(%)': 0.0, 'PID': self.pid,
+                'CPU(%)': 0.0, f'VMS({self.value_unit})': 0.0, f'RSS({self.value_unit})': 0.0,
+                f'USS({self.value_unit})': 0.0, f'PSS({self.value_unit})': 0.0,
+                f'SWAP({self.value_unit})': 0.0, 'FD': 0.0, 'Read_Ops': 0.0, 'Write_Ops': 0.0,
+                f'Disk_Read({self.value_unit})': 0.0, f'Disk_Written({self.value_unit})': 0.0, 'Disk(%)': 0.0,
+                }
 
         def unit_conversion(x):
             return x / (1024 ** self.data_units[self.value_unit])
+        try:
+            with proc.oneshot():
+                info['CPU(%)'] = proc.cpu_percent(interval=0.5)
 
-        with proc.oneshot():
-            info['Daemon'] = self.process_name
-            info['Version'] = self.version
-            info['Timestamp'] = datetime.now().strftime('%H:%M:%S')
-            info['CPU(%)'] = proc.cpu_percent(interval=0.1)
+                memory_data = proc.memory_full_info()
+                info[f'VMS({self.value_unit})'] = unit_conversion(memory_data.vms)
+                info[f'RSS({self.value_unit})'] = unit_conversion(memory_data.rss)
+                info[f'USS({self.value_unit})'] = unit_conversion(memory_data.uss)
+                info[f'PSS({self.value_unit})'] = unit_conversion(memory_data.pss)
+                info[f'SWAP({self.value_unit})'] = unit_conversion(memory_data.swap)
+                info['FD'] = proc.num_fds()
 
-            memory_data = proc.memory_full_info()
-            info[f'VMS({self.value_unit})'] = unit_conversion(memory_data.vms)
-            info[f'RSS({self.value_unit})'] = unit_conversion(memory_data.rss)
-            info[f'USS({self.value_unit})'] = unit_conversion(memory_data.uss)
-            info[f'PSS({self.value_unit})'] = unit_conversion(memory_data.pss)
-            info[f'SWAP({self.value_unit})'] = unit_conversion(memory_data.swap)
-            info['FD'] = proc.num_fds()
-
-            if self.platform == 'linux' or platform == "win32":
-                io_counters = proc.io_counters()
-                disk_usage_process = io_counters.read_bytes + io_counters.write_bytes
-                disk_io_counter = psutil.disk_io_counters()
-                disk_total = disk_io_counter.read_bytes + disk_io_counter.write_bytes
-                info['Read_Ops'] = io_counters.read_count
-                info['Write_Ops'] = io_counters.write_count
-                info[f'Disk_Read({self.value_unit})'] = unit_conversion(io_counters.read_bytes)
-                info[f'Disk_Written({self.value_unit})'] = unit_conversion(io_counters.write_bytes)
-                info['Disk(%)'] = disk_usage_process / disk_total * 100
-
-        info.update({key: round(value, 2) for key, value in info.items() if isinstance(value, (int, float))})
-        logger.debug(f'Recollected data for process {proc.pid}')
-        return info
+                if self.platform == 'linux' or platform == "win32":
+                    io_counters = proc.io_counters()
+                    disk_usage_process = io_counters.read_bytes + io_counters.write_bytes
+                    disk_io_counter = psutil.disk_io_counters()
+                    disk_total = disk_io_counter.read_bytes + disk_io_counter.write_bytes
+                    info['Read_Ops'] = io_counters.read_count
+                    info['Write_Ops'] = io_counters.write_count
+                    info[f'Disk_Read({self.value_unit})'] = unit_conversion(io_counters.read_bytes)
+                    info[f'Disk_Written({self.value_unit})'] = unit_conversion(io_counters.write_bytes)
+                    info['Disk(%)'] = disk_usage_process / disk_total * 100
+        finally:
+            info.update({key: round(value, 2) for key, value in info.items() if isinstance(value, (int, float))})
+            logger.debug(f'Recollected data for process {proc.pid}')
+            return info
 
     def _write_csv(self, data):
 
