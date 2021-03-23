@@ -106,7 +106,7 @@ class Agent:
                  id=None, name=None, key=None, version="v3.12.0", fim_eps=1000, fim_integrity_eps=1000,
                  syscollector_eps=1000, rootcheck_eps=100, authd_password=None, disable_all_modules=False,
                  rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, syscollector_frequency=60.0,
-                 syscollector_batch_size=10, hostinfo_eps = 100):
+                 syscollector_batch_size=10, hostinfo_eps = 100, winevt_eps = 100):
         self.id = id
         self.name = name
         self.key = key
@@ -121,6 +121,7 @@ class Agent:
         self.fim_integrity_eps = fim_integrity_eps
         self.syscollector_eps = syscollector_eps
         self.rootcheck_eps = rootcheck_eps
+        self.winevt_eps = winevt_eps
         self.rootcheck_frequency = rootcheck_frequency
         self.hostinfo_eps = hostinfo_eps
         self.keepalive_frequency = keepalive_frequency
@@ -137,6 +138,7 @@ class Agent:
         self.rootcheck_sample = rootcheck_sample
         self.rootcheck = None
         self.hostinfo = None
+        self.winevt = None
         self.fim = None
         self.fim_integrity = None
         self.syscollector = None
@@ -147,6 +149,7 @@ class Agent:
             "syscollector": {"status": "disabled", "frequency": self.syscollector_frequency, "eps": self.syscollector_eps},
             "rootcheck": {"status": "disabled", "frequency": self.rootcheck_frequency, "eps": self.rootcheck_eps},
             "hostinfo": {"status": "disabled", "eps": self.hostinfo_eps},
+            "winevt": {"status": "disabled", "eps": self.winevt_eps},
             "receive_messages": {"status": "enabled"},
         }
         self.sha_key = None
@@ -587,6 +590,8 @@ class Agent:
             self.init_fim_integrity()
         if self.modules['hostinfo']['status'] == 'enabled':
             self.init_hostinfo()
+        if self.modules['winevt']['status'] == 'enabled':
+            self.init_winevt()
 
     def init_syscollector(self):
         if self.syscollector is None:
@@ -607,6 +612,10 @@ class Agent:
     def init_hostinfo(self):
         if self.hostinfo is None:
             self.hostinfo = GeneratorHostinfo()
+
+    def init_winevt(self):
+        if self.winevt is None:
+            self.winevt = GeneratorWinevt()
 
     def get_connection_status(self):
         result = wdb.query_wdb(f"global get-agent-info {self.id}")
@@ -780,6 +789,49 @@ class GeneratorHostinfo:
         message += message_open_port_list
         message = fr"{self.HOSTINFO_MQ}:{self.localfile}:{message}"
         return message
+
+
+class GeneratorWinevt:
+
+    def __init__(self, agent_name, agent_id):
+        self.agent_name = agent_name
+        self.agent_id = agent_id
+        self.WINENVT = 'f'
+
+    def format_event(self):
+        message =   f"{{\"Message\":{random_string(500)}," \
+                    f"\"Event\":" \
+                    f"<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'>" \
+                    f"<System>" \
+                    f"<Provider Name='Microsoft-Windows-Security-Auditing' Guid='{{54849625-5478-4994-a5ba-3e3b0328c30d}}'/>" \
+                    f"<EventID>4719</EventID>" \
+                    f"<Version>0</Version>" \
+                    f"<Level>0</Level>" \
+                    f"<Task>13568</Task>" \
+                    f"<Opcode>0</Opcode>" \
+                    f"<Keywords>0x8020000000000000</Keywords>" \
+                    f"<TimeCreated SystemTime='2019-05-28T09:29:41.443963000Z'/>" \
+                    f"<EventRecordID>965047</EventRecordID>" \
+                    f"<Correlation ActivityID='{{1115b961-1535-0000-8bbb-15113515d501}}'/>" \
+                    f"<Execution ProcessID='556' ThreadID='6024'/>" \
+                    f"<Channel>Security</Channel>" \
+                    f"<Computer>WIN-ACL01C4DS88</Computer>" \
+                    f"<Security/></System>" \
+                    f"<EventData>" \
+                    f"<Data Name='SubjectUserSid'>S-1-5-21-1331263578-1683884876-2739179494-500</Data>" \
+                    f"<Data Name='SubjectUserName'>Administrator</Data>" \
+                    f"<Data Name='SubjectDomainName'>WIN-ACL01C4DS88</Data>" \
+                    f"<Data Name='SubjectLogonId'>0x372c7</Data>" \
+                    f"<Data Name='CategoryId'>%%8277</Data>" \
+                    f"<Data Name='SubcategoryId'>%%13572</Data>" \
+                    f"<Data Name='SubcategoryGuid'>{{0cce9233-69ae-11d9-bed3-505054503030}}</Data>" \
+                    f"<Data Name='AuditPolicyChanges'>%%8449, %%8451</Data>" \
+                    f"</EventData>" \
+                    f"</Event>}}"
+        return message
+
+    def generate_event(self):
+        return f"{self.WINENVT}:[{self.agent.id}] ({self.agent_name}) any->EventChannel:{self.format_event(self)}"
 
 
 class GeneratorFIM:
@@ -1205,6 +1257,19 @@ class InjectorThread(threading.Thread):
             if self.totalMessages % self.agent.modules["hostinfo"]["eps"] == 0:
                 sleep(1.0 - ((time() - start_time) % 1.0))
 
+    def winevt(self):
+        """Send a winevt message from the agent to the manager."""
+        sleep(10)
+        start_time = time()
+        self.agent.init_winevt()
+        # Loop events
+        while self.stop_thread == 0:
+            event = self.agent.create_event(self.agent.winevt.generate_event())
+            self.sender.send_event(event)
+            self.totalMessages += 1
+            if self.totalMessages % self.agent.modules["winevt"]["eps"] == 0:
+                sleep(1.0 - ((time() - start_time) % 1.0))
+
     def run(self):
         """Start the thread that will send messages to the manager."""
         # message = "1:/var/log/syslog:Jan 29 10:03:41 master sshd[19635]:
@@ -1225,6 +1290,8 @@ class InjectorThread(threading.Thread):
             self.agent.receive_message(self.sender)
         elif self.module == 'hostinfo':
             self.hostinfo()
+        elif self.module == 'winevt':
+            self.winevt()
         else:
             logging.debug("Module unknown: {}".format(self.module))
             pass
