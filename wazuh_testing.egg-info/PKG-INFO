@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: wazuh-testing
+Version: 4.2.0
+Summary: Wazuh testing utilites to help programmers automate tests
+Home-page: https://github.com/wazuh
+Author: Wazuh
+Author-email: hello@wazuh.com
+License: GPLv2
+Description: UNKNOWN
+Platform: UNKNOWN

@@ -710,12 +710,14 @@ class SCA:
         self.count = 0
         self.SCA_MQ = 'p'
         self.SCA = 'sca'
+        self.started_time = int(time())
 
     def get_message(self):
-        if self.count % 50 == 0:
+        if self.count % 100 == 0:
             msg = self.create_sca_event('summary')
         else:
             msg = self.create_sca_event('check')
+        self.count += 1
 
         msg = msg.strip('\n')
 
@@ -730,6 +732,8 @@ class SCA:
 
         def create_summary_sca_event(event_data):
             event_data['name'] = f"CIS Benchmark for {self.os}"
+            event_data['policy_id'] = f"cis_{self.os}_linux"
+            event_data['file'] = f"cis_{self.os}_linux.yml"
             event_data['description'] = 'This provides prescriptive guidance for establishing a secure configuration.'
             event_data['references'] = 'https://www.cisecurity.org/cis-benchmarks'
             total_checks = randint(0, 900)
@@ -741,18 +745,22 @@ class SCA:
             event_data['invalid'] = invalid_checks
             event_data['total_checks'] = total_checks
             event_data['score'] = str(random() * 100)
-            event_data['start_time'] = '1616067879'
-            event_data['end_time'] = '1616067883'
+            event_data['start_time'] = self.started_time
+            sleep(1)
+            self.started_time = int(time())
+            event_data['end_time'] = self.started_time
             event_data['hash'] = getrandbits(256)
             event_data['hash_file'] = getrandbits(256)
             event_data['force_alert'] = '1'
             return event_data
 
         def create_check_sca_event(event_data):
+            event_data['type'] = 'check'
+            event_data['id'] = randint(0, 9999999999)
             event_data['policy'] = f"CIS Benchmark for {self.os}"
-            event_data['policy_id'] = 'cis_{self.os}_policy'
+            event_data['policy_id'] = f"cis_{self.os}_policy"
             event_data['check'] = {}
-            event_data['check']['id'] = str(randint(0, 99999))
+            event_data['check']['id'] = randint(0, 99999)
             event_data['check']['title'] = 'Ensure root is the only UID 0 account'
             event_data['check']['description'] = 'Any account with UID 0 has superuser privileges on the system'
             event_data['check']['rationale'] = 'This access must be limited to only the default root account'
@@ -786,7 +794,7 @@ class Rootcheck:
         self.agent_name = agent_name
         self.agent_id = agent_id
         self.ROOTCHECK = 'rootcheck'
-        self.ROOTCHECK_MQROOTCHECK_MQ = '9'
+        self.ROOTCHECK_MQ = '9'
         self.messages_list = []
         self.message = cycle(self.messages_list)
         self.rootcheck_path = ""
