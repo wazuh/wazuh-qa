@@ -799,35 +799,27 @@ class GeneratorWinevt:
         self.WINENVT = 'f'
 
     def format_event(self):
-        message = f"{{\"Message\":\"{random_string(500)}\"," \
-                  f"\"Event\":" \
-                  f"\"<Event xmlns='{random_string(50)}'>"\
-                  f"<System>" \
-                  f"<Provider Name='Microsoft-Windows-Security-Auditing' Guid='{random_string(36)}'/>" \
-                  f"<EventID>{randint(0,10*6)}</EventID>" \
-                  f"<Version>{randint(0,10)}</Version>" \
-                  f"<Level>{randint(0,10)}</Level>" \
-                  f"<Task>{randint(0,10*5)}</Task>" \
-                  f"<Opcode>{randint(0,10)}</Opcode>" \
-                  f"<Keywords>{hex(randint(0,1000))}</Keywords>" \
-                  f"<TimeCreated SystemTime='2019-05-28T09:29:41.443963000Z'/>" \
-                  f"<EventRecordID>{randint(0,10*5)}</EventRecordID>" \
-                  f"<Correlation ActivityID='{random_string(36)}'/>" \
-                  f"<Execution ProcessID='{randint(0,10*3)}' ThreadID='{randint(0,10*3)}'/>" \
-                  f"<Channel>{choice(['Security', 'System', 'Application'])}</Channel>" \
-                  f"<Computer>{random_string(15)}</Computer>" \
-                  f"<Security/></System>" \
-                  f"<EventData>" \
-                  f"<Data Name='SubjectUserSid'>{random_string(45)}</Data>" \
-                  f"<Data Name='SubjectUserName'>{random_string(40)}</Data>" \
-                  f"<Data Name='SubjectDomainName'>{random_string(45)}</Data>" \
-                  f"<Data Name='SubjectLogonId'>{hex(randint(0,10*4))}</Data>" \
-                  f"<Data Name='CategoryId'>%%{randint(0,10*5)}</Data>" \
-                  f"<Data Name='SubcategoryId'>%%{randint(0,10*5)}</Data>" \
-                  f"<Data Name='SubcategoryGuid'>{random_string(40)}</Data>" \
-                  f"<Data Name='AuditPolicyChanges'>%%{randint(0,10)}, %%{randint(0,10)}</Data>" \
-                  f"</EventData>" \
-                  f"</Event>\"}}"
+        message = f'{{"Message":"{random_string(30, False)}' \
+                  f'\r\n\r\nSubject:\r\n\tSecurity ID:\t\t{random_string(30)}\r\n\t' \
+                  f'Account Name:\t\t{random_string(10)}\r\n\tAccount Domain:\t\t{random_string(10)}\r\n\t' \
+                  f'Logon ID:\t\t({hex(randint(0, 12))}\r\n\r\nAudit Policy Change:\r\n\t' \
+                  f'Category:\t\tPolicy Change\r\n\tSubcategory:\t\tFiltering Platform Policy Change\r\n\t' \
+                  f'Subcategory GUID:\t{random_string(50)}\r\n\tChanges:\t\t' \
+                  f'Success Added, Failure added","Event":"' \
+                  f'<Event xmlns=\'{random_string(30)}\'>' \
+                  f'<System><Provider Name=\'Microsoft-Windows-Security-Auditing\' ' \
+                  f'Guid=\'{random_string(30)}\'/><EventID>{randint(0, 10 * 4)}</EventID>' \
+                  f'<Version>{randint(0, 10)}</Version><Level>{randint(0, 10)}</Level><Task>{randint(0, 10 * 4)}</Task><Opcode>0' \
+                  f'</Opcode><Keywords>{(hex(randint(0, 10 * 5)))}</Keywords><TimeCreated ' \
+                  f'SystemTime=\'2019-05-28T09:29:41.443963000Z\'/><EventRecordID></EventRecordID>' \
+                  f'<Correlation ActivityID=\'{random_string(30)}\'/><Execution ProcessID=\'{randint(0, 10 * 5)}\' ' \
+                  f'ThreadID=\'{randint(0, 10 * 5)}\'/><Channel>Security</Channel><Computer>{random_string(14)}</Computer><Security/>' \
+                  f'</System><EventData><Data Name=\'SubjectUserSid\'>{random_string(30)}' \
+                  f'</Data><Data Name=\'SubjectUserName\'>Administrator</Data><Data Name=\'SubjectDomainName\'>' \
+                  f'{random_string(20)}</Data><Data Name=\'SubjectLogonId\'>{(hex(randint(0, 10 * 3)))}</Data><Data Name=\'CategoryId\'>' \
+                  f'%%{randint(0, 10 * 4)}</Data><Data Name=\'SubcategoryId\'>%%{randint(0, 10 * 5)}</Data><Data Name=\'SubcategoryGuid\'>' \
+                  f'{random_string(40)}</Data><Data Name=\'AuditPolicyChanges\'>' \
+                  f'%%{randint(0, 10 * 4)}, %%{randint(0, 10 * 4)}</Data></EventData></Event>"}}'
         return message
 
     def generate_event(self):
