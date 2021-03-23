@@ -20,12 +20,12 @@ import ssl
 import threading
 import zlib
 from datetime import date
-from random import randint, sample, choice
-
+from random import randint, sample, choice, random, getrandbits
 from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
 from string import ascii_letters, digits
 from struct import pack
 from time import mktime, localtime, sleep, time
+from itertools import cycle
 
 import wazuh_testing.wazuh_db as wdb
 import wazuh_testing.tools.syscollector as syscollector
@@ -75,7 +75,8 @@ class Agent:
         fim_eps (int): Fim's maximum event reporting throughput. Default `1000`.
         fim_integrity_eps (int): Fim integrity's maximum event reporting throughput. Default `100`.
         syscollector_eps (int): Syscollector's maximum event reporting throughput. Default `100`.
-        rootcheck_eps (float): Rootcheck's maximum event reporting throughput. Default `60.0`.
+        rootcheck_eps (float): Rootcheck's maximum event reporting throughput. Default `100`.
+        sca_eps (float): SCA's maximum event reporting throughput. Default `100`.
         manager_address (str): Manager IP address.
         encryption_key (bytes): Encryption key used for encrypt and decrypt the message.
         keep_alive_event (bytes): Keep alive event (read from template data according to OS and parsed to an event).
@@ -101,12 +102,13 @@ class Agent:
         syscollector_frequency (int): frequency to run syscollector scans. 0 to continuously send syscollector events.
         keepalive_frequency (int): frequency to send keepalive messages. 0 to continuously send keepalive messages.
         syscollector_batch_size (int): Size of the syscollector type batch events.
+	    sca_frequency (int): frequency to run SCA scans. 0 to continuously send SCA events.
     """
     def __init__(self, manager_address, cypher="aes", os=None, rootcheck_sample=None,
-                 id=None, name=None, key=None, version="v3.12.0", fim_eps=1000, fim_integrity_eps=1000,
+                 id=None, name=None, key=None, version="v3.12.0", fim_eps=1000, fim_integrity_eps=1000,sca_eps=100,
                  syscollector_eps=1000, rootcheck_eps=100, authd_password=None, disable_all_modules=False,
-                 rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, syscollector_frequency=60.0,
-                 syscollector_batch_size=10, hostinfo_eps = 100, winevt_eps = 100):
+                 rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, sca_frequency=60,
+                 syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100):
         self.id = id
         self.name = name
         self.key = key
@@ -122,11 +124,12 @@ class Agent:
         self.syscollector_eps = syscollector_eps
         self.rootcheck_eps = rootcheck_eps
         self.winevt_eps = winevt_eps
+        self.sca_eps = sca_eps
         self.rootcheck_frequency = rootcheck_frequency
+        self.sca_frequency = sca_frequency
         self.hostinfo_eps = hostinfo_eps
         self.keepalive_frequency = keepalive_frequency
         self.syscollector_frequency = syscollector_frequency
-
         self.manager_address = manager_address
         self.encryption_key = ""
         self.keep_alive_event = ""
@@ -134,6 +137,7 @@ class Agent:
         self.merged_checksum = 'd6e3ac3e75ca0319af3e7c262776f331'
         self.startup_msg = ""
         self.authd_password = authd_password
+        self.sca = None
         self.syscollector_batch_size = syscollector_batch_size
         self.rootcheck_sample = rootcheck_sample
         self.rootcheck = None
@@ -148,6 +152,7 @@ class Agent:
             "fim_integrity": {"status": "disabled", "eps": self.fim_integrity_eps},
             "syscollector": {"status": "disabled", "frequency": self.syscollector_frequency, "eps": self.syscollector_eps},
             "rootcheck": {"status": "disabled", "frequency": self.rootcheck_frequency, "eps": self.rootcheck_eps},
+            "sca": {"status": "disabled", "frequency": self.sca_frequency, "eps": self.sca_eps},
             "hostinfo": {"status": "disabled", "eps": self.hostinfo_eps},
             "winevt": {"status": "disabled", "eps": self.winevt_eps},
             "receive_messages": {"status": "enabled"},
@@ -592,6 +597,12 @@ class Agent:
             self.init_hostinfo()
         if self.modules['winevt']['status'] == 'enabled':
             self.init_winevt()
+        if self.modules['sca']['status'] == 'enabled':
+            self.init_sca()
+
+    def init_sca(self):
+        if self.sca is None:
+            self.sca = SCA(self.os)
 
     def init_syscollector(self):
         if self.syscollector is None:
@@ -599,7 +610,7 @@ class Agent:
 
     def init_rootcheck(self):
         if self.rootcheck is None:
-            self.rootcheck = Rootcheck(self.rootcheck_sample)
+            self.rootcheck = Rootcheck(self.rootcheck_sample, self.name, self.id)
 
     def init_fim(self):
         if self.fim is None:
@@ -701,12 +712,99 @@ class GeneratorSyscollector:
         return self.format_event(event)
 
 
-class Rootcheck:
-    def __init__(self, os, rootcheck_sample=None):
+class SCA:
+    def __init__(self, os):
+        self.last_scan_id = 0
         self.os = os
+        self.count = 0
+        self.SCA_MQ = 'p'
+        self.SCA = 'sca'
+        self.started_time = int(time())
+
+    def get_message(self):
+        if self.count % 100 == 0:
+            msg = self.create_sca_event('summary')
+        else:
+            msg = self.create_sca_event('check')
+        self.count += 1
+
+        msg = msg.strip('\n')
+
+        return f"{self.SCA_MQ}:{self.SCA}:{msg}"
+
+
+    def create_sca_event(self, event_type):
+        event_data = json.loads('{}')
+        event_data['type'] = event_type
+        event_data['scan_id'] = self.last_scan_id
+        self.last_scan_id += 1
+
+        def create_summary_sca_event(event_data):
+            event_data['name'] = f"CIS Benchmark for {self.os}"
+            event_data['policy_id'] = f"cis_{self.os}_linux"
+            event_data['file'] = f"cis_{self.os}_linux.yml"
+            event_data['description'] = 'This provides prescriptive guidance for establishing a secure configuration.'
+            event_data['references'] = 'https://www.cisecurity.org/cis-benchmarks'
+            total_checks = randint(0, 900)
+            passed_checks = randint(0, total_checks)
+            failed_checks = randint(0, total_checks - passed_checks)
+            invalid_checks = total_checks - failed_checks - passed_checks
+            event_data['passed'] = passed_checks
+            event_data['failed'] = failed_checks
+            event_data['invalid'] = invalid_checks
+            event_data['total_checks'] = total_checks
+            event_data['score'] = 20
+            event_data['start_time'] = self.started_time
+            self.started_time = int(time() + 1)
+            event_data['end_time'] = self.started_time
+            event_data['hash'] = getrandbits(256)
+            event_data['hash_file'] = getrandbits(256)
+            event_data['force_alert'] = '1'
+            return event_data
+
+        def create_check_sca_event(event_data):
+            event_data['type'] = 'check'
+            event_data['id'] = randint(0, 9999999999)
+            event_data['policy'] = f"CIS Benchmark for {self.os}"
+            event_data['policy_id'] = f"cis_{self.os}_policy"
+            event_data['check'] = {}
+            event_data['check']['id'] = randint(0, 99999)
+            event_data['check']['title'] = 'Ensure root is the only UID 0 account'
+            event_data['check']['description'] = 'Any account with UID 0 has superuser privileges on the system'
+            event_data['check']['rationale'] = 'This access must be limited to only the default root account'
+            event_data['check']['remediation'] = 'Remove any users other than root with UID 0'
+            event_data['check']['compliance'] = {}
+            event_data['check']['compliance']['cis'] = '6.2.6'
+            event_data['check']['compliance']['cis_csc'] = '5.1'
+            event_data['check']['compliance']['pci_dss'] = '10.2.5'
+            event_data['check']['compliance']['hipaa'] = '164.312.b'
+            event_data['check']['compliance']['nist_800_53'] = 'AU.14,AC.7'
+            event_data['check']['compliance']['gpg_13'] = '7.8'
+            event_data['check']['compliance']['gdpr_IV'] = '35.7,32.2'
+            event_data['check']['compliance']['tsc'] = 'CC6.1,CC6.8,CC7.2,CC7.3,CC7.4'
+            event_data['check']['rules'] = 'f:/etc/passwd -> !r:^# && !r:^\\\\s*\\\\t*root: && r:^\\\\w+:\\\\w+:0:\"]'
+            event_data['check']['condition'] = 'none'
+            event_data['check']['file'] = '/etc/passwd'
+            event_data['check']['result'] = choice(['passed', 'failed'])
+            return event_data
+
+        if event_type == 'summary':
+            event_data = create_summary_sca_event(event_data)
+        elif event_type == 'check':
+            event_data = create_check_sca_event(event_data)
+
+        return json.dumps(event_data)
+
+
+class Rootcheck:
+    def __init__(self, os, agent_name, agent_id, rootcheck_sample=None):
+        self.os = os
+        self.agent_name = agent_name
+        self.agent_id = agent_id
         self.ROOTCHECK = 'rootcheck'
         self.ROOTCHECK_MQ = '9'
-        self.rootcheck = []
+        self.messages_list = []
+        self.message = cycle(self.messages_list)
         self.rootcheck_path = ""
         self.rootcheck_sample = rootcheck_sample
         self.setup()
@@ -721,9 +819,18 @@ class Rootcheck:
             while line:
                 if not line.startswith("#"):
                     msg = "{0}:{1}:{2}".format(self.ROOTCHECK_MQ, self.ROOTCHECK, line.strip("\n"))
-                    self.rootcheck.append(msg)
+                    self.messages_list.append(msg)
                 line = fp.readline()
 
+    def get_message(self):
+        message = next(self.message)
+        if message == 'Starting rootcheck scan.':
+            logging.debug(f"Scan started - {self.agent_name}({self.agent_id}) "
+                          f"- rootcheck({self.rootcheck_path})")
+        if message == 'Ending rootcheck scan.':
+            logging.debug(f"Scan ended - {self.agent_name}({self.agent_id}) "
+                          f"- rootcheck({self.rootcheck_path})")
+        return message
 
 class GeneratorIntegrityFIM:
     def __init__(self, agent_id, agent_name, agent_version):
@@ -1159,108 +1266,61 @@ class InjectorThread(threading.Thread):
                   ((time() - start_time) %
                    self.agent.modules["keepalive"]["frequency"]))
 
-    def fim(self):
-        """Send a File Integrity Monitoring message from the agent to the manager."""
+
+    def run_module(self, module):
+        """Send a module message from the agent to the manager.
+         Args:
+                module (str): Module name 
+        """
+        module_info = self.agent.modules[module]
+        eps = module_info['eps'] if 'eps' in module_info else 1
+        frequency = module_info["frequency"] if 'frequency' in module_info else 1
+
         sleep(10)
         start_time = time()
+
+        if frequency > 1:
+            batch_messages = eps * 0.5 * frequency
+        else:
+            batch_messages = eps
+
+        if module == 'hostinfo':
+            self.agent.init_hostinfo()
+            module_event_generator = self.agent.hostinfo.generate_event
+        elif module == 'rootcheck':
+            self.agent.init_rootcheck()
+            module_event_generator = self.agent.rootcheck.get_message
+            batch_messages = len(self.agent.rootcheck.messages_list) * eps
+        elif module == 'syscollector':
+            self.agent.init_syscollector()
+            module_event_generator = self.agent.syscollector.generate_event
+        elif module == 'fim_integrity':
+            self.agent.init_fim_integrity()
+            module_event_generator = self.agent.fim_integrity.get_message
+        elif module == 'fim':
+            module_event_generator = self.agent.fim.get_message
+        elif module == 'sca':
+            self.agent.init_sca()
+            module_event_generator = self.agent.sca.get_message
+        elif module == 'winevt':
+            self.agent.init_sca()
+            module_event_generator = self.agent.winevt.get_message
+        else:
+            raise ValueError('Invalid module selected')
+
         # Loop events
         while self.stop_thread == 0:
-            event = self.agent.create_event(self.agent.fim.get_message())
-            self.sender.send_event(event)
-            self.totalMessages += 1
-            if self.totalMessages % self.agent.modules["fim"]["eps"] == 0:
-                sleep(1.0 - ((time() - start_time) % 1.0))
-
-    def fim_integrity(self):
-        """Send an integrity FIM message from the agent to the manager"""
-        sleep(10)
-        start_time = time()
-        self.agent.init_fim_integrity()
-        # Loop events
-        while self.stop_thread == 0:
-            event = self.agent.create_event(self.agent.fim_integrity.get_message())
-            self.sender.send_event(event)
-            self.totalMessages += 1
-            if self.totalMessages % self.agent.modules["fim_integrity"]["eps"] == 0:
-                sleep(1.0 - ((time() - start_time) % 1.0))
-
-    def syscollector(self):
-        """Send a syscollector message from the agent to the manager."""
-        sleep(10)
-        start_time = time()
-        self.agent.init_syscollector()
-        frequency = self.agent.modules["syscollector"]["frequency"]
-        eps = self.agent.modules["syscollector"]["eps"]
-        events_to_send = 0.5 * eps * frequency
-        while self.stop_thread == 0:
-            events_sent = 0
-            logging.debug(f"Scan started - {self.agent.name}({self.agent.id}) - ")
-            while events_sent < events_to_send:
-                syscollector_event = self.agent.syscollector.generate_event()
-                event = self.agent.create_event(syscollector_event)
+            sent_messages = 0
+            while sent_messages < batch_messages:
+                event_msg = module_event_generator()
+                event = self.agent.create_event(event_msg)
                 self.sender.send_event(event)
                 self.totalMessages += 1
+                sent_messages += 1
                 if self.totalMessages % eps == 0:
-                    self.totalMessages = 0
                     sleep(1.0 - ((time() - start_time) % 1.0))
-
-            logging.debug(f"Scan ended - {self.agent.name}({self.agent.id}) - ")
-
             if frequency > 1:
                 sleep(frequency - ((time() - start_time) % frequency))
-
-
-    def rootcheck(self):
-        """Send a rootcheck message from the agent to the manager."""
-        sleep(10)
-        start_time = time()
-        self.agent.init_rootcheck()
-        frequency = self.agent.modules["rootcheck"]["frequency"]
-        eps = self.agent.modules["rootcheck"]["eps"]
-        events_to_send = 0.5 * eps * frequency
-        while self.stop_thread == 0:
-            events_sent = 0
-            # Send agent rootcheck scan
-            logging.debug(f"Scan started - {self.agent.name}({self.agent.id}) "
-                          f"- rootcheck({self.agent.rootcheck.rootcheck_path})")
-            while events_sent < events_to_send:
-                for item in self.agent.rootcheck.rootcheck:
-                    self.sender.send_event(self.agent.create_event(item))
-                    self.totalMessages += 1
-                    if self.totalMessages % eps == 0:
-                        self.totalMessages = 0
-                        sleep(1.0 - ((time() - start_time) % 1.0))
-            logging.debug(
-                f"Scan ended - {self.agent.name}({self.agent.id}) - rootcheck({self.agent.rootcheck.rootcheck_path})"
-            )
-            if frequency > 1:
-                sleep(frequency - ((time() - start_time) % frequency))
-
-    def hostinfo(self):
-        """Send a hostinfo message from the agent to the manager."""
-        sleep(10)
-        start_time = time()
-        self.agent.init_hostinfo()
-        # Loop events
-        while self.stop_thread == 0:
-            event = self.agent.create_event(self.agent.hostinfo.generate_event())
-            self.sender.send_event(event)
-            self.totalMessages += 1
-            if self.totalMessages % self.agent.modules["hostinfo"]["eps"] == 0:
-                sleep(1.0 - ((time() - start_time) % 1.0))
-
-    def winevt(self):
-        """Send a winevt message from the agent to the manager."""
-        sleep(10)
-        start_time = time()
-        self.agent.init_winevt()
-        # Loop events
-        while self.stop_thread == 0:
-            event = self.agent.create_event(self.agent.winevt.generate_event())
-            self.sender.send_event(event)
-            self.totalMessages += 1
-            if self.totalMessages % self.agent.modules["winevt"]["eps"] == 0:
-                sleep(1.0 - ((time() - start_time) % 1.0))
 
     def run(self):
         """Start the thread that will send messages to the manager."""
@@ -1270,23 +1330,8 @@ class InjectorThread(threading.Thread):
         logging.debug(f"Starting - {self.agent.name}({self.agent.id})({self.agent.os}) - {self.module}")
         if self.module == "keepalive":
             self.keep_alive()
-        elif self.module == "fim":
-            self.fim()
-        elif self.module == "syscollector":
-            self.syscollector()
-        elif self.module == "rootcheck":
-            self.rootcheck()
-        elif self.module == "fim_integrity":
-            self.fim_integrity()
-        elif self.module == "receive_messages":
-            self.agent.receive_message(self.sender)
-        elif self.module == 'hostinfo':
-            self.hostinfo()
-        elif self.module == 'winevt':
-            self.winevt()
         else:
-            logging.debug("Module unknown: {}".format(self.module))
-            pass
+            self.run_module(self.module)
 
     def stop_rec(self):
         """Stop the thread to avoid sending any more messages."""
@@ -1324,21 +1369,4 @@ def create_agents(agents_number, manager_address, cypher='aes', fim_eps=None, au
         agents.append(Agent(manager_address, cypher, fim_eps=fim_eps, authd_password=authd_password,
                             os=agent_os, version=agent_version, disable_all_modules=disable_all_modules))
 
-        agent_count = agent_count + 1
-
-    return agents
-
-
-def connect(agent,  manager_address='localhost', protocol=TCP, manager_port='1514'):
-    """Connects an agent to the manager
-    Args:
-        agent (Agent): agent to connect.
-        manager_address (str): address of the manager. It can be an IP or a DNS.
-        protocol (str): protocol used to connect with the manager. Defaults to 'TCP'.
-        manager_port (str): port used to connect with the manager. Defaults to '1514'.
-    """
-    sender = Sender(manager_address, protocol=protocol, manager_port=manager_port)
-    injector = Injector(sender, agent)
-    injector.run()
-    agent.wait_status_active()
     return sender, injector
