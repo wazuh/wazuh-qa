@@ -906,27 +906,32 @@ class GeneratorWinevt:
         self.WINENVT = 'f'
 
     def format_event(self):
-        message = f'{{"Message":"{random_string(30, False)}' \
-                  f'\r\n\r\nSubject:\r\n\tSecurity ID:\t\t{random_string(30)}\r\n\t' \
-                  f'Account Name:\t\t{random_string(10)}\r\n\tAccount Domain:\t\t{random_string(10)}\r\n\t' \
-                  f'Logon ID:\t\t({hex(randint(0, 12))}\r\n\r\nAudit Policy Change:\r\n\t' \
-                  f'Category:\t\tPolicy Change\r\n\tSubcategory:\t\tFiltering Platform Policy Change\r\n\t' \
-                  f'Subcategory GUID:\t{random_string(50)}\r\n\tChanges:\t\t' \
-                  f'Success Added, Failure added","Event":"' \
-                  f'<Event xmlns=\'{random_string(30)}\'>' \
-                  f'<System><Provider Name=\'Microsoft-Windows-Security-Auditing\' ' \
-                  f'Guid=\'{random_string(30)}\'/><EventID>{randint(0, 10 * 4)}</EventID>' \
-                  f'<Version>{randint(0, 10)}</Version><Level>{randint(0, 10)}</Level><Task>{randint(0, 10 * 4)}</Task><Opcode>0' \
-                  f'</Opcode><Keywords>{(hex(randint(0, 10 * 5)))}</Keywords><TimeCreated ' \
-                  f'SystemTime=\'2019-05-28T09:29:41.443963000Z\'/><EventRecordID></EventRecordID>' \
-                  f'<Correlation ActivityID=\'{random_string(30)}\'/><Execution ProcessID=\'{randint(0, 10 * 5)}\' ' \
-                  f'ThreadID=\'{randint(0, 10 * 5)}\'/><Channel>Security</Channel><Computer>{random_string(14)}</Computer><Security/>' \
-                  f'</System><EventData><Data Name=\'SubjectUserSid\'>{random_string(30)}' \
-                  f'</Data><Data Name=\'SubjectUserName\'>Administrator</Data><Data Name=\'SubjectDomainName\'>' \
-                  f'{random_string(20)}</Data><Data Name=\'SubjectLogonId\'>{(hex(randint(0, 10 * 3)))}</Data><Data Name=\'CategoryId\'>' \
-                  f'%%{randint(0, 10 * 4)}</Data><Data Name=\'SubcategoryId\'>%%{randint(0, 10 * 5)}</Data><Data Name=\'SubcategoryGuid\'>' \
-                  f'{random_string(40)}</Data><Data Name=\'AuditPolicyChanges\'>' \
-                  f'%%{randint(0, 10 * 4)}, %%{randint(0, 10 * 4)}</Data></EventData></Event>"}}'
+
+        message = f"{{\"Message\":\"System audit policy was changed.\r\n\r\nSubject:\r\n\t" \
+                  "Security ID:\t\tS-1-5-21-1331263578-1683884876-2739179494-500\r\n\t" \
+                  "Account Name:\t\tAdministrator\r\n\tAccount Domain:\t\tWIN-ACL01C4DS88\r\n\t" \
+                  "Logon ID:\t\t0x372C7\r\n\r\nAudit Policy Change:\r\n\t" \
+                  "Category:\t\tPolicy Change\r\n\tSubcategory:\t\t" \
+                  "Filtering Platform Policy Change\r\n\t" \
+                  "Subcategory GUID:\t{0cce9233-69ae-11d9-bed3-505054503030}\r\n\t" \
+                  "Changes:\t\tSuccess Added, Failure added\"," \
+                  "\"Event\":\"<Event xmlns=\'http://schemas.microsoft.com/win/2004/08/events/event\'>" \
+                  "<System><Provider Name=\'Microsoft-Windows-Security-Auditing\' " \
+                  "Guid=\'{54849625-5478-4994-a5ba-3e3b0328c30d}\'/>" \
+                  f"<EventID>{randint(0,10*5)}</EventID><Version>0</Version><Level>0</Level>" \
+                  "<Task>13568</Task><Opcode>0</Opcode><Keywords>0x8020000000000000</Keywords>" \
+                  "<TimeCreated SystemTime=\'2019-05-28T09:29:41.443963000Z\'/><EventRecordID>965047" \
+                  "</EventRecordID><Correlation ActivityID=\'{1115b961-1535-0000-8bbb-15113515d501}\'/>" \
+                  "<Execution ProcessID=\'556\' ThreadID=\'6024\'/><Channel>Security</Channel>" \
+                  "<Computer>WIN-ACL01C4DS88</Computer><Security/></System><EventData>" \
+                  "<Data Name=\'SubjectUserSid\'>S-1-5-21-1331263578-1683884876-2739179494-500</Data>" \
+                  "<Data Name=\'SubjectUserName\'>Administrator</Data>" \
+                  "<Data Name=\'SubjectDomainName\'>WIN-ACL01C4DS88</Data>" \
+                  "<Data Name=\'SubjectLogonId\'>0x372c7</Data>" \
+                  "<Data Name=\'CategoryId\'>%%8277" \
+                  "</Data><Data Name=\'SubcategoryId\'>%%13572</Data>" \
+                  "<Data Name=\'SubcategoryGuid\'>{0cce9233-69ae-11d9-bed3-505054503030}</Data" \
+                  "><Data Name=\'AuditPolicyChanges\'>%%8449, %%8451</Data></EventData></Event>\"}'"
         return message
 
     def generate_event(self):
@@ -1303,8 +1308,8 @@ class InjectorThread(threading.Thread):
             self.agent.init_sca()
             module_event_generator = self.agent.sca.get_message
         elif module == 'winevt':
-            self.agent.init_sca()
-            module_event_generator = self.agent.winevt.get_message
+            self.agent.init_winevt()
+            module_event_generator = self.agent.winevt.generate_event
         else:
             raise ValueError('Invalid module selected')
 
