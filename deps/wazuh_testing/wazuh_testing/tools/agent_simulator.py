@@ -744,7 +744,7 @@ class SCA:
             event_data['failed'] = failed_checks
             event_data['invalid'] = invalid_checks
             event_data['total_checks'] = total_checks
-            event_data['score'] = str(random() * 100)
+            event_data['score'] = 20
             event_data['start_time'] = self.started_time
             sleep(1)
             self.started_time = int(time())

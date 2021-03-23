@@ -2,6 +2,8 @@
 __pycache__
 
 venv
+wazuh_testing.egg-info
+dist
 
 # Python bytecode files
 *.pyc

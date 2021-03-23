@@ -1,6 +1,0 @@
-README.md
-wazuh_testing.egg-info/PKG-INFO
-wazuh_testing.egg-info/SOURCES.txt
-wazuh_testing.egg-info/dependency_links.txt
-wazuh_testing.egg-info/not-zip-safe
-wazuh_testing.egg-info/top_level.txt
