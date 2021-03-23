@@ -50,7 +50,7 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
                 if modules_eps is not None and 'eps' in agent.modules[module]:
                     agent.modules[module]['eps'] = modules_eps[index]
                 else:
-                    agent.modules[module]['eps'] = eps/sending_modules
+                    agent.modules[module]['eps'] = eps // sending_modules
                     
             else:
                 agent.modules[module]['status'] = 'disabled'
@@ -122,11 +122,11 @@ def main():
                         "the same process.")
 
     # Calculate modules EPS
-    if args.modules is not None and args.modules_eps is not None:
-            len_mod = len(args.modules)
-            len_eps = len(args.modules_eps)
-            if len_mod != len_eps:
-                arg_parser.error(f"Wrong number of eps introduced for selected modules:{len_eps}, expected:{len_mod}.")
+    if args.modules_eps is not None:
+        len_mod = len(args.modules)
+        len_eps = len(args.modules_eps)
+        if len_mod != len_eps:
+            arg_parser.error(f"Wrong number of eps introduced for selected modules:{len_eps}, expected:{len_mod}.")
 
     # Calculate agents per process
     remainder = args.n_agents % args.agent_batch
