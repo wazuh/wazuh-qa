@@ -65,7 +65,7 @@ class DataVisualizer:
             ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=self.x_ticks_interval))
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
 
-    def plot_binaries_dataset(self):
+    def _plot_binaries_dataset(self):
         elements = self.dataframe.columns.drop(BINARY_NON_PRINTABLE_HEADERS)
         for element in elements:
             fig, ax = plt.subplots()
@@ -79,6 +79,9 @@ class DataVisualizer:
             plt.xticks(rotation=90)
             csv_name = sub(pattern=r'\(.*\)', string=element, repl='')
             plt.savefig(join(self.store_path, f"{csv_name}.svg"), dpi=1200, format='svg')
+
+    def plot(self):
+        self._plot_binaries_dataset()
 
     def _get_daemons(self):
         """Get the list of Wazuh Daemons in the dataset"""
