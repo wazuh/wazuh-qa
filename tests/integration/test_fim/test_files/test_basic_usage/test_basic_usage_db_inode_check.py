@@ -17,7 +17,7 @@ from wazuh_testing.tools.file import truncate_file
 
 # Marks
 
-pytestmark = pytest.mark.tier(level=0)
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
 
 # Variables
 
