@@ -102,10 +102,12 @@ class Agent:
         syscollector_frequency (int): frequency to run syscollector scans. 0 to continuously send syscollector events.
         keepalive_frequency (int): frequency to send keepalive messages. 0 to continuously send keepalive messages.
         syscollector_batch_size (int): Size of the syscollector type batch events.
-	    sca_frequency (int): frequency to run SCA scans. 0 to continuously send SCA events.
+        sca_frequency (int): frequency to run SCA scans. 0 to continuously send SCA events.
+        hostinfo_eps (int): Hostinfo's maximum event reporting throughput. Default `100`.
+        winevt_eps (float): Winevt's maximum event reporting throughput. Default `100`.
     """
     def __init__(self, manager_address, cypher="aes", os=None, rootcheck_sample=None,
-                 id=None, name=None, key=None, version="v3.12.0", fim_eps=1000, fim_integrity_eps=1000,sca_eps=100,
+                 id=None, name=None, key=None, version="v3.12.0", fim_eps=1000, fim_integrity_eps=1000, sca_eps=100,
                  syscollector_eps=1000, rootcheck_eps=100, authd_password=None, disable_all_modules=False,
                  rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, sca_frequency=60,
                  syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100):

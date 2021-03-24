@@ -106,9 +106,5 @@ def random_ip():
 
 
 def random_string(string_length, digits=True):
-    if(digits):
-        return ''.join(SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(string_length))
-    else:
-        return ''.join(SystemRandom().choice(string.ascii_uppercase) for _ in range(string_length))
-
-
+    character_set = string.ascii_uppercase + string.digits if digits else string.ascii_uppercase
+    return ''.join(SystemRandom().choice(character_set) for _ in range(string_length))
