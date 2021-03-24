@@ -20,16 +20,15 @@ import ssl
 import threading
 import zlib
 from datetime import date
-from random import randint, sample, choice, random, getrandbits
+from itertools import cycle
+from random import randint, sample, choice, getrandbits
 from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
 from string import ascii_letters, digits
 from struct import pack
 from time import mktime, localtime, sleep, time
-from itertools import cycle
 
-import wazuh_testing.wazuh_db as wdb
 import wazuh_testing.tools.syscollector as syscollector
-
+import wazuh_testing.wazuh_db as wdb
 from wazuh_testing import TCP
 from wazuh_testing import is_udp, is_tcp
 from wazuh_testing.tools.monitoring import wazuh_unpack, Queue
@@ -47,8 +46,8 @@ class Agent:
     """Class that allows us to simulate an agent registered in a manager.
 
     This simulated agent also allows sending-receiving messages and commands, in addition to simulating the
-    syscollector, FIM and rootcheck modules by making use of other classes such as GeneratorSyscollector, Rootcheck, GeneratorFIM
-    and GeneratorIntegrityFIM.
+    syscollector, FIM and rootcheck modules by making use of other classes such as GeneratorSyscollector,
+    Rootcheck, GeneratorFIM and GeneratorIntegrityFIM.
 
     Args:
         manager_address (str): Manager IP address.
@@ -76,6 +75,8 @@ class Agent:
         fim_integrity_eps (int): Fim integrity's maximum event reporting throughput. Default `100`.
         syscollector_eps (int): Syscollector's maximum event reporting throughput. Default `100`.
         rootcheck_eps (float): Rootcheck's maximum event reporting throughput. Default `100`.
+        hostinfo_eps (int): Hostinfo's maximum event reporting throughput. Default `100`.
+        winevt_eps (float): Winevt's maximum event reporting throughput. Default `100`.
         logcollector_eps (float): Logcollector's maximum event reporting throughput. Default `100`.
         sca_eps (float): SCA's maximum event reporting throughput. Default `100`.
         manager_address (str): Manager IP address.
@@ -102,14 +103,12 @@ class Agent:
         rootcheck_frequency (int): frequency to run rootcheck scans. 0 to continuously send rootcheck events.
         syscollector_frequency (int): frequency to run syscollector scans. 0 to continuously send syscollector events.
         keepalive_frequency (int): frequency to send keepalive messages. 0 to continuously send keepalive messages.
-        syscollector_batch_size (int): Size of the syscollector type batch events.
         sca_frequency (int): frequency to run SCA scans. 0 to continuously send SCA events.
-        hostinfo_eps (int): Hostinfo's maximum event reporting throughput. Default `100`.
-        winevt_eps (float): Winevt's maximum event reporting throughput. Default `100`.
+        syscollector_batch_size (int): Size of the syscollector type batch events.
     """
-    def __init__(self, manager_address, cypher="aes", os=None, rootcheck_sample=None,
-                 id=None, name=None, key=None, version="v3.12.0", fim_eps=1000, fim_integrity_eps=1000, sca_eps=100,
-                 syscollector_eps=1000, rootcheck_eps=100, logcollector_eps=100, authd_password=None, disable_all_modules=False,
+    def __init__(self, manager_address, cypher="aes", os=None, rootcheck_sample=None, id=None, name=None, key=None,
+                 version="v3.12.0", fim_eps=1000, fim_integrity_eps=1000, sca_eps=100, syscollector_eps=1000,
+                 rootcheck_eps=100, logcollector_eps=100, authd_password=None, disable_all_modules=False,
                  rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, sca_frequency=60,
                  syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100):
         self.id = id
@@ -129,9 +128,9 @@ class Agent:
         self.logcollector_eps = logcollector_eps
         self.winevt_eps = winevt_eps
         self.sca_eps = sca_eps
+        self.hostinfo_eps = hostinfo_eps
         self.rootcheck_frequency = rootcheck_frequency
         self.sca_frequency = sca_frequency
-        self.hostinfo_eps = hostinfo_eps
         self.keepalive_frequency = keepalive_frequency
         self.syscollector_frequency = syscollector_frequency
         self.manager_address = manager_address
@@ -155,7 +154,8 @@ class Agent:
             "keepalive": {"status": "enabled", "frequency": self.keepalive_frequency},
             "fim": {"status": "enabled", "eps": self.fim_eps},
             "fim_integrity": {"status": "disabled", "eps": self.fim_integrity_eps},
-            "syscollector": {"status": "disabled", "frequency": self.syscollector_frequency, "eps": self.syscollector_eps},
+            "syscollector": {"status": "disabled", "frequency": self.syscollector_frequency,
+                             "eps": self.syscollector_eps},
             "rootcheck": {"status": "disabled", "frequency": self.rootcheck_frequency, "eps": self.rootcheck_eps},
             "sca": {"status": "disabled", "frequency": self.sca_frequency, "eps": self.sca_eps},
             "hostinfo": {"status": "disabled", "eps": self.hostinfo_eps},
@@ -744,7 +744,6 @@ class SCA:
 
         return f"{self.SCA_MQ}:{self.SCA}:{msg}"
 
-
     def create_sca_event(self, event_type):
         event_data = json.loads('{}')
         event_data['type'] = event_type
@@ -1294,11 +1293,10 @@ class InjectorThread(threading.Thread):
                   ((time() - start_time) %
                    self.agent.modules["keepalive"]["frequency"]))
 
-
     def run_module(self, module):
         """Send a module message from the agent to the manager.
          Args:
-                module (str): Module name 
+                module (str): Module name
         """
         module_info = self.agent.modules[module]
         eps = module_info['eps'] if 'eps' in module_info else 1

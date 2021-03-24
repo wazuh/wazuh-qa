@@ -19,7 +19,8 @@ SYSCOLLECTOR_PACKAGES_EVENT_TEMPLATE = ',"program":{"format":"rpm","name":"<rand
                                        '"install_time":"2021/03/12 12:23:17"' \
                                        ',"version":"1:2.97.001-3.el8"}}'
 
-SYSCOLLECTOR_PROCESS_EVENT_TEMPLATE = ',"process":{"pid":3150,"name":"<random_string>","state":"R","ppid":2965,"utime":58,' \
+SYSCOLLECTOR_PROCESS_EVENT_TEMPLATE = ',"process":{"pid":3150,"name":"<random_string>","state":"R",' \
+                                      '"ppid":2965,"utime":58,' \
                                       '"stime":2,"cmd":"rpm","argvs":["-qa","xorg-x11*"],' \
                                       '"euser":"root","ruser":"root","suser":"root","egroup":"ossec",' \
                                       '"rgroup":"ossec","sgroup":"ossec",' \
@@ -45,4 +46,3 @@ SYSCOLLECTOR_PORT_EVENT_TEMPLATE = ',"port":{"protocol":"tcp","local_ip":"0.0.0.
                                    '"rx_queue":0,"inode":22273,"state":"listening"}}'
 
 SYSCOLLECTOR_HOTFIX_EVENT_TEMPLATE = ',"hotfix":"<random_string>"}'
-
