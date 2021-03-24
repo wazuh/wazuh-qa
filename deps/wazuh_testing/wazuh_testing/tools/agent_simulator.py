@@ -909,7 +909,7 @@ class GeneratorWinevt:
 
     def format_event(self):
 
-        message = f"{{\"Message\":\"System audit policy was changed.\r\n\r\nSubject:\r\n\t" \
+        message = "{\"Message\":\"System audit policy was changed.\r\n\r\nSubject:\r\n\t" \
                   "Security ID:\t\tS-1-5-21-1331263578-1683884876-2739179494-500\r\n\t" \
                   "Account Name:\t\tAdministrator\r\n\tAccount Domain:\t\tWIN-ACL01C4DS88\r\n\t" \
                   "Logon ID:\t\t0x372C7\r\n\r\nAudit Policy Change:\r\n\t" \
