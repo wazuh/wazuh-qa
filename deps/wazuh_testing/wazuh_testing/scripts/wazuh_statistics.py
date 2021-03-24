@@ -31,6 +31,8 @@ def get_script_arguments():
                         help='Type the time in seconds between each entry.')
     parser.add_argument('-d', '--debug', dest='debug', action='store_true', default=False,
                         help='Enable debug level logging.')
+    parser.add_argument('--store', dest='store_path', action='store', default=gettempdir(),
+                        help=f"Path to store the CSVs with the data. Default {gettempdir()}")
 
     return parser.parse_args()
 
@@ -42,6 +44,7 @@ def main():
     options = get_script_arguments()
     target_list = options.target_list
     sleep_time = options.sleep_time
+    store_path = options.store_path
 
     makedirs(CURRENT_SESSION)
     logging.basicConfig(filename=join(METRICS_FOLDER, 'wazuh-statistics.log'), filemode='a',
@@ -51,7 +54,7 @@ def main():
     logger.info(f'Started new session: {CURRENT_SESSION}')
 
     for target in target_list:
-        monitor = StatisticMonitor(target=target, time_step=sleep_time)
+        monitor = StatisticMonitor(target=target, time_step=sleep_time, dst_dir=store_path)
         monitor.start()
         MONITOR_LIST.append(monitor)
 

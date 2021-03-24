@@ -33,6 +33,8 @@ def get_script_arguments():
     parser.add_argument('-v', '--version', dest='version', default=None, help='Version of the binaries. Default none.')
     parser.add_argument('-d', '--debug', dest='debug', action='store_true', default=False,
                         help='Enable debug level logging.')
+    parser.add_argument('--store', dest='store_path', action='store', default=gettempdir(),
+                        help=f"Path to store the CSVs with the data. Default {gettempdir()}")
 
     return parser.parse_args()
 
@@ -46,6 +48,7 @@ def main():
     data_unit = options.data_unit
     sleep_time = options.sleep_time
     version = options.version
+    store_path = options.store_path
 
     makedirs(CURRENT_SESSION)
     logging.basicConfig(filename=join(METRICS_FOLDER, 'wazuh-metrics.log'), filemode='a',
@@ -55,7 +58,8 @@ def main():
     logger.info(f'Started new session: {CURRENT_SESSION}')
 
     for process in process_list:
-        monitor = Monitor(process_name=process, value_unit=data_unit, time_step=sleep_time, version=version)
+        monitor = Monitor(process_name=process, value_unit=data_unit, time_step=sleep_time,
+                          version=version, dst_dir=store_path)
         monitor.start()
         MONITOR_LIST.append(monitor)
 
