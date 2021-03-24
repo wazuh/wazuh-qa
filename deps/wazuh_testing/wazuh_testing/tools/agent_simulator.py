@@ -847,12 +847,12 @@ class Rootcheck:
 
 class Logcollector:
     def __init__(self):
-        self.name = 'syslog'
+        self.LOGCOLLECTOR = 'syslog'
         self.LOGCOLLECTOR_MQ = 'x'
 
     def generate_event(self):
         log = 'Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550'
-        return f"{self.LOGCOLLECTOR_MQ}:{self.name}:{log}"
+        return f"{self.LOGCOLLECTOR_MQ}:{self.LOGCOLLECTOR}:{log}"
 
 
 class GeneratorIntegrityFIM:
