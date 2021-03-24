@@ -48,6 +48,10 @@ class Monitor:
             raise ValueError(f"The process {process_name} is not running.")
 
     def get_process_info(self, proc):
+
+        def unit_conversion(x):
+            return x / (1024 ** self.data_units[self.value_unit])
+
         # Pre-initialize the info dictionary. If there's a problem while taking metrics of the binary (i.e. it crashed)
         # the CSV will set all its values to 0 to easily identify if there was a problem or not
         info = {'Daemon': self.process_name, 'Version': self.version, 'Timestamp': datetime.now().strftime('%H:%M:%S'),
@@ -59,8 +63,6 @@ class Monitor:
                 f'Disk_Read({self.value_unit})': 0.0, f'Disk_Written({self.value_unit})': 0.0, 'Disk(%)': 0.0,
                 }
 
-        def unit_conversion(x):
-            return x / (1024 ** self.data_units[self.value_unit])
         try:
             with proc.oneshot():
                 info['CPU(%)'] = proc.cpu_percent(interval=0.5)
