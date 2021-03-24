@@ -110,10 +110,11 @@ class Agent:
         syscollector_batch_size (int): Size of the syscollector type batch events.
     """
     def __init__(self, manager_address, cypher="aes", os=None, rootcheck_sample=None, id=None, name=None, key=None,
-                 version="v3.12.0", fim_eps=100, fim_integrity_eps=100, sca_eps=100, syscollector_eps=100, labels=None,
+                 version="v4.3.0", fim_eps=100, fim_integrity_eps=100, sca_eps=100, syscollector_eps=100, labels=None,
                  rootcheck_eps=100, logcollector_eps=100, authd_password=None, disable_all_modules=False,
-                 rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10, sca_frequency=60,
-                 syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100):
+                 rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, sca_frequency=60,
+                 syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100,
+                 fixed_message_size=None):
         self.id = id
         self.name = name
         self.key = key
@@ -175,6 +176,7 @@ class Agent:
         self.stage_disconnect = None
         self.setup(disable_all_modules=disable_all_modules)
         self.rcv_msg_queue = Queue(rcv_msg_limit)
+        self.fixed_message_size = fixed_message_size
 
     def update_checksum(self, new_checksum):
         self.keep_alive_raw_msg = self.keep_alive_raw_msg.replace(self.merged_checksum, new_checksum)
@@ -1635,6 +1637,10 @@ class InjectorThread(threading.Thread):
             sent_messages = 0
             while sent_messages < batch_messages:
                 event_msg = module_event_generator()
+                if self.agent.fixed_message_size is not None:
+                    event_msg_size = len(event_msg.encode('utf8'))
+                    dummy_message = self.agent.fixed_message_size - event_msg_size
+                    event_msg.append(random_string(dummy_message))
                 event = self.agent.create_event(event_msg)
                 self.sender.send_event(event)
                 self.totalMessages += 1
