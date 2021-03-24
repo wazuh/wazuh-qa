@@ -10,19 +10,19 @@ import seaborn as sns
 
 BINARY_NON_PRINTABLE_HEADERS = ['PID', 'Daemon', 'Version']
 
-ANALYSISD_CSV_HEADERS = {'cumulative': ['Timestamp', 'Total Events', 'Syscheck Events Decoded',
+ANALYSISD_CSV_HEADERS = {'cumulative': ['Total Events', 'Syscheck Events Decoded',
                                         'Syscollector Events Decoded', 'Rootcheck Events Decoded',
                                         'SCA Events Decoded', 'HostInfo Events Decoded',
                                         'WinEvt Events Decoded', 'Other Events Decoded',
                                         'Events processed (Rule matching)', 'Events received',
                                         'Events dropped', 'Alerts written', 'Firewall alerts written',
                                         'FTS alerts written'],
-                         'non_cumulative': ['Timestamp', 'Syscheck queue', 'Syscollector queue',
+                         'non_cumulative': ['Syscheck queue', 'Syscollector queue',
                                             'Rootcheck queue', 'SCA queue', 'Hostinfo queue', 'Winevt queue',
                                             'Event queue', 'Rule matching queue', 'Alerts log queue',
                                             'Firewall log queue', 'Statistical log queue',
                                             'Archives log queue'],
-                         'events': ['Timestamp', 'Syscheck EDPS', 'Syscollector EDPS', 'Rootcheck EDPS',
+                         'events': ['Syscheck EDPS', 'Syscollector EDPS', 'Rootcheck EDPS',
                                     'SCA EDPS', 'HostInfo EDPS', 'WinEvt EDPS', 'Other EDPS',
                                     'Events EDPS (Rule matching)'],
                          }
@@ -79,6 +79,18 @@ class DataVisualizer:
             plt.xticks(rotation=90)
             csv_name = sub(pattern=r'\(.*\)', string=element, repl='')
             plt.savefig(join(self.store_path, f"{csv_name}.svg"), dpi=1200, format='svg')
+
+    def _plot_analysisd_dataset(self):
+        pass
+
+    def _plot_remoted_dataset(self):
+        pass
+
+    def _plot_agentd_dataset(self):
+        pass
+
+    def _plot_logcollector_dataset(self):
+        pass
 
     def plot(self):
         self._plot_binaries_dataset()
