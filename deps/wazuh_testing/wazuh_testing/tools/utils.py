@@ -105,7 +105,6 @@ def random_ip():
     return fr"{randint(0,255)}.{randint(0,255)}.{randint(0,255)}.{randint(0,255)}"
 
 
-def random_string(string_length):
-    return ''.join(SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(string_length))
-
-
+def random_string(string_length, digits=True):
+    character_set = string.ascii_uppercase + string.digits if digits else string.ascii_uppercase
+    return ''.join(SystemRandom().choice(character_set) for _ in range(string_length))

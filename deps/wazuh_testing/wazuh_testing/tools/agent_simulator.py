@@ -102,13 +102,15 @@ class Agent:
         syscollector_frequency (int): frequency to run syscollector scans. 0 to continuously send syscollector events.
         keepalive_frequency (int): frequency to send keepalive messages. 0 to continuously send keepalive messages.
         syscollector_batch_size (int): Size of the syscollector type batch events.
-	  sca_frequency (int): frequency to run SCA scans. 0 to continuously send SCA events.
+        sca_frequency (int): frequency to run SCA scans. 0 to continuously send SCA events.
+        hostinfo_eps (int): Hostinfo's maximum event reporting throughput. Default `100`.
+        winevt_eps (float): Winevt's maximum event reporting throughput. Default `100`.
     """
     def __init__(self, manager_address, cypher="aes", os=None, rootcheck_sample=None,
-                 id=None, name=None, key=None, version="v3.12.0", fim_eps=1000, fim_integrity_eps=1000,sca_eps=100,
+                 id=None, name=None, key=None, version="v3.12.0", fim_eps=1000, fim_integrity_eps=1000, sca_eps=100,
                  syscollector_eps=1000, rootcheck_eps=100, authd_password=None, disable_all_modules=False,
                  rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, sca_frequency=60,
-                 syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100):
+                 syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100):
         self.id = id
         self.name = name
         self.key = key
@@ -123,6 +125,7 @@ class Agent:
         self.fim_integrity_eps = fim_integrity_eps
         self.syscollector_eps = syscollector_eps
         self.rootcheck_eps = rootcheck_eps
+        self.winevt_eps = winevt_eps
         self.sca_eps = sca_eps
         self.rootcheck_frequency = rootcheck_frequency
         self.sca_frequency = sca_frequency
@@ -141,6 +144,7 @@ class Agent:
         self.rootcheck_sample = rootcheck_sample
         self.rootcheck = None
         self.hostinfo = None
+        self.winevt = None
         self.fim = None
         self.fim_integrity = None
         self.syscollector = None
@@ -152,6 +156,7 @@ class Agent:
             "rootcheck": {"status": "disabled", "frequency": self.rootcheck_frequency, "eps": self.rootcheck_eps},
             "sca": {"status": "disabled", "frequency": self.sca_frequency, "eps": self.sca_eps},
             "hostinfo": {"status": "disabled", "eps": self.hostinfo_eps},
+            "winevt": {"status": "disabled", "eps": self.winevt_eps},
             "receive_messages": {"status": "enabled"},
         }
         self.sha_key = None
@@ -592,6 +597,8 @@ class Agent:
             self.init_fim_integrity()
         if self.modules['hostinfo']['status'] == 'enabled':
             self.init_hostinfo()
+        if self.modules['winevt']['status'] == 'enabled':
+            self.init_winevt()
         if self.modules['sca']['status'] == 'enabled':
             self.init_sca()
 
@@ -618,6 +625,10 @@ class Agent:
     def init_hostinfo(self):
         if self.hostinfo is None:
             self.hostinfo = GeneratorHostinfo()
+
+    def init_winevt(self):
+        if self.winevt is None:
+            self.winevt = GeneratorWinevt(self.name, self.id)
 
     def get_connection_status(self):
         result = wdb.query_wdb(f"global get-agent-info {self.id}")
@@ -887,6 +898,46 @@ class GeneratorHostinfo:
         message += message_open_port_list
         message = fr"{self.HOSTINFO_MQ}:{self.localfile}:{message}"
         return message
+
+
+class GeneratorWinevt:
+
+    def __init__(self, agent_name, agent_id):
+        self.agent_name = agent_name
+        self.agent_id = agent_id
+        self.WINENVT = 'f'
+
+    def format_event(self):
+
+        message = "{\"Message\":\"System audit policy was changed.\r\n\r\nSubject:\r\n\t" \
+                  "Security ID:\t\tS-1-5-21-1331263578-1683884876-2739179494-500\r\n\t" \
+                  "Account Name:\t\tAdministrator\r\n\tAccount Domain:\t\tWIN-ACL01C4DS88\r\n\t" \
+                  "Logon ID:\t\t0x372C7\r\n\r\nAudit Policy Change:\r\n\t" \
+                  "Category:\t\tPolicy Change\r\n\tSubcategory:\t\t" \
+                  "Filtering Platform Policy Change\r\n\t" \
+                  "Subcategory GUID:\t{0cce9233-69ae-11d9-bed3-505054503030}\r\n\t" \
+                  "Changes:\t\tSuccess Added, Failure added\"," \
+                  "\"Event\":\"<Event xmlns=\'http://schemas.microsoft.com/win/2004/08/events/event\'>" \
+                  "<System><Provider Name=\'Microsoft-Windows-Security-Auditing\' " \
+                  "Guid=\'{54849625-5478-4994-a5ba-3e3b0328c30d}\'/>" \
+                  f"<EventID>{randint(0,10*5)}</EventID><Version>0</Version><Level>0</Level>" \
+                  "<Task>13568</Task><Opcode>0</Opcode><Keywords>0x8020000000000000</Keywords>" \
+                  "<TimeCreated SystemTime=\'2019-05-28T09:29:41.443963000Z\'/><EventRecordID>965047" \
+                  "</EventRecordID><Correlation ActivityID=\'{1115b961-1535-0000-8bbb-15113515d501}\'/>" \
+                  "<Execution ProcessID=\'556\' ThreadID=\'6024\'/><Channel>Security</Channel>" \
+                  "<Computer>WIN-ACL01C4DS88</Computer><Security/></System><EventData>" \
+                  "<Data Name=\'SubjectUserSid\'>S-1-5-21-1331263578-1683884876-2739179494-500</Data>" \
+                  "<Data Name=\'SubjectUserName\'>Administrator</Data>" \
+                  "<Data Name=\'SubjectDomainName\'>WIN-ACL01C4DS88</Data>" \
+                  "<Data Name=\'SubjectLogonId\'>0x372c7</Data>" \
+                  "<Data Name=\'CategoryId\'>%%8277" \
+                  "</Data><Data Name=\'SubcategoryId\'>%%13572</Data>" \
+                  "<Data Name=\'SubcategoryGuid\'>{0cce9233-69ae-11d9-bed3-505054503030}</Data" \
+                  "><Data Name=\'AuditPolicyChanges\'>%%8449, %%8451</Data></EventData></Event>\"}"
+        return message
+
+    def generate_event(self):
+        return f"{self.WINENVT}:[{self.agent_id}] ({self.agent_name}) any->EventChannel:{self.format_event()}"
 
 
 class GeneratorFIM:
@@ -1258,6 +1309,9 @@ class InjectorThread(threading.Thread):
         elif module == 'sca':
             self.agent.init_sca()
             module_event_generator = self.agent.sca.get_message
+        elif module == 'winevt':
+            self.agent.init_winevt()
+            module_event_generator = self.agent.winevt.generate_event
         else:
             raise ValueError('Invalid module selected')
 
@@ -1322,21 +1376,4 @@ def create_agents(agents_number, manager_address, cypher='aes', fim_eps=None, au
         agents.append(Agent(manager_address, cypher, fim_eps=fim_eps, authd_password=authd_password,
                             os=agent_os, version=agent_version, disable_all_modules=disable_all_modules))
 
-        agent_count = agent_count + 1
-
-    return agents
-
-
-def connect(agent,  manager_address='localhost', protocol=TCP, manager_port='1514'):
-    """Connects an agent to the manager
-    Args:
-        agent (Agent): agent to connect.
-        manager_address (str): address of the manager. It can be an IP or a DNS.
-        protocol (str): protocol used to connect with the manager. Defaults to 'TCP'.
-        manager_port (str): port used to connect with the manager. Defaults to '1514'.
-    """
-    sender = Sender(manager_address, protocol=protocol, manager_port=manager_port)
-    injector = Injector(sender, agent)
-    injector.run()
-    agent.wait_status_active()
     return sender, injector
