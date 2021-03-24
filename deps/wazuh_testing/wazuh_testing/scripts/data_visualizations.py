@@ -21,13 +21,12 @@ def get_script_arguments():
 
 def main():
     options = get_script_arguments()
-    csv_list = options.csv_list
-    target = options.visualization_target
     destination = options.destination
 
     if not exists(destination):
         makedirs(destination)
-    dv = DataVisualizer(dataframes=csv_list, target=target, compare=False, store_path=destination)
+    dv = DataVisualizer(dataframes=options.csv_list, target=options.visualization_target,
+                        compare=False, store_path=options.destination)
     dv.plot()
 
 

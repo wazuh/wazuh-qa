@@ -42,9 +42,6 @@ def main():
     signal(SIGINT, shutdown_threads)
 
     options = get_script_arguments()
-    target_list = options.target_list
-    sleep_time = options.sleep_time
-    store_path = options.store_path
 
     makedirs(CURRENT_SESSION)
     logging.basicConfig(filename=join(METRICS_FOLDER, 'wazuh-statistics.log'), filemode='a',
@@ -53,8 +50,8 @@ def main():
     options.debug and logger.setLevel(logging.DEBUG)
     logger.info(f'Started new session: {CURRENT_SESSION}')
 
-    for target in target_list:
-        monitor = StatisticMonitor(target=target, time_step=sleep_time, dst_dir=store_path)
+    for target in options.target_list:
+        monitor = StatisticMonitor(target=target, time_step=options.sleep_time, dst_dir=options.store_path)
         monitor.start()
         MONITOR_LIST.append(monitor)
 
