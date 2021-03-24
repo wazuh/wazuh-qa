@@ -76,6 +76,7 @@ class Agent:
         fim_integrity_eps (int): Fim integrity's maximum event reporting throughput. Default `100`.
         syscollector_eps (int): Syscollector's maximum event reporting throughput. Default `100`.
         rootcheck_eps (float): Rootcheck's maximum event reporting throughput. Default `100`.
+        logcollector_eps (float): Logcollector's maximum event reporting throughput. Default `100`.
         sca_eps (float): SCA's maximum event reporting throughput. Default `100`.
         manager_address (str): Manager IP address.
         encryption_key (bytes): Encryption key used for encrypt and decrypt the message.
@@ -108,7 +109,7 @@ class Agent:
     """
     def __init__(self, manager_address, cypher="aes", os=None, rootcheck_sample=None,
                  id=None, name=None, key=None, version="v3.12.0", fim_eps=1000, fim_integrity_eps=1000, sca_eps=100,
-                 syscollector_eps=1000, rootcheck_eps=100, authd_password=None, disable_all_modules=False,
+                 syscollector_eps=1000, rootcheck_eps=100, logcollector_eps=100, authd_password=None, disable_all_modules=False,
                  rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, sca_frequency=60,
                  syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100):
         self.id = id
@@ -125,6 +126,7 @@ class Agent:
         self.fim_integrity_eps = fim_integrity_eps
         self.syscollector_eps = syscollector_eps
         self.rootcheck_eps = rootcheck_eps
+        self.logcollector_eps = logcollector_eps
         self.winevt_eps = winevt_eps
         self.sca_eps = sca_eps
         self.rootcheck_frequency = rootcheck_frequency
@@ -140,6 +142,7 @@ class Agent:
         self.startup_msg = ""
         self.authd_password = authd_password
         self.sca = None
+        self.logcollector = None
         self.syscollector_batch_size = syscollector_batch_size
         self.rootcheck_sample = rootcheck_sample
         self.rootcheck = None
@@ -157,6 +160,7 @@ class Agent:
             "sca": {"status": "disabled", "frequency": self.sca_frequency, "eps": self.sca_eps},
             "hostinfo": {"status": "disabled", "eps": self.hostinfo_eps},
             "winevt": {"status": "disabled", "eps": self.winevt_eps},
+            "logcollector": {"status": "disabled", "eps": self.logcollector_eps},
             "receive_messages": {"status": "enabled"},
         }
         self.sha_key = None
@@ -601,6 +605,12 @@ class Agent:
             self.init_winevt()
         if self.modules['sca']['status'] == 'enabled':
             self.init_sca()
+        if self.modules['logcollector']['status'] == 'enabled':
+            self.init_logcollector()
+
+    def init_logcollector(self):
+        if self.logcollector is None:
+            self.logcollector = Logcollector()
 
     def init_sca(self):
         if self.sca is None:
@@ -833,6 +843,17 @@ class Rootcheck:
             logging.debug(f"Scan ended - {self.agent_name}({self.agent_id}) "
                           f"- rootcheck({self.rootcheck_path})")
         return message
+
+
+class Logcollector:
+    def __init__(self):
+        self.name = 'syslog'
+        self.LOGCOLLECTOR_MQ = 'x'
+
+    def generate_event(self):
+        log = 'Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550'
+        return f"{self.LOGCOLLECTOR_MQ}:{self.name}:{log}"
+
 
 class GeneratorIntegrityFIM:
     def __init__(self, agent_id, agent_name, agent_version):
@@ -1312,6 +1333,9 @@ class InjectorThread(threading.Thread):
         elif module == 'winevt':
             self.agent.init_winevt()
             module_event_generator = self.agent.winevt.generate_event
+        elif module == 'logcollector':
+            self.agent.init_logcollector()
+            module_event_generator = self.agent.logcollector.generate_event
         else:
             raise ValueError('Invalid module selected')
 
