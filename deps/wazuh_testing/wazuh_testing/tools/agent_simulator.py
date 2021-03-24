@@ -933,7 +933,7 @@ class GeneratorWinevt:
                   "<Data Name=\'CategoryId\'>%%8277" \
                   "</Data><Data Name=\'SubcategoryId\'>%%13572</Data>" \
                   "<Data Name=\'SubcategoryGuid\'>{0cce9233-69ae-11d9-bed3-505054503030}</Data" \
-                  "><Data Name=\'AuditPolicyChanges\'>%%8449, %%8451</Data></EventData></Event>\"}'"
+                  "><Data Name=\'AuditPolicyChanges\'>%%8449, %%8451</Data></EventData></Event>\"}"
         return message
 
     def generate_event(self):
