@@ -55,7 +55,7 @@ class StatisticMonitor:
             raise ValueError(f'The target {self.target} is not a valid one.')
 
         state_file = splitext(basename(self.statistics_file))[0]
-        self.csv_file = join(self.dst_dir, f'{state_file}.csv')
+        self.csv_file = join(self.dst_dir, f'{state_file}_stats.csv')
 
     def _parse_classic_state_file(self, data):
         """Parse the info from the .state files from Wazuh with shell compatible format
