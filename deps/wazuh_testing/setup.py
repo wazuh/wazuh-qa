@@ -24,6 +24,11 @@ setup(name='wazuh_testing',
                                       'data/rootcheck.txt'
                                       ]
                     },
+      entry_points={
+        'console_scripts': [
+            'simulate-agents=wazuh_testing.scripts.simulate_agents:main',
+        ],
+      },
       include_package_data=True,
       zip_safe=False
       )
