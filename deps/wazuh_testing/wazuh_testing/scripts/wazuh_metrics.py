@@ -44,11 +44,6 @@ def main():
     signal(SIGINT, shutdown_threads)
 
     options = get_script_arguments()
-    process_list = options.process_list
-    data_unit = options.data_unit
-    sleep_time = options.sleep_time
-    version = options.version
-    store_path = options.store_path
 
     makedirs(CURRENT_SESSION)
     logging.basicConfig(filename=join(METRICS_FOLDER, 'wazuh-metrics.log'), filemode='a',
@@ -57,9 +52,9 @@ def main():
     options.debug and logger.setLevel(logging.DEBUG)
     logger.info(f'Started new session: {CURRENT_SESSION}')
 
-    for process in process_list:
-        monitor = Monitor(process_name=process, value_unit=data_unit, time_step=sleep_time,
-                          version=version, dst_dir=store_path)
+    for process in options.process_list:
+        monitor = Monitor(process_name=process, value_unit=options.data_unit, time_step=options.sleep_time,
+                          version=options.version, dst_dir=options.store_path)
         monitor.start()
         MONITOR_LIST.append(monitor)
 
