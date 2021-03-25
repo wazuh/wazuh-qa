@@ -65,8 +65,7 @@ class Monitor:
 
         try:
             with proc.oneshot():
-                info['CPU(%)'] = proc.cpu_percent(interval=0.5)
-
+                info['CPU(%)'] = proc.cpu_percent(interval=None)
                 memory_data = proc.memory_full_info()
                 info[f'VMS({self.value_unit})'] = unit_conversion(memory_data.vms)
                 info[f'RSS({self.value_unit})'] = unit_conversion(memory_data.rss)
