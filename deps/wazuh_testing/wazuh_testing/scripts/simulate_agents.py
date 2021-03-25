@@ -31,7 +31,6 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
 
     active_agents, injectors = [], []
 
-
     for _ in range(agents_number):
         agent = ag.Agent(manager_address, "aes", os=agent_os, version=agent_version, fim_eps=eps)
         available_modules = agent.modules.keys()
@@ -39,16 +38,16 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
         for module in active_modules:
             if module not in available_modules:
                 raise ValueError(f"Selected module: '{module}' doesn't exist on agent simulator!")
-            
+
         for index, module in enumerate(available_modules):
             if module in active_modules:
                 agent.modules[module]['status'] = 'enabled'
-                
+
                 if modules_eps is not None and 'eps' in agent.modules[module]:
                     agent.modules[module]['eps'] = modules_eps[index]
                 else:
                     agent.modules[module]['eps'] = eps
-                    
+
             else:
                 agent.modules[module]['status'] = 'disabled'
                 agent.modules[module]['eps'] = 0

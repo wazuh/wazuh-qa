@@ -1318,7 +1318,6 @@ class InjectorThread(threading.Thread):
                 if self.totalMessages % eps == 0:
                     sleep(1.0 - ((time() - start_time) % 1.0))
 
-
     def run_module(self, module):
         """Send a module message from the agent to the manager.
          Args:
