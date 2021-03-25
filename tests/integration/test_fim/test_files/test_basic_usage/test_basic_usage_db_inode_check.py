@@ -21,23 +21,23 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
 
 # Variables
 
-monitored_folder = os.path.join(PREFIX, 'testdir1')
+monitored_folder = os.path.join(PREFIX, 'testdir')
 test_directories = [monitored_folder]
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_check_inodes.yaml')
-file_list = ['file1', 'file2', 'file3', 'file4', 'file5', 'file6', 'file7', 'file8', 'file9', 'file10']
+file_list = [f"file{i}" for i in range(10)]
 
 # configurations
 
 monitoring_modes = ['scheduled']
 
 conf_params = {'TEST_DIRECTORIES': test_directories, 'MODULE_NAME': __name__}
-p, m = generate_params(extra_params=conf_params, modes=monitoring_modes,
+params, metadata = generate_params(extra_params=conf_params, modes=monitoring_modes,
                        apply_to_all=({'CHECK_TYPE': check} for check in ['yes', 'no']))
 
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
 
 # fixtures
@@ -80,11 +80,11 @@ def test_db_inode_check(test_added, get_configuration, configure_environment, re
     """Test to check for false positives due to possible inconsistencies with inodes in the database.
 
     Args:
-      test_added: Boolean variable to set whether the test will add one more or one less file.
-      get_configuration: Function to access the configuration in use.
-      configure_environment: Fixture to prepare the environment to pass the test
-      restart_syscheck_function: Restart syscheck and truncate the log file with function scope.
-      wait_for_fim_start_function: Wait until the log 'scan end' appear, with function scope.
+      test_added (boolean): variable to set whether the test will add one more or one less file.
+      get_configuration (fixture): Function to access the configuration in use.
+      configure_environment (fixture): Fixture to prepare the environment to pass the test
+      restart_syscheck_function (fixture): Restart syscheck and truncate the log file with function scope.
+      wait_for_fim_start_function (fixture): Wait until the log 'scan end' appear, with function scope.
 
     Returns: Test failed if an unexpected event is founded.
 
@@ -102,14 +102,14 @@ def test_db_inode_check(test_added, get_configuration, configure_environment, re
     for file in aux_file_list:
         create_file(REGULAR, monitored_folder, file, content=file)
 
-    # Time travel after create 10 files
+    # Time travel after creating the required files
     check_time_travel(True, monitor=wazuh_log_monitor)
 
     shutil.rmtree(monitored_folder, ignore_errors=True)
 
     # Duplicate cases with one file more or one file less
     if test_added:
-        aux_file_list.insert(0, "file0")
+        aux_file_list.insert(0, "file")
     else:
         aux_file_list.pop(0)
 

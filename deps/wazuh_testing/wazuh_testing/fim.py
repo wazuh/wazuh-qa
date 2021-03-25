@@ -977,7 +977,9 @@ def callback_detect_end_scan(line):
     try:
         if json.loads(match.group(1))['type'] == 'scan_end':
             return True
-    except (AttributeError, JSONDecodeError, KeyError):
+    except (JSONDecodeError):
+        logger.warning("Couldn't load a log line into json object")
+    except (AttributeError, KeyError):
         pass
 
 
@@ -989,10 +991,10 @@ def callback_detect_event(line):
         json_event = json.loads(match.group(1))
         if json_event['type'] == 'event':
             return json_event
-    except (AttributeError, JSONDecodeError, KeyError):
+    except (JSONDecodeError):
+        logger.warning("Couldn't load a log line into json object")
+    except (AttributeError, KeyError):
         pass
-
-    return None
 
 
 def callback_detect_modified_event(line):
@@ -1003,10 +1005,10 @@ def callback_detect_modified_event(line):
         json_event = json.loads(match.group(1))
         if (json_event['type'] == 'event') and (json_event['data']['type'] == 'modified'):
             return json_event
-    except (AttributeError, JSONDecodeError, KeyError):
+    except (JSONDecodeError):
+        logger.warning("Couldn't load a log line into json object")
+    except (AttributeError, KeyError):
         pass
-
-    return None
 
 
 def callback_detect_modified_event_with_inode_mtime(line):
@@ -1018,10 +1020,10 @@ def callback_detect_modified_event_with_inode_mtime(line):
         if (json_event['type'] == 'event') and (json_event['data']['type'] == 'modified'):
             if {'inode', 'mtime'}.symmetric_difference(set(json_event['data']['changed_attributes'])):
                 return json_event
-    except (AttributeError, JSONDecodeError, KeyError):
+    except (JSONDecodeError):
+        logger.warning("Couldn't load a log line into json object")
+    except (AttributeError, KeyError):
         pass
-
-    return None
 
 
 def callback_detect_integrity_event(line):
