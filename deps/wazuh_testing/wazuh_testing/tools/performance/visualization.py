@@ -10,22 +10,30 @@ import seaborn as sns
 
 BINARY_NON_PRINTABLE_HEADERS = ['PID', 'Daemon', 'Version']
 
-ANALYSISD_CSV_HEADERS = {'cumulative': ['Total Events', 'Syscheck Events Decoded',
-                                        'Syscollector Events Decoded', 'Rootcheck Events Decoded',
-                                        'SCA Events Decoded', 'HostInfo Events Decoded',
-                                        'WinEvt Events Decoded', 'Other Events Decoded',
-                                        'Events processed (Rule matching)', 'Events received',
-                                        'Events dropped', 'Alerts written', 'Firewall alerts written',
-                                        'FTS alerts written'],
-                         'non_cumulative': ['Syscheck queue', 'Syscollector queue',
-                                            'Rootcheck queue', 'SCA queue', 'Hostinfo queue', 'Winevt queue',
-                                            'Event queue', 'Rule matching queue', 'Alerts log queue',
-                                            'Firewall log queue', 'Statistical log queue',
-                                            'Archives log queue'],
-                         'events': ['Syscheck EDPS', 'Syscollector EDPS', 'Rootcheck EDPS',
-                                    'SCA EDPS', 'HostInfo EDPS', 'WinEvt EDPS', 'Other EDPS',
-                                    'Events EDPS (Rule matching)'],
-                         }
+ANALYSISD_CSV_HEADERS = {
+    'decoded_events': {'title': 'events decoded per queue',
+                       'columns': ['total_events_decoded', 'syscheck_events_decoded',
+                                   'syscollector_events_decoded', 'rootcheck_events_decoded',
+                                   'sca_events_decoded', 'hostinfo_events_decoded', 'winevt_events_decoded',
+                                   'other_events_decoded', 'dbsync_messages_dispatched'],
+                       },
+    'queue_usage': { 'title': 'queue usage during the test',
+                     'columns': ['syscheck_queue_usage', 'syscollector_queue_usage', 'rootcheck_queue_usage',
+                                 'sca_queue_usage', 'hostinfo_queue_usage', 'winevt_queue_usage',
+                                 'dbsync_queue_usage', 'upgrade_queue_usage', 'event_queue_usage',
+                                 'rule_matching_queue_usage', 'alerts_queue_usage', 'firewall_queue_usage',
+                                 'statistical_queue_usage', 'archives_queue_usage'],
+                     },
+    'events_decoded_per_second': {'title': 'events decoded per second',
+                                   'columns': ['syscheck_edps', 'syscollector_edps', 'rootcheck_edps',
+                                               'sca_edps', 'hostinfo_edps', 'winevt_edps',
+                                               'other_events_edps', 'events_edps', 'dbsync_mdps'],
+                                  },
+    'alerts_info': {'title': 'alerts and events info.',
+                    'columns': ['events_processed', 'events_received', 'events_dropped', 'alerts_written',
+                                'firewall_written', 'fts_written'],
+                    }
+}
 REMOTED_CSV_HEADERS = {}
 AGENTD_CSV_HEADERS = {}
 
@@ -65,23 +73,42 @@ class DataVisualizer:
             ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=self.x_ticks_interval))
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
 
+    @staticmethod
+    def _basic_plot(ax, dataframe, label=None):
+        ax.plot(dataframe, label=label)
+
+    def _save_custom_plot(self, ax, y_label, title, rotation=90):
+        ax.legend(loc='center left', bbox_to_anchor=(1.0, 0.5))
+        ax.set_ylabel(y_label)
+        ax.set_title(title)
+        self._set_x_ticks_interval(ax)
+        plt.xticks(rotation=rotation)
+        csv_name = sub(pattern=r'\(.*\)', string=y_label, repl='')
+        plt.savefig(join(self.store_path, f"{csv_name}.svg"), dpi=1200, format='svg')
+
+    def _plot_data(self, elements, binary_dataset, title=None, generic_label=None):
+        if binary_dataset:
+            for element in elements:
+                fig, ax = plt.subplots()
+                for daemon in self._get_daemons():
+                    self._basic_plot(ax, self.dataframe[self.dataframe.Daemon == daemon][element], label=daemon)
+                self._save_custom_plot(ax, element, f"{element} {title}")
+
+        else:
+            fig, ax = plt.subplots()
+            for element in elements:
+                self._basic_plot(ax, self.dataframe[element], label=element)
+            self._save_custom_plot(ax, generic_label, title)
+
     def _plot_binaries_dataset(self):
         elements = self.dataframe.columns.drop(BINARY_NON_PRINTABLE_HEADERS)
-        for element in elements:
-            fig, ax = plt.subplots()
-            for daemon in self._get_daemons():
-                ax.plot(self.dataframe[self.dataframe.Daemon == daemon][element], label=daemon)
-
-            ax.legend(loc='center left', bbox_to_anchor=(1.0, 0.5))
-            ax.set_ylabel(element)
-            ax.set_title(f"{element} usage during the test")
-            self._set_x_ticks_interval(ax)
-            plt.xticks(rotation=90)
-            csv_name = sub(pattern=r'\(.*\)', string=element, repl='')
-            plt.savefig(join(self.store_path, f"{csv_name}.svg"), dpi=1200, format='svg')
+        self._plot_data(elements, True, "usage during the test")
 
     def _plot_analysisd_dataset(self):
-        pass
+        for element in ANALYSISD_CSV_HEADERS:
+            columns = ANALYSISD_CSV_HEADERS[element]['columns']
+            title = ANALYSISD_CSV_HEADERS[element]['title']
+            self._plot_data(elements=columns, binary_dataset=False, title=title, generic_label=element)
 
     def _plot_remoted_dataset(self):
         pass
