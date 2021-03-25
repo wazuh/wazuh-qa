@@ -58,6 +58,7 @@ class Agent:
         name (str, optional): Agent name. Specify only if it already exists.
         key (str, optional): Client key. Specify only if it already exists.
         version (str, optional): Wazuh agent version. Default v3.12.0.
+        labels (dict, optional): Wazuh agent labels. Each dict key will be a new label.
         fim_eps (int, optional): Set the maximum event reporting throughput. Events are messages that will produce an
                                  alert.
         fim_integrity_eps (int, optional): Set the maximum database synchronization message throughput.
@@ -107,7 +108,7 @@ class Agent:
         syscollector_batch_size (int): Size of the syscollector type batch events.
     """
     def __init__(self, manager_address, cypher="aes", os=None, rootcheck_sample=None, id=None, name=None, key=None,
-                 version="v3.12.0", fim_eps=1000, fim_integrity_eps=1000, sca_eps=100, syscollector_eps=1000,
+                 version="v3.12.0", fim_eps=100, fim_integrity_eps=100, sca_eps=100, syscollector_eps=100, labels=None,
                  rootcheck_eps=100, logcollector_eps=100, authd_password=None, disable_all_modules=False,
                  rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, sca_frequency=60,
                  syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100):
@@ -119,6 +120,7 @@ class Agent:
         self.long_version = version
         ver_split = version.replace("v", "").split(".")
         self.short_version = f"{'.'.join(ver_split[:2])}"
+        self.labels = labels
         self.cypher = cypher
         self.os = os
         self.fim_eps = fim_eps
@@ -578,6 +580,13 @@ class Agent:
             msg = msg.replace("<MERGED_CHECKSUM>", self.merged_checksum)
         except UnboundLocalError:
             logging.critical("Error creating keep alive for the agent. Check if the OS is in the keepalives.txt")
+
+        if self.labels:
+            msg_as_list = msg.split('\n')
+            for key, value in self.labels.items():
+                msg_as_list.insert(1, f'"{key}":{value}')
+            msg = '\n'.join(msg_as_list)
+
         self.keep_alive_event = self.create_event(msg)
         self.keep_alive_raw_msg = msg
 
