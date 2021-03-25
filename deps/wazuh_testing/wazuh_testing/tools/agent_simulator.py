@@ -27,13 +27,13 @@ from string import ascii_letters, digits
 from struct import pack
 from time import mktime, localtime, sleep, time
 
-import wazuh_testing.tools.syscollector as syscollector
+import wazuh_testing.data.syscollector as syscollector
 import wazuh_testing.wazuh_db as wdb
 from wazuh_testing import TCP
 from wazuh_testing import is_udp, is_tcp
 from wazuh_testing.tools.monitoring import wazuh_unpack, Queue
 from wazuh_testing.tools.remoted_sim import Cipher
-from wazuh_testing.tools.utils import retry, random_ip, random_string
+from wazuh_testing.tools.utils import retry, get_random_ip, get_random_string
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 
@@ -215,7 +215,7 @@ class Agent:
     def set_name(self):
         """Set a random agent name."""
         random_string = ''.join(sample('0123456789abcdef' * 2, 8))
-        self.name = "{}-{}-{}".format(agent_count, random_string, self.os)
+        self.name = f"{agent_count}-{random_string}-{self.os}"
 
     def register(self):
         """Request to register the agent in the manager.
@@ -706,15 +706,17 @@ class GeneratorSyscollector:
         today = date.today()
         timestamp = today.strftime("%Y/%m/%d %H:%M:%S")
 
-        event_map = [
+        fields_to_replace = [
                         ('<agent_name>', self.agent_name), ('<random_int>', str(randint(1, 10 * 10))),
-                        ('<random_string>', random_string(10)),
+                        ('<random_string>', get_random_string(10)),
                         ('<timestamp>', timestamp), ('<syscollector_type>', message_type)
                     ]
 
-        for variable, value in event_map:
+        for variable, value in fields_to_replace:
             message = message.replace(variable, value)
+
         message = f"{self.SYSCOLLECTOR_MQ}:{self.SYSCOLLECTOR}:{message}"
+
         return message
 
     def generate_event(self):
@@ -754,7 +756,7 @@ class SCA:
         return f"{self.SCA_MQ}:{self.SCA}:{msg}"
 
     def create_sca_event(self, event_type):
-        event_data = json.loads('{}')
+        event_data = {}
         event_data['type'] = event_type
         event_data['scan_id'] = self.last_scan_id
         self.last_scan_id += 1
@@ -780,6 +782,7 @@ class SCA:
             event_data['hash'] = getrandbits(256)
             event_data['hash_file'] = getrandbits(256)
             event_data['force_alert'] = '1'
+
             return event_data
 
         def create_check_sca_event(event_data):
@@ -806,6 +809,7 @@ class SCA:
             event_data['check']['condition'] = 'none'
             event_data['check']['file'] = '/etc/passwd'
             event_data['check']['result'] = choice(['passed', 'failed'])
+
             return event_data
 
         if event_type == 'summary':
@@ -850,6 +854,7 @@ class Rootcheck:
         if message == 'Ending rootcheck scan.':
             logging.debug(f"Scan ended - {self.agent_name}({self.agent_id}) "
                           f"- rootcheck({self.rootcheck_path})")
+
         return message
 
 
@@ -860,6 +865,7 @@ class Logcollector:
 
     def generate_event(self):
         log = 'Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550'
+
         return f"{self.LOGCOLLECTOR_MQ}:{self.LOGCOLLECTOR}:{log}"
 
 
@@ -918,7 +924,7 @@ class GeneratorHostinfo:
 
     def generate_event(self):
         number_open_ports = randint(1, 10)
-        host_ip = random_ip()
+        host_ip = get_random_ip()
         message_open_port_list = ''
         for i in range(number_open_ports):
             message_open_port_list += fr"{randint(1,65535)} ({choice(self.protocols_list)}) "
@@ -926,6 +932,7 @@ class GeneratorHostinfo:
         message = self.hostinfo_basic_template.replace('<random_ip>', host_ip)
         message += message_open_port_list
         message = fr"{self.HOSTINFO_MQ}:{self.localfile}:{message}"
+
         return message
 
 
@@ -1304,6 +1311,7 @@ class InjectorThread(threading.Thread):
 
     def run_module(self, module):
         """Send a module message from the agent to the manager.
+
          Args:
                 module (str): Module name
         """
