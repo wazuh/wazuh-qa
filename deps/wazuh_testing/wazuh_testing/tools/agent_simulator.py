@@ -213,7 +213,7 @@ class Agent:
     def set_name(self):
         """Set a random agent name."""
         random_string = ''.join(sample('0123456789abcdef' * 2, 8))
-        self.name = random_string
+        self.name = "{}-{}-{}".format(agent_count, random_string, self.os)
 
     def register(self):
         """Request to register the agent in the manager.
