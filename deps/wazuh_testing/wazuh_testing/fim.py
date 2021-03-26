@@ -973,57 +973,59 @@ def change_conf_param(param, value):
 def callback_detect_end_scan(line):
     msg = r'.*Sending FIM event: (.+)$'
     match = re.match(msg, line)
+    if not match:
+        return None
 
     try:
         if json.loads(match.group(1))['type'] == 'scan_end':
             return True
-    except (JSONDecodeError):
-        logger.warning("Couldn't load a log line into json object")
-    except (AttributeError, KeyError):
-        pass
+    except (JSONDecodeError, AttributeError, KeyError) as e:
+        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
 
 
 def callback_detect_event(line):
     msg = r'.*Sending FIM event: (.+)$'
     match = re.match(msg, line)
+    if not match:
+        return None
 
     try:
         json_event = json.loads(match.group(1))
         if json_event['type'] == 'event':
             return json_event
-    except (JSONDecodeError):
-        logger.warning("Couldn't load a log line into json object")
-    except (AttributeError, KeyError):
-        pass
+    except (JSONDecodeError, AttributeError, KeyError) as e:
+        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
 
 
 def callback_detect_modified_event(line):
     msg = r'.*Sending FIM event: (.+)$'
     match = re.match(msg, line)
+    if not match:
+        return None
 
     try:
         json_event = json.loads(match.group(1))
-        if (json_event['type'] == 'event') and (json_event['data']['type'] == 'modified'):
+        if json_event['type'] == 'event' and json_event['data']['type'] == 'modified':
             return json_event
-    except (JSONDecodeError):
-        logger.warning("Couldn't load a log line into json object")
-    except (AttributeError, KeyError):
-        pass
+    except (JSONDecodeError, AttributeError, KeyError) as e:
+        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
 
 
 def callback_detect_modified_event_with_inode_mtime(line):
     msg = r'.*Sending FIM event: (.+)$'
     match = re.match(msg, line)
+    if not match:
+        return None
 
     try:
         json_event = json.loads(match.group(1))
-        if (json_event['type'] == 'event') and (json_event['data']['type'] == 'modified'):
+        if json_event['type'] == 'event' and json_event['data']['type'] == 'modified':
+            # If 'changed_attributes' are not exactly 'inode' and 'mtime', symmetric_difference
+            # will return a non-empty set, returning the event.
             if {'inode', 'mtime'}.symmetric_difference(set(json_event['data']['changed_attributes'])):
                 return json_event
-    except (JSONDecodeError):
-        logger.warning("Couldn't load a log line into json object")
-    except (AttributeError, KeyError):
-        pass
+    except (JSONDecodeError, AttributeError, KeyError) as e:
+        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
 
 
 def callback_detect_integrity_event(line):
