@@ -11,30 +11,41 @@ import seaborn as sns
 BINARY_NON_PRINTABLE_HEADERS = ['PID', 'Daemon', 'Version']
 
 ANALYSISD_CSV_HEADERS = {
-    'decoded_events': {'title': 'events decoded per queue',
+    'decoded_events': {'title': 'Events decoded per queue',
                        'columns': ['total_events_decoded', 'syscheck_events_decoded',
                                    'syscollector_events_decoded', 'rootcheck_events_decoded',
                                    'sca_events_decoded', 'hostinfo_events_decoded', 'winevt_events_decoded',
                                    'other_events_decoded', 'dbsync_messages_dispatched'],
                        },
-    'queue_usage': { 'title': 'queue usage during the test',
+    'queue_usage': { 'title': 'Queue usage during the test',
                      'columns': ['syscheck_queue_usage', 'syscollector_queue_usage', 'rootcheck_queue_usage',
                                  'sca_queue_usage', 'hostinfo_queue_usage', 'winevt_queue_usage',
                                  'dbsync_queue_usage', 'upgrade_queue_usage', 'event_queue_usage',
                                  'rule_matching_queue_usage', 'alerts_queue_usage', 'firewall_queue_usage',
                                  'statistical_queue_usage', 'archives_queue_usage'],
                      },
-    'events_decoded_per_second': {'title': 'events decoded per second',
-                                   'columns': ['syscheck_edps', 'syscollector_edps', 'rootcheck_edps',
-                                               'sca_edps', 'hostinfo_edps', 'winevt_edps',
-                                               'other_events_edps', 'events_edps', 'dbsync_mdps'],
+    'events_decoded_per_second': {'title': 'Events decoded per second',
+                                  'columns': ['syscheck_edps', 'syscollector_edps', 'rootcheck_edps',
+                                              'sca_edps', 'hostinfo_edps', 'winevt_edps',
+                                              'other_events_edps', 'events_edps', 'dbsync_mdps'],
                                   },
-    'alerts_info': {'title': 'alerts and events info.',
+    'alerts_info': {'title': 'Alerts and events info.',
                     'columns': ['events_processed', 'events_received', 'events_dropped', 'alerts_written',
                                 'firewall_written', 'fts_written'],
                     }
 }
-REMOTED_CSV_HEADERS = {}
+REMOTED_CSV_HEADERS = {
+    'events_info': {'title': 'Events sent and count',
+                    'columns': ["evt_count", "ctrl_msg_count", "discarded_count", "msg_sent", 'dequeued_after_close']
+                    },
+    'queue_size': {'title': 'Queue status',
+                   'columns': ['queue_size', 'total_queue_size']
+                   },
+    'tcp_sessions': {'title': 'TCP sessions',
+                     'columns': ['tcp_sessions']},
+    'recv_bytes': {'title': 'Bytes received',
+                     'columns': ['recv_bytes']}
+}
 AGENTD_CSV_HEADERS = {}
 
 
@@ -83,8 +94,8 @@ class DataVisualizer:
         ax.set_title(title)
         self._set_x_ticks_interval(ax)
         plt.xticks(rotation=rotation)
-        csv_name = sub(pattern=r'\(.*\)', string=y_label, repl='')
-        plt.savefig(join(self.store_path, f"{csv_name}.svg"), dpi=1200, format='svg')
+        svg_name = sub(pattern=r'\(.*\)', string=y_label, repl='')
+        plt.savefig(join(self.store_path, f"{svg_name}.svg"), dpi=1200, format='svg')
 
     def _plot_data(self, elements, binary_dataset, title=None, generic_label=None):
         if binary_dataset:
@@ -111,7 +122,10 @@ class DataVisualizer:
             self._plot_data(elements=columns, binary_dataset=False, title=title, generic_label=element)
 
     def _plot_remoted_dataset(self):
-        pass
+        for element in REMOTED_CSV_HEADERS:
+            columns = REMOTED_CSV_HEADERS[element]['columns']
+            title = REMOTED_CSV_HEADERS[element]['title']
+            self._plot_data(elements=columns, binary_dataset=False, title=title, generic_label=element)
 
     def _plot_agentd_dataset(self):
         pass
