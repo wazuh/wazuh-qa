@@ -396,7 +396,7 @@ def check_syslog_event(wazuh_archives_log_monitor, message, port, protocol, time
     # Syslog events may contain a PRI header at the beginning of the message <1>. If wazuh-remoted receives a message
     # with this header, it parses the message and removes the header. That's why we remove the header to search the
     # event in the archives.log. More info about PRI headers at: https://tools.ietf.org/html/rfc3164#section-4.1.1
-    parsed_msg = re.sub(r"<\d+>", '', message)
+    parsed_msg = re.sub(r"<.+>", '', message)
 
     for msg in parsed_msg.split("\n"):
         detect_archives_log_event(archives_monitor=wazuh_archives_log_monitor,

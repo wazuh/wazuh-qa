@@ -19,6 +19,26 @@ logger.setLevel(logging.INFO)
 
 
 class Monitor:
+    """Class to monitor a binary process and extract data referring to the CPU usage, memory consumption, etc.
+
+    Args:
+        process_name (str): name of the process to monitor.
+        value_unit (str, optional): unit to store the bytes values. Defaults to KB.
+        time_step (int, optional): time between each scan in seconds. Defaults to 1 second.
+        version (str, optional): version of the binary. Defaults to None.
+        dst_dir (str, optional): directory to store the CSVs. Defaults to temp directory.
+
+    Attributes:
+        process_name (str): name of the process to monitor.
+        value_unit (str): unit to store the bytes values. Defaults to KB.
+        time_step (int): time between each scan in seconds. Defaults to 1 second.
+        version (str): version of the binary. Defaults to None.
+        dst_dir (str): directory to store the CSVs. Defaults to temp directory.
+        pid (int): PID of the process.
+        event (thread.Event): thread Event used to control the scans.
+        thread (thread): thread to scan the data.
+        csv_file (str): path to the CSV file.
+    """
     def __init__(self, process_name, value_unit='KB', time_step=1, version=None, dst_dir=gettempdir()):
         self.process_name = process_name
         self.value_unit = value_unit
@@ -34,6 +54,11 @@ class Monitor:
         self.csv_file = join(self.dst_dir, f'{self.process_name}.csv')
 
     def set_pid(self, process_name):
+        """Search and set the PID of the process.
+
+        Raises:
+            ValueError: if the process is not running.
+        """
         for proc in psutil.process_iter():
             # These two binaries are executed using the Python interpreter instead of
             # directly execute them as daemons. That's why we need to search the .py file in
@@ -48,16 +73,39 @@ class Monitor:
             raise ValueError(f"The process {process_name} is not running.")
 
     def get_process_info(self, proc):
+        """Collect the data from the process.
 
+        The monitor collects this info from the process:
+            - Daemon: daemon name.
+            - Version: version.
+            - Timestamp: timestamp of the scan.
+            - PID: pid of the process.
+            - CPU(%): cpu percent of the process. It maybe greater than 100% if the process uses multiple threads.
+            - VMS: Virtual Memory Size.
+            - RSS: Resident Set Size.
+            - USS: Unique Set Size.
+            - PSS: Proportional Set Size.
+            - SWAP: memory of the process in the swap space.
+            - FD: file descriptors opened by the process.
+            - Read_Ops: read operations.
+            - Write_Ops: write operations.
+            - Disk_Read: Bytes read by the process.
+            - Disk_Written: Bytes written by the process.
+            - Disk(%): percentage of the I/O operations ran by the process compared with the OS.
+
+        Args:
+            proc (psutil.proc): psutil object with the data of the process.
+
+        Returns:
+            dict: Dictionary containing the data of the process.
+        """
         def unit_conversion(x):
             return x / (1024 ** self.data_units[self.value_unit])
 
         # Pre-initialize the info dictionary. If there's a problem while taking metrics of the binary (i.e. it crashed)
         # the CSV will set all its values to 0 to easily identify if there was a problem or not
         info = {'Daemon': self.process_name, 'Version': self.version, 'Timestamp': datetime.now().strftime('%H:%M:%S'),
-                'Read_Ops': 0, 'Write_Ops': 0, f'Disk_Read({self.value_unit})': 0.0,
-                f'Disk_Written({self.value_unit})': 0.0, 'Disk(%)': 0.0, 'PID': self.pid,
-                'CPU(%)': 0.0, f'VMS({self.value_unit})': 0.0, f'RSS({self.value_unit})': 0.0,
+                'PID': self.pid, 'CPU(%)': 0.0, f'VMS({self.value_unit})': 0.0, f'RSS({self.value_unit})': 0.0,
                 f'USS({self.value_unit})': 0.0, f'PSS({self.value_unit})': 0.0,
                 f'SWAP({self.value_unit})': 0.0, 'FD': 0.0, 'Read_Ops': 0.0, 'Write_Ops': 0.0,
                 f'Disk_Read({self.value_unit})': 0.0, f'Disk_Written({self.value_unit})': 0.0, 'Disk(%)': 0.0,
@@ -90,7 +138,11 @@ class Monitor:
             return info
 
     def _write_csv(self, data):
+        """Write the collected data in a CSV file.
 
+        Args:
+            data (dict): dictionary containing the data collected from the process.
+        """
         header = not isfile(self.csv_file)
         with open(self.csv_file, 'a', newline='') as f:
             csv_writer = csv.writer(f)
@@ -101,6 +153,7 @@ class Monitor:
         logger.debug(f'Added new entry in {self.csv_file}')
 
     def _monitor_process(self):
+        """Private function that runs the function to extract data."""
         proc = psutil.Process(self.pid)
         while not self.event.is_set():
             data = dict()
@@ -114,14 +167,17 @@ class Monitor:
             sleep(self.time_step)
 
     def run(self):
+        """Run the event and thread monitoring functions."""
         self.event = Event()
         self.thread = Thread(target=self._monitor_process)
         self.thread.start()
 
     def start(self):
+        """Start the monitoring threads."""
         self.run()
         logger.info(f'Started monitoring process {self.process_name} ({self.pid})')
 
     def shutdown(self):
+        """Stop all the monitoring threads."""
         self.event.set()
         self.thread.join()

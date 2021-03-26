@@ -34,7 +34,7 @@ def get_script_arguments():
     parser.add_argument('-d', '--debug', dest='debug', action='store_true', default=False,
                         help='Enable debug level logging.')
     parser.add_argument('--store', dest='store_path', action='store', default=gettempdir(),
-                        help=f"Path to store the CSVs with the data. Default {gettempdir()}")
+                        help=f"Path to store the CSVs with the data. Default {gettempdir()}.")
 
     return parser.parse_args()
 
