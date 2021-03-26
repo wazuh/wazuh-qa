@@ -1,9 +1,7 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
 from setuptools import setup, find_packages
-
 setup(name='wazuh_testing',
       version='4.2.0',
       description='Wazuh testing utilities to help programmers automate tests',
@@ -21,7 +19,9 @@ setup(name='wazuh_testing',
                                       'data/state_integrity_analysis_schema.json',
                                       'data/gcp_event.json',
                                       'data/keepalives.txt',
-                                      'data/rootcheck.txt'
+                                      'data/rootcheck.txt',
+                                      'data/syscollector.py',
+                                      'data/winevt.py'
                                       ]
                     },
       entry_points={
