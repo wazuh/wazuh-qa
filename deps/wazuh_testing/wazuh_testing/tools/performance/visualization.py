@@ -44,9 +44,14 @@ REMOTED_CSV_HEADERS = {
     'tcp_sessions': {'title': 'TCP sessions',
                      'columns': ['tcp_sessions']},
     'recv_bytes': {'title': 'Bytes received',
-                     'columns': ['recv_bytes']}
+                   'columns': ['recv_bytes']}
 }
-AGENTD_CSV_HEADERS = {}
+AGENTD_CSV_HEADERS = {
+    'messages_info': {'title': 'Messages generated and total',
+                      'columns': ['msg_count', 'msg_sent', 'msg_buffer']},
+    'buffered_messages': {'title': 'Events in the anti-flooding buffer', 'columns': ['msg_buffer']},
+    'ack_and_keepalive_diff': {'title': 'Difference between the last ACK and KeepAlive', 'columns': ['diff_seconds']}
+}
 
 
 class DataVisualizer:
@@ -128,7 +133,15 @@ class DataVisualizer:
             self._plot_data(elements=columns, binary_dataset=False, title=title, generic_label=element)
 
     def _plot_agentd_dataset(self):
-        pass
+        if 'diff_seconds' not in self.dataframe.columns:
+            self.dataframe['diff_seconds'] = abs(pd.to_datetime(self.dataframe['last_keepalive']) -
+                                                 pd.to_datetime(self.dataframe['last_ack']))
+            self.dataframe['diff_seconds'] = self.dataframe.diff_seconds.dt.total_seconds()
+
+        for element in AGENTD_CSV_HEADERS:
+            columns = AGENTD_CSV_HEADERS[element]['columns']
+            title = AGENTD_CSV_HEADERS[element]['title']
+            self._plot_data(elements=columns, binary_dataset=False, title=title, generic_label=element)
 
     def _plot_logcollector_dataset(self):
         pass
