@@ -31,7 +31,6 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
 
     active_agents, injectors = [], []
 
-
     for _ in range(agents_number):
         agent = ag.Agent(manager_address, "aes", os=agent_os, version=agent_version, fim_eps=eps)
         available_modules = agent.modules.keys()

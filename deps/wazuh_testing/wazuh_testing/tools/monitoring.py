@@ -586,7 +586,7 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
             print(err)
             raise
 
-        # Save last_adress
+        # Save last_address
         self.last_address = fromaddr
         return connstream, fromaddr
 

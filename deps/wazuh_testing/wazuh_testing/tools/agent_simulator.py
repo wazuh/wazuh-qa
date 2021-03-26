@@ -620,38 +620,56 @@ class Agent:
             self.init_logcollector()
 
     def init_logcollector(self):
+        """ Initialize logcollector module
+        """
         if self.logcollector is None:
             self.logcollector = Logcollector()
 
     def init_sca(self):
+        """ Initialize init_sca module
+        """
         if self.sca is None:
             self.sca = SCA(self.os)
 
     def init_syscollector(self):
+        """ Initialize syscollector module
+        """
         if self.syscollector is None:
             self.syscollector = GeneratorSyscollector(self.name, self.syscollector_batch_size)
 
     def init_rootcheck(self):
+        """ Initialize rootcheck module
+        """
         if self.rootcheck is None:
             self.rootcheck = Rootcheck(self.rootcheck_sample, self.name, self.id)
 
     def init_fim(self):
+        """ Initialize fim module
+        """
         if self.fim is None:
             self.fim = GeneratorFIM(self.id, self.name, self.short_version)
 
     def init_fim_integrity(self):
+        """ Initialize fom integrity module
+        """
         if self.fim_integrity is None:
             self.fim_integrity = GeneratorIntegrityFIM(self.id, self.name, self.short_version)
 
     def init_hostinfo(self):
+        """ Initialize hostinfo module
+        """
         if self.hostinfo is None:
             self.hostinfo = GeneratorHostinfo()
 
     def init_winevt(self):
+        """ Initialize winevt module
+        """
         if self.winevt is None:
             self.winevt = GeneratorWinevt(self.name, self.id)
 
     def get_connection_status(self):
+        """ Get agent connection status of global.db
+        """
         result = wdb.query_wdb(f"global get-agent-info {self.id}")
 
         if len(result) > 0:
@@ -662,30 +680,44 @@ class Agent:
 
     @retry(AttributeError, attempts=10, delay=2, delay_multiplier=1)
     def wait_status_active(self):
+        """ Wait until agent status is active in global.db
+        """
         status = self.get_connection_status()
         if status == 'active':
             return
         raise AttributeError(f"Agent is not active yet: {status}")
 
     def set_module_status(self, module_name, status):
+        """ Set module status
+        Args:
+            module_name (str): Module name
+            status (str): Module status
+        """
         self.modules[module_name]['status'] = status
 
     def set_module_attribute(self, module_name, attribute, value):
+        """ Set module attribute
+        Args:
+            module_name (str): Module name.
+            attribute (str): Attribute name to change.
+            value: Attribute value
+        """
         self.modules[module_name][attribute] = value
 
 
 class GeneratorSyscollector:
     """This class allows the generation of syscollector events.
 
-    Create events of the different winevt channels: System, Security, Application, Windows-Defender and Sysmon.
-    It uses template events (`data/winevt.py`) for which the `EventID` field is randomized.
-    Message template:
-    >>> f:EventChannel:{"Message":"<EVENTCHANNEL_MESSAGE>","Event":"<EVENT_CHANNEL_EVENT_XML>"}
-test_multi_agents_protocols_communication
+    Create events of different syscollector event types Network, Process, Port, Packages, OS, Hardware and Hotfix.
+    In order to change messages events it randomized different fields of templates specified by <random_string>.
+    In order to simulate syscollector module, it send a set of the same syscollector type messages,
+    which size is specified by `batch_size` attribute.
+
+    >>>
 
     Args:
         agent_name (str): Name of the agent.
-        agent_id (str): ID of the agent.
+        batch_size (int): Number of messages of the same type
     """
     def __init__(self, agent_name, batch_size):
         self.current_batch_events = -1
@@ -698,6 +730,10 @@ test_multi_agents_protocols_communication
         self.SYSCOLLECTOR_MQ = 'd'
 
     def format_event(self, message_type):
+        """ Format syscollector message of the specified type.
+        Args:
+            message_type (str): Syscollector event type.
+        """
         message = syscollector.SYSCOLLECTOR_HEADER
         if message_type == 'network':
             message += syscollector.SYSCOLLECTOR_NETWORK_EVENT_TEMPLATE
@@ -733,6 +769,10 @@ test_multi_agents_protocols_communication
         return message
 
     def generate_event(self):
+        """ Generate syscollector event.
+         The event types are selected sequentially, creating a number of events of the same type specified
+         in `bath_size`
+        """
         event = ''
         if self.current_batch_events_size == 0:
             self.current_batch_events = (self.current_batch_events + 1) % len(self.list_events)
@@ -749,8 +789,14 @@ test_multi_agents_protocols_communication
 
 
 class SCA:
-    """
+    """This class allows the generation of SCA events.
 
+    Create sca events, both summary and check.
+
+    >>>
+
+    Args:
+        os (str): Agent operative system.
     """
     def __init__(self, os):
         self.last_scan_id = 0
@@ -761,6 +807,8 @@ class SCA:
         self.started_time = int(time())
 
     def get_message(self):
+        """ Alternatively creates summary and check sca messages.
+        """
         if self.count % 100 == 0:
             msg = self.create_sca_event('summary')
         else:
@@ -772,6 +820,12 @@ class SCA:
         return f"{self.SCA_MQ}:{self.SCA}:{msg}"
 
     def create_sca_event(self, event_type):
+        """ Create sca event, of desired type
+
+        Args:
+            event_type (str): Event type `[summary, check]`
+
+        """
         event_data = {}
         event_data['type'] = event_type
         event_data['scan_id'] = self.last_scan_id
@@ -1449,7 +1503,6 @@ class InjectorThread(threading.Thread):
         else:
             self.stop_thread = 1
 
-
 def create_agents(agents_number, manager_address, cypher='aes', fim_eps=None, authd_password=None, agents_os=None,
                   agents_version=None, disable_all_modules=False):
     """Create a list of generic agents
@@ -1478,4 +1531,21 @@ def create_agents(agents_number, manager_address, cypher='aes', fim_eps=None, au
         agents.append(Agent(manager_address, cypher, fim_eps=fim_eps, authd_password=authd_password,
                             os=agent_os, version=agent_version, disable_all_modules=disable_all_modules))
 
+        agent_count = agent_count + 1
+
+    return agents
+
+
+def connect(agent,  manager_address='localhost', protocol=TCP, manager_port='1514'):
+    """Connects an agent to the manager
+    Args:
+        agent (Agent): agent to connect.
+        manager_address (str): address of the manager. It can be an IP or a DNS.
+        protocol (str): protocol used to connect with the manager. Defaults to 'TCP'.
+        manager_port (str): port used to connect with the manager. Defaults to '1514'.
+    """
+    sender = Sender(manager_address, protocol=protocol, manager_port=manager_port)
+    injector = Injector(sender, agent)
+    injector.run()
+    agent.wait_status_active()
     return sender, injector
