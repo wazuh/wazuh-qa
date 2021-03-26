@@ -21,7 +21,9 @@ setup(name='wazuh_testing',
                                       'data/state_integrity_analysis_schema.json',
                                       'data/gcp_event.json',
                                       'data/keepalives.txt',
-                                      'data/rootcheck.txt'
+                                      'data/rootcheck.txt',
+                                      'data/syscollector.py',
+                                      'data/winevt.py'
                                       ]
                     },
       entry_points={
