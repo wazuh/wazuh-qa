@@ -1,5 +1,13 @@
 # Test active response
 
+## Requeriments (local internal options)
+```
+# Local internal option configuration
+remoted.debug=2
+analydisd.debug=2
+wazuh_modules.debug=2
+```
+
 ## Overview
 These tests will check if an active response command is sent correctly to the agent.
 

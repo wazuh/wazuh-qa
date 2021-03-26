@@ -205,7 +205,7 @@ def callback_error_invalid_value_for(option):
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"ERROR: Invalid value for option '\<{option}\>'"
+    msg = fr"WARNING: \(\d+\): Invalid value '.*' in '{option}' option. Default value will be used."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 

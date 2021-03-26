@@ -957,16 +957,15 @@ class Rootcheck:
 class Logcollector:
     """This class allows the generation of logcollector events.
 
-    Creates logcollector events. Generated message:
-
-        x:syslog:Mar    24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550
+    Creates logcollector events.
     """
     def __init__(self):
         self.LOGCOLLECTOR = 'syslog'
         self.LOGCOLLECTOR_MQ = 'x'
 
     def generate_event(self):
-        """ Generate logcollector event
+        """ Generate logcollector event. Generated event:
+                x:syslog:Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550
         """
         log = 'Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550'
 
@@ -974,6 +973,12 @@ class Logcollector:
 
 
 class GeneratorIntegrityFIM:
+    """This class allows the generation of fim_integrity events.
+    Args:
+        agent_id (str): The id of the agent.
+        agent_name (str): The name of the agent.
+        agent_version (str): The version of the agent.
+    """
     def __init__(self, agent_id, agent_name, agent_version):
         self.agent_id = agent_id
         self.agent_name = agent_name
@@ -983,9 +988,15 @@ class GeneratorIntegrityFIM:
         self.fim_generator = GeneratorFIM(self.agent_id, self.agent_name, self.agent_version)
 
     def format_message(self, message):
+        """ Format fim integrity message.
+        Args:
+            message (str): Integrity fim event.
+        """
         return '{0}:[{1}] ({2}) any->syscheck:{3}'.format(self.INTEGRITY_MQ, self.agent_id, self.agent_name, message)
 
     def generate_message(self):
+        """ Generate integrity FIM message according to `event_type` attribute.
+        """
         data = None
         if self.event_type in ["integrity_check_global", "integrity_check_left", "integrity_check_right"]:
             id = int(time())
