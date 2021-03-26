@@ -53,6 +53,12 @@ AGENTD_CSV_HEADERS = {
     'ack_and_keepalive_diff': {'title': 'Difference between the last ACK and KeepAlive', 'columns': ['diff_seconds']}
 }
 
+LOGCOLLECTOR_CSV_HEADERS = {
+    'events': {'title': 'Events generated', 'columns': ['events']},
+    'bytes_sent': {'title': 'Bytes sent', 'columns': ['bytes']},
+    'drops': {'title': 'Events dropped', 'columns': ['target_drops']},
+}
+
 
 class DataVisualizer:
     def __init__(self, dataframes, target, compare=False, store_path=gettempdir(), x_ticks_granularity='minutes',
@@ -102,13 +108,21 @@ class DataVisualizer:
         svg_name = sub(pattern=r'\(.*\)', string=y_label, repl='')
         plt.savefig(join(self.store_path, f"{svg_name}.svg"), dpi=1200, format='svg')
 
-    def _plot_data(self, elements, binary_dataset, title=None, generic_label=None):
-        if binary_dataset:
+    def _plot_data(self, elements, title=None, generic_label=None):
+        if self.target == 'binary':
             for element in elements:
                 fig, ax = plt.subplots()
                 for daemon in self._get_daemons():
                     self._basic_plot(ax, self.dataframe[self.dataframe.Daemon == daemon][element], label=daemon)
                 self._save_custom_plot(ax, element, f"{element} {title}")
+
+        elif self.target == 'logcollector':
+            for element in elements:
+                fig, ax = plt.subplots()
+                for target in self._get_logcollector_targets():
+                    print(target)
+                    self._basic_plot(ax, self.dataframe[self.dataframe.target == target][element], label=target)
+                self._save_custom_plot(ax, element, title)
 
         else:
             fig, ax = plt.subplots()
@@ -124,13 +138,13 @@ class DataVisualizer:
         for element in ANALYSISD_CSV_HEADERS:
             columns = ANALYSISD_CSV_HEADERS[element]['columns']
             title = ANALYSISD_CSV_HEADERS[element]['title']
-            self._plot_data(elements=columns, binary_dataset=False, title=title, generic_label=element)
+            self._plot_data(elements=columns, title=title, generic_label=element)
 
     def _plot_remoted_dataset(self):
         for element in REMOTED_CSV_HEADERS:
             columns = REMOTED_CSV_HEADERS[element]['columns']
             title = REMOTED_CSV_HEADERS[element]['title']
-            self._plot_data(elements=columns, binary_dataset=False, title=title, generic_label=element)
+            self._plot_data(elements=columns, title=title, generic_label=element)
 
     def _plot_agentd_dataset(self):
         if 'diff_seconds' not in self.dataframe.columns:
@@ -141,14 +155,32 @@ class DataVisualizer:
         for element in AGENTD_CSV_HEADERS:
             columns = AGENTD_CSV_HEADERS[element]['columns']
             title = AGENTD_CSV_HEADERS[element]['title']
-            self._plot_data(elements=columns, binary_dataset=False, title=title, generic_label=element)
+            self._plot_data(elements=columns, title=title, generic_label=element)
 
     def _plot_logcollector_dataset(self):
-        pass
+        for element in LOGCOLLECTOR_CSV_HEADERS:
+            columns = LOGCOLLECTOR_CSV_HEADERS[element]['columns']
+            title = LOGCOLLECTOR_CSV_HEADERS[element]['title']
+            self._plot_data(elements=columns, title=title, generic_label=element)
 
     def plot(self):
-        self._plot_binaries_dataset()
+        if self.target == 'binary':
+            self._plot_binaries_dataset()
+        elif self.target == 'analysis':
+            self._plot_analysisd_dataset()
+        elif self.target == 'remote':
+            self._plot_remoted_dataset()
+        elif self.target == 'agent':
+            self._plot_agentd_dataset()
+        elif self.target == 'logcollector':
+            self._plot_logcollector_dataset()
+        else:
+            raise AttributeError(f"Invalid target {self.target}")
 
     def _get_daemons(self):
         """Get the list of Wazuh Daemons in the dataset"""
         return self.dataframe.Daemon.unique()
+
+    def _get_logcollector_targets(self):
+        """Get the list of unique logcollector targets (sockets) in the dataset"""
+        return self.dataframe.target.unique()
