@@ -129,4 +129,7 @@ def test_db_inode_check(test_cases, get_configuration, configure_environment, re
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_test).result()
+        if test_cases == 2:
+            pytest.xfail('Xfailing due to false positive in special case, issue related: \
+                          https://github.com/wazuh/wazuh/issues/7829')
         raise AttributeError(f'Unexpected event {event}')

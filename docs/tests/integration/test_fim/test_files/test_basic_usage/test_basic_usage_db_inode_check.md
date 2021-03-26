@@ -6,7 +6,7 @@ The test check for false positives due to possible inconsistencies with inodes i
 
 | Tier | Platforms | Time spent| Test file |
 |:--:|:--:|:--:|:--:|
-| 0 | Linux | 00:00:37 | [test_basic_usage_db_inode_check.py](../../../../../../tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_db_inode_check.)|
+| 0 | Linux | 00:00:43 | [test_basic_usage_db_inode_check.py](../../../../../../tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_db_inode_check.)|
 
 ## Test logic
 
@@ -23,17 +23,17 @@ The test check for false positives due to possible inconsistencies with inodes i
 
 ```
 python3 -m pytest --html=/vagrant/report.html tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_db_inode_check.py
-======================================= test session starts ========================================
+============================================== test session starts ==============================================
 platform linux -- Python 3.8.5, pytest-6.2.1, py-1.10.0, pluggy-0.13.1
 rootdir: /home/vagrant/wazuh-qa/tests/integration, configfile: pytest.ini
 plugins: html-2.0.1, testinfra-5.0.0, metadata-1.11.0
-collected 4 items
+collected 6 items
 
-tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_db_inode_check.py .. [ 50%]
-..                                                                                           [100%]
+tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_db_inode_check.py ..x..x          [100%]
 
-------------------------- generated html file: file:///vagrant/report.html -------------------------
-======================================== 4 passed in 37.66s ========================================
+------------------------------- generated html file: file:///vagrant/report.html --------------------------------
+========================================= 4 passed, 2 xfailed in 43.88s =========================================
+
 
 ```
 
