@@ -11,7 +11,7 @@ def get_script_arguments():
     parser.add_argument('-s', '--sources', dest='csv_list', required=True, type=str, nargs='+', action='store',
                         help='Paths to the CSV files separated by whitespace.')
     parser.add_argument('-t', '--target', dest='visualization_target', default='binary',
-                        choices=['binary', 'analysisd', 'remoted', 'agentd', 'logcollector'],
+                        choices=['binary', 'analysis', 'remote', 'agent', 'logcollector'],
                         help='Generate data visualizations for a specific target. Default binary.')
     parser.add_argument('-d', '--destination', dest='destination', default=gettempdir(),
                         help=f'Directory to store the images. Default {gettempdir()}')
