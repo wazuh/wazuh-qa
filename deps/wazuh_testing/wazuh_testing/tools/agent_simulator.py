@@ -867,6 +867,7 @@ class SCA:
             event_data['hash_file'] = getrandbits(256)
             event_data['force_alert'] = '1'
 
+
             return event_data
 
         def create_check_sca_event(event_data):
@@ -893,6 +894,7 @@ class SCA:
             event_data['check']['condition'] = 'none'
             event_data['check']['file'] = '/etc/passwd'
             event_data['check']['result'] = choice(['passed', 'failed'])
+
 
             return event_data
 
@@ -972,6 +974,7 @@ class Logcollector:
                 x:syslog:Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550
         """
         log = 'Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550'
+
 
         return f"{self.LOGCOLLECTOR_MQ}:{self.LOGCOLLECTOR}:{log}"
 
@@ -1059,6 +1062,7 @@ class GeneratorHostinfo:
         message = self.hostinfo_basic_template.replace('<random_ip>', host_ip)
         message += message_open_port_list
         message = fr"{self.HOSTINFO_MQ}:{self.localfile}:{message}"
+
 
         return message
 
@@ -1497,6 +1501,7 @@ class InjectorThread(threading.Thread):
 
     def run_module(self, module):
         """Send a module message from the agent to the manager.
+
 
          Args:
                 module (str): Module name
