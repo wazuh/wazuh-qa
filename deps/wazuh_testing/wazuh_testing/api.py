@@ -132,7 +132,7 @@ def get_manager_configuration(section=None, field=None):
 
         Received a section and a field and tries to return all available values that match with this entry.
         This function is required because, sometimes, there may be multiple entries with the same field or section
-        and the API will return a list instead of a map. Using recursivity we make sure that the output matches
+        and the API will return a list instead of a map. Using recursion we make sure that the output matches
         the user expectations.
         """
         if isinstance(answer, list):
