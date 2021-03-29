@@ -679,7 +679,7 @@ class Agent:
 
     def set_module_status(self, module_name, status):
         """Set module status.
-        
+
         Args:
             module_name (str): Module name.
             status (str): Module status.
@@ -727,7 +727,7 @@ class GeneratorSyscollector:
 
     def format_event(self, message_type):
         """Format syscollector message of the specified type.
-        
+
         Args:
             message_type (str): Syscollector event type.
         """
@@ -767,7 +767,7 @@ class GeneratorSyscollector:
 
     def generate_event(self):
         """Generate syscollector event.
-        
+
          The event types are selected sequentially, creating a number of events of the same type specified
          in `bath_size`.
         """
@@ -857,7 +857,6 @@ class SCA:
             event_data['hash_file'] = getrandbits(256)
             event_data['force_alert'] = '1'
 
-
             return event_data
 
         def create_check_sca_event(event_data):
@@ -884,7 +883,6 @@ class SCA:
             event_data['check']['condition'] = 'none'
             event_data['check']['file'] = '/etc/passwd'
             event_data['check']['result'] = choice(['passed', 'failed'])
-
 
             return event_data
 
@@ -962,7 +960,6 @@ class Logcollector:
                 x:syslog:Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550
         """
         log = 'Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550'
-
 
         return f"{self.LOGCOLLECTOR_MQ}:{self.LOGCOLLECTOR}:{log}"
 
@@ -1052,7 +1049,6 @@ class GeneratorHostinfo:
         message += message_open_port_list
         message = fr"{self.HOSTINFO_MQ}:{self.localfile}:{message}"
 
-
         return message
 
 
@@ -1112,7 +1108,7 @@ class GeneratorWinevt:
 
 class GeneratorFIM:
     """This class allows the generation of FIM events.
-    
+
     Args:
         agent_id (str): The id of the agent.
         agent_name (str): The name of the agent.
@@ -1566,6 +1562,7 @@ class InjectorThread(threading.Thread):
             self.agent.stop_receiver()
         else:
             self.stop_thread = 1
+
 
 def create_agents(agents_number, manager_address, cypher='aes', fim_eps=None, authd_password=None, agents_os=None,
                   agents_version=None, disable_all_modules=False):
