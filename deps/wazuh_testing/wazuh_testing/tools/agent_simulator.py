@@ -620,56 +620,47 @@ class Agent:
             self.init_logcollector()
 
     def init_logcollector(self):
-        """ Initialize logcollector module.
-        """
+        """Initialize logcollector module."""
         if self.logcollector is None:
             self.logcollector = Logcollector()
 
     def init_sca(self):
-        """ Initialize init_sca module.
-        """
+        """Initialize init_sca module."""
         if self.sca is None:
             self.sca = SCA(self.os)
 
     def init_syscollector(self):
-        """ Initialize syscollector module.
-        """
+        """Initialize syscollector module."""
         if self.syscollector is None:
             self.syscollector = GeneratorSyscollector(self.name, self.syscollector_batch_size)
 
     def init_rootcheck(self):
-        """ Initialize rootcheck module.
-        """
+        """Initialize rootcheck module."""
         if self.rootcheck is None:
             self.rootcheck = Rootcheck(self.rootcheck_sample, self.name, self.id)
 
     def init_fim(self):
-        """ Initialize fim module.
-        """
+        """Initialize fim module."""
         if self.fim is None:
             self.fim = GeneratorFIM(self.id, self.name, self.short_version)
 
     def init_fim_integrity(self):
-        """ Initialize fom integrity module.
-        """
+        """Initialize fom integrity module."""
         if self.fim_integrity is None:
             self.fim_integrity = GeneratorIntegrityFIM(self.id, self.name, self.short_version)
 
     def init_hostinfo(self):
-        """ Initialize hostinfo module.
-        """
+        """Initialize hostinfo module."""
         if self.hostinfo is None:
             self.hostinfo = GeneratorHostinfo()
 
     def init_winevt(self):
-        """ Initialize winevt module
-        """
+        """Initialize winevt module."""
         if self.winevt is None:
             self.winevt = GeneratorWinevt(self.name, self.id)
 
     def get_connection_status(self):
-        """ Get agent connection status of global.db.
-        """
+        """Get agent connection status of global.db."""
         result = wdb.query_wdb(f"global get-agent-info {self.id}")
 
         if len(result) > 0:
@@ -680,15 +671,15 @@ class Agent:
 
     @retry(AttributeError, attempts=10, delay=2, delay_multiplier=1)
     def wait_status_active(self):
-        """ Wait until agent status is active in global.db.
-        """
+        """Wait until agent status is active in global.db."""
         status = self.get_connection_status()
         if status == 'active':
             return
         raise AttributeError(f"Agent is not active yet: {status}")
 
     def set_module_status(self, module_name, status):
-        """ Set module status
+        """Set module status.
+        
         Args:
             module_name (str): Module name.
             status (str): Module status.
@@ -696,7 +687,7 @@ class Agent:
         self.modules[module_name]['status'] = status
 
     def set_module_attribute(self, module_name, attribute, value):
-        """ Set module attribute.
+        """Set module attribute.
         Args:
             module_name (str): Module name.
             attribute (str): Attribute name to change.
@@ -711,7 +702,7 @@ class GeneratorSyscollector:
     Create events of different syscollector event types Network, Process, Port, Packages, OS, Hardware and Hotfix.
     In order to change messages events it randomized different fields of templates specified by <random_string>.
     In order to simulate syscollector module, it send a set of the same syscollector type messages,
-    which size is specified by `batch_size` attribute. Example of syscollector message
+    which size is specified by `batch_size` attribute. Example of syscollector message:
 
         d:syscollector:{"type":"network","ID":18,"timestamp":"2021/03/26 00:00:00","iface":{"name":"O977Q1F55O",
         "type":"ethernet","state":"up","MAC":"08:00:27:be:ce:3a","tx_packets":2135,"rx_packets":9091,"tx_bytes":210748,
@@ -735,7 +726,8 @@ class GeneratorSyscollector:
         self.SYSCOLLECTOR_MQ = 'd'
 
     def format_event(self, message_type):
-        """ Format syscollector message of the specified type.
+        """Format syscollector message of the specified type.
+        
         Args:
             message_type (str): Syscollector event type.
         """
@@ -774,11 +766,11 @@ class GeneratorSyscollector:
         return message
 
     def generate_event(self):
-        """ Generate syscollector event.
+        """Generate syscollector event.
+        
          The event types are selected sequentially, creating a number of events of the same type specified
-         in `bath_size`
+         in `bath_size`.
         """
-        event = ''
         if self.current_batch_events_size == 0:
             self.current_batch_events = (self.current_batch_events + 1) % len(self.list_events)
             self.current_batch_events_size = self.batch_size
@@ -821,8 +813,7 @@ class SCA:
         self.started_time = int(time())
 
     def get_message(self):
-        """ Alternatively creates summary and check sca messages.
-        """
+        """Alternatively creates summary and check SCA messages."""
         if self.count % 100 == 0:
             msg = self.create_sca_event('summary')
         else:
@@ -834,11 +825,10 @@ class SCA:
         return f"{self.SCA_MQ}:{self.SCA}:{msg}"
 
     def create_sca_event(self, event_type):
-        """ Create sca event, of desired type.
+        """Create SCA event, of the desired type.
 
         Args:
             event_type (str): Event type `[summary, check]`.
-
         """
         event_data = {}
         event_data['type'] = event_type
@@ -930,8 +920,7 @@ class Rootcheck:
         self.setup()
 
     def setup(self):
-        """ Initialized the list of rootcheck messages, using `rootcheck_sample` and agent information.
-        """
+        """Initialized the list of rootcheck messages, using `rootcheck_sample` and agent information."""
         if self.rootcheck_sample is None:
             self.rootcheck_path = os.path.join(_data_path, 'rootcheck.txt')
         else:
@@ -945,8 +934,7 @@ class Rootcheck:
                 line = fp.readline()
 
     def get_message(self):
-        """ Returns a rootcheck message, informing when rootcheck scan starts and ends.
-        """
+        """Returns a rootcheck message, informing when rootcheck scan starts and ends."""
         message = next(self.message)
         if message == 'Starting rootcheck scan.':
             logging.debug(f"Scan started - {self.agent_name}({self.agent_id}) "
@@ -970,7 +958,7 @@ class Logcollector:
         self.LOGCOLLECTOR_MQ = 'x'
 
     def generate_event(self):
-        """ Generate logcollector event. Generated event:
+        """Generate logcollector event. Generated event:
                 x:syslog:Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550
         """
         log = 'Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550'
@@ -981,6 +969,7 @@ class Logcollector:
 
 class GeneratorIntegrityFIM:
     """This class allows the generation of fim_integrity events.
+
     Args:
         agent_id (str): The id of the agent.
         agent_name (str): The name of the agent.
@@ -995,15 +984,15 @@ class GeneratorIntegrityFIM:
         self.fim_generator = GeneratorFIM(self.agent_id, self.agent_name, self.agent_version)
 
     def format_message(self, message):
-        """ Format fim integrity message.
+        """Format FIM integrity message.
+
         Args:
             message (str): Integrity fim event.
         """
         return '{0}:[{1}] ({2}) any->syscheck:{3}'.format(self.INTEGRITY_MQ, self.agent_id, self.agent_name, message)
 
     def generate_message(self):
-        """ Generate integrity FIM message according to `event_type` attribute.
-        """
+        """Generate integrity FIM message according to `event_type` attribute."""
         data = None
         if self.event_type in ["integrity_check_global", "integrity_check_left", "integrity_check_right"]:
             id = int(time())
@@ -1075,7 +1064,6 @@ class GeneratorWinevt:
 
         f:EventChannel:{"Message":"<EVENTCHANNEL_MESSAGE>","Event":"<EVENT_CHANNEL_EVENT_XML>"}
 
-
     Args:
         agent_name (str): Name of the agent.
         agent_id (str): ID of the agent.
@@ -1093,13 +1081,13 @@ class GeneratorWinevt:
         self.actual_winevt_source_index = -1
 
     def generate_event(self, winevt_type=None):
-        """ Genereate winevt event
+        """Genereate winevt event.
 
-        Generate desired type of winevt event. If no type of winvt message is provided, all winvt message types
+        Generate the desired type of winevt event. If no type of winvt message is provided, all winvt message types
         will be generated sequentially.
 
         Args:
-            winevt_type (str): Winevt type message `system, security, application, windows-defender, sysmon`
+            winevt_type (str): Winevt type message `system, security, application, windows-defender, sysmon`.
         """
         winevt_type_index = self.actual_winevt_source_index
         if winevt_type is not None:
@@ -1123,7 +1111,8 @@ class GeneratorWinevt:
 
 
 class GeneratorFIM:
-    """This class allows the generation of fim events.
+    """This class allows the generation of FIM events.
+    
     Args:
         agent_id (str): The id of the agent.
         agent_name (str): The name of the agent.
