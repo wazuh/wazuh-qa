@@ -27,13 +27,14 @@ from string import ascii_letters, digits
 from struct import pack
 from time import mktime, localtime, sleep, time
 
-import wazuh_testing.tools.syscollector as syscollector
+import wazuh_testing.data.syscollector as syscollector
+import wazuh_testing.data.winevt as winevt
 import wazuh_testing.wazuh_db as wdb
 from wazuh_testing import TCP
 from wazuh_testing import is_udp, is_tcp
 from wazuh_testing.tools.monitoring import wazuh_unpack, Queue
 from wazuh_testing.tools.remoted_sim import Cipher
-from wazuh_testing.tools.utils import retry, random_ip, random_string
+from wazuh_testing.tools.utils import retry, get_random_ip, get_random_string
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 
@@ -216,7 +217,7 @@ class Agent:
     def set_name(self):
         """Set a random agent name."""
         random_string = ''.join(sample('0123456789abcdef' * 2, 8))
-        self.name = "{}-{}-{}".format(agent_count, random_string, self.os)
+        self.name = f"{agent_count}-{random_string}-{self.os}"
 
     def register(self):
         """Request to register the agent in the manager.
@@ -625,7 +626,6 @@ class Agent:
             self.logcollector = Logcollector()
 
     def init_sca(self):
-
         """ Initialize init_sca module.
         """
         if self.sca is None:
@@ -662,6 +662,8 @@ class Agent:
             self.hostinfo = GeneratorHostinfo()
 
     def init_winevt(self):
+        """ Initialize winevt module
+        """
         if self.winevt is None:
             self.winevt = GeneratorWinevt(self.name, self.id)
 
@@ -733,6 +735,10 @@ class GeneratorSyscollector:
         self.SYSCOLLECTOR_MQ = 'd'
 
     def format_event(self, message_type):
+        """ Format syscollector message of the specified type.
+        Args:
+            message_type (str): Syscollector event type.
+        """
         message = syscollector.SYSCOLLECTOR_HEADER
         if message_type == 'network':
             message += syscollector.SYSCOLLECTOR_NETWORK_EVENT_TEMPLATE
@@ -742,7 +748,7 @@ class GeneratorSyscollector:
             message += syscollector.SYSCOLLECTOR_PORT_EVENT_TEMPLATE
         elif message_type == 'packages':
             message += syscollector.SYSCOLLECTOR_PACKAGES_EVENT_TEMPLATE
-        elif message_type == 'os':
+        elif message_type == 'OS':
             message += syscollector.SYSCOLLECTOR_OS_EVENT_TEMPLATE
         elif message_type == 'hardware':
             message += syscollector.SYSCOLLECTOR_HARDWARE_EVENT_TEMPLATE
@@ -754,18 +760,24 @@ class GeneratorSyscollector:
         today = date.today()
         timestamp = today.strftime("%Y/%m/%d %H:%M:%S")
 
-        event_map = [
+        fields_to_replace = [
                         ('<agent_name>', self.agent_name), ('<random_int>', str(randint(1, 10 * 10))),
-                        ('<random_string>', random_string(10)),
+                        ('<random_string>', get_random_string(10)),
                         ('<timestamp>', timestamp), ('<syscollector_type>', message_type)
                     ]
 
-        for variable, value in event_map:
+        for variable, value in fields_to_replace:
             message = message.replace(variable, value)
+
         message = f"{self.SYSCOLLECTOR_MQ}:{self.SYSCOLLECTOR}:{message}"
+
         return message
 
     def generate_event(self):
+        """ Generate syscollector event.
+         The event types are selected sequentially, creating a number of events of the same type specified
+         in `bath_size`
+        """
         event = ''
         if self.current_batch_events_size == 0:
             self.current_batch_events = (self.current_batch_events + 1) % len(self.list_events)
@@ -809,6 +821,8 @@ class SCA:
         self.started_time = int(time())
 
     def get_message(self):
+        """ Alternatively creates summary and check sca messages.
+        """
         if self.count % 100 == 0:
             msg = self.create_sca_event('summary')
         else:
@@ -852,6 +866,7 @@ class SCA:
             event_data['hash'] = getrandbits(256)
             event_data['hash_file'] = getrandbits(256)
             event_data['force_alert'] = '1'
+
             return event_data
 
         def create_check_sca_event(event_data):
@@ -878,6 +893,7 @@ class SCA:
             event_data['check']['condition'] = 'none'
             event_data['check']['file'] = '/etc/passwd'
             event_data['check']['result'] = choice(['passed', 'failed'])
+
             return event_data
 
         if event_type == 'summary':
@@ -936,6 +952,7 @@ class Rootcheck:
         if message == 'Ending rootcheck scan.':
             logging.debug(f"Scan ended - {self.agent_name}({self.agent_id}) "
                           f"- rootcheck({self.rootcheck_path})")
+
         return message
 
 
@@ -951,11 +968,21 @@ class Logcollector:
         self.LOGCOLLECTOR_MQ = 'x'
 
     def generate_event(self):
+        """ Generate logcollector event. Generated event:
+                x:syslog:Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550
+        """
         log = 'Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550'
+
         return f"{self.LOGCOLLECTOR_MQ}:{self.LOGCOLLECTOR}:{log}"
 
 
 class GeneratorIntegrityFIM:
+    """This class allows the generation of fim_integrity events.
+    Args:
+        agent_id (str): The id of the agent.
+        agent_name (str): The name of the agent.
+        agent_version (str): The version of the agent.
+    """
     def __init__(self, agent_id, agent_name, agent_version):
         self.agent_id = agent_id
         self.agent_name = agent_name
@@ -965,9 +992,15 @@ class GeneratorIntegrityFIM:
         self.fim_generator = GeneratorFIM(self.agent_id, self.agent_name, self.agent_version)
 
     def format_message(self, message):
+        """ Format fim integrity message.
+        Args:
+            message (str): Integrity fim event.
+        """
         return '{0}:[{1}] ({2}) any->syscheck:{3}'.format(self.INTEGRITY_MQ, self.agent_id, self.agent_name, message)
 
     def generate_message(self):
+        """ Generate integrity FIM message according to `event_type` attribute.
+        """
         data = None
         if self.event_type in ["integrity_check_global", "integrity_check_left", "integrity_check_right"]:
             id = int(time())
@@ -1018,7 +1051,7 @@ class GeneratorHostinfo:
 
     def generate_event(self):
         number_open_ports = randint(1, 10)
-        host_ip = random_ip()
+        host_ip = get_random_ip()
         message_open_port_list = ''
         for i in range(number_open_ports):
             message_open_port_list += fr"{randint(1,65535)} ({choice(self.protocols_list)}) "
@@ -1026,6 +1059,7 @@ class GeneratorHostinfo:
         message = self.hostinfo_basic_template.replace('<random_ip>', host_ip)
         message += message_open_port_list
         message = fr"{self.HOSTINFO_MQ}:{self.localfile}:{message}"
+
         return message
 
 
@@ -1036,43 +1070,53 @@ class GeneratorWinevt:
     It uses template events (`data/winevt.py`) for which the `EventID` field is randomized. Message structure:
 
         f:EventChannel:{"Message":"<EVENTCHANNEL_MESSAGE>","Event":"<EVENT_CHANNEL_EVENT_XML>"}
+
+
+    Args:
+        agent_name (str): Name of the agent.
+        agent_id (str): ID of the agent.
+>>>>>>> 1133-queues-pr-review-changes
     """
     def __init__(self, agent_name, agent_id):
         self.agent_name = agent_name
         self.agent_id = agent_id
-        self.WINENVT = 'f'
+        self.WINENVT_MQ = 'f'
+        self.WINENVT = 'Eventchannel'
+        self.winevt_sources = [('system', winevt.WINEVT_SYSTEM), ('security', winevt.WINEVT_SECURITY),
+                               ('application', winevt.WINEVT_APPLICATION),
+                               ('windows-defender', winevt.WINEVT_WINDOWS_DEFENDER),
+                               ('sysmon', winevt.WINEVT_SYSMON)]
 
-    def format_event(self):
+        self.actual_winevt_source_index = -1
 
-        message = "{\"Message\":\"System audit policy was changed.\r\n\r\nSubject:\r\n\t" \
-                  "Security ID:\t\tS-1-5-21-1331263578-1683884876-2739179494-500\r\n\t" \
-                  "Account Name:\t\tAdministrator\r\n\tAccount Domain:\t\tWIN-ACL01C4DS88\r\n\t" \
-                  "Logon ID:\t\t0x372C7\r\n\r\nAudit Policy Change:\r\n\t" \
-                  "Category:\t\tPolicy Change\r\n\tSubcategory:\t\t" \
-                  "Filtering Platform Policy Change\r\n\t" \
-                  "Subcategory GUID:\t{0cce9233-69ae-11d9-bed3-505054503030}\r\n\t" \
-                  "Changes:\t\tSuccess Added, Failure added\"," \
-                  "\"Event\":\"<Event xmlns=\'http://schemas.microsoft.com/win/2004/08/events/event\'>" \
-                  "<System><Provider Name=\'Microsoft-Windows-Security-Auditing\' " \
-                  "Guid=\'{54849625-5478-4994-a5ba-3e3b0328c30d}\'/>" \
-                  f"<EventID>{randint(0,10*5)}</EventID><Version>0</Version><Level>0</Level>" \
-                  "<Task>13568</Task><Opcode>0</Opcode><Keywords>0x8020000000000000</Keywords>" \
-                  "<TimeCreated SystemTime=\'2019-05-28T09:29:41.443963000Z\'/><EventRecordID>965047" \
-                  "</EventRecordID><Correlation ActivityID=\'{1115b961-1535-0000-8bbb-15113515d501}\'/>" \
-                  "<Execution ProcessID=\'556\' ThreadID=\'6024\'/><Channel>Security</Channel>" \
-                  "<Computer>WIN-ACL01C4DS88</Computer><Security/></System><EventData>" \
-                  "<Data Name=\'SubjectUserSid\'>S-1-5-21-1331263578-1683884876-2739179494-500</Data>" \
-                  "<Data Name=\'SubjectUserName\'>Administrator</Data>" \
-                  "<Data Name=\'SubjectDomainName\'>WIN-ACL01C4DS88</Data>" \
-                  "<Data Name=\'SubjectLogonId\'>0x372c7</Data>" \
-                  "<Data Name=\'CategoryId\'>%%8277" \
-                  "</Data><Data Name=\'SubcategoryId\'>%%13572</Data>" \
-                  "<Data Name=\'SubcategoryGuid\'>{0cce9233-69ae-11d9-bed3-505054503030}</Data" \
-                  "><Data Name=\'AuditPolicyChanges\'>%%8449, %%8451</Data></EventData></Event>\"}"
-        return message
+    def generate_event(self, winevt_type=None):
+        """ Genereate winevt event
 
-    def generate_event(self):
-        return f"{self.WINENVT}:[{self.agent_id}] ({self.agent_name}) any->EventChannel:{self.format_event()}"
+        Generate desired type of winevt event. If no type of winvt message is provided, all winvt message types
+        will be generated sequentially.
+
+        Args:
+            winevt_type (str): Winevt type message `system, security, application, windows-defender, sysmon`
+        """
+        winevt_type_index = self.actual_winevt_source_index
+        if winevt_type is not None:
+            if winevt_type == 'system':
+                winevt_type_index = 0
+            elif winevt_type == 'security':
+                winevt_type_index = 1
+            elif winevt_type == 'application':
+                winevt_type_index = 2
+            elif winevt_type == 'windows-defender':
+                winevt_type_index = 3
+            elif winevt_type == 'sysmon':
+                winevt_type_index = 4
+        else:
+            self.actual_winevt_source_index = (self.actual_winevt_source_index + 1) % len(self.winevt_sources)
+
+        eventchannel_raw_message = self.winevt_sources[winevt_type_index][1]
+        eventchannel_raw_message = eventchannel_raw_message.replace("<random_int>", str(randint(0, 10*5)))
+
+        return f"{self.WINENVT_MQ}:{self.WINENVT}:{eventchannel_raw_message}"
 
 
 class GeneratorFIM:
@@ -1453,6 +1497,7 @@ class InjectorThread(threading.Thread):
 
     def run_module(self, module):
         """Send a module message from the agent to the manager.
+
          Args:
                 module (str): Module name
         """
@@ -1517,6 +1562,8 @@ class InjectorThread(threading.Thread):
         logging.debug(f"Starting - {self.agent.name}({self.agent.id})({self.agent.os}) - {self.module}")
         if self.module == "keepalive":
             self.keep_alive()
+        elif self.module == "receive_messages":
+            self.agent.receive_message(self.sender)
         else:
             self.run_module(self.module)
 
@@ -1526,7 +1573,6 @@ class InjectorThread(threading.Thread):
             self.agent.stop_receiver()
         else:
             self.stop_thread = 1
-
 
 def create_agents(agents_number, manager_address, cypher='aes', fim_eps=None, authd_password=None, agents_os=None,
                   agents_version=None, disable_all_modules=False):
@@ -1556,4 +1602,21 @@ def create_agents(agents_number, manager_address, cypher='aes', fim_eps=None, au
         agents.append(Agent(manager_address, cypher, fim_eps=fim_eps, authd_password=authd_password,
                             os=agent_os, version=agent_version, disable_all_modules=disable_all_modules))
 
+        agent_count = agent_count + 1
+
+    return agents
+
+
+def connect(agent,  manager_address='localhost', protocol=TCP, manager_port='1514'):
+    """Connects an agent to the manager
+    Args:
+        agent (Agent): agent to connect.
+        manager_address (str): address of the manager. It can be an IP or a DNS.
+        protocol (str): protocol used to connect with the manager. Defaults to 'TCP'.
+        manager_port (str): port used to connect with the manager. Defaults to '1514'.
+    """
+    sender = Sender(manager_address, protocol=protocol, manager_port=manager_port)
+    injector = Injector(sender, agent)
+    injector.run()
+    agent.wait_status_active()
     return sender, injector
