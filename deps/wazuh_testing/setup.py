@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 setup(name='wazuh_testing',
       version='4.2.0',
-      description='Wazuh testing utilites to help programmers automate tests',
+      description='Wazuh testing utilities to help programmers automate tests',
       url='https://github.com/wazuh',
       author='Wazuh',
       author_email='hello@wazuh.com',
@@ -27,6 +27,10 @@ setup(name='wazuh_testing',
       entry_points={
         'console_scripts': [
             'simulate-agents=wazuh_testing.scripts.simulate_agents:main',
+            'wazuh-metrics=wazuh_testing.scripts.wazuh_metrics:main',
+            'wazuh-statistics=wazuh_testing.scripts.wazuh_statistics:main',
+            'data-visualizer=wazuh_testing.scripts.data_visualizations:main',
+            'simulate-api-load=wazuh_testing.scripts.simulate_api_load:main'
         ],
       },
       include_package_data=True,
