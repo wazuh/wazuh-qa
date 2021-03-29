@@ -3,19 +3,13 @@ wazuh-master:
   - regex: '.*Received request:.*{"daemon_name": "wazuh-db", "message": "global sync-agent-info-set.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
-  - regex: '.*wazuh-worker1.*Finished integrity synchronization.'
-    path: "/var/ossec/logs/cluster.log"
-    timeout: 15
-  - regex: '.*wazuh-worker2.*Finished integrity synchronization.'
-    path: "/var/ossec/logs/cluster.log"
-    timeout: 15
   - regex: '.*Received request: .*test_label.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
 
 
 wazuh-worker1:
-  - regex: ".*Starting agent-info sync process."
+  - regex: ".*Agent-info sync.*Starting."
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
   - regex: ".*Obtaining data to be sent to master's wazuh-db."
@@ -36,7 +30,7 @@ wazuh-worker1:
 
 
 wazuh-worker2:
-  - regex: ".*Starting agent-info sync process."
+  - regex: ".*Agent-info sync.*Starting."
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
   - regex: ".*Obtaining data to be sent to master's wazuh-db."
