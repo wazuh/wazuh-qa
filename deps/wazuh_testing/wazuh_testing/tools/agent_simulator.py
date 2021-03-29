@@ -1079,7 +1079,6 @@ class GeneratorWinevt:
     Args:
         agent_name (str): Name of the agent.
         agent_id (str): ID of the agent.
->>>>>>> 1133-queues-pr-review-changes
     """
     def __init__(self, agent_name, agent_id):
         self.agent_name = agent_name

@@ -127,10 +127,26 @@ def get_manager_configuration(section=None, field=None):
     assert response.json()['error'] == 0, f"Wazuh API response status different from 0: {response.json()}"
     answer = response.json()['data']['affected_items'][0]
 
-    if section is not None:
-        answer = answer[section]
-        if isinstance(answer, list) and len(answer) == 1:
-            answer = answer[0]
-        if field is not None:
-            answer = answer[field]
-    return answer
+    def get_requested_values(answer, section, field):
+        """ Return requested value from API response
+
+        Received a section and a field and tries to return all available values that match with this entry.
+        This function is required because, sometimes, there may be multiple entries with the same field or section
+        and the API will return a list instead of a map. Using recursivity we make sure that the output matches
+        the user expectations.
+        """
+        if isinstance(answer, list):
+            new_answer = []
+            for element in answer:
+                new_answer.append(get_requested_values(element, section, field))
+            return ','.join(new_answer)
+        elif isinstance(answer, dict):
+            if section in answer.keys():
+                new_answer = answer[section]
+                return get_requested_values(new_answer, section, field)
+            if field in answer.keys():
+                new_answer = answer[field]
+                return get_requested_values(new_answer, section, field)
+        return answer
+
+    return get_requested_values(answer, section, field)
