@@ -828,7 +828,7 @@ class SCA:
         self.started_time = int(time())
 
     def get_message(self):
-        """Alternatively creates summary and check sca_label messages.
+        """Alternatively creates summary and check SCA messages.
 
         Returns:
             string: an sca_label message formatted with the required header codes.
