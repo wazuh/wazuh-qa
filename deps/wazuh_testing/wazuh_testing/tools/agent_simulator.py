@@ -1087,7 +1087,7 @@ class GeneratorHostinfo:
         number_open_ports = randint(1, 10)
         host_ip = get_random_ip()
         message_open_port_list = ''
-        for i in range(number_open_ports):
+        for _ in range(number_open_ports):
             message_open_port_list += fr"{randint(1,65535)} ({choice(self.protocols_list)}) "
 
         message = self.hostinfo_basic_template.replace('<random_ip>', host_ip)
