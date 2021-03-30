@@ -846,7 +846,7 @@ class SCA:
         return sca_msg
 
     def create_sca_event(self, event_type):
-        """Create sca_label event, of the desired type.
+        """Create sca_label event of the desired type.
 
         Args:
             event_type (str): Event type `[summary, check]`.
