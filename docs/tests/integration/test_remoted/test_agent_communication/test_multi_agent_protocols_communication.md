@@ -17,7 +17,6 @@ protocols simultaneously.
 | 2 | 6 | 24s |
 
 ## Expected behavior
-
 Success if the events have been found in the manager's `queue` socket after sending it from the agents, using different
 protocols and ports. Failure otherwise.
 
@@ -31,7 +30,7 @@ The process that is carried out is as follows:
 - Create and register `n` agents in the manager.
 - Launch two jobs in separate threads:
    - A monitoring job that is based on monitoring the manager's  `queue` socket to see the events received.
-   - A job that sends an custom event for each agent.
+   - A job that sends a custom event for each agent.
 
 ### Checks
 
@@ -45,7 +44,7 @@ The process that is carried out is as follows:
 ## Comments
 
 An important aspect to take into account is the time needed by wazuh-remoted to reload the `client.keys`.
-By default it is **10 seconds**, but this option is configurable in the `internal_options.conf`, using the
+By default, it is **10 seconds**, but this option is configurable in the `internal_options.conf`, using the
 following directive:
 
 ```
