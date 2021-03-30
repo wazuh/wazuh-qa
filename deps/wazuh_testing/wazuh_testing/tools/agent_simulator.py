@@ -660,18 +660,27 @@ class Agent:
             self.winevt = GeneratorWinevt(self.name, self.id)
 
     def get_connection_status(self):
-        """Get agent connection status of global.db."""
-        result = wdb.query_wdb(f"global get-agent-info {self.id}")
+        """Get agent connection status of global.db.
 
-        if len(result) > 0:
-            result = result[0]['connection_status']
+        Returns:
+            string: Agent connection status (connected, disconnected, never_connected)
+        """
+        status = wdb.query_wdb(f"global get-agent-info {self.id}")
+
+        if len(status) > 0:
+            result = status[0]['connection_status']
         else:
             result = "Not in global.db"
-        return result
+        return status
 
     @retry(AttributeError, attempts=10, delay=2, delay_multiplier=1)
     def wait_status_active(self):
-        """Wait until agent status is active in global.db."""
+        """Wait until agent status is active in global.db.
+
+        Raises:
+            AttributeError: If the agent is not active. Combined with the retry decorator makes a wait loop
+                until the agent is active.
+        """
         status = self.get_connection_status()
         if status == 'active':
             return
@@ -730,6 +739,9 @@ class GeneratorSyscollector:
 
         Args:
             message_type (str): Syscollector event type.
+
+        Returns:
+            string: the generated syscollector event message.
         """
         message = syscollector.SYSCOLLECTOR_HEADER
         if message_type == 'network':
@@ -770,6 +782,9 @@ class GeneratorSyscollector:
 
          The event types are selected sequentially, creating a number of events of the same type specified
          in `bath_size`.
+
+         Returns:
+            string: generated event with the desired format for syscollector
         """
         if self.current_batch_events_size == 0:
             self.current_batch_events = (self.current_batch_events + 1) % len(self.list_events)
@@ -813,7 +828,11 @@ class SCA:
         self.started_time = int(time())
 
     def get_message(self):
-        """Alternatively creates summary and check SCA messages."""
+        """Alternatively creates summary and check SCA messages.
+
+        Returns:
+            string: an SCA message formatted with the required header codes.
+        """
         if self.count % 100 == 0:
             msg = self.create_sca_event('summary')
         else:
@@ -822,7 +841,9 @@ class SCA:
 
         msg = msg.strip('\n')
 
-        return f"{self.SCA_MQ}:{self.SCA}:{msg}"
+        sca_msg = f"{self.SCA_MQ}:{self.SCA}:{msg}"
+
+        return sca_msg
 
     def create_sca_event(self, event_type):
         """Create SCA event, of the desired type.
@@ -932,7 +953,11 @@ class Rootcheck:
                 line = fp.readline()
 
     def get_message(self):
-        """Returns a rootcheck message, informing when rootcheck scan starts and ends."""
+        """Returns a rootcheck message, informing when rootcheck scan starts and ends.
+
+        Returns:
+            string: a Rootcheck generated message
+        """
         message = next(self.message)
         if message == 'Starting rootcheck scan.':
             logging.debug(f"Scan started - {self.agent_name}({self.agent_id}) "
@@ -958,10 +983,15 @@ class Logcollector:
     def generate_event(self):
         """Generate logcollector event. Generated event:
                 x:syslog:Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550
+
+        Returns:
+            string: a Logcollector generated message
         """
         log = 'Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550'
 
-        return f"{self.LOGCOLLECTOR_MQ}:{self.LOGCOLLECTOR}:{log}"
+        message = f"{self.LOGCOLLECTOR_MQ}:{self.LOGCOLLECTOR}:{log}"
+
+        return message
 
 
 class GeneratorIntegrityFIM:
@@ -989,7 +1019,11 @@ class GeneratorIntegrityFIM:
         return '{0}:[{1}] ({2}) any->syscheck:{3}'.format(self.INTEGRITY_MQ, self.agent_id, self.agent_name, message)
 
     def generate_message(self):
-        """Generate integrity FIM message according to `event_type` attribute."""
+        """Generate integrity FIM message according to `event_type` attribute.
+
+        Returns:
+            string: an IntegrityFIM formatted message
+        """
         data = None
         if self.event_type in ["integrity_check_global", "integrity_check_left", "integrity_check_right"]:
             id = int(time())
@@ -1011,9 +1045,15 @@ class GeneratorIntegrityFIM:
                     "attributes": attributes}
 
         message = json.dumps({"component": "syscheck", "type": self.event_type, "data": data})
-        return self.format_message(message)
+        formatted_message = self.format_message(message)
+        return formatted_message
 
     def get_message(self, event_type=None):
+        """Generate a random kind of integrity FIM message according to `event_type` attribute.
+
+        Returns:
+            string: an IntegrityFIM formatted message
+        """
         if event_type is not None:
             self.event_type = event_type
         else:
@@ -1039,6 +1079,11 @@ class GeneratorHostinfo:
         self.localfile = '/var/log/nmap.log'
 
     def generate_event(self):
+        """"Generates an arbitrary hostinfo message
+
+        Returns:
+            string: an hostinfo formatted message
+        """
         number_open_ports = randint(1, 10)
         host_ip = get_random_ip()
         message_open_port_list = ''
@@ -1084,6 +1129,9 @@ class GeneratorWinevt:
 
         Args:
             winevt_type (str): Winevt type message `system, security, application, windows-defender, sysmon`.
+
+        Returns:
+            string: an windows event generatted message.
         """
         winevt_type_index = self.actual_winevt_source_index
         if winevt_type is not None:
@@ -1103,7 +1151,9 @@ class GeneratorWinevt:
         eventchannel_raw_message = self.winevt_sources[winevt_type_index][1]
         eventchannel_raw_message = eventchannel_raw_message.replace("<random_int>", str(randint(0, 10*5)))
 
-        return f"{self.WINENVT_MQ}:{self.WINENVT}:{eventchannel_raw_message}"
+        winevent_msg = f"{self.WINENVT_MQ}:{self.WINENVT}:{eventchannel_raw_message}"
+
+        return winevent_msg
 
 
 class GeneratorFIM:
@@ -1146,18 +1196,27 @@ class GeneratorFIM:
 
     def random_file(self):
         """ Initialize file attribute.
+
+        Returns:
+            string: the new randomized file for the instance
         """
         self._file = self.FILE_ROOT + ''.join(sample(ascii_letters + digits, self.DEFAULT_FILE_LENGTH))
         return self._file
 
     def random_size(self):
         """ Initialize file size with random value
+
+        Returns:
+            string: the new randomized file size for the instance
         """
         self._size = randint(-1, self.MAX_SIZE)
         return self._size
 
     def random_mode(self):
         """ Initialize module attribute with `S_IFREG` or `S_IFLNK`
+
+        Returns:
+            self._mode: the new randomized file mode for the instance
         """
         self._mode = choice((S_IFREG, S_IFLNK))
 
@@ -1173,6 +1232,9 @@ class GeneratorFIM:
 
     def random_uid(self):
         """ Initialize uid attribute with random value.
+
+        Returns:
+            string: the new randomized file uid for the instance
         """
         self._uid = choice(list(self.USERS.keys()))
         self._uname = self.USERS[self._uid]
@@ -1180,6 +1242,10 @@ class GeneratorFIM:
 
     def random_gid(self):
         """ Initialize gid attribute with random value.
+
+        Returns:
+            string: the new randomized gid for the instance,
+            string: the new randomized gname for the instance.
         """
         self._gid = choice(list(self.USERS.keys()))
         self._gname = self.USERS[self._gid]
@@ -1187,6 +1253,8 @@ class GeneratorFIM:
 
     def random_md5(self):
         """ Initialize md5 attribute with random value.
+        Returns:
+            string: the new randomized md5 for the instance.
         """
         if self._mode & S_IFREG == S_IFREG:
             self._md5 = ''.join(sample('0123456789abcdef' * 2, 32))
@@ -1195,6 +1263,8 @@ class GeneratorFIM:
 
     def random_sha1(self):
         """ Initialize sha1 attribute with random value.
+        Returns:
+            string: the new randomized sha1 for the instance.
         """
         if self._mode & S_IFREG == S_IFREG:
             self._sha1 = ''.join(sample('0123456789abcdef' * 3, 40))
@@ -1203,6 +1273,8 @@ class GeneratorFIM:
 
     def random_sha256(self):
         """ Initialize sha256 attribute with random value.
+        Returns:
+            string: the new randomized sha256 for the instance.
         """
         if self._mode & S_IFREG == S_IFREG:
             self._sha256 = ''.join(sample('0123456789abcdef' * 4, 64))
@@ -1211,19 +1283,22 @@ class GeneratorFIM:
 
     def random_time(self):
         """ Initialize time attribute with random value.
+         Returns:
+            string: the new randomized mdate for the instance.
         """
         self._mdate += randint(1, self.MAX_TIMEDIFF)
         return self._mdate
 
     def random_inode(self):
         """ Initialize inode attribute with random value.
+        Returns:
+            string: the new randomized inode for the instance.
         """
         self._inode = randint(1, self.MAX_INODE)
         return self._inode
 
     def generate_attributes(self):
-        """ Initialize GeneratorFIM attributes
-        """
+        """Initialize GeneratorFIM attributes"""
         self.random_file()
         self.random_size()
         self.random_mode()
@@ -1236,8 +1311,7 @@ class GeneratorFIM:
         self.random_inode()
 
     def check_changed_attributes(self, attributes, old_attributes):
-        """ Returns attributes that have changed.
-        """
+        """Returns attributes that have changed. """
         changed_attributes = []
         if attributes["size"] != old_attributes["size"]:
             changed_attributes.append("size")
@@ -1266,6 +1340,9 @@ class GeneratorFIM:
 
     def get_attributes(self):
         """ Return GeneratorFIM attributes.
+
+        Returns:
+            dict: instance attributes.
         """
         attributes = {
             "type": "file", "size": self._size,
@@ -1282,23 +1359,28 @@ class GeneratorFIM:
         """ Format FIM message.
         Args:
             message (str): FIM message.
+
+        Returns:
+            string: generated message with the required FIM header.
         """
         if self.agent_version >= "3.12":
-            return '{0}:[{1}] ({2}) any->syscheck:{3}' \
-                .format(self.SYSCHECK_MQ, self.agent_id,
-                        self.agent_name, message)
+            formated_message = f"{self.SYSCHECK_MQ}:[{self.agent_id}] ({message})"
         else:
             # If first time generating. Send control message to simulate
             # end of FIM baseline.
             if self.baseline_completed == 0:
                 self.baseline_completed = 1
-                return '{0}:{1}:{2}'.format(self.SYSCHECK_MQ, self.SYSCHECK,
-                                            "syscheck-db-completed")
-            return '{0}:{1}:{2}'.format(self.SYSCHECK_MQ, self.SYSCHECK,
-                                        message)
+                formated_message = f"{self.SYSCHECK_MQ}:{self.SYSCHECK}:syscheck-db-completed"
+            else:
+                formated_message = f"{self.SYSCHECK_MQ}:{self.SYSCHECK}:{message}"
+
+        return formated_message
 
     def generate_message(self):
         """ Generate FIM event based on `event_type` and `agent_version` attribute.
+
+        Returns:
+            string: generated message with the required FIM header.
         """
         if self.agent_version >= "3.12":
             if self.event_type == "added":
@@ -1334,13 +1416,18 @@ class GeneratorFIM:
             self.generate_attributes()
             message = f'{self._size}:{self._mode}:{self._uid}:{self._gid}:{self._md5}:{self._sha1}:{self._uname}:' \
                       f'{self._gname}:{self._mdate}:{self._inode} {self._file}'
-        return self.format_message(message)
+
+        formatted_message = self.format_message(message)
+        return formatted_message
 
     def get_message(self, event_mode=None, event_type=None):
         """ Get FIM message. If no parameters are provided, it is randomly selected among the possible values
         Args:
             event_mode (str): Event mode `real-time, whodata, scheduled`.
             event_type (str): Event type `added, modified, deleted`.
+
+        Returns:
+            string: generated message.
         """
         if event_mode is not None:
             self.event_mode = event_mode
@@ -1352,7 +1439,9 @@ class GeneratorFIM:
         else:
             self.event_type = choice(["added", "modified", "deleted"])
 
-        return self.generate_message()
+        generated_message = self.generate_message()
+
+        return generated_message
 
 
 class Sender:
@@ -1485,7 +1574,6 @@ class InjectorThread(threading.Thread):
 
     def run_module(self, module):
         """Send a module message from the agent to the manager.
-
 
          Args:
                 module (str): Module name
