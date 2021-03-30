@@ -5,6 +5,7 @@
       - git
       - gcc
       - make
+      - cmake
       - libc6-dev
       - curl
       - policycoreutils

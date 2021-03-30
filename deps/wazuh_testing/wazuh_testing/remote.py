@@ -205,7 +205,7 @@ def callback_error_invalid_value_for(option):
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"ERROR: Invalid value for option '\<{option}\>'"
+    msg = fr"WARNING: \(\d+\): Invalid value '.*' in '{option}' option. Default value will be used."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
@@ -242,10 +242,7 @@ def compare_config_api_response(configuration):
     # Check that API query return the selected configuration
     for field in configuration.keys():
         api_answer = api.get_manager_configuration(section="remote", field=field)
-        if field == 'protocol':
-            assert all(map(lambda x, y: x == y, configuration[field].split(","), api_answer))
-        else:
-            assert configuration[field] == api_answer, "Wazuh API answer different from introduced configuration"
+        assert str(configuration[field]) in api_answer, "Wazuh API answer different from introduced configuration"
 
 
 def get_protocols(all_protocols):
@@ -396,7 +393,7 @@ def check_syslog_event(wazuh_archives_log_monitor, message, port, protocol, time
     # Syslog events may contain a PRI header at the beginning of the message <1>. If wazuh-remoted receives a message
     # with this header, it parses the message and removes the header. That's why we remove the header to search the
     # event in the archives.log. More info about PRI headers at: https://tools.ietf.org/html/rfc3164#section-4.1.1
-    parsed_msg = re.sub(r"<\d+>", '', message)
+    parsed_msg = re.sub(r"<.+>", '', message)
 
     for msg in parsed_msg.split("\n"):
         detect_archives_log_event(archives_monitor=wazuh_archives_log_monitor,

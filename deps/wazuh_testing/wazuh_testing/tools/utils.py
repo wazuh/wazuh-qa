@@ -101,10 +101,11 @@ def replace_in_file(filename, to_replace, replacement):
         f.write(replace_content)
 
 
-def random_ip():
+def get_random_ip():
     return fr"{randint(0,255)}.{randint(0,255)}.{randint(0,255)}.{randint(0,255)}"
 
 
-def random_string(string_length, digits=True):
+def get_random_string(string_length, digits=True):
     character_set = string.ascii_uppercase + string.digits if digits else string.ascii_uppercase
+
     return ''.join(SystemRandom().choice(character_set) for _ in range(string_length))

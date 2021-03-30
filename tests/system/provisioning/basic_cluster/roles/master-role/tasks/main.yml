@@ -5,6 +5,7 @@
       - git
       - gcc
       - make
+      - cmake
       - libc6-dev
       - curl
       - policycoreutils
@@ -14,6 +15,8 @@
       - sqlite3
     force_apt_get: True
     state: present
+    update-cache: true
+    cache_valid_time: 3600
 
 - name: "Clone wazuh repository"
   git:

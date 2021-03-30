@@ -6,7 +6,7 @@ wazuh-master:
   - regex: '.*Received request:.*{"daemon_name":"authd","message":{"arguments":{"name":".*","ip":"any","force":0},"function":"add"}}'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
-  - regex: '.*Worker wazuh-worker1.*Finished integrity synchronization.*'
+  - regex: '.*Worker wazuh-worker1.*Integrity sync.*Finished in.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
 
@@ -24,7 +24,7 @@ wazuh-worker1:
   - regex: '.*Processing file etc\/client\.keys.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
-  - regex: '.*Updating files: End.*'
+  - regex: '.*Updating local files: End.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
 
