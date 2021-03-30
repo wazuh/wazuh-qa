@@ -81,7 +81,7 @@ class Agent:
         hostinfo_eps (int): Hostinfo's maximum event reporting throughput. Default `100`.
         winevt_eps (float): Winevt's maximum event reporting throughput. Default `100`.
         logcollector_eps (float): Logcollector's maximum event reporting throughput. Default `100`.
-        sca_eps (float): SCA's maximum event reporting throughput. Default `100`.
+        sca_eps (float): sca_label's maximum event reporting throughput. Default `100`.
         manager_address (str): Manager IP address.
         encryption_key (bytes): Encryption key used for encrypt and decrypt the message.
         keep_alive_event (bytes): Keep alive event (read from template data according to OS and parsed to an event).
@@ -106,7 +106,7 @@ class Agent:
         rootcheck_frequency (int): frequency to run rootcheck scans. 0 to continuously send rootcheck events.
         syscollector_frequency (int): frequency to run syscollector scans. 0 to continuously send syscollector events.
         keepalive_frequency (int): frequency to send keepalive messages. 0 to continuously send keepalive messages.
-        sca_frequency (int): frequency to run SCA scans. 0 to continuously send SCA events.
+        sca_frequency (int): frequency to run sca_label scans. 0 to continuously send sca_label events.
         syscollector_batch_size (int): Size of the syscollector type batch events.
     """
     def __init__(self, manager_address, cypher="aes", os=None, rootcheck_sample=None, id=None, name=None, key=None,
@@ -731,8 +731,8 @@ class GeneratorSyscollector:
                             'process', 'packages', 'OS', 'hardware']
         self.agent_name = agent_name
         self.batch_size = batch_size
-        self.SYSCOLLECTOR = 'syscollector'
-        self.SYSCOLLECTOR_MQ = 'd'
+        self.syscollector_tag = 'syscollector'
+        self.syscollector_mq = 'd'
 
     def format_event(self, message_type):
         """Format syscollector message of the specified type.
@@ -773,7 +773,7 @@ class GeneratorSyscollector:
         for variable, value in fields_to_replace:
             message = message.replace(variable, value)
 
-        message = f"{self.SYSCOLLECTOR_MQ}:{self.SYSCOLLECTOR}:{message}"
+        message = f"{self.syscollector_mq}:{self.syscollector_tag}:{message}"
 
         return message
 
@@ -801,7 +801,7 @@ class GeneratorSyscollector:
 
 
 class SCA:
-    """This class allows the generation of SCA events.
+    """This class allows the generation of sca_label events.
 
     Create sca events, both summary and check. Example messasge:
 
@@ -823,15 +823,15 @@ class SCA:
         self.last_scan_id = 0
         self.os = os
         self.count = 0
-        self.SCA_MQ = 'p'
-        self.SCA = 'sca'
+        self.sca_mq = 'p'
+        self.sca_label = 'sca'
         self.started_time = int(time())
 
     def get_message(self):
-        """Alternatively creates summary and check SCA messages.
+        """Alternatively creates summary and check sca_label messages.
 
         Returns:
-            string: an SCA message formatted with the required header codes.
+            string: an sca_label message formatted with the required header codes.
         """
         if self.count % 100 == 0:
             msg = self.create_sca_event('summary')
@@ -841,12 +841,12 @@ class SCA:
 
         msg = msg.strip('\n')
 
-        sca_msg = f"{self.SCA_MQ}:{self.SCA}:{msg}"
+        sca_msg = f"{self.sca_mq}:{self.sca_label}:{msg}"
 
         return sca_msg
 
     def create_sca_event(self, event_type):
-        """Create SCA event, of the desired type.
+        """Create sca_label event, of the desired type.
 
         Args:
             event_type (str): Event type `[summary, check]`.
@@ -930,8 +930,8 @@ class Rootcheck:
     def __init__(self, agent_name, agent_id, rootcheck_sample=None):
         self.agent_name = agent_name
         self.agent_id = agent_id
-        self.ROOTCHECK = 'rootcheck'
-        self.ROOTCHECK_MQ = '9'
+        self.rootcheck_tag = 'rootcheck'
+        self.rootcheck_mq = '9'
         self.messages_list = []
         self.message = cycle(self.messages_list)
         self.rootcheck_path = ""
@@ -977,8 +977,8 @@ class Logcollector:
         x:syslog:Mar    24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550
     """
     def __init__(self):
-        self.LOGCOLLECTOR = 'syslog'
-        self.LOGCOLLECTOR_MQ = 'x'
+        self.logcollector_tag = 'syslog'
+        self.logcollector_mq = 'x'
 
     def generate_event(self):
         """Generate logcollector event. Generated event:
@@ -989,7 +989,7 @@ class Logcollector:
         """
         log = 'Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550'
 
-        message = f"{self.LOGCOLLECTOR_MQ}:{self.LOGCOLLECTOR}:{log}"
+        message = f"{self.logcollector_mq}:{self.logcollector_tag}:{log}"
 
         return message
 
@@ -1006,7 +1006,7 @@ class GeneratorIntegrityFIM:
         self.agent_id = agent_id
         self.agent_name = agent_name
         self.agent_version = agent_version
-        self.INTEGRITY_MQ = "5"
+        self.integrity_mq = "5"
         self.event_type = None
         self.fim_generator = GeneratorFIM(self.agent_id, self.agent_name, self.agent_version)
 
@@ -1016,7 +1016,7 @@ class GeneratorIntegrityFIM:
         Args:
             message (str): Integrity fim event.
         """
-        return '{0}:[{1}] ({2}) any->syscheck:{3}'.format(self.INTEGRITY_MQ, self.agent_id, self.agent_name, message)
+        return '{0}:[{1}] ({2}) any->syscheck:{3}'.format(self.integrity_mq, self.agent_id, self.agent_name, message)
 
     def generate_message(self):
         """Generate integrity FIM message according to `event_type` attribute.
@@ -1073,7 +1073,7 @@ class GeneratorHostinfo:
         3:/var/log/nmap.log:Host: 95.211.24.108 (), open ports: 43270 (udp) 37146 (tcp) 19885 (tcp)
     """
     def __init__(self):
-        self.HOSTINFO_MQ = 3
+        self.hostinfo_mq = 3
         self.hostinfo_basic_template = 'Host: <random_ip> (), open ports: '
         self.protocols_list = ['udp', 'tcp']
         self.localfile = '/var/log/nmap.log'
@@ -1092,7 +1092,7 @@ class GeneratorHostinfo:
 
         message = self.hostinfo_basic_template.replace('<random_ip>', host_ip)
         message += message_open_port_list
-        message = fr"{self.HOSTINFO_MQ}:{self.localfile}:{message}"
+        message = fr"{self.hostinfo_mq}:{self.localfile}:{message}"
 
         return message
 
@@ -1112,8 +1112,8 @@ class GeneratorWinevt:
     def __init__(self, agent_name, agent_id):
         self.agent_name = agent_name
         self.agent_id = agent_id
-        self.WINENVT_MQ = 'f'
-        self.WINENVT = 'Eventchannel'
+        self.winevent_mq = 'f'
+        self.winevent_tag = 'Eventchannel'
         self.winevt_sources = [('system', winevt.WINEVT_SYSTEM), ('security', winevt.WINEVT_SECURITY),
                                ('application', winevt.WINEVT_APPLICATION),
                                ('windows-defender', winevt.WINEVT_WINDOWS_DEFENDER),
@@ -1151,7 +1151,7 @@ class GeneratorWinevt:
         eventchannel_raw_message = self.winevt_sources[winevt_type_index][1]
         eventchannel_raw_message = eventchannel_raw_message.replace("<random_int>", str(randint(0, 10*5)))
 
-        winevent_msg = f"{self.WINENVT_MQ}:{self.WINENVT}:{eventchannel_raw_message}"
+        winevent_msg = f"{self.winevent_mq}:{self.winevent_tag}:{eventchannel_raw_message}"
 
         return winevent_msg
 
@@ -1168,8 +1168,8 @@ class GeneratorFIM:
         self.agent_id = agent_id
         self.agent_name = agent_name
         self.agent_version = agent_version
-        self.FILE_ROOT = '/root/'
-        self._file = self.FILE_ROOT + 'a'
+        self.file_root = '/root/'
+        self._file = self.file_root + 'a'
         self._size = 0
         self._mode = S_IFREG | S_IRWXU
         self._uid = 0
@@ -1183,13 +1183,13 @@ class GeneratorFIM:
         self._permissions = "rw-r--r--"
         self._inode = 0
         self._checksum = "f65b9f66c5ef257a7566b98e862732640d502b6f"
-        self.SYSCHECK = 'syscheck'
-        self.SYSCHECK_MQ = 8
-        self.DEFAULT_FILE_LENGTH = 10
-        self.MAX_SIZE = 1024
-        self.USERS = {0: 'root', 1000: 'Dave', 1001: 'Connie'}
-        self.MAX_TIMEDIFF = 3600
-        self.MAX_INODE = 1024
+        self.syscheck_tag = 'syscheck'
+        self.syscheck_mq = 8
+        self.default_file_length = 10
+        self.max_size = 1024
+        self.users = {0: 'root', 1000: 'Dave', 1001: 'Connie'}
+        self.max_timediff = 3600
+        self.max_inode = 1024
         self.baseline_completed = 0
         self.event_mode = None
         self.event_type = None
@@ -1200,7 +1200,7 @@ class GeneratorFIM:
         Returns:
             string: the new randomized file for the instance
         """
-        self._file = self.FILE_ROOT + ''.join(sample(ascii_letters + digits, self.DEFAULT_FILE_LENGTH))
+        self._file = self.file_root + ''.join(sample(ascii_letters + digits, self.default_file_length))
         return self._file
 
     def random_size(self):
@@ -1209,7 +1209,7 @@ class GeneratorFIM:
         Returns:
             string: the new randomized file size for the instance
         """
-        self._size = randint(-1, self.MAX_SIZE)
+        self._size = randint(-1, self.max_size)
         return self._size
 
     def random_mode(self):
@@ -1236,8 +1236,8 @@ class GeneratorFIM:
         Returns:
             string: the new randomized file uid for the instance
         """
-        self._uid = choice(list(self.USERS.keys()))
-        self._uname = self.USERS[self._uid]
+        self._uid = choice(list(self.users.keys()))
+        self._uname = self.users[self._uid]
         return self._uid, self._uname
 
     def random_gid(self):
@@ -1247,8 +1247,8 @@ class GeneratorFIM:
             string: the new randomized gid for the instance,
             string: the new randomized gname for the instance.
         """
-        self._gid = choice(list(self.USERS.keys()))
-        self._gname = self.USERS[self._gid]
+        self._gid = choice(list(self.users.keys()))
+        self._gname = self.users[self._gid]
         return self._gid, self._gname
 
     def random_md5(self):
@@ -1286,7 +1286,7 @@ class GeneratorFIM:
          Returns:
             string: the new randomized mdate for the instance.
         """
-        self._mdate += randint(1, self.MAX_TIMEDIFF)
+        self._mdate += randint(1, self.max_timediff)
         return self._mdate
 
     def random_inode(self):
@@ -1294,7 +1294,7 @@ class GeneratorFIM:
         Returns:
             string: the new randomized inode for the instance.
         """
-        self._inode = randint(1, self.MAX_INODE)
+        self._inode = randint(1, self.max_inode)
         return self._inode
 
     def generate_attributes(self):
@@ -1364,15 +1364,15 @@ class GeneratorFIM:
             string: generated message with the required FIM header.
         """
         if self.agent_version >= "3.12":
-            formated_message = f"{self.SYSCHECK_MQ}:[{self.agent_id}] ({message})"
+            formated_message = f"{self.syscheck_mq}:[{self.agent_id}] ({message})"
         else:
             # If first time generating. Send control message to simulate
             # end of FIM baseline.
             if self.baseline_completed == 0:
                 self.baseline_completed = 1
-                formated_message = f"{self.SYSCHECK_MQ}:{self.SYSCHECK}:syscheck-db-completed"
+                formated_message = f"{self.syscheck_mq}:{self.syscheck_tag}:syscheck-db-completed"
             else:
-                formated_message = f"{self.SYSCHECK_MQ}:{self.SYSCHECK}:{message}"
+                formated_message = f"{self.syscheck_mq}:{self.syscheck_tag}:{message}"
 
         return formated_message
 
