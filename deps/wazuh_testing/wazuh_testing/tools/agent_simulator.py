@@ -1114,12 +1114,16 @@ class GeneratorWinevt:
         self.agent_id = agent_id
         self.winevent_mq = 'f'
         self.winevent_tag = 'Eventchannel'
-        self.winevt_sources = [('system', winevt.WINEVT_SYSTEM), ('security', winevt.WINEVT_SECURITY),
-                               ('application', winevt.WINEVT_APPLICATION),
-                               ('windows-defender', winevt.WINEVT_WINDOWS_DEFENDER),
-                               ('sysmon', winevt.WINEVT_SYSMON)]
+        self.winevent_sources = {
+            'system': winevt.WINEVT_SYSTEM,
+            'security': winevt.WINEVT_SECURITY,
+            'windows-defender': winevt.WINEVT_WINDOWS_DEFENDER,
+            'application': winevt.WINEVT_APPLICATION,
+            'sysmon': winevt.WINEVT_SYSMON
+        }
 
-        self.actual_winevt_source_index = -1
+        self.current_event_key = None
+        self.next_event_key = cycle(self.winevent_sources.keys())
 
     def generate_event(self, winevt_type=None):
         """Genereate winevt event.
@@ -1133,22 +1137,9 @@ class GeneratorWinevt:
         Returns:
             string: an windows event generatted message.
         """
-        winevt_type_index = self.actual_winevt_source_index
-        if winevt_type is not None:
-            if winevt_type == 'system':
-                winevt_type_index = 0
-            elif winevt_type == 'security':
-                winevt_type_index = 1
-            elif winevt_type == 'application':
-                winevt_type_index = 2
-            elif winevt_type == 'windows-defender':
-                winevt_type_index = 3
-            elif winevt_type == 'sysmon':
-                winevt_type_index = 4
-        else:
-            self.actual_winevt_source_index = (self.actual_winevt_source_index + 1) % len(self.winevt_sources)
+        self.current_event_key = next(self.next_event_key)
 
-        eventchannel_raw_message = self.winevt_sources[winevt_type_index][1]
+        eventchannel_raw_message = self.winevent_sources[self.current_event_key]
         eventchannel_raw_message = eventchannel_raw_message.replace("<random_int>", str(randint(0, 10*5)))
 
         winevent_msg = f"{self.winevent_mq}:{self.winevent_tag}:{eventchannel_raw_message}"
