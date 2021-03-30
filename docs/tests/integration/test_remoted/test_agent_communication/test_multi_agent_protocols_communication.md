@@ -17,7 +17,6 @@ protocols simultaneously.
 | 2 | 6 | 24s |
 
 ## Expected behavior
-test_agents_switching_protocols
 Success if the events have been found in the manager's `queue` socket after sending it from the agents, using different
 protocols and ports. Failure otherwise.
 
