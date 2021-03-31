@@ -1571,7 +1571,7 @@ class InjectorThread(threading.Thread):
             if frequency > 0:
                 sleep(frequency - ((time() - start_time) % frequency))
             else:
-                logging.warning('Merged checksum modified to force manager overload')
+                logging.debug('Merged checksum modified to force manager overload')
                 new_checksum = str(getrandbits(128))
                 self.agent.update_checksum(new_checksum)
                 if self.totalMessages % eps == 0:
