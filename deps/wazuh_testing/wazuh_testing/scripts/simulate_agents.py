@@ -39,7 +39,8 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
             if module not in available_modules:
                 raise ValueError(f"Selected module: '{module}' doesn't exist on agent simulator!")
 
-        for index, module in enumerate(available_modules):
+        index = 0
+        for module in available_modules:
             if module in active_modules:
                 agent.modules[module]['status'] = 'enabled'
 
@@ -47,7 +48,7 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
                     agent.modules[module]['eps'] = modules_eps[index]
                 else:
                     agent.modules[module]['eps'] = eps
-
+                index += 1
             else:
                 agent.modules[module]['status'] = 'disabled'
                 agent.modules[module]['eps'] = 0
