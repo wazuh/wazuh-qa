@@ -113,15 +113,13 @@ class Agent:
                  version="v3.12.0", fim_eps=100, fim_integrity_eps=100, sca_eps=100, syscollector_eps=100, labels=None,
                  rootcheck_eps=100, logcollector_eps=100, authd_password=None, disable_all_modules=False,
                  rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10, sca_frequency=60,
-                 syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100,
-                 ignore_merge_checksum=False):
+                 syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100):
         self.id = id
         self.name = name
         self.key = key
         if version is None:
             version = "v3.13.2"
         self.long_version = version
-        self.ignore_merge_checksum = ignore_merge_checksum
         ver_split = version.replace("v", "").split(".")
         self.short_version = f"{'.'.join(ver_split[:2])}"
         self.labels = labels
@@ -445,7 +443,7 @@ class Agent:
             self.process_command(sender, msg_decoded_list)
         elif '#!-up' in msg_decoded_list[0]:
             kind, checksum, name = msg_decoded_list[1:4]
-            if kind == 'file' and "merged.mg" in name and not self.ignore_merge_checksum:
+            if kind == 'file' and "merged.mg" in name:
                 self.update_checksum(checksum)
 
     def process_command(self, sender, message_list):
