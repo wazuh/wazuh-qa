@@ -179,6 +179,7 @@ nav:
               - tests/integration/test_fim/test_files/test_basic_usage/index.md
               - Test basic usage baseline generation: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_baseline_generation.md
               - Test basic usage changes: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_changes.md
+              - Test basic usage db inode check: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_db_inode_check.md
               - Test basic usage create after delete dir: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_create_after_delete_dir.md
               - Test basic usage create rt wd: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_create_rt_wd.md
               - Test basic usage create scheduled: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_create_scheduled.md
