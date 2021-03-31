@@ -105,7 +105,7 @@ def callback_error_in_configuration(severity):
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"{severity}: \(\d+\): Configuration error at '{tools.WAZUH_CONF}'."
+    msg = fr"{severity}: \(\d+\): Configuration error at '{tools.WAZUH_CONF_RELATIVE}'."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
