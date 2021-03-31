@@ -676,7 +676,7 @@ class Agent:
             result = status[0]['connection_status']
         else:
             result = "Not in global.db"
-        return status
+        return result
 
     @retry(AttributeError, attempts=10, delay=2, delay_multiplier=1)
     def wait_status_active(self):
