@@ -615,7 +615,7 @@ def check_agent_received_message(message_queue, search_pattern, timeout=5, updat
                         update_position=update_position, error_message=error_message)
 
 
-def check_push_shared_config(agent, sender):
+def check_push_shared_config(agent, sender, injector=None):
     """Allow to check if the manager sends the shared configuration to agents through remoted.
 
     First, check if the default group configuration file is completely pushed (up message, configuration
@@ -625,7 +625,7 @@ def check_push_shared_config(agent, sender):
     Args:
         agent (Agent): Agent to check if the shared configuration is pushed.
         sender (Sender): Sender object associated to the agent and used to send messages to the manager.
-
+        injector (Injector): Injector associated to the agent and sender. If None, a new one will be created.
     Raises:
         TimeoutError: If agent does not receive the manager ACK message in the expected time.
     """
@@ -634,7 +634,11 @@ def check_push_shared_config(agent, sender):
     agent.set_module_status('receive_messages', 'enabled')
 
     # Run injector with only receive messages module enabled
-    injector = ag.Injector(sender, agent)
+    stop_injector = False
+
+    if injector is None:
+        injector = ag.Injector(sender, agent)
+        stop_injector = True
     try:
         injector.run()
 
@@ -677,4 +681,5 @@ def check_push_shared_config(agent, sender):
                                      error_message="New group shared config not received")
 
     finally:
-        injector.stop_receive()
+        if stop_injector:
+            injector.stop_receive()

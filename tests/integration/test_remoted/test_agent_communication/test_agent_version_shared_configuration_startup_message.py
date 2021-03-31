@@ -74,14 +74,13 @@ def test_agent_remote_configuration(agent_name, get_configuration, configure_env
         agent = ag.Agent(**agent_info[agent_name])
         agent.set_module_status('receive_messages', 'enabled')
         agent.set_module_status('keepalive', 'enabled')
-
-        # Time necessary until socket creation
-        sleep(1)
-
         sender = ag.Sender(agent_info[agent_name]['manager_address'], protocol=protocol)
         injector = ag.Injector(sender, agent)
         try:
             injector.run()
+
+            # Time necessary until socket creation
+            sleep(1)
 
             agent.wait_status_active()
 
@@ -91,18 +90,10 @@ def test_agent_remote_configuration(agent_name, get_configuration, configure_env
             wazuh_log_monitor.start(timeout=5, callback=keep_alive_log,
                                     error_message='The expected event has not been found in ossec.log')
 
-            result = agent.get_agent_db_data('version')
+            result = agent.get_agent_version()
             assert result == fr"Wazuh {agent_info[agent_name]['version']}"
 
-            check_push_shared_config(agent, sender)
-
-            injector.stop_receive()
-            agent.set_module_status('keepalive', 'disabled')
-
-            sender = ag.Sender(agent_info[agent_name]['manager_address'], protocol=protocol)
-            agent.set_module_status('keepalive', 'enabled')
-            injector = ag.Injector(sender, agent)
-            injector.run()
+            check_push_shared_config(agent, sender, injector)
 
             log_callback = remote.callback_start_up(agent.name)
             wazuh_log_monitor.start(timeout=15, callback=log_callback,

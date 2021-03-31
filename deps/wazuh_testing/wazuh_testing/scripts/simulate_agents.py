@@ -39,6 +39,8 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
             if module not in available_modules:
                 raise ValueError(f"Selected module: '{module}' doesn't exist on agent simulator!")
 
+
+
         index = 0
         for module in available_modules:
             if module in active_modules:
