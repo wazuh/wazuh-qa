@@ -77,7 +77,7 @@ class Agent:
         fim_eps (int): Fim's maximum event reporting throughput. Default `1000`.
         fim_integrity_eps (int): Fim integrity's maximum event reporting throughput. Default `100`.
         syscollector_eps (int): Syscollector's maximum event reporting throughput. Default `100`.
-        rootcheck_eps (float): Rootcheck's maximum event reporting throughput. Default `100`.
+        rootcheck_eps (int): Rootcheck's maximum event reporting throughput. Default `100`.
         hostinfo_eps (int): Hostinfo's maximum event reporting throughput. Default `100`.
         winevt_eps (float): Winevt's maximum event reporting throughput. Default `100`.
         logcollector_eps (float): Logcollector's maximum event reporting throughput. Default `100`.
@@ -112,7 +112,7 @@ class Agent:
     def __init__(self, manager_address, cypher="aes", os=None, rootcheck_sample=None, id=None, name=None, key=None,
                  version="v3.12.0", fim_eps=100, fim_integrity_eps=100, sca_eps=100, syscollector_eps=100, labels=None,
                  rootcheck_eps=100, logcollector_eps=100, authd_password=None, disable_all_modules=False,
-                 rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, sca_frequency=60,
+                 rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10, sca_frequency=60,
                  syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100):
         self.id = id
         self.name = name
@@ -175,6 +175,11 @@ class Agent:
         self.stage_disconnect = None
         self.setup(disable_all_modules=disable_all_modules)
         self.rcv_msg_queue = Queue(rcv_msg_limit)
+
+    def update_checksum(self, new_checksum):
+        self.keep_alive_raw_msg = self.keep_alive_raw_msg.replace(self.merged_checksum, new_checksum)
+        self.keep_alive_event = self.create_event(self.keep_alive_raw_msg)
+        self.merged_checksum = new_checksum
 
     def setup(self, disable_all_modules):
         """Set up agent: os, registration, encryption key, start up msg and activate modules."""
@@ -439,9 +444,7 @@ class Agent:
         elif '#!-up' in msg_decoded_list[0]:
             kind, checksum, name = msg_decoded_list[1:4]
             if kind == 'file' and "merged.mg" in name:
-                self.keep_alive_raw_msg = self.keep_alive_raw_msg.replace(self.merged_checksum, checksum)
-                self.keep_alive_event = self.create_event(self.keep_alive_raw_msg)
-                self.merged_checksum = checksum
+                self.update_checksum(checksum)
 
     def process_command(self, sender, message_list):
         """Process agent received commands through the socket.
@@ -671,7 +674,7 @@ class Agent:
             result = status[0]['connection_status']
         else:
             result = "Not in global.db"
-        return status
+        return result
 
     @retry(AttributeError, attempts=10, delay=2, delay_multiplier=1)
     def wait_status_active(self):
@@ -1555,13 +1558,24 @@ class InjectorThread(threading.Thread):
         self.sender.send_event(self.agent.startup_msg)
         self.sender.send_event(self.agent.keep_alive_event)
         start_time = time()
+        frequency = self.agent.modules["keepalive"]["frequency"]
+        eps = 1
+        if 'eps' in self.agent.modules["keepalive"]:
+            frequency = 0
+            eps = self.agent.modules["keepalive"]["eps"]
         while self.stop_thread == 0:
             # Send agent keep alive
             logging.debug(f"KeepAlive - {self.agent.name}({self.agent.id})")
             self.sender.send_event(self.agent.keep_alive_event)
-            sleep(self.agent.modules["keepalive"]["frequency"] -
-                  ((time() - start_time) %
-                   self.agent.modules["keepalive"]["frequency"]))
+            self.totalMessages += 1
+            if frequency > 0:
+                sleep(frequency - ((time() - start_time) % frequency))
+            else:
+                logging.debug('Merged checksum modified to force manager overload')
+                new_checksum = str(getrandbits(128))
+                self.agent.update_checksum(new_checksum)
+                if self.totalMessages % eps == 0:
+                    sleep(1.0 - ((time() - start_time) % 1.0))
 
     def run_module(self, module):
         """Send a module message from the agent to the manager.

@@ -35,7 +35,9 @@ else:
         GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
         PREFIX = os.sep
 
-    WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
+    WAZUH_CONF_RELATIVE = os.path.join('etc', 'ossec.conf')
+
+    WAZUH_CONF = os.path.join(WAZUH_PATH, WAZUH_CONF_RELATIVE)
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
     WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
