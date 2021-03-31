@@ -88,7 +88,7 @@ def test_agent_remote_configuration(agent_name, get_configuration, configure_env
             keep_alive_log = monitoring.make_callback(pattern=agent.keep_alive_raw_msg[3:],
                                                       prefix=monitoring.REMOTED_DETECTOR_PREFIX)
             wazuh_log_monitor.start(timeout=5, callback=keep_alive_log,
-                                    error_message='The expected event has not been found in ossec.log')
+                                    error_message='Keepalive log has not been found in the logs.')
 
             result = agent.get_agent_version()
             assert result == fr"Wazuh {agent_info[agent_name]['version']}"
@@ -97,7 +97,7 @@ def test_agent_remote_configuration(agent_name, get_configuration, configure_env
 
             log_callback = remote.callback_start_up(agent.name)
             wazuh_log_monitor.start(timeout=15, callback=log_callback,
-                                    error_message='The expected event has not been found in ossec.log')
+                                    error_message='The start up message has not been found in the logs')
 
         finally:
             injector.stop_receive()

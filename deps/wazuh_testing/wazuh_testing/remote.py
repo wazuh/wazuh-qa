@@ -638,10 +638,10 @@ def check_push_shared_config(agent, sender, injector=None):
 
     if injector is None:
         injector = ag.Injector(sender, agent)
-        stop_injector = True
-    try:
         injector.run()
+        stop_injector = True
 
+    try:
         wazuh_log_monitor = FileMonitor(tools.LOG_FILE_PATH)
 
         # Wait until remoted has loaded the new agent key
