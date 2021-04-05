@@ -20,6 +20,7 @@ import ssl
 import threading
 import zlib
 from datetime import date
+from sys import getsizeof
 from itertools import cycle
 from random import randint, sample, choice, getrandbits
 from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
@@ -108,6 +109,7 @@ class Agent:
         keepalive_frequency (int): frequency to send keepalive messages. 0 to continuously send keepalive messages.
         sca_frequency (int): frequency to run sca_label scans. 0 to continuously send sca_label events.
         syscollector_batch_size (int): Size of the syscollector type batch events.
+        fixed_message_size (int): Fixed size of the agent modules messages in KB.
     """
     def __init__(self, manager_address, cypher="aes", os=None, rootcheck_sample=None, id=None, name=None, key=None,
                  version="v3.12.0", fim_eps=100, fim_integrity_eps=100, sca_eps=100, syscollector_eps=100, labels=None,
@@ -1631,9 +1633,12 @@ class InjectorThread(threading.Thread):
             while sent_messages < batch_messages:
                 event_msg = module_event_generator()
                 if self.agent.fixed_message_size is not None:
-                    event_msg_size = len(event_msg.encode('utf8'))
-                    dummy_message = self.agent.fixed_message_size - event_msg_size
-                    event_msg += 'A' * dummy_message
+                    event_msg_size = getsizeof(event_msg)
+                    fixed_message_size_bytes = self.agent.fixed_message_size * 1024
+                    dummy_message_size = fixed_message_size_bytes - event_msg_size
+                    char_size = getsizeof(event_msg[0]) - getsizeof('')
+                    event_msg += 'A' * int(dummy_message_size/char_size)
+
                 event = self.agent.create_event(event_msg)
                 self.sender.send_event(event)
                 self.totalMessages += 1
@@ -1642,6 +1647,7 @@ class InjectorThread(threading.Thread):
                     sleep(1.0 - ((time() - start_time) % 1.0))
             if frequency > 1:
                 sleep(frequency - ((time() - start_time) % frequency))
+
 
     def run(self):
         """Start the thread that will send messages to the manager."""
