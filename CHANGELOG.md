@@ -1,6 +1,16 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [v4.3.0]
+### Added
+
+### Changed
+
+### Fixed
+
+### Deleted
+
+
 ## [v4.2.0]
 ### Added
 - Add agent labels to agent simulator tool [#1153](https://github.com/wazuh/wazuh-qa/pull/1153) 

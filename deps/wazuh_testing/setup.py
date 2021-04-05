@@ -3,7 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 from setuptools import setup, find_packages
 setup(name='wazuh_testing',
-      version='4.2.0',
+      version='4.3.0',
       description='Wazuh testing utilities to help programmers automate tests',
       url='https://github.com/wazuh',
       author='Wazuh',
