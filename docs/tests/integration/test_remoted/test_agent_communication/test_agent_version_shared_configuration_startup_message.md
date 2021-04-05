@@ -1,7 +1,8 @@
 # Test agent version, shared configuration and startup message
 ## Overview
-Check if the manager receives the correct agent version, sends shared configuration and that agent sends 
-startup message restart.
+This test checks if the manager receives and process the version sent by the agent in keep alive messages. The manager
+should update its database according to the received version, send the shared configuration and confirm the agent
+startup after it is restarted due to the new pushed configuration .
 
 ## Objective
 

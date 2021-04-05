@@ -60,25 +60,30 @@ def get_configuration(request):
 @pytest.mark.parametrize("agent_name", agent_info.keys())
 def test_agent_remote_configuration(agent_name, get_configuration, configure_environment, remove_shared_files,
                                     restart_remoted, create_agent_group):
-    """ Check agents send its version, receives correctly shared configuration and that startup message
-    is sent to the manager.
+    """Check if the agents correctly send their version, receive the shared configuration, and finally,
+        the start-up message is received and processed by the manager.
 
     Raises:
         AssertionError: if `wazuh-db` returns a wrong agent version, agents do not receive shared configuration or
-        startup message after agent restart is not created
+        startup message after agent restart is not received.
     """
 
     protocols = get_configuration['metadata']['protocol']
 
     for protocol in protocols.split(","):
         agent = ag.Agent(**agent_info[agent_name])
+
         # Sleep to avoid ConnectionRefusedError
         sleep(1)
+
         sender = ag.Sender(agent_info[agent_name]['manager_address'], protocol=protocol)
+
         check_push_shared_config(agent, sender)
+
         wazuh_db_agent_version = agent.get_agent_version()
         assert wazuh_db_agent_version == fr"Wazuh {agent_info[agent_name]['version']}"
-        log_callback = remote.callback_start_up(agent.name)
+
         wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+        log_callback = remote.callback_start_up(agent.name)
         wazuh_log_monitor.start(timeout=10, callback=log_callback,
                                 error_message='The start up message has not been found in the logs')
