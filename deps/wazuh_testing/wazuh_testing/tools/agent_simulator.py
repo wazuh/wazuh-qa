@@ -662,19 +662,25 @@ class Agent:
         if self.winevt is None:
             self.winevt = GeneratorWinevt(self.name, self.id)
 
+    def get_agent_info(self, field):
+        agent_info = wdb.query_wdb(f"global get-agent-info {self.id}")
+
+        if len(agent_info) > 0:
+            field_value = agent_info[0][field]
+        else:
+            field_value = "Not in global.db"
+        return field_value
+
+    def get_agent_version(self):
+        return self.get_agent_info('version')
+
     def get_connection_status(self):
         """Get agent connection status of global.db.
 
         Returns:
             string: Agent connection status (connected, disconnected, never_connected)
         """
-        status = wdb.query_wdb(f"global get-agent-info {self.id}")
-
-        if len(status) > 0:
-            result = status[0]['connection_status']
-        else:
-            result = "Not in global.db"
-        return result
+        return self.get_agent_info('connection_status')
 
     @retry(AttributeError, attempts=10, delay=2, delay_multiplier=1)
     def wait_status_active(self):
@@ -685,6 +691,7 @@ class Agent:
                 until the agent is active.
         """
         status = self.get_connection_status()
+
         if status == 'active':
             return
         raise AttributeError(f"Agent is not active yet: {status}")
@@ -1576,6 +1583,7 @@ class InjectorThread(threading.Thread):
                 self.agent.update_checksum(new_checksum)
                 if self.totalMessages % eps == 0:
                     sleep(1.0 - ((time() - start_time) % 1.0))
+
 
     def run_module(self, module):
         """Send a module message from the agent to the manager.

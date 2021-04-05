@@ -16,6 +16,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools import file
 from wazuh_testing.tools import monitoring
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.utils import retry
 
 
 REMOTED_GLOBAL_TIMEOUT = 10
@@ -140,7 +141,7 @@ def callback_error_getting_protocol():
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"WARNING: \(\d+\): Error getting protocol. Default value \(TCP\) will be used."
+    msg = r"WARNING: \(\d+\): Error getting protocol. Default value \(TCP\) will be used."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
@@ -162,7 +163,7 @@ def callback_warning_secure_ipv6():
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"WARNING: \(\d+\): Secure connection does not support IPv6. IPv4 will be used instead."
+    msg = r"WARNING: \(\d+\): Secure connection does not support IPv6. IPv4 will be used instead."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
@@ -172,7 +173,7 @@ def callback_error_bind_port():
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"CRITICAL: \(\d+\): Unable to Bind port '1514' due to \[\(\d+\)\-\(Cannot assign requested address\)\]"
+    msg = r"CRITICAL: \(\d+\): Unable to Bind port '1514' due to \[\(\d+\)\-\(Cannot assign requested address\)\]"
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
@@ -182,7 +183,7 @@ def callback_error_queue_size_syslog():
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"ERROR: Invalid option \<queue_size\> for Syslog remote connection."
+    msg = r"ERROR: Invalid option \<queue_size\> for Syslog remote connection."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
@@ -192,7 +193,7 @@ def callback_queue_size_too_big():
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"WARNING: Queue size is very high. The application may run out of memory."
+    msg = r"WARNING: Queue size is very high. The application may run out of memory."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
@@ -228,7 +229,7 @@ def callback_info_no_allowed_ips():
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"INFO: \(\d+\): IP or network must be present in syslog access list \(allowed-ips\). "
+    msg = r"INFO: \(\d+\): IP or network must be present in syslog access list \(allowed-ips\). "
     msg += "Syslog server disabled."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
@@ -271,6 +272,11 @@ def callback_active_response_received(ar_message):
 
 def callback_active_response_sent(ar_message):
     msg = fr"DEBUG: Active response sent: #!-execd {ar_message[26:]}"
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX, escape=True)
+
+
+def callback_start_up(agent_name):
+    msg = fr"DEBUG: Agent {agent_name} sent HC_STARTUP from 127.0.0.1"
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX, escape=True)
 
 
@@ -609,7 +615,7 @@ def check_agent_received_message(message_queue, search_pattern, timeout=5, updat
                         update_position=update_position, error_message=error_message)
 
 
-def check_push_shared_config(agent, sender):
+def check_push_shared_config(agent, sender, injector=None):
     """Allow to check if the manager sends the shared configuration to agents through remoted.
 
     First, check if the default group configuration file is completely pushed (up message, configuration
@@ -619,7 +625,7 @@ def check_push_shared_config(agent, sender):
     Args:
         agent (Agent): Agent to check if the shared configuration is pushed.
         sender (Sender): Sender object associated to the agent and used to send messages to the manager.
-
+        injector (Injector): Injector associated to the agent and sender. If None, a new one will be created.
     Raises:
         TimeoutError: If agent does not receive the manager ACK message in the expected time.
     """
@@ -628,10 +634,14 @@ def check_push_shared_config(agent, sender):
     agent.set_module_status('receive_messages', 'enabled')
 
     # Run injector with only receive messages module enabled
-    injector = ag.Injector(sender, agent)
-    try:
-        injector.run()
+    stop_injector = False
 
+    if injector is None:
+        injector = ag.Injector(sender, agent)
+        injector.run()
+        stop_injector = True
+
+    try:
         wazuh_log_monitor = FileMonitor(tools.LOG_FILE_PATH)
 
         # Wait until remoted has loaded the new agent key
@@ -671,4 +681,5 @@ def check_push_shared_config(agent, sender):
                                      error_message="New group shared config not received")
 
     finally:
-        injector.stop_receive()
+        if stop_injector:
+            injector.stop_receive()
