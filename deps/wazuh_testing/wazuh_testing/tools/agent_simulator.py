@@ -1654,7 +1654,6 @@ class InjectorThread(threading.Thread):
             if frequency > 1:
                 sleep(frequency - ((time() - start_time) % frequency))
 
-
     def run(self):
         """Start the thread that will send messages to the manager."""
         # message = "1:/var/log/syslog:Jan 29 10:03:41 master sshd[19635]:
