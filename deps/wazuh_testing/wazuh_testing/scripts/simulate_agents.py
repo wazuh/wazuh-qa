@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent_version='v4.0.0',
-               agent_os='debian8', eps=1000, run_duration=20, active_modules=[], modules_eps=None):
+               agent_os='debian8', eps=1000, run_duration=20, active_modules=[], modules_eps=None, fixed_message_size=None):
     """Run a batch of agents connected to a manager with the same parameters.
 
     Args:
@@ -32,7 +32,8 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
     active_agents, injectors = [], []
 
     for _ in range(agents_number):
-        agent = ag.Agent(manager_address, "aes", os=agent_os, version=agent_version, fim_eps=eps)
+        agent = ag.Agent(manager_address, "aes", os=agent_os, version=agent_version, fim_eps=eps,
+                         fixed_message_size=fixed_message_size)
         available_modules = agent.modules.keys()
 
         for module in active_modules:
@@ -111,6 +112,9 @@ def main():
     arg_parser.add_argument('-s', '--modules-eps', dest='modules_eps', required=False, type=int, nargs='+',
                             action='store', default=None, help='Active module EPS separated by whitespace.')
 
+    arg_parser.add_argument('-f', '--fixed-message-size', metavar='<fixed_message_size>', type=int, required=False,
+                            default=None, help='Size of all the agent modules messages (KB)', dest='fixed_message_size')
+
     args = arg_parser.parse_args()
 
     if args.agent_batch > 1:
@@ -138,7 +142,7 @@ def main():
 
         arguments = (
             agents, args.manager_addr, args.agent_protocol, args.version, args.os, args.eps, args.duration,
-            args.modules, args.modules_eps
+            args.modules, args.modules_eps, args.fixed_message_size
         )
 
         processes.append(Process(target=run_agents, args=arguments))
