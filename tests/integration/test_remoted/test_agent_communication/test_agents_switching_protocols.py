@@ -55,7 +55,7 @@ def connect_and_check_agents_status(agents, agents_connections, port, use_tcp):
         use_tcp (bool): variable used to alternate between protocols.
     """
     for agent in agents:
-        sender, injector = ag.connect(agent, protocol=TCP if use_tcp else UDP, port=port)
+        sender, injector = ag.connect(agent, protocol=TCP if use_tcp else UDP, manager_port=port)
         agents_connections[agent.id] = {'agent': agent, 'sender': sender, 'injector': injector}
         use_tcp = not use_tcp
         assert agent.get_connection_status() == 'active'
