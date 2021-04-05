@@ -6,11 +6,11 @@ from time import sleep
 
 import pytest
 import wazuh_testing.tools.agent_simulator as ag
-import wazuh_testing.remote as remote
-from wazuh_testing import UDP, TCP, TCP_UDP
+from wazuh_testing import UDP, TCP, TCP_UDP, remote
 from wazuh_testing.remote import check_push_shared_config
+from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools import monitoring
+from wazuh_testing.tools.monitoring import FileMonitor
 
 pytestmark = pytest.mark.tier(level=2)
 
@@ -72,33 +72,13 @@ def test_agent_remote_configuration(agent_name, get_configuration, configure_env
 
     for protocol in protocols.split(","):
         agent = ag.Agent(**agent_info[agent_name])
-        agent.set_module_status('receive_messages', 'enabled')
-        agent.set_module_status('keepalive', 'enabled')
+        # Sleep to avoid ConnectionRefusedError
+        sleep(1)
         sender = ag.Sender(agent_info[agent_name]['manager_address'], protocol=protocol)
-        injector = ag.Injector(sender, agent)
-        try:
-            injector.run()
-
-            # Time necessary until socket creation
-            sleep(1)
-
-            agent.wait_status_active()
-
-            # Uses [3:] substring to avoid #!- characters
-            keep_alive_log = monitoring.make_callback(pattern=agent.keep_alive_raw_msg[3:],
-                                                      prefix=monitoring.REMOTED_DETECTOR_PREFIX)
-            wazuh_log_monitor.start(timeout=5, callback=keep_alive_log,
-                                    error_message='Keepalive log has not been found in the logs.')
-
-            result = agent.get_agent_version()
-            assert result == fr"Wazuh {agent_info[agent_name]['version']}"
-
-            check_push_shared_config(agent, sender, injector)
-
-            log_callback = remote.callback_start_up(agent.name)
-            wazuh_log_monitor.start(timeout=15, callback=log_callback,
-                                    error_message='The start up message has not been found in the logs')
-
-        finally:
-            injector.stop_receive()
-
+        check_push_shared_config(agent, sender)
+        wazuh_db_agent_version = agent.get_agent_version()
+        assert wazuh_db_agent_version == fr"Wazuh {agent_info[agent_name]['version']}"
+        log_callback = remote.callback_start_up(agent.name)
+        wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+        wazuh_log_monitor.start(timeout=10, callback=log_callback,
+                                error_message='The start up message has not been found in the logs')
