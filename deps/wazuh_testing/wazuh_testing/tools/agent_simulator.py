@@ -1640,7 +1640,7 @@ class InjectorThread(threading.Thread):
                 if self.agent.fixed_message_size is not None:
                     event_msg_size = len(event_msg.encode('utf8'))
                     dummy_message = self.agent.fixed_message_size - event_msg_size
-                    event_msg.append(random_string(dummy_message))
+                    event_msg += 'A' * dummy_message
                 event = self.agent.create_event(event_msg)
                 self.sender.send_event(event)
                 self.totalMessages += 1
