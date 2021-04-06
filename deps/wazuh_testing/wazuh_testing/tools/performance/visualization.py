@@ -81,7 +81,7 @@ class DataVisualizer:
     """
     def __init__(self, dataframes, target, compare=False, store_path=gettempdir(), x_ticks_granularity='minutes',
                  x_ticks_interval=1):
-        self.dataframes_path = dataframes
+        self.dataframes_paths = dataframes
         self.dataframe = None
         self.compare = compare
         self.target = target
