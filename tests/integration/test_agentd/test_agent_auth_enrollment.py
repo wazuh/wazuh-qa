@@ -3,14 +3,15 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import pytest
-import ssl
 import subprocess
 import yaml
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.monitoring import QueueMonitor
-from conftest import *
+from conftest import AGENT_AUTH_BINARY_PATH, AUTHDPASS_PATH, DEFAULT_VALUES, \
+    SERVER_CERT_PATH, SERVER_KEY_PATH, AgentAuthParser, build_expected_request, \
+    check_client_keys_file, configure_enrollment, os, parse_configuration_string, platform
 
 # Marks
 

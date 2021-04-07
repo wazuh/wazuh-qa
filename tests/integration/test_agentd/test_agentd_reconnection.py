@@ -13,8 +13,7 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
-
-from conftest import *
+from conftest import CLIENT_KEYS_PATH, SERVER_CERT_PATH, SERVER_KEY_PATH, os, platform
 
 # Marks
 

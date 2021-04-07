@@ -2,16 +2,11 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import hashlib
 import os
 import platform
 import pytest
 import time
-import requests
 import subprocess
-import yaml
-import json
-import socket
 
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
@@ -20,9 +15,8 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
-from conftest import AR_LOG_FILE_PATH, set_ar_conf_mode, set_debug_mode, \
-    wait_received_message_line, wait_start_message_line, \
-    wait_ended_message_line, test_version, start_log_monitoring
+from conftest import AR_LOG_FILE_PATH, wait_received_message_line, \
+    wait_start_message_line, wait_ended_message_line, start_log_monitoring
 
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]
 
