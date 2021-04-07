@@ -31,7 +31,8 @@ DST_USR = 'root'
 ARG1 = '--argv1'
 ARG2 = '--argv2'
 AR_TIMEOUT = 10
-LOG_MESSAGE = f'Jan 27 11:52:25 {SERVER_NAME} sshd[32046]: Accepted password for {DST_USR} from {SRC_IP} port 62300 ssh2'
+LOG_MESSAGE = f'Jan 27 11:52:25 {SERVER_NAME} sshd[32046]: ' \
+              f'Accepted password for {DST_USR} from {SRC_IP} port 62300 ssh2'
 
 cases = [
     # Case 1: Local AR, new agent (version 4.2)
@@ -185,17 +186,13 @@ def set_debug_mode():
 
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
-    """
-    Get configurations from the module
-    """
+    """Get configurations from the module"""
     yield request.param
 
 
 @pytest.fixture(scope="function")
 def restart_service():
-    """
-    Restart Wazuh manager service and clean log file
-    """
+    """Restart Wazuh manager service and clean log file"""
     control_service('stop')
     clean_logs()
     control_service('start')
@@ -204,9 +201,7 @@ def restart_service():
 
 @pytest.fixture(scope="function")
 def configure_agents(request, get_configuration):
-    """
-    Create simulated agents for test
-    """
+    """Create simulated agents for test"""
     metadata = get_configuration.get('metadata')
     agents_number = metadata['agents_number']
     agents_os = metadata['agents_os']
@@ -217,15 +212,11 @@ def configure_agents(request, get_configuration):
 
 
 def send_message(data_object, socket_path):
-    """
-    Send a message to a given UNIX socket
+    """Send a message to a given UNIX socket
 
-    Parameters
-    ----------
-    data_object: str
-        Message to be sent
-    socket_path: str
-        Location of the UNIX socket
+    Args:
+        data_object (str): Message to be sent
+        socket_path (str): Location of the UNIX socket
     """
     with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as sock:
         sock.connect(socket_path)
@@ -233,37 +224,27 @@ def send_message(data_object, socket_path):
 
 
 def clean_logs():
-    """
-    Clean log file
-    """
+    """Clean log file"""
     truncate_file(LOG_FILE_PATH)
 
 
 def wait_ar_line(line):
-    """
-    Callback function to wait for the Active Response message
-    """
+    """Callback function to wait for the Active Response message"""
     if 'Active response request received: ' in line:
         return line.split('Active response request received: ', 1)[1]
+
     return None
 
 
 def validate_old_ar_message(agent_id, message, extra_args, timeout, all_agents):
-    """
-    Function to validate Active Response messages in old string format
+    """Function to validate Active Response messages in old string format
 
-    Parameters
-    ----------
-    agent_id: str
-        Agent ID or list of agent IDs
-    message: str
-        Message to be analyzed
-    extra_args: str
-        If 'yes', validate extra_args
-    timeout: str
-        If 'yes', validate timeout in Active Response name
-    all_agents: str
-        If 'yes', validate that message was sent to specific agent
+    Args:
+        agent_id (str): Agent ID or list of agent IDs.
+        message (str): Message to be analyzed.
+        extra_args (str): If 'yes', validate extra_args.
+        timeout (str): If 'yes', validate timeout in Active Response name.
+        all_agents (str): If 'yes', validate that message was sent to specific agent.
     """
     args = message.split()
 
@@ -289,26 +270,20 @@ def validate_old_ar_message(agent_id, message, extra_args, timeout, all_agents):
 
 
 def validate_new_ar_message(agent_id, message, extra_args, timeout, all_agents):
-    """
-    Function to validate Active Response messages in new JSON format
+    """Function to validate Active Response messages in new JSON format
 
-    Parameters
-    ----------
-    agent_id: str
-        Agent ID or list of agent IDs
-    message: str
-        Message to be analyzed
-    extra_args: str
-        If 'yes', validate extra_args
-    timeout: str
-        If 'yes', validate timeout in Active Response name
-    all_agents: str
-        If 'yes', validate that message was sent to specific agent
+    Args:
+        agent_id (str): Agent ID or list of agent IDs
+        message (str): Message to be analyzed
+        extra_args (str): If 'yes', validate extra_args
+        timeout (str): If 'yes', validate timeout in Active Response name
+        all_agents (str): If 'yes', validate that message was sent to specific agent
     """
     args = message.split(' ', 4)
 
     assert args[0] == f'(local_source)', 'Event location did not match expected!'
     assert args[1] == '[]', 'Source IP did not match expected!'
+
     if all_agents == 'yes':
         assert args[2] == 'NNS', 'AR flags did not match expected!'
         assert args[3] in agent_id, 'Agent ID did not match expected!'
@@ -323,10 +298,12 @@ def validate_new_ar_message(agent_id, message, extra_args, timeout, all_agents):
     assert json_alert['origin']['module'], 'Missing module in JSON message'
     assert json_alert['origin']['module'] == 'wazuh-analysisd', 'Invalid module in JSON message'
     assert json_alert['command'], 'Missing command in JSON message'
+
     if timeout == 'yes':
         assert json_alert['command'] == f'{AR_NAME}{AR_TIMEOUT}', 'Invalid command in JSON message'
     else:
         assert json_alert['command'] == f'{AR_NAME}0', 'Invalid command in JSON message'
+
     assert json_alert['parameters'], 'Missing parameters in JSON message'
     assert json_alert['parameters']['alert'], 'Missing alert in JSON message'
     assert json_alert['parameters']['alert']['rule'], 'Missing rule in JSON message'
@@ -337,6 +314,7 @@ def validate_new_ar_message(agent_id, message, extra_args, timeout, all_agents):
     assert json_alert['parameters']['alert']['data']['srcip'] == SRC_IP, 'Invalid source IP in JSON message'
     assert json_alert['parameters']['alert']['data']['dstuser'], 'Missing destination user in JSON message'
     assert json_alert['parameters']['alert']['data']['dstuser'] == DST_USR, 'Invalid destination user in JSON message'
+
     if extra_args == 'yes':
         assert json_alert['parameters']['extra_args'], 'Missing extra_args in JSON message'
         assert json_alert['parameters']['extra_args'][0] == ARG1, 'Missing arg1 in JSON message'
@@ -345,9 +323,7 @@ def validate_new_ar_message(agent_id, message, extra_args, timeout, all_agents):
 
 # TESTS
 def test_os_exec(set_debug_mode, get_configuration, configure_environment, restart_service, configure_agents):
-    """
-    Check if Active Response message is sent in correct format depending on agent version
-    """
+    """Check if Active Response message is sent in correct format depending on agent version"""
     metadata = get_configuration.get('metadata')
     protocol = metadata['protocol']
     extra_args = metadata['extra_args']
