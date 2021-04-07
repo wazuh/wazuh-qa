@@ -178,7 +178,7 @@ class Agent:
         self.stage_disconnect = None
         self.setup(disable_all_modules=disable_all_modules)
         self.rcv_msg_queue = Queue(rcv_msg_limit)
-        self.fixed_message_size = fixed_message_size * 1024
+        self.fixed_message_size = fixed_message_size * 1024 if fixed_message_size is not None else None
 
     def update_checksum(self, new_checksum):
         self.keep_alive_raw_msg = self.keep_alive_raw_msg.replace(self.merged_checksum, new_checksum)
