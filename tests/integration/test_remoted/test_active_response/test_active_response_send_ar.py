@@ -86,12 +86,12 @@ def test_active_response_ar_sending(get_configuration, configure_environment, re
 
             log_callback = remote.callback_active_response_received(active_response_message)
             wazuh_log_monitor.start(timeout=10, callback=log_callback,
-                                    error_message='The expected event has not been found in ossec.log')
+                                    error_message='The expected event has not been found in wazuh.log')
 
             log_callback = remote.callback_active_response_sent(active_response_message)
 
             wazuh_log_monitor.start(timeout=10, callback=log_callback,
-                                    error_message='The expected event has not been found in ossec.log')
+                                    error_message='The expected event has not been found in wazuh.log')
 
             remote.check_agent_received_message(agent.rcv_msg_queue, f"#!-execd {remote.ACTIVE_RESPONSE_EXAMPLE_COMMAND}",
                                                                      escape=True)

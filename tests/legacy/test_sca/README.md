@@ -54,7 +54,7 @@ evaluation.
 ## Results
 ----------
 
-The agent will log to __ossec.log__ these type of messages
+The agent will log to __wazuh.log__ these type of messages
 
 ```
  sca: INFO: Starting evaluation of policy: 'policy.yml'

@@ -44,7 +44,7 @@ def test_big_queue_size(get_configuration, configure_environment, restart_remote
     Check that the API answer for manager connection coincides with the option selected on `ossec.conf`.
 
     Raises:
-        AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected warning messages or if API answer is
+        AssertionError: if `wazuh-remoted` does not show in `wazuh.log` expected warning messages or if API answer is
         different of expected configuration.
     """
     cfg = get_configuration['metadata']

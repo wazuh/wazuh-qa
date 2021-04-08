@@ -43,7 +43,7 @@ def test_denied_ips_syslog_invalid(get_configuration, configure_environment, res
     """Test if `wazuh-remoted` fails when invalid `denied-ips` label value is set.
 
     Raises:
-        AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected error message.
+        AssertionError: if `wazuh-remoted` does not show in `wazuh.log` expected error message.
     """
     cfg = get_configuration['metadata']
 

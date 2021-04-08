@@ -42,7 +42,7 @@ def test_rids_closing_time_invalid(get_configuration, configure_environment, res
     """Test if `wazuh-remoted` fails when invalid `rids_closing_time` values are configured.
 
     Raises:
-        AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected error messages.
+        AssertionError: if `wazuh-remoted` does not show in `wazuh.log` expected error messages.
     """
     log_callback = remote.callback_error_invalid_value_for('rids_closing_time')
     wazuh_log_monitor.start(timeout=5, callback=log_callback,

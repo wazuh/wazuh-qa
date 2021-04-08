@@ -306,7 +306,7 @@ Vulnerability detection
 
 **Description**
 
-To evaluate if a package is vulnerable or not, the module performs a comparison between its version and the version where the vulnerability was fixed/disappeared. These checks are displayed en the `ossec.log` file if debug level of modulesd is level 2.
+To evaluate if a package is vulnerable or not, the module performs a comparison between its version and the version where the vulnerability was fixed/disappeared. These checks are displayed en the `wazuh.log` file if debug level of modulesd is level 2.
 
 You can verify that the result of those checks is correct by checking the messages whose ID is 5467, 5468, 5533 or 5456.
 
@@ -583,7 +583,7 @@ Doesn't matter.
 
 **Expected logs**
 
-Since this test is the reverse of `VUL009`, verify that the `ossec.log` file does not have a false positive of that test.
+Since this test is the reverse of `VUL009`, verify that the `wazuh.log` file does not have a false positive of that test.
 
 
 ## VUL011

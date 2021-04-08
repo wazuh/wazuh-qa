@@ -55,7 +55,7 @@ typedef struct fim_entry_data {
 Configure in local_internal_options.conf:
 >`syscheck.debug=2`
 
-During the test, check `ossec.log` looking for debug, error or warning messages that may be unnecessarily repetitive or useless.
+During the test, check `wazuh.log` looking for debug, error or warning messages that may be unnecessarily repetitive or useless.
 
 ### FIM start:
 - [ ] FIM should not report any alerts until the first scan has finished and generated a base line.
@@ -323,7 +323,7 @@ typedef struct fim_entry_data {
 Configure in local_internal_options.conf:
 >`syscheck.debug=2`
 
-During the test, check `ossec.log` looking for debug, error or warning messages that may be unnecessarily repetitive or useless.
+During the test, check `wazuh.log` looking for debug, error or warning messages that may be unnecessarily repetitive or useless.
 
 ### FIM start:
 - [ ] FIM should not report any alerts until the first scan has finished and generated a base line.
@@ -573,7 +573,7 @@ typedef struct fim_entry_data {
 Configure in local_internal_options.conf:
 >`syscheck.debug=2`
 
-During the test, check `ossec.log` looking for debug, error or warning messages that may be unnecessarily repetitive or useless.
+During the test, check `wazuh.log` looking for debug, error or warning messages that may be unnecessarily repetitive or useless.
 
 ### FIM start:
 - [ ] FIM should not report any alerts until the first scan has finished and generated a base line.

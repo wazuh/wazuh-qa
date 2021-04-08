@@ -42,7 +42,7 @@ else:
     state_file_path = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-agentd.state')
     internal_options = os.path.join(WAZUH_PATH, 'etc', 'internal_options.conf')
 
-# ossec.log watch callbacks
+# wazuh.log watch callbacks
 callbacks = {
     'interval_not_valid': callback_state_interval_not_valid,
     'interval_not_found': callback_state_interval_not_found,
@@ -76,7 +76,7 @@ def test_agentd_state_config(configure_environment, test_case: list):
 
     control_service('stop', 'wazuh-agentd')
 
-    # Truncate ossec.log in order to watch it correctly
+    # Truncate wazuh.log in order to watch it correctly
     truncate_file(LOG_FILE_PATH)
 
     # Remove state file to check if agent behavior is as expected
@@ -94,7 +94,7 @@ def test_agentd_state_config(configure_environment, test_case: list):
             time.sleep(test_case['interval'])
         assert test_case['state_file_exist'] == os.path.exists(state_file_path)
 
-    # Follow ossec.log to find desired messages by a callback
+    # Follow wazuh.log to find desired messages by a callback
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                             callback=callbacks.get(test_case['log_expect']),

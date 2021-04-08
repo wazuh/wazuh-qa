@@ -231,14 +231,14 @@ def create_long_path(length, path_name):
 
 
 def find_ossec_log(regex=None, strlog=None):
-    """Find in the ossec.log the specified strlog and return the first group if match with the regex.
+    """Find in the wazuh.log the specified strlog and return the first group if match with the regex.
 
     Parameters
     ----------
     regex : str
         Regular expression to be matched.
     strlog : str
-        String to be found in the ossec.log.
+        String to be found in the wazuh.log.
 
     Returns
     -------

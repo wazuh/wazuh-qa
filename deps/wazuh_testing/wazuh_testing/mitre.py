@@ -27,7 +27,7 @@ def callback_detect_mitre_event(line):
     """Callback to detect Mitre event
 
     Args:
-        line (str): text to be compared with alerts in ossec.log
+        line (str): text to be compared with alerts in wazuh.log
 
     Returns:
         dict: JSON object on success or None on fail

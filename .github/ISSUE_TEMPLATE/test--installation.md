@@ -21,7 +21,7 @@ assignees: ''
 - [ ] Service is running after installation
 - [ ] Service status
 - [ ] Running processes
-- [ ] No errors in ossec.log
+- [ ] No errors in wazuh.log
 - [ ] CentOS5
 - [ ] Check uninstall (services / files / users)
 - [ ] /opt
@@ -37,7 +37,7 @@ assignees: ''
 - [ ] Check apt-get remove
 - [ ] Check apt-get purge
 - [ ] Check uninstall (services / files / users)
-- [ ] No errors in ossec.log
+- [ ] No errors in wazuh.log
 
 
 ## Mac OS X
@@ -73,4 +73,4 @@ assignees: ''
 - [ ] Service is running after installation
 - [ ] Service status
 - [ ] Running processes
-- [ ] No errors in ossec.log
+- [ ] No errors in wazuh.log

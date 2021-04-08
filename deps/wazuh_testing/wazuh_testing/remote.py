@@ -283,7 +283,7 @@ def callback_start_up(agent_name):
 def callback_detect_remoted_started(port, protocol, connection_type="secure"):
     """Create a callback to detect if remoted was correctly started.
 
-    wazuh-remoted logs if it has correctly started for each connection type, the port and the protocol in the ossec.log
+    wazuh-remoted logs if it has correctly started for each connection type, the port and the protocol in the wazuh.log
 
     Args:
         port (int): port configured for wazuh-remoted.
@@ -445,18 +445,18 @@ def send_ping_pong_messages(protocol, manager_address, port):
 
 def check_remoted_log_event(wazuh_log_monitor, callback_pattern, error_message='', update_position=False,
                             timeout=REMOTED_GLOBAL_TIMEOUT):
-    """Allow to monitor the ossec.log file and search for a remoted event.
+    """Allow to monitor the wazuh.log file and search for a remoted event.
 
     Args:
         wazuh_log_monitor (FileMonitor): FileMonitor object to monitor the Wazuh log.
-        callback_pattern (str): Regex pattern to search in ossec.log.
+        callback_pattern (str): Regex pattern to search in wazuh.log.
         error_message (str): Message error to show in case that the callback pattern is not found in the expected time.
         update_position (boolean): True to search from the last line of the log file, False to search in the complete
                                    log file.
         timeout (int): Maximum time in seconds for event search in log.
 
     Raises:
-        TimeoutError: if callback pattern is not found in ossec.log in the expected time.
+        TimeoutError: if callback pattern is not found in wazuh.log in the expected time.
     """
     wazuh_log_monitor.start(
         timeout=timeout,
@@ -467,7 +467,7 @@ def check_remoted_log_event(wazuh_log_monitor, callback_pattern, error_message='
 
 
 def check_tcp_connection_established_log(wazuh_log_monitor, update_position=False, ip_address='127.0.0.1'):
-    """Allow to detect events of new incoming TCP connections in the ossec.log.
+    """Allow to detect events of new incoming TCP connections in the wazuh.log.
 
     Args:
         wazuh_log_monitor (FileMonitor): FileMonitor object to monitor the Wazuh log.
@@ -476,7 +476,7 @@ def check_tcp_connection_established_log(wazuh_log_monitor, update_position=Fals
         ip_address (str): IP address of incoming connection.
 
     Raises:
-        TimeoutError: if callback pattern is not found in ossec.log in the expected time.
+        TimeoutError: if callback pattern is not found in wazuh.log in the expected time.
     """
     callback_pattern = f".*New TCP connection at {ip_address}.*"
     error_message = f"Could not find the log with the following pattern {callback_pattern}"

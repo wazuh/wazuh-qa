@@ -112,7 +112,7 @@ Then, install Manager
 **Expected logs**
 
 ```
-# cat ossec.log | grep Mitre
+# cat wazuh.log | grep Mitre
 ```
 > wazuh-analysisd[19213] mitre.c:71 at mitre_load(): DEBUG: Mitre info loading failed. Mitre's database response has 0 elements.
 
@@ -148,7 +148,7 @@ Then, install Manager
 **Expected logs**
 
 ```
-# cat ossec.log | grep Mitre
+# cat wazuh.log | grep Mitre
 ```
 > wazuh-analysisd[19213] mitre.c:71 at mitre_load(): DEBUG: Mitre info loading failed. Query's response has 0 elements.
 
@@ -799,7 +799,7 @@ wazuh-control restart
 }
 ```
 ```
-# cat ossec.log | grep Mitre
+# cat wazuh.log | grep Mitre
 ```
 > wazuh-db[7314] wdb_parser.c:348 at wdb_parse(): DEBUG: Mitre DB Cannot execute SQL query; err database var/db/mitre.db: no such table: has_phase
 
@@ -874,7 +874,7 @@ wazuh-control restart
 }
 ```
 ```
-# cat ossec.log | grep Mitre
+# cat wazuh.log | grep Mitre
 ```
 > wazuh-db[27581] wdb_parser.c:348 at wdb_parse(): DEBUG: Mitre DB Cannot execute SQL query; err database var/db/mitre.db: no such table: attack
 
@@ -947,7 +947,7 @@ Change  id for ids in sql_create_attack = """CREATE TABLE IF NOT EXISTS attack (
 }
 ```
 ```
-# cat ossec.log | grep Mitre
+# cat wazuh.log | grep Mitre
 ```
 > wazuh-db[28187] wdb_parser.c:358 at wdb_parse(): DEBUG: Mitre DB Cannot execute SQL query; err database var/db/mitre.db: no such column: id
 
@@ -1025,7 +1025,7 @@ Change phase_name for phase in sql_create_has_phase = """CREATE TABLE IF NOT EXI
 }
 ```
 ```
-# cat ossec.log | grep Mitre
+# cat wazuh.log | grep Mitre
 ```
 > wazuh-db[3303] wdb_parser.c:358 at wdb_parse(): DEBUG: Mitre DB Cannot execute SQL query; err database var/db/mitre.db: no such table: has_phase
 
@@ -1098,7 +1098,7 @@ wazuh-control restart
 }
 ```
 ```
-# cat ossec.log | grep Mitre
+# cat wazuh.log | grep Mitre
 ```
 > wazuh-db[14586] wdb.c:212 at wdb_open_mitre(): ERROR: Can't open SQLite database 'var/db/mitre.db': unable to open database file
 

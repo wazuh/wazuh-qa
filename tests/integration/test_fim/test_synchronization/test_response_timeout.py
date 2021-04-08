@@ -78,11 +78,11 @@ def test_response_timeout(num_files, get_configuration, configure_environment, r
         truncate_agent_log()
         start_time = datetime.now()
         while datetime.now() < start_time + timedelta(seconds=time_out):
-            ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("sudo cat /var/ossec/logs/ossec.log")
+            ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("sudo cat /var/ossec/logs/wazuh.log")
             for line in ssh_stdout.read().decode('ascii').splitlines():
                 if callback_detect_end_scan(line):
                     return
-        pytest.fail("No 'File integrity monitoring scan ended.' was found on ossec.log.")
+        pytest.fail("No 'File integrity monitoring scan ended.' was found on wazuh.log.")
 
     def create_files_in_agent():
         ssh.exec_command("sudo systemctl stop wazuh-agent")
@@ -105,7 +105,7 @@ def test_response_timeout(num_files, get_configuration, configure_environment, r
     def detect_synchronization_start(time_out=1):
         start_time = datetime.now()
         while datetime.now() < start_time + timedelta(seconds=time_out):
-            ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("sudo cat /var/ossec/logs/ossec.log")
+            ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("sudo cat /var/ossec/logs/wazuh.log")
             for line in ssh_stdout.read().decode('ascii').splitlines():
                 if callback_detect_synchronization(line):
                     return extract_datetime(str(line))
@@ -114,7 +114,7 @@ def test_response_timeout(num_files, get_configuration, configure_environment, r
     def wait_agent_dbsync_finish():
         previous_time = datetime.now()
         while datetime.now() - previous_time < timedelta(seconds=3):
-            ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("sudo cat /var/ossec/logs/ossec.log")
+            ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("sudo cat /var/ossec/logs/wazuh.log")
             for line in ssh_stdout.read().decode('ascii').splitlines():
                 if "syscheck dbsync" in line:
                     previous_time = datetime.now()
@@ -124,7 +124,7 @@ def test_response_timeout(num_files, get_configuration, configure_environment, r
     def wait_agent_integrity_control():
         previous_time = datetime.now()
         while datetime.now() - previous_time < timedelta(seconds=1):
-            ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("sudo cat /var/ossec/logs/ossec.log")
+            ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command("sudo cat /var/ossec/logs/wazuh.log")
             for line in ssh_stdout.read().decode('ascii').splitlines():
                 if "Sending integrity control message" in line:
                     previous_time = datetime.now()
@@ -154,7 +154,7 @@ def test_response_timeout(num_files, get_configuration, configure_environment, r
     check_apply_test({'response_timeout'}, get_configuration['tags'])
 
     # Variables
-    LOG_PATH = "/var/ossec/logs/ossec.log"
+    LOG_PATH = "/var/ossec/logs/wazuh.log"
     DIR_NAME = "/testdir1"
     AGENT_IP = "172.19.0.201"
     USERNAME = "vagrant"

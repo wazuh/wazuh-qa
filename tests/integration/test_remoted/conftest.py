@@ -16,7 +16,7 @@ DAEMON_NAME = "wazuh-remoted"
 
 @pytest.fixture(scope='module')
 def restart_remoted(get_configuration, request):
-    # Reset ossec.log and start a new monitor
+    # Reset wazuh.log and start a new monitor
     control_service('stop', daemon=DAEMON_NAME)
     truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)

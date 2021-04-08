@@ -43,7 +43,7 @@ def test_ipv6_secure(get_configuration, configure_environment, restart_remoted):
     manager connection coincides with the option selected on `ossec.conf`.
 
     Raises:
-        AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected warning message or
+        AssertionError: if `wazuh-remoted` does not show in `wazuh.log` expected warning message or
         if API answer is different of expected configuration."""
     cfg = get_configuration['metadata']
 

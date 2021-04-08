@@ -89,7 +89,7 @@ def clean_client_keys_file():
 
 
 def read_random_pass():
-    osseclog_path = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+    osseclog_path = os.path.join(WAZUH_PATH, 'logs', 'wazuh.log')
     passw = None
     try:
         with open(osseclog_path, 'r') as log_file:

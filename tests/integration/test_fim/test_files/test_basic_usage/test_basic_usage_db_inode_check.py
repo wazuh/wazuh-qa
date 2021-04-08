@@ -49,7 +49,7 @@ def get_configuration(request):
 @pytest.fixture(scope='function')
 def restart_syscheck_function(get_configuration, request):
     """
-    Reset ossec.log and start a new monitor.
+    Reset wazuh.log and start a new monitor.
     """
     control_service('stop', daemon='wazuh-syscheckd')
     truncate_file(fim.LOG_FILE_PATH)

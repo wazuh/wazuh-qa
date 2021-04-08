@@ -57,7 +57,7 @@ def test_invalid_protocol(get_configuration, configure_environment, restart_remo
     For a syslog connection if more than one protocol is provided only TCP should be used.
 
     Raises:
-        AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected warning messages or does not
+        AssertionError: if `wazuh-remoted` does not show in `wazuh.log` expected warning messages or does not
         set properly protocol values.
     """
     cfg = get_configuration['metadata']

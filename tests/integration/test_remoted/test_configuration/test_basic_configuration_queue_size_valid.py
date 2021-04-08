@@ -45,7 +45,7 @@ def test_queue_size_valid(get_configuration, configure_environment, restart_remo
     errors.
 
     Check if the API answer for manager connection coincides with the option selected on `ossec.conf` and expected
-    warning message is shown in `ossec.log`.
+    warning message is shown in `wazuh.log`.
 
     Raises:
         AssertionError: if API answer is different of expected configuration.

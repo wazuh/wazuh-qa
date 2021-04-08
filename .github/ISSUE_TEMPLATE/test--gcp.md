@@ -111,7 +111,7 @@ GCP
 
 **Description**
 
-The accepted values for this option are debug, info, warning, error, critical. Depending on which is configured, the ossec.log file will show messages from this severities. In debug mode, other severity messages and events can be seen at this file.
+The accepted values for this option are debug, info, warning, error, critical. Depending on which is configured, the wazuh.log file will show messages from this severities. In debug mode, other severity messages and events can be seen at this file.
 
 **Compatible versions**
 

@@ -46,7 +46,7 @@ def test_local_ip_invalid(get_configuration, configure_environment, restart_remo
     """Test if `wazuh-remoted` fails when invalid `local_ip` values are configured.
 
     Raises:
-        AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected error messages.
+        AssertionError: if `wazuh-remoted` does not show in `wazuh.log` expected error messages.
     """
     log_callback = remote.callback_error_bind_port()
     wazuh_log_monitor.start(timeout=5, callback=log_callback,

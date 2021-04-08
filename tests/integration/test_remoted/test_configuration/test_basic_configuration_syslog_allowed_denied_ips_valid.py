@@ -47,7 +47,7 @@ def test_allowed_denied_ips_syslog(get_configuration, configure_environment, res
     """Check that "allowed-ips" and "denied-ips" could be configured without errors for syslog connection.
 
     Raises:
-        AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected error message.
+        AssertionError: if `wazuh-remoted` does not show in `wazuh.log` expected error message.
     """
     cfg = get_configuration['metadata']
 

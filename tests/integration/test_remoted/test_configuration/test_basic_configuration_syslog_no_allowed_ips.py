@@ -37,7 +37,7 @@ def test_allowed_denied_ips_syslog(get_configuration, configure_environment, res
     """Test if `wazuh-remoted` fails when `syslog` connection is configured without `allowed-ips` value.
 
     Raises:
-        AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected error message.
+        AssertionError: if `wazuh-remoted` does not show in `wazuh.log` expected error message.
     """
     log_callback = remote.callback_info_no_allowed_ips()
     wazuh_log_monitor.start(timeout=5, callback=log_callback,

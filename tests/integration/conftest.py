@@ -61,7 +61,7 @@ def restart_wazuh(get_configuration, request):
     # Stop Wazuh
     control_service('stop')
 
-    # Reset ossec.log and start a new monitor
+    # Reset wazuh.log and start a new monitor
     truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
@@ -72,7 +72,7 @@ def restart_wazuh(get_configuration, request):
 
 @pytest.fixture(scope='module')
 def reset_ossec_log(get_configuration, request):
-    # Reset ossec.log and start a new monitor
+    # Reset wazuh.log and start a new monitor
     truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
