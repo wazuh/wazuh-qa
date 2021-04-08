@@ -1313,6 +1313,7 @@ class GeneratorFIM:
         self.random_sha256()
         self.random_time()
         self.random_inode()
+        self._checksum = self.random_sha1()
 
     def check_changed_attributes(self, attributes, old_attributes):
         """Returns attributes that have changed. """
@@ -1368,7 +1369,7 @@ class GeneratorFIM:
             string: generated message with the required FIM header.
         """
         if self.agent_version >= "3.12":
-            formated_message = f"{self.syscheck_mq}:[{self.agent_id}] ({message})"
+            formated_message = f"{self.syscheck_mq}:({self.agent_id}) any->syscheck:{message}"
         else:
             # If first time generating. Send control message to simulate
             # end of FIM baseline.
