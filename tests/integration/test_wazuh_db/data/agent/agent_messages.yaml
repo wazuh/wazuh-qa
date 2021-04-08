@@ -42,12 +42,12 @@
     stage: "agent vuln_cves update already inserted entry"
   -
     input: 'agent 000 sql INSERT INTO sys_programs (scan_id,scan_time,format,name,priority,section,size,vendor,install_time,version,architecture,multiarch,source,description,location,triaged,cpe,msu_name,checksum,item_id)
-                                             VALUES(0,"2021/04/0722:00:00","deb","test package","optional","utils","7490","Core Bugman corebugman@wazuh.com",NULL,"1.0.0","amd64",NULL,NULL,"Test package",NULL,0,NULL,NULL,"e7dbc9bba5a0ee252866536225b952d3de7ea5cb","777fef8cc434b597769d102361af718d29ef72c1")'
+                                             VALUES(0,"2021/04/0722:00:00","deb","test package","optional","utils","7490","Wazuh wazuh@wazuh.com",NULL,"1.0.0","amd64",NULL,NULL,"Test package",NULL,0,NULL,NULL,"e7dbc9bba5a0ee252866536225b952d3de7ea5cb","777fef8cc434b597769d102361af718d29ef72c1")'
     output: 'ok []'
     stage: "agent vuln_cves adding dummy test package to sys_programs"
   -
     input: 'agent 000 sql SELECT * FROM sys_programs WHERE name = "test package"'
-    output: 'ok [{"scan_id":0,"scan_time":"2021/04/0722:00:00","format":"deb","name":"test package","priority":"optional","section":"utils","size":7490,"vendor":"Core Bugman corebugman@wazuh.com","version":"1.0.0","architecture":"amd64","description":"Test package","triaged":0,"checksum":"e7dbc9bba5a0ee252866536225b952d3de7ea5cb","item_id":"777fef8cc434b597769d102361af718d29ef72c1"}]'
+    output: 'ok [{"scan_id":0,"scan_time":"2021/04/0722:00:00","format":"deb","name":"test package","priority":"optional","section":"utils","size":7490,"vendor":"Wazuh wazuh@wazuh.com","version":"1.0.0","architecture":"amd64","description":"Test package","triaged":0,"checksum":"e7dbc9bba5a0ee252866536225b952d3de7ea5cb","item_id":"777fef8cc434b597769d102361af718d29ef72c1"}]'
     stage: "agent vuln_cves checking test package in sys_programs"
   -
     input: 'agent 000 vuln_cves insert {"name":"test package",
