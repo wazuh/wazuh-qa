@@ -198,6 +198,14 @@
     output: 'ok [{"scan_id":0,"scan_time":"2021/04/08 10:00:00","hostname":"focal","architecture":"x86_64","os_name":"Ubuntu","os_version":"20.04.2 LTS (Focal Fossa)","os_codename":"focal","os_major":"20","os_minor":"04","os_patch":"2","os_build":"1","os_platform":"ubuntu","sysname":"Linux","release":"5.4.0-70-generic","version":"#78-Ubuntu SMP Thu Apr 08 10:00:00 UTC 2021","os_release":"1","checksum":"legacy","triaged":0,"reference":"54d5344c8f49eae38d81651495227c5080755b45"}]'
     stage: "agent sys_osinfo getting information"
   -
+    input: 'agent 000 osinfo set_triaged'
+    output: 'ok'
+    stage: "agent sys_osinfo set triaged"
+  -
+    input: 'agent 000 sql SELECT triaged FROM sys_osinfo WHERE triaged = 1'
+    output: 'ok [{"triaged":1}]'
+    stage: "agent sys_osinfo checking triaged"
+  -
     input: 'agent 000 sql DELETE FROM sys_osinfo'
     output: "ok []"
     stage: "agent sys_osinfo cleaning sys_osinfo table"
