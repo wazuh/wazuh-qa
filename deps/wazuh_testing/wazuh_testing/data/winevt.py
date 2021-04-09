@@ -45,9 +45,9 @@ WINEVT_SYSTEM= "{\"Message\":\"The sppsvc service entered the running state.\",\
 
 WINEVT_SYSMON = "{\"Message\":\"File creation time changed:\r\nRuleName: T1099\r\nUtcTime: " \
                 "2021-03-25 15:04:03.302\r\nProcessGuid: {A5A24D70-A630-605C-8C00-000000000F00}\r\nProcessId: " \
-                "2020\r\nImage: C:\\Users\\Administrator\\AppData\\Local\\Programs\\Opera\\74.0.3911.232\\opera.exe" \
-                "\r\nTargetFilename: C:\\Users\\Administrator\\AppData\\Roaming\\Opera Software\\Opera Stable" \
-                "\\bc0808a3-2f49-487c-8ae3-325cf7658646.tmp\r\nCreationUtcTime: 2021-03-23 07:56:11.597" \
+                r"2020\r\nImage: C:\\Users\\Administrator\\AppData\\Local\\Programs\\Opera\\74.0.3911.232\\opera.exe" \
+                "\r\nTargetFilename: " r"C:\\Users\\Administrator\\AppData\\Roaming\\Opera Software\\Opera Stable" \
+                r"\\" "bc0808a3-2f49-487c-8ae3-325cf7658646.tmp\r\nCreationUtcTime: 2021-03-23 07:56:11.597" \
                 "\r\nPreviousCreationUtcTime: 2021-03-25 15:04:03.302\",\"Event\":\"<Event " \
                 "xmlns='http://schemas.microsoft.com/win/2004/08/events/event'>" \
                 "<System><Provider Name='Microsoft-Windows-Sysmon' " \
@@ -61,16 +61,16 @@ WINEVT_SYSMON = "{\"Message\":\"File creation time changed:\r\nRuleName: T1099\r
                 "</System><EventData><Data Name='RuleName'>T1099</Data><Data Name='UtcTime'>2021-03-25 " \
                 "15:04:03.302</Data><Data Name='ProcessGuid'>{A5A24D70-A630-605C-8C00-000000000F00}" \
                 "</Data><Data Name='ProcessId'>2020</Data><Data Name='Image'>" \
-                "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Opera\\74.0.3911.232\\opera.exe" \
-                "</Data><Data Name='TargetFilename'>C:\\Users\\Administrator\\AppData\\Roaming\\Opera Software\\" \
-                "Opera Stable\\bc0808a3-2f49-487c-8ae3-325cf7658646.tmp</Data><Data Name='CreationUtcTime'>" \
+                r"C:\\Users\\Administrator\\AppData\\Local\\Programs\\Opera\\74.0.3911.232\\opera.exe" \
+                r"</Data><Data Name='TargetFilename'>C:\\Users\\Administrator\\AppData\\Roaming\\Opera Software\\" \
+                r"Opera Stable\\bc0808a3-2f49-487c-8ae3-325cf7658646.tmp</Data><Data Name='CreationUtcTime'>" \
                 "2021-03-23 07:56:11.597</Data><Data Name='PreviousCreationUtcTime'>2021-03-25 15:04:03.302" \
                 "</Data></EventData></Event>\"}"
 
 WINEVT_WINDOWS_DEFENDER = "{\"Message\":\"Windows Defender scan has started.\r\n \tScan ID: " \
                            "{6E6187EE-21DF-4CC6-B0FA-42E2ADF201DE}\r\n \tScan Type: " \
                            "Antimalware\r\n \tScan Parameters: Quick Scan\r\n \tScan " \
-                           "Resources: \r\n \tUser: VAGRANT-2016\\Administrator\"," \
+                           r"Resources: \r\n \tUser: VAGRANT-2016\\Administrator" "\"," \
                            "\"Event\":\"<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'>" \
                            "<System><Provider Name='Microsoft-Windows-Windows Defender' " \
                            "Guid='{11CD958A-C507-4EF3-B3F2-5FD9DFBD2C78}'/><EventID><random_int>" \
