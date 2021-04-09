@@ -1035,6 +1035,13 @@ def callback_detect_integrity_event(line):
     return None
 
 
+def callback_detect_registry_integrity_event(line):
+    match = re.match(r'.*Sending integrity control message: {"component":"fim_registry","type":"state","data":(.+)}', line)
+    if match:
+        return json.loads(match.group(1))
+    return None
+
+
 def callback_detect_integrity_state(line):
     event = callback_detect_integrity_event(line)
     if event:
@@ -1305,6 +1312,13 @@ def callback_detect_max_files_per_second(line):
     match = re.match(msg, line)
 
     return match is not None
+
+
+def callback_dbsync_no_data(line):
+    match = re.match(r'.*#!-fim_registry dbsync no_data (.+)', line)
+    if match:
+        return match.group(1)
+    return None
 
 
 def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None):

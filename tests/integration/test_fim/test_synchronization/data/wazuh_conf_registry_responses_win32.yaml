@@ -1,0 +1,22 @@
+---
+# conf 1
+- tags:
+  - registry_sync_responses
+  apply_to_modules:
+  - test_registry_responses_win32
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - windows_registry:
+        value: WINDOWS_REGISTRY
+        attributes:
+        - check_mtime: 'no'
+        - arch: '64bit'
+    - synchronization:
+        elements:
+        - interval:
+            value: SYNC_INTERVAL
+        - max_interval:
+            value: SYNC_INTERVAL
