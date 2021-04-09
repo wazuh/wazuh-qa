@@ -105,7 +105,7 @@
                                         "status":"VALID",
                                         "check_pkg_existence":false}'
     output: 'ok {"action":"INSERT","status":"SUCCESS"}'
-    stage: "agent vuln_cves insert same package with different CVE without checking if the package is present in sys_program"
+    stage: "agent vuln_cves insert same package with different CVE without checking if the package is present in sys_programs"
   -
     input: 'agent 000 sql SELECT * FROM vuln_cves WHERE name = "test_package2" AND cve = "CVE-2021-1002"'
     output: 'ok [{"name":"test_package2","version":"3.0","architecture":"x86","cve":"CVE-2021-1002","reference":"99efe684b5ff4646b3c754de46cb6a9cbee9fbaa","type":"PACKAGE","status":"VALID"}]'
@@ -123,11 +123,29 @@
     input: 'agent 000 vuln_cves update_status {"new_status":"PENDING",
                                                "type":"OS"}'
     output: 'ok'
-    stage: "agent vuln_cves update status by type"
+    stage: 'agent vuln_cves update status by type "OS"'
   -
-    input: 'agent 000 sql SELECT distinct status FROM vuln_cves'
-    output: 'ok [{"status":"PENDING"},{"status":"VALID"}]'
-    stage: 'agent vuln_cves checking update status by type'
+    input: 'agent 000 sql SELECT count(status) FROM vuln_cves WHERE type = "OS"'
+    output: 'ok [{"count(status)":1}]'
+    stage: 'agent vuln_cves checking update status by type "OS"'
+  -
+    input: 'agent 000 vuln_cves update_status {"new_status":"PENDING",
+                                               "type":"PACKAGE"}'
+    output: 'ok'
+    stage: 'agent vuln_cves update status by type "PACKAGE"'
+  -
+    input: 'agent 000 sql SELECT count(status) FROM vuln_cves WHERE type = "PACKAGE"'
+    output: 'ok [{"count(status)":3}]'
+    stage: 'agent vuln_cves checking update status by type "PACKAGE"'
+  -
+    input: 'agent 000 vuln_cves update_status {"new_status":"VALID",
+                                               "type":"PACKAGE"}'
+    output: 'ok'
+    stage: 'agent vuln_cves update status by type "PACKAGE" again'
+  -
+    input: 'agent 000 sql SELECT count(status) FROM vuln_cves WHERE type = "PACKAGE"'
+    output: 'ok [{"count(status)":3}]'
+    stage: 'agent vuln_cves checking update status by type "PACKAGE" again'
   -
     input: 'agent 000 vuln_cves remove {"cve":"CVE-2021-1001",
                                         "reference":"03c06c4f118618400772367b1cf7e73ce0178e02"}'
