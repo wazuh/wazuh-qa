@@ -20,10 +20,12 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 
 def load_tests(path):
-    """ Loads a yaml file from a path
-    Returns
-    ----------
-    yaml structure
+    """Loads a yaml file from a path
+    Args:
+        path (str): path to the file.
+
+    Returns:
+        dict: dictionary containing the test info.
     """
     with open(path) as f:
         return yaml.safe_load(f)
@@ -83,14 +85,13 @@ def test_ossec_auth_messages(clean_client_keys_file, get_configuration, set_up_g
                              configure_sockets_environment, connect_to_sockets_module, wait_for_agentd_startup):
     """Check that every input message in authd port generates the adequate output
 
-    Parameters
-    ----------
-    test_case : list
-        List of test_case stages (dicts with input, output and stage keys).
+    Raises:
+        ConnectionResetError: if wazuh-authd does not send the response to the agent through the socket.
+        AssertionError: if the response does not match the expected message.
     """
     test_case = set_up_groups['test_case']
     for stage in test_case:
-        # Reopen socket (socket is closed by maanger after sending message with client key)
+        # Reopen socket (socket is closed by manager after sending message with client key)
         receiver_sockets[0].open()
         expected = stage['output']
         message = stage['input']
