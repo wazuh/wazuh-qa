@@ -69,18 +69,19 @@ class DataVisualizer:
         store_path (str): path to store the CSV images. Defaults to the temp directory.
         x_ticks_granularity (string): granularity of the Timestamp. It is set by default to minutes.
         x_ticks_interval (int): interval of the x-label.
-
+        base_name (str, optional): base name used to store the images.
     Attributes:
-        dataframes_path (list): paths of the CSVs.
+        dataframes_paths (list): paths of the CSVs.
         dataframe (pandas.Dataframe): dataframe containing the info from all the CSVs.
         compare (bool): boolean to compare the different datasets.
         target (str): string to set the visualization type.
         store_path (str): path to store the CSV images. Defaults to the temp directory.
         x_ticks_granularity (string): granularity of the Timestamp. It is set by default to minutes.
         x_ticks_interval (int): interval of the x-label.
+        base_name (str, optional): base name used to store the images.
     """
     def __init__(self, dataframes, target, compare=False, store_path=gettempdir(), x_ticks_granularity='minutes',
-                 x_ticks_interval=1):
+                 x_ticks_interval=1, base_name=None):
         self.dataframes_paths = dataframes
         self.dataframe = None
         self.compare = compare
@@ -89,6 +90,7 @@ class DataVisualizer:
         self._load_dataframes()
         self.x_ticks_granularity = x_ticks_granularity
         self.x_ticks_interval = x_ticks_interval
+        self.base_name = base_name
         sns.set(rc={'figure.figsize': (26, 9)})
 
     def _load_dataframes(self):
@@ -138,6 +140,8 @@ class DataVisualizer:
         self._set_x_ticks_interval(ax)
         plt.xticks(rotation=rotation)
         svg_name = sub(pattern=r'\(.*\)', string=y_label, repl='')
+        if self.base_name is not None:
+            svg_name = f"{self.base_name}_{svg_name}"
         plt.savefig(join(self.store_path, f"{svg_name}.svg"), dpi=1200, format='svg')
 
     def _plot_data(self, elements, title=None, generic_label=None):
