@@ -35,7 +35,7 @@ class HostManager:
         """
         return testinfra.get_host(f"ansible://{host}?ansible_inventory={self.inventory_path}")
 
-    def move_file(self, host: str, src_path: str, dest_path: str = '/var/ossec/etc/ossec.conf', check: bool = False):
+    def move_file(self, host: str, src_path: str, dest_path: str = '/var/ossec/etc/manager.conf', check: bool = False):
         """Move from src_path to the desired location dest_path for the specified host.
 
         Args:
@@ -116,9 +116,9 @@ class HostManager:
 
         parse_configurations = dict()
         for host, payload in config.items():
-            template_ossec_conf = self.get_file_content(host, dest_path).split('\n')
+            template_manager_conf = self.get_file_content(host, dest_path).split('\n')
             parse_configurations[host] = set_section_wazuh_conf(sections=payload['sections'],
-                                                                template=template_ossec_conf)
+                                                                template=template_manager_conf)
 
         for host, configuration in parse_configurations.items():
             configuration = ''.join(configuration)

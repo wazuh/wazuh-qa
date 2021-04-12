@@ -83,7 +83,7 @@ def callback_detect_syslog_denied_ips(syslog_ips):
 
 
 def callback_invalid_value(option, value):
-    """Create a callback to detect invalid values in ossec.conf file.
+    """Create a callback to detect invalid values in manager.conf file.
 
     Args:
         option (str): Wazuh manager configuration option.
@@ -97,7 +97,7 @@ def callback_invalid_value(option, value):
 
 
 def callback_error_in_configuration(severity):
-    """Create a callback to detect configuration error in ossec.conf file.
+    """Create a callback to detect configuration error in configuration file.
 
     Args:
         severity (str): ERROR or CRITICAL.
@@ -198,7 +198,7 @@ def callback_queue_size_too_big():
 
 
 def callback_error_invalid_value_for(option):
-    """Create a callback to detect invalid values in ossec.conf file.
+    """Create a callback to detect invalid values in manager.conf file.
 
     Args:
         option (str): Wazuh manager configuration option.
