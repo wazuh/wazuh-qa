@@ -68,7 +68,10 @@ remoted_simulator = None
 @pytest.fixture(scope="function")
 def start_agent(request, get_configuration):
     """
-    Create Remoted and Authd simulators, register agent and start it
+    Create Remoted and Authd simulators, register agent and start it.
+
+    Args:
+        get_configuration (fixture): Get configurations from the module.
     """
     metadata = get_configuration['metadata']
     authd_simulator = AuthdSimulator(server_address=SERVER_ADDRESS,
@@ -105,7 +108,10 @@ def start_agent(request, get_configuration):
 @pytest.fixture(scope="function")
 def remove_ip_from_iptables(request, get_configuration):
     """
-    Remove the test IP from iptables if it exist
+    Remove the test IP from iptables if it exist.
+
+    Args:
+        get_configuration (fixture): Get configurations from the module.
     """
     metadata = get_configuration['metadata']
     param = '{"version":1,"origin":{"name":"","module":"wazuh-execd"},"command":"delete",' \
@@ -131,14 +137,18 @@ def remove_ip_from_iptables(request, get_configuration):
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
     """
-    Get configurations from the module
+    Get configurations from the module.
     """
     yield request.param
 
 
 def validate_ar_message(message, command_id):
     """
-    Get configurations from the module
+    Verify that Active Response JSON messages have a "command" field and that it is valid.
+
+    Args:
+        message: Serialized JSON message.
+        command_id: Integer with command ID.
     """
     command = 'add' if command_id == 0 else 'delete'
 
@@ -149,7 +159,10 @@ def validate_ar_message(message, command_id):
 
 def wait_message_line(line):
     """
-    Callback function to wait for Active Response JSON message
+    Callback function to wait for Active Response JSON message.
+
+    Args:
+        line: String containing message.
     """
     if "{\"version\"" in line:
         return line.split("/ossec/active-response/bin/firewall-drop: ", 1)[1]
@@ -158,14 +171,21 @@ def wait_message_line(line):
 
 def wait_invalid_input_message_line(line):
     """
-    Callback function to wait for error message
+    Callback function to wait for error message.
+
+    Args:
+        line: String containing message.
     """
     return True if "Cannot read 'srcip' from data" in line else None
 
 
 def build_message(metadata, expected):
     """
-    Build Active Response message to be used in tests
+    Build Active Response message to be used in tests.
+
+    Args:
+        metadata (dict): Components must be: 'command', 'rule_id' and 'ip'
+        expected (dict): Only one component called 'success' with boolean value.
     """
     origin = '"name":"","module":"wazuh-analysisd"'
     rules = f'"level":5,"description":"Test.","id":{metadata["rule_id"]}'
@@ -182,7 +202,7 @@ def build_message(metadata, expected):
 def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, configure_environment,
                              remove_ip_from_iptables, start_agent, set_ar_conf_mode):
     """
-    Check if firewall-drop Active Response is executed correctly
+    Check if firewall-drop Active Response is executed correctly.
 
     Args:
         set_debug_mode (fixture): Set execd daemon in debug mode.

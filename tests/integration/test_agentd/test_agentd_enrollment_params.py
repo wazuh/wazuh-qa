@@ -28,10 +28,14 @@ INSTALLATION_FOLDER = WAZUH_PATH
 
 
 def load_tests(path):
-    """ Loads a yaml file from a path
-    Returns
-    ----------
-    yaml structure
+    """
+    Load a yaml file from a path.
+
+    Args:
+        path: File location.
+
+    Returns:
+        yaml structure.
     """
     with open(path) as f:
         return yaml.safe_load(f)
@@ -55,20 +59,22 @@ remoted_server = None
 
 
 def teardown():
+    """End simulated remoted connection."""
     global remoted_server
-    if remoted_server != None:
+    if remoted_server is not None:
         remoted_server.stop()
 
 
 # fixtures
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
-    """Get configurations from the module"""
+    """Get configurations from the module."""
     return request.param
 
 
 @pytest.fixture(scope="module")
 def configure_authd_server(request):
+    """Initialize a simulated authd connection."""
     authd_server.start()
     global monitored_sockets
     monitored_sockets = QueueMonitor(authd_server.queue)
@@ -79,6 +85,7 @@ def configure_authd_server(request):
 
 
 def clean_log_file():
+    """Clear the log file located in LOG_FILE_PATH."""
     try:
         client_file = open(LOG_FILE_PATH, 'w')
         client_file.close()
@@ -87,6 +94,17 @@ def clean_log_file():
 
 
 def override_wazuh_conf(configuration):
+    """
+    It applies custom settings on ossec.conf file from values located under
+    "configuration" section of tests found in a YAML file. For this purpose,
+    it stops the wazuh-agentd service, applies the settings and starts it again.
+
+    Args:
+        configuration: New parameters to be applied.
+
+    Raises:
+        Exception: If wazuh-agentd daemon cannot be started again.
+    """
     # Stop Wazuh
     control_service('stop', daemon='wazuh-agentd')
 
@@ -111,11 +129,20 @@ def override_wazuh_conf(configuration):
     try:
         # Start Wazuh
         control_service('start', daemon='wazuh-agentd')
-    except:
+    except ValueError:
         raise Exception
 
 
 def get_temp_yaml(param):
+    """
+    Generate a new YAML configuration file by applying new parameters to it.
+
+    Args:
+        param: New parameters to be applied.
+
+    Returns:
+        YAML stream with new configuration.
+    """
     temp = os.path.join(test_data_path, 'temp.yaml')
     with open(configurations_path, 'r') as conf_file:
         enroll_conf = {'enrollment': {'elements': []}}
@@ -132,7 +159,15 @@ def get_temp_yaml(param):
 
 
 def check_time_to_connect(timeout):
-    """Wait until client try connect"""
+    """
+    Wait until client try connect.
+
+    Args:
+        timeout (int, optional): Maximum timeout. Default `-1`
+
+    Returns:
+        Integer with elapsed time in seconds.
+    """
 
     def wait_connect(line):
         if 'Trying to connect to server' in line:
@@ -157,7 +192,7 @@ def check_time_to_connect(timeout):
                 initial_line = line
                 break
 
-    if initial_line != None and final_line != None:
+    if initial_line is not None and final_line is not None:
         form = '%H:%M:%S'
         initial_time = datetime.datetime.strptime(initial_line.split()[1], form).time()
         final_time = datetime.datetime.strptime(final_line.split()[1], form).time()
@@ -170,6 +205,15 @@ def check_time_to_connect(timeout):
 
 
 def check_log_error_conf(msg):
+    """
+    Check if a certain message has been written to the log files.
+
+    Args:
+        msg: string with the message.
+
+    Returns:
+        string with the complete line where the message is located or None if it is not found.
+    """
     with open(LOG_FILE_PATH, 'r') as log_file:
         lines = log_file.readlines()
         for line in lines:
@@ -180,6 +224,14 @@ def check_log_error_conf(msg):
 
 @pytest.mark.parametrize('test_case', [case for case in tests])
 def test_agent_agentd_enrollment(configure_authd_server, configure_environment, test_case: list):
+    """
+    Test different situations that can occur on the wazuh-agentd daemon during agent enrollment.
+
+    Args:
+        configure_authd_server (fixture): Initializes a simulated authd connection.
+        configure_environment (fixture): Configure a custom environment for testing.
+        test_case: List of tests to be performed.
+    """
     global remoted_server
     print(f'Test: {test_case["name"]}')
     if 'wazuh-agentd' in test_case.get("skips", []):
@@ -195,7 +247,7 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
     except Exception as err:
         if test_case.get('expected_error') and not test_case.get('enrollment', {}).get('response'):
             # Expected to happen
-            assert check_log_error_conf(test_case.get('expected_error')) != None, \
+            assert check_log_error_conf(test_case.get('expected_error')) is not None, \
                 'Expected configuration error at ossec.conf file, fail log_check'
             return
         else:
@@ -209,7 +261,7 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
         assert results[1] == check_client_keys_file(), 'Client key does not match'
     else:
         # Expected to happen
-        assert check_log_error_conf(test_case.get('expected_error')) != None, \
+        assert check_log_error_conf(test_case.get('expected_error')) is not None, \
             'Expected configuration error at ossec.conf file, fail log_check'
         assert len(results) == 0, 'Enrollment message was not expected!'
 

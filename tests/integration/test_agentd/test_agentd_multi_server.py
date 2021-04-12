@@ -28,11 +28,12 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 How does this test work:
 
     - PROTOCOL: tcp/udp
-    - CLEAN_KEYS: whetever start with an empty client.keys file or not
+    - CLEAN_KEYS: whatever start with an empty client.keys file or not
     - SIMULATOR_NUMBERS: Number of simulator to be instantiated, this should match wazuh_conf.yaml
     - SIMULATOR MODES: for each number of simulator will define a list of "stages"
     that defines the state that remoted simulator should have in that state
-    Lenght of the stages should be the same for all simulators. Authd simulator will only accept one enrollment for stage
+    Length of the stages should be the same for all simulators.
+    Authd simulator will only accept one enrollment for stage
     - LOG_MONITOR_STR: (list of lists) Expected string to be monitored in all stages
 """
 metadata = [
@@ -119,8 +120,9 @@ metadata = [
         ]
     },
     {
-        # 4. 3 Server - UDP protocol. Agent should enroll and connect to first server,
-        # and then the first server will disconnect, agent should try to enroll to the first server again and then after failure, move to the second server and connect.
+        # 4. 3 Server - UDP protocol. Agent should enroll and connect to first server, and then the first server will
+        # disconnect, agent should try to enroll to the first server again and then after failure, move to the second
+        # server and connect.
         'PROTOCOL': 'udp',
         'CLEAN_KEYS': True,
         'SIMULATOR_NUMBER': 3,
@@ -243,6 +245,9 @@ def get_configuration(request):
 
 @pytest.fixture(scope="module")
 def add_hostnames(request):
+    """
+    Add to OS hosts file, names and IP's of test servers.
+    """
     HOSTFILE_PATH = os.path.join(os.environ['SystemRoot'], 'system32', 'drivers', 'etc', 'hosts') \
         if os.sys.platform == 'win32' else '/etc/hosts'
     hostfile = None
@@ -260,6 +265,12 @@ def add_hostnames(request):
 
 @pytest.fixture(scope="module")
 def configure_authd_server(request, get_configuration):
+    """
+    Initialize multiple simulated remoted connections.
+
+    Args:
+        get_configuration (fixture): Get configurations from the module.
+    """
     global monitored_sockets
     monitored_sockets = QueueMonitor(authd_server.queue)
     authd_server.start()
@@ -283,11 +294,18 @@ def configure_authd_server(request, get_configuration):
 
 @pytest.fixture(scope="function")
 def set_authd_id(request):
+    """Set agent id to 101 in the authd simulated connection."""
     authd_server.agent_id = 101
 
 
 @pytest.fixture(scope="function")
 def clean_keys(request, get_configuration):
+    """
+    Clear the client.key file used by the simulated remoted connections.
+
+    Args:
+        get_configuration (fixture): Get configurations from the module.
+    """
     if get_configuration['metadata'].get('CLEAN_KEYS', True):
         truncate_file(CLIENT_KEYS_PATH)
         sleep(1)
@@ -298,6 +316,7 @@ def clean_keys(request, get_configuration):
 
 
 def restart_agentd():
+    """Restart agentd daemon with debug mode active."""
     control_service('stop', daemon="wazuh-agentd")
     truncate_file(LOG_FILE_PATH)
     control_service('start', daemon="wazuh-agentd", debug_mode=True)
@@ -305,6 +324,13 @@ def restart_agentd():
 
 # Tests
 def wait_until(x, log_str):
+    """
+    Callback function to wait for a message in a log file.
+
+    Args:
+        x: String containing message.
+        log_str: Log file string.
+    """
     print(x)
     return x if log_str in x else None
 
@@ -312,6 +338,18 @@ def wait_until(x, log_str):
 # @pytest.mark.parametrize('test_case', [case for case in tests])
 def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id, clean_keys, configure_environment,
                              get_configuration):
+    """
+    Initialize an environment with multiple simulated servers in which the agent is forced to register
+    under different test conditions, verifying the agent's behavior through its log files.
+
+    Args:
+        add_hostnames (fixture): Adds to the OS hosts file the names and IP's of the test servers.
+        configure_authd_server (fixture): Initializes multiple simulated remoted connections.
+        set_authd_id (fixture): Sets the agent id to 101 in authd simulated connection.
+        clean_keys (fixture): Clears the client.key file used by the simulated remote connections.
+        configure_environment (fixture): Configure a custom environment for testing.
+        get_configuration (fixture): Get configurations from the module.
+    """
     log_monitor = FileMonitor(LOG_FILE_PATH)
 
     for stage in range(0, len(get_configuration['metadata']['LOG_MONITOR_STR'])):
@@ -327,7 +365,7 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
                 remoted_servers[i].stop()
 
         if stage == 0:
-            # Restart at beggining of test
+            # Restart at beginning of test
             restart_agentd()
 
         for index, log_str in enumerate(get_configuration['metadata']['LOG_MONITOR_STR'][stage]):

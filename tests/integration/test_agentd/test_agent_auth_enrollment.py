@@ -22,10 +22,14 @@ REMOTED_PORT = 1514
 
 
 def load_tests(path):
-    """ Loads a yaml file from a path
-    Returns
-    ----------
-    yaml structure
+    """
+    Load a yaml file from a path.
+
+    Args:
+        path: File location.
+
+    Returns:
+        yaml structure.
     """
     with open(path) as f:
         return yaml.safe_load(f)
@@ -46,12 +50,13 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 # fixtures
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
-    """Get configurations from the module"""
+    """Get configurations from the module."""
     return request.param
 
 
 @pytest.fixture(scope="module")
 def configure_authd_server(request):
+    """Initialize a simulated authd connection."""
     authd_server.start()
     global monitored_sockets
     monitored_sockets = QueueMonitor(authd_server.queue)
@@ -63,6 +68,14 @@ def configure_authd_server(request):
 
 @pytest.mark.parametrize('test_case', [case for case in tests])
 def test_agent_auth_enrollment(configure_authd_server, configure_environment, test_case: list):
+    """
+    Test different situations that can occur on the agent-auth program during agent enrollment.
+
+    Args:
+        configure_authd_server (fixture): Initializes a simulated authd connection.
+        configure_environment (fixture): Configure a custom environment for testing.
+        test_case: List of tests to be performed.
+    """
     print(f'Test: {test_case["name"]}')
     if 'agent-auth' in test_case.get("skips", []):
         pytest.skip("This test does not apply to agent-auth")

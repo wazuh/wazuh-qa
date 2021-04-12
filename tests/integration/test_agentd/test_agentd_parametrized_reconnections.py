@@ -46,23 +46,26 @@ remoted_server = None
 
 def teardown():
     global remoted_server
-    if remoted_server != None:
+    if remoted_server is not None:
         remoted_server.stop()
 
 
 def set_debug_mode():
+    """
+    Set debug2 for agentd in local internal options file.
+    """
     if platform.system() == 'win32' or platform.system() == 'Windows':
         local_int_conf_path = os.path.join(WAZUH_PATH, 'local_internal_options.conf')
         debug_line = 'windows.debug=2\n'
     else:
         local_int_conf_path = os.path.join(WAZUH_PATH, 'etc', 'local_internal_options.conf')
         debug_line = 'agent.debug=2\n'
-    with  open(local_int_conf_path, 'r') as local_file_read:
+    with open(local_int_conf_path, 'r') as local_file_read:
         lines = local_file_read.readlines()
         for line in lines:
             if line == debug_line:
                 return
-    with  open(local_int_conf_path, 'a') as local_file_write:
+    with open(local_int_conf_path, 'a') as local_file_write:
         local_file_write.write('\n' + debug_line)
 
 
@@ -72,12 +75,13 @@ set_debug_mode()
 # fixtures
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
-    """Get configurations from the module"""
+    """Get configurations from the module."""
     return request.param
 
 
 @pytest.fixture(scope="module")
 def configure_authd_server(request):
+    """Initialize a simulated authd connection."""
     authd_server.start()
     global monitored_sockets
     monitored_sockets = QueueMonitor(authd_server.queue)
@@ -88,29 +92,34 @@ def configure_authd_server(request):
 
 @pytest.fixture(scope="function")
 def start_authd(request):
+    """Enable authd to accept connections and perform enrollments."""
     authd_server.set_mode("ACCEPT")
     authd_server.clear()
 
 
 @pytest.fixture(scope="function")
 def stop_authd(request):
+    """Disable authd to accept connections and perform enrollments."""
     authd_server.set_mode("REJECT")
 
 
 @pytest.fixture(scope="function")
 def clean_keys(request):
+    """Clear the agent's client.keys file."""
     truncate_file(CLIENT_KEYS_PATH)
     sleep(1)
 
 
 @pytest.fixture(scope="function")
 def delete_keys(request):
+    """Remove the agent's client.keys file."""
     os.remove(CLIENT_KEYS_PATH)
     sleep(1)
 
 
 @pytest.fixture(scope="function")
 def set_keys(request):
+    """Write to client.keys file the agent's enrollment details."""
     with open(CLIENT_KEYS_PATH, 'w+') as f:
         f.write("100 ubuntu-agent any TopSecret")
     sleep(1)
@@ -118,37 +127,48 @@ def set_keys(request):
 
 @pytest.fixture(scope="function")
 def start_agent(request):
+    """Start Wazuh's agent."""
     control_service('start')
 
 
 @pytest.fixture(scope="function")
 def stop_agent(request):
+    """Stop Wazuh's agent."""
     control_service('stop')
 
 
 def clean_logs():
+    """Clear the log file."""
     truncate_file(LOG_FILE_PATH)
 
 
 def wait_notify(line):
+    """Callback function to wait for agent checkins to the manager."""
     if 'Sending keep alive:' in line:
         return line
     return None
 
 
 def wait_server_rollback(line):
+    """Callback function to wait until the agent cannot connect to any server."""
     if "Unable to connect to any server" in line:
         return line
     return None
 
 
 def wait_connect(line):
+    """Callback function to wait for the agent to try to connect to a server."""
     if 'Trying to connect to server' in line:
         return line
     return None
 
 
 def count_retry_mesages():
+    """
+    Count number of attempts to connect to server and enrollments made from log file.
+
+    Returns (int , int): Tuple with connection attempts and enrollments.
+    """
     connect = 0
     enroll = 0
     with open(LOG_FILE_PATH) as log_file:
@@ -159,34 +179,44 @@ def count_retry_mesages():
             if 'Valid key received' in line:
                 enroll += 1
             if "Unable to connect to any server" in line:
-                return (connect, enroll)
-    return (connect, enroll)
+                return connect, enroll
+    return connect, enroll
 
 
 def wait_enrollment(line):
+    """Callback function to wait for enrollment."""
     if 'Valid key received' in line:
         return line
     return None
 
 
 def wait_unable_to_connect(line):
+    """Callback function to wait until the agent cannot connect to a server."""
     if 'connect_server(): ERROR: (1216):' in line:
         return line
     return None
 
 
 def change_timeout(new_value):
+    """
+    Set agent.recv_timeout for agentd in local internal options file.
+    The above option sets the maximum number of seconds to wait
+    for server response from the TCP client socket.
+
+    Args:
+        new_value (int): Number of seconds (between 1 and 600).
+    """
     new_timeout = 'agent.recv_timeout=' + new_value
     if platform.system() == 'win32' or platform.system() == 'Windows':
         local_int_conf_path = os.path.join(WAZUH_PATH, 'local_internal_options.conf')
     else:
         local_int_conf_path = os.path.join(WAZUH_PATH, 'etc', 'local_internal_options.conf')
-    with  open(local_int_conf_path, 'r') as local_file_read:
+    with open(local_int_conf_path, 'r') as local_file_read:
         lines = local_file_read.readlines()
         for line in lines:
             if line == new_timeout:
                 return
-    with  open(local_int_conf_path, 'a') as local_file_write:
+    with open(local_int_conf_path, 'a') as local_file_write:
         local_file_write.write('\n' + new_timeout)
 
 
@@ -194,6 +224,15 @@ change_timeout('5')
 
 
 def parse_time_from_log_line(log_line):
+    """
+    Create a datetime object from a date in a string.
+
+    Args:
+        log_line: String with date
+
+    Returns:
+        datetime object.
+    """
     data = log_line.split(" ")
     (year, month, day) = data[0].split("/")
     (hour, minute, second) = data[1].split(":")
@@ -214,6 +253,18 @@ This test covers different options of delays between server connection attempts:
 
 def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, stop_agent, set_keys,
                                            configure_environment, get_configuration):
+    """
+    Check how the agent behaves when there are delays between connection attempts to server during registration.
+    For this purpose, different values for max_retries and retry_interval parameters are tested.
+
+    Args:
+        configure_authd_server (fixture): Initialize a simulated authd connection.
+        start_authd (fixture): Enable authd to accept connections and perform enrollments.
+        stop_agent (fixture): Stop Wazuh's agent.
+        set_keys (fixture): Write to client.keys file the agent's enrollment details.
+        configure_environment (fixture): Configure a custom environment for testing.
+        get_configuration (fixture): Get configurations from the module.
+    """
     DELTA = 1
     RECV_TIMEOUT = 5
     ENROLLMENT_SLEEP = 20
@@ -232,7 +283,7 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
     remoted_server = RemotedSimulator(protocol=PROTOCOL, client_keys=CLIENT_KEYS_PATH)
     control_service('start')
 
-    # 2 Check for unsuccesful connection retries in Agentd initialization
+    # 2 Check for unsuccessful connection retries in Agentd initialization
     interval = INTERVAL
     if PROTOCOL == 'udp':
         interval += RECV_TIMEOUT
@@ -245,11 +296,11 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
     for retry in range(total_retries):
         # 3 If auto enrollment is enabled, retry check enrollment and retries after that
         if ENROLL == 'yes' and retry == total_retries - 1:
-            # Wait succesfull enrollment
+            # Wait successfully enrollment
             try:
                 log_monitor.start(timeout=20, callback=wait_enrollment)
             except TimeoutError as err:
-                raise AssertionError("No succesful enrollment after retries!")
+                raise AssertionError("No successful enrollment after retries!")
             last_log = parse_time_from_log_line(log_monitor.result())
 
             # Next retry will be after enrollment sleep
@@ -258,11 +309,11 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
         try:
             log_monitor.start(timeout=interval + LOG_TIMEOUT, callback=wait_connect)
         except TimeoutError as err:
-            raise AssertionError("Connection attempts tooks too much!")
+            raise AssertionError("Connection attempts took too much!")
         actual_retry = parse_time_from_log_line(log_monitor.result())
         if retry > 0:
             delta_retry = actual_retry - last_log
-            # Check if delay was aplied
+            # Check if delay was applied
             assert delta_retry >= timedelta(seconds=interval - DELTA), "Retries to quick"
             assert delta_retry <= timedelta(seconds=interval + DELTA), "Retries to slow"
         last_log = actual_retry
@@ -271,9 +322,9 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
     try:
         log_monitor.start(timeout=30, callback=wait_server_rollback)
     except TimeoutError as err:
-        raise AssertionError("Server rollback tooks too much!")
+        raise AssertionError("Server rollback took too much!")
 
-    # 5 Check ammount of retriesand enrollment
+    # 5 Check amount of retries and enrollment
     (connect, enroll) = count_retry_mesages()
     assert connect == total_retries
     if ENROLL == 'yes':

@@ -64,7 +64,10 @@ remoted_simulator = None
 @pytest.fixture(scope="function")
 def start_agent(request, get_configuration):
     """
-    Create Remoted and Authd simulators, register agent and start it
+    Create Remoted and Authd simulators, register agent and start it.
+
+    Args:
+        get_configuration (fixture): Get configurations from the module.
     """
     metadata = get_configuration['metadata']
     authd_simulator = AuthdSimulator(server_address=SERVER_ADDRESS,
@@ -101,14 +104,14 @@ def start_agent(request, get_configuration):
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
     """
-    Get configurations from the module
+    Get configurations from the module.
     """
     yield request.param
 
 
 def wait_message_line(line):
     """
-    Callback function to wait for Active Response JSON message
+    Callback function to wait for Active Response JSON message.
     """
     if platform.system() == 'Windows' and "active-response/bin/restart-wazuh.exe: {\"version\"" in line:
         return True
@@ -119,21 +122,25 @@ def wait_message_line(line):
 
 def wait_invalid_input_message_line(line):
     """
-    Callback function to wait for error message
+    Callback function to wait for error message.
     """
     return line if "Invalid input format" in line else None
 
 
 def wait_shutdown_message_line(line):
     """
-    Callback function to wait for Wazuh shutdown message
+    Callback function to wait for Wazuh shutdown message.
     """
     return True if "Shutdown received. Deleting responses." in line else None
 
 
 def build_message(metadata, expected):
     """
-    Build Active Response message to be used in tests
+    Build Active Response message to be used in tests.
+
+    Args:
+        metadata (dict): Components must be: 'command' and 'rule_id'
+        expected (dict): Only one component called 'success' with boolean value.
     """
     origin = '"name":"","module":"wazuh-analysisd"'
     rules = f'"level":5,"description":"Test.","id":{metadata["rule_id"]}'
@@ -146,15 +153,18 @@ def build_message(metadata, expected):
            '","parameters":{"extra_args":[],"alert":{"rule":{' + rules + '}}}}'
 
 
-def test_execd_restart(set_debug_mode, get_configuration, test_version, configure_environment, start_agent, set_ar_conf_mode):
+def test_execd_restart(set_debug_mode, get_configuration, test_version,
+                       configure_environment, start_agent, set_ar_conf_mode):
     """
-    Check if restart-wazuh Active Response is executed correctly
+    Check if restart-wazuh Active Response is executed correctly.
 
     Args:
         set_debug_mode (fixture): Set execd daemon in debug mode.
+        get_configuration (fixture): Get configurations from the module.
         test_version (fixture): Validate Wazuh version.
-        set_ar_conf_mode (fixture): Configure Active Responses used in tests.
+        configure_environment (fixture): Configure a custom environment for testing.
         start_agent (fixture): Create Remoted and Authd simulators, register agent and start it.
+        set_ar_conf_mode (fixture): Configure Active Responses used in tests.
     """
     metadata = get_configuration['metadata']
     expected = metadata['results']
