@@ -22,8 +22,7 @@ ANALYSISD_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'sockets', 'queue')
 SERVER_ADDRESS = 'localhost'
 SERVER_NAME = 'vm-test'
 CRYPTO = 'aes'
-
-AR_NAME = 'restart-wazuh'
+AR_NAME = 'dummy-ar-message'
 RULE_ID = '5715'
 LOG_LOCATION = 'any->logcollector'
 SRC_IP = '172.16.5.15'
@@ -245,6 +244,7 @@ def validate_old_ar_message(agent_id, message, extra_args, timeout, all_agents):
         extra_args (str): If 'yes', validate extra_args.
         timeout (str): If 'yes', validate timeout in Active Response name.
         all_agents (str): If 'yes', validate that message was sent to specific agent.
+        ar_name (str): active response command.
     """
     args = message.split()
 
@@ -273,11 +273,11 @@ def validate_new_ar_message(agent_id, message, extra_args, timeout, all_agents):
     """Function to validate Active Response messages in new JSON format
 
     Args:
-        agent_id (str): Agent ID or list of agent IDs
-        message (str): Message to be analyzed
-        extra_args (str): If 'yes', validate extra_args
-        timeout (str): If 'yes', validate timeout in Active Response name
-        all_agents (str): If 'yes', validate that message was sent to specific agent
+        agent_id (str): Agent ID or list of agent IDs.
+        message (str): Message to be analyzed.
+        extra_args (str): If 'yes', validate extra_args.
+        timeout (str): If 'yes', validate timeout in Active Response name.
+        all_agents (str): If 'yes', validate that message was sent to specific agent.
     """
     args = message.split(' ', 4)
 
@@ -318,7 +318,34 @@ def validate_new_ar_message(agent_id, message, extra_args, timeout, all_agents):
     if extra_args == 'yes':
         assert json_alert['parameters']['extra_args'], 'Missing extra_args in JSON message'
         assert json_alert['parameters']['extra_args'][0] == ARG1, 'Missing arg1 in JSON message'
-        assert json_alert['parameters']['extra_args'][1] == ARG2, 'Missing arg1 in JSON message'
+        assert json_alert['parameters']['extra_args'][1] == ARG2, 'Missing arg2 in JSON message'
+
+
+def validate_ar_message(message, ids, log_monitor, agent, extra_args, timeout, all_agents):
+    """Send an Active Response message and check if analysisd can parse and send the AR message back to the agent
+
+    Args:
+        message (str): Active response message sent to analysisd.
+        ids (str or list): Ids of the agents.
+        log_monitor (Monitor): Python object to monitor the ossec.log.
+        agent (Agent): Agent that will run the active response command.
+        extra_args (str): extra arguments of the active response command.
+        timeout (int): maximum time in seconds to wait for the log.
+        all_agents (bool): flag to check if the active response command affects to all the agents or not.
+    """
+
+    send_message(message, ANALYSISD_SOCKET)
+
+    # Checking AR in logs
+    log_monitor.start(timeout=60, callback=wait_ar_line, error_message='AR message took too much!')
+    last_log = log_monitor.result()
+
+    if agent.os == 'ubuntu20.04':
+        # Version 4.2
+        validate_new_ar_message(ids, last_log, extra_args, timeout, all_agents)
+    else:
+        # Version < 4.2
+        validate_old_ar_message(ids, last_log, extra_args, timeout, all_agents)
 
 
 # TESTS
@@ -346,45 +373,15 @@ def test_os_exec(set_debug_mode, get_configuration, configure_environment, resta
     # Give time for registration key to be available and send a few heartbeats
     time.sleep(30)
 
-    if all_agents == 'yes':
-        message = f"1:({SERVER_NAME}) {LOG_LOCATION}:{LOG_MESSAGE}"
-        send_message(message, ANALYSISD_SOCKET)
-
-        for agent in agents:
-            # Checking AR in logs
-            try:
-                log_monitor.start(timeout=60, callback=wait_ar_line)
-            except TimeoutError:
-                raise AssertionError("AR message took too much!")
-
-            last_log = log_monitor.result()
-
-            if agent.os == 'ubuntu20.04':
-                # Version 4.2
-                validate_new_ar_message(agents_id, last_log, extra_args, timeout, all_agents)
-            else:
-                # Version < 4.2
-                validate_old_ar_message(agents_id, last_log, extra_args, timeout, all_agents)
-
-    else:
-        for agent in agents:
+    for agent in agents:
+        if all_agents == 'yes':
+            message = f"1:({SERVER_NAME}) {LOG_LOCATION}:{LOG_MESSAGE}"
+            ids = agents_id
+        else:
             message = f"1:[{agent.id}] ({agent.name}) {LOG_LOCATION}:{LOG_MESSAGE}"
-            send_message(message, ANALYSISD_SOCKET)
+            ids = agent.id
 
-            # Checking AR in logs
-            try:
-                log_monitor.start(timeout=60, callback=wait_ar_line)
-            except TimeoutError as err:
-                raise AssertionError("AR message tooks too much!")
-
-            last_log = log_monitor.result()
-
-            if agent.os == 'ubuntu20.04':
-                # Version 4.2
-                validate_new_ar_message(agent.id, last_log, extra_args, timeout, all_agents)
-            else:
-                # Version < 4.2
-                validate_old_ar_message(agent.id, last_log, extra_args, timeout, all_agents)
+        validate_ar_message(message, ids, log_monitor, agent, extra_args, timeout, all_agents)
 
     for injector in injectors:
         injector.stop_receive()

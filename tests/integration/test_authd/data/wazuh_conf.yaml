@@ -32,10 +32,6 @@
             value: '/var/ossec/etc/sslmanager.key'
         - ssl_auto_negotiate:
             value: 'no'
-      - section: cluster
-        elements:
-        - disabled:
-            value: 'yes'
     - tags:
       - all
       apply_to_modules:
