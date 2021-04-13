@@ -28,8 +28,7 @@ wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
 
 # configurations
 
-conf_params, conf_metadata = fim.generate_params(extra_params=conf_params,
-                                                 modes=['scheduled'])
+conf_params, conf_metadata = fim.generate_params(extra_params=conf_params, modes=['scheduled'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
 
@@ -42,8 +41,8 @@ def get_configuration(request):
 
 
 def get_sync_msgs(tout, new_data=True):
-    """This function will look for as many synchronization events as possible (with a 'max_events' limit) and will
-       append all the json events in a list. If a Timeout is raised, the function will stop looking for events.
+    """Look for as many synchronization events as possible.
+    This function will look for the synchronization messages until a Timeout is raised or 'max_events' is reached.
     Params:
         tout (int): Timeout that will be used to get the dbsync_no_data message.
         new_data (bool): Specifies if the test will wait the event `dbsync_no_data`
@@ -58,15 +57,15 @@ def get_sync_msgs(tout, new_data=True):
                                               '"db sync no data" event')
     for _ in range(0, max_events):
         try:
-            js = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                         callback=fim.callback_detect_registry_integrity_event,
-                                         accum_results=1,
-                                         error_message='Did not receive expected '
-                                                       'Sending integrity control message"').result()
+            sync_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                                 callback=fim.callback_detect_registry_integrity_event,
+                                                 accum_results=1,
+                                                 error_message='Did not receive expected '
+                                                               'Sending integrity control message"').result()
         except TimeoutError:
             break
 
-        events.append(js)
+        events.append(sync_event)
 
     return events
 
@@ -151,11 +150,11 @@ def test_registry_responses(key_name, value_name, tags_to_apply,
         else:
             key_path = subkey
 
-        v_path = os.path.join(key, key_path, value_name)
+        value_path = os.path.join(key, key_path, value_name)
 
-        key_h = fim.RegOpenKeyEx(fim.registry_parser[key], key_path, 0, fim.KEY_ALL_ACCESS | fim.KEY_WOW64_64KEY)
+        key_handle = fim.RegOpenKeyEx(fim.registry_parser[key], key_path, 0, fim.KEY_ALL_ACCESS | fim.KEY_WOW64_64KEY)
 
-        fim.modify_registry_value(key_h, value_name, fim.REG_SZ, 'This is a test')
+        fim.modify_registry_value(key_handle, value_name, fim.REG_SZ, 'This is a test')
         fim.check_time_travel(True, monitor=wazuh_log_monitor)
 
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
@@ -165,12 +164,11 @@ def test_registry_responses(key_name, value_name, tags_to_apply,
         events = get_sync_msgs(sync_interval + 15)
 
         assert find_value_in_event_list(
-               os.path.join(key, key_path), value_name, events) is not None, f"No sync event was found for {v_path}"
+               os.path.join(key, key_path), value_name, events) is not None, f"No sync event was found for {value_path}"
 
 
 @pytest.mark.parametrize('tags_to_apply', [{'registry_sync_responses'}])
-@pytest.mark.parametrize('key_name, value_name', [(':subkey1:', 'value1'),
-                                                  (':subkey2', ':value2')])
+@pytest.mark.parametrize('key_name, value_name', [(':subkey1:', 'value1'), (':subkey2', ':value2')])
 def test_registry_sync_after_restart(key_name, value_name, tags_to_apply,
                                      get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """
@@ -191,18 +189,18 @@ def test_registry_sync_after_restart(key_name, value_name, tags_to_apply,
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     key_path = os.path.join(subkey, key_name)
-    v_path = os.path.join(key, key_path, value_name)
+    value_path = os.path.join(key, key_path, value_name)
 
     # wait until the sync is done.
     get_sync_msgs(sync_interval)
     # stops syscheckd
     control_service('stop')
 
-    key_h = fim.create_registry(fim.registry_parser[key], key_path, fim.KEY_WOW64_64KEY)
-    fim.modify_registry_value(key_h, value_name, fim.REG_SZ, 'This is a test with syscheckd down.')
+    key_handle = fim.create_registry(fim.registry_parser[key], key_path, fim.KEY_WOW64_64KEY)
+    fim.modify_registry_value(key_handle, value_name, fim.REG_SZ, 'This is a test with syscheckd down.')
     control_service('start')
 
     events = get_sync_msgs(sync_interval + 15)
 
     assert find_value_in_event_list(
-               os.path.join(key, key_path), value_name, events) is not None, f"No sync event was found for {v_path}"
+               os.path.join(key, key_path), value_name, events) is not None, f"No sync event was found for {value_path}"
