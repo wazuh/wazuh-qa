@@ -110,9 +110,12 @@ def control_service(action, daemon=None, debug_mode=False):
                 processes = []
 
                 for proc in psutil.process_iter():
-                    if daemon in proc.name():
                         try:
-                            processes.append(proc)
+                            if daemon in ['wazuh-clusterd', 'wazuh-apid']:
+                                if any(filter(lambda x: f"{daemon}.py" in x, proc.cmdline())):
+                                    processes.append(proc)
+                            elif daemon in proc.name():
+                                processes.append(proc)
                         except psutil.NoSuchProcess:
                             pass
                 try:
