@@ -111,7 +111,7 @@ def test_remote_configuration(get_configuration, configure_environment,
     """
     These tests verify remote configuration matches with the ossec_configuration.
     The first test checks the default options. The second checks the configuration when it is completed.
-    The last one checks repeated options in ossec.conf, so the last value will be applied.
+    The last one checks repeated options in manager.conf, so the last value will be applied.
     """
     tags_to_apply = get_configuration['tags'][0]
 

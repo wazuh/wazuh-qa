@@ -37,7 +37,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 ssl_configuration_tests = load_tests(os.path.join(test_data_path, 'enroll_ssl_options_tests.yaml'))
 
-# Ossec.conf configurations
+# manager.conf configurations
 DEFAULT_CIPHERS = "HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH"
 DEFAULT_AUTO_NEGOTIATE = 'no'
 conf_params = {'CIPHERS': [], 'SSL_AUTO_NEGOTIATE': []}

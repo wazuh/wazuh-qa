@@ -52,7 +52,7 @@ def test_connection_valid(get_configuration, configure_environment, restart_remo
     """Check that "connection" option could be configured as "secure" or "syslog" without errors.
 
     This option specifies a type of incoming connection to accept: secure or syslog. Also, check if multiple
-    ports can be used with all valid connection values. Also, check if the API answer for manager connection coincides with the option selected on `ossec.conf`.
+    ports can be used with all valid connection values. Also, check if the API answer for manager connection coincides with the option selected on `manager.conf`.
 
     Raises:
         AssertionError: if API answer is different of expected configuration."""

@@ -34,7 +34,7 @@ AGENT_IP = '127.0.0.1'
 WRONG_IP = '10.0.0.240'
 INPUT_MESSAGE = f"OSSEC A:'{AGENT_NAME}'"
 OUPUT_MESSAGE = "OSSEC K:'"
-# Ossec.conf configurations
+# manager.conf configurations
 params = [{
     'SSL_AGENT_CA': SSL_AGENT_CA,
     'SSL_VERIFY_HOST': ssl_verify_host,

@@ -696,7 +696,7 @@ def protocol_detection(ossec_conf_path=WAZUH_CONF):
     Parameters
     ----------
     ossec_conf_path : str
-        ossec.conf path.
+        agent.conf path.
 
     Returns
     -------

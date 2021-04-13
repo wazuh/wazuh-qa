@@ -44,7 +44,7 @@ def test_queue_size_valid(get_configuration, configure_environment, restart_remo
     """Check that `queue_size` option could be configured with valid values (any number between 1 and 262144) without
     errors.
 
-    Check if the API answer for manager connection coincides with the option selected on `ossec.conf` and expected
+    Check if the API answer for manager connection coincides with the option selected on `manager.conf` and expected
     warning message is shown in `ossec.log`.
 
     Raises:

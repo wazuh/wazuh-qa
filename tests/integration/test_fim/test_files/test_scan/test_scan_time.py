@@ -56,7 +56,7 @@ def test_scan_time(tags_to_apply,
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    # Reformat given time to a readable format since it can be writen in several ways in ossec.conf
+    # Reformat given time to a readable format since it can be writen in several ways in agent.conf
     scan_time = reformat_time(get_configuration['metadata']['scan_time'])
     current_time = datetime.now()
 

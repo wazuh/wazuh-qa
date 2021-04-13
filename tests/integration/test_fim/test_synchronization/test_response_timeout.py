@@ -71,7 +71,7 @@ def test_response_timeout(num_files, get_configuration, configure_environment, r
             <enabled>yes</enabled>\
                 <interval>" + str(sync_interval) + "</interval>\
                     <response_timeout>" + str(response_timeout) + "</response_timeout>\
-                        </synchronization>|g' /var/ossec/etc/ossec.conf"
+                        </synchronization>|g' /var/ossec/etc/agent.conf"
         ssh.exec_command(cmd)
 
     def wait_agent_initial_scan(time_out=60):

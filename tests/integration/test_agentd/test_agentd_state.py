@@ -280,7 +280,7 @@ def check_status(expected_value=None, get_state_callback=None):
 
 
 def wait_connect(update_position=False):
-    """ Watch ossec.conf until `callback_connected_to_server` is triggered
+    """ Watch manager.conf until `callback_connected_to_server` is triggered
 
     Args:
         update_position (bool, optional): update position after reading.
@@ -293,7 +293,7 @@ def wait_connect(update_position=False):
 
 
 def wait_ack(update_position=False):
-    """ Watch ossec.conf until `callback_ack` is triggered
+    """ Watch manager.conf until `callback_ack` is triggered
 
     Args:
         update_position (bool, optional): update position after reading.
@@ -306,7 +306,7 @@ def wait_ack(update_position=False):
 
 
 def wait_keepalive(update_position=False):
-    """ Watch ossec.conf until `callback_keepalive` is triggered
+    """ Watch manager.conf until `callback_keepalive` is triggered
 
     Args:
         update_position (bool, optional): update position after reading.
@@ -319,7 +319,7 @@ def wait_keepalive(update_position=False):
 
 
 def wait_state_update(update_position=True):
-    """ Watch ossec.conf until `callback_state_file_updated` is triggered
+    """ Watch manager.conf until `callback_state_file_updated` is triggered
 
     Args:
         update_position (bool, optional): update position after reading.

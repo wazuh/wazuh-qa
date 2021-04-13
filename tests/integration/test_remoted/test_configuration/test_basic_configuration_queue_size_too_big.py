@@ -41,7 +41,7 @@ def get_configuration(request):
 def test_big_queue_size(get_configuration, configure_environment, restart_remoted):
     """Test if warning message appears in case `queue_size` is greater than 262144.
 
-    Check that the API answer for manager connection coincides with the option selected on `ossec.conf`.
+    Check that the API answer for manager connection coincides with the option selected on `manager.conf`.
 
     Raises:
         AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected warning messages or if API answer is

@@ -45,7 +45,7 @@ def get_configuration(request):
 
 def test_process_priority(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check if the wazuh-syscheckd service priority is updated correctly using
-       <process_priority> tag in ossec.conf.
+       <process_priority> tag in agent.conf.
     """
     check_apply_test({'ossec_conf'}, get_configuration['tags'])
 

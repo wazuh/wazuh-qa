@@ -185,7 +185,7 @@ def send_message(data_object, socket_path):
 def overwrite_node_name(value):
     new_content = ''
 
-    ossec_conf = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
+    ossec_conf = os.path.join(WAZUH_PATH, 'etc', 'manager.conf')
 
     with open(ossec_conf, 'r') as f:
         lines = f.readlines()

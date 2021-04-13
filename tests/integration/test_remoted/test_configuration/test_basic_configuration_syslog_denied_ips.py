@@ -37,7 +37,7 @@ def get_configuration(request):
 def test_denied_ips_syslog(get_configuration, configure_environment, restart_remoted):
     """Check that `wazuh-remoted` block messages from `denied-ips`.
 
-    Check if the API answer for manager connection coincides with the option selected on `ossec.conf`.
+    Check if the API answer for manager connection coincides with the option selected on `manager.conf`.
 
     Raises:
         AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected error message or API answer different
