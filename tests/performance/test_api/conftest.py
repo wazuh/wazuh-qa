@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import pytest
+import requests
 from py.xml import html
 from wazuh_testing.api import get_api_details_dict
 
@@ -16,6 +17,16 @@ def set_api_test_environment(request):
         configuration = getattr(request.module, 'configuration')
         kwargs.update({'host': configuration['host'], 'port': configuration['port']})
 
+    api_details = get_api_details_dict(**kwargs)
+
+    # Set a longer token expiration timeout
+    token_time_endpoint = f"{api_details['base_url']}/security/config"
+    headers = api_details['auth_headers']
+    response = requests.put(token_time_endpoint, headers=headers, json={'auth_token_exp_timeout': 999999}, verify=False)
+
+    assert response.status_code == 200, f'Failed to set API token expiration timeout. Response: {response.json()}'
+
+    # Ask for a new token and set it
     setattr(request.module, 'api_details', get_api_details_dict(**kwargs))
 
 
