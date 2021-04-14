@@ -254,7 +254,7 @@ This test covers different options of delays between server connection attempts:
 def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, stop_agent, set_keys,
                                            configure_environment, get_configuration):
     """
-    Check how the agent behaves when there are delays between connection attempts to server during registration.
+    Check how the agent behaves when there are delays between connection attempts to the server.
     For this purpose, different values for max_retries and retry_interval parameters are tested.
 
     Args:

@@ -339,7 +339,7 @@ def wait_until(x, log_str):
 def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id, clean_keys, configure_environment,
                              get_configuration):
     """
-    Initialize an environment with multiple simulated servers in which the agent is forced to register
+    Initialize an environment with multiple simulated servers in which the agent is forced to enroll
     under different test conditions, verifying the agent's behavior through its log files.
 
     Args:

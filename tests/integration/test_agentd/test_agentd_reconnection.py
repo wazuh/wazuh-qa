@@ -189,6 +189,7 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_a
                                                  configure_environment, get_configuration):
     """
     Check how the agent behaves when losing communication with remoted and a new enrollment is sent to authd.
+    The agent starting with keys.
 
     Args:
         configure_authd_server (fixture): Initialize a simulated authd connection.
