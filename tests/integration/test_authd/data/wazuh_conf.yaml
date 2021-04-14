@@ -65,10 +65,6 @@
             value: '/var/ossec/etc/sslmanager.key'
         - ssl_auto_negotiate:
             value: SSL_AUTO_NEGOTIATE
-      - section: cluster
-        elements:
-        - disabled:
-            value: 'yes'
     # conf 2
     - tags:
       - all
@@ -105,10 +101,6 @@
             value: 'no'
         - ssl_agent_ca:
             value: SSL_AGENT_CA
-      - section: cluster
-        elements:
-        - disabled:
-            value: 'yes'
     #local-server
     - tags:
       - all
@@ -121,10 +113,6 @@
             value: 'no'        
         - purge:
             value: 'no'
-      - section: cluster
-        elements:
-        - disabled:
-            value: 'yes'
     # conf 3
     - tags:
       - all
@@ -214,10 +202,6 @@
               value: '/var/ossec/etc/sslmanager.key'
           - ssl_auto_negotiate:
               value: 'no'
-      - section: cluster
-        elements:
-        - disabled:
-            value: 'yes'
     - tags:
       - all
       apply_to_modules:
@@ -251,7 +235,3 @@
             value: '/var/ossec/etc/sslmanager.key'
         - ssl_auto_negotiate:
             value: 'no'
-      - section: cluster
-        elements:
-        - disabled:
-            value: 'yes'
