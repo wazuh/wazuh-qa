@@ -81,26 +81,15 @@ def get_configuration(request):
 
 
 def clean_client_keys_file():
-    try:
-        client_file = open(client_keys_path, 'w')
-        client_file.close()
-    except IOError as exception:
-        raise
+    client_file = open(client_keys_path, 'w')
+    client_file.close()
 
 
 def read_random_pass():
-    osseclog_path = os.path.join(WAZUH_PATH, 'logs', 'wazuh.log')
-    passw = None
-    try:
-        with open(osseclog_path, 'r') as log_file:
-            lines = log_file.readlines()
-            for line in lines:
-                if "Random password" in line:
-                    passw = line.split()[-1]
-            log_file.close()
-    except IOError as exception:
-        raise
-    return passw
+    with open(LOG_FILE_PATH, 'r') as log_file:
+        for line in log_file:
+            if "Random password" in line:
+                return line.split()[-1]
 
 
 def read_hostname():
@@ -108,23 +97,17 @@ def read_hostname():
 
 
 def reset_password(set_password):
-    # in case of random pass, remove /etc/authd.pass
+    # In case of random pass, remove /etc/authd.pass
     if set_password and set_password == 'random':
         try:
             os.remove(authd_default_password_path)
         except FileNotFoundError:
             pass
-        except IOError:
-            raise
-    # in case of defined pass, set predefined pass in  /etc/authd.pass
+    # In case of defined pass, set predefined pass in  /etc/authd.pass
     elif set_password and set_password == 'defined':
         # Write authd.pass
-        try:
-            with open(authd_default_password_path, 'w') as pass_file:
-                pass_file.write(DEFAULT_TEST_PASSWORD)
-                pass_file.close()
-        except IOError as exception:
-            raise
+        with open(authd_default_password_path, 'w') as pass_file:
+            pass_file.write(DEFAULT_TEST_PASSWORD)
 
 
 def override_wazuh_conf(configuration, set_password):
@@ -139,18 +122,16 @@ def override_wazuh_conf(configuration, set_password):
     # Set new configuration
     write_wazuh_conf(test_config)
 
-    # reset_client_keys
     clean_client_keys_file()
-    # reset password
+    # Reset password
     reset_password(set_password)
 
     time.sleep(1)
     # Start Wazuh
     control_service('start', daemon='wazuh-authd')
 
-    """Wait until agentd has begun"""
-
     def callback_agentd_startup(line):
+        """Wait until agentd has begun"""
         if 'Accepting connections on port 1515' in line:
             return line
         return None
@@ -161,27 +142,22 @@ def override_wazuh_conf(configuration, set_password):
 
 
 def check_client_keys_file(response):
-    try:
-        with open(client_keys_path) as client_file:
-            client_lines = client_file.readlines()
-            for line in client_lines:
-                # discard endline because response finalize with "'\n\n" character and client.keys only with "\n"
-                if line[:-1] in response:
-                    client_file.close()
-                    return True
-    except IOError as exception:
-        raise
-    return False
+    with open(client_keys_path) as client_file:
+        client_lines = client_file.readlines()
+        for line in client_lines:
+            # Discard the end line because response finalize with "'\n\n"
+            # character and client.keys only with "\n"
+            if line[:-1] in response:
+                client_file.close()
+                return True
+        else:
+            return False
 
 
 def send_message(message):
     address, family, connection_protocol = receiver_sockets_params[0]
     SSL_socket = SocketController(address, family=family, connection_protocol=connection_protocol)
-    try:
-        SSL_socket.open()
-    except ssl.SSLError as exception:
-        # We did not expect this error, fail test
-        raise
+    SSL_socket.open()
     SSL_socket.send(message, size=False)
     response = SSL_socket.receive().decode()
     SSL_socket.close()
@@ -192,16 +168,14 @@ def send_message(message):
 # Stop Wazuh
 control_service('stop')
 
-# reset_client_keys
 clean_client_keys_file()
 
 # Start Wazuh
 control_service('start')
 
-"""Wait until agentd has begun"""
-
 
 def callback_agentd_startup(line):
+    """Wait until agentd has begun"""
     if 'Accepting connections on port 1515' in line:
         return line
     return None
@@ -232,7 +206,7 @@ def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, confi
     """
     current_test = get_current_test()
 
-    # setup the password enviroment to password test
+    # Setup the password environment to password test
     set_password = None
     test_case = ip_name_configuration_tests[current_test]['test_case']
     try:
@@ -246,9 +220,9 @@ def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, confi
     override_wazuh_conf(get_configuration, set_password)
     for config in test_case:
 
-        # insert previous agent to force repeated case
+        # Insert previous agent to force repeated case
         try:
-            if config['insert_prev_agent'] == "yes":
+            if config['insert_prev_agent'] == 'yes':
                 try:
                     response = send_message(config['insert_prev_agent_custom'])
                 except KeyError:
@@ -256,30 +230,28 @@ def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, confi
 
                 # Prev output is expected
                 expected = "OSSEC K:'"
-                assert response, \
-                    'Failed connection previous insert for {}: {}'.format \
-                        (ip_name_configuration_tests[current_test]['name'], config['input'])
-                assert response[:len(expected)] == expected, \
-                    "Failed response previous '{}': Input: {}".format \
-                        (ip_name_configuration_tests[current_test]['name'], config['input'])
+                assert response, f"Failed connection previous insert for" \
+                                 f" {ip_name_configuration_tests[current_test]['name']}: {config['input']}"
+                assert response[:len(expected)] == expected, f"Failed response previous '" \
+                                                             f"{ip_name_configuration_tests[current_test]['name']}" \
+                                                             f"': Input: {config['input']}"
                 if expected == "OSSEC K:'":
                     time.sleep(0.5)
-                    assert check_client_keys_file(response) == True, \
-                        "Failed test case '{}' checking previous client.keys : Input: {}".format \
-                            (ip_name_configuration_tests[current_test]['name'], config['input'])
+                    assert check_client_keys_file(response), f"Failed test case '" \
+                                                             f"{ip_name_configuration_tests[current_test]['name']}' " \
+                                                             f"checking previous client.keys : Input: {config['input']}"
         except KeyError:
             pass
 
-        # in case of test random and correct password register, read the random pass generated by os_authd and insert in query
-        # in case of test random and wrong password keep the password of the original query
+        # In case of test random and correct password register, read the random pass generated
+        # by os_authd and insert in query. In case of test random and wrong password keep
+        # the password of the original query
         if set_password and set_password == 'random':
             try:
                 if config['insert_random_pass_in_query'] == 'yes':
                     config['input'] = config['input'].format(read_random_pass())
             except KeyError:
                 pass
-            except IndexError:
-                raise
 
         try:
             if config['insert_hostname_in_query'] == 'yes':
@@ -287,27 +259,24 @@ def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, confi
                 config['output'] = config['output'].format(read_hostname())
         except KeyError:
             pass
-        except IndexError:
-            raise
 
         # Output is expected
         expected = config['output']
         response = send_message(config['input'])
-        assert response, "Failed connection stage '{}'': '{}'".format \
-            (ip_name_configuration_tests[current_test]['name'], config['input'])
+        assert response, f"Failed connection stage '{ip_name_configuration_tests[current_test]['name']}'': " \
+                         f"'{config['input']}'"
         if response[:len(expected)] != expected:
             if config.get('expected_fail') == 'yes':
                 pytest.xfail("Test expected to fail by configuration")
             else:
-                raise AssertionError("Failed test case '{}': Input: {}".format \
-                                         (ip_name_configuration_tests[current_test]['name'], config['input']))
+                raise AssertionError(f"Failed test case '{ip_name_configuration_tests[current_test]['name']}'"
+                                     f": Input: {config['input']}")
 
-        # if expect a key check with client.keys file
+        # If expect a key check with client.keys file
         if expected[:len("OSSEC K:'")] == "OSSEC K:'":
             time.sleep(0.5)
             if "/32" in response:
                 response = response.replace("/32", "")
-            assert check_client_keys_file(response) == True, \
-                "Failed test case '{}' checking client.keys : Input: {}".format \
-                    (ip_name_configuration_tests[current_test]['name'], config['input'])
-    return
+            assert check_client_keys_file(response), f"Failed test case '" \
+                                                     f"{ip_name_configuration_tests[current_test]['name']}' " \
+                                                     f"checking client.keys : Input: {config['input']}"
