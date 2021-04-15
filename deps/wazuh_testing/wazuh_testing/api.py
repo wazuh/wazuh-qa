@@ -8,6 +8,7 @@ import time
 from base64 import b64encode
 
 import requests
+
 from urllib3 import disable_warnings, exceptions
 disable_warnings(exceptions.InsecureRequestWarning)
 
@@ -101,6 +102,27 @@ def get_security_resource_information(**kwargs):
         return {}
 
 
+def compare_config_api_response(configuration, section):
+    """Assert if configuration values provided are the same that configuration provided for API response.
+
+    Args:
+        configuration (dict): Dictionary with wazuh manager configuration.
+        section (str): Section to compare.
+    """
+    api_answer = get_manager_configuration(section=section)
+    assert type(api_answer) == type(configuration)
+
+    if isinstance(api_answer, list):
+        api_answer_lenght = len(api_answer)
+        for i in range(api_answer_lenght):
+            api_answer_subdict = dict((key, api_answer[i][key]) for key in configuration[i].keys())
+            assert api_answer_subdict == configuration[i]
+    else:
+        api_answer_subdict = dict((key, api_answer[key]) for key in configuration.keys())
+        assert api_answer_subdict == configuration
+
+
+
 def get_manager_configuration(section=None, field=None):
     """Get Wazuh manager configuration response from API using GET /manager/configuration
         
@@ -139,7 +161,7 @@ def get_manager_configuration(section=None, field=None):
             new_answer = []
             for element in answer:
                 new_answer.append(get_requested_values(element, section, field))
-            return ','.join(new_answer)
+            return new_answer
         elif isinstance(answer, dict):
             if section in answer.keys():
                 new_answer = answer[section]
@@ -150,3 +172,16 @@ def get_manager_configuration(section=None, field=None):
         return answer
 
     return get_requested_values(answer, section, field)
+
+
+def wait_until_api_ready(protocol=API_PROTOCOL, host=API_HOST, port=API_PORT, user=API_USER, password=API_PASS,
+                         login_endpoint=API_LOGIN_ENDPOINT, timeout=10, attempts=5):
+    api_ready = False
+    while attempts > 0 and not api_ready:
+        try:
+            attempts -= 1
+            get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout)
+        except requests.exceptions.ConnectionError:
+            time.sleep(1)
+        else:
+            api_ready = True
