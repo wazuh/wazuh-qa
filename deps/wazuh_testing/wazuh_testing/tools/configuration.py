@@ -12,7 +12,8 @@ from typing import List, Any, Set
 import pytest
 import yaml
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX
+from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS
+from wazuh_testing.api import wait_until_api_ready
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
@@ -191,7 +192,7 @@ def set_section_wazuh_conf(sections, template=None):
         Args:
             section (ET.Element): Section where the element will be inserted.
             elements (list): List with the new elements to be inserted.
-        Returns:
+        Returns:    
             ET.ElementTree: Modified Wazuh configuration.
         """
         tag = None
@@ -540,3 +541,49 @@ def generate_syscheck_registry_config():
     for yn_values, tag_value in itertools.product(values_list, tags):
         yn_str = ' '.join([f'{name}="{value}"' for name, value in zip(check_names, yn_values)])
         yield ' '.join([yn_str, tag_value])
+
+
+def get_wazuh_local_internal_options() -> List[str]:
+    """
+    Get current `internal_options.conf` file content.
+
+    Returns
+        List of str: A list containing all the lines of the `ossec.conf` file.
+    """
+    with open(WAZUH_LOCAL_INTERNAL_OPTIONS) as f:
+        lines = f.readlines()
+    return lines
+
+
+def set_wazuh_local_internal_options(wazuh_local_internal_options: List[str]):
+    """
+    Set up Wazuh `local_internal_options.conf` file content. Wazuh will be restarted to apply it.
+
+    Returns
+        List of str: A list containing all the lines of the `local_interal_options.conf` file.
+    """
+    with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'w') as f:
+        f.writelines(wazuh_local_internal_options)
+
+    print("Restarting Wazuh...")
+    command = os.path.join(WAZUH_PATH, 'bin/wazuh-control')
+    arguments = ['restart']
+    check_call([command] + arguments, stdout=DEVNULL, stderr=DEVNULL)
+
+
+def add_wazuh_local_internal_options(wazuh_local_internal_options_dict):
+    local_internal_options_str = create_local_internal_configuration(wazuh_local_internal_options_dict)
+    with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'a') as f:
+        f.writelines(local_internal_options_str)
+
+    command = os.path.join(WAZUH_PATH, 'bin/wazuh-control')
+    arguments = ['restart']
+    check_call([command] + arguments, stdout=DEVNULL, stderr=DEVNULL)
+    wait_until_api_ready()
+
+
+def create_local_internal_configuration(dict_local_internal_options):
+    wazuh_local_internal_options = ''
+    for key, value in dict_local_internal_options.items():
+        wazuh_local_internal_options += f"{str(key)}={str(value)}\n"
+    return wazuh_local_internal_options

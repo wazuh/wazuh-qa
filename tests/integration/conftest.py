@@ -16,7 +16,8 @@ from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH
-from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
+from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, \
+    write_wazuh_conf, add_wazuh_local_internal_options, set_wazuh_local_internal_options, get_wazuh_local_internal_options
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
@@ -405,6 +406,15 @@ def connect_to_sockets_function(request):
     yield receiver_sockets
     close_sockets(receiver_sockets)
 
+@pytest.fixture(scope='module')
+def configure_local_internal_options(get_local_internal_options):
+    backup_options = get_wazuh_local_internal_options()
+    add_wazuh_local_internal_options(get_local_internal_options)
+
+    yield
+
+    TimeMachine.time_rollback()
+    set_wazuh_local_internal_options(backup_options)
 
 @pytest.fixture(scope='module')
 def configure_environment(get_configuration, request):
@@ -412,7 +422,7 @@ def configure_environment(get_configuration, request):
 
     # Save current configuration
     backup_config = get_wazuh_conf()
-
+    
     # Configuration for testing
     test_config = set_section_wazuh_conf(get_configuration.get('sections'))
 
