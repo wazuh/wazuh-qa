@@ -42,6 +42,7 @@ def restart_wazuh_with_new_conf(new_conf, daemon='wazuh-syscheckd'):
     control_service('restart', daemon=daemon)
 
 
+
 def delete_sockets(path=None):
     """Delete a list of Wazuh socket files or all of them if None is specified.
 

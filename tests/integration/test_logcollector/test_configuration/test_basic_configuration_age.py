@@ -1,17 +1,15 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
 import os
 import pytest
 import sys
-
 import wazuh_testing.api as api
+from wazuh_testing.tools import get_service
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 import wazuh_testing.generic_callbacks as gc
 import wazuh_testing.logcollector as logcollector
-
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -19,15 +17,20 @@ pytestmark = pytest.mark.tier(level=0)
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
+wazuh_component = get_service()
+
+if wazuh_component == 'wazuh-manager':
+    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
+else:
+    prefix = AGENT_DETECTOR_PREFIX
+
 
 if sys.platform == 'win32':
     location = r'C:\testing\file.txt'
     wazuh_configuration = 'ossec.conf'
-    prefix = AGENT_DETECTOR_PREFIX
 else:
     location = '/tmp/testing.txt'
     wazuh_configuration = 'etc/ossec.conf'
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 parameters = [
     {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'AGE': '3s'},
@@ -42,7 +45,6 @@ parameters = [
     {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'AGE': '3992'},
     {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'AGE': 'Testing'},
 ]
-
 metadata = [
     {'location': f'{location}', 'log_format': 'syslog', 'age': '3s', 'valid_value': True},
     {'location': f'{location}', 'log_format': 'syslog', 'age': '4000s', 'valid_value': True},
@@ -56,58 +58,52 @@ metadata = [
     {'location': f'{location}', 'log_format': 'syslog', 'age': '3992', 'valid_value': False},
     {'location': f'{location}', 'log_format': 'syslog', 'age': 'Testing', 'valid_value': False},
 ]
-
+problematic_values = ['44sTesting', '9hTesting', '400mTesting', '3992']
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
 configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['AGE']}" for x in parameters]
 
 
-# fixtures
+def check_configuration_age_valid(cfg):
+    log_callback = logcollector.callback_analyzing_file(cfg['location'], prefix=prefix)
+    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                            error_message="The expected error output has not been produced")
+    if wazuh_component == 'wazuh-manager':
+        real_configuration = cfg.copy()
+        real_configuration.pop('valid_value')
+        api.wait_until_api_ready()
+        api.compare_config_api_response([real_configuration], 'localfile')
+
+
+def check_configuration_age_invalid(cfg):
+    if cfg['age'] in problematic_values:
+        pytest.xfail("Logcolector accepts invalid values. Issue: https://github.com/wazuh/wazuh/issues/8158")
+
+    log_callback = gc.callback_invalid_conf_for_localfile('age', prefix, severity='ERROR')
+    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                            error_message="The expected error output has not been produced")
+    log_callback = gc.callback_error_in_configuration('ERROR', prefix,
+                                                      conf_path=f'{wazuh_configuration}')
+    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                            error_message="The expected error output has not been produced")
+
+    if sys.platform != 'win32':
+        log_callback = gc.callback_error_in_configuration('CRITICAL', prefix,
+                                                          conf_path=f'{wazuh_configuration}')
+        wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                error_message="The expected error output has not been produced")
+
+
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
 
-def test_configuration_age_valid(get_configuration, configure_environment, restart_logcollector):
-    """
-    """
-    cfg = get_configuration['metadata']
-    if not cfg['valid_value']:
-        pytest.skip('Invalid values provided')
-
-    log_callback = logcollector.callback_analyzing_file(cfg['location'])
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
-
-    if sys.platform != 'win32':
-        real_configuration = cfg.copy()
-        real_configuration.pop('valid_value')
-        api.compare_config_api_response([real_configuration], 'localfile')
-
-
-@pytest.mark.skipif(sys.platform == 'win32',
-                    reason="Windows system currently does not support this test required")
-def test_configuration_age_invalid(get_configuration, configure_environment, restart_logcollector):
-    """
-    """
+def test_configuration_age(get_configuration, configure_environment, restart_logcollector):
     cfg = get_configuration['metadata']
     if cfg['valid_value']:
-        pytest.skip('Invalid values provided')
-
-    log_callback = gc.callback_invalid_conf_for_localfile('age', prefix, 'ERROR')
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
-
-    log_callback = gc.callback_error_in_configuration('ERROR', prefix,
-                                                      conf_path=f'{wazuh_configuration}')
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
-
-    log_callback = gc.callback_error_in_configuration('CRITICAL', prefix,
-                                                      conf_path=f'{wazuh_configuration}')
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
-
-
+        check_configuration_age_valid(cfg)
+    else:
+        check_configuration_age_invalid(cfg)

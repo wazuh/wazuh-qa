@@ -6,7 +6,9 @@ import os
 import pytest
 import sys
 
+from wazuh_testing.tools import get_service
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 import wazuh_testing.logcollector as logcollector
 import wazuh_testing.api as api
 
@@ -22,10 +24,19 @@ local_internal_options = {
     'logcollector.remote_commands': 1
 }
 
+wazuh_component = get_service()
+
+if wazuh_component == 'wazuh-manager':
+    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
+else:
+    prefix = AGENT_DETECTOR_PREFIX
+
+
 if sys.platform == 'win32':
     command = 'tasklist'
 else:
     command = 'ps -aux'
+
 
 parameters = [
     {'LOG_FORMAT': 'command', 'COMMAND': f'{command}', 'ALIAS': 'alias'},
@@ -63,8 +74,10 @@ def test_configuration_alias(get_local_internal_options, configure_local_interna
 
     cfg = get_configuration['metadata']
 
-    log_callback = logcollector.callback_command_alias_output(cfg['alias'])
+    log_callback = logcollector.callback_command_alias_output(cfg['alias'], prefix=prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
 
-    api.compare_config_api_response([cfg], 'localfile')
+    if wazuh_component == 'wazuh-manager':
+        api.wait_until_api_ready()
+        api.compare_config_api_response([cfg], 'localfile')

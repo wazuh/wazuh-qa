@@ -13,8 +13,6 @@ import pytest
 import yaml
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS
-from wazuh_testing.api import wait_until_api_ready
-
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
 def _serialize_xml(write, elem, qnames, namespaces,
@@ -192,7 +190,7 @@ def set_section_wazuh_conf(sections, template=None):
         Args:
             section (ET.Element): Section where the element will be inserted.
             elements (list): List with the new elements to be inserted.
-        Returns:    
+        Returns:
             ET.ElementTree: Modified Wazuh configuration.
         """
         tag = None
@@ -566,20 +564,12 @@ def set_wazuh_local_internal_options(wazuh_local_internal_options: List[str]):
         f.writelines(wazuh_local_internal_options)
 
     print("Restarting Wazuh...")
-    command = os.path.join(WAZUH_PATH, 'bin/wazuh-control')
-    arguments = ['restart']
-    check_call([command] + arguments, stdout=DEVNULL, stderr=DEVNULL)
 
 
 def add_wazuh_local_internal_options(wazuh_local_internal_options_dict):
     local_internal_options_str = create_local_internal_configuration(wazuh_local_internal_options_dict)
     with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'a') as f:
         f.writelines(local_internal_options_str)
-
-    command = os.path.join(WAZUH_PATH, 'bin/wazuh-control')
-    arguments = ['restart']
-    check_call([command] + arguments, stdout=DEVNULL, stderr=DEVNULL)
-    wait_until_api_ready()
 
 
 def create_local_internal_configuration(dict_local_internal_options):

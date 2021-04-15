@@ -8,8 +8,9 @@ import sys
 import wazuh_testing.api as api
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 import wazuh_testing.generic_callbacks as gc
+from wazuh_testing.tools import get_service
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -22,6 +23,14 @@ local_internal_options = {
     'logcollector.remote_commands': 1
 }
 
+wazuh_component = get_service()
+
+if wazuh_component == 'wazuh-manager':
+    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
+else:
+    prefix = AGENT_DETECTOR_PREFIX
+
+
 if sys.platform == 'win32':
     command = 'tasklist'
     wazuh_configuration = 'ossec.conf'
@@ -29,7 +38,6 @@ if sys.platform == 'win32':
 else:
     command = 'ps -aux'
     wazuh_configuration = 'etc/ossec.conf'
-
 
 parameters = [
     {'LOG_FORMAT': 'command', 'COMMAND': f'{command}', 'FREQUENCY': '3'},
@@ -70,10 +78,50 @@ metadata = [
     {'log_format': 'full_command', 'command': f'{command}', 'frequency': 'Testing3', 'valid_value': False},
 ]
 
+problematic_values = ['3s', '3s5m', '3Testing']
+
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
 configuration_ids = [f"{x['LOG_FORMAT'], x['COMMAND'], x['FREQUENCY']}" for x in parameters]
+
+
+def check_configuration_frequency_valid(cfg):
+    """
+    """
+
+    log_callback = logcollector.callback_monitoring_command(cfg['log_format'], cfg['command'], prefix=prefix)
+    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                            error_message="The expected error output has not been produced")
+
+    real_configuration = cfg.copy()
+    real_configuration.pop('valid_value')
+    if wazuh_component == 'wazuh-manager':
+        api.wait_until_api_ready()
+        api.compare_config_api_response([real_configuration], 'localfile')
+
+
+def check_configuration_frequency_invalid(cfg):
+    """
+    """
+    if cfg['frequency'] in problematic_values:
+        pytest.xfail("Logcolector accepts invalid values. Issue: https://github.com/wazuh/wazuh/issues/8158")
+
+    log_callback = gc.callback_invalid_value('frequency', cfg['frequency'], prefix)
+    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                            error_message="The expected error output has not been produced")
+
+    log_callback = gc.callback_error_in_configuration('ERROR', prefix,
+                                                      conf_path=f'{wazuh_configuration}')
+    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                            error_message="The expected error output has not been produced")
+
+    if sys.platform != 'win32':
+
+        log_callback = gc.callback_error_in_configuration('CRITICAL', prefix,
+                                                          conf_path=f'{wazuh_configuration}')
+        wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                error_message="The expected error output has not been produced")
 
 
 # fixtures
@@ -89,41 +137,10 @@ def get_local_internal_options():
     return local_internal_options
 
 
-def test_configuration_frequency_valid(get_local_internal_options, configure_local_internal_options,
-                                       get_configuration, configure_environment, restart_logcollector):
-    """
-    """
-    cfg = get_configuration['metadata']
-    if not cfg['valid_value']:
-        pytest.skip('Invalid values provided')
-
-    log_callback = logcollector.callback_monitoring_command(cfg['log_format'], cfg['command'])
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
-
-    real_configuration = cfg.copy()
-    real_configuration.pop('valid_value')
-    api.compare_config_api_response([real_configuration], 'localfile')
-
-@pytest.mark.skipif(sys.platform == 'win32',
-                    reason="Windows system currently does not support this test required")
-def test_configuration_frequency_invalid(get_configuration, configure_environment, restart_logcollector):
-    """
-    """
+def test_configuration_frequency(get_local_internal_options, configure_local_internal_options,
+                                 get_configuration, configure_environment, restart_logcollector):
     cfg = get_configuration['metadata']
     if cfg['valid_value']:
-        pytest.skip('Valid values provided')
-
-    log_callback = gc.callback_invalid_value('frequency', cfg['frequency'], LOG_COLLECTOR_DETECTOR_PREFIX)
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
-
-    log_callback = gc.callback_error_in_configuration('ERROR', LOG_COLLECTOR_DETECTOR_PREFIX,
-                                                      conf_path=f'{wazuh_configuration}')
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
-
-    log_callback = gc.callback_error_in_configuration('CRITICAL', LOG_COLLECTOR_DETECTOR_PREFIX,
-                                                      conf_path=f'{wazuh_configuration}')
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
+        check_configuration_frequency_valid(cfg)
+    else:
+        check_configuration_frequency_invalid(cfg)
