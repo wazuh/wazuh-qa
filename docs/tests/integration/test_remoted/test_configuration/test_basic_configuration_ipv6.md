@@ -19,7 +19,7 @@ To confirm `ipv6` can be configured to `yes` without errors. In case of `secure`
 - Fail if remoted does not start correctly.
 - Fail if remoted does not show expected warning if use secure connection with ipv6 with value `yes`.
 - Fail if API query `{protocol}://{host}:{port}/manager/configuration?section=remote` doesn't match the 
-  introduced configuration on ossec.conf.
+  introduced configuration on manager.conf.
 
 ## Code documentation
 

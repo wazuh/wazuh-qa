@@ -83,7 +83,7 @@ Every group could have its own `conftest` if it needed some specific configurati
 
 #### data
 
-Folder with the configuration yaml's to create the testing environment. These yaml's have the `ossec.conf` that will be applied to each module.
+Folder with the configuration yaml's to create the testing environment. These yaml's have the `manager.conf` that will be applied to each module.
 This is a sample yaml used for `FIM`:
 
 ```yaml

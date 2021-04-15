@@ -48,7 +48,7 @@ Folder with all the general tools that could be used in every test. They are gro
 
 - **Init**: `__init__` file with the common information between all these modules (paths set in execution time).
 
-- **Configuration**:  Functions to configure our environment (rewrite `ossec.conf`, load it, change metadata...)
+- **Configuration**:  Functions to configure our environment (rewrite `manager.conf`, load it, change metadata...)
 
 - **File**: Functions to work with files.
 

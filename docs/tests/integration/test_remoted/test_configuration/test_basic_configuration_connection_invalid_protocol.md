@@ -20,7 +20,7 @@ To confirm that `protocol` option allow multiple values and works correctly when
 - Fail if remoted does not use TCP in case of every value in the `protocol` option is invalid.
 - Fail if remoted does not show expected warning if use more than one protocol for syslog connection.
 - Fail if API query `{protocol}://{host}:{port}/manager/configuration?section=remote` doesn't match 
-  the introduced configuration on ossec.conf.
+  the introduced configuration on manager.conf.
 
 ## Code documentation
 

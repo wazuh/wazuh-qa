@@ -19,7 +19,7 @@ To confirm `wazuh-remoted` denied the connection of the ip specified in `denied-
 - Fail if remoted does not start correctly.
 - Fail if remoted does not show expected warning when receive a message from a denied ip.
 - Fail if API query `{protocol}://{host}:{port}/manager/configuration?section=remote` doesn't match 
-  the introduced configuration on ossec.conf.
+  the introduced configuration on manager.conf.
 
 ## Code documentation
 

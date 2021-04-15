@@ -2,8 +2,8 @@
 
 ## Overview 
 
-These tests check if the introduced configuration in the ossec.conf works as expected for valid values and if the API 
-response for configuration requests coincides with the one introduced in the ossec.conf.
+These tests check if the introduced configuration in the manager.conf works as expected for valid values and if the API 
+response for configuration requests coincides with the one introduced in the manager.conf.
 
 For invalid ones, it checks if `wazuh-remoted` returns the expected error message.
 
