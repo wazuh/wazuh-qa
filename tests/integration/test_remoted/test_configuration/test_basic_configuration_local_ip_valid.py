@@ -7,7 +7,7 @@ import pytest
 import netifaces
 
 
-import wazuh_testing.remote as remote
+import wazuh_testing.api as api
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 
 # Marks
@@ -58,4 +58,4 @@ def test_local_ip_valid(get_configuration, configure_environment, restart_remote
     cfg = get_configuration['metadata']
 
     # Check that API query return the selected configuration
-    remote.compare_config_api_response(cfg)
+    api.compare_config_api_response(cfg, 'remote')

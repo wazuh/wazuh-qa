@@ -7,6 +7,7 @@ import pytest
 
 import wazuh_testing.remote as remote
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+import wazuh_testing.generic_callbacks as gc
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -42,15 +43,15 @@ def test_invalid_connection(get_configuration, configure_environment, restart_re
     """
     cfg = get_configuration['metadata']
 
-    log_callback = remote.callback_invalid_value('connection', cfg['connection'])
+    log_callback = gc.callback_invalid_value('connection', cfg['connection'])
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
 
-    log_callback = remote.callback_error_in_configuration('ERROR')
+    log_callback = gc.callback_error_in_configuration('ERROR')
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
 
-    log_callback = remote.callback_error_in_configuration('CRITICAL')
+    log_callback = gc.callback_error_in_configuration('CRITICAL')
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
 

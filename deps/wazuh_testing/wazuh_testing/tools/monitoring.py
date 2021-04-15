@@ -33,6 +33,8 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.system import HostManager
 
 REMOTED_DETECTOR_PREFIX = r'.*wazuh-remoted.*'
+LOG_COLLECTOR_DETECTOR_PREFIX = r'.*wazuh-logcollector.*'
+AGENT_DETECTOR_PREFIX = r'.*wazuh-agent.*'
 
 
 def wazuh_unpack(data, format_: str = "<I"):

@@ -6,6 +6,8 @@ import os
 import pytest
 
 import wazuh_testing.remote as remote
+import wazuh_testing.api as api
+
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 
 # Marks
@@ -54,4 +56,4 @@ def test_allowed_denied_ips_syslog(get_configuration, configure_environment, res
     log_callback = remote.callback_detect_syslog_allowed_ips(cfg['allowed-ips'])
     wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message="Wazuh remoted didn't start as expected.")
 
-    remote.compare_config_api_response(cfg)
+    api.compare_config_api_response(cfg, 'remote')
