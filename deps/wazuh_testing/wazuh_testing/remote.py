@@ -234,18 +234,6 @@ def callback_info_no_allowed_ips():
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
-def compare_config_api_response(configuration):
-    """Assert if configuration values provided are the same that configuration provided for API response.
-
-    Args:
-        configuration (dict): Dictionary with wazuh manager configuration.
-    """
-    # Check that API query return the selected configuration
-    for field in configuration.keys():
-        api_answer = api.get_manager_configuration(section="remote", field=field)
-        assert str(configuration[field]) in api_answer, "Wazuh API answer different from introduced configuration"
-
-
 def get_protocols(all_protocols):
     """Create a pair of arrays with valid protocols (TCP and UDP) in element 0 and invalid protocols in element 1.
 
