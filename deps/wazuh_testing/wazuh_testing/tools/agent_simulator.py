@@ -158,17 +158,17 @@ class Agent:
         self.fim_integrity = None
         self.syscollector = None
         self.modules = {
-            "keepalive": {"status": "enabled", "frequency": self.keepalive_frequency},
-            "fim": {"status": "enabled", "eps": self.fim_eps},
-            "fim_integrity": {"status": "disabled", "eps": self.fim_integrity_eps},
-            "syscollector": {"status": "disabled", "frequency": self.syscollector_frequency,
-                             "eps": self.syscollector_eps},
-            "rootcheck": {"status": "disabled", "frequency": self.rootcheck_frequency, "eps": self.rootcheck_eps},
-            "sca": {"status": "disabled", "frequency": self.sca_frequency, "eps": self.sca_eps},
-            "hostinfo": {"status": "disabled", "eps": self.hostinfo_eps},
-            "winevt": {"status": "disabled", "eps": self.winevt_eps},
-            "logcollector": {"status": "disabled", "eps": self.logcollector_eps},
-            "receive_messages": {"status": "enabled"},
+            'keepalive': {'status': 'enabled', 'frequency': self.keepalive_frequency},
+            'fim': {'status': 'enabled', 'eps': self.fim_eps},
+            'fim_integrity': {'status': 'disabled', 'eps': self.fim_integrity_eps},
+            'syscollector': {'status': 'disabled', 'frequency': self.syscollector_frequency,
+                             'eps': self.syscollector_eps},
+            'rootcheck': {'status': 'disabled', 'frequency': self.rootcheck_frequency, 'eps': self.rootcheck_eps},
+            'sca': {'status': 'disabled', 'frequency': self.sca_frequency, 'eps': self.sca_eps},
+            'hostinfo': {'status': 'disabled', 'eps': self.hostinfo_eps},
+            'winevt': {'status': 'disabled', 'eps': self.winevt_eps},
+            'logcollector': {'status': 'disabled', 'eps': self.logcollector_eps},
+            'receive_messages': {'status': 'enabled'},
         }
         self.sha_key = None
         self.upgrade_exec_result = None
@@ -865,7 +865,7 @@ class SCA:
         Args:
             event_type (str): Event type `[summary, check]`.
         """
-        event_data = {}
+        event_data = dict()
         event_data['type'] = event_type
         event_data['scan_id'] = self.last_scan_id
         self.last_scan_id += 1
@@ -1139,16 +1139,16 @@ class GeneratorWinevt:
         self.next_event_key = cycle(self.winevent_sources.keys())
 
     def generate_event(self, winevt_type=None):
-        """Genereate winevt event.
+        """Generate Windows event.
 
-        Generate the desired type of winevt event. If no type of winvt message is provided, all winvt message types
-        will be generated sequentially.
+        Generate the desired type of Windows event (winevt). If no type of winvt message is provided,
+        all winvt message types will be generated sequentially.
 
         Args:
             winevt_type (str): Winevt type message `system, security, application, windows-defender, sysmon`.
 
         Returns:
-            string: an windows event generatted message.
+            string: an windows event generated message.
         """
         self.current_event_key = next(self.next_event_key)
 
@@ -1199,7 +1199,7 @@ class GeneratorFIM:
         self.event_type = None
 
     def random_file(self):
-        """ Initialize file attribute.
+        """Initialize file attribute.
 
         Returns:
             string: the new randomized file for the instance
@@ -1208,7 +1208,7 @@ class GeneratorFIM:
         return self._file
 
     def random_size(self):
-        """ Initialize file size with random value
+        """Initialize file size with random value
 
         Returns:
             string: the new randomized file size for the instance
@@ -1587,7 +1587,6 @@ class InjectorThread(threading.Thread):
                 self.agent.update_checksum(new_checksum)
                 if self.totalMessages % eps == 0:
                     sleep(1.0 - ((time() - start_time) % 1.0))
-
 
     def run_module(self, module):
         """Send a module message from the agent to the manager.

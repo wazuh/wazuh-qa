@@ -11,7 +11,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent_version='v4.0.0',
-               agent_os='debian8', eps=1000, run_duration=20, active_modules=[], modules_eps=None, fixed_message_size=None):
+               agent_os='debian8', eps=1000, run_duration=20, active_modules=[], modules_eps=None,
+               fixed_message_size=None):
     """Run a batch of agents connected to a manager with the same parameters.
 
     Args:
@@ -24,6 +25,7 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
         run_duration (int): Agent life time.
         active_modules (list): list with active modules names.
         modules_eps (list): list with eps for each active modules.
+        fixed_message_size (int): size in bytes for the message.
     """
 
     logger = logging.getLogger(f"P{os.getpid()}")
@@ -40,11 +42,10 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
             if module not in available_modules:
                 raise ValueError(f"Selected module: '{module}' doesn't exist on agent simulator!")
 
-        index = 0
         for module in available_modules:
             if module in active_modules:
+                index = list(active_modules).index(module)
                 agent.modules[module]['status'] = 'enabled'
-
                 if modules_eps is not None and 'eps' in agent.modules[module]:
                     agent.modules[module]['eps'] = modules_eps[index]
                 else:
@@ -144,6 +145,8 @@ def main():
             agents, args.manager_addr, args.agent_protocol, args.version, args.os, args.eps, args.duration,
             args.modules, args.modules_eps, args.fixed_message_size
         )
+
+        print(args.modules_eps)
 
         processes.append(Process(target=run_agents, args=arguments))
 
