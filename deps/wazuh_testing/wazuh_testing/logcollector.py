@@ -48,5 +48,10 @@ def callback_invalid_reconnection_time(severity='WARNING', default_value='5', pr
 
 
 def callback_eventchannel_analyzing(event_location):
-    msg = fr"INFO: \(\d+\): Analyzing event log: 'Security'"
+    msg = fr"INFO: \(\d+\): Analyzing event log: '{event_location}'"
     return monitoring.make_callback(pattern=msg, prefix=monitoring.AGENT_DETECTOR_PREFIX)
+
+
+def callback_invalid_location_pattern(location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+    msg = fr"Glob error. Invalid pattern: '{location}' or no files found."
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)

@@ -80,7 +80,14 @@ def get_local_internal_options():
 
 def test_configuration_command(get_local_internal_options, configure_local_internal_options, get_configuration,
                                      configure_environment, restart_logcollector):
-    """
+    """Check if the Wazuh run correctly with the specified command monitoring configuration.
+
+    Ensure command monitoring allow the specified attributes. Also, in case of manager instance, check if the API
+    answer for localfile block coincides.
+
+    Raises:
+        TimeoutError: If the command monitoring callback is not generated.
+        AssertError: In case of a server instance, the API response is different that the real configuration.
     """
     cfg = get_configuration['metadata']
 
