@@ -57,7 +57,18 @@ configuration_ids = [f"{x['LOG_FORMAT'], x['TARGET'], x['SOCKET_NAME'], x['LOCAT
 
 
 def check_configuration_target_valid(cfg):
-    """
+    """Check if the Wazuh module run correctly and that it uses the designated socket.
+
+    Ensure logcollector is running with the specified configuration, analyzing the designated socket and
+    , in case of the Wazuh server, check if the API answer for localfile configuration block coincides
+    the selected configuration.
+
+    Args:
+        cfg (dict): Dictionary with the localfile configuration.
+
+    Raises:
+        TimeoutError: If the socket target callback is not generated.
+        AssertError: In case of a server instance, the API response is different that the real configuration.
     """
     log_callback = logcollector.callback_socket_target(cfg['location'], cfg['target'], prefix=prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
@@ -70,7 +81,13 @@ def check_configuration_target_valid(cfg):
 
 
 def check_configuration_target_invalid(cfg):
-    """
+    """Check if the Wazuh fails because a invalid target configuration value.
+
+    Args:
+        cfg (dict): Dictionary with the localfile configuration.
+
+    Raises:
+        TimeoutError: If error callback are not generated.
     """
     log_callback = logcollector.callback_socket_not_defined(cfg['location'], cfg['target'], prefix=prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
@@ -84,6 +101,13 @@ def get_configuration(request):
 
 
 def test_configuration_target(get_configuration, configure_environment, restart_logcollector):
+    """Check if the Wazuh target field of logcollector works properly.
+
+    Ensure Wazuh component fails in case of invalid values and works properly in case of valid target values.
+
+    Raises:
+        TimeoutError: If expected callback are not generated.
+    """
     cfg = get_configuration['metadata']
     if cfg['valid_value']:
         check_configuration_target_valid(cfg)

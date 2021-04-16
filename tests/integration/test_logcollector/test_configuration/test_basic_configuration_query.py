@@ -21,7 +21,6 @@ else:
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
-
 prefix = AGENT_DETECTOR_PREFIX
 
 parameters = [
@@ -58,16 +57,14 @@ def get_configuration(request):
 
 
 def test_configuration_query_valid(get_configuration, configure_environment, restart_logcollector):
+    """Check if the Wazuh run correctly with the specified query attributes.
+
+    Ensure logcollector allows the specified query attribute.
+
+    Raises:
+        TimeoutError: If the callback for analyzing eventchannel is not generated
     """
-    """
-    cfg = get_configuration['metadata']
 
     log_callback = logcollector.callback_eventchannel_analyzing('Security')
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
-
-    if get_service() == 'wazuh-manager':
-        real_configuration = cfg.copy()
-        real_configuration.pop('valid_value')
-        api.wait_until_api_ready()
-        api.compare_config_api_response([real_configuration], 'localfile')

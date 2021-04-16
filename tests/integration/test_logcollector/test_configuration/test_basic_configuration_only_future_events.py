@@ -8,7 +8,6 @@ import sys
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 import wazuh_testing.generic_callbacks as gc
-import wazuh_testing.api as api
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 from wazuh_testing.tools import get_service
@@ -25,37 +24,28 @@ else:
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
-if sys.platform == 'win32':
-    location = r'C:\testing.txt'
-else:
-    location = '/tmp/test.txt'
-
-
+location = r'C:\testing.txt'
 wazuh_component = get_service()
-
-if wazuh_component == 'wazuh-manager':
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
-else:
-    prefix = AGENT_DETECTOR_PREFIX
+prefix = AGENT_DETECTOR_PREFIX
 
 
 parameters = [
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'ONLY_FUTURE_EVENTS': 'yes'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'ONLY_FUTURE_EVENTS': 'no'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'ONLY_FUTURE_EVENTS': 'yesTesting'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'ONLY_FUTURE_EVENTS': 'noTesting'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'ONLY_FUTURE_EVENTS': 'testingvalue'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'ONLY_FUTURE_EVENTS': '1234'}
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'yes'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'no'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'yesTesting'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'noTesting'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'testingvalue'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': '1234'}
 
 ]
 
 metadata = [
-    {'location': f'{location}', 'log_format': 'syslog', 'only-future-events': 'yes', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'syslog', 'only-future-events': 'no', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'syslog', 'only-future-events': 'yesTesting', 'valid_value': False},
-    {'location': f'{location}', 'log_format': 'syslog', 'only-future-events': 'noTesting', 'valid_value': False},
-    {'location': f'{location}', 'log_format': 'syslog', 'only-future-events': 'testingvalue', 'valid_value': False},
-    {'location': f'{location}', 'log_format': 'syslog', 'only-future-events': '1234', 'valid_value': False}
+    {'location': f'{location}', 'log_format': 'eventchannel', 'only-future-events': 'yes', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'eventchannel', 'only-future-events': 'no', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'eventchannel', 'only-future-events': 'yesTesting', 'valid_value': False},
+    {'location': f'{location}', 'log_format': 'eventchannel', 'only-future-events': 'noTesting', 'valid_value': False},
+    {'location': f'{location}', 'log_format': 'eventchannel', 'only-future-events': 'testingvalue', 'valid_value': False},
+    {'location': f'{location}', 'log_format': 'eventchannel', 'only-future-events': '1234', 'valid_value': False}
 
 ]
 
@@ -66,21 +56,25 @@ configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['ONLY_FUTURE_EVENTS']}
 
 
 def check_only_future_events_valid(cfg):
+    """Check if the Wazuh run correctly with the specified only future events field.
+
+    Ensure logcollector allows the specified future events attribute.
+
+    Raises:
+        TimeoutError: If the "Analyzing file" callback is not generated.
     """
-    """
-    log_callback = logcollector.callback_analyzing_file(cfg['location'], prefix=prefix)
+    log_callback = logcollector.callback_eventchannel_analyzing('Security')
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
 
-    if wazuh_component == 'wazuh-manager':
-        real_configuration = cfg.copy()
-        real_configuration.pop('valid_value')
-        api.wait_until_api_ready()
-        api.compare_config_api_response([real_configuration], 'localfile')
-
-
 def check_only_future_events_invalid(cfg):
-    """
+    """Check if the Wazuh fails because a invalid only future events configuration value.
+
+    Args:
+        cfg (dict): Dictionary with the localfile configuration.
+
+    Raises:
+        TimeoutError: If error callbacks are not generated.
     """
     log_callback = gc.callback_invalid_value('only-future-events', cfg['only-future-events'],
                                              prefix, severity="WARNING")
@@ -95,9 +89,10 @@ def get_configuration(request):
 
 
 def test_only_future_events(get_configuration, configure_environment, restart_logcollector):
-    """Check if the Wazuh frequency field of logcollector works properly.
+    """Check if the Wazuh only future events field of logcollector works properly.
 
-    Ensure Wazuh component fails in case of invalid values and works properly in case of valid frequency values.
+    Ensure Wazuh component fails in case of invalid values and works properly in case of valid
+    only future events values.
 
     Raises:
         TimeoutError: If expected callback are not generated.
