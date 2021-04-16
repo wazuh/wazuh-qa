@@ -22,7 +22,7 @@ def callback_command_alias_output(alias, prefix=monitoring.LOG_COLLECTOR_DETECTO
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 
-def callback_query_bad_format(event_location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_eventchannel_bad_format(event_location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
     msg = fr"ERROR: Could not EvtSubscribe() for ({event_location}) which returned \(\d+\)"
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 
@@ -45,3 +45,8 @@ def callback_log_target_not_found(location, socket_name, prefix=monitoring.LOG_C
 def callback_invalid_reconnection_time(severity='WARNING', default_value='5', prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
     msg = fr"{severity}: Invalid reconnection time value. Changed to {default_value} seconds."
     return monitoring.make_callback(pattern=msg, prefix=prefix)
+
+
+def callback_eventchannel_analyzing(event_location):
+    msg = fr"INFO: \(\d+\): Analyzing event log: 'Security'"
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.AGENT_DETECTOR_PREFIX)

@@ -66,6 +66,19 @@ configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['AGE']}" for x in para
 
 
 def check_configuration_age_valid(cfg):
+    """Check if the Wazuh module run correctly and that analyze the desired file.
+
+    Ensure logcollector is running with the specified configuration, analyzing the designate file and
+    , in case of the Wazuh component is a Wazuh server, check if the API answer for localfile block coincides
+    the selected configuration.
+
+    Args:
+        cfg (dict): Dictionary with the localfile configuration
+
+    Raises:
+        TimeoutError: If the "Analyzing file" callback is not generated or ,in case, of a server instance the API
+        response is different that the real confiugration
+    """
     log_callback = logcollector.callback_analyzing_file(cfg['location'], prefix=prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
