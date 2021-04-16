@@ -19,18 +19,16 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 wazuh_component = get_service()
 
-if wazuh_component == 'wazuh-manager':
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
-else:
-    prefix = AGENT_DETECTOR_PREFIX
-
 
 if sys.platform == 'win32':
     location = r'C:\testing\file.txt'
     wazuh_configuration = 'ossec.conf'
+    prefix = AGENT_DETECTOR_PREFIX
+
 else:
     location = '/tmp/testing.txt'
     wazuh_configuration = 'etc/ossec.conf'
+    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 parameters = [
     {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'AGE': '3s'},

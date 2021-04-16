@@ -26,16 +26,12 @@ local_internal_options = {
 
 wazuh_component = get_service()
 
-if wazuh_component == 'wazuh-manager':
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
-else:
-    prefix = AGENT_DETECTOR_PREFIX
-
-
 if sys.platform == 'win32':
     command = 'tasklist'
+    prefix = AGENT_DETECTOR_PREFIX
 else:
     command = 'ps -aux'
+    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 
 parameters = [

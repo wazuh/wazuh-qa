@@ -29,18 +29,16 @@ local_internal_options = {
 if sys.platform == 'win32':
     location = r'C:\testing.txt'
     wazuh_configuration = 'ossec.conf'
+    prefix = AGENT_DETECTOR_PREFIX
 
 else:
     location = '/tmp/test.txt'
     wazuh_configuration = 'etc/ossec.conf'
+    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 
 wazuh_component = get_service()
 
-if wazuh_component == 'wazuh-manager':
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
-else:
-    prefix = AGENT_DETECTOR_PREFIX
 
 
 parameters = [

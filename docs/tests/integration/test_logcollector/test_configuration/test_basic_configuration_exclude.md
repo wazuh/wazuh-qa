@@ -1,0 +1,1 @@
+::: tests.integration.test_logcollector.test_configuration.test_basic_configuration_exclude
