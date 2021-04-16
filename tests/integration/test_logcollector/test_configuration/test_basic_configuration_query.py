@@ -12,7 +12,11 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 import sys
 
 # Marks
-pytestmark = pytest.mark.tier(level=0)
+
+if sys.platform != 'win32':
+    pytestmark = [pytest.mark.skip, pytest.mark.tier(level=0)]
+else:
+    pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
