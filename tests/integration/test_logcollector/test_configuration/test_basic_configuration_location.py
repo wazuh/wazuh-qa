@@ -9,7 +9,7 @@ import wazuh_testing.api as api
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools import get_service
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
-from wazuh_testing.tools.services import get_process_cmd, check_daemon_status
+from wazuh_testing.tools.services import get_process_cmd, check_if_process_is_running
 
 
 # Marks
@@ -121,4 +121,4 @@ def test_configuration_location(get_configuration, configure_environment, restar
         if sys.platform == 'win32':
             assert get_process_cmd('wazuh-agent.exe') != 'None'
         else:
-            assert check_daemon_status('wazuh-logcollector')
+            assert check_if_process_is_running('wazuh-logcollector')
