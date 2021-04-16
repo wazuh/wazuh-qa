@@ -75,7 +75,7 @@ def test_agent_info_sync(clean_cluster_logs, remove_labels):
     # Check that the agent label is updated in the master's database.
     for i in range(10):
         if host_manager.run_command(
-            'wazuh-worker1',
+            'wazuh-master',
             'sqlite3 {0} "{1}"'.format(
                 global_db_path,
                 "SELECT id FROM labels WHERE key='{}'".format(f'\\"{label}\\"'))):
