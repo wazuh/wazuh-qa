@@ -3,8 +3,10 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+from time import sleep
 
 import pytest
+
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
@@ -69,6 +71,18 @@ def test_agent_info_sync(clean_cluster_logs, remove_labels):
 
     # Run the callback checks for the Master and Worker nodes
     HostMonitor(inventory_path=inventory_path, messages_path=messages_path, tmp_path=tmp_path).run()
+
+    # Check that the agent label is updated in the master's database.
+    for i in range(10):
+        if host_manager.run_command(
+            'wazuh-worker1',
+            'sqlite3 {0} "{1}"'.format(
+                global_db_path,
+                "SELECT id FROM labels WHERE key='{}'".format(f'\\"{label}\\"'))):
+            break
+        sleep(10)
+    else:
+        pytest.fail(f"Label {label} couldn't be found in master's global.db database.")
 
 
 def test_agent_info_sync_remove_agent(clean_cluster_logs, register_agent):
