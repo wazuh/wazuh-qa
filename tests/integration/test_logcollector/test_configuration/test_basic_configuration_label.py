@@ -68,7 +68,14 @@ def get_configuration(request):
 
 
 def test_configuration_label(get_configuration, configure_environment, restart_logcollector):
-    """
+    """Check if the Wazuh run correctly with the specified label field value.
+
+    Ensure logcollector allow the specified label attributes. Also, in case of manager instance, check if the API
+    answer for localfile block coincides.
+
+    Raises:
+        TimeoutError: If the "Analyzing file" callback is not generated.
+        AssertError: In case of a server instance, the API response is different that the real configuration.
     """
     cfg = get_configuration['metadata']
 

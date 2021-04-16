@@ -16,7 +16,10 @@ from wazuh_testing.tools import get_service
 
 
 # Marks
-pytestmark = pytest.mark.tier(level=0)
+if sys.platform != 'win32':
+    pytestmark = [pytest.mark.skip, pytest.mark.tier(level=0)]
+else:
+    pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -92,6 +95,13 @@ def get_configuration(request):
 
 
 def test_only_future_events(get_configuration, configure_environment, restart_logcollector):
+    """Check if the Wazuh frequency field of logcollector works properly.
+
+    Ensure Wazuh component fails in case of invalid values and works properly in case of valid frequency values.
+
+    Raises:
+        TimeoutError: If expected callback are not generated.
+    """
     cfg = get_configuration['metadata']
     if cfg['valid_value']:
         check_only_future_events_valid(cfg)

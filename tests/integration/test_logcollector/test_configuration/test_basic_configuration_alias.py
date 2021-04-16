@@ -69,14 +69,15 @@ def get_local_internal_options():
 
 def test_configuration_alias(get_local_internal_options, configure_local_internal_options,
                              get_configuration, configure_environment, restart_logcollector):
-    """Check if the Wazuh run correctly with the specified command monitoring configuration and using alias value.
+    """
+    Check if the module run correctly with the specified command monitoring configuration and that it uses alias value.
 
-    Ensure command monitoring uses specified alias value. Also, in case of manager instance, check if the API
+    Ensure command monitoring uses specified alias value. Also, in the case of manager instance, check if the API
     answer for localfile configuration block coincides.
 
     Raises:
         TimeoutError: If the command monitoring callback is not generated.
-        AssertError: In case of a server instance, the API response is different that the real configuration.
+        AssertError: In the case of a server instance, the API response is different from the real configuration.
     """
 
 

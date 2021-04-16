@@ -127,7 +127,14 @@ def get_local_internal_options():
 
 
 def check_log_format_valid(cfg):
-    """
+    """Check if the Wazuh run correctly with the specified log formats.
+
+    Ensure logcollector allow the specified log formats. Also, in case of manager instance, check if the API
+    answer for localfile block coincides.
+
+    Raises:
+        TimeoutError: If the "Analyzing file" callback is not generated.
+        AssertError: In case of a server instance, the API response is different that the real configuration.
     """
     if cfg['log_format'] not in log_format_not_print_analyzing_info :
 
@@ -154,7 +161,13 @@ def check_log_format_valid(cfg):
 
 
 def check_log_format_invalid(cfg):
-    """
+    """Check if the Wazuh fails because a invalid frequency configuration value.
+
+    Args:
+        cfg (dict): Dictionary with the localfile configuration.
+
+    Raises:
+        TimeoutError: If error callback are not generated.
     """
 
     if cfg['valid_value']:

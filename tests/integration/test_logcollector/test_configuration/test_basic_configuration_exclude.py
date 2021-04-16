@@ -10,6 +10,7 @@ from wazuh_testing.tools.services import get_service
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
+from wazuh_testing.tools.services import get_process_cmd, check_daemon_status
 
 
 # Marks
@@ -77,11 +78,11 @@ def get_configuration(request):
 def test_configuration_exclude(get_configuration, configure_environment, restart_logcollector):
     """Check if the Wazuh run correctly with the specified exclude field value.
 
-    Ensure logcollector allow the specified exclude attribute. Also, in case of manager instance, check if the API
+    Ensure logcollector allows the specified exclude attribute. Also, in case of manager instance, check if the API
     answer for localfile block coincides.
 
     Raises:
-        TimeoutError: If the command monitoring callback is not generated.
+        TimeoutError: In case of Windows system, callback for invalid location pattern is not generated.
         AssertError: In case of a server instance, the API response is different that the real configuration.
     """
     cfg = get_configuration['metadata']
@@ -95,3 +96,8 @@ def test_configuration_exclude(get_configuration, configure_environment, restart
         api.wait_until_api_ready()
         api.compare_config_api_response([cfg], 'localfile')
 
+    else:
+        if sys.platform == 'win32':
+            assert get_process_cmd('wazuh-agent.exe') != 'None'
+        else:
+            assert check_daemon_status('wazuh-logcollector')

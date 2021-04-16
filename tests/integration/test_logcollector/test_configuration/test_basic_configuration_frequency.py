@@ -87,7 +87,18 @@ configuration_ids = [f"{x['LOG_FORMAT'], x['COMMAND'], x['FREQUENCY']}" for x in
 
 
 def check_configuration_frequency_valid(cfg):
-    """
+    """Check if the Wazuh module run correctly and that analyze the desired file.
+
+    Ensure logcollector is running with the specified configuration, analyzing the designate file and
+    , in case of the Wazuh server, check if the API answer for localfile configuration block coincides
+    the selected configuration.
+
+    Args:
+        cfg (dict): Dictionary with the localfile configuration.
+
+    Raises:
+        TimeoutError: If the "Analyzing file" callback is not generated.
+        AssertError: In case of a server instance, the API response is different that the real configuration.
     """
 
     log_callback = logcollector.callback_monitoring_command(cfg['log_format'], cfg['command'], prefix=prefix)
@@ -102,8 +113,15 @@ def check_configuration_frequency_valid(cfg):
 
 
 def check_configuration_frequency_invalid(cfg):
+    """Check if the Wazuh fails because a invalid frequency configuration value.
+
+    Args:
+        cfg (dict): Dictionary with the localfile configuration.
+
+    Raises:
+        TimeoutError: If error callback are not generated.
     """
-    """
+
     if cfg['frequency'] in problematic_values:
         pytest.xfail("Logcolector accepts invalid values. Issue: https://github.com/wazuh/wazuh/issues/8158")
 
@@ -139,6 +157,13 @@ def get_local_internal_options():
 
 def test_configuration_frequency(get_local_internal_options, configure_local_internal_options,
                                  get_configuration, configure_environment, restart_logcollector):
+    """Check if the Wazuh frequency field of logcollector works properly.
+
+    Ensure Wazuh component fails in case of invalid values and works properly in case of valid frequency values.
+
+    Raises:
+        TimeoutError: If expected callback are not generated.
+    """
     cfg = get_configuration['metadata']
     if cfg['valid_value']:
         check_configuration_frequency_valid(cfg)

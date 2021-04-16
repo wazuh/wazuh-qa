@@ -9,6 +9,7 @@ import wazuh_testing.api as api
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools import get_service
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
+from wazuh_testing.tools.services import get_process_cmd, check_daemon_status
 
 
 # Marks
@@ -102,9 +103,22 @@ def get_configuration(request):
 
 
 def test_configuration_location(get_configuration, configure_environment, restart_logcollector):
-    """
+    """Check if the Wazuh run correctly with the specified location field value.
+
+    Ensure logcollector allow the specified locations. Also, in case of manager instance, check if the API
+    answer for localfile block coincides.
+
+    Raises:
+        TimeoutError: If the "Analyzing file" callback is not generated.
+        AssertError: In case of a server instance, the API response is different that the real configuration.
     """
     cfg = get_configuration['metadata']
+
     if wazuh_component == 'wazuh-manager':
         api.wait_until_api_ready()
         api.compare_config_api_response([cfg], 'localfile')
+    else:
+        if sys.platform == 'win32':
+            assert get_process_cmd('wazuh-agent.exe') != 'None'
+        else:
+            assert check_daemon_status('wazuh-logcollector')
