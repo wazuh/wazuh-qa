@@ -103,7 +103,7 @@ class DataVisualizer:
         Returns:
             list: list of colors. The colors are represented as a tuple of float values.
         """
-        return sns.hls_palette(size - 1, h=.5)
+        return sns.hls_palette(size - 1 if size > 1 else 1, h=.5)
 
     def _load_dataframes(self):
         """Load the dataframes from dataframes_paths."""
