@@ -24,3 +24,5 @@ def restart_logcollector(get_configuration, request):
         control_service('start', daemon=DAEMON_NAME)
     except sb.CalledProcessError:
         pass
+    except ValueError:
+        pass
