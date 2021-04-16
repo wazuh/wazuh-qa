@@ -86,9 +86,10 @@ def test_configuration_exclude(get_configuration, configure_environment, restart
     """
     cfg = get_configuration['metadata']
 
-    log_callback = logcollector.callback_invalid_location_pattern(cfg['location'], prefix=prefix)
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
+    if sys.platform == 'win32':
+        log_callback = logcollector.callback_invalid_location_pattern(cfg['location'], prefix=prefix)
+        wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                error_message="The expected error output has not been produced")
 
     if wazuh_component == 'wazuh-manager':
         api.wait_until_api_ready()

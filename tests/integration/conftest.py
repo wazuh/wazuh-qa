@@ -471,7 +471,10 @@ def configure_environment(get_configuration, request):
 
     # Remove created folders (parents)
     if sys.platform == 'win32':
-        control_service('stop')
+        try:
+            control_service('stop')
+        except ValueError:
+            pass
 
     if hasattr(request.module, 'test_directories'):
         for test_dir in test_directories:
