@@ -30,4 +30,5 @@ the expected one. Both parameters and responses are found in a YAML file.
 - **Test cases found in the file: `wazuh_enrollment_tests.yaml`**
 
 ## Code documentation
-<!-- ::: tests.integration.test_agentd.test_agent_auth_enrollment -->
+
+::: tests.integration.test_agentd.test_agent_auth_enrollment

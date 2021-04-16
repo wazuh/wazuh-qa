@@ -33,4 +33,5 @@ them and then, verifying that the connection between AgentD and RemoteD is final
 - **Enrollment between retries.**
 
 ## Code documentation
-<!-- ::: tests.integration.test_agentd.test_agentd_parametrized_reconnections -->
+
+::: tests.integration.test_agentd.test_agentd_parametrized_reconnections

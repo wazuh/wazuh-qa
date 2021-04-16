@@ -40,4 +40,5 @@ The above is done under the following states of the agent's `client.keys` file:
     are performed before a new enrollment is made.**
 
 ## Code documentation
-<!-- ::: tests.integration.test_agentd.test_agentd_reconnection -->
+
+::: tests.integration.test_agentd.test_agentd_reconnection

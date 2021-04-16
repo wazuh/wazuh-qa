@@ -31,4 +31,5 @@ Both configurations and responses are found in a YAML file.
 
 
 ## Code documentation
-<!-- ::: tests.integration.test_agentd.test_agentd_enrollment_params -->
+
+::: tests.integration.test_agentd.test_agentd_enrollment_params

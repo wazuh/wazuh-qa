@@ -51,5 +51,6 @@ For each situation, it is verified that the agent behaves as expected.
 - **`UDP/TCP` protocols in connections.**
 
 ## Code documentation
-<!-- ::: tests.integration.test_agentd.test_agentd_multi_server -->
+
+::: tests.integration.test_agentd.test_agentd_multi_server
 
