@@ -2,9 +2,10 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import os
+import pytest
 from time import sleep
 
-import pytest
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -12,7 +13,7 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
-from conftest import CLIENT_KEYS_PATH, SERVER_CERT_PATH, SERVER_KEY_PATH, os
+from wazuh_testing.agent import CLIENT_KEYS_PATH, SERVER_CERT_PATH, SERVER_KEY_PATH
 
 # Marks
 

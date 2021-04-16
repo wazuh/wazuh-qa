@@ -3,9 +3,10 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import datetime
-
+import os
 import pytest
 import yaml
+
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -13,9 +14,9 @@ from wazuh_testing.tools.configuration import set_section_wazuh_conf, write_wazu
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
-from conftest import CLIENT_KEYS_PATH, DEFAULT_VALUES, SERVER_CERT_PATH, SERVER_KEY_PATH, \
+from wazuh_testing.agent import CLIENT_KEYS_PATH, DEFAULT_VALUES, SERVER_CERT_PATH, SERVER_KEY_PATH, \
     AgentAuthParser, build_expected_request, check_client_keys_file, clean_client_keys_file, \
-    clean_password_file, os, parse_configuration_string, configure_enrollment
+    clean_password_file, parse_configuration_string, configure_enrollment
 
 # Marks
 
