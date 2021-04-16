@@ -15,7 +15,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
-from conftest import AR_LOG_FILE_PATH, wait_received_message_line, \
+from wazuh_testing.execd import AR_LOG_FILE_PATH, wait_received_message_line, \
     wait_start_message_line, wait_ended_message_line, start_log_monitoring
 
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]

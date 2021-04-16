@@ -1,16 +1,8 @@
 import os
-import pytest
-import socket
-import ssl
 import platform
+import pytest
 
-from configobj import ConfigObj
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH, get_version
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.file import truncate_file
-
-AR_FOLDER = 'active-response' if platform.system() == 'Windows' else 'logs'
-AR_LOG_FILE_PATH = os.path.join(WAZUH_PATH, AR_FOLDER, 'active-responses.log')
+from wazuh_testing.tools import WAZUH_PATH, get_version
 
 
 @pytest.fixture(scope="session")
@@ -48,35 +40,6 @@ def set_debug_mode():
         local_file_write.write('\n'+debug_line)
 
 
-def wait_received_message_line(line):
-    """
-    Callback function to wait for the Received Active Response message
-    """
-    return True if "DEBUG: Received message: " in line else None
-
-
-def wait_start_message_line(line):
-    """
-    Callback function to wait for the Starting Active Response message
-    """
-    return True if "Starting" in line else None
-
-
-def wait_ended_message_line(line):
-    """
-    Callback function to wait for the Ended Active Response message
-    """
-    return True if "Ended" in line else None
-
-
-def clean_logs():
-    """
-    Clean log file
-    """
-    truncate_file(LOG_FILE_PATH)
-    truncate_file(AR_LOG_FILE_PATH)
-
-
 @pytest.fixture(scope="session")
 def test_version():
     """
@@ -84,13 +47,3 @@ def test_version():
     """
     if get_version() < "v4.2.0":
         raise AssertionError("The version of the agent is < 4.2.0")
-
-
-def start_log_monitoring(monitor, callback, timeout=60):
-    """
-    Monitor log and wait for message defined in callback
-    """
-    try:
-        monitor.start(timeout, callback)
-    except TimeoutError:
-        raise AssertionError("Message took too much!")

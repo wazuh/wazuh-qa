@@ -5,11 +5,10 @@
 import json
 import os
 import platform
-import subprocess
-import time
-from subprocess import Popen, PIPE
-
 import pytest
+from subprocess import call, Popen, PIPE
+import time
+
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -17,8 +16,7 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
-
-from conftest import AR_LOG_FILE_PATH, wait_received_message_line, wait_start_message_line, \
+from wazuh_testing.execd import AR_LOG_FILE_PATH, wait_received_message_line, wait_start_message_line, \
     wait_ended_message_line, start_log_monitoring
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
@@ -95,8 +93,7 @@ def start_agent(request, get_configuration):
 
     control_service('stop')
     agent_auth_pat = 'bin' if platform.system() == 'Linux' else ''
-    subprocess.call([f'{WAZUH_PATH}/{agent_auth_pat}/agent-auth', '-m',
-                     SERVER_ADDRESS])
+    call([f'{WAZUH_PATH}/{agent_auth_pat}/agent-auth', '-m', SERVER_ADDRESS])
     control_service('start')
 
     yield
