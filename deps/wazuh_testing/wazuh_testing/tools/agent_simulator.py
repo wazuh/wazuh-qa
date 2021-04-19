@@ -747,6 +747,7 @@ class GeneratorSyscollector:
         self.batch_size = batch_size
         self.syscollector_tag = 'syscollector'
         self.syscollector_mq = 'd'
+        self.current_id = 1
 
     def format_event(self, message_type):
         """Format syscollector message of the specified type.
@@ -779,13 +780,15 @@ class GeneratorSyscollector:
         timestamp = today.strftime("%Y/%m/%d %H:%M:%S")
 
         fields_to_replace = [
-                        ('<agent_name>', self.agent_name), ('<random_int>', str(randint(1, 10 * 10))),
+                        ('<agent_name>', self.agent_name), ('<random_int>', f"{self.current_id}"),
                         ('<random_string>', get_random_string(10)),
                         ('<timestamp>', timestamp), ('<syscollector_type>', message_type)
                     ]
 
         for variable, value in fields_to_replace:
             message = message.replace(variable, value)
+
+        self.current_id += 1
 
         message = f"{self.syscollector_mq}:{self.syscollector_tag}:{message}"
 
