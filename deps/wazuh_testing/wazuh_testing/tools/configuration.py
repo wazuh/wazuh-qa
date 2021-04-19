@@ -563,8 +563,6 @@ def set_wazuh_local_internal_options(wazuh_local_internal_options: List[str]):
     with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'w') as f:
         f.writelines(wazuh_local_internal_options)
 
-    print("Restarting Wazuh...")
-
 
 def add_wazuh_local_internal_options(wazuh_local_internal_options_dict):
     local_internal_options_str = create_local_internal_configuration(wazuh_local_internal_options_dict)

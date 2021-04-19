@@ -1,7 +1,6 @@
 from wazuh_testing.tools import WAZUH_CONF
 from wazuh_testing.tools import monitoring
 
-
 def callback_invalid_value(option, value, wazuh_daemon, severity='ERROR'):
     """Create a callback to detect invalid values in ossec.conf file.
 
@@ -21,6 +20,8 @@ def callback_error_in_configuration(severity, wazuh_daemon, conf_path=WAZUH_CONF
 
     Args:
         severity (str): ERROR or CRITICAL.
+        wazuh_daemon (str): Daemon that generates the error log.
+        conf_path (str): Wazuh configuration file path.
 
     Returns:
         callable: callback to detect this event.
@@ -30,5 +31,15 @@ def callback_error_in_configuration(severity, wazuh_daemon, conf_path=WAZUH_CONF
 
 
 def callback_invalid_conf_for_localfile(field, wazuh_daemon,  severity='ERROR'):
+    """Create a callback to detect invalid configuration option value.
+
+    Args:
+        field (str): Option field that produces the error.
+        wazuh_daemon (str): Daemon that generates the error log.
+        severity (str): ERROR or CRITICAL.
+
+    Returns:
+        callable: callback to detect this event.
+    """
     msg = fr"{severity}: Invalid {field} for localfile"
     return monitoring.make_callback(pattern=msg, prefix=wazuh_daemon)

@@ -8,7 +8,6 @@ import time
 from base64 import b64encode
 
 import requests
-
 from urllib3 import disable_warnings, exceptions
 disable_warnings(exceptions.InsecureRequestWarning)
 
@@ -106,21 +105,20 @@ def compare_config_api_response(configuration, section):
     """Assert if configuration values provided are the same that configuration provided for API response.
 
     Args:
-        configuration (dict): Dictionary with wazuh manager configuration.
+        configuration (dict): Dictionary with Wazuh manager configuration.
         section (str): Section to compare.
     """
     api_answer = get_manager_configuration(section=section)
     assert type(api_answer) == type(configuration)
 
     if isinstance(api_answer, list):
-        api_answer_lenght = len(api_answer)
-        for i in range(api_answer_lenght):
-            api_answer_subdict = dict((key, api_answer[i][key]) for key in configuration[i].keys())
-            assert api_answer_subdict == configuration[i]
+        api_answer_length = len(api_answer)
+        for i in range(api_answer_length):
+            api_answer_to_compare = dict((key, api_answer[i][key]) for key in configuration[i].keys())
+            assert api_answer_to_compare == configuration[i]
     else:
-        api_answer_subdict = dict((key, api_answer[key]) for key in configuration.keys())
-        assert api_answer_subdict == configuration
-
+        api_answer_to_compare = dict((key, api_answer[key]) for key in configuration.keys())
+        assert api_answer_to_compare == configuration
 
 
 def get_manager_configuration(section=None, field=None):
@@ -176,6 +174,18 @@ def get_manager_configuration(section=None, field=None):
 
 def wait_until_api_ready(protocol=API_PROTOCOL, host=API_HOST, port=API_PORT, user=API_USER, password=API_PASS,
                          login_endpoint=API_LOGIN_ENDPOINT, timeout=10, attempts=5):
+    """ Wait until Wazuh API is ready
+
+    Args:
+        protocol (str): Used protocol for Wazuh manager.
+        host (str): Wazuh manager host ip.
+        port (str): Wazuh manager port.
+        user (str): API user.
+        password (str): API password.
+        login_endpoint (str): API login endpoint.
+        timeout (int): Timeout to get an API response.
+        attempts (int): Maximum number of attempts to check API is ready.
+    """
     api_ready = False
     while attempts > 0 and not api_ready:
         try:
