@@ -1,6 +1,6 @@
 # Active response tests
 
-# Overview
+## Overview
 
 Active responses perform various countermeasures to address active threats, such as blocking access
 to an agent from the threat source when certain criteria are met.
@@ -12,5 +12,5 @@ to an agent from the threat source when certain criteria are met.
 
 #### Test execd
 
-These tests will check that the active responses, which are executed by the `wazuh-execd` program via scripts,
+These tests will check if the active responses, which are executed by the `wazuh-execd` program via scripts,
 run correctly.

@@ -1,13 +1,13 @@
-# Test AgentD enrollment params
+# Test wazuh-agentd enrollment params
 
 ## Overview
 
-These tests will verify different situations that may occur at AgentD during enrollment.
+These tests will verify different situations that may occur at `wazuh-agentd` during enrollment.
 
 ## Objective
 
 The objective is to check the enrollment of the agent using certain settings
-in the `ossec.conf` file produces the expected responses from the server.
+in the configuration file produces the expected responses from the server.
 
 ## General info
 

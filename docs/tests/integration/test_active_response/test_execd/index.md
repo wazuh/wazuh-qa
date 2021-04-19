@@ -4,13 +4,13 @@
 
 Active responses execute a script in response to the triggering of specific alerts
 based on the alert level or rule group.
-The `wazuh-execd` program runs Active Responses by initiating the configured scripts.
+`wazuh-execd` runs Active Responses by initiating the configured scripts.
 
 These tests check if `wazuh-execd` executes the active responses correctly.
 
 ## Objective
 
-Check that the Active Response scripts are executed correctly by `execd`.
+Check if the Active Response scripts are executed correctly by `execd`.
 
 ## General info
 

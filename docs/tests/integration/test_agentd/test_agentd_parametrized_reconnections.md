@@ -1,4 +1,4 @@
-# Test AgentD parametrized reconnection
+# Test wazuh-agentd parametrized reconnection
 
 ## Overview
 
@@ -7,8 +7,8 @@ there are delays between connection attempts to the server.
 
 ## Objective
 
-The objective is to check how AgentD behaves when there are delays between connection attempts
-to RemoteD using `TCP` and `UDP` protocols.
+The objective is to check how `wazuh-agentd` behaves when there are delays between connection attempts
+to `wazuh-remoted` using `TCP` and `UDP` protocols.
 
 ## General info
 
@@ -23,7 +23,7 @@ Success if the agent connects with the manager, failure otherwise.
 ## Testing
 
 The tests are based on testing a different number of connection attempts and time between
-them and then, verifying that the connection between AgentD and RemoteD is finally successful. 
+them and then, verify if the connection between `wazuh-agentd` and `wazuh-remoted` is finally successful. 
 
 ### Checks
   

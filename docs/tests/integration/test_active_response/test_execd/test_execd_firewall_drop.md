@@ -1,6 +1,6 @@
 # Test execd firewall drop
 
-This test check that Active Response script called `firewall-drop` is executed correctly when configured.
+This test checks if the Active Response script called `firewall-drop` is executed correctly when configured.
 
 ## General info
 

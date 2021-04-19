@@ -2,11 +2,11 @@
 
 ## Overview
 
-These tests will verify different situations that may occur at agent-auth program during enrollment.
+These tests will verify different situations that may occur at `agent-auth` during enrollment.
 
 ## Objective
 
-The objective is to check that the parameters sent by the agent-auth program to the AuthD daemon
+The objective is to check if the parameters sent by the `agent-auth` to the `wazuh-authd` daemon
 are consistent with its responses.
 
 ## General info

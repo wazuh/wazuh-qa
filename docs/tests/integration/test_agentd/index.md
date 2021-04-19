@@ -2,8 +2,8 @@
 
 ## Overview 
 
-The `wazuh-agentd`  program is the client-side daemon that communicates with the server.
-The `agent-auth` program is the client application used along with `wazuh-authd`
+`wazuh-agentd` is the client-side daemon that communicates with the manager.
+`agent-auth` is the client application used along with `wazuh-authd` 
 to automatically add agents to a Wazuh manager.
 
 These tests check if the `agentd` daemon correctly manages the enrollment (along with `agent-auth`) and connections,

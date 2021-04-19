@@ -1,4 +1,4 @@
-# Test AgentD multi-server
+# Test wazuh-agentd multi-server
 
 ## Overview
 
@@ -22,7 +22,7 @@ Success if the agent passes the stages of each test, failure otherwise.
 ## Testing
 
 The tests are based on simulating a multi-server environment with three
-RemoteD simulated connections that, in each test, are in a different state.
+`wazuh-remoted` simulated connections that, in each test, are in a different state.
 For each situation, it is verified that the agent behaves as expected. 
 
 ### Checks

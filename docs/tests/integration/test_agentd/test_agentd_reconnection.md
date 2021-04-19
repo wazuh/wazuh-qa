@@ -1,8 +1,8 @@
-# Test AgentD reconnection
+# Test wazuh-agentd reconnection
 
 ## Overview
 
-These tests will check that, during enrollment, the agent re-establishes communication with the manager
+These tests will check if, during enrollment, the agent re-establishes communication with the manager
 under different situations that interrupt it.
 
 ## Objective
@@ -22,8 +22,9 @@ Success if the agent enrolls and starts communication with remoted, failure othe
 
 ## Testing
 
-The tests are based on verifying that AgentD is communicating with RemoteD (if the agent is already enrolled),
-configuring RemoteD to reject this connection, and finally verifying that the agent is enrolled again.
+The tests are based on verifying that `wazuh-agentd` is communicating with `wazuh-remoted` 
+(if the agent is already enrolled), configuring `wazuh-remoted` to reject this connection, 
+and finally verifying that the agent is enrolled again.
 
 The above is done under the following states of the agent's `client.keys` file:
 - It contains valid keys.
