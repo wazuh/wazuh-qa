@@ -38,7 +38,7 @@ def test_invalid_connection(get_configuration, configure_environment, restart_re
     """Test if `wazuh-remoted` fails when invalid configuration for `connection` label is set.
 
     Raises:
-        AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected error message.
+        AssertionError: if `wazuh-remoted` does not show in `wazuh.log` expected error message.
     """
     cfg = get_configuration['metadata']
 

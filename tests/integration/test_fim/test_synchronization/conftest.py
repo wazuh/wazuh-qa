@@ -13,7 +13,7 @@ from wazuh_testing.tools.services import control_service
 @pytest.fixture(scope='module')
 def restart_syscheckd(get_configuration, request):
     """
-    Reset ossec.log and start a new monitor.
+    Reset wazuh.log and start a new monitor.
     """
     control_service('stop', daemon='wazuh-syscheckd')
     truncate_file(LOG_FILE_PATH)

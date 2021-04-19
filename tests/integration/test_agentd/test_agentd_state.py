@@ -37,7 +37,7 @@ with open(test_data_file) as f:
 
 # Global RemotedSimulator variable
 remoted_server = None
-# Global FileMonitor variable to watch ossec.log
+# Global FileMonitor variable to watch wazuh.log
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # Variables
@@ -93,7 +93,7 @@ def test_agentd_state(configure_environment, test_case: list):
     else:
         set_state_interval(1, internal_options)
 
-    # Truncate ossec.log in order to watch it correctly
+    # Truncate wazuh.log in order to watch it correctly
     truncate_file(LOG_FILE_PATH)
 
     # Remove state file to check if agent behavior is as expected

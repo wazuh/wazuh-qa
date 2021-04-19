@@ -5,7 +5,7 @@
 import os
 
 import pytest
-from wazuh_testing.tools import WAZUH_LOGS_PATH
+from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 
@@ -26,11 +26,11 @@ def configure_environment(host_manager):
                            src_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files/fetch_keys.py'),
                            dest_path='/tmp/fetch_keys.py')
     host_manager.apply_config(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/config.yml'),
-                              clear_files=[os.path.join(WAZUH_LOGS_PATH, 'ossec.log')],
+                              clear_files=[LOG_FILE_PATH],
                               restart_services=['wazuh'])
     host_manager.add_block_to_file(host='wazuh-master', path='/var/ossec/etc/client.keys', replace='NOTVALIDKEY',
                                    after='wazuh-agent2 any ', before='2\n')
-    host_manager.clear_file(host='wazuh-agent2', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
+    host_manager.clear_file(host='wazuh-agent2', file_path=LOG_FILE_PATH)
 
 
 @pytest.mark.skip(reason='Development in progress: https://github.com/wazuh/wazuh/issues/4387')

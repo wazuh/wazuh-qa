@@ -129,7 +129,7 @@ def test_ambiguous_restrict(folders, tags_to_apply, get_configuration, configure
 
     /testdir -> has a restrict configuration
     /testdir/subdir -> has no restrict configuration
-    Only /testdir/subdir events should appear in ossec.log
+    Only /testdir/subdir events should appear in wazuh.log
 
     This test is intended to be used with valid configurations files. Each execution of this test will configure
     the environment properly, restart the service and wait for the initial scan.

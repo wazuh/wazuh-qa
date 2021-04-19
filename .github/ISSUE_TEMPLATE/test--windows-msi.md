@@ -20,7 +20,7 @@ To check in every test:
 - Correct version.
 - WUI doesn't show any strange information.
 - Service is running correctly.
-- No errors in ossec.log.
+- No errors in wazuh.log.
 
 - [ ] Successful installation by UI
 - [ ] Unattended installation
@@ -73,7 +73,7 @@ To check in every test:
 - It does not overwrite the `client.keys`, `ossec.conf` and `local_internal_options.conf`.
 - WUI doesn't show any strange information.
 - Service is restarted correctly.
-- No errors in ossec.log.
+- No errors in wazuh.log.
 - No duplicated package when upgrading from the EXE.
 
 - [ ] Upgrade MSI from 3.X.X

@@ -147,7 +147,7 @@ specify which messages are expected in each of the nodes.
 # sample messages
 node_name:
   - regex: ".*wazuh-master restarted.*"
-    path: "/var/ossec/logs/ossec.log"
+    path: "/var/ossec/logs/wazuh.log"
     timeout: 60
 ```
 
@@ -315,17 +315,17 @@ rootdir: /home/adriiiprodri/Desktop/git/wazuh-qa/tests/system/cluster
 plugins: html-2.0.1, tavern-0.34.0, testinfra-5.0.0, metadata-1.8.0
 collected 1 item                                                                                                                                                          
 
-test_agent_key_polling/test_agent_key_polling.py::test_agent_key_polling 2020-03-31 09:42:46,087 - wazuh_testing - DEBUG - Add new file composer process for wazuh-master and path: /var/ossec/logs/ossec.log
-2020-03-31 09:42:46,089 - wazuh_testing - DEBUG - Add new file monitor process for wazuh-master and path: /var/ossec/logs/ossec.log
-2020-03-31 09:42:46,089 - wazuh_testing - DEBUG - Starting file composer for wazuh-master and path: /var/ossec/logs/ossec.log. Composite file in /home/adriiiprodri/Desktop/git/wazuh-qa/tests/system/cluster/test_agent_key_polling/tmp/wazuh-master_ossec.log.tmp
-2020-03-31 09:42:46,091 - wazuh_testing - DEBUG - Add new file composer process for wazuh-worker1 and path: /var/ossec/logs/ossec.log
+test_agent_key_polling/test_agent_key_polling.py::test_agent_key_polling 2020-03-31 09:42:46,087 - wazuh_testing - DEBUG - Add new file composer process for wazuh-master and path: /var/ossec/logs/wazuh.log
+2020-03-31 09:42:46,089 - wazuh_testing - DEBUG - Add new file monitor process for wazuh-master and path: /var/ossec/logs/wazuh.log
+2020-03-31 09:42:46,089 - wazuh_testing - DEBUG - Starting file composer for wazuh-master and path: /var/ossec/logs/wazuh.log. Composite file in /home/adriiiprodri/Desktop/git/wazuh-qa/tests/system/cluster/test_agent_key_polling/tmp/wazuh-master_wazuh.log.tmp
+2020-03-31 09:42:46,091 - wazuh_testing - DEBUG - Add new file composer process for wazuh-worker1 and path: /var/ossec/logs/wazuh.log
 2020-03-31 09:42:46,092 - wazuh_testing - DEBUG - Starting QueueMonitor for wazuh-master and message: .*Agent key generated for agent 'wazuh-agent2'.*
-2020-03-31 09:42:46,092 - wazuh_testing - DEBUG - Add new file monitor process for wazuh-worker1 and path: /var/ossec/logs/ossec.log
-2020-03-31 09:42:46,093 - wazuh_testing - DEBUG - Starting file composer for wazuh-worker1 and path: /var/ossec/logs/ossec.log. Composite file in /home/adriiiprodri/Desktop/git/wazuh-qa/tests/system/cluster/test_agent_key_polling/tmp/wazuh-worker1_ossec.log.tmp
-2020-03-31 09:42:46,094 - wazuh_testing - DEBUG - Add new file composer process for wazuh-agent2 and path: /var/ossec/logs/ossec.log
+2020-03-31 09:42:46,092 - wazuh_testing - DEBUG - Add new file monitor process for wazuh-worker1 and path: /var/ossec/logs/wazuh.log
+2020-03-31 09:42:46,093 - wazuh_testing - DEBUG - Starting file composer for wazuh-worker1 and path: /var/ossec/logs/wazuh.log. Composite file in /home/adriiiprodri/Desktop/git/wazuh-qa/tests/system/cluster/test_agent_key_polling/tmp/wazuh-worker1_wazuh.log.tmp
+2020-03-31 09:42:46,094 - wazuh_testing - DEBUG - Add new file composer process for wazuh-agent2 and path: /var/ossec/logs/wazuh.log
 2020-03-31 09:42:46,095 - wazuh_testing - DEBUG - Starting QueueMonitor for wazuh-worker1 and message: .*Authentication error. Wrong key or corrupt payload. Message received from agent '002'.*
-2020-03-31 09:42:46,096 - wazuh_testing - DEBUG - Add new file monitor process for wazuh-agent2 and path: /var/ossec/logs/ossec.log
-2020-03-31 09:42:46,097 - wazuh_testing - DEBUG - Starting file composer for wazuh-agent2 and path: /var/ossec/logs/ossec.log. Composite file in /home/adriiiprodri/Desktop/git/wazuh-qa/tests/system/cluster/test_agent_key_polling/tmp/wazuh-agent2_ossec.log.tmp
+2020-03-31 09:42:46,096 - wazuh_testing - DEBUG - Add new file monitor process for wazuh-agent2 and path: /var/ossec/logs/wazuh.log
+2020-03-31 09:42:46,097 - wazuh_testing - DEBUG - Starting file composer for wazuh-agent2 and path: /var/ossec/logs/wazuh.log. Composite file in /home/adriiiprodri/Desktop/git/wazuh-qa/tests/system/cluster/test_agent_key_polling/tmp/wazuh-agent2_wazuh.log.tmp
 2020-03-31 09:42:46,099 - wazuh_testing - DEBUG - Starting QueueMonitor for wazuh-agent2 and message: .*Lost connection with manager. Setting lock.*
 2020-03-31 09:42:49,100 - wazuh_testing - DEBUG - Finishing QueueMonitor for wazuh-master and message: .*Agent key generated for agent 'wazuh-agent2'.*
 2020-03-31 09:42:49,101 - wazuh_testing - DEBUG - Finishing QueueMonitor for wazuh-worker1 and message: .*Authentication error. Wrong key or corrupt payload. Message received from agent '002'.*
