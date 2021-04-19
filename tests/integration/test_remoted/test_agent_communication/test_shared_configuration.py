@@ -51,7 +51,7 @@ def get_configuration(request):
 
 def test_push_shared_config(get_configuration, configure_environment, remove_shared_files,
                             restart_remoted, create_agent_group):
-    """ Checks that manager push shared configuration to agents when required.
+    """Checks that manager push shared configuration to agents when required.
 
     Checks if Wazuh Manager sends new shared files from group shared folder when the merged.mg checksum received from
     agent is different than the stored one, for example, when the group configuration changes.

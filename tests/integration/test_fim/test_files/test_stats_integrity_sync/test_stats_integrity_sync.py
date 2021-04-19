@@ -367,7 +367,7 @@ def check_all_n_completions(agents_list):
 
 
 def modify_database(agent_id, directory, prefix, total_files, modify_file, modify_all, restore_all):
-    """ Modify the database files
+    """Modify the database files
 
     Parameters
     ----------

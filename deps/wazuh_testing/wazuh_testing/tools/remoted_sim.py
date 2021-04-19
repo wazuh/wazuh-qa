@@ -18,7 +18,7 @@ from wazuh_testing.tools import WAZUH_PATH
 
 
 class Cipher:
-    """ Algorithm to perform encryption/decryption of manager-agent secure messages
+    """Algorithm to perform encryption/decryption of manager-agent secure messages
 
     Ref: https://documentation.wazuh.com/current/development/message-format.html#secure-message-format
     """

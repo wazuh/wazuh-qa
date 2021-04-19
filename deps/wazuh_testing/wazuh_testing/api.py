@@ -148,7 +148,7 @@ def get_manager_configuration(section=None, field=None):
     answer = response.json()['data']['affected_items'][0]
 
     def get_requested_values(answer, section, field):
-        """ Return requested value from API response
+        """Return requested value from API response
 
         Received a section and a field and tries to return all available values that match with this entry.
         This function is required because, sometimes, there may be multiple entries with the same field or section
@@ -174,7 +174,7 @@ def get_manager_configuration(section=None, field=None):
 
 def wait_until_api_ready(protocol=API_PROTOCOL, host=API_HOST, port=API_PORT, user=API_USER, password=API_PASS,
                          login_endpoint=API_LOGIN_ENDPOINT, timeout=10, attempts=5):
-    """ Wait until Wazuh API is ready
+    """Wait until Wazuh API is ready
 
     Args:
         protocol (str): Used protocol for Wazuh manager.

@@ -72,7 +72,7 @@ def wait_for_fim_start_function(get_configuration, request):
 @pytest.mark.parametrize('test_cases', [0, 1, 2])
 def test_db_inode_check(test_cases, get_configuration, configure_environment, restart_syscheck_function,
                         wait_for_fim_start_function):
-    """ Test to check for false positives due to possible inconsistencies with inodes in the database.
+    """Test to check for false positives due to possible inconsistencies with inodes in the database.
         Cases:
             - With check_mtime="no" and check_inode="no", no modification events should appear.
             - With check_mtime="yes" and check_inode="yes", modification events should have:
