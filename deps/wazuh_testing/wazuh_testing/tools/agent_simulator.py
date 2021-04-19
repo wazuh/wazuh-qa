@@ -158,17 +158,17 @@ class Agent:
         self.fim_integrity = None
         self.syscollector = None
         self.modules = {
-            "keepalive": {"status": "enabled", "frequency": self.keepalive_frequency},
-            "fim": {"status": "enabled", "eps": self.fim_eps},
-            "fim_integrity": {"status": "disabled", "eps": self.fim_integrity_eps},
-            "syscollector": {"status": "disabled", "frequency": self.syscollector_frequency,
-                             "eps": self.syscollector_eps},
-            "rootcheck": {"status": "disabled", "frequency": self.rootcheck_frequency, "eps": self.rootcheck_eps},
-            "sca": {"status": "disabled", "frequency": self.sca_frequency, "eps": self.sca_eps},
-            "hostinfo": {"status": "disabled", "eps": self.hostinfo_eps},
-            "winevt": {"status": "disabled", "eps": self.winevt_eps},
-            "logcollector": {"status": "disabled", "eps": self.logcollector_eps},
-            "receive_messages": {"status": "enabled"},
+            'keepalive': {'status': 'enabled', 'frequency': self.keepalive_frequency},
+            'fim': {'status': 'enabled', 'eps': self.fim_eps},
+            'fim_integrity': {'status': 'disabled', 'eps': self.fim_integrity_eps},
+            'syscollector': {'status': 'disabled', 'frequency': self.syscollector_frequency,
+                             'eps': self.syscollector_eps},
+            'rootcheck': {'status': 'disabled', 'frequency': self.rootcheck_frequency, 'eps': self.rootcheck_eps},
+            'sca': {'status': 'disabled', 'frequency': self.sca_frequency, 'eps': self.sca_eps},
+            'hostinfo': {'status': 'disabled', 'eps': self.hostinfo_eps},
+            'winevt': {'status': 'disabled', 'eps': self.winevt_eps},
+            'logcollector': {'status': 'disabled', 'eps': self.logcollector_eps},
+            'receive_messages': {'status': 'enabled'},
         }
         self.sha_key = None
         self.upgrade_exec_result = None
@@ -178,7 +178,7 @@ class Agent:
         self.stage_disconnect = None
         self.setup(disable_all_modules=disable_all_modules)
         self.rcv_msg_queue = Queue(rcv_msg_limit)
-        self.fixed_message_size = fixed_message_size * 1024
+        self.fixed_message_size = fixed_message_size * 1024 if fixed_message_size is not None else None
 
     def update_checksum(self, new_checksum):
         self.keep_alive_raw_msg = self.keep_alive_raw_msg.replace(self.merged_checksum, new_checksum)
@@ -644,7 +644,7 @@ class Agent:
     def init_rootcheck(self):
         """Initialize rootcheck module."""
         if self.rootcheck is None:
-            self.rootcheck = Rootcheck(self.rootcheck_sample, self.name, self.id)
+            self.rootcheck = Rootcheck(self.os, self.name, self.id, self.rootcheck_sample)
 
     def init_fim(self):
         """Initialize fim module."""
@@ -747,6 +747,7 @@ class GeneratorSyscollector:
         self.batch_size = batch_size
         self.syscollector_tag = 'syscollector'
         self.syscollector_mq = 'd'
+        self.current_id = 1
 
     def format_event(self, message_type):
         """Format syscollector message of the specified type.
@@ -779,13 +780,15 @@ class GeneratorSyscollector:
         timestamp = today.strftime("%Y/%m/%d %H:%M:%S")
 
         fields_to_replace = [
-                        ('<agent_name>', self.agent_name), ('<random_int>', str(randint(1, 10 * 10))),
+                        ('<agent_name>', self.agent_name), ('<random_int>', f"{self.current_id}"),
                         ('<random_string>', get_random_string(10)),
                         ('<timestamp>', timestamp), ('<syscollector_type>', message_type)
                     ]
 
         for variable, value in fields_to_replace:
             message = message.replace(variable, value)
+
+        self.current_id += 1
 
         message = f"{self.syscollector_mq}:{self.syscollector_tag}:{message}"
 
@@ -865,7 +868,7 @@ class SCA:
         Args:
             event_type (str): Event type `[summary, check]`.
         """
-        event_data = {}
+        event_data = dict()
         event_data['type'] = event_type
         event_data['scan_id'] = self.last_scan_id
         self.last_scan_id += 1
@@ -930,8 +933,6 @@ class SCA:
 
 
 class Rootcheck:
-    def __init__(self, os, agent_name, agent_id, rootcheck_sample=None):
-        self.os = os
     """This class allows the generation of rootcheck events.
 
     Creates rootcheck events by sequentially repeating the events of a sample file file.
@@ -941,7 +942,8 @@ class Rootcheck:
         agent_id (str): Id of the agent.
         rootcheck_sample (str): File with the rootcheck events that are going to be used.
     """
-    def __init__(self, agent_name, agent_id, rootcheck_sample=None):
+    def __init__(self, os, agent_name, agent_id, rootcheck_sample=None):
+        self.os = os
         self.agent_name = agent_name
         self.agent_id = agent_id
         self.rootcheck_tag = 'rootcheck'
@@ -962,7 +964,7 @@ class Rootcheck:
             line = fp.readline()
             while line:
                 if not line.startswith("#"):
-                    msg = "{0}:{1}:{2}".format(self.ROOTCHECK_MQ, self.ROOTCHECK, line.strip("\n"))
+                    msg = "{0}:{1}:{2}".format(self.rootcheck_mq, self.rootcheck_tag, line.strip("\n"))
                     self.messages_list.append(msg)
                 line = fp.readline()
 
@@ -1140,16 +1142,16 @@ class GeneratorWinevt:
         self.next_event_key = cycle(self.winevent_sources.keys())
 
     def generate_event(self, winevt_type=None):
-        """Genereate winevt event.
+        """Generate Windows event.
 
-        Generate the desired type of winevt event. If no type of winvt message is provided, all winvt message types
-        will be generated sequentially.
+        Generate the desired type of Windows event (winevt). If no type of winvt message is provided,
+        all winvt message types will be generated sequentially.
 
         Args:
             winevt_type (str): Winevt type message `system, security, application, windows-defender, sysmon`.
 
         Returns:
-            string: an windows event generatted message.
+            string: an windows event generated message.
         """
         self.current_event_key = next(self.next_event_key)
 
@@ -1200,7 +1202,7 @@ class GeneratorFIM:
         self.event_type = None
 
     def random_file(self):
-        """ Initialize file attribute.
+        """Initialize file attribute.
 
         Returns:
             string: the new randomized file for the instance
@@ -1209,7 +1211,7 @@ class GeneratorFIM:
         return self._file
 
     def random_size(self):
-        """ Initialize file size with random value
+        """Initialize file size with random value
 
         Returns:
             string: the new randomized file size for the instance
@@ -1314,6 +1316,7 @@ class GeneratorFIM:
         self.random_sha256()
         self.random_time()
         self.random_inode()
+        self._checksum = self.random_sha1()
 
     def check_changed_attributes(self, attributes, old_attributes):
         """Returns attributes that have changed. """
@@ -1369,7 +1372,7 @@ class GeneratorFIM:
             string: generated message with the required FIM header.
         """
         if self.agent_version >= "3.12":
-            formated_message = f"{self.syscheck_mq}:[{self.agent_id}] ({message})"
+            formated_message = f"{self.syscheck_mq}:({self.agent_id}) any->syscheck:{message}"
         else:
             # If first time generating. Send control message to simulate
             # end of FIM baseline.
@@ -1588,7 +1591,6 @@ class InjectorThread(threading.Thread):
                 if self.totalMessages % eps == 0:
                     sleep(1.0 - ((time() - start_time) % 1.0))
 
-
     def run_module(self, module):
         """Send a module message from the agent to the manager.
 
@@ -1601,7 +1603,6 @@ class InjectorThread(threading.Thread):
 
         sleep(10)
         start_time = time()
-
         if frequency > 1:
             batch_messages = eps * 0.5 * frequency
         else:
@@ -1675,7 +1676,7 @@ class InjectorThread(threading.Thread):
             self.stop_thread = 1
 
 
-def create_agents(agents_number, manager_address, cypher='aes', fim_eps=None, authd_password=None, agents_os=None,
+def create_agents(agents_number, manager_address, cypher='aes', fim_eps=100, authd_password=None, agents_os=None,
                   agents_version=None, disable_all_modules=False):
     """Create a list of generic agents
 
@@ -1690,6 +1691,7 @@ def create_agents(agents_number, manager_address, cypher='aes', fim_eps=None, au
         agents_os (list, optional): list containing different operative systems for the agents.
         agents_version (list, optional): list containing different version of the agent.
         disable_all_modules (boolean): Disable all simulated modules for this agent.
+
     Returns:
         list: list of the new virtual agents.
     """
@@ -1710,6 +1712,7 @@ def create_agents(agents_number, manager_address, cypher='aes', fim_eps=None, au
 
 def connect(agent,  manager_address='localhost', protocol=TCP, manager_port='1514'):
     """Connects an agent to the manager
+
     Args:
         agent (Agent): agent to connect.
         manager_address (str): address of the manager. It can be an IP or a DNS.
