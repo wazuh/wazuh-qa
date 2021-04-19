@@ -95,7 +95,7 @@ def test_only_future_events(get_configuration, configure_environment, restart_lo
     only future events values.
 
     Raises:
-        TimeoutError: If expected callback are not generated.
+        TimeoutError: If expected callbacks are not generated.
     """
     cfg = get_configuration['metadata']
     if cfg['valid_value']:

@@ -159,7 +159,7 @@ def test_configuration_frequency(get_local_internal_options, configure_local_int
     Ensure Wazuh component fails in case of invalid values and works properly in case of valid frequency values.
 
     Raises:
-        TimeoutError: If expected callback are not generated.
+        TimeoutError: If expected callbacks are not generated.
     """
     cfg = get_configuration['metadata']
     if cfg['valid_value']:

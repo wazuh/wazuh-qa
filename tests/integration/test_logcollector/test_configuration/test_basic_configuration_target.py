@@ -106,7 +106,7 @@ def test_configuration_target(get_configuration, configure_environment, restart_
     Ensure Wazuh component fails in case of invalid values and works properly in case of valid target values.
 
     Raises:
-        TimeoutError: If expected callback are not generated.
+        TimeoutError: If expected callbacks are not generated.
     """
     cfg = get_configuration['metadata']
     if cfg['valid_value']:

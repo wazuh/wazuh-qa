@@ -127,7 +127,7 @@ def test_ignore_binaries(get_configuration, configure_environment, restart_logco
     Ensure Wazuh component fails in case of invalid values and works properly in case of valid ignore_binaries values.
 
     Raises:
-        TimeoutError: If expected callback are not generated.
+        TimeoutError: If expected callbacks are not generated.
     """
     cfg = get_configuration['metadata']
     if cfg['valid_value']:
