@@ -35,7 +35,7 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
 
     for _ in range(agents_number):
         agent = ag.Agent(manager_address, "aes", os=agent_os, version=agent_version, fim_eps=eps,
-                         fixed_message_size=fixed_message_size)
+                         fixed_message_size=fixed_message_size, syscollector_frequency=0)
         available_modules = agent.modules.keys()
 
         for module in active_modules:
