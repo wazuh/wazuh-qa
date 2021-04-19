@@ -6,6 +6,7 @@ import os
 import pytest
 
 import wazuh_testing.generic_callbacks as gc
+import wazuh_testing.remote as remote
 from wazuh_testing.tools.monitoring import REMOTED_DETECTOR_PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 
@@ -43,7 +44,7 @@ def test_invalid_port(get_configuration, configure_environment, restart_remoted)
     """
     cfg = get_configuration['metadata']
 
-    log_callback = gc.callback_error_invalid_port(cfg['port'], wazuh_daemon=REMOTED_DETECTOR_PREFIX)
+    log_callback = remote.callback_error_invalid_port(cfg['port'])
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
 

@@ -55,4 +55,4 @@ def test_big_queue_size(get_configuration, configure_environment, restart_remote
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
 
-    api.compare_config_api_response(cfg, 'remote')
+    api.compare_config_api_response([cfg], 'remote')

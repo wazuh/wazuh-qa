@@ -58,4 +58,4 @@ def test_local_ip_valid(get_configuration, configure_environment, restart_remote
     cfg = get_configuration['metadata']
 
     # Check that API query return the selected configuration
-    api.compare_config_api_response(cfg, 'remote')
+    api.compare_config_api_response([cfg], 'remote')

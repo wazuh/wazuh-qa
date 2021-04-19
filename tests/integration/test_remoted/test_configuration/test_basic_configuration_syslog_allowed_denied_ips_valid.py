@@ -56,4 +56,4 @@ def test_allowed_denied_ips_syslog(get_configuration, configure_environment, res
     log_callback = remote.callback_detect_syslog_allowed_ips(cfg['allowed-ips'])
     wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message="Wazuh remoted didn't start as expected.")
 
-    api.compare_config_api_response(cfg, 'remote')
+    api.compare_config_api_response([cfg], 'remote')

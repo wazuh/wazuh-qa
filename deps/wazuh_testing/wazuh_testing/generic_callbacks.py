@@ -1,4 +1,4 @@
-from wazuh_testing.tools import WAZUH_CONF
+from wazuh_testing.tools import WAZUH_CONF, WAZUH_CONF_RELATIVE
 from wazuh_testing.tools import monitoring
 
 def callback_invalid_value(option, value, wazuh_daemon, severity='ERROR'):
@@ -15,7 +15,7 @@ def callback_invalid_value(option, value, wazuh_daemon, severity='ERROR'):
     return monitoring.make_callback(pattern=msg, prefix=wazuh_daemon)
 
 
-def callback_error_in_configuration(severity, wazuh_daemon, conf_path=WAZUH_CONF):
+def callback_error_in_configuration(severity, wazuh_daemon, conf_path=WAZUH_CONF_RELATIVE):
     """Create a callback to detect configuration error in ossec.conf file.
 
     Args:

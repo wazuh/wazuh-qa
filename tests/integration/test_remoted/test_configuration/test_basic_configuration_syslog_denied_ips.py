@@ -59,4 +59,4 @@ def test_denied_ips_syslog(get_configuration, configure_environment, restart_rem
                             error_message="The expected output for denied-ips has not been produced")
 
     # Check that API query return the selected configuration
-    api.compare_config_api_response(cfg, 'remote')
+    api.compare_config_api_response([cfg], 'remote')

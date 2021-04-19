@@ -93,5 +93,8 @@ def test_invalid_protocol(get_configuration, configure_environment, restart_remo
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message="The expected error output has not been produced")
 
+    real_configuration = cfg.copy()
+    real_configuration['protocol'] = cfg['protocol'].split(',')
+
     # Check that API query return the selected configuration
-    api.compare_config_api_response(cfg, 'remote')
+    api.compare_config_api_response([real_configuration], 'remote')

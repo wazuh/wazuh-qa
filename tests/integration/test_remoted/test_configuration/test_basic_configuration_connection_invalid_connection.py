@@ -42,6 +42,9 @@ def test_invalid_connection(get_configuration, configure_environment, restart_re
         AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected error message.
     """
     cfg = get_configuration['metadata']
+    real_configuration = cfg.copy()
+
+    real_configuration['protocol'] = cfg['protocol'].split(',')
 
     log_callback = gc.callback_invalid_value('connection', cfg['connection'], wazuh_daemon=REMOTED_DETECTOR_PREFIX)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,

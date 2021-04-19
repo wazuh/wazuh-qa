@@ -55,4 +55,4 @@ def test_ipv6_secure(get_configuration, configure_environment, restart_remoted):
                                 error_message="The expected error output has not been produced")
 
     # Check that API query return the selected configuration
-    api.compare_config_api_response(cfg, 'remote')
+    api.compare_config_api_response([cfg], 'remote')

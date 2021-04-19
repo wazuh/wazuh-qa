@@ -52,4 +52,4 @@ def test_queue_size_valid(get_configuration, configure_environment, restart_remo
     """
     cfg = get_configuration['metadata']
 
-    api.compare_config_api_response(cfg, 'remote')
+    api.compare_config_api_response([cfg], 'remote')
