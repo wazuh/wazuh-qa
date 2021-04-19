@@ -43,3 +43,17 @@ def callback_invalid_conf_for_localfile(field, wazuh_daemon,  severity='ERROR'):
     """
     msg = fr"{severity}: Invalid {field} for localfile"
     return monitoring.make_callback(pattern=msg, prefix=wazuh_daemon)
+
+
+def callback_error_invalid_value_for(option, wazuh_daemon):
+    """Create a callback to detect invalid values in ossec.conf file.
+
+    Args:
+        option (str): Wazuh manager configuration option.
+        wazuh_daemon (str): Daemon that generates the error log.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"WARNING: \(\d+\): Invalid value '.*' in '{option}' option. Default value will be used."
+    return monitoring.make_callback(pattern=msg, prefix=wazuh_daemon)

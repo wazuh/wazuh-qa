@@ -197,19 +197,6 @@ def callback_queue_size_too_big():
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
-def callback_error_invalid_value_for(option):
-    """Create a callback to detect invalid values in ossec.conf file.
-
-    Args:
-        option (str): Wazuh manager configuration option.
-
-    Returns:
-        callable: callback to detect this event.
-    """
-    msg = fr"WARNING: \(\d+\): Invalid value '.*' in '{option}' option. Default value will be used."
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
-
-
 def callback_error_invalid_ip(ip):
     """Create a callback to detect if error is created when invalid local ip value is provided.
 

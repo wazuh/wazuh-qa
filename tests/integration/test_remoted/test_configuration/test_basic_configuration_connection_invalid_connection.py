@@ -5,7 +5,7 @@
 import os
 import pytest
 
-import wazuh_testing.remote as remote
+from wazuh_testing.tools.monitoring import REMOTED_DETECTOR_PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 import wazuh_testing.generic_callbacks as gc
 
@@ -43,7 +43,7 @@ def test_invalid_connection(get_configuration, configure_environment, restart_re
     """
     cfg = get_configuration['metadata']
 
-    log_callback = gc.callback_invalid_value('connection', cfg['connection'])
+    log_callback = gc.callback_invalid_value('connection', cfg['connection'], wazuh_daemon=REMOTED_DETECTOR_PREFIX)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
 

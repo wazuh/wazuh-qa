@@ -7,7 +7,6 @@ import pytest
 
 import wazuh_testing.remote as remote
 import wazuh_testing.api as api
-import wazuh_testing.generic_callbacks as gc
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 
@@ -72,17 +71,17 @@ def test_invalid_protocol(get_configuration, configure_environment, restart_remo
     invalid_protocol_list = valid_invalid_protocols[1]
 
     for invalid_protocol in invalid_protocol_list:
-        log_callback = gc.callback_ignored_invalid_protocol(invalid_protocol)
+        log_callback = remote.callback_ignored_invalid_protocol(invalid_protocol)
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message="The expected error output has not been produced")
 
     if len(valid_protocol) == 0:
-        log_callback = gc.callback_error_getting_protocol()
+        log_callback = remote.callback_error_getting_protocol()
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message="The expected error output has not been produced")
 
     elif len(valid_protocol) == 1:
-        log_callback = gc.callback_detect_remoted_started(cfg['port'], valid_protocol[0], cfg['connection'])
+        log_callback = remote.callback_detect_remoted_started(cfg['port'], valid_protocol[0], cfg['connection'])
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message="The expected error output has not been produced")
 
