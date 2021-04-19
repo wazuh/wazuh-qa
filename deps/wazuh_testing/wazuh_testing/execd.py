@@ -9,17 +9,13 @@ AR_LOG_FILE_PATH = os.path.join(WAZUH_PATH, AR_FOLDER, 'active-responses.log')
 
 
 def clean_logs():
-    """
-    Clean log file
-    """
+    """Clean log file."""
     truncate_file(LOG_FILE_PATH)
     truncate_file(AR_LOG_FILE_PATH)
 
 
 def start_log_monitoring(monitor, callback, timeout=60):
-    """
-    Monitor log and wait for message defined in callback
-    """
+    """Monitor log and wait for message defined in callback."""
     try:
         monitor.start(timeout, callback)
     except TimeoutError:
@@ -27,21 +23,15 @@ def start_log_monitoring(monitor, callback, timeout=60):
 
 
 def wait_ended_message_line(line):
-    """
-    Callback function to wait for the Ended Active Response message
-    """
+    """Callback function to wait for the Ended Active Response message."""
     return True if "Ended" in line else None
 
 
 def wait_received_message_line(line):
-    """
-    Callback function to wait for the Received Active Response message
-    """
+    """Callback function to wait for the Received Active Response message."""
     return True if "DEBUG: Received message: " in line else None
 
 
 def wait_start_message_line(line):
-    """
-    Callback function to wait for the Starting Active Response message
-    """
+    """Callback function to wait for the Starting Active Response message."""
     return True if "Starting" in line else None

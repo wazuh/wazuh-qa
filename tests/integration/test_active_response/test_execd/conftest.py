@@ -7,9 +7,7 @@ from wazuh_testing.tools import WAZUH_PATH, get_version
 
 @pytest.fixture(scope="session")
 def set_ar_conf_mode():
-    """
-    Configure Active Responses used in tests
-    """
+    """Configure Active Responses used in tests."""
     folder = 'shared' if platform.system() == 'Windows' else 'etc/shared'
     local_int_conf_path = os.path.join(WAZUH_PATH, folder, 'ar.conf')
     debug_line = "restart-wazuh0 - restart-wazuh - 0\nrestart-wazuh0 - restart-wazuh.exe - 0\n" \
@@ -25,9 +23,7 @@ def set_ar_conf_mode():
 
 @pytest.fixture(scope="session")
 def set_debug_mode():
-    """
-    Set execd daemon in debug mode
-    """
+    """Set execd daemon in debug mode."""
     folder = '' if platform.system() == 'Windows' else 'etc'
     local_int_conf_path = os.path.join(WAZUH_PATH, folder, 'local_internal_options.conf')
     debug_line = 'windows.debug=2\n' if platform.system() == 'Windows' else 'execd.debug=2\n'
@@ -42,8 +38,6 @@ def set_debug_mode():
 
 @pytest.fixture(scope="session")
 def test_version():
-    """
-    Validate Wazuh version
-    """
+    """Validate Wazuh version."""
     if get_version() < "v4.2.0":
         raise AssertionError("The version of the agent is < 4.2.0")

@@ -54,16 +54,14 @@ def teardown():
 
 
 def set_debug_mode():
-    """
-    Set debug2 for agentd in local internal options file.
-    """
+    """Set debug2 for agentd in local internal options file."""
     if platform.system() == 'win32' or platform.system() == 'Windows':
         local_int_conf_path = os.path.join(WAZUH_PATH, 'local_internal_options.conf')
         debug_line = 'windows.debug=2\n'
     else:
         local_int_conf_path = os.path.join(WAZUH_PATH, 'etc', 'local_internal_options.conf')
         debug_line = 'agent.debug=2\n'
-    with open(local_int_conf_path, 'r') as local_file_read:
+    with open(local_int_conf_path) as local_file_read:
         lines = local_file_read.readlines()
         for line in lines:
             if line == debug_line:
@@ -167,10 +165,10 @@ def wait_connect(line):
 
 
 def count_retry_mesages():
-    """
-    Count number of attempts to connect to server and enrollments made from log file.
+    """Count number of attempts to connect to server and enrollments made from log file.
 
-    Returns (int , int): Tuple with connection attempts and enrollments.
+    Returns:
+        (int , int): Tuple with connection attempts and enrollments.
     """
     connect = 0
     enroll = 0
@@ -201,8 +199,8 @@ def wait_unable_to_connect(line):
 
 
 def change_timeout(new_value):
-    """
-    Set agent.recv_timeout for agentd in local internal options file.
+    """Set agent.recv_timeout for agentd in local internal options file.
+
     The above option sets the maximum number of seconds to wait
     for server response from the TCP client socket.
 
@@ -227,14 +225,13 @@ change_timeout('5')
 
 
 def parse_time_from_log_line(log_line):
-    """
-    Create a datetime object from a date in a string.
+    """Create a datetime object from a date in a string.
 
     Args:
-        log_line: String with date
+        log_line (str): String with date.
 
     Returns:
-        datetime object.
+        datetime: datetime object with the parsed time.
     """
     data = log_line.split(" ")
     (year, month, day) = data[0].split("/")
@@ -256,8 +253,8 @@ This test covers different options of delays between server connection attempts:
 
 def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, stop_agent, set_keys,
                                            configure_environment, get_configuration):
-    """
-    Check how the agent behaves when there are delays between connection attempts to the server.
+    """Check how the agent behaves when there are delays between connection attempts to the server.
+
     For this purpose, different values for max_retries and retry_interval parameters are tested.
 
     Args:

@@ -246,9 +246,7 @@ def get_configuration(request):
 
 @pytest.fixture(scope="module")
 def add_hostnames(request):
-    """
-    Add to OS hosts file, names and IP's of test servers.
-    """
+    """Add to OS hosts file, names and IP's of test servers."""
     HOSTFILE_PATH = os.path.join(os.environ['SystemRoot'], 'system32', 'drivers', 'etc', 'hosts') \
         if os.sys.platform == 'win32' else '/etc/hosts'
     hostfile = None
@@ -266,8 +264,7 @@ def add_hostnames(request):
 
 @pytest.fixture(scope="module")
 def configure_authd_server(request, get_configuration):
-    """
-    Initialize multiple simulated remoted connections.
+    """Initialize multiple simulated remoted connections.
 
     Args:
         get_configuration (fixture): Get configurations from the module.
@@ -301,8 +298,7 @@ def set_authd_id(request):
 
 @pytest.fixture(scope="function")
 def clean_keys(request, get_configuration):
-    """
-    Clear the client.key file used by the simulated remoted connections.
+    """Clear the client.key file used by the simulated remoted connections.
 
     Args:
         get_configuration (fixture): Get configurations from the module.
@@ -325,12 +321,11 @@ def restart_agentd():
 
 # Tests
 def wait_until(x, log_str):
-    """
-    Callback function to wait for a message in a log file.
+    """Callback function to wait for a message in a log file.
 
     Args:
-        x: String containing message.
-        log_str: Log file string.
+        x (str): String containing message.
+        log_str (str): Log file string.
     """
     print(x)
     return x if log_str in x else None
@@ -339,7 +334,8 @@ def wait_until(x, log_str):
 # @pytest.mark.parametrize('test_case', [case for case in tests])
 def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id, clean_keys, configure_environment,
                              get_configuration):
-    """
+    """Check the agent's enrollment and connection to a manager in a multi-server environment.
+
     Initialize an environment with multiple simulated servers in which the agent is forced to enroll
     under different test conditions, verifying the agent's behavior through its log files.
 

@@ -63,9 +63,7 @@ def teardown():
 
 
 def set_debug_mode():
-    """
-    Set debug2 for agentd in local internal options file.
-    """
+    """Set debug2 for agentd in local internal options file."""
     if platform.system() == 'win32' or platform.system() == 'Windows':
         local_int_conf_path = os.path.join(WAZUH_PATH, 'local_internal_options.conf')
         debug_line = 'windows.debug=2\n'
@@ -166,11 +164,10 @@ def wait_enrollment_try(line):
 
 
 def search_error_messages():
-    """
-    Retrieve the line of the log file where first error is found.
+    """Retrieve the line of the log file where first error is found.
 
     Returns:
-          String where the error is found or None if errors are not found.
+          str: String where the error is found or None if errors are not found.
     """
     with open(LOG_FILE_PATH, 'r') as log_file:
         lines = log_file.readlines()
@@ -189,9 +186,9 @@ when misses communication with Remoted and a new enrollment is sent to Authd.
 
 def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_authd, set_authd_id, set_keys,
                                                  configure_environment, get_configuration):
-    """
-    Check how the agent behaves when losing communication with remoted and a new enrollment is sent to authd.
-    The agent starting with keys.
+    """Check how the agent behaves when losing communication with remoted and a new enrollment is sent to authd.
+
+    In this case, the agent starts with keys.
 
     Args:
         configure_authd_server (fixture): Initialize a simulated authd connection.
@@ -259,8 +256,8 @@ and an enrollment is sent to Authd to start communicating with Remoted
 
 def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, start_authd, set_authd_id, delete_keys,
                                                     configure_environment, get_configuration):
-    """
-    Check how the agent behaves when losing communication with remoted and a new enrollment is sent to authd.
+    """Check how the agent behaves when losing communication with remoted and a new enrollment is sent to authd.
+
     In this case, the agent doesn't have client.keys file.
 
     Args:
@@ -332,8 +329,8 @@ and an enrollment is sent to Authd to start communicating with Remoted
 
 def test_agentd_reconection_enrollment_no_keys(configure_authd_server, start_authd, set_authd_id, clean_keys,
                                                configure_environment, get_configuration):
-    """
-    Check how the agent behaves when losing communication with remoted and a new enrollment is sent to authd.
+    """Check how the agent behaves when losing communication with remoted and a new enrollment is sent to authd.
+
     In this case, the agent has its client.keys file empty.
 
     Args:
@@ -405,9 +402,10 @@ and multiple retries are required until the new key is obtained to start communi
 
 def test_agentd_initial_enrollment_retries(configure_authd_server, stop_authd, set_authd_id, clean_keys,
                                            configure_environment, get_configuration):
-    """
-    Check how the agent behaves when starting without keys and perform multiple enrollment
-    requests to authd before getting the new key to communicate with remoted.
+    """Check how the agent behaves when it makes multiple enrollment attempts before getting its key.
+
+    For this, the agent starts without keys and perform multiple enrollment requests
+    to authd before getting the new key to communicate with remoted.
 
     Args:
         configure_authd_server (fixture): Initialize a simulated authd connection.
@@ -480,9 +478,10 @@ and multiple connection retries are required prior to requesting a new enrollmen
 
 def test_agentd_connection_retries_pre_enrollment(configure_authd_server, stop_authd, set_keys, configure_environment,
                                                   get_configuration):
-    """
-    Check how the agent behaves when it starts with keys but Remoted is not available for several seconds
-    and performs multiple connection retries before requesting a new enrollment.
+    """Check how the agent behaves when Remoted is not available and performs multiple connection attempts to it.
+
+    For this, the agent starts with keys but Remoted is not available for several seconds,
+    then the agent performs multiple connection retries before requesting a new enrollment.
 
     Args:
         configure_authd_server (fixture): Initialize a simulated authd connection.
