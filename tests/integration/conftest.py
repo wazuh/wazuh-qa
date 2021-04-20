@@ -18,7 +18,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, \
     write_wazuh_conf, add_wazuh_local_internal_options, set_wazuh_local_internal_options, \
-    get_wazuh_local_internal_options
+    get_wazuh_local_internal_options, local_internal_options_to_dict
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
@@ -410,17 +410,21 @@ def connect_to_sockets_function(request):
 
 @pytest.fixture(scope='module')
 def configure_local_internal_options(get_local_internal_options):
-    backup_options = get_wazuh_local_internal_options()
-    add_wazuh_local_internal_options(get_local_internal_options)
+    backup_options_lines = get_wazuh_local_internal_options()
+    backup_options_dict = local_internal_options_to_dict(backup_options_lines)
+    if not all(option in backup_options_dict.items() for option in get_local_internal_options.items()):
+        add_wazuh_local_internal_options(get_local_internal_options)
 
-    control_service('restart')
+        control_service('restart')
 
-    yield
+        yield
 
-    TimeMachine.time_rollback()
-    set_wazuh_local_internal_options(backup_options)
+        TimeMachine.time_rollback()
+        set_wazuh_local_internal_options(backup_options_lines)
 
-    control_service('restart')
+        control_service('restart')
+    else:
+        yield
 
 
 @pytest.fixture(scope='module')

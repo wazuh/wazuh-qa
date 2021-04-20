@@ -10,5 +10,5 @@ firewalls and other such devices. In case of the Windows agent, the daemon in ch
 #### Test configuration
 
 For each configuration option, we check if logcollector and agentd correctly
-starts and that any api request to the Manager configuration returns the same options that the specified 
+starts and that any API request to the Manager configuration returns the same options that the specified 
 in `ossec.conf`

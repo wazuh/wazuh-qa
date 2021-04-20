@@ -575,3 +575,10 @@ def create_local_internal_configuration(dict_local_internal_options):
     for key, value in dict_local_internal_options.items():
         wazuh_local_internal_options += f"{str(key)}={str(value)}\n"
     return wazuh_local_internal_options
+
+
+def local_internal_options_to_dict(local_internal_options):
+    no_comments_options = [line.strip() for line in local_internal_options
+                           if not (line.startswith('#') or line == '\n')]
+    dict_local_internal_options = dict(line.split('=') for line in no_comments_options)
+    return dict_local_internal_options
