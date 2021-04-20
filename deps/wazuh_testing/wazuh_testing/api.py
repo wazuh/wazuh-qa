@@ -112,8 +112,8 @@ def compare_config_api_response(configuration, section):
     assert type(api_answer) == type(configuration)
 
     if isinstance(api_answer, list):
-        api_answer_length = len(api_answer)
-        for i in range(api_answer_length):
+        configuration_length = len(configuration)
+        for i in range(configuration_length):
             api_answer_to_compare = dict((key, api_answer[i][key]) for key in configuration[i].keys())
             assert api_answer_to_compare == configuration[i]
     else:
