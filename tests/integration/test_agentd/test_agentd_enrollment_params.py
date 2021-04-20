@@ -124,8 +124,8 @@ def override_wazuh_conf(configuration):
         parser.add_password(password=configuration['password']['value'], isFile=True,
                             path=configuration.get('authorization_pass_path'))
 
-        # Start Wazuh
-        control_service('start', daemon='wazuh-agentd')
+    # Start Wazuh
+    control_service('start', daemon='wazuh-agentd')
 
 
 def get_temp_yaml(param):
@@ -161,7 +161,6 @@ def check_time_to_connect(timeout):
     Returns:
         int: Integer with elapsed time in seconds.
     """
-
     def wait_connect(line):
         if 'Trying to connect to server' in line:
             return line

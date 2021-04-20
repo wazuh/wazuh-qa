@@ -78,7 +78,7 @@ def test_agent_auth_enrollment(configure_authd_server, configure_environment, te
     if 'agent-auth' in test_case.get("skips", []):
         pytest.skip("This test does not apply to agent-auth")
     parser = ag.AgentAuthParser(server_address=SERVER_ADDRESS, BINARY_PATH=ag.AGENT_AUTH_BINARY_PATH,
-                             sudo=True if platform.system() == 'Linux' else False)
+                                sudo=True if platform.system() == 'Linux' else False)
     configuration = test_case.get('configuration', {})
     ag.parse_configuration_string(configuration)
     enrollment = test_case.get('enrollment', {})
@@ -112,7 +112,8 @@ def test_agent_auth_enrollment(configure_authd_server, configure_environment, te
     print(stdout.decode())
     results = monitored_sockets.get_results(callback=(lambda y: [x.decode() for x in y]), timeout=5, accum_results=1)
     if test_case.get('enrollment') and test_case['enrollment'].get('response'):
-        assert results[0] == ag.build_expected_request(configuration), 'Expected enrollment request message does not match'
+        assert results[0] == ag.build_expected_request(configuration), \
+            'Expected enrollment request message does not match'
         assert results[1] == test_case['enrollment']['response'].format(**ag.DEFAULT_VALUES), \
             'Expected response message does not match'
         assert ag.check_client_keys_file(), 'Client key does not match'
