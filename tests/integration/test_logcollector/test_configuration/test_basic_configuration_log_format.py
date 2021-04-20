@@ -111,6 +111,7 @@ configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['COMMAND']}" for x in 
 
 log_format_not_print_analyzing_info = ['command', 'full_command', 'eventlog', 'eventchannel']
 
+
 # fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
@@ -138,18 +139,18 @@ def check_log_format_valid(cfg):
 
         log_callback = logcollector.callback_analyzing_file(cfg['location'], prefix=prefix)
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="The expected error output has not been produced")
+                                error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
     elif 'command' in cfg['log_format']:
 
         log_callback = logcollector.callback_monitoring_command(cfg['log_format'], cfg['command'], prefix=prefix)
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="The expected error output has not been produced")
+                                error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
     elif cfg['log_format'] == 'djb-multilog':
 
         log_callback = logcollector.callback_monitoring_djb_multilog(cfg['location'], prefix=prefix)
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="The expected error output has not been produced")
+                                error_message="The expected multilog djb log has not been produced")
 
     if wazuh_component == 'wazuh-manager':
         real_configuration = cfg.copy()
@@ -173,18 +174,18 @@ def check_log_format_invalid(cfg):
 
     log_callback = gc.callback_invalid_value('log_format', cfg['log_format'], prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
+                            error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
     log_callback = gc.callback_error_in_configuration('ERROR', prefix,
                                                       conf_path=f'{wazuh_configuration}')
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
+                            error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
     if sys.platform != 'win32':
         log_callback = gc.callback_error_in_configuration('CRITICAL', prefix,
                                                           conf_path=f'{wazuh_configuration}')
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="The expected error output has not been produced")
+                                error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
 
 def test_log_format(get_configuration, configure_environment, restart_logcollector):

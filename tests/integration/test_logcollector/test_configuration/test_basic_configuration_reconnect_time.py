@@ -95,7 +95,7 @@ def check_configuration_reconnect_time_invalid(cfg):
 
     log_callback = logcollector.callback_invalid_reconnection_time(prefix=prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
+                            error_message="The expected invalid reconnection time error has not been produced")
 
 
 # fixtures

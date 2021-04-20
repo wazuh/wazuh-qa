@@ -67,4 +67,4 @@ def test_configuration_query_valid(get_configuration, configure_environment, res
 
     log_callback = logcollector.callback_eventchannel_analyzing('Security')
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)

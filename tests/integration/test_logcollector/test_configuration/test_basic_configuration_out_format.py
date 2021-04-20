@@ -12,16 +12,12 @@ from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_
 
 import sys
 
-
 # Marks
 pytestmark = pytest.mark.tier(level=0)
-
-
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
-
 
 wazuh_component = get_service()
 
@@ -105,7 +101,9 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
 configuration_ids = \
-    [f"{x['LOG_FORMAT'], x['TARGET'], x['SOCKET_NAME'], x['LOCATION'], x['SOCKET_PATH'], x['TARGET_OUT_FORMAT'], x['OUT_FORMAT']}" for x in parameters]
+    [
+        f"{x['LOG_FORMAT'], x['TARGET'], x['SOCKET_NAME'], x['LOCATION'], x['SOCKET_PATH'], x['TARGET_OUT_FORMAT'], x['OUT_FORMAT']}"
+        for x in parameters]
 
 
 def check_configuration_out_format_valid(cfg):
@@ -122,7 +120,7 @@ def check_configuration_out_format_valid(cfg):
     """
     log_callback = logcollector.callback_socket_target(cfg['location'], cfg['target'], prefix=prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="The expected error output has not been produced")
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
 
     if wazuh_component == 'wazuh-manager':
         real_configuration = dict((key, cfg[key]) for key in ('location', 'target', 'log_format'))
@@ -142,7 +140,7 @@ def check_configuration_out_format_invalid(cfg):
     """
     log_callback = logcollector.callback_log_target_not_found(cfg['location'], cfg['target_out_format'], prefix=prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="The expected error output has not been produced")
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND)
 
 
 # fixtures
@@ -165,4 +163,3 @@ def test_configuration_out_format(get_configuration, configure_environment, rest
         check_configuration_out_format_valid(cfg)
     else:
         check_configuration_out_format_invalid(cfg)
-

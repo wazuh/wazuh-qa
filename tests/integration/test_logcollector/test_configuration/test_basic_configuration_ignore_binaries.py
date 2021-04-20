@@ -10,6 +10,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 import wazuh_testing.generic_callbacks as gc
 from wazuh_testing.tools import get_service
 import wazuh_testing.logcollector as logcollector
+from wazuh_testing.tools.services import get_process_cmd, check_if_process_is_running
 
 import wazuh_testing.api as api
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
@@ -73,8 +74,8 @@ def get_configuration(request):
 def check_ignore_binaries_valid(cfg):
     """Check if the Wazuh run correctly with the specified ignore_binaries field value.
 
-    Ensure logcollector allow the specified ignore_binaries attribute. Also, in case of manager instance, check if the API
-    answer for localfile block coincides.
+    Ensure logcollector allow the specified ignore_binaries attribute. Also, in case of manager instance,
+    check if the API answer for localfile block coincides.
 
     Args:
         cfg (dict): Dictionary with the localfile configuration.
@@ -87,13 +88,18 @@ def check_ignore_binaries_valid(cfg):
     if sys.platform == 'win32':
         log_callback = logcollector.callback_invalid_location_pattern(cfg['location'], prefix=prefix)
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="The expected error output has not been produced")
+                                error_message=logcollector.GENERIC_CALLBACK_ERROR_INVALID_LOCATION)
 
     if wazuh_component == 'wazuh-manager':
         real_configuration = cfg.copy()
         real_configuration.pop('valid_value')
         api.wait_until_api_ready()
         api.compare_config_api_response([real_configuration], 'localfile')
+    else:
+        if sys.platform == 'win32':
+            assert get_process_cmd('wazuh-agent.exe') != 'None'
+        else:
+            assert check_if_process_is_running('wazuh-logcollector')
 
 
 def check_ignore_binaries_invalid(cfg):
@@ -107,18 +113,18 @@ def check_ignore_binaries_invalid(cfg):
     """
     log_callback = gc.callback_invalid_value('ignore_binaries', cfg['ignore_binaries'], prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
+                            error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
     log_callback = gc.callback_error_in_configuration('ERROR', prefix,
                                                       conf_path=f'{wazuh_configuration}')
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
+                            error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
     if sys.platform != 'win32':
         log_callback = gc.callback_error_in_configuration('CRITICAL', prefix,
                                                           conf_path=f'{wazuh_configuration}')
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="The expected error output has not been produced")
+                                error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
 
 def test_ignore_binaries(get_configuration, configure_environment, restart_logcollector):

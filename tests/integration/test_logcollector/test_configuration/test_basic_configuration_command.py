@@ -91,7 +91,7 @@ def test_configuration_command(get_local_internal_options, configure_local_inter
 
     log_callback = logcollector.callback_monitoring_command(cfg['log_format'], cfg['command'], prefix=prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
     if wazuh_component == 'wazuh-manager':
         api.wait_until_api_ready()

@@ -1,5 +1,7 @@
-from wazuh_testing.tools import WAZUH_CONF, WAZUH_CONF_RELATIVE
+from wazuh_testing.tools import WAZUH_CONF_RELATIVE
 from wazuh_testing.tools import monitoring
+
+GENERIC_CALLBACK_ERROR_MESSAGE = 'The expected error output has not been produced'
 
 def callback_invalid_value(option, value, wazuh_daemon, severity='ERROR'):
     """Create a callback to detect invalid values in ossec.conf file.

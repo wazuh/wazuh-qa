@@ -79,7 +79,7 @@ def test_configuration_label(get_configuration, configure_environment, restart_l
 
     log_callback = logcollector.callback_analyzing_file(cfg['location'], prefix=prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
 
     if wazuh_component == 'wazuh-manager':
         real_configuration = dict((key, cfg[key]) for key in ['location'])

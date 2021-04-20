@@ -100,7 +100,7 @@ def check_configuration_frequency_valid(cfg):
 
     log_callback = logcollector.callback_monitoring_command(cfg['log_format'], cfg['command'], prefix=prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
     real_configuration = cfg.copy()
     real_configuration.pop('valid_value')
@@ -124,19 +124,19 @@ def check_configuration_frequency_invalid(cfg):
 
     log_callback = gc.callback_invalid_value('frequency', cfg['frequency'], prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
+                            error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
     log_callback = gc.callback_error_in_configuration('ERROR', prefix,
                                                       conf_path=f'{wazuh_configuration}')
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
+                            error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
     if sys.platform != 'win32':
 
         log_callback = gc.callback_error_in_configuration('CRITICAL', prefix,
                                                           conf_path=f'{wazuh_configuration}')
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="The expected error output has not been produced")
+                                error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
 
 # fixtures

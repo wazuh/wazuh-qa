@@ -75,13 +75,11 @@ def test_configuration_alias(get_local_internal_options, configure_local_interna
         TimeoutError: If the command monitoring callback is not generated.
         AssertError: In the case of a server instance, the API response is different from the real configuration.
     """
-
-
     cfg = get_configuration['metadata']
 
     log_callback = logcollector.callback_command_alias_output(cfg['alias'], prefix=prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
     if wazuh_component == 'wazuh-manager':
         api.wait_until_api_ready()

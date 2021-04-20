@@ -80,7 +80,7 @@ def check_configuration_age_valid(cfg):
     """
     log_callback = logcollector.callback_analyzing_file(cfg['location'], prefix=prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
     if wazuh_component == 'wazuh-manager':
         real_configuration = cfg.copy()
         real_configuration.pop('valid_value')
@@ -102,17 +102,17 @@ def check_configuration_age_invalid(cfg):
 
     log_callback = gc.callback_invalid_conf_for_localfile('age', prefix, severity='ERROR')
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
+                            error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
     log_callback = gc.callback_error_in_configuration('ERROR', prefix,
                                                       conf_path=f'{wazuh_configuration}')
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message="The expected error output has not been produced")
+                            error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
     if sys.platform != 'win32':
         log_callback = gc.callback_error_in_configuration('CRITICAL', prefix,
                                                           conf_path=f'{wazuh_configuration}')
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message="The expected error output has not been produced")
+                                error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
 
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
