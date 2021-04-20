@@ -62,8 +62,6 @@ def check_only_future_events_valid(cfg):
     Raises:
         TimeoutError: If the "Analyzing file" callback is not generated.
     """
-    cfg = get_configuration['metadata']
-
     log_callback = logcollector.callback_eventchannel_analyzing(cfg['location'])
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)
