@@ -24,28 +24,27 @@ else:
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
-location = r'C:\testing.txt'
 wazuh_component = get_service()
 prefix = AGENT_DETECTOR_PREFIX
 
 
 parameters = [
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'yes'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'no'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'yesTesting'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'noTesting'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'testingvalue'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': '1234'}
+    {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'yes'},
+    {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'no'},
+    {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'yesTesting'},
+    {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'noTesting'},
+    {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'testingvalue'},
+    {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': '1234'}
 
 ]
 
 metadata = [
-    {'location': f'{location}', 'log_format': 'eventchannel', 'only-future-events': 'yes', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'eventchannel', 'only-future-events': 'no', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'eventchannel', 'only-future-events': 'yesTesting', 'valid_value': False},
-    {'location': f'{location}', 'log_format': 'eventchannel', 'only-future-events': 'noTesting', 'valid_value': False},
-    {'location': f'{location}', 'log_format': 'eventchannel', 'only-future-events': 'testingvalue', 'valid_value': False},
-    {'location': f'{location}', 'log_format': 'eventchannel', 'only-future-events': '1234', 'valid_value': False}
+    {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'yes', 'valid_value': True},
+    {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'no', 'valid_value': True},
+    {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'yesTesting', 'valid_value': False},
+    {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'noTesting', 'valid_value': False},
+    {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'testingvalue', 'valid_value': False},
+    {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': '1234', 'valid_value': False}
 
 ]
 
@@ -63,7 +62,9 @@ def check_only_future_events_valid(cfg):
     Raises:
         TimeoutError: If the "Analyzing file" callback is not generated.
     """
-    log_callback = logcollector.callback_eventchannel_analyzing('Security')
+    cfg = get_configuration['metadata']
+
+    log_callback = logcollector.callback_eventchannel_analyzing(cfg['location'])
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)
 
