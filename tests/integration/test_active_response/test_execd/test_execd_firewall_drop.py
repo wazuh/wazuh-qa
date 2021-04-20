@@ -204,18 +204,18 @@ def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, co
     ar_log_monitor = FileMonitor(execd.AR_LOG_FILE_PATH)
 
     # Checking AR in ossec logs
-    execd.start_log_monitoring(ossec_log_monitor, execd.wait_received_message_line)
+    ossec_log_monitor.start(timeout=60, callback=execd.wait_received_message_line)
 
     # Checking AR in active-response logs
-    execd.start_log_monitoring(ar_log_monitor, execd.wait_start_message_line)
+    ar_log_monitor.start(timeout=60, callback=execd.wait_start_message_line)
 
     if expected['success']:
         for command_id in range(2):
-            execd.start_log_monitoring(ar_log_monitor, wait_message_line)
+            ar_log_monitor.start(timeout=60, callback=wait_message_line)
             last_log = ar_log_monitor.result()
             validate_ar_message(last_log, command_id)
 
-            execd.start_log_monitoring(ar_log_monitor, execd.wait_ended_message_line)
+            ar_log_monitor.start(timeout=60, callback=execd.wait_ended_message_line)
 
             # Checking if the IP was added/removed in iptables
             iptables_file = os.popen('iptables -L')
@@ -231,4 +231,4 @@ def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, co
 
             time.sleep(5)
     else:
-        execd.start_log_monitoring(ar_log_monitor, wait_invalid_input_message_line)
+        ar_log_monitor.start(timeout=60, callback=wait_invalid_input_message_line)

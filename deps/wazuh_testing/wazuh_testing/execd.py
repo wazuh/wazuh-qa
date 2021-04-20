@@ -14,14 +14,6 @@ def clean_logs():
     truncate_file(AR_LOG_FILE_PATH)
 
 
-def start_log_monitoring(monitor, callback, timeout=60):
-    """Monitor log and wait for message defined in callback."""
-    try:
-        monitor.start(timeout, callback)
-    except TimeoutError:
-        raise AssertionError("Message took too much!")
-
-
 def wait_ended_message_line(line):
     """Callback function to wait for the Ended Active Response message."""
     return True if "Ended" in line else None

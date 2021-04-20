@@ -160,17 +160,17 @@ def test_execd_restart(set_debug_mode, get_configuration, test_version,
     ar_log_monitor = FileMonitor(execd.AR_LOG_FILE_PATH)
 
     # Checking AR in ossec logs
-    execd.start_log_monitoring(ossec_log_monitor, execd.wait_received_message_line)
+    ossec_log_monitor.start(timeout=60, callback=execd.wait_received_message_line)
 
     # Checking AR in active-response logs
-    execd.start_log_monitoring(ar_log_monitor, execd.wait_start_message_line)
+    ar_log_monitor.start(timeout=60, callback=execd.wait_start_message_line)
 
     if expected['success']:
-        execd.start_log_monitoring(ar_log_monitor, wait_message_line)
+        ar_log_monitor.start(timeout=60, callback=wait_message_line)
 
         # Checking shutdown message in ossec logs
-        execd.start_log_monitoring(ossec_log_monitor, wait_shutdown_message_line)
+        ossec_log_monitor.start(timeout=60, callback=wait_shutdown_message_line)
 
-        execd.start_log_monitoring(ar_log_monitor, execd.wait_ended_message_line)
+        ar_log_monitor.start(timeout=60, callback=execd.wait_ended_message_line)
     else:
-        execd.start_log_monitoring(ar_log_monitor, wait_invalid_input_message_line)
+        ar_log_monitor.start(timeout=60, callback=wait_invalid_input_message_line)
