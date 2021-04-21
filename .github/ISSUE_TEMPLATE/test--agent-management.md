@@ -13,24 +13,24 @@ assignees: ''
 | --- | --- | --- |
 | x.y.z | rev | branch |
 
-## *agent.conf*
+## *Shared.conf*
 
-- [ ] Check if the "verify-agent-conf" tool verifies the agent.conf including all the modules. (1)
+- [ ] Check if the "verify-agent-conf" tool verifies the shared.conf including all the modules. (1)
 - [ ] Set a configuration for a non-existent agent, OS, or profile. Try to send it to agents. (1)
-- [ ] Send by the agent.conf an unrecognizable module for the agent.
-- [ ] Agents (Linux/Windows) receive the agent.conf, applying the configuration and restarting the agent automatically. (1)
-- [ ] Agents ignore agent.conf when it is specified in the internal options. (1)
+- [ ] Send by the shared.conf an unrecognizable module for the agent.
+- [ ] Agents (Linux/Windows) receive the shared.conf, applying the configuration and restarting the agent automatically. (1)
+- [ ] Agents ignore shared.conf when it is specified in the internal options. (1)
 
-(1) https://documentation.wazuh.com/3.x/user-manual/reference/centralized-configuration.html
+(1) https://documentation.wazuh.com/current/user-manual/reference/centralized-configuration.html
 
 ## Labels
 
-- [ ] Set nested labels for an agent in the "agent.conf". (2)
+- [ ] Set nested labels for an agent in the "shared.conf". (2)
 - [ ] Show hidden labels with the internal option of analysisd. (2)
 - [ ] Use labels in the "localfile" section for a monitored log file in JSON. (3) 
 
-(2) https://documentation.wazuh.com/3.x/user-manual/capabilities/labels.html
-(3) https://documentation.wazuh.com/3.x/user-manual/reference/ossec-conf/localfile.html#label
+(2) https://documentation.wazuh.com/current/user-manual/capabilities/labels.html
+(3) https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html#label
 
 ## Groups / Multiple groups
 

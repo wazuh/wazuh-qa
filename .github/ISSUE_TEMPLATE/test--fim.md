@@ -249,8 +249,8 @@ Check links:
 - [ ] Configure `max_eps` option.
 
 ### Centralized configuration and on-demand configuration
-- [ ] Check that `<directories>` in `syscheck` configuration block are overwritten by a configuration specified in the centralized configuration (`agent.conf`) including entries with a trailing slash in a single comma-separated stanza.
-- [ ] Check the `syscheck` on-demand configuration (agent configured with `agent.conf` file).
+- [ ] Check that `<directories>` in `syscheck` configuration block are overwritten by a configuration specified in the centralized configuration (`shared.conf`) including entries with a trailing slash in a single comma-separated stanza.
+- [ ] Check the `syscheck` on-demand configuration (agent configured with `shared.conf` file).
 
 ### Updates
 - [ ] Check for false positives when an old manager is updated.
@@ -277,7 +277,7 @@ Check links:
 - [ ] Add/Modify/Delete a file. Connect the agent with another administrator (if you have two or more managers in the configuration, the agent doesn't need to be restarted). Check that the database is up to date, but there is no alert in the new administrator.
 - [ ] Stop the agent. Add a file. Start the agent. The new file must be in the database after the scan but there must not be any alert.
 - [ ] Stop the agent. Remove a file. Start the agent. The removed file must not be in the database after the scan and there must not be any alert.
-- [ ] Set the inventory paramete `sync_interval` to 0 in the agent's ossec.conf. Syscheck must log a Warning message. The value of `sync_interval` must be 300. It can be queried with the API: `curl -u foo:bar -k -X GET "http://127.0.0.1:55000/agents/001/config/syscheck/syscheck?pretty"`
+- [ ] Set the inventory paramete `sync_interval` to 0 in the agent's manager.conf. Syscheck must log a Warning message. The value of `sync_interval` must be 300. It can be queried with the API: `curl -u foo:bar -k -X GET "http://127.0.0.1:55000/agents/001/config/syscheck/syscheck?pretty"`
 - [ ] Checks syscheck configuration for consistency, looking for errors when typing incorrect fields.
 
 
@@ -494,8 +494,8 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Configure `max_eps` option.
 
 ### Centralized configuration and on-demand configuration
-- [ ] Check that `<directories>` in `syscheck` configuration block are overwritten by a configuration specified in the centralized configuration (`agent.conf`) including entries with a trailing slash in a single comma-separated stanza.
-- [ ] Check the `syscheck` on-demand configuration (agent configured with `agent.conf` file).
+- [ ] Check that `<directories>` in `syscheck` configuration block are overwritten by a configuration specified in the centralized configuration (`shared.conf`) including entries with a trailing slash in a single comma-separated stanza.
+- [ ] Check the `syscheck` on-demand configuration (agent configured with `shared.conf` file).
 
 ### Updates
 - [ ] Check for false positives when an old manager is updated.
@@ -525,7 +525,7 @@ Check FIM alerts ADD, DELETE, MODIFICATION
 - [ ] Add/Modify/Remove a regitry. Connect the agent to another manager (if you have two or more managers in the configuration, the agent doesn't need to be restarted). Check the database is updated but there is no alert in the new manager.
 - [ ] Stop the agent. Add a registry. Start the agent. The new file must be in the database after the scan but there must not be any alert.
 - [ ] Stop the agent. Remove a registry. Start the agent. The removed file must not be in the database after the scan and there must not be any alert.
-- [ ] Set the inventory paramete `sync_interval` to 0 in the agent's ossec.conf. Syscheck must log a Warning message. The value of `sync_interval` must be 300. It can be queried with the API: `curl -u foo:bar -k -X GET "http://127.0.0.1:55000/agents/001/config/syscheck/syscheck?pretty"`
+- [ ] Set the inventory paramete `sync_interval` to 0 in the agent's manager.conf. Syscheck must log a Warning message. The value of `sync_interval` must be 300. It can be queried with the API: `curl -u foo:bar -k -X GET "http://127.0.0.1:55000/agents/001/config/syscheck/syscheck?pretty"`
 - [ ] In the configuration, put only files. Wait for a full scan.  Checks the integrity between the agent data and the database.
 - [ ] In the configuration, put only registries. Wait for a full scan. Checks the integrity between the agent data and the database.
 - [ ] Checks syscheck configuration for consistency, looking for errors when typing incorrect fields.
@@ -674,8 +674,8 @@ Check links:
 - [ ] Configure `max_eps` option.
 
 ### Centralized configuration and on-demand configuration
-- [ ] Check that `<directories>` in `syscheck` configuration block are overwritten by a configuration specified in the centralized configuration (`agent.conf`) including entries with a trailing slash in a single comma-separated stanza.
-- [ ] Check the `syscheck` on-demand configuration (agent configured with `agent.conf` file).
+- [ ] Check that `<directories>` in `syscheck` configuration block are overwritten by a configuration specified in the centralized configuration (`shared.conf`) including entries with a trailing slash in a single comma-separated stanza.
+- [ ] Check the `syscheck` on-demand configuration (agent configured with `shared.conf` file).
 
 ### Updates
 - [ ] Check for false positives when an old manager (3.6 or less) is updated.
@@ -702,7 +702,7 @@ Check links:
 - [ ] Add/Modify/Delete a file. Connect the agent with another administrator (if you have two or more managers in the configuration, the agent doesn't need to be restarted). Check that the database is up to date, but there is no alert in the new administrator.
 - [ ] Stop the agent. Add a file. Start the agent. The new file must be in the database after the scan but there must not be any alert.
 - [ ] Stop the agent. Remove a file. Start the agent. The removed file must not be in the database after the scan and there must not be any alert.
-- [ ] Set the inventory paramete `sync_interval` to 0 in the agent's ossec.conf. Syscheck must log a Warning message. The value of `sync_interval` must be 300. It can be queried with the API: `curl -u foo:bar -k -X GET "http://127.0.0.1:55000/agents/001/config/syscheck/syscheck?pretty"`
+- [ ] Set the inventory paramete `sync_interval` to 0 in the agent's manager.conf. Syscheck must log a Warning message. The value of `sync_interval` must be 300. It can be queried with the API: `curl -u foo:bar -k -X GET "http://127.0.0.1:55000/agents/001/config/syscheck/syscheck?pretty"`
 - [ ] Checks syscheck configuration for consistency, looking for errors when typing incorrect fields.
 
 

@@ -47,7 +47,7 @@ To check in every test:
 
 To check in every test:
 
-- It only remains the `client.keys`, `ossec.conf` and `local_internal_options.conf` files.
+- It only remains the `client.keys`, `agent.conf` and `local_internal_options.conf` files.
 - The package and service are removed.
 
 - [ ] Successful uninstallation by running the MSI
@@ -70,7 +70,7 @@ To check in every test:
 
 To check in every test:
 
-- It does not overwrite the `client.keys`, `ossec.conf` and `local_internal_options.conf`.
+- It does not overwrite the `client.keys`, `agent.conf` and `local_internal_options.conf`.
 - WUI doesn't show any strange information.
 - Service is restarted correctly.
 - No errors in ossec.log.

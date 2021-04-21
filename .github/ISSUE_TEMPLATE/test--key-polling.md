@@ -18,7 +18,7 @@ assignees: ''
 - [ ] Configure and enable the agent key polling module. (1) 
 - [ ] Set up a MySQL Database with a table named "agent" and the fields required in the JSON output. (2) 
 - [ ] Copy the Python script found at (2).
-- [ ] Adjust the script path <exec_path> in you ossec.conf file.
+- [ ] Adjust the script path <exec_path> in you agent.conf file.
 
 ## Test
 

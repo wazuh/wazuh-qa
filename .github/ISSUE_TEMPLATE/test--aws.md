@@ -15,7 +15,7 @@ assignees: ''
 
 ### RPM (Linux)
 
-- [ ] Configure *ossec.conf* to use different services and check manager logs:
+- [ ] Configure *agent.conf* to use different services and check manager logs:
     - [ ] *CloudTrail*.
     - [ ] *Config*.
     - [ ] *VPC*.

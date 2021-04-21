@@ -33,7 +33,7 @@ assignees: ''
 - [ ] Insert C/C++ comments to JSON configuration. The module should be able to insert decorators and packs.
 - [ ] Kill *osqueryd* while being run by the agent. The module should restart it only if it ran during 10 seconds at less.
 - [ ] Unexisting folder */var/osquery*. The module **should report the error** and the manager should create an alert.
-- [ ] Declaring osquery module multiple times (*ossec.conf* and another in *agent.conf*). Only the last one applies
+- [ ] Declaring osquery module multiple times (*agent.conf* and another in *shared.conf*). Only the last one applies
 - [ ] Unexisting configuration with `<add_labels>` disabled and no `<pack>`. The module should log it, wait 10 minutes and retry.
 
 ## On Windows

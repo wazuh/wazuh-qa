@@ -345,7 +345,7 @@ File integrity
 
 The information stored in `<installation_path>/queue/vulnerabilities/cve.db` is not currently persistent, so the database must be removed between updates.
 
-To verify it, perform a vulnerability scan or update, check that the database exists, modify the `ossec.conf` file to disable the module, and update Wazuh. After this, the database should not exist.
+To verify it, perform a vulnerability scan or update, check that the database exists, modify the `manager.conf` file to disable the module, and update Wazuh. After this, the database should not exist.
 
 Implicated code:
 - [RPM SPECS](https://github.com/wazuh/wazuh-packages/blob/48abb535e609d608fec1be6104391794664a7a07/rpms/SPECS/3.11.0/wazuh-manager-3.11.0.spec#L213).

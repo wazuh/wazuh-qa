@@ -69,7 +69,7 @@ Fields project_id, subscription_name and credentials_file are required to run th
 # /var/ossec/bin/wazuh-control restart
 ```
 > 2019/11/26 10:21:05 wazuh-modulesd: ERROR: No value defined for tag 'project_id' in module 'gcp-pubsub'
-> 2019/11/26 10:21:05 wazuh-modulesd: ERROR: (1202): Configuration error at '/var/ossec/etc/ossec.conf'.
+> 2019/11/26 10:21:05 wazuh-modulesd: ERROR: (1202): Configuration error at '/var/ossec/etc/agent.conf'.
 > wazuh-modulesd: Configuration error. Exiting
 
 
@@ -95,7 +95,7 @@ Field credentials_file must specify the Google Cloud credentials file with JWTok
 
 ```
 2019/11/26 10:51:13 wazuh-modulesd: WARNING: File '/var/ossec/-' from tag 'credentials_file' not found.
-2019/11/26 10:51:13 wazuh-modulesd: ERROR: (1202): Configuration error at '/var/ossec/etc/ossec.conf'.
+2019/11/26 10:51:13 wazuh-modulesd: ERROR: (1202): Configuration error at '/var/ossec/etc/agent.conf'.
 wazuh-modulesd: Configuration error. Exiting
 ```
 

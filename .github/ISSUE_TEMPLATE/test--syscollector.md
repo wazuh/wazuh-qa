@@ -34,7 +34,7 @@ Test on:
 ## Configuration
 
 - [ ] Check interval option runs as expected more than the very first time.
-- [ ] Send a Syscollector configuration by the shared conf (*agent.conf*).
+- [ ] Send a Syscollector configuration by the shared conf (*shared.conf*).
 
 ## Database
 
