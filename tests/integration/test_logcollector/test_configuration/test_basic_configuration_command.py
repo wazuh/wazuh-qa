@@ -22,10 +22,8 @@ wazuh_component = get_service()
 
 
 if sys.platform == 'win32':
-    command = 'tasklist'
     prefix = AGENT_DETECTOR_PREFIX
 else:
-    command = 'ps -aux'
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 local_internal_options = {

@@ -97,7 +97,7 @@ def callback_invalid_value(option, value):
 
 
 def callback_error_invalid_port(port):
-    """Create a callback to detect invalid port.
+    """Create a callback to detect invalid port.callback_detect_remoted_started
 
     Args:
         port (str): Wazuh manager port.

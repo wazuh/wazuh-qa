@@ -5,10 +5,8 @@
 import os
 import pytest
 import sys
-import wazuh_testing.api as api
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 import wazuh_testing.logcollector as logcollector
-from wazuh_testing.tools import get_service
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 
 
@@ -25,9 +23,8 @@ if sys.platform != 'win32':
 else:
     pytestmark = pytest.mark.tier(level=0)
 
-location = r'C:\testing.txt'
+location = r'Security'
 wazuh_configuration = 'ossec.conf'
-wazuh_component = get_service()
 prefix = AGENT_DETECTOR_PREFIX
 
 
