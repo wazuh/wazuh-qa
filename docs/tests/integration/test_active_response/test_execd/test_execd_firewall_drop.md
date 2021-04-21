@@ -1,11 +1,12 @@
 # Test execd firewall drop
-This test check that Active Response script called 'firewall-drop' is executed correctly when configured.
+
+This test checks if the Active Response script called `firewall-drop` is executed correctly when configured.
 
 ## General info
 
 | Tier | Platforms | Time spent| Test file |
 |:--:|:--:|:--:|:--:|
-| 0 | Linux | 00:00:11 | [test_active_response/test_execd/test_execd_firewall_drop.py]|
+| 0 | Linux | 11s | [test_active_response/test_execd/test_execd_firewall_drop.py]|
 
 ## Test logic
 
@@ -15,4 +16,4 @@ This test check that Active Response script called 'firewall-drop' is executed c
 
 ## Code documentation
 
-<!-- ::: tests.integration.test_active_response.test_execd.test_execd_firewall_drop -->
+::: tests.integration.test_active_response.test_execd.test_execd_firewall_drop
