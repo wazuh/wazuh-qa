@@ -186,12 +186,11 @@ def wait_until_api_ready(protocol=API_PROTOCOL, host=API_HOST, port=API_PORT, us
         timeout (int): Timeout to get an API response.
         attempts (int): Maximum number of attempts to check API is ready.
     """
-    api_ready = False
-    while attempts > 0 and not api_ready:
+    while attempts > 0:
         try:
             attempts -= 1
             get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout)
         except requests.exceptions.ConnectionError:
             time.sleep(1)
         else:
-            api_ready = True
+            break

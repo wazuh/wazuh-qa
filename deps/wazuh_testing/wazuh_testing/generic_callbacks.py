@@ -1,5 +1,4 @@
-from wazuh_testing.tools import WAZUH_CONF
-from wazuh_testing.tools import monitoring
+from wazuh_testing.tools import WAZUH_CONF, monitoring
 
 GENERIC_CALLBACK_ERROR_MESSAGE = 'The expected error output has not been produced'
 
@@ -9,6 +8,8 @@ def callback_invalid_value(option, value, wazuh_daemon, severity='ERROR'):
     Args:
         option (str): Wazuh manager configuration option.
         value (str): Value of the configuration option.
+        wazuh_daemon (str): Daemon that generates the error log.
+        severity (str): Severity of the error (WARNING,ERROR or CRITICAL)
 
     Returns:
         callable: callback to detect this event.
