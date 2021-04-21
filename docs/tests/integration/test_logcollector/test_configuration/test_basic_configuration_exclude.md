@@ -2,12 +2,12 @@
 ## Overview 
 
 Check if `wazuh-logcollector`, or `wazuh-agent` in Windows agent, allows valid exclude values for 
-log monitoring
+log monitoring.
 
 ## Objective
 
 - To confirm `exclude` option is used correctly.
-- To confirm API response is equal to set configuration.
+- To confirm the API response is equal to the set configuration.
 
 ## General info
 
@@ -17,8 +17,8 @@ log monitoring
 
 ## Expected behavior
 
-- Fail if `wazuh-logcollector` or `wazuh-agent` allows valid exclude values for command monitoring
-- Fail if API response is different that Wazuh configuration.
+- Fail if `wazuh-logcollector` or `wazuh-agent` allows valid exclude values for command monitoring.
+- Fail if the API response is different from the Wazuh configuration.
 
 ## Code documentation
 

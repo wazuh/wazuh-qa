@@ -2,8 +2,8 @@
 
 ## Overview 
 
-These tests check if the introduced configuration in the ossec.conf works as expected for valid values and if the API 
-response for configuration requests coincides with the one introduced in the ossec.conf.
+These tests check if the introduced configuration works as expected for valid values and if the API 
+response for configuration requests coincides with the one introduced in the configuration file.
 
 For invalid ones, it checks if `wazuh-logcollector` for manager and `wazuh-agent` for agent returns 
 the expected error message.

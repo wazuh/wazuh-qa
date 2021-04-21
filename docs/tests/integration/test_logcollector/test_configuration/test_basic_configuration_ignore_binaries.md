@@ -22,7 +22,7 @@ values and allows valid `ignore_binaries` value.
   are provided.
 - Fail if `wazuh-logcollector` or `wazuh-agent` does not start correctly when invalid `ignore_binaries` 
   values are provided.
-- Fail if API response is different that Wazuh configuration
+- Fail if the API response is different from the Wazuh configuration.
 
 ## Code documentation
 

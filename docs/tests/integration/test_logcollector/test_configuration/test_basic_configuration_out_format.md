@@ -9,7 +9,7 @@ values.
 - To confirm `out-format` option allows valid `out-format` values.
 - To confirm `wazuh-logcollector` and `wazuh-agent` fails when invalid `out-format` 
   values are provided.
-- To confirm API response is equal to set configuration.
+- To confirm the API response is equal to set configuration.
 
 ## General info
 
@@ -23,7 +23,7 @@ values.
   `out-format` values are provided.
 - Fail if `wazuh-logcollector` or `wazuh-agent` does not start correctly when invalid 
   `out-format` values are provided.
-- Fail if API response is different that Wazuh configuration
+- Fail if the API response is different from the Wazuh configuration.
 
 ## Code documentation 
 

@@ -1,14 +1,14 @@
 # Test basic configuration - Frequency
 ## Overview 
 
-Check if `wazuh-logcollector`, or `wazuh-agent` for Windows agent, fails using invalid `frequency` values and 
+Check if `wazuh-logcollector` or `wazuh-agent` for Windows agent fails using invalid `frequency` values and 
 allows valid values.
 
 ## Objective
 
 - To confirm `frequency` option allows valid values.
 - To confirm `wazuh-logcollector` and `wazuh-agent` fails when invalid `frequency` values are provided.
-- To confirm API response is equal to set configuration.
+- To confirm the API response is equal to set configuration.
 
 ## General info
 
@@ -22,7 +22,7 @@ allows valid values.
   are provided.
 - Fail if `wazuh-logcollector` or `wazuh-agent` does not start correctly when valid `frequency`
   values are provided.
-- Fail if API response is different that Wazuh configuration
+- Fail if the API response is different from the Wazuh configuration.
 
 ## Code documentation
 

@@ -20,7 +20,7 @@ allow valid values.
 
 - Fail if `wazuh-logcollector` or `wazuh-agent` starts correctly when invalid age values are provided.
 - Fail if `wazuh-logcollector` or `wazuh-agent` does not start correctly when valid age values are provided.
-- Fail if API response is different that Wazuh configuration
+- Fail if the API response is different that Wazuh configuration.
 
 ## Code documentation
 

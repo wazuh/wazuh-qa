@@ -1,13 +1,13 @@
 # Test basic configuration - Location
 ## Overview 
 
-Check if `wazuh-logcollector`, or `wazuh-agent` in Windows agent, allows valid `location` values for 
+Check if `wazuh-logcollector` or `wazuh-agent` in Windows agent, allows valid `location` values for 
 log monitoring.
 
 ## Objective
 
 - To confirm Wazuh allows all possible `location` valid values.
-- To confirm API response is equal to set configuration.
+- To confirm the API response is equal to set configuration.
 
 ## General info
 
@@ -18,7 +18,7 @@ log monitoring.
 ## Expected behavior
 
 - Fail if `wazuh-logcollector` or `wazuh-agent` allows valid `location` values for log monitoring.
-- Fail if API response is different that Wazuh configuration.
+- Fail if the API response is different from the Wazuh configuration.
 
 ## Code documentation
 

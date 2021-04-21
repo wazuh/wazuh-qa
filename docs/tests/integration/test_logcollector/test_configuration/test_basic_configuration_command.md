@@ -1,13 +1,13 @@
 # Test basic configuration - Command
 ## Overview 
 
-Check if `wazuh-logcollector`, or `wazuh-agent` for Windows agent, allows valid command values for command
-monitoring
+Check if `wazuh-logcollector` or `wazuh-agent` for Windows agent, allows valid command values 
+for command monitoring
 
 ## Objective
 
 - To confirm `command` option is used correctly.
-- To confirm API response is equal to set configuration.
+- To confirm the API response is equal to set configuration.
 
 ## General info
 
@@ -17,8 +17,8 @@ monitoring
 
 ## Expected behavior
 
-- Fail if `wazuh-logcollector` or `wazuh-agent` allows valid command for command monitoring
-- Fail if API response is different that Wazuh configuration.
+- Fail if `wazuh-logcollector` or `wazuh-agent` allows valid command for command monitoring.
+- Fail if the API response is different from the     Wazuh configuration.
 
 ## Code documentation
 

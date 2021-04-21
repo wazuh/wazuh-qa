@@ -7,7 +7,7 @@ Check if `wazuh-agent` fails using invalid `reconnect_time` values and allows va
 
 - To confirm `reconnect_time` option allows valid values.
 - To confirm `wazuh-logcollector` and `wazuh-agent` fails when invalid `reconnect_time` values are provided.
-- To confirm API response is equal to set configuration.
+- To confirm the API response is equal to set configuration.
 
 ## General info
 
@@ -20,7 +20,7 @@ Check if `wazuh-agent` fails using invalid `reconnect_time` values and allows va
 - Fail if `wazuh-logcollector` or `wazuh-agent` and start correctly when invalid `reconnect_time` values
   are provided.
 - Fail if `wazuh-logcollector` or `wazuh-agent` fails when invalid `reconnect_time` values are provided.
-- Fail if API response is different that Wazuh configuration
+- Fail if API response is different from the Wazuh configuration.
 
 ## Code documentation
 
