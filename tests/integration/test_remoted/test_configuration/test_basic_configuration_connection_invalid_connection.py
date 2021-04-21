@@ -7,6 +7,7 @@ import pytest
 
 from wazuh_testing.tools.monitoring import REMOTED_DETECTOR_PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools import WAZUH_CONF_RELATIVE
 import wazuh_testing.generic_callbacks as gc
 
 # Marks
@@ -50,11 +51,12 @@ def test_invalid_connection(get_configuration, configure_environment, restart_re
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
 
-    log_callback = gc.callback_error_in_configuration('ERROR', wazuh_daemon=REMOTED_DETECTOR_PREFIX)
+    log_callback = gc.callback_error_in_configuration('ERROR', wazuh_daemon=REMOTED_DETECTOR_PREFIX,
+                                                      conf_path=WAZUH_CONF_RELATIVE)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
 
-    log_callback = gc.callback_error_in_configuration('CRITICAL', wazuh_daemon=REMOTED_DETECTOR_PREFIX)
+    log_callback = gc.callback_error_in_configuration('CRITICAL', wazuh_daemon=REMOTED_DETECTOR_PREFIX,
+                                                      conf_path=WAZUH_CONF_RELATIVE)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
-
