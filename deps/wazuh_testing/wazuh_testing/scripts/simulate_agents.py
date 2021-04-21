@@ -48,6 +48,8 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
             if module in active_modules:
                 index = list(active_modules).index(module)
                 agent.modules[module]['status'] = 'enabled'
+                if module in ['keepalive', 'receive_messages']:
+                    continue
                 if modules_eps is not None and 'eps' in agent.modules[module]:
                     agent.modules[module]['eps'] = modules_eps[index]
                 else:
@@ -150,8 +152,6 @@ def main():
             agents, args.manager_addr, args.agent_protocol, args.version, args.os, args.eps, args.duration,
             args.modules, args.modules_eps, args.fixed_message_size, args.manager_registration_address
         )
-
-        print(args.modules_eps)
 
         processes.append(Process(target=run_agents, args=arguments))
 
