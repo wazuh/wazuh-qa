@@ -49,12 +49,12 @@ def test_invalid_port(get_configuration, configure_environment, restart_remoted)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
 
-    log_callback = gc.callback_error_in_configuration('ERROR', wazuh_daemon=REMOTED_DETECTOR_PREFIX,
+    log_callback = gc.callback_error_in_configuration('ERROR', prefix=REMOTED_DETECTOR_PREFIX,
                                                       conf_path=WAZUH_CONF_RELATIVE)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
 
-    log_callback = gc.callback_error_in_configuration('CRITICAL', wazuh_daemon=REMOTED_DETECTOR_PREFIX,
+    log_callback = gc.callback_error_in_configuration('CRITICAL', prefix=REMOTED_DETECTOR_PREFIX,
                                                       conf_path=WAZUH_CONF_RELATIVE)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")

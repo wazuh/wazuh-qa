@@ -45,6 +45,6 @@ def test_rids_closing_time_invalid(get_configuration, configure_environment, res
     Raises:
         AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected error messages.
     """
-    log_callback = gc.callback_error_invalid_value_for('rids_closing_time', wazuh_daemon=REMOTED_DETECTOR_PREFIX)
+    log_callback = gc.callback_error_invalid_value_for('rids_closing_time', prefix=REMOTED_DETECTOR_PREFIX)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
