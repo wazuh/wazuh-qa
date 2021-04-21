@@ -16,9 +16,7 @@ from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH
-from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, \
-    write_wazuh_conf, add_wazuh_local_internal_options, set_wazuh_local_internal_options, \
-    get_wazuh_local_internal_options, local_internal_options_to_dict
+import wazuh_testing.tools.configuration as conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
@@ -410,17 +408,17 @@ def connect_to_sockets_function(request):
 
 @pytest.fixture(scope='module')
 def configure_local_internal_options(get_local_internal_options):
-    backup_options_lines = get_wazuh_local_internal_options()
-    backup_options_dict = local_internal_options_to_dict(backup_options_lines)
+    backup_options_lines = conf.get_wazuh_local_internal_options()
+    backup_options_dict = conf.local_internal_options_to_dict(backup_options_lines)
     if not all(option in backup_options_dict.items() for option in get_local_internal_options.items()):
-        add_wazuh_local_internal_options(get_local_internal_options)
+        conf.add_wazuh_local_internal_options(get_local_internal_options)
 
         control_service('restart')
 
         yield
 
         TimeMachine.time_rollback()
-        set_wazuh_local_internal_options(backup_options_lines)
+        conf.set_wazuh_local_internal_options(backup_options_lines)
 
         control_service('restart')
     else:
@@ -432,10 +430,10 @@ def configure_environment(get_configuration, request):
     """Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration."""
 
     # Save current configuration
-    backup_config = get_wazuh_conf()
+    backup_config = conf.get_wazuh_conf()
 
     # Configuration for testing
-    test_config = set_section_wazuh_conf(get_configuration.get('sections'))
+    test_config = conf.set_section_wazuh_conf(get_configuration.get('sections'))
 
     # Create test directories
     if hasattr(request.module, 'test_directories'):
@@ -454,7 +452,7 @@ def configure_environment(get_configuration, request):
                 create_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_64KEY)
 
     # Set new configuration
-    write_wazuh_conf(test_config)
+    conf.write_wazuh_conf(test_config)
 
     # Change Windows Date format to ensure TimeMachine will work properly
     if sys.platform == 'win32':
@@ -499,7 +497,7 @@ def configure_environment(get_configuration, request):
             error_in_configuration = True
             pass
     # Restore previous configuration
-    write_wazuh_conf(backup_config)
+    conf.write_wazuh_conf(backup_config)
     if error_in_configuration:
         control_service('restart')
 

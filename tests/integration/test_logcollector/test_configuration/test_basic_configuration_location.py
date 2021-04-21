@@ -103,14 +103,14 @@ def get_configuration(request):
 
 
 def test_configuration_location(get_configuration, configure_environment, restart_logcollector):
-    """Check if the Wazuh run correctly with the specified location field value.
+    """Check if Wazuh runs correctly with the specified location field value.
 
-    Ensure logcollector allow the specified locations. Also, in case of manager instance, check if the API
+    Ensure logcollector allows the specified locations. Also, in the case of the manager instance, check if the API
     answer for localfile block coincides.
 
     Raises:
         TimeoutError: If the "Analyzing file" callback is not generated.
-        AssertError: In case of a server instance, the API response is different that the real configuration.
+        AssertError: In the case of a server instance, the API response is different that the real configuration.
     """
     cfg = get_configuration['metadata']
 

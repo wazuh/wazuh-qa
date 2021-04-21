@@ -78,12 +78,12 @@ def get_configuration(request):
 def test_configuration_exclude(get_configuration, configure_environment, restart_logcollector):
     """Check if the Wazuh run correctly with the specified exclude field value.
 
-    Ensure logcollector allows the specified exclude attribute. Also, in case of manager instance, check if the API
+    Ensure logcollector allows the specified exclude attribute. Also, in case of the manager instance, check if the API
     answer for localfile block coincides.
 
     Raises:
-        TimeoutError: In case of Windows system, callback for invalid location pattern is not generated.
-        AssertError: In case of a server instance, the API response is different that the real configuration.
+        TimeoutError: In the case of a Windows system, the callback for an invalid location pattern is not generated.
+        AssertError: In the case of a server instance, the API response is different that the real configuration.
     """
     cfg = get_configuration['metadata']
 

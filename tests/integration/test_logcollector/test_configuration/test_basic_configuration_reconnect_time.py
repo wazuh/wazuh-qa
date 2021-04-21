@@ -64,10 +64,9 @@ problematic_values = ['44sTesting', '9hTesting', '400mTesting', '3992']
 
 
 def check_configuration_reconnect_time_valid():
-    """Check if the Wazuh module run correctly and that analyze the desired eventchannel.
+    """Check if Wazuh module correctly runs and analyzes the desired eventchannel.
 
     Ensure logcollector is running with the specified configuration, analyzing the designate eventchannel.
-
 
     Raises:
         TimeoutError: If the "Analyzing eventchannel" callback is not generated.
@@ -79,7 +78,7 @@ def check_configuration_reconnect_time_valid():
 
 
 def check_configuration_reconnect_time_invalid(cfg):
-    """Check if the Wazuh fails because a invalid reconnect time attribute configuration value.
+    """Check if Wazuh fails due to a invalid reconnect time attribute configuration value.
 
     Args:
         cfg (dict): Dictionary with the localfile configuration.
@@ -103,7 +102,7 @@ def get_configuration(request):
 
 
 def test_configuration_reconnect_time(get_configuration, configure_environment, restart_logcollector):
-    """Check if the Wazuh reconnect time field of logcollector works properly.
+    """Check if Wazuh reconnects time field of logcollector works properly.
 
     Ensure Wazuh component fails in case of invalid values and works properly in case of valid reconnect time values.
 
@@ -115,4 +114,3 @@ def test_configuration_reconnect_time(get_configuration, configure_environment, 
         check_configuration_reconnect_time_valid()
     else:
         check_configuration_reconnect_time_invalid(cfg)
-

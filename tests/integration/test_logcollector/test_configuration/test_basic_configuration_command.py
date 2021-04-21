@@ -26,9 +26,7 @@ if sys.platform == 'win32':
 else:
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
-local_internal_options = {
-    'logcollector.remote_commands': 1
-}
+local_internal_options = {'logcollector.remote_commands': 1}
 
 parameters = [
     {'LOG_FORMAT': 'command', 'COMMAND': 'echo Testing'},
@@ -78,7 +76,7 @@ def test_configuration_command(get_local_internal_options, configure_local_inter
                                      configure_environment, restart_logcollector):
     """Check if the Wazuh run correctly with the specified command monitoring configuration.
 
-    Ensure command monitoring allow the specified attributes. Also, in the case of manager instance, check if the API
+    Ensure command monitoring allow the specified attributes. Also, in the case of the manager instance, check if the API
     answer for localfile block coincides.
 
     Raises:

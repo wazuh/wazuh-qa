@@ -1,14 +1,14 @@
 # Test basic configuration - Age
 ## Overview 
 
-Check if `wazuh-logcollector`, or `wazuh-agent` for Windows agent, fails using invalid `age` values and 
+Check if `wazuh-logcollector` or `wazuh-agent` for Windows agent, fails using invalid `age` values and,
 allow valid values.
 
 ## Objective
 
 - To confirm `age` option allows valid values.
 - To confirm `wazuh-logcollector` and `wazuh-agent` fails when invalid age values are provided.
-- To confirm API response is equal to set configuration.
+- To confirm the API response is equal to set configuration.
 
 ## General info
 
@@ -20,7 +20,7 @@ allow valid values.
 
 - Fail if `wazuh-logcollector` or `wazuh-agent` starts correctly when invalid age values are provided.
 - Fail if `wazuh-logcollector` or `wazuh-agent` does not start correctly when valid age values are provided.
-- Fail if the API response is different that Wazuh configuration.
+- Fail if the API response is different from the Wazuh configuration.
 
 ## Code documentation
 

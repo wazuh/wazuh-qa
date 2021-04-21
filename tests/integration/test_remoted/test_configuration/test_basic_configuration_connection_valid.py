@@ -6,7 +6,7 @@ import os
 import pytest
 
 import wazuh_testing.remote as remote
-import wazuh_testing.api as api
+from wazuh_testing.api import compare_config_api_response
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 
@@ -75,4 +75,4 @@ def test_connection_valid(get_configuration, configure_environment, restart_remo
 
     real_configuration = cfg.copy()
     real_configuration['protocol'] = cfg['protocol'].split(',')
-    api.compare_config_api_response([real_configuration], 'remote')
+    compare_config_api_response([real_configuration], 'remote')

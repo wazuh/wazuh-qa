@@ -13,7 +13,6 @@ from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_
 from wazuh_testing.tools import get_service
 
 
-
 # Marks
 if sys.platform != 'win32':
     pytestmark = [pytest.mark.skip, pytest.mark.tier(level=0)]
@@ -55,7 +54,7 @@ configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['ONLY_FUTURE_EVENTS']}
 
 
 def check_only_future_events_valid(cfg):
-    """Check if the Wazuh run correctly with the specified only future events field.
+    """Check if Wazuh runs correctly with the specified only future events field.
 
     Ensure logcollector allows the specified future events attribute.
 
@@ -67,7 +66,7 @@ def check_only_future_events_valid(cfg):
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)
 
 def check_only_future_events_invalid(cfg):
-    """Check if the Wazuh fails because a invalid only future events configuration value.
+    """Check if Wazuh fails due to a invalid only future events configuration value.
 
     Args:
         cfg (dict): Dictionary with the localfile configuration.
@@ -88,7 +87,7 @@ def get_configuration(request):
 
 
 def test_only_future_events(get_configuration, configure_environment, restart_logcollector):
-    """Check if the Wazuh only future events field of logcollector works properly.
+    """Check if Wazuh only future events field of logcollector works properly.
 
     Ensure Wazuh component fails in case of invalid values and works properly in case of valid
     only future events values.

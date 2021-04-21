@@ -115,8 +115,8 @@ def check_configuration_out_format_valid(cfg):
         cfg (dict): Dictionary with the localfile configuration.
 
     Raises:
-        TimeoutError: If the callback for socket target is not generated.
-        AssertError: In case of a server instance, the API response is different that the real configuration.
+        TimeoutError: If the callback for the socket target is not generated.
+        AssertError: In the case of a server instance, the API response is different than the real configuration.
     """
     log_callback = logcollector.callback_socket_target(cfg['location'], cfg['target'], prefix=prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
@@ -130,13 +130,13 @@ def check_configuration_out_format_valid(cfg):
 
 
 def check_configuration_out_format_invalid(cfg):
-    """Check if the Wazuh fails because a invalid out format configuration value.
+    """Check if the Wazuh fails because an invalid out format configuration value.
 
     Args:
         cfg (dict): Dictionary with the localfile configuration.
 
     Raises:
-        TimeoutError: If error callback are not generated.
+        TimeoutError: If the error callbacks are not generated.
     """
     log_callback = logcollector.callback_log_target_not_found(cfg['location'], cfg['target_out_format'], prefix=prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,

@@ -72,17 +72,17 @@ def get_configuration(request):
 
 
 def check_ignore_binaries_valid(cfg):
-    """Check if the Wazuh run correctly with the specified ignore_binaries field value.
+    """Check if the Wazuh runs correctly with the specified ignore_binaries field value.
 
-    Ensure logcollector allow the specified ignore_binaries attribute. Also, in case of manager instance,
+    Ensure logcollector allows the specified ignore_binaries attribute. Also, in the case of the manager instance,
     check if the API answer for localfile block coincides.
 
     Args:
         cfg (dict): Dictionary with the localfile configuration.
 
     Raises:
-        TimeoutError: In case of Windows system, callback for invalid location pattern is not generated.
-        AssertError: In case of a server instance, the API response is different that the real configuration.
+        TimeoutError: In the case of Windows system, the callback for an invalid location pattern is not generated.
+        AssertError: In the case of a server instance, the API response is different than the real configuration.
     """
 
     if sys.platform == 'win32':

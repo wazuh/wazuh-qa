@@ -19,9 +19,7 @@ pytestmark = pytest.mark.tier(level=0)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
-local_internal_options = {
-    'logcollector.remote_commands': '1'
-}
+local_internal_options = {'logcollector.remote_commands': '1'}
 
 wazuh_component = get_service()
 
@@ -84,10 +82,10 @@ configuration_ids = [f"{x['LOG_FORMAT'], x['COMMAND'], x['FREQUENCY']}" for x in
 
 
 def check_configuration_frequency_valid(cfg):
-    """Check if the Wazuh module run correctly and that analyze the desired file.
+    """Check if the Wazuh module runs correctly and that analyze the desired file.
 
-    Ensure logcollector is running with the specified configuration, analyzing the designate file and
-    , in case of the Wazuh server, check if the API answer for localfile configuration block coincides
+    Ensure logcollector is running with the specified configuration, analyzing the designated file and,
+    in the case of the Wazuh server, check if the API answer for localfile configuration block coincides
     the selected configuration.
 
     Args:
@@ -95,7 +93,7 @@ def check_configuration_frequency_valid(cfg):
 
     Raises:
         TimeoutError: If the "Analyzing file" callback is not generated.
-        AssertError: In case of a server instance, the API response is different that the real configuration.
+        AssertError: In the case of a server instance, the API response is different than the real configuration.
     """
 
     log_callback = logcollector.callback_monitoring_command(cfg['log_format'], cfg['command'], prefix=prefix)
@@ -110,13 +108,13 @@ def check_configuration_frequency_valid(cfg):
 
 
 def check_configuration_frequency_invalid(cfg):
-    """Check if the Wazuh fails because a invalid frequency configuration value.
+    """Check if the Wazuh fails because an invalid frequency configuration value.
 
     Args:
         cfg (dict): Dictionary with the localfile configuration.
 
     Raises:
-        TimeoutError: If error callback are not generated.
+        TimeoutError: If error callbacks are not generated.
     """
 
     if cfg['frequency'] in problematic_values:

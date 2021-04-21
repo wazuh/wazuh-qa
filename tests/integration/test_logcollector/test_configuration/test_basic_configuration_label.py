@@ -26,10 +26,7 @@ else:
     location = '/tmp/testing.txt'
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
-
 wazuh_component = get_service()
-
-
 
 parameters = [
     {'LOCATION': f'{location}', 'LABEL': 'myapp', 'KEY': '@source'},
@@ -66,14 +63,14 @@ def get_configuration(request):
 
 
 def test_configuration_label(get_configuration, configure_environment, restart_logcollector):
-    """Check if the Wazuh run correctly with the specified label field value.
+    """Check if the Wazuh runs correctly with the specified label field value.
 
-    Ensure logcollector allow the specified label attributes. Also, in case of manager instance, check if the API
+    Ensure logcollector allows the specified label attributes. Also, in the case of the manager instance, check if the API
     answer for localfile block coincides.
 
     Raises:
         TimeoutError: If the "Analyzing file" callback is not generated.
-        AssertError: In case of a server instance, the API response is different that the real configuration.
+        AssertError: In the case of a server instance, the API response is different than the real configuration.
     """
     cfg = get_configuration['metadata']
 
@@ -86,5 +83,3 @@ def test_configuration_label(get_configuration, configure_environment, restart_l
         real_configuration['label'] = {'key': cfg['key'], 'item': cfg['label']}
         api.wait_until_api_ready()
         api.compare_config_api_response([real_configuration], 'localfile')
-
-

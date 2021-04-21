@@ -67,8 +67,8 @@ configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['AGE']}" for x in para
 def check_configuration_age_valid(cfg):
     """Check if the Wazuh module runs correctly and analyze the desired file.
 
-    Ensure logcollector is running with the specified configuration, analyzing the designated file and
-    , in the case of the Wazuh server, check if the API answer for localfile configuration block coincides
+    Ensure logcollector is running with the specified configuration, analyzing the designated file and,
+    in the case of the Wazuh server, check if the API answer for localfile configuration block coincides
     the selected configuration.
 
     Args:

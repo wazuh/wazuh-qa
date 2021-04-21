@@ -14,7 +14,6 @@ from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_
 from wazuh_testing.tools import get_service
 
 
-
 # Marks
 pytestmark = pytest.mark.tier(level=0)
 
@@ -22,9 +21,7 @@ pytestmark = pytest.mark.tier(level=0)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
-local_internal_options = {
-    'logcollector.remote_commands': '1'
-}
+local_internal_options = {'logcollector.remote_commands': '1'}
 
 if sys.platform == 'win32':
     location = r'C:\testing.txt'
@@ -36,10 +33,7 @@ else:
     wazuh_configuration = 'etc/ossec.conf'
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
-
 wazuh_component = get_service()
-
-
 
 parameters = [
     {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'COMMAND': 'example-command'},
@@ -126,28 +120,24 @@ def get_local_internal_options():
 
 
 def check_log_format_valid(cfg):
-    """Check if the Wazuh run correctly with the specified log formats.
+    """Check if Wazuh run correctly with the specified log formats.
 
-    Ensure logcollector allow the specified log formats. Also, in case of manager instance, check if the API
+    Ensure logcollector allows the specified log formats. Also, in the case of the manager instance, check if the API
     answer for localfile block coincides.
 
     Raises:
         TimeoutError: If the "Analyzing file" callback is not generated.
-        AssertError: In case of a server instance, the API response is different that the real configuration.
+        AssertError: In the case of a server instance, the API response is different that the real configuration.
     """
-    if cfg['log_format'] not in log_format_not_print_analyzing_info :
-
+    if cfg['log_format'] not in log_format_not_print_analyzing_info:
         log_callback = logcollector.callback_analyzing_file(cfg['location'], prefix=prefix)
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
     elif 'command' in cfg['log_format']:
-
         log_callback = logcollector.callback_monitoring_command(cfg['log_format'], cfg['command'], prefix=prefix)
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
-
     elif cfg['log_format'] == 'djb-multilog':
-
         log_callback = logcollector.callback_monitoring_djb_multilog(cfg['location'], prefix=prefix)
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message="The expected multilog djb log has not been produced")
@@ -160,7 +150,7 @@ def check_log_format_valid(cfg):
 
 
 def check_log_format_invalid(cfg):
-    """Check if the Wazuh fails because a invalid frequency configuration value.
+    """Check if Wazuh fails because a invalid frequency configuration value.
 
     Args:
         cfg (dict): Dictionary with the localfile configuration.
