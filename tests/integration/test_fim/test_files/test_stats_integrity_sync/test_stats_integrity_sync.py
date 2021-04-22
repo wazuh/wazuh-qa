@@ -28,7 +28,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=3), pytest.mark.server]
 
 # variables
 
-agent_conf = os.path.join(WAZUH_PATH, 'etc', 'shared', 'default', 'agent.conf')
+agent_conf = os.path.join(WAZUH_PATH, 'etc', 'shared', 'default', 'shared.conf')
 state_path = os.path.join(WAZUH_PATH, 'var', 'run')
 db_path = '/var/ossec/queue/db/wdb'
 setup_environment_time = 1  # Seconds
@@ -332,7 +332,7 @@ def replace_conf(sync_eps, fim_eps, directory, buffer):
     fim_eps_regex = r"<max_eps>(FIM_EPS)</max_eps>"
     sync_eps_regex = r"<max_eps>(SYNC_EPS)</max_eps>"
     buffer_regex = r'<client_buffer><disabled>(CLIENT)</disabled></client_buffer>'
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'template_agent.conf'), 'r') as f:
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'shared-template.conf'), 'r') as f:
         content = f.read()
         new_config = re.sub(re.search(directories_regex, content).group(1), directory, content)
         new_config = re.sub(re.search(sync_eps_regex, new_config).group(1), str(sync_eps), new_config)
@@ -342,7 +342,7 @@ def replace_conf(sync_eps, fim_eps, directory, buffer):
         with open(agent_conf, 'w') as conf:
             conf.write(new_config)
 
-    # Set Read/Write permissions to agent.conf
+    # Set Read/Write permissions to shared.conf
     os.chmod(agent_conf, 0o666)
 
 
@@ -696,7 +696,7 @@ def protocol_detection(ossec_conf_path=WAZUH_CONF):
     Parameters
     ----------
     ossec_conf_path : str
-        agent.conf path.
+        shared.conf path.
 
     Returns
     -------

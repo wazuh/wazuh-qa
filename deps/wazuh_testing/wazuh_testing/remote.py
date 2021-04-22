@@ -35,14 +35,14 @@ DEFAULT_TESTING_GROUP_NAME = 'testing_group'
 data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 
-def new_agent_group(group_name=DEFAULT_TESTING_GROUP_NAME, configuration_file='agent.conf'):
+def new_agent_group(group_name=DEFAULT_TESTING_GROUP_NAME, configuration_file='shared.conf'):
     """Create a new agent group for testing purpose, must be run only on Managers."""
 
     sb.run([f"{tools.WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-g", group_name])
 
     agent_conf_path = os.path.join(data_path, configuration_file)
 
-    with open(f"{tools.WAZUH_PATH}/etc/shared/{group_name}/agent.conf", "w") as agent_conf_file:
+    with open(f"{tools.WAZUH_PATH}/etc/shared/{group_name}/shared.conf", "w") as agent_conf_file:
         with open(agent_conf_path, 'r') as configuration:
             agent_conf_file.write(configuration.read())
 
@@ -655,9 +655,9 @@ def check_push_shared_config(agent, sender, injector=None):
         check_agent_received_message(agent.rcv_msg_queue, r'#!-up file \w+ merged.mg', timeout=10,
                                      error_message="initial up file message not received")
 
-        # Check agent.conf message
+        # Check shared.conf message
         check_agent_received_message(agent.rcv_msg_queue, '#default', timeout=10,
-                                     error_message="agent.conf message not received")
+                                     error_message="shared.conf message not received")
         # Check close file (push end) message
         check_agent_received_message(agent.rcv_msg_queue, 'close', timeout=35,
                                      error_message="initial close message not received")

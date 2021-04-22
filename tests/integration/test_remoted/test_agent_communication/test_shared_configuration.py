@@ -17,7 +17,7 @@ pytestmark = pytest.mark.tier(level=1)
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_shared_configuration.yaml')
-agent_conf_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'agent.conf')
+agent_conf_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'shared.conf')
 
 parameters = [
     {'PROTOCOL': TCP},
