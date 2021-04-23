@@ -1,0 +1,21 @@
+---
+# conf 2
+- tags:
+  - ossec_conf_2
+  apply_to_modules:
+  - test_basic_usage_registry_duplicated_entries
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - windows_registry:
+        value: WINDOWS_DUPLICATED_REGISTRY_1
+        attributes:
+          - ATTRIBUTE
+          - arch: "32bit"
+    - windows_registry:
+        value: WINDOWS_DUPLICATED_REGISTRY_2
+        attributes:
+          - ATTRIBUTE
+          - arch: "32bit"
