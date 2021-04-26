@@ -16,7 +16,7 @@ Confirm that the different options for logcollector configuration work and are c
 
 |Tier | Number of tests | Time spent |
 |:--:|:--:|:--:|
-| 0 |  | 6m24s |
+| 0 | 122 | 6m24s |
 
 ## List of configuration tests
 
