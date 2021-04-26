@@ -10,6 +10,13 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 import wazuh_testing.generic_callbacks as gc
 import wazuh_testing.logcollector as logcollector
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.services import control_service
+import subprocess as sb
+
+LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -18,7 +25,6 @@ pytestmark = pytest.mark.tier(level=0)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 wazuh_component = get_service()
-
 
 if sys.platform == 'win32':
     location = r'C:\testing\file.txt'
@@ -78,6 +84,8 @@ def check_configuration_age_valid(cfg):
         TimeoutError: If the "Analyzing file" callback is not generated.
         AssertError: In the case of a server instance, the API response is different from real configuration.
     """
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+
     log_callback = logcollector.callback_analyzing_file(cfg['location'], prefix=prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
@@ -97,8 +105,10 @@ def check_configuration_age_invalid(cfg):
     Raises:
         TimeoutError: If error callback are not generated.
     """
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+
     if cfg['age'] in problematic_values:
-        pytest.xfail("Logcolector accepts invalid values. Issue: https://github.com/wazuh/wazuh/issues/8158")
+        pytest.xfail("Logcollector accepts invalid values. Issue: https://github.com/wazuh/wazuh/issues/8158")
 
     log_callback = gc.callback_invalid_conf_for_localfile('age', prefix, severity='ERROR')
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
@@ -121,7 +131,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_configuration_age(get_configuration, configure_environment, restart_logcollector):
+def test_configuration_age(get_configuration, configure_environment):
     """Check if the Wazuh age field of logcollector works properly.
 
     Ensure Wazuh component fails in case of invalid values and works properly in case of valid age values.
@@ -130,7 +140,19 @@ def test_configuration_age(get_configuration, configure_environment, restart_log
         TimeoutError: If expected callbacks are not generated.
     """
     cfg = get_configuration['metadata']
+
+    control_service('stop', daemon=LOGCOLLECTOR_DAEMON)
+    truncate_file(LOG_FILE_PATH)
+
     if cfg['valid_value']:
+        control_service('start', daemon=LOGCOLLECTOR_DAEMON)
         check_configuration_age_valid(cfg)
     else:
-        check_configuration_age_invalid(cfg)
+        if sys.platform == 'win32':
+            expected_exception = ValueError
+        else:
+            expected_exception = sb.CalledProcessError
+
+        with pytest.raises(expected_exception):
+            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+            check_configuration_age_invalid(cfg)

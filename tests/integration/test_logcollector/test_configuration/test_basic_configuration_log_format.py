@@ -12,7 +12,13 @@ import wazuh_testing.generic_callbacks as gc
 import wazuh_testing.api as api
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 from wazuh_testing.tools import get_service
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.services import control_service
+import subprocess as sb
 
+LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -129,6 +135,8 @@ def check_log_format_valid(cfg):
         TimeoutError: If the "Analyzing file" callback is not generated.
         AssertError: In the case of a server instance, the API response is different that the real configuration.
     """
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+
     if cfg['log_format'] not in log_format_not_print_analyzing_info:
         log_callback = logcollector.callback_analyzing_file(cfg['location'], prefix=prefix)
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
@@ -150,6 +158,8 @@ def check_log_format_valid(cfg):
 
 
 def check_log_format_invalid(cfg):
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+
     """Check if Wazuh fails because a invalid frequency configuration value.
 
     Args:
@@ -180,7 +190,19 @@ def check_log_format_invalid(cfg):
 
 def test_log_format(get_configuration, configure_environment, restart_logcollector):
     cfg = get_configuration['metadata']
+
+    control_service('stop', daemon=LOGCOLLECTOR_DAEMON)
+    truncate_file(LOG_FILE_PATH)
+
     if cfg['valid_value']:
+        control_service('start', daemon=LOGCOLLECTOR_DAEMON)
         check_log_format_valid(cfg)
     else:
-        check_log_format_invalid(cfg)
+        if sys.platform == 'win32':
+            expected_exception = ValueError
+        else:
+            expected_exception = sb.CalledProcessError
+
+        with pytest.raises(expected_exception):
+            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+            check_log_format_invalid(cfg)

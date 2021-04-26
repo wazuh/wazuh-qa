@@ -473,10 +473,7 @@ def configure_environment(get_configuration, request):
 
     # Remove created folders (parents)
     if sys.platform == 'win32':
-        try:
-            control_service('stop')
-        except ValueError:
-            pass
+        control_service('stop')
 
     if hasattr(request.module, 'test_directories'):
         for test_dir in test_directories:
@@ -489,17 +486,11 @@ def configure_environment(get_configuration, request):
                 delete_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_32KEY)
                 delete_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_64KEY)
 
-    error_in_configuration = False
     if sys.platform == 'win32':
-        try:
-            control_service('start')
-        except ValueError:
-            error_in_configuration = True
-            pass
+        control_service('start')
+
     # Restore previous configuration
     conf.write_wazuh_conf(backup_config)
-    if error_in_configuration:
-        control_service('restart')
 
     # Call extra functions after yield
     if hasattr(request.module, 'extra_configuration_after_yield'):

@@ -8,7 +8,13 @@ import sys
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.services import control_service
+import subprocess as sb
 
+LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -71,6 +77,7 @@ def check_configuration_reconnect_time_valid():
     Raises:
         TimeoutError: If the "Analyzing eventchannel" callback is not generated.
     """
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     log_callback = logcollector.callback_eventchannel_analyzing('Security')
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
@@ -86,6 +93,8 @@ def check_configuration_reconnect_time_invalid(cfg):
     Raises:
         TimeoutError: If error callback are not generated.
     """
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+
     if cfg['reconnect_time'] in problematic_values:
         pytest.xfail("Logcolector accepts invalid values. Issue: https://github.com/wazuh/wazuh/issues/8158")
 
@@ -110,7 +119,19 @@ def test_configuration_reconnect_time(get_configuration, configure_environment, 
         TimeoutError: If expected callbacks are not generated.
     """
     cfg = get_configuration['metadata']
+
+    control_service('stop', daemon=LOGCOLLECTOR_DAEMON)
+    truncate_file(LOG_FILE_PATH)
+
     if cfg['valid_value']:
-        check_configuration_reconnect_time_valid()
+        control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+        check_configuration_reconnect_time_valid(cfg)
     else:
-        check_configuration_reconnect_time_invalid(cfg)
+        if sys.platform == 'win32':
+            expected_exception = ValueError
+        else:
+            expected_exception = sb.CalledProcessError
+
+        with pytest.raises(expected_exception):
+            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+            check_configuration_reconnect_time_invalid(cfg)
