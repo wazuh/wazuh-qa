@@ -16,6 +16,7 @@ from wazuh_testing.tools.services import get_process_cmd, check_if_process_is_ru
 pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
+no_restart_windows_after_configuration_set = True
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
@@ -45,7 +46,7 @@ if sys.platform == 'win32':
         {'LOCATION': r'C:\xampp\apache\logs\*.log', 'LOG_FORMAT': 'syslog'},
         {'LOCATION': r'C:\logs\file-%Y-%m-%d.log', 'LOG_FORMAT': 'syslog'},
         {'LOCATION': r'C:\Testing white spaces', 'LOG_FORMAT': 'syslog'},
-        {'LOCATION': r'C:\FOLDER' '\\', 'LOG_FORMAT': 'json'},
+        {'LOCATION': r'C:\FOLDER\*', 'LOG_FORMAT': 'json'},
     ]
 
     metadata = [
@@ -63,7 +64,7 @@ if sys.platform == 'win32':
         {'location': r'C:\xampp\apache\logs\*.log', 'log_format': 'syslog'},
         {'location': r'C:\logs\file-%Y-%m-%d.log', 'log_format': 'syslog'},
         {'location': r'C:\Testing white spaces', 'log_format': 'syslog'},
-        {'location': r'C:\FOLDER' '\\', 'log_format': 'json'},
+        {'location': r'C:\FOLDER\*', 'log_format': 'json'},
     ]
 
 else:

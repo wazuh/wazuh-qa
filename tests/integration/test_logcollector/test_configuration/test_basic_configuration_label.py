@@ -16,6 +16,7 @@ from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_
 pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
+no_restart_windows_after_configuration_set = True
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 

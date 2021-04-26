@@ -472,7 +472,7 @@ def configure_environment(get_configuration, request):
     TimeMachine.time_rollback()
 
     # Remove created folders (parents)
-    if sys.platform == 'win32':
+    if sys.platform == 'win32' and not hasattr(request.module, 'no_restart_windows_after_configuration_set'):
         control_service('stop')
 
     if hasattr(request.module, 'test_directories'):
@@ -486,7 +486,7 @@ def configure_environment(get_configuration, request):
                 delete_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_32KEY)
                 delete_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_64KEY)
 
-    if sys.platform == 'win32':
+    if sys.platform == 'win32' and not hasattr(request.module, 'no_restart_windows_after_configuration_set'):
         control_service('start')
 
     # Restore previous configuration
