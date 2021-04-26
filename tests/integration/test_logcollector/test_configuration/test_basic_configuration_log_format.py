@@ -191,6 +191,14 @@ def check_log_format_invalid(cfg):
 
 
 def test_log_format(get_configuration, configure_environment):
+    """Check if Wazuh log format field of logcollector works properly.
+
+    Ensure Wazuh component fails in case of invalid values and works properly in case of valid
+    log format values.
+
+    Raises:
+        TimeoutError: If expected callbacks are not generated.
+    """
     cfg = get_configuration['metadata']
 
     control_service('stop', daemon=LOGCOLLECTOR_DAEMON)
