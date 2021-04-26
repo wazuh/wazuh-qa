@@ -5,11 +5,11 @@
 import json
 import os
 import platform
-import subprocess
-import time
-from subprocess import Popen, PIPE
-
 import pytest
+from subprocess import call, Popen, PIPE
+import time
+
+import wazuh_testing.execd as execd
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -17,9 +17,6 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
-
-from conftest import AR_LOG_FILE_PATH, wait_received_message_line, wait_start_message_line, \
-    wait_ended_message_line, start_log_monitoring
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.agent]
 
@@ -67,8 +64,10 @@ remoted_simulator = None
 
 @pytest.fixture(scope="function")
 def start_agent(request, get_configuration):
-    """
-    Create Remoted and Authd simulators, register agent and start it
+    """Create Remoted and Authd simulators, register agent and start it.
+
+    Args:
+        get_configuration (fixture): Get configurations from the module.
     """
     metadata = get_configuration['metadata']
     authd_simulator = AuthdSimulator(server_address=SERVER_ADDRESS,
@@ -92,8 +91,7 @@ def start_agent(request, get_configuration):
 
     control_service('stop')
     agent_auth_pat = 'bin' if platform.system() == 'Linux' else ''
-    subprocess.call([f'{WAZUH_PATH}/{agent_auth_pat}/agent-auth', '-m',
-                     SERVER_ADDRESS])
+    call([f'{WAZUH_PATH}/{agent_auth_pat}/agent-auth', '-m', SERVER_ADDRESS])
     control_service('start')
 
     yield
@@ -104,8 +102,10 @@ def start_agent(request, get_configuration):
 
 @pytest.fixture(scope="function")
 def remove_ip_from_iptables(request, get_configuration):
-    """
-    Remove the test IP from iptables if it exist
+    """Remove the test IP from iptables if it exist.
+
+    Args:
+        get_configuration (fixture): Get configurations from the module.
     """
     metadata = get_configuration['metadata']
     param = '{"version":1,"origin":{"name":"","module":"wazuh-execd"},"command":"delete",' \
@@ -130,15 +130,16 @@ def remove_ip_from_iptables(request, get_configuration):
 
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
-    """
-    Get configurations from the module
-    """
+    """Get configurations from the module."""
     yield request.param
 
 
 def validate_ar_message(message, command_id):
-    """
-    Get configurations from the module
+    """Verify that Active Response JSON messages have a "command" field and that it is valid.
+
+    Args:
+        message (str): Serialized JSON message.
+        command_id (int): Integer with command ID.
     """
     command = 'add' if command_id == 0 else 'delete'
 
@@ -148,8 +149,10 @@ def validate_ar_message(message, command_id):
 
 
 def wait_message_line(line):
-    """
-    Callback function to wait for Active Response JSON message
+    """Callback function to wait for Active Response JSON message.
+
+    Args:
+        line (str): String containing message.
     """
     if "{\"version\"" in line:
         return line.split("/ossec/active-response/bin/firewall-drop: ", 1)[1]
@@ -157,15 +160,20 @@ def wait_message_line(line):
 
 
 def wait_invalid_input_message_line(line):
-    """
-    Callback function to wait for error message
+    """Callback function to wait for error message.
+
+    Args:
+        line (str): String containing message.
     """
     return True if "Cannot read 'srcip' from data" in line else None
 
 
 def build_message(metadata, expected):
-    """
-    Build Active Response message to be used in tests
+    """Build Active Response message to be used in tests.
+
+    Args:
+        metadata (dict): Components must be: 'command', 'rule_id' and 'ip'
+        expected (dict): Only one component called 'success' with boolean value.
     """
     origin = '"name":"","module":"wazuh-analysisd"'
     rules = f'"level":5,"description":"Test.","id":{metadata["rule_id"]}'
@@ -181,8 +189,7 @@ def build_message(metadata, expected):
 
 def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, configure_environment,
                              remove_ip_from_iptables, start_agent, set_ar_conf_mode):
-    """
-    Check if firewall-drop Active Response is executed correctly
+    """Check if firewall-drop Active Response is executed correctly.
 
     Args:
         set_debug_mode (fixture): Set execd daemon in debug mode.
@@ -194,21 +201,21 @@ def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, co
     metadata = get_configuration['metadata']
     expected = metadata['results']
     ossec_log_monitor = FileMonitor(LOG_FILE_PATH)
-    ar_log_monitor = FileMonitor(AR_LOG_FILE_PATH)
+    ar_log_monitor = FileMonitor(execd.AR_LOG_FILE_PATH)
 
     # Checking AR in ossec logs
-    start_log_monitoring(ossec_log_monitor, wait_received_message_line)
+    ossec_log_monitor.start(timeout=60, callback=execd.wait_received_message_line)
 
     # Checking AR in active-response logs
-    start_log_monitoring(ar_log_monitor, wait_start_message_line)
+    ar_log_monitor.start(timeout=60, callback=execd.wait_start_message_line)
 
     if expected['success']:
         for command_id in range(2):
-            start_log_monitoring(ar_log_monitor, wait_message_line)
+            ar_log_monitor.start(timeout=60, callback=wait_message_line)
             last_log = ar_log_monitor.result()
             validate_ar_message(last_log, command_id)
 
-            start_log_monitoring(ar_log_monitor, wait_ended_message_line)
+            ar_log_monitor.start(timeout=60, callback=execd.wait_ended_message_line)
 
             # Checking if the IP was added/removed in iptables
             iptables_file = os.popen('iptables -L')
@@ -224,4 +231,4 @@ def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, co
 
             time.sleep(5)
     else:
-        start_log_monitoring(ar_log_monitor, wait_invalid_input_message_line)
+        ar_log_monitor.start(timeout=60, callback=wait_invalid_input_message_line)

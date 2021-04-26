@@ -2,17 +2,13 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import hashlib
 import os
 import platform
 import pytest
 import time
-import requests
 import subprocess
-import yaml
-import json
-import socket
 
+import wazuh_testing.execd as execd
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.services import control_service
@@ -20,9 +16,6 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
-from conftest import AR_LOG_FILE_PATH, set_ar_conf_mode, set_debug_mode, \
-    wait_received_message_line, wait_start_message_line, \
-    wait_ended_message_line, test_version, start_log_monitoring
 
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]
 
@@ -69,8 +62,10 @@ remoted_simulator = None
 
 @pytest.fixture(scope="function")
 def start_agent(request, get_configuration):
-    """
-    Create Remoted and Authd simulators, register agent and start it
+    """Create Remoted and Authd simulators, register agent and start it.
+
+    Args:
+        get_configuration (fixture): Get configurations from the module.
     """
     metadata = get_configuration['metadata']
     authd_simulator = AuthdSimulator(server_address=SERVER_ADDRESS,
@@ -106,16 +101,12 @@ def start_agent(request, get_configuration):
 
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
-    """
-    Get configurations from the module
-    """
+    """Get configurations from the module."""
     yield request.param
 
 
 def wait_message_line(line):
-    """
-    Callback function to wait for Active Response JSON message
-    """
+    """Callback function to wait for Active Response JSON message."""
     if platform.system() == 'Windows' and "active-response/bin/restart-wazuh.exe: {\"version\"" in line:
         return True
     elif "ossec/active-response/bin/restart-wazuh: {\"version\"" in line:
@@ -124,22 +115,21 @@ def wait_message_line(line):
 
 
 def wait_invalid_input_message_line(line):
-    """
-    Callback function to wait for error message
-    """
+    """Callback function to wait for error message."""
     return line if "Invalid input format" in line else None
 
 
 def wait_shutdown_message_line(line):
-    """
-    Callback function to wait for Wazuh shutdown message
-    """
+    """Callback function to wait for Wazuh shutdown message."""
     return True if "Shutdown received. Deleting responses." in line else None
 
 
 def build_message(metadata, expected):
-    """
-    Build Active Response message to be used in tests
+    """Build Active Response message to be used in tests.
+
+    Args:
+        metadata (dict): Components must be: 'command' and 'rule_id'
+        expected (dict): Only one component called 'success' with boolean value.
     """
     origin = '"name":"","module":"wazuh-analysisd"'
     rules = f'"level":5,"description":"Test.","id":{metadata["rule_id"]}'
@@ -152,33 +142,35 @@ def build_message(metadata, expected):
            '","parameters":{"extra_args":[],"alert":{"rule":{' + rules + '}}}}'
 
 
-def test_execd_restart(set_debug_mode, get_configuration, test_version, configure_environment, start_agent, set_ar_conf_mode):
-    """
-    Check if restart-wazuh Active Response is executed correctly
+def test_execd_restart(set_debug_mode, get_configuration, test_version,
+                       configure_environment, start_agent, set_ar_conf_mode):
+    """Check if restart-wazuh Active Response is executed correctly.
 
     Args:
         set_debug_mode (fixture): Set execd daemon in debug mode.
+        get_configuration (fixture): Get configurations from the module.
         test_version (fixture): Validate Wazuh version.
-        set_ar_conf_mode (fixture): Configure Active Responses used in tests.
+        configure_environment (fixture): Configure a custom environment for testing.
         start_agent (fixture): Create Remoted and Authd simulators, register agent and start it.
+        set_ar_conf_mode (fixture): Configure Active Responses used in tests.
     """
     metadata = get_configuration['metadata']
     expected = metadata['results']
     ossec_log_monitor = FileMonitor(LOG_FILE_PATH)
-    ar_log_monitor = FileMonitor(AR_LOG_FILE_PATH)
+    ar_log_monitor = FileMonitor(execd.AR_LOG_FILE_PATH)
 
     # Checking AR in ossec logs
-    start_log_monitoring(ossec_log_monitor, wait_received_message_line)
+    ossec_log_monitor.start(timeout=60, callback=execd.wait_received_message_line)
 
     # Checking AR in active-response logs
-    start_log_monitoring(ar_log_monitor, wait_start_message_line)
+    ar_log_monitor.start(timeout=60, callback=execd.wait_start_message_line)
 
     if expected['success']:
-        start_log_monitoring(ar_log_monitor, wait_message_line)
+        ar_log_monitor.start(timeout=60, callback=wait_message_line)
 
         # Checking shutdown message in ossec logs
-        start_log_monitoring(ossec_log_monitor, wait_shutdown_message_line)
+        ossec_log_monitor.start(timeout=60, callback=wait_shutdown_message_line)
 
-        start_log_monitoring(ar_log_monitor, wait_ended_message_line)
+        ar_log_monitor.start(timeout=60, callback=execd.wait_ended_message_line)
     else:
-        start_log_monitoring(ar_log_monitor, wait_invalid_input_message_line)
+        ar_log_monitor.start(timeout=60, callback=wait_invalid_input_message_line)

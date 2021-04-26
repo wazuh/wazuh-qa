@@ -53,8 +53,8 @@ else:
         import grp
         import pwd
 
-        OSSEC_UID = pwd.getpwnam("ossec").pw_uid
-        OSSEC_GID = grp.getgrnam("ossec").gr_gid
+        WAZUH_UID = pwd.getpwnam("wazuh").pw_uid
+        WAZUH_GID = grp.getgrnam("wazuh").gr_gid
     except (ImportError, KeyError, ModuleNotFoundError):
         pass
 

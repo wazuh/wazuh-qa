@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent_version='v4.0.0',
                agent_os='debian8', eps=1000, run_duration=20, active_modules=[], modules_eps=None,
-               fixed_message_size=None):
+               fixed_message_size=None, registration_address=None):
     """Run a batch of agents connected to a manager with the same parameters.
 
     Args:
@@ -26,6 +26,7 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
         active_modules (list): list with active modules names.
         modules_eps (list): list with eps for each active modules.
         fixed_message_size (int): size in bytes for the message.
+        registration_address (str): Manager IP address where the agent will be registered.
     """
 
     logger = logging.getLogger(f"P{os.getpid()}")
@@ -35,7 +36,8 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
 
     for _ in range(agents_number):
         agent = ag.Agent(manager_address, "aes", os=agent_os, version=agent_version, fim_eps=eps,
-                         fixed_message_size=fixed_message_size)
+                         fixed_message_size=fixed_message_size, syscollector_frequency=0,
+                         registration_address=registration_address)
         available_modules = agent.modules.keys()
 
         for module in active_modules:
@@ -46,11 +48,12 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
             if module in active_modules:
                 index = list(active_modules).index(module)
                 agent.modules[module]['status'] = 'enabled'
+                if module in ['keepalive', 'receive_messages']:
+                    continue
                 if modules_eps is not None and 'eps' in agent.modules[module]:
                     agent.modules[module]['eps'] = modules_eps[index]
                 else:
                     agent.modules[module]['eps'] = eps
-                index += 1
             else:
                 agent.modules[module]['status'] = 'disabled'
                 agent.modules[module]['eps'] = 0
@@ -101,6 +104,10 @@ def main():
     arg_parser.add_argument('-p', '--protocol', metavar='<protocol>', dest='agent_protocol',
                             type=str, required=False, default=TCP, help='Communication protocol')
 
+    arg_parser.add_argument('-r', '--registration-address', metavar='<manager_registration_ip_address>', type=str,
+                            required=False, default=None, help='Manager IP address where the agent will be registered',
+                            dest='manager_registration_address')
+
     arg_parser.add_argument('-t', '--time', metavar='<monitoring_time>', dest='duration',
                             type=int, required=False, default=20, help='Time in seconds for monitoring')
 
@@ -143,10 +150,8 @@ def main():
 
         arguments = (
             agents, args.manager_addr, args.agent_protocol, args.version, args.os, args.eps, args.duration,
-            args.modules, args.modules_eps, args.fixed_message_size
+            args.modules, args.modules_eps, args.fixed_message_size, args.manager_registration_address
         )
-
-        print(args.modules_eps)
 
         processes.append(Process(target=run_agents, args=arguments))
 

@@ -3,6 +3,8 @@
 
 Our newest integration tests are located in `wazuh-qa/tests/integration/`. They are organized by capabilities:
 
+- **[_test_active_response_](test_active_response#test_active_response)**
+- **[_test_agentd_](test_agentd#test_active_response)**
 - _test_analysisd_
 - _test_api_
 - _test_cluster_
