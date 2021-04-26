@@ -45,8 +45,8 @@
   copy:
     src: ../files/ossec.conf
     dest: /var/ossec/etc/ossec.conf
-    owner: ossec
-    group: ossec
+    owner: wazuh
+    group: wazuh
     mode: '0644'
 
 - name: Remove client.keys
@@ -58,8 +58,8 @@
   lineinfile:
     path: /var/ossec/etc/client.keys
     line: "{{ agent_id }} {{agent_hostname}} any {{ agent_key }}"
-    owner: ossec
-    group: ossec
+    owner: wazuh
+    group: wazuh
     mode: "0644"
     create: yes
 

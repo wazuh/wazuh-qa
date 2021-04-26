@@ -6,11 +6,9 @@ import json
 import os
 import sys
 from time import sleep
-
 import pytest
 import yaml
-from wazuh_testing.agent import (set_state_interval, callback_ack, callback_keepalive,
-                                 callback_connected_to_server, callback_state_file_updated)
+
 from wazuh_testing.fim import change_internal_options
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -18,9 +16,8 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
-
-from conftest import CLIENT_KEYS_PATH
-
+from wazuh_testing.agent import (CLIENT_KEYS_PATH, set_state_interval, callback_ack, callback_keepalive,
+                                 callback_connected_to_server, callback_state_file_updated)
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]

@@ -93,6 +93,18 @@ class DataVisualizer:
         self.base_name = base_name
         sns.set(rc={'figure.figsize': (26, 9)})
 
+    @staticmethod
+    def _color_palette(size):
+        """Create a list of different colors.
+
+        Args:
+            size (int): number of elements.
+
+        Returns:
+            list: list of colors. The colors are represented as a tuple of float values.
+        """
+        return sns.hls_palette(size - 1 if size > 1 else 1, h=.5)
+
     def _load_dataframes(self):
         """Load the dataframes from dataframes_paths."""
         for df_path in self.dataframes_paths:
@@ -115,15 +127,16 @@ class DataVisualizer:
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
 
     @staticmethod
-    def _basic_plot(ax, dataframe, label=None):
+    def _basic_plot(ax, dataframe, label=None, color=None):
         """Basic function to visualize a dataframe.
 
         Args:
             ax (axes.SubplotBase): subplot base where the data will be printed.
             dataframe (pandas.Dataframe): dataframe containing the data from the CSVs.
             label (str, optional): optional label to add to the plot.
+            color (tuple, optional): tuple defining the color (float, float).
         """
-        ax.plot(dataframe, label=label)
+        ax.plot(dataframe, label=label, color=color)
 
     def _save_custom_plot(self, ax, y_label, title, rotation=90):
         """Function to add info to the plot, the legend and save the SVG image.
@@ -155,27 +168,34 @@ class DataVisualizer:
         if self.target == 'binary':
             for element in elements:
                 fig, ax = plt.subplots()
-                for daemon in self._get_daemons():
-                    self._basic_plot(ax, self.dataframe[self.dataframe.Daemon == daemon][element], label=daemon)
+                daemons = self._get_daemons()
+                colors = self._color_palette(len(daemons))
+                for daemon, color in zip(daemons, colors):
+                    self._basic_plot(ax, self.dataframe[self.dataframe.Daemon == daemon][element],
+                                     label=daemon, color=color)
                 self._save_custom_plot(ax, element, f"{element} {title}")
 
         elif self.target == 'logcollector':
             for element in elements:
                 fig, ax = plt.subplots()
-                for target in self._get_logcollector_targets():
-                    self._basic_plot(ax, self.dataframe[self.dataframe.target == target][element], label=target)
+                targets = self._get_logcollector_targets()
+                colors = self._color_palette(len(targets))
+                for target, color in zip(targets, colors):
+                    self._basic_plot(ax, self.dataframe[self.dataframe.target == target][element],
+                                     label=target, color=color)
                 self._save_custom_plot(ax, element, title)
 
         else:
             fig, ax = plt.subplots()
-            for element in elements:
-                self._basic_plot(ax, self.dataframe[element], label=element)
+            colors = self._color_palette(len(elements))
+            for element, color in zip(elements, colors):
+                self._basic_plot(ax, self.dataframe[element], label=element, color=color)
             self._save_custom_plot(ax, generic_label, title)
 
     def _plot_binaries_dataset(self):
         """Function to plot the hardware data of the binary."""
         elements = self.dataframe.columns.drop(BINARY_NON_PRINTABLE_HEADERS)
-        self._plot_data(elements, True, "usage during the test")
+        self._plot_data(elements, title="usage during the test")
 
     def _plot_analysisd_dataset(self):
         """Function to plot the statistics from wazuh-analysisd."""
