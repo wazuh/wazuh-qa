@@ -2,7 +2,7 @@
 ## Overview 
 
 Check if `wazuh-logcollector` or `wazuh-agent` for Windows agent, allows valid command values 
-for command monitoring
+for command monitoring.
 
 ## Objective
 
@@ -18,7 +18,7 @@ for command monitoring
 ## Expected behavior
 
 - Fail if `wazuh-logcollector` or `wazuh-agent` allows valid command for command monitoring.
-- Fail if the API response is different from the     Wazuh configuration.
+- Fail if the API response is different from the Wazuh configuration.
 
 ## Code documentation
 
