@@ -11,11 +11,7 @@ import wazuh_testing.generic_callbacks as gc
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 from wazuh_testing.tools import get_service
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import LOG_FILE_PATH
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.services import control_service
-import subprocess as sb
+
 
 LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 
@@ -68,8 +64,6 @@ def check_only_future_events_valid(cfg):
     Raises:
         TimeoutError: If the "Analyzing file" callback is not generated.
     """
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
     log_callback = logcollector.callback_eventchannel_analyzing(cfg['location'])
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)
@@ -83,7 +77,6 @@ def check_only_future_events_invalid(cfg):
     Raises:
         TimeoutError: If error callbacks are not generated.
     """
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     log_callback = gc.callback_invalid_value('only-future-events', cfg['only-future-events'],
                                              prefix, severity="WARNING")
@@ -108,18 +101,7 @@ def test_only_future_events(get_configuration, configure_environment, restart_lo
     """
     cfg = get_configuration['metadata']
 
-    control_service('stop', daemon=LOGCOLLECTOR_DAEMON)
-    truncate_file(LOG_FILE_PATH)
-
     if cfg['valid_value']:
-        control_service('start', daemon=LOGCOLLECTOR_DAEMON)
         check_only_future_events_valid(cfg)
     else:
-        if sys.platform == 'win32':
-            expected_exception = ValueError
-        else:
-            expected_exception = sb.CalledProcessError
-
-        with pytest.raises(expected_exception):
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-            check_only_future_events_invalid(cfg)
+        check_only_future_events_invalid(cfg)

@@ -127,7 +127,7 @@ def test_configuration_reconnect_time(get_configuration, configure_environment, 
 
     if cfg['valid_value']:
         control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-        check_configuration_reconnect_time_valid(cfg)
+        check_configuration_reconnect_time_valid()
     else:
         if sys.platform == 'win32':
             expected_exception = ValueError
