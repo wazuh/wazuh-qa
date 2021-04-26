@@ -188,7 +188,7 @@ def check_log_format_invalid(cfg):
                                 error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
 
-def test_log_format(get_configuration, configure_environment, restart_logcollector):
+def test_log_format(get_configuration, configure_environment):
     cfg = get_configuration['metadata']
 
     control_service('stop', daemon=LOGCOLLECTOR_DAEMON)
