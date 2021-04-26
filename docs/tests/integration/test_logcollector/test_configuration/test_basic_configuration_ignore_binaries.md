@@ -8,7 +8,7 @@ values and allows valid `ignore_binaries` value.
 
 - To confirm `ignore_binaries` option allows valid values.
 - To confirm `wazuh-logcollector` and `wazuh-agent` fails when invalid `ignore_binaries` values are provided.
-- To confirm API response is equal to set configuration.
+- To confirm the API response is equal to set configuration.
 
 ## General info
 
