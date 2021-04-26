@@ -31,7 +31,7 @@ checks:
    condition: any
    rules:
      - f:/var/ossec/etc/ossec.conf
-     - f:/var/ossec/logs/ossec.log
+     - f:/var/ossec/logs/wazuh.log
      - f:/var/ossec/etc/client.keys
 
  - id: 800101
@@ -100,7 +100,7 @@ checks:
    rules:
      - f:/var/ossec/etc/ossec.conf
      - f:/var/ossec/etc/client.keys
-     - f:/var/ossec/logs/ossec.log 
+     - f:/var/ossec/logs/wazuh.log
 
  - id: 800201
    title: FAIL -- ALL on a list [TRUE, TRUE, FALSE]
@@ -170,7 +170,7 @@ checks:
    rules:
      - f:/var/ossec/etc/ossec.conf
      - f:/var/ossec/etc/client.keys
-     - f:/var/ossec/logs/ossec.log
+     - f:/var/ossec/logs/wazuh.log
 
  - id: 800301
    title: FAIL -- NONE on a list [TRUE, FALSE, FALSE]

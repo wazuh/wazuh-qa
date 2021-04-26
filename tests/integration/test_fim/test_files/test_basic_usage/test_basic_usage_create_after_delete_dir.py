@@ -56,7 +56,7 @@ def test_create_after_delete(tags_to_apply, get_configuration, configure_environ
 
     This test performs the following steps:
     - Monitor a directory that exist.
-    - Create some files inside. Check that it does produce events in ossec.log.
+    - Create some files inside. Check that it does produce events in wazuh.log.
     - Delete the directory and wait for a second.
     - Create the directory again and wait for a second.
     - Check that creating files within the directory do generate events again.

@@ -5,7 +5,7 @@
 import os
 
 import pytest
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
+from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, CLUSTER_LOG_PATH
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 
@@ -34,19 +34,19 @@ def clean_environment():
 def test_agent_enrollment(clean_environment):
     """Check agent enrollment process works as expected. An agent pointing to a worker should be able to register itself
     into the master by starting Wazuh-agent process."""
-    # Clean ossec.log and cluster.log
-    host_manager.clear_file(host='wazuh-master', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
-    host_manager.clear_file(host='wazuh-worker1', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
-    host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
-    host_manager.clear_file(host='wazuh-master', file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
-    host_manager.clear_file(host='wazuh-worker1', file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
+    # Clean wazuh.log and cluster.log
+    host_manager.clear_file(host='wazuh-master', file_path=LOG_FILE_PATH)
+    host_manager.clear_file(host='wazuh-worker1', file_path=LOG_FILE_PATH)
+    host_manager.clear_file(host='wazuh-agent1', file_path=LOG_FILE_PATH)
+    host_manager.clear_file(host='wazuh-master', file_path=CLUSTER_LOG_PATH)
+    host_manager.clear_file(host='wazuh-worker1', file_path=CLUSTER_LOG_PATH)
 
     # Start the agent enrollment process by restarting the wazuh-agent
     host_manager.control_service(host='wazuh-master', service='wazuh', state="restarted")
     host_manager.control_service(host='wazuh-worker1', service='wazuh', state="restarted")
     host_manager.get_host('wazuh-agent1').ansible('command', f'service wazuh-agent restart', check=False)
 
-    # Run the callback checks for the ossec.log and the cluster.log
+    # Run the callback checks for the wazuh.log and the cluster.log
     HostMonitor(inventory_path=inventory_path,
                 messages_path=messages_path,
                 tmp_path=tmp_path).run()

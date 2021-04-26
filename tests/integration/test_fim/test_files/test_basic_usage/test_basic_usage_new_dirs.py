@@ -68,7 +68,7 @@ def test_new_directory(tags_to_apply, get_configuration, configure_environment, 
 
     This test performs the following steps:
     - Monitor a directory that does not exist.
-    - Create the directory with files inside. Check that this does not produce events in ossec.log.
+    - Create the directory with files inside. Check that this does not produce events in wazuh.log.
     - Move time forward to the next scheduled scan.
     - Check that now creating files within the directory do generate events.
 

@@ -1,11 +1,12 @@
 # Test execd restart
-This test check that Active Response script called 'restart-wazuh' is executed correctly when configured.
+
+This test checks if the Active Response script called `restart-wazuh` is executed correctly when configured.
 
 ## General info
 
 | Tier | Platforms | Time spent| Test file |
 |:--:|:--:|:--:|:--:|
-| 0 | Linux/Windows | 00:00:10 | [test_active_response/test_execd/test_execd_restart.py]|
+| 0 | Linux/Windows | 10s | [test_active_response/test_execd/test_execd_restart.py]|
 
 ## Test logic
 
@@ -15,4 +16,4 @@ This test check that Active Response script called 'restart-wazuh' is executed c
 
 ## Code documentation
 
-<!-- ::: tests.integration.test_active_response.test_execd.test_execd_restart -->
+::: tests.integration.test_active_response.test_execd.test_execd_restart

@@ -66,6 +66,7 @@ class Agent:
                                  alert.
         fim_integrity_eps (int, optional): Set the maximum database synchronization message throughput.
         authd_password (str), optional: Password for registration if needed.
+        registration_address (str, optional): Manager registration IP address.
 
     Attributes:
         id (str): ID of the agent.
@@ -110,13 +111,14 @@ class Agent:
         sca_frequency (int): frequency to run sca_label scans. 0 to continuously send sca_label events.
         syscollector_batch_size (int): Size of the syscollector type batch events.
         fixed_message_size (int): Fixed size of the agent modules messages in KB.
+        registration_address (str): Manager registration IP address.
     """
     def __init__(self, manager_address, cypher="aes", os=None, rootcheck_sample=None, id=None, name=None, key=None,
                  version="v4.3.0", fim_eps=100, fim_integrity_eps=100, sca_eps=100, syscollector_eps=100, labels=None,
                  rootcheck_eps=100, logcollector_eps=100, authd_password=None, disable_all_modules=False,
                  rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, sca_frequency=60,
                  syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100,
-                 fixed_message_size=None):
+                 fixed_message_size=None, registration_address=None):
         self.id = id
         self.name = name
         self.key = key
@@ -141,6 +143,7 @@ class Agent:
         self.keepalive_frequency = keepalive_frequency
         self.syscollector_frequency = syscollector_frequency
         self.manager_address = manager_address
+        self.registration_address = manager_address if registration_address is None else registration_address
         self.encryption_key = ""
         self.keep_alive_event = ""
         self.keep_alive_raw_msg = ""
@@ -158,17 +161,17 @@ class Agent:
         self.fim_integrity = None
         self.syscollector = None
         self.modules = {
-            "keepalive": {"status": "enabled", "frequency": self.keepalive_frequency},
-            "fim": {"status": "enabled", "eps": self.fim_eps},
-            "fim_integrity": {"status": "disabled", "eps": self.fim_integrity_eps},
-            "syscollector": {"status": "disabled", "frequency": self.syscollector_frequency,
-                             "eps": self.syscollector_eps},
-            "rootcheck": {"status": "disabled", "frequency": self.rootcheck_frequency, "eps": self.rootcheck_eps},
-            "sca": {"status": "disabled", "frequency": self.sca_frequency, "eps": self.sca_eps},
-            "hostinfo": {"status": "disabled", "eps": self.hostinfo_eps},
-            "winevt": {"status": "disabled", "eps": self.winevt_eps},
-            "logcollector": {"status": "disabled", "eps": self.logcollector_eps},
-            "receive_messages": {"status": "enabled"},
+            'keepalive': {'status': 'enabled', 'frequency': self.keepalive_frequency},
+            'fim': {'status': 'enabled', 'eps': self.fim_eps},
+            'fim_integrity': {'status': 'disabled', 'eps': self.fim_integrity_eps},
+            'syscollector': {'status': 'disabled', 'frequency': self.syscollector_frequency,
+                             'eps': self.syscollector_eps},
+            'rootcheck': {'status': 'disabled', 'frequency': self.rootcheck_frequency, 'eps': self.rootcheck_eps},
+            'sca': {'status': 'disabled', 'frequency': self.sca_frequency, 'eps': self.sca_eps},
+            'hostinfo': {'status': 'disabled', 'eps': self.hostinfo_eps},
+            'winevt': {'status': 'disabled', 'eps': self.winevt_eps},
+            'logcollector': {'status': 'disabled', 'eps': self.logcollector_eps},
+            'receive_messages': {'status': 'enabled'},
         }
         self.sha_key = None
         self.upgrade_exec_result = None
@@ -237,19 +240,22 @@ class Agent:
         context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
-        ssl_socket = context.wrap_socket(sock,
-                                         server_hostname=self.manager_address)
-        ssl_socket.connect((self.manager_address, 1515))
+
+        ssl_socket = context.wrap_socket(sock, server_hostname=self.registration_address)
+        ssl_socket.connect((self.registration_address, 1515))
+
         if self.authd_password is None:
-            event = "OSSEC A:'{}'\n".format(self.name).encode()
+            event = f"OSSEC A:'{self.name}'\n".encode()
         else:
-            event = "OSSEC PASS: {} OSSEC A:'{}'\n".format(self.authd_password,
-                                                           self.name).encode()
+            event = f"OSSEC PASS: {self.authd_password} OSSEC A:'{self.name}'\n".encode()
+
         ssl_socket.send(event)
         recv = ssl_socket.recv(4096)
         registration_info = recv.decode().split("'")[1].split(" ")
+
         self.id = registration_info[0]
         self.key = registration_info[3]
+
         ssl_socket.close()
         sock.close()
         logging.debug("Registration - {}({})".format(self.name, self.id))
@@ -747,6 +753,7 @@ class GeneratorSyscollector:
         self.batch_size = batch_size
         self.syscollector_tag = 'syscollector'
         self.syscollector_mq = 'd'
+        self.current_id = 1
 
     def format_event(self, message_type):
         """Format syscollector message of the specified type.
@@ -779,13 +786,15 @@ class GeneratorSyscollector:
         timestamp = today.strftime("%Y/%m/%d %H:%M:%S")
 
         fields_to_replace = [
-                        ('<agent_name>', self.agent_name), ('<random_int>', str(randint(1, 10 * 10))),
+                        ('<agent_name>', self.agent_name), ('<random_int>', f"{self.current_id}"),
                         ('<random_string>', get_random_string(10)),
                         ('<timestamp>', timestamp), ('<syscollector_type>', message_type)
                     ]
 
         for variable, value in fields_to_replace:
             message = message.replace(variable, value)
+
+        self.current_id += 1
 
         message = f"{self.syscollector_mq}:{self.syscollector_tag}:{message}"
 
@@ -865,7 +874,7 @@ class SCA:
         Args:
             event_type (str): Event type `[summary, check]`.
         """
-        event_data = {}
+        event_data = dict()
         event_data['type'] = event_type
         event_data['scan_id'] = self.last_scan_id
         self.last_scan_id += 1
@@ -1139,16 +1148,16 @@ class GeneratorWinevt:
         self.next_event_key = cycle(self.winevent_sources.keys())
 
     def generate_event(self, winevt_type=None):
-        """Genereate winevt event.
+        """Generate Windows event.
 
-        Generate the desired type of winevt event. If no type of winvt message is provided, all winvt message types
-        will be generated sequentially.
+        Generate the desired type of Windows event (winevt). If no type of winvt message is provided,
+        all winvt message types will be generated sequentially.
 
         Args:
             winevt_type (str): Winevt type message `system, security, application, windows-defender, sysmon`.
 
         Returns:
-            string: an windows event generatted message.
+            string: an windows event generated message.
         """
         self.current_event_key = next(self.next_event_key)
 
@@ -1199,7 +1208,7 @@ class GeneratorFIM:
         self.event_type = None
 
     def random_file(self):
-        """ Initialize file attribute.
+        """Initialize file attribute.
 
         Returns:
             string: the new randomized file for the instance
@@ -1208,7 +1217,7 @@ class GeneratorFIM:
         return self._file
 
     def random_size(self):
-        """ Initialize file size with random value
+        """Initialize file size with random value
 
         Returns:
             string: the new randomized file size for the instance
@@ -1587,7 +1596,6 @@ class InjectorThread(threading.Thread):
                 self.agent.update_checksum(new_checksum)
                 if self.totalMessages % eps == 0:
                     sleep(1.0 - ((time() - start_time) % 1.0))
-
 
     def run_module(self, module):
         """Send a module message from the agent to the manager.

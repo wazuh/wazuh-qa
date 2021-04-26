@@ -33,7 +33,7 @@ def get_service():
 if sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
-    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'ossec.log')
+    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'wazuh.log')
     PREFIX = os.path.join('c:', os.sep)
     GEN_WAZUH = None
     WAZUH_API_CONF = None
@@ -69,7 +69,8 @@ else:
     WAZUH_CONF = os.path.join(WAZUH_PATH, WAZUH_CONF_RELATIVE)
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
     WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
-    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'wazuh.log')
+    CLUSTER_LOG_PATH = os.path.join(WAZUH_PATH, 'logs', 'cluster.log')
     API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
     ARCHIVES_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'archives', 'archives.log')
     AGENT_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-agentd.state')
@@ -81,8 +82,8 @@ else:
         import grp
         import pwd
 
-        OSSEC_UID = pwd.getpwnam("ossec").pw_uid
-        OSSEC_GID = grp.getgrnam("ossec").gr_gid
+        WAZUH_UID = pwd.getpwnam("wazuh").pw_uid
+        WAZUH_GID = grp.getgrnam("wazuh").gr_gid
     except (ImportError, KeyError, ModuleNotFoundError):
         pass
 
