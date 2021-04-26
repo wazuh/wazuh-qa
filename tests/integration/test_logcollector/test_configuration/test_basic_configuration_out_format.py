@@ -9,13 +9,7 @@ import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools import get_service
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import LOG_FILE_PATH
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.services import control_service
-import subprocess as sb
 
-LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 import sys
 
 # Marks
@@ -124,8 +118,6 @@ def check_configuration_out_format_valid(cfg):
         TimeoutError: If the callback for the socket target is not generated.
         AssertError: In the case of a server instance, the API response is different than the real configuration.
     """
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
     log_callback = logcollector.callback_socket_target(cfg['location'], cfg['target'], prefix=prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
@@ -146,8 +138,6 @@ def check_configuration_out_format_invalid(cfg):
     Raises:
         TimeoutError: If the error callbacks are not generated.
     """
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
     log_callback = logcollector.callback_log_target_not_found(cfg['location'], cfg['target_out_format'], prefix=prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND)
@@ -169,19 +159,7 @@ def test_configuration_out_format(get_configuration, configure_environment, rest
         TimeoutError: If expected callbacks are not generated.
     """
     cfg = get_configuration['metadata']
-
-    control_service('stop', daemon=LOGCOLLECTOR_DAEMON)
-    truncate_file(LOG_FILE_PATH)
-
     if cfg['valid_value']:
-        control_service('start', daemon=LOGCOLLECTOR_DAEMON)
         check_configuration_out_format_valid(cfg)
     else:
-        if sys.platform == 'win32':
-            expected_exception = ValueError
-        else:
-            expected_exception = sb.CalledProcessError
-
-        with pytest.raises(expected_exception):
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-            check_configuration_out_format_invalid(cfg)
+        check_configuration_out_format_invalid(cfg)
