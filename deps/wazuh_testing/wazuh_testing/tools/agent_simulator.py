@@ -472,7 +472,7 @@ class Agent:
         req_code = message_list[1]
 
         if 'com' in message_list:
-            """ Examples:
+            """Examples:
             ['12d95abf04334f90f8dc3140031b3e7b342680000000130:5489:#!-req', '81d15486', 'com', 'close',
                 'wazuh_agent_v4.2.0_linux_x86_64.wpk']
             ['dff5324c331a37d56978f7f034f2634e599120000000130:5490:#!-req', '81d15487', 'com', 'sha1',
@@ -484,7 +484,7 @@ class Agent:
             command = message_list[com_index + 1]
 
         elif 'upgrade' in message_list:
-            """ Examples:
+            """Examples:
             ['5e085e566814750136f3926f758349cb232030000000130:5492:#!-req', '81d15489', 'upgrade',
                 '{"command":"clear_upgrade_result","parameters":{}}']
             """
@@ -492,12 +492,12 @@ class Agent:
             json_command = json.loads(message_list[com_index + 1])
             command = json_command['command']
         elif 'getconfig' in message_list:
-            """ Examples:
+            """Examples:
             ['ececac937b8e5dead15e9096e8bd5215214970000000002:3090:#!-req', 'c2b2c9e3', 'agent', 'getconfig', 'client']
             """
             command = 'getconfig'
         elif 'getstate' in message_list:
-            """ Examples:
+            """Examples:
             ['ececac937b8e5dead15e9096e8bd5215214970000000002:3090:#!-req', 'c2b2c9e3', 'logcollector', 'getstate']
             """
             command = 'getstate'
@@ -1226,7 +1226,7 @@ class GeneratorFIM:
         return self._size
 
     def random_mode(self):
-        """ Initialize module attribute with `S_IFREG` or `S_IFLNK`
+        """Initialize module attribute with `S_IFREG` or `S_IFLNK`
 
         Returns:
             self._mode: the new randomized file mode for the instance
@@ -1244,7 +1244,7 @@ class GeneratorFIM:
         return self._mode
 
     def random_uid(self):
-        """ Initialize uid attribute with random value.
+        """Initialize uid attribute with random value.
 
         Returns:
             string: the new randomized file uid for the instance
@@ -1254,7 +1254,7 @@ class GeneratorFIM:
         return self._uid, self._uname
 
     def random_gid(self):
-        """ Initialize gid attribute with random value.
+        """Initialize gid attribute with random value.
 
         Returns:
             string: the new randomized gid for the instance,
@@ -1265,7 +1265,7 @@ class GeneratorFIM:
         return self._gid, self._gname
 
     def random_md5(self):
-        """ Initialize md5 attribute with random value.
+        """Initialize md5 attribute with random value.
         Returns:
             string: the new randomized md5 for the instance.
         """
@@ -1275,7 +1275,7 @@ class GeneratorFIM:
         return self._md5
 
     def random_sha1(self):
-        """ Initialize sha1 attribute with random value.
+        """Initialize sha1 attribute with random value.
         Returns:
             string: the new randomized sha1 for the instance.
         """
@@ -1285,7 +1285,7 @@ class GeneratorFIM:
         return self._sha1
 
     def random_sha256(self):
-        """ Initialize sha256 attribute with random value.
+        """Initialize sha256 attribute with random value.
         Returns:
             string: the new randomized sha256 for the instance.
         """
@@ -1295,7 +1295,7 @@ class GeneratorFIM:
         return self._sha256
 
     def random_time(self):
-        """ Initialize time attribute with random value.
+        """Initialize time attribute with random value.
          Returns:
             string: the new randomized mdate for the instance.
         """
@@ -1303,7 +1303,7 @@ class GeneratorFIM:
         return self._mdate
 
     def random_inode(self):
-        """ Initialize inode attribute with random value.
+        """Initialize inode attribute with random value.
         Returns:
             string: the new randomized inode for the instance.
         """
@@ -1353,7 +1353,7 @@ class GeneratorFIM:
         return changed_attributes
 
     def get_attributes(self):
-        """ Return GeneratorFIM attributes.
+        """Return GeneratorFIM attributes.
 
         Returns:
             dict: instance attributes.
@@ -1370,7 +1370,7 @@ class GeneratorFIM:
         return attributes
 
     def format_message(self, message):
-        """ Format FIM message.
+        """Format FIM message.
         Args:
             message (str): FIM message.
 
@@ -1391,7 +1391,7 @@ class GeneratorFIM:
         return formated_message
 
     def generate_message(self):
-        """ Generate FIM event based on `event_type` and `agent_version` attribute.
+        """Generate FIM event based on `event_type` and `agent_version` attribute.
 
         Returns:
             string: generated message with the required FIM header.
@@ -1435,7 +1435,7 @@ class GeneratorFIM:
         return formatted_message
 
     def get_message(self, event_mode=None, event_type=None):
-        """ Get FIM message. If no parameters are provided, it is randomly selected among the possible values
+        """Get FIM message. If no parameters are provided, it is randomly selected among the possible values
         Args:
             event_mode (str): Event mode `real-time, whodata, scheduled`.
             event_type (str): Event type `added, modified, deleted`.

@@ -21,7 +21,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 
 def load_tests(path):
-    """ Loads a yaml file from a path
+    """Loads a yaml file from a path
     Returns
     ----------
     yaml structure

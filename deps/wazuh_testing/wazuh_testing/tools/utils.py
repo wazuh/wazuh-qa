@@ -91,7 +91,7 @@ def insert_xml_tag(pattern, tag, value, data):
 
 
 def replace_in_file(filename, to_replace, replacement):
-    """ Replaces all occurrences of <to_replace> with <replacement> in <filename> file.
+    """Replaces all occurrences of <to_replace> with <replacement> in <filename> file.
     This helper performs a search and replacement similar to `sed -i` to a desired file.
     """
     with open(filename) as f:

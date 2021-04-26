@@ -427,6 +427,24 @@ nav:
                 - tests/integration/test_remoted/test_agent_communication/test_shared_configuration.md
                 - tests/integration/test_remoted/test_agent_communication/test_agent_version_shared_configuration_startup_message.md
                 - tests/integration/test_remoted/test_agent_communication/test_agents_switching_protocols.md
+        - Logcollector:
+            - tests/integration/test_logcollector/index.md
+            - Test basic configuration:
+                - tests/integration/test_logcollector/test_configuration/index.md
+                - Test basic configuration age: tests/integration/test_logcollector/test_configuration/test_basic_configuration_age.md
+                - Test basic configuration alias: tests/integration/test_logcollector/test_configuration/test_basic_configuration_alias.md
+                - Test basic configuration command: tests/integration/test_logcollector/test_configuration/test_basic_configuration_command.md
+                - Test basic configuration exclude: tests/integration/test_logcollector/test_configuration/test_basic_configuration_exclude.md
+                - Test basic configuration frequency: tests/integration/test_logcollector/test_configuration/test_basic_configuration_frequency.md
+                - Test basic configuration ignore binaries: tests/integration/test_logcollector/test_configuration/test_basic_configuration_ignore_binaries.md
+                - Test basic configuration label: tests/integration/test_logcollector/test_configuration/test_basic_configuration_label.md
+                - Test basic configuration location: tests/integration/test_logcollector/test_configuration/test_basic_configuration_location.md
+                - Test basic configuration log format: tests/integration/test_logcollector/test_configuration/test_basic_configuration_log_format.md
+                - Test basic configuration only future events: tests/integration/test_logcollector/test_configuration/test_basic_configuration_only_future_events.md
+                - Test basic configuration out format: tests/integration/test_logcollector/test_configuration/test_basic_configuration_out_format.md
+                - Test basic configuration query: tests/integration/test_logcollector/test_configuration/test_basic_configuration_query.md
+                - Test basic configuration reconnect time: tests/integration/test_logcollector/test_configuration/test_basic_configuration_reconnect_time.md
+                - Test basic configuration target: tests/integration/test_logcollector/test_configuration/test_basic_configuration_target.md
         - Logtest:
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md
