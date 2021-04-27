@@ -67,6 +67,7 @@ class Agent:
         fim_integrity_eps (int, optional): Set the maximum database synchronization message throughput.
         authd_password (str), optional: Password for registration if needed.
         registration_address (str, optional): Manager registration IP address.
+        retry_enrollment (bool, optional): retry then enrollment in case of error.
 
     Attributes:
         id (str): ID of the agent.
@@ -118,7 +119,7 @@ class Agent:
                  rootcheck_eps=100, logcollector_eps=100, authd_password=None, disable_all_modules=False,
                  rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, sca_frequency=60,
                  syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100,
-                 fixed_message_size=None, registration_address=None):
+                 fixed_message_size=None, registration_address=None, retry_enrollment=False):
         self.id = id
         self.name = name
         self.key = key
@@ -179,9 +180,10 @@ class Agent:
         self.upgrade_script_result = 0
         self.stop_receive = 0
         self.stage_disconnect = None
-        self.setup(disable_all_modules=disable_all_modules)
+        self.retry_enrollment = retry_enrollment
         self.rcv_msg_queue = Queue(rcv_msg_limit)
         self.fixed_message_size = fixed_message_size * 1024 if fixed_message_size is not None else None
+        self.setup(disable_all_modules=disable_all_modules)
 
     def update_checksum(self, new_checksum):
         self.keep_alive_raw_msg = self.keep_alive_raw_msg.replace(self.merged_checksum, new_checksum)
@@ -231,11 +233,7 @@ class Agent:
         random_string = ''.join(sample('0123456789abcdef' * 2, 8))
         self.name = f"{agent_count}-{random_string}-{self.os}"
 
-    def register(self):
-        """Request to register the agent in the manager.
-
-        In addition, it sets the agent id and agent key with the response data.
-        """
+    def _register_helper(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
         context.check_hostname = False
@@ -259,6 +257,24 @@ class Agent:
         ssl_socket.close()
         sock.close()
         logging.debug("Registration - {}({})".format(self.name, self.id))
+
+    def register(self):
+        """Request to register the agent in the manager.
+
+        In addition, it sets the agent id and agent key with the response data.
+        """
+        if self.retry_enrollment:
+            retries = 10
+            while retries >= 0:
+                try:
+                    self._register_helper()
+                except (ssl.SSLEOFError, ConnectionResetError):
+                    retries -= 1
+                    sleep(3)
+                else:
+                    break
+        else:
+            self._register_helper()
 
     @staticmethod
     def wazuh_padding(compressed_event):
