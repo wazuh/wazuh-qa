@@ -55,7 +55,7 @@ pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro p
 echo 'syscheck.debug=2' >> $wazuh_path/etc/local_internal_options.conf
 
 # Avoid agent disconnections when travelling in time (only for agents)
-sed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time-reconnect>:g" /var/ossec/etc/agent.conf
+sed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time-reconnect>:g" $WAZUH_CONF
 
 # Disable log rotation
 echo 'monitord.rotate_log=0' >> $wazuh_path/etc/local_internal_options.conf

@@ -35,7 +35,7 @@ class HostManager:
         """
         return testinfra.get_host(f"ansible://{host}?ansible_inventory={self.inventory_path}")
 
-    def move_file(self, host: str, src_path: str, dest_path: str = '/var/ossec/etc/manager.conf', check: bool = False):
+    def move_file(self, host: str, src_path: str, dest_path: str = WAZUH_CONF, check: bool = False):
         """Move from src_path to the desired location dest_path for the specified host.
 
         Args:

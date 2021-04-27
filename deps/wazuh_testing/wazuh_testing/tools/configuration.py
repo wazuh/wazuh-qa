@@ -105,9 +105,7 @@ def get_wazuh_conf() -> List[str]:
     Get current configuration file content.
 
     Returns
-        List of str: A list containing all the lines of the configuration.
-                     If it's a Server the file name is 'manager.conf'
-                     else the file name is 'agent.conf'.
+        List of str: A list containing all the lines of the configuration ('manager.conf' or 'agent.conf)'.
 
     """
     with open(WAZUH_CONF) as f:
@@ -223,16 +221,16 @@ def set_section_wazuh_conf(sections, template=None):
                 tag.tail = "\n    "
         tag.tail = "\n  "
 
-    def purge_multiple_root_elements(str_list: List[str], root_delimeter: str = "</ossec_config>") -> List[str]:
+    def purge_multiple_root_elements(str_list: List[str], root_delimeter: str = "</wazuh_config>") -> List[str]:
         """
         Remove from the list all the lines located after the root element ends.
 
         This operation is needed before attempting to convert the list to ElementTree because if the configuration had more
-        than one `<ossec_config>` element as root the conversion would fail.
+        than one `<wazuh_config>` element as root the conversion would fail.
 
         Args:
             str_list (list or str): The content of the configuration file (manager.conf or agent.conf) in a list of str.
-            root_delimeter (str, optional: The expected string to identify when the first root element ends, by default "</ossec_config>"
+            root_delimeter (str, optional: The expected string to identify when the first root element ends, by default "</wazuh_config>"
 
         Returns:
             list of str : The first N lines of the specified str_list until the root_delimeter is found. The rest of the list will be ignored.

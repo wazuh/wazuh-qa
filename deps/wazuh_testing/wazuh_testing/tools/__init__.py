@@ -16,8 +16,7 @@ def get_version():
 
     else:  # Linux, sunos5, darwin, aix...
         return subprocess.check_output([
-          f"{WAZUH_PATH}/bin/wazuh-control", "info", "-v"
-        ], stderr=subprocess.PIPE).decode('utf-8').rstrip()
+            f"{WAZUH_PATH}/bin/wazuh-control", "info", "-v"], stderr=subprocess.PIPE).decode('utf-8').rstrip()
 
 def get_service():
     if platform.system() in ['Windows', 'win32']:
@@ -25,8 +24,7 @@ def get_service():
 
     else:  # Linux, sunos5, darwin, aix...
         service = subprocess.check_output([
-          f"{WAZUH_PATH}/bin/wazuh-control", "info", "-t"
-        ], stderr=subprocess.PIPE).decode('utf-8').strip()
+          f"{WAZUH_PATH}/bin/wazuh-control", "info", "-t"], stderr=subprocess.PIPE).decode('utf-8').strip()
 
     return 'wazuh-manager' if service == 'server' else 'wazuh-agent'
 
@@ -43,10 +41,7 @@ if sys.platform == 'win32':
     LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'wazuh-logcollector.state')
     REMOTE_STATISTICS_FILE = None
     ANALYSIS_STATISTICS_FILE = None
-    if get_service() == 'wazuh-manager':
-        WAZUH_CONF = os.path.join(WAZUH_PATH, 'manager.conf')
-    else:
-        WAZUH_CONF = os.path.join(WAZUH_PATH, 'agent.conf')
+    WAZUH_CONF = os.path.join(WAZUH_PATH, 'agent.conf')
 
 else:
 
@@ -77,6 +72,7 @@ else:
     LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-logcollector.state')
     REMOTE_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-remoted.state')
     ANALYSIS_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
+    REMOTE_AGENT_CONF = os.path.join(WAZUH_PATH, 'etc', 'shared', 'default', 'shared.conf')
 
     try:
         import grp
@@ -87,6 +83,8 @@ else:
     except (ImportError, KeyError, ModuleNotFoundError):
         pass
 
+state_path = os.path.join(WAZUH_PATH, 'var', 'run')
+db_path = '/var/ossec/queue/db/wdb'
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
 ALERT_FILE_PATH = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.json')

@@ -47,8 +47,8 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.parametrize('folder, file_list, filetype, tags_to_apply', [
-    (testdir1, ['regular0', 'regular1', 'regular2'], REGULAR, {'ossec_conf'},),
-    (testdir2, ['regular0', 'regular1', 'regular2'], REGULAR, {'ossec_conf'},)
+    (testdir1, ['regular0', 'regular1', 'regular2'], REGULAR, {'wazuh_conf'},),
+    (testdir2, ['regular0', 'regular1', 'regular2'], REGULAR, {'wazuh_conf'},)
 ])
 def test_delete_folder(folder, file_list, filetype, tags_to_apply,
                        get_configuration, configure_environment,

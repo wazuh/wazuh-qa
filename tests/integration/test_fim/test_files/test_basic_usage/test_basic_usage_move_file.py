@@ -45,7 +45,7 @@ def get_configuration(request):
 
 
 @pytest.mark.parametrize('file, file_content, tags_to_apply', [
-    ('regular1', '', {'ossec_conf'})
+    ('regular1', '', {'wazuh_conf'})
 ])
 @pytest.mark.parametrize('source_folder, target_folder, triggers_delete_event, triggers_add_event', [
     (testdir1, PREFIX, True, False),

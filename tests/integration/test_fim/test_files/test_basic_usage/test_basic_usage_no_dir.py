@@ -46,7 +46,7 @@ def get_configuration(request):
 # Tests
 
 @pytest.mark.parametrize('tags_to_apply', [
-    {'ossec_conf'}
+    {'wazuh_conf'}
 ])
 def test_new_directory(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
     """Verify that syscheck shows a debug message when an empty directories tag is found.

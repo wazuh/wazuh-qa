@@ -13,8 +13,8 @@ import wazuh_testing.tools.agent_simulator as ag
 import wazuh_testing.tools as tools
 from wazuh_testing import UDP, TCP, TCP_UDP
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import file
-from wazuh_testing.tools import monitoring
+from wazuh_testing.tools import REMOTE_AGENT_CONF
+from wazuh_testing.tools import monitoring, file
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.utils import retry
 
@@ -35,14 +35,14 @@ DEFAULT_TESTING_GROUP_NAME = 'testing_group'
 data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 
-def new_agent_group(group_name=DEFAULT_TESTING_GROUP_NAME, configuration_file='shared.conf'):
+def new_agent_group(group_name=DEFAULT_TESTING_GROUP_NAME, configuration_file=REMOTE_AGENT_CONF):
     """Create a new agent group for testing purpose, must be run only on Managers."""
 
     sb.run([f"{tools.WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-g", group_name])
 
     agent_conf_path = os.path.join(data_path, configuration_file)
 
-    with open(f"{tools.WAZUH_PATH}/etc/shared/{group_name}/shared.conf", "w") as agent_conf_file:
+    with open(f"{tools.WAZUH_PATH}/etc/shared/{group_name}/{configuration_file}", "w") as agent_conf_file:
         with open(agent_conf_path, 'r') as configuration:
             agent_conf_file.write(configuration.read())
 
@@ -83,7 +83,7 @@ def callback_detect_syslog_denied_ips(syslog_ips):
 
 
 def callback_invalid_value(option, value):
-    """Create a callback to detect invalid values in manager.conf file.
+    """Create a callback to detect invalid values in the manager.conf file.
 
     Args:
         option (str): Wazuh manager configuration option.
@@ -97,7 +97,7 @@ def callback_invalid_value(option, value):
 
 
 def callback_error_in_configuration(severity):
-    """Create a callback to detect configuration error in configuration file.
+    """Create a callback to detect configuration error in the configuration file.
 
     Args:
         severity (str): ERROR or CRITICAL.
@@ -198,7 +198,7 @@ def callback_queue_size_too_big():
 
 
 def callback_error_invalid_value_for(option):
-    """Create a callback to detect invalid values in manager.conf file.
+    """Create a callback to detect invalid values in the manager.conf file.
 
     Args:
         option (str): Wazuh manager configuration option.
@@ -657,7 +657,7 @@ def check_push_shared_config(agent, sender, injector=None):
 
         # Check shared.conf message
         check_agent_received_message(agent.rcv_msg_queue, '#default', timeout=10,
-                                     error_message="shared.conf message not received")
+                                     error_message=f"{REMOTE_AGENT_CONF} message not received")
         # Check close file (push end) message
         check_agent_received_message(agent.rcv_msg_queue, 'close', timeout=35,
                                      error_message="initial close message not received")

@@ -18,7 +18,7 @@ To confirm that `wazuh-remote` accepts valid ip addresses for `allowed-ips` and 
 
 - Fail if remoted does not start correctly.
 - Fail if API query `{protocol}://{host}:{port}/manager/configuration?section=remote` doesn't 
-  match the introduced configuration on manager.conf.
+  match the configuration from the manager.conf.
 
 ## Code documentation
 

@@ -1,7 +1,7 @@
 ---
 # Registry tags configuration
 - tags:
-  - ossec_conf
+  - wazuh_conf
   apply_to_modules:
   - test_registry_tags
   sections:

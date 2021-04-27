@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 import psutil
 import pytest
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_end_scan, callback_detect_synchronization, generate_params
-from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools import PREFIX, WAZUH_CONF
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.time import TimeMachine, time_to_timedelta
@@ -71,7 +71,7 @@ def test_response_timeout(num_files, get_configuration, configure_environment, r
             <enabled>yes</enabled>\
                 <interval>" + str(sync_interval) + "</interval>\
                     <response_timeout>" + str(response_timeout) + "</response_timeout>\
-                        </synchronization>|g' /var/ossec/etc/agent.conf"
+                        </synchronization>|g'" + WAZUH_CONF
         ssh.exec_command(cmd)
 
     def wait_agent_initial_scan(time_out=60):

@@ -1,5 +1,5 @@
 - tags:
-  - ossec_conf
+  - wazuh_conf
   apply_to_modules:
   - MODULE_NAME
   sections:

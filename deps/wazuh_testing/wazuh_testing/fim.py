@@ -24,7 +24,7 @@ from typing import Sequence, Union, Generator, Any
 import pytest
 from jsonschema import validate
 from wazuh_testing import global_parameters, logger
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH, get_service
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH, WAZUH_CONF
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.time import TimeMachine
 
@@ -958,13 +958,7 @@ def change_conf_param(param, value):
         param (str): parameter to change.
         value (obj): new value.
     """
-    if get_service() == 'wazuh-manager':
-        conf_file = 'manager.conf'
-    else:
-        conf_file = 'agent.conf'
-
-    conf_path = os.path.join(WAZUH_PATH, conf_file) if sys.platform == 'win32' else \
-        os.path.join(WAZUH_PATH, 'etc', conf_file)
+    conf_path = WAZUH_CONF
 
     with open(conf_path, "r") as sources:
         lines = sources.readlines()

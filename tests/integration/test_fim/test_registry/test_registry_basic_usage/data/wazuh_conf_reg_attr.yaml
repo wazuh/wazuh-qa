@@ -1,7 +1,7 @@
 ---
 # conf 2
 - tags:
-  - ossec_conf_2
+  - wazuh_conf_2
   apply_to_modules:
   - test_basic_usage_entries_match_key_count
   - test_basic_usage_registry_new_key
