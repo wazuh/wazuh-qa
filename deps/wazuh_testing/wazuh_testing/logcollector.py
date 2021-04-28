@@ -22,20 +22,21 @@ def callback_analyzing_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFI
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
-def callback_monitoring_command(log_format, command, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_monitoring_command(log_format, command, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, escape=False):
     """Create a callback to detect if logcollector is monitoring a command.
 
     Args:
         log_format (str): Log format of the command monitoring (full_command or command).
         command (str): Monitored command.
         prefix (str): Daemon that generates the error log.
+        escape (bool): Flag to escape special characters in the pattern.
 
     Returns:
         callable: callback to detect this event.
     """
-    log_format_message = 'full output' if log_format == 'full_command' else 'output'
-    msg = fr"INFO: Monitoring {log_format_message} of command\(\d+\): {command}"
-    return monitoring.make_callback(pattern=msg, prefix=prefix)
+    # log_format_message = 'full output' if log_format == 'full_command' else 'output'
+    msg = f"{command}"
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=escape)
 
 
 def callback_monitoring_djb_multilog(program_name, multilog_file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
