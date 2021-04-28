@@ -1,0 +1,27 @@
+- tags:
+  - test_command_execution
+  apply_to_modules:
+  - test_command_execution
+  sections:
+  - section: localfile
+    elements:
+    - command:
+        value: COMMAND
+    - log_format:
+        value: LOG_FORMAT
+    - alias:
+        value: ALIAS
+
+- tags:
+  - test_command_execution
+  apply_to_modules:
+  - test_command_execution_freq
+  sections:
+  - section: localfile
+    elements:
+    - command:
+        value: COMMAND
+    - log_format:
+        value: LOG_FORMAT
+    - frequency:
+        value: FREQUENCY
