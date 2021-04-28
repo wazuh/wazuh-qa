@@ -60,6 +60,7 @@ def test_registry_duplicated_entry(key, subkey1, subkey2, arch,
                                    restart_syscheckd, wait_for_fim_start):
     """Test to check that two registries monitored with the same name but
        capital differences only triggers one modified event when the registry is changed.
+
     Params:
         key(str): Name of the root subpath for registries.
         subkey1(str): Name of the subpath identifying the registry 1 (no capital letter in name).
@@ -69,9 +70,9 @@ def test_registry_duplicated_entry(key, subkey1, subkey2, arch,
         configure_environment (fixture): Configure the environment for the execution of the test.
         restart_syscheckd (fixture): Restarts syscheck.
         wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
+
     Raises:
         TimeoutError: If an expected event (registry modified) couldn't be captured.
-        Exception: Error: only two modified type events was expected.
     """
     mode = get_configuration['metadata']['fim_mode']
     scheduled = mode == 'scheduled'
@@ -93,6 +94,6 @@ def test_registry_duplicated_entry(key, subkey1, subkey2, arch,
                                 callback=fim.callback_detect_modified_event,
                                 error_message='Did not receive expected '
                                 '"Sending Fim event: ..." event').result()
-        raise Exception("Error: only two modified type events was expected.")
+        pytest.fail("Only one modification event was expected.")
     except TimeoutError:
         pass

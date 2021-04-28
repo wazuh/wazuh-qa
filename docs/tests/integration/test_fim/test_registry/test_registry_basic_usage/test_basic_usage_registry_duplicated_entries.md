@@ -10,9 +10,9 @@ This test will check that for two monitored registries with the same name value 
 
 ## Test logic
 
-The test creates two registries with the same name but different capitalisation,
-and then modifies one of them and wait for the monitor to grab that event.
-The second call to the monitor should arise TimeoutError to be succesful. This test
+The test creates two registries with the same name but different capitalization,
+modifies one of them and waits for the monitor to grab that event.
+The second call to the monitor should arise TimeoutError to be successful. This test
 ensures the windows agent doesn't duplicate alerts due to windows being case insensitive.
 
 
