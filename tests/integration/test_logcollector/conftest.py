@@ -15,7 +15,7 @@ DAEMON_NAME = "wazuh-logcollector"
 
 @pytest.fixture(scope='module')
 def restart_logcollector(get_configuration, request):
-    """ Reset log file and start a new monitor."""
+    """Reset log file and start a new monitor."""
     control_service('stop', daemon=DAEMON_NAME)
     truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)

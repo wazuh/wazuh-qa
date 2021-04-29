@@ -13,7 +13,7 @@
         value: ALIAS
 
 - tags:
-  - test_command_execution
+  - test_command_execution_freq
   apply_to_modules:
   - test_command_execution_freq
   sections:

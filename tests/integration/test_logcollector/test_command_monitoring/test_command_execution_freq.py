@@ -4,28 +4,20 @@
 
 import os
 import pytest
-import sys
 from datetime import timedelta, datetime
 
-from wazuh_testing import logger
-from wazuh_testing.tools import get_service, monitoring
+from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools.time import TimeMachine
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX
 
 # Marks
-pytestmark = pytest.mark.tier(level=0)
+pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_command_conf.yaml')
-wazuh_component = get_service()
-
-if sys.platform == 'win32':
-    prefix = AGENT_DETECTOR_PREFIX
-else:
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 local_internal_options = {
     'logcollector.remote_commands': 1,
@@ -34,28 +26,28 @@ local_internal_options = {
 }
 
 parameters = [
-    {'LOG_FORMAT': 'command', 'COMMAND': 'echo execution frequency 300', 'FREQUENCY': 300},  # 5 minutes.
-    {'LOG_FORMAT': 'command', 'COMMAND': 'echo execution frequency 1800', 'FREQUENCY': 1800},  # 30 minutes.
-    {'LOG_FORMAT': 'command', 'COMMAND': 'echo execution frequency 3600', 'FREQUENCY': 3600},  # 1 hour.
-    {'LOG_FORMAT': 'command', 'COMMAND': 'echo execution frequency 86400', 'FREQUENCY': 86400},  # 24 hours.
-    {'LOG_FORMAT': 'full_command', 'COMMAND': 'echo full_command frequency 300', 'FREQUENCY': 300},  # 5 minutes.
-    {'LOG_FORMAT': 'full_command', 'COMMAND': 'echo full_command frequency 1800', 'FREQUENCY': 1800},  # 30 minutes.
-    {'LOG_FORMAT': 'full_command', 'COMMAND': 'echo full_command frequency 3600', 'FREQUENCY': 3600},  # 1 hour.
-    {'LOG_FORMAT': 'full_command', 'COMMAND': 'echo full_command frequency 86400', 'FREQUENCY': 86400}  # 24 hours.
+    {'LOG_FORMAT': 'command', 'COMMAND': 'echo command_5m', 'FREQUENCY': 300},  # 5 minutes.
+    {'LOG_FORMAT': 'command', 'COMMAND': 'echo command_30m', 'FREQUENCY': 1800},  # 30 minutes.
+    {'LOG_FORMAT': 'command', 'COMMAND': 'echo command_1h', 'FREQUENCY': 3600},  # 1 hour.
+    {'LOG_FORMAT': 'command', 'COMMAND': 'echo command_24h', 'FREQUENCY': 86400},  # 24 hours.
+    {'LOG_FORMAT': 'full_command', 'COMMAND': 'echo full_command_5m', 'FREQUENCY': 300},
+    {'LOG_FORMAT': 'full_command', 'COMMAND': 'echo full_command_30m', 'FREQUENCY': 1800},
+    {'LOG_FORMAT': 'full_command', 'COMMAND': 'echo full_command_1h', 'FREQUENCY': 3600},
+    {'LOG_FORMAT': 'full_command', 'COMMAND': 'echo full_command_24h', 'FREQUENCY': 86400}
 ]
 metadata = [
-    {'log_format': 'command', 'command': 'echo execution frequency 300', 'frequency': 300},  # 5 minutes.
-    {'log_format': 'command', 'command': 'echo execution frequency 1800', 'frequency': 1800},  # 30 minutes.
-    {'log_format': 'command', 'command': 'echo execution frequency 3600', 'frequency': 3600},  # 1 hour.
-    {'log_format': 'command', 'command': 'echo execution frequency 86400', 'frequency': 86400},  # 24 hours.
-    {'log_format': 'full_command', 'command': 'echo full_command frequency 300', 'frequency': 300},  # 5 minutes.
-    {'log_format': 'full_command', 'command': 'echo full_command frequency 1800', 'frequency': 1800},  # 30 minutes.
-    {'log_format': 'full_command', 'command': 'echo full_command frequency 3600', 'frequency': 3600},  # 1 hour.
-    {'log_format': 'full_command', 'command': 'echo full_command frequency 86400', 'frequency': 86400}  # 24 hours.
+    {'log_format': 'command', 'command': 'echo command_5m', 'frequency': 300, 'freq_str': '5_minutes'},
+    {'log_format': 'command', 'command': 'echo command_30m', 'frequency': 1800, 'freq_str': '30_minutes'},
+    {'log_format': 'command', 'command': 'echo command_1h', 'frequency': 3600, 'freq_str': '1_hour'},
+    {'log_format': 'command', 'command': 'echo command_24h', 'frequency': 86400, 'freq_str': '24_hours'},
+    {'log_format': 'full_command', 'command': 'echo full_command_5m', 'frequency': 300, 'freq_str': '5_minutes'},
+    {'log_format': 'full_command', 'command': 'echo full_command_30m', 'frequency': 1800, 'freq_str': '30_minutes'},
+    {'log_format': 'full_command', 'command': 'echo full_command_1h', 'frequency': 3600, 'freq_str': '1_hour'},
+    {'log_format': 'full_command', 'command': 'echo full_command_24h', 'frequency': 86400, 'freq_str': '24_hours'}
 ]
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-configuration_ids = [f"{x['LOG_FORMAT'], x['COMMAND'], x['FREQUENCY']}" for x in parameters]
+configuration_ids = [f"{x['log_format']}_{x['freq_str']}" for x in metadata]
 
 
 # fixtures
@@ -87,29 +79,30 @@ def test_command_execution_freq(get_local_internal_options, configure_local_inte
 
     Raises:
         TimeoutError: If the command monitoring callback is not generated.
-        AssertError: In the case of a server instance, the API response is different that the real configuration.
     """
     cfg = get_configuration['metadata']
-    log_format_message = 'full command' if cfg['log_format'] == 'full_command' else 'command'
-    msg = fr"DEBUG: Running {log_format_message} '{cfg['command']}'"
-    log_callback = monitoring.make_callback(pattern=msg, prefix=prefix)
+    log_callback = logcollector.callback_dbg_running_command(log_format=cfg['log_format'], command=cfg['command'],
+                                                             prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
     seconds_to_travel = cfg['frequency'] / 2  # Middle of the command execution cycle.
 
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
     before = str(datetime.now())
     TimeMachine.travel_to_future(timedelta(seconds=seconds_to_travel))
-    logger.debug(f"Changing the system clock from {before} to {str(datetime.now())}")
+    logger.debug(f"Changing the system clock from {before} to {datetime.now()}")
 
     # The command should not be executed in the middle of the command execution cycle.
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=log_callback,
                                 error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
     before = str(datetime.now())
-    TimeMachine.travel_to_future(timedelta(seconds=seconds_to_travel-5))
-    logger.debug(f"Changing the system clock from {before} to {str(datetime.now())}")
+    TimeMachine.travel_to_future(timedelta(seconds=seconds_to_travel))
+    logger.debug(f"Changing the system clock from {before} to {datetime.now()}")
 
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
+
+    # Restore the system clock.
+    TimeMachine.time_rollback()
