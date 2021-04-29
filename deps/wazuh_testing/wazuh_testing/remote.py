@@ -13,8 +13,7 @@ import wazuh_testing.tools.agent_simulator as ag
 import wazuh_testing.tools as tools
 from wazuh_testing import UDP, TCP, TCP_UDP
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import REMOTE_AGENT_CONF
-from wazuh_testing.tools import monitoring, file
+from wazuh_testing.tools import monitoring, file, REMOTE_AGENT_CONF
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.utils import retry
 
