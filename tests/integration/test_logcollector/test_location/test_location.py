@@ -2,15 +2,15 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import sys
+import datetime
 import os
+import sys
 from shutil import rmtree
 
 import pytest
-import datetime
-from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing import logcollector
 from wazuh_testing.tools import LOG_FILE_PATH, monitoring
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
 
@@ -45,7 +45,8 @@ if sys.platform == 'win32':
 
     metadata = [
         {'location': 'Microsoft-Windows-Sysmon/Operational', 'log_format': 'eventchannel'},
-        {'location': 'Microsoft-Windows-Windows Firewall With Advanced Security/Firewall', 'log_format': 'eventchannel'},
+        {'location': 'Microsoft-Windows-Windows Firewall With Advanced Security/Firewall',
+         'log_format': 'eventchannel'},
         {'location': 'Application', 'log_format': 'eventchannel'},
         {'location': 'Security', 'log_format': 'eventchannel'},
         {'location': 'System', 'log_format': 'eventchannel'},
@@ -60,7 +61,6 @@ if sys.platform == 'win32':
         {'location': r'C:\Testing white spaces', 'log_format': 'syslog'},
         {'location': r'C:\FOLDER' '\\', 'log_format': 'json'},
     ]
-
 else:
     parameters = [
         {'LOCATION': '/tmp/wazuh-testing/test.txt', 'LOG_FORMAT': 'syslog'},
@@ -76,7 +76,7 @@ else:
         {'LOCATION': '/tmp/wazuh-testing/multiple-logs/*', 'LOG_FORMAT': 'syslog'}
     ]
 
-    date=datetime.date.today().strftime("%Y-%m-%d")
+    date = datetime.date.today().strftime("%Y-%m-%d")
 
     metadata = [
         {'location': '/tmp/wazuh-testing/test.txt', 'files': ['/tmp/wazuh-testing/test.txt'],
@@ -118,9 +118,7 @@ else:
 
 
 # Configuration data
-configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=parameters,
-                                           metadata=metadata)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT']}" for x in parameters]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
@@ -130,11 +128,12 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 def create_directory():
     """Create expected directories."""
     os.makedirs('/tmp/wazuh-testing/multiple-logs', exist_ok=True)
-    os.makedirs('/tmp/wazuh-testing/depth1/depth2',  exist_ok=True)
+    os.makedirs('/tmp/wazuh-testing/depth1/depth2', exist_ok=True)
     os.makedirs('/tmp/wazuh-testing/duplicated', exist_ok=True)
     yield
 
     rmtree('/tmp/wazuh-testing')
+
 
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
@@ -147,11 +146,13 @@ def get_local_internal_options():
     """Get configurations from the module."""
     return local_internal_options
 
+
 @pytest.fixture(scope='module')
 def create_files(request, get_configuration):
     """Create expected files."""
     files = get_configuration['metadata']['files']
     file_type = get_configuration['metadata']['file_type']
+
     for file_location in files:
         if file_type == 'non_existent_file':
             pass
@@ -170,10 +171,11 @@ def create_files(request, get_configuration):
 
     for file_location in files:
         if os.path.exists(file_location):
-         os.remove(file_location)
+            os.remove(file_location)
 
 
-def test_location(get_local_internal_options, configure_local_internal_options, create_directory, create_files, get_configuration, configure_environment,
+def test_location(get_local_internal_options, configure_local_internal_options, create_directory, create_files,
+                  get_configuration, configure_environment,
                   restart_logcollector):
     """Check if logcollector is running properly with the specified configuration.
 
@@ -181,8 +183,8 @@ def test_location(get_local_internal_options, configure_local_internal_options, 
         TimeoutError: If the expected callback is not generated.
     """
     file_type = get_configuration['metadata']['file_type']
-
     files = get_configuration['metadata']['files']
+
     for file_location in sorted(files):
         if file_type == 'single_file':
             log_callback = logcollector.callback_analyzing_file(file_location,
@@ -198,14 +200,18 @@ def test_location(get_local_internal_options, configure_local_internal_options, 
                                     error_message=f"The expected 'New file that matches the '{pattern}' "
                                                   f"pattern: '{file_location}' message has not been produced")
         elif file_type == 'non_existent_file':
-            log_callback = logcollector.callback_non_existent_file(file_location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX)
+            log_callback = logcollector.callback_non_existent_file(file_location,
+                                                                   prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX)
             wazuh_log_monitor.start(timeout=60, callback=log_callback,
                                     error_message="The expected ' Could not open file' message has not been produced")
         elif file_type == 'duplicated_file':
-            log_callback = logcollector.callback_duplicated_file(file_location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX)
+            log_callback = logcollector.callback_duplicated_file(file_location,
+                                                                 prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX)
             wazuh_log_monitor.start(timeout=60, callback=log_callback,
-                                    error_message=f"The expected 'Log file '{file_location}' is duplicated' message has not been produced")
+                                    error_message=f"The expected 'Log file '{file_location}' is duplicated' "
+                                                  f"message has not been produced")
         elif file_type == 'multiple_logs':
             log_callback = logcollector.callback_file_limit(prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX)
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                    error_message=f"The expected 'File limit has been reached' message has not been produced")
+                                    error_message=f"The expected 'File limit has been reached' "
+                                                  f"message has not been produced")
