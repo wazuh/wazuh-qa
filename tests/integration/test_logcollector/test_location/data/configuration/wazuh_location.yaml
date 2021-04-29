@@ -14,6 +14,8 @@
         value: 'syslog'
     - location:
         value: LOCATION
+    - exclude:
+        value: EXCLUDE
   - section: localfile
     attributes:
       - name: 'duplicated'
