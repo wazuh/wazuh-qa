@@ -156,9 +156,9 @@ test_cases:
 
   - endpoint: /groups
     method: post
-    parameters:
+    parameters: {}
+    body:
       group_id: "new_test_group"
-    body: {}
 
   - endpoint: /security/users
     method: post
@@ -166,7 +166,6 @@ test_cases:
     body:
       username: "new_test_user"
       password: "Password1!"
-      allow_run_as: True
 
   - endpoint: /security/roles
     method: post
