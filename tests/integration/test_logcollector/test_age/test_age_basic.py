@@ -23,7 +23,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 WINDOWS_FOLDER_PATH = r'C:\testing_age' + '\\'
 LINUX_FOLDER_PATH = '/tmp/testing_age/'
 
-local_internal_options = {'logcollector.vcheck_files': 1}
+local_internal_options = {'logcollector.vcheck_files': 0}
 
 if sys.platform == 'win32':
     folder_path = WINDOWS_FOLDER_PATH
@@ -117,7 +117,6 @@ def test_configuration_age_basic(get_local_internal_options, configure_local_int
     cfg = get_configuration['metadata']
     age_seconds = time_to_seconds(cfg['age'])
 
-    time.sleep(1)
     for file in file_structure:
         wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
@@ -138,6 +137,8 @@ def test_configuration_age_basic(get_local_internal_options, configure_local_int
                     f"{file['folder_path']}{file['filename']}", prefix=prefix)
                 wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                         error_message='Testing file was not ignored')
+
+    for file in file_structure:
 
         f = open(f"{file['folder_path']}{file['filename']}", "a")
         f.write(file['content'])
