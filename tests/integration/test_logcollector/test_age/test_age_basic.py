@@ -135,6 +135,8 @@ def test_configuration_age_basic(get_local_internal_options, configure_local_int
         f = open(f"{file['folder_path']}{file['filename']}", "a")
         f.write(file['content'])
         f.close()
+    
+    for file in file_structure:
 
         log_callback = logcollector.callback_reading_syslog_message(file['content'][:-1], prefix=prefix)
         wazuh_log_monitor.start(timeout=10, callback=log_callback,
