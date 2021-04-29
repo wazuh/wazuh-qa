@@ -12,3 +12,7 @@ logs and send them to the manager.
 For each configuration option, we check if logcollector and agentd correctly
 starts and that any API request to the Manager configuration returns the same options that the specified 
 in `ossec.conf`
+
+#### Test location
+
+For each location and exclude option, we check if logcollector is analyzing or excluding the required files.
