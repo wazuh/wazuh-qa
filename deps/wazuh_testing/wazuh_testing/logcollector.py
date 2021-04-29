@@ -199,3 +199,64 @@ def callback_running_command(log_format, command, prefix=monitoring.LOG_COLLECTO
     log_format_message = 'full command' if log_format == 'full_command' else 'command'
     msg = fr"DEBUG: Running {log_format_message} '{command}'"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=escape)
+
+
+def callback_match_pattern_file(file_pattern, file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+    """Create a callback to detect if logcollector is monitoring a file with wildcard.
+    Args:
+        file_pattern (str): Location pattern that the has to match.
+        file (str): Name with absolute path of the analyzed file.
+        prefix (str): Daemon that generates the error log.
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"New file that matches the '{file_pattern}' pattern: '{file}'."
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
+def callback_non_existent_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+    """Create a callback to detect if logcollector is showing an error when the file does not exist.
+    Args:
+        file (str): Name with absolute path of the analyzed file.
+        prefix (str): Daemon that generates the error log.
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"ERROR: (1103): Could not open file '{file}'"
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
+def callback_duplicated_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+    """Create a callback to detect if logcollector configuration in ossec.conf is duplicated.
+    Args:
+        file (str): Name with absolute path of the analyzed file.
+        prefix (str): Daemon that generates the error log.
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"Log file '{file}' is duplicated."
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
+def callback_file_limit(prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+    """Create a callback to detect if logcollector is monitoring a file.
+    Args:
+        file (str): Name with absolute path of the analyzed file.
+        prefix (str): Daemon that generates the error log.
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"File limit has been reached "
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
+def callback_excluded_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+    """Create a callback to detect if logcollector is excluding files.
+    Args:
+        file (str): Name with absolute path of the analyzed file.
+        prefix (str): Daemon that generates the error log.
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"File excluded: '{file}'."
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
