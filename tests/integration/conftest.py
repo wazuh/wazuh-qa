@@ -419,7 +419,6 @@ def configure_local_internal_options(get_local_internal_options):
 
         yield
 
-        TimeMachine.time_rollback()
         conf.set_wazuh_local_internal_options(backup_options_lines)
 
         control_service('restart')
@@ -440,56 +439,10 @@ def create_file_structure(get_files_list):
             fileinfo = os.stat(f"{file['folder_path']}{file['filename']}")
             os.utime(f"{file['folder_path']}{file['filename']}", (fileinfo.st_atime - file['age'],
                                                                   fileinfo.st_mtime - file['age']))
-
     yield
-    TimeMachine.time_rollback()
 
     for file in get_files_list:
         shutil.rmtree(f"{file['folder_path']}{file['filename']}", ignore_errors=True)
-
-
-@pytest.fixture(scope='function')
-def change_host_date(get_datetime_changes):
-    actual_time = time.time()
-    if sys.platform == 'win32':
-        if get_datetime_changes[0] == '-':
-            current_time = datetime.now() - timedelta(seconds=time_to_seconds(get_datetime_changes[1:]))
-        else:
-            current_time = datetime.now() + timedelta(seconds=time_to_seconds(get_datetime_changes))
-
-        win32api.SetSystemTime(int(current_time.year), int(current_time.month), int(current_time.weekday()),
-                               int(current_time.day), int(current_time.hour), int(current_time.minute), 1, 0)
-    else:
-        if get_datetime_changes[0] == '-':
-            time.clock_settime(time.CLOCK_REALTIME, actual_time - time_to_seconds(get_datetime_changes[1:]))
-        else:
-            time.clock_settime(time.CLOCK_REALTIME, actual_time + time_to_seconds(get_datetime_changes))
-
-    yield
-    TimeMachine.time_rollback()
-
-    if sys.platform == 'win32':
-        if get_datetime_changes[0] == '-':
-            current_time = datetime.now() + timedelta(seconds=time_to_seconds(get_datetime_changes[1:]))
-        else:
-            current_time = datetime.now() - timedelta(seconds=time_to_seconds(get_datetime_changes))
-
-        win32api.SetSystemTime(int(current_time.year), int(current_time.month), int(current_time.weekday()),
-                               int(current_time.day), int(current_time.hour), int(current_time.minute), 1, 0)
-    else:
-        time.clock_settime(time.CLOCK_REALTIME, actual_time)
-
-
-@pytest.fixture(scope='module')
-def disable_time_sync():
-    if sys.platform != 'win32':
-        os.system("timedatectl set-ntp 0")
-
-    yield
-    TimeMachine.time_rollback()
-
-    if sys.platform != 'win32':
-        os.system("timedatectl set-ntp 1")
 
 
 @pytest.fixture(scope='module')

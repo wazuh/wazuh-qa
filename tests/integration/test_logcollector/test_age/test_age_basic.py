@@ -125,22 +125,24 @@ def test_configuration_age_basic(get_local_internal_options, configure_local_int
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                     error_message='Testing file was not ignored')
 
-            f = open(f"{file['folder_path']}{file['filename']}", "a")
-            f.write(file['content'])
-            f.close()
-
-            log_callback = logcollector.callback_reading_syslog_message(file['content'][:-1], prefix=prefix)
-            wazuh_log_monitor.start(timeout=10, callback=log_callback,
-                                    error_message='Testing file was not ignored')
-
-            log_callback = logcollector.callback_read_line_from_file(1, f"{file['folder_path']}{file['filename']}",
-                                                                        prefix=prefix)
-            wazuh_log_monitor.start(timeout=10, callback=log_callback,
-                                    error_message='Testing file was not ignored')
-
         else:
             with pytest.raises(TimeoutError):
                 log_callback = logcollector.callback_ignoring_file(
                     f"{file['folder_path']}{file['filename']}", prefix=prefix)
                 wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                         error_message='Testing file was not ignored')
+
+        f = open(f"{file['folder_path']}{file['filename']}", "a")
+        f.write(file['content'])
+        f.close()
+
+        log_callback = logcollector.callback_reading_syslog_message(file['content'][:-1], prefix=prefix)
+        wazuh_log_monitor.start(timeout=10, callback=log_callback,
+                                error_message='Testing file was not ignored')
+
+        wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+
+        log_callback = logcollector.callback_read_line_from_file(1, f"{file['folder_path']}{file['filename']}",
+                                                                 prefix=prefix)
+        wazuh_log_monitor.start(timeout=10, callback=log_callback,
+                                error_message='Testing file was not ignored')

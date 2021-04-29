@@ -5,15 +5,16 @@ import os
 import pytest
 import sys
 import time
-from wazuh_testing.tools.time import time_to_seconds
-from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
-import wazuh_testing.logcollector as logcollector
 from datetime import datetime
+
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.monitoring import FileMonitor, LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.time import TimeMachine, time_to_timedelta, time_to_seconds
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+import wazuh_testing.logcollector as logcollector
+
 # Marks
 pytestmark = pytest.mark.tier(level=0)
 
@@ -23,6 +24,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 
 WINDOWS_FOLDER_PATH = 'C:\\testing_age' + '\\'
 LINUX_FOLDER_PATH = '/tmp/testing_age/'
+DAEMON_NAME = "wazuh-logcollector"
 
 now_date = datetime.now()
 
@@ -75,26 +77,18 @@ def get_files_list():
     return file_structure
 
 
-@pytest.fixture(scope="function", params=new_host_datetime)
-def get_datetime_changes(request, restart_logcollector):
-    """Get configurations from the module."""
-    return request.param
-
-
-def test_configuration_age_datetime(disable_time_sync, get_files_list, create_file_structure, get_configuration,
-                           configure_environment, change_host_date):
-
-
-
-    DAEMON_NAME = "wazuh-logcollector"
+@pytest.mark.parametrize('new_datetime', new_host_datetime)
+def test_configuration_age_datetime(new_datetime, get_files_list, get_configuration,
+                                    create_file_structure, configure_environment):
+    cfg = get_configuration['metadata']
+    age_seconds = time_to_seconds(cfg['age'])
 
     control_service('stop', daemon=DAEMON_NAME)
     truncate_file(LOG_FILE_PATH)
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     control_service('start', daemon=DAEMON_NAME)
 
-    cfg = get_configuration['metadata']
-    age_seconds = time_to_seconds(cfg['age'])
+    TimeMachine.travel_to_future(time_to_timedelta(new_datetime))
 
     for file in file_structure:
 
@@ -114,14 +108,9 @@ def test_configuration_age_datetime(disable_time_sync, get_files_list, create_fi
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                     error_message='Testing file was not ignored')
         else:
-            not_ignored_file = False
-            try:
+            with pytest.raises(TimeoutError):
                 log_callback = logcollector.callback_ignoring_file(
                     f"{file['folder_path']}{file['filename']}", prefix=prefix)
                 wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                         error_message='Testing file was not ignored')
-            except TimeoutError:
-                not_ignored_file = True
-            assert not_ignored_file, f"{file['filename']} have been ignored with smaller modified time than age value"
-
-
+        TimeMachine.time_rollback()
