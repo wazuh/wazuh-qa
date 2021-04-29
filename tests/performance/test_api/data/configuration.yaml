@@ -59,11 +59,6 @@ test_cases:
     parameters: {}
     body: {}
 
-  - endpoint: /manager/stats
-    method: get
-    parameters: {}
-    body: {}
-
   - endpoint: /manager/logs
     method: get
     parameters: {}
