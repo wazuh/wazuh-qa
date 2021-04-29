@@ -229,3 +229,17 @@ def callback_file_limit(prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
     msg = fr"File limit has been reached "
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
+
+def callback_excluded_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+    """Create a callback to detect if logcollector is excluding files.
+
+        Args:
+            file (str): Name with absolute path of the analyzed file.
+            prefix (str): Daemon that generates the error log.
+
+        Returns:
+            callable: callback to detect this event.
+        """
+
+    msg = fr"File excluded: '{file}'."
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
