@@ -82,6 +82,7 @@ def test_configuration_age_datetime(new_datetime, get_files_list, get_configurat
                                     create_file_structure, configure_environment):
     cfg = get_configuration['metadata']
     age_seconds = time_to_seconds(cfg['age'])
+    time.sleep(1)
 
     control_service('stop', daemon=DAEMON_NAME)
     truncate_file(LOG_FILE_PATH)

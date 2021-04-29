@@ -4,13 +4,13 @@
 import os
 import pytest
 import sys
+import time
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.time import time_to_seconds
-from datetime import datetime
 
 
 # Marks
@@ -43,25 +43,25 @@ file_structure = [
         "folder_path": f"{folder_path}",
         "filename": "testing_file_5m.log",
         "age": 300,
-        'content': f'Content of testing_file_40s\n'
+        'content': f'Content of testing_file_5m\n'
     },
     {
         "folder_path": f"{folder_path}",
         "filename": "testing_file_3h.log",
         "age": 10800,
-        'content': f'Content of testing_file_40s\n'
+        'content': f'Content of testing_file_3h\n'
     },
     {
         "folder_path": f"{folder_path}",
         "filename": "testing_file_5d.log",
         "age": 432000,
-        'content': f'Content of testing_file_40s\n'
+        'content': f'Content of testing_file_5d\n'
     },
     {
         "folder_path": f"{folder_path}",
         "filename": "testing_file_300d.log",
         "age": 25920000,
-        'content': f'Content of testing_file_40s\n'
+        'content': f'Content of testing_file_300d\n'
     },
 ]
 
@@ -94,23 +94,30 @@ def get_configuration(request):
 
 @pytest.fixture(scope="function")
 def get_files_list():
-    """Get configurations from the module."""
+    """Get file list to create from the module."""
     return file_structure
 
 
 @pytest.fixture(scope="module")
 def get_local_internal_options():
-    """Get configurations from the module."""
+    """Get local internal options from the module."""
     return local_internal_options
 
 
 def test_configuration_age_basic(get_local_internal_options, configure_local_internal_options, get_files_list,
                                  create_file_structure, get_configuration, configure_environment, restart_logcollector):
-    """
+    """Check if logcollector works correctly and uses the specified age value.
+
+    Check that those files that have not been modified for a time greater than age value, are ignored for logcollector.
+    Otherwise, files should not be ignored. Also, it checks logcollector detect modification time changes in monitored
+    files and catch new logs from ignored and not ignored files.
+
 
     """
     cfg = get_configuration['metadata']
     age_seconds = time_to_seconds(cfg['age'])
+
+    time.sleep(1)
     for file in file_structure:
         wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
@@ -132,10 +139,6 @@ def test_configuration_age_basic(get_local_internal_options, configure_local_int
                 wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                         error_message='Testing file was not ignored')
 
-
-    
-    for file in file_structure:
-        
         f = open(f"{file['folder_path']}{file['filename']}", "a")
         f.write(file['content'])
         f.close()
