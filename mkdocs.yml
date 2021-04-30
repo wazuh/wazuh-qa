@@ -445,6 +445,10 @@ nav:
                 - Test basic configuration query: tests/integration/test_logcollector/test_configuration/test_basic_configuration_query.md
                 - Test basic configuration reconnect time: tests/integration/test_logcollector/test_configuration/test_basic_configuration_reconnect_time.md
                 - Test basic configuration target: tests/integration/test_logcollector/test_configuration/test_basic_configuration_target.md
+            - Test age:
+                - tests/integration/test_logcollector/test_age/index.md
+                - Test age basic: tests/integration/test_logcollector/test_age/test_age_basic.md
+                - Test age changed datetime: tests/integration/test_logcollector/test_age/test_age_changed_datetime.md
         - Logtest:
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md

@@ -2,18 +2,18 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
-import pytest
 import sys
 import time
 from datetime import datetime
 
+import pytest
+import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.time import TimeMachine, time_to_timedelta, time_to_seconds
-from wazuh_testing.tools.configuration import load_wazuh_configurations
-import wazuh_testing.logcollector as logcollector
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -73,16 +73,23 @@ def get_configuration(request):
 
 @pytest.fixture(scope="function")
 def get_files_list():
-    """Get configurations from the module."""
+    """Get file list to create from the module."""
     return file_structure
 
 
 @pytest.mark.parametrize('new_datetime', new_host_datetime)
 def test_configuration_age_datetime(new_datetime, get_files_list, get_configuration,
                                     create_file_structure, configure_environment):
+    """Check if logcollector age option works correctly when date time of the system changes.
+
+    Ensure that when date of the system change logcollector use properly age value, ignoring files that have not been
+    modified for a time greater than age value using current date.
+
+    Raises:
+        TimeoutError: If the expected callbacks are not generated.
+    """
     cfg = get_configuration['metadata']
     age_seconds = time_to_seconds(cfg['age'])
-    time.sleep(1)
 
     control_service('stop', daemon=DAEMON_NAME)
     truncate_file(LOG_FILE_PATH)
@@ -97,7 +104,7 @@ def test_configuration_age_datetime(new_datetime, get_files_list, get_configurat
                                                                   f"{file['folder_path']}{file['filename']}",
                                                                   prefix=prefix)
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message='No testing file detected')
+                                error_message=f'{file["filename"]} was not detected')
 
         fileinfo = os.stat(f"{file['folder_path']}{file['filename']}")
         current_time = time.time()
@@ -107,11 +114,12 @@ def test_configuration_age_datetime(new_datetime, get_files_list, get_configurat
             log_callback = logcollector.callback_ignoring_file(
                 f"{file['folder_path']}{file['filename']}", prefix=prefix)
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                    error_message='Testing file was not ignored')
+                                    error_message=f'{file["filename"]} was not ignored')
         else:
             with pytest.raises(TimeoutError):
                 log_callback = logcollector.callback_ignoring_file(
                     f"{file['folder_path']}{file['filename']}", prefix=prefix)
                 wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                        error_message='Testing file was not ignored')
-        TimeMachine.time_rollback()
+                                        error_message=f'{file["filename"]} was not ignored')
+
+    TimeMachine.time_rollback()
