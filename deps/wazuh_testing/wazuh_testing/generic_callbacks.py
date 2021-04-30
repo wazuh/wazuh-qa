@@ -17,6 +17,22 @@ def callback_invalid_value(option, value, prefix, severity='ERROR'):
     msg = fr"{severity}: \(\d+\): Invalid value for element '{option}': {value}."
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 
+def callback_invalid_attribute(option, attribute, value, prefix, severity='WARNING'):
+    """Create a callback to detect invalid values in ossec.conf file.
+
+    Args:
+        option (str): Wazuh manager configuration option.
+        attribute (str): Wazuh manager configuration attribute.
+        value (str): Value of the configuration option.
+        prefix (str): Daemon that generates the error log.
+        severity (str): Severity of the error (WARNING, ERROR or CRITICAL)
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"{severity}: \(\d+\): Invalid value '{value}' for attribute '{attribute}' in '{option}' option."
+    return monitoring.make_callback(pattern=msg, prefix=prefix)
+
 
 def callback_error_in_configuration(severity, prefix, conf_path=WAZUH_CONF):
     """Create a callback to detect configuration error in ossec.conf file.
