@@ -10,6 +10,11 @@ test_data = safe_load(open(join(dirname(realpath(__file__)), 'data', 'configurat
 configuration = test_data['configuration']
 api_details = dict()
 
+xfailed_items = {
+    '/active-response': 'Agent simulator not handling active-response messages: '
+                        'https://github.com/wazuh/wazuh-qa/issues/1266'
+}
+
 
 # Tests
 @pytest.mark.parametrize('test_configuration', [configuration])
@@ -17,6 +22,9 @@ api_details = dict()
 def test_api_endpoints(test_case, test_configuration, set_api_test_environment):
     """Make an API request for each `test_case`. `test_configuration` fixture is only used to add metadata to the
     HTML report."""
+    # Apply xfails
+    test_case['endpoint'] in xfailed_items and pytest.xfail(xfailed_items[test_case['endpoint']])
+
     base_url = api_details['base_url']
     headers = api_details['auth_headers']
     response = getattr(requests, test_case['method'])(f"{base_url}{test_case['endpoint']}", headers=headers,
