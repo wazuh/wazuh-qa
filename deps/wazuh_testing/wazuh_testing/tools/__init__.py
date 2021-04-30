@@ -72,7 +72,7 @@ else:
     LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-logcollector.state')
     REMOTE_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-remoted.state')
     ANALYSIS_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
-    REMOTE_AGENT_CONF = os.path.join(WAZUH_PATH, 'etc', 'shared', 'default', 'shared.conf')
+    REMOTE_AGENT_CONF = os.path.join(WAZUH_PATH, 'shared.conf')
 
     try:
         import grp
