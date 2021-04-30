@@ -157,11 +157,8 @@ def test_command_execution_dbg(get_local_internal_options, configure_local_inter
                                configure_environment, restart_logcollector):
     """Check if the debug logs are displayed correctly when the test commands are executed.
 
-    For this purpose, the following items are tested:
-        * "DEBUG: Running command '<command>'"
-        * "DEBUG: Reading command message: 'ossec: output: '<command>': <output>'"
-        * "DEBUG: Reading command message: 'ossec: output: '<alias_command>': <output>'"
-        * "DEBUG: Read <number> lines from command <command>"
+    For this purpose, it checks that the following logs are generated:  "DEBUG: Running command...",
+    "DEBUG: Reading command message..." and, finally "Read ... lines from command...".
 
     Args:
         get_local_internal_options (fixture): Get internal configuration.

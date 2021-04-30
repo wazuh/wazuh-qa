@@ -9,9 +9,9 @@ logs and send them to the manager.
 ### Tier 0
 #### Test configuration
 
-For each configuration option, we check if logcollector and agentd correctly
+For each configuration option, we check if `logcollector` and `agentd` correctly
 starts and that any API request to the Manager configuration returns the same options that the specified 
-in `ossec.conf`
+in configuration file.
 
 #### Test command monitoring
 
