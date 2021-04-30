@@ -36,5 +36,6 @@ def test_api_endpoints(test_case, test_configuration, set_api_test_environment):
     print(f'Status code: {response.status_code}\n')
     print(f'Full response:\n{dumps(response.json(), indent=2)}')
 
-    assert response.status_code == 200
     test_case['method'] == 'put' and test_case['restart'] and sleep(configuration['restart_delay'])
+    assert response.status_code == 200
+    assert response.json()['error'] == 0
