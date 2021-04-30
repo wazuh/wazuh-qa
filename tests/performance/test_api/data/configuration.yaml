@@ -7,8 +7,6 @@ test_cases:
 
 # SERVICE ENDPOINTS
 
-  # GET
-
   - endpoint: /cluster/local/info
     method: get
     parameters: {}
@@ -89,8 +87,6 @@ test_cases:
     parameters: {}
     body: {}
 
-  # PUT
-
   - endpoint: /active-response
     method: put
     parameters: {}
@@ -123,36 +119,12 @@ test_cases:
     body: {}
     restart: False
 
-  # DELETE
-
   - endpoint: /rootcheck
     method: delete
     parameters: {}
     body: {}
 
 # RESOURCE ENDPOINTS
-
-  # POST
-
-  - endpoint: /agents
-    method: post
-    parameters: {}
-    body:
-      name: "new_test_agent"
-      ip: "any"
-
-  - endpoint: /agents/insert
-    method: post
-    parameters: {}
-    body:
-      name: "new_test_agent_insert"
-      ip: "any"
-
-  - endpoint: /agents/insert/quick
-    method: post
-    parameters:
-      agent_name: "new_test_agent_insert_quick"
-    body: {}
 
   - endpoint: /groups
     method: post
@@ -194,8 +166,6 @@ test_cases:
         MATCH:
           name: "test"
 
-  # PUT
-
   - endpoint: /agents/group
     method: put
     parameters:
@@ -215,7 +185,25 @@ test_cases:
     body: {}
     restart: True
 
-  # GET
+  - endpoint: /agents
+    method: post
+    parameters: {}
+    body:
+      name: "new_test_agent"
+      ip: "any"
+
+  - endpoint: /agents/insert
+    method: post
+    parameters: {}
+    body:
+      name: "new_test_agent_insert"
+      ip: "any"
+
+  - endpoint: /agents/insert/quick
+    method: post
+    parameters:
+      agent_name: "new_test_agent_insert_quick"
+    body: {}
 
   - endpoint: /agents
     method: get
@@ -271,8 +259,6 @@ test_cases:
     method: get
     parameters: {}
     body: {}
-
-  # DELETE
 
   - endpoint: /agents
     method: delete
