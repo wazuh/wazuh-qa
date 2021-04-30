@@ -65,6 +65,8 @@
         value: LOG_FORMAT
     - only-future-events:
         value: ONLY_FUTURE_EVENTS
+        attributes:
+          - max-size: MAX_SIZE
 
 - tags:
   - test_basic_configuration_frequency
