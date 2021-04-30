@@ -152,7 +152,7 @@ def wait_message_line(line):
     Callback function to wait for Active Response JSON message
     """
     if "{\"version\"" in line:
-        return line.split("/ossec/active-response/bin/firewall-drop: ", 1)[1]
+        return line.split("active-response/bin/firewall-drop: ", 1)[1]
     return None
 
 

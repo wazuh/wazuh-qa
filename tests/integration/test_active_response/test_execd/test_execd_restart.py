@@ -118,7 +118,7 @@ def wait_message_line(line):
     """
     if platform.system() == 'Windows' and "active-response/bin/restart-wazuh.exe: {\"version\"" in line:
         return True
-    elif "ossec/active-response/bin/restart-wazuh: {\"version\"" in line:
+    elif "active-response/bin/restart-wazuh: {\"version\"" in line:
         return True
     return None
 
