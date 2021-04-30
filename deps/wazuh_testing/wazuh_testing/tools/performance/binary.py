@@ -52,6 +52,7 @@ class Monitor:
         self.platform = platform
         self.dst_dir = dst_dir
         self.pid = None
+        self.proc = None
         self.event = None
         self.thread = None
         self.previous_read = None
@@ -65,18 +66,22 @@ class Monitor:
         Raises:
             ValueError: if the process is not running.
         """
+        ppid = None
         for proc in psutil.process_iter():
             # These two binaries are executed using the Python interpreter instead of
             # directly execute them as daemons. That's why we need to search the .py file in
             # the cmdline instead of searching it in the name
             if process_name in ['wazuh-clusterd', 'wazuh-apid']:
                 if any(filter(lambda x: f"{process_name}.py" in x, proc.cmdline())):
-                    self.pid = proc.pid
+                    ppid = proc.pid
             elif process_name in proc.name():
-                self.pid = proc.pid
+                ppid = proc.pid
 
-        if self.pid is None:
+        if ppid is None:
             raise ValueError(f"The process {process_name} is not running.")
+
+        self.pid = ppid
+        self.proc = psutil.Process(self.pid)
 
     def get_process_info(self, proc):
         """Collect the data from the process.
@@ -149,9 +154,15 @@ class Monitor:
                     else:
                         self.previous_read = info[f'Disk_Read({self.value_unit})']
                         self.previous_write = info[f'Disk_Written({self.value_unit})']
+        except psutil.NoSuchProcess:
+            logger.warning(f'Lost PID for {self.process_name}. Trying to obtain a new one')
+            try:
+                self.set_pid(self.process_name)
+            except ValueError:
+                logger.warning(f'Could not obtain a new PID for {self.process_name}. Trying again in {self.time_step}s')
         finally:
             info.update({key: round(value, 2) for key, value in info.items() if isinstance(value, (int, float))})
-            logger.debug(f'Recollected data for process {proc.pid}')
+            logger.debug(f'Recollected data for process {self.pid}')
             return info
 
     def _write_csv(self, data):
@@ -171,11 +182,10 @@ class Monitor:
 
     def _monitor_process(self):
         """Private function that runs the function to extract data."""
-        proc = psutil.Process(self.pid)
         while not self.event.is_set():
             data = dict()
             try:
-                data = self.get_process_info(proc)
+                data = self.get_process_info(self.proc)
             except Exception as e:
                 logger.error(f'Exception with {self.process_name} | {e}')
                 print(e.with_traceback())
