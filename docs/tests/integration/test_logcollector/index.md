@@ -12,3 +12,9 @@ logs and send them to the manager.
 For each configuration option, we check if logcollector and agentd correctly
 starts and that any API request to the Manager configuration returns the same options that the specified 
 in `ossec.conf`
+
+#### Test command monitoring
+
+Command monitoring consists of periodically executing programs and logging their output to detect 
+possible changes in it. These tests will verify that the `logcollector` command monitoring system works 
+correctly by running different commands with special characteristics.
