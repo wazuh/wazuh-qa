@@ -1,11 +1,9 @@
 configuration:
   host: 'localhost'
   port: 55000
-  restart_delay: 45
+  restart_delay: 30
 
 test_cases:
-
-# SERVICE ENDPOINTS
 
   - endpoint: /cluster/local/info
     method: get
@@ -95,18 +93,6 @@ test_cases:
       custom: True
     restart: False
 
-  - endpoint: /cluster/restart
-    method: put
-    parameters: {}
-    body: {}
-    restart: True
-
-  - endpoint: /manager/restart
-    method: put
-    parameters: {}
-    body: {}
-    restart: True
-
   - endpoint: /rootcheck
     method: put
     parameters: {}
@@ -123,8 +109,6 @@ test_cases:
     method: delete
     parameters: {}
     body: {}
-
-# RESOURCE ENDPOINTS
 
   - endpoint: /groups
     method: post
@@ -297,3 +281,15 @@ test_cases:
     parameters:
       rule_ids: "all"
     body: {}
+
+  - endpoint: /manager/restart
+    method: put
+    parameters: {}
+    body: {}
+    restart: True
+
+  - endpoint: /cluster/restart
+    method: put
+    parameters: {}
+    body: {}
+    restart: True
