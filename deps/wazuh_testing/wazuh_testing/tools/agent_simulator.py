@@ -256,7 +256,8 @@ class Agent:
 
         ssl_socket.close()
         sock.close()
-        logging.debug("Registration - {}({})".format(self.name, self.id))
+
+        logging.debug(f"Registration - {self.name}({self.id}) in {self.registration_address}")
 
     def register(self):
         """Request to register the agent in the manager.
