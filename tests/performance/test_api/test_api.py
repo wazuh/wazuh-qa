@@ -19,7 +19,7 @@ xfailed_items = {
 # Tests
 @pytest.mark.parametrize('test_configuration', [configuration])
 @pytest.mark.parametrize('test_case', test_data['test_cases'])
-def test_api_endpoints(test_case, test_configuration, set_api_test_environment):
+def test_api_endpoints(test_case, test_configuration, set_api_test_environment, api_healthcheck):
     """Make an API request for each `test_case`. `test_configuration` fixture is only used to add metadata to the
     HTML report."""
     # Apply xfails
@@ -27,15 +27,21 @@ def test_api_endpoints(test_case, test_configuration, set_api_test_environment):
 
     base_url = api_details['base_url']
     headers = api_details['auth_headers']
-    response = getattr(requests, test_case['method'])(f"{base_url}{test_case['endpoint']}", headers=headers,
-                                                      params=test_case['parameters'], json=test_case['body'],
-                                                      verify=False)
+    response = None
+    try:
+        response = getattr(requests, test_case['method'])(f"{base_url}{test_case['endpoint']}", headers=headers,
+                                                          params=test_case['parameters'], json=test_case['body'],
+                                                          verify=False)
+        assert response.status_code == 200
+        assert response.json()['error'] == 0
 
-    # Add useful information to report as stdout
-    print(f'Request elapsed time: {response.elapsed.total_seconds():.3f}s\n')
-    print(f'Status code: {response.status_code}\n')
-    print(f'Full response:\n{dumps(response.json(), indent=2)}')
+    finally:
+        # Add useful information to report as stdout
+        if response:
+            print(f'Request elapsed time: {response.elapsed.total_seconds():.3f}s\n')
+            print(f'Status code: {response.status_code}\n')
+            print(f'Full response: \n{dumps(response.json(), indent=2)}')
+        else:
+            print('No response available')
 
-    test_case['method'] == 'put' and test_case['restart'] and sleep(configuration['restart_delay'])
-    assert response.status_code == 200
-    assert response.json()['error'] == 0
+        test_case['method'] == 'put' and test_case['restart'] and sleep(configuration['restart_delay'])
