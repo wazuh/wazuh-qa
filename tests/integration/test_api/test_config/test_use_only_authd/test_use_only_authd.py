@@ -77,11 +77,11 @@ def test_add_agent(tags_to_apply, get_configuration, configure_api_environment,
 
     # Assert if an error code was returned when wazuh-authd is disabled and use_only_authd enabled.
     if use_only_authd:
-        assert post_response.status_code == 500, 'Expected status code was 500, ' \
-                                                 f'but {post_response.status_code} was returned. \nFull response: {post_response.text}'
+        assert post_response.status_code == 400, 'Expected status code was 400, but {post_response.status_code} was ' \
+                                                 'returned. \nFull response: {post_response.text}'
     else:
-        assert post_response.status_code == 200, 'Expected status code was 200, ' \
-                                                 f'but {post_response.status_code} was returned. \nFull response: {post_response.text}'
+        assert post_response.status_code == 200, 'Expected status code was 200, but {post_response.status_code} was ' \
+                                                 'returned. \nFull response: {post_response.text}'
 
         # Delete the agent created
         agent_id = post_response.json()['data']['id']
@@ -123,11 +123,11 @@ def test_insert_agent(tags_to_apply, get_configuration, configure_api_environmen
 
     # Assert if an error code was returned when wazuh-authd is disabled and use_only_authd enabled.
     if use_only_authd:
-        assert post_response.status_code == 500, 'Expected status code was 500, ' \
-                                                 f'but {post_response.status_code} was returned. \nFull response: {post_response.text}'
+        assert post_response.status_code == 400, 'Expected status code was 400, but {post_response.status_code} was ' \
+                                                 'returned. \nFull response: {post_response.text}'
     else:
-        assert post_response.status_code == 200, 'Expected status code was 200, ' \
-                                                 f'but {post_response.status_code} was returned. \nFull response: {post_response.text}'
+        assert post_response.status_code == 200, 'Expected status code was 200, but {post_response.status_code} was ' \
+                                                 'returned. \nFull response: {post_response.text}'
 
         # Delete the agent
         agent_id = post_response.json()['data']['id']
@@ -164,11 +164,11 @@ def test_insert_quick_agent(tags_to_apply, get_configuration, configure_api_envi
 
     # Assert if an error code was returned when wazuh-authd is disabled and use_only_authd enabled.
     if use_only_authd:
-        assert post_response.status_code == 500, 'Expected status code was 500, ' \
-                                                 f'but {post_response.status_code} was returned. \nFull response: {post_response.text}'
+        assert post_response.status_code == 400, 'Expected status code was 400, but {post_response.status_code} was ' \
+                                                 'returned. \nFull response: {post_response.text}'
     else:
-        assert post_response.status_code == 200, 'Expected status code was 200, ' \
-                                                 f'but {post_response.status_code} was returned. \nFull response: {post_response.text}'
+        assert post_response.status_code == 200, 'Expected status code was 200, but {post_response.status_code} was ' \
+                                                 'returned. \nFull response: {post_response.text}'
 
         # Delete the agent
         agent_id = post_response.json()['data']['id']
