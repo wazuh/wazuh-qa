@@ -445,6 +445,10 @@ nav:
                 - Test basic configuration query: tests/integration/test_logcollector/test_configuration/test_basic_configuration_query.md
                 - Test basic configuration reconnect time: tests/integration/test_logcollector/test_configuration/test_basic_configuration_reconnect_time.md
                 - Test basic configuration target: tests/integration/test_logcollector/test_configuration/test_basic_configuration_target.md
+            - Test location:
+                - tests/integration/test_logcollector/test_location/index.md
+                - Test location: tests/integration/test_logcollector/test_location/test_location.md
+                - Test exclude: tests/integration/test_logcollector/test_location/test_exclude.md
         - Logtest:
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md
