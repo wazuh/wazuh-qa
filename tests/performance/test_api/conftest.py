@@ -2,6 +2,8 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+from time import sleep
+
 import pytest
 import requests
 from py.xml import html
@@ -28,6 +30,29 @@ def set_api_test_environment(request):
 
     # Ask for a new token and set it
     setattr(request.module, 'api_details', get_api_details_dict(**kwargs))
+
+
+@pytest.fixture(scope='function')
+def api_healthcheck(request):
+    yield
+
+    user_properties = getattr(request.node, 'user_properties')
+    # Check if there was a restart
+    if len(user_properties) > 4 and user_properties[4][1]:
+        active = False
+        api_details = getattr(request.module, 'api_details')
+        while not active:
+            try:
+                status = None
+                status = requests.get(api_details['base_url'], headers=api_details['auth_headers'],
+                                      verify=False).status_code
+            except Exception:
+                pass
+            finally:
+                if status == 200:
+                    active = True
+                else:
+                    sleep(5)
 
 
 def pytest_html_report_title(report):
