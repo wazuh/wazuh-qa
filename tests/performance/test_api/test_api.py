@@ -37,11 +37,11 @@ def test_api_endpoints(test_case, test_configuration, set_api_test_environment, 
 
     finally:
         # Add useful information to report as stdout
-        if response:
+        try:
             print(f'Request elapsed time: {response.elapsed.total_seconds():.3f}s\n')
             print(f'Status code: {response.status_code}\n')
             print(f'Full response: \n{dumps(response.json(), indent=2)}')
-        else:
+        except KeyError:
             print('No response available')
 
         test_case['method'] == 'put' and test_case['restart'] and sleep(configuration['restart_delay'])
