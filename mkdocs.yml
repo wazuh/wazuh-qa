@@ -445,6 +445,10 @@ nav:
                 - Test basic configuration query: tests/integration/test_logcollector/test_configuration/test_basic_configuration_query.md
                 - Test basic configuration reconnect time: tests/integration/test_logcollector/test_configuration/test_basic_configuration_reconnect_time.md
                 - Test basic configuration target: tests/integration/test_logcollector/test_configuration/test_basic_configuration_target.md
+            - Test command monitoring:
+                - Overview: tests/integration/test_logcollector/test_command_monitoring/index.md
+                - Test command execution: tests/integration/test_logcollector/test_command_monitoring/test_command_execution.md
+                - Test command execution freq: tests/integration/test_logcollector/test_command_monitoring/test_command_execution_freq.md
         - Logtest:
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md
