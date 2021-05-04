@@ -146,8 +146,10 @@ def test_insert_quick_agent(tags_to_apply, get_configuration, configure_api_envi
     Verify that when 'use_only_authd' option is enabled, if the wazuh-authd service
     is not active, an error is returned.
 
-    Attributes:
-        tags_to_apply (set): Run test if match with a configuration identifier, skip otherwise.
+    Parameters
+    ----------
+    tags_to_apply : set
+        Run test if match with a configuration identifier, skip otherwise.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
