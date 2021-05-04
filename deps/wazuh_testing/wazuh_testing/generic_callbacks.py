@@ -17,6 +17,28 @@ def callback_invalid_value(option, value, prefix, severity='ERROR'):
     msg = fr"{severity}: \(\d+\): Invalid value for element '{option}': {value}."
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 
+def callback_invalid_format_value(line, option, location, prefix, severity='DEBUG'):
+
+    """Create a callback to detect content values invalid in ossec.conf file.
+
+    Args:
+        line(str):  content line of file created
+        option (str): log format value .
+        location (str): Wazuh manager configuration option.
+        prefix (str): Daemon that generates the error log.
+        severity (str): Severity of the error (DEBUG)
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    if option == 'json':
+        msg = fr"{severity}: Line '{line}' read from '{location}' is not a {option} object."
+        return monitoring.make_callback(pattern=msg, prefix=prefix)
+    else:
+        # NEED TO ADD OTHER CASES
+        pass
+
+
 def callback_invalid_attribute(option, attribute, value, prefix, severity='WARNING'):
     """Create a callback to detect invalid values in ossec.conf file.
 
