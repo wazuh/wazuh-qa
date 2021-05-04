@@ -33,10 +33,12 @@ def callback_invalid_format_value(line, option, location, prefix, severity='DEBU
     """
     if option == 'json':
         msg = fr"{severity}: Line '{line}' read from '{location}' is not a {option} object."
-        return monitoring.make_callback(pattern=msg, prefix=prefix)
+    elif option == 'syslog':
+        msg = fr"{severity}: Line '{line}' read from '{location}' is not a {option} object."
     else:
-        # NEED TO ADD OTHER CASES
-        pass
+        msg = fr" Quedan aun varios formatos"
+
+    return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 
 def callback_invalid_attribute(option, attribute, value, prefix, severity='WARNING'):

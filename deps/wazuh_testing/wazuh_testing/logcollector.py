@@ -21,7 +21,7 @@ def callback_analyzing_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFI
     msg = fr"Analyzing file: '{file}'."
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
-def callback_reading_file(content_file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_reading_file(log_format, content_file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
     """Create a callback to detect if logcollector is monitoring a file.
 
     Args:
@@ -31,7 +31,11 @@ def callback_reading_file(content_file, prefix=monitoring.LOG_COLLECTOR_DETECTOR
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"Reading json message: '{content_file}'."
+    if log_format == 'json':
+        msg = fr"Reading json message: '{content_file}'."
+    elif log_format == 'syslog':
+        msg = fr"Reading : '{content_file}'."
+
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 

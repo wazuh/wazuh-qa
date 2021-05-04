@@ -5,7 +5,6 @@
 import os
 import pytest
 import sys
-import json
 import subprocess as sb
 import wazuh_testing.logcollector as logcollector
 import wazuh_testing.generic_callbacks as gc
@@ -15,7 +14,6 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX, FileMonitor
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.services import control_service
-import time
 
 LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 
@@ -108,6 +106,11 @@ def create_file(file):
     with open(file, 'a') as f:
         f.write("")
 
+def remove_file(file):
+    """ Remove a file created to testing."""
+    if path.exists(file):
+        remove(file)
+
 def modify_json_file(file, type):
     """Create a json content with an specific values"""
     if type:
@@ -117,10 +120,15 @@ def modify_json_file(file, type):
     with open(file, 'a') as f:
         f.write(data)
 
+def modify_syslog_file(file, type):
+    """Create a syslog content with an specific values"""
+    if type:
+        data = """{"issue":22,"severity":1}\n"""
+    else:
+        data = """{"issue:22,"severity":1}\n"""
+    with open(file, 'a') as f:
+        f.write(data)
 
-def remove_file(file):
-    if path.exists(file):
-        remove(file)
 
 def check_log_format_valid(cfg):
     """Check if Wazuh run correctly with the specified log formats.
@@ -194,6 +202,7 @@ def check_log_format_value_invalid(conf):
 
             log_callback = gc.callback_invalid_format_value(line, conf['log_format'], location, prefix)
             wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
+
 
 def test_log_format(get_configuration, configure_environment):
     """
