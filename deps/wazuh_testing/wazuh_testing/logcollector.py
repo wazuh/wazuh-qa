@@ -169,7 +169,7 @@ def callback_invalid_location_pattern(location, prefix=monitoring.LOG_COLLECTOR_
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
-def callback_dbg_read_lines(command, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, escape=False):
+def callback_read_lines(command, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, escape=False):
     """Create a callback to detect "DEBUG: Read <number> lines from command <command>" debug line.
 
     Args:
@@ -184,7 +184,7 @@ def callback_dbg_read_lines(command, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PR
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=escape)
 
 
-def callback_dbg_running_command(log_format, command,  prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, escape=False):
+def callback_running_command(log_format, command, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, escape=False):
     """Create a callback to detect "DEBUG: Running <log_format> '<command>'" debug line.
 
     Args:

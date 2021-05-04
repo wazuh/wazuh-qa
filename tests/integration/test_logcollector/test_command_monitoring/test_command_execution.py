@@ -143,8 +143,8 @@ def test_command_execution(get_local_internal_options, configure_local_internal_
     Raises:
         TimeoutError: If the command monitoring callback is not generated.
     """
-    cfg = get_configuration['metadata']
-    msg = f": {cfg['command']}"
+    config = get_configuration['metadata']
+    msg = config['command']
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
@@ -170,24 +170,24 @@ def test_command_execution_dbg(get_local_internal_options, configure_local_inter
     Raises:
         TimeoutError: If the command monitoring callback is not generated.
     """
-    cfg = get_configuration['metadata']
+    config = get_configuration['metadata']
 
     # Check log line "DEBUG: Running command '<command>'"
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                            callback=logcollector.callback_dbg_running_command(log_format=cfg['log_format'],
-                                                                               command=cfg['command'],
-                                                                               prefix=LOG_COLLECTOR_DETECTOR_PREFIX,
-                                                                               escape=True))
+                            callback=logcollector.callback_running_command(log_format=config['log_format'],
+                                                                           command=config['command'],
+                                                                           prefix=LOG_COLLECTOR_DETECTOR_PREFIX,
+                                                                           escape=True))
 
     # Command with known output to test "Reading command message: ..."
-    if cfg['command'].startswith('echo') and cfg['alias'] != '':
-        dbg_reading_command(cfg['command'], cfg['alias'], cfg['log_format'])
+    if config['command'].startswith('echo') and config['alias'] != '':
+        dbg_reading_command(config['command'], config['alias'], config['log_format'])
 
     # "Read ... lines from command ..." only appears with log_format=command
-    if cfg['log_format'] == 'command':
+    if config['log_format'] == 'command':
         wazuh_log_monitor.start(timeout=60,
                                 error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                                callback=logcollector.callback_dbg_read_lines(command=cfg['command'],
-                                                                              prefix=LOG_COLLECTOR_DETECTOR_PREFIX,
-                                                                              escape=True))
+                                callback=logcollector.callback_read_lines(command=config['command'],
+                                                                          prefix=LOG_COLLECTOR_DETECTOR_PREFIX,
+                                                                          escape=True))

@@ -80,10 +80,10 @@ def test_command_execution_freq(get_local_internal_options, configure_local_inte
     Raises:
         TimeoutError: If the command monitoring callback is not generated.
     """
-    cfg = get_configuration['metadata']
-    log_callback = logcollector.callback_dbg_running_command(log_format=cfg['log_format'], command=cfg['command'],
-                                                             prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
-    seconds_to_travel = cfg['frequency'] / 2  # Middle of the command execution cycle.
+    config = get_configuration['metadata']
+    log_callback = logcollector.callback_running_command(log_format=config['log_format'], command=config['command'],
+                                                         prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
+    seconds_to_travel = config['frequency'] / 2  # Middle of the command execution cycle.
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
