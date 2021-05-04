@@ -1,7 +1,9 @@
 import argparse
-from os.path import join, dirname, abspath
-
 import yaml
+
+from os.path import join, dirname, abspath
+from time import sleep
+
 from wazuh_testing.tools.api_simulator import CustomLogger, APISimulator
 
 
@@ -9,18 +11,20 @@ def get_arguments():
     parser = argparse.ArgumentParser(usage="%(prog)s [options]",
                                      description="Wazuh API load simulator",
                                      formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('-at', '--api-timeout', dest='timeout', action='store', default=15, type=int,
+                        help='Insert API timeout')
     parser.add_argument('-f', '--foreground', dest='foreground', action='store_true', default=False,
                         help='Enable logging in foreground mode')
     parser.add_argument('-fr', '--frequency', dest='frequency', action='store', default=60, type=int,
                         help='Insert Kibana API requests interval')
-    parser.add_argument('-t', '--timeout', dest='timeout', action='store', default=15, type=int,
-                        help='Insert API timeout')
+    parser.add_argument('-t', '--time', dest='time', action='store', default=60, type=int, required=True,
+                        help='Time in seconds for the simulation')
     parser.add_argument('-c', '--configuration', dest='configuration', action='store', required=True, type=str,
                         help='Path to the configuration file')
     parser.add_argument('-kt', '--kibana-template', dest='kibana_template', action='store', required=True, type=str,
                         help='Path to the Kibana request template')
-    parser.add_argument('-et', '--extraload-template', dest='extraload_template', action='store', required=True, type=str,
-                        help='Path to the ExtraLoad request template')
+    parser.add_argument('-et', '--extraload-template', dest='extraload_template', action='store', required=True,
+                        type=str, help='Path to the ExtraLoad request template')
 
     return parser.parse_args()
 
@@ -47,6 +51,8 @@ def main():
                                          frequency=options.frequency, timeout=options.timeout,
                                          external_logger=kibana_logger)
             kibana_thread.start()
+            sleep(options.time)
+            kibana_thread.shutdown()
         except Exception as kibana_exception:
             kibana_logger.error(f'Unhandled exception: {kibana_exception}')
 
@@ -58,6 +64,8 @@ def main():
                                              request_percentage=request_percentage, timeout=options.timeout,
                                              external_logger=extra_logger)
             extra_load_thread.start()
+            sleep(options.time)
+            extra_load_thread.shutdown()
         except Exception as extra_exception:
             extra_logger.error(f'Unhandled exception: {extra_exception}')
 
