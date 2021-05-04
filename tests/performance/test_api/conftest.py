@@ -33,7 +33,6 @@ def set_api_test_environment(request):
 def pytest_html_report_title(report):
     report.title = 'Wazuh API integration tests'
 
-
 # HTML report
 class HTMLStyle(html):
     class body(html.body):

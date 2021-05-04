@@ -20,8 +20,8 @@ pillow>=6.2.0; platform_system == "Linux" or platform_system == "MacOS" or platf
 psutil==5.6.6
 pycryptodome==3.9.8
 pyOpenSSL==19.1.0
-pytest-html==2.0.1
-pytest==6.2.2
+pytest-html==3.1.1
+pytest==6.2.3
 pyyaml==5.3
 requests==2.23.0
 scipy>=1.0; platform_system == "Linux" or platform_system == "MacOS" or platform_system=='Windows'
@@ -29,3 +29,7 @@ seaborn>=0.11.1; platform_system == "Linux" or platform_system == "MacOS" or pla
 testinfra==5.0.0
 jq==1.1.2; platform_system == "Linux" or platform_system == "MacOS"
 cryptography==3.3.2; platform_system == "Linux" or platform_system == "MacOS" or platform_system=='Windows'
+urllib3~=1.25.11
+setuptools~=56.0.0
+numpy~=1.20.2
+py~=1.10.0
