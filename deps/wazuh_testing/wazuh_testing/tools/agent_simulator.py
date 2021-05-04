@@ -619,6 +619,8 @@ class Agent:
                 msg_as_list.insert(1, f'"{key}":{value}')
             msg = '\n'.join(msg_as_list)
 
+        logging.debug(f"Keep alive message = {msg}")
+
         self.keep_alive_event = self.create_event(msg)
         self.keep_alive_raw_msg = msg
 
