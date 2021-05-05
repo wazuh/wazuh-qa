@@ -230,32 +230,33 @@ class Agent:
 
     def set_name(self):
         """Set a random agent name."""
-        random_string = ''.join(sample('0123456789abcdef' * 2, 8))
+        random_string = ''.join(sample(f"0123456789{ascii_letters}", 16))
         self.name = f"{agent_count}-{random_string}-{self.os}"
 
     def _register_helper(self):
+        """Helper function to enroll an agent."""
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
+        try:
+            ssl_socket = context.wrap_socket(sock, server_hostname=self.registration_address)
+            ssl_socket.connect((self.registration_address, 1515))
 
-        ssl_socket = context.wrap_socket(sock, server_hostname=self.registration_address)
-        ssl_socket.connect((self.registration_address, 1515))
+            if self.authd_password is None:
+                event = f"OSSEC A:'{self.name}'\n".encode()
+            else:
+                event = f"OSSEC PASS: {self.authd_password} OSSEC A:'{self.name}'\n".encode()
 
-        if self.authd_password is None:
-            event = f"OSSEC A:'{self.name}'\n".encode()
-        else:
-            event = f"OSSEC PASS: {self.authd_password} OSSEC A:'{self.name}'\n".encode()
+            ssl_socket.send(event)
+            recv = ssl_socket.recv(4096)
+            registration_info = recv.decode().split("'")[1].split(" ")
 
-        ssl_socket.send(event)
-        recv = ssl_socket.recv(4096)
-        registration_info = recv.decode().split("'")[1].split(" ")
-
-        self.id = registration_info[0]
-        self.key = registration_info[3]
-
-        ssl_socket.close()
-        sock.close()
+            self.id = registration_info[0]
+            self.key = registration_info[3]
+        finally:
+            ssl_socket.close()
+            sock.close()
 
         logging.debug(f"Registration - {self.name}({self.id}) in {self.registration_address}")
 
@@ -265,15 +266,17 @@ class Agent:
         In addition, it sets the agent id and agent key with the response data.
         """
         if self.retry_enrollment:
-            retries = 10
+            retries = 20
             while retries >= 0:
                 try:
                     self._register_helper()
-                except (ssl.SSLEOFError, ConnectionResetError):
+                except Exception:
                     retries -= 1
-                    sleep(3)
+                    sleep(6)
                 else:
                     break
+            else:
+                raise ValueError(f"The agent {self.name} was not correctly enrolled.")
         else:
             self._register_helper()
 

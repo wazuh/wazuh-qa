@@ -7,7 +7,7 @@ from time import sleep
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing import TCP
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent_version='v4.0.0',
