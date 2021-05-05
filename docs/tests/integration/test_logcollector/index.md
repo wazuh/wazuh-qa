@@ -9,6 +9,17 @@ logs and send them to the manager.
 ### Tier 0
 #### Test configuration
 
-For each configuration option, we check if logcollector and agentd correctly
+For each configuration option, we check if `logcollector` and `agentd` correctly
 starts and that any API request to the Manager configuration returns the same options that the specified 
-in `ossec.conf`
+in configuration file.
+
+#### Test command monitoring
+
+Command monitoring consists of periodically executing programs and logging their output to detect 
+possible changes in it. These tests will verify that the `logcollector` command monitoring system works 
+correctly by running different commands with special characteristics.
+
+#### Test keep running
+
+This test will check if `logcollector` keeps running once a log is rotated 
+(move the data to another file and empty the file that is being monitored).
