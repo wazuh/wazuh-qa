@@ -35,54 +35,55 @@ else:
 if sys.platform == 'win32':
     parameters = [
         {'LOCATION': fr'{temp_dir}\wazuh-testing\test.txt', 'LOG_FORMAT': 'syslog'},
-        #{'LOCATION': r'\tmp\wazuh-testing\depth1\depth_test.txt', 'LOG_FORMAT': 'syslog'},
-        #{'LOCATION': r'\tmp\wazuh-testing\depth1\depth2\depth_test.txt', 'LOG_FORMAT': 'syslog'},
-        #{'LOCATION': r'\tmp\wazuh-testing\non-existent.txt', 'LOG_FORMAT': 'syslog'},
-        #{'LOCATION': r'\tmp\wazuh-testing\*', 'LOG_FORMAT': 'syslog'},
-        #{'LOCATION': r'\tmp\wazuh-testing\Testing white spaces', 'LOG_FORMAT': 'syslog'},
-        #{'LOCATION': r'\tmp\wazuh-testing\test.*', 'LOG_FORMAT': 'syslog'},
-        #{'LOCATION': r'\tmp\wazuh-testing\c*test.txt', 'LOG_FORMAT': 'syslog'},
-        #{'LOCATION': r'\tmp\wazuh-testing\duplicated/duplicated.txt', 'LOG_FORMAT': 'syslog'},
-        #{'LOCATION': r'\tmp\wazuh-testing\file.log-%Y-%m-%d', 'LOG_FORMAT': 'syslog'},
-        #{'LOCATION': r'\tmp\wazuh-testing\multiple-logs\*', 'LOG_FORMAT': 'syslog'}
+        {'LOCATION': fr'{temp_dir}\wazuh-testing\depth1\depth_test.txt', 'LOG_FORMAT': 'syslog'},
+        {'LOCATION': fr'{temp_dir}\wazuh-testing\depth1\depth2\depth_test.txt', 'LOG_FORMAT': 'syslog'},
+        {'LOCATION': fr'{temp_dir}\wazuh-testing\non-existent.txt', 'LOG_FORMAT': 'syslog'},
+        {'LOCATION': fr'{temp_dir}\wazuh-testing\*', 'LOG_FORMAT': 'syslog'},
+        {'LOCATION': fr'{temp_dir}\wazuh-testing\Testing white spaces', 'LOG_FORMAT': 'syslog'},
+        {'LOCATION': fr'{temp_dir}\wazuh-testing\test.*', 'LOG_FORMAT': 'syslog'},
+        {'LOCATION': fr'{temp_dir}\wazuh-testing\c*test.txt', 'LOG_FORMAT': 'syslog'},
+        {'LOCATION': fr'{temp_dir}\wazuh-testing\duplicated\duplicated.txt', 'LOG_FORMAT': 'syslog',
+         'PATH_2': fr'{temp_dir}\wazuh-testing\duplicated\duplicated.txt'},
+        {'LOCATION': fr'{temp_dir}\wazuh-testing\file.log-%Y-%m-%d', 'LOG_FORMAT': 'syslog'},
+        {'LOCATION': fr'{temp_dir}\wazuh-testing\multiple-logs\*', 'LOG_FORMAT': 'syslog'}
     ]
 
     metadata = [
         {'location': fr'{temp_dir}\wazuh-testing\test.txt', 'files': [fr'{temp_dir}\wazuh-testing\test.txt'],
          'log_format': 'syslog', 'file_type': 'single_file'},
-       # {'location': r'\tmp\wazuh-testing\depth1\depth_test.txt',
-       #  'files': [r'\tmp\wazuh-testing\depth1\depth_test.txt'],
-       #  'log_format': 'syslog', 'file_type': 'single_file'},
-       # {'location': r'\tmp\wazuh-testing\depth1\depth2\depth_test.txt',
-       #  'files': [r'\tmp\wazuh-testing\depth1\depth2\depth_test.txt'],
-       #  'log_format': 'syslog', 'file_type': 'single_file'},
-       # {'location': r'\tmp\wazuh-testing\non-existent.txt',
-       #  'files': [r'\tmp\wazuh-testing\non-existent.txt'],
-       #  'log_format': 'syslog', 'file_type': 'non_existent_file'},
-       # {'location': r'\tmp\wazuh-testing\*',
-       #  'files': [r'\tmp\wazuh-testing\foo.txt', r'\tmp\wazuh-testing\bar.log',
-       #            r'\tmp\wazuh-testing\test.yaml', r'\tmp\wazuh-testing\ñ.txt',
-       #            r'\tmp\wazuh-testing\テスト.txt', r'\tmp\wazuh-testing\ИСПЫТАНИЕ.txt',
-       #            r'\tmp\wazuh-testing\测试.txt', r'\tmp\wazuh-testing\اختبار.txt'],
-       #  'log_format': 'syslog', 'file_type': 'wildcard_file'},
-       # {'location': r'\tmp\wazuh-testing\Testing white spaces',
-       #  'files': [r'\tmp\wazuh-testing\Testing white spaces'], 'log_format': 'syslog',
-       #  'file_type': 'single_file'},
-       # {'location': r'%tempdir\wazuh-testing\test.*',
-       #  'files': [r'%tempdir\wazuh-testing\test.txt', r'%tempdir\wazuh-testing\test.log'],
-       #  'log_format': 'syslog', 'file_type': 'wildcard_file'},
-       # {'location': r'%tempdir\wazuh-testing\c*test.txt',
-       #  'files': [r'%tempdir\wazuh-testing\c1test.txt', r'%tempdir\wazuh-testing\c2test.txt',
-       #            r'%tempdir\wazuh-testing\c3test.txt'], 'log_format': 'syslog',
-       #  'file_type': 'wildcard_file'},
-       # {'location': r'%tempdir\wazuh-testing\duplicated\duplicated.txt',
-       #  'files': [r'%tempdir\wazuh-testing\duplicated\duplicated.txt'],
-       #  'log_format': 'syslog', 'file_type': 'duplicated_file'},
-       # {'location': r'%tempdir\wazuh-testing\file.log-%Y-%m-%d',
-       #  'files': [fr'%tempdir\wazuh-testing\file.log-{date}'], 'log_format': 'syslog',
-       #  'file_type': 'single_file'},
-       # {'location': r'%tempdir\wazuh-testing\multiple-logs\*', 'files': [r'%tempdir\wazuh-testing\multiple-logs\multiple'],
-       #  'log_format': 'syslog', 'file_type': 'multiple_logs'}
+        {'location': fr'{temp_dir}\wazuh-testing\depth1\depth_test.txt',
+         'files': [fr'{temp_dir}\wazuh-testing\depth1\depth_test.txt'],
+         'log_format': 'syslog', 'file_type': 'single_file'},
+        {'location': fr'{temp_dir}\wazuh-testing\depth1\depth2\depth_test.txt',
+         'files': [fr'{temp_dir}\wazuh-testing\depth1\depth2\depth_test.txt'],
+         'log_format': 'syslog', 'file_type': 'single_file'},
+        {'location': fr'{temp_dir}\wazuh-testing\non-existent.txt',
+         'files': [fr'{temp_dir}\wazuh-testing\non-existent.txt'],
+         'log_format': 'syslog', 'file_type': 'non_existent_file'},
+        {'location': fr'{temp_dir}\wazuh-testing\*',
+         'files': [fr'{temp_dir}\wazuh-testing\foo.txt', fr'{temp_dir}\wazuh-testing\bar.log',
+                   fr'{temp_dir}\wazuh-testing\test.yaml', fr'{temp_dir}\wazuh-testing\ñ.txt'],
+         'log_format': 'syslog', 'file_type': 'wildcard_file'},
+        {'location': fr'{temp_dir}\wazuh-testing\Testing white spaces',
+         'files': [fr'{temp_dir}\wazuh-testing\Testing white spaces'], 'log_format': 'syslog',
+         'file_type': 'single_file'},
+        {'location': fr'{temp_dir}\wazuh-testing\test.*',
+         'files': [fr'{temp_dir}\wazuh-testing\test.txt', fr'{temp_dir}\wazuh-testing\test.log'],
+         'log_format': 'syslog', 'file_type': 'wildcard_file'},
+        {'location': fr'{temp_dir}\wazuh-testing\c*test.txt',
+         'files': [fr'{temp_dir}\wazuh-testing\c1test.txt', fr'{temp_dir}\wazuh-testing\c2test.txt',
+                   fr'{temp_dir}\wazuh-testing\c3test.txt'], 'log_format': 'syslog',
+         'file_type': 'wildcard_file'},
+        {'location': fr'{temp_dir}\wazuh-testing\duplicated\duplicated.txt',
+         'files': [fr'{temp_dir}\wazuh-testing\duplicated\duplicated.txt'],
+         'log_format': 'syslog', 'path_2': fr'{temp_dir}\wazuh-testing\duplicated\duplicated.txt',
+         'file_type': 'duplicated_file'},
+        {'location': fr'{temp_dir}\wazuh-testing\file.log-%Y-%m-%d',
+         'files': [fr'{temp_dir}\wazuh-testing\file.log-{date}'], 'log_format': 'syslog',
+         'file_type': 'single_file'},
+        {'location': fr'{temp_dir}\wazuh-testing\multiple-logs\*',
+         'files': [fr'{temp_dir}\wazuh-testing\multiple-logs\multiple'],
+         'log_format': 'syslog', 'file_type': 'multiple_logs'}
     ]
 else:
     parameters = [
@@ -94,7 +95,8 @@ else:
         {'LOCATION': '/tmp/wazuh-testing/Testing white spaces', 'LOG_FORMAT': 'syslog'},
         {'LOCATION': '/tmp/wazuh-testing/test.*', 'LOG_FORMAT': 'syslog'},
         {'LOCATION': '/tmp/wazuh-testing/c*test.txt', 'LOG_FORMAT': 'syslog'},
-        {'LOCATION': '/tmp/wazuh-testing/duplicated/duplicated.txt', 'LOG_FORMAT': 'syslog'},
+        {'LOCATION': '/tmp/wazuh-testing/duplicated/duplicated.txt', 'LOG_FORMAT': 'syslog',
+         'PATH_2': '/tmp/wazuh-testing/duplicated/duplicated.txt'},
         {'LOCATION': '/tmp/wazuh-testing/file.log-%Y-%m-%d', 'LOG_FORMAT': 'syslog'},
         {'LOCATION': '/tmp/wazuh-testing/multiple-logs/*', 'LOG_FORMAT': 'syslog'}
     ]
@@ -129,7 +131,8 @@ else:
          'file_type': 'wildcard_file'},
         {'location': '/tmp/wazuh-testing/duplicated/duplicated.txt',
          'files': ['/tmp/wazuh-testing/duplicated/duplicated.txt'],
-         'log_format': 'syslog', 'file_type': 'duplicated_file'},
+         'log_format': 'syslog', 'path_2': '/tmp/wazuh-testing/duplicated/duplicated.txt',
+         'file_type': 'duplicated_file'},
         {'location': '/tmp/wazuh-testing/file.log-%Y-%m-%d',
          'files': [f'/tmp/wazuh-testing/file.log-{date}'], 'log_format': 'syslog',
          'file_type': 'single_file'},
@@ -148,9 +151,9 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 def create_directory():
     """Create expected directories."""
     if sys.platform == 'win32':
-        os.makedirs(fr'{temp_dir}\wazuh-testing\multiple-logs', exist_ok=True, mode=0o777)
-        os.makedirs(fr'{temp_dir}\wazuh-testing\depth1\depth2', exist_ok=True, mode=0o777)
-        os.makedirs(fr'{temp_dir}\wazuh-testing\duplicated', exist_ok=True, mode=0o777)
+        os.makedirs(fr'{temp_dir}\wazuh-testing\multiple-logs', exist_ok=True)
+        os.makedirs(fr'{temp_dir}\wazuh-testing\depth1\depth2', exist_ok=True)
+        os.makedirs(fr'{temp_dir}\wazuh-testing\duplicated', exist_ok=True)
     else:
         os.makedirs('/tmp/wazuh-testing/multiple-logs', exist_ok=True)
         os.makedirs('/tmp/wazuh-testing/depth1/depth2', exist_ok=True)
@@ -158,7 +161,7 @@ def create_directory():
     yield
 
     if sys.platform == 'win32':
-        os.remove(fr'{temp_dir}\wazuh-testing\test.txt')
+        rmtree(fr'{temp_dir}\wazuh-testing', ignore_errors = True)
     else:
         rmtree('/tmp/wazuh-testing')
 
@@ -190,7 +193,7 @@ def create_files(request, get_configuration):
                 with open(name, 'w') as file:
                     file.write(' ')
         else:
-            with open(file_location, 'w+') as file:
+            with open(file_location, 'w') as file:
                 file.write(' ')
     yield
 
@@ -228,7 +231,7 @@ def test_location(get_local_internal_options, configure_local_internal_options, 
             log_callback = logcollector.callback_non_existent_file(file_location,
                                                                    prefix)
             wazuh_log_monitor.start(timeout=60, callback=log_callback,
-                                    error_message="The expected ' Could not open file' message has not been produced")
+                                    error_message="The expected 'Could not open file' message has not been produced")
         elif file_type == 'duplicated_file':
             log_callback = logcollector.callback_duplicated_file(file_location,
                                                                  prefix)
@@ -237,6 +240,6 @@ def test_location(get_local_internal_options, configure_local_internal_options, 
                                                   f"message has not been produced")
         elif file_type == 'multiple_logs':
             log_callback = logcollector.callback_file_limit(prefix)
-            wazuh_log_monitor.start(timeout=5, callback=log_callback,
+            wazuh_log_monitor.start(timeout=60, callback=log_callback,
                                     error_message=f"The expected 'File limit has been reached' "
                                                   f"message has not been produced")
