@@ -440,7 +440,7 @@ def create_file_structure(get_files_list):
     yield
 
     for file in get_files_list:
-        shutil.rmtree(f"{file['folder_path']}{file['filename']}", ignore_errors=True)
+        shutil.rmtree(f"{file['folder_path']}", ignore_errors=True)
 
 
 @pytest.fixture(scope='module')
