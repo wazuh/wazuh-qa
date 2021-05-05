@@ -12,10 +12,10 @@ CURRENT_SESSION = join(METRICS_FOLDER, datetime.now().strftime('%d-%m-%Y'), str(
 
 def get_script_arguments():
     target_choices = ['cluster']
-    parser = argparse.ArgumentParser(usage="%(prog)s [options]", description="cluster.log parser",
+    parser = argparse.ArgumentParser(usage="%(prog)s [options]", description="Wazuh log parser",
                                      formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-l', '--log', dest='log', default=None,
-                        help='Cluster log file to be analyzed.', action='store')
+                        help='Log file to be analyzed.', action='store')
     parser.add_argument('-t', '--target', dest='log_type_target', default='cluster',
                         choices=target_choices, help='Log type to be parsed. Default cluster.')
     parser.add_argument('-o', '--output', dest='output', action='store', default=None,

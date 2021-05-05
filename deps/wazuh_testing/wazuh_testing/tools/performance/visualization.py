@@ -158,7 +158,9 @@ class DataVisualizer:
         if not cluster_log:
             self._set_x_ticks_interval(ax)
             plt.xticks(rotation=rotation)
-        svg_name = sub(pattern=r'\(.*\)', string=y_label, repl='')
+            svg_name = sub(pattern=r'\(.*\)', string=y_label, repl='')
+        else:
+            svg_name = sub(pattern=r'\(.*\)', string=title, repl='')
         if self.base_name is not None:
             svg_name = f"{self.base_name}_{svg_name}"
         plt.savefig(join(self.store_path, f"{svg_name}.svg"), dpi=1200, format='svg')
@@ -199,7 +201,7 @@ class DataVisualizer:
                 for node, color in zip(nodes, self._color_palette(len(nodes) + 1)):
                     self._basic_plot(ax=ax, dataframe=current_df[current_df.node_name == node]['time_spent(s)'],
                                      label=node, color=color)
-                self._save_custom_plot(ax, element, title, cluster_log=True)
+                self._save_custom_plot(ax, 'time_spent(s)', element, cluster_log=True)
 
         else:
             fig, ax = plt.subplots()
@@ -248,8 +250,7 @@ class DataVisualizer:
 
     def _plot_cluster_dataset(self):
         """Function to plot the information from the cluster.log file."""
-        self._plot_data(elements=list(self.dataframe['activity'].unique()), title=self.dataframe.iloc[0][1],
-                        generic_label='Managers')
+        self._plot_data(elements=list(self.dataframe['activity'].unique()), generic_label='Managers')
 
     def plot(self):
         """Public function to plot the dataset."""
