@@ -1,7 +1,7 @@
 ---
 # conf 2
 - tags:
-  - ossec_conf_2
+  - wazuh_conf_2
   apply_to_modules:
   - test_basic_usage_delete_registry
   - test_basic_usage_registry_baseline_generation

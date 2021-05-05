@@ -51,7 +51,7 @@ def test_directories_with_commas(directory, get_configuration, put_env_variables
     """
     Test alerts are generated when monitor environment variables
     """
-    check_apply_test({'ossec_conf'}, get_configuration['tags'])
+    check_apply_test({'wazuh_conf'}, get_configuration['tags'])
 
     regular_file_cud(directory, wazuh_log_monitor, file_list=["testing_env_variables"],
                      min_timeout=global_parameters.default_timeout,

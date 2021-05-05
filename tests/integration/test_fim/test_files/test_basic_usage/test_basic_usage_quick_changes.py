@@ -44,14 +44,14 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.parametrize('sleep, tags_to_apply', [
-    (0.25, {'ossec_conf'}),
-    (0.5, {'ossec_conf'}),
-    (0.75, {'ossec_conf'}),
-    (1, {'ossec_conf'}),
-    (1.25, {'ossec_conf'}),
-    (1.50, {'ossec_conf'}),
-    (1.75, {'ossec_conf'}),
-    (2, {'ossec_conf'})
+    (0.25, {'wazuh_conf'}),
+    (0.5, {'wazuh_conf'}),
+    (0.75, {'wazuh_conf'}),
+    (1, {'wazuh_conf'}),
+    (1.25, {'wazuh_conf'}),
+    (1.50, {'wazuh_conf'}),
+    (1.75, {'wazuh_conf'}),
+    (2, {'wazuh_conf'})
 ])
 def test_regular_file_changes(sleep, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                               wait_for_fim_start):

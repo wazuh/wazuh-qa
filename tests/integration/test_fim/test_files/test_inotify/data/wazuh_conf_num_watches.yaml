@@ -2,7 +2,7 @@
 # conf 1
 - tags:
   - num_watches_conf
-  - ossec_conf
+  - wazuh_conf
   apply_to_modules:
   - test_num_watches
   - test_remove_rename_folder

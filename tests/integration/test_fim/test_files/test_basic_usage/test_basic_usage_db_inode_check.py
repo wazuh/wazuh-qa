@@ -89,7 +89,7 @@ def test_db_inode_check(test_cases, get_configuration, configure_environment, re
         AttributeError: If an wrong or unexpected modified event appear
     """
 
-    check_apply_test({'ossec_conf'}, get_configuration['tags'])
+    check_apply_test({'wazuh_conf'}, get_configuration['tags'])
 
     aux_file_list = file_list.copy()
 

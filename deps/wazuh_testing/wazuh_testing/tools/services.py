@@ -34,7 +34,7 @@ def restart_wazuh_daemon(daemon):
 
 def restart_wazuh_with_new_conf(new_conf, daemon='wazuh-syscheckd'):
     """
-    Restart Wazuh service applying a new ossec.conf
+    Restart Wazuh service applying a new configuration (manager.conf or agent.conf)
 
     Args:
         new_conf ( ET.ElementTree) : New config file.

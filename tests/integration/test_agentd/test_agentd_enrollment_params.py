@@ -84,11 +84,8 @@ def configure_authd_server(request):
 
 def clean_log_file():
     """Clear the log file located in LOG_FILE_PATH."""
-    try:
-        client_file = open(LOG_FILE_PATH, 'w')
-        client_file.close()
-    except IOError as exception:
-        raise
+    client_file = open(LOG_FILE_PATH, 'w')
+    client_file.close()
 
 
 def override_wazuh_conf(configuration):
@@ -238,10 +235,10 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
         if test_case.get('expected_error') and not test_case.get('enrollment', {}).get('response'):
             # Expected to happen
             assert check_log_error_conf(test_case.get('expected_error')) is not None, \
-                'Expected configuration error at ossec.conf file, fail log_check'
+                'Expected configuration error at agent.conf file, fail log_check'
             return
         else:
-            raise AssertionError(f'Configuration error at ossec.conf file')
+            raise AssertionError(f'Configuration error at agent.conf file')
 
     results = monitored_sockets.get_results(callback=(lambda y: [x.decode() for x in y]), timeout=20, accum_results=1)
     if test_case.get('enrollment') and test_case['enrollment'].get('response'):
@@ -253,7 +250,7 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
     else:
         # Expected to happen
         assert check_log_error_conf(test_case.get('expected_error')) is not None, \
-            'Expected configuration error at ossec.conf file, fail log_check'
+            'Expected configuration error at agent.conf file, fail log_check'
         assert len(results) == 0, 'Enrollment message was not expected!'
 
     if configuration.get('delay_after_enrollment') and test_case.get('enrollment', {}).get('response'):

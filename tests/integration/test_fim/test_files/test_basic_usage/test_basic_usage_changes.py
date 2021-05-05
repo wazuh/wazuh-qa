@@ -49,20 +49,20 @@ def get_configuration(request):
     testdir2
 ])
 @pytest.mark.parametrize('name, encoding, checkers,  tags_to_apply', [
-    ('regular0', None, {CHECK_ALL}, {'ossec_conf'}),
-    pytest.param('檔案', 'cp950', {CHECK_ALL}, {'ossec_conf'}, marks=(pytest.mark.linux,
+    ('regular0', None, {CHECK_ALL}, {'wazuh_conf'}),
+    pytest.param('檔案', 'cp950', {CHECK_ALL}, {'wazuh_conf'}, marks=(pytest.mark.linux,
                                                                     pytest.mark.darwin,
                                                                     pytest.mark.sunos5)),
-    pytest.param('Образецтекста', 'koi8-r', {CHECK_ALL}, {'ossec_conf'}, marks=(pytest.mark.linux,
+    pytest.param('Образецтекста', 'koi8-r', {CHECK_ALL}, {'wazuh_conf'}, marks=(pytest.mark.linux,
                                                                                 pytest.mark.darwin,
                                                                                 pytest.mark.sunos5)),
-    pytest.param('Δείγμακειμένου', 'cp737', {CHECK_ALL}, {'ossec_conf'}, marks=(pytest.mark.linux,
+    pytest.param('Δείγμακειμένου', 'cp737', {CHECK_ALL}, {'wazuh_conf'}, marks=(pytest.mark.linux,
                                                                                 pytest.mark.darwin,
                                                                                 pytest.mark.sunos5)),
-    pytest.param('نصبسيط', 'cp720', {CHECK_ALL}, {'ossec_conf'}, marks=(pytest.mark.linux,
+    pytest.param('نصبسيط', 'cp720', {CHECK_ALL}, {'wazuh_conf'}, marks=(pytest.mark.linux,
                                                                         pytest.mark.darwin,
                                                                         pytest.mark.sunos5)),
-    pytest.param('Ξ³ΞµΞΉΞ±', None, {CHECK_ALL}, {'ossec_conf'}, marks=(pytest.mark.win32,
+    pytest.param('Ξ³ΞµΞΉΞ±', None, {CHECK_ALL}, {'wazuh_conf'}, marks=(pytest.mark.win32,
                                                                        pytest.mark.xfail(reason='Xfail due to issue: \
                                                                        https://github.com/wazuh/wazuh/issues/4612'))),
     pytest.param('regular1', None, {CHECK_ALL}, {'ossec_conf_wildcards'}, marks=(pytest.mark.linux,

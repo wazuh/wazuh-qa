@@ -61,7 +61,7 @@ def get_configuration(request):
     'regular2'
 ])
 @pytest.mark.parametrize('tags_to_apply', [
-    {'ossec_conf'}
+    {'wazuh_conf'}
 ])
 def test_events_from_existing_files(filename, tags_to_apply, get_configuration,
                                     configure_environment, restart_syscheckd, wait_for_fim_start):

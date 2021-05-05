@@ -9,7 +9,7 @@ import struct
 import time
 
 import pytest
-from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools import WAZUH_PATH, WAZUH_CONF
 from wazuh_testing.tools.agent_simulator import Sender, Injector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
@@ -185,9 +185,7 @@ def send_message(data_object, socket_path):
 def overwrite_node_name(value):
     new_content = ''
 
-    ossec_conf = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
-
-    with open(ossec_conf, 'r') as f:
+    with open({WAZUH_CONF}, 'r') as f:
         lines = f.readlines()
 
         for line in lines:
@@ -196,7 +194,7 @@ def overwrite_node_name(value):
                 new_line = f'<node_name>{value}</node_name>\n'
             new_content += new_line
 
-    with open(ossec_conf, 'w') as f:
+    with open({WAZUH_CONF}, 'w') as f:
         f.write(new_content)
 
 
