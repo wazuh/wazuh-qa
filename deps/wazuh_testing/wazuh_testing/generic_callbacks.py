@@ -26,17 +26,17 @@ def callback_invalid_format_value(line, option, location, prefix, severity='DEBU
         option (str): log format value .
         location (str): Wazuh manager configuration option.
         prefix (str): Daemon that generates the error log.
-        severity (str): Severity of the error (DEBUG)
+        severity (str): Severity of the error (DEBUG, ERROR)
 
     Returns:
         callable: callback to detect this event.
     """
     if option == 'json':
         msg = fr"{severity}: Line '{line}' read from '{location}' is not a {option} object."
-    elif option == 'syslog':
-        msg = fr"{severity}: Line '{line}' read from '{location}' is not a {option} object."
+    elif option == 'audit':
+        msg = fr"{severity}: Discaring audit message because of invalid syntax."
     else:
-        msg = fr" Quedan aun varios formatos"
+        msg = fr" Quedan varios formatos"
 
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 

@@ -33,8 +33,8 @@ def callback_reading_file(log_format, content_file, prefix=monitoring.LOG_COLLEC
     """
     if log_format == 'json':
         msg = fr"Reading json message: '{content_file}'."
-    elif log_format == 'syslog':
-        msg = fr"Reading : '{content_file}'."
+    elif log_format == 'syslog' or log_format == 'snort-full' or log_format == 'squid':
+        msg = fr"Reading syslog message: '{content_file}'."
 
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 

@@ -39,11 +39,11 @@ else:
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 parameters = [
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'json'},
-    # {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog'},
-    # {'LOCATION': f'{location}', 'LOG_FORMAT': 'snort-full'},
-    # {'LOCATION': f'{location}', 'LOG_FORMAT': 'squid'},
-    # {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit'},
+#    {'LOCATION': f'{location}', 'LOG_FORMAT': 'json'},
+#    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog'},
+#    {'LOCATION': f'{location}', 'LOG_FORMAT': 'snort-full'},
+#    {'LOCATION': f'{location}', 'LOG_FORMAT': 'squid'},
+     {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit'},
     # {'LOCATION': f'{location}', 'LOG_FORMAT': 'mysql_log'},
     # {'LOCATION': f'{location}', 'LOG_FORMAT': 'postgresql_log'},
     # {'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapg'},
@@ -56,13 +56,11 @@ parameters = [
 ]
 
 metadata = [
-    {'location': f'{location}', 'log_format': 'json', 'valid_value': False},
-
-    # {'location': f'{location}', 'log_format': 'syslog', 'valid_value': True},
-
-    # {'location': f'{location}', 'log_format': 'snort-full', 'valid_value': True},
-    # {'location': f'{location}', 'log_format': 'squid', 'command': 'example-command', 'valid_value': True},
-    # {'location': f'{location}', 'log_format': 'audit', 'command': 'example-command', 'valid_value': True},
+ #   {'location': f'{location}', 'log_format': 'json', 'valid_value': False}, #debo agregar un TRUE tmb
+ #   {'location': f'{location}', 'log_format': 'syslog', 'valid_value': True},
+#    {'location': f'{location}', 'log_format': 'snort-full', 'valid_value': True},
+#    {'location': f'{location}', 'log_format': 'squid', 'valid_value': True},
+     {'location': f'{location}', 'log_format': 'audit', 'valid_value': False},  # debo agregar el True tmb
     # {'location': f'{location}', 'log_format': 'mysql_log', 'valid_value': True},
     # {'location': f'{location}', 'log_format': 'postgresql_log', 'valid_value': True},
     # {'location': f'{location}', 'log_format': 'nmapg', 'valid_value': True},
@@ -79,8 +77,8 @@ if sys.platform == 'win32':
     parameters.append({'LOCATION': f'{location}', 'LOG_FORMAT': 'eventchannel'})
     parameters.append({'LOCATION': f'{location}', 'LOG_FORMAT': 'iis'})
 
-    metadata.append({'location': 'Security', 'log_format': 'eventlog', 'command': 'example-command', 'valid_value': True})
-    metadata.append({'location': f'{location}', 'log_format': 'eventchannel', 'command': 'example-command', 'valid_value': True})
+    metadata.append({'location': 'Security', 'log_format': 'eventlog', 'valid_value': True})
+    metadata.append({'location': f'{location}', 'log_format': 'eventchannel', 'valid_value': True})
     metadata.append({'location': f'{location}', 'log_format': 'iis', 'valid_value': True}),
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
@@ -111,6 +109,22 @@ def remove_file(file):
     if path.exists(file):
         remove(file)
 
+def modify_file(file, type):
+    """ Modify file created to a specified type."""
+    if type == 'json':
+        modify_json_file(file, type)
+    elif type == 'syslog':
+        modify_syslog_file(file)
+    elif type == 'snort-full':
+        modify_snort_file(file)
+    elif type == 'squid':
+        modify_squid_file(file)
+    elif type == 'audit':
+        modify_audit_file(file, type)
+    else:
+        data = """QUEDAN LOS DEMAS A AGREGAR"""
+
+
 def modify_json_file(file, type):
     """Create a json content with an specific values"""
     if type:
@@ -120,15 +134,34 @@ def modify_json_file(file, type):
     with open(file, 'a') as f:
         f.write(data)
 
-def modify_syslog_file(file, type):
+def modify_syslog_file(file):
     """Create a syslog content with an specific values"""
-    if type:
-        data = """{"issue":22,"severity":1}\n"""
-    else:
-        data = """{"issue:22,"severity":1}\n"""
+    data = """Apr 29 12:47:51 dev-branch systemd[1]: Starting"""
+
     with open(file, 'a') as f:
         f.write(data)
 
+def modify_snort_file(file):
+    """Create a snort content with an specific values"""
+    data = """10/12-21:29:35.911089 [**] [1:0:0] TEST [**] [Priority: 0] {ICMP} 192.168.1.99 – > 192.168.1.103"""
+
+    with open(file, 'a') as f:
+        f.write(data)
+
+def modify_squid_file(file):
+    """Create a squid content with an specific values"""
+    data = """902351618.864 440 120.65.1.1 TCP_MISS/304 110 GET http://www.webtrends.com:8005/Images/search.gif - DIRECT/www.webtrends.com -"""
+    with open(file, 'a') as f:
+        f.write(data)
+
+def modify_audit_file(file, type):
+    """Create a audit content with an specific values"""
+    if type:
+        data = """type=SERVICE_START msg=audit(1620164215.922:963): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=dnf-makecache comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'UID="root" AUID="unset"\n"""
+    else:
+        data = """=SERVICE_START msg=audit(1620164215.922:963): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=dnf-makecache comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'UID="root" AUID="unset\n"""
+    with open(file, 'a') as f:
+        f.write(data)
 
 def check_log_format_valid(cfg):
     """Check if Wazuh run correctly with the specified log formats.
@@ -194,14 +227,18 @@ def check_log_format_value_invalid(conf):
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    # CHECK ONLY JSON FILE FOR NOW
-
     if conf['log_format'] not in log_format_not_print_analyzing_info:
         with open(location, "r") as f:
             line = f.readline()
+            if conf['log_format'] == 'json':
+                log_callback = gc.callback_invalid_format_value(line, conf['log_format'], location, prefix)
+            elif conf['log_format'] == 'audit':
+                severity = 'ERROR'
+                log_callback = gc.callback_invalid_format_value(line, conf['log_format'], location, prefix, severity)
 
-            log_callback = gc.callback_invalid_format_value(line, conf['log_format'], location, prefix)
             wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
+
+    #NEED TO ADD OTHER CASES
 
 
 def test_log_format(get_configuration, configure_environment):
@@ -223,7 +260,7 @@ def test_log_format(get_configuration, configure_environment):
         create_file(location)
         control_service('start', daemon=LOGCOLLECTOR_DAEMON)
         check_log_format_valid(conf)
-        modify_json_file(location, conf['valid_value'])
+        modify_file(location, conf['valid_value'])
         check_log_format_value_valid(conf)
 
     else:
@@ -236,7 +273,7 @@ def test_log_format(get_configuration, configure_environment):
             create_file(location)
             control_service('start', daemon=LOGCOLLECTOR_DAEMON)
             check_log_format_valid(conf)
-            modify_json_file(location, conf['valid_value'])
+            modify_file(location, conf['valid_value'])
             check_log_format_value_invalid(conf)
 
 
