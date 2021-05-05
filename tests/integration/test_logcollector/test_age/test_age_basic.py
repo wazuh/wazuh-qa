@@ -22,7 +22,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 
 folder_path = tempfile.gettempdir()
 
-local_internal_options = {'logcollector.vcheck_files': 0}
+local_internal_options = {'logcollector.vcheck_files': 1}
 
 if sys.platform == 'win32':
     prefix = AGENT_DETECTOR_PREFIX
