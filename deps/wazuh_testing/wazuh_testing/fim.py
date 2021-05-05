@@ -1162,6 +1162,14 @@ def callback_audit_key(line):
     return None
 
 
+def callback_get_audit_key(line):
+    match = re.match(r'.*Match audit_key: \'(.+)\'', line)
+    if match:
+        return match.group(1)
+
+    return None
+
+
 def callback_audit_unable_dir(line):
     match = re.match(r'.*Unable to add audit rule for \'(.+)\'', line)
     if match:

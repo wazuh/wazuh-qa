@@ -171,6 +171,7 @@ nav:
             - Test audit:
               - tests/integration/test_fim/test_files/test_audit/index.md
               - tests/integration/test_fim/test_files/test_audit/test_audit_after_initial_scan.md
+              - tests/integration/test_fim/test_files/test_audit/test_audit_multiple_keys.md
               - tests/integration/test_fim/test_files/test_audit/test_audit_no_dir.md
               - tests/integration/test_fim/test_files/test_audit/test_audit.md
               - tests/integration/test_fim/test_files/test_audit/test_remove_audit.md
