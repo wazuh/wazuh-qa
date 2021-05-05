@@ -11,14 +11,14 @@ def get_arguments():
     parser = argparse.ArgumentParser(usage="%(prog)s [options]",
                                      description="Wazuh API load simulator",
                                      formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-at', '--api-timeout', dest='timeout', action='store', default=15, type=int,
-                        help='Insert API timeout')
     parser.add_argument('-f', '--foreground', dest='foreground', action='store_true', default=False,
                         help='Enable logging in foreground mode')
     parser.add_argument('-fr', '--frequency', dest='frequency', action='store', default=60, type=int,
                         help='Insert Kibana API requests interval')
     parser.add_argument('-t', '--time', dest='time', action='store', default=60, type=int, required=True,
                         help='Time in seconds for the simulation')
+    parser.add_argument('-l', '--log-path', dest='log_path', action='store', default='/tmp/wazuh_api_simulator.log',
+                        required=True, type=str, help='Log path file destination')
     parser.add_argument('-c', '--configuration', dest='configuration', action='store', required=True, type=str,
                         help='Path to the configuration file')
     parser.add_argument('-kt', '--kibana-template', dest='kibana_template', action='store', required=True, type=str,
@@ -32,8 +32,8 @@ def get_arguments():
 def main():
     options = get_arguments()
 
-    main_logger = CustomLogger('wazuh_api_simulator', foreground=options.foreground).get_logger()
-
+    main_logger = CustomLogger('wazuh_api_simulator', file_path=options.log_path,
+                               foreground=options.foreground).get_logger()
     try:
         configuration = yaml.safe_load(open(options.configuration))
         main_logger.info(f'Loaded configuration file: {configuration}')
@@ -45,11 +45,11 @@ def main():
     PORT = configuration['remote']['port']
 
     if configuration['kibana']['enabled']:
-        kibana_logger = CustomLogger('kibana_thread', foreground=options.foreground, tag='Kibana').get_logger()
+        kibana_logger = CustomLogger('kibana_thread', file_path=options.log_path, foreground=options.foreground,
+                                     tag='Kibana').get_logger()
         try:
             kibana_thread = APISimulator(HOST, PORT, request_template=options.kibana_template,
-                                         frequency=options.frequency, timeout=options.timeout,
-                                         external_logger=kibana_logger)
+                                         frequency=options.frequency, external_logger=kibana_logger)
             kibana_thread.start()
             sleep(options.time)
             kibana_thread.shutdown()
@@ -57,12 +57,12 @@ def main():
             kibana_logger.error(f'Unhandled exception: {kibana_exception}')
 
     if configuration['extra_load']['enabled']:
-        extra_logger = CustomLogger('extra_thread', foreground=options.foreground, tag='ExtraLoad').get_logger()
+        extra_logger = CustomLogger('extra_thread', file_path=options.log_path, foreground=options.foreground,
+                                    tag='ExtraLoad').get_logger()
         try:
             request_percentage = configuration['extra_load']['api_requests_percentage']
             extra_load_thread = APISimulator(HOST, PORT, request_template=options.extraload_template,
-                                             request_percentage=request_percentage, timeout=options.timeout,
-                                             external_logger=extra_logger)
+                                             request_percentage=request_percentage, external_logger=extra_logger)
             extra_load_thread.start()
             sleep(options.time)
             extra_load_thread.shutdown()
