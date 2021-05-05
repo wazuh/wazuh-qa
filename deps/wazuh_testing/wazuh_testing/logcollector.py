@@ -194,7 +194,7 @@ def callback_non_existent_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PR
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"ERROR: (1103): Could not open file '{file}' due to [(2)-(No such file or directory)]."
+    msg = fr"ERROR: (1103): Could not open file '{file}'"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
