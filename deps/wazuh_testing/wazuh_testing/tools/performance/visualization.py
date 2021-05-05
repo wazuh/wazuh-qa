@@ -108,8 +108,13 @@ class DataVisualizer:
     def _load_dataframes(self):
         """Load the dataframes from dataframes_paths."""
         for df_path in self.dataframes_paths:
-            if self.dataframe is None:
+            if self.dataframe is None and self.target != 'cluster':
                 self.dataframe = pd.read_csv(df_path, index_col="Timestamp", parse_dates=True)
+            elif self.dataframe is None and self.target == 'cluster':
+                self.dataframe = pd.read_csv(df_path)
+            elif self.target == 'cluster':
+                new_csv = pd.read_csv(df_path)
+                self.dataframe = pd.concat([self.dataframe, new_csv])
             else:
                 new_csv = pd.read_csv(df_path, index_col="Timestamp", parse_dates=True)
                 self.dataframe = pd.concat([self.dataframe, new_csv])
@@ -138,7 +143,7 @@ class DataVisualizer:
         """
         ax.plot(dataframe, label=label, color=color)
 
-    def _save_custom_plot(self, ax, y_label, title, rotation=90):
+    def _save_custom_plot(self, ax, y_label, title, rotation=90, cluster_log=False):
         """Function to add info to the plot, the legend and save the SVG image.
 
         Args:
@@ -150,8 +155,9 @@ class DataVisualizer:
         ax.legend(loc='center left', bbox_to_anchor=(1.0, 0.5))
         ax.set_ylabel(y_label)
         ax.set_title(title)
-        self._set_x_ticks_interval(ax)
-        plt.xticks(rotation=rotation)
+        if not cluster_log:
+            self._set_x_ticks_interval(ax)
+            plt.xticks(rotation=rotation)
         svg_name = sub(pattern=r'\(.*\)', string=y_label, repl='')
         if self.base_name is not None:
             svg_name = f"{self.base_name}_{svg_name}"
@@ -184,6 +190,16 @@ class DataVisualizer:
                     self._basic_plot(ax, self.dataframe[self.dataframe.target == target][element],
                                      label=target, color=color)
                 self._save_custom_plot(ax, element, title)
+
+        elif self.target == 'cluster':
+            for element in elements:
+                fig, ax = plt.subplots()
+                nodes = self.dataframe[self.dataframe.activity == element]['node_name'].unique()
+                current_df = self.dataframe[self.dataframe.activity == element]
+                for node, color in zip(nodes, self._color_palette(len(nodes) + 1)):
+                    self._basic_plot(ax=ax, dataframe=current_df[current_df.node_name == node]['time_spent(s)'],
+                                     label=node, color=color)
+                self._save_custom_plot(ax, element, title, cluster_log=True)
 
         else:
             fig, ax = plt.subplots()
@@ -230,6 +246,11 @@ class DataVisualizer:
             title = LOGCOLLECTOR_CSV_HEADERS[element]['title']
             self._plot_data(elements=columns, title=title, generic_label=element)
 
+    def _plot_cluster_dataset(self):
+        """Function to plot the information from the cluster.log file."""
+        self._plot_data(elements=list(self.dataframe['activity'].unique()), title=self.dataframe.iloc[0][1],
+                        generic_label='Managers')
+
     def plot(self):
         """Public function to plot the dataset."""
         if self.target == 'binary':
@@ -242,6 +263,8 @@ class DataVisualizer:
             self._plot_agentd_dataset()
         elif self.target == 'logcollector':
             self._plot_logcollector_dataset()
+        elif self.target == 'cluster':
+            self._plot_cluster_dataset()
         else:
             raise AttributeError(f"Invalid target {self.target}")
 

@@ -30,7 +30,8 @@ setup(name='wazuh_testing',
             'wazuh-metrics=wazuh_testing.scripts.wazuh_metrics:main',
             'wazuh-statistics=wazuh_testing.scripts.wazuh_statistics:main',
             'data-visualizer=wazuh_testing.scripts.data_visualizations:main',
-            'simulate-api-load=wazuh_testing.scripts.simulate_api_load:main'
+            'simulate-api-load=wazuh_testing.scripts.simulate_api_load:main',
+            'wazuh-log-metrics=wazuh_testing.scripts.wazuh_log_metrics:main'
         ],
       },
       include_package_data=True,
