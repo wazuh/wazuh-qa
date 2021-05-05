@@ -110,11 +110,6 @@ class DataVisualizer:
         for df_path in self.dataframes_paths:
             if self.dataframe is None and self.target != 'cluster':
                 self.dataframe = pd.read_csv(df_path, index_col="Timestamp", parse_dates=True)
-            elif self.dataframe is None and self.target == 'cluster':
-                self.dataframe = pd.read_csv(df_path)
-            elif self.target == 'cluster':
-                new_csv = pd.read_csv(df_path)
-                self.dataframe = pd.concat([self.dataframe, new_csv])
             else:
                 new_csv = pd.read_csv(df_path, index_col="Timestamp", parse_dates=True)
                 self.dataframe = pd.concat([self.dataframe, new_csv])
@@ -198,6 +193,7 @@ class DataVisualizer:
                 fig, ax = plt.subplots()
                 nodes = self.dataframe[self.dataframe.activity == element]['node_name'].unique()
                 current_df = self.dataframe[self.dataframe.activity == element]
+                current_df.reset_index(drop=True, inplace=True)
                 for node, color in zip(nodes, self._color_palette(len(nodes) + 1)):
                     self._basic_plot(ax=ax, dataframe=current_df[current_df.node_name == node]['time_spent(s)'],
                                      label=node, color=color)
