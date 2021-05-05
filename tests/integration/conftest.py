@@ -428,12 +428,10 @@ def configure_local_internal_options(get_local_internal_options):
 
 @pytest.fixture(scope='function')
 def create_file_structure(get_files_list):
-    """
-
-    """
+    """ Creates the directory structure specified for a test case"""
     for file in get_files_list:
         os.makedirs(file['folder_path'], exist_ok=True, mode=0o777)
-        f = open(f"{file['folder_path']}{file['filename']}", "w+").close()
+        open(f"{file['folder_path']}{file['filename']}", "w").close()
 
         if 'age' in file:
             fileinfo = os.stat(f"{file['folder_path']}{file['filename']}")

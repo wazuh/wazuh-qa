@@ -14,6 +14,8 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.time import TimeMachine, time_to_timedelta, time_to_seconds
+import tempfile
+
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -27,12 +29,12 @@ LINUX_FOLDER_PATH = '/tmp/testing_age/'
 DAEMON_NAME = "wazuh-logcollector"
 
 now_date = datetime.now()
+folder_path = tempfile.gettempdir()
+
 
 if sys.platform == 'win32':
-    folder_path = WINDOWS_FOLDER_PATH
     prefix = AGENT_DETECTOR_PREFIX
 else:
-    folder_path = LINUX_FOLDER_PATH
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 file_structure = [

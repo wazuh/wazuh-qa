@@ -11,6 +11,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 from wazuh_testing.tools.time import time_to_seconds
+import tempfile
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -19,16 +20,13 @@ pytestmark = pytest.mark.tier(level=0)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 
-WINDOWS_FOLDER_PATH = r'C:\testing_age' + '\\'
-LINUX_FOLDER_PATH = '/tmp/testing_age/'
+folder_path = tempfile.gettempdir()
 
 local_internal_options = {'logcollector.vcheck_files': 0}
 
 if sys.platform == 'win32':
-    folder_path = WINDOWS_FOLDER_PATH
     prefix = AGENT_DETECTOR_PREFIX
 else:
-    folder_path = LINUX_FOLDER_PATH
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 file_structure = [
@@ -79,9 +77,7 @@ metadata = [
     {'location': f'{folder_path}*', 'log_format': 'syslog', 'age': '200d'},
 ]
 
-configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=parameters,
-                                           metadata=metadata)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['AGE']}" for x in parameters]
 
 
@@ -134,16 +130,14 @@ def test_configuration_age_basic(get_local_internal_options, configure_local_int
 
         else:
             with pytest.raises(TimeoutError):
-                log_callback = logcollector.callback_ignoring_file(
-                    f"{file['folder_path']}{file['filename']}", prefix=prefix)
+                log_callback = logcollector.callback_ignoring_file(f"{file['folder_path']}{file['filename']}",
+                                                                   prefix=prefix)
                 wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                         error_message=f'{file["filename"]} was not ignored')
 
     for file in file_structure:
-
-        f = open(f"{file['folder_path']}{file['filename']}", "a")
-        f.write(file['content'])
-        f.close()
+        with open(os.path.join(file['folder_path'], file['filename']), 'a') as file_to_write:
+            file_to_write.write(file['content'])
 
         log_callback = logcollector.callback_reading_syslog_message(file['content'][:-1], prefix=prefix)
         wazuh_log_monitor.start(timeout=10, callback=log_callback,
