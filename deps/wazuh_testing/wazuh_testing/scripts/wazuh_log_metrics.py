@@ -19,7 +19,7 @@ def get_script_arguments():
     parser.add_argument('-t', '--target', dest='log_type_target', default='cluster',
                         choices=target_choices, help='Log type to be parsed. Default cluster.')
     parser.add_argument('-o', '--output', dest='output', action='store', default=None,
-                        help='File where the extracted data will be dumped (csv).')
+                        help='Folder where the extracted data will be dumped (csv).')
 
     return parser.parse_args()
 

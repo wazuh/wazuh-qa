@@ -6,6 +6,7 @@ import csv
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
+from os import makedirs
 from os.path import join, isfile
 from re import compile
 from sys import platform
@@ -218,6 +219,11 @@ class LogParser(ABC):
 
     def write_csv(self):
         """Function in charge of saving the CSV files according to their label."""
+        try:
+            makedirs(self.dst_dir)
+        except OSError:
+            pass
+
         for key, value in self.data.items():
             with open(join(self.dst_dir, f"{key.replace(' ', '_')}.csv"), 'w', newline='') as f:
                 writer = csv.writer(f)
