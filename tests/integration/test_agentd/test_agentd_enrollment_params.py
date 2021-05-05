@@ -177,7 +177,7 @@ def check_log_error_conf(msg):
     return None
 
 
-@pytest.mark.parametrize('test_case', tests, ids=[case['descrpition'] for case in tests])
+@pytest.mark.parametrize('test_case', tests, ids=[case['description'] for case in tests])
 def test_agent_agentd_enrollment(configure_authd_server, configure_environment, test_case: list):
     global remoted_server
     print(f'Test: {test_case["name"]}')

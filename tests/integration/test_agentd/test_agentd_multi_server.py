@@ -41,7 +41,7 @@ metadata = [
         # 1. 3 Servers - (TCP/UDP) protocol all servers will refuse the connection to remoted but will accept enrollment
         # Starting with an empty clients.key.
         # We should verify that the agent tries to connect and enroll to each one of them.
-        'ID': 'refure_remoted_accept_enrollment',
+        'ID': 'refuse_remoted_accept_enrollment',
         'PROTOCOL': 'tcp',
         'CLEAN_KEYS': True,
         'SIMULATOR_NUMBER': 3,
@@ -114,7 +114,8 @@ metadata = [
                 f"Received message: '#!-agent ack '"
             ],
             [
-                f'Lost connection with manager. Setting lock.',
+                # This log doesn't
+                # f'Lost connection with manager. Setting lock.',
                 f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
                 f'Connected to the server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
@@ -143,7 +144,7 @@ metadata = [
                 f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f'Connected to the server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f"Received message: '#!-agent ack '"
-            ],
+            ],  # Stage 2 - Enroll and connect to second server after failed attempts to connect with server 1
             [
                 f'Server unavailable. Setting lock.',
                 f'Requesting a key from server: {SERVER_HOSTS[0]}',
@@ -315,7 +316,6 @@ def restart_agentd():
 
 # Tests
 def wait_until(x, log_str):
-    print(x)
     return x if log_str in x else None
 
 
