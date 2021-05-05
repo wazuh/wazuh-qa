@@ -24,8 +24,6 @@ pytestmark = pytest.mark.tier(level=0)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 
-WINDOWS_FOLDER_PATH = 'C:\\testing_age' + '\\'
-LINUX_FOLDER_PATH = '/tmp/testing_age/'
 DAEMON_NAME = "wazuh-logcollector"
 
 now_date = datetime.now()
@@ -34,8 +32,10 @@ folder_path = tempfile.gettempdir()
 
 if sys.platform == 'win32':
     prefix = AGENT_DETECTOR_PREFIX
+    folder_path = folder_path + '\\' + 'wazuh_testing_age' + '\\'
 else:
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
+    folder_path = folder_path + '/' + 'wazuh_testing_age' + '/'
 
 file_structure = [
     {

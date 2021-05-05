@@ -26,8 +26,11 @@ local_internal_options = {'logcollector.vcheck_files': 0}
 
 if sys.platform == 'win32':
     prefix = AGENT_DETECTOR_PREFIX
+    folder_path = folder_path + '\\' + 'wazuh_testing_age' + '\\'
 else:
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
+    folder_path = folder_path + '/' + 'wazuh_testing_age' + '/'
+
 
 file_structure = [
     {
