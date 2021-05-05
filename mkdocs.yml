@@ -378,6 +378,7 @@ nav:
             - Test sync interval: tests/integration/test_fim/test_synchronization/test_sync_interval.md
             - Test synchronize integrity scan: tests/integration/test_fim/test_synchronization/test_synchronize_integrity_scan.md
             - Test synchronize integrity win32: tests/integration/test_fim/test_synchronization/test_synchronize_integrity_win32.md
+            - Test registry responses win32: tests/integration/test_fim/test_synchronization/test_registry_responses_win32.md
         - gCloud:
           - tests/integration/test_gcloud/index.md
           - Test configuration:
