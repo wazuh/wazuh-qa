@@ -7,16 +7,17 @@ import sys
 import platform
 import subprocess
 
-def get_version():
 
+def get_version():
     if platform.system() in ['Windows', 'win32']:
         with open(os.path.join(WAZUH_PATH, 'VERSION'), 'r') as f:
             version = f.read()
             return version[:version.rfind('\n')]
 
     else:  # Linux, sunos5, darwin, aix...
-        return subprocess.check_output([
-            f"{WAZUH_PATH}/bin/wazuh-control", "info", "-v"], stderr=subprocess.PIPE).decode('utf-8').rstrip()
+        return subprocess.check_output([os.path.join(WAZUH_PATH, 'bin', 'wazuh-control'),
+                                        'info', '-v'], stderr=subprocess.PIPE).decode('utf-8').rstrip()
+
 
 def get_service():
     if platform.system() in ['Windows', 'win32']:
@@ -27,6 +28,9 @@ def get_service():
           f"{WAZUH_PATH}/bin/wazuh-control", "info", "-t"], stderr=subprocess.PIPE).decode('utf-8').strip()
 
     return 'wazuh-manager' if service == 'server' else 'wazuh-agent'
+
+
+BASE_SHARED_CONF = 'shared.conf'
 
 if sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
@@ -44,7 +48,6 @@ if sys.platform == 'win32':
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'agent.conf')
 
 else:
-
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
 
     if sys.platform == 'darwin':
@@ -72,7 +75,7 @@ else:
     LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-logcollector.state')
     REMOTE_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-remoted.state')
     ANALYSIS_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
-    REMOTE_AGENT_CONF = os.path.join(WAZUH_PATH, 'shared.conf')
+    REMOTE_AGENT_CONF = os.path.join(WAZUH_PATH, BASE_SHARED_CONF)
 
     try:
         import grp
@@ -84,7 +87,7 @@ else:
         pass
 
 state_path = os.path.join(WAZUH_PATH, 'var', 'run')
-db_path = '/var/ossec/queue/db/wdb'
+db_path = os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb')
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
 ALERT_FILE_PATH = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.json')
