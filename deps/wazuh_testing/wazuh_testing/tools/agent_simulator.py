@@ -1520,6 +1520,8 @@ class Sender:
                 self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.socket.connect((self.manager_address, int(self.manager_port)))
                 self.socket.send(length + event)
+            except ConnectionResetError:
+                logging.warning(f"Connection reset by peer. Continuing...")
         if is_udp(self.protocol):
             self.socket.sendto(event, (self.manager_address, int(self.manager_port)))
 
