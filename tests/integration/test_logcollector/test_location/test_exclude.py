@@ -165,8 +165,7 @@ def create_files(request, get_configuration):
     files = get_configuration['metadata']['files']
 
     for file_location in files:
-        with open(file_location, 'w+') as file:
-            file.write(' ')
+        open(file_location, 'w').close()
     yield
 
     for file_location in files:

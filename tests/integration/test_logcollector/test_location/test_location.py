@@ -134,17 +134,13 @@ def create_files(request, get_configuration):
     files = get_configuration['metadata']['files']
     file_type = get_configuration['metadata']['file_type']
 
-    for file_location in files:
-        if file_type == 'non_existent_file':
-            pass
-        elif file_type == 'multiple_logs':
-            for i in range(2000):
-                name = f'{file_location}{i}.txt'
-                with open(name, 'w') as file:
-                    file.write(' ')
-        else:
-            with open(file_location, 'w') as file:
-                file.write(' ')
+    if file_type != 'non_existent_file':
+        for file_location in files:
+            if file_type == 'multiple_logs':
+                for i in range(2000):
+                    open(f'{file_location}{i}.txt', 'w').close()
+            else:
+                open(file_location, 'w').close()
     yield
 
     for file_location in files:
