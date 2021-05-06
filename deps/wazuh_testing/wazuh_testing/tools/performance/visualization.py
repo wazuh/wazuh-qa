@@ -1,5 +1,6 @@
 from os.path import join
 from re import sub
+from statistics import mean, median
 from tempfile import gettempdir
 
 import matplotlib.dates as mdates
@@ -127,6 +128,23 @@ class DataVisualizer:
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
 
     @staticmethod
+    def _get_statistics(df, calculate_mean=True, calculate_median=False):
+        """Function for calculating statistics.
+
+        Args:
+            df (pandas.DataFrame): dataframe on which the operations will be applied.
+            calculate_mean (bool, optional): specify whether or not the mean will be calculated.
+            calculate_median (bool, optional): specify whether or not the median will be calculated.
+        """
+        statistics = str()
+        if calculate_mean:
+            statistics += f"Mean: {round(mean(df), 3)}\n"
+        if calculate_median:
+            statistics += f"Median: {round(median(df), 3)}\n"
+
+        return statistics
+
+    @staticmethod
     def _basic_plot(ax, dataframe, label=None, color=None):
         """Basic function to visualize a dataframe.
 
@@ -138,7 +156,7 @@ class DataVisualizer:
         """
         ax.plot(dataframe, label=label, color=color)
 
-    def _save_custom_plot(self, ax, y_label, title, rotation=90, cluster_log=False):
+    def _save_custom_plot(self, ax, y_label, title, rotation=90, cluster_log=False, statistics=None):
         """Function to add info to the plot, the legend and save the SVG image.
 
         Args:
@@ -146,16 +164,22 @@ class DataVisualizer:
             y_label (str): label for the Y axis.
             title (str): title of the plot.
             rotation (int, optional): optional int to set the rotation of the X-axis labels.
+            statistics (str, optional): optional statistics measures.
         """
+        if statistics:
+            ax.text(0.9, 0.9, statistics, fontsize=14, transform=plt.gcf().transFigure)
+
         ax.legend(loc='center left', bbox_to_anchor=(1.0, 0.5))
         ax.set_ylabel(y_label)
         ax.set_title(title)
+
         if not cluster_log:
             self._set_x_ticks_interval(ax)
             plt.xticks(rotation=rotation)
             svg_name = sub(pattern=r'\(.*\)', string=y_label, repl='')
         else:
             svg_name = sub(pattern=r'\(.*\)', string=title, repl='')
+
         if self.base_name is not None:
             svg_name = f"{self.base_name}_{svg_name}"
         plt.savefig(join(self.store_path, f"{svg_name}.svg"), dpi=1200, format='svg')
@@ -197,7 +221,9 @@ class DataVisualizer:
                 for node, color in zip(nodes, self._color_palette(len(nodes) + 1)):
                     self._basic_plot(ax=ax, dataframe=current_df[current_df.node_name == node]['time_spent(s)'],
                                      label=node, color=color)
-                self._save_custom_plot(ax, 'time_spent(s)', element, cluster_log=True)
+                self._save_custom_plot(ax, 'time_spent(s)', element, cluster_log=True,
+                                       statistics=DataVisualizer._get_statistics(
+                                           current_df['time_spent(s)'], calculate_mean=True, calculate_median=True))
 
         else:
             fig, ax = plt.subplots()
