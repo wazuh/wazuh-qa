@@ -35,6 +35,9 @@ params = [
     {'PROTOCOL': 'tcp', 'MAX_RETRIES': 5, 'RETRY_INTERVAL': 5, 'ENROLL': 'yes'},
 ]
 
+case_ids = [f"{x['PROTOCOL']}_max-retry={x['MAX_RETRIES']}_interval={x['RETRY_INTERVAL']}_enroll={x['ENROLL']}".lower()
+            for x in params]
+
 metadata = params
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 log_monitor_paths = []
@@ -71,7 +74,7 @@ set_debug_mode()
 
 
 # fixtures
-@pytest.fixture(scope="module", params=configurations)
+@pytest.fixture(scope="module", params=configurations, ids=case_ids)
 def get_configuration(request):
     """Get configurations from the module"""
     return request.param
@@ -251,7 +254,7 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
                 log_monitor.start(timeout=20, callback=wait_enrollment)
             except TimeoutError as err:
                 raise AssertionError("No succesful enrollment after retries!")
-            last_log = parse_time_from_log_line(log_monitor.result())
+            last_log_time = parse_time_from_log_line(log_monitor.result())
 
             # Next retry will be after enrollment sleep
             interval = ENROLLMENT_SLEEP
@@ -260,13 +263,13 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
             log_monitor.start(timeout=interval + LOG_TIMEOUT, callback=wait_connect)
         except TimeoutError as err:
             raise AssertionError("Connection attempts tooks too much!")
-        actual_retry = parse_time_from_log_line(log_monitor.result())
+        current_time = parse_time_from_log_line(log_monitor.result())
         if retry > 0:
-            delta_retry = actual_retry - last_log
+            delta_retry = current_time - last_log_time
             # Check if delay was aplied
             assert delta_retry >= timedelta(seconds=interval - DELTA), "Retries to quick"
             assert delta_retry <= timedelta(seconds=interval + DELTA), "Retries to slow"
-        last_log = actual_retry
+        last_log_time = current_time
 
     # 4 Wait for server rollback
     try:

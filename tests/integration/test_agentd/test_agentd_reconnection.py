@@ -40,6 +40,8 @@ metadata = [
     {'PROTOCOL': 'udp'}
 ]
 
+config_ids = ['tcp', 'udp']
+
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
 log_monitor_paths = []
@@ -82,7 +84,7 @@ set_debug_mode()
 
 
 # fixtures
-@pytest.fixture(scope="module", params=configurations)
+@pytest.fixture(scope="module", params=configurations, ids=config_ids)
 def get_configuration(request):
     """Get configurations from the module"""
     return request.param
