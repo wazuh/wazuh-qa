@@ -7,7 +7,7 @@ from urllib3 import disable_warnings, exceptions
 
 disable_warnings(exceptions.InsecureRequestWarning)
 
-HOST = MASTER_NODE_IP
+HOST = 'MASTER_NODE_IP'
 PORT = 55000
 BASE_URL = f'https://{HOST}:{PORT}'
 WAZUH_PATH = '/var/ossec'
