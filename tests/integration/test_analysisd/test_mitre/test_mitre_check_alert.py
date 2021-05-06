@@ -4,6 +4,7 @@
 
 import os
 
+import jsonschema
 import pytest
 from wazuh_testing.mitre import (callback_detect_mitre_event, validate_mitre_event)
 from wazuh_testing.tools import ALERT_FILE_PATH
@@ -18,10 +19,14 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 wazuh_alert_monitor = FileMonitor(ALERT_FILE_PATH)
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
+invalid_configurations = []
+
 configurations = []
 for i in range(1, 15):
     file_test = os.path.join(_data_path, f"test{i}.xml")
     configurations.append(file_test)
+    if i in range(5,9):
+        invalid_configurations.append(os.path.join(_data_path, f"test{i}.xml"))
 
 
 # fixtures
@@ -38,6 +43,11 @@ def test_mitre_check_alert(get_configuration, configure_local_rules, restart_waz
     """Check Mitre alerts have correct format in accordance with configuration"""
 
     # Wait until Mitre's event is detected
-    if get_configuration != os.path.join(_data_path, f"test8.xml"):
+    if get_configuration not in invalid_configurations:
         event = wazuh_alert_monitor.start(timeout=30, callback=callback_detect_mitre_event).result()
         validate_mitre_event(event)
+    else:
+        with pytest.raises(jsonschema.exceptions.ValidationError):
+            event = wazuh_alert_monitor.start(timeout=30, callback=callback_detect_mitre_event).result()
+            validate_mitre_event(event)
+
