@@ -235,8 +235,7 @@ def create_files(request, get_configuration):
 
 
 def test_exclude(get_local_internal_options, configure_local_internal_options, create_directory, create_files,
-                 get_configuration, configure_environment,
-                 restart_logcollector):
+                 get_configuration, configure_environment, restart_logcollector):
     """Check if logcollector is excluding specified files.
 
     Raises:
@@ -248,8 +247,7 @@ def test_exclude(get_local_internal_options, configure_local_internal_options, c
     for file_location in sorted(files):
         match = fnmatch.fnmatch(file_location, excluded)
         if match:
-            log_callback = logcollector.callback_excluded_file(file_location,
-                                                               prefix=prefix)
+            log_callback = logcollector.callback_excluded_file(file_location, prefix=prefix)
             wazuh_log_monitor.start(timeout=60, callback=log_callback, error_message=f"The expected 'File excluded: "
                                                                                      f"'{file_location}' message has "
                                                                                      f"not been produced")
