@@ -134,7 +134,7 @@ metadata = [
 
 # Configuration data
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT']}" for x in parameters]
+configuration_ids = [f"{x['LOCATION']}_{x['LOG_FORMAT']}" for x in parameters]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
