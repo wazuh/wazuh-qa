@@ -442,17 +442,19 @@ class Agent:
             else:
                 msg_remove_header = bytes(buffer_array[1:])
                 msg_decrypted = Cipher(msg_remove_header, self.encryption_key).decrypt_blowfish()
-
-            padding = 0
-            while msg_decrypted:
-                if msg_decrypted[padding] == 33:
-                    padding += 1
-                else:
-                    break
-            msg_remove_padding = msg_decrypted[padding:]
-            msg_decompress = zlib.decompress(msg_remove_padding)
-            msg_decoded = msg_decompress.decode('ISO-8859-1')
-            self.process_message(sender, msg_decoded)
+            try:
+                padding = 0
+                while msg_decrypted:
+                    if msg_decrypted[padding] == 33:
+                        padding += 1
+                    else:
+                        break
+                msg_remove_padding = msg_decrypted[padding:]
+                msg_decompress = zlib.decompress(msg_remove_padding)
+                msg_decoded = msg_decompress.decode('ISO-8859-1')
+                self.process_message(sender, msg_decoded)
+            except zlib.error:
+                logging.error("Corrupted message from the manager. Continuing.")
 
     def stop_receiver(self):
         """Stop Agent listener."""
