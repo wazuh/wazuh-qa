@@ -54,8 +54,8 @@ def load_client_keys():
 
     for agent in open(CLIENT_KEYS).readlines():
         try:
-            line = agent.split(' ')
-            AGENT_IDS.update({line[0]: {'name': line[1], 'key': line[2]}})
+            line = agent.strip().split(' ')
+            AGENT_IDS.update({line[0]: {'name': line[1], 'key': line[3]}})
         except (IndexError, KeyError):
             continue
 
