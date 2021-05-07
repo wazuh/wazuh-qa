@@ -20,7 +20,7 @@ pytestmark = pytest.mark.tier(level=0)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 
-folder_path = os.join.path(tempfile.gettempdir(), 'wazuh_testing_age')
+folder_path = os.path.join(tempfile.gettempdir(), 'wazuh_testing_age')
 
 local_internal_options = {'logcollector.vcheck_files': 1}
 

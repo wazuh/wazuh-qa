@@ -27,7 +27,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 DAEMON_NAME = "wazuh-logcollector"
 
 now_date = datetime.now()
-folder_path = os.join.path(tempfile.gettempdir(), 'wazuh_testing_age')
+folder_path = os.path.join(tempfile.gettempdir(), 'wazuh_testing_age')
 
 
 if sys.platform == 'win32':
