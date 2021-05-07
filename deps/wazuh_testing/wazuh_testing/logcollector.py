@@ -1,4 +1,7 @@
+import sys
+
 from wazuh_testing.tools import monitoring
+from wazuh_testing.tools.monitoring import AGENT_DETECTOR_PREFIX, LOG_COLLECTOR_DETECTOR_PREFIX
 
 GENERIC_CALLBACK_ERROR_COMMAND_MONITORING = 'The expected command monitoring log has not been produced'
 GENERIC_CALLBACK_ERROR_INVALID_LOCATION = 'The expected invalid location error log has not been produced'
@@ -8,7 +11,12 @@ GENERIC_CALLBACK_ERROR_TARGET_SOCKET = "The expected target socket log has not b
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND = "The expected target socket not found error has not been produced"
 LOG_COLLECTOR_GLOBAL_TIMEOUT = 20
 
-def callback_analyzing_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+if sys.platform == 'win32':
+    prefix = AGENT_DETECTOR_PREFIX
+else:
+    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
+
+def callback_analyzing_file(file):
     """Create a callback to detect if logcollector is monitoring a file.
 
     Args:
@@ -22,7 +30,7 @@ def callback_analyzing_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFI
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
-def callback_monitoring_command(log_format, command, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_monitoring_command(log_format, command):
     """Create a callback to detect if logcollector is monitoring a command.
 
     Args:
@@ -38,7 +46,7 @@ def callback_monitoring_command(log_format, command, prefix=monitoring.LOG_COLLE
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 
-def callback_monitoring_djb_multilog(program_name, multilog_file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_monitoring_djb_multilog(program_name, multilog_file):
     """Create a callback to detect if logcollector is monitoring a djb multilog file.
 
     Args:
@@ -53,7 +61,7 @@ def callback_monitoring_djb_multilog(program_name, multilog_file, prefix=monitor
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 
-def callback_command_alias_output(alias, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_command_alias_output(alias):
     """Create a callback to detect if logcollector is monitoring a command with an assigned alias.
 
     Args:
@@ -67,7 +75,7 @@ def callback_command_alias_output(alias, prefix=monitoring.LOG_COLLECTOR_DETECTO
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 
-def callback_eventchannel_bad_format(event_location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_eventchannel_bad_format(event_location):
     """Create a callback to detect if logcollector inform about bad formatted eventchannel location.
 
     Args:
@@ -81,7 +89,7 @@ def callback_eventchannel_bad_format(event_location, prefix=monitoring.LOG_COLLE
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 
-def callback_socket_target(location, socket_name, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_socket_target(location, socket_name):
     """Create a callback to detect if logcollector has assign a socket to a monitored file.
 
     Args:
@@ -96,7 +104,7 @@ def callback_socket_target(location, socket_name, prefix=monitoring.LOG_COLLECTO
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 
-def callback_socket_not_defined(location, socket_name, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_socket_not_defined(location, socket_name):
     """Create a callback to detect if a socket has not been defined.
 
     Args:
@@ -111,7 +119,7 @@ def callback_socket_not_defined(location, socket_name, prefix=monitoring.LOG_COL
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 
-def callback_log_target_not_found(location, socket_name, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_log_target_not_found(location, socket_name):
     """Create a callback to detect if a log target has not been found.
 
     Args:
@@ -126,8 +134,7 @@ def callback_log_target_not_found(location, socket_name, prefix=monitoring.LOG_C
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 
-def callback_invalid_reconnection_time(severity='WARNING', default_value='5',
-                                       prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_invalid_reconnection_time(severity='WARNING', default_value='5'):
     """Create a callback to detect if a invalid reconnection has been used.
 
     Args:
@@ -152,10 +159,10 @@ def callback_eventchannel_analyzing(event_location):
         callable: callback to detect this event.
     """
     msg = fr"INFO: \(\d+\): Analyzing event log: '{event_location}'"
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.AGENT_DETECTOR_PREFIX)
+    return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 
-def callback_invalid_location_pattern(location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_invalid_location_pattern(location):
     """Create a callback to detect if invalid location pattern has been used.
 
     Args:
@@ -169,7 +176,7 @@ def callback_invalid_location_pattern(location, prefix=monitoring.LOG_COLLECTOR_
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
-def callback_read_lines(command, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, escape=False):
+def callback_read_lines(command, escape=False):
     """Create a callback to detect "DEBUG: Read <number> lines from command <command>" debug line.
 
     Args:
@@ -184,7 +191,7 @@ def callback_read_lines(command, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=escape)
 
 
-def callback_running_command(log_format, command, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, escape=False):
+def callback_running_command(log_format, command, escape=False):
     """Create a callback to detect "DEBUG: Running <log_format> '<command>'" debug line.
 
     Args:
@@ -201,7 +208,7 @@ def callback_running_command(log_format, command, prefix=monitoring.LOG_COLLECTO
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=escape)
 
 
-def callback_match_pattern_file(file_pattern, file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_match_pattern_file(file_pattern, file):
     """Create a callback to detect if logcollector is monitoring a file with wildcard.
     Args:
         file_pattern (str): Location pattern that the has to match.
@@ -214,7 +221,7 @@ def callback_match_pattern_file(file_pattern, file, prefix=monitoring.LOG_COLLEC
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
-def callback_non_existent_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_non_existent_file(file):
     """Create a callback to detect if logcollector is showing an error when the file does not exist.
     Args:
         file (str): Name with absolute path of the analyzed file.
@@ -226,7 +233,7 @@ def callback_non_existent_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PR
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
-def callback_duplicated_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_duplicated_file(file):
     """Create a callback to detect if logcollector configuration in ossec.conf is duplicated.
     Args:
         file (str): Name with absolute path of the analyzed file.
@@ -238,7 +245,7 @@ def callback_duplicated_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREF
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
-def callback_file_limit(prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_file_limit():
     """Create a callback to detect if logcollector is monitoring a file.
     Args:
         file (str): Name with absolute path of the analyzed file.
@@ -250,7 +257,7 @@ def callback_file_limit(prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
-def callback_excluded_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_excluded_file(file):
     """Create a callback to detect if logcollector is excluding files.
     Args:
         file (str): Name with absolute path of the analyzed file.

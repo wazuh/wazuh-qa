@@ -29,11 +29,6 @@ local_internal_options = {'logcollector.debug': '2'}
 temp_dir = tempfile.gettempdir()
 date = datetime.date.today().strftime("%Y-%m-%d")
 
-if sys.platform == 'win32':
-    prefix = AGENT_DETECTOR_PREFIX
-else:
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
-
 parameters = [
     {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'depth1', 'test.txt'), 'LOG_FORMAT': 'syslog'},
     {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'depth1', ' depth_test.txt'), 'LOG_FORMAT': 'syslog'},
@@ -162,26 +157,26 @@ def test_location(get_local_internal_options, configure_local_internal_options, 
 
     for file_location in sorted(files):
         if file_type == 'single_file':
-            log_callback = logcollector.callback_analyzing_file(file_location,prefix=prefix)
+            log_callback = logcollector.callback_analyzing_file(file_location)
             wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
                                     error_message="The expected 'Analyzing file' message has not been produced")
         elif file_type == 'wildcard_file':
             pattern = get_configuration['metadata']['location']
-            log_callback = logcollector.callback_match_pattern_file(pattern, file_location, prefix=prefix)
+            log_callback = logcollector.callback_match_pattern_file(pattern, file_location)
             wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
                                     error_message=f"The expected 'New file that matches the '{pattern}' "
                                                   f"pattern: '{file_location}' message has not been produced")
         elif file_type == 'non_existent_file':
-            log_callback = logcollector.callback_non_existent_file(file_location, prefix=prefix)
+            log_callback = logcollector.callback_non_existent_file(file_location)
             wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
                                     error_message="The expected 'Could not open file' message has not been produced")
         elif file_type == 'duplicated_file':
-            log_callback = logcollector.callback_duplicated_file(file_location, prefix=prefix)
+            log_callback = logcollector.callback_duplicated_file(file_location)
             wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
                                     error_message=f"The expected 'Log file '{file_location}' is duplicated' "
                                                   f"message has not been produced")
         elif file_type == 'multiple_logs':
-            log_callback = logcollector.callback_file_limit(prefix=prefix)
+            log_callback = logcollector.callback_file_limit()
             wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
                                     error_message=f"The expected 'File limit has been reached' "
                                                   f"message has not been produced")

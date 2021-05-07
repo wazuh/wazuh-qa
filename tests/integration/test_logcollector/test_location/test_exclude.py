@@ -27,11 +27,6 @@ local_internal_options = {'logcollector.debug': '2'}
 
 temp_dir = tempfile.gettempdir()
 
-if sys.platform == 'win32':
-    prefix = AGENT_DETECTOR_PREFIX
-else:
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
-
 parameters = [
     {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'test*'), 'LOG_FORMAT': 'syslog',
      'EXCLUDE': os.path.join(temp_dir, 'wazuh-testing', '*.log')},
@@ -188,7 +183,7 @@ def test_exclude(get_local_internal_options, configure_local_internal_options, c
     for file_location in sorted(files):
         match = fnmatch.fnmatch(file_location, excluded)
         if match:
-            log_callback = logcollector.callback_excluded_file(file_location, prefix=prefix)
+            log_callback = logcollector.callback_excluded_file(file_location)
             wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback, error_message=f"The expected 'File excluded: "
                                                                                      f"'{file_location}' message has "
                                                                                      f"not been produced")
