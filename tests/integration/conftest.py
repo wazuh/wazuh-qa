@@ -381,7 +381,7 @@ def close_sockets(receiver_sockets):
     """Close the sockets connection gracefully."""
     for socket in receiver_sockets:
         try:
-            # We flush the buffer before closing connection if connection is TCP
+            # We flush the buffer before closing connection if connection is TCPt_files_list:
             if socket.protocol == 1:
                 socket.sock.settimeout(5)
                 socket.receive()  # Flush buffer before closing connection
@@ -431,11 +431,12 @@ def create_file_structure(get_files_list):
     """ Creates the directory structure specified for a test case"""
     for file in get_files_list:
         os.makedirs(file['folder_path'], exist_ok=True, mode=0o777)
-        open(f"{file['folder_path']}{file['filename']}", "w").close()
+        os.path.join
+        open(f"{os.path.join(file['folder_path'],file['filename'])}", "w").close()
 
         if 'age' in file:
-            fileinfo = os.stat(f"{file['folder_path']}{file['filename']}")
-            os.utime(f"{file['folder_path']}{file['filename']}", (fileinfo.st_atime - file['age'],
+            fileinfo = os.stat(f"{os.path.join(file['folder_path'],file['filename'])}")
+            os.utime(f"{os.path.join(file['folder_path'],file['filename'])}", (fileinfo.st_atime - file['age'],
                                                                   fileinfo.st_mtime - file['age']))
     yield
 
