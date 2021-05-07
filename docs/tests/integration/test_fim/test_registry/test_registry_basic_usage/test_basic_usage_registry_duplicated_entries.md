@@ -1,12 +1,12 @@
 # Test duplicated regitry entries
 
-This test will check that for two monitored registries with the same name value but with different capitalisation only triggers  one modified event when the registry is changed.
+This test will check that for two monitored registries with the same name value but with different capitalisation only triggers one modified event when the registry is changed.
 
 ## General info
 
-|Tier | Number of tests | Time spent| Test file |
-|:--:|:--:|:--:|:--:|
-| 0 | 1 | 0:0:25 | [test_basic_usage_registry_duplicated_entries.py](../../../../../../tests/integration/test_fim/test_registry/test_registry_basic_usage/test_basic_usage_registry_duplicated_entries.py)|
+|Tier | Number of tests | Time spent|
+|:--:|:--:|:--:|
+| 0 | 1 | 25s |
 
 ## Test logic
 
@@ -17,6 +17,7 @@ ensures the windows agent doesn't duplicate alerts due to windows being case ins
 
 
 ## Execution result
+
 python3 -m pytest test_files/test_registry/test_registry_basic_usage/test_basic_usage_registry_duplicated_entries.py
 ```
 ===================================================================================== test session starts =====================================================================================
