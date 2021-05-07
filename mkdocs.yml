@@ -329,6 +329,7 @@ nav:
               - Test basic usage registry changes: tests/integration/test_fim/test_registry/test_registry_basic_usage/test_basic_usage_registry_changes.md
               - Test basic new key: tests/integration/test_fim/test_registry/test_registry_basic_usage/test_basic_usage_registry_new_key.md
               - Test long registry path: tests/integration/test_fim/test_registry/test_registry_basic_usage/test_long_registry_path.md
+              - Test duplicated registry entries: tests/integration/test_fim/test_registry/test_registry_basic_usage/test_basic_usage_registry_duplicated_entries.md
             - Test registry checks:
               - tests/integration/test_fim/test_registry/test_registry_checks/index.md
               - Test registry checks others: tests/integration/test_fim/test_registry/test_registry_checks/test_registry_check_others.md
