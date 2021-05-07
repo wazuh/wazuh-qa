@@ -22,7 +22,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 
 folder_path = os.path.join(tempfile.gettempdir(), 'wazuh_testing_age')
 
-local_internal_options = {'logcollector.vcheck_files': 1}
+local_internal_options = {'logcollector.vcheck_files': 0}
 
 if sys.platform == 'win32':
     prefix = AGENT_DETECTOR_PREFIX
@@ -100,6 +100,7 @@ def get_local_internal_options():
     return local_internal_options
 
 
+@pytest.mark.xfail(reason="Expected error. Issue https://github.com/wazuh/wazuh/issues/8438")
 def test_configuration_age_basic(get_local_internal_options, configure_local_internal_options, get_files_list,
                                  create_file_structure, get_configuration, configure_environment, restart_logcollector):
     """Check if logcollector works correctly and uses the specified age value.
@@ -111,7 +112,6 @@ def test_configuration_age_basic(get_local_internal_options, configure_local_int
     Raises:
         TimeoutError: If the expected callbacks are not generated.
     """
-    time.sleep(1)
 
     cfg = get_configuration['metadata']
     age_seconds = time_to_seconds(cfg['age'])
