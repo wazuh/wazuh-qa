@@ -1,6 +1,5 @@
 from os.path import join
 from re import sub
-from statistics import mean, median
 from tempfile import gettempdir
 
 import matplotlib.dates as mdates
@@ -138,9 +137,9 @@ class DataVisualizer:
         """
         statistics = str()
         if calculate_mean:
-            statistics += f"Mean: {round(mean(df), 3)}\n"
+            statistics += f"Mean: {round(pd.DataFrame.mean(df), 3)}\n"
         if calculate_median:
-            statistics += f"Median: {round(median(df), 3)}\n"
+            statistics += f"Median: {round(pd.DataFrame.median(df), 3)}\n"
 
         return statistics
 
