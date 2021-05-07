@@ -1,4 +1,5 @@
 from wazuh_testing.tools import monitoring
+import sys
 
 GENERIC_CALLBACK_ERROR_COMMAND_MONITORING = 'The expected command monitoring log has not been produced'
 GENERIC_CALLBACK_ERROR_INVALID_LOCATION = 'The expected invalid location error log has not been produced'
@@ -6,6 +7,8 @@ GENERIC_CALLBACK_ERROR_ANALYZING_FILE = 'The expected analyzing file log has not
 GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL = "The expected analyzing eventchannel log has not been produced"
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET = "The expected target socket log has not been produced"
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND = "The expected target socket not found error has not been produced"
+GENERIC_CALLBACK_ERROR_READING_FILE = "The expected invalid content error log has not been produced"
+GENERIC_CALLBACK_ERROR = 'The expected error output has not been produced'
 
 
 def callback_analyzing_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
@@ -18,14 +21,19 @@ def callback_analyzing_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFI
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"Analyzing file: '{file}'."
+    if sys.platform == 'win32':
+        msg = fr"Analyzing file: '{file}'."
+    else:
+        msg = fr"Analyzing file: '{file}'."
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 def callback_reading_file(log_format, content_file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
-    """Create a callback to detect if logcollector is monitoring a file.
+    """
+    Create a callback to detect if the logcollector could read a file with valid content successfully.
 
     Args:
-        content_file (str): Content file analyzed.
+        log_format(str): Log format type(json, syslog, snort-full, squid, djb-multilog, multi-line:3)
+        content_file (str): Content file to analyze
         prefix (str): Daemon that generates the error log.
 
     Returns:
@@ -35,9 +43,51 @@ def callback_reading_file(log_format, content_file, prefix=monitoring.LOG_COLLEC
         msg = fr"Reading json message: '{content_file}'."
     elif log_format == 'syslog' or log_format == 'snort-full' or log_format == 'squid':
         msg = fr"Reading syslog message: '{content_file}'."
+    elif log_format == 'djb-multilog':
+        msg = fr"Reading DJB multilog message: '{content_file}'"
+    elif log_format == 'multi-line:3':
+        msg = fr"Reading message: '{content_file}'"
 
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
+def callback_read_file(location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+    """
+    Create a callback to detect if the logcollector read and not analized a file with specific content.
+
+    Args:
+        location (str): Path Read.
+
+    Returns:
+        callable: callback to detect this log.
+    """
+    msg = fr"DEBUG: Read 1 lines from '{location}"
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+def callback_invalid_format_value(line, option, location, prefix, severity='DEBUG'):
+
+    """
+    Create a callback to detect content values invalid in a log format file specific.
+
+    Args:
+        line(str):  content line of file analized
+        option (str): log format value .
+        location (str): Wazuh manager configuration option.
+        prefix (str): Daemon that generates the error log.
+        severity (str): Severity of the error (DEBUG, ERROR)
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    if option == 'json':
+        msg = fr"{severity}: Line '{line}' read from '{location}' is not a {option} object."
+    elif option == 'audit':
+        msg = fr"{severity}: Discaring audit message because of invalid syntax."
+    elif option == 'nmapg':
+        msg = fr"{severity}: Bad formated nmap grepable file."
+    elif option == 'djb-multilog':
+        msg = fr"{severity}: Invalid DJB log: '{line}'"
+
+    return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 def callback_monitoring_command(log_format, command, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
     """Create a callback to detect if logcollector is monitoring a command.

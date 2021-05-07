@@ -7,7 +7,7 @@ import pytest
 import sys
 import subprocess as sb
 import wazuh_testing.logcollector as logcollector
-import wazuh_testing.generic_callbacks as gc
+
 from os import remove, path
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -26,10 +26,10 @@ force_restart_after_restoring = True
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 
-local_internal_options = {'logcollector.remote_commands': '1', 'logcollector.debug': '2'}
+local_internal_options = {'logcollector.remote_commands': '1', 'logcollector.vcheck_files': '1', 'logcollector.debug': '2','monitord.rotate_log': '0'}
 
 if sys.platform == 'win32':
-    location = r'C:\testing.txt'
+    location = r'C:\test.txt'
     wazuh_configuration = 'ossec.conf'
     prefix = AGENT_DETECTOR_PREFIX
 
@@ -39,37 +39,37 @@ else:
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 parameters = [
-#    {'LOCATION': f'{location}', 'LOG_FORMAT': 'json'},
-#    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog'},
-#    {'LOCATION': f'{location}', 'LOG_FORMAT': 'snort-full'},
-#    {'LOCATION': f'{location}', 'LOG_FORMAT': 'squid'},
-     {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit'},
-    # {'LOCATION': f'{location}', 'LOG_FORMAT': 'mysql_log'},
-    # {'LOCATION': f'{location}', 'LOG_FORMAT': 'postgresql_log'},
-    # {'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapg'},
-    # {'LOCATION': f'{location}', 'LOG_FORMAT': 'command'},
-    # {'LOCATION': f'{location}', 'LOG_FORMAT': 'full_command'},
-    # {'LOCATION': '/var/log/testing/current', 'LOG_FORMAT': 'djb-multilog'},
-    # {'LOCATION': '/var/log/testing/current', 'LOG_FORMAT': 'djb-multilog'},
-    # {'LOCATION': '/var/log/testing/current', 'LOG_FORMAT': 'djb-multilog'},
-    # {'LOCATION': f'{location}', 'LOG_FORMAT': 'multi-line:3'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'json'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'json'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'snort-full'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'squid'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'mysql_log'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'postgresql_log'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapg'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapg'},
+    {'LOCATION': '/var/log/current', 'LOG_FORMAT': 'djb-multilog'},
+    {'LOCATION': '/var/log/current', 'LOG_FORMAT': 'djb-multilog'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'multi-line:3'},
 ]
 
 metadata = [
- #   {'location': f'{location}', 'log_format': 'json', 'valid_value': False}, #debo agregar un TRUE tmb
- #   {'location': f'{location}', 'log_format': 'syslog', 'valid_value': True},
-#    {'location': f'{location}', 'log_format': 'snort-full', 'valid_value': True},
-#    {'location': f'{location}', 'log_format': 'squid', 'valid_value': True},
-     {'location': f'{location}', 'log_format': 'audit', 'valid_value': False},  # debo agregar el True tmb
-    # {'location': f'{location}', 'log_format': 'mysql_log', 'valid_value': True},
-    # {'location': f'{location}', 'log_format': 'postgresql_log', 'valid_value': True},
-    # {'location': f'{location}', 'log_format': 'nmapg', 'valid_value': True},
-    # {'location': f'{location}', 'log_format': 'command', 'valid_value': True},
-    # {'location': f'{location}', 'log_format': 'full_command', 'valid_value': True},
-    # {'location': '/var/log/testing/current', 'log_format': 'djb-multilog', 'command': 'example-command', 'valid_value': True},
-    # {'location': '/var/log/testing/current', 'log_format': 'djb-multilog', 'command': 'example-command', 'valid_value': True},
-    # {'location': '/var/log/testing/current', 'log_format': 'djb-multilog', 'command': 'example-command', 'valid_value': True},
-    # {'location': f'{location}', 'log_format': 'multi-line:3', 'command': 'example-command', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'json', 'valid_value': False},
+    {'location': f'{location}', 'log_format': 'json', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'syslog', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'snort-full', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'squid', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'audit', 'valid_value': False},
+    {'location': f'{location}', 'log_format': 'audit', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'mysql_log', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'postgresql_log', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'nmapg', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'nmapg', 'valid_value': False},
+    {'location': '/var/log/current', 'log_format': 'djb-multilog', 'valid_value': True},
+    {'location': '/var/log/current', 'log_format': 'djb-multilog', 'valid_value': False},
+    {'location': f'{location}', 'log_format': 'multi-line:3', 'valid_value': True},
 ]
 
 if sys.platform == 'win32':
@@ -82,11 +82,13 @@ if sys.platform == 'win32':
     metadata.append({'location': f'{location}', 'log_format': 'iis', 'valid_value': True}),
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
+#configuration_ids = [f"{x['LOG_FORMAT'] 'Valid' if x['VALID_VALUE'] == TRUE else 'Invalid'}" for x in metadata]
+# configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['COMMAND']}" for x in parameters]
+configuration_ids = [f"{x['log_format'], x['valid_value']}" for x in metadata]
 
-configuration_ids = [f"{x['LOG_FORMAT']}" for x in parameters]
+log_format_not_print_analyzing_info = ['eventlog', 'eventchannel', 'iis']
 
-log_format_not_print_analyzing_info = ['command', 'full_command', 'eventlog', 'eventchannel']
-
+log_format_not_print_reading_info = ['audit', 'mysql_log', 'postgresql_log', 'nmapg']
 
 # fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
@@ -108,22 +110,6 @@ def remove_file(file):
     """ Remove a file created to testing."""
     if path.exists(file):
         remove(file)
-
-def modify_file(file, type):
-    """ Modify file created to a specified type."""
-    if type == 'json':
-        modify_json_file(file, type)
-    elif type == 'syslog':
-        modify_syslog_file(file)
-    elif type == 'snort-full':
-        modify_snort_file(file)
-    elif type == 'squid':
-        modify_squid_file(file)
-    elif type == 'audit':
-        modify_audit_file(file, type)
-    else:
-        data = """QUEDAN LOS DEMAS A AGREGAR"""
-
 
 def modify_json_file(file, type):
     """Create a json content with an specific values"""
@@ -163,6 +149,72 @@ def modify_audit_file(file, type):
     with open(file, 'a') as f:
         f.write(data)
 
+def modify_mysqlLog_file(file):
+    """Create a mysql_log content with an specific values"""
+    data = """show variables like 'general_log%';\n"""
+    with open(file, 'a') as f:
+        f.write(data)
+
+def modify_postgresqlLog_file(file):
+    """Create a postgresql_log content with an specific values"""
+    data = """show variables like 'general_log%';\n"""
+    with open(file, 'a') as f:
+        f.write(data)
+
+def modify_nmapg_file(file, type):
+    """Create a nmapg content with an specific values"""
+    if type:
+        with open('/var/log/nmapg.log', 'a') as f:
+            f.write("")
+        data = """"nmap -T4 -A -v -oG /var/log/nmapg.log scanme.nmap.org"""
+    else:
+        data = """nmap -n -Pn -p 80 --open -sV -vvv --script banner,http-title -iR 1000\n"""
+
+    with open(file, 'a') as f:
+        f.write(data)
+
+def modify_djb_multilog_file(file, type):
+    """Create a djb-multilog content with an specific values"""
+
+    if type:
+        data = """@40000000590e30983973bda4 Message 1"""
+    else:
+        data = """@40000000590e30983973bda4 -e Error\n"""
+
+    with open(file, 'a') as f:
+        f.write(data)
+
+def modify_multi_line_file(file):
+    """Create a multi-line content with an specific values"""
+
+    data = """Aug 9 14:22:47 log1\nAug 9 14:22:47 log2\nAug 9 14:22:47 log3\n"""
+
+    with open(file, 'a') as f:
+        f.write(data)
+
+def modify_file(file, type, content):
+    """ Modify a file to generate logs."""
+    if type == 'json':
+        modify_json_file(file, content)
+    elif type == 'syslog':
+        modify_syslog_file(file)
+    elif type == 'snort-full':
+        modify_snort_file(file)
+    elif type == 'squid':
+        modify_squid_file(file)
+    elif type == 'audit':
+        modify_audit_file(file, content)
+    elif type == 'mysql_log':
+        modify_mysqlLog_file(file)
+    elif type == 'postgresql_log':
+        modify_postgresqlLog_file(file)
+    elif type == 'nmap':
+        modify_nmapg_file(file, content)
+    elif type == 'djb-multilog':
+        modify_djb_multilog_file(file, content)
+    elif type == 'multi-line:3':
+        modify_multi_line_file(file)
+
 def check_log_format_valid(cfg):
     """Check if Wazuh run correctly with the specified log formats.
 
@@ -179,9 +231,6 @@ def check_log_format_valid(cfg):
         log_callback = logcollector.callback_analyzing_file(cfg['location'], prefix=prefix)
         wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
 
-    elif 'command' in cfg['log_format']:
-        log_callback = logcollector.callback_monitoring_command(cfg['log_format'], cfg['command'], prefix=prefix)
-        wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
     elif cfg['log_format'] == 'djb-multilog':
         log_callback = logcollector.callback_monitoring_djb_multilog(cfg['location'], prefix=prefix)
         wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message="The expected multilog djb log has not been produced")
@@ -190,7 +239,6 @@ def check_log_format_valid(cfg):
 def check_log_format_value_valid(conf):
     """
     Check if Wazuh runs correctly with the correct log format and content.
-
     Ensure logcollector allows the specified log formats.
 
     Raises:
@@ -199,30 +247,39 @@ def check_log_format_value_valid(conf):
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    # CHECK ONLY JSON FILE FOR NOW
-
     if conf['log_format'] not in log_format_not_print_analyzing_info:
-        file1 = open(location, 'r')
-        lines = file1.readlines()
 
-        # Strips the newline character
-        for line in lines:
-            log_callback = logcollector.callback_reading_file(line.strip(), prefix=prefix)
+        if conf['log_format'] in log_format_not_print_reading_info:
+            log_callback = logcollector.callback_read_file(location, prefix=prefix)
             wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
 
-    #NEED TO ADD OTHER CASES
+            if conf['log_format'] == 'nampg':
+                remove_file('/var/log/nampg.log')
 
+        elif conf['log_format'] == 'multi-line:3':
+            msg = ""
+            with open(location, 'r') as file:
+                for line in file:
+                    msg += line.strip()
+                    msg += " "
+            log_callback = logcollector.callback_reading_file(msg, prefix=prefix)
+            wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
+        else:
+            file1 = open(location, 'r')
+            lines = file1.readlines()
+
+            # Strips the newline character
+            for line in lines:
+                log_callback = logcollector.callback_reading_file(line.strip(), prefix=prefix)
+                wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
 
 
 def check_log_format_value_invalid(conf):
     """
-    Check if Wazuh fails because of an invalid log format or content.
+    Check if Wazuh fails because of an  log format content invalid.
 
-       Args:
-           cfg (dict): Dictionary with the localfile configuration.
-
-       Raises:
-           TimeoutError: If error callback are not generated.
+    Raises:
+       TimeoutError: If error callback are not generated.
    """
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -230,15 +287,13 @@ def check_log_format_value_invalid(conf):
     if conf['log_format'] not in log_format_not_print_analyzing_info:
         with open(location, "r") as f:
             line = f.readline()
-            if conf['log_format'] == 'json':
-                log_callback = gc.callback_invalid_format_value(line, conf['log_format'], location, prefix)
-            elif conf['log_format'] == 'audit':
+            if conf['log_format'] == 'json' or conf['log_format'] == 'djb-multilog':
+                log_callback = logcollector.callback_invalid_format_value(line, conf['log_format'], location, prefix)
+            elif conf['log_format'] == 'audit' or conf['log_format'] == 'nmapg':
                 severity = 'ERROR'
-                log_callback = gc.callback_invalid_format_value(line, conf['log_format'], location, prefix, severity)
+                log_callback = logcollector.callback_invalid_format_value(line, conf['log_format'], location, prefix, severity)
 
-            wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
-
-    #NEED TO ADD OTHER CASES
+            wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR)
 
 
 def test_log_format(get_configuration, configure_environment):
@@ -257,11 +312,24 @@ def test_log_format(get_configuration, configure_environment):
     truncate_file(LOG_FILE_PATH)
 
     if conf['valid_value']:
-        create_file(location)
-        control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-        check_log_format_valid(conf)
-        modify_file(location, conf['valid_value'])
-        check_log_format_value_valid(conf)
+        if conf['log_format'] == 'djb-multilog':
+            location_multilog = '/var/log/current'
+            create_file(location_multilog)
+            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+            check_log_format_valid(conf)
+            modify_file(location_multilog, conf['log_format'], conf['valid_value'])
+            check_log_format_value_valid(conf)
+            remove_file(location_multilog)
+        elif sys.platform == 'win32':
+            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+            check_log_format_valid(conf)
+        else:
+            create_file(location)
+            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+            check_log_format_valid(conf)
+            modify_file(location, conf['log_format'], conf['valid_value'])
+            check_log_format_value_valid(conf)
+            remove_file(location)
 
     else:
         if sys.platform == 'win32':
@@ -270,11 +338,18 @@ def test_log_format(get_configuration, configure_environment):
             expected_exception = sb.CalledProcessError
 
         with pytest.raises(expected_exception):
-            create_file(location)
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-            check_log_format_valid(conf)
-            modify_file(location, conf['valid_value'])
-            check_log_format_value_invalid(conf)
-
-
-#   remove_file(location)
+            if conf['log_format'] == 'djb-multilog':
+                location_multilog = '/var/log/current'
+                create_file(location_multilog)
+                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+                check_log_format_valid(conf)
+                modify_file(location_multilog, conf['log_format'], conf['valid_value'])
+                check_log_format_value_invalid(conf)
+                remove_file(location_multilog)
+            else:
+                create_file(location)
+                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+                check_log_format_valid(conf)
+                modify_file(location, conf['log_format'], conf['valid_value'])
+                check_log_format_value_invalid(conf)
+                remove_file(location)
