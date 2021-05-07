@@ -187,3 +187,33 @@ def callback_reading_syslog_message(message, prefix=monitoring.LOG_COLLECTOR_DET
 def callback_read_line_from_file(n_lines, filename, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
     msg = fr"DEBUG: Read {n_lines} lines from {filename}"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+def callback_read_lines(command, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, escape=False):
+    """Create a callback to detect "DEBUG: Read <number> lines from command <command>" debug line.
+
+    Args:
+        command (str): Command to be monitored.
+        prefix (str): Daemon that generates the log.
+        escape (bool): Flag to escape special characters in the pattern.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"lines from command '{command}'"
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=escape)
+
+
+def callback_running_command(log_format, command, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, escape=False):
+    """Create a callback to detect "DEBUG: Running <log_format> '<command>'" debug line.
+
+    Args:
+        log_format (str): Log format of the command monitoring (full_command or command).
+        command (str): Command to be monitored.
+        prefix (str): Daemon that generates the log.
+        escape (bool): Flag to escape special characters in the pattern.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    log_format_message = 'full command' if log_format == 'full_command' else 'command'
+    msg = fr"DEBUG: Running {log_format_message} '{command}'"
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=escape)

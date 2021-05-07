@@ -378,6 +378,7 @@ nav:
             - Test sync interval: tests/integration/test_fim/test_synchronization/test_sync_interval.md
             - Test synchronize integrity scan: tests/integration/test_fim/test_synchronization/test_synchronize_integrity_scan.md
             - Test synchronize integrity win32: tests/integration/test_fim/test_synchronization/test_synchronize_integrity_win32.md
+            - Test registry responses win32: tests/integration/test_fim/test_synchronization/test_registry_responses_win32.md
         - gCloud:
           - tests/integration/test_gcloud/index.md
           - Test configuration:
@@ -449,6 +450,10 @@ nav:
                 - tests/integration/test_logcollector/test_age/index.md
                 - Test age basic: tests/integration/test_logcollector/test_age/test_age_basic.md
                 - Test age changed datetime: tests/integration/test_logcollector/test_age/test_age_changed_datetime.md
+            - Test command monitoring:
+                - Overview: tests/integration/test_logcollector/test_command_monitoring/index.md
+                - Test command execution: tests/integration/test_logcollector/test_command_monitoring/test_command_execution.md
+                - Test command execution freq: tests/integration/test_logcollector/test_command_monitoring/test_command_execution_freq.md
         - Logtest:
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md
