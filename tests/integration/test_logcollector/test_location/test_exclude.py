@@ -9,12 +9,14 @@ from shutil import rmtree
 
 import pytest
 from wazuh_testing import logcollector
+from wazuh_testing.logcollector import LOG_COLLECTOR_GLOBAL_TIMEOUT
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 
 # Marks
+
 pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
@@ -187,6 +189,6 @@ def test_exclude(get_local_internal_options, configure_local_internal_options, c
         match = fnmatch.fnmatch(file_location, excluded)
         if match:
             log_callback = logcollector.callback_excluded_file(file_location, prefix=prefix)
-            wazuh_log_monitor.start(timeout=60, callback=log_callback, error_message=f"The expected 'File excluded: "
+            wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback, error_message=f"The expected 'File excluded: "
                                                                                      f"'{file_location}' message has "
                                                                                      f"not been produced")

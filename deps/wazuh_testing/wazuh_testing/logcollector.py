@@ -6,7 +6,7 @@ GENERIC_CALLBACK_ERROR_ANALYZING_FILE = 'The expected analyzing file log has not
 GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL = "The expected analyzing eventchannel log has not been produced"
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET = "The expected target socket log has not been produced"
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND = "The expected target socket not found error has not been produced"
-
+LOG_COLLECTOR_GLOBAL_TIMEOUT = 20
 
 def callback_analyzing_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
     """Create a callback to detect if logcollector is monitoring a file.
