@@ -21,6 +21,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 
 folder_path = os.path.join(tempfile.gettempdir(), 'wazuh_testing_age')
+folder_path_regex = os.path.join(folder_path, '*')
 
 local_internal_options = {'logcollector.vcheck_files': 0}
 
@@ -64,18 +65,18 @@ file_structure = [
 ]
 
 parameters = [
-    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '4000s'},
-    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '5m'},
-    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '500m'},
-    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '9h'},
-    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '200d'},
+    {'LOCATION': folder_path_regex, 'LOG_FORMAT': 'syslog', 'AGE': '4000s'},
+    {'LOCATION': folder_path_regex, 'LOG_FORMAT': 'syslog', 'AGE': '5m'},
+    {'LOCATION': folder_path_regex, 'LOG_FORMAT': 'syslog', 'AGE': '500m'},
+    {'LOCATION': folder_path_regex, 'LOG_FORMAT': 'syslog', 'AGE': '9h'},
+    {'LOCATION': folder_path_regex, 'LOG_FORMAT': 'syslog', 'AGE': '200d'},
 ]
 metadata = [
-    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '4000s'},
-    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '5m'},
-    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '500m'},
-    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '9h'},
-    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '200d'},
+    {'location': folder_path_regex, 'log_format': 'syslog', 'age': '4000s'},
+    {'location': folder_path_regex, 'log_format': 'syslog', 'age': '5m'},
+    {'location': folder_path_regex, 'log_format': 'syslog', 'age': '500m'},
+    {'location': folder_path_regex, 'log_format': 'syslog', 'age': '9h'},
+    {'location': folder_path_regex, 'log_format': 'syslog', 'age': '200d'},
 ]
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)

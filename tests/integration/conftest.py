@@ -430,18 +430,20 @@ def configure_local_internal_options(get_local_internal_options):
 def create_file_structure(get_files_list):
     """ Creates the directory structure specified for a test case"""
     for file in get_files_list:
+        absolute_file_path = os.path.join(file['folder_path'], file['filename'])
         os.makedirs(file['folder_path'], exist_ok=True, mode=0o777)
         os.path.join
-        open(f"{os.path.join(file['folder_path'],file['filename'])}", "w").close()
+        open(absolute_file_path, "w").close()
 
         if 'age' in file:
-            fileinfo = os.stat(f"{os.path.join(file['folder_path'],file['filename'])}")
-            os.utime(f"{os.path.join(file['folder_path'],file['filename'])}", (fileinfo.st_atime - file['age'],
+            fileinfo = os.stat(absolute_file_path)
+            os.utime(absolute_file_path, (fileinfo.st_atime - file['age'],
                                                                   fileinfo.st_mtime - file['age']))
     yield
 
     for file in get_files_list:
-        shutil.rmtree(f"{file['folder_path']}", ignore_errors=True)
+        absolute_file_path = os.path.join(file['folder_path'], file['filename'])
+        shutil.rmtree(absolute_file_path, ignore_errors=True)
 
 
 @pytest.fixture(scope='module')

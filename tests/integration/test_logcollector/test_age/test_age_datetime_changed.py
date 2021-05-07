@@ -16,7 +16,6 @@ from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.time import TimeMachine, time_to_timedelta, time_to_seconds
 import tempfile
 
-
 # Marks
 pytestmark = pytest.mark.tier(level=0)
 
@@ -28,7 +27,7 @@ DAEMON_NAME = "wazuh-logcollector"
 
 now_date = datetime.now()
 folder_path = os.path.join(tempfile.gettempdir(), 'wazuh_testing_age')
-
+folder_path_regex = os.path.join(folder_path, '*')
 
 if sys.platform == 'win32':
     prefix = AGENT_DETECTOR_PREFIX
@@ -43,18 +42,18 @@ file_structure = [
 ]
 
 parameters = [
-    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '4000s'},
-    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '5m'},
-    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '500m'},
-    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '9h'},
-    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '200d'},
+    {'LOCATION': folder_path_regex, 'LOG_FORMAT': 'syslog', 'AGE': '4000s'},
+    {'LOCATION': folder_path_regex, 'LOG_FORMAT': 'syslog', 'AGE': '5m'},
+    {'LOCATION': folder_path_regex, 'LOG_FORMAT': 'syslog', 'AGE': '500m'},
+    {'LOCATION': folder_path_regex, 'LOG_FORMAT': 'syslog', 'AGE': '9h'},
+    {'LOCATION': folder_path_regex, 'LOG_FORMAT': 'syslog', 'AGE': '200d'},
 ]
 metadata = [
-    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '4000s'},
-    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '5m'},
-    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '500m'},
-    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '9h'},
-    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '200d'},
+    {'location': folder_path_regex, 'log_format': 'syslog', 'age': '4000s'},
+    {'location': folder_path_regex, 'log_format': 'syslog', 'age': '5m'},
+    {'location': folder_path_regex, 'log_format': 'syslog', 'age': '500m'},
+    {'location': folder_path_regex, 'log_format': 'syslog', 'age': '9h'},
+    {'location': folder_path_regex, 'log_format': 'syslog', 'age': '200d'},
 ]
 
 new_host_datetime = ['60s', '-60s', '30m', '-30m', '2h', '-2h', '43d', '-43d']
