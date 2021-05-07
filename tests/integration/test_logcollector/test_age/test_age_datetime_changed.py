@@ -37,24 +37,24 @@ else:
 
 file_structure = [
     {
-        "folder_path": f"{folder_path}",
+        "folder_path": folder_path,
         "filename": "testing_age_dating.log",
     }
 ]
 
 parameters = [
-    {'LOCATION': f'{folder_path}*', 'LOG_FORMAT': 'syslog', 'AGE': '4000s'},
-    {'LOCATION': f'{folder_path}*', 'LOG_FORMAT': 'syslog', 'AGE': '5m'},
-    {'LOCATION': f'{folder_path}*', 'LOG_FORMAT': 'syslog', 'AGE': '500m'},
-    {'LOCATION': f'{folder_path}*', 'LOG_FORMAT': 'syslog', 'AGE': '9h'},
-    {'LOCATION': f'{folder_path}*', 'LOG_FORMAT': 'syslog', 'AGE': '200d'},
+    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '4000s'},
+    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '5m'},
+    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '500m'},
+    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '9h'},
+    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '200d'},
 ]
 metadata = [
-    {'location': f'{folder_path}*', 'log_format': 'syslog', 'age': '4000s'},
-    {'location': f'{folder_path}*', 'log_format': 'syslog', 'age': '5m'},
-    {'location': f'{folder_path}*', 'log_format': 'syslog', 'age': '500m'},
-    {'location': f'{folder_path}*', 'log_format': 'syslog', 'age': '9h'},
-    {'location': f'{folder_path}*', 'log_format': 'syslog', 'age': '200d'},
+    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '4000s'},
+    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '5m'},
+    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '500m'},
+    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '9h'},
+    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '200d'},
 ]
 
 new_host_datetime = ['60s', '-60s', '30m', '-30m', '2h', '-2h', '43d', '-43d']

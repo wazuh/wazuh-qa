@@ -32,31 +32,31 @@ else:
 
 file_structure = [
     {
-        "folder_path": f"{folder_path}",
+        "folder_path": folder_path,
         "filename": "testing_file_40s.log",
         "age": 40,
         'content': f'Content of testing_file_40s\n'
     },
     {
-        "folder_path": f"{folder_path}",
+        "folder_path": folder_path,
         "filename": "testing_file_5m.log",
         "age": 300,
         'content': f'Content of testing_file_5m\n'
     },
     {
-        "folder_path": f"{folder_path}",
+        "folder_path": folder_path,
         "filename": "testing_file_3h.log",
         "age": 10800,
         'content': f'Content of testing_file_3h\n'
     },
     {
-        "folder_path": f"{folder_path}",
+        "folder_path": folder_path,
         "filename": "testing_file_5d.log",
         "age": 432000,
         'content': f'Content of testing_file_5d\n'
     },
     {
-        "folder_path": f"{folder_path}",
+        "folder_path": folder_path,
         "filename": "testing_file_300d.log",
         "age": 25920000,
         'content': f'Content of testing_file_300d\n'
@@ -64,18 +64,18 @@ file_structure = [
 ]
 
 parameters = [
-    {'LOCATION': f'{folder_path}*', 'LOG_FORMAT': 'syslog', 'AGE': '4000s'},
-    {'LOCATION': f'{folder_path}*', 'LOG_FORMAT': 'syslog', 'AGE': '5m'},
-    {'LOCATION': f'{folder_path}*', 'LOG_FORMAT': 'syslog', 'AGE': '500m'},
-    {'LOCATION': f'{folder_path}*', 'LOG_FORMAT': 'syslog', 'AGE': '9h'},
-    {'LOCATION': f'{folder_path}*', 'LOG_FORMAT': 'syslog', 'AGE': '200d'},
+    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '4000s'},
+    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '5m'},
+    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '500m'},
+    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '9h'},
+    {'LOCATION': f'{folder_path}/*', 'LOG_FORMAT': 'syslog', 'AGE': '200d'},
 ]
 metadata = [
-    {'location': f'{folder_path}*', 'log_format': 'syslog', 'age': '4000s'},
-    {'location': f'{folder_path}*', 'log_format': 'syslog', 'age': '5m'},
-    {'location': f'{folder_path}*', 'log_format': 'syslog', 'age': '500m'},
-    {'location': f'{folder_path}*', 'log_format': 'syslog', 'age': '9h'},
-    {'location': f'{folder_path}*', 'log_format': 'syslog', 'age': '200d'},
+    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '4000s'},
+    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '5m'},
+    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '500m'},
+    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '9h'},
+    {'location': f'{folder_path}/*', 'log_format': 'syslog', 'age': '200d'},
 ]
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
