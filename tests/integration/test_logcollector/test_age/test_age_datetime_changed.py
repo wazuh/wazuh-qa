@@ -27,15 +27,13 @@ configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 DAEMON_NAME = "wazuh-logcollector"
 
 now_date = datetime.now()
-folder_path = tempfile.gettempdir()
+folder_path = os.join.path(tempfile.gettempdir(), 'wazuh_testing_age')
 
 
 if sys.platform == 'win32':
     prefix = AGENT_DETECTOR_PREFIX
-    folder_path = folder_path + '\\' + 'wazuh_testing_age' + '\\'
 else:
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
-    folder_path = folder_path + '/' + 'wazuh_testing_age' + '/'
 
 file_structure = [
     {
