@@ -81,7 +81,7 @@ def test_reconnect_time(get_local_internal_options, configure_local_internal_opt
     config = get_configuration['metadata']
 
     if config['reconnect_time'] != default_value:
-        pytest.xfail("Expected fail: ")
+        pytest.xfail("Expected fail: https://github.com/wazuh/wazuh/issues/8580 ")
 
     log_callback = logcollector.callback_eventchannel_analyzing(config['location'])
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=log_callback,
