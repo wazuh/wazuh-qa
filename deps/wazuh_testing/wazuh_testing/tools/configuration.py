@@ -591,7 +591,11 @@ def local_internal_options_to_dict(local_internal_options):
     Args:
         local_internal_options (List of str): A list containing local internal options.
     """
+    dict_local_internal_options= {}
     no_comments_options = [line.strip() for line in local_internal_options
                            if not (line.startswith('#') or line == '\n')]
-    dict_local_internal_options = dict(line.split('=') for line in no_comments_options)
+    for line in no_comments_options:
+        key, value = line.split('=')
+        dict_local_internal_options[key.rstrip("\n")] = value
+
     return dict_local_internal_options

@@ -10,8 +10,12 @@ logs and send them to the manager.
 #### Test configuration
 
 For each configuration option, we check if `logcollector` and `agentd` correctly
-starts and that any API request to the Manager configuration returns the same options that the specified 
-in configuration file.
+starts and that any API request to the Manager configuration returns the same options that the specified configuration file.
+
+#### Test age
+
+Ensure age option work as expected, ignoring files that have not been  modified for a time greater than age 
+value using current date, even if datetime of the system changed while logcollector is running.
 
 #### Test command monitoring
 
