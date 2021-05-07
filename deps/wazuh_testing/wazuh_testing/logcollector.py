@@ -21,6 +21,23 @@ def callback_analyzing_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFI
     msg = fr"Analyzing file: '{file}'."
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
+def callback_reading_file(log_format, content_file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+    """Create a callback to detect if logcollector is monitoring a file.
+
+    Args:
+        content_file (str): Content file analyzed.
+        prefix (str): Daemon that generates the error log.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    if log_format == 'json':
+        msg = fr"Reading json message: '{content_file}'."
+    elif log_format == 'syslog' or log_format == 'snort-full' or log_format == 'squid':
+        msg = fr"Reading syslog message: '{content_file}'."
+
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
 
 def callback_monitoring_command(log_format, command, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
     """Create a callback to detect if logcollector is monitoring a command.
