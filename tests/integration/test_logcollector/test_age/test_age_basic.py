@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
 import sys
+import tempfile
 
 import pytest
 import wazuh_testing.logcollector as logcollector
@@ -10,8 +11,7 @@ from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
-from wazuh_testing.tools.time import time_to_seconds
-import tempfile
+from wazuh_testing.tools.time import time_to_seconds, time
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -113,6 +113,8 @@ def test_configuration_age_basic(get_local_internal_options, configure_local_int
     Raises:
         TimeoutError: If the expected callbacks are not generated.
     """
+    time.sleep(1)
+
     cfg = get_configuration['metadata']
     age_seconds = time_to_seconds(cfg['age'])
 
