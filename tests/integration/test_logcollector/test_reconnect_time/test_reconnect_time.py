@@ -28,7 +28,8 @@ local_internal_options = {
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_reconnect_time.yaml')
 
-default_value = '5s'
+timeout_callback_reconnect_time = 30
+
 parameters = [
     {'LOCATION': 'Application', 'LOG_FORMAT': 'eventchannel', 'RECONNECT_TIME': '5s'},
     {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'RECONNECT_TIME': '5s'},
@@ -80,8 +81,8 @@ def test_reconnect_time(get_local_internal_options, configure_local_internal_opt
 
     config = get_configuration['metadata']
 
-    if config['reconnect_time'] != default_value:
-        pytest.xfail("Expected fail: https://github.com/wazuh/wazuh/issues/8580 ")
+    if time_to_seconds(config['reconnect_time']) >=  timeout_callback_reconnect_time:
+        pytest.xfail("Expected fail: ")
 
     log_callback = logcollector.callback_eventchannel_analyzing(config['location'])
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=log_callback,
@@ -100,16 +101,21 @@ def test_reconnect_time(get_local_internal_options, configure_local_internal_opt
 
     services.control_event_log_service('start')
 
-    before = str(datetime.now())
-    seconds_to_travel = time_to_seconds(config['reconnect_time']) / 2
-    TimeMachine.travel_to_future(timedelta(seconds=seconds_to_travel))
-    logger.debug(f"Changing the system clock from {before} to {datetime.now()}")
+    time.sleep(1)
+
+    if time_to_seconds(config['reconnect_time']) >=  timeout_callback_reconnect_time:
+        before = str(datetime.now())
+        seconds_to_travel = time_to_seconds(config['reconnect_time']) / 2
+        TimeMachine.travel_to_future(timedelta(seconds=seconds_to_travel))
+        logger.debug(f"Changing the system clock from {before} to {datetime.now()}")
 
     log_callback = logcollector.callback_reconnect_eventchannel(config['location'])
 
     before = str(datetime.now())
-    TimeMachine.travel_to_future(timedelta(seconds=(seconds_to_travel)))
-    logger.debug(f"Changing the system clock from {before} to {datetime.now()}")
+
+    if time_to_seconds(config['reconnect_time']) >=  timeout_callback_reconnect_time:
+        TimeMachine.travel_to_future(timedelta(seconds=(seconds_to_travel)))
+        logger.debug(f"Changing the system clock from {before} to {datetime.now()}")
 
     wazuh_log_monitor.start(timeout=30, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
