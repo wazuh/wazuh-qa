@@ -27,7 +27,7 @@ def callback_analyzing_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFI
         msg = fr"Analyzing file: '{file}'."
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
-def callback_reading_file(log_format, content_file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_reading_file(log_format, content_file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, severity='DEBUG'):
     """
     Create a callback to detect if the logcollector could read a file with valid content successfully.
 
@@ -40,15 +40,15 @@ def callback_reading_file(log_format, content_file, prefix=monitoring.LOG_COLLEC
         callable: callback to detect this event.
     """
     if log_format == 'json':
-        msg = fr"Reading json message: '{content_file}'."
+        msg = fr"{severity}: Reading json message: '{content_file}'"
     elif log_format == 'syslog' or log_format == 'snort-full' or log_format == 'squid':
-        msg = fr"Reading syslog message: '{content_file}'."
+        msg = fr"{severity}: Reading syslog message: '{content_file}'"
     elif log_format == 'djb-multilog':
-        msg = fr"Reading DJB multilog message: '{content_file}'"
+        msg = fr"{severity}: Reading DJB multilog message: '{content_file}'"
     elif log_format == 'multi-line:3':
-        msg = fr"Reading message: '{content_file}'"
+        msg = fr"{severity}: Reading message: '{content_file}'"
 
-    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+    return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 def callback_read_file(location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
     """
