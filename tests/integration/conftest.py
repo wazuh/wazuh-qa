@@ -381,7 +381,7 @@ def close_sockets(receiver_sockets):
     """Close the sockets connection gracefully."""
     for socket in receiver_sockets:
         try:
-            # We flush the buffer before closing connection if connection is TCPt_files_list:
+            # We flush the buffer before closing the connection if the protocol is TCP:
             if socket.protocol == 1:
                 socket.sock.settimeout(5)
                 socket.receive()  # Flush buffer before closing connection
@@ -428,17 +428,20 @@ def configure_local_internal_options(get_local_internal_options):
 
 @pytest.fixture(scope='function')
 def create_file_structure(get_files_list):
-    """ Creates the directory structure specified for a test case"""
+    """Creates the directory structure specified for a test case
+
+    Args:
+        get_file_list (Fixture): Fixture that returns a dictionary with the file structure to be created
+    """
     for file in get_files_list:
         absolute_file_path = os.path.join(file['folder_path'], file['filename'])
         os.makedirs(file['folder_path'], exist_ok=True, mode=0o777)
-        os.path.join
         open(absolute_file_path, "w").close()
 
         if 'age' in file:
             fileinfo = os.stat(absolute_file_path)
             os.utime(absolute_file_path, (fileinfo.st_atime - file['age'],
-                                                                  fileinfo.st_mtime - file['age']))
+                                          fileinfo.st_mtime - file['age']))
     yield
 
     for file in get_files_list:

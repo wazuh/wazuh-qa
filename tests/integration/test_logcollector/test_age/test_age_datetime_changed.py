@@ -2,7 +2,6 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
-import sys
 import time
 from datetime import datetime
 
@@ -11,7 +10,7 @@ import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor, LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
+from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.time import TimeMachine, time_to_timedelta, time_to_seconds
 import tempfile
@@ -28,11 +27,6 @@ DAEMON_NAME = "wazuh-logcollector"
 now_date = datetime.now()
 folder_path = os.path.join(tempfile.gettempdir(), 'wazuh_testing_age')
 folder_path_regex = os.path.join(folder_path, '*')
-
-if sys.platform == 'win32':
-    prefix = AGENT_DETECTOR_PREFIX
-else:
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 file_structure = [
     {
@@ -100,7 +94,7 @@ def test_configuration_age_datetime(new_datetime, get_files_list, get_configurat
     for file in file_structure:
         absolute_file_path = os.path.join(file['folder_path'], file['filename'])
 
-        log_callback = logcollector.callback_file_matches_pattern(cfg['location'], absolute_file_path, prefix=prefix)
+        log_callback = logcollector.callback_match_pattern_file(cfg['location'], absolute_file_path)
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message=f'{file["filename"]} was not detected')
 
@@ -109,12 +103,12 @@ def test_configuration_age_datetime(new_datetime, get_files_list, get_configurat
         mfile_time = current_time - fileinfo.st_mtime
 
         if age_seconds <= int(mfile_time):
-            log_callback = logcollector.callback_ignoring_file(absolute_file_path, prefix=prefix)
+            log_callback = logcollector.callback_ignoring_file(absolute_file_path)
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                     error_message=f'{file["filename"]} was not ignored')
         else:
             with pytest.raises(TimeoutError):
-                log_callback = logcollector.callback_ignoring_file(absolute_file_path, prefix=prefix)
+                log_callback = logcollector.callback_ignoring_file(absolute_file_path)
                 wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                         error_message=f'{file["filename"]} was not ignored')
 

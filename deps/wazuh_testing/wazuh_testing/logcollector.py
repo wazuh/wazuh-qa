@@ -166,7 +166,6 @@ def callback_invalid_location_pattern(location):
 
     Args:
         location (str): Location pattern
-        prefix (str): Daemon that generates the error log.
 
     Returns:
         callable: callback to detect this event.
@@ -175,22 +174,33 @@ def callback_invalid_location_pattern(location):
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
-def callback_ignoring_file(location_file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_ignoring_file(location_file):
+    """Create a callback to detect if specified file was ignored due to modification time
+
+    Args:
+        location_file: File absolute path.
+    """
     msg = fr"DEBUG: Ignoring file '{location_file}' due to modification time"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
-def callback_file_matches_pattern(location_pattern, location_file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
-    msg = fr"New file that matches the '{location_pattern}' pattern: '{location_file}'."
-    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+def callback_reading_syslog_message(message):
+    """Create a callback to detect if syslog message has been readed.
 
-
-def callback_reading_syslog_message(message, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+    Args:
+        message (str): Syslog message.
+    """
     msg = fr"DEBUG: Reading syslog message: '{message}'"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
-def callback_read_line_from_file(n_lines, filename, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_read_line_from_file(n_lines, filename):
+    """Create a callback to detect if specified lines number has been readed.
+
+    Args:
+        n_lines (str): Lines number.
+        filename (str): Filename from which lines have been read.
+    """
     msg = fr"DEBUG: Read {n_lines} lines from {filename}"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 

@@ -2,7 +2,6 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
-import sys
 import tempfile
 
 import pytest
@@ -10,7 +9,6 @@ import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 from wazuh_testing.tools.time import time_to_seconds, time
 
 # Marks
@@ -24,11 +22,6 @@ folder_path = os.path.join(tempfile.gettempdir(), 'wazuh_testing_age')
 folder_path_regex = os.path.join(folder_path, '*')
 
 local_internal_options = {'logcollector.vcheck_files': 0}
-
-if sys.platform == 'win32':
-    prefix = AGENT_DETECTOR_PREFIX
-else:
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 
 file_structure = [
@@ -121,31 +114,31 @@ def test_configuration_age_basic(get_local_internal_options, configure_local_int
         absolute_file_path = os.path.join(file['folder_path'], file['filename'])
         wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-        log_callback = logcollector.callback_file_matches_pattern(cfg['location'], absolute_file_path, prefix=prefix)
+        log_callback = logcollector.callback_match_pattern_file(cfg['location'], absolute_file_path)
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message=f'{file["filename"]} was not detected')
 
         if int(age_seconds) <= int(file['age']):
             log_callback = logcollector.callback_ignoring_file(
-                absolute_file_path, prefix=prefix)
+                absolute_file_path)
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                     error_message=f'{file["filename"]} was not ignored')
 
         else:
             with pytest.raises(TimeoutError):
-                log_callback = logcollector.callback_ignoring_file(absolute_file_path,
-                                                                   prefix=prefix)
+                log_callback = logcollector.callback_ignoring_file(absolute_file_path)
                 wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                         error_message=f'{file["filename"]} was not ignored')
 
     for file in file_structure:
+        absolute_file_path = os.path.join(file['folder_path'], file['filename'])
         with open(absolute_file_path, 'a') as file_to_write:
             file_to_write.write(file['content'])
 
-        log_callback = logcollector.callback_reading_syslog_message(file['content'][:-1], prefix=prefix)
+        log_callback = logcollector.callback_reading_syslog_message(file['content'][:-1])
         wazuh_log_monitor.start(timeout=10, callback=log_callback,
                                 error_message=f'No syslog message received from {file["filename"]}')
 
-        log_callback = logcollector.callback_read_line_from_file(1, absolute_file_path, prefix=prefix)
+        log_callback = logcollector.callback_read_line_from_file(1, absolute_file_path)
         wazuh_log_monitor.start(timeout=10, callback=log_callback,
                                 error_message=f'No lines read from {file["filename"]}')
