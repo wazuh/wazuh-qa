@@ -1,7 +1,6 @@
 import sys
 
 from wazuh_testing.tools import monitoring
-from wazuh_testing.tools.monitoring import AGENT_DETECTOR_PREFIX, LOG_COLLECTOR_DETECTOR_PREFIX
 
 GENERIC_CALLBACK_ERROR_COMMAND_MONITORING = 'The expected command monitoring log has not been produced'
 GENERIC_CALLBACK_ERROR_INVALID_LOCATION = 'The expected invalid location error log has not been produced'
@@ -12,9 +11,9 @@ GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND = "The expected target socket not
 LOG_COLLECTOR_GLOBAL_TIMEOUT = 20
 
 if sys.platform == 'win32':
-    prefix = AGENT_DETECTOR_PREFIX
+    prefix = monitoring.AGENT_DETECTOR_PREFIX
 else:
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
+    prefix = monitoring.LOG_COLLECTOR_DETECTOR_PREFIX
 
 def callback_analyzing_file(file):
     """Create a callback to detect if logcollector is monitoring a file.
@@ -211,9 +210,8 @@ def callback_running_command(log_format, command, escape=False):
 def callback_match_pattern_file(file_pattern, file):
     """Create a callback to detect if logcollector is monitoring a file with wildcard.
     Args:
-        file_pattern (str): Location pattern that the has to match.
+        file_pattern (str): Location pattern.
         file (str): Name with absolute path of the analyzed file.
-        prefix (str): Daemon that generates the error log.
     Returns:
         callable: callback to detect this event.
     """
@@ -225,7 +223,6 @@ def callback_non_existent_file(file):
     """Create a callback to detect if logcollector is showing an error when the file does not exist.
     Args:
         file (str): Name with absolute path of the analyzed file.
-        prefix (str): Daemon that generates the error log.
     Returns:
         callable: callback to detect this event.
     """
@@ -234,10 +231,9 @@ def callback_non_existent_file(file):
 
 
 def callback_duplicated_file(file):
-    """Create a callback to detect if logcollector configuration in ossec.conf is duplicated.
+    """Create a callback to detect if logcollector configuration is duplicated.
     Args:
         file (str): Name with absolute path of the analyzed file.
-        prefix (str): Daemon that generates the error log.
     Returns:
         callable: callback to detect this event.
     """
@@ -247,13 +243,10 @@ def callback_duplicated_file(file):
 
 def callback_file_limit():
     """Create a callback to detect if logcollector is monitoring a file.
-    Args:
-        file (str): Name with absolute path of the analyzed file.
-        prefix (str): Daemon that generates the error log.
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"File limit has been reached "
+    msg = f'File limit has been reached'
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
@@ -261,7 +254,6 @@ def callback_excluded_file(file):
     """Create a callback to detect if logcollector is excluding files.
     Args:
         file (str): Name with absolute path of the analyzed file.
-        prefix (str): Daemon that generates the error log.
     Returns:
         callable: callback to detect this event.
     """
