@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from time import sleep
 
 import pytest
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
+from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, file
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
@@ -180,7 +180,8 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_a
     control_service('stop')
     # Clean logs
     truncate_file(LOG_FILE_PATH)
-    # Start target Agent
+    file.remove_file("/var/ossec/etc/client.keys")
+    # Start whole Agent service to check other daemons status after initialization
     control_service('start')
 
     # Start hearing logs
@@ -238,7 +239,8 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, star
     control_service('stop')
     # Clean logs
     truncate_file(LOG_FILE_PATH)
-    # Start target Agent
+    file.remove_file("/var/ossec/etc/client.keys")
+    # Start whole Agent service to check other daemons status after initialization
     control_service('start')
 
     # start hearing logs
@@ -299,7 +301,8 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, start_aut
     control_service('stop')
     # Clean logs
     truncate_file(LOG_FILE_PATH)
-    # Start target Agent
+    file.remove_file("/var/ossec/etc/client.keys")
+    # Start whole Agent service to check other daemons status after initialization
     control_service('start')
 
     # start hearing logs
@@ -360,6 +363,7 @@ def test_agentd_initial_enrollment_retries(configure_authd_server, stop_authd, s
     control_service('stop')
     # Clean logs
     truncate_file(LOG_FILE_PATH)
+    file.remove_file("/var/ossec/etc/client.keys")
     # Start whole Agent service to check other daemons status after initialization
     control_service('start')
 
@@ -420,26 +424,34 @@ def test_agentd_connection_retries_pre_enrollment(configure_authd_server, stop_a
     # Start Remoted mock
     remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], client_keys=CLIENT_KEYS_PATH)
 
+    # Stop target Agent
+    control_service('stop')
     # Clean logs
     truncate_file(LOG_FILE_PATH)
-
-    # Start target Agentd
-    control_service('restart')
+    # Start whole Agent service to check other daemons status after initialization
+    control_service('start')
 
     # Start hearing logs
     log_monitor = FileMonitor(LOG_FILE_PATH)
 
+    retries = 3
+
+    while retries > 0:
+        retries -=1
+        try:
+            log_monitor.start(timeout=15, callback=wait_notify)
+        except TimeoutError:
+            pass
+
     # Simulate time of Remoted to synchronize keys by waiting previous to start responding
-    sleep(REMOTED_KEYS_SYNC_TIME)
     remoted_server.set_mode('CONTROLLED_ACK')
+    sleep(REMOTED_KEYS_SYNC_TIME)
 
-    # Check Agentd is finally comunicating
-    try:
-        log_monitor.start(timeout=120, callback=wait_notify)
-    except TimeoutError as err:
-        raise AssertionError("Notify message from agent was never sent!")
+    # Stop target Agent
+    control_service('stop')
+    # Clean logs
+    truncate_file(LOG_FILE_PATH)
+    # Start whole Agent service to check other daemons status after initialization
+    control_service('start')
 
-    log_errors = search_error_messages()
-    assert log_errors == None, "Error found in logs: " + log_errors
-
-    return
+    log_monitor.start(timeout=120, callback=wait_notify, error_message='Notify message from agent was never sent!')
