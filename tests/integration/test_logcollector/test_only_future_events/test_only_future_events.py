@@ -63,7 +63,8 @@ def generate_log_file():
     """Generate a log of size greater than 10 MiB for testing."""
     global current_line
     file.write_file(log_test_path, '')
-    current_line = logcollector.add_log_data_line_num(log_test_path, metadata[0]['log_line'], size_kib=10240)
+    current_line = logcollector.add_log_data(log_path=log_test_path, log_line_message=metadata[0]['log_line'],
+                                             size_kib=10240, print_line_num=True)
     yield
     file.remove_file(log_test_path)
 
@@ -96,10 +97,8 @@ def test_only_future_events(get_local_internal_options, configure_local_internal
                             callback=callback_message)
 
     # Add one KiB of data to log
-    current_line = logcollector.add_log_data_line_num(log_path=config['location'],
-                                                      log_line_message=config['log_line'],
-                                                      size_kib=1,
-                                                      line_start=current_line + 1)
+    current_line = logcollector.add_log_data(log_path=config['location'], log_line_message=config['log_line'],
+                                             size_kib=1, line_start=current_line + 1, print_line_num=True)
 
     message = f"DEBUG: Reading syslog message: '{config['log_line']}{current_line}'"
     callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX, escape=True)
@@ -111,10 +110,8 @@ def test_only_future_events(get_local_internal_options, configure_local_internal
 
     # Add another KiB of data to log while logcollector is stopped
     first_line = current_line + 1
-    current_line = logcollector.add_log_data_line_num(log_path=config['location'],
-                                                      log_line_message=config['log_line'],
-                                                      size_kib=1,
-                                                      line_start=first_line)
+    current_line = logcollector.add_log_data(log_path=config['location'], log_line_message=config['log_line'],
+                                             size_kib=1, line_start=first_line, print_line_num=True)
 
     control_service('start', daemon=DAEMON_NAME)
 
@@ -151,10 +148,8 @@ def test_only_future_events(get_local_internal_options, configure_local_internal
                                     callback=callback_message)
 
     # Add another KiB of data to log (additional check)
-    current_line = logcollector.add_log_data_line_num(log_path=config['location'],
-                                                      log_line_message=config['log_line'],
-                                                      size_kib=1,
-                                                      line_start=current_line + 1)
+    current_line = logcollector.add_log_data(log_path=config['location'], log_line_message=config['log_line'],
+                                             size_kib=1, line_start=current_line + 1, print_line_num=True)
 
     message = f"DEBUG: Reading syslog message: '{config['log_line']}{current_line}'"
     callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX, escape=True)

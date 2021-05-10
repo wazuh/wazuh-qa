@@ -62,7 +62,7 @@ def generate_log_file():
     """Generate a log file of approximately 10 mebibytes for testing."""
     message_line = f"{metadata[0]['log_line_before']}{metadata[0]['mode']}"
     file.write_file(log_test_path, '')
-    logcollector.add_log_data(log_test_path, message_line, 10)
+    logcollector.add_log_data(log_path=log_test_path, log_line_message=message_line, size_kib=10240)
     yield
     file.remove_file(log_test_path)
 
@@ -92,7 +92,9 @@ def test_keep_running(get_local_internal_options, configure_local_internal_optio
                             callback=callback_message)
 
     # Add another MiB of data to log
-    logcollector.add_log_data(config['location'], f"{config['log_line_before']}{config['mode']}", 1)
+    logcollector.add_log_data(log_path=config['location'],
+                              log_line_message=f"{config['log_line_before']}{config['mode']}",
+                              size_kib=1024)
 
     message = f"DEBUG: Reading syslog message: '{config['log_line_before']}{config['mode']}'"
     callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
@@ -119,7 +121,9 @@ def test_keep_running(get_local_internal_options, configure_local_internal_optio
                                 callback=callback_message)
 
     # Add a MiB of data to rotated/truncated log
-    logcollector.add_log_data(config['location'], f"{config['log_line_after']}{config['mode']}", 1)
+    logcollector.add_log_data(log_path=config['location'],
+                              log_line_message=f"{config['log_line_after']}{config['mode']}",
+                              size_kib=1024)
 
     message = f"DEBUG: Reading syslog message: '{config['log_line_after']}{config['mode']}'"
     callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
