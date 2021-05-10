@@ -175,31 +175,40 @@ def callback_invalid_location_pattern(location):
 
 
 def callback_ignoring_file(location_file):
-    """Create a callback to detect if specified file was ignored due to modification time
+    """Create a callback to detect if specified file was ignored due to modification time.
 
     Args:
         location_file: File absolute path.
+
+    Returns:
+        callable: callback to detect this event.
     """
     msg = fr"DEBUG: Ignoring file '{location_file}' due to modification time"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
 def callback_reading_syslog_message(message):
-    """Create a callback to detect if syslog message has been readed.
+    """Create a callback to detect if syslog message has been read.
 
     Args:
         message (str): Syslog message.
+
+    Returns:
+        callable: callback to detect this event.
     """
     msg = fr"DEBUG: Reading syslog message: '{message}'"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
 def callback_read_line_from_file(n_lines, filename):
-    """Create a callback to detect if specified lines number has been readed.
+    """Create a callback to detect if specified lines number has been read.
 
     Args:
-        n_lines (str): Lines number.
+        n_lines (str): Number of lines read.
         filename (str): Filename from which lines have been read.
+
+    Returns:
+        callable: callback to detect this event.
     """
     msg = fr"DEBUG: Read {n_lines} lines from {filename}"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
