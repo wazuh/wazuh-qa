@@ -41,9 +41,9 @@ else:
 parameters = [
     {'LOCATION': f'{location}', 'LOG_FORMAT': 'json'},
     {'LOCATION': f'{location}', 'LOG_FORMAT': 'json'},
-#    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog'},
-#    {'LOCATION': f'{location}', 'LOG_FORMAT': 'snort-full'},
-#    {'LOCATION': f'{location}', 'LOG_FORMAT': 'squid'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'snort-full'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'squid'},
 #    {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit'},
 #    {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit'},
 #    {'LOCATION': f'{location}', 'LOG_FORMAT': 'mysql_log'},
@@ -58,9 +58,9 @@ parameters = [
 metadata = [
     {'location': f'{location}', 'log_format': 'json', 'valid_value': True},
     {'location': f'{location}', 'log_format': 'json', 'valid_value': False},
-#    {'location': f'{location}', 'log_format': 'syslog', 'valid_value': True},
-#    {'location': f'{location}', 'log_format': 'snort-full', 'valid_value': True},
-#    {'location': f'{location}', 'log_format': 'squid', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'syslog', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'snort-full', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'squid', 'valid_value': True},
 #    {'location': f'{location}', 'log_format': 'audit', 'valid_value': False},
 #    {'location': f'{location}', 'log_format': 'audit', 'valid_value': True},
 #    {'location': f'{location}', 'log_format': 'mysql_log', 'valid_value': True},
@@ -123,14 +123,14 @@ def modify_syslog_file(file):
 
 def modify_snort_file(file):
     """Create a snort content with an specific values"""
-    data = '10/12-21:29:35.911089 [**] [1:0:0] TEST [**] [Priority: 0] {ICMP} 192.168.1.99 – > 192.168.1.103\n'
+    data = '10/12-21:29:35.911089 {ICMP} 192.168.1.99 – > 192.168.1.103\n'
 
     with open(file, 'a') as f:
         f.write(data)
 
 def modify_squid_file(file):
     """Create a squid content with an specific values"""
-    data = '902351618.864 440 120.65.1.1 TCP_MISS/304 110 GET http://www.webtrends.com:8005/Images/search.gif - DIRECT/www.webtrends.com -'
+    data = '902618.84 440 120.65.1.1 TCP/304 80 GET http://www.web.com:8005\n'
     with open(file, 'a') as f:
         f.write(data)
 
@@ -265,7 +265,7 @@ def check_log_format_value_valid(conf):
 
                 # Strips the newline character
                 for line in lines:
-                    log_callback = logcollector.callback_reading_file(conf['log_format'], line.strip(), prefix=prefix)
+                    log_callback = logcollector.callback_reading_file(conf['log_format'], line.rstrip('\n'), prefix=prefix)
                     wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
 
 
@@ -285,8 +285,8 @@ def check_log_format_value_invalid(conf):
             if conf['log_format'] == 'json' or conf['log_format'] == 'djb-multilog':
                 log_callback = logcollector.callback_invalid_format_value(line.rstrip('\n'), conf['log_format'], location, prefix)
             elif conf['log_format'] == 'audit' or conf['log_format'] == 'nmapg':
-                severity = 'ERROR'
-                log_callback = logcollector.callback_invalid_format_value(line, conf['log_format'], location, prefix, severity)
+            #    severity = 'ERROR'
+                log_callback = logcollector.callback_invalid_format_value(line, conf['log_format'], location, prefix)
 
             wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR)
 
