@@ -21,8 +21,8 @@ Then, system time is changed using `reconnect_time` value. After that, Wazuh sho
 
 ## Expected behavior
 
-- Fail if Wazuh agent does not reconnect to Windows event log at the time specified by `reconnect_time `
-- Fail if Wazuh agent does not generate a debug message when Windows event log is down
+- Fail if Wazuh agent does not reconnect to Windows event log at the time specified by `reconnect_time`.
+- Fail if Wazuh agent does not generate a debug message when the Windows event log is down.
 
 ## Code documentation
 

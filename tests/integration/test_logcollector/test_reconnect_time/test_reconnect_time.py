@@ -13,10 +13,7 @@ import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.time import time_to_seconds
 import wazuh_testing.tools.services as services
 
-if sys.platform != 'win32':
-    pytestmark = [pytest.mark.skip, pytest.mark.tier(level=0)]
-else:
-    pytestmark = pytest.mark.tier(level=0)
+pytestmark = [pytest.mark.win32, pytest.mark.tier(level=0)]
 
 local_internal_options = {
     'logcollector.remote_commands': 1,
@@ -81,8 +78,8 @@ def test_reconnect_time(get_local_internal_options, configure_local_internal_opt
 
     config = get_configuration['metadata']
 
-    if time_to_seconds(config['reconnect_time']) >=  timeout_callback_reconnect_time:
-        pytest.xfail("Expected fail: ")
+    if time_to_seconds(config['reconnect_time']) >= timeout_callback_reconnect_time:
+        pytest.xfail("Expected fail: https://github.com/wazuh/wazuh/issues/8580")
 
     log_callback = logcollector.callback_eventchannel_analyzing(config['location'])
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=log_callback,
@@ -103,7 +100,7 @@ def test_reconnect_time(get_local_internal_options, configure_local_internal_opt
 
     time.sleep(1)
 
-    if time_to_seconds(config['reconnect_time']) >=  timeout_callback_reconnect_time:
+    if time_to_seconds(config['reconnect_time']) >= timeout_callback_reconnect_time:
         before = str(datetime.now())
         seconds_to_travel = time_to_seconds(config['reconnect_time']) / 2
         TimeMachine.travel_to_future(timedelta(seconds=seconds_to_travel))
@@ -113,7 +110,7 @@ def test_reconnect_time(get_local_internal_options, configure_local_internal_opt
 
     before = str(datetime.now())
 
-    if time_to_seconds(config['reconnect_time']) >=  timeout_callback_reconnect_time:
+    if time_to_seconds(config['reconnect_time']) >= timeout_callback_reconnect_time:
         TimeMachine.travel_to_future(timedelta(seconds=(seconds_to_travel)))
         logger.debug(f"Changing the system clock from {before} to {datetime.now()}")
 

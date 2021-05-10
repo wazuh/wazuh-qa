@@ -237,10 +237,13 @@ def check_if_process_is_running(process_name):
 
 
 def control_event_log_service(control):
-    """Control Windows event log service
+    """Control Windows event log service.
 
     Args:
-        control (str): Start or Stop
+        control (str): Start or Stop.
+
+    Raises:
+        ValueError: If the event log channel does not start/stop correctly.
     """
     for _ in range(10):
         control_sc = 'disabled' if control == 'stop' else 'auto'

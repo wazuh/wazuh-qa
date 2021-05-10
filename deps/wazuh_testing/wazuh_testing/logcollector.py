@@ -219,7 +219,6 @@ def callback_running_command(log_format, command, prefix=monitoring.LOG_COLLECTO
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=escape)
 
 
-
 def callback_event_log_service_down(location, severity='WARNING'):
     """Create a callback to detect "DEBUG: Running <log_format> '<command>'" debug line.
 
@@ -233,7 +232,6 @@ def callback_event_log_service_down(location, severity='WARNING'):
         callable: callback to detect this event.
     """
     log_format_message = f"{severity}: The eventlog service is down. Unable to collect logs from '{location}' channel."
-    print(f"{log_format_message}")
     return monitoring.make_callback(pattern=log_format_message, prefix=monitoring.AGENT_DETECTOR_PREFIX)
 
 def callback_trying_to_reconnect(location, reconnect_time):
@@ -249,11 +247,13 @@ def callback_trying_to_reconnect(location, reconnect_time):
         callable: callback to detect this event.
     """
     log_format_message = f"DEBUG: Trying to reconnect {location} channel in {reconnect_time} seconds."
-    print(f"{log_format_message}")
     return monitoring.make_callback(pattern=log_format_message, prefix=monitoring.AGENT_DETECTOR_PREFIX)
 
 def callback_reconnect_eventchannel(location):
-    """
+    """Create a callback to detect if specified channel has been reconnected successfully.
+
+    Args:
+        location (str): Location channel.
 
     """
     log_format_message = f"INFO: '{location}' channel has been reconnected succesfully."
