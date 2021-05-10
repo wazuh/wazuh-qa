@@ -107,7 +107,9 @@ def create_directory():
     os.makedirs(os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs'), exist_ok=True)
     os.makedirs(os.path.join(temp_dir, 'wazuh-testing', 'depth1', 'depth2'), exist_ok=True)
     os.makedirs(os.path.join(temp_dir, 'wazuh-testing', 'duplicated'), exist_ok=True)
+
     yield
+
     rmtree(os.path.join(temp_dir, 'wazuh-testing'), ignore_errors=True)
 
 
@@ -136,6 +138,7 @@ def create_files(request, get_configuration):
                     open(f'{file_location}{i}.txt', 'w').close()
             else:
                 open(file_location, 'w').close()
+                
     yield
 
     for file_location in files:

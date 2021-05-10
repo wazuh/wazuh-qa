@@ -138,7 +138,9 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 def create_directory():
     """Create expected directories."""
     os.makedirs(os.path.join(temp_dir, 'wazuh-testing'), exist_ok=True)
+
     yield
+
     rmtree(os.path.join(temp_dir, 'wazuh-testing'), ignore_errors=True)
 
 
@@ -161,6 +163,7 @@ def create_files(request, get_configuration):
 
     for file_location in files:
         open(file_location, 'w').close()
+
     yield
 
     for file_location in files:
