@@ -1,0 +1,22 @@
+{
+  "name": "wazuh-kibana-app-automation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx cypress open",
+    "cy:install": "npx cypress install --force",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cypress": "^7.1.0"
+  },
+  "devDependencies": {
+    "cypress-cucumber-preprocessor": "^4.0.3"
+  },
+  "cypress-cucumber-preprocessor": {
+    "nonGlobalStepDefinitions": true
+  }
+}
