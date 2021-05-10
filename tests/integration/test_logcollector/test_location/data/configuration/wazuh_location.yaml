@@ -1,5 +1,3 @@
----
-# conf 1
 - tags:
   - test_location
   apply_to_modules:
