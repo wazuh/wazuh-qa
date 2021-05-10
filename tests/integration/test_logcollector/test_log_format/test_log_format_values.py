@@ -26,7 +26,7 @@ force_restart_after_restoring = True
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 
-local_internal_options = {'logcollector.remote_commands': '1', 'logcollector.vcheck_files': '1', 'logcollector.debug': '2','monitord.rotate_log': '0'}
+local_internal_options = {'logcollector.vcheck_files': '1', 'logcollector.debug': '2', 'monitord.rotate_log': '0'}
 
 if sys.platform == 'win32':
     location = r'C:\test.txt'
@@ -39,37 +39,11 @@ else:
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 parameters = [
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'json'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'json'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'snort-full'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'squid'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'mysql_log'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'postgresql_log'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapg'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapg'},
-    {'LOCATION': '/var/log/current', 'LOG_FORMAT': 'djb-multilog'},
-    {'LOCATION': '/var/log/current', 'LOG_FORMAT': 'djb-multilog'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'multi-line:3'},
+    {'location': f'{location}', 'log_format': 'json'},
 ]
 
 metadata = [
     {'location': f'{location}', 'log_format': 'json', 'valid_value': False},
-    {'location': f'{location}', 'log_format': 'json', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'syslog', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'snort-full', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'squid', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'audit', 'valid_value': False},
-    {'location': f'{location}', 'log_format': 'audit', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'mysql_log', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'postgresql_log', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'nmapg', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'nmapg', 'valid_value': False},
-    {'location': '/var/log/current', 'log_format': 'djb-multilog', 'valid_value': True},
-    {'location': '/var/log/current', 'log_format': 'djb-multilog', 'valid_value': False},
-    {'location': f'{location}', 'log_format': 'multi-line:3', 'valid_value': True},
 ]
 
 if sys.platform == 'win32':
@@ -82,8 +56,6 @@ if sys.platform == 'win32':
     metadata.append({'location': f'{location}', 'log_format': 'iis', 'valid_value': True}),
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-#configuration_ids = [f"{x['LOG_FORMAT'] 'Valid' if x['VALID_VALUE'] == TRUE else 'Invalid'}" for x in metadata]
-# configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['COMMAND']}" for x in parameters]
 configuration_ids = [f"{x['log_format'], x['valid_value']}" for x in metadata]
 
 log_format_not_print_analyzing_info = ['eventlog', 'eventchannel', 'iis']
@@ -109,7 +81,7 @@ def create_file(file):
 def remove_file(file):
     """ Remove a file created to testing."""
     if path.exists(file):
-        remove(file)
+        os.remove(file)
 
 def modify_json_file(file, type):
     """Create a json content with an specific values"""
@@ -296,7 +268,7 @@ def check_log_format_value_invalid(conf):
             wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR)
 
 
-def test_log_format(get_configuration, configure_environment):
+def test_log_format(get_local_internal_options, get_configuration, configure_local_internal_options):
     """
     Check if Wazuh log format field of logcollector works properly.
 
@@ -352,4 +324,4 @@ def test_log_format(get_configuration, configure_environment):
                 check_log_format_valid(conf)
                 modify_file(location, conf['log_format'], conf['valid_value'])
                 check_log_format_value_invalid(conf)
-                remove_file(location)
+ #               remove_file(location)

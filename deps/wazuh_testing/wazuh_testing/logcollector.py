@@ -63,7 +63,7 @@ def callback_read_file(location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX
     msg = fr"DEBUG: Read 1 lines from '{location}"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
-def callback_invalid_format_value(line, option, location, prefix, severity='DEBUG'):
+def callback_invalid_format_value(line, option, location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, severity='DEBUG'):
 
     """
     Create a callback to detect content values invalid in a log format file specific.
