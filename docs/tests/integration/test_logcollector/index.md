@@ -10,8 +10,9 @@ logs and send them to the manager.
 #### Test configuration
 
 For each configuration option, we check if `logcollector` and `agentd` correctly
-starts and that any API request to the Manager configuration returns the same options that the specified 
+starts and that any API request to the Manager configuration returns the same options that the specified
 in configuration file.
+
 
 #### Test command monitoring
 
@@ -24,3 +25,8 @@ correctly by running different commands with special characteristics.
 By default, when Wazuh starts it will only read the contents of the logs of a certain file since 
 the agent was started, with the `only-future-events` option Wazuh can read these logs that were 
 produced while the agent was stopped. 
+
+#### Test location
+
+For each location and exclude option specified in the configuration file, check if `logcollector` is analyzing or excluding the required files.
+

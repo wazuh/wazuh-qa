@@ -450,6 +450,10 @@ nav:
                 - Overview: tests/integration/test_logcollector/test_command_monitoring/index.md
                 - Test command execution: tests/integration/test_logcollector/test_command_monitoring/test_command_execution.md
                 - Test command execution freq: tests/integration/test_logcollector/test_command_monitoring/test_command_execution_freq.md
+            - Test location:
+                - Overview: tests/integration/test_logcollector/test_location/index.md
+                - Test location: tests/integration/test_logcollector/test_location/test_location.md
+                - Test exclude: tests/integration/test_logcollector/test_location/test_location_exclude.md
             - Test only future events: tests/integration/test_logcollector/test_only_future_events/test_only_future_events.md
         - Logtest:
           - tests/integration/test_logtest/index.md
