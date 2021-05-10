@@ -2,12 +2,11 @@
 
 ## Overview 
 
-These tests check if the introduced configuration works as expected for valid values and if the logcollector 
-response for analyzing requests works properly.
+These tests check if the logcollector location and exclude options work as expected for valid values.
 
 ## Objective
 
-Confirm that the different options for logcollector configuration work and are correctly loaded.
+Confirm that different location values for logcollector configuration work and are correctly loaded.
 
 ## General info
 

@@ -23,5 +23,5 @@ correctly by running different commands with special characteristics.
 
 #### Test location
 
-For each location and exclude option specified in configuration file, we check if `logcollector` is analyzing or excluding the required files.
+For each location and exclude option specified in the configuration file, check if `logcollector` is analyzing or excluding the required files.
 

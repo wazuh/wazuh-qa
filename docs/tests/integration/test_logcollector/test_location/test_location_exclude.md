@@ -1,7 +1,7 @@
 # Test location - Exclude
 ## Overview 
 
-Check if logcollector works properly with different exclude and locations.
+Check if logcollector works properly with different exclude and location values.
 
 ## Objective
 
