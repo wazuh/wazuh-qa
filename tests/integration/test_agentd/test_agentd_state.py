@@ -50,7 +50,7 @@ else:
 
 
 # Fixtures
-@pytest.fixture(scope="module", params=configurations)
+@pytest.fixture(scope="module", params=configurations, ids=[""])
 def get_configuration(request):
     """Get configurations from the module"""
     return request.param

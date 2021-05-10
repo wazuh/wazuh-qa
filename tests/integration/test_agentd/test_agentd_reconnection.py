@@ -6,11 +6,10 @@ from datetime import datetime, timedelta
 from time import sleep
 
 import pytest
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, file
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor
+from wazuh_testing.tools.monitoring import QueueMonitor
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
 
@@ -66,17 +65,17 @@ def teardown():
 def set_debug_mode():
     if platform.system() == 'win32' or platform.system() == 'Windows':
         local_int_conf_path = os.path.join(WAZUH_PATH, 'local_internal_options.conf')
-        debug_line = 'windows.debug=2\n'
+        debug_line = 'windows.debug=2\nagent.recv_timeout=5\n'
     else:
         local_int_conf_path = os.path.join(WAZUH_PATH, 'etc', 'local_internal_options.conf')
-        debug_line = 'agent.debug=2\n'
+        debug_line = 'agent.debug=2\nagent.recv_timeout=5\n'
 
-    with  open(local_int_conf_path, 'r') as local_file_read:
+    with open(local_int_conf_path, 'r') as local_file_read:
         lines = local_file_read.readlines()
         for line in lines:
             if line == debug_line:
                 return
-    with  open(local_int_conf_path, 'a') as local_file_write:
+    with open(local_int_conf_path, 'a') as local_file_write:
         local_file_write.write('\n' + debug_line)
 
 
@@ -90,7 +89,7 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def configure_authd_server(request):
     authd_server.start()
     global monitored_sockets
@@ -100,40 +99,33 @@ def configure_authd_server(request):
     authd_server.shutdown()
 
 
-@pytest.fixture(scope="function")
-def start_authd(request):
+def start_authd():
     authd_server.set_mode("ACCEPT")
     authd_server.clear()
 
 
-@pytest.fixture(scope="function")
-def stop_authd(request):
+def stop_authd():
     authd_server.set_mode("REJECT")
 
 
-@pytest.fixture(scope="function")
-def set_authd_id(request):
+def set_authd_id():
     authd_server.agent_id = 101
 
 
-@pytest.fixture(scope="function")
-def clean_keys(request):
+def clean_keys():
     truncate_file(CLIENT_KEYS_PATH)
     sleep(1)
 
 
-@pytest.fixture(scope="function")
-def delete_keys(request):
+def delete_keys():
     os.remove(CLIENT_KEYS_PATH)
     sleep(1)
 
 
-@pytest.fixture(scope="function")
-def set_keys(request):
+def set_keys():
     with open(CLIENT_KEYS_PATH, 'w+') as f:
         f.write("100 ubuntu-agent any TopSecret")
     sleep(1)
-
 
 def wait_notify(line):
     if 'Sending keep alive:' in line:
@@ -169,8 +161,7 @@ when misses comunication with Remoted and a new enrollment is sent to Authd.
 """
 
 
-def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_authd, set_authd_id, set_keys,
-                                                 configure_environment, get_configuration):
+def test_agentd_reconection_enrollment_with_keys(configure_authd_server, configure_environment, get_configuration):
     global remoted_server
 
     remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLLED_ACK',
@@ -179,24 +170,24 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_a
     # Stop target Agent
     control_service('stop')
     # Clean logs
+    log_monitor = FileMonitor(LOG_FILE_PATH)
     truncate_file(LOG_FILE_PATH)
-    file.remove_file("/var/ossec/etc/client.keys")
+    # Prepare test
+    start_authd()
+    set_authd_id()
+    set_keys()
     # Start whole Agent service to check other daemons status after initialization
     control_service('start')
-
-    # Start hearing logs
-    truncate_file(LOG_FILE_PATH)
-    log_monitor = FileMonitor(LOG_FILE_PATH)
-
     # hearing on enrollment server
     authd_server.clear()
 
     # Wait until Agent is notifing Manager
     try:
         log_monitor.start(timeout=120, callback=wait_notify)
-    except TimeoutError as err:
+    except TimeoutError:
         remoted_server.stop()
         raise AssertionError("Notify message from agent was never sent!")
+
     assert "aes" in remoted_server.last_message_ctx, "Incorrect Secure Message"
 
     # Start rejecting Agent
@@ -206,17 +197,14 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, start_a
     # Wait until Agent asks a new key to enrollment
     try:
         log_monitor.start(timeout=180, callback=wait_enrollment)
-    except TimeoutError as err:
+    except TimeoutError:
         remoted_server.stop()
         raise AssertionError("Agent never enrolled after rejecting connection!")
 
     # Start responding to Agent
     remoted_server.set_mode('CONTROLLED_ACK')
     # Wait until Agent is notifing Manager
-    try:
-        log_monitor.start(timeout=120, callback=wait_notify)
-    except TimeoutError as err:
-        raise AssertionError("Notify message from agent was never sent!")
+    log_monitor.start(timeout=120, callback=wait_notify, error_message="Notify message from agent was never sent!")
     assert "aes" in remoted_server.last_message_ctx, "Incorrect Secure Message"
 
     return
@@ -228,8 +216,7 @@ and an enrollment is sent to Authd to start comunicating with Remoted
 """
 
 
-def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, start_authd, set_authd_id, delete_keys,
-                                                    configure_environment, get_configuration):
+def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, configure_environment, get_configuration):
     global remoted_server
 
     remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLLED_ACK',
@@ -239,27 +226,24 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, star
     control_service('stop')
     # Clean logs
     truncate_file(LOG_FILE_PATH)
-    file.remove_file("/var/ossec/etc/client.keys")
+    # Prepare test
+    start_authd()
+    set_authd_id()
+    delete_keys()
     # Start whole Agent service to check other daemons status after initialization
     control_service('start')
-
     # start hearing logs
     log_monitor = FileMonitor(LOG_FILE_PATH)
-
     # hearing on enrollment server
     authd_server.clear()
 
     # Wait until Agent asks keys for the first time
-    try:
-        log_monitor.start(timeout=120, callback=wait_enrollment)
-    except TimeoutError as err:
-        raise AssertionError("Agent never enrolled for the first time rejecting connection!")
+    log_monitor.start(timeout=50, callback=wait_enrollment,
+                      error_message="Agent never enrolled for the first time.")
 
     # Wait until Agent is notifing Manager
-    try:
-        log_monitor.start(timeout=120, callback=wait_notify)
-    except TimeoutError as err:
-        raise AssertionError("Notify message from agent was never sent!")
+    log_monitor.start(timeout=50, callback=wait_notify, error_message="Notify message from agent was never sent!")
+
     assert "aes" in remoted_server.last_message_ctx, "Incorrect Secure Message"
 
     # Start rejecting Agent
@@ -267,18 +251,14 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, star
     # hearing on enrollment server
     authd_server.clear()
     # Wait until Agent asks a new key to enrollment
-    try:
-        log_monitor.start(timeout=180, callback=wait_enrollment)
-    except TimeoutError as err:
-        raise AssertionError("Agent never enrolled after rejecting connection!")
+    log_monitor.start(timeout=180, callback=wait_enrollment,
+                      error_message="Agent never enrolled after rejecting connection!")
 
     # Start responding to Agent
     remoted_server.set_mode('CONTROLLED_ACK')
     # Wait until Agent is notifing Manager
-    try:
-        log_monitor.start(timeout=120, callback=wait_notify)
-    except TimeoutError as err:
-        raise AssertionError("Notify message from agent was never sent!")
+    log_monitor.start(timeout=120, callback=wait_notify, error_message="Notify message from agent was never sent!")
+
     assert "aes" in remoted_server.last_message_ctx, "Incorrect Secure Message"
 
     return
@@ -290,8 +270,7 @@ and an enrollment is sent to Authd to start comunicating with Remoted
 """
 
 
-def test_agentd_reconection_enrollment_no_keys(configure_authd_server, start_authd, set_authd_id, clean_keys,
-                                               configure_environment, get_configuration):
+def test_agentd_reconection_enrollment_no_keys(configure_authd_server, configure_environment, get_configuration):
     global remoted_server
 
     remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLLED_ACK',
@@ -301,26 +280,27 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, start_aut
     control_service('stop')
     # Clean logs
     truncate_file(LOG_FILE_PATH)
-    file.remove_file("/var/ossec/etc/client.keys")
+    # Prepare test
+    start_authd()
+    set_authd_id()
+    clean_keys()
     # Start whole Agent service to check other daemons status after initialization
     control_service('start')
-
     # start hearing logs
     log_monitor = FileMonitor(LOG_FILE_PATH)
-
     # hearing on enrollment server
     authd_server.clear()
 
     # Wait until Agent asks keys for the first time
     try:
         log_monitor.start(timeout=120, callback=wait_enrollment)
-    except TimeoutError as err:
+    except TimeoutError:
         raise AssertionError("Agent never enrolled for the first time rejecting connection!")
 
     # Wait until Agent is notifing Manager
     try:
         log_monitor.start(timeout=120, callback=wait_notify)
-    except TimeoutError as err:
+    except TimeoutError:
         raise AssertionError("Notify message from agent was never sent!")
     assert "aes" in remoted_server.last_message_ctx, "Incorrect Secure Message"
 
@@ -331,7 +311,7 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, start_aut
     # Wait until Agent asks a new key to enrollment
     try:
         log_monitor.start(timeout=180, callback=wait_enrollment)
-    except TimeoutError as err:
+    except TimeoutError:
         raise AssertionError("Agent never enrolled after rejecting connection!")
 
     # Start responding to Agent
@@ -339,7 +319,7 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, start_aut
     # Wait until Agent is notifing Manager
     try:
         log_monitor.start(timeout=120, callback=wait_notify)
-    except TimeoutError as err:
+    except TimeoutError:
         raise AssertionError("Notify message from agent was never sent!")
     assert "aes" in remoted_server.last_message_ctx, "Incorrect Secure Message"
 
@@ -352,8 +332,7 @@ and multiple retries are required until the new key is obtained to start comunic
 """
 
 
-def test_agentd_initial_enrollment_retries(configure_authd_server, stop_authd, set_authd_id, clean_keys,
-                                           configure_environment, get_configuration):
+def test_agentd_initial_enrollment_retries(configure_authd_server, configure_environment, get_configuration):
     global remoted_server
 
     remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLLED_ACK',
@@ -363,7 +342,10 @@ def test_agentd_initial_enrollment_retries(configure_authd_server, stop_authd, s
     control_service('stop')
     # Clean logs
     truncate_file(LOG_FILE_PATH)
-    file.remove_file("/var/ossec/etc/client.keys")
+    # Preapre test
+    stop_authd()
+    set_authd_id()
+    clean_keys()
     # Start whole Agent service to check other daemons status after initialization
     control_service('start')
 
@@ -375,10 +357,8 @@ def test_agentd_initial_enrollment_retries(configure_authd_server, stop_authd, s
     retries = 0
     while retries < 4:
         retries += 1
-        try:
-            log_monitor.start(timeout=retries * 5 + 20, callback=wait_enrollment_try)
-        except TimeoutError as err:
-            raise AssertionError("Enrollment retry was not sent!")
+        log_monitor.start(timeout=retries * 5 + 20, callback=wait_enrollment_try,
+                          error_message="Enrollment retry was not sent!")
     stop_time = datetime.now()
     expected_time = start_time + timedelta(seconds=retries * 5 - 2)
     # Check if delay was aplied
@@ -388,16 +368,10 @@ def test_agentd_initial_enrollment_retries(configure_authd_server, stop_authd, s
     authd_server.clear()
     authd_server.set_mode("ACCEPT")
     # Wait succesfull enrollment
-    try:
-        log_monitor.start(timeout=70, callback=wait_enrollment)
-    except TimeoutError as err:
-        raise AssertionError("No succesful enrollment after reties!")
+    log_monitor.start(timeout=70, callback=wait_enrollment, error_message="No succesful enrollment after reties!")
 
     # Wait until Agent is notifing Manager
-    try:
-        log_monitor.start(timeout=120, callback=wait_notify)
-    except TimeoutError as err:
-        raise AssertionError("Notify message from agent was never sent!")
+    log_monitor.start(timeout=120, callback=wait_notify, error_message="Notify message from agent was never sent!")
     assert "aes" in remoted_server.last_message_ctx, "Incorrect Secure Message"
 
     # Check if no Wazuh module stoped due to Agentd Initialization
@@ -416,9 +390,10 @@ and multiple connection retries are required prior to requesting a new enrollmen
 """
 
 
-def test_agentd_connection_retries_pre_enrollment(configure_authd_server, stop_authd, set_keys, configure_environment,
+def test_agentd_connection_retries_pre_enrollment(configure_authd_server, configure_environment,
                                                   get_configuration):
     global remoted_server
+
     REMOTED_KEYS_SYNC_TIME = 10
 
     # Start Remoted mock
@@ -428,20 +403,14 @@ def test_agentd_connection_retries_pre_enrollment(configure_authd_server, stop_a
     control_service('stop')
     # Clean logs
     truncate_file(LOG_FILE_PATH)
+    # Prepare test
+    stop_authd()
+    set_keys()
     # Start whole Agent service to check other daemons status after initialization
     control_service('start')
 
     # Start hearing logs
     log_monitor = FileMonitor(LOG_FILE_PATH)
-
-    retries = 3
-
-    while retries > 0:
-        retries -=1
-        try:
-            log_monitor.start(timeout=15, callback=wait_notify)
-        except TimeoutError:
-            pass
 
     # Simulate time of Remoted to synchronize keys by waiting previous to start responding
     remoted_server.set_mode('CONTROLLED_ACK')

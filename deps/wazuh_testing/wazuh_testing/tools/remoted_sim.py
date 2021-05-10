@@ -16,6 +16,8 @@ from Crypto.Cipher import AES, Blowfish
 from Crypto.Util.Padding import pad
 from wazuh_testing.tools import WAZUH_PATH
 
+import os
+
 
 class Cipher:
     """ Algorithm to perform encryption/decryption of manager-agent secure messages
@@ -607,6 +609,9 @@ class RemotedSimulator:
         """
         Update keys table with keys read from client.keys
         """
+        if not os.path.exists(self.client_keys_path):
+            with open(self.client_keys_path, 'w+') as f:
+                f.write("100 ubuntu-agent any TopSecret")
         with open(self.client_keys_path) as client_file:
             client_lines = client_file.read().splitlines()
 

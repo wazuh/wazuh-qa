@@ -191,7 +191,7 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
     configure_enrollment(test_case.get('enrollment'), authd_server, configuration.get('agent_name'))
     try:
         override_wazuh_conf(configuration)
-    except Exception as err:
+    except Exception:
         if test_case.get('expected_error') and not test_case.get('enrollment', {}).get('response'):
             # Expected to happen
             assert check_log_error_conf(test_case.get('expected_error')) != None, \

@@ -116,10 +116,10 @@
   enrollment:
     id: 1
     protocol: "TLSv1_1"
+    response: "OSSEC K:'001 test_agent_1 any TopSecret'\n"
   configuration:
     agent_name: "test_agent_1"
     auto_method: "yes"
-  expected_error: "ERROR: SSL error (1). Connection refused by the manager."
 -
   name: "SSL - Auto Negotiation TLSv1_2"
   description: "Try auto negotiation option using TLSv1_2"
