@@ -15,6 +15,7 @@ if sys.platform == 'win32':
 else:
     prefix = monitoring.LOG_COLLECTOR_DETECTOR_PREFIX
 
+
 def callback_analyzing_file(file):
     """Create a callback to detect if logcollector is monitoring a file.
 
@@ -35,7 +36,6 @@ def callback_monitoring_command(log_format, command):
     Args:
         log_format (str): Log format of the command monitoring (full_command or command).
         command (str): Monitored command.
-        prefix (str): Daemon that generates the error log.
 
     Returns:
         callable: callback to detect this event.
@@ -51,7 +51,6 @@ def callback_monitoring_djb_multilog(program_name, multilog_file):
     Args:
         program_name (str): Program name of multilog file.
         multilog_file (str): Multilog file name.
-        prefix (str): Daemon that generates the error log.
 
     Returns:
         callable: callback to detect this event.
@@ -65,7 +64,6 @@ def callback_command_alias_output(alias):
 
     Args:
         alias (str): Command alias.
-        prefix (str): Daemon that generates the error log.
 
     Returns:
         callable: callback to detect this event.
@@ -79,7 +77,6 @@ def callback_eventchannel_bad_format(event_location):
 
     Args:
         event_location (str): Eventchannel location.
-        prefix (str): Daemon that generates the error log.
 
     Returns:
         callable: callback to detect this event.
@@ -94,7 +91,6 @@ def callback_socket_target(location, socket_name):
     Args:
         location (str): Name with the analyzed file.
         socket_name (str): Socket name.
-        prefix (str): Daemon that generates the error log.
 
     Returns:
         callable: callback to detect this event.
@@ -109,7 +105,6 @@ def callback_socket_not_defined(location, socket_name):
     Args:
         location (str): Name with the analyzed file.
         socket_name (str): Socket name.
-        prefix (str): Daemon that generates the error log.
 
     Returns:
         callable: callback to detect this event.
@@ -124,7 +119,6 @@ def callback_log_target_not_found(location, socket_name):
     Args:
         location (str): Name with the analyzed file.
         socket_name (str): Socket name.
-        prefix (str): Daemon that generates the error log.
 
     Returns:
         callable: callback to detect this event.
@@ -139,7 +133,6 @@ def callback_invalid_reconnection_time(severity='WARNING', default_value='5'):
     Args:
         severity (str): Severity of the error (WARNING, ERROR or CRITICAL)
         default_value (int): Default value used instead of specified reconnection time.
-        prefix (str): Daemon that generates the error log.
 
     Returns:
         callable: callback to detect this event.
@@ -166,7 +159,6 @@ def callback_invalid_location_pattern(location):
 
     Args:
         location (str): Location pattern
-        prefix (str): Daemon that generates the error log.
 
     Returns:
         callable: callback to detect this event.
@@ -180,7 +172,6 @@ def callback_read_lines(command, escape=False):
 
     Args:
         command (str): Command to be monitored.
-        prefix (str): Daemon that generates the log.
         escape (bool): Flag to escape special characters in the pattern.
 
     Returns:
@@ -196,24 +187,6 @@ def callback_running_command(log_format, command, escape=False):
     Args:
         log_format (str): Log format of the command monitoring (full_command or command).
         command (str): Command to be monitored.
-        prefix (str): Daemon that generates the log.
-        escape (bool): Flag to escape special characters in the pattern.
-
-    Returns:
-        callable: callback to detect this event.
-    """
-    log_format_message = 'full command' if log_format == 'full_command' else 'command'
-    msg = fr"DEBUG: Running {log_format_message} '{command}'"
-    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=escape)
-
-
-def callback_running_command(log_format, command, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, escape=False):
-    """Create a callback to detect "DEBUG: Running <log_format> '<command>'" debug line.
-
-    Args:
-        log_format (str): Log format of the command monitoring (full_command or command).
-        command (str): Command to be monitored.
-        prefix (str): Daemon that generates the log.
         escape (bool): Flag to escape special characters in the pattern.
 
     Returns:
@@ -225,13 +198,11 @@ def callback_running_command(log_format, command, prefix=monitoring.LOG_COLLECTO
 
 
 def callback_event_log_service_down(location, severity='WARNING'):
-    """Create a callback to detect "DEBUG: Running <log_format> '<command>'" debug line.
+    """Create a callback to detect if eventlog service is down.
 
     Args:
-        log_format (str): Log format of the command monitoring (full_command or command).
-        command (str): Command to be monitored.
-        prefix (str): Daemon that generates the log.
-        escape (bool): Flag to escape special characters in the pattern.
+        location (str): Event channel.
+        severity (str): Severity of the error (WARNING, ERROR or CRITICAL).
 
     Returns:
         callable: callback to detect this event.
@@ -239,20 +210,20 @@ def callback_event_log_service_down(location, severity='WARNING'):
     log_format_message = f"{severity}: The eventlog service is down. Unable to collect logs from '{location}' channel."
     return monitoring.make_callback(pattern=log_format_message, prefix=monitoring.AGENT_DETECTOR_PREFIX)
 
+
 def callback_trying_to_reconnect(location, reconnect_time):
-    """Create a callback to detect "DEBUG: Running <log_format> '<command>'" debug line.
+    """Create a callback to detect if `wazuh-agentd` is trying to reconnect to specified channel.
 
     Args:
-        log_format (str): Log format of the command monitoring (full_command or command).
-        command (str): Command to be monitored.
-        prefix (str): Daemon that generates the log.
-        escape (bool): Flag to escape special characters in the pattern.
+        location (str): Event log channel.
+        reconnect_time (str): Reconnect time.
 
     Returns:
         callable: callback to detect this event.
     """
     log_format_message = f"DEBUG: Trying to reconnect {location} channel in {reconnect_time} seconds."
     return monitoring.make_callback(pattern=log_format_message, prefix=monitoring.AGENT_DETECTOR_PREFIX)
+
 
 def callback_reconnect_eventchannel(location):
     """Create a callback to detect if specified channel has been reconnected successfully.
@@ -263,6 +234,8 @@ def callback_reconnect_eventchannel(location):
     """
     log_format_message = f"INFO: '{location}' channel has been reconnected succesfully."
     return monitoring.make_callback(pattern=log_format_message, prefix=monitoring.AGENT_DETECTOR_PREFIX)
+
+
 def callback_match_pattern_file(file_pattern, file):
     """Create a callback to detect if logcollector is monitoring a file with wildcard.
     Args:
