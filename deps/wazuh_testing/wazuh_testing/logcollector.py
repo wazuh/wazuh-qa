@@ -48,7 +48,7 @@ def callback_reading_file(log_format, content_file, prefix=monitoring.LOG_COLLEC
     elif log_format == 'multi-line:3':
         msg = fr"{severity}: Reading message: '{content_file}'"
 
-    return monitoring.make_callback(pattern=msg, prefix=prefix)
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 def callback_read_file(location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
     """
@@ -79,7 +79,7 @@ def callback_invalid_format_value(line, option, location, prefix=monitoring.LOG_
         callable: callback to detect this event.
     """
     if option == 'json':
-        msg = fr"{severity}: Line '{line}' read from '{location}' is not a {option} object."
+        msg = fr"{severity}: Line '{line}' read from '{location}' is not a JSON object."
     elif option == 'audit':
         msg = fr"{severity}: Discaring audit message because of invalid syntax."
     elif option == 'nmapg':

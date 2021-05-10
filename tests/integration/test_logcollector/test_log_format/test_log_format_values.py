@@ -6,13 +6,13 @@ import os
 import pytest
 import sys
 import subprocess as sb
+import wazuh_testing.tools.file as file
 import wazuh_testing.logcollector as logcollector
 
 from os import remove, path
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX, FileMonitor
-from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.services import control_service
 
 LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
@@ -39,9 +39,9 @@ else:
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 parameters = [
-#    {'LOCATION': f'{location}', 'LOG_FORMAT': 'json'},
-#    {'LOCATION': f'{location}', 'LOG_FORMAT': 'json'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'json'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'json'},
+#    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog'},
 #    {'LOCATION': f'{location}', 'LOG_FORMAT': 'snort-full'},
 #    {'LOCATION': f'{location}', 'LOG_FORMAT': 'squid'},
 #    {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit'},
@@ -56,9 +56,9 @@ parameters = [
 ]
 
 metadata = [
-#    {'location': f'{location}', 'log_format': 'json', 'valid_value': False},
-#    {'location': f'{location}', 'log_format': 'json', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'syslog', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'json', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'json', 'valid_value': False},
+#    {'location': f'{location}', 'log_format': 'syslog', 'valid_value': True},
 #    {'location': f'{location}', 'log_format': 'snort-full', 'valid_value': True},
 #    {'location': f'{location}', 'log_format': 'squid', 'valid_value': True},
 #    {'location': f'{location}', 'log_format': 'audit', 'valid_value': False},
@@ -104,36 +104,33 @@ def create_file(file):
     with open(file, 'a') as f:
         f.write("")
 
-def remove_file(file):
-    """ Remove a file created to testing."""
-    os.remove(file)
-
 def modify_json_file(file, type):
     """Create a json content with an specific values"""
     if type:
-        data = """{"issue":22,"severity":1}\n"""
+        data = '{"issue":22,"severity":1}\n'
     else:
-        data = """{"issue:22,"severity":1}"""
+        data = '{"issue:22,"severity":1}\n'
+
     with open(file, 'a') as f:
         f.write(data)
 
 def modify_syslog_file(file):
     """Create a syslog content with an specific values"""
-    data = """Apr 29 12:47:51 dev-branch systemd[1]: Starting\n"""
+    data = 'Apr 29 12:47:51 dev-branch systemd[1]: Starting\n'
 
     with open(file, 'a') as f:
         f.write(data)
 
 def modify_snort_file(file):
     """Create a snort content with an specific values"""
-    data = """10/12-21:29:35.911089 [**] [1:0:0] TEST [**] [Priority: 0] {ICMP} 192.168.1.99 – > 192.168.1.103"""
+    data = '10/12-21:29:35.911089 [**] [1:0:0] TEST [**] [Priority: 0] {ICMP} 192.168.1.99 – > 192.168.1.103\n'
 
     with open(file, 'a') as f:
         f.write(data)
 
 def modify_squid_file(file):
     """Create a squid content with an specific values"""
-    data = """902351618.864 440 120.65.1.1 TCP_MISS/304 110 GET http://www.webtrends.com:8005/Images/search.gif - DIRECT/www.webtrends.com -"""
+    data = '902351618.864 440 120.65.1.1 TCP_MISS/304 110 GET http://www.webtrends.com:8005/Images/search.gif - DIRECT/www.webtrends.com -'
     with open(file, 'a') as f:
         f.write(data)
 
@@ -251,7 +248,8 @@ def check_log_format_value_valid(conf):
             wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
 
             if conf['log_format'] == 'nampg':
-                remove_file('/var/log/nampg.log')
+                pass
+             #   file.remove_file('/var/log/nampg.log')
 
         elif conf['log_format'] == 'multi-line:3':
             msg = ""
@@ -285,7 +283,7 @@ def check_log_format_value_invalid(conf):
         with open(location, "r") as f:
             line = f.readline()
             if conf['log_format'] == 'json' or conf['log_format'] == 'djb-multilog':
-                log_callback = logcollector.callback_invalid_format_value(line, conf['log_format'], location, prefix)
+                log_callback = logcollector.callback_invalid_format_value(line.rstrip('\n'), conf['log_format'], location, prefix)
             elif conf['log_format'] == 'audit' or conf['log_format'] == 'nmapg':
                 severity = 'ERROR'
                 log_callback = logcollector.callback_invalid_format_value(line, conf['log_format'], location, prefix, severity)
@@ -306,7 +304,7 @@ def test_log_format(get_local_internal_options, get_configuration, configure_loc
     conf = get_configuration['metadata']
 
     control_service('stop', daemon=LOGCOLLECTOR_DAEMON)
-    truncate_file(LOG_FILE_PATH)
+    file.truncate_file(LOG_FILE_PATH)
 
     if conf['valid_value']:
         if conf['log_format'] == 'djb-multilog':
@@ -316,7 +314,7 @@ def test_log_format(get_local_internal_options, get_configuration, configure_loc
             check_log_format_valid(conf)
             modify_file(location_multilog, conf['log_format'], conf['valid_value'])
             check_log_format_value_valid(conf)
-            remove_file(location_multilog)
+            file.remove_file(location_multilog)
 
         elif sys.platform == 'win32':
             control_service('start', daemon=LOGCOLLECTOR_DAEMON)
@@ -327,7 +325,7 @@ def test_log_format(get_local_internal_options, get_configuration, configure_loc
             check_log_format_valid(conf)
             modify_file(location, conf['log_format'], conf['valid_value'])
             check_log_format_value_valid(conf)
-            remove_file(location)
+            file.remove_file(location)
 
     else:
 #        if sys.platform == 'win32':
@@ -342,11 +340,11 @@ def test_log_format(get_local_internal_options, get_configuration, configure_loc
             check_log_format_valid(conf)
             modify_file(location_multilog, conf['log_format'], conf['valid_value'])
             check_log_format_value_invalid(conf)
-            remove_file(location_multilog)
+            file.remove_file(location_multilog)
         else:
             create_file(location)
             control_service('start', daemon=LOGCOLLECTOR_DAEMON)
             check_log_format_valid(conf)
             modify_file(location, conf['log_format'], conf['valid_value'])
             check_log_format_value_invalid(conf)
-            remove_file(location)
+            file.remove_file(location)
