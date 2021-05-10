@@ -4,12 +4,16 @@
 
 import csv
 import logging
+from abc import ABC, abstractmethod
 from datetime import datetime
+from os import makedirs
 from os.path import join, isfile
-from threading import Thread, Event
-from time import sleep
+from re import compile
 from sys import platform
 from tempfile import gettempdir
+from threading import Thread, Event
+from time import sleep
+
 import psutil
 
 MONITOR_LIST = []
@@ -181,3 +185,83 @@ class Monitor:
         """Stop all the monitoring threads."""
         self.event.set()
         self.thread.join()
+
+
+class LogParser(ABC):
+    """Class to parse a log file and extract specified data based on a regular expression.
+
+    Args:
+        log_file (str): log file path.
+        regex (regex): regular expression to be applied to the log file content.
+        columns (list, str): csv headers.
+        dst_dir (str, optional): directory to store the CSVs. Defaults to temp directory.
+
+    Attributes:
+        log_file (str): log file path.
+        regex (regex): regular expression to be applied to the log file content.
+        columns (list, str): csv headers.
+        dst_dir (str): directory to store the CSVs. Defaults to temp directory.
+        data (dict): processed log file.
+    """
+
+    def __init__(self, log_file, regex, columns, dst_dir=gettempdir()):
+        self.log_file = log_file
+        self.dst_dir = dst_dir
+        self.regex = compile(regex)
+        self.columns = columns
+        self.data = None
+        super().__init__()
+
+    @abstractmethod
+    def _log_parser(self):
+        """Function to be overloaded by specifying in each child function the necessary logic to parse the log file."""
+        pass
+
+    def write_csv(self):
+        """Function in charge of saving the CSV files according to their label."""
+        try:
+            makedirs(self.dst_dir)
+        except OSError:
+            pass
+
+        for key, value in self.data.items():
+            with open(join(self.dst_dir, f"{key.replace(' ', '_')}.csv"), 'w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(self.columns)
+                writer.writerows(value)
+
+
+class ClusterLogParser(LogParser):
+    """Logparser child class, this is exclusively in charge of parsing the cluster logs.
+
+    Args:
+        log_file (str): log file path.
+        dst_dir (str, optional): directory to store the CSVs. Defaults to temp directory.
+
+    Attributes:
+        log_file (str): log file path.
+        dst_dir (str): directory to store the CSVs. Defaults to temp directory.
+        data (dict): processed log file.
+    """
+    def __init__(self, log_file, dst_dir=gettempdir()):
+        # group1 Timestamp - group2 node_name - group3 activity - group4 time_spent(s)
+        regex = r'(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) .* ' \
+                r'\[Worker Test_cluster_performance_.*_(manager_\d+)] \[(.*)] Finished in (\d+.\d+)s.*'
+        columns = ['Timestamp', 'node_name', 'activity', 'time_spent(s)']
+        super().__init__(log_file, regex, columns, dst_dir)
+
+    def _log_parser(self):
+        """Function in charge of parsing the information of the cluster.log file."""
+        performance_information = dict()
+        for match in self.regex.finditer(open(self.log_file).read()):
+            try:
+                performance_information[match.group(3)].append(match.groups())
+            except KeyError:
+                performance_information[match.group(3)] = list()
+                performance_information[match.group(3)].append(match.groups())
+
+        return performance_information
+
+    def write_csv(self):
+        self.data = self._log_parser()
+        super().write_csv()
