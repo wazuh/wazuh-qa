@@ -25,4 +25,3 @@ Then('The user should see the rules', () => {
         .should('exist')
         .should('be.visible');
 });
-
