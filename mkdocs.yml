@@ -452,7 +452,7 @@ nav:
             - Test location:
                 - Overview: tests/integration/test_logcollector/test_location/index.md
                 - Test location: tests/integration/test_logcollector/test_location/test_location.md
-                - Test exclude: tests/integration/test_logcollector/test_location/test_exclude.md
+                - Test exclude: tests/integration/test_logcollector/test_location/test_location_exclude.md
         - Logtest:
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md

@@ -170,7 +170,7 @@ def create_files(request, get_configuration):
             os.remove(file_location)
 
 
-def test_exclude(get_local_internal_options, configure_local_internal_options, create_directory, create_files,
+def test_location_exclude(get_local_internal_options, configure_local_internal_options, create_directory, create_files,
                  get_configuration, configure_environment, restart_logcollector):
     """Check if logcollector is excluding specified files.
 

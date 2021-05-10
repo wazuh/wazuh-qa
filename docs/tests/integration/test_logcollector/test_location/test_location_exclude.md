@@ -22,4 +22,4 @@ Check if logcollector works properly with different exclude and locations.
 
 ## Code documentation
 
-::: tests.integration.test_logcollector.test_location.test_exclude
+::: tests.integration.test_logcollector.test_location.test_location_exclude
