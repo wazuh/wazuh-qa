@@ -1,4 +1,5 @@
 import sys
+from math import ceil
 
 from wazuh_testing.tools import monitoring
 
@@ -14,6 +15,7 @@ if sys.platform == 'win32':
     prefix = monitoring.AGENT_DETECTOR_PREFIX
 else:
     prefix = monitoring.LOG_COLLECTOR_DETECTOR_PREFIX
+
 
 def callback_analyzing_file(file):
     """Create a callback to detect if logcollector is monitoring a file.
@@ -259,3 +261,42 @@ def callback_excluded_file(file):
     """
     msg = fr"File excluded: '{file}'."
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
+def add_log_data(log_path, log_line_message, size_mib=10):
+    """Increase the space occupied by a log file by adding lines to it.
+
+    Args:
+        log_path (str): Path to log file.
+        log_line_message (str): Line content to be added to the log.
+        size_mib (int, optional): Size in mebibytes (1024^2 bytes). Defaults to 10 MiB.
+    """
+    if len(log_line_message):
+        with open(log_path, 'a') as f:
+            lines = ceil((size_mib * 1024 ** 2) / len(log_line_message))
+            for _ in range(0, lines):
+                f.write(f"{log_line_message}\n")
+
+
+def add_log_data_line_num(log_path, log_line_message, size_kib=1024, line_start=1):
+    """Increase the space occupied by a log file by adding lines to it.
+
+    In each line of the log, its number is added, so the final size of the log
+    is always larger than the specified size.
+
+    Args:
+        log_path (str): Path to log file.
+        log_line_message (str): Line content to be added to the log.
+        size_kib (int, optional): Size in kibibytes (1024^2 bytes). Defaults to 1 MiB (1024 KiB).
+        line_start (int, optional): Line number to start with. Defaults to 1.
+
+    Returns:
+        int: Last line number written.
+    """
+    if len(log_line_message):
+        with open(log_path, 'a') as f:
+            lines = ceil((size_kib * 1024) / len(log_line_message))
+            for x in range(line_start, line_start + lines + 1):
+                f.write(f"{log_line_message}{x}\n")
+        return line_start + lines - 1
+    return 0

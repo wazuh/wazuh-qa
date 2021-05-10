@@ -1,7 +1,6 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-import math
 import os
 import tempfile
 
@@ -45,22 +44,6 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 configuration_ids = [f"{x['mode']}_{x['location']}_in_{x['log_format']}_format" for x in metadata]
 
 
-def add_log_data(log_path, log_line_message, size_mib):
-    """
-    Increase the space occupied by a log file by adding lines to it.
-
-    Args:
-        log_path (str): Path to log file.
-        log_line_message (str): Line content to be added to the log.
-        size_mib (int): Size in mebibytes (1024^2 bytes).
-    """
-    if len(log_line_message):
-        with open(log_path, 'a') as f:
-            lines = math.ceil((size_mib * 1024 ** 2) / len(log_line_message))
-            for _ in range(0, lines):
-                f.write(f"{log_line_message}\n")
-
-
 # fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
@@ -79,7 +62,7 @@ def generate_log_file():
     """Generate a log file of approximately 10 mebibytes for testing."""
     message_line = f"{metadata[0]['log_line_before']}{metadata[0]['mode']}"
     file.write_file(log_test_path, '')
-    add_log_data(log_test_path, message_line, 10)
+    logcollector.add_log_data(log_test_path, message_line, 10)
     yield
     file.remove_file(log_test_path)
 
@@ -109,7 +92,7 @@ def test_keep_running(get_local_internal_options, configure_local_internal_optio
                             callback=callback_message)
 
     # Add another MiB of data to log
-    add_log_data(config['location'], f"{config['log_line_before']}{config['mode']}", 1)
+    logcollector.add_log_data(config['location'], f"{config['log_line_before']}{config['mode']}", 1)
 
     message = f"DEBUG: Reading syslog message: '{config['log_line_before']}{config['mode']}'"
     callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
@@ -136,7 +119,7 @@ def test_keep_running(get_local_internal_options, configure_local_internal_optio
                                 callback=callback_message)
 
     # Add a MiB of data to rotated/truncated log
-    add_log_data(config['location'], f"{config['log_line_after']}{config['mode']}", 1)
+    logcollector.add_log_data(config['location'], f"{config['log_line_after']}{config['mode']}", 1)
 
     message = f"DEBUG: Reading syslog message: '{config['log_line_after']}{config['mode']}'"
     callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
