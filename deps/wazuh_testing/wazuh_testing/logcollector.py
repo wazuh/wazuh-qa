@@ -231,6 +231,8 @@ def callback_reconnect_eventchannel(location):
     Args:
         location (str): Location channel.
 
+    Returns:
+        callable: callback to detect this event.
     """
     log_format_message = f"INFO: '{location}' channel has been reconnected succesfully."
     return monitoring.make_callback(pattern=log_format_message, prefix=monitoring.AGENT_DETECTOR_PREFIX)
