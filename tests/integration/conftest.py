@@ -9,7 +9,8 @@ import shutil
 import subprocess
 import sys
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
+import time
 
 import pytest
 from numpydoc.docscrape import FunctionDoc
@@ -20,10 +21,11 @@ import wazuh_testing.tools.configuration as conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
-from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.tools.time import TimeMachine, time_to_seconds
 
 if sys.platform == 'win32':
     from wazuh_testing.fim import KEY_WOW64_64KEY, KEY_WOW64_32KEY, delete_registry, registry_parser, create_registry
+    import win32api
 
 PLATFORMS = set("darwin linux win32 sunos5".split())
 HOST_TYPES = set("server agent".split())
@@ -379,7 +381,7 @@ def close_sockets(receiver_sockets):
     """Close the sockets connection gracefully."""
     for socket in receiver_sockets:
         try:
-            # We flush the buffer before closing connection if connection is TCP
+            # We flush the buffer before closing the connection if the protocol is TCP:
             if socket.protocol == 1:
                 socket.sock.settimeout(5)
                 socket.receive()  # Flush buffer before closing connection
@@ -417,12 +419,34 @@ def configure_local_internal_options(get_local_internal_options):
 
         yield
 
-        TimeMachine.time_rollback()
         conf.set_wazuh_local_internal_options(backup_options_lines)
 
         control_service('restart')
     else:
         yield
+
+
+@pytest.fixture(scope='function')
+def create_file_structure(get_files_list):
+    """Creates the directory structure specified for a test case
+
+    Args:
+        get_file_list (Fixture): Fixture that returns a dictionary with the file structure to be created
+    """
+    for file in get_files_list:
+        absolute_file_path = os.path.join(file['folder_path'], file['filename'])
+        os.makedirs(file['folder_path'], exist_ok=True, mode=0o777)
+        open(absolute_file_path, "w").close()
+
+        if 'age' in file:
+            fileinfo = os.stat(absolute_file_path)
+            os.utime(absolute_file_path, (fileinfo.st_atime - file['age'],
+                                          fileinfo.st_mtime - file['age']))
+    yield
+
+    for file in get_files_list:
+        absolute_file_path = os.path.join(file['folder_path'], file['filename'])
+        shutil.rmtree(absolute_file_path, ignore_errors=True)
 
 
 @pytest.fixture(scope='module')
