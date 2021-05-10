@@ -20,6 +20,11 @@ Command monitoring consists of periodically executing programs and logging their
 possible changes in it. These tests will verify that the `logcollector` command monitoring system works 
 correctly by running different commands with special characteristics.
 
+#### Test only future events
+
+By default, when Wazuh starts it will only read the contents of the logs of a certain file since 
+the agent was started, with the `only-future-events` option Wazuh can read these logs that were 
+produced while the agent was stopped. 
 
 #### Test location
 
