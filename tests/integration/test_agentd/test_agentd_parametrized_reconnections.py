@@ -277,7 +277,7 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
     except TimeoutError as err:
         raise AssertionError("Server rollback tooks too much!")
 
-    # 5 Check ammount of retriesand enrollment
+    # 5 Check ammount of retries and enrollment
     (connect, enroll) = count_retry_mesages()
     assert connect == total_retries
     if ENROLL == 'yes':
