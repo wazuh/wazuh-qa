@@ -10,11 +10,18 @@ logs and send them to the manager.
 #### Test configuration
 
 For each configuration option, we check if `logcollector` and `agentd` correctly
-starts and that any API request to the Manager configuration returns the same options that the specified 
+starts and that any API request to the Manager configuration returns the same options that the specified
 in configuration file.
+
 
 #### Test command monitoring
 
 Command monitoring consists of periodically executing programs and logging their output to detect 
 possible changes in it. These tests will verify that the `logcollector` command monitoring system works 
 correctly by running different commands with special characteristics.
+
+
+#### Test location
+
+For each location and exclude option specified in the configuration file, check if `logcollector` is analyzing or excluding the required files.
+

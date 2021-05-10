@@ -450,6 +450,10 @@ nav:
                 - Overview: tests/integration/test_logcollector/test_command_monitoring/index.md
                 - Test command execution: tests/integration/test_logcollector/test_command_monitoring/test_command_execution.md
                 - Test command execution freq: tests/integration/test_logcollector/test_command_monitoring/test_command_execution_freq.md
+            - Test location:
+                - Overview: tests/integration/test_logcollector/test_location/index.md
+                - Test location: tests/integration/test_logcollector/test_location/test_location.md
+                - Test exclude: tests/integration/test_logcollector/test_location/test_location_exclude.md
         - Logtest:
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md
