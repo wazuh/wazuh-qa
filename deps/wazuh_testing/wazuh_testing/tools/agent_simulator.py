@@ -417,19 +417,20 @@ class Agent:
         """
         while self.stop_receive == 0:
             if is_tcp(sender.protocol):
-                rcv = sender.socket.recv(4)
-                if len(rcv) == 4:
-                    data_len = wazuh_unpack(rcv)
-                    try:
+                try:
+                    rcv = sender.socket.recv(4)
+                    if len(rcv) == 4:
+                        data_len = wazuh_unpack(rcv)
                         buffer_array = sender.socket.recv(data_len)
-                    except MemoryError:
-                        logging.critical(f"Memory error, trying to allocate {data_len}")
-                        return
-
-                    if data_len != len(buffer_array):
+                        if data_len != len(buffer_array):
+                            continue
+                    else:
                         continue
-                else:
-                    continue
+                except MemoryError:
+                    logging.critical(f"Memory error, trying to allocate {data_len}.")
+                    return
+                except Exception:
+                    return
             else:
                 buffer_array, client_address = sender.socket.recvfrom(65536)
             index = buffer_array.find(b'!')
@@ -442,17 +443,19 @@ class Agent:
             else:
                 msg_remove_header = bytes(buffer_array[1:])
                 msg_decrypted = Cipher(msg_remove_header, self.encryption_key).decrypt_blowfish()
-
-            padding = 0
-            while msg_decrypted:
-                if msg_decrypted[padding] == 33:
-                    padding += 1
-                else:
-                    break
-            msg_remove_padding = msg_decrypted[padding:]
-            msg_decompress = zlib.decompress(msg_remove_padding)
-            msg_decoded = msg_decompress.decode('ISO-8859-1')
-            self.process_message(sender, msg_decoded)
+            try:
+                padding = 0
+                while msg_decrypted:
+                    if msg_decrypted[padding] == 33:
+                        padding += 1
+                    else:
+                        break
+                msg_remove_padding = msg_decrypted[padding:]
+                msg_decompress = zlib.decompress(msg_remove_padding)
+                msg_decoded = msg_decompress.decode('ISO-8859-1')
+                self.process_message(sender, msg_decoded)
+            except zlib.error:
+                logging.error("Corrupted message from the manager. Continuing.")
 
     def stop_receiver(self):
         """Stop Agent listener."""
@@ -1518,6 +1521,8 @@ class Sender:
                 self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.socket.connect((self.manager_address, int(self.manager_port)))
                 self.socket.send(length + event)
+            except ConnectionResetError:
+                logging.warning(f"Connection reset by peer. Continuing...")
         if is_udp(self.protocol):
             self.socket.sendto(event, (self.manager_address, int(self.manager_port)))
 
