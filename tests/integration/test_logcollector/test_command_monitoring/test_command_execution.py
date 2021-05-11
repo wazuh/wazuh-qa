@@ -185,7 +185,7 @@ def test_command_execution_dbg(get_local_internal_options, configure_local_inter
 
     # "Read ... lines from command ..." only appears with log_format=command
     if config['log_format'] == 'command':
-        wazuh_log_monitor.start(timeout=60,
+        wazuh_log_monitor.start(timeout=80,
                                 error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
                                 callback=logcollector.callback_read_lines(command=config['command'],
                                                                           escape=True))
