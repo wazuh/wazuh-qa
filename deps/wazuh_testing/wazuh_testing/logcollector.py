@@ -279,11 +279,7 @@ def add_log_data(log_path, log_line_message, size_kib=1024, line_start=1, print_
     if len(log_line_message):
         with open(log_path, 'a') as f:
             lines = ceil((size_kib * 1024) / len(log_line_message))
-            if print_line_num is True:
-                for x in range(line_start, line_start + lines + 1):
-                    f.write(f"{log_line_message}{x}\n")
-            else:
-                for x in range(line_start, line_start + lines + 1):
-                    f.write(f"{log_line_message}\n")
+            for x in range(line_start, line_start + lines + 1):
+                f.write(f"{log_line_message}{x}\n") if print_line_num else f.write(f"{log_line_message}\n")
         return line_start + lines - 1
     return 0
