@@ -9,21 +9,23 @@ import shutil
 import subprocess
 import sys
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
+import time
 
 import pytest
 from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH
-from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
+import wazuh_testing.tools.configuration as conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
-from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.tools.time import TimeMachine, time_to_seconds
 
 if sys.platform == 'win32':
     from wazuh_testing.fim import KEY_WOW64_64KEY, KEY_WOW64_32KEY, delete_registry, registry_parser, create_registry
+    import win32api
 
 PLATFORMS = set("darwin linux win32 sunos5".split())
 HOST_TYPES = set("server agent".split())
@@ -379,7 +381,7 @@ def close_sockets(receiver_sockets):
     """Close the sockets connection gracefully."""
     for socket in receiver_sockets:
         try:
-            # We flush the buffer before closing connection if connection is TCP
+            # We flush the buffer before closing the connection if the protocol is TCP:
             if socket.protocol == 1:
                 socket.sock.settimeout(5)
                 socket.receive()  # Flush buffer before closing connection
@@ -407,14 +409,55 @@ def connect_to_sockets_function(request):
 
 
 @pytest.fixture(scope='module')
+def configure_local_internal_options(get_local_internal_options):
+    backup_options_lines = conf.get_wazuh_local_internal_options()
+    backup_options_dict = conf.local_internal_options_to_dict(backup_options_lines)
+    if not all(option in backup_options_dict.items() for option in get_local_internal_options.items()):
+        conf.add_wazuh_local_internal_options(get_local_internal_options)
+
+        control_service('restart')
+
+        yield
+
+        conf.set_wazuh_local_internal_options(backup_options_lines)
+
+        control_service('restart')
+    else:
+        yield
+
+
+@pytest.fixture(scope='function')
+def create_file_structure(get_files_list):
+    """Creates the directory structure specified for a test case
+
+    Args:
+        get_file_list (Fixture): Fixture that returns a dictionary with the file structure to be created
+    """
+    for file in get_files_list:
+        absolute_file_path = os.path.join(file['folder_path'], file['filename'])
+        os.makedirs(file['folder_path'], exist_ok=True, mode=0o777)
+        open(absolute_file_path, "w").close()
+
+        if 'age' in file:
+            fileinfo = os.stat(absolute_file_path)
+            os.utime(absolute_file_path, (fileinfo.st_atime - file['age'],
+                                          fileinfo.st_mtime - file['age']))
+    yield
+
+    for file in get_files_list:
+        absolute_file_path = os.path.join(file['folder_path'], file['filename'])
+        shutil.rmtree(absolute_file_path, ignore_errors=True)
+
+
+@pytest.fixture(scope='module')
 def configure_environment(get_configuration, request):
     """Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration."""
 
     # Save current configuration
-    backup_config = get_wazuh_conf()
+    backup_config = conf.get_wazuh_conf()
 
     # Configuration for testing
-    test_config = set_section_wazuh_conf(get_configuration.get('sections'))
+    test_config = conf.set_section_wazuh_conf(get_configuration.get('sections'))
 
     # Create test directories
     if hasattr(request.module, 'test_directories'):
@@ -433,7 +476,7 @@ def configure_environment(get_configuration, request):
                 create_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_64KEY)
 
     # Set new configuration
-    write_wazuh_conf(test_config)
+    conf.write_wazuh_conf(test_config)
 
     # Change Windows Date format to ensure TimeMachine will work properly
     if sys.platform == 'win32':
@@ -453,7 +496,7 @@ def configure_environment(get_configuration, request):
     TimeMachine.time_rollback()
 
     # Remove created folders (parents)
-    if sys.platform == 'win32':
+    if sys.platform == 'win32' and not hasattr(request.module, 'no_restart_windows_after_configuration_set'):
         control_service('stop')
 
     if hasattr(request.module, 'test_directories'):
@@ -467,11 +510,11 @@ def configure_environment(get_configuration, request):
                 delete_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_32KEY)
                 delete_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_64KEY)
 
-    if sys.platform == 'win32':
+    if sys.platform == 'win32' and not hasattr(request.module, 'no_restart_windows_after_configuration_set'):
         control_service('start')
 
     # Restore previous configuration
-    write_wazuh_conf(backup_config)
+    conf.write_wazuh_conf(backup_config)
 
     # Call extra functions after yield
     if hasattr(request.module, 'extra_configuration_after_yield'):

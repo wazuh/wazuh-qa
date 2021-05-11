@@ -158,7 +158,7 @@ params = [
 
 
 def load_tests(path):
-    """ Loads a yaml file from a path
+    """Loads a yaml file from a path
     Return
     ----------
     yaml structure

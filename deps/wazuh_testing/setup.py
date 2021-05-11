@@ -3,7 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 from setuptools import setup, find_packages
 setup(name='wazuh_testing',
-      version='4.2.0',
+      version='4.3.0',
       description='Wazuh testing utilities to help programmers automate tests',
       url='https://github.com/wazuh',
       author='Wazuh',
@@ -30,7 +30,8 @@ setup(name='wazuh_testing',
             'wazuh-metrics=wazuh_testing.scripts.wazuh_metrics:main',
             'wazuh-statistics=wazuh_testing.scripts.wazuh_statistics:main',
             'data-visualizer=wazuh_testing.scripts.data_visualizations:main',
-            'simulate-api-load=wazuh_testing.scripts.simulate_api_load:main'
+            'simulate-api-load=wazuh_testing.scripts.simulate_api_load:main',
+            'wazuh-log-metrics=wazuh_testing.scripts.wazuh_log_metrics:main'
         ],
       },
       include_package_data=True,

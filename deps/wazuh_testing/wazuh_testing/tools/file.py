@@ -226,7 +226,7 @@ def copy(source, destination):
 def bind_unix_socket(socket_path, protocol='TCP'):
     """Allow to create a unix socket if it does not exist.
 
-    By default it is assigned owner and group ossec and permissions 660.
+    By default it is assigned owner and group wazuh and permissions 660.
 
     Args:
         socket_path (str): Path where create the unix socket.
@@ -237,7 +237,7 @@ def bind_unix_socket(socket_path, protocol='TCP'):
         new_socket = socket.socket(socket.AF_UNIX, sock_type)
         new_socket.bind(socket_path)
 
-        set_file_owner_and_group(socket_path, 'ossec', 'ossec')
+        set_file_owner_and_group(socket_path, 'wazuh', 'wazuh')
         os.chmod(socket_path, 0o660)
 
 
