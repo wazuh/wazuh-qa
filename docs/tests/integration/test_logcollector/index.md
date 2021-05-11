@@ -25,6 +25,11 @@ Command monitoring consists of periodically executing programs and logging their
 possible changes in it. These tests will verify that the `logcollector` command monitoring system works 
 correctly by running different commands with special characteristics.
 
+#### Test keep running
+
+This test will check if `logcollector` keeps running once a log is rotated 
+(move the data to another file and empty the file that is being monitored).
+
 #### Test only future events
 
 By default, when Wazuh starts it will only read the contents of the logs of a certain file since 

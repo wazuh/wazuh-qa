@@ -454,6 +454,8 @@ nav:
                 - Overview: tests/integration/test_logcollector/test_command_monitoring/index.md
                 - Test command execution: tests/integration/test_logcollector/test_command_monitoring/test_command_execution.md
                 - Test command execution freq: tests/integration/test_logcollector/test_command_monitoring/test_command_execution_freq.md
+            - Test keep running:
+                - Test keep running: tests/integration/test_logcollector/test_keep_running/test_keep_running.md
             - Test location:
                 - Overview: tests/integration/test_logcollector/test_location/index.md
                 - Test location: tests/integration/test_logcollector/test_location/test_location.md
