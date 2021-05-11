@@ -50,7 +50,7 @@ def callback_reading_file(log_format, content_file, prefix=monitoring.LOG_COLLEC
 
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
-def callback_read_file(location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
+def callback_read_file(location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, severity='DEBUG'):
     """
     Create a callback to detect if the logcollector read and not analized a file with specific content.
 
@@ -60,7 +60,8 @@ def callback_read_file(location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX
     Returns:
         callable: callback to detect this log.
     """
-    msg = fr"DEBUG: Read 1 lines from '{location}"
+
+    msg = fr"{severity}: Read 1 lines from {location}"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 def callback_invalid_format_value(line, option, location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, severity='DEBUG'):
@@ -73,7 +74,7 @@ def callback_invalid_format_value(line, option, location, prefix=monitoring.LOG_
         option (str): log format value .
         location (str): Wazuh manager configuration option.
         prefix (str): Daemon that generates the error log.
-        severity (str): Severity of the error (DEBUG, ERROR)
+        severity (str): Severity of the error (DEBUG)
 
     Returns:
         callable: callback to detect this event.
@@ -81,7 +82,7 @@ def callback_invalid_format_value(line, option, location, prefix=monitoring.LOG_
     if option == 'json':
         msg = fr"{severity}: Line '{line}' read from '{location}' is not a JSON object."
     elif option == 'audit':
-        msg = fr"{severity}: Discaring audit message because of invalid syntax."
+        msg = fr"ERROR: Discarding audit message because of invalid syntax."
     elif option == 'nmapg':
         msg = fr"{severity}: Bad formated nmap grepable file."
     elif option == 'djb-multilog':

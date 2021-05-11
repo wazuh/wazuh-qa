@@ -44,10 +44,10 @@ parameters = [
     {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog'},
     {'LOCATION': f'{location}', 'LOG_FORMAT': 'snort-full'},
     {'LOCATION': f'{location}', 'LOG_FORMAT': 'squid'},
-#    {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit'},
-#    {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit'},
-#    {'LOCATION': f'{location}', 'LOG_FORMAT': 'mysql_log'},
-#    {'LOCATION': f'{location}', 'LOG_FORMAT': 'postgresql_log'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'mysql_log'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'postgresql_log'},
 #    {'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapg'},
 #    {'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapg'},
 #    {'LOCATION': '/var/log/current', 'LOG_FORMAT': 'djb-multilog'},
@@ -61,10 +61,10 @@ metadata = [
     {'location': f'{location}', 'log_format': 'syslog', 'valid_value': True},
     {'location': f'{location}', 'log_format': 'snort-full', 'valid_value': True},
     {'location': f'{location}', 'log_format': 'squid', 'valid_value': True},
-#    {'location': f'{location}', 'log_format': 'audit', 'valid_value': False},
-#    {'location': f'{location}', 'log_format': 'audit', 'valid_value': True},
-#    {'location': f'{location}', 'log_format': 'mysql_log', 'valid_value': True},
-#    {'location': f'{location}', 'log_format': 'postgresql_log', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'audit', 'valid_value': False},
+    {'location': f'{location}', 'log_format': 'audit', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'mysql_log', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'postgresql_log', 'valid_value': True},
 #    {'location': f'{location}', 'log_format': 'nmapg', 'valid_value': True},
 #    {'location': f'{location}', 'log_format': 'nmapg', 'valid_value': False},
 #    {'location': '/var/log/current', 'log_format': 'djb-multilog', 'valid_value': True},
@@ -247,10 +247,6 @@ def check_log_format_value_valid(conf):
             log_callback = logcollector.callback_read_file(location, prefix=prefix)
             wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
 
-            if conf['log_format'] == 'nampg':
-                pass
-             #   file.remove_file('/var/log/nampg.log')
-
         elif conf['log_format'] == 'multi-line:3':
             msg = ""
             with open(location, 'r') as file:
@@ -285,7 +281,6 @@ def check_log_format_value_invalid(conf):
             if conf['log_format'] == 'json' or conf['log_format'] == 'djb-multilog':
                 log_callback = logcollector.callback_invalid_format_value(line.rstrip('\n'), conf['log_format'], location, prefix)
             elif conf['log_format'] == 'audit' or conf['log_format'] == 'nmapg':
-            #    severity = 'ERROR'
                 log_callback = logcollector.callback_invalid_format_value(line, conf['log_format'], location, prefix)
 
             wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR)
@@ -325,7 +320,10 @@ def test_log_format(get_local_internal_options, get_configuration, configure_loc
             check_log_format_valid(conf)
             modify_file(location, conf['log_format'], conf['valid_value'])
             check_log_format_value_valid(conf)
-            file.remove_file(location)
+            if conf['log_format'] == 'nampg':
+                file.remove_file('/var/log/nampg.log')
+            else:
+                file.remove_file(location)
 
     else:
 #        if sys.platform == 'win32':
@@ -347,4 +345,7 @@ def test_log_format(get_local_internal_options, get_configuration, configure_loc
             check_log_format_valid(conf)
             modify_file(location, conf['log_format'], conf['valid_value'])
             check_log_format_value_invalid(conf)
-            file.remove_file(location)
+            if conf['log_format'] == 'nampg':
+                file.remove_file('/var/log/nampg.log')
+            else:
+                file.remove_file(location)
