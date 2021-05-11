@@ -10,7 +10,6 @@ from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools.time import TimeMachine
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]
@@ -81,8 +80,8 @@ def test_command_execution_freq(get_local_internal_options, configure_local_inte
         TimeoutError: If the command monitoring callback is not generated.
     """
     config = get_configuration['metadata']
-    log_callback = logcollector.callback_running_command(log_format=config['log_format'], command=config['command'],
-                                                         prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
+    log_callback = logcollector.callback_running_command(log_format=config['log_format'], command=config['command'])
+
     seconds_to_travel = config['frequency'] / 2  # Middle of the command execution cycle.
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=log_callback,

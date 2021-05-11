@@ -11,7 +11,6 @@ from wazuh_testing.tools import monitoring, LOG_FILE_PATH
 from wazuh_testing import global_parameters
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]
@@ -115,17 +114,15 @@ def dbg_reading_command(command, alias, log_format):
     Raises:
         TimeoutError: If the command monitoring callback is not generated.
     """
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
     output = check_output(command, universal_newlines=True, shell=True).strip()
 
     if log_format == 'full_command':
         msg = fr"^{output}'"
-        prefix = ''
     else:
         msg = fr"DEBUG: Reading command message: 'ossec: output: '{alias}': {output}'"
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            callback=monitoring.make_callback(pattern=msg, prefix=prefix),
+                            callback=monitoring.make_callback(pattern=msg),
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
 
@@ -148,9 +145,7 @@ def test_command_execution(get_local_internal_options, configure_local_internal_
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                            callback=monitoring.make_callback(pattern=msg,
-                                                              prefix=LOG_COLLECTOR_DETECTOR_PREFIX,
-                                                              escape=True))
+                            callback=monitoring.make_callback(pattern=msg, escape=True))
 
 
 def test_command_execution_dbg(get_local_internal_options, configure_local_internal_options, get_configuration,
@@ -177,7 +172,6 @@ def test_command_execution_dbg(get_local_internal_options, configure_local_inter
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
                             callback=logcollector.callback_running_command(log_format=config['log_format'],
                                                                            command=config['command'],
-                                                                           prefix=LOG_COLLECTOR_DETECTOR_PREFIX,
                                                                            escape=True))
 
     # Command with known output to test "Reading command message: ..."
@@ -189,5 +183,4 @@ def test_command_execution_dbg(get_local_internal_options, configure_local_inter
         wazuh_log_monitor.start(timeout=60,
                                 error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
                                 callback=logcollector.callback_read_lines(command=config['command'],
-                                                                          prefix=LOG_COLLECTOR_DETECTOR_PREFIX,
                                                                           escape=True))
