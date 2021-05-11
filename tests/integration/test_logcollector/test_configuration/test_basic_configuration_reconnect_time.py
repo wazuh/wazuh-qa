@@ -7,7 +7,6 @@ import pytest
 import sys
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 import wazuh_testing.logcollector as logcollector
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
@@ -33,7 +32,6 @@ else:
 
 location = r'Security'
 wazuh_configuration = 'ossec.conf'
-prefix = AGENT_DETECTOR_PREFIX
 
 
 parameters = [
@@ -100,7 +98,7 @@ def check_configuration_reconnect_time_invalid(cfg):
     if cfg['reconnect_time'] in problematic_values:
         pytest.xfail("Logcolector accepts invalid values. Issue: https://github.com/wazuh/wazuh/issues/8158")
 
-    log_callback = logcollector.callback_invalid_reconnection_time(prefix=prefix)
+    log_callback = logcollector.callback_invalid_reconnection_time()
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected invalid reconnection time error has not been produced")
 

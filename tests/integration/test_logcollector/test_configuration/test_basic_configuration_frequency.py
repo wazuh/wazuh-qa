@@ -106,7 +106,7 @@ def check_configuration_frequency_valid(cfg):
     """
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    log_callback = logcollector.callback_monitoring_command(cfg['log_format'], cfg['command'], prefix=prefix)
+    log_callback = logcollector.callback_monitoring_command(cfg['log_format'], cfg['command'])
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 

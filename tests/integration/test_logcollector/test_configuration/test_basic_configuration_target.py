@@ -8,15 +8,9 @@ import wazuh_testing.api as api
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools import get_service
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import LOG_FILE_PATH
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.services import control_service
-import subprocess as sb
+
 
 LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
-import sys
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -28,10 +22,6 @@ configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.ya
 
 wazuh_component = get_service()
 
-if sys.platform == 'win32':
-    prefix = AGENT_DETECTOR_PREFIX
-else:
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 parameters = [
     {'SOCKET_NAME': 'custom_socket', 'SOCKET_PATH': '/var/log/messages', 'LOCATION': "/tmp/testing.log",
@@ -71,7 +61,7 @@ def check_configuration_target_valid(cfg):
         TimeoutError: If the socket target callback is not generated.
         AssertError: In the case of a server instance, the API response is different than the real configuration.
     """
-    log_callback = logcollector.callback_socket_target(cfg['location'], cfg['target'], prefix=prefix)
+    log_callback = logcollector.callback_socket_target(cfg['location'], cfg['target'])
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
 
@@ -90,7 +80,7 @@ def check_configuration_target_invalid(cfg):
     Raises:
         TimeoutError: If the error callbacks are not generated.
     """
-    log_callback = logcollector.callback_socket_not_defined(cfg['location'], cfg['target'], prefix=prefix)
+    log_callback = logcollector.callback_socket_not_defined(cfg['location'], cfg['target'])
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND)
 

@@ -5,7 +5,6 @@
 import os
 import pytest
 import wazuh_testing.logcollector as logcollector
-from wazuh_testing.tools.monitoring import AGENT_DETECTOR_PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 import sys
 
@@ -20,7 +19,6 @@ else:
 no_restart_windows_after_configuration_set = True
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
-prefix = AGENT_DETECTOR_PREFIX
 
 parameters = [
     {'LOG_FORMAT': 'eventchannel', 'QUERY': 'Event[System/EventID = 4624]'},

@@ -89,7 +89,7 @@ def check_configuration_age_valid(cfg):
     """
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    log_callback = logcollector.callback_analyzing_file(cfg['location'], prefix=prefix)
+    log_callback = logcollector.callback_analyzing_file(cfg['location'])
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
     if wazuh_component == 'wazuh-manager':

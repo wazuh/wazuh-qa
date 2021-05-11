@@ -183,6 +183,7 @@ def check_only_future_events_valid(cfg):
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)
 
+
 def check_only_future_events_invalid(cfg):
     """Check if Wazuh fails due to a invalid only future events configuration value.
 
@@ -205,6 +206,7 @@ def check_only_future_events_invalid(cfg):
 
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
+
 
 # fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)

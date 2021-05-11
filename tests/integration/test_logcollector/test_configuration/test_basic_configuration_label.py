@@ -9,7 +9,6 @@ import wazuh_testing.api as api
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools import get_service
 import wazuh_testing.logcollector as logcollector
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 
 
 # Marks
@@ -22,10 +21,8 @@ configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.ya
 
 if sys.platform == 'win32':
     location = r'C:\TESTING\testfile.txt'
-    prefix = AGENT_DETECTOR_PREFIX
 else:
     location = '/tmp/testing.txt'
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 wazuh_component = get_service()
 
@@ -75,7 +72,7 @@ def test_configuration_label(get_configuration, configure_environment, restart_l
     """
     cfg = get_configuration['metadata']
 
-    log_callback = logcollector.callback_analyzing_file(cfg['location'], prefix=prefix)
+    log_callback = logcollector.callback_analyzing_file(cfg['location'])
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
 

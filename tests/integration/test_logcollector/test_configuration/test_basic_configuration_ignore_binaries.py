@@ -93,7 +93,7 @@ def check_ignore_binaries_valid(cfg):
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     if sys.platform == 'win32':
-        log_callback = logcollector.callback_invalid_location_pattern(cfg['location'], prefix=prefix)
+        log_callback = logcollector.callback_invalid_location_pattern(cfg['location'])
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message=logcollector.GENERIC_CALLBACK_ERROR_INVALID_LOCATION)
 

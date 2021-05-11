@@ -119,7 +119,7 @@ def check_configuration_out_format_valid(cfg):
         TimeoutError: If the callback for the socket target is not generated.
         AssertError: In the case of a server instance, the API response is different than the real configuration.
     """
-    log_callback = logcollector.callback_socket_target(cfg['location'], cfg['target'], prefix=prefix)
+    log_callback = logcollector.callback_socket_target(cfg['location'], cfg['target'])
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
 
@@ -139,7 +139,7 @@ def check_configuration_out_format_invalid(cfg):
     Raises:
         TimeoutError: If the error callbacks are not generated.
     """
-    log_callback = logcollector.callback_log_target_not_found(cfg['location'], cfg['target_out_format'], prefix=prefix)
+    log_callback = logcollector.callback_log_target_not_found(cfg['location'], cfg['target_out_format'])
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND)
 

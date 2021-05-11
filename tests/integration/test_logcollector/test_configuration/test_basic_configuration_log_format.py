@@ -140,15 +140,15 @@ def check_log_format_valid(cfg):
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     if cfg['log_format'] not in log_format_not_print_analyzing_info:
-        log_callback = logcollector.callback_analyzing_file(cfg['location'], prefix=prefix)
+        log_callback = logcollector.callback_analyzing_file(cfg['location'])
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
     elif 'command' in cfg['log_format']:
-        log_callback = logcollector.callback_monitoring_command(cfg['log_format'], cfg['command'], prefix=prefix)
+        log_callback = logcollector.callback_monitoring_command(cfg['log_format'], cfg['command'])
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
     elif cfg['log_format'] == 'djb-multilog':
-        log_callback = logcollector.callback_monitoring_djb_multilog(cfg['location'], prefix=prefix)
+        log_callback = logcollector.callback_monitoring_djb_multilog(cfg['location'])
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message="The expected multilog djb log has not been produced")
 
