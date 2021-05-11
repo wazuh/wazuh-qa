@@ -102,11 +102,6 @@ def check_ignore_binaries_valid(cfg):
         real_configuration.pop('valid_value')
         api.wait_until_api_ready()
         api.compare_config_api_response([real_configuration], 'localfile')
-    else:
-        if sys.platform == 'win32':
-            assert get_process_cmd('wazuh-agent.exe') != 'None'
-        else:
-            assert check_if_process_is_running('wazuh-logcollector')
 
 
 def check_ignore_binaries_invalid(cfg):
