@@ -43,14 +43,12 @@ def callback_reading_file(log_format, content_file, prefix=monitoring.LOG_COLLEC
         msg = fr"{severity}: Reading json message: '{content_file}'"
     elif log_format == 'syslog' or log_format == 'snort-full' or log_format == 'squid':
         msg = fr"{severity}: Reading syslog message: '{content_file}'"
-    elif log_format == 'djb-multilog':
-        msg = fr"{severity}: Reading DJB multilog message: '{content_file}'"
     elif log_format == 'multi-line:3':
         msg = fr"{severity}: Reading message: '{content_file}'"
 
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
-def callback_read_file(location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, severity='DEBUG'):
+def callback_read_file(format, location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, severity='DEBUG'):
     """
     Create a callback to detect if the logcollector read and not analized a file with specific content.
 
@@ -60,8 +58,10 @@ def callback_read_file(location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX
     Returns:
         callable: callback to detect this log.
     """
-
-    msg = fr"{severity}: Read 1 lines from {location}"
+    if (format == 'nmapg'):
+        msg = fr"{severity}: Read 2 lines from {location}"
+    else:
+        msg = fr"{severity}: Read 1 lines from {location}"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 def callback_invalid_format_value(line, option, location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, severity='DEBUG'):
@@ -84,7 +84,7 @@ def callback_invalid_format_value(line, option, location, prefix=monitoring.LOG_
     elif option == 'audit':
         msg = fr"ERROR: Discarding audit message because of invalid syntax."
     elif option == 'nmapg':
-        msg = fr"{severity}: Bad formated nmap grepable file."
+        msg = fr"ERROR: Bad formated nmap grepable file."
     elif option == 'djb-multilog':
         msg = fr"{severity}: Invalid DJB log: '{line}'"
 
