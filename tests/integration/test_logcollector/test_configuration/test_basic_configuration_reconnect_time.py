@@ -15,9 +15,6 @@ import subprocess as sb
 
 LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 
-# Marks
-pytestmark = pytest.mark.tier(level=0)
-
 # Configuration
 no_restart_windows_after_configuration_set = True
 force_restart_after_restoring = True

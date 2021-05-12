@@ -52,9 +52,9 @@ windows_parameters = [
 macos_parameters = [{'LOCATION': 'oslog', 'LOG_FORMAT': 'oslog'}]
 
 if sys.platform == 'win32':
-    parameters + windows_parameters
+    parameters += windows_parameters
 elif sys.platform == 'darwin':
-    parameters + macos_parameters
+    parameters += macos_parameters
 
 metadata = lower_case_key_dictionary(parameters)
 
