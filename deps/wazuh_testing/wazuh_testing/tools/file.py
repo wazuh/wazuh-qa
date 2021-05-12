@@ -290,7 +290,8 @@ def create_file_structure(get_files_list):
                                                                       fileinfo.st_mtime - file['age']))
             elif 'size' in file:
                 logcollector.add_log_data(log_path=os.path.join(file['folder_path'], name),
-                                          log_line_message=file['content'], size_kib=10240)
+                                          log_line_message=file['content'], size_kib=file['size_kib'])
+
 
 def delete_file_structure(get_files_list):
     """Delete the directory structure specified for a test case"""

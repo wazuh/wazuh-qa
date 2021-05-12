@@ -41,11 +41,23 @@ metadata = [
      'log_line': "Jan  1 00:00:00 localhost test[0]: line="}
 ]
 
+current_line = logcollector.add_log_data(log_path=log_test_path, log_line_message=metadata[0]['log_line'],
+                                         size_kib=10240, print_line_num=True)
+
+file_structure = [
+    {
+        'folder_path': temp_dir,
+        'filename': ['test.log'],
+        'content': current_line,
+        'size_kib': 10240
+    }
+]
+
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 configuration_ids = [f"rotate_{x['location']}_in_{x['log_format']}_format" for x in metadata]
 
 
-# fixtures
+#Fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -58,19 +70,25 @@ def get_local_internal_options():
     return local_internal_options
 
 
+#@pytest.fixture(scope="module")
+#def generate_log_file():
+#    """Generate a log of size greater than 10 MiB for testing."""
+#    global current_line
+#    file.write_file(log_test_path, '')
+#    current_line = logcollector.add_log_data(log_path=log_test_path, log_line_message=metadata[0]['log_line'],
+#                                             size_kib=10240, print_line_num=True)
+#    yield
+#    file.remove_file(log_test_path)
+
+
 @pytest.fixture(scope="module")
-def generate_log_file():
-    """Generate a log of size greater than 10 MiB for testing."""
-    global current_line
-    file.write_file(log_test_path, '')
-    current_line = logcollector.add_log_data(log_path=log_test_path, log_line_message=metadata[0]['log_line'],
-                                             size_kib=10240, print_line_num=True)
-    yield
-    file.remove_file(log_test_path)
+def get_files_list():
+    """Get file list to create from the module."""
+    return file_structure
 
 
 def test_only_future_events(get_local_internal_options, configure_local_internal_options, get_configuration,
-                            configure_environment, generate_log_file, restart_logcollector):
+                            configure_environment, get_files_list, restart_logcollector):
     """Check if the "only-future-events" option is working correctly.
 
     To do this, logcollector is stopped and several lines are added to a test log file.
