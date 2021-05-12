@@ -1,4 +1,5 @@
 import sys
+from math import ceil
 
 from wazuh_testing.tools import monitoring
 
@@ -14,6 +15,7 @@ if sys.platform == 'win32':
     prefix = monitoring.AGENT_DETECTOR_PREFIX
 else:
     prefix = monitoring.LOG_COLLECTOR_DETECTOR_PREFIX
+
 
 def callback_analyzing_file(file):
     """Create a callback to detect if logcollector is monitoring a file.
@@ -166,7 +168,6 @@ def callback_invalid_location_pattern(location):
 
     Args:
         location (str): Location pattern
-        prefix (str): Daemon that generates the error log.
 
     Returns:
         callable: callback to detect this event.
@@ -175,12 +176,51 @@ def callback_invalid_location_pattern(location):
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
+def callback_ignoring_file(location_file):
+    """Create a callback to detect if specified file was ignored due to modification time.
+
+    Args:
+        location_file: File absolute path.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"DEBUG: Ignoring file '{location_file}' due to modification time"
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
+def callback_reading_syslog_message(message):
+    """Create a callback to detect if syslog message has been read.
+
+    Args:
+        message (str): Syslog message.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"DEBUG: Reading syslog message: '{message}'"
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
+def callback_read_line_from_file(n_lines, filename):
+    """Create a callback to detect if specified lines number has been read.
+
+    Args:
+        n_lines (str): Number of lines read.
+        filename (str): Filename from which lines have been read.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"DEBUG: Read {n_lines} lines from {filename}"
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
 def callback_read_lines(command, escape=False):
     """Create a callback to detect "DEBUG: Read <number> lines from command <command>" debug line.
 
     Args:
         command (str): Command to be monitored.
-        prefix (str): Daemon that generates the log.
         escape (bool): Flag to escape special characters in the pattern.
 
     Returns:
@@ -269,3 +309,25 @@ def callback_macos_oslog_monitoring():
     """
     msg = fr"Monitoring MacOS logs with: /usr/bin/log stream --style syslog"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
+def add_log_data(log_path, log_line_message, size_kib=1024, line_start=1, print_line_num=False):
+    """Increase the space occupied by a log file by adding lines to it.
+
+    Args:
+        log_path (str): Path to log file.
+        log_line_message (str): Line content to be added to the log.
+        size_kib (int, optional): Size in kibibytes (1024^2 bytes). Defaults to 1 MiB (1024 KiB).
+        line_start (int, optional): Line number to start with. Defaults to 1.
+        print_line_num (bool, optional): If True, in each line of the log its number is added. Defaults to False.
+
+    Returns:
+        int: Last line number written.
+    """
+    if len(log_line_message):
+        with open(log_path, 'a') as f:
+            lines = ceil((size_kib * 1024) / len(log_line_message))
+            for x in range(line_start, line_start + lines + 1):
+                f.write(f"{log_line_message}{x}\n") if print_line_num else f.write(f"{log_line_message}\n")
+        return line_start + lines - 1
+    return 0

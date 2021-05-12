@@ -10,15 +10,25 @@ logs and send them to the manager.
 #### Test configuration
 
 For each configuration option, we check if `logcollector` and `agentd` correctly
+starts and that any API request to the Manager configuration returns the same options that the specified configuration file.
+
+#### Test age
+
+Ensure age option work as expected, ignoring files that have not been  modified for a time greater than age 
+value using current date, even if datetime of the system changed while logcollector is running.
 starts and that any API request to the Manager configuration returns the same options that the specified
 in configuration file.
-
 
 #### Test command monitoring
 
 Command monitoring consists of periodically executing programs and logging their output to detect 
 possible changes in it. These tests will verify that the `logcollector` command monitoring system works 
 correctly by running different commands with special characteristics.
+
+#### Test keep running
+
+This test will check if `logcollector` keeps running once a log is rotated 
+(move the data to another file and empty the file that is being monitored).
 
 #### Test only future events
 
@@ -29,4 +39,3 @@ produced while the agent was stopped.
 #### Test location
 
 For each location and exclude option specified in the configuration file, check if `logcollector` is analyzing or excluding the required files.
-
