@@ -10,8 +10,8 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools import get_service
 from wazuh_testing.tools.services import get_process_cmd, check_if_process_is_running
 from wazuh_testing.tools.utils import lower_case_key_dictionary_array
+from wazuh_testing.wazuh_testing.logcollector import WINDOWS_CHANNEL_LIST
 import tempfile
-
 # Marks
 pytestmark = pytest.mark.tier(level=0)
 
@@ -35,19 +35,9 @@ parameters = [
     {'LOCATION': fr"{os.path.join(folder_path, 'file.log-%Y-%m-%d')}", 'LOG_FORMAT': 'syslog'},
 ]
 
-windows_parameters = [
-    {'LOCATION': 'Microsoft-Windows-Sysmon/Operational', 'LOG_FORMAT': 'eventchannel'},
-    {'LOCATION': 'Microsoft-Windows-Windows Firewall With Advanced Security/Firewall',
-     'LOG_FORMAT': 'eventchannel'},
-    {'LOCATION': 'Application', 'LOG_FORMAT': 'eventchannel'},
-    {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel'},
-    {'LOCATION': 'System', 'LOG_FORMAT': 'eventchannel'},
-    {'LOCATION': 'Microsoft-Windows-Sysmon/Operational', 'LOG_FORMAT': 'eventchannel'},
-    {'LOCATION': 'Microsoft-Windows-Windows Defender/Operational', 'LOG_FORMAT': 'eventchannel'},
-    {'LOCATION': 'File Replication Service', 'LOG_FORMAT': 'eventchannel'},
-    {'LOCATION': 'Service Microsoft-Windows-TerminalServices-RemoteConnectionManager',
-     'LOG_FORMAT': 'eventchannel'},
-]
+windows_parameters = []
+for channel in WINDOWS_CHANNEL_LIST:
+    windows_parameters.append({'LOCATION': f'{channel}', 'LOG_FORMAT': 'eventchannel'})
 
 macos_parameters = [{'LOCATION': 'oslog', 'LOG_FORMAT': 'oslog'}]
 

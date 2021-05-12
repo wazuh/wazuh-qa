@@ -65,15 +65,15 @@ for log_format in log_format_list:
         {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '5GB',
          'INVALID_VALUE': ''},
         {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no',
-         'MAX-SIZE': '43423423423', 'INVALID_VALUE': 'max_size'},
+         'MAX-SIZE': '43423423423', 'INVALID_VALUE': 'max-size'},
         {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '-12345',
-         'INVALID_VALUE': 'max_size'},
+         'INVALID_VALUE': 'max-size'},
         {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': 'test',
-         'INVALID_VALUE': 'max_size'},
+         'INVALID_VALUE': 'max-size'},
         {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '{/}',
-         'INVALID_VALUE': 'max_size'},
+         'INVALID_VALUE': 'max-size'},
         {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '!32817--',
-         'INVALID_VALUE': 'max_size'},
+         'INVALID_VALUE': 'max-size'},
         {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'yes', 'INVALID_VALUE': ''},
         {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'INVALID_VALUE': ''},
         {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'yesTesting',
@@ -139,9 +139,9 @@ def check_only_future_events_invalid(cfg):
 
     invalid_value = cfg['invalid_value']
 
-    if invalid_value == 'max_size':
-        option_value = cfg['max_size']
-        log_callback = gc.callback_invalid_attribute('only-future-events', 'max_size', option_value,
+    if invalid_value == 'max-size':
+        option_value = cfg['max-size']
+        log_callback = gc.callback_invalid_attribute('only-future-events', 'max-size', option_value,
                                                      prefix, severity="WARNING")
     else:
         option_value = cfg['only-future-events']
