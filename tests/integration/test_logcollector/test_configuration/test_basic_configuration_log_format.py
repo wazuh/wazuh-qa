@@ -3,22 +3,21 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import pytest
+import subprocess as sb
 import sys
 
-from wazuh_testing.tools.configuration import load_wazuh_configurations
-import wazuh_testing.logcollector as logcollector
-import wazuh_testing.generic_callbacks as gc
+import pytest
 import wazuh_testing.api as api
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
-from wazuh_testing.tools import get_service
-from wazuh_testing.tools.monitoring import FileMonitor
+import wazuh_testing.generic_callbacks as gc
+import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools import get_service
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
-import subprocess as sb
-from wazuh_testing.tools.utils import lower_case_key_dictionary
-
+from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 
 LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 
@@ -73,9 +72,7 @@ windows_tcases = [
     {'LOCATION': '/tmp/test.txt', 'LOG_FORMAT': 'eventchannel', 'COMMAND': 'example-command', 'VALID_VALUE': True}
 ]
 
-macos_tcases = [
-    {'LOCATION': 'oslog', 'LOG_FORMAT': 'oslog', 'COMMAND': 'example-command', 'VALID_VALUE': True},
-]
+macos_tcases = [{'LOCATION': 'oslog', 'LOG_FORMAT': 'oslog', 'COMMAND': 'example-command', 'VALID_VALUE': True}]
 
 if sys.platform == 'win32':
     tcases += windows_tcases
@@ -84,7 +81,7 @@ elif sys.platform == 'darwin':
 
 
 parameters = tcases.pop('VALID_VALUE')
-metadata = tcases.lower_case_key_dictionary(tcases)
+metadata = lower_case_key_dictionary_array(tcases)
 
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
