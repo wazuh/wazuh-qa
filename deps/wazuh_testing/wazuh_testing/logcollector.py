@@ -116,6 +116,20 @@ def callback_socket_not_defined(location, socket_name):
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 
+def callback_socket_connected(socket_name, socket_path):
+    """Create a callback to detect if logcollector has been connected to the specified socket.
+
+    Args:
+        socket_name (str): Socket name.
+        socket_path (str): Path to UNIX named socket.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"DEBUG: Connected to socket '{socket_name}' ({socket_path})"
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
 def callback_log_target_not_found(location, socket_name):
     """Create a callback to detect if a log target has not been found.
 
