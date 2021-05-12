@@ -21,7 +21,7 @@ DAEMON_NAME = "wazuh-logcollector"
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_only_future_events_conf.yaml')
 temp_dir = tempfile.gettempdir()
-log_test_path = os.path.join(temp_dir, 'test.log')
+log_test_path = os.path.join(temp_dir, 'wazuh-testing', 'test.log')
 current_line = 0
 
 local_internal_options = {
@@ -46,7 +46,7 @@ current_line = logcollector.add_log_data(log_path=log_test_path, log_line_messag
 
 file_structure = [
     {
-        'folder_path': temp_dir,
+        'folder_path': os.path.join(temp_dir, 'wazuh-testing'),
         'filename': ['test.log'],
         'content': current_line,
         'size_kib': 10240

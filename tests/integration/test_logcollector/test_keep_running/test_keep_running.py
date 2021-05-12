@@ -19,7 +19,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_keep_running_conf.yaml')
 temp_dir = tempfile.gettempdir()
-log_test_path = os.path.join(temp_dir, 'test_log.log')
+log_test_path = os.path.join(temp_dir, 'wazuh-testing', 'test_log.log')
 
 local_internal_options = {
     'logcollector.debug': 2,
@@ -44,7 +44,7 @@ message_line = f"{metadata[0]['log_line_before']}{metadata[0]['mode']}"
 
 file_structure = [
     {
-        'folder_path': temp_dir,
+        'folder_path': os.path.join(temp_dir, 'wazuh-testing'),
         'filename': ['test_log.log'],
         'content': f"{metadata[0]['log_line_before']}{metadata[0]['mode']}",
         'size_kib': 10240
