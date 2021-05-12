@@ -111,8 +111,13 @@ def get_random_string(string_length, digits=True):
     return ''.join(SystemRandom().choice(character_set) for _ in range(string_length))
 
 
-def lower_case_key_dictionary(dictionary):
-    for key in dictionary:
-        if not key.islower():
-            dictionary[key.lower()] = dictionary[key]
-            del dictionary[key]
+def lower_case_key_dictionary(array_dict):
+    lower_case_array_dict = []
+
+    for element in array_dict:
+        lower_case_element = {}
+        for key, value in element.items():
+            lower_case_element[str(key).lower()] = value
+        lower_case_array_dict.append(lower_case_element)
+
+    return lower_case_array_dict
