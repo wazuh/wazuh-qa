@@ -134,16 +134,6 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
 # Fixtures
-@pytest.fixture(scope="module")
-def create_directory():
-    """Create expected directories."""
-    os.makedirs(os.path.join(temp_dir, 'wazuh-testing'), exist_ok=True)
-
-    yield
-
-    rmtree(os.path.join(temp_dir, 'wazuh-testing'), ignore_errors=True)
-
-
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -156,22 +146,13 @@ def get_local_internal_options():
     return local_internal_options
 
 
-@pytest.fixture(scope='module')
-def create_files(request, get_configuration):
-    """Create expected files."""
-    files = get_configuration['metadata']['files']
-
-    for file_location in files:
-        open(file_location, 'w').close()
-
-    yield
-
-    for file_location in files:
-        if os.path.exists(file_location):
-            os.remove(file_location)
+@pytest.fixture(scope="module")
+def get_files_list():
+    """Get file list to create from the module."""
+    return file_structure
 
 
-def test_location_exclude(get_local_internal_options, configure_local_internal_options, create_directory, create_files,
+def test_location_exclude(get_local_internal_options, configure_local_internal_options, create_file_structure_module,
                  get_configuration, configure_environment, restart_logcollector):
     """Check if logcollector is excluding specified files.
 
