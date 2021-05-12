@@ -487,8 +487,3 @@ def test_agentd_connection_retries_pre_enrollment(configure_authd_server, config
 
     # Check Agentd is finally communicating
     log_monitor.start(timeout=120, callback=wait_notify, error_message="Notify message from agent was never sent!")
-
-    log_errors = search_error_messages()
-    assert log_errors is None, "Error found in logs: " + log_errors
-
-    return
