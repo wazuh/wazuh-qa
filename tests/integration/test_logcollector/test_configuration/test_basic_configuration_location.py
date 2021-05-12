@@ -9,7 +9,7 @@ import wazuh_testing.api as api
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools import get_service
 from wazuh_testing.tools.services import get_process_cmd, check_if_process_is_running
-from wazuh_testing.tools.utils import lower_case_key_dictionary
+from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 import tempfile
 
 # Marks
@@ -56,7 +56,7 @@ if sys.platform == 'win32':
 elif sys.platform == 'darwin':
     parameters += macos_parameters
 
-metadata = lower_case_key_dictionary(parameters)
+metadata = lower_case_key_dictionary_array(parameters)
 
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,

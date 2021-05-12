@@ -54,45 +54,45 @@ for log_format in log_format_list:
         location = temp_file_path
 
     tcases += [
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no',
-            'MAX_SIZE': '9999999999999999999999999999999B'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '5000B',
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no',
+            'MAX-SIZE': '9999999999999999999999999999999B', 'INVALID_VALUE': ''},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '5000B',
          'INVALID_VALUE': ''},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '500KB',
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '500KB',
          'INVALID_VALUE': ''},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '50MB',
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '50MB',
          'INVALID_VALUE': ''},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '5GB',
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '5GB',
          'INVALID_VALUE': ''},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '43423423423',
-         'INVALID_VALUE': 'max-size'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '-12345',
-         'INVALID_VALUE': 'max-size'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': 'test',
-         'INVALID_VALUE': 'max-size'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '{/}',
-         'INVALID_VALUE': 'max-size'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '!32817--',
-         'INVALID_VALUE': 'max-size'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'yes', 'INVALID_VALUE': ''},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'INVALID_VALUE': ''},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'yesTesting',
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no',
+         'MAX-SIZE': '43423423423', 'INVALID_VALUE': 'max_size'},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '-12345',
+         'INVALID_VALUE': 'max_size'},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': 'test',
+         'INVALID_VALUE': 'max_size'},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '{/}',
+         'INVALID_VALUE': 'max_size'},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '!32817--',
+         'INVALID_VALUE': 'max_size'},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'yes', 'INVALID_VALUE': ''},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'INVALID_VALUE': ''},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'yesTesting',
          'INVALID_VALUE': 'only-future-events'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'noTesting',
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'noTesting',
          'INVALID_VALUE': 'only-future-events'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'testingvalue',
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'testingvalue',
          'INVALID_VALUE': 'only-future-events'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': '1234',
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': '1234',
          'INVALID_VALUE': 'only-future-events'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'yes', 'INVALID_VALUE': ''},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'INVALID_VALUE': ''},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'yesTesting',
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'yes', 'INVALID_VALUE': ''},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'INVALID_VALUE': ''},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'yesTesting',
          'INVALID_VALUE': 'only-future-events'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'noTesting',
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'noTesting',
          'INVALID_VALUE': 'only-future-events'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'testingvalue',
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'testingvalue',
          'INVALID_VALUE': 'only-future-events'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': '1234',
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': '1234',
          'INVALID_VALUE': 'only-future-events'}
     ]
 
@@ -106,8 +106,8 @@ parameters = tcases
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
-configuration_ids = [f"{x['LOG_FORMAT']}_{x['ONLY_FUTURE_EVENTS']}_{x['MAX_SIZE']}" + f"" if 'MAX_SIZE' in x
-                     else f"{x['LOG_FORMAT']}_{x['ONLY_FUTURE_EVENTS']}" for x in parameters]
+configuration_ids = [f"{x['LOG_FORMAT']}_{x['ONLY-FUTURE-EVENTS']}_{x['MAX-SIZE']}" + f"" if 'MAX-SIZE' in x
+                     else f"{x['LOG_FORMAT']}_{x['ONLY-FUTURE-EVENTS']}" for x in parameters]
 
 
 def check_only_future_events_valid(cfg):
@@ -139,9 +139,9 @@ def check_only_future_events_invalid(cfg):
 
     invalid_value = cfg['invalid_value']
 
-    if invalid_value == 'max-size':
-        option_value = cfg['max-size']
-        log_callback = gc.callback_invalid_attribute('only-future-events', 'max-size', option_value,
+    if invalid_value == 'max_size':
+        option_value = cfg['max_size']
+        log_callback = gc.callback_invalid_attribute('only-future-events', 'max_size', option_value,
                                                      prefix, severity="WARNING")
     else:
         option_value = cfg['only-future-events']
