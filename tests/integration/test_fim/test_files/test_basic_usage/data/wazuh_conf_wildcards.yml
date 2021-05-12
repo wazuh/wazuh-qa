@@ -1,16 +1,15 @@
----
 # conf 1
 - tags:
-  - ossec_conf
+  - ossec_conf_wildcards_start
   apply_to_modules:
-  - MODULE_NAME
+  - test_basic_usage_wildcards
   sections:
   - section: syscheck
     elements:
     - disabled:
         value: 'no'
     - directories:
-        value: TEST_DIRECTORIES
+        value: TEST_WILDCARDS_START
         attributes:
         - check_all: 'yes'
         - FIM_MODE
