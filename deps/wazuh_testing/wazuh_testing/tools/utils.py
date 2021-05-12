@@ -109,3 +109,10 @@ def get_random_string(string_length, digits=True):
     character_set = string.ascii_uppercase + string.digits if digits else string.ascii_uppercase
 
     return ''.join(SystemRandom().choice(character_set) for _ in range(string_length))
+
+
+def lower_case_key_dictionary(dictionary):
+    for key in dictionary:
+        if not key.islower():
+            dictionary[key.lower()] = dictionary[key]
+            del dictionary[key]

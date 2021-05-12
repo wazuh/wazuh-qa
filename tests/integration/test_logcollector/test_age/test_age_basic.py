@@ -9,7 +9,7 @@ import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.time import time_to_seconds, time
+from wazuh_testing.tools.time import time_to_seconds
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)

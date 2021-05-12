@@ -26,7 +26,7 @@ wazuh_component = get_service()
 
 if sys.platform == 'win32':
     command = 'tasklist'
-elif sys.platfrom == 'darwin':
+elif sys.platform == 'darwin':
     command = 'ps aux'
 else:
     command = 'ps -aux'
