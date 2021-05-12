@@ -6,7 +6,6 @@ import datetime
 import os
 import sys
 import tempfile
-from shutil import rmtree
 
 import pytest
 from wazuh_testing import logcollector
@@ -26,6 +25,35 @@ local_internal_options = {'logcollector.debug': '2'}
 
 temp_dir = tempfile.gettempdir()
 date = datetime.date.today().strftime("%Y-%m-%d")
+
+file_structure = [
+    {
+        'folder_path': os.path.join(temp_dir, 'wazuh-testing'),
+        'filename': ['test.txt', 'foo.txt', 'bar.log', 'test.yaml', 'ñ.txt', 'Testing white spaces', 'test.log',
+                     'c1test.txt', 'c2test.txt', 'c3test.txt', f'file.log-{date}'],
+        'content': f'Content of testing_file\n'
+    },
+    {
+        'folder_path':  os.path.join(temp_dir, 'wazuh-testing', 'depth1'),
+        'filename': ['depth_test.txt'],
+        'content': f'Content of testing_file\n'
+    },
+    {
+        'folder_path': os.path.join(temp_dir, 'wazuh-testing', 'depth1', 'depth2'),
+        'filename': ['depth_test.txt'],
+        'content': f'Content of testing_file\n'
+    },
+    {
+        'folder_path': os.path.join(temp_dir, 'wazuh-testing', 'duplicated'),
+        'filename': ['duplicated.txt'],
+        'content': f'Content of testing_file\n'
+    },
+    {
+        'folder_path': os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs'),
+        'filename': [],
+        'content': f'Content of testing_file\n'
+    }
+]
 
 parameters = [
     {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'depth1', 'test.txt'), 'LOG_FORMAT': 'syslog'},
@@ -89,10 +117,22 @@ metadata = [
 if sys.platform != 'win32':
     for case in metadata:
         if case['location'] == os.path.join(temp_dir, 'wazuh-testing', '*'):
+            for value in file_structure:
+                if value['folder_path'] == os.path.join(temp_dir, 'wazuh-testing'):
+                    value['filename'].append('テスト.txt')
+                    value['filename'].append('ИСПЫТАНИЕ.txt')
+                    value['filename'].append('测试.txt')
+                    value['filename'].append( 'اختبار.txt')
             case['files'].append(os.path.join(temp_dir, 'wazuh-testing', 'テスト.txt'))
             case['files'].append(os.path.join(temp_dir, 'wazuh-testing', 'ИСПЫТАНИЕ.txt'))
             case['files'].append(os.path.join(temp_dir, 'wazuh-testing', '测试.txt'))
             case['files'].append(os.path.join(temp_dir, 'wazuh-testing', 'اختبار.txt'))
+
+for value in file_structure:
+    if value['folder_path'] == os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs'):
+        for i in range(2000):
+            value['filename'].append(f'multiple{i}.txt')
+
 
 # Configuration data
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)

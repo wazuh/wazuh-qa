@@ -17,8 +17,7 @@ from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH
-from wazuh_testing.tools.file import create_file_structure
-from wazuh_testing.tools.file import delete_file_structure
+from wazuh_testing.tools.file import create_file_structure, delete_file_structure
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs

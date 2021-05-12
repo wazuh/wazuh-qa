@@ -3,9 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import fnmatch
 import os
-import sys
 import tempfile
-from shutil import rmtree
 
 import pytest
 from wazuh_testing import logcollector
@@ -24,6 +22,15 @@ configurations_path = os.path.join(test_data_path, 'wazuh_location.yaml')
 local_internal_options = {'logcollector.debug': '2'}
 
 temp_dir = tempfile.gettempdir()
+
+file_structure = [
+    {
+        'folder_path': os.path.join(temp_dir, 'wazuh-testing'),
+        'filename': ['test.txt', 'test1.log', 'test2.log', '1test.txt', '2test.txt', '1test1.txt', '1test1.log',
+                     '2test2.log', 'test1.txt', 'test2.txt'],
+        'content': f'Content of testing_file\n'
+    },
+]
 
 parameters = [
     {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'test*'), 'LOG_FORMAT': 'syslog',

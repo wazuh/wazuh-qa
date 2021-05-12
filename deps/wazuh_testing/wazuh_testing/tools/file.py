@@ -6,13 +6,12 @@ import gzip
 import json
 import os
 import random
+import shutil
+import socket
+import stat
 import string
 import xml.etree.ElementTree as ET
 import zipfile
-import stat
-import shutil
-import socket
-
 from os.path import exists
 
 import filetype
