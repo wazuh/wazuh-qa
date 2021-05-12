@@ -77,7 +77,7 @@ set_debug_mode()
 
 
 # fixtures
-pytest.fixture(scope="module", params=configurations, ids=case_ids)
+@pytest.fixture(scope="module", params=configurations, ids=case_ids)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
