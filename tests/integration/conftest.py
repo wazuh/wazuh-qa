@@ -577,7 +577,7 @@ def put_env_variables(get_configuration, request):
                 os.unsetenv(env[0])
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def create_file_structure_module(get_files_list):
     """Module scope version of create_file_structure."""
     create_file_structure(get_files_list)
@@ -587,7 +587,7 @@ def create_file_structure_module(get_files_list):
     delete_file_structure(get_files_list)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def create_file_structure_function(get_files_list):
     """Function scope version of create_file_structure."""
     create_file_structure(get_files_list)

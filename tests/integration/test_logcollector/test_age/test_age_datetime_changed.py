@@ -31,7 +31,7 @@ folder_path_regex = os.path.join(folder_path, '*')
 file_structure = [
     {
         'folder_path': folder_path,
-        'filename': ["testing_age_dating.log"],
+        'filename': ['testing_age_dating.log'],
     }
 ]
 
@@ -58,13 +58,13 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
 configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['AGE']}" for x in parameters]
 
 
-@pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
+@pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def get_files_list():
     """Get file list to create from the module."""
     return file_structure

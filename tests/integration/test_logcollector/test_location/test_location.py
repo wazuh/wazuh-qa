@@ -141,7 +141,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
 # Fixtures
-@pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
+@pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
