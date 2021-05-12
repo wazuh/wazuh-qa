@@ -259,3 +259,13 @@ def callback_excluded_file(file):
     """
     msg = fr"File excluded: '{file}'."
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
+def callback_excluded_file():
+    """Create a callback to detect if logcollector is monitoring MacOS logs.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"Monitoring MacOS logs with: /usr/bin/log stream --style syslog"
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
