@@ -17,6 +17,8 @@ from os.path import exists
 import filetype
 import requests
 
+from deps.wazuh_testing.wazuh_testing import logcollector
+
 
 def read_json(file_path):
     """
@@ -286,7 +288,9 @@ def create_file_structure(get_files_list):
                 fileinfo = os.stat(f"{file['folder_path']}{file['filename']}")
                 os.utime(f"{file['folder_path']}{file['filename']}", (fileinfo.st_atime - file['age'],
                                                                       fileinfo.st_mtime - file['age']))
-
+            elif 'size' in file:
+                logcollector.add_log_data(log_path=os.path.join(file['folder_path'], name),
+                                          log_line_message=file['content'], size_kib=10240)
 
 def delete_file_structure(get_files_list):
     """Delete the directory structure specified for a test case"""

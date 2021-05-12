@@ -40,11 +40,22 @@ metadata = [
      'log_line_after': "log test line: AFTER "}
 ]
 
+message_line = f"{metadata[0]['log_line_before']}{metadata[0]['mode']}"
+
+file_structure = [
+    {
+        'folder_path': temp_dir,
+        'filename': ['test_log.log'],
+        'content': f"{metadata[0]['log_line_before']}{metadata[0]['mode']}",
+        'size_kib': 10240
+    }
+]
+
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 configuration_ids = [f"{x['mode']}_{x['location']}_in_{x['log_format']}_format" for x in metadata]
 
 
-# fixtures
+# Fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -58,17 +69,13 @@ def get_local_internal_options():
 
 
 @pytest.fixture(scope="module")
-def generate_log_file():
-    """Generate a log file of approximately 10 mebibytes for testing."""
-    message_line = f"{metadata[0]['log_line_before']}{metadata[0]['mode']}"
-    file.write_file(log_test_path, '')
-    logcollector.add_log_data(log_path=log_test_path, log_line_message=message_line, size_kib=10240)
-    yield
-    file.remove_file(log_test_path)
+def get_files_list():
+    """Get file list to create from the module."""
+    return file_structure
 
 
 def test_keep_running(get_local_internal_options, configure_local_internal_options, get_configuration,
-                      configure_environment, generate_log_file, restart_logcollector):
+                      configure_environment, create_file_structure_module, restart_logcollector):
     """Check if logcollector keeps running once a log is rotated.
 
     To do this, logcollector is configured to monitor a log file, then data is added to the log and it is rotated.
