@@ -217,32 +217,23 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, configu
     authd_server.clear()
 
     # Wait until Agent is notifying Manager
-    try:
-        log_monitor.start(timeout=120, callback=wait_notify)
-    except TimeoutError:
-        remoted_server.stop()
-        raise AssertionError("Notify message from agent was never sent!")
-    assert "aes" in remoted_server.last_message_ctx, "Incorrect Secure Message"
+    log_monitor.start(timeout=120, callback=wait_notify, error_message="Notify message from agent was never sent!")
+
 
     # Start rejecting Agent
     remoted_server.set_mode('REJECT')
     # hearing on enrollment server
     authd_server.clear()
     # Wait until Agent asks a new key to enrollment
-    try:
-        log_monitor.start(timeout=180, callback=wait_enrollment)
-    except TimeoutError:
-        remoted_server.stop()
-        raise AssertionError("Agent never enrolled after rejecting connection!")
+    log_monitor.start(timeout=180, callback=wait_enrollment,
+                      error_message="Agent never enrolled after rejecting connection!")
+
 
     # Start responding to Agent
     remoted_server.set_mode('CONTROLLED_ACK')
     # Wait until Agent is notifying Manager
     log_monitor.start(timeout=120, callback=wait_notify, error_message="Notify message from agent was never sent!")
     assert "aes" in remoted_server.last_message_ctx, "Incorrect Secure Message"
-
-    return
-
 
 """
 This test covers the scenario of Agent starting without client.keys file
@@ -305,8 +296,6 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, conf
     # Wait until Agent is notifing Manager
     log_monitor.start(timeout=120, callback=wait_notify, error_message="Notify message from agent was never sent!")
     assert "aes" in remoted_server.last_message_ctx, "Incorrect Secure Message"
-
-    return
 
 
 """
@@ -371,8 +360,6 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, configure
     # Wait until Agent is notifying Manager
     log_monitor.start(timeout=120, callback=wait_notify, error_message="Notify message from agent was never sent!")
     assert "aes" in remoted_server.last_message_ctx, "Incorrect Secure Message"
-
-    return
 
 
 """
@@ -442,9 +429,6 @@ def test_agentd_initial_enrollment_retries(configure_authd_server, configure_env
         for line in log_lines:
             if "Unable to access queue:" in line:
                 raise AssertionError("A Wazuh module stopped because of Agentd initialization!")
-
-    return
-
 
 """
 This test covers and check the scenario of Agent starting with keys but Remoted is not reachable during some seconds

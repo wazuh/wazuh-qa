@@ -611,6 +611,7 @@ class RemotedSimulator:
         if not os.path.exists(self.client_keys_path):
             with open(self.client_keys_path, 'w+') as f:
                 f.write("100 ubuntu-agent any TopSecret")
+
         with open(self.client_keys_path) as client_file:
             client_lines = client_file.read().splitlines()
 

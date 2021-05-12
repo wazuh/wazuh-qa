@@ -84,11 +84,7 @@ def configure_authd_server(request):
 
 def clean_log_file():
     """Clear the log file located in LOG_FILE_PATH."""
-    try:
-        client_file = open(LOG_FILE_PATH, 'w')
-        client_file.close()
-    except IOError:
-        raise
+    open(LOG_FILE_PATH, 'w').close()
 
 
 def override_wazuh_conf(configuration):
