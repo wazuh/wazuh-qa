@@ -47,7 +47,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 
 # fixtures
-@pytest.fixture(scope="module", params=configurations)
+@pytest.fixture(scope="module", params=configurations, ids=[''])
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
@@ -65,7 +65,8 @@ def configure_authd_server(request):
     authd_server.shutdown()
 
 
-@pytest.mark.parametrize('test_case', [case for case in tests])
+
+pytest.mark.parametrize('test_case', tests, ids=[case['description'] for case in tests])
 def test_agent_auth_enrollment(configure_authd_server, configure_environment, test_case: list):
     """Test different situations that can occur on the agent-auth program during agent enrollment.
 
