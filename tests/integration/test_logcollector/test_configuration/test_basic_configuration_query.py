@@ -6,7 +6,7 @@ import os
 import pytest
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.wazuh_testing.logcollector import WINDOWS_CHANNEL_LIST
+from wazuh_testing.logcollector import WINDOWS_CHANNEL_LIST
 import sys
 
 # Marks

@@ -10,7 +10,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools import get_service
 from wazuh_testing.tools.services import get_process_cmd, check_if_process_is_running
 from wazuh_testing.tools.utils import lower_case_key_dictionary_array
-from wazuh_testing.wazuh_testing.logcollector import WINDOWS_CHANNEL_LIST
+from wazuh_testing.logcollector import WINDOWS_CHANNEL_LIST
 import tempfile
 # Marks
 pytestmark = pytest.mark.tier(level=0)
