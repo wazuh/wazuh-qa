@@ -27,31 +27,31 @@ local_internal_options = {'logcollector.vcheck_files': 0}
 file_structure = [
     {
         "folder_path": folder_path,
-        "filename": "testing_file_40s.log",
+        "filename": ["testing_file_40s.log"],
         "age": 40,
         'content': f'Content of testing_file_40s\n'
     },
     {
         "folder_path": folder_path,
-        "filename": "testing_file_5m.log",
+        "filename": ["testing_file_5m.log"],
         "age": 300,
         'content': f'Content of testing_file_5m\n'
     },
     {
         "folder_path": folder_path,
-        "filename": "testing_file_3h.log",
+        "filename": ["testing_file_3h.log"],
         "age": 10800,
         'content': f'Content of testing_file_3h\n'
     },
     {
         "folder_path": folder_path,
-        "filename": "testing_file_5d.log",
+        "filename": ["testing_file_5d.log"],
         "age": 432000,
         'content': f'Content of testing_file_5d\n'
     },
     {
         "folder_path": folder_path,
-        "filename": "testing_file_300d.log",
+        "filename": ["testing_file_300d.log"],
         "age": 25920000,
         'content': f'Content of testing_file_300d\n'
     },
@@ -96,7 +96,7 @@ def get_local_internal_options():
 
 @pytest.mark.xfail(reason="Expected error. Issue https://github.com/wazuh/wazuh/issues/8438")
 def test_configuration_age_basic(get_local_internal_options, configure_local_internal_options, get_files_list,
-                                 create_file_structure, get_configuration, configure_environment, restart_logcollector):
+                                 create_file_structure_function, get_configuration, configure_environment, restart_logcollector):
     """Check if logcollector works correctly and uses the specified age value.
 
     Check that those files that have not been modified for a time greater than age value, are ignored for logcollector.

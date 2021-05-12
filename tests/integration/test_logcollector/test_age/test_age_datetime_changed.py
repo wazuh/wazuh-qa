@@ -30,8 +30,8 @@ folder_path_regex = os.path.join(folder_path, '*')
 
 file_structure = [
     {
-        "folder_path": folder_path,
-        "filename": "testing_age_dating.log",
+        'folder_path': folder_path,
+        'filename': ["testing_age_dating.log"],
     }
 ]
 
@@ -58,13 +58,13 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
 configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['AGE']}" for x in parameters]
 
 
-@pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
+@pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def get_files_list():
     """Get file list to create from the module."""
     return file_structure
@@ -72,7 +72,7 @@ def get_files_list():
 
 @pytest.mark.parametrize('new_datetime', new_host_datetime)
 def test_configuration_age_datetime(new_datetime, get_files_list, get_configuration,
-                                    create_file_structure, configure_environment):
+                                    create_file_structure_function, configure_environment):
     """Check if logcollector age option works correctly when date time of the system changes.
 
     Ensure that when date of the system change logcollector use properly age value, ignoring files that have not been
@@ -92,24 +92,25 @@ def test_configuration_age_datetime(new_datetime, get_files_list, get_configurat
     TimeMachine.travel_to_future(time_to_timedelta(new_datetime))
 
     for file in file_structure:
-        absolute_file_path = os.path.join(file['folder_path'], file['filename'])
+        for name in file['filename']:
+            absolute_file_path = os.path.join(file['folder_path'], name)
 
-        log_callback = logcollector.callback_match_pattern_file(cfg['location'], absolute_file_path)
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message=f'{file["filename"]} was not detected')
-
-        fileinfo = os.stat(absolute_file_path)
-        current_time = time.time()
-        mfile_time = current_time - fileinfo.st_mtime
-
-        if age_seconds <= int(mfile_time):
-            log_callback = logcollector.callback_ignoring_file(absolute_file_path)
+            log_callback = logcollector.callback_match_pattern_file(cfg['location'], absolute_file_path)
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                    error_message=f'{file["filename"]} was not ignored')
-        else:
-            with pytest.raises(TimeoutError):
+                                    error_message=f"{name} was not detected")
+
+            fileinfo = os.stat(absolute_file_path)
+            current_time = time.time()
+            mfile_time = current_time - fileinfo.st_mtime
+
+            if age_seconds <= int(mfile_time):
                 log_callback = logcollector.callback_ignoring_file(absolute_file_path)
                 wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                        error_message=f'{file["filename"]} was not ignored')
+                                        error_message=f"{name} was not ignored")
+            else:
+                with pytest.raises(TimeoutError):
+                    log_callback = logcollector.callback_ignoring_file(absolute_file_path)
+                    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                            error_message=f"{name} was not ignored")
 
-    TimeMachine.time_rollback()
+        TimeMachine.time_rollback()

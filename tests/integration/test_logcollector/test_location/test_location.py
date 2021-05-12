@@ -159,8 +159,8 @@ def get_files_list():
     return file_structure
 
 
-def test_location(get_local_internal_options, configure_local_internal_options, create_file_structure_module,
-                  get_configuration, configure_environment, restart_logcollector):
+def test_location(get_local_internal_options, configure_local_internal_options, get_files_list,
+                  create_file_structure_module, get_configuration, configure_environment, restart_logcollector):
     """Check if logcollector is running properly with the specified configuration.
 
     Raises:
