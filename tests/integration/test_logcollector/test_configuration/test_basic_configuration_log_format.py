@@ -45,31 +45,30 @@ else:
 wazuh_component = get_service()
 
 tcases = [
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'COMMAND': 'example-command', 'VALID_VALUE': True},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'json', 'COMMAND': 'example-command', 'VALID_VALUE': True},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'snort-full', 'COMMAND': 'example-command', 'VALID_VALUE': True},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'mysql_log', 'COMMAND': 'example-command', 'VALID_VALUE': True},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'postgresql_log', 'COMMAND': 'example-command', 'VALID_VALUE': True},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapg', 'COMMAND': 'example-command', 'VALID_VALUE': True},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'iis', 'COMMAND': 'example-command', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'json', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'snort-full', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'mysql_log', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'postgresql_log', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapg', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'iis', 'VALID_VALUE': True},
     {'LOCATION': f'{location}', 'LOG_FORMAT': 'command', 'COMMAND': 'example-command', 'VALID_VALUE': True},
     {'LOCATION': f'{location}', 'LOG_FORMAT': 'full_command', 'COMMAND': 'example-command', 'VALID_VALUE': True},
-    {'LOCATION': '/var/log/testing/current', 'LOG_FORMAT': 'djb-multilog', 'COMMAND': 'example-command',
-     'VALID_VALUE': True},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'multi-line:3', 'COMMAND': 'example-command', 'VALID_VALUE': True},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'squid', 'COMMAND': 'example-command', 'VALID_VALUE': True},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit', 'COMMAND': 'example-command', 'VALID_VALUE': True},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'invalid', 'COMMAND': 'example-command', 'VALID_VALUE': False},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'testing', 'COMMAND': 'example-command', 'VALID_VALUE': False},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'iisTesting', 'COMMAND': 'example-command', 'VALID_VALUE': False},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapgFSKF', 'COMMAND': 'example-command', 'VALID_VALUE': False},
+    {'LOCATION': '/var/log/testing/current', 'LOG_FORMAT': 'djb-multilog', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'multi-line:3', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'squid', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'invalid', 'VALID_VALUE': False},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'testing', 'VALID_VALUE': False},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'iisTesting', 'VALID_VALUE': False},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapgFSKF', 'VALID_VALUE': False},
     {'LOCATION': f'{location}', 'LOG_FORMAT': 'jsonLGK', 'COMMAND': 'example-command', 'VALID_VALUE': False},
     {'LOCATION': f'{location}', 'LOG_FORMAT': 'commandFLKD', 'COMMAND': 'example-command', 'VALID_VALUE': False}
 ]
 
 windows_tcases = [
-    {'LOCATION': 'Security', 'LOG_FORMAT': 'eventlog', 'COMMAND': 'example-command', 'VALID_VALUE': True},
-    {'LOCATION': '/tmp/test.txt', 'LOG_FORMAT': 'eventchannel', 'COMMAND': 'example-command', 'VALID_VALUE': True}
+    {'LOCATION': 'Security', 'LOG_FORMAT': 'eventlog', 'VALID_VALUE': True},
+    {'LOCATION': '/tmp/test.txt', 'LOG_FORMAT': 'eventchannel', 'VALID_VALUE': True}
 ]
 
 macos_tcases = [{'LOCATION': 'oslog', 'LOG_FORMAT': 'oslog', 'COMMAND': 'example-command', 'VALID_VALUE': True}]
@@ -90,7 +89,10 @@ parameters = tcases
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
-configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['COMMAND']}" for x in parameters]
+
+configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['COMMAND']}" + f"" if 'COMMAND' in x
+                     else f"{x['LOCATION']}_{x['LOG_FORMAT']}" for x in parameters]
+
 
 log_format_not_print_analyzing_info = ['command', 'full_command', 'eventlog', 'eventchannel']
 
