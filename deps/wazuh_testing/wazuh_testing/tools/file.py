@@ -278,7 +278,11 @@ def set_file_owner_and_group(file_path, owner, group):
 
 
 def create_file_structure(get_files_list):
-    """Create the directory structure specified for a test case"""
+    """Create the specified file tree structure.
+
+    Args:
+        get_files_list(dict):  Files to create.
+    """
     for file in get_files_list:
         os.makedirs(file['folder_path'], exist_ok=True, mode=0o777)
         for name in file['filename']:
@@ -294,6 +298,10 @@ def create_file_structure(get_files_list):
 
 
 def delete_file_structure(get_files_list):
-    """Delete the directory structure specified for a test case"""
+    """Delete the specified file tree structure.
+
+    Args:
+        get_files_list(dict):  Files to delete.
+    """
     for file in get_files_list:
         shutil.rmtree(file['folder_path'], ignore_errors=True)

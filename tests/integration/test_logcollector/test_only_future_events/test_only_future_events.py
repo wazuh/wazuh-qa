@@ -70,17 +70,6 @@ def get_local_internal_options():
     return local_internal_options
 
 
-#@pytest.fixture(scope="module")
-#def generate_log_file():
-#    """Generate a log of size greater than 10 MiB for testing."""
-#    global current_line
-#    file.write_file(log_test_path, '')
-#    current_line = logcollector.add_log_data(log_path=log_test_path, log_line_message=metadata[0]['log_line'],
-#                                             size_kib=10240, print_line_num=True)
-#    yield
-#    file.remove_file(log_test_path)
-
-
 @pytest.fixture(scope="module")
 def get_files_list():
     """Get file list to create from the module."""
