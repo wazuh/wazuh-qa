@@ -225,7 +225,7 @@ class LogParser(ABC):
             pass
 
         for key, value in self.data.items():
-            with open(join(self.dst_dir, f"{key.replace(' ', '_')}.csv"), 'w', newline='') as f:
+            with open(join(self.dst_dir, f"{key.replace(' ', '_')}.csv".lower()), 'w', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerow(self.columns)
                 writer.writerows(value)
@@ -246,19 +246,20 @@ class ClusterLogParser(LogParser):
     def __init__(self, log_file, dst_dir=gettempdir()):
         # group1 Timestamp - group2 node_name - group3 activity - group4 time_spent(s)
         regex = r'(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) .* ' \
-                r'\[Worker Test_cluster_performance_.*_(manager_\d+)] \[(.*)] Finished in (\d+.\d+)s.*'
+                r'\[Worker .*_(manager_\d+)] \[(.*)] Finished in (\d+.\d+)s.*'
         columns = ['Timestamp', 'node_name', 'activity', 'time_spent(s)']
         super().__init__(log_file, regex, columns, dst_dir)
 
     def _log_parser(self):
         """Function in charge of parsing the information of the cluster.log file."""
         performance_information = dict()
-        for match in self.regex.finditer(open(self.log_file).read()):
-            try:
-                performance_information[match.group(3)].append(match.groups())
-            except KeyError:
-                performance_information[match.group(3)] = list()
-                performance_information[match.group(3)].append(match.groups())
+        with open(self.log_file) as log:
+            for match in self.regex.finditer(log.read()):
+                try:
+                    performance_information[match.group(3)].append(match.groups())
+                except KeyError:
+                    performance_information[match.group(3)] = list()
+                    performance_information[match.group(3)].append(match.groups())
 
         return performance_information
 
