@@ -11,11 +11,14 @@ import wazuh_testing.generic_callbacks as gc
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.monitoring import AGENT_DETECTOR_PREFIX, FileMonitor, LOG_COLLECTOR_DETECTOR_PREFIX
 from wazuh_testing.tools import get_service, LOG_FILE_PATH
+from tempfile import gettempdir
+from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 
 LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
+prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 # Marks
-# pytestmark = pytest.mark.tier(level=0)
+pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
 no_restart_windows_after_configuration_set = True
@@ -26,139 +29,79 @@ wazuh_component = get_service()
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
+temp_file_path = os.path.join(gettempdir(), 'testing.log')
+
+
+log_format_list = ['syslog', 'json', 'snort-full', 'mysql_log', 'postgresql_log', 'nmapg', 'iis', 'djb-multilog',
+                   'multi-line:3', 'squid', 'audit']
+tcases = []
+
+
 if sys.platform == 'win32':
     prefix = AGENT_DETECTOR_PREFIX
-    parameters = [
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'no',
+    log_format_list += ['eventchannel']
+elif sys.platform == 'darwin':
+    log_format_list += ['oslog']
+
+for log_format in log_format_list:
+    if log_format == 'djb-multilog':
+        location = '/var/log/testing/current'
+    elif log_format == 'eventchannel':
+        location = 'Security'
+    elif log_format == 'oslog':
+        location = 'oslog'
+    else:
+        location = temp_file_path
+
+    tcases += [
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no',
             'MAX_SIZE': '9999999999999999999999999999999B'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '5000B'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '500KB'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '50MB'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '5GB'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '43423423423'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '-12345'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': 'test'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '{}'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '!32817--'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'yes'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'no'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'yesTesting'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'noTesting'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': 'testingvalue'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'eventchannel', 'ONLY_FUTURE_EVENTS': '1234'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'syslog', 'ONLY_FUTURE_EVENTS': 'yes'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'syslog', 'ONLY_FUTURE_EVENTS': 'no'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'syslog', 'ONLY_FUTURE_EVENTS': 'yesTesting'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'syslog', 'ONLY_FUTURE_EVENTS': 'noTesting'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'syslog', 'ONLY_FUTURE_EVENTS': 'testingvalue'},
-        {'LOCATION': 'Security', 'LOG_FORMAT': 'syslog', 'ONLY_FUTURE_EVENTS': '1234'}
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '5000B',
+         'INVALID_VALUE': ''},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '500KB',
+         'INVALID_VALUE': ''},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '50MB',
+         'INVALID_VALUE': ''},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '5GB',
+         'INVALID_VALUE': ''},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '43423423423',
+         'INVALID_VALUE': 'max-size'},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '-12345',
+         'INVALID_VALUE': 'max-size'},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': 'test',
+         'INVALID_VALUE': 'max-size'},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '{/}',
+         'INVALID_VALUE': 'max-size'},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '!32817--',
+         'INVALID_VALUE': 'max-size'},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'yes', 'INVALID_VALUE': ''},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'INVALID_VALUE': ''},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'yesTesting',
+         'INVALID_VALUE': 'only-future-events'},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'noTesting',
+         'INVALID_VALUE': 'only-future-events'},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'testingvalue',
+         'INVALID_VALUE': 'only-future-events'},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': '1234',
+         'INVALID_VALUE': 'only-future-events'},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'yes', 'INVALID_VALUE': ''},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'no', 'INVALID_VALUE': ''},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'yesTesting',
+         'INVALID_VALUE': 'only-future-events'},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'noTesting',
+         'INVALID_VALUE': 'only-future-events'},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': 'testingvalue',
+         'INVALID_VALUE': 'only-future-events'},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY_FUTURE_EVENTS': '1234',
+         'INVALID_VALUE': 'only-future-events'}
     ]
 
-    metadata = [
-        {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'no',
-         'max-size': '9999999999999999999999999999999B', 'invalid_value': ''},
-        {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'no', 'max-size': '5000B',
-            'invalid_value': ''},
-        {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'no', 'max-size': '500KB',
-            'invalid_value': ''},
-        {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'no', 'max-size': '50MB',
-            'invalid_value': ''},
-        {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'no', 'max-size': '5GB',
-            'invalid_value': ''},
-        {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'no', 'max-size': '43423423423',
-         'invalid_value': 'max-size'},
-        {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'no', 'max-size': '-12345',
-         'invalid_value': 'max-size'},
-        {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'no', 'max-size': 'test',
-         'invalid_value': 'max-size'},
-        {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'no', 'max-size': '{}',
-         'invalid_value': 'max-size'},
-        {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'no', 'max-size': '!32817--',
-         'invalid_value': 'max-size'},
-        {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'yes', 'invalid_value': ''},
-        {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'no', 'invalid_value': ''},
-        {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'yesTesting',
-         'invalid_value': 'only-future-events'},
-        {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'noTesting', 'invalid_value': 'only-future-events'},
-        {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': 'testingvalue',
-         'invalid_value': 'only-future-events'},
-        {'location': 'Security', 'log_format': 'eventchannel', 'only-future-events': '1234', 'invalid_value': 'only-future-events'},
-        {'location': 'Security', 'log_format': 'syslog', 'only-future-events': 'yes', 'invalid_value': ''},
-        {'location': 'Security', 'log_format': 'syslog', 'only-future-events': 'no', 'invalid_value': ''},
-        {'location': 'Security', 'log_format': 'syslog', 'only-future-events': 'yesTesting',
-         'invalid_value': 'only-future-events'},
-        {'location': 'Security', 'log_format': 'syslog', 'only-future-events': 'noTesting', 'invalid_value': 'only-future-events'},
-        {'location': 'Security', 'log_format': 'syslog', 'only-future-events': 'testingvalue',
-         'invalid_value': 'only-future-events'},
-        {'location': 'Security', 'log_format': 'syslog', 'only-future-events': '1234', 'invalid_value': 'only-future-events'}
-    ]
+metadata = lower_case_key_dictionary_array(tcases)
 
-else:
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
-    parameters = [
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'json', 'ONLY_FUTURE_EVENTS': 'no',
-            'MAX_SIZE': '9999999999999999999999999999999B'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'json', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '5000B'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'json', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '500KB'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'json', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '50MB'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'json', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '5GB'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'json', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '43423423423'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'json', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '-12345'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'json', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': 'test'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'json', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '{/}'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'json', 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '!32817--'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'json', 'ONLY_FUTURE_EVENTS': 'yes'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'json', 'ONLY_FUTURE_EVENTS': 'no'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'json', 'ONLY_FUTURE_EVENTS': 'yesTesting'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'json', 'ONLY_FUTURE_EVENTS': 'noTesting'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'json', 'ONLY_FUTURE_EVENTS': 'testingvalue'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'json', 'ONLY_FUTURE_EVENTS': '1234'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'syslog', 'ONLY_FUTURE_EVENTS': 'yes'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'syslog', 'ONLY_FUTURE_EVENTS': 'no'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'syslog', 'ONLY_FUTURE_EVENTS': 'yesTesting'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'syslog', 'ONLY_FUTURE_EVENTS': 'noTesting'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'syslog', 'ONLY_FUTURE_EVENTS': 'testingvalue'},
-        {'LOCATION': '/var/log/testing.log', 'LOG_FORMAT': 'syslog', 'ONLY_FUTURE_EVENTS': '1234'}
-    ]
+for element in tcases:
+    element.pop('INVALID_VALUE')
 
-    metadata = [
-        {'location': '/var/log/testing.log', 'log_format': 'json', 'only-future-events': 'no', 'invalid_value': '',
-            'max-size': '9999999999999999999999999999999B'},
-        {'location': '/var/log/testing.log', 'log_format': 'json', 'only-future-events': 'no', 'invalid_value': '',
-            'max-size': '5000B'},
-        {'location': '/var/log/testing.log', 'log_format': 'json', 'only-future-events': 'no', 'invalid_value': '',
-            'max-size': '500KB'},
-        {'location': '/var/log/testing.log', 'log_format': 'json', 'only-future-events': 'no', 'invalid_value': '',
-            'max-size': '50MB'},
-        {'location': '/var/log/testing.log', 'log_format': 'json', 'only-future-events': 'no', 'invalid_value': '',
-            'max-size': '5GB'},
-        {'location': '/var/log/testing.log', 'log_format': 'json', 'only-future-events': 'no', 'invalid_value': 'max-size',
-         'max-size': '43423423423'},
-        {'location': '/var/log/testing.log', 'log_format': 'json', 'only-future-events': 'no', 'invalid_value': 'max-size',
-         'max-size': '-12345'},
-        {'location': '/var/log/testing.log', 'log_format': 'json', 'only-future-events': 'no', 'invalid_value': 'max-size',
-         'max-size': 'test'},
-        {'location': '/var/log/testing.log', 'log_format': 'json', 'only-future-events': 'no', 'invalid_value': 'max-size',
-         'max-size': '{/}'},
-        {'location': '/var/log/testing.log', 'log_format': 'json', 'only-future-events': 'no', 'invalid_value': 'max-size',
-         'max-size': '!32817--'},
-        {'location': '/var/log/testing.log', 'log_format': 'json', 'only-future-events': 'yes', 'invalid_value': ''},
-        {'location': '/var/log/testing.log', 'log_format': 'json', 'only-future-events': 'no', 'invalid_value': ''},
-        {'location': '/var/log/testing.log', 'log_format': 'json', 'only-future-events': 'yesTesting',
-         'invalid_value': 'only-future-events'},
-        {'location': '/var/log/testing.log', 'log_format': 'json', 'only-future-events': 'noTesting', 'invalid_value': 'only-future-events'},
-        {'location': '/var/log/testing.log', 'log_format': 'json', 'only-future-events': 'testingvalue',
-         'invalid_value': 'only-future-events'},
-        {'location': '/var/log/testing.log', 'log_format': 'json', 'only-future-events': '1234', 'invalid_value': 'only-future-events'},
-        {'location': '/var/log/testing.log', 'log_format': 'syslog', 'only-future-events': 'yes', 'invalid_value': ''},
-        {'location': '/var/log/testing.log', 'log_format': 'syslog', 'only-future-events': 'no', 'invalid_value': ''},
-        {'location': '/var/log/testing.log', 'log_format': 'syslog', 'only-future-events': 'yesTesting',
-         'invalid_value': 'only-future-events'},
-        {'location': '/var/log/testing.log', 'log_format': 'syslog', 'only-future-events': 'noTesting', 'invalid_value': 'only-future-events'},
-        {'location': '/var/log/testing.log', 'log_format': 'syslog', 'only-future-events': 'testingvalue',
-         'invalid_value': 'only-future-events'},
-        {'location': '/var/log/testing.log', 'log_format': 'syslog', 'only-future-events': '1234', 'invalid_value': 'only-future-events'}
-    ]
+parameters = tcases
 
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,

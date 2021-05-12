@@ -80,8 +80,12 @@ elif sys.platform == 'darwin':
     tcases += macos_tcases
 
 
-parameters = tcases.pop('VALID_VALUE')
 metadata = lower_case_key_dictionary_array(tcases)
+
+for element in tcases:
+    element.pop('VALID_VALUE')
+
+parameters = tcases
 
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
