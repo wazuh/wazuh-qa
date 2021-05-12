@@ -64,7 +64,7 @@ def teardown():
 
 
 # fixtures
-@pytest.fixture(scope="module", params=configurations)
+@pytest.fixture(scope="module", params=configurations, ids=[''])
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
@@ -87,7 +87,7 @@ def clean_log_file():
     try:
         client_file = open(LOG_FILE_PATH, 'w')
         client_file.close()
-    except IOError as exception:
+    except IOError:
         raise
 
 
@@ -213,7 +213,7 @@ def check_log_error_conf(msg):
     return None
 
 
-@pytest.mark.parametrize('test_case', [case for case in tests])
+@pytest.mark.parametrize('test_case', tests, ids=[case['description'] for case in tests])
 def test_agent_agentd_enrollment(configure_authd_server, configure_environment, test_case: list):
     """Test different situations that can occur on the wazuh-agentd daemon during agent enrollment.
 
@@ -234,7 +234,7 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
     ag.configure_enrollment(test_case.get('enrollment'), authd_server, configuration.get('agent_name'))
     try:
         override_wazuh_conf(configuration)
-    except Exception as err:
+    except Exception:
         if test_case.get('expected_error') and not test_case.get('enrollment', {}).get('response'):
             # Expected to happen
             assert check_log_error_conf(test_case.get('expected_error')) is not None, \

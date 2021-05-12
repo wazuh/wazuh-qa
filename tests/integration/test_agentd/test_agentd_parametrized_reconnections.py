@@ -37,6 +37,9 @@ params = [
     {'PROTOCOL': 'tcp', 'MAX_RETRIES': 5, 'RETRY_INTERVAL': 5, 'ENROLL': 'yes'},
 ]
 
+case_ids = [f"{x['PROTOCOL']}_max-retry={x['MAX_RETRIES']}_interval={x['RETRY_INTERVAL']}_enroll={x['ENROLL']}".lower()
+            for x in params]
+
 metadata = params
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 log_monitor_paths = []
@@ -74,7 +77,7 @@ set_debug_mode()
 
 
 # fixtures
-@pytest.fixture(scope="module", params=configurations)
+pytest.fixture(scope="module", params=configurations, ids=case_ids)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
