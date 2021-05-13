@@ -65,7 +65,7 @@ def add_agent_authd_from_worker(agent_id):
                   "ip": "any",
                   "id": agent_id,
                   "key": key,
-                  "force": 0
+                  "force": -1
                   }
              }
     }
