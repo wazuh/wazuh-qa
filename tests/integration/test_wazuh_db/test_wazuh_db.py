@@ -215,7 +215,7 @@ def pre_set_sync_info():
 @pytest.fixture(scope="function")
 def pre_insert_packages():
     PACKAGES_NUMBER = 2000
-    for pkg_n in range(0, PACKAGES_NUMBER):
+    for pkg_n in range(PACKAGES_NUMBER):
         command = f'agent 000 sql INSERT OR REPLACE INTO sys_programs \
         (scan_id,scan_time,format,name,priority,section,size,vendor,install_time,version,\
         architecture,multiarch,source,description,location,triaged,cpe,msu_name,checksum,item_id)\
