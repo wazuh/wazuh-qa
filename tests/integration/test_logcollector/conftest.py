@@ -26,7 +26,7 @@ def restart_logcollector(get_configuration, request):
 
 
 @pytest.fixture(scope="package", autouse=True)
-def configure_local_internal_options():
+def configure_local_internal_options_logcollector():
     backup_options_lines = conf.get_wazuh_local_internal_options()
     backup_options_dict = conf.local_internal_options_to_dict(backup_options_lines)
 
