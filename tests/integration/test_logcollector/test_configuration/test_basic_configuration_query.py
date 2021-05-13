@@ -12,10 +12,13 @@ from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 # Marks
 common_query = ['', 'Testing', '!ras*^']
 query_list = []
+location = ''
+log_format = ''
 
 if sys.platform != 'win32' and sys.platform != 'darwin':
     pytestmark = [pytest.mark.skip, pytest.mark.tier(level=0)]
 else:
+    pytestmark = pytest.mark.tier(level=0)
     if sys.platform == 'darwin':
         clauses = ['eventMessage', 'processImagePath', 'senderImagePath', 'subsystem', 'category', 'eventType',
                    'messageType']
@@ -58,7 +61,6 @@ else:
                       ]
 
 query_list += common_query
-pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
 no_restart_windows_after_configuration_set = True
