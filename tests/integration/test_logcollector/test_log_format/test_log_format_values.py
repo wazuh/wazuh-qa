@@ -77,13 +77,13 @@ else:
     parameters.append({'LOCATION': f'{location}', 'LOG_FORMAT': 'multi-line:3'})
     parameters.append({'LOCATION': f'{filemultilog}', 'LOG_FORMAT': 'djb-multilog'})
     parameters.append({'LOCATION': f'{filemultilog}', 'LOG_FORMAT': 'djb-multilog'})
-    parameters.append({'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapg'})
+    parameters.append({'LOCATION': f'{nmap_log}', 'LOG_FORMAT': 'nmapg'})
     parameters.append({'LOCATION': f'{nmap_log}', 'LOG_FORMAT': 'nmapg'})
 
     metadata.append({'location': f'{location}', 'log_format': 'multi-line:3', 'valid_value': True})
     metadata.append({'location': f'{filemultilog}', 'log_format': 'djb-multilog', 'valid_value': True})
     metadata.append({'location': f'{filemultilog}', 'log_format': 'djb-multilog', 'valid_value': False})
-    metadata.append({'location': f'{location}', 'log_format': 'nmapg', 'valid_value': False})
+    metadata.append({'location': f'{nmap_log}', 'log_format': 'nmapg', 'valid_value': False})
     metadata.append({'location': f'{nmap_log}', 'log_format': 'nmapg', 'valid_value': True})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
@@ -427,10 +427,8 @@ def test_log_format(get_local_internal_options, get_configuration, configure_loc
 
             elif conf['log_format'] == 'nmapg':
                 create_file_location(nmap_log, conf['log_format'])
-                create_file_location(location, conf['log_format'])
                 control_service('start', daemon=LOGCOLLECTOR_DAEMON)
                 check_log_format_values(conf)
-                file.remove_file(nmap_log)
 
             else:
                 create_file_location(location, conf['log_format'])
