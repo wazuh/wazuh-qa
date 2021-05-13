@@ -1,4 +1,4 @@
-import {getObject} from "../../utils";
+import {getObject} from "../../utils/Driver";
 
 class Rules {
 
