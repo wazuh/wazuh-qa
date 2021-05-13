@@ -29,10 +29,7 @@ local_internal_options = {'logcollector.vcheck_files': '1', 'logcollector.debug'
 
 if sys.platform == 'win32':
     location = r'C:\test.txt'
-#    iis_path = r'%SystemDrive%\inetpub\logs\LogFiles\W3SVC1\test.log'
     iis_path = r'C:\test_iis.log'
-    filemultilog = r'C:\test_multilog'
-    nmap_log = r'C:\test_nmapg.log'
     wazuh_configuration = 'ossec.conf'
     prefix = AGENT_DETECTOR_PREFIX
 
@@ -52,12 +49,7 @@ parameters = [
     {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit'},
     {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit'},
     {'LOCATION': f'{location}', 'LOG_FORMAT': 'mysql_log'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'postgresql_log'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'multi-line:3'},
-    {'LOCATION': f'{filemultilog}', 'LOG_FORMAT': 'djb-multilog'},
-    {'LOCATION': f'{filemultilog}', 'LOG_FORMAT': 'djb-multilog'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapg'},
-    {'LOCATION': f'{nmap_log}', 'LOG_FORMAT': 'nmapg'},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'postgresql_log'}
 ]
 
 metadata = [
@@ -69,12 +61,7 @@ metadata = [
     {'location': f'{location}', 'log_format': 'audit', 'valid_value': False},
     {'location': f'{location}', 'log_format': 'audit', 'valid_value': True},
     {'location': f'{location}', 'log_format': 'mysql_log', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'postgresql_log', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'multi-line:3', 'valid_value': True},
-    {'location': f'{filemultilog}', 'log_format': 'djb-multilog', 'valid_value': False},
-    {'location': f'{filemultilog}', 'log_format': 'djb-multilog', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'nmapg', 'valid_value': False},
-    {'location': f'{nmap_log}', 'log_format': 'nmapg', 'valid_value': True},
+    {'location': f'{location}', 'log_format': 'postgresql_log', 'valid_value': True}
 ]
 
 if sys.platform == 'win32':
@@ -84,7 +71,20 @@ if sys.platform == 'win32':
 
     metadata.append({'location': 'Security', 'log_format': 'eventlog', 'valid_value': True})
     metadata.append({'location': 'Application', 'log_format': 'eventchannel', 'valid_value': True})
-    metadata.append({'location': f'{iis_path}', 'log_format': 'iis', 'valid_value': True}),
+    metadata.append({'location': f'{iis_path}', 'log_format': 'iis', 'valid_value': True})
+else:
+
+    parameters.append({'LOCATION': f'{location}', 'LOG_FORMAT': 'multi-line:3'})
+    parameters.append({'LOCATION': f'{filemultilog}', 'LOG_FORMAT': 'djb-multilog'})
+    parameters.append({'LOCATION': f'{filemultilog}', 'LOG_FORMAT': 'djb-multilog'})
+    parameters.append({'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapg'})
+    parameters.append({'LOCATION': f'{nmap_log}', 'LOG_FORMAT': 'nmapg'})
+
+    metadata.append({'location': f'{location}', 'log_format': 'multi-line:3', 'valid_value': True})
+    metadata.append({'location': f'{filemultilog}', 'log_format': 'djb-multilog', 'valid_value': True})
+    metadata.append({'location': f'{filemultilog}', 'log_format': 'djb-multilog', 'valid_value': False})
+    metadata.append({'location': f'{location}', 'log_format': 'nmapg', 'valid_value': False})
+    metadata.append({'location': f'{nmap_log}', 'log_format': 'nmapg', 'valid_value': True})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 configuration_ids = [f"{x['log_format'], x['valid_value']}" for x in metadata]
@@ -103,15 +103,14 @@ def get_local_internal_options():
     """Get configurations from the module."""
     return local_internal_options
 
-def create_file(file, type):
+def create_file(files, type):
     """Create an empty file."""
     if type == 'iis':
         data = '#Software: Microsoft Internet Information Server 6.0\n#Version: 1.0\n#Date: 1998-11-19 22:48:39'
         data += '#Fields: date time c-ip cs-username s-ip cs-method cs-uri-stem cs-uri-query sc-status sc-bytes cs-bytes time-taken cs-version cs(User-Agent) cs(Cookie) cs(Referrer)\n'
     else:
         data = ""
-    with open(file, 'a') as f:
-        f.write(data)
+    file.write_file(files, data)
 
 def modify_json_file(file, type):
     """Create a json content with an specific values"""

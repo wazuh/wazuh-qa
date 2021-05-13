@@ -21,10 +21,7 @@ def callback_analyzing_file(file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFI
     Returns:
         callable: callback to detect this event.
     """
-    if sys.platform == 'win32':
-        msg = fr"Analyzing file: '{file}'."
-    else:
-        msg = fr"Analyzing file: '{file}'."
+    msg = fr"Analyzing file: '{file}'."
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 def callback_reading_file(log_format, content_file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, severity='DEBUG'):
@@ -108,18 +105,14 @@ def callback_monitoring_command(log_format, command, prefix=monitoring.LOG_COLLE
 
 def callback_monitoring_djb_multilog(program_name, multilog_file, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
     """Create a callback to detect if logcollector is monitoring a djb multilog file.
-
     Args:
         program_name (str): Program name of multilog file.
         multilog_file (str): Multilog file name.
-        prefix (str): Daemon that generates the error log.
-
     Returns:
         callable: callback to detect this event.
     """
     msg = fr"INFO: Using program name '{program_name}' for DJB multilog file: '{multilog_file}'."
     return monitoring.make_callback(pattern=msg, prefix=prefix)
-
 
 def callback_command_alias_output(alias, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
     """Create a callback to detect if logcollector is monitoring a command with an assigned alias.
