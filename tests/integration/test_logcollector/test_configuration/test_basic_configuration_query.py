@@ -19,6 +19,8 @@ else:
     if sys.platform == 'darwin':
         clauses = ['eventMessage', 'processImagePath', 'senderImagePath', 'subsystem', 'category', 'eventType',
                    'messageType']
+        location = 'oslog'
+        log_format = 'oslog'
         for clause in clauses:
             query_list.append([f'{clause} CONTAINS[c] "com.apple.geod"',
                                f'{clause} == "testing"',
@@ -44,9 +46,9 @@ else:
                                f'! {clause} BEGINSWITH[c] "testing"',
                                f'! {clause} IN "testing"',
                                ])
+    else:
         location = logcollector.WINDOWS_CHANNEL_LIST
         log_format = 'eventchannel'
-    else:
         query_list = ['Event[System/EventID = 4624]',
                       'Event[System/EventID = 1343 and (EventData/Data[@Name=\'LogonType\'] = 2',
                       'Event[System/EventID = 6632 and (EventData/Data[@Name=\'LogonType\'] = 93 or '
@@ -55,11 +57,10 @@ else:
                       'Event[EventData[Data="value"]]',
                       'Event[ EventData[Data[@Name="PropA"]="ValueA" and  Data[@Name="PropB"]="ValueB" ]]'
                       ]
-        location = 'oslog'
-        log_format = 'oslog'
 
-    query_list += common_query
-    pytestmark = pytest.mark.tier(level=0)
+
+query_list += common_query
+pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
 no_restart_windows_after_configuration_set = True
@@ -69,17 +70,17 @@ configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.ya
 parameters = []
 for query in query_list:
     if isinstance(location, list):
-        for channel in WINDOWS_CHANNEL_LIST:
-            parameters.append({'LOG_FORMAT': f'{log_format}', 'QUERY': f'{query}'})
+        for channel in location:
+            parameters.append({'LOCATION': f'{location}', 'LOG_FORMAT': f'{log_format}', 'QUERY': f'{query}'})
     else:
-        parameters.append({'LOG_FORMAT': f'{log_format}', 'QUERY': f'{query}'})
+        parameters.append({'LOCATION': f'{location}', 'LOG_FORMAT': f'{log_format}', 'QUERY': f'{query}'})
 
 metadata = lower_case_key_dictionary_array(parameters)
 
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
-configuration_ids = [f"{x['LOG_FORMAT'], x['QUERY']}" for x in parameters]
+configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['QUERY']}" for x in parameters]
 
 
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
@@ -97,6 +98,14 @@ def test_configuration_query_valid(get_configuration, configure_environment, res
         TimeoutError: If the callback for analyzing eventchannel is not generated
     """
 
-    log_callback = logcollector.callback_eventchannel_analyzing('Security')
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)
+    configuration = get_configuration['metadata']
+    log_format = configuration['log_format']
+
+    if log_format == 'oslog':
+        log_callback = logcollector.callback_macos_oslog_monitoring()
+        wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)
+    else:
+        log_callback = logcollector.callback_eventchannel_analyzing('Security')
+        wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)
