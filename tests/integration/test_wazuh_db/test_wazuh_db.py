@@ -8,6 +8,7 @@ import time
 
 import pytest
 import yaml
+import random
 from wazuh_testing.tools import WAZUH_PATH
 
 # Marks
@@ -76,6 +77,30 @@ def pre_insert_agents():
         assert data[0] == 'ok', f'Unable to update agent {id}'
 
 
+@pytest.fixture(scope="function")
+def pre_set_sync_info():
+    command = f'agent 000 sql UPDATE sync_info SET last_completion = (SELECT last_attempt from sync_info where component = "syscollector-packages") where component = "syscollector-packages"'
+    receiver_sockets[0].send(command, size=True)
+    response = receiver_sockets[0].receive(size=True).decode()
+    data = response.split(" ", 1)
+    assert data[0] == 'ok', 'Unable to set sync_info table'
+
+
+@pytest.fixture(scope="function")
+def pre_insert_packages():
+    PACKAGES_NUMBER = 2000
+    for pkg_n in range(0, PACKAGES_NUMBER):
+        command = f'agent 000 sql INSERT OR REPLACE INTO sys_programs \
+        (scan_id,scan_time,format,name,priority,section,size,vendor,install_time,version,\
+        architecture,multiarch,source,description,location,triaged,cpe,msu_name,checksum,item_id)\
+        VALUES(0,"2021/04/07 22:00:00","deb","test_package_{pkg_n}","optional","utils",{random.randint(200,1000)},"Wazuh wazuh@wazuh.com",\
+        NULL,"{random.randint(1,10)}.0.0","all",NULL,NULL,"Test package {pkg_n}",NULL,0,NULL,NULL,"{random.getrandbits(128)}","{random.getrandbits(128)}")'
+        receiver_sockets[0].send(command, size=True)
+        response = receiver_sockets[0].receive(size=True).decode()
+        data = response.split(" ", 1)
+        assert data[0] == 'ok', f'Unable to insert package {pkg_n}'
+
+
 @pytest.mark.parametrize('test_case',
                          [case['test_case'] for module_data in module_tests for case in module_data[0]],
                          ids=[f"{module_name}: {case['name']}"
@@ -137,3 +162,24 @@ def test_wazuh_db_chunks(configure_sockets_environment, connect_to_sockets_modul
     send_chunk_command('global get-agents-by-connection-status 0 active')
     # Check disconnect-agents chunk limit
     send_chunk_command('global disconnect-agents 0 {} syncreq'.format(str(int(time.time()) + 1)))
+
+
+def test_wazuh_db_timeout(configure_sockets_environment, connect_to_sockets_module, pre_insert_packages, pre_set_sync_info):
+    """Check that efectively the socket is closed after timeout is reached"""
+
+    def send_row_by_row_command(command):
+        receiver_sockets[0].send(command, size=True)
+        loop=True
+        c=0
+        time.sleep(5)
+        while loop:
+            c+=1
+            response = receiver_sockets[0].receive(size=True).decode()
+            status = response.split(" ", 1)[0]
+            if status != 'due':
+                    loop=False
+                    assert response == 'Socket closed', 'ok'
+                    break
+
+    # Check get packages
+    send_row_by_row_command('agent 000 package get')

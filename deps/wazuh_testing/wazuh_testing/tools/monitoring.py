@@ -314,8 +314,13 @@ class SocketController:
             bytes: Socket message.
         """
         if size:
-            size = wazuh_unpack(self.sock.recv(4, socket.MSG_WAITALL))
-            output = self.sock.recv(size, socket.MSG_WAITALL)
+            data = self.sock.recv(4, socket.MSG_WAITALL)
+            if not data:
+                output = bytes('Socket closed', 'utf8')
+                return output
+            else:
+                size = wazuh_unpack(data)
+                output = self.sock.recv(size, socket.MSG_WAITALL)
         else:
             output = self.sock.recv(4096)
             if len(output) == 4096:
