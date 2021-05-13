@@ -10,7 +10,7 @@ import sys
 from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 
 # Marks
-common_query = ['', 'Testing', '2342342', '!ras*^']
+common_query = ['', 'Testing', '!ras*^']
 query_list = []
 
 if sys.platform != 'win32' and sys.platform != 'darwin':

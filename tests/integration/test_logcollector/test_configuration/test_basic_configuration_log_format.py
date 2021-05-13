@@ -94,7 +94,7 @@ configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['COMMAND']}" + f"" if 
                      else f"{x['LOCATION']}_{x['LOG_FORMAT']}" for x in parameters]
 
 
-log_format_not_print_analyzing_info = ['command', 'full_command', 'eventlog', 'eventchannel']
+log_format_not_print_analyzing_info = ['command', 'full_command', 'eventlog', 'eventchannel', 'oslog']
 
 
 # fixtures
@@ -136,7 +136,7 @@ def check_log_format_valid(cfg):
                                 error_message="The expected multilog djb log has not been produced")
 
     elif cfg['log_format'] == 'oslog':
-        log_callback = logcollector.callback_macos_oslog_monitoring(cfg['location'])
+        log_callback = logcollector.callback_macos_oslog_monitoring()
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message="The expected macos log monitoring has not been produced")
 
