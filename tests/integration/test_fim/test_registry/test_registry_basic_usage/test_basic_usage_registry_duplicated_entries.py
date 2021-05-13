@@ -33,10 +33,11 @@ conf_params = {'WINDOWS_DUPLICATED_REGISTRY_1': registry_1,
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_duplicated_registry.yaml')
 parameters, metadata = fim.generate_params(extra_params=conf_params, modes=monitoring_modes)
 configurations = load_wazuh_configurations(configurations_path, __name__,
-params=parameters, metadata=metadata)
+                                           params=parameters, metadata=metadata)
 
 registry_list = [(key, sub_key_1, fim.KEY_WOW64_32KEY), (key, sub_key_2,
-fim.KEY_WOW64_32KEY)]
+                 fim.KEY_WOW64_32KEY)]
+
 
 # fixtures
 @pytest.fixture(scope='module', params=configurations)
@@ -44,9 +45,10 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
+
 # test
 @pytest.mark.parametrize('key, subkey1, subkey2, arch', [(key, sub_key_1, sub_key_2,
-fim.KEY_WOW64_32KEY)])
+                         fim.KEY_WOW64_32KEY)])
 def test_registry_duplicated_entry(key, subkey1, subkey2, arch,
                                    get_configuration, configure_environment,
                                    restart_syscheckd, wait_for_fim_start):
