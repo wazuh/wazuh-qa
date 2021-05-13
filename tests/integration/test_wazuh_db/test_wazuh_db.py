@@ -204,9 +204,8 @@ def remove_agent(agent_id):
 
 @pytest.fixture(scope="function")
 def pre_set_sync_info():
-    command = f'agent 000 sql UPDATE sync_info SET last_completion = \
-                (SELECT last_attempt from sync_info where component = "syscollector-packages") \
-                where component = "syscollector-packages"'
+    command = 'agent 000 sql UPDATE sync_info SET last_completion = (SELECT last_attempt from sync_info ' \
+              'where component = "syscollector-packages") where component = "syscollector-packages" '
     receiver_sockets[0].send(command, size=True)
     response = receiver_sockets[0].receive(size=True).decode()
     data = response.split(" ", 1)
