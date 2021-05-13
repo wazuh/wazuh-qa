@@ -79,6 +79,8 @@ def pre_insert_agents():
 
 @pytest.fixture(scope="function")
 def pre_set_sync_info():
+    """Asign the last_attempt value to last_completion in sync_info table"""
+
     command = 'agent 000 sql UPDATE sync_info SET last_completion = (SELECT last_attempt from sync_info ' \
               'where component = "syscollector-packages") where component = "syscollector-packages" '
     receiver_sockets[0].send(command, size=True)
@@ -89,6 +91,8 @@ def pre_set_sync_info():
 
 @pytest.fixture(scope="function")
 def pre_insert_packages():
+    """Insert a set of dummy packages into sys_programs table"""
+
     PACKAGES_NUMBER = 2000
     for pkg_n in range(PACKAGES_NUMBER):
         command = f'agent 000 sql INSERT OR REPLACE INTO sys_programs \
@@ -166,21 +170,20 @@ def test_wazuh_db_chunks(configure_sockets_environment, connect_to_sockets_modul
     send_chunk_command('global disconnect-agents 0 {} syncreq'.format(str(int(time.time()) + 1)))
 
 
-def test_wazuh_db_timeout(configure_sockets_environment, connect_to_sockets_module, 
+def test_wazuh_db_timeout(configure_sockets_environment, connect_to_sockets_module,
                           pre_insert_packages, pre_set_sync_info):
     """Check that efectively the socket is closed after timeout is reached"""
 
-    def send_row_by_row_command(command):
-        receiver_sockets[0].send(command, size=True)
-        loop = True
-        time.sleep(5)
-        while loop:
-            response = receiver_sockets[0].receive(size=True).decode()
-            status = response.split(" ", 1)[0]
-            if status != 'due':
-                loop = False
-                assert response == 'Socket closed', 'ok'
-                break
-
-    # Check get packages
-    send_row_by_row_command('agent 000 package get')
+    command = 'agent 000 package get'
+    receiver_sockets[0].send(command, size=True)
+    time.sleep(5)
+    socket_closed = False
+    while True:
+        rcv = receiver_sockets[0].receive(size=True)
+        if rcv is None:
+            socket_closed = True
+            break
+        status = rcv.decode().split(" ", 1)[0]
+        if status != "due":
+            break
+    assert socket_closed, f'Socket never closed, received: {status}'
