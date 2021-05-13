@@ -18,11 +18,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_command_conf.yaml')
 
-local_internal_options = {
-    'logcollector.remote_commands': 1,
-    'logcollector.debug': 2,
-    'monitord.rotate_log': 0
-}
+local_internal_options = {'logcollector.remote_commands': 1}
 
 parameters = [
     {'LOG_FORMAT': 'command', 'COMMAND': 'echo command_5m', 'FREQUENCY': 300},  # 5 minutes.

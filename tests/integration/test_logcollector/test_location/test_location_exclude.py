@@ -20,8 +20,6 @@ pytestmark = pytest.mark.tier(level=0)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'configuration')
 configurations_path = os.path.join(test_data_path, 'wazuh_location.yaml')
 
-local_internal_options = {'logcollector.debug': '2'}
-
 temp_dir = tempfile.gettempdir()
 
 parameters = [
@@ -149,14 +147,9 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope="package")
-def get_local_internal_options():
-    """Get configurations from the module."""
-    return local_internal_options
-
 
 @pytest.fixture(scope='module')
-def create_files(request, get_configuration):
+def create_files(get_configuration):
     """Create expected files."""
     files = get_configuration['metadata']['files']
 
@@ -170,8 +163,8 @@ def create_files(request, get_configuration):
             os.remove(file_location)
 
 
-def test_location_exclude(get_local_internal_options, configure_local_internal_options, create_directory, create_files,
-                 get_configuration, configure_environment, restart_logcollector):
+def test_location_exclude(create_directory, create_files, get_configuration, configure_environment,
+                          restart_logcollector):
     """Check if logcollector is excluding specified files.
 
     Raises:
