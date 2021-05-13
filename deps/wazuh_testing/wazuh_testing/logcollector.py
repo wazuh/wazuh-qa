@@ -1,9 +1,13 @@
 import os
 import shutil
 import sys
+from os import path
 from math import ceil
+from json import load
+from time import sleep
+from datetime import datetime, timedelta
 
-from wazuh_testing.tools import monitoring
+from wazuh_testing.tools import LOGCOLLECTOR_STATISTICS_FILE, monitoring
 
 GENERIC_CALLBACK_ERROR_COMMAND_MONITORING = 'The expected command monitoring log has not been produced'
 GENERIC_CALLBACK_ERROR_INVALID_LOCATION = 'The expected invalid location error log has not been produced'
@@ -369,6 +373,95 @@ def add_log_data(log_path, log_line_message, size_kib=1024, line_start=1, print_
                 f.write(f"{log_line_message}{x}\n") if print_line_num else f.write(f"{log_line_message}\n")
         return line_start + lines - 1
     return 0
+
+
+def get_logcollector_data_sending_stats(log_path, socket_name, state_interval):
+    """Returns the statistics of a log monitored by logcollector.
+
+    For this purpose, it parses the "wazuh-logcollector.state" file and retrieves the data.
+    See:
+    https://documentation-dev.wazuh.com/current/user-manual/reference/statistics-files/wazuh-logcollector-state.html
+
+    Args:
+        log_path (str): Path of the log from which the statistics are to be obtained.
+        socket_name (str): Target socket name.
+        state_interval (int): Statistics generation interval, in seconds ("logcollector.state_interval").
+
+    Returns:
+        dict: Dictionary with the statistics.
+    """
+    # Wait until the statistics file becomes available
+    for _ in range(state_interval * 2):
+        if path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
+            break
+        else:
+            sleep(1)
+
+    if not path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
+        raise TimeoutError
+
+    with open(LOGCOLLECTOR_STATISTICS_FILE, 'r') as json_file:
+        data = load(json_file)
+        global_files = data['global']['files']
+        global_start_date = datetime.strptime(data['global']['start'], '%Y-%m-%d %H:%M:%S')
+        global_end_date = datetime.strptime(data['global']['end'], '%Y-%m-%d %H:%M:%S')
+        interval_files = data['interval']['files']
+        interval_start_date = datetime.strptime(data['interval']['start'], '%Y-%m-%d %H:%M:%S')
+        interval_end_date = datetime.strptime(data['interval']['end'], '%Y-%m-%d %H:%M:%S')
+        stats = {'global_events': 0, 'global_drops': 0,
+                 'global_start_date': global_start_date, 'global_end_date': global_end_date,
+                 'interval_events': 0, 'interval_drops': 0,
+                 'interval_start_date': interval_start_date, 'interval_end_date': interval_end_date}
+        # Global statistics
+        for g_file in global_files:
+            if g_file['location'] == log_path:
+                stats['global_events'] = g_file['events']
+                targets = g_file['targets']
+                for t in targets:
+                    if t['name'] == socket_name:
+                        stats['global_drops'] = t['drops']
+        # Interval statistics
+        for i_file in interval_files:
+            if i_file['location'] == log_path:
+                stats['interval_events'] = i_file['events']
+                targets = i_file['targets']
+                for t in targets:
+                    if t['name'] == socket_name:
+                        stats['interval_drops'] = t['drops']
+    return stats
+
+
+def get_next_stats(current_stats, log_path, socket_name, state_interval):
+    """Return the next statistics to be written to the "wazuh-logcollector.state" file and the seconds elapsed.
+
+    Args:
+        current_stats (dict): Dictionary with the current statistics.
+        log_path (str): Path of the log from which the statistics are to be obtained.
+        socket_name (str): Target socket name.
+        state_interval (int): Statistics generation interval, in seconds ("logcollector.state_interval").
+
+    Returns:
+        (dict, float): A tuple with a dictionary with the next statistics and the seconds
+                       elapsed between the two statistics based on the modification date
+                       of the "wazuh-logcollector.state" file.
+
+    Raises:
+          TimeoutError: If the next statistics could not be obtained according to the interval
+                        defined by "logcollector.state_interval"
+    """
+    mtime_current = path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
+    next_interval_date = current_stats['interval_end_date'] + timedelta(seconds=state_interval)
+    next_2_intervals_date = current_stats['interval_end_date'] + timedelta(seconds=state_interval * 2)
+    for _ in range(0, state_interval * 2):
+        stats = get_logcollector_data_sending_stats(log_path, socket_name, state_interval)
+        mtime_next = path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
+        # The time of the interval must be equal to or greater than the calculated time,
+        # but less than the calculated time for two intervals.
+        if next_interval_date <= stats['interval_end_date'] < next_2_intervals_date:
+            return stats, mtime_next - mtime_current
+        else:
+            sleep(1)
+    raise TimeoutError
 
 
 def create_file_structure(get_files_list):
