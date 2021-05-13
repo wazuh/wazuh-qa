@@ -9,9 +9,8 @@ import sys
 
 import pytest
 import wazuh_testing.fim as fim
-
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import PREFIX, LOG_FILE_PATH, ALERT_FILE_PATH
+from wazuh_testing.tools import PREFIX, ALERT_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 

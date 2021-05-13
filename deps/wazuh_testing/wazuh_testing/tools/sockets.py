@@ -4,6 +4,7 @@
 import socket
 import struct
 from os import path
+
 from wazuh_testing.tools import WAZUH_PATH, ACTIVE_RESPONSE_SOCKET_PATH
 from wazuh_testing.tools.utils import retry
 

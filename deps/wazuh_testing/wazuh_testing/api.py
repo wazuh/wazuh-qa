@@ -9,6 +9,7 @@ from base64 import b64encode
 
 import requests
 from urllib3 import disable_warnings, exceptions
+
 disable_warnings(exceptions.InsecureRequestWarning)
 
 # Variables

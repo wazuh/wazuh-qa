@@ -3,12 +3,11 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import socket
 import subprocess
 import sys
 import time
-import psutil
 
+import psutil
 from wazuh_testing.tools import WAZUH_PATH, get_service, WAZUH_SOCKETS, QUEUE_DB_PATH, WAZUH_OPTIONAL_SOCKETS
 from wazuh_testing.tools.configuration import write_wazuh_conf
 

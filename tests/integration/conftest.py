@@ -408,7 +408,7 @@ def connect_to_sockets_function(request):
     close_sockets(receiver_sockets)
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='package')
 def configure_local_internal_options(get_local_internal_options):
     backup_options_lines = conf.get_wazuh_local_internal_options()
     backup_options_dict = conf.local_internal_options_to_dict(backup_options_lines)

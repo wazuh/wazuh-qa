@@ -3,10 +3,10 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import logging
 import re
-from functools import wraps
-from time import sleep
-from random import randint, SystemRandom, choice
 import string
+from functools import wraps
+from random import randint, SystemRandom
+from time import sleep
 
 
 def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):

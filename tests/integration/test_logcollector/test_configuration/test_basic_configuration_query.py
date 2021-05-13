@@ -19,33 +19,32 @@ else:
     if sys.platform == 'darwin':
         clauses = ['eventMessage', 'processImagePath', 'senderImagePath', 'subsystem', 'category', 'eventType',
                    'messageType']
-        location = 'oslog'
-        log_format = 'oslog'
+        location = log_format = 'oslog'
         for clause in clauses:
-            query_list.append([f'{clause} CONTAINS[c] "com.apple.geod"',
-                               f'{clause} == "testing"',
-                               f'{clause} <> "testing"',
-                               f'{clause} = "testing"',
-                               f'{clause} <= "testing"',
-                               f'{clause} >= "testing"',
-                               f'{clause} = > "testing"',
-                               f'{clause} < "testing"',
-                               f'{clause} < "testing"',
-                               f'{clause} < "testing"',
-                               f'{clause} <= "testing" AND  {clause} == "testing"',
-                               f'{clause} <= "testing" & &  {clause} == "testing"',
-                               f'{clause} <= "testing" OR  {clause} == "testing"',
-                               f'{clause} <= "testing" | |  {clause} == "testing"',
-                               f'NOT {clause} <= "testing"',
-                               f'! {clause} <= "testing"',
-                               f'! {clause} BEGINSWITH[c] "testing"',
-                               f'! {clause} ENDSWITH[c] "testing"',
-                               f'! {clause} LIKE[c] "testing"',
-                               f'! {clause} MATCHES[c] "testing"',
-                               f'! {clause} BEGINSWITH[c] "testing"',
-                               f'! {clause} BEGINSWITH[c] "testing"',
-                               f'! {clause} IN "testing"',
-                               ])
+            query_list += [f'{clause} CONTAINS[c] "com.apple.geod"',
+                           f'{clause} == "testing"',
+                           f'{clause} <> "testing"',
+                           f'{clause} = "testing"',
+                           f'{clause} <= "testing"',
+                           f'{clause} >= "testing"',
+                           f'{clause} = > "testing"',
+                           f'{clause} < "testing"',
+                           f'{clause} < "testing"',
+                           f'{clause} < "testing"',
+                           f'{clause} <= "testing" AND  {clause} == "testing"',
+                           f'{clause} <= "testing" & &  {clause} == "testing"',
+                           f'{clause} <= "testing" OR  {clause} == "testing"',
+                           f'{clause} <= "testing" | |  {clause} == "testing"',
+                           f'NOT {clause} <= "testing"',
+                           f'! {clause} <= "testing"',
+                           f'! {clause} BEGINSWITH[c] "testing"',
+                           f'! {clause} ENDSWITH[c] "testing"',
+                           f'! {clause} LIKE[c] "testing"',
+                           f'! {clause} MATCHES[c] "testing"',
+                           f'! {clause} BEGINSWITH[c] "testing"',
+                           f'! {clause} BEGINSWITH[c] "testing"',
+                           f'! {clause} IN "testing"',
+                           ]
     else:
         location = logcollector.WINDOWS_CHANNEL_LIST
         log_format = 'eventchannel'
@@ -57,7 +56,6 @@ else:
                       'Event[EventData[Data="value"]]',
                       'Event[ EventData[Data[@Name="PropA"]="ValueA" and  Data[@Name="PropB"]="ValueB" ]]'
                       ]
-
 
 query_list += common_query
 pytestmark = pytest.mark.tier(level=0)

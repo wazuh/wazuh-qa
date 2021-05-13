@@ -1,8 +1,9 @@
 import argparse
 from os import makedirs
 from os.path import exists
-from wazuh_testing.tools.performance.visualization import DataVisualizer
 from tempfile import gettempdir
+
+from wazuh_testing.tools.performance.visualization import DataVisualizer
 
 
 def get_script_arguments():
