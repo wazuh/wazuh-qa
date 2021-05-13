@@ -49,7 +49,7 @@ for log_format in log_format_list:
     elif log_format == 'eventchannel':
         location = 'Security'
     elif log_format == 'oslog':
-        location = 'oslog'
+        location = log_format
     else:
         location = temp_file_path
 

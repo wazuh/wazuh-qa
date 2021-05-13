@@ -47,7 +47,7 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope="package")
+@pytest.fixture(scope="module")
 def get_local_internal_options():
     """Get internal configuration."""
     return local_internal_options

@@ -88,7 +88,7 @@ def get_files_list():
     return file_structure
 
 
-@pytest.fixture(scope="package")
+@pytest.fixture(scope="module")
 def get_local_internal_options():
     """Get local internal options from the module."""
     return local_internal_options
