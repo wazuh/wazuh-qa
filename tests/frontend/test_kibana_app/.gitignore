@@ -3,3 +3,6 @@
 
 #node libraries
 node_modules/
+
+#env configurations
+cypress.json

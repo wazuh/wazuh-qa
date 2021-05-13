@@ -5,18 +5,18 @@ Feature: Should List Decoders And Show The Pager
   in order to manage them
 
   Scenario: Should List Decoders And Show The Pager
-    Given The kibana admin user is logged in
+    Given The kibana admin user is logged in using odfe authentication
     When The user navigates to decoders
     Then The user should see the decoders
 
   Scenario: Should List Custom Decoders And Show The Pager
-    Given The kibana admin user is logged in
+    Given The kibana admin user is logged in using odfe authentication
     When The user navigates to decoders
     When The user press button custom decoders
     Then The user should see the custom decoders
 
   Scenario: Should can edit a decoder
-    Given The kibana admin user is logged in
+    Given The kibana admin user is logged in using odfe authentication
     When The user navigates to decoders
     When The user press button custom decoders
     When The user presses the edit decoder button and edits it
