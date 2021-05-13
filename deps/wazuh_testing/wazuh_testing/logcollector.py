@@ -1,5 +1,4 @@
 from wazuh_testing.tools import monitoring
-import sys
 
 GENERIC_CALLBACK_ERROR_COMMAND_MONITORING = 'The expected command monitoring log has not been produced'
 GENERIC_CALLBACK_ERROR_INVALID_LOCATION = 'The expected invalid location error log has not been produced'
@@ -47,7 +46,7 @@ def callback_reading_file(log_format, content_file, prefix=monitoring.LOG_COLLEC
 
 def callback_read_file(format, location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, severity='DEBUG'):
     """
-    Create a callback to detect if the logcollector read and not analized a file with specific content.
+    Create a callback to detect when the logcollector reads a file.
 
     Args:
         location (str): Path Read.
@@ -61,7 +60,7 @@ def callback_read_file(format, location, prefix=monitoring.LOG_COLLECTOR_DETECTO
         msg = fr"{severity}: Read 1 lines from {location}"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
-def callback_invalid_format_value(line, option, location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX, severity='DEBUG'):
+def callback_invalid_format_value(line, option, location, prefix=monitoring.LOG_COLLECTOR_DETECTOR_PREFIX):
 
     """
     Create a callback to detect content values invalid in a log format file specific.
@@ -71,19 +70,18 @@ def callback_invalid_format_value(line, option, location, prefix=monitoring.LOG_
         option (str): log format value .
         location (str): Wazuh manager configuration option.
         prefix (str): Daemon that generates the error log.
-        severity (str): Severity of the error (DEBUG)
 
     Returns:
         callable: callback to detect this event.
     """
     if option == 'json':
-        msg = fr"{severity}: Line '{line}' read from '{location}' is not a JSON object."
+        msg = fr"DEBUG: Line '{line}' read from '{location}' is not a JSON object."
     elif option == 'audit':
         msg = fr"ERROR: Discarding audit message because of invalid syntax."
     elif option == 'nmapg':
         msg = fr"ERROR: Bad formated nmap grepable file."
     elif option == 'djb-multilog':
-        msg = fr"{severity}: Invalid DJB log: '{line}'"
+        msg = fr"DEBUG: Invalid DJB log: '{line}'"
 
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 

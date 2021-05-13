@@ -103,103 +103,157 @@ def get_local_internal_options():
     """Get configurations from the module."""
     return local_internal_options
 
-def create_file(files, type):
-    """Create an empty file."""
+def create_file_location(filename, type):
+    """
+    Create a specific content for a specific log_format.
+
+     Args:
+        filename(str): filename create with a specified content.
+        type(str): log format type.
+    """
     if type == 'iis':
         data = '#Software: Microsoft Internet Information Server 6.0\n#Version: 1.0\n#Date: 1998-11-19 22:48:39'
         data += '#Fields: date time c-ip cs-username s-ip cs-method cs-uri-stem cs-uri-query sc-status sc-bytes cs-bytes time-taken cs-version cs(User-Agent) cs(Cookie) cs(Referrer)\n'
     else:
         data = ""
-    file.write_file(files, data)
+    file.write_file(filename, data)
 
-def modify_json_file(file, type):
-    """Create a json content with an specific values"""
+def modify_json_file(filename, type):
+    """
+    Added content with json format and valid or invalid values.
+    Args:
+        filename (str):filename to modify.
+        type (str):type of content value. It can be valid or invalid.
+    """
+
     if type:
         data = '{"issue":22,"severity":1}\n'
     else:
         data = '{"issue:22,"severity":1}\n'
 
-    with open(file, 'a') as f:
-        f.write(data)
+    file.write_file(filename, data)
 
-def modify_syslog_file(file):
-    """Create a syslog content with an specific values"""
+def modify_syslog_file(filename):
+    """
+    Added content with syslog format and valid values.
+    Args:
+        filename (str):filename to modify.
+    """
+
     data = 'Apr 29 12:47:51 dev-branch systemd[1]: Starting\n'
+    file.write_file(filename, data)
 
-    with open(file, 'a') as f:
-        f.write(data)
-
-def modify_snort_file(file):
-    """Create a snort content with an specific values"""
+def modify_snort_file(filename):
+    """
+    Added content with syslog format and invalid values.
+    Args:
+        filename (str):filename to modify.
+    """
     data = '10/12-21:29:35.911089 {ICMP} 192.168.1.99 – > 192.168.1.103\n'
+    file.write_file(filename, data)
 
-    with open(file, 'a') as f:
-        f.write(data)
-
-def modify_squid_file(file):
-    """Create a squid content with an specific values"""
+def modify_squid_file(filename):
+    """
+    Added content with squid format and valid values.
+    Args:
+        filename (str):filename to modify.
+    """
     data = '902618.84 440 120.65.1.1 TCP/304 80 GET http://www.web.com:8005\n'
-    with open(file, 'a') as f:
-        f.write(data)
+    file.write_file(filename, data)
 
-def modify_audit_file(file, type):
-    """Create a audit content with an specific values"""
+def modify_audit_file(filename, type):
+    """
+    Added content with audit format and specific values.
+    Args:
+        filename (str):filename to modify.
+        type (str):type of content value. It can be valid or invalid.
+    """
+
     if type:
         data = """type=SERVICE_START msg=audit(1620164215.922:963): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=dnf-makecache comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'UID="root" AUID="unset"\n"""
     else:
         data = """=SERVICE_START msg=audit(1620164215.922:963): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=dnf-makecache comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'UID="root" AUID="unset\n"""
-    with open(file, 'a') as f:
-        f.write(data)
+    file.write_file(filename, data)
 
-def modify_mysqlLog_file(file):
-    """Create a mysql_log content with an specific values"""
+
+def modify_mysqlLog_file(filename):
+    """
+    Added content with mysql format and valid values.
+    Args:
+        filename (str):filename to modify.
+    """
+
     data = """show variables like 'general_log%';\n"""
-    with open(file, 'a') as f:
-        f.write(data)
+    file.write_file(filename, data)
 
-def modify_postgresqlLog_file(file):
-    """Create a postgresql_log content with an specific values"""
+
+def modify_postgresqlLog_file(filename):
+    """
+    Added content with postgresql format and valid values.
+    Args:
+        filename (str):filename to modify.
+    """
+
     data = """show variables like 'general_log%';\n"""
-    with open(file, 'a') as f:
-        f.write(data)
+    file.write_file(filename, data)
 
-def modify_nmapg_file(file, type):
-    """Create a nmapg content with an specific values"""
+def modify_nmapg_file(filename, type):
+    """
+    Added content with nmapg format and specific values.
+    Args:
+        filename (str):filename to modify.
+        type (str):type of content value. It can be valid or invalid.
+    """
     if type:
         data = '# Nmap 7.70 scan initiated Tue May 11 16:48:35 2021 as: nmap -T4 -A -v -oG /var/log/map.log scanme.nmap.org\n'
         data += '# Ports scanned: TCP(1000;1,3-4,6-7,9,13,17,7920-7921,7937-7938,7999-8002,8007-8011,8021-8022,8031,8042,8045,8800,64680,65000,65129,65389) UDP(0;) SCTP(0;) PROTOCOLS(0;)\n'
     else:
         data = 'nmap -n -Pn -p 80 --open -sV -vvv --script banner,http-title -iR 1000\n'
-    with open(file, 'a') as f:
-        f.write(data)
+    file.write_file(filename, data)
 
-def modify_djb_multilog_file(file, type):
-    """Create a djb-multilog content with an specific values"""
+def modify_djb_multilog_file(filename, type):
+    """
+    Added content with djb-multilog format and specific values.
+    Args:
+        filename (str):filename to modify.
+        type (str):type of content value. It can be valid or invalid.
+    """
     if type:
         data = '@400000003b4a39c23294b13c fatal: out of memory'
     else:
         data = '@40000000590e30983973bda4-eError'
 
-    with open(file, 'a') as f:
-        f.write(data)
+    file.write_file(filename, data)
 
-def modify_multi_line_file(file):
-    """Create a multi-line content with an specific values"""
+def modify_multi_line_file(filename):
+    """
+    Added content with multiline format and valid values.
+    Args:
+        filename (str):filename to modify.
+    """
 
     data = """Aug 9 14:22:47 log1\nAug 9 14:22:47 log2\nAug 9 14:22:47 log3\n"""
+    file.write_file(filename, data)
 
-    with open(file, 'a') as f:
-        f.write(data)
-
-def modify_iis_file(file):
-    """Create a iis content with an specific values"""
+def modify_iis_file(filename):
+    """
+    Added content with iis format and valid values.
+    Args:
+        filename (str):filename to modify.
+    """
 
     data = '2020-11-19 22:48:39 206.175.82.5 - 208.201.133.173 GET /global/images/navlineboards.gif - 200 540 324 157 HTTP/1.0 Mozilla/4.0+(compatible;+MSIE+4.01;+Windows+95) USERID=CustomerA;+IMPID=01234 http://www.loganalyzer.net\n'
-    with open(file, 'a') as f:
-        f.write(data)
+    file.write_file(filename, data)
+
 
 def modify_file(file, type, content):
-    """ Modify a file to generate logs."""
+    """ Modified a file with a specific log format to generate logs.
+    Args:
+        file (str): filename to modify.
+        type (str): log format type to add.
+        content (str): content type(Valid=True, Invalid=False) to add to the file.
+    """
+
     if type == 'json':
         modify_json_file(file, content)
     elif type == 'syslog':
@@ -224,14 +278,11 @@ def modify_file(file, type, content):
         modify_iis_file(file)
 
 def check_log_format_valid(cfg):
-    """Check if Wazuh run correctly with the specified log formats.
-
-    Ensure logcollector allows the specified log formats. Also, in the case of the manager instance, check if the API
-    answer for localfile block coincides.
+    """
+    Check if Wazuh run correctly with the specified log formats.
 
     Raises:
         TimeoutError: If the "Analyzing file" callback is not generated.
-        AssertError: In the case of a server instance, the API response is different that the real configuration.
     """
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     if cfg['log_format'] == 'eventchannel' or cfg['log_format'] == 'eventlog':
@@ -242,8 +293,7 @@ def check_log_format_valid(cfg):
 
 def check_log_format_value_valid(conf):
     """
-    Check if Wazuh runs correctly with the correct log format and content.
-    Ensure logcollector allows the specified log formats.
+    Check if Wazuh runs correctly with the correct log format and a specific content.
 
     Raises:
         TimeoutError: If the "Analyzing file" callback is not generated.
@@ -282,10 +332,7 @@ def check_log_format_value_valid(conf):
 
 def analyzing_invalid_value(conf):
     """
-    Created to analyze the content of a file specific.
-    Args:
-        location (str): Path Read.
-        format (str): format Type to analyze error message
+    Checks for the error message that is shown when the record format type is valid but the content is invalid.
     """
 
     with open(conf['location']) as log:
@@ -295,7 +342,7 @@ def analyzing_invalid_value(conf):
 
 def check_log_format_value_invalid(conf):
     """
-    Check if Wazuh fails because of an  log format content invalid.
+    Check if Wazuh fails because of content invalid log.
 
     Raises:
        TimeoutError: If error callback are not generated.
@@ -308,6 +355,11 @@ def check_log_format_value_invalid(conf):
         wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR)
 
 def check_log_format_values(conf):
+    """
+    Set of validations to follow to validate a certain content.
+    The file content could be valid or invalid.
+
+   """
 
     if conf['valid_value']:
         check_log_format_valid(conf)
@@ -339,7 +391,7 @@ def test_log_format(get_local_internal_options, get_configuration, configure_loc
         # Analyze valid formats with valid content in Windows
         if sys.platform == 'win32':
             if conf['log_format'] == 'iis':
-                create_file(iis_path, conf['log_format'])
+                create_file_location(iis_path, conf['log_format'])
                 control_service('start', daemon=LOGCOLLECTOR_DAEMON)
                 check_log_format_values(conf)
             else:
@@ -348,16 +400,16 @@ def test_log_format(get_local_internal_options, get_configuration, configure_loc
         else:
             # Analyze valid formats with valid content in Linux
             if conf['log_format'] == 'djb-multilog':
-                create_file(filemultilog, conf['log_format'])
+                create_file_location(filemultilog, conf['log_format'])
                 control_service('start', daemon=LOGCOLLECTOR_DAEMON)
                 check_log_format_values(conf)
 
             elif conf['log_format'] == 'nmapg':
-                create_file(nmap_log, conf['log_format'])
+                create_file_location(nmap_log, conf['log_format'])
                 control_service('start', daemon=LOGCOLLECTOR_DAEMON)
                 check_log_format_values(conf)
             else:
-                create_file(location, conf['log_format'])
+                create_file_location(location, conf['log_format'])
                 control_service('start', daemon=LOGCOLLECTOR_DAEMON)
                 check_log_format_values(conf)
 
@@ -369,18 +421,18 @@ def test_log_format(get_local_internal_options, get_configuration, configure_loc
         else:
         # Analyze valid formats with invalid content in Linux
             if conf['log_format'] == 'djb-multilog':
-                create_file(filemultilog, conf['log_format'])
+                create_file_location(filemultilog, conf['log_format'])
                 control_service('start', daemon=LOGCOLLECTOR_DAEMON)
                 check_log_format_values(conf)
 
             elif conf['log_format'] == 'nmapg':
-                create_file(nmap_log, conf['log_format'])
-                create_file(location, conf['log_format'])
+                create_file_location(nmap_log, conf['log_format'])
+                create_file_location(location, conf['log_format'])
                 control_service('start', daemon=LOGCOLLECTOR_DAEMON)
                 check_log_format_values(conf)
                 file.remove_file(nmap_log)
 
             else:
-                create_file(location, conf['log_format'])
+                create_file_location(location, conf['log_format'])
                 control_service('start', daemon=LOGCOLLECTOR_DAEMON)
                 check_log_format_values(conf)
