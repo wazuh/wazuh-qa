@@ -19,16 +19,14 @@ pytestmark = pytest.mark.tier(level=0)
 
 test_folder = os.path.join(PREFIX, 'test_folder')
 matched_directories = ['simple1', 'simple2', 'star12', 'stars123', 'multiple_1', 'multiplet']
-matched_subdirectories = ['sub_simple1', 'sub_simple2', 'substar', 'subdtar', '_submult', 'submult']
-matched_subdirectories = [os.path.join(matched_directories[index], matched_subdirectories[index])
-for index in range(len(matched_subdirectories))]
-test_subdirectories = matched_directories + matched_subdirectories + ['random_directory', 'not_monitored_directory']
+matched_subdirs = ['sub_simple1', 'sub_simple2', 'substar', 'subdtar', '_submult', 'submult']
+matched_subdirs = [os.path.join(parent, child) for parent, child in zip(matched_directories, matched_subdirs)]
+test_subdirectories = matched_directories + matched_subdirs + ['random_directory', 'not_monitored_directory']
 wildcards = [os.path.join(test_folder, 'simple?'),
-                  os.path.join(test_folder, 'star*'),
-                  os.path.join(test_folder, '*ple*'),
-                  os.path.join(test_folder, 'simple?/*'),
-                  os.path.join(test_folder, 'star*/sub?*'),
-                  os.path.join(test_folder, 'mul*/*?lt')]
+             os.path.join(test_folder, 'star*'),
+             os.path.join(test_folder, '*ple*'),
+             os.path.join(test_folder, 'star*/sub*'),
+             os.path.join(test_folder, 'mul*/*lt')]
 
 wildcards = ','.join(wildcards)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -92,4 +90,4 @@ def test_basic_usage_wildcards(parent_folder, subfolder, file_name, tags_to_appl
     regular_file_cud(folder, wazuh_log_monitor, file_list=[file_name],
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
                      min_timeout=global_parameters.default_timeout * mult,
-                     triggers_event=subfolder in matched_directories or subfolder in matched_subdirectories)
+                     triggers_event=subfolder in matched_directories or subfolder in matched_subdirs)
