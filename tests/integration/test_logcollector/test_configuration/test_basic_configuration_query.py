@@ -11,14 +11,14 @@ from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 
 # Marks
 common_query = ['', 'Testing', '2342342', '!ras*^']
+query_list = []
 
-if sys.platform != 'win32' or sys.platform != 'darwin':
+if sys.platform != 'win32' and sys.platform != 'darwin':
     pytestmark = [pytest.mark.skip, pytest.mark.tier(level=0)]
 else:
     if sys.platform == 'darwin':
         clauses = ['eventMessage', 'processImagePath', 'senderImagePath', 'subsystem', 'category', 'eventType',
                    'messageType']
-        query_list = []
         for clause in clauses:
             query_list.append([f'{clause} CONTAINS[c] "com.apple.geod"',
                                f'{clause} == "testing"',

@@ -9,11 +9,10 @@ from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.services import LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS
+from wazuh_testing.logcollector import LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS
 import wazuh_testing.tools.configuration as conf
 
 DAEMON_NAME = "wazuh-logcollector"
-
 
 
 @pytest.fixture(scope='module')
