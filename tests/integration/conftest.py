@@ -412,7 +412,8 @@ def connect_to_sockets_function(request):
 def configure_local_internal_options(get_local_internal_options):
     backup_options_lines = conf.get_wazuh_local_internal_options()
     backup_options_dict = conf.local_internal_options_to_dict(backup_options_lines)
-    if not all(option in backup_options_dict.items() for option in get_local_internal_options.items()):
+
+    if backup_options_dict != get_local_internal_options:
         conf.add_wazuh_local_internal_options(get_local_internal_options)
 
         control_service('restart')

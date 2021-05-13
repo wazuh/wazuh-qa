@@ -11,18 +11,21 @@ GENERIC_CALLBACK_ERROR_TARGET_SOCKET = "The expected target socket log has not b
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND = "The expected target socket not found error has not been produced"
 LOG_COLLECTOR_GLOBAL_TIMEOUT = 20
 
-
 WINDOWS_CHANNEL_LIST = ['Microsoft-Windows-Sysmon/Operational',
-                             'Microsoft-Windows-Windows Firewall With Advanced Security/Firewall',
-                             'Application',
-                             'Security',
-                             'System',
-                             'Microsoft-Windows-Sysmon/Operational',
-                             'Microsoft-Windows-Windows Defender/Operational',
-                             'File Replication Service',
-                             'Service Microsoft-Windows-TerminalServices-RemoteConnectionManager'
-                             ]
+                        'Microsoft-Windows-Windows Firewall With Advanced Security/Firewall',
+                        'Application',
+                        'Security',
+                        'System',
+                        'Microsoft-Windows-Sysmon/Operational',
+                        'Microsoft-Windows-Windows Defender/Operational',
+                        'File Replication Service',
+                        'Service Microsoft-Windows-TerminalServices-RemoteConnectionManager'
+                        ]
 
+LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
+    'logcollector.debug': '2',
+    'monitord.rotate_log': '0',
+}
 
 if sys.platform == 'win32':
     prefix = monitoring.AGENT_DETECTOR_PREFIX
