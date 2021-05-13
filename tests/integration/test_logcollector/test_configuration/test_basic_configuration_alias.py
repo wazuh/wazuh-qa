@@ -10,6 +10,7 @@ from wazuh_testing.tools import get_service
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 import wazuh_testing.logcollector as logcollector
 import wazuh_testing.api as api
+from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 
 
 # Marks
@@ -37,15 +38,12 @@ parameters = [
     {'LOG_FORMAT': 'full_command', 'COMMAND': f'{command}', 'ALIAS': 'alias2'}
 ]
 
-metadata = [
-    {'log_format': 'command', 'command': f'{command}', 'alias': 'alias'},
-    {'log_format': 'full_command', 'command': f'{command}', 'alias': 'alias2'}
-]
+metadata = lower_case_key_dictionary_array(parameters)
 
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
-configuration_ids = [f"{x['LOG_FORMAT'], x['COMMAND'], x['ALIAS']}" for x in parameters]
+configuration_ids = [f"{x['log_format']}_{x['command']}_{x['alias']}" for x in metadata]
 
 
 # fixtures

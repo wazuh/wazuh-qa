@@ -90,8 +90,8 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
 
-configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['COMMAND']}" + f"" if 'COMMAND' in x
-                     else f"{x['LOCATION']}_{x['LOG_FORMAT']}" for x in parameters]
+configuration_ids = [f"{x['location']}_{x['log_format']}_{x['command']}" + f"" if 'command' in x
+                     else f"{x['location']}_{x['log_format']}" for x in metadata]
 
 
 log_format_not_print_analyzing_info = ['command', 'full_command', 'eventlog', 'eventchannel', 'oslog']

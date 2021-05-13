@@ -87,7 +87,7 @@ problematic_values = ['3s', '3s5m', '3Testing']
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
-configuration_ids = [f"{x['LOG_FORMAT'], x['COMMAND'], x['FREQUENCY']}" for x in parameters]
+configuration_ids = [f"{x['log_format']}_{x['command']}_{x['frequency']}" for x in metadata]
 
 
 def check_configuration_frequency_valid(cfg):

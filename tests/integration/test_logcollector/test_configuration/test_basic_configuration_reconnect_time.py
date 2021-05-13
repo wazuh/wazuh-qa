@@ -62,7 +62,7 @@ metadata = [
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
-configuration_ids = [f"{x['LOG_FORMAT'], x['LOCATION'], x['RECONNECT_TIME']}" for x in parameters]
+configuration_ids = [f"{x['log_format']}_{x['location']}_{x['reconnect_time']}" for x in metadata]
 problematic_values = ['44sTesting', '9hTesting', '400mTesting', '3992']
 
 

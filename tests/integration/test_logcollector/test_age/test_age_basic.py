@@ -10,6 +10,8 @@ from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.time import time_to_seconds
+from wazuh_testing.tools.utils import lower_case_key_dictionary_array
+
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -64,16 +66,12 @@ parameters = [
     {'LOCATION': folder_path_regex, 'LOG_FORMAT': 'syslog', 'AGE': '9h'},
     {'LOCATION': folder_path_regex, 'LOG_FORMAT': 'syslog', 'AGE': '200d'},
 ]
-metadata = [
-    {'location': folder_path_regex, 'log_format': 'syslog', 'age': '4000s'},
-    {'location': folder_path_regex, 'log_format': 'syslog', 'age': '5m'},
-    {'location': folder_path_regex, 'log_format': 'syslog', 'age': '500m'},
-    {'location': folder_path_regex, 'log_format': 'syslog', 'age': '9h'},
-    {'location': folder_path_regex, 'log_format': 'syslog', 'age': '200d'},
-]
+
+metadata = lower_case_key_dictionary_array(parameters)
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['AGE']}" for x in parameters]
+
+configuration_ids = [f"{x['location']}_{x['log_format']}" for x in metadata]
 
 
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)

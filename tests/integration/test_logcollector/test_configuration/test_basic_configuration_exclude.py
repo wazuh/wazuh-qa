@@ -60,7 +60,7 @@ else:
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
-configuration_ids = [f"{x['LOG_FORMAT'], x['LOCATION'], x['EXCLUDE']}" for x in parameters]
+configuration_ids = [f"{x['log_format']}_{x['location']}_{x['exclude']}" for x in metadata]
 
 
 # fixtures

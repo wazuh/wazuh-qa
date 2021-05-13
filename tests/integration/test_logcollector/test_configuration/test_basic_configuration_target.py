@@ -43,8 +43,8 @@ metadata = [
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
-configuration_ids = [f"{x['LOG_FORMAT'], x['TARGET'], x['SOCKET_NAME'], x['LOCATION'], x['SOCKET_PATH']}"
-                     for x in parameters]
+configuration_ids = [f"{x['log_format']}_{x['target']}_{x['socket_name']}_{x['location']}_{x['socket_path']}"
+                     for x in metadata]
 
 
 def check_configuration_target_valid(cfg):

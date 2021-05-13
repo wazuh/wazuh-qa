@@ -67,7 +67,7 @@ metadata = [
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
-configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['IGNORE_BINARIES']}" for x in parameters]
+configuration_ids = [f"{x['location']}_{x['log_format']}_{x['ignore_binaries']}" for x in metadata]
 
 
 # fixtures

@@ -70,7 +70,7 @@ problematic_values = ['44sTesting', '9hTesting', '400mTesting', '3992']
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
-configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['AGE']}" for x in parameters]
+configuration_ids = [f"{x['location']}_{x['log_format']}_{x['age']}" for x in metadata]
 
 
 def check_configuration_age_valid(cfg):

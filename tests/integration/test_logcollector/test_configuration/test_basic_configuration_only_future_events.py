@@ -106,8 +106,8 @@ parameters = tcases
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
-configuration_ids = [f"{x['LOG_FORMAT']}_{x['ONLY-FUTURE-EVENTS']}_{x['MAX-SIZE']}" + f"" if 'MAX-SIZE' in x
-                     else f"{x['LOG_FORMAT']}_{x['ONLY-FUTURE-EVENTS']}" for x in parameters]
+configuration_ids = [f"{x['log_format']}_{x['only-future-events']}_{x['max-size']}" + f"" if 'max-size' in x
+                     else f"{x['log-format']}_{x['only-future-events']}" for x in metadata]
 
 
 def check_only_future_events_valid(cfg):

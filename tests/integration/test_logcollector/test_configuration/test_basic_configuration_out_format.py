@@ -101,10 +101,10 @@ metadata = [
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
-configuration_ids = \
-    [
-        f"{x['LOG_FORMAT'], x['TARGET'], x['SOCKET_NAME'], x['LOCATION'], x['SOCKET_PATH'], x['TARGET_OUT_FORMAT'], x['OUT_FORMAT']}"
-        for x in parameters]
+configuration_ids = [
+    f"{x['log_format']}_{x['target']}_{x['socket_name']}_{x['location']}_{x['socket_path']}_" \
+    f"{x['target_out_format']}_{x['out_format']}" for x in metadata
+]
 
 
 def check_configuration_out_format_valid(cfg):
