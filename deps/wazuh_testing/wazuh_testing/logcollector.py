@@ -375,7 +375,7 @@ def add_log_data(log_path, log_line_message, size_kib=1024, line_start=1, print_
     return 0
 
 
-def get_logcollector_data_sending_stats(log_path, socket_name, state_interval):
+def get_data_sending_stats(log_path, socket_name, state_interval):
     """Returns the statistics of a log monitored by logcollector.
 
     For this purpose, it parses the "wazuh-logcollector.state" file and retrieves the data.
@@ -453,7 +453,7 @@ def get_next_stats(current_stats, log_path, socket_name, state_interval):
     next_interval_date = current_stats['interval_end_date'] + timedelta(seconds=state_interval)
     next_2_intervals_date = current_stats['interval_end_date'] + timedelta(seconds=state_interval * 2)
     for _ in range(0, state_interval * 2):
-        stats = get_logcollector_data_sending_stats(log_path, socket_name, state_interval)
+        stats = get_data_sending_stats(log_path, socket_name, state_interval)
         mtime_next = path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
         # The time of the interval must be equal to or greater than the calculated time,
         # but less than the calculated time for two intervals.
