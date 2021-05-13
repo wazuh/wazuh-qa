@@ -235,8 +235,10 @@ def check_log_format_valid(cfg):
         AssertError: In the case of a server instance, the API response is different that the real configuration.
     """
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
-    log_callback = logcollector.callback_analyzing_file(cfg['location'], prefix=prefix)
+    if cfg['log_format'] == 'eventchannel' or cfg['log_format'] == 'eventlog':
+        log_callback = logcollector.callback_eventchannel_analyzing(cfg['location'])
+    else:
+        log_callback = logcollector.callback_analyzing_file(cfg['location'], prefix=prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
 
 def check_log_format_value_valid(conf):
