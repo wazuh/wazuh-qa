@@ -7,8 +7,6 @@ import pytest
 import sys
 import subprocess as sb
 import wazuh_testing.tools.file as file
-import wazuh_testing.tools.system as system
-
 
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools import LOG_FILE_PATH
@@ -31,12 +29,17 @@ local_internal_options = {'logcollector.vcheck_files': '1', 'logcollector.debug'
 
 if sys.platform == 'win32':
     location = r'C:\test.txt'
+#    iis_path = r'%SystemDrive%\inetpub\logs\LogFiles\W3SVC1\test.log'
+    iis_path = r'C:\test_iis.log'
+    filemultilog = r'C:\test_multilog'
+    nmap_log = r'C:\test_nmapg.log'
     wazuh_configuration = 'ossec.conf'
     prefix = AGENT_DETECTOR_PREFIX
 
 else:
     location = '/tmp/test.txt'
     filemultilog = '/var/log/current'
+    nmap_log = '/var/log/wa.log'
     wazuh_configuration = 'etc/ossec.conf'
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
@@ -54,8 +57,7 @@ parameters = [
     {'LOCATION': f'{filemultilog}', 'LOG_FORMAT': 'djb-multilog'},
     {'LOCATION': f'{filemultilog}', 'LOG_FORMAT': 'djb-multilog'},
     {'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapg'},
-
-#    {'LOCATION': '/var/log/nmap.log', 'LOG_FORMAT': 'nmapg'},
+    {'LOCATION': f'{nmap_log}', 'LOG_FORMAT': 'nmapg'},
 ]
 
 metadata = [
@@ -72,24 +74,22 @@ metadata = [
     {'location': f'{filemultilog}', 'log_format': 'djb-multilog', 'valid_value': False},
     {'location': f'{filemultilog}', 'log_format': 'djb-multilog', 'valid_value': True},
     {'location': f'{location}', 'log_format': 'nmapg', 'valid_value': False},
-
-#    {'location': '/var/log/nmap.log', 'log_format': 'nmapg', 'valid_value': True},
+    {'location': f'{nmap_log}', 'log_format': 'nmapg', 'valid_value': True},
 ]
 
 if sys.platform == 'win32':
     parameters.append({'LOCATION': 'Security', 'LOG_FORMAT': 'eventlog'})
-    parameters.append({'LOCATION': f'{location}', 'LOG_FORMAT': 'eventchannel'})
-    parameters.append({'LOCATION': f'{location}', 'LOG_FORMAT': 'iis'})
+    parameters.append({'LOCATION': 'Application', 'LOG_FORMAT': 'eventchannel'})
+    parameters.append({'LOCATION': f'{iis_path}', 'LOG_FORMAT': 'iis'})
 
     metadata.append({'location': 'Security', 'log_format': 'eventlog', 'valid_value': True})
-    metadata.append({'location': f'{location}', 'log_format': 'eventchannel', 'valid_value': True})
-    metadata.append({'location': f'{location}', 'log_format': 'iis', 'valid_value': True}),
+    metadata.append({'location': 'Application', 'log_format': 'eventchannel', 'valid_value': True})
+    metadata.append({'location': f'{iis_path}', 'log_format': 'iis', 'valid_value': True}),
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 configuration_ids = [f"{x['log_format'], x['valid_value']}" for x in metadata]
 
-log_format_not_print_analyzing_info = ['eventlog', 'eventchannel', 'iis']
-
+log_format_windows_print_analyzing_info = ['eventlog', 'eventchannel', 'iis']
 log_format_not_print_reading_info = ['audit', 'mysql_log', 'postgresql_log', 'nmapg', 'djb-multilog']
 
 # fixtures
@@ -103,10 +103,15 @@ def get_local_internal_options():
     """Get configurations from the module."""
     return local_internal_options
 
-def create_file(file):
+def create_file(file, type):
     """Create an empty file."""
+    if type == 'iis':
+        data = '#Software: Microsoft Internet Information Server 6.0\n#Version: 1.0\n#Date: 1998-11-19 22:48:39'
+        data += '#Fields: date time c-ip cs-username s-ip cs-method cs-uri-stem cs-uri-query sc-status sc-bytes cs-bytes time-taken cs-version cs(User-Agent) cs(Cookie) cs(Referrer)\n'
+    else:
+        data = ""
     with open(file, 'a') as f:
-        f.write("")
+        f.write(data)
 
 def modify_json_file(file, type):
     """Create a json content with an specific values"""
@@ -159,9 +164,13 @@ def modify_postgresqlLog_file(file):
     with open(file, 'a') as f:
         f.write(data)
 
-def modify_nmapg_file(file):
+def modify_nmapg_file(file, type):
     """Create a nmapg content with an specific values"""
-    data = 'nmap -n -Pn -p 80 --open -sV -vvv --script banner,http-title -iR 1000\n'
+    if type:
+        data = '# Nmap 7.70 scan initiated Tue May 11 16:48:35 2021 as: nmap -T4 -A -v -oG /var/log/map.log scanme.nmap.org\n'
+        data += '# Ports scanned: TCP(1000;1,3-4,6-7,9,13,17,7920-7921,7937-7938,7999-8002,8007-8011,8021-8022,8031,8042,8045,8800,64680,65000,65129,65389) UDP(0;) SCTP(0;) PROTOCOLS(0;)\n'
+    else:
+        data = 'nmap -n -Pn -p 80 --open -sV -vvv --script banner,http-title -iR 1000\n'
     with open(file, 'a') as f:
         f.write(data)
 
@@ -183,6 +192,13 @@ def modify_multi_line_file(file):
     with open(file, 'a') as f:
         f.write(data)
 
+def modify_iis_file(file):
+    """Create a iis content with an specific values"""
+
+    data = '2020-11-19 22:48:39 206.175.82.5 - 208.201.133.173 GET /global/images/navlineboards.gif - 200 540 324 157 HTTP/1.0 Mozilla/4.0+(compatible;+MSIE+4.01;+Windows+95) USERID=CustomerA;+IMPID=01234 http://www.loganalyzer.net\n'
+    with open(file, 'a') as f:
+        f.write(data)
+
 def modify_file(file, type, content):
     """ Modify a file to generate logs."""
     if type == 'json':
@@ -200,11 +216,13 @@ def modify_file(file, type, content):
     elif type == 'postgresql_log':
         modify_postgresqlLog_file(file)
     elif type == 'nmapg':
-        modify_nmapg_file(file)
+        modify_nmapg_file(file, content)
     elif type == 'djb-multilog':
         modify_djb_multilog_file(file, content)
     elif type == 'multi-line:3':
         modify_multi_line_file(file)
+    elif type == 'iis':
+        modify_iis_file(file)
 
 def check_log_format_valid(cfg):
     """Check if Wazuh run correctly with the specified log formats.
@@ -218,14 +236,8 @@ def check_log_format_valid(cfg):
     """
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    if cfg['log_format'] not in log_format_not_print_analyzing_info:
-        log_callback = logcollector.callback_analyzing_file(cfg['location'], prefix=prefix)
-        wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
-
-    elif cfg['log_format'] == 'djb-multilog':
-        log_callback = logcollector.callback_monitoring_djb_multilog(cfg['location'], prefix=prefix)
-        wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message="The expected multilog djb log has not been produced")
-
+    log_callback = logcollector.callback_analyzing_file(cfg['location'], prefix=prefix)
+    wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
 
 def check_log_format_value_valid(conf):
     """
@@ -238,16 +250,16 @@ def check_log_format_value_valid(conf):
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    if conf['log_format'] not in log_format_not_print_analyzing_info:
-
+    if conf['log_format'] not in log_format_windows_print_analyzing_info:
         if conf['log_format'] in log_format_not_print_reading_info:
-            if conf['log_format'] == 'djb-multilog':
-                log_callback = logcollector.callback_read_file(conf['log_format'], filemultilog, prefix=prefix)
-            else:
-                log_callback = logcollector.callback_read_file(conf['log_format'], location, prefix=prefix)
+            # Logs format that only shows when a specific file is read.
+
+            log_callback = logcollector.callback_read_file(conf['log_format'], conf['location'], prefix=prefix)
             wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
 
         elif conf['log_format'] == 'multi-line:3':
+            # It is necessary to reorganize the content of the file to compare it with the generated output of the 'multiline' format.
+
             msg = ""
             with open(location, 'r') as file:
                 for line in file:
@@ -256,12 +268,29 @@ def check_log_format_value_valid(conf):
                 log_callback = logcollector.callback_reading_file(conf['log_format'], msg.rstrip(' '), prefix=prefix)
                 wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
         else:
+            # Verify that the content of the parsed file is equal to the output generated in the logs.
             with open(location, 'r') as f:
                 lines = f.readlines()
                 for line in lines:
                     log_callback = logcollector.callback_reading_file(conf['log_format'], line.rstrip('\n'), prefix=prefix)
                     wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
 
+    elif conf['log_format'] == 'iis':
+        log_callback = logcollector.callback_read_file(conf['log_format'], conf['location'], prefix=prefix)
+        wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
+
+def analyzing_invalid_value(conf):
+    """
+    Created to analyze the content of a file specific.
+    Args:
+        location (str): Path Read.
+        format (str): format Type to analyze error message
+    """
+
+    with open(conf['location']) as log:
+        line = log.readline()
+        log_callback = logcollector.callback_invalid_format_value(line.rstrip('\n'), conf['log_format'], conf['location'], prefix)
+        return log_callback
 
 def check_log_format_value_invalid(conf):
     """
@@ -273,22 +302,22 @@ def check_log_format_value_invalid(conf):
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    if conf['log_format'] not in log_format_not_print_analyzing_info:
-        if conf['log_format'] == 'djb-multilog':
-            with open(filemultilog) as f:
-                line = f.readline()
-                log_callback = logcollector.callback_invalid_format_value(line.rstrip('\n'), conf['log_format'], f, prefix)
-                wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR)
-        else:
-            with open(location, "r") as f:
-                line = f.readline()
-                if conf['log_format'] == 'json':
-                    log_callback = logcollector.callback_invalid_format_value(line.rstrip('\n'), conf['log_format'], location, prefix)
-                elif conf['log_format'] == 'audit' or conf['log_format'] == 'nmapg':
-                    log_callback = logcollector.callback_invalid_format_value(line, conf['log_format'], location, prefix)
+    if conf['log_format'] not in log_format_windows_print_analyzing_info:
+        log_callback = analyzing_invalid_value(conf)
+        wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR)
 
-                wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR)
+def check_log_format_values(conf):
 
+    if conf['valid_value']:
+        check_log_format_valid(conf)
+        modify_file(conf['location'], conf['log_format'], conf['valid_value'])
+        check_log_format_value_valid(conf)
+        file.remove_file(conf['location'])
+    else:
+        check_log_format_valid(conf)
+        modify_file(conf['location'], conf['log_format'], conf['valid_value'])
+        check_log_format_value_invalid(conf)
+        file.remove_file(conf['location'])
 
 def test_log_format(get_local_internal_options, get_configuration, configure_local_internal_options, configure_environment):
     """
@@ -306,63 +335,51 @@ def test_log_format(get_local_internal_options, get_configuration, configure_loc
     file.truncate_file(LOG_FILE_PATH)
 
     if conf['valid_value']:
-        if conf['log_format'] == 'djb-multilog':
-            create_file(filemultilog)
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-            check_log_format_valid(conf)
-            modify_file(filemultilog, conf['log_format'], conf['valid_value'])
-            check_log_format_value_valid(conf)
-            file.remove_file(filemultilog)
-
-        elif sys.platform == 'win32':
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-            check_log_format_valid(conf)
-
-        elif conf['log_format'] == 'nmapg':
-            create_file('/var/log/nmap.log')
-            create_file(location)
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-            check_log_format_valid(conf)
-            system.run_command('nmap -T4 -A -v -oG /var/log/nmap.log scanme.nmap.org')
-            check_log_format_value_valid(conf)
-            file.remove_file('/var/log/nmap.log')
-            file.remove_file(location)
-
+        # Analyze valid formats with valid content in Windows
+        if sys.platform == 'win32':
+            if conf['log_format'] == 'iis':
+                create_file(iis_path, conf['log_format'])
+                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+                check_log_format_values(conf)
+            else:
+                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+                check_log_format_valid(conf)
         else:
-            create_file(location)
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-            check_log_format_valid(conf)
-            modify_file(location, conf['log_format'], conf['valid_value'])
-            check_log_format_value_valid(conf)
-            file.remove_file(location)
+            # Analyze valid formats with valid content in Linux
+            if conf['log_format'] == 'djb-multilog':
+                create_file(filemultilog, conf['log_format'])
+                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+                check_log_format_values(conf)
+
+            elif conf['log_format'] == 'nmapg':
+                create_file(nmap_log, conf['log_format'])
+                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+                check_log_format_values(conf)
+            else:
+                create_file(location, conf['log_format'])
+                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+                check_log_format_values(conf)
 
     else:
+        # Analyze valid formats with invalid content in Windows
+        # Return Exception Error
         if sys.platform == 'win32':
-#            sb.CalledProcessError
-            pass
-
-        elif conf['log_format'] == 'djb-multilog':
-            create_file(filemultilog)
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-            check_log_format_valid(conf)
-            modify_file(filemultilog, conf['log_format'], conf['valid_value'])
-            check_log_format_value_invalid(conf)
-            file.remove_file(filemultilog)
-
-        elif conf['log_format'] == 'nmapg':
-            create_file(location)
-            create_file('/var/log/nmap.log')
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-            check_log_format_valid(conf)
-            modify_file(location, conf['log_format'], conf['valid_value'])
-            check_log_format_value_invalid(conf)
-            file.remove_file('/var/log/nmap.log')
-            file.remove_file(location)
-
+            sb.CalledProcessError
         else:
-            create_file(location)
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-            check_log_format_valid(conf)
-            modify_file(location, conf['log_format'], conf['valid_value'])
-            check_log_format_value_invalid(conf)
-            file.remove_file(location)
+        # Analyze valid formats with invalid content in Linux
+            if conf['log_format'] == 'djb-multilog':
+                create_file(filemultilog, conf['log_format'])
+                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+                check_log_format_values(conf)
+
+            elif conf['log_format'] == 'nmapg':
+                create_file(nmap_log, conf['log_format'])
+                create_file(location, conf['log_format'])
+                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+                check_log_format_values(conf)
+                file.remove_file(nmap_log)
+
+            else:
+                create_file(location, conf['log_format'])
+                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+                check_log_format_values(conf)
