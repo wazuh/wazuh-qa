@@ -1,163 +1,58 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-import math
-import json
-import stat
-import os
-import tempfile
-from time import sleep
-from datetime import datetime
+from os import path, unlink
 from socket import AF_UNIX, SHUT_RDWR, SOCK_STREAM, SOCK_DGRAM, socket
+from tempfile import gettempdir
 
 import pytest
 
-import wazuh_testing.logcollector as logcollector
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import monitoring, file
-from wazuh_testing.tools.services import control_service
+from wazuh_testing.logcollector import (GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, add_log_data,
+                                        callback_analyzing_file, callback_socket_connected, callback_socket_offline,
+                                        get_next_stats, get_data_sending_stats)
+from wazuh_testing.tools import LOG_FILE_PATH, file
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.services import control_service
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=1)]
 
 # Configuration
 DAEMON_NAME = "wazuh-logcollector"
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_location_custom_sockets_conf.yaml')
-temp_dir = tempfile.gettempdir()
-log_test_path = os.path.join(temp_dir, 'test.log')
-mode = "tcp"
-
-# Batch sizes of lines to add to the test log (powers of 2)
-lines_batch = [2 ** x for x in range(0, 12)]
+test_data_path = path.join(path.dirname(path.realpath(__file__)), 'data')
+configurations_path = path.join(test_data_path, 'wazuh_location_custom_sockets_conf.yaml')
+temp_dir = gettempdir()
+log_test_path = path.join(temp_dir, 'test.log')
+test_socket = None
 
 local_internal_options = {
     'logcollector.debug': 2,
     'logcollector.state_interval': 5,
+    'logcollector.queue_size': 2048,
     'monitord.rotate_log': 0
 }
 
-parameters = []
-for x in range(0, 12):
-    parameters.append({'LOG_FORMAT': 'syslog', 'LOCATION': log_test_path, 'SOCKET_NAME': 'custom_socket',
-                       'SOCKET_PATH': '/var/run/custom.sock', 'MODE': 'tcp'})
-    parameters.append({'LOG_FORMAT': 'syslog', 'LOCATION': log_test_path, 'SOCKET_NAME': 'custom_socket',
-                       'SOCKET_PATH': '/var/run/custom.sock', 'MODE': 'udp'})
+# Batch sizes of events to add to the log file
+batch_size = [5, 10, 50, 100, 500, 1000, 5000, 10000]
 
-# parameters = [
-#     {'LOG_FORMAT': 'syslog', 'LOCATION': log_test_path, 'SOCKET_NAME': 'custom_socket',
-#      'SOCKET_PATH': '/var/run/custom.sock', 'MODE': 'tcp'},
-#     # {'LOG_FORMAT': 'syslog', 'LOCATION': log_test_path, 'SOCKET_NAME': 'custom_socket',
-#     #  'SOCKET_PATH': '/var/run/custom.sock', 'MODE': 'udp'}
-# ]
+parameters = [
+    {'LOG_FORMAT': 'syslog', 'LOCATION': log_test_path, 'SOCKET_NAME': 'custom_socket',
+     'SOCKET_PATH': '/var/run/custom.sock', 'MODE': 'tcp'},
+    {'LOG_FORMAT': 'syslog', 'LOCATION': log_test_path, 'SOCKET_NAME': 'custom_socket',
+     'SOCKET_PATH': '/var/run/custom.sock', 'MODE': 'udp'}
+]
 
-metadata = []
-for x in range(0, 12):
-    metadata.append({'log_format': 'syslog', 'location': log_test_path, 'socket_name': 'custom_socket',
-                     'socket_path': '/var/run/custom.sock', 'mode': 'tcp', 'lines_batch': 2 ** x,
-                     'log_line': "Jan  1 00:00:00 localhost test[0]: log line"})
-    metadata.append({'log_format': 'syslog', 'location': log_test_path, 'socket_name': 'custom_socket',
-                     'socket_path': '/var/run/custom.sock', 'mode': 'udp', 'lines_batch': 2 ** x,
-                     'log_line': "Jan  1 00:00:00 localhost test[0]: log line"})
-
-# metadata = [
-#     {'log_format': 'syslog', 'location': log_test_path, 'socket_name': 'custom_socket',
-#      'socket_path': '/var/run/custom.sock', 'mode': 'tcp',
-#      'log_line': "Jan  1 00:00:00 localhost test[0]: log line"},
-#     # {'log_format': 'syslog', 'location': log_test_path, 'socket_name': 'custom_socket',
-#     #  'socket_path': '/var/run/custom.sock', 'mode': 'udp',
-#     #  'log_line': "Jan  1 00:00:00 localhost test[0]: log line"}
-# ]
+metadata = [
+    {'log_format': 'syslog', 'location': log_test_path, 'socket_name': 'custom_socket', 'mode': 'tcp',
+     'socket_path': '/var/run/custom.sock', 'log_line': "Jan  1 00:00:00 localhost test[0]: log line"},
+    {'log_format': 'syslog', 'location': log_test_path, 'socket_name': 'custom_socket', 'mode': 'udp',
+     'socket_path': '/var/run/custom.sock', 'log_line': "Jan  1 00:00:00 localhost test[0]: log line"},
+]
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-configuration_ids = [f"target_socket:{x['socket_name']}_mode:{x['mode']}" for x in metadata]
-
-
-def get_logcollector_data_sending_stats(log_path, named_socket):
-    """Returns the statistics of a log monitored by logcollector.
-
-    For this purpose, it parses the wazuh-logcollector.state file and retrieves the data.
-    See:
-    https://documentation-dev.wazuh.com/current/user-manual/reference/statistics-files/wazuh-logcollector-state.html
-
-    Args:
-        log_path (str): Path of the log from which the statistics are to be obtained.
-        named_socket (str): Target socket name.
-
-    Returns:
-        dict: Dictionary with the statistics.
-    """
-    statistics_file_path = '/var/ossec/var/run/wazuh-logcollector.state'
-    # Wait until the statistics file becomes available
-    for _ in range(global_parameters.default_timeout):
-        if os.path.isfile(statistics_file_path):
-            break
-        else:
-            sleep(1)
-
-    with open('/var/ossec/var/run/wazuh-logcollector.state', 'r') as json_file:
-        data = json.load(json_file)
-        global_files = data['global']['files']
-        global_start = data['global']['start']
-        global_end = data['global']['end']
-        global_start_seconds = datetime.strptime(data['global']['start'], '%Y-%m-%d %H:%M:%S').time().second
-        global_end_seconds = datetime.strptime(data['global']['end'], '%Y-%m-%d %H:%M:%S').time().second
-        interval_files = data['interval']['files']
-        interval_start = data['interval']['start']
-        interval_end = data['interval']['end']
-        interval_start_seconds = datetime.strptime(data['interval']['start'], '%Y-%m-%d %H:%M:%S').time().second
-        interval_end_seconds = datetime.strptime(data['interval']['end'], '%Y-%m-%d %H:%M:%S').time().second
-        stats = {'global_events': 0, 'global_drops': 0,
-                 'global_start': global_start, 'global_end': global_end,
-                 'global_start_seconds': global_start_seconds, 'global_end_seconds': global_end_seconds,
-                 'interval_events': 0, 'interval_drops': 0,
-                 'interval_start': interval_start, 'interval_end': interval_end,
-                 'interval_start_seconds': interval_start_seconds, 'interval_end_seconds': interval_end_seconds}
-        # Global statistics
-        for g_file in global_files:
-            if g_file['location'] == log_path:
-                stats['global_events'] = g_file['events']
-                targets = g_file['targets']
-                for t in targets:
-                    if t['name'] == named_socket:
-                        stats['global_drops'] = t['drops']
-        # Interval statistics
-        for i_file in interval_files:
-            if i_file['location'] == log_path:
-                stats['interval_events'] = i_file['events']
-                targets = i_file['targets']
-                for t in targets:
-                    if t['name'] == named_socket:
-                        stats['interval_drops'] = t['drops']
-    return stats
-
-
-def get_next_stats(current_stats, log_path, named_socket):
-    """Return the next statistics to be written to the "wazuh-logcollector.state" file.
-
-    Args:
-        current_stats (dict): Dictionary with the current statistics.
-        log_path (str): Path of the log from which the statistics are to be obtained.
-        named_socket (str): Target socket name.
-
-    Returns:
-        dict: Dictionary with the next statistics.
-
-    Raises:
-          TimeoutError: If the next statistics could not be obtained according to the interval
-                        defined by "logcollector.state_interval"
-    """
-    state_interval_seconds = local_internal_options['logcollector.state_interval']
-    seconds_next_interval = (int(current_stats['interval_end_seconds']) + state_interval_seconds) % 60
-    for _ in range(0, state_interval_seconds + 1):
-        next_stats = get_logcollector_data_sending_stats(log_path, named_socket)
-        if int(next_stats['interval_end_seconds']) != seconds_next_interval:
-            sleep(1)
-        else:
-            return next_stats
-    raise TimeoutError
+configuration_ids = [f"target_{x['socket_name']}_mode_{x['mode']}" for x in metadata]
 
 
 # fixtures
@@ -173,41 +68,63 @@ def get_local_internal_options():
     return local_internal_options
 
 
+@pytest.fixture(scope='function')
+def restart_logcollector(get_configuration, request):
+    """Reset log file and start a new monitor."""
+    control_service('stop', daemon=DAEMON_NAME)
+    file.truncate_file(LOG_FILE_PATH)
+    file_monitor = FileMonitor(LOG_FILE_PATH)
+    setattr(request.module, 'wazuh_log_monitor', file_monitor)
+    control_service('start', daemon=DAEMON_NAME)
+
+
 @pytest.fixture(scope="module")
 def generate_log_file():
     """Generate a log of size greater than 10 MiB for testing."""
     file.write_file(log_test_path, '')
-    logcollector.add_log_data(log_test_path, metadata[0]['log_line'], size_kib=10240)
+    add_log_data(log_test_path, metadata[0]['log_line'], size_kib=10240)
     yield
     file.remove_file(log_test_path)
 
 
 @pytest.fixture(scope="function")
-def create_socket():
+def create_socket(get_configuration):
     """Create a UNIX named socket for testing."""
-    # config = get_configuration['metadata']
+    config = get_configuration['metadata']
+    global test_socket
     # Check if the socket exists and unlink it
-    if os.path.exists(metadata[0]['socket_path']):
-        os.unlink(metadata[0]['socket_path'])
+    if path.exists(config['socket_path']):
+        unlink(config['socket_path'])
 
-    if mode == "tcp":
-        sock = socket(AF_UNIX, SOCK_STREAM)
-        sock.bind(metadata[0]['socket_path'])
-        sock.listen()
+    if config['mode'] == "tcp":
+        test_socket = socket(AF_UNIX, SOCK_STREAM)
+        test_socket.bind(config['socket_path'])
+        test_socket.listen()
     else:
-        sock = socket(AF_UNIX, SOCK_DGRAM)
-        sock.bind(metadata[0]['socket_path'])
+        test_socket = socket(AF_UNIX, SOCK_DGRAM)
+        test_socket.bind(config['socket_path'])
     yield
-    sock.shutdown(SHUT_RDWR)
-    sock.close()
-    os.unlink(metadata[0]['socket_path'])
+    try:
+        test_socket.shutdown(SHUT_RDWR)
+        test_socket.close()
+    except OSError:
+        # The socket is already closed
+        pass
+    finally:
+        if path.exists(config['socket_path']):
+            unlink(config['socket_path'])
 
 
-# @pytest.mark.parametrize('batch', lines_batch)
+@pytest.mark.parametrize("batch", batch_size, ids=[f"batch_{x}" for x in batch_size])
 def test_location_custom_sockets(get_local_internal_options, configure_local_internal_options,
                                  get_configuration, configure_environment, generate_log_file,
-                                 create_socket, restart_logcollector):
+                                 batch, create_socket, restart_logcollector):
     """Check if the "location" option used with custom sockets is working correctly.
+
+    To do this, a UNIX "named socket" is created and added to the configuration
+    through the "socket" section and the "target" option of the "localfile" section.
+    Then, event batches of increasing size are added to the log and, at the same time,
+    it is checked by analyzing the "wazuh-logcollector.state" file to see if these events are dropped.
 
     Args:
         get_local_internal_options (fixture): Get internal configuration.
@@ -215,57 +132,152 @@ def test_location_custom_sockets(get_local_internal_options, configure_local_int
         get_configuration (fixture): Get configurations from the module.
         configure_environment (fixture): Configure a custom environment for testing.
         generate_log_file (fixture): Generate a log file for testing.
-        batch (fixture): Line batches to be added to the test log
+        batch (fixture): Event batches to be added to the test log file.
         create_socket (fixture): Create a UNIX named socket for testing.
         restart_logcollector (fixture): Reset log file and start a new monitor.
     """
     config = get_configuration['metadata']
-    global mode
 
     # Ensure that the log file is being analyzed
-    callback_message = logcollector.callback_analyzing_file(file=config['location'])
+    callback_message = callback_analyzing_file(file=config['location'])
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                            error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
                             callback=callback_message)
 
-    # Add one line of data to force logcollector to connect to the socket
+    # Add one event to force logcollector to connect to the socket
     with open(config['location'], 'a') as f:
         f.write(f"{config['log_line']}\n")
 
     # Ensure that the logcollector is connected to the socket
-    callback_message = logcollector.callback_socket_connected(socket_name=config['socket_name'],
-                                                              socket_path=config['socket_path'])
+    callback_message = callback_socket_connected(socket_name=config['socket_name'],
+                                                 socket_path=config['socket_path'])
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                            error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
                             callback=callback_message)
 
-    stats = get_logcollector_data_sending_stats(config['location'], config['socket_name'])
-    global_drops = int(stats['global_drops'])
-    interval_drops = int(stats['interval_drops'])
+    # This way we make sure to get the statistics right at the beginning of an interval
+    stats = get_data_sending_stats(log_path=config['location'],
+                                   socket_name=config['socket_name'],
+                                   state_interval=local_internal_options['logcollector.state_interval'])
+    next_stats = get_next_stats(current_stats=stats,
+                                log_path=config['location'],
+                                socket_name=config['socket_name'],
+                                state_interval=local_internal_options['logcollector.state_interval'])
+    interval_drops = int(next_stats[0]['interval_drops'])
 
-    # Add batches of lines to log
+    # Add batches of events to log file and check if drops
     with open(config['location'], 'a') as f:
-        for _ in range(0, config['lines_batch']):
+        for _ in range(0, batch):
             f.write(f"{config['log_line']}\n")
 
-    stats = get_next_stats(stats, config['location'], config['socket_name'])
-    global_drops += int(stats['global_drops'])
-    interval_drops += int(stats['interval_drops'])
-
-    print(config['lines_batch'])
-    print(f"g_events: {stats['global_events']}, g_drops: {stats['global_drops']} ({stats['global_end_seconds']})")
-    print(
-        f"i_events: {stats['interval_events']}, i_drops: {stats['interval_drops']} ({stats['interval_end_seconds']})\n")
+    next_stats = get_next_stats(current_stats=next_stats[0],
+                                log_path=config['location'],
+                                socket_name=config['socket_name'],
+                                state_interval=local_internal_options['logcollector.state_interval'])
+    interval_drops += int(next_stats[0]['interval_drops'])
 
     # Obtain next statistics in case dropped events appear during the next interval
-    stats = get_next_stats(stats, config['location'], config['socket_name'])
-    global_drops += int(stats['global_drops'])
-    interval_drops += int(stats['interval_drops'])
+    next_stats = get_next_stats(current_stats=next_stats[0],
+                                log_path=config['location'],
+                                socket_name=config['socket_name'],
+                                state_interval=local_internal_options['logcollector.state_interval'])
+    global_drops = int(next_stats[0]['global_drops'])
+    interval_drops += int(next_stats[0]['interval_drops'])
 
-    print(f"g_events: {stats['global_events']}, g_drops: {stats['global_drops']} ({stats['global_end_seconds']})")
-    print(f"i_events: {stats['interval_events']}, i_drops: {stats['interval_drops']} ({stats['interval_end_seconds']})")
+    # Event drops should not occur with batches smaller than the value of "logcollector.queue_size".
+    if batch > local_internal_options['logcollector.queue_size']:
+        with pytest.raises(AssertionError):
+            assert global_drops == interval_drops == 0, f"Event drops have been detected in batch {batch}."
+    else:
+        assert global_drops == interval_drops == 0, f"Event drops have been detected in batch {batch}."
 
-    assert global_drops == interval_drops == 0, "Event drops have been detected."
 
-    # mode = "udp"
-    # sleep(600)
+@pytest.mark.parametrize("batch", batch_size, ids=[f"batch_{x}" for x in batch_size])
+def test_location_custom_sockets_offline(get_local_internal_options, configure_local_internal_options,
+                                         get_configuration, configure_environment, generate_log_file,
+                                         batch, create_socket, restart_logcollector):
+    """Verify that event drops occur when the socket to which they are sent becomes unavailable.
+
+    To do this logcollector is configured to forward events to a socket, and when the connection
+    has been established one event is written to the log file to force logcollector to connect
+    to the socket, then the socket is closed and batch of events is written to the log file,
+    in which case the event drops should be detected.
+
+    Args:
+        get_local_internal_options (fixture): Get internal configuration.
+        configure_local_internal_options (fixture): Set internal configuration for testing.
+        get_configuration (fixture): Get configurations from the module.
+        configure_environment (fixture): Configure a custom environment for testing.
+        generate_log_file (fixture): Generate a log file for testing.
+        batch (fixture): Event batches to be added to the test log file.
+        create_socket (fixture): Create a UNIX named socket for testing.
+        restart_logcollector (fixture): Reset log file and start a new monitor.
+    """
+    config = get_configuration['metadata']
+    global test_socket
+
+    # Ensure that the log file is being analyzed
+    callback_message = callback_analyzing_file(file=config['location'])
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                            error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                            callback=callback_message)
+
+    # Add one event to force logcollector to connect to the socket
+    with open(config['location'], 'a') as f:
+        f.write(f"{config['log_line']}\n")
+
+    # Ensure that the logcollector is connected to the socket
+    callback_message = callback_socket_connected(socket_name=config['socket_name'],
+                                                 socket_path=config['socket_path'])
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                            error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                            callback=callback_message)
+
+    # Close socket
+    test_socket.shutdown(SHUT_RDWR)
+    test_socket.close()
+
+    # Add another event to verify that logcollector cannot connect to the already closed socket
+    with open(config['location'], 'a') as f:
+        f.write(f"{config['log_line']}\n")
+
+    # Ensure that the socket is closed
+    callback_message = callback_socket_offline(socket_name=config['socket_name'],
+                                               socket_path=config['socket_path'])
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                            error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                            callback=callback_message)
+
+    # This way we make sure to get the statistics right at the beginning of an interval
+    stats = get_data_sending_stats(log_path=config['location'],
+                                   socket_name=config['socket_name'],
+                                   state_interval=local_internal_options['logcollector.state_interval'])
+    next_stats = get_next_stats(current_stats=stats,
+                                log_path=config['location'],
+                                socket_name=config['socket_name'],
+                                state_interval=local_internal_options['logcollector.state_interval'])
+    interval_drops = int(next_stats[0]['interval_drops'])
+
+    # Add batches of events to log file and check if drops
+    with open(config['location'], 'a') as f:
+        for _ in range(0, batch):
+            f.write(f"{config['log_line']}\n")
+
+    next_stats = get_next_stats(current_stats=next_stats[0],
+                                log_path=config['location'],
+                                socket_name=config['socket_name'],
+                                state_interval=local_internal_options['logcollector.state_interval'])
+    interval_drops += int(next_stats[0]['interval_drops'])
+
+    # Obtain next statistics in case dropped events appear during the next interval
+    next_stats = get_next_stats(current_stats=next_stats[0],
+                                log_path=config['location'],
+                                socket_name=config['socket_name'],
+                                state_interval=local_internal_options['logcollector.state_interval'])
+    global_drops = int(next_stats[0]['global_drops'])
+    interval_drops += int(next_stats[0]['interval_drops'])
+
+    # The number of global events must be the same as
+    # the batch size plus one (the event to verify the closure of the socket).
+    assert global_drops == batch + 1, "The global drops reported do not match those caused by the test."
+    assert interval_drops == batch, "The interval drops reported do not match those caused by the test."
