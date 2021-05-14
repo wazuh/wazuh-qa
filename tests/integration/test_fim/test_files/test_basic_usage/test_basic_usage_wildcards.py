@@ -18,6 +18,7 @@ pytestmark = pytest.mark.tier(level=0)
 # Variables
 
 test_folder = os.path.join(PREFIX, 'test_folder')
+test_directories = [test_folder]
 matched_directories = ['simple1', 'simple2', 'star12', 'stars123', 'multiple_1', 'multiplet']
 matched_subdirs = ['sub_simple1', 'sub_simple2', 'substar', 'subdtar', '_submult', 'submult']
 matched_subdirs = [os.path.join(parent, child) for parent, child in zip(matched_directories, matched_subdirs)]
@@ -48,6 +49,13 @@ def extra_configuration_before_yield():
     for sub_directory in test_subdirectories:
         if not os.path.exists(os.path.join(test_folder, sub_directory)):
             os.mkdir(os.path.join(test_folder, sub_directory))
+
+
+def extra_configuration_after_yield():
+
+    for sub_directory in test_subdirectories:
+        if os.path.exists(os.path.join(test_folder, sub_directory)):
+            os.rmdir(os.path.join(test_folder, sub_directory))
 
 
 # Fixtures

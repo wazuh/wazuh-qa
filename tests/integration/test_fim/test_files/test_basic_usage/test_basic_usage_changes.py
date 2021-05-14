@@ -28,8 +28,7 @@ testdir1, testdir2 = test_directories
 
 # configurations
 
-conf_params = {'TEST_DIRECTORIES': directory_str, 'TEST_WILDCARDS': os.path.join(PREFIX, 'testdir?'),
-               'MODULE_NAME': __name__}
+conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
 p, m = generate_params(extra_params=conf_params)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
