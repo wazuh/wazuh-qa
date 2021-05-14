@@ -323,7 +323,8 @@ class SocketController:
         if size:
             data = self.sock.recv(4, socket.MSG_WAITALL)
             if not data:
-                return None
+                output = bytes('', 'utf8')
+                return output
             size = wazuh_unpack(data)
             output = self.sock.recv(size, socket.MSG_WAITALL)
         else:
