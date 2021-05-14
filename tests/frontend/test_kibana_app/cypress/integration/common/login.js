@@ -1,8 +1,8 @@
 import {Given} from "cypress-cucumber-preprocessor/steps";
-import {WAZUH_URL} from "../utils/constants";
 import Driver from "../utils/Driver";
 import ODFELogin from "./ODEFLogin";
 import XPackLogin from "./XPackLogin";
+import { BASIC, ODFE, XPACK } from '../utils/constants';
 
 Given('The kibana admin user is logged in using {word} authentication', (loginMethod) => {
     Cypress.on('uncaught:exception', (err, runnable) => {
@@ -11,17 +11,21 @@ Given('The kibana admin user is logged in using {word} authentication', (loginMe
         return false
     })
 
-    Driver.navigate(WAZUH_URL)
+    const url = Cypress.env(loginMethod);
+    Driver.navigate(url);
     cy.wait(5000);
 
     switch (loginMethod) {
-        case 'xpack' :
+        case XPACK :
             XPackLogin.login();
             break;
-        case 'odfe' :
+        case ODFE :
             ODFELogin.login();
             break;
+        case BASIC :
+            break;
         default :
+            console.log(`Parameters loginMethod is: ${loginMethod}`)
             break;
     }
 })
