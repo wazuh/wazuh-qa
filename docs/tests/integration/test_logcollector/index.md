@@ -39,3 +39,11 @@ produced while the agent was stopped.
 #### Test location
 
 For each location and exclude option specified in the configuration file, check if `logcollector` is analyzing or excluding the required files.
+
+### Tier 1
+#### Test location custom sockets
+
+Wazuh allows forwarding the events that are written in a monitored log file to a UNIX `named socket` 
+through the `target` option in the `localfile` section of the configuration. These tests will check 
+if the statistics of the forwarded events, which are in the file `wazuh-logcollector.state` are correct, 
+verifying that the dropped events match with the reported ones.
