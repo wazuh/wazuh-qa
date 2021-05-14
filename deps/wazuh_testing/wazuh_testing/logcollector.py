@@ -134,6 +134,20 @@ def callback_socket_connected(socket_name, socket_path):
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
+def callback_socket_offline(socket_name, socket_path):
+    """Create a callback to detect if a socket that logcollector was connected to is unavailable.
+
+    Args:
+        socket_name (str): Socket name.
+        socket_path (str): Path to UNIX named socket.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = f"ERROR: Unable to connect to socket '{socket_name}': {socket_path}"
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
 def callback_log_target_not_found(location, socket_name):
     """Create a callback to detect if a log target has not been found.
 
