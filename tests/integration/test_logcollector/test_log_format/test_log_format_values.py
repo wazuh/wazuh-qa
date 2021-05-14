@@ -288,7 +288,7 @@ def check_log_format_valid(cfg):
     if cfg['log_format'] == 'eventchannel' or cfg['log_format'] == 'eventlog':
         log_callback = logcollector.callback_eventchannel_analyzing(cfg['location'])
     else:
-        log_callback = logcollector.callback_analyzing_file(cfg['location'], prefix=prefix)
+        log_callback = logcollector.callback_analyzing_file(cfg['location'])
     wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
 
 def check_log_format_value_valid(conf):
@@ -305,7 +305,7 @@ def check_log_format_value_valid(conf):
         if conf['log_format'] in log_format_not_print_reading_info:
             # Logs format that only shows when a specific file is read.
 
-            log_callback = logcollector.callback_read_file(conf['log_format'], conf['location'], prefix=prefix)
+            log_callback = logcollector.callback_read_file(conf['location'])
             wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
 
         elif conf['log_format'] == 'multi-line:3':
@@ -316,18 +316,18 @@ def check_log_format_value_valid(conf):
                 for line in file:
                     msg += line.rstrip('\n')
                     msg += ' '
-                log_callback = logcollector.callback_reading_file(conf['log_format'], msg.rstrip(' '), prefix=prefix)
+                log_callback = logcollector.callback_reading_file(conf['log_format'], msg.rstrip(' '))
                 wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
         else:
             # Verify that the content of the parsed file is equal to the output generated in the logs.
             with open(location, 'r') as f:
                 lines = f.readlines()
                 for line in lines:
-                    log_callback = logcollector.callback_reading_file(conf['log_format'], line.rstrip('\n'), prefix=prefix)
+                    log_callback = logcollector.callback_reading_file(conf['log_format'], line.rstrip('\n'))
                     wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
 
     elif conf['log_format'] == 'iis':
-        log_callback = logcollector.callback_read_file(conf['log_format'], conf['location'], prefix=prefix)
+        log_callback = logcollector.callback_read_file(conf['location'])
         wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
 
 def analyzing_invalid_value(conf):
@@ -337,7 +337,7 @@ def analyzing_invalid_value(conf):
 
     with open(conf['location']) as log:
         line = log.readline()
-        log_callback = logcollector.callback_invalid_format_value(line.rstrip('\n'), conf['log_format'], conf['location'], prefix)
+        log_callback = logcollector.callback_invalid_format_value(line.rstrip('\n'), conf['log_format'], conf['location'])
         return log_callback
 
 def check_log_format_value_invalid(conf):
