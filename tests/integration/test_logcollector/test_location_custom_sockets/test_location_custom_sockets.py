@@ -24,7 +24,7 @@ DAEMON_NAME = "wazuh-logcollector"
 test_data_path = path.join(path.dirname(path.realpath(__file__)), 'data')
 configurations_path = path.join(test_data_path, 'wazuh_location_custom_sockets_conf.yaml')
 temp_dir = gettempdir()
-log_test_path = path.join(temp_dir, 'test.log')
+log_test_path = path.join(temp_dir, 'wazuh-testing', 'test.log')
 test_socket = None
 
 local_internal_options = {
@@ -49,6 +49,15 @@ metadata = [
      'socket_path': '/var/run/custom.sock', 'log_line': "Jan  1 00:00:00 localhost test[0]: log line"},
     {'log_format': 'syslog', 'location': log_test_path, 'socket_name': 'custom_socket', 'mode': 'udp',
      'socket_path': '/var/run/custom.sock', 'log_line': "Jan  1 00:00:00 localhost test[0]: log line"},
+]
+
+file_structure = [
+    {
+        'folder_path': path.join(temp_dir, 'wazuh-testing'),
+        'filename': ['test.log'],
+        'content': f"{metadata[0]['log_line']}",
+        'size_kib': 10240
+    }
 ]
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
@@ -76,15 +85,6 @@ def restart_logcollector(get_configuration, request):
     file_monitor = FileMonitor(LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
     control_service('start', daemon=DAEMON_NAME)
-
-
-@pytest.fixture(scope="module")
-def generate_log_file():
-    """Generate a log of size greater than 10 MiB for testing."""
-    file.write_file(log_test_path, '')
-    add_log_data(log_test_path, metadata[0]['log_line'], size_kib=10240)
-    yield
-    file.remove_file(log_test_path)
 
 
 @pytest.fixture(scope="function")
@@ -115,9 +115,15 @@ def create_socket(get_configuration):
             unlink(config['socket_path'])
 
 
+@pytest.fixture(scope="module")
+def get_files_list():
+    """Get file list to create from the module."""
+    return file_structure
+
+
 @pytest.mark.parametrize("batch", batch_size, ids=[f"batch_{x}" for x in batch_size])
 def test_location_custom_sockets(get_local_internal_options, configure_local_internal_options,
-                                 get_configuration, configure_environment, generate_log_file,
+                                 get_configuration, configure_environment, create_file_structure_module,
                                  batch, create_socket, restart_logcollector):
     """Check if the "location" option used with custom sockets is working correctly.
 
@@ -131,7 +137,7 @@ def test_location_custom_sockets(get_local_internal_options, configure_local_int
         configure_local_internal_options (fixture): Set internal configuration for testing.
         get_configuration (fixture): Get configurations from the module.
         configure_environment (fixture): Configure a custom environment for testing.
-        generate_log_file (fixture): Generate a log file for testing.
+        create_file_structure_module (fixture): Module scope version of create_file_structure.
         batch (fixture): Event batches to be added to the test log file.
         create_socket (fixture): Create a UNIX named socket for testing.
         restart_logcollector (fixture): Reset log file and start a new monitor.
@@ -194,7 +200,7 @@ def test_location_custom_sockets(get_local_internal_options, configure_local_int
 
 @pytest.mark.parametrize("batch", batch_size, ids=[f"batch_{x}" for x in batch_size])
 def test_location_custom_sockets_offline(get_local_internal_options, configure_local_internal_options,
-                                         get_configuration, configure_environment, generate_log_file,
+                                         get_configuration, configure_environment, create_file_structure_module,
                                          batch, create_socket, restart_logcollector):
     """Verify that event drops occur when the socket to which they are sent becomes unavailable.
 
