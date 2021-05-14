@@ -241,7 +241,7 @@
     stage: "agent sys_osinfo checking table is empty"
 -
   name: "Agents' Packages/Hotfixes tables: sys_programs and sys_hotfixes"
-  description: "It checks the commands get packages, set package triage and get hotfixes"
+  description: "It checks the commands to get packages, set package triaged, and get hotfixes"
   test_case:
   -
     input: 'agent 003 package save 0|2021/04/07 22:00:00|deb|test_deb_pkg|optional|utils|7490|Wazuh wazuh@wazuh.com|NULL|1.0.0|amd64|NULL|NULL|Test package|NULL|1'
@@ -258,7 +258,7 @@
   -
     input: 'agent 003 package get'
     output: ['ok {"status":"NOT_SYNCED"}']
-    stage: "agent sys_programs getting packages attempt"
+    stage: "agent sys_programs getting not synced packages attempt"
   -
     input: 'agent 003 hotfix save 0|0|KB2980293|legacy'
     output: ['ok']
@@ -278,11 +278,11 @@
   -
     input: 'agent 003 hotfix get'
     output: ['ok {"status":"NOT_SYNCED"}']
-    stage: "agent sys_hotfixes getting hotfixes attempt"
+    stage: "agent sys_programs getting not synced packages attempt"
   -
     input: 'agent 003 sql UPDATE sync_info SET last_attempt = 1, last_completion = 1 where component = "syscollector-hotfixes"'
     output: ['ok []']
-    stage: "agent sync_info last_attempt and last_completion fields match for hotfixes."
+    stage: "agent sync_info set synced"
   -
     input: 'agent 003 hotfix get'
     output: ['due {"hotfix":"KB2980293"}','due {"hotfix":"KB2980294"}','due {"hotfix":"KB2980295"}','ok {"status":"SUCCESS"}']
@@ -290,7 +290,7 @@
   -
     input: 'agent 003 sql UPDATE sync_info SET last_attempt = 1, last_completion = 1 where component = "syscollector-packages"'
     output: ['ok []']
-    stage: "agent sync_info last_attempt and last_completion fields match for packages."
+    stage: "agent sync_info set synced"
   -
     input: 'agent 003 sql UPDATE sys_programs SET triaged = 1  WHERE name = "test_rpm_pkg"'
     output: ['ok []']
@@ -299,10 +299,10 @@
     input: 'agent 003 package get not_triaged'
     output: ['due {"name":"test_deb_pkg","version":"1.0.0","architecture":"amd64","vendor":"Wazuh wazuh@wazuh.com","item_id":"1"}',
              'ok {"status":"SUCCESS"}']
-    stage: "agent sys_programs getting package"
+    stage: "agent sys_programs getting not triaged packages"
   -
     input: 'agent 003 package get'
     output: ['due {"name":"test_deb_pkg","version":"1.0.0","architecture":"amd64","vendor":"Wazuh wazuh@wazuh.com","item_id":"1"}',
              'due {"name":"test_rpm_pkg","version":"1.0.0","architecture":"amd64","vendor":"Wazuh wazuh@wazuh.com","item_id":"1"}',
              'ok {"status":"SUCCESS"}']
-    stage: "agent sys_programs getting package"
+    stage: "agent sys_programs getting not all packages"

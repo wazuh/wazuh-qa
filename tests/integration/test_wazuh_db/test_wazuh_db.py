@@ -204,7 +204,7 @@ def remove_agent(agent_id):
 
 @pytest.fixture(scope="function")
 def pre_set_sync_info():
-    """Asign the last_attempt value to last_completion in sync_info table"""
+    """Asign the last_attempt value to last_completion in sync_info table to force the synced status"""
 
     command = 'agent 000 sql UPDATE sync_info SET last_completion = (SELECT last_attempt from sync_info ' \
               'where component = "syscollector-packages") where component = "syscollector-packages" '
