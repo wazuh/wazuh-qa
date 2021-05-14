@@ -316,6 +316,7 @@ def add_log_data(log_path, log_line_message, size_kib=1024, line_start=1, print_
         return line_start + lines - 1
     return 0
 
+
 def callback_invalid_format_value(line, option, location):
 
     """
@@ -362,6 +363,7 @@ def callback_reading_file(log_format, content_file, severity='DEBUG'):
         msg = fr"{severity}: Reading message: '{content_file}'"
 
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
 
 def callback_read_file(location):
     """

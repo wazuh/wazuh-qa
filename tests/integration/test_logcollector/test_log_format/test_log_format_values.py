@@ -98,10 +98,12 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
+
 @pytest.fixture(scope="module")
 def get_local_internal_options():
     """Get configurations from the module."""
     return local_internal_options
+
 
 def create_file_location(filename, type):
     """
@@ -113,10 +115,12 @@ def create_file_location(filename, type):
     """
     if type == 'iis':
         data = '#Software: Microsoft Internet Information Server 6.0\n#Version: 1.0\n#Date: 1998-11-19 22:48:39'
-        data += '#Fields: date time c-ip cs-username s-ip cs-method cs-uri-stem cs-uri-query sc-status sc-bytes cs-bytes time-taken cs-version cs(User-Agent) cs(Cookie) cs(Referrer)\n'
+        data += '#Fields: date time c-ip cs-username s-ip cs-method cs-uri-stem cs-uri-query sc-status sc-bytes '
+        data += 'cs-bytes time-taken cs-version cs(User-Agent) cs(Cookie) cs(Referrer)\n'
     else:
         data = ""
     file.write_file(filename, data)
+
 
 def modify_json_file(filename, type):
     """
@@ -133,6 +137,7 @@ def modify_json_file(filename, type):
 
     file.write_file(filename, data)
 
+
 def modify_syslog_file(filename):
     """
     Added content with syslog format and valid values.
@@ -143,6 +148,7 @@ def modify_syslog_file(filename):
     data = 'Apr 29 12:47:51 dev-branch systemd[1]: Starting\n'
     file.write_file(filename, data)
 
+
 def modify_snort_file(filename):
     """
     Added content with syslog format and invalid values.
@@ -151,6 +157,7 @@ def modify_snort_file(filename):
     """
     data = '10/12-21:29:35.911089 {ICMP} 192.168.1.99 – > 192.168.1.103\n'
     file.write_file(filename, data)
+
 
 def modify_squid_file(filename):
     """
@@ -161,6 +168,7 @@ def modify_squid_file(filename):
     data = '902618.84 440 120.65.1.1 TCP/304 80 GET http://www.web.com:8005\n'
     file.write_file(filename, data)
 
+
 def modify_audit_file(filename, type):
     """
     Added content with audit format and specific values.
@@ -170,9 +178,15 @@ def modify_audit_file(filename, type):
     """
 
     if type:
-        data = """type=SERVICE_START msg=audit(1620164215.922:963): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=dnf-makecache comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'UID="root" AUID="unset"\n"""
+        data = """type=SERVICE_START msg=audit(1620164215.922:963): pid=1 uid=0 auid=4294967295 ses=4294967295 """
+        data += """subj=system_u:system_r:init_t:s0 msg='unit=dnf-makecache comm="systemd" """
+        data += """exe="/usr/lib/systemd/systemd" """
+        data += """hostname=? addr=? terminal=? res=success'UID="root" AUID="unset"\n"""
+
     else:
-        data = """=SERVICE_START msg=audit(1620164215.922:963): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=dnf-makecache comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'UID="root" AUID="unset\n"""
+        data = """=SERVICE_START msg=audit(1620164215.922:963): pid=1 uid=0 auid=4294967295 """
+        data += """ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=dnf-makecache comm="systemd" """
+        data += """exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'UID="root" AUID="unset\n"""
     file.write_file(filename, data)
 
 
@@ -197,6 +211,7 @@ def modify_postgresqlLog_file(filename):
     data = """show variables like 'general_log%';\n"""
     file.write_file(filename, data)
 
+
 def modify_nmapg_file(filename, type):
     """
     Added content with nmapg format and specific values.
@@ -205,11 +220,14 @@ def modify_nmapg_file(filename, type):
         type (str):type of content value. It can be valid or invalid.
     """
     if type:
-        data = '# Nmap 7.70 scan initiated Tue May 11 16:48:35 2021 as: nmap -T4 -A -v -oG /var/log/map.log scanme.nmap.org\n'
-        data += '# Ports scanned: TCP(1000;1,3-4,6-7,9,13,17,7920-7921,7937-7938,7999-8002,8007-8011,8021-8022,8031,8042,8045,8800,64680,65000,65129,65389) UDP(0;) SCTP(0;) PROTOCOLS(0;)\n'
+        data = '# Nmap 7.70 scan initiated Tue May 11 16:48:35 2021 as: nmap -T4 -A -v '
+        data += '-oG /var/log/map.log scanme.nmap.org\n'
+        data += '# Ports scanned: TCP(1000;1,3-4,6-7,9,13,17,7920-7921,7937-7938,7999-8002,8007-8011,8021-8022,8031,'
+        data += '8042,8045,8800,64680,65000,65129,65389) UDP(0;) SCTP(0;) PROTOCOLS(0;)\n'
     else:
         data = 'nmap -n -Pn -p 80 --open -sV -vvv --script banner,http-title -iR 1000\n'
     file.write_file(filename, data)
+
 
 def modify_djb_multilog_file(filename, type):
     """
@@ -225,6 +243,7 @@ def modify_djb_multilog_file(filename, type):
 
     file.write_file(filename, data)
 
+
 def modify_multi_line_file(filename):
     """
     Added content with multiline format and valid values.
@@ -235,6 +254,7 @@ def modify_multi_line_file(filename):
     data = """Aug 9 14:22:47 log1\nAug 9 14:22:47 log2\nAug 9 14:22:47 log3\n"""
     file.write_file(filename, data)
 
+
 def modify_iis_file(filename):
     """
     Added content with iis format and valid values.
@@ -242,7 +262,9 @@ def modify_iis_file(filename):
         filename (str):filename to modify.
     """
 
-    data = '2020-11-19 22:48:39 206.175.82.5 - 208.201.133.173 GET /global/images/navlineboards.gif - 200 540 324 157 HTTP/1.0 Mozilla/4.0+(compatible;+MSIE+4.01;+Windows+95) USERID=CustomerA;+IMPID=01234 http://www.loganalyzer.net\n'
+    data = '2020-11-19 22:48:39 206.175.82.5 - 208.201.133.173 GET /global/images/navlineboards.gif '
+    data += '- 200 540 324 157 HTTP/1.0 Mozilla/4.0+(compatible;+MSIE+4.01;+Windows+95) '
+    data += 'USERID=CustomerA;+IMPID=01234 http://www.loganalyzer.net\n'
     file.write_file(filename, data)
 
 
@@ -277,6 +299,7 @@ def modify_file(file, type, content):
     elif type == 'iis':
         modify_iis_file(file)
 
+
 def check_log_format_valid(cfg):
     """
     Check if Wazuh run correctly with the specified log formats.
@@ -289,7 +312,9 @@ def check_log_format_valid(cfg):
         log_callback = logcollector.callback_eventchannel_analyzing(cfg['location'])
     else:
         log_callback = logcollector.callback_analyzing_file(cfg['location'])
-    wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
+    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
+
 
 def check_log_format_value_valid(conf):
     """
@@ -306,10 +331,12 @@ def check_log_format_value_valid(conf):
             # Logs format that only shows when a specific file is read.
 
             log_callback = logcollector.callback_read_file(conf['location'])
-            wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
+            wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                    error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
 
         elif conf['log_format'] == 'multi-line:3':
-            # It is necessary to reorganize the content of the file to compare it with the generated output of the 'multiline' format.
+            # It is necessary to reorganize the content of the file to compare it
+            # with the generated output of the 'multiline' format.
 
             msg = ""
             with open(location, 'r') as file:
@@ -317,18 +344,22 @@ def check_log_format_value_valid(conf):
                     msg += line.rstrip('\n')
                     msg += ' '
                 log_callback = logcollector.callback_reading_file(conf['log_format'], msg.rstrip(' '))
-                wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
+                wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                        error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
         else:
             # Verify that the content of the parsed file is equal to the output generated in the logs.
             with open(location, 'r') as f:
                 lines = f.readlines()
                 for line in lines:
                     log_callback = logcollector.callback_reading_file(conf['log_format'], line.rstrip('\n'))
-                    wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
+                    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                            error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
 
     elif conf['log_format'] == 'iis':
         log_callback = logcollector.callback_read_file(conf['location'])
-        wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
+        wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
+
 
 def analyzing_invalid_value(conf):
     """
@@ -337,8 +368,10 @@ def analyzing_invalid_value(conf):
 
     with open(conf['location']) as log:
         line = log.readline()
-        log_callback = logcollector.callback_invalid_format_value(line.rstrip('\n'), conf['log_format'], conf['location'])
+        log_callback = logcollector.callback_invalid_format_value(line.rstrip('\n'),
+                                                                  conf['log_format'], conf['location'])
         return log_callback
+
 
 def check_log_format_value_invalid(conf):
     """
@@ -353,6 +386,7 @@ def check_log_format_value_invalid(conf):
     if conf['log_format'] not in log_format_windows_print_analyzing_info:
         log_callback = analyzing_invalid_value(conf)
         wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message=logcollector.GENERIC_CALLBACK_ERROR)
+
 
 def check_log_format_values(conf):
     """
@@ -372,7 +406,9 @@ def check_log_format_values(conf):
         check_log_format_value_invalid(conf)
         file.remove_file(conf['location'])
 
-def test_log_format(get_local_internal_options, get_configuration, configure_local_internal_options, configure_environment):
+
+def test_log_format(get_local_internal_options, get_configuration,
+                    configure_local_internal_options, configure_environment):
     """
     Check if Wazuh log format field of logcollector works properly.
 
@@ -419,7 +455,7 @@ def test_log_format(get_local_internal_options, get_configuration, configure_loc
         if sys.platform == 'win32':
             sb.CalledProcessError
         else:
-        # Analyze valid formats with invalid content in Linux
+            # Analyze valid formats with invalid content in Linux
             if conf['log_format'] == 'djb-multilog':
                 create_file_location(filemultilog, conf['log_format'])
                 control_service('start', daemon=LOGCOLLECTOR_DAEMON)
