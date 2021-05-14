@@ -179,11 +179,11 @@ def test_wazuh_db_timeout(configure_sockets_environment, connect_to_sockets_modu
     time.sleep(5)
     socket_closed = False
     while True:
-        rcv = receiver_sockets[0].receive(size=True)
-        if rcv is None:
+        response = receiver_sockets[0].receive(size=True).decode()
+        if response == "":
             socket_closed = True
             break
-        status = rcv.decode().split(" ", 1)[0]
+        status = response.split(" ", 1)[0]
         if status != "due":
             break
     assert socket_closed, f'Socket never closed, received: {status}'
