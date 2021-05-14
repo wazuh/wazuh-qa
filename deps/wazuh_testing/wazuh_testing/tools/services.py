@@ -204,7 +204,7 @@ def check_daemon_status(daemon=None, running=True, timeout=10, extra_sockets=Non
                 # Finish main for loop if both daemon and socket checks are ok
                 break
 
-        time.sleep(timeout/3)
+        time.sleep(timeout / 3)
     else:
         raise TimeoutError(f"{'wazuh-service' if daemon is None else daemon} "
                            f"{'is not' if running else 'is'} running")
@@ -234,3 +234,33 @@ def check_if_process_is_running(process_name):
         pass
 
     return is_running
+
+
+def control_event_log_service(control):
+    """Control Windows event log service.
+
+    Args:
+        control (str): Start or Stop.
+
+    Raises:
+        ValueError: If the event log channel does not start/stop correctly.
+    """
+    for _ in range(10):
+        control_sc = 'disabled' if control == 'stop' else 'auto'
+
+        command = subprocess.run(f'sc config eventlog start= {control_sc}', stderr=subprocess.PIPE)
+        result = command.returncode
+        if result != 0:
+            raise ValueError(f'Event log service did not stop correctly')
+
+        command = subprocess.run(f"net {control} eventlog /y", stderr=subprocess.PIPE)
+        result = command.returncode
+        if result == 0:
+            break
+        else:
+            time.sleep(1)
+    else:
+        raise ValueError(f"Event log service did not stop correctly")
+
+    time.sleep(1)
+
