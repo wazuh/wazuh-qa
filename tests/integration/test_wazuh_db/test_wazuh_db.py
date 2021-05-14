@@ -79,7 +79,7 @@ def pre_insert_agents():
 
 @pytest.fixture(scope="function")
 def pre_set_sync_info():
-    """Asign the last_attempt value to last_completion in sync_info table"""
+    """Asign the last_attempt value to last_completion in sync_info table to force the synced status"""
 
     command = 'agent 000 sql UPDATE sync_info SET last_completion = (SELECT last_attempt from sync_info ' \
               'where component = "syscollector-packages") where component = "syscollector-packages" '
@@ -171,7 +171,7 @@ def test_wazuh_db_chunks(configure_sockets_environment, connect_to_sockets_modul
 
 def test_wazuh_db_timeout(configure_sockets_environment, connect_to_sockets_module,
                           pre_insert_packages, pre_set_sync_info):
-    """Check that efectively the socket is closed after timeout is reached"""
+    """Check that effectively the socket is closed after timeout is reached"""
 
     command = 'agent 000 package get'
     receiver_sockets[0].send(command, size=True)
