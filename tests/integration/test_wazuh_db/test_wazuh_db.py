@@ -125,16 +125,15 @@ def test_wazuh_db_messages(configure_sockets_environment, connect_to_sockets_mod
         if 'ignore' in stage and stage['ignore'] == "yes":
             continue
 
-        expected = stage['output']
         receiver_sockets[0].send(stage['input'], size=True)
-        response = receiver_sockets[0].receive(size=True).decode()
-
-        if 'use_regex' in stage and stage['use_regex'] == 'yes':
-            match = True if regex_match(expected, response) else False
-        else:
-            match = (expected == response)
-        assert match, 'Failed test case stage {}: {}. Expected: {}. Response: {}' \
-            .format(index + 1, stage['stage'], expected, response)
+        for output in stage['output']:
+            response = receiver_sockets[0].receive(size=True).decode()
+            if 'use_regex' in stage and stage['use_regex'] == 'yes':
+                match = True if regex_match(output, response) else False
+            else:
+                match = (output == response)
+            assert match, 'Failed test case stage {}: {}. Expected: {}. Response: {}' \
+                .format(index + 1, stage['stage'], output, response)
 
 
 def test_wazuh_db_create_agent(configure_sockets_environment, connect_to_sockets_module):
@@ -143,7 +142,7 @@ def test_wazuh_db_create_agent(configure_sockets_environment, connect_to_sockets
             "description": "Wazuh DB creates automatically the agent's database the first time a query with a new agent"
                            " ID reaches it. Once the database is created, the query is processed as expected.",
             "test_case": [{"input": "agent 999 syscheck integrity_check_left",
-                           "output": "err Invalid FIM query syntax, near 'integrity_check_left'",
+                           "output": ["err Invalid FIM query syntax, near 'integrity_check_left'"],
                            "stage": "Syscheck - Agent does not exits yet"}]}
     test_wazuh_db_messages(configure_sockets_environment, connect_to_sockets_module, test['test_case'])
     assert os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'db', "999.db"))
