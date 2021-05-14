@@ -246,7 +246,7 @@ class ClusterLogParser(LogParser):
     def __init__(self, log_file, dst_dir=gettempdir()):
         # group1 Timestamp - group2 node_name - group3 activity - group4 time_spent(s)
         regex = r'(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) .* ' \
-                r'\[Worker .*_(manager_\d+)] \[(.*)] Finished in (\d+.\d+)s.*'
+                r'(?:\[(?:Worker|Client) .*_(manager_\d+)]) \[(.*)] Finished in (\d+.\d+)s.*'
         columns = ['Timestamp', 'node_name', 'activity', 'time_spent(s)']
         super().__init__(log_file, regex, columns, dst_dir)
 
