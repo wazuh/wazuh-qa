@@ -137,7 +137,7 @@
          value: RECONNECT_TIME
 
 - tags:
-  - test_basic_configuration_query
+  - test_basic_configuration_query_macos
   apply_to_modules:
   - test_basic_configuration_query
   sections:
@@ -147,7 +147,24 @@
         value: LOCATION
     - log_format:
          value: LOG_FORMAT
-    - reconnect_time:
+    - query:
+         value: QUERY
+         attributes:
+           - type: TYPE
+           - level: LEVEL
+
+- tags:
+  - test_basic_configuration_query
+  apply_to_modules:
+  - test_basic_configuration_query_windows
+  sections:
+  - section: localfile
+    elements:
+    - location:
+        value: LOCATION
+    - log_format:
+         value: LOG_FORMAT
+    - query:
          value: QUERY
 
 - tags:

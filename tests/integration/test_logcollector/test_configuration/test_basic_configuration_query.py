@@ -12,13 +12,18 @@ from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 # Marks
 common_query = ['', 'Testing', '!ras*^']
 query_list = []
-location = ''
-log_format = ''
+
+location = log_format = ''
+wazuh_configuration = ''
+
+level_list = [ 'default', 'info', 'debug']
+type_list = ['log', 'trace', 'activity']
 
 if sys.platform != 'win32' and sys.platform != 'darwin':
     pytestmark = [pytest.mark.skip, pytest.mark.tier(level=0)]
 else:
     pytestmark = pytest.mark.tier(level=0)
+    wazuh_configuration = 'test_basic_configuration_query_macos'
     if sys.platform == 'darwin':
         clauses = ['eventMessage', 'processImagePath', 'senderImagePath', 'subsystem', 'category', 'eventType',
                    'messageType']
@@ -49,6 +54,7 @@ else:
                            f'! {clause} IN "testing"',
                            ]
     else:
+        wazuh_configuration = 'test_basic_configuration_query_windows'
         location = logcollector.WINDOWS_CHANNEL_LIST
         log_format = 'eventchannel'
         query_list = ['Event[System/EventID = 4624]',
@@ -71,16 +77,21 @@ parameters = []
 for query in query_list:
     if isinstance(location, list):
         for channel in location:
-            parameters.append({'LOCATION': f'{location}', 'LOG_FORMAT': f'{log_format}', 'QUERY': f'{query}'})
+            parameters.append({'LOCATION': location, 'LOG_FORMAT': log_format, 'QUERY': query})
     else:
-        parameters.append({'LOCATION': f'{location}', 'LOG_FORMAT': f'{log_format}', 'QUERY': f'{query}'})
+        for level in level_list:
+            for type in type_list:
+                parameters.append({'LOCATION': location, 'LOG_FORMAT': log_format,
+                                   'QUERY': query, 'TYPE': type, 'LEVEL': level})
 
 metadata = lower_case_key_dictionary_array(parameters)
 
-configurations = load_wazuh_configurations(configurations_path, __name__,
+configurations = load_wazuh_configurations(configurations_path, wazuh_configuration,
                                            params=parameters,
                                            metadata=metadata)
-configuration_ids = [f"{x['location']}_{x['log_format']}_{x['query']}" for x in metadata]
+
+configuration_ids = [f"{x['location']}_{x['log_format']}_{x['query']}_{x['level']}_{x['type']}" + f"" if 'level' in x
+                     else f"{x['location']}_{x['log_format']}_{x['query']}" for x in metadata]
 
 
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)

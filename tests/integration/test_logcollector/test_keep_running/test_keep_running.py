@@ -53,7 +53,7 @@ def get_local_internal_options():
     return local_internal_options
 
 
-@pytest.fixture(scope="package")
+@pytest.fixture(scope="module")
 def generate_log_file():
     """Generate a log file of approximately 10 mebibytes for testing."""
     message_line = f"{metadata[0]['log_line_before']}{metadata[0]['mode']}"
