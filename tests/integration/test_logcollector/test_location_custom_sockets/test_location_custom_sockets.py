@@ -8,8 +8,8 @@ from tempfile import gettempdir
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.logcollector import (GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, add_log_data,
-                                        callback_analyzing_file, callback_socket_connected, callback_socket_offline,
+from wazuh_testing.logcollector import (GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, callback_analyzing_file,
+                                        callback_socket_connected, callback_socket_offline,
                                         get_next_stats, get_data_sending_stats)
 from wazuh_testing.tools import LOG_FILE_PATH, file
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -214,7 +214,7 @@ def test_location_custom_sockets_offline(get_local_internal_options, configure_l
         configure_local_internal_options (fixture): Set internal configuration for testing.
         get_configuration (fixture): Get configurations from the module.
         configure_environment (fixture): Configure a custom environment for testing.
-        generate_log_file (fixture): Generate a log file for testing.
+        create_file_structure_module (fixture): Module scope version of create_file_structure.
         batch (fixture): Event batches to be added to the test log file.
         create_socket (fixture): Create a UNIX named socket for testing.
         restart_logcollector (fixture): Reset log file and start a new monitor.
