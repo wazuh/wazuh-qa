@@ -479,3 +479,16 @@ def delete_file_structure(get_files_list):
     for file in get_files_list:
         shutil.rmtree(file['folder_path'], ignore_errors=True)
 
+
+def callback_invalid_state_interval(interval):
+    """Create a callback to detect if logcollector is excluding files.
+    Args:
+        file (str): Name with absolute path of the analyzed file.
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"Invalid definition for logcollector.state_interval: '{interval}'."
+    print(msg)
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+

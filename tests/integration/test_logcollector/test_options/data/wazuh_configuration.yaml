@@ -1,0 +1,13 @@
+- tags:
+  - test_options
+  apply_to_modules:
+  - test_options_state_interval
+  sections:
+  - section: localfile
+    attributes:
+      - name: 'testing files'
+    elements:
+    - log_format:
+        value: 'syslog'
+    - location:
+        value: LOCATION
