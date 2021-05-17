@@ -35,7 +35,7 @@ if sys.platform == 'win32':
 
 else:
     location = '/tmp/test.txt'
-    filemultilog = '/var/log/current'
+    file_multilog = '/var/log/current'
     nmap_log = '/var/log/wa.log'
     wazuh_configuration = 'etc/ossec.conf'
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
@@ -75,14 +75,14 @@ if sys.platform == 'win32':
 else:
 
     parameters.append({'LOCATION': f'{location}', 'LOG_FORMAT': 'multi-line:3'})
-    parameters.append({'LOCATION': f'{filemultilog}', 'LOG_FORMAT': 'djb-multilog'})
-    parameters.append({'LOCATION': f'{filemultilog}', 'LOG_FORMAT': 'djb-multilog'})
+    parameters.append({'LOCATION': f'{file_multilog}', 'LOG_FORMAT': 'djb-multilog'})
+    parameters.append({'LOCATION': f'{file_multilog}', 'LOG_FORMAT': 'djb-multilog'})
     parameters.append({'LOCATION': f'{nmap_log}', 'LOG_FORMAT': 'nmapg'})
     parameters.append({'LOCATION': f'{nmap_log}', 'LOG_FORMAT': 'nmapg'})
 
     metadata.append({'location': f'{location}', 'log_format': 'multi-line:3', 'valid_value': True})
-    metadata.append({'location': f'{filemultilog}', 'log_format': 'djb-multilog', 'valid_value': True})
-    metadata.append({'location': f'{filemultilog}', 'log_format': 'djb-multilog', 'valid_value': False})
+    metadata.append({'location': f'{file_multilog}', 'log_format': 'djb-multilog', 'valid_value': True})
+    metadata.append({'location': f'{file_multilog}', 'log_format': 'djb-multilog', 'valid_value': False})
     metadata.append({'location': f'{nmap_log}', 'log_format': 'nmapg', 'valid_value': False})
     metadata.append({'location': f'{nmap_log}', 'log_format': 'nmapg', 'valid_value': True})
 
@@ -91,6 +91,7 @@ configuration_ids = [f"{x['log_format'], x['valid_value']}" for x in metadata]
 
 log_format_windows_print_analyzing_info = ['eventlog', 'eventchannel', 'iis']
 log_format_not_print_reading_info = ['audit', 'mysql_log', 'postgresql_log', 'nmapg', 'djb-multilog']
+
 
 # fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
@@ -106,8 +107,7 @@ def get_local_internal_options():
 
 
 def create_file_location(filename, type):
-    """
-    Create a specific content for a specific log_format.
+    """Create a specific content for a specific log_format.
 
      Args:
         filename(str): filename create with a specified content.
@@ -122,27 +122,21 @@ def create_file_location(filename, type):
     file.write_file(filename, data)
 
 
-def modify_json_file(filename, type):
-    """
-    Added content with json format and valid or invalid values.
+def modify_json_file(filename, valid):
+    """Added content with JSON format and valid or invalid values.
     Args:
-        filename (str):filename to modify.
-        type (str):type of content value. It can be valid or invalid.
+        filename (str): file's path to modify.
+        valid (bool): type of content value. It can be valid or invalid.
     """
 
-    if type:
-        data = '{"issue":22,"severity":1}\n'
-    else:
-        data = '{"issue:22,"severity":1}\n'
-
+    data = '{"issue":22,"severity":1}\n' if valid else '{"issue:22,"severity":1}\n'
     file.write_file(filename, data)
 
 
 def modify_syslog_file(filename):
-    """
-    Added content with syslog format and valid values.
+    """Added content with Syslog format and valid values.
     Args:
-        filename (str):filename to modify.
+        filename (str): file's path to modify.
     """
 
     data = 'Apr 29 12:47:51 dev-branch systemd[1]: Starting\n'
@@ -150,34 +144,31 @@ def modify_syslog_file(filename):
 
 
 def modify_snort_file(filename):
-    """
-    Added content with syslog format and invalid values.
+    """Added content with snort format and invalid values.
     Args:
-        filename (str):filename to modify.
+        filename (str): file's path to modify.
     """
     data = '10/12-21:29:35.911089 {ICMP} 192.168.1.99 – > 192.168.1.103\n'
     file.write_file(filename, data)
 
 
 def modify_squid_file(filename):
-    """
-    Added content with squid format and valid values.
+    """Added content with squid format and valid values.
     Args:
-        filename (str):filename to modify.
+        filename (str): file's path to modify.
     """
     data = '902618.84 440 120.65.1.1 TCP/304 80 GET http://www.web.com:8005\n'
     file.write_file(filename, data)
 
 
-def modify_audit_file(filename, type):
-    """
-    Added content with audit format and specific values.
+def modify_audit_file(filename, valid):
+    """Added content with audit format and specific values.
     Args:
-        filename (str):filename to modify.
-        type (str):type of content value. It can be valid or invalid.
+        filename (str): file's path to modify.
+        valid (bool): type of content value. It can be valid or invalid.
     """
 
-    if type:
+    if valid:
         data = """type=SERVICE_START msg=audit(1620164215.922:963): pid=1 uid=0 auid=4294967295 ses=4294967295 """
         data += """subj=system_u:system_r:init_t:s0 msg='unit=dnf-makecache comm="systemd" """
         data += """exe="/usr/lib/systemd/systemd" """
@@ -191,10 +182,9 @@ def modify_audit_file(filename, type):
 
 
 def modify_mysqlLog_file(filename):
-    """
-    Added content with mysql format and valid values.
+    """Added content with MySQL format and valid values.
     Args:
-        filename (str):filename to modify.
+        filename (str): file's path to modify.
     """
 
     data = """show variables like 'general_log%';\n"""
@@ -202,24 +192,22 @@ def modify_mysqlLog_file(filename):
 
 
 def modify_postgresqlLog_file(filename):
-    """
-    Added content with postgresql format and valid values.
+    """Added content with Postgresql format and valid values.
     Args:
-        filename (str):filename to modify.
+        filename (str): filename to modify.
     """
 
-    data = """show variables like 'general_log%';\n"""
+    data = "show variables like 'general_log%';\n"
     file.write_file(filename, data)
 
 
-def modify_nmapg_file(filename, type):
-    """
-    Added content with nmapg format and specific values.
+def modify_nmapg_file(filename, valid):
+    """Added content with nmapg format and specific values.
     Args:
-        filename (str):filename to modify.
-        type (str):type of content value. It can be valid or invalid.
+        filename (str): filename to modify.
+        valid (bool): type of content value. It can be valid or invalid.
     """
-    if type:
+    if valid:
         data = '# Nmap 7.70 scan initiated Tue May 11 16:48:35 2021 as: nmap -T4 -A -v '
         data += '-oG /var/log/map.log scanme.nmap.org\n'
         data += '# Ports scanned: TCP(1000;1,3-4,6-7,9,13,17,7920-7921,7937-7938,7999-8002,8007-8011,8021-8022,8031,'
@@ -229,14 +217,13 @@ def modify_nmapg_file(filename, type):
     file.write_file(filename, data)
 
 
-def modify_djb_multilog_file(filename, type):
-    """
-    Added content with djb-multilog format and specific values.
+def modify_djb_multilog_file(filename, valid):
+    """Added content with djb-multilog format and specific values.
     Args:
-        filename (str):filename to modify.
-        type (str):type of content value. It can be valid or invalid.
+        filename (str): filename to modify.
+        valid (bool): type of content value. It can be valid or invalid.
     """
-    if type:
+    if valid:
         data = '@400000003b4a39c23294b13c fatal: out of memory'
     else:
         data = '@40000000590e30983973bda4-eError'
@@ -245,21 +232,19 @@ def modify_djb_multilog_file(filename, type):
 
 
 def modify_multi_line_file(filename):
-    """
-    Added content with multiline format and valid values.
+    """Added content with multiline format and valid values.
     Args:
-        filename (str):filename to modify.
+        filename (str): filename to modify.
     """
 
-    data = """Aug 9 14:22:47 log1\nAug 9 14:22:47 log2\nAug 9 14:22:47 log3\n"""
+    data = "Aug 9 14:22:47 log1\nAug 9 14:22:47 log2\nAug 9 14:22:47 log3\n"
     file.write_file(filename, data)
 
 
 def modify_iis_file(filename):
-    """
-    Added content with iis format and valid values.
+    """Added content with iis format and valid values.
     Args:
-        filename (str):filename to modify.
+        filename (str): filename to modify.
     """
 
     data = '2020-11-19 22:48:39 206.175.82.5 - 208.201.133.173 GET /global/images/navlineboards.gif '
@@ -273,7 +258,7 @@ def modify_file(file, type, content):
     Args:
         file (str): filename to modify.
         type (str): log format type to add.
-        content (str): content type(Valid=True, Invalid=False) to add to the file.
+        content (bool): content type(Valid=True, Invalid=False) to add to the file.
     """
 
     if type == 'json':
@@ -301,25 +286,28 @@ def modify_file(file, type, content):
 
 
 def check_log_format_valid(cfg):
-    """
-    Check if Wazuh run correctly with the specified log formats.
-
+    """Check if Wazuh runs correctly with the specified log formats.
+    Args:
+        cfg (dict): Dictionary with the localfile configuration.
     Raises:
         TimeoutError: If the "Analyzing file" callback is not generated.
     """
+
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+
     if cfg['log_format'] == 'eventchannel' or cfg['log_format'] == 'eventlog':
         log_callback = logcollector.callback_eventchannel_analyzing(cfg['location'])
     else:
         log_callback = logcollector.callback_analyzing_file(cfg['location'])
+
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
 
 
 def check_log_format_value_valid(conf):
-    """
-    Check if Wazuh runs correctly with the correct log format and a specific content.
-
+    """Check if Wazuh runs correctly with the correct log format and specific content.
+    Args:
+        conf (dict): Dictionary with the localfile configuration.
     Raises:
         TimeoutError: If the "Analyzing file" callback is not generated.
     """
@@ -362,21 +350,24 @@ def check_log_format_value_valid(conf):
 
 
 def analyzing_invalid_value(conf):
-    """
-    Checks for the error message that is shown when the record format type is valid but the content is invalid.
+    """Checks for the error message that is shown when the record format type is valid but the content is invalid.
+    Args:
+        conf (dict): Dictionary with the localfile configuration.
+    Returns:
+        callable: callback to detect this event log.
     """
 
     with open(conf['location']) as log:
         line = log.readline()
         log_callback = logcollector.callback_invalid_format_value(line.rstrip('\n'),
                                                                   conf['log_format'], conf['location'])
-        return log_callback
+    return log_callback
 
 
 def check_log_format_value_invalid(conf):
-    """
-    Check if Wazuh fails because of content invalid log.
-
+    """Check if Wazuh fails because of content invalid log.
+    Args:
+        conf (dict): Dictionary with the localfile configuration.
     Raises:
        TimeoutError: If error callback are not generated.
    """
@@ -389,31 +380,30 @@ def check_log_format_value_invalid(conf):
 
 
 def check_log_format_values(conf):
-    """
-    Set of validations to follow to validate a certain content.
-    The file content could be valid or invalid.
-
+    """Set of validations to follow to validate a certain content.
+        The file content could be valid or invalid.
+    Args:
+        conf (dict): Dictionary with the localfile configuration.
    """
+    check_log_format_valid(conf)
+    modify_file(conf['location'], conf['log_format'], conf['valid_value'])
 
     if conf['valid_value']:
-        check_log_format_valid(conf)
-        modify_file(conf['location'], conf['log_format'], conf['valid_value'])
         check_log_format_value_valid(conf)
-        file.remove_file(conf['location'])
     else:
-        check_log_format_valid(conf)
-        modify_file(conf['location'], conf['log_format'], conf['valid_value'])
         check_log_format_value_invalid(conf)
-        file.remove_file(conf['location'])
+    file.remove_file(conf['location'])
 
 
 def test_log_format(get_local_internal_options, get_configuration,
                     configure_local_internal_options, configure_environment):
-    """
-    Check if Wazuh log format field of logcollector works properly.
-
+    """Check if Wazuh log format field of logcollector works properly.
     Ensure Wazuh component fails in case of invalid content file and works properly in case of valid log format values.
-
+    Args:
+        get_local_internal_options (fixture): Get internal configuration.
+        get_configuration (fixture): Get configurations from the module.
+        configure_local_internal_options (fixture): Set internal configuration.
+        configure_environment (fixture): Configure a custom environment for testing.
     Raises:
         TimeoutError: If expected callbacks are not generated.
     """
@@ -436,7 +426,7 @@ def test_log_format(get_local_internal_options, get_configuration,
         else:
             # Analyze valid formats with valid content in Linux
             if conf['log_format'] == 'djb-multilog':
-                create_file_location(filemultilog, conf['log_format'])
+                create_file_location(file_multilog, conf['log_format'])
                 control_service('start', daemon=LOGCOLLECTOR_DAEMON)
                 check_log_format_values(conf)
 
@@ -457,7 +447,7 @@ def test_log_format(get_local_internal_options, get_configuration,
         else:
             # Analyze valid formats with invalid content in Linux
             if conf['log_format'] == 'djb-multilog':
-                create_file_location(filemultilog, conf['log_format'])
+                create_file_location(file_multilog, conf['log_format'])
                 control_service('start', daemon=LOGCOLLECTOR_DAEMON)
                 check_log_format_values(conf)
 

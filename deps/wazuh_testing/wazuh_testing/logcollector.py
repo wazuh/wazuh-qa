@@ -320,9 +320,7 @@ def add_log_data(log_path, log_line_message, size_kib=1024, line_start=1, print_
 
 
 def callback_invalid_format_value(line, option, location):
-
-    """
-    Create a callback to detect content values invalid in a log format file specific.
+    """Create a callback to detect content values invalid in a log format file specific.
 
     Args:
         line(str):  content line of file analized
@@ -346,8 +344,7 @@ def callback_invalid_format_value(line, option, location):
 
 
 def callback_reading_file(log_format, content_file, severity='DEBUG'):
-    """
-    Create a callback to detect if the logcollector could read a file with valid content successfully.
+    """Create a callback to detect if the logcollector could read a file with valid content successfully.
 
     Args:
         log_format(str): Log format type(json, syslog, snort-full, squid, djb-multilog, multi-line:3)
@@ -359,7 +356,7 @@ def callback_reading_file(log_format, content_file, severity='DEBUG'):
     """
     if log_format == 'json':
         msg = fr"{severity}: Reading json message: '{content_file}'"
-    elif log_format == 'syslog' or log_format == 'snort-full' or log_format == 'squid':
+    elif log_format in ['syslog', 'snort-full', 'squid']:
         msg = fr"{severity}: Reading syslog message: '{content_file}'"
     elif log_format == 'multi-line:3':
         msg = fr"{severity}: Reading message: '{content_file}'"
@@ -368,8 +365,7 @@ def callback_reading_file(log_format, content_file, severity='DEBUG'):
 
 
 def callback_read_file(location):
-    """
-    Create a callback to detect when the logcollector reads a file.
+    """Create a callback to detect when the logcollector reads a file.
 
     Args:
         location (str): Path Read.
