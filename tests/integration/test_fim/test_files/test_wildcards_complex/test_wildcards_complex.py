@@ -2,7 +2,6 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-from genericpath import exists
 import os
 import sys
 import pytest
@@ -14,22 +13,26 @@ from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
-pytestmark = pytest.mark.tier(level=0)
+pytestmark = pytest.mark.tier(level=1)
 
 # Variables
 
 test_folder = os.path.join(PREFIX, 'test_folder')
 test_directories = [test_folder]
-matched_directories = ['simple1', 'simple2', 'star12', 'stars123', 'multiple_1', 'multiplet']
+
+matched_dirs = ['simple1', 'simple2', 'star12', 'stars123', 'multiple_1', 'multiplet']
 matched_subdirs = ['sub_simple1', 'sub_simple2', 'substar', 'subdtar', '_submult', 'submult']
-matched_subdirs = [os.path.join(parent, child) for parent, child in zip(matched_directories, matched_subdirs)]
-no_match_directories = ['random_directory', 'not_monitored_directory']
-test_subdirectories = matched_directories + matched_subdirs + no_match_directories
+no_match_dirs = ['random_directory', 'not_monitored_directory', 'star12', 'stars123']
+
+matched_subdirs = [os.path.join(parent, child) for parent, child in zip(matched_dirs, matched_subdirs)]
+matched_dirs = [directory for directory in matched_dirs if directory not in no_match_dirs]
+test_subdirectories = matched_dirs + matched_subdirs + no_match_dirs
+
 wildcards = [os.path.join(test_folder, 'star*/sub*'),
              os.path.join(test_folder, 'mul*/*lt'),
              os.path.join(test_folder, '*ple*')]
-
 wildcards = ','.join(wildcards)
+
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_wildcards.yml')
@@ -46,17 +49,17 @@ def extra_configuration_before_yield():
     if not os.path.exists(test_folder):
         os.mkdir(test_folder)
 
-    for matched_dir in matched_directories:
-        if not os.path.exists(os.path.join(test_folder, matched_dir)):
-            os.mkdir(os.path.join(test_folder, matched_dir))
+    for no_match_dir in no_match_dirs:
+        if not os.path.exists(os.path.join(test_folder, no_match_dir)):
+            os.mkdir(os.path.join(test_folder, no_match_dir))
+
+    for dir in matched_dirs:
+        if not os.path.exists(os.path.join(test_folder, dir)):
+            os.mkdir(os.path.join(test_folder, dir))
 
     for sub_directory in matched_subdirs:
         if not os.path.exists(os.path.join(test_folder, sub_directory)):
             os.mkdir(os.path.join(test_folder, sub_directory))
-
-    for no_match_dir in no_match_directories:
-        if not os.path.exists(os.path.join(test_folder, no_match_dir)):
-            os.mkdir(os.path.join(test_folder, no_match_dir))
 
 
 # Fixtures
@@ -102,4 +105,4 @@ def test_wildcards_complex(parent_folder, subfolder, file_name, tags_to_apply,
     regular_file_cud(folder, wazuh_log_monitor, file_list=[file_name],
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
                      min_timeout=global_parameters.default_timeout * mult,
-                     triggers_event=subfolder in matched_directories or subfolder in matched_subdirs)
+                     triggers_event=subfolder in matched_dirs or subfolder in matched_subdirs)
