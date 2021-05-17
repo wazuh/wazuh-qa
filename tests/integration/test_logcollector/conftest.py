@@ -1,3 +1,4 @@
+
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
@@ -27,6 +28,7 @@ def restart_logcollector(get_configuration, request):
 
 @pytest.fixture(scope="package", autouse=True)
 def configure_local_internal_options_logcollector():
+    """Configure Wazuh with local internal options required for logcollector tests."""
     backup_options_lines = conf.get_wazuh_local_internal_options()
     backup_options_dict = conf.local_internal_options_to_dict(backup_options_lines)
 

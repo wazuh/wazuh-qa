@@ -410,6 +410,11 @@ def connect_to_sockets_function(request):
 
 @pytest.fixture(scope='module')
 def configure_local_internal_options(get_local_internal_options):
+    """Configure Wazuh local internal options.
+
+    Args:
+        get_local_internal_options (Fixture): Fixture that returns a dictionary with the desired local internal options.
+    """
     backup_options_lines = conf.get_wazuh_local_internal_options()
     backup_options_dict = conf.local_internal_options_to_dict(backup_options_lines)
 

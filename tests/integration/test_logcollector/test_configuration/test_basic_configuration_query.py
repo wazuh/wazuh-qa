@@ -106,7 +106,7 @@ def test_configuration_query_valid(get_configuration, configure_environment, res
     log_format = configuration['log_format']
 
     if log_format == 'oslog':
-        log_callback = logcollector.callback_macos_oslog_monitoring()
+        log_callback = logcollector.callback_monitoring_macos_logs()
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)
     else:

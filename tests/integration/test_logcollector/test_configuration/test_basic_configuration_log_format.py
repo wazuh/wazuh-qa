@@ -136,7 +136,7 @@ def check_log_format_valid(cfg):
                                 error_message="The expected multilog djb log has not been produced")
 
     elif cfg['log_format'] == 'oslog':
-        log_callback = logcollector.callback_macos_oslog_monitoring()
+        log_callback = logcollector.callback_monitoring_macos_logs()
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message="The expected macos log monitoring has not been produced")
 

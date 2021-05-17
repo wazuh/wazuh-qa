@@ -349,7 +349,7 @@ def callback_excluded_file(file):
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
-def callback_macos_oslog_monitoring():
+def callback_monitoring_macos_logs():
     """Create a callback to detect if logcollector is monitoring MacOS logs.
 
     Returns:
