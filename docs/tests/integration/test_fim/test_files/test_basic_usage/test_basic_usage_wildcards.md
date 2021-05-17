@@ -12,7 +12,7 @@ The test check for the correct expansion of wildcards in syscheck directories pa
 ## Test logic
 
 The test creates a group of directories that match wildcards expressions and other that
-doesn't match the expressions set in syscheck directories to be monitored. Then, the test will create, modify and delete files inside a folder. The test will expect events only if the folder where the changes are made matches the configured expresion
+doesn't match the expressions set in syscheck directories to be monitored. Then, the test will create, modify and delete files inside a folder passed as argument. The test will expect events only if the folder where the changes are made matches the expresion previously set under syscheck stanza.
 
 ## Execution result
 
