@@ -3,7 +3,8 @@
 cd /wazuh-qa/deps/wazuh_testing/
 python setup.py install
 
-mkdir -p /var/ossec/queue/vulnerabilities/dictionaries/  /var/ossec/etc/ /var/ossec/logs/archives /var/ossec/bin/
+mkdir -p /var/ossec/queue/vulnerabilities/dictionaries/  /var/ossec/etc/ /var/ossec/logs/archives /var/ossec/bin/ \
+/tmp/wazuh-testing
 
 echo "" > /var/ossec/queue/vulnerabilities/dictionaries/cpe_helper.json
 echo "" > /var/ossec/etc/local_internal_options.conf

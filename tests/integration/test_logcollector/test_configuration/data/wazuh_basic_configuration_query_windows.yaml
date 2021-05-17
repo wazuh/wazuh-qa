@@ -1,7 +1,7 @@
 - tags:
-  - test_basic_configuration_query
-  apply_to_modules:
   - test_basic_configuration_query_windows
+  apply_to_modules:
+  - test_basic_configuration_query
   sections:
   - section: localfile
     elements:

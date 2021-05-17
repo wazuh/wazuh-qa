@@ -13,7 +13,6 @@ from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 query_list = ['', 'Testing', '!ras*^']
 parameters = []
 
-
 level_list = ['default', 'info', 'debug']
 type_list = ['log', 'trace', 'activity']
 wazuh_configuration = 'wazuh_basic_configuration_query_macos.yaml'
@@ -52,26 +51,26 @@ else:
                            ]
     else:
         wazuh_configuration = 'wazuh_basic_configuration_query_windows.yaml'
-        location = logcollector.WINDOWS_CHANNEL_LIST
+        location = ['Security', 'System', 'Application']
         log_format = 'eventchannel'
-        query_list = ['Event[System/EventID = 4624]',
-                      'Event[System/EventID = 1343 and (EventData/Data[@Name=\'LogonType\'] = 2',
-                      'Event[System/EventID = 6632 and (EventData/Data[@Name=\'LogonType\'] = 93 or '
-                      'EventData/Data[@Name=\'LogonType\'] = 111)]',
-                      'Event[EventData[Data[@Name="property"]="value"]]',
-                      'Event[EventData[Data="value"]]',
-                      'Event[ EventData[Data[@Name="PropA"]="ValueA" and  Data[@Name="PropB"]="ValueB" ]]'
-                      ]
+        query_list += ['Event[System/EventID = 4624]',
+                       'Event[System/EventID = 1343 and (EventData/Data[@Name=\'LogonType\'] = 2',
+                       'Event[System/EventID = 6632 and (EventData/Data[@Name=\'LogonType\'] = 93 or '
+                       'EventData/Data[@Name=\'LogonType\'] = 111)]',
+                       'Event[EventData[Data[@Name="property"]="value"]]',
+                       'Event[EventData[Data="value"]]',
+                       'Event[ EventData[Data[@Name="PropA"]="ValueA" and  Data[@Name="PropB"]="ValueB" ]]'
+                       ]
 
     for query in query_list:
         if isinstance(location, list):
             for channel in location:
-                parameters.append({'LOCATION': location, 'LOG_FORMAT': log_format, 'QUERY': query})
+                parameters += [{'LOCATION': channel, 'LOG_FORMAT': log_format, 'QUERY': query}]
         else:
             for level in level_list:
                 for type in type_list:
-                    parameters.append({'LOCATION': location, 'LOG_FORMAT': log_format,
-                                       'QUERY': query, 'TYPE': type, 'LEVEL': level})
+                    parameters += [{'LOCATION': location, 'LOG_FORMAT': log_format,
+                                       'QUERY': query, 'TYPE': type, 'LEVEL': level}]
 
 metadata = lower_case_key_dictionary_array(parameters)
 
@@ -110,6 +109,6 @@ def test_configuration_query_valid(get_configuration, configure_environment, res
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)
     else:
-        log_callback = logcollector.callback_eventchannel_analyzing('Security')
+        log_callback = logcollector.callback_eventchannel_analyzing(configuration['location'])
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)
