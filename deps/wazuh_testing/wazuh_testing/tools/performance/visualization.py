@@ -163,6 +163,7 @@ class DataVisualizer:
             y_label (str): label for the Y axis.
             title (str): title of the plot.
             rotation (int, optional): optional int to set the rotation of the X-axis labels.
+            cluster_log (bool, optional): optional flag used to plot specific graphics for the cluster.
             statistics (str, optional): optional statistics measures.
         """
         if statistics:
@@ -220,7 +221,7 @@ class DataVisualizer:
                 for node, color in zip(nodes, self._color_palette(len(nodes) + 1)):
                     self._basic_plot(ax=ax, dataframe=current_df[current_df.node_name == node]['time_spent(s)'],
                                      label=node, color=color)
-                self._save_custom_plot(ax, 'time_spent(s)', element, cluster_log=True,
+                self._save_custom_plot(ax, 'time_spent(s)', element.replace(' ', '_').lower(), cluster_log=True,
                                        statistics=DataVisualizer._get_statistics(
                                            current_df['time_spent(s)'], calculate_mean=True, calculate_median=True))
 

@@ -1,3 +1,5 @@
+import os
+import shutil
 import sys
 from os import path
 from math import ceil
@@ -446,3 +448,34 @@ def get_next_stats(current_stats, log_path, socket_name, state_interval):
         else:
             sleep(1)
     raise TimeoutError
+
+
+def create_file_structure(get_files_list):
+    """Create the specified file tree structure.
+
+    Args:
+        get_files_list(dict):  Files to create.
+    """
+    for file in get_files_list:
+        os.makedirs(file['folder_path'], exist_ok=True, mode=0o777)
+        for name in file['filename']:
+            open(os.path.join(file['folder_path'], name), 'w').close()
+
+            if 'age' in file:
+                fileinfo = os.stat(f"{file['folder_path']}{file['filename']}")
+                os.utime(f"{file['folder_path']}{file['filename']}", (fileinfo.st_atime - file['age'],
+                                                                      fileinfo.st_mtime - file['age']))
+            elif 'size' in file:
+                add_log_data(log_path=os.path.join(file['folder_path'], name),
+                             log_line_message=file['content'], size_kib=file['size_kib'])
+
+
+def delete_file_structure(get_files_list):
+    """Delete the specified file tree structure.
+
+    Args:
+        get_files_list(dict):  Files to delete.
+    """
+    for file in get_files_list:
+        shutil.rmtree(file['folder_path'], ignore_errors=True)
+

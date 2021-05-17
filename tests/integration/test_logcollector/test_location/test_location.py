@@ -6,7 +6,6 @@ import datetime
 import os
 import sys
 import tempfile
-from shutil import rmtree
 
 import pytest
 from wazuh_testing import logcollector
@@ -26,6 +25,35 @@ local_internal_options = {'logcollector.debug': '2'}
 
 temp_dir = tempfile.gettempdir()
 date = datetime.date.today().strftime("%Y-%m-%d")
+
+file_structure = [
+    {
+        'folder_path': os.path.join(temp_dir, 'wazuh-testing'),
+        'filename': ['test.txt', 'foo.txt', 'bar.log', 'test.yaml', 'ñ.txt', 'Testing white spaces', 'test.log',
+                     'c1test.txt', 'c2test.txt', 'c3test.txt', f'file.log-{date}'],
+        'content': f'Content of testing_file\n'
+    },
+    {
+        'folder_path':  os.path.join(temp_dir, 'wazuh-testing', 'depth1'),
+        'filename': ['depth_test.txt'],
+        'content': f'Content of testing_file\n'
+    },
+    {
+        'folder_path': os.path.join(temp_dir, 'wazuh-testing', 'depth1', 'depth2'),
+        'filename': ['depth_test.txt'],
+        'content': f'Content of testing_file\n'
+    },
+    {
+        'folder_path': os.path.join(temp_dir, 'wazuh-testing', 'duplicated'),
+        'filename': ['duplicated.txt'],
+        'content': f'Content of testing_file\n'
+    },
+    {
+        'folder_path': os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs'),
+        'filename': [],
+        'content': f'Content of testing_file\n'
+    }
+]
 
 parameters = [
     {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'depth1', 'test.txt'), 'LOG_FORMAT': 'syslog'},
@@ -89,10 +117,22 @@ metadata = [
 if sys.platform != 'win32':
     for case in metadata:
         if case['location'] == os.path.join(temp_dir, 'wazuh-testing', '*'):
+            for value in file_structure:
+                if value['folder_path'] == os.path.join(temp_dir, 'wazuh-testing'):
+                    value['filename'].append('テスト.txt')
+                    value['filename'].append('ИСПЫТАНИЕ.txt')
+                    value['filename'].append('测试.txt')
+                    value['filename'].append( 'اختبار.txt')
             case['files'].append(os.path.join(temp_dir, 'wazuh-testing', 'テスト.txt'))
             case['files'].append(os.path.join(temp_dir, 'wazuh-testing', 'ИСПЫТАНИЕ.txt'))
             case['files'].append(os.path.join(temp_dir, 'wazuh-testing', '测试.txt'))
             case['files'].append(os.path.join(temp_dir, 'wazuh-testing', 'اختبار.txt'))
+
+for value in file_structure:
+    if value['folder_path'] == os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs'):
+        for i in range(2000):
+            value['filename'].append(f'multiple{i}.txt')
+
 
 # Configuration data
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
@@ -101,19 +141,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
 # Fixtures
-@pytest.fixture(scope="module")
-def create_directory():
-    """Create expected directories."""
-    os.makedirs(os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs'), exist_ok=True)
-    os.makedirs(os.path.join(temp_dir, 'wazuh-testing', 'depth1', 'depth2'), exist_ok=True)
-    os.makedirs(os.path.join(temp_dir, 'wazuh-testing', 'duplicated'), exist_ok=True)
-
-    yield
-
-    rmtree(os.path.join(temp_dir, 'wazuh-testing'), ignore_errors=True)
-
-
-@pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
+@pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
@@ -125,29 +153,14 @@ def get_local_internal_options():
     return local_internal_options
 
 
-@pytest.fixture(scope='module')
-def create_files(request, get_configuration):
-    """Create expected files."""
-    files = get_configuration['metadata']['files']
-    file_type = get_configuration['metadata']['file_type']
-
-    if file_type != 'non_existent_file':
-        for file_location in files:
-            if file_type == 'multiple_logs':
-                for i in range(2000):
-                    open(f'{file_location}{i}.txt', 'w').close()
-            else:
-                open(file_location, 'w').close()
-                
-    yield
-
-    for file_location in files:
-        if os.path.exists(file_location):
-            os.remove(file_location)
+@pytest.fixture(scope="module")
+def get_files_list():
+    """Get file list to create from the module."""
+    return file_structure
 
 
-def test_location(get_local_internal_options, configure_local_internal_options, create_directory, create_files,
-                  get_configuration, configure_environment, restart_logcollector):
+def test_location(get_local_internal_options, configure_local_internal_options, get_files_list,
+                  create_file_structure_module, get_configuration, configure_environment, restart_logcollector):
     """Check if logcollector is running properly with the specified configuration.
 
     Raises:
