@@ -28,33 +28,33 @@ local_internal_options = {'logcollector.vcheck_files': 0}
 
 file_structure = [
     {
-        "folder_path": folder_path,
-        "filename": "testing_file_40s.log",
-        "age": 40,
+        'folder_path': folder_path,
+        'filename': ['testing_file_40s.log'],
+        'age': 40,
         'content': f'Content of testing_file_40s\n'
     },
     {
-        "folder_path": folder_path,
-        "filename": "testing_file_5m.log",
-        "age": 300,
+        'folder_path': folder_path,
+        'filename': ['testing_file_5m.log'],
+        'age': 300,
         'content': f'Content of testing_file_5m\n'
     },
     {
-        "folder_path": folder_path,
-        "filename": "testing_file_3h.log",
-        "age": 10800,
+        'folder_path': folder_path,
+        'filename': ['testing_file_3h.log'],
+        'age': 10800,
         'content': f'Content of testing_file_3h\n'
     },
     {
-        "folder_path": folder_path,
-        "filename": "testing_file_5d.log",
-        "age": 432000,
+        'folder_path': folder_path,
+        'filename': ['testing_file_5d.log'],
+        'age': 432000,
         'content': f'Content of testing_file_5d\n'
     },
     {
-        "folder_path": folder_path,
-        "filename": "testing_file_300d.log",
-        "age": 25920000,
+        'folder_path': folder_path,
+        'filename': ['testing_file_300d.log'],
+        'age': 25920000,
         'content': f'Content of testing_file_300d\n'
     },
 ]
@@ -92,9 +92,9 @@ def get_local_internal_options():
     return local_internal_options
 
 
-@pytest.mark.xfail(reason="Expected error. Issue https://github.com/wazuh/wazuh/issues/8438")
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8438')
 def test_configuration_age_basic(get_local_internal_options, configure_local_internal_options, get_files_list,
-                                 create_file_structure, get_configuration, configure_environment, restart_logcollector):
+                                 create_file_structure_function, get_configuration, configure_environment, restart_logcollector):
     """Check if logcollector works correctly and uses the specified age value.
 
     Check that those files that have not been modified for a time greater than age value, are ignored for logcollector.
@@ -109,34 +109,36 @@ def test_configuration_age_basic(get_local_internal_options, configure_local_int
     age_seconds = time_to_seconds(cfg['age'])
 
     for file in file_structure:
-        absolute_file_path = os.path.join(file['folder_path'], file['filename'])
-        wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+        for name in file['filename']:
+            absolute_file_path = os.path.join(file['folder_path'], name)
+            wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-        log_callback = logcollector.callback_match_pattern_file(cfg['location'], absolute_file_path)
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message=f'{file["filename"]} was not detected')
-
-        if int(age_seconds) <= int(file['age']):
-            log_callback = logcollector.callback_ignoring_file(
-                absolute_file_path)
+            log_callback = logcollector.callback_match_pattern_file(cfg['location'], absolute_file_path)
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                    error_message=f'{file["filename"]} was not ignored')
+                                    error_message=f"{name} was not detected")
 
-        else:
-            with pytest.raises(TimeoutError):
-                log_callback = logcollector.callback_ignoring_file(absolute_file_path)
+            if int(age_seconds) <= int(file['age']):
+                log_callback = logcollector.callback_ignoring_file(
+                    absolute_file_path)
                 wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                        error_message=f'{file["filename"]} was not ignored')
+                                        error_message=f"{name} was not ignored")
+
+            else:
+                with pytest.raises(TimeoutError):
+                    log_callback = logcollector.callback_ignoring_file(absolute_file_path)
+                    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                            error_message=f"{name} was not ignored")
 
     for file in file_structure:
-        absolute_file_path = os.path.join(file['folder_path'], file['filename'])
-        with open(absolute_file_path, 'a') as file_to_write:
-            file_to_write.write(file['content'])
+        for name in file['filename']:
+            absolute_file_path = os.path.join(file['folder_path'], name)
+            with open(absolute_file_path, 'a') as file_to_write:
+                file_to_write.write(file['content'])
 
-        log_callback = logcollector.callback_reading_syslog_message(file['content'][:-1])
-        wazuh_log_monitor.start(timeout=10, callback=log_callback,
-                                error_message=f'No syslog message received from {file["filename"]}')
+            log_callback = logcollector.callback_reading_syslog_message(file['content'][:-1])
+            wazuh_log_monitor.start(timeout=10, callback=log_callback,
+                                    error_message=f"No syslog message received from {name}")
 
-        log_callback = logcollector.callback_read_line_from_file(1, absolute_file_path)
-        wazuh_log_monitor.start(timeout=10, callback=log_callback,
-                                error_message=f'No lines read from {file["filename"]}')
+            log_callback = logcollector.callback_read_line_from_file(1, absolute_file_path)
+            wazuh_log_monitor.start(timeout=10, callback=log_callback,
+                                    error_message=f"No lines read from {name}")

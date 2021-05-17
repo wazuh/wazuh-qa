@@ -4,7 +4,6 @@
 import fnmatch
 import os
 import tempfile
-from shutil import rmtree
 
 import pytest
 from wazuh_testing import logcollector
@@ -21,6 +20,15 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_location.yaml')
 
 temp_dir = tempfile.gettempdir()
+
+file_structure = [
+    {
+        'folder_path': os.path.join(temp_dir, 'wazuh-testing'),
+        'filename': ['test.txt', 'test1.log', 'test2.log', '1test.txt', '2test.txt', '1test1.txt', '1test1.log',
+                     '2test2.log', 'test1.txt', 'test2.txt'],
+        'content': f'Content of testing_file\n'
+    },
+]
 
 parameters = [
     {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'test*'), 'LOG_FORMAT': 'syslog',
@@ -131,39 +139,20 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
 # Fixtures
-@pytest.fixture(scope="module")
-def create_directory():
-    """Create expected directories."""
-    os.makedirs(os.path.join(temp_dir, 'wazuh-testing'), exist_ok=True)
-
-    yield
-
-    rmtree(os.path.join(temp_dir, 'wazuh-testing'), ignore_errors=True)
-
-
-@pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
+@pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
 
 
-@pytest.fixture(scope='module')
-def create_files(get_configuration):
-    """Create expected files."""
-    files = get_configuration['metadata']['files']
-
-    for file_location in files:
-        open(file_location, 'w').close()
-
-    yield
-
-    for file_location in files:
-        if os.path.exists(file_location):
-            os.remove(file_location)
+@pytest.fixture(scope="module")
+def get_files_list():
+    """Get file list to create from the module."""
+    return file_structure
 
 
-def test_location_exclude(create_directory, create_files, get_configuration, configure_environment,
+def test_location_exclude(get_files_list, create_file_structure_module, get_configuration, configure_environment,
                           restart_logcollector):
     """Check if logcollector is excluding specified files.
 

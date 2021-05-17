@@ -9,23 +9,23 @@ import shutil
 import subprocess
 import sys
 import uuid
-from datetime import datetime, timedelta
-import time
+from datetime import datetime
 
 import pytest
 from numpydoc.docscrape import FunctionDoc
 from py.xml import html
-from wazuh_testing import global_parameters
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH
+
 import wazuh_testing.tools.configuration as conf
+from wazuh_testing import global_parameters
+from wazuh_testing.logcollector import create_file_structure, delete_file_structure
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
-from wazuh_testing.tools.time import TimeMachine, time_to_seconds
+from wazuh_testing.tools.time import TimeMachine
 
 if sys.platform == 'win32':
     from wazuh_testing.fim import KEY_WOW64_64KEY, KEY_WOW64_32KEY, delete_registry, registry_parser, create_registry
-    import win32api
 
 PLATFORMS = set("darwin linux win32 sunos5".split())
 HOST_TYPES = set("server agent".split())
@@ -432,29 +432,6 @@ def configure_local_internal_options(get_local_internal_options):
         yield
 
 
-@pytest.fixture(scope='function')
-def create_file_structure(get_files_list):
-    """Creates the directory structure specified for a test case
-
-    Args:
-        get_file_list (Fixture): Fixture that returns a dictionary with the file structure to be created
-    """
-    for file in get_files_list:
-        absolute_file_path = os.path.join(file['folder_path'], file['filename'])
-        os.makedirs(file['folder_path'], exist_ok=True, mode=0o777)
-        open(absolute_file_path, "w").close()
-
-        if 'age' in file:
-            fileinfo = os.stat(absolute_file_path)
-            os.utime(absolute_file_path, (fileinfo.st_atime - file['age'],
-                                          fileinfo.st_mtime - file['age']))
-    yield
-
-    for file in get_files_list:
-        absolute_file_path = os.path.join(file['folder_path'], file['filename'])
-        shutil.rmtree(absolute_file_path, ignore_errors=True)
-
-
 @pytest.fixture(scope='module')
 def configure_environment(get_configuration, request):
     """Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration."""
@@ -605,3 +582,23 @@ def put_env_variables(get_configuration, request):
         for env in environment_variables:
             if sys.platform != 'win32':
                 os.unsetenv(env[0])
+
+
+@pytest.fixture(scope="module")
+def create_file_structure_module(get_files_list):
+    """Module scope version of create_file_structure."""
+    create_file_structure(get_files_list)
+
+    yield
+
+    delete_file_structure(get_files_list)
+
+
+@pytest.fixture(scope="function")
+def create_file_structure_function(get_files_list):
+    """Function scope version of create_file_structure."""
+    create_file_structure(get_files_list)
+
+    yield
+
+    delete_file_structure(get_files_list)

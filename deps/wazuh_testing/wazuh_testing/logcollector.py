@@ -1,3 +1,5 @@
+import os
+import shutil
 import sys
 from math import ceil
 
@@ -379,3 +381,33 @@ def add_log_data(log_path, log_line_message, size_kib=1024, line_start=1, print_
                 f.write(f"{log_line_message}{x}\n") if print_line_num else f.write(f"{log_line_message}\n")
         return line_start + lines - 1
     return 0
+
+
+def create_file_structure(get_files_list):
+    """Create the specified file tree structure.
+
+    Args:
+        get_files_list(dict):  Files to create.
+    """
+    for file in get_files_list:
+        os.makedirs(file['folder_path'], exist_ok=True, mode=0o777)
+        for name in file['filename']:
+            open(os.path.join(file['folder_path'], name), 'w').close()
+
+            if 'age' in file:
+                fileinfo = os.stat(f"{file['folder_path']}{file['filename']}")
+                os.utime(f"{file['folder_path']}{file['filename']}", (fileinfo.st_atime - file['age'],
+                                                                      fileinfo.st_mtime - file['age']))
+            elif 'size' in file:
+                add_log_data(log_path=os.path.join(file['folder_path'], name),
+                             log_line_message=file['content'], size_kib=file['size_kib'])
+
+
+def delete_file_structure(get_files_list):
+    """Delete the specified file tree structure.
+
+    Args:
+        get_files_list(dict):  Files to delete.
+    """
+    for file in get_files_list:
+        shutil.rmtree(file['folder_path'], ignore_errors=True)
