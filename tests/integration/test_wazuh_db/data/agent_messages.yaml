@@ -196,8 +196,8 @@
     output: ['ok []']
     stage: "agent vuln_cves checking empty table"
 -
-  name: "Agents' OS table: os_info"
-  description: "It checks the commands get and set"
+  name: "Agents' OS table: sys_osinfo"
+  description: "It checks the commands get, set and set_triaged"
   test_case:
   -
     input: 'agent 000 sql DELETE FROM sys_osinfo'
@@ -233,7 +233,7 @@
     stage: "agent sys_osinfo checking table is empty"
 -
   name: "Agents' Packages/Hotfixes tables: sys_programs and sys_hotfixes"
-  description: "It checks the commands to get packages, set package triaged, and get hotfixes"
+  description: "It checks the commands get packages and get hotfixes"
   test_case:
   -
     input: 'agent 003 package save 0|2021/04/07 22:00:00|deb|test_deb_pkg|optional|utils|7490|Wazuh wazuh@wazuh.com|NULL|1.0.0|amd64|NULL|NULL|Test package|NULL|1'
