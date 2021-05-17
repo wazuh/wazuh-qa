@@ -10,23 +10,20 @@ import sys
 from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 
 # Marks
-common_query = ['', 'Testing', '!ras*^']
-query_list = []
+query_list = ['', 'Testing', '!ras*^']
+parameters = []
 
-location = log_format = ''
-wazuh_configuration = ''
 
-level_list = [ 'default', 'info', 'debug']
+level_list = ['default', 'info', 'debug']
 type_list = ['log', 'trace', 'activity']
+wazuh_configuration = 'wazuh_basic_configuration_query_macos.yaml'
 
 if sys.platform != 'win32' and sys.platform != 'darwin':
     pytestmark = [pytest.mark.skip, pytest.mark.tier(level=0)]
 else:
-    pytestmark = pytest.mark.tier(level=0)
-    wazuh_configuration = 'test_basic_configuration_query_macos'
+    pytestmark = [pytest.mark.tier(level=0)]
     if sys.platform == 'darwin':
-        clauses = ['eventMessage', 'processImagePath', 'senderImagePath', 'subsystem', 'category', 'eventType',
-                   'messageType']
+        clauses = ['eventMessage', 'processImagePath', 'senderImagePath', 'subsystem', 'category']
         location = log_format = 'oslog'
         for clause in clauses:
             query_list += [f'{clause} CONTAINS[c] "com.apple.geod"',
@@ -54,7 +51,7 @@ else:
                            f'! {clause} IN "testing"',
                            ]
     else:
-        wazuh_configuration = 'test_basic_configuration_query_windows'
+        wazuh_configuration = 'wazuh_basic_configuration_query_windows.yaml'
         location = logcollector.WINDOWS_CHANNEL_LIST
         log_format = 'eventchannel'
         query_list = ['Event[System/EventID = 4624]',
@@ -66,27 +63,24 @@ else:
                       'Event[ EventData[Data[@Name="PropA"]="ValueA" and  Data[@Name="PropB"]="ValueB" ]]'
                       ]
 
-query_list += common_query
+    parameters = []
+    for query in query_list:
+        if isinstance(location, list):
+            for channel in location:
+                parameters.append({'LOCATION': location, 'LOG_FORMAT': log_format, 'QUERY': query})
+        else:
+            for level in level_list:
+                for type in type_list:
+                    parameters.append({'LOCATION': location, 'LOG_FORMAT': log_format,
+                                       'QUERY': query, 'TYPE': type, 'LEVEL': level})
+
+metadata = lower_case_key_dictionary_array(parameters)
 
 # Configuration
 no_restart_windows_after_configuration_set = True
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
-
-parameters = []
-for query in query_list:
-    if isinstance(location, list):
-        for channel in location:
-            parameters.append({'LOCATION': location, 'LOG_FORMAT': log_format, 'QUERY': query})
-    else:
-        for level in level_list:
-            for type in type_list:
-                parameters.append({'LOCATION': location, 'LOG_FORMAT': log_format,
-                                   'QUERY': query, 'TYPE': type, 'LEVEL': level})
-
-metadata = lower_case_key_dictionary_array(parameters)
-
-configurations = load_wazuh_configurations(configurations_path, wazuh_configuration,
+configurations_path = os.path.join(test_data_path, wazuh_configuration)
+configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
 
