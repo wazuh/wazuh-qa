@@ -63,7 +63,6 @@ else:
                       'Event[ EventData[Data[@Name="PropA"]="ValueA" and  Data[@Name="PropB"]="ValueB" ]]'
                       ]
 
-    parameters = []
     for query in query_list:
         if isinstance(location, list):
             for channel in location:
