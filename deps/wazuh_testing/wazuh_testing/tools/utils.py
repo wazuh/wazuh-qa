@@ -128,7 +128,7 @@ def get_random_string(string_length, digits=True):
 def lower_case_key_dictionary_array(array_dict):
     """Given an array of dictionaries, create a copy of it with the keys of each dictionary in lower case.
 
-    Arg:
+    Args:
         array_dict (List): List of dictionaries.
     """
     lower_case_array_dict = []
