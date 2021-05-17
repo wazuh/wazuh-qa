@@ -24,12 +24,12 @@ LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
-no_restart_windows_after_configuration_set = True
-force_restart_after_restoring = True
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
 if sys.platform == 'win32':
+    no_restart_windows_after_configuration_set = True
+    force_restart_after_restoring = True
     location = r'C:\testing\files*'
     wazuh_configuration = 'ossec.conf'
     prefix = AGENT_DETECTOR_PREFIX

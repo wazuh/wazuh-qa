@@ -16,13 +16,14 @@ import subprocess as sb
 LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 
 # Configuration
-no_restart_windows_after_configuration_set = True
-force_restart_after_restoring = True
+
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
 # Marks
 if sys.platform != 'win32':
+    no_restart_windows_after_configuration_set = True
+    force_restart_after_restoring = True
     pytestmark = [pytest.mark.skip, pytest.mark.tier(level=0)]
 else:
     pytestmark = pytest.mark.tier(level=0)

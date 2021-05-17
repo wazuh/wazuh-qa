@@ -26,13 +26,14 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 wazuh_component = get_service()
 
-no_restart_windows_after_configuration_set = True
-force_restart_after_restoring = True
+
 
 if sys.platform == 'win32':
     location = r'C:\testing\file.txt'
     wazuh_configuration = 'ossec.conf'
     prefix = AGENT_DETECTOR_PREFIX
+    no_restart_windows_after_configuration_set = True
+    force_restart_after_restoring = True
 
 else:
     location = '/tmp/testing.txt'
