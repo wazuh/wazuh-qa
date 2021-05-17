@@ -50,11 +50,9 @@ conf_params = {'WINDOWS_DUPLICATED_REGISTRY_1': registry_1,
                'WINDOWS_DUPLICATED_REGISTRY_2': registry_2}
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_duplicated_registry.yaml')
 parameters, metadata = fim.generate_params(extra_params=conf_params, modes=monitoring_modes)
-configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=parameters, metadata=metadata)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
-registry_list = [(key, sub_key_1, fim.KEY_WOW64_32KEY), (key, sub_key_2,
-                 fim.KEY_WOW64_32KEY)]
+registry_list = [(key, sub_key_1, fim.KEY_WOW64_32KEY), (key, sub_key_2, fim.KEY_WOW64_32KEY)]
 
 
 # Fixtures
@@ -67,10 +65,8 @@ def get_configuration(request):
 
 # Test
 
-@pytest.mark.parametrize('key, subkey1, subkey2, arch', [(key, sub_key_1, sub_key_2,
-                         fim.KEY_WOW64_32KEY)])
-def test_registry_duplicated_entry(key, subkey1, subkey2, arch,
-                                   get_configuration, configure_environment,
+@pytest.mark.parametrize('key, subkey1, subkey2, arch', [(key, sub_key_1, sub_key_2, fim.KEY_WOW64_32KEY)])
+def test_registry_duplicated_entry(key, subkey1, subkey2, arch, get_configuration, configure_environment,
                                    restart_syscheckd, wait_for_fim_start):
     """Two registries with capital differences must trigger just one modify event
 
