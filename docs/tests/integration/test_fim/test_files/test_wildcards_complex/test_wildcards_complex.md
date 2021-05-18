@@ -6,8 +6,8 @@ The test check for the correct expansion of complex wildcards in syscheck direct
 
 | Tier | Platforms | Time spent| Test file |
 |:--:|:--:|:--:|:--:|
-| 1 | Linux | 1109s |
-| 1 | Windows | 569s |
+| 1 | Linux | 1503s |
+| 1 | Windows | 756s |
 
 ## Test logic
 
@@ -16,16 +16,17 @@ The test creates a group of root directories and subdirectories that match compl
 ## Execution result
 
 ```
-=========================================================================================== test session starts ===========================================================================================
+============================= test session starts ==============================
 platform linux -- Python 3.6.9, pytest-6.2.4, py-1.10.0, pluggy-0.13.1
 rootdir: /home/vagrant/wazuh-qa/tests/integration, configfile: pytest.ini
 plugins: metadata-1.11.0, html-2.0.1, testinfra-6.0.0, testinfra-6.3.0
-collected 84 items
+collected 96 items
 
-test_wildcards_complex.py ....................................................................................                                                                                      [100%]
+test_wildcards_complex.py .............................................. [ 47%]
+..................................................                       [100%]
 
--------------------------------------------------------------------------- generated html file: file:///vagrant/html_report.html --------------------------------------------------------------------------
-===================================================================================== 84 passed in 1109.08s (0:18:29) =====================================================================================
+------------ generated html file: file:///vagrant/html_report.html -------------
+======================= 96 passed in 1503.30s (0:25:03) ========================
 ```
 
 ## Code documentation

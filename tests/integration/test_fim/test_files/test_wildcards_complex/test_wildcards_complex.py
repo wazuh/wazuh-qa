@@ -21,11 +21,13 @@ test_folder = os.path.join(PREFIX, 'test_folder')
 test_directories = [test_folder]
 
 matched_dirs = ['simple1', 'simple2', 'star12', 'stars123', 'multiple_1', 'multiplet']
-matched_subdirs = ['sub_simple1', 'sub_simple2', 'substar', 'subdtar', '_submult', 'submult']
+matched_subdirs = ['sub_simple1', 'sub_simple2', 'substar', 'subdtar1', '_submult', 'submult']
 no_match_dirs = ['random_directory', 'not_monitored_directory', 'star12', 'stars123']
 
+matched_dirs = [os.path.join(test_folder, directory) for directory in matched_dirs]
 matched_subdirs = [os.path.join(parent, child) for parent, child in zip(matched_dirs, matched_subdirs)]
-matched_dirs = [directory for directory in matched_dirs if directory not in no_match_dirs]
+no_match_dirs = [os.path.join(test_folder, directory) for directory in no_match_dirs]
+
 test_subdirectories = matched_dirs + matched_subdirs + no_match_dirs
 
 wildcards = [os.path.join(test_folder, 'star*/sub*'),
@@ -44,22 +46,19 @@ parameters, metadata = generate_params(extra_params=conf_params)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
 
+def recursive_directory_creation(splitted_path):
+    if splitted_path[0] != PREFIX:
+        if not os.path.exists(splitted_path[0]):
+            splitted_path = os.path.split(splitted_path[0])
+            recursive_directory_creation(splitted_path)
+        elif not os.path.exists(os.path.join(splitted_path[0], splitted_path[1])):
+            os.mkdir(os.path.join(splitted_path[0], splitted_path[1]))
+
+
 def extra_configuration_before_yield():
-
-    if not os.path.exists(test_folder):
-        os.mkdir(test_folder)
-
-    for no_match_dir in no_match_dirs:
-        if not os.path.exists(os.path.join(test_folder, no_match_dir)):
-            os.mkdir(os.path.join(test_folder, no_match_dir))
-
-    for dir in matched_dirs:
-        if not os.path.exists(os.path.join(test_folder, dir)):
-            os.mkdir(os.path.join(test_folder, dir))
-
-    for sub_directory in matched_subdirs:
-        if not os.path.exists(os.path.join(test_folder, sub_directory)):
-            os.mkdir(os.path.join(test_folder, sub_directory))
+    for subdir in test_subdirectories:
+        splitted_path = os.path.split(subdir)
+        recursive_directory_creation(splitted_path)
 
 
 # Fixtures
@@ -72,11 +71,10 @@ def get_configuration(request):
 
 # Test
 
-@pytest.mark.parametrize('parent_folder', [test_folder])
 @pytest.mark.parametrize('subfolder', test_subdirectories)
 @pytest.mark.parametrize('file_name', ['regular_1', '*.*'])
 @pytest.mark.parametrize('tags_to_apply', [{'ossec_conf_wildcards'}])
-def test_wildcards_complex(parent_folder, subfolder, file_name, tags_to_apply,
+def test_wildcards_complex(subfolder, file_name, tags_to_apply,
                            get_configuration, configure_environment,
                            restart_syscheckd, wait_for_fim_start):
     """Test the correct expansion of complex wildcards for monitored directories in syscheck
@@ -92,8 +90,6 @@ def test_wildcards_complex(parent_folder, subfolder, file_name, tags_to_apply,
         wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
     """
 
-    folder = os.path.join(parent_folder, subfolder)
-
     mult = 1 if sys.platform == 'win32' else 2
 
     if sys.platform == 'win32':
@@ -102,7 +98,7 @@ def test_wildcards_complex(parent_folder, subfolder, file_name, tags_to_apply,
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    regular_file_cud(folder, wazuh_log_monitor, file_list=[file_name],
+    regular_file_cud(subfolder, wazuh_log_monitor, file_list=[file_name],
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
                      min_timeout=global_parameters.default_timeout * mult,
-                     triggers_event=subfolder in matched_dirs or subfolder in matched_subdirs)
+                     triggers_event=subfolder not in no_match_dirs)
