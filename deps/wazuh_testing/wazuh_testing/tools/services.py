@@ -110,14 +110,14 @@ def control_service(action, daemon=None, debug_mode=False):
                 processes = []
 
                 for proc in psutil.process_iter():
-                        try:
-                            if daemon in ['wazuh-clusterd', 'wazuh-apid']:
-                                if any(filter(lambda x: f"{daemon}.py" in x, proc.cmdline())):
-                                    processes.append(proc)
-                            elif daemon in proc.name():
+                    try:
+                        if daemon in ['wazuh-clusterd', 'wazuh-apid']:
+                            if any(filter(lambda x: f"{daemon}.py" in x, proc.cmdline())):
                                 processes.append(proc)
-                        except psutil.NoSuchProcess:
-                            pass
+                        elif daemon in proc.name() or daemon in ' '.join(proc.cmdline()):
+                            processes.append(proc)
+                    except psutil.NoSuchProcess:
+                        pass
                 try:
                     for proc in processes:
                         proc.terminate()
@@ -209,7 +209,7 @@ def check_daemon_status(daemon=None, running=True, timeout=10, extra_sockets=Non
                 # Finish main for loop if both daemon and socket checks are ok
                 break
 
-        time.sleep(timeout/3)
+        time.sleep(timeout / 3)
     else:
         raise TimeoutError(f"{'wazuh-service' if daemon is None else daemon} "
                            f"{'is not' if running else 'is'} running")
