@@ -1,13 +1,12 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
 import os
 import subprocess
 import sys
 import time
-
 import psutil
+
 from wazuh_testing.tools import WAZUH_PATH, get_service, WAZUH_SOCKETS, QUEUE_DB_PATH, WAZUH_OPTIONAL_SOCKETS
 from wazuh_testing.tools.configuration import write_wazuh_conf
 
@@ -107,7 +106,7 @@ def control_service(action, daemon=None, debug_mode=False):
                 processes = []
 
                 for proc in psutil.process_iter():
-                    if daemon in proc.name():
+                    if daemon in proc.name() or daemon in ' '.join(proc.cmdline()):
                         try:
                             processes.append(proc)
                         except psutil.NoSuchProcess:

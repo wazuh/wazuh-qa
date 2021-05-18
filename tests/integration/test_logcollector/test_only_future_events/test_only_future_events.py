@@ -37,14 +37,13 @@ metadata = [
      'log_line': "Jan  1 00:00:00 localhost test[0]: line="}
 ]
 
-current_line = logcollector.add_log_data(log_path=log_test_path, log_line_message=metadata[0]['log_line'],
-                                         size_kib=10240, print_line_num=True)
+log_line = metadata[0]['log_line']
 
 file_structure = [
     {
         'folder_path': os.path.join(temp_dir, 'wazuh-testing'),
         'filename': ['test.log'],
-        'content': current_line,
+        'content': log_line,
         'size_kib': 10240
     }
 ]
@@ -73,7 +72,7 @@ def get_files_list():
 
 
 def test_only_future_events(get_local_internal_options, configure_local_internal_options, get_configuration,
-                            configure_environment, get_files_list, restart_logcollector):
+                            configure_environment, get_files_list, create_file_structure_module, restart_logcollector):
     """Check if the "only-future-events" option is working correctly.
 
     To do this, logcollector is stopped and several lines are added to a test log file.

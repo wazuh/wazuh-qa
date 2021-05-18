@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 
-cd /wazuh-qa/deps/wazuh_testing/
-python setup.py install
+BRANCH=$1
+
+cd /wazuh-qa
+git checkout ${BRANCH}
+pip install -r requirements.txt
+cd deps/wazuh_testing
+python3 setup.py install
 
 mkdir -p /var/ossec/queue/vulnerabilities/dictionaries/  /var/ossec/etc/ /var/ossec/logs/archives /var/ossec/bin/ \
 /tmp/wazuh-testing

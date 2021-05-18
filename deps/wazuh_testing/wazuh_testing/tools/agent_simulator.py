@@ -713,7 +713,7 @@ class Agent:
         """Get agent connection status of global.db.
 
         Returns:
-            string: Agent connection status (connected, disconnected, never_connected)
+            str: Agent connection status (connected, disconnected, never_connected)
         """
         return self.get_agent_info('connection_status')
 
@@ -787,7 +787,7 @@ class GeneratorSyscollector:
             message_type (str): Syscollector event type.
 
         Returns:
-            string: the generated syscollector event message.
+            str: the generated syscollector event message.
         """
         message = syscollector.SYSCOLLECTOR_HEADER
         if message_type == 'network':
@@ -832,7 +832,7 @@ class GeneratorSyscollector:
          in `bath_size`.
 
          Returns:
-            string: generated event with the desired format for syscollector
+            str: generated event with the desired format for syscollector
         """
         if self.current_batch_events_size == 0:
             self.current_batch_events = (self.current_batch_events + 1) % len(self.list_events)
@@ -851,18 +851,7 @@ class GeneratorSyscollector:
 class SCA:
     """This class allows the generation of sca_label events.
 
-    Create sca events, both summary and check. Example messasge:
-
-          p:sca:{"type": "check", "scan_id": 386,
-         "id": 8247694953, "policy": "CIS Benchmark for debian8",
-         "policy_id": "cis_debian8_policy", "check": {"id": 92105,
-         "title": "Ensure root is the only UID 0 account", "description": "Any account with UID 0
-         has superuser privileges on the system", "rationale": "This access must be limited to only the
-         default root account", "remediation": "Remove any users other than root with UID 0", "compliance":
-         {"cis": "6.2.6", "cis_csc": "5.1", "pci_dss": "10.2.5", "hipaa": "164.312.b", "nist_800_53":
-         "AU.14,AC.7", "gpg_13": "7.8", "gdpr_IV": "35.7,32.2", "tsc": "CC6.1,CC6.8,CC7.2,CC7.3,CC7.4"},
-         "rules": "f:/etc/passwd -> !r:^# && !r:^\\\\s*\\\\t*root: && r:^\\\\w+:\\\\w+:0:\"]",
-         "condition": "none", "file": "/etc/passwd", "result": "failed"}}
+    Create sca events, both summary and check.
 
     Args:
         os (str): Agent operative system.
@@ -879,7 +868,7 @@ class SCA:
         """Alternatively creates summary and check SCA messages.
 
         Returns:
-            string: an sca_label message formatted with the required header codes.
+            str: an sca_label message formatted with the required header codes.
         """
         if self.count % 100 == 0:
             msg = self.create_sca_event('summary')
@@ -897,7 +886,10 @@ class SCA:
         """Create sca_label event of the desired type.
 
         Args:
-            event_type (str): Event type `[summary, check]`.
+            event_type (str): Event type summary or check.
+
+        Returns:
+            dict: SCA event.
         """
         event_data = dict()
         event_data['type'] = event_type
@@ -971,7 +963,7 @@ class Rootcheck:
     Args:
         agent_name (str): Name of the agent.
         agent_id (str): Id of the agent.
-        rootcheck_sample (str): File with the rootcheck events that are going to be used.
+        rootcheck_sample (str, optional): File with the rootcheck events that are going to be used.
     """
     def __init__(self, os, agent_name, agent_id, rootcheck_sample=None):
         self.os = os
@@ -991,6 +983,7 @@ class Rootcheck:
             self.rootcheck_path = os.path.join(_data_path, 'rootcheck.txt')
         else:
             self.rootcheck_path = os.path.join(_data_path, self.rootcheck_sample)
+
         with open(self.rootcheck_path) as fp:
             line = fp.readline()
             while line:
@@ -1003,7 +996,7 @@ class Rootcheck:
         """Returns a rootcheck message, informing when rootcheck scan starts and ends.
 
         Returns:
-            string: a Rootcheck generated message
+            str: a Rootcheck generated message
         """
         message = next(self.message)
         if message == 'Starting rootcheck scan.':
@@ -1017,22 +1010,16 @@ class Rootcheck:
 
 
 class Logcollector:
-    """This class allows the generation of logcollector events.
-
-    Creates logcollector events. Generated message:
-
-        x:syslog:Mar    24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550
-    """
+    """This class allows the generation of logcollector events."""
     def __init__(self):
         self.logcollector_tag = 'syslog'
         self.logcollector_mq = 'x'
 
     def generate_event(self):
-        """Generate logcollector event. Generated event:
-                x:syslog:Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550
+        """Generate logcollector event
 
         Returns:
-            string: a Logcollector generated message
+            str: a Logcollector generated message
         """
         log = 'Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550'
 
@@ -1069,7 +1056,7 @@ class GeneratorIntegrityFIM:
         """Generate integrity FIM message according to `event_type` attribute.
 
         Returns:
-            string: an IntegrityFIM formatted message
+            str: an IntegrityFIM formatted message
         """
         data = None
         if self.event_type in ["integrity_check_global", "integrity_check_left", "integrity_check_right"]:
@@ -1099,7 +1086,7 @@ class GeneratorIntegrityFIM:
         """Generate a random kind of integrity FIM message according to `event_type` attribute.
 
         Returns:
-            string: an IntegrityFIM formatted message
+            str: an IntegrityFIM formatted message
         """
         if event_type is not None:
             self.event_type = event_type
@@ -1129,7 +1116,7 @@ class GeneratorHostinfo:
         """"Generates an arbitrary hostinfo message
 
         Returns:
-            string: an hostinfo formatted message
+            str: an hostinfo formatted message
         """
         number_open_ports = randint(1, 10)
         host_ip = get_random_ip()
@@ -1182,7 +1169,7 @@ class GeneratorWinevt:
             winevt_type (str): Winevt type message `system, security, application, windows-defender, sysmon`.
 
         Returns:
-            string: an windows event generated message.
+            str: an windows event generated message.
         """
         self.current_event_key = next(self.next_event_key)
 
@@ -1236,7 +1223,7 @@ class GeneratorFIM:
         """Initialize file attribute.
 
         Returns:
-            string: the new randomized file for the instance
+            str: the new randomized file for the instance
         """
         self._file = self.file_root + ''.join(sample(ascii_letters + digits, self.default_file_length))
         return self._file
@@ -1245,7 +1232,7 @@ class GeneratorFIM:
         """Initialize file size with random value
 
         Returns:
-            string: the new randomized file size for the instance
+            str: the new randomized file size for the instance
         """
         self._size = randint(-1, self.max_size)
         return self._size
@@ -1272,7 +1259,7 @@ class GeneratorFIM:
         """Initialize uid attribute with random value.
 
         Returns:
-            string: the new randomized file uid for the instance
+            str: the new randomized file uid for the instance
         """
         self._uid = choice(list(self.users.keys()))
         self._uname = self.users[self._uid]
@@ -1282,8 +1269,8 @@ class GeneratorFIM:
         """Initialize gid attribute with random value.
 
         Returns:
-            string: the new randomized gid for the instance,
-            string: the new randomized gname for the instance.
+            str: the new randomized gid for the instance,
+            str: the new randomized gname for the instance.
         """
         self._gid = choice(list(self.users.keys()))
         self._gname = self.users[self._gid]
@@ -1292,7 +1279,7 @@ class GeneratorFIM:
     def random_md5(self):
         """Initialize md5 attribute with random value.
         Returns:
-            string: the new randomized md5 for the instance.
+            str: the new randomized md5 for the instance.
         """
         if self._mode & S_IFREG == S_IFREG:
             self._md5 = ''.join(sample('0123456789abcdef' * 2, 32))
@@ -1302,7 +1289,7 @@ class GeneratorFIM:
     def random_sha1(self):
         """Initialize sha1 attribute with random value.
         Returns:
-            string: the new randomized sha1 for the instance.
+            str: the new randomized sha1 for the instance.
         """
         if self._mode & S_IFREG == S_IFREG:
             self._sha1 = ''.join(sample('0123456789abcdef' * 3, 40))
@@ -1312,7 +1299,7 @@ class GeneratorFIM:
     def random_sha256(self):
         """Initialize sha256 attribute with random value.
         Returns:
-            string: the new randomized sha256 for the instance.
+            str: the new randomized sha256 for the instance.
         """
         if self._mode & S_IFREG == S_IFREG:
             self._sha256 = ''.join(sample('0123456789abcdef' * 4, 64))
@@ -1322,7 +1309,7 @@ class GeneratorFIM:
     def random_time(self):
         """Initialize time attribute with random value.
          Returns:
-            string: the new randomized mdate for the instance.
+            str: the new randomized mdate for the instance.
         """
         self._mdate += randint(1, self.max_timediff)
         return self._mdate
@@ -1330,7 +1317,7 @@ class GeneratorFIM:
     def random_inode(self):
         """Initialize inode attribute with random value.
         Returns:
-            string: the new randomized inode for the instance.
+            str: the new randomized inode for the instance.
         """
         self._inode = randint(1, self.max_inode)
         return self._inode
@@ -1400,7 +1387,7 @@ class GeneratorFIM:
             message (str): FIM message.
 
         Returns:
-            string: generated message with the required FIM header.
+            str: generated message with the required FIM header.
         """
         if self.agent_version >= "3.12":
             formated_message = f"{self.syscheck_mq}:({self.agent_id}) any->syscheck:{message}"
@@ -1419,7 +1406,7 @@ class GeneratorFIM:
         """Generate FIM event based on `event_type` and `agent_version` attribute.
 
         Returns:
-            string: generated message with the required FIM header.
+            str: generated message with the required FIM header.
         """
         if self.agent_version >= "3.12":
             if self.event_type == "added":
@@ -1466,7 +1453,7 @@ class GeneratorFIM:
             event_type (str): Event type `added, modified, deleted`.
 
         Returns:
-            string: generated message.
+            str: generated message.
         """
         if event_mode is not None:
             self.event_mode = event_mode
