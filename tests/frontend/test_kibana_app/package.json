@@ -11,12 +11,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "cypress": "^7.1.0"
+    "cosmiconfig": "^4.0.0",
+    "cypress": "^7.1.0",
+    "prettier": "^2.3.0"
   },
   "devDependencies": {
-    "cypress-cucumber-preprocessor": "^4.0.3"
+    "cypress-cucumber-preprocessor": "^4.0.3",
+    "eslint-plugin-cypress": "^2.11.3"
   },
   "cypress-cucumber-preprocessor": {
-    "nonGlobalStepDefinitions": true
+    "nonGlobalStepDefinitions": false,
+    "step_definitions": "cypress/integration/step_definitions/**/"
   }
 }
