@@ -33,6 +33,8 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.system import HostManager
 
 REMOTED_DETECTOR_PREFIX = r'.*wazuh-remoted.*'
+LOG_COLLECTOR_DETECTOR_PREFIX = r'.*wazuh-logcollector.*'
+AGENT_DETECTOR_PREFIX = r'.*wazuh-agent.*'
 
 
 def wazuh_unpack(data, format_: str = "<I"):
@@ -499,7 +501,7 @@ class Queue(queue.Queue):
         return aux_queue.get(*args, **kwargs)
 
     def __repr__(self):
-        """ Returns the object representation in string format.
+        """Returns the object representation in string format.
 
         This method is called when repr() function is invoked on the object. If possible, the string returned should
             be a valid Python expression that can be used to reconstruct the object again. This is used to define how
@@ -777,8 +779,8 @@ class ManInTheMiddle:
 
         # Give proper permissions to socket
         if isinstance(self.listener_socket_address, str):
-            uid = pwd.getpwnam('ossec').pw_uid
-            gid = grp.getgrnam('ossec').gr_gid
+            uid = pwd.getpwnam('wazuh').pw_uid
+            gid = grp.getgrnam('wazuh').gr_gid
             os.chown(self.listener_socket_address, uid, gid)
             os.chmod(self.listener_socket_address, 0o660)
 

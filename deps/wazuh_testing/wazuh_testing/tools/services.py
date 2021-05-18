@@ -1,13 +1,10 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
 import os
-import socket
 import subprocess
 import sys
 import time
-from subprocess import check_call
 
 import psutil
 
@@ -29,7 +26,7 @@ def restart_wazuh_daemon(daemon):
             proc.terminate()
 
     daemon_path = os.path.join(WAZUH_PATH, 'bin')
-    check_call([f'{daemon_path}/{daemon}'])
+    subprocess.check_call([f'{daemon_path}/{daemon}'])
 
 
 def restart_wazuh_with_new_conf(new_conf, daemon='wazuh-syscheckd'):
@@ -110,7 +107,7 @@ def control_service(action, daemon=None, debug_mode=False):
                 processes = []
 
                 for proc in psutil.process_iter():
-                    if daemon in proc.name():
+                    if daemon in proc.name() or daemon in ' '.join(proc.cmdline()):
                         try:
                             processes.append(proc)
                         except psutil.NoSuchProcess:
@@ -129,7 +126,7 @@ def control_service(action, daemon=None, debug_mode=False):
                 delete_sockets(WAZUH_SOCKETS[daemon])
             else:
                 daemon_path = os.path.join(WAZUH_PATH, 'bin')
-                check_call([f'{daemon_path}/{daemon}', '' if not debug_mode else '-dd'])
+                subprocess.check_call([f'{daemon_path}/{daemon}', '' if not debug_mode else '-dd'])
             result = 0
 
     if result != 0:
@@ -206,7 +203,7 @@ def check_daemon_status(daemon=None, running=True, timeout=10, extra_sockets=Non
                 # Finish main for loop if both daemon and socket checks are ok
                 break
 
-        time.sleep(timeout/3)
+        time.sleep(timeout / 3)
     else:
         raise TimeoutError(f"{'wazuh-service' if daemon is None else daemon} "
                            f"{'is not' if running else 'is'} running")
@@ -236,3 +233,33 @@ def check_if_process_is_running(process_name):
         pass
 
     return is_running
+
+
+def control_event_log_service(control):
+    """Control Windows event log service.
+
+    Args:
+        control (str): Start or Stop.
+
+    Raises:
+        ValueError: If the event log channel does not start/stop correctly.
+    """
+    for _ in range(10):
+        control_sc = 'disabled' if control == 'stop' else 'auto'
+
+        command = subprocess.run(f'sc config eventlog start= {control_sc}', stderr=subprocess.PIPE)
+        result = command.returncode
+        if result != 0:
+            raise ValueError(f'Event log service did not stop correctly')
+
+        command = subprocess.run(f"net {control} eventlog /y", stderr=subprocess.PIPE)
+        result = command.returncode
+        if result == 0:
+            break
+        else:
+            time.sleep(1)
+    else:
+        raise ValueError(f"Event log service did not stop correctly")
+
+    time.sleep(1)
+

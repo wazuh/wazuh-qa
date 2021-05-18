@@ -7,11 +7,12 @@ from time import sleep
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing import TCP
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent_version='v4.0.0',
-               agent_os='debian8', eps=1000, run_duration=20, active_modules=[], modules_eps=None, fixed_message_size=None):
+               agent_os='debian8', eps=1000, run_duration=20, active_modules=[], modules_eps=None,
+               fixed_message_size=None, registration_address=None, labels=None):
     """Run a batch of agents connected to a manager with the same parameters.
 
     Args:
@@ -24,6 +25,9 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
         run_duration (int): Agent life time.
         active_modules (list): list with active modules names.
         modules_eps (list): list with eps for each active modules.
+        fixed_message_size (int): size in bytes for the message.
+        registration_address (str): Manager IP address where the agent will be registered.
+        labels (dict): Wazuh agent labels in dict format.
     """
 
     logger = logging.getLogger(f"P{os.getpid()}")
@@ -33,23 +37,24 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
 
     for _ in range(agents_number):
         agent = ag.Agent(manager_address, "aes", os=agent_os, version=agent_version, fim_eps=eps,
-                         fixed_message_size=fixed_message_size)
+                         fixed_message_size=fixed_message_size, syscollector_frequency=0, sca_frequency=0,
+                         registration_address=registration_address, retry_enrollment=True, labels=labels)
         available_modules = agent.modules.keys()
 
         for module in active_modules:
             if module not in available_modules:
                 raise ValueError(f"Selected module: '{module}' doesn't exist on agent simulator!")
 
-        index = 0
         for module in available_modules:
             if module in active_modules:
+                index = list(active_modules).index(module)
                 agent.modules[module]['status'] = 'enabled'
-
+                if module in ['keepalive', 'receive_messages']:
+                    continue
                 if modules_eps is not None and 'eps' in agent.modules[module]:
                     agent.modules[module]['eps'] = modules_eps[index]
                 else:
                     agent.modules[module]['eps'] = eps
-                index += 1
             else:
                 agent.modules[module]['status'] = 'disabled'
                 agent.modules[module]['eps'] = 0
@@ -59,6 +64,8 @@ def run_agents(agents_number=1, manager_address='localhost', protocol=TCP, agent
         active_agents.append(agent)
         sender = ag.Sender(manager_address, protocol=protocol)
         injectors.append(ag.Injector(sender, agent))
+
+    sleep(30)
 
     try:
         start(injectors)
@@ -100,6 +107,10 @@ def main():
     arg_parser.add_argument('-p', '--protocol', metavar='<protocol>', dest='agent_protocol',
                             type=str, required=False, default=TCP, help='Communication protocol')
 
+    arg_parser.add_argument('-r', '--registration-address', metavar='<manager_registration_ip_address>', type=str,
+                            required=False, default=None, help='Manager IP address where the agent will be registered',
+                            dest='manager_registration_address')
+
     arg_parser.add_argument('-t', '--time', metavar='<monitoring_time>', dest='duration',
                             type=int, required=False, default=20, help='Time in seconds for monitoring')
 
@@ -108,6 +119,9 @@ def main():
 
     arg_parser.add_argument('-m', '--modules', dest='modules', required=False, type=str, nargs='+', action='store',
                             default=['fim'], help='Active module separated by whitespace.')
+
+    arg_parser.add_argument('-l', '--labels', dest='labels', required=False, type=str, nargs='+',
+                            action='store', default=None, help='Wazuh agent labels.')
 
     arg_parser.add_argument('-s', '--modules-eps', dest='modules_eps', required=False, type=int, nargs='+',
                             action='store', default=None, help='Active module EPS separated by whitespace.')
@@ -135,6 +149,17 @@ def main():
 
     processes = []
 
+    custom_labels = args.labels
+
+    # Parse the custom labels from list format to dict
+    if args.labels is not None:
+        custom_labels = {}
+
+        for item in args.labels:
+            label = item.split(':')
+            custom_labels[label[0]] = label[1]
+
+    # Create the process list
     for i in range(n_processes):
         agents = args.agent_batch
         if remainder != 0 and i == 0:
@@ -142,7 +167,7 @@ def main():
 
         arguments = (
             agents, args.manager_addr, args.agent_protocol, args.version, args.os, args.eps, args.duration,
-            args.modules, args.modules_eps, args.fixed_message_size
+            args.modules, args.modules_eps, args.fixed_message_size, args.manager_registration_address, custom_labels
         )
 
         processes.append(Process(target=run_agents, args=arguments))

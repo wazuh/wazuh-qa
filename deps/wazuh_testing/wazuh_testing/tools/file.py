@@ -6,13 +6,12 @@ import gzip
 import json
 import os
 import random
+import shutil
+import socket
+import stat
 import string
 import xml.etree.ElementTree as ET
 import zipfile
-import stat
-import shutil
-import socket
-
 from os.path import exists
 
 import filetype
@@ -21,12 +20,14 @@ import requests
 
 def read_json(file_path):
     """
-    Read a JSON file from a given path, return a dictionary with the json data
+    Read a JSON file from a given path, return a dictionary with the json data.
 
     Args:
-        file_path (str): Path of the JSON file to be readed
+        file_path (str): Path of the JSON file to be read.
+
+    Returns:
+        output(dict): Read json data.
     """
-    # Read JSON data templates
     with open(file_path, 'r') as f:
         output = json.loads(f.read())
 
@@ -60,7 +61,7 @@ def random_string_unicode(length, encode=None):
 
     Args:
         length (int) : String length.
-        encode (str, optional) : Encoding type. Default `None`
+        encode (str, optional) : Encoding type. Default `None`.
 
     Returns:
         (str or binary): Random unicode string.
@@ -80,7 +81,7 @@ def random_string(length, encode=None):
 
     Args:
         length (int): String length.
-        encode (str, optional): Encoding type. Default `None`
+        encode (str, optional): Encoding type. Default `None`.
 
     Returns:
         str or binary: Random string.
@@ -114,9 +115,11 @@ def write_json_file(file_path, data, ensure_ascii=False):
     Write dict data to JSON file
 
     Args:
-    file_path (str): File path where is located the JSON file to write
-    data (dict): Data to write
-    ensure_ascii (boolean) : If ensure_ascii is true, the output is guaranteed to have all incoming non-ASCII characters escaped. If ensure_ascii is false, these characters will be output as-is.
+        file_path (str): File path where is located the JSON file to write.
+        data (dict): Data to write.
+        ensure_ascii (boolean) : If ensure_ascii is true, the output is guaranteed to have all incoming
+                                 non-ASCII characters escaped. If ensure_ascii is false, these characters will
+                                 be output as-is.
     """
     write_file(file_path, json.dumps(data, indent=4, ensure_ascii=ensure_ascii))
 
@@ -172,14 +175,14 @@ def decompress_zip(zip_file_path, dest_file_path):
 
 def read_xml_file(file_path, namespaces=None, xml_header=False):
     """
-    Function to read XML file as string
+    Function to read XML file as string.
 
     Args:
-        file_path (str): File path where is the XML file
-        namespaces (list): List with data {name: namespace, url: url_namespace}
+        file_path (str): File path where is the XML file.
+        namespaces (list): List with data {name: namespace, url: url_namespace}.
 
     Returns:
-        str: XML string data
+        xml_string_data (str): XML string data
     """
     xml_root = ET.parse(file_path).getroot()
 
@@ -200,7 +203,7 @@ def read_xml_file(file_path, namespaces=None, xml_header=False):
 
 def compress_gzip_file(src_path, dest_path):
     """
-    Compresses a text file into a .gz one
+    Compresses a text file into a .gz one.
 
     Args:
         src_path : Path to source file.
@@ -213,10 +216,11 @@ def compress_gzip_file(src_path, dest_path):
 
 def copy(source, destination):
     """
-    Copy file with metadata and ownership to a specific destination
+    Copy file with metadata and ownership to a specific destination.
+
     Args:
-        source (str): Source file path to copy
-        destination (str): Destination file
+        source (str): Source file path to copy.
+        destination (str): Destination file.
     """
     shutil.copy2(source, destination)
     source_stats = os.stat(source)
@@ -226,7 +230,7 @@ def copy(source, destination):
 def bind_unix_socket(socket_path, protocol='TCP'):
     """Allow to create a unix socket if it does not exist.
 
-    By default it is assigned owner and group ossec and permissions 660.
+    By default it is assigned owner and group wazuh and permissions 660.
 
     Args:
         socket_path (str): Path where create the unix socket.
@@ -237,7 +241,7 @@ def bind_unix_socket(socket_path, protocol='TCP'):
         new_socket = socket.socket(socket.AF_UNIX, sock_type)
         new_socket.bind(socket_path)
 
-        set_file_owner_and_group(socket_path, 'ossec', 'ossec')
+        set_file_owner_and_group(socket_path, 'wazuh', 'wazuh')
         os.chmod(socket_path, 0o660)
 
 
@@ -248,7 +252,7 @@ def is_socket(socket_path):
         socket_path (str): File path to check.
 
     Returns:
-        boolean: True if is a socket, False otherwhise.
+        stat.S_ISSOCK (bool): True if is a socket, False otherwise.
     """
     mode = os.stat(socket_path).st_mode
 

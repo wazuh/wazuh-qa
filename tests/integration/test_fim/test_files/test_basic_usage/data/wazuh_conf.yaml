@@ -19,7 +19,7 @@
 - tags:
   - ossec_conf_wildcards
   apply_to_modules:
-  - MODULE_NAME
+  - test_regular_file_changes
   sections:
   - section: syscheck
     elements:

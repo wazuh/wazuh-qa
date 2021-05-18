@@ -14,9 +14,11 @@ from datetime import datetime
 import pytest
 from numpydoc.docscrape import FunctionDoc
 from py.xml import html
+
+import wazuh_testing.tools.configuration as conf
 from wazuh_testing import global_parameters
+from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH
-from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
@@ -379,7 +381,7 @@ def close_sockets(receiver_sockets):
     """Close the sockets connection gracefully."""
     for socket in receiver_sockets:
         try:
-            # We flush the buffer before closing connection if connection is TCP
+            # We flush the buffer before closing the connection if the protocol is TCP:
             if socket.protocol == 1:
                 socket.sock.settimeout(5)
                 socket.receive()  # Flush buffer before closing connection
@@ -407,14 +409,32 @@ def connect_to_sockets_function(request):
 
 
 @pytest.fixture(scope='module')
+def configure_local_internal_options(get_local_internal_options):
+    backup_options_lines = conf.get_wazuh_local_internal_options()
+    backup_options_dict = conf.local_internal_options_to_dict(backup_options_lines)
+    if not all(option in backup_options_dict.items() for option in get_local_internal_options.items()):
+        conf.add_wazuh_local_internal_options(get_local_internal_options)
+
+        control_service('restart')
+
+        yield
+
+        conf.set_wazuh_local_internal_options(backup_options_lines)
+
+        control_service('restart')
+    else:
+        yield
+
+
+@pytest.fixture(scope='module')
 def configure_environment(get_configuration, request):
     """Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration."""
 
     # Save current configuration
-    backup_config = get_wazuh_conf()
+    backup_config = conf.get_wazuh_conf()
 
     # Configuration for testing
-    test_config = set_section_wazuh_conf(get_configuration.get('sections'))
+    test_config = conf.set_section_wazuh_conf(get_configuration.get('sections'))
 
     # Create test directories
     if hasattr(request.module, 'test_directories'):
@@ -433,7 +453,7 @@ def configure_environment(get_configuration, request):
                 create_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_64KEY)
 
     # Set new configuration
-    write_wazuh_conf(test_config)
+    conf.write_wazuh_conf(test_config)
 
     # Change Windows Date format to ensure TimeMachine will work properly
     if sys.platform == 'win32':
@@ -453,7 +473,7 @@ def configure_environment(get_configuration, request):
     TimeMachine.time_rollback()
 
     # Remove created folders (parents)
-    if sys.platform == 'win32':
+    if sys.platform == 'win32' and not hasattr(request.module, 'no_restart_windows_after_configuration_set'):
         control_service('stop')
 
     if hasattr(request.module, 'test_directories'):
@@ -467,11 +487,11 @@ def configure_environment(get_configuration, request):
                 delete_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_32KEY)
                 delete_registry(registry_parser[match.group(1)], match.group(2), KEY_WOW64_64KEY)
 
-    if sys.platform == 'win32':
+    if sys.platform == 'win32' and not hasattr(request.module, 'no_restart_windows_after_configuration_set'):
         control_service('start')
 
     # Restore previous configuration
-    write_wazuh_conf(backup_config)
+    conf.write_wazuh_conf(backup_config)
 
     # Call extra functions after yield
     if hasattr(request.module, 'extra_configuration_after_yield'):
@@ -556,3 +576,23 @@ def put_env_variables(get_configuration, request):
         for env in environment_variables:
             if sys.platform != 'win32':
                 os.unsetenv(env[0])
+
+
+@pytest.fixture(scope="module")
+def create_file_structure_module(get_files_list):
+    """Module scope version of create_file_structure."""
+    create_file_structure(get_files_list)
+
+    yield
+
+    delete_file_structure(get_files_list)
+
+
+@pytest.fixture(scope="function")
+def create_file_structure_function(get_files_list):
+    """Function scope version of create_file_structure."""
+    create_file_structure(get_files_list)
+
+    yield
+
+    delete_file_structure(get_files_list)

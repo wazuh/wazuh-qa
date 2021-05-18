@@ -10,6 +10,7 @@ import subprocess
 if sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'ossec.conf')
+    WAZUH_LOCAL_INTERNAL_OPTIONS = os.path.join(WAZUH_PATH, 'local_internal_options.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'ossec.log')
     PREFIX = os.path.join('c:', os.sep)
@@ -36,7 +37,7 @@ else:
         PREFIX = os.sep
 
     WAZUH_CONF_RELATIVE = os.path.join('etc', 'ossec.conf')
-
+    WAZUH_LOCAL_INTERNAL_OPTIONS = os.path.join(f'{WAZUH_PATH}/etc', 'local_internal_options.conf')
     WAZUH_CONF = os.path.join(WAZUH_PATH, WAZUH_CONF_RELATIVE)
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
     WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
@@ -52,8 +53,8 @@ else:
         import grp
         import pwd
 
-        OSSEC_UID = pwd.getpwnam("ossec").pw_uid
-        OSSEC_GID = grp.getgrnam("ossec").gr_gid
+        WAZUH_UID = pwd.getpwnam("wazuh").pw_uid
+        WAZUH_GID = grp.getgrnam("wazuh").gr_gid
     except (ImportError, KeyError, ModuleNotFoundError):
         pass
 

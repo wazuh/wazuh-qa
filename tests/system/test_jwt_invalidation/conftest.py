@@ -39,10 +39,16 @@ def create_testing_api_user(request):
 
     # Create new user
     response = hm.make_api_call(test_hosts[0], method='POST', endpoint='/security/users',
-                                request_body={'username': username, 'password': password, 'allow_run_as': True},
+                                request_body={'username': username, 'password': password},
                                 token=token)
     assert response['status'] == 200, f'Failed to create testing user: {response}'
     username_id = response['json']['data']['affected_items'][0]['id']
+
+    # Edit allow_run_as
+    response = hm.make_api_call(test_hosts[0], method='PUT',
+                                endpoint=f'/security/users/{username_id}/run_as?allow_run_as=true',
+                                token=token)
+    assert response['status'] == 200, f'Failed to enable allow_run_as: {response}'
 
     # Assign administrator role
     response = hm.make_api_call(test_hosts[0], method='POST',

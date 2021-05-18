@@ -101,6 +101,26 @@ def get_security_resource_information(**kwargs):
         return {}
 
 
+def compare_config_api_response(configuration, section):
+    """Assert if configuration values provided are the same that configuration provided for API response.
+
+    Args:
+        configuration (dict): Dictionary with Wazuh manager configuration.
+        section (str): Section to compare.
+    """
+    api_answer = get_manager_configuration(section=section)
+    assert type(api_answer) == type(configuration)
+
+    if isinstance(api_answer, list):
+        configuration_length = len(configuration)
+        for i in range(configuration_length):
+            api_answer_to_compare = dict((key, api_answer[i][key]) for key in configuration[i].keys())
+            assert api_answer_to_compare == configuration[i]
+    else:
+        api_answer_to_compare = dict((key, api_answer[key]) for key in configuration.keys())
+        assert api_answer_to_compare == configuration
+
+
 def get_manager_configuration(section=None, field=None):
     """Get Wazuh manager configuration response from API using GET /manager/configuration
         
@@ -128,7 +148,7 @@ def get_manager_configuration(section=None, field=None):
     answer = response.json()['data']['affected_items'][0]
 
     def get_requested_values(answer, section, field):
-        """ Return requested value from API response
+        """Return requested value from API response
 
         Received a section and a field and tries to return all available values that match with this entry.
         This function is required because, sometimes, there may be multiple entries with the same field or section
@@ -139,7 +159,7 @@ def get_manager_configuration(section=None, field=None):
             new_answer = []
             for element in answer:
                 new_answer.append(get_requested_values(element, section, field))
-            return ','.join(new_answer)
+            return new_answer
         elif isinstance(answer, dict):
             if section in answer.keys():
                 new_answer = answer[section]
@@ -150,3 +170,27 @@ def get_manager_configuration(section=None, field=None):
         return answer
 
     return get_requested_values(answer, section, field)
+
+
+def wait_until_api_ready(protocol=API_PROTOCOL, host=API_HOST, port=API_PORT, user=API_USER, password=API_PASS,
+                         login_endpoint=API_LOGIN_ENDPOINT, timeout=10, attempts=5):
+    """Wait until Wazuh API is ready
+
+    Args:
+        protocol (str): Used protocol for Wazuh manager.
+        host (str): Wazuh manager host ip.
+        port (str): Wazuh manager port.
+        user (str): API user.
+        password (str): API password.
+        login_endpoint (str): API login endpoint.
+        timeout (int): Timeout to get an API response.
+        attempts (int): Maximum number of attempts to check API is ready.
+    """
+    while attempts > 0:
+        try:
+            attempts -= 1
+            get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout)
+        except requests.exceptions.ConnectionError:
+            time.sleep(1)
+        else:
+            break
