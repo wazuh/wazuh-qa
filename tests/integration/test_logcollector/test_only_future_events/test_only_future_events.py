@@ -76,7 +76,7 @@ def get_files_list():
 
 
 def test_only_future_events(get_local_internal_options, configure_local_internal_options, get_configuration,
-                            configure_environment, get_files_list, restart_logcollector):
+                            configure_environment, get_files_list, create_file_structure_module, restart_logcollector):
     """Check if the "only-future-events" option is working correctly.
 
     To do this, logcollector is stopped and several lines are added to a test log file.
