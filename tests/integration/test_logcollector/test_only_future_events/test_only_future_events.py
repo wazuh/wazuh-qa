@@ -41,8 +41,7 @@ metadata = [
      'log_line': "Jan  1 00:00:00 localhost test[0]: line="}
 ]
 
-current_line = logcollector.add_log_data(log_path=log_test_path, log_line_message=metadata[0]['log_line'],
-                                         size_kib=10240, print_line_num=True)
+current_line = metadata[0]['log_line']
 
 file_structure = [
     {
