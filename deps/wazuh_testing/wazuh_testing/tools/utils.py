@@ -134,12 +134,4 @@ def lower_case_key_dictionary_array(array_dict):
     Returns:
         List: List of dictionaries with lowercase keys.
     """
-    lower_case_array_dict = []
-
-    for element in array_dict:
-        lower_case_element = {}
-        for key, value in element.items():
-            lower_case_element[str(key).lower()] = value
-        lower_case_array_dict.append(lower_case_element)
-
-    return lower_case_array_dict
+    return [{str(key).lower(): value for key, value in element.items()} for element in array_dict]
