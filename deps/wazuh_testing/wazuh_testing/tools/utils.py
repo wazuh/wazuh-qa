@@ -130,6 +130,9 @@ def lower_case_key_dictionary_array(array_dict):
 
     Args:
         array_dict (List): List of dictionaries.
+
+    Returns:
+        List: List of dictionaries with lowercase keys.
     """
     lower_case_array_dict = []
 

@@ -71,7 +71,7 @@ windows_tcases = [
     {'LOCATION': '/tmp/test.txt', 'LOG_FORMAT': 'eventchannel', 'VALID_VALUE': True}
 ]
 
-macos_tcases = [{'LOCATION': 'oslog', 'LOG_FORMAT': 'oslog', 'COMMAND': 'example-command', 'VALID_VALUE': True}]
+macos_tcases = [{'LOCATION': 'macos', 'LOG_FORMAT': 'macos', 'COMMAND': 'example-command', 'VALID_VALUE': True}]
 
 if sys.platform == 'win32':
     tcases += windows_tcases
@@ -94,7 +94,7 @@ configuration_ids = [f"{x['location']}_{x['log_format']}_{x['command']}" + f"" i
                      else f"{x['location']}_{x['log_format']}" for x in metadata]
 
 
-log_format_not_print_analyzing_info = ['command', 'full_command', 'eventlog', 'eventchannel', 'oslog']
+log_format_not_print_analyzing_info = ['command', 'full_command', 'eventlog', 'eventchannel', 'macos']
 
 
 # fixtures
@@ -135,7 +135,7 @@ def check_log_format_valid(cfg):
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message="The expected multilog djb log has not been produced")
 
-    elif cfg['log_format'] == 'oslog':
+    elif cfg['log_format'] == 'macos':
         log_callback = logcollector.callback_monitoring_macos_logs()
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message="The expected macos log monitoring has not been produced")

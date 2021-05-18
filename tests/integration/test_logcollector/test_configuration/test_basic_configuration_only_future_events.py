@@ -41,14 +41,14 @@ if sys.platform == 'win32':
     prefix = AGENT_DETECTOR_PREFIX
     log_format_list += ['eventchannel']
 elif sys.platform == 'darwin':
-    log_format_list += ['oslog']
+    log_format_list += ['macos']
 
 for log_format in log_format_list:
     if log_format == 'djb-multilog':
         location = '/var/log/testing/current'
     elif log_format == 'eventchannel':
         location = 'Security'
-    elif log_format == 'oslog':
+    elif log_format == 'macos':
         location = log_format
     else:
         location = temp_file_path

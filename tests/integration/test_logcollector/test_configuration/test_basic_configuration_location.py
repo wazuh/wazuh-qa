@@ -39,7 +39,7 @@ windows_parameters = []
 for channel in WINDOWS_CHANNEL_LIST:
     windows_parameters.append({'LOCATION': f'{channel}', 'LOG_FORMAT': 'eventchannel'})
 
-macos_parameters = [{'LOCATION': 'oslog', 'LOG_FORMAT': 'oslog'}]
+macos_parameters = [{'LOCATION': 'macos', 'LOG_FORMAT': 'macos'}]
 
 if sys.platform == 'win32':
     parameters += windows_parameters

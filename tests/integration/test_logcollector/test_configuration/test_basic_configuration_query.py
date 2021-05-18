@@ -23,7 +23,7 @@ else:
     pytestmark = [pytest.mark.tier(level=0)]
     if sys.platform == 'darwin':
         clauses = ['eventMessage', 'processImagePath', 'senderImagePath', 'subsystem', 'category']
-        location = log_format = 'oslog'
+        location = log_format = 'macos'
         for clause in clauses:
             query_list += [f'{clause} CONTAINS[c] "com.apple.geod"',
                            f'{clause} == "testing"',
@@ -104,7 +104,7 @@ def test_configuration_query_valid(get_configuration, configure_environment, res
     configuration = get_configuration['metadata']
     log_format = configuration['log_format']
 
-    if log_format == 'oslog':
+    if log_format == 'macos':
         log_callback = logcollector.callback_monitoring_macos_logs()
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)
