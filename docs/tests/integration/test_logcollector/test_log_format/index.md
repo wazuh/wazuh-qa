@@ -1,4 +1,4 @@
-# Test log format values
+# Test log format
 
 ## Overview 
 

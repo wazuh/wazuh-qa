@@ -11,10 +11,8 @@ import wazuh_testing.tools.file as file
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX, FileMonitor
+from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
-
-LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -25,20 +23,13 @@ force_restart_after_restoring = True
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 
-local_internal_options = {'logcollector.vcheck_files': '1', 'logcollector.debug': '2', 'monitord.rotate_log': '0'}
-
 if sys.platform == 'win32':
     location = r'C:\test.txt'
     iis_path = r'C:\test_iis.log'
-    wazuh_configuration = 'ossec.conf'
-    prefix = AGENT_DETECTOR_PREFIX
-
 else:
     location = '/tmp/test.txt'
     file_multilog = '/var/log/current'
-    nmap_log = '/var/log/wa.log'
-    wazuh_configuration = 'etc/ossec.conf'
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
+    nmap_log = '/var/log/nmap.log'
 
 parameters = [
     {'LOCATION': f'{location}', 'LOG_FORMAT': 'json'},
@@ -98,12 +89,6 @@ log_format_not_print_reading_info = ['audit', 'mysql_log', 'postgresql_log', 'nm
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
-
-
-@pytest.fixture(scope="module")
-def get_local_internal_options():
-    """Get configurations from the module."""
-    return local_internal_options
 
 
 def create_file_location(filename, type):
@@ -181,7 +166,7 @@ def modify_audit_file(filename, valid):
     file.write_file(filename, data)
 
 
-def modify_mysqlLog_file(filename):
+def modify_mysqlog_file(filename):
     """Added content with MySQL format and valid values.
     Args:
         filename (str): file's path to modify.
@@ -191,7 +176,7 @@ def modify_mysqlLog_file(filename):
     file.write_file(filename, data)
 
 
-def modify_postgresqlLog_file(filename):
+def modify_postgresqlog_file(filename):
     """Added content with Postgresql format and valid values.
     Args:
         filename (str): filename to modify.
@@ -272,9 +257,9 @@ def modify_file(file, type, content):
     elif type == 'audit':
         modify_audit_file(file, content)
     elif type == 'mysql_log':
-        modify_mysqlLog_file(file)
+        modify_mysqlog_file(file)
     elif type == 'postgresql_log':
-        modify_postgresqlLog_file(file)
+        modify_postgresqlog_file(file)
     elif type == 'nmapg':
         modify_nmapg_file(file, content)
     elif type == 'djb-multilog':
@@ -390,14 +375,11 @@ def check_log_format_values(conf):
     file.remove_file(conf['location'])
 
 
-def test_log_format(get_local_internal_options, get_configuration,
-                    configure_local_internal_options, configure_environment):
+def test_log_format(get_configuration, configure_environment):
     """Check if Wazuh log format field of logcollector works properly.
     Ensure Wazuh component fails in case of invalid content file and works properly in case of valid log format values.
     Args:
-        get_local_internal_options (fixture): Get internal configuration.
         get_configuration (fixture): Get configurations from the module.
-        configure_local_internal_options (fixture): Set internal configuration.
         configure_environment (fixture): Configure a custom environment for testing.
     Raises:
         TimeoutError: If expected callbacks are not generated.
@@ -405,7 +387,7 @@ def test_log_format(get_local_internal_options, get_configuration,
 
     conf = get_configuration['metadata']
 
-    control_service('stop', daemon=LOGCOLLECTOR_DAEMON)
+    control_service('stop')
     file.truncate_file(LOG_FILE_PATH)
 
     if conf['valid_value']:
@@ -413,12 +395,12 @@ def test_log_format(get_local_internal_options, get_configuration,
         if sys.platform == 'win32':
             if conf['log_format'] == 'iis':
                 create_file_location(iis_path, conf['log_format'])
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+            control_service('start')
             check_log_format_valid(conf)
         else:
             # Analyze valid formats with valid content in Linux
             create_file_location(conf['location'], conf['log_format'])
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+            control_service('start')
             check_log_format_values(conf)
 
     else:
@@ -429,6 +411,6 @@ def test_log_format(get_local_internal_options, get_configuration,
         else:
             # Analyze valid formats with invalid content in Linux
             create_file_location(conf['location'], conf['log_format'])
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+            control_service('start')
             check_log_format_values(conf)
 
