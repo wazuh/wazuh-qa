@@ -54,6 +54,8 @@ class Monitor:
         self.pid = None
         self.event = None
         self.thread = None
+        self.previous_read = None
+        self.previous_write = None
         self.set_pid(self.process_name)
         self.csv_file = join(self.dst_dir, f'{self.process_name}.csv')
 
@@ -113,6 +115,7 @@ class Monitor:
                 f'USS({self.value_unit})': 0.0, f'PSS({self.value_unit})': 0.0,
                 f'SWAP({self.value_unit})': 0.0, 'FD': 0.0, 'Read_Ops': 0.0, 'Write_Ops': 0.0,
                 f'Disk_Read({self.value_unit})': 0.0, f'Disk_Written({self.value_unit})': 0.0, 'Disk(%)': 0.0,
+                f'Disk_Read_Speed({self.value_unit}/s)': 0.0, f'Disk_Write_Speed({self.value_unit}/s)': 0.0,
                 }
 
         try:
@@ -136,6 +139,16 @@ class Monitor:
                     info[f'Disk_Read({self.value_unit})'] = unit_conversion(io_counters.read_bytes)
                     info[f'Disk_Written({self.value_unit})'] = unit_conversion(io_counters.write_bytes)
                     info['Disk(%)'] = disk_usage_process / disk_total * 100
+                    if self.previous_read is not None and self.previous_write is not None:
+                        read_speed = (info[f'Disk_Read({self.value_unit})'] - self.previous_read) / self.time_step
+                        write_speed = (info[f'Disk_Written({self.value_unit})'] - self.previous_write) / self.time_step
+                        info[f'Disk_Read_Speed({self.value_unit}/s)'] = read_speed
+                        info[f'Disk_Write_Speed({self.value_unit}/s)'] = write_speed
+                        self.previous_read = info[f'Disk_Read({self.value_unit})']
+                        self.previous_write = info[f'Disk_Written({self.value_unit})']
+                    else:
+                        self.previous_read = info[f'Disk_Read({self.value_unit})']
+                        self.previous_write = info[f'Disk_Written({self.value_unit})']
         finally:
             info.update({key: round(value, 2) for key, value in info.items() if isinstance(value, (int, float))})
             logger.debug(f'Recollected data for process {proc.pid}')
