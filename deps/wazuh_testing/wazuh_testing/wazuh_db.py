@@ -7,12 +7,9 @@ import logging
 import socket
 import sqlite3
 
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_DB_SOCKET_PATH
+from wazuh_testing.tools import GLOBAL_DB_PATH, WAZUH_DB_SOCKET_PATH
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.monitoring import wazuh_pack, wazuh_unpack
-
-
-GLOBAL_DB_PATH = f"{WAZUH_PATH}/queue/db/global.db"
 
 
 def callback_wazuhdb_response(item):
