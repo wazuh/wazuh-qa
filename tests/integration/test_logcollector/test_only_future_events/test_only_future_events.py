@@ -41,13 +41,13 @@ metadata = [
      'log_line': "Jan  1 00:00:00 localhost test[0]: line="}
 ]
 
-current_line = metadata[0]['log_line']
+log_line = metadata[0]['log_line']
 
 file_structure = [
     {
         'folder_path': os.path.join(temp_dir, 'wazuh-testing'),
         'filename': ['test.log'],
-        'content': current_line,
+        'content': log_line,
         'size_kib': 10240
     }
 ]
