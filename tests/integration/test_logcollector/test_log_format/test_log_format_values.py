@@ -90,7 +90,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 configuration_ids = [f"{x['log_format'], x['valid_value']}" for x in metadata]
 
 log_format_windows_print_analyzing_info = ['eventlog', 'eventchannel', 'iis']
-log_format_not_print_reading_info = ['audit', 'mysql_log', 'postgresql_log', 'nmapg', 'djb-multilog']
+log_format_not_print_reading_info = ['audit', 'mysql_log', 'postgresql_log', 'nmapg', 'djb-multilog', 'iis']
 
 
 # fixtures
@@ -343,11 +343,6 @@ def check_log_format_value_valid(conf):
                     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                             error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
 
-    elif conf['log_format'] == 'iis':
-        log_callback = logcollector.callback_read_file(conf['location'])
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message=logcollector.GENERIC_CALLBACK_ERROR_READING_FILE)
-
 
 def analyzing_invalid_value(conf):
     """Checks for the error message that is shown when the record format type is valid but the content is invalid.
@@ -418,26 +413,13 @@ def test_log_format(get_local_internal_options, get_configuration,
         if sys.platform == 'win32':
             if conf['log_format'] == 'iis':
                 create_file_location(iis_path, conf['log_format'])
-                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-                check_log_format_values(conf)
-            else:
-                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-                check_log_format_valid(conf)
+            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+            check_log_format_valid(conf)
         else:
             # Analyze valid formats with valid content in Linux
-            if conf['log_format'] == 'djb-multilog':
-                create_file_location(file_multilog, conf['log_format'])
-                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-                check_log_format_values(conf)
-
-            elif conf['log_format'] == 'nmapg':
-                create_file_location(nmap_log, conf['log_format'])
-                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-                check_log_format_values(conf)
-            else:
-                create_file_location(location, conf['log_format'])
-                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-                check_log_format_values(conf)
+            create_file_location(conf['location'], conf['log_format'])
+            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+            check_log_format_values(conf)
 
     else:
         # Analyze valid formats with invalid content in Windows
@@ -446,17 +428,7 @@ def test_log_format(get_local_internal_options, get_configuration,
             sb.CalledProcessError
         else:
             # Analyze valid formats with invalid content in Linux
-            if conf['log_format'] == 'djb-multilog':
-                create_file_location(file_multilog, conf['log_format'])
-                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-                check_log_format_values(conf)
+            create_file_location(conf['location'], conf['log_format'])
+            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+            check_log_format_values(conf)
 
-            elif conf['log_format'] == 'nmapg':
-                create_file_location(nmap_log, conf['log_format'])
-                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-                check_log_format_values(conf)
-
-            else:
-                create_file_location(location, conf['log_format'])
-                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-                check_log_format_values(conf)
