@@ -1,7 +1,3 @@
-class OdefLoginPage {
-  static inputUsernameSelector = 'input[data-test-subj="user-name"]';
-  static inputPasswordSelector = 'input[data-test-subj="password"]';
-  static buttonSubmitSelector = 'button[data-test-subj="submit"]';
-}
-
-export default OdefLoginPage;
+export const inputUsernameSelector = 'input[data-test-subj="user-name"]';
+export const inputPasswordSelector = 'input[data-test-subj="password"]';
+export const buttonSubmitSelector = 'button[data-test-subj="submit"]';

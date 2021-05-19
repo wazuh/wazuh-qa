@@ -1,31 +1,30 @@
 import { XPACK_PASSWORD, XPACK_USERNAME } from '../../utils/constants';
-import XpackLoginPage from '../../pageobjects/login/xpack-login-page';
-import Driver from '../../utils/driver';
+import { clickElement, fillField } from '../../utils/driver';
+import {
+  buttonSubmitSelector,
+  inputPasswordSelector,
+  inputUsernameSelector,
+} from '../../pageobjects/login/odef-login-page';
 
-class LoginXpack {
-  static XPackLogin;
+const fillUsernameFieldXPack = (userName) => {
+  fillField(inputUsernameSelector, userName);
+  return this;
+};
 
-  static fillUsernameFieldXPack(userName) {
-    Driver.fillField(XpackLoginPage.inputUsernameSelector, userName);
-    return this;
-  }
+const fillPasswordFieldXPack = (password) => {
+  fillField(inputPasswordSelector, password);
+  return this;
+};
 
-  static fillPasswordFieldXPack(password) {
-    Driver.fillField(XpackLoginPage.inputPasswordSelector, password);
-    return this;
-  }
+const clickSubmitButtonXPack = () => {
+  clickElement(buttonSubmitSelector);
+};
 
-  static clickSubmitButtonXPack() {
-    Driver.clickElement(XpackLoginPage.buttonSubmitSelector);
-  }
+const loginXpack = () => {
+  fillUsernameFieldXPack(XPACK_USERNAME);
+  fillPasswordFieldXPack(XPACK_PASSWORD);
+  clickSubmitButtonXPack();
+  cy.wait(12000);
+};
 
-  static login() {
-    LoginXpack
-      .fillUsernameFieldXPack(XPACK_USERNAME)
-      .fillPasswordFieldXPack(XPACK_PASSWORD)
-      .clickSubmitButtonXPack();
-    cy.wait(12000);
-  }
-}
-
-export default LoginXpack;
+export { loginXpack };
