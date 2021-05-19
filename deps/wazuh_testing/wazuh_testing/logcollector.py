@@ -404,12 +404,7 @@ def get_data_sending_stats(log_path, socket_name, state_interval):
     Returns:
         dict: Dictionary with the statistics.
     """
-    # Wait until the statistics file becomes available
-    for _ in range(state_interval * 2):
-        if path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
-            break
-        else:
-            sleep(1)
+    wait_statistics_file
 
     if not path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
         raise TimeoutError
@@ -506,3 +501,26 @@ def delete_file_structure(get_files_list):
     """
     for file in get_files_list:
         shutil.rmtree(file['folder_path'], ignore_errors=True)
+
+
+def callback_invalid_state_interval(interval):
+    """Create a callback to detect if logcollector is excluding files.
+    Args:
+        file (str): Name with absolute path of the analyzed file.
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"Invalid definition for logcollector.state_interval: '{interval}'."
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
+def wait_statistics_file():
+    """Wait until statistics file is available"""
+    for _ in range(LOG_COLLECTOR_GLOBAL_TIMEOUT):
+        if path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
+            break
+        else:
+            sleep(1)
+
+    if not path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
+        raise TimeoutError
