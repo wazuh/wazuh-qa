@@ -376,7 +376,7 @@ def get_data_sending_stats(log_path, socket_name, state_interval):
     Returns:
         dict: Dictionary with the statistics.
     """
-    wait_statistics_file
+    wait_statistics_file()
 
     if not path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
         raise TimeoutError
