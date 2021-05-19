@@ -1,31 +1,23 @@
-class Driver {
+const navigate = (url) => {
+  cy.visit(url);
+};
 
-  static navigate(url) {
-    cy.visit(url);
-  }
+const getObject = (selector) => {
+  return cy.get(selector);
+};
 
-  static getObject(selector) {
-    return cy.get(selector);
-  }
+const fillField = (selector, text) => {
+  getObject(selector).clear().type(text);
+  return this;
+};
 
-  static fillField(selector, text) {
-    this.getObject(selector)
-      .clear()
-      .type(text);
-    return this;
-  }
+const clickElement = (selector) => {
+  getObject(selector).click();
+  return this;
+};
 
-  static clickElement(selector) {
-    this.getObject(selector)
-      .click();
-    return this;
-  }
+const elementIsVisible = (element) => {
+  return getObject(element).should('exist').should('be.visible');
+};
 
-  static elementIsVisible(element) {
-    return this.getObject(element)
-      .should('exist')
-      .should('be.visible');
-  }
-}
-
-export default Driver;
+export { navigate, getObject, fillField, clickElement, elementIsVisible };
