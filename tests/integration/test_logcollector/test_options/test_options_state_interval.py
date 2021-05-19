@@ -65,7 +65,7 @@ def get_local_internal_options(request):
     backup_options_lines = conf.get_wazuh_local_internal_options()
     conf.add_wazuh_local_internal_options({'logcollector.debug': '2'})
     conf.add_wazuh_local_internal_options({'logcollector.state_interval': request.param})
-    if request.param not in range(0, 36001):
+    if request.param not in range(0, 36001) and not isinstance(request.param, int):
         with pytest.raises(ValueError):
             control_service('restart')
     yield request.param
@@ -89,7 +89,7 @@ def test_options_state_interval(get_local_internal_options, get_files_list, crea
             wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
                                     error_message=f"Invalid definition for logcollector.state_interval: {interval}.")
         else:
-            logcollector.wait_statistics_file
+            logcollector.wait_statistics_file()
             previous_modification_time = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
             for file in get_files_list:
                 for name in file['filename']:
