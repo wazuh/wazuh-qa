@@ -488,7 +488,16 @@ def callback_invalid_state_interval(interval):
         callable: callback to detect this event.
     """
     msg = fr"Invalid definition for logcollector.state_interval: '{interval}'."
-    print(msg)
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
+def wait_statistics_file():
+    """Wait until statistics file is avaible"""
+    for _ in range(LOG_COLLECTOR_GLOBAL_TIMEOUT):
+        if path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
+            break
+        else:
+            sleep(1)
+
+    if not path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
+        raise TimeoutError

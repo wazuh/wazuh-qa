@@ -8,6 +8,7 @@ from time import sleep
 import pytest
 import wazuh_testing.tools.configuration as conf
 from wazuh_testing import logcollector
+from wazuh_testing.logcollector import wait_statistics_file
 from wazuh_testing.tools import LOGCOLLECTOR_STATISTICS_FILE
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -21,8 +22,6 @@ pytestmark = pytest.mark.tier(level=1)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_configuration.yaml')
 temp_dir = tempfile.gettempdir()
-
-local_internal_options = {'logcollector.debug': '2'}
 
 state_interval = [-2, 753951, 'dummy', 5, 10, 15]
 
@@ -40,7 +39,7 @@ parameters = [
 metadata = [
     {'location': os.path.join(temp_dir, 'wazuh-testing', 'test.txt'),
      'files': [os.path.join(temp_dir, 'wazuh-testing', 'test.txt')],
-     'log_format': 'syslog', 'file_type': 'single_file'}
+     'log_format': 'syslog'}
 ]
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
@@ -61,23 +60,34 @@ def get_files_list():
     return file_structure
 
 
-@pytest.fixture(scope="module")
-def get_local_internal_options():
+@pytest.fixture(scope="module", params=state_interval)
+def get_local_internal_options(request):
     """Get configurations from the module."""
-    return local_internal_options
+    backup_options_lines = conf.get_wazuh_local_internal_options()
+    conf.add_wazuh_local_internal_options({'logcollector.debug': '2'})
+    conf.add_wazuh_local_internal_options({'logcollector.state_interval': request.param})
+    print(f'PONGO {request.param}')
+    if request.param not in range(0, 36001):
+        print('ESTOY EN EL IF')
+        with pytest.raises(ValueError):
+            control_service('restart')
+            print('DESPUES DE REINICIO 1')
+    yield request.param
+    conf.set_wazuh_local_internal_options(backup_options_lines)
+    print('BORRO')
+    control_service('restart')
+    print('DESPUES DE REINICIO 2')
 
 
-@pytest.mark.parametrize('interval', state_interval)
-def test_options_state_interval(interval, get_local_internal_options, get_files_list, create_file_structure_module,
-                                get_configuration, configure_environment, restart_logcollector):
+def test_options_state_interval(get_local_internal_options, get_files_list, create_file_structure_module,
+                                get_configuration, configure_environment):
     """Check if logcollector is excluding specified files.
 
     Raises:
         TimeoutError: If the expected callback is not generated.
     """
-    backup_options_lines = conf.get_wazuh_local_internal_options()
-    conf.add_wazuh_local_internal_options(get_local_internal_options)
-    conf.add_wazuh_local_internal_options({'logcollector.state_interval': interval})
+    interval = get_local_internal_options
+    print(f'INTERVAL {interval}')
     if isinstance(interval, int):
         if interval not in range(0, 36001):
             with pytest.raises(ValueError):
@@ -86,20 +96,31 @@ def test_options_state_interval(interval, get_local_internal_options, get_files_
             wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
                                     error_message=f"Invalid definition for logcollector.state_interval: {interval}.")
         else:
-            begin = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
+            wait_statistics_file
+            previous_modification_time = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
+            print('ANTES DE MODIFICAR EL ARCHIVO')
             for file in get_files_list:
                 for name in file['filename']:
                     with open(os.path.join(file['folder_path'], name), 'w') as file:
                         file.write('Modifying the file')
-            sleep(interval)
-            end = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
-            elapsed = end - begin
-            assert interval - 1 <= elapsed and elapsed <= interval + 2
+            last_modification_time = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
+            print('ANTES DEL WHILE')
+            while last_modification_time == previous_modification_time:
+                sleep(1)
+                last_modification_time = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
+            elapsed = last_modification_time - previous_modification_time
+            print(f'INICIO: {previous_modification_time}')
+            print(f'FIN: {last_modification_time}')
+            print(f'ELAPSED: {elapsed}')
+            if elapsed < interval - 1:
+                pytest.xfail('Elpased time lower than interval')
+            else:
+                assert interval - 1 <= elapsed and elapsed <= interval + 1
+
     else:
         with pytest.raises(ValueError):
             control_service('restart')
-        log_callback = logcollector.callback_invalid_state_interval(interval)
-        wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
-                                error_message=f"Invalid definition for logcollector.state_interval: {interval}.")
+            log_callback = logcollector.callback_invalid_state_interval(interval)
+            wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
+                                    error_message=f"The message: 'Invalid definition for logcollector.state_interval: {interval}.' didn't appear")
 
-    conf.set_wazuh_local_internal_options(backup_options_lines)
