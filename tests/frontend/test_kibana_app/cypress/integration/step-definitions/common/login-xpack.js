@@ -1,10 +1,10 @@
 import { XPACK_PASSWORD, XPACK_USERNAME } from '../../utils/constants';
-import { clickElement, fillField } from '../../utils/driver';
 import {
   buttonSubmitSelector,
   inputPasswordSelector,
   inputUsernameSelector,
-} from '../../pageobjects/login/odef-login-page';
+} from '../../pageobjects/login/xpack-login-page';
+import { clickElement, fillField } from '../../utils/driver';
 
 const fillUsernameFieldXPack = (userName) => {
   fillField(inputUsernameSelector, userName);
