@@ -206,8 +206,8 @@ def remove_agent(agent_id):
 def pre_set_sync_info():
     """Asign the last_attempt value to last_completion in sync_info table to force the synced status"""
 
-    command = 'agent 000 sql UPDATE sync_info SET last_completion = (SELECT last_attempt from sync_info ' \
-              'where component = "syscollector-packages") where component = "syscollector-packages" '
+    command = 'agent 000 sql UPDATE sync_info SET last_completion = 10, last_attempt = 10 ' \
+              'where component = "syscollector-packages"'
     receiver_sockets[0].send(command, size=True)
     response = receiver_sockets[0].receive(size=True).decode()
     data = response.split(" ", 1)
@@ -218,7 +218,7 @@ def pre_set_sync_info():
 def pre_insert_packages():
     """Insert a set of dummy packages into sys_programs table"""
 
-    PACKAGES_NUMBER = 2000
+    PACKAGES_NUMBER = 20000
     for pkg_n in range(PACKAGES_NUMBER):
         command = f'agent 000 sql INSERT OR REPLACE INTO sys_programs \
         (scan_id,scan_time,format,name,priority,section,size,vendor,install_time,version,\
@@ -340,9 +340,11 @@ def test_wazuh_db_timeout(configure_sockets_environment,
 
     command = 'agent 000 package get'
     receiver_sockets[0].send(command, size=True)
-    time.sleep(5)
+    time.sleep(2)
     socket_closed = False
+    cmd_counter = 0
     while True:
+        cmd_counter += 1
         response = receiver_sockets[0].receive(size=True).decode()
         if response == "":
             socket_closed = True
@@ -350,4 +352,5 @@ def test_wazuh_db_timeout(configure_sockets_environment,
         status = response.split(" ", 1)[0]
         if status != "due":
             break
-    assert socket_closed, f'Socket never closed, received: {status}'
+
+    assert socket_closed, f'Socket never closed. Received {cmd_counter} commands. Last command: {response}'
