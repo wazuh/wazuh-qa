@@ -376,12 +376,7 @@ def get_data_sending_stats(log_path, socket_name, state_interval):
     Returns:
         dict: Dictionary with the statistics.
     """
-    # Wait until the statistics file becomes available
-    for _ in range(state_interval * 2):
-        if path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
-            break
-        else:
-            sleep(1)
+    wait_statistics_file
 
     if not path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
         raise TimeoutError
@@ -492,7 +487,7 @@ def callback_invalid_state_interval(interval):
 
 
 def wait_statistics_file():
-    """Wait until statistics file is avaible"""
+    """Wait until statistics file is available"""
     for _ in range(LOG_COLLECTOR_GLOBAL_TIMEOUT):
         if path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
             break
