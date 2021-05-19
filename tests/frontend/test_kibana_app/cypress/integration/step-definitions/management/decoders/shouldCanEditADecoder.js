@@ -1,5 +1,5 @@
 import { Then, When } from 'cypress-cucumber-preprocessor/steps';
-import WazuhMenu from '../../../pageobjects/wzMenu/wazuh-menu';
+import WazuhMenu from '../../../pageobjects/wazuh-menu/wazuh-menu';
 
 const wzMenu = new WazuhMenu();
 const decoders = wzMenu.getDecoders();

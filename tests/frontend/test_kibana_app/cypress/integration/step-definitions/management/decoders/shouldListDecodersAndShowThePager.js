@@ -1,23 +1,17 @@
-import { Then, When } from 'cypress-cucumber-preprocessor/steps';
-import WazuhMenu from '../../../pageobjects/wzMenu/wazuh-menu';
+import { Then } from 'cypress-cucumber-preprocessor/steps';
+import WazuhMenu from '../../../pageobjects/wazuh-menu/wazuh-menu';
 
 const wzMenu = new WazuhMenu();
 const decoders = wzMenu.getDecoders();
 
-When('The user press button custom decoders', () => {
+Then('The user should see the decoders', () => {
   cy.wait(3000);
-  decoders.getCustomDecodersButton()
-    .click();
-});
 
-Then('The user should see the custom decoders', () => {
-  cy.wait(3000);
   decoders.getTittle()
     .should('exist')
     .should('contain', 'Decoders');
   decoders.getTable()
-    .should('exist')
-    .should('be.visible');
+    .should('exist');
   decoders.getTablePaginationDropdowns()
     .should('exist')
     .should('be.visible');

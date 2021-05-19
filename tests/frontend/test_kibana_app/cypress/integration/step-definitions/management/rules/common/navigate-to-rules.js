@@ -1,6 +1,6 @@
 import { When } from 'cypress-cucumber-preprocessor/steps';
 
-import WazuhMenu from '../../../pageobjects/wzMenu/wazuh-menu';
+import WazuhMenu from '../../../../pageobjects/wazuh-menu/wazuh-menu';
 
 When('The user navigates to rules', () => {
   const wzMenu = new WazuhMenu();
