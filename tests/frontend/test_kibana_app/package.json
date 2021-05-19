@@ -21,6 +21,6 @@
   },
   "cypress-cucumber-preprocessor": {
     "nonGlobalStepDefinitions": false,
-    "step_definitions": "cypress/integration/step_definitions/**/"
+    "step_definitions": "cypress/integration/step-definitions/**/"
   }
 }
