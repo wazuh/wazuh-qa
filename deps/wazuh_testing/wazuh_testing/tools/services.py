@@ -107,11 +107,14 @@ def control_service(action, daemon=None, debug_mode=False):
                 processes = []
 
                 for proc in psutil.process_iter():
-                    if daemon in proc.name() or daemon in ' '.join(proc.cmdline()):
-                        try:
+                    try:
+                        if daemon in ['wazuh-clusterd', 'wazuh-apid']:
+                            if any(filter(lambda x: f"{daemon}.py" in x, proc.cmdline())):
+                                processes.append(proc)
+                        elif daemon in proc.name() or daemon in ' '.join(proc.cmdline()):
                             processes.append(proc)
-                        except psutil.NoSuchProcess:
-                            pass
+                    except psutil.NoSuchProcess:
+                        pass
                 try:
                     for proc in processes:
                         proc.terminate()
@@ -262,4 +265,3 @@ def control_event_log_service(control):
         raise ValueError(f"Event log service did not stop correctly")
 
     time.sleep(1)
-
