@@ -401,11 +401,15 @@ def get_data_sending_stats(log_path, socket_name):
 
     Returns:
         dict: Dictionary with the statistics.
+
+    Raises:
+        FileNotFoundError: If the next statistics could not be obtained according to the interval
+                           defined by "logcollector.state_interval".
     """
     wait_statistics_file()
 
     if not path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
-        raise TimeoutError
+        raise FileNotFoundError
 
     with open(LOGCOLLECTOR_STATISTICS_FILE, 'r') as json_file:
         data = load(json_file)
