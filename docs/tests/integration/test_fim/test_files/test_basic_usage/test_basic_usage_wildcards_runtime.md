@@ -6,8 +6,7 @@ functionality using simple wildcards expressions.
 
 | Tier | Platforms | Time spent| Test file |
 |:--:|:--:|:--:|:--:|
-| 0 | Linux | 1503s |
-| 0 | Windows | 756s |
+| 0 | Linux, windows | 248s | test_basic_usage_wildcards_runtime.py
 
 ## Test logic
 The test will configure wildcards expressions and will create an empty folder. Once that FIM has started and the
@@ -17,6 +16,16 @@ delete files inside those folders. The test will wait for events of a folder onl
 ## Execution result
 
 ```
+root@ubuntumanager:/vagrant/wazuh-qa/tests/integration/test_fim/test_files/test_basic_usage# python3 -m pytest test_basic_usage_wildcards_runtime.py
+==================================================================== test session starts ====================================================================
+platform linux -- Python 3.8.5, pytest-6.2.3, py-1.10.0, pluggy-0.13.1
+rootdir: /vagrant/wazuh-qa/tests/integration, configfile: pytest.ini
+plugins: testinfra-5.0.0, metadata-1.11.0, html-3.1.1
+collected 9 items
+
+test_basic_usage_wildcards_runtime.py .........                                                                                                       [100%]
+
+=============================================================== 9 passed in 247.79s (0:04:07) ===============================================================
 
 ```
 
