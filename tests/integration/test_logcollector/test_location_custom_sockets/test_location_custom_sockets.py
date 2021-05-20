@@ -8,9 +8,7 @@ from tempfile import gettempdir
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.logcollector import (GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, callback_analyzing_file,
-                                        callback_socket_connected, callback_socket_offline,
-                                        get_next_stats, get_data_sending_stats)
+from wazuh_testing import logcollector as lg
 from wazuh_testing.tools import LOG_FILE_PATH, file
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -145,9 +143,9 @@ def test_location_custom_sockets(get_local_internal_options, configure_local_int
     config = get_configuration['metadata']
 
     # Ensure that the log file is being analyzed
-    callback_message = callback_analyzing_file(file=config['location'])
+    callback_message = lg.callback_analyzing_file(file=config['location'])
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                            error_message=lg.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
                             callback=callback_message)
 
     # Add one event to force logcollector to connect to the socket
@@ -155,38 +153,37 @@ def test_location_custom_sockets(get_local_internal_options, configure_local_int
         f.write(f"{config['log_line']}\n")
 
     # Ensure that the logcollector is connected to the socket
-    callback_message = callback_socket_connected(socket_name=config['socket_name'],
-                                                 socket_path=config['socket_path'])
+    callback_message = lg.callback_socket_connected(socket_name=config['socket_name'],
+                                                    socket_path=config['socket_path'])
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                            error_message=lg.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
                             callback=callback_message)
 
     # This way we make sure to get the statistics right at the beginning of an interval
-    stats = get_data_sending_stats(log_path=config['location'],
+    stats = lg.get_data_sending_stats(log_path=config['location'],
+                                      socket_name=config['socket_name'])
+    next_stats = lg.get_next_stats(current_stats=stats,
+                                   log_path=config['location'],
                                    socket_name=config['socket_name'],
                                    state_interval=local_internal_options['logcollector.state_interval'])
-    next_stats = get_next_stats(current_stats=stats,
-                                log_path=config['location'],
-                                socket_name=config['socket_name'],
-                                state_interval=local_internal_options['logcollector.state_interval'])
     interval_drops = int(next_stats[0]['interval_drops'])
 
     # Add batches of events to log file and check if drops
     with open(config['location'], 'a') as f:
-        for _ in range(0, batch):
+        for _ in range(batch):
             f.write(f"{config['log_line']}\n")
 
-    next_stats = get_next_stats(current_stats=next_stats[0],
-                                log_path=config['location'],
-                                socket_name=config['socket_name'],
-                                state_interval=local_internal_options['logcollector.state_interval'])
+    next_stats = lg.get_next_stats(current_stats=next_stats[0],
+                                   log_path=config['location'],
+                                   socket_name=config['socket_name'],
+                                   state_interval=local_internal_options['logcollector.state_interval'])
     interval_drops += int(next_stats[0]['interval_drops'])
 
     # Obtain next statistics in case dropped events appear during the next interval
-    next_stats = get_next_stats(current_stats=next_stats[0],
-                                log_path=config['location'],
-                                socket_name=config['socket_name'],
-                                state_interval=local_internal_options['logcollector.state_interval'])
+    next_stats = lg.get_next_stats(current_stats=next_stats[0],
+                                   log_path=config['location'],
+                                   socket_name=config['socket_name'],
+                                   state_interval=local_internal_options['logcollector.state_interval'])
     global_drops = int(next_stats[0]['global_drops'])
     interval_drops += int(next_stats[0]['interval_drops'])
 
@@ -223,9 +220,9 @@ def test_location_custom_sockets_offline(get_local_internal_options, configure_l
     global test_socket
 
     # Ensure that the log file is being analyzed
-    callback_message = callback_analyzing_file(file=config['location'])
+    callback_message = lg.callback_analyzing_file(file=config['location'])
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                            error_message=lg.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
                             callback=callback_message)
 
     # Add one event to force logcollector to connect to the socket
@@ -233,10 +230,10 @@ def test_location_custom_sockets_offline(get_local_internal_options, configure_l
         f.write(f"{config['log_line']}\n")
 
     # Ensure that the logcollector is connected to the socket
-    callback_message = callback_socket_connected(socket_name=config['socket_name'],
-                                                 socket_path=config['socket_path'])
+    callback_message = lg.callback_socket_connected(socket_name=config['socket_name'],
+                                                    socket_path=config['socket_path'])
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                            error_message=lg.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
                             callback=callback_message)
 
     # Close socket
@@ -248,38 +245,37 @@ def test_location_custom_sockets_offline(get_local_internal_options, configure_l
         f.write(f"{config['log_line']}\n")
 
     # Ensure that the socket is closed
-    callback_message = callback_socket_offline(socket_name=config['socket_name'],
-                                               socket_path=config['socket_path'])
+    callback_message = lg.callback_socket_offline(socket_name=config['socket_name'],
+                                                  socket_path=config['socket_path'])
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                            error_message=lg.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
                             callback=callback_message)
 
     # This way we make sure to get the statistics right at the beginning of an interval
-    stats = get_data_sending_stats(log_path=config['location'],
+    stats = lg.get_data_sending_stats(log_path=config['location'],
+                                      socket_name=config['socket_name'])
+    next_stats = lg.get_next_stats(current_stats=stats,
+                                   log_path=config['location'],
                                    socket_name=config['socket_name'],
                                    state_interval=local_internal_options['logcollector.state_interval'])
-    next_stats = get_next_stats(current_stats=stats,
-                                log_path=config['location'],
-                                socket_name=config['socket_name'],
-                                state_interval=local_internal_options['logcollector.state_interval'])
     interval_drops = int(next_stats[0]['interval_drops'])
 
     # Add batches of events to log file and check if drops
     with open(config['location'], 'a') as f:
-        for _ in range(0, batch):
+        for _ in range(batch):
             f.write(f"{config['log_line']}\n")
 
-    next_stats = get_next_stats(current_stats=next_stats[0],
-                                log_path=config['location'],
-                                socket_name=config['socket_name'],
-                                state_interval=local_internal_options['logcollector.state_interval'])
+    next_stats = lg.get_next_stats(current_stats=next_stats[0],
+                                   log_path=config['location'],
+                                   socket_name=config['socket_name'],
+                                   state_interval=local_internal_options['logcollector.state_interval'])
     interval_drops += int(next_stats[0]['interval_drops'])
 
     # Obtain next statistics in case dropped events appear during the next interval
-    next_stats = get_next_stats(current_stats=next_stats[0],
-                                log_path=config['location'],
-                                socket_name=config['socket_name'],
-                                state_interval=local_internal_options['logcollector.state_interval'])
+    next_stats = lg.get_next_stats(current_stats=next_stats[0],
+                                   log_path=config['location'],
+                                   socket_name=config['socket_name'],
+                                   state_interval=local_internal_options['logcollector.state_interval'])
     global_drops = int(next_stats[0]['global_drops'])
     interval_drops += int(next_stats[0]['interval_drops'])
 

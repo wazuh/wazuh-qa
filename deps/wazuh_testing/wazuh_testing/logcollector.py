@@ -28,7 +28,6 @@ def callback_analyzing_file(file):
 
     Args:
         file (str): Name with absolute path of the analyzed file.
-        prefix (str): Daemon that generates the error log.
 
     Returns:
         callable: callback to detect this event.
@@ -389,17 +388,16 @@ def add_log_data(log_path, log_line_message, size_kib=1024, line_start=1, print_
     return 0
 
 
-def get_data_sending_stats(log_path, socket_name, state_interval):
+def get_data_sending_stats(log_path, socket_name):
     """Returns the statistics of a log monitored by logcollector.
 
     For this purpose, it parses the "wazuh-logcollector.state" file and retrieves the data.
     See:
-    https://documentation-dev.wazuh.com/current/user-manual/reference/statistics-files/wazuh-logcollector-state.html
+    https://documentation.wazuh.com/current/user-manual/reference/statistics-files/wazuh-logcollector-state.html
 
     Args:
         log_path (str): Path of the log from which the statistics are to be obtained.
         socket_name (str): Target socket name.
-        state_interval (int): Statistics generation interval, in seconds ("logcollector.state_interval").
 
     Returns:
         dict: Dictionary with the statistics.
@@ -426,17 +424,17 @@ def get_data_sending_stats(log_path, socket_name, state_interval):
             if g_file['location'] == log_path:
                 stats['global_events'] = g_file['events']
                 targets = g_file['targets']
-                for t in targets:
-                    if t['name'] == socket_name:
-                        stats['global_drops'] = t['drops']
+                for target in targets:
+                    if target['name'] == socket_name:
+                        stats['global_drops'] = target['drops']
         # Interval statistics
         for i_file in interval_files:
             if i_file['location'] == log_path:
                 stats['interval_events'] = i_file['events']
                 targets = i_file['targets']
-                for t in targets:
-                    if t['name'] == socket_name:
-                        stats['interval_drops'] = t['drops']
+                for target in targets:
+                    if target['name'] == socket_name:
+                        stats['interval_drops'] = target['drops']
     return stats
 
 
@@ -455,14 +453,14 @@ def get_next_stats(current_stats, log_path, socket_name, state_interval):
                        of the "wazuh-logcollector.state" file.
 
     Raises:
-          TimeoutError: If the next statistics could not be obtained according to the interval
-                        defined by "logcollector.state_interval"
+        FileNotFoundError: If the next statistics could not be obtained according to the interval
+                           defined by "logcollector.state_interval".
     """
     mtime_current = path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
     next_interval_date = current_stats['interval_end_date'] + timedelta(seconds=state_interval)
     next_2_intervals_date = current_stats['interval_end_date'] + timedelta(seconds=state_interval * 2)
-    for _ in range(0, state_interval * 2):
-        stats = get_data_sending_stats(log_path, socket_name, state_interval)
+    for _ in range(state_interval * 2):
+        stats = get_data_sending_stats(log_path, socket_name)
         mtime_next = path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
         # The time of the interval must be equal to or greater than the calculated time,
         # but less than the calculated time for two intervals.
@@ -470,7 +468,7 @@ def get_next_stats(current_stats, log_path, socket_name, state_interval):
             return stats, mtime_next - mtime_current
         else:
             sleep(1)
-    raise TimeoutError
+    raise FileNotFoundError
 
 
 def create_file_structure(get_files_list):
@@ -505,8 +503,10 @@ def delete_file_structure(get_files_list):
 
 def callback_invalid_state_interval(interval):
     """Create a callback to detect if logcollector is excluding files.
+
     Args:
-        file (str): Name with absolute path of the analyzed file.
+        interval (str): Name with absolute path of the analyzed file.
+
     Returns:
         callable: callback to detect this event.
     """
@@ -515,7 +515,12 @@ def callback_invalid_state_interval(interval):
 
 
 def wait_statistics_file():
-    """Wait until statistics file is available"""
+    """Wait until statistics file is available.
+
+    Raises:
+        FileNotFoundError: If the next statistics could not be obtained according to the interval
+                           defined by "logcollector.state_interval".
+    """
     for _ in range(LOG_COLLECTOR_GLOBAL_TIMEOUT):
         if path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
             break
@@ -523,4 +528,4 @@ def wait_statistics_file():
             sleep(1)
 
     if not path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
-        raise TimeoutError
+        raise FileNotFoundError
