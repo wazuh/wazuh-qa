@@ -37,16 +37,10 @@ conf_params = {'TEST_WILDCARDS': expresion_str, 'FREQUENCY': frequency_scan}
 parameters, metadata = fim.generate_params(extra_params=conf_params)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
-# fixtures
+# Fixtures
 
 
-@pytest.fixture(scope='module', params=configurations)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
-
-
-@pytest.fixture(scope='module')
+@pytest.fixture()
 def wait_for_initial_scan():
     """Fixture that waits for the initial scan, independently of the configured mode."""
     fim.detect_initial_scan(wazuh_log_monitor)
@@ -55,17 +49,13 @@ def wait_for_initial_scan():
 @pytest.fixture()
 def create_test_folders():
     """Fixture that creates all the folders specified in the `test_subdirectories` list"""
-    for sub_directory in test_subdirectories:
-        if not os.path.exists(os.path.join(test_folder, sub_directory)):
-            os.mkdir(os.path.join(test_folder, sub_directory))
-
-
-@pytest.fixture()
-def remove_test_folders():
-    """Fixture that removes all the folders specified in the `test_subdirectories` list"""
-    for sub_directory in test_subdirectories:
-        if os.path.exists(os.path.join(test_folder, sub_directory)):
-            rmtree(os.path.join(test_folder, sub_directory))
+    for dir in test_subdirectories:
+        split_path = os.path.split(dir)
+        parent_folder = os.path.join(test_folder, split_path[0])
+        if not os.path.exists(parent_folder):
+            os.mkdir(os.path.join(parent_folder))
+        if not os.path.exists(os.path.join(parent_folder, split_path[1])):
+            os.mkdir(os.path.join(parent_folder, split_path[1]))
 
 
 @pytest.fixture()
@@ -77,12 +67,18 @@ def wait_for_wildcards_scan():
                             error_message='End of FIM scan not detected').result()
 
 
+@pytest.fixture(scope='module', params=configurations)
+def get_configuration(request):
+    """Get configurations from the module."""
+    return request.param
+
+
 @pytest.mark.parametrize('parent_folder', [test_folder])
 @pytest.mark.parametrize('subfolder_name', test_subdirectories)
 @pytest.mark.parametrize('file_name', ['regular_1'])
 @pytest.mark.parametrize('tags_to_apply', [{'ossec_conf_wildcards_runtime'}])
 def test_basic_usage_wildcards_runtime(parent_folder, subfolder_name, file_name, tags_to_apply,
-                                       get_configuration, configure_environment, remove_test_folders, restart_syscheckd,
+                                       get_configuration, configure_environment, restart_syscheckd,
                                        wait_for_initial_scan, create_test_folders, wait_for_wildcards_scan):
     """Test the expansion once a given directory matches a configured expresion.
 
@@ -96,7 +92,6 @@ def test_basic_usage_wildcards_runtime(parent_folder, subfolder_name, file_name,
         tags_to_apply (str): Value holding the configuration used in the test.
         get_configuration (fixture): Gets the current configuration of the test.
         configure_environment (fixture): Configure the environment for the execution of the test.
-        remove_test_folders (fixture): Fixture that will delete all folders inside the test folder
         restart_syscheckd (fixture): Restarts syscheck.
         wait_for_initial_scan (fixture): Waits until the first FIM scan is completed.
         create_test_folders (fixture): Creates the folders that will match (or not) the configured glob expresion.
@@ -106,6 +101,11 @@ def test_basic_usage_wildcards_runtime(parent_folder, subfolder_name, file_name,
     if sys.platform == 'win32':
         if '?' in file_name or '*' in file_name:
             pytest.skip("Windows can't create files with wildcards.")
+
+    if sys.platform == 'linux':
+        # wait until the audit rules are reloaded
+        whodata = get_configuration['metadata']['fim_mode'] == 'whodata'
+        fim.wait_for_audit(whodata, wazuh_log_monitor)
 
     folder_path = os.path.join(parent_folder, subfolder_name)
 

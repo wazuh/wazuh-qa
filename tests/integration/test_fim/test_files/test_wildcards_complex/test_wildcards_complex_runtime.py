@@ -70,8 +70,6 @@ def wait_for_wildcards_scan():
                             callback=fim.callback_detect_end_scan,
                             error_message='End of FIM scan not detected').result()
 
-# Fixtures
-
 
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
@@ -108,6 +106,10 @@ def test_wildcards_complex_runtime(subfolder_name, file_name, tags_to_apply,
         if "?" in file_name or "*" in file_name:
             pytest.skip("Windows can't create files with wildcards.")
 
+    if sys.platform == 'linux':
+        # wait until the audit rules are reloaded
+        whodata = get_configuration['metadata']['fim_mode'] == 'whodata'
+        fim.wait_for_audit(whodata, wazuh_log_monitor)
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     fim.regular_file_cud(folder, wazuh_log_monitor, file_list=[file_name],

@@ -1,4 +1,4 @@
-# Test complex wildcards
+# Test basic usage wildcards runtime
 In every scan, FIM looks for any new folder that matches a configured wildcard expression. This test checks this
 functionality using simple wildcards expressions.
 
