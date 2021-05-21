@@ -1,4 +1,5 @@
 {
-  "baseUrl": "https://localhost:5601",
-  "testFiles": "**/*.{feature,features}"
+  "testFiles": "**/*.{feature,features}",
+  "viewportWidth": 1360,
+  "viewportHeight": 790
 }
