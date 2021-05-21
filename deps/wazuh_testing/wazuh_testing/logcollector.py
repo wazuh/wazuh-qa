@@ -16,6 +16,8 @@ GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL = "The expected analyzing eventcha
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET = "The expected target socket log has not been produced"
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND = "The expected target socket not found error has not been produced"
 LOG_COLLECTOR_GLOBAL_TIMEOUT = 20
+GENERIC_CALLBACK_ERROR_READING_FILE = "The expected invalid content error log has not been produced"
+GENERIC_CALLBACK_ERROR = 'The expected error output has not been produced'
 
 if sys.platform == 'win32':
     prefix = monitoring.AGENT_DETECTOR_PREFIX
@@ -25,10 +27,8 @@ else:
 
 def callback_analyzing_file(file):
     """Create a callback to detect if logcollector is monitoring a file.
-
     Args:
         file (str): Name with absolute path of the analyzed file.
-
     Returns:
         callable: callback to detect this event.
     """
@@ -38,11 +38,9 @@ def callback_analyzing_file(file):
 
 def callback_monitoring_command(log_format, command):
     """Create a callback to detect if logcollector is monitoring a command.
-
     Args:
         log_format (str): Log format of the command monitoring (full_command or command).
         command (str): Monitored command.
-
     Returns:
         callable: callback to detect this event.
     """
@@ -53,11 +51,9 @@ def callback_monitoring_command(log_format, command):
 
 def callback_monitoring_djb_multilog(program_name, multilog_file):
     """Create a callback to detect if logcollector is monitoring a djb multilog file.
-
     Args:
         program_name (str): Program name of multilog file.
         multilog_file (str): Multilog file name.
-
     Returns:
         callable: callback to detect this event.
     """
@@ -67,10 +63,8 @@ def callback_monitoring_djb_multilog(program_name, multilog_file):
 
 def callback_command_alias_output(alias):
     """Create a callback to detect if logcollector is monitoring a command with an assigned alias.
-
     Args:
         alias (str): Command alias.
-
     Returns:
         callable: callback to detect this event.
     """
@@ -80,10 +74,8 @@ def callback_command_alias_output(alias):
 
 def callback_eventchannel_bad_format(event_location):
     """Create a callback to detect if logcollector inform about bad formatted eventchannel location.
-
     Args:
         event_location (str): Eventchannel location.
-
     Returns:
         callable: callback to detect this event.
     """
@@ -93,11 +85,9 @@ def callback_eventchannel_bad_format(event_location):
 
 def callback_socket_target(location, socket_name):
     """Create a callback to detect if logcollector has assign a socket to a monitored file.
-
     Args:
         location (str): Name with the analyzed file.
         socket_name (str): Socket name.
-
     Returns:
         callable: callback to detect this event.
     """
@@ -107,11 +97,9 @@ def callback_socket_target(location, socket_name):
 
 def callback_socket_not_defined(location, socket_name):
     """Create a callback to detect if a socket has not been defined.
-
     Args:
         location (str): Name with the analyzed file.
         socket_name (str): Socket name.
-
     Returns:
         callable: callback to detect this event.
     """
@@ -149,11 +137,9 @@ def callback_socket_offline(socket_name, socket_path):
 
 def callback_log_target_not_found(location, socket_name):
     """Create a callback to detect if a log target has not been found.
-
     Args:
         location (str): Name with the analyzed file.
         socket_name (str): Socket name.
-
     Returns:
         callable: callback to detect this event.
     """
@@ -163,11 +149,9 @@ def callback_log_target_not_found(location, socket_name):
 
 def callback_invalid_reconnection_time(severity='WARNING', default_value='5'):
     """Create a callback to detect if a invalid reconnection has been used.
-
     Args:
         severity (str): Severity of the error (WARNING, ERROR or CRITICAL)
         default_value (int): Default value used instead of specified reconnection time.
-
     Returns:
         callable: callback to detect this event.
     """
@@ -177,10 +161,8 @@ def callback_invalid_reconnection_time(severity='WARNING', default_value='5'):
 
 def callback_eventchannel_analyzing(event_location):
     """Create a callback to detect if logcollector is monitoring a event log.
-
     Args:
         event_location (str): Event log location.
-
     Returns:
         callable: callback to detect this event.
     """
@@ -190,10 +172,8 @@ def callback_eventchannel_analyzing(event_location):
 
 def callback_invalid_location_pattern(location):
     """Create a callback to detect if invalid location pattern has been used.
-
     Args:
         location (str): Location pattern
-
     Returns:
         callable: callback to detect this event.
     """
@@ -203,10 +183,8 @@ def callback_invalid_location_pattern(location):
 
 def callback_ignoring_file(location_file):
     """Create a callback to detect if specified file was ignored due to modification time.
-
     Args:
         location_file: File absolute path.
-
     Returns:
         callable: callback to detect this event.
     """
@@ -216,10 +194,8 @@ def callback_ignoring_file(location_file):
 
 def callback_reading_syslog_message(message):
     """Create a callback to detect if syslog message has been read.
-
     Args:
         message (str): Syslog message.
-
     Returns:
         callable: callback to detect this event.
     """
@@ -229,11 +205,9 @@ def callback_reading_syslog_message(message):
 
 def callback_read_line_from_file(n_lines, filename):
     """Create a callback to detect if specified lines number has been read.
-
     Args:
         n_lines (str): Number of lines read.
         filename (str): Filename from which lines have been read.
-
     Returns:
         callable: callback to detect this event.
     """
@@ -243,11 +217,9 @@ def callback_read_line_from_file(n_lines, filename):
 
 def callback_read_lines(command, escape=False):
     """Create a callback to detect "DEBUG: Read <number> lines from command <command>" debug line.
-
     Args:
         command (str): Command to be monitored.
         escape (bool): Flag to escape special characters in the pattern.
-
     Returns:
         callable: callback to detect this event.
     """
@@ -257,12 +229,10 @@ def callback_read_lines(command, escape=False):
 
 def callback_running_command(log_format, command, escape=False):
     """Create a callback to detect "DEBUG: Running <log_format> '<command>'" debug line.
-
     Args:
         log_format (str): Log format of the command monitoring (full_command or command).
         command (str): Command to be monitored.
         escape (bool): Flag to escape special characters in the pattern.
-
     Returns:
         callable: callback to detect this event.
     """
@@ -273,11 +243,9 @@ def callback_running_command(log_format, command, escape=False):
 
 def callback_event_log_service_down(location, severity='WARNING'):
     """Create a callback to detect if eventlog service is down.
-
     Args:
         location (str): Event channel.
         severity (str): Severity of the error (WARNING, ERROR or CRITICAL).
-
     Returns:
         callable: callback to detect this event.
     """
@@ -287,11 +255,9 @@ def callback_event_log_service_down(location, severity='WARNING'):
 
 def callback_trying_to_reconnect(location, reconnect_time):
     """Create a callback to detect if `wazuh-agentd` is trying to reconnect to specified channel.
-
     Args:
         location (str): Event log channel.
         reconnect_time (str): Reconnect time.
-
     Returns:
         callable: callback to detect this event.
     """
@@ -301,10 +267,8 @@ def callback_trying_to_reconnect(location, reconnect_time):
 
 def callback_reconnect_eventchannel(location):
     """Create a callback to detect if specified channel has been reconnected successfully.
-
     Args:
         location (str): Location channel.
-
     Returns:
         callable: callback to detect this event.
     """
@@ -368,14 +332,12 @@ def callback_excluded_file(file):
 
 def add_log_data(log_path, log_line_message, size_kib=1024, line_start=1, print_line_num=False):
     """Increase the space occupied by a log file by adding lines to it.
-
     Args:
         log_path (str): Path to log file.
         log_line_message (str): Line content to be added to the log.
         size_kib (int, optional): Size in kibibytes (1024^2 bytes). Defaults to 1 MiB (1024 KiB).
         line_start (int, optional): Line number to start with. Defaults to 1.
         print_line_num (bool, optional): If True, in each line of the log its number is added. Defaults to False.
-
     Returns:
         int: Last line number written.
     """
@@ -386,6 +348,64 @@ def add_log_data(log_path, log_line_message, size_kib=1024, line_start=1, print_
                 f.write(f"{log_line_message}{x}\n") if print_line_num else f.write(f"{log_line_message}\n")
         return line_start + lines - 1
     return 0
+
+
+def callback_invalid_format_value(line, option, location):
+    """Create a callback to detect content values invalid in a log format file specific.
+
+    Args:
+        line(str):  content line of file analized
+        option (str): log format value .
+        location (str): Wazuh manager configuration option.
+        prefix (str): Daemon that generates the error log.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    if option == 'json':
+        msg = fr"DEBUG: Line '{line}' read from '{location}' is not a JSON object."
+    elif option == 'audit':
+        msg = fr"ERROR: Discarding audit message because of invalid syntax."
+    elif option == 'nmapg':
+        msg = fr"ERROR: Bad formated nmap grepable file."
+    elif option == 'djb-multilog':
+        msg = fr"DEBUG: Invalid DJB log: '{line}'"
+
+    return monitoring.make_callback(pattern=msg, prefix=prefix)
+
+
+def callback_reading_file(log_format, content_file, severity='DEBUG'):
+    """Create a callback to detect if the logcollector could read a file with valid content successfully.
+
+    Args:
+        log_format(str): Log format type(json, syslog, snort-full, squid, djb-multilog, multi-line:3)
+        content_file (str): Content file to analyze
+        prefix (str): Daemon that generates the error log.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    if log_format == 'json':
+        msg = fr"{severity}: Reading json message: '{content_file}'"
+    elif log_format in ['syslog', 'snort-full', 'squid']:
+        msg = fr"{severity}: Reading syslog message: '{content_file}'"
+    elif log_format == 'multi-line:3':
+        msg = fr"{severity}: Reading message: '{content_file}'"
+
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
+def callback_read_file(location):
+    """Create a callback to detect when the logcollector reads a file.
+
+    Args:
+        location (str): Path Read.
+
+    Returns:
+        callable: callback to detect this log.
+    """
+    msg = fr"lines from {location}"
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
 def get_data_sending_stats(log_path, socket_name):
