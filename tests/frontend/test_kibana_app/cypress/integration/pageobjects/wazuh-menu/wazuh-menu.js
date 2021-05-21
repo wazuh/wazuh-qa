@@ -1,10 +1,11 @@
-import Decoders from './decoders';
 import Rules from './rules';
+import { getObject } from '../../utils/driver';
+import { decodersButtonSelector } from './decoders.page';
+import { rulesButtonSelector } from './rules.page';
 
 class WazuhMenu {
 
   constructor() {
-    this.decoders = new Decoders();
     this.rules = new Rules();
   }
 
@@ -21,7 +22,7 @@ class WazuhMenu {
       .click();
     this.getManagementButton()
       .click();
-    const button = this.decoders.getDecodersButton();
+    const button = getObject(decodersButtonSelector).eq(1);
     button.click();
   }
 
@@ -30,16 +31,8 @@ class WazuhMenu {
       .click();
     this.getManagementButton()
       .click();
-    const button = this.rules.getRulesButton();
+    const button = getObject(rulesButtonSelector).eq(0);
     button.click();
-  }
-
-  getDecoders() {
-    return this.decoders;
-  }
-
-  getRules() {
-    return this.rules;
   }
 
 }

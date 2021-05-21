@@ -3,7 +3,7 @@ import {
   buttonSubmitSelector,
   inputPasswordSelector,
   inputUsernameSelector,
-} from '../../pageobjects/login/xpack-login-page';
+} from '../../pageobjects/login/xpack-login.page';
 import { clickElement, fillField } from '../../utils/driver';
 
 const fillUsernameFieldXPack = (userName) => {
@@ -24,7 +24,7 @@ const loginXpack = () => {
   fillUsernameFieldXPack(XPACK_USERNAME);
   fillPasswordFieldXPack(XPACK_PASSWORD);
   clickSubmitButtonXPack();
-  cy.wait(12000);
+  cy.wait(20000);
 };
 
 export { loginXpack };

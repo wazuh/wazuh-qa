@@ -3,7 +3,7 @@ import {
   buttonSubmitSelector,
   inputPasswordSelector,
   inputUsernameSelector,
-} from '../../pageobjects/login/odef-login-page';
+} from '../../pageobjects/login/odef-login.page';
 import { clickElement, fillField } from '../../utils/driver';
 
 const fillUsernameFieldODFE = (userName) => {
