@@ -1,8 +1,19 @@
 import { When } from 'cypress-cucumber-preprocessor/steps';
-import WazuhMenu from '../../../pageobjects/wazuh-menu/wazuh-menu';
+import { getObject } from '../../../utils/driver';
+import {
+  menuListButtonsSelector,
+  subMenuListButtonsSelector,
+  wazuhButtonSelector,
+} from '../../../pageobjects/wazuh-menu/wazuh-menu.page';
 
 When('The user navigates to decoders', () => {
-  const wzMenu = new WazuhMenu();
-  wzMenu.goToDecoders();
+  getObject(wazuhButtonSelector)
+    .click();
+  getObject(menuListButtonsSelector)
+    .eq(0)
+    .click();
+  getObject(subMenuListButtonsSelector)
+    .eq(1)
+    .click();
   cy.wait(3000);
 });

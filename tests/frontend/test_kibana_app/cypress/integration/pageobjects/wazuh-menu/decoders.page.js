@@ -1,5 +1,4 @@
 export const titleSelector = '[class="euiTitle euiTitle--medium"]';
-export const decodersButtonSelector = '[class="euiSideNavItem euiSideNavItem--trunk"]';
 export const tableSelector = '[class="euiTableRow customRowClass euiTableRow-isClickable"]';
 export const dropdownPaginationSelector = '[data-test-subj="tablePaginationPopoverButton"]';
 export const listPages = 'nav[class="euiPagination"]';
