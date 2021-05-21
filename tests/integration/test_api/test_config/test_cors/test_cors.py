@@ -29,6 +29,7 @@ def get_configuration(request):
 
 # Tests
 
+@pytest.mark.xfail(reason="Error fixed in this issue: https://github.com/wazuh/wazuh/issues/8485")
 @pytest.mark.parametrize('origin, tags_to_apply', [
     ('https://test_url.com', {'cors'}),
     ('http://other_url.com', {'cors'}),

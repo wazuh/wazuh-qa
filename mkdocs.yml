@@ -462,6 +462,7 @@ nav:
                 - Test location: tests/integration/test_logcollector/test_location/test_location.md
                 - Test exclude: tests/integration/test_logcollector/test_location/test_location_exclude.md
             - Test only future events: tests/integration/test_logcollector/test_only_future_events/test_only_future_events.md
+            - Test location custom sockets: tests/integration/test_logcollector/test_location_custom_sockets/test_location_custom_sockets.md
         - Logtest:
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md
