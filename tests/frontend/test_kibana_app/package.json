@@ -6,17 +6,28 @@
   "scripts": {
     "start": "npx cypress open",
     "cy:install": "npx cypress install --force",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "cypress:run": "cypress run --headless --browser chrome",
+    "merge": "mochawesome-merge cypress/report/mochawesome-report/*.json > cypress/report/output.json",
+    "generate_mochawesome_report": "marge cypress/report/output.json --reportDir ./ --inline",
+    "delete_reports": "node delete-reports.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "cypress": "^7.1.0"
+    "cosmiconfig": "^4.0.0",
+    "cypress": "^7.3.0",
+    "mocha": "^5.2.0",
+    "prettier": "^2.3.0"
   },
   "devDependencies": {
-    "cypress-cucumber-preprocessor": "^4.0.3"
+    "cypress-cucumber-preprocessor": "^4.0.3",
+    "eslint-plugin-cypress": "^2.11.3",
+    "mochawesome": "^6.2.2",
+    "mochawesome-merge": "^4.2.0"
   },
   "cypress-cucumber-preprocessor": {
-    "nonGlobalStepDefinitions": true
+    "nonGlobalStepDefinitions": false,
+    "step_definitions": "cypress/integration/step-definitions/**/"
   }
 }
