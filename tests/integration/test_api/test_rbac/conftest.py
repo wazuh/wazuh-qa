@@ -26,12 +26,17 @@ def set_security_resources(request):
     # Create new user
     response = requests.post(users_endpoint,
                              json={'username': f'test_user',
-                                   'password': 'Password1!',
-                                   'allow_run_as': False},
+                                   'password': 'Password1!'},
                              headers=api_details['auth_headers'], verify=False)
     assert response.status_code == 200, f'Expected status code was 200. Full response: ' \
                                         f'{response.text}'
     user_id = response.json()['data']['affected_items'][0]['id']
+
+    # Edit allow_run_as
+    response = requests.put(users_endpoint + f'/{user_id}/run_as?allow_run_as=true',
+                            headers=api_details['auth_headers'], verify=False)
+    assert response.status_code == 200, f'Expected status code was 200. Full response: ' \
+                                        f'{response.text}'
 
     # Create new role
     response = requests.post(roles_endpoint,

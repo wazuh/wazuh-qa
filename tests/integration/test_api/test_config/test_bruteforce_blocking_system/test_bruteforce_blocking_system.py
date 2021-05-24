@@ -50,12 +50,11 @@ def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_
     max_login_attempts = get_configuration['configuration']['access']['max_login_attempts']
 
     # Provoke a block from an unknown IP ('max_login_attempts' attempts with incorrect credentials).
-    for _ in range(max_login_attempts):
-        with pytest.raises(Exception):
-            get_api_details(user='wrong', password='wrong')
+    with pytest.raises(RuntimeError):
+        get_api_details(user='wrong', password='wrong', login_attempts=max_login_attempts, sleep_time=0)
 
     # Request with correct credentials before blocking time expires.
-    with pytest.raises(Exception) as login_exc:
+    with pytest.raises(RuntimeError) as login_exc:
         get_api_details()
     assert 'Error obtaining login token' in login_exc.value.args[0], f'An error getting the token was expected, but ' \
                                                                      f'it was not obtained. \nFull response: ' \

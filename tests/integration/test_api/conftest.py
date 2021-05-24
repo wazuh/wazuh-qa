@@ -55,8 +55,7 @@ def configure_api_environment(get_configuration, request):
             shutil.rmtree(test_dir, ignore_errors=True)
 
     # Restore previous configuration
-    if backup_config:
-        write_api_conf(WAZUH_API_CONF, backup_config)
+    write_api_conf(WAZUH_API_CONF, backup_config if backup_config else {})
 
     # Restore previous RBAC configuration
     if backup_security_config:

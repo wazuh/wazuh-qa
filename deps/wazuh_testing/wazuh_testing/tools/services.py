@@ -1,12 +1,11 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
 import os
-import socket
 import subprocess
 import sys
 import time
+
 import psutil
 
 from wazuh_testing.tools import WAZUH_PATH, get_service, WAZUH_SOCKETS, QUEUE_DB_PATH, WAZUH_OPTIONAL_SOCKETS
@@ -108,11 +107,14 @@ def control_service(action, daemon=None, debug_mode=False):
                 processes = []
 
                 for proc in psutil.process_iter():
-                    if daemon in proc.name():
-                        try:
+                    try:
+                        if daemon in ['wazuh-clusterd', 'wazuh-apid']:
+                            if any(filter(lambda x: f"{daemon}.py" in x, proc.cmdline())):
+                                processes.append(proc)
+                        elif daemon in proc.name() or daemon in ' '.join(proc.cmdline()):
                             processes.append(proc)
-                        except psutil.NoSuchProcess:
-                            pass
+                    except psutil.NoSuchProcess:
+                        pass
                 try:
                     for proc in processes:
                         proc.terminate()
@@ -263,4 +265,3 @@ def control_event_log_service(control):
         raise ValueError(f"Event log service did not stop correctly")
 
     time.sleep(1)
-

@@ -1,9 +1,17 @@
 FROM python
 
-COPY ./requirements.txt /
-COPY ./run-documentation.sh /usr/bin
+RUN git clone https://github.com/wazuh/wazuh-qa
 
-RUN pip install mkdocs mkdocstrings mkdocs-material
+WORKDIR /wazuh-qa/deps/wazuh_testing
+
+RUN python3 setup.py install
+
+WORKDIR /wazuh-qa
+
 RUN pip install -r requirements.txt
 
-ENTRYPOINT ["/usr/bin/run-documentation.sh"] 
+RUN pip install mkdocs mkdocstrings mkdocs-material
+
+COPY ./run-documentation.sh /usr/bin
+
+ENTRYPOINT ["/usr/bin/run-documentation.sh"]

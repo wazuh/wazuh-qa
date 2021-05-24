@@ -115,7 +115,6 @@ metadata = [
                 f"Received message: '#!-agent ack '"
             ],
             [
-                # This log doesn't
                 # f'Lost connection with manager. Setting lock.',
                 f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
