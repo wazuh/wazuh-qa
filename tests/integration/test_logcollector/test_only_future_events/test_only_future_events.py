@@ -5,7 +5,6 @@ import os
 import tempfile
 
 import pytest
-
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import monitoring, file

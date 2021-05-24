@@ -10,7 +10,7 @@ import sys
 from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 
 # Marks
-query_list = ['', 'Testing', '!ras*^']
+query_list = ['']
 parameters = []
 
 level_list = ['default', 'info', 'debug']
@@ -29,23 +29,15 @@ else:
                            f'{clause} == "testing"',
                            f'{clause} <> "testing"',
                            f'{clause} = "testing"',
-                           f'{clause} <= "testing"',
-                           f'{clause} >= "testing"',
-                           f'{clause} = > "testing"',
-                           f'{clause} < "testing"',
-                           f'{clause} < "testing"',
-                           f'{clause} < "testing"',
-                           f'{clause} <= "testing" AND  {clause} == "testing"',
-                           f'{clause} <= "testing" & &  {clause} == "testing"',
-                           f'{clause} <= "testing" OR  {clause} == "testing"',
-                           f'{clause} <= "testing" | |  {clause} == "testing"',
-                           f'NOT {clause} <= "testing"',
-                           f'! {clause} <= "testing"',
+                           f'{clause} CONTAINS[c] "testing" AND  {clause} CONTAINS[c] "example"',
+                           f'{clause} CONTAINS[c] "testing" &&  {clause} CONTAINS[c] "example"',
+                           f'{clause} CONTAINS[c] "testing" OR  {clause} CONTAINS[c] "example"',
+                           f'{clause} CONTAINS[c] "testing" ||  {clause} CONTAINS[c] "example"',
+                           f'NOT {clause} BEGINSWITH[c] "testing"',
                            f'! {clause} BEGINSWITH[c] "testing"',
                            f'! {clause} ENDSWITH[c] "testing"',
                            f'! {clause} LIKE[c] "testing"',
                            f'! {clause} MATCHES[c] "testing"',
-                           f'! {clause} BEGINSWITH[c] "testing"',
                            f'! {clause} BEGINSWITH[c] "testing"',
                            f'! {clause} IN "testing"',
                            ]
