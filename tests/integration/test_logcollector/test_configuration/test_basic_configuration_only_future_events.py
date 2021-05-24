@@ -126,7 +126,7 @@ def check_only_future_events_valid(cfg):
 
     elif sys.platform == 'darwin' and cfg['log_format'] == 'macos':
         error_message = logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_MACOS
-        if cfg['only-future-value'] == 'no':
+        if cfg['only-future-events'] == 'no':
             log_callback = logcollector.callback_monitoring_macos_logs(True)
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                     error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_MACOS)

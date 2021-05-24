@@ -389,7 +389,7 @@ def callback_monitoring_macos_logs(old_logs=False):
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"Monitoring MacOS logs with: /usr/bin/log show --style syslog --start"  if old_logs else \
+    msg = fr"Monitoring MacOS old logs with: /usr/bin/log show --style syslog --start" if old_logs else \
         fr"Monitoring MacOS logs with: /usr/bin/log stream --style syslog"
 
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
