@@ -13,6 +13,7 @@ GENERIC_CALLBACK_ERROR_COMMAND_MONITORING = 'The expected command monitoring log
 GENERIC_CALLBACK_ERROR_INVALID_LOCATION = 'The expected invalid location error log has not been produced'
 GENERIC_CALLBACK_ERROR_ANALYZING_FILE = 'The expected analyzing file log has not been produced'
 GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL = "The expected analyzing eventchannel log has not been produced"
+GENERIC_CALLBACK_ERROR_ANALYZING_MACOS = "The expected analyzing macos log has not been produced"
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET = "The expected target socket log has not been produced"
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND = "The expected target socket not found error has not been produced"
 LOG_COLLECTOR_GLOBAL_TIMEOUT = 20
@@ -382,13 +383,15 @@ def callback_excluded_file(file):
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
-def callback_monitoring_macos_logs():
+def callback_monitoring_macos_logs(old_logs=False):
     """Create a callback to detect if logcollector is monitoring MacOS logs.
 
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"Monitoring MacOS logs with: /usr/bin/log stream --style syslog"
+    msg = fr"Monitoring MacOS logs with: /usr/bin/log show --style syslog --start"  if old_logs else \
+        fr"Monitoring MacOS logs with: /usr/bin/log stream --style syslog"
+
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 

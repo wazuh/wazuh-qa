@@ -118,13 +118,26 @@ def check_only_future_events_valid(cfg):
     Raises:
         TimeoutError: If the "Analyzing file" callback is not generated.
     """
-    if sys.platform == 'win32':
+    error_message = logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE
+
+    if sys.platform == 'win32' and cfg['log_format'] == 'eventchannel':
+        error_message = logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL
         log_callback = logcollector.callback_eventchannel_analyzing(cfg['location'])
+
+    elif sys.platform == 'darwin' and cfg['log_format'] == 'macos':
+        error_message = logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_MACOS
+        if cfg['only-future-value'] == 'no':
+            log_callback = logcollector.callback_monitoring_macos_logs(True)
+            wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                    error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_MACOS)
+
+        log_callback = logcollector.callback_monitoring_macos_logs()
+
     else:
         log_callback = logcollector.callback_analyzing_file(cfg['location'])
 
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)
+                            error_message=error_message)
 
 
 def check_only_future_events_invalid(cfg):
