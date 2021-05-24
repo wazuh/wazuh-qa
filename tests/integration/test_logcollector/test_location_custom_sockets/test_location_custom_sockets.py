@@ -2,7 +2,11 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 from os import path, unlink
-from socket import AF_UNIX, SHUT_RDWR, SOCK_STREAM, SOCK_DGRAM, socket
+from sys import platform
+if platform != 'win32':
+    import AF_UNIX
+    
+from socket import SHUT_RDWR, SOCK_STREAM, SOCK_DGRAM, socket
 from tempfile import gettempdir
 
 import pytest
