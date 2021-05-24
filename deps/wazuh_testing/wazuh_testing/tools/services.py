@@ -171,45 +171,51 @@ def get_process_cmd(search_cmd):
             return proc
 
 
-def check_daemon_status(daemon=None, running=True, timeout=10, extra_sockets=None):
-    """Check Wazuh daemon status.
+def check_daemon_status(target_daemon=None, running_condition=True, timeout=10, extra_sockets=None):
+    """Wait until Wazuh daemon's status matches the expected one. If timeout is reached and the status didn't match,
+       it raises a TimeoutError.
 
     Args:
-        daemon (str, optional):  Wazuh daemon to check. Default `None`
-        running (bool, optional): True if the daemon is expected to be running False if it is expected to be stopped.
+        target_daemon (str, optional):  Wazuh daemon to check. Default `None`. None means all.
+        running_condition (bool, optional): True if the daemon is expected to be running False if it is expected to be stopped.
             Default `True`
-        timeout (int, optional): Timeout value for the check. Default `10`
+        timeout (int, optional): Timeout value for the check. Default `10` seconds.
         extra_sockets (list, optional): Additional sockets to check. They may not be present in default configuration
 
     Raises:
         TimeoutError: If the daemon status is wrong after timeout seconds.
     """
+    start_time = time.time()
+    elapsed_time = 0
+    condition_met = False
     if extra_sockets is None:
         extra_sockets = []
-    for _ in range(3):
-        # Check specified daemon/s status
-        daemon_status = subprocess.run(['service', get_service(), 'status'], stdout=subprocess.PIPE).stdout.decode()
-        if f"{daemon if daemon is not None else ''} {'not' if running else 'is'} running" not in daemon_status:
-            # Construct set of socket paths to check
-            if daemon is None:
-                socket_set = {path for array in WAZUH_SOCKETS.values() for path in array}
-            else:
-                socket_set = {path for path in WAZUH_SOCKETS[daemon]}
-            # We remove optional sockets and add extra sockets to the set to check
-            socket_set.difference_update(WAZUH_OPTIONAL_SOCKETS)
-            socket_set.update(extra_sockets)
-            # Check specified socket/s status
-            for socket in socket_set:
-                if os.path.exists(socket) is not running:
-                    break
-            else:
-                # Finish main for loop if both daemon and socket checks are ok
-                break
 
-        time.sleep(timeout / 3)
-    else:
-        raise TimeoutError(f"{'wazuh-service' if daemon is None else daemon} "
-                           f"{'is not' if running else 'is'} running")
+    while elapsed_time < timeout and condition_met == False:
+        control_status_output = subprocess.run([f'{WAZUH_PATH}/bin/wazuh-control', 'status'],
+                                       stdout=subprocess.PIPE).stdout.decode()
+        condition_met = True
+        for lines in control_status_output.splitlines():
+            daemon_status_tokens = lines.split()
+            current_daemon = daemon_status_tokens[0]
+            daemon_status = ' '.join(daemon_status_tokens[1:])
+            daemon_running = daemon_status == 'is running...'
+            if current_daemon == target_daemon or target_daemon == None:
+                socket_set = {path for path in WAZUH_SOCKETS[current_daemon]}
+                # We remove optional sockets and add extra sockets to the set to check
+                socket_set.difference_update(WAZUH_OPTIONAL_SOCKETS)
+                socket_set.update(extra_sockets)
+                # Check specified socket/s status
+                for socket in socket_set:
+                    if os.path.exists(socket) != running_condition:
+                        condition_met = False
+                if daemon_running != running_condition:
+                    condition_met = False
+        if not condition_met:
+            time.sleep(1)
+        elapsed_time = time.time() - start_time
+    if not condition_met:
+        raise TimeoutError(f"{target_daemon} does not meet condition: running = {running_condition}")
 
 
 def delete_dbs():
