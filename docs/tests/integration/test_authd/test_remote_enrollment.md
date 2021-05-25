@@ -36,4 +36,4 @@ we won't do it for the time being
 ## Code documentation
 
 
-::: tests.integration.test_authd.test_remote_enrollment -->
+::: tests.integration.test_authd.test_remote_enrollment
