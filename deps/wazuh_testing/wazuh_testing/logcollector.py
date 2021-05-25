@@ -31,14 +31,17 @@ WINDOWS_CHANNEL_LIST = ['Microsoft-Windows-Sysmon/Operational',
                         'Service Microsoft-Windows-TerminalServices-RemoteConnectionManager'
                         ]
 
-LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
-    'logcollector.debug': '2',
-    'monitord.rotate_log': '0',
-}
-
 if sys.platform == 'win32':
+    LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
+        'windows.debug': '2',
+        'agent.debug': '2'
+    }
     prefix = monitoring.AGENT_DETECTOR_PREFIX
 else:
+    LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
+        'logcollector.debug': '2',
+        'monitord.rotate_log': '0',
+    }
     prefix = monitoring.LOG_COLLECTOR_DETECTOR_PREFIX
 
 
