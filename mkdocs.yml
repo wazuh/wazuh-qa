@@ -62,7 +62,7 @@ nav:
           - Tests general settings:
             -  tests/integration/test_vulnerability_detector/test_general_settings/index.md
             - Test general settings enabled: tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_enabled.md
-            - Test general settings ignore time: tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_ignore_time.md
+            - Test general settings min full scan interval: tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_min_full_scan_interval.md
             - Test general settings intervals: tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_interval.md
             - Test general settings run on start: tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_run_on_start.md
           - Tests providers:
