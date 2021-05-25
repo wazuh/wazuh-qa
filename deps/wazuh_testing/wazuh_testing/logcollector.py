@@ -533,8 +533,8 @@ def create_file_structure(get_files_list):
     for file in get_files_list:
         os.makedirs(file['folder_path'], exist_ok=True, mode=0o777)
         for name in file['filename']:
-            open(os.path.join(file['folder_path'], name), 'w').close()
-
+            with open(os.path.join(file['folder_path'], name), mode='w'):
+                pass
             if 'age' in file:
                 fileinfo = os.stat(f"{file['folder_path']}{file['filename']}")
                 os.utime(f"{file['folder_path']}{file['filename']}", (fileinfo.st_atime - file['age'],
