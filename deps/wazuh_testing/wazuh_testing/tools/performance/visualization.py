@@ -225,6 +225,16 @@ class DataVisualizer:
                                        statistics=DataVisualizer._get_statistics(
                                            current_df['time_spent(s)'], calculate_mean=True, calculate_median=True))
 
+        elif self.target == 'api':
+            for element in elements:
+                fig, ax = plt.subplots()
+                queries = self.dataframe.endpoint.unique()
+                colors = self._color_palette(len(queries))
+                for endpoint, color in zip(queries, colors):
+                    self._basic_plot(ax, self.dataframe[self.dataframe.endpoint == endpoint]['time_spent(s)'],
+                                     label=endpoint, color=color)
+                self._save_custom_plot(ax, element, 'API Response time')
+
         else:
             fig, ax = plt.subplots()
             colors = self._color_palette(len(elements))
@@ -274,6 +284,10 @@ class DataVisualizer:
         """Function to plot the information from the cluster.log file."""
         self._plot_data(elements=list(self.dataframe['activity'].unique()), generic_label='Managers')
 
+    def _plot_api_dataset(self):
+        """Function to plot the information from the api.log file."""
+        self._plot_data(elements=['endpoint'], generic_label='Queries')
+
     def plot(self):
         """Public function to plot the dataset."""
         if self.target == 'binary':
@@ -288,6 +302,8 @@ class DataVisualizer:
             self._plot_logcollector_dataset()
         elif self.target == 'cluster':
             self._plot_cluster_dataset()
+        elif self.target == 'api':
+            self._plot_api_dataset()
         else:
             raise AttributeError(f"Invalid target {self.target}")
 

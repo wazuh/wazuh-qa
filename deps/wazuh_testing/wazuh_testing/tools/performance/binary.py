@@ -225,7 +225,8 @@ class LogParser(ABC):
             pass
 
         for key, value in self.data.items():
-            with open(join(self.dst_dir, f"{key.replace(' ', '_')}.csv".lower()), 'w', newline='') as f:
+            file_name = key.replace(' ', '_').replace('/', '_').lower()
+            with open(join(self.dst_dir, f"{file_name}.csv"), 'w', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerow(self.columns)
                 writer.writerows(value)
@@ -260,6 +261,42 @@ class ClusterLogParser(LogParser):
                 except KeyError:
                     performance_information[match.group(3)] = list()
                     performance_information[match.group(3)].append(match.groups())
+
+        return performance_information
+
+    def write_csv(self):
+        self.data = self._log_parser()
+        super().write_csv()
+
+
+class APILogParser(LogParser):
+    """Logparser child class, this is exclusively in charge of parsing the API logs.
+
+    Args:
+        log_file (str): log file path.
+        dst_dir (str, optional): directory to store the CSVs. Defaults to temp directory.
+
+    Attributes:
+        log_file (str): log file path.
+        dst_dir (str): directory to store the CSVs. Defaults to temp directory.
+        data (dict): processed log file.
+    """
+    def __init__(self, log_file, dst_dir=gettempdir()):
+        # group1 Timestamp - group2 query - group3 time_spent(s)
+        regex = r'(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) .* \"(GET .+)\" with parameters .* done in (\d+\.\d+)s: .*'
+        columns = ['Timestamp', 'endpoint', 'time_spent(s)']
+        super().__init__(log_file, regex, columns, dst_dir)
+
+    def _log_parser(self):
+        """Function in charge of parsing the information of the cluster.log file."""
+        performance_information = dict()
+        with open(self.log_file) as log:
+            for match in self.regex.finditer(log.read()):
+                try:
+                    performance_information[match.group(2)].append(match.groups())
+                except KeyError:
+                    performance_information[match.group(2)] = list()
+                    performance_information[match.group(2)].append(match.groups())
 
         return performance_information
 
