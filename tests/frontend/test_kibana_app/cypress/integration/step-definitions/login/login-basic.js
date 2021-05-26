@@ -1,3 +1,3 @@
-export const loginBasic = loginMethod => {
-  cy.log(`Parameter loginMethod is: ${loginMethod}`)
+export const loginBasic = () => {
+ //placeholder if we ever need login logic with basic authentication
 };
