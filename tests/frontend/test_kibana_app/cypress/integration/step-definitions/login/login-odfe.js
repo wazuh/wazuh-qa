@@ -1,4 +1,4 @@
-import { ODFE_PASSWORD, ODFE_USERNAME } from '../../utils/constants';
+import { ODFE_PASSWORD, ODFE_USERNAME } from '../../utils/login-constants';
 import {
   buttonSubmitSelector,
   inputPasswordSelector,
@@ -20,8 +20,7 @@ const clickSubmitButtonODFE = () => {
   clickElement(buttonSubmitSelector);
 };
 
-const loginOdfe = loginMethod => {
-  cy.log(`Parameter loginMethod is: ${loginMethod}`)
+const loginOdfe = () => {
   fillUsernameFieldODFE(ODFE_USERNAME);
   fillPasswordFieldODFE(ODFE_PASSWORD);
   clickSubmitButtonODFE();

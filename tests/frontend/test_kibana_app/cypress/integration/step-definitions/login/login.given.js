@@ -1,6 +1,6 @@
 import { Given } from 'cypress-cucumber-preprocessor/steps';
 import { navigate } from '../../utils/driver';
-import { LOGIN_TYPE } from '../../utils/constants';
+import { LOGIN_TYPE } from '../../utils/login-constants';
 
 Given('The kibana admin user is logged in using {word} authentication', (loginMethod) => {
   Cypress.on('uncaught:exception', (err, runnable) => {
@@ -9,10 +9,12 @@ Given('The kibana admin user is logged in using {word} authentication', (loginMe
     return false;
   });
 
-  const url = Cypress.env(loginMethod) ? Cypress.env(loginMethod) : Cypress.env('default');
+  const url = Cypress.env(loginMethod);
+  const login = LOGIN_TYPE[loginMethod];
+
+  cy.log(`Parameter loginMethod is: ${loginMethod} and url from loginMethod is: ${url}`);
   navigate(url);
   cy.wait(5000);
 
-  const login = LOGIN_TYPE[loginMethod] ? LOGIN_TYPE[loginMethod]() : LOGIN_TYPE['default']();
-  login(loginMethod);
+  login ? login() : cy.log('Error login() it is not a function');
 });

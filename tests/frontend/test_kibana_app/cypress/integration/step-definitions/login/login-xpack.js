@@ -1,4 +1,4 @@
-import { XPACK_PASSWORD, XPACK_USERNAME } from '../../utils/constants';
+import { XPACK_PASSWORD, XPACK_USERNAME } from '../../utils/login-constants';
 import {
   buttonSubmitSelector,
   inputPasswordSelector,
@@ -20,8 +20,7 @@ const clickSubmitButtonXPack = () => {
   clickElement(buttonSubmitSelector);
 };
 
-const loginXpack = loginMethod => {
-  cy.log(`Parameter loginMethod is: ${loginMethod}`)
+const loginXpack = () => {
   fillUsernameFieldXPack(XPACK_USERNAME);
   fillPasswordFieldXPack(XPACK_PASSWORD);
   clickSubmitButtonXPack();
