@@ -6,8 +6,11 @@
   "reporterOptions": {
     "charts": true,
     "overwrite": false,
-    "html": false,
+    "html": true,
     "json": true,
-    "reportDir": "cypress/report/mochawesome-report"
-  }
+    "reportDir": "cypress/report/mochawesome-report",
+    "mochaFile": "cypress/report/output.html"
+  },
+  "videosFolder": "cypress/report/video",
+  "screenshotsFolder": "cypress/report/screenshots"
 }
