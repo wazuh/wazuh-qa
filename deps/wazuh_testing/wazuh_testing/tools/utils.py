@@ -6,6 +6,7 @@ import re
 from functools import wraps
 from time import sleep
 from random import randint, SystemRandom, choice
+from distutils.version import StrictVersion
 import string
 
 
@@ -42,7 +43,7 @@ def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
                     sleep(wait_time)
             return func(*args, **kwargs)  # final attempt
         return to_retry  # actual decorator
-        
+
     return retry_function
 
 
@@ -109,3 +110,20 @@ def get_random_string(string_length, digits=True):
     character_set = string.ascii_uppercase + string.digits if digits else string.ascii_uppercase
 
     return ''.join(SystemRandom().choice(character_set) for _ in range(string_length))
+
+
+def compare_versions(version_1, version_2):
+    """Version comparison function
+
+    Args:
+        version_1 (str): Version 1 to compare in `x.y.z` format
+        version_2 (str): Version 2 to compare in `x.y.z` format
+    Returns:
+        int: 1 if version1 is greater, -1 if version 2 is greater or 0 if versions are equals.
+    """
+    if StrictVersion(version_1) > StrictVersion(version_2):
+        return 1
+    elif StrictVersion(version_1) < StrictVersion(version_2):
+        return -1
+    else:
+        return 0
