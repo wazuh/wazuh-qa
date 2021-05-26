@@ -9,10 +9,10 @@ Given('The kibana admin user is logged in using {word} authentication', (loginMe
     return false;
   });
 
-  const url = Cypress.env(loginMethod);
+  const url = Cypress.env(loginMethod) ? Cypress.env(loginMethod) : Cypress.env('default');
   navigate(url);
   cy.wait(5000);
 
-  const login = LOGIN_TYPE[loginMethod] ? LOGIN_TYPE[loginMethod]() : LOGIN_TYPE['default'](loginMethod);
-  login();
+  const login = LOGIN_TYPE[loginMethod] ? LOGIN_TYPE[loginMethod]() : LOGIN_TYPE['default']();
+  login(loginMethod);
 });

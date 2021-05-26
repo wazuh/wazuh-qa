@@ -20,7 +20,8 @@ const clickSubmitButtonODFE = () => {
   clickElement(buttonSubmitSelector);
 };
 
-const loginOdfe = () => {
+const loginOdfe = loginMethod => {
+  cy.log(`Parameter loginMethod is: ${loginMethod}`)
   fillUsernameFieldODFE(ODFE_USERNAME);
   fillPasswordFieldODFE(ODFE_PASSWORD);
   clickSubmitButtonODFE();
