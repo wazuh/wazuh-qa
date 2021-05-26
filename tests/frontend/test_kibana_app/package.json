@@ -10,7 +10,7 @@
     "cypress:run": "cypress run --headless --browser chrome",
     "merge": "mochawesome-merge cypress/report/mochawesome-report/*.json > cypress/report/output.json",
     "generate_mochawesome_report": "marge cypress/report/output.json --reportDir ./ --inline",
-    "delete_reports": "node delete-reports.js"
+    "delete_reports": "node ./cypress/utils/delete-reports.js"
   },
   "author": "",
   "license": "ISC",

@@ -5,3 +5,8 @@
 node_modules/
 
 #env configurations
+
+#reports
+report/
+output.html
+
