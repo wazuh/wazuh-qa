@@ -4,6 +4,8 @@ import sys
 from os import path
 from math import ceil
 from json import load
+import stat
+
 from time import sleep
 from datetime import datetime, timedelta
 
@@ -403,7 +405,7 @@ def callback_invalid_format_value(line, option, location):
     elif option == 'djb-multilog':
         msg = fr"DEBUG: Invalid DJB log: '{line}'"
 
-    return monitoring.make_callback(pattern=msg, prefix=prefix)
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
 def callback_reading_file(log_format, content_file, severity='DEBUG'):
@@ -536,8 +538,14 @@ def create_file_structure(get_files_list):
     for file in get_files_list:
         os.makedirs(file['folder_path'], exist_ok=True, mode=0o777)
         for name in file['filename']:
-            with open(os.path.join(file['folder_path'], name), mode='w'):
-                pass
+            for i in range(0, 5):
+                try:
+                    with open(os.path.join(file['folder_path'], name), mode='w'):
+                        pass
+                except:
+                    continue
+                break
+
             if 'age' in file:
                 fileinfo = os.stat(f"{file['folder_path']}{file['filename']}")
                 os.utime(f"{file['folder_path']}{file['filename']}", (fileinfo.st_atime - file['age'],
@@ -553,8 +561,19 @@ def delete_file_structure(get_files_list):
     Args:
         get_files_list(dict):  Files to delete.
     """
-    for file in get_files_list:
-        shutil.rmtree(file['folder_path'], ignore_errors=True)
+
+    def remove_readonly(func, path, _):
+        "Clear the readonly bit and reattempt the removal"
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
+
+    for folder in get_files_list:
+        for i in range(0, 5):
+            try:
+                shutil.rmtree(folder['folder_path'], onerror=remove_readonly)
+            except:
+                continue
+            break
 
 
 def callback_invalid_state_interval(interval):

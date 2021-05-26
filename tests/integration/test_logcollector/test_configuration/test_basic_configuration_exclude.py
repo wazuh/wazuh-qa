@@ -81,12 +81,6 @@ def test_configuration_exclude(get_configuration, configure_environment, restart
         AssertError: In the case of a server instance, the API response is different that the real configuration.
     """
     cfg = get_configuration['metadata']
-
-    if sys.platform == 'win32':
-        log_callback = logcollector.callback_invalid_location_pattern(cfg['location'])
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message=logcollector.GENERIC_CALLBACK_ERROR_INVALID_LOCATION)
-
     if wazuh_component == 'wazuh-manager':
         api.wait_until_api_ready()
         api.compare_config_api_response([cfg], 'localfile')

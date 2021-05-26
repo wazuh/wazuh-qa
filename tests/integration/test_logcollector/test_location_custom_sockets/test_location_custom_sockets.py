@@ -19,7 +19,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 
 # Marks
-pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=1)]
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
 # Configuration
 DAEMON_NAME = "wazuh-logcollector"
