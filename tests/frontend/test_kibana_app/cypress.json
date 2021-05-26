@@ -1,6 +1,7 @@
 {
-  "baseUrl": "https://localhost:5601",
   "testFiles": "**/*.{feature,features}",
+  "viewportWidth": 1360,
+  "viewportHeight": 790,
   "reporter": "mochawesome",
   "reporterOptions": {
     "charts": true,
