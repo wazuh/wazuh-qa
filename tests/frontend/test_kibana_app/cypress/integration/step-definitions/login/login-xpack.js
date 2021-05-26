@@ -1,4 +1,4 @@
-import { XPACK_PASSWORD, XPACK_USERNAME } from '../../utils/constants';
+import { XPACK_PASSWORD, XPACK_USERNAME } from '../../utils/login-constants';
 import {
   buttonSubmitSelector,
   inputPasswordSelector,

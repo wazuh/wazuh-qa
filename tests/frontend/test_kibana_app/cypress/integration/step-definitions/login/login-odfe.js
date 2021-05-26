@@ -1,4 +1,4 @@
-import { ODFE_PASSWORD, ODFE_USERNAME } from '../../utils/constants';
+import { ODFE_PASSWORD, ODFE_USERNAME } from '../../utils/login-constants';
 import {
   buttonSubmitSelector,
   inputPasswordSelector,

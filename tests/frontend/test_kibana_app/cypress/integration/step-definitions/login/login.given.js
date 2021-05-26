@@ -1,8 +1,6 @@
 import { Given } from 'cypress-cucumber-preprocessor/steps';
 import { navigate } from '../../utils/driver';
-import { loginXpack } from './login-xpack';
-import { BASIC, ODFE, XPACK } from '../../utils/constants';
-import { loginOdfe } from './login-odfe';
+import { LOGIN_TYPE } from '../../utils/login-constants';
 
 Given('The kibana admin user is logged in using {word} authentication', (loginMethod) => {
   Cypress.on('uncaught:exception', (err, runnable) => {
@@ -12,20 +10,11 @@ Given('The kibana admin user is logged in using {word} authentication', (loginMe
   });
 
   const url = Cypress.env(loginMethod);
+  const login = LOGIN_TYPE[loginMethod];
+
+  cy.log(`Parameter loginMethod is: ${loginMethod} and url from loginMethod is: ${url}`);
   navigate(url);
   cy.wait(5000);
 
-  switch (loginMethod) {
-    case XPACK:
-      loginXpack();
-      break;
-    case ODFE:
-      loginOdfe();
-      break;
-    case BASIC:
-      break;
-    default:
-      console.log(`Parameter loginMethod is: ${loginMethod}`);
-      break;
-  }
+  login ? login() : cy.log('Error login() it is not a function');
 });
