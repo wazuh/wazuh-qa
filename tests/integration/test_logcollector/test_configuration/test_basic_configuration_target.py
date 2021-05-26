@@ -98,8 +98,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_configuration_target(configure_local_internal_options, get_configuration,
-                              configure_environment):
+def test_configuration_target(get_configuration, configure_environment):
     """Check if Wazuh target field of logcollector works properly.
 
     Ensure Wazuh component fails in the case of invalid values and works properly in the case of valid target values.
