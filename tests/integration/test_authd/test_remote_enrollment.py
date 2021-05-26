@@ -11,8 +11,8 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import SocketController, FileMonitor
 from wazuh_testing.tools.sockets import wait_for_tcp_port
 from wazuh_testing.tools.wazuh import DEFAULT_SSL_REMOTE_ENROLLMENT_PORT
-# Marks
 
+# Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 
@@ -24,18 +24,16 @@ parameters = [
     {'REMOTE_ENROLLMENT': 'no', 'CLUSTER_DISABLED': 'no', 'NODE_TYPE': 'master'},
     {'REMOTE_ENROLLMENT': 'yes', 'CLUSTER_DISABLED': 'no', 'NODE_TYPE': 'master'},
     {'REMOTE_ENROLLMENT': 'no', 'CLUSTER_DISABLED': 'no', 'NODE_TYPE': 'worker'},
-    # x{'REMOTE_ENROLLMENT': 'yes', 'CLUSTER_DISABLED': 'no', 'NODE_TYPE': 'worker'},
+    {'REMOTE_ENROLLMENT': 'yes', 'CLUSTER_DISABLED': 'no', 'NODE_TYPE': 'worker'}
 ]
 
 metadata = [
-    {'remote_enrollment': 'no', 'id': 'no_remote_enrollment_standalone'},
-    {'remote_enrollment': 'yes', 'id': 'yes_remote_enrollment_standalone'},
-    {'remote_enrollment': 'no', 'id': 'no_remote_enrollment_cluster_master'},
-    {'remote_enrollment': 'yes', 'id': 'yes_remote_enrollment_cluster_master'},
-    {'remote_enrollment': 'no', 'id': 'no_remote_enrollment_cluster_worker'},
-
-    # {'remote_enrollment': 'yes', 'id': 'yes_remote_enrollment_cluster_worker}
-    # this fails with 'ERROR: Cannot communicate with master', would require a master node to work
+    {'remote_enrollment': 'no', 'node_type': 'no',  'id': 'no_remote_enrollment_standalone'},
+    {'remote_enrollment': 'yes', 'node_type': 'no',  'id': 'yes_remote_enrollment_standalone'},
+    {'remote_enrollment': 'no', 'node_type': 'master',  'id': 'no_remote_enrollment_cluster_master'},
+    {'remote_enrollment': 'yes', 'node_type': 'master',  'id': 'yes_remote_enrollment_cluster_master'},
+    {'remote_enrollment': 'no', 'node_type': 'worker',  'id': 'no_remote_enrollment_cluster_worker'},
+    {'remote_enrollment': 'yes', 'node_type': 'worker', 'id': 'yes_remote_enrollment_cluster_worker'}
 ]
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -51,6 +49,8 @@ monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, T
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
+cluster_socket_address = ('localhost', 1516)
+remote_enrollment_address = ('localhost', 1515)
 
 @pytest.fixture(scope="module", params=configurations,
                 ids=[f"{x['id']}" for x in metadata])
@@ -72,9 +72,10 @@ def test_remote_enrollment(get_configuration, configure_environment, restart_aut
                       are enabled.
     """
     expectation = does_not_raise()
+    expected_answer = 'OSSEC K:'
 
-    configuration = get_configuration['metadata']
-    remote_enrollment_enabled = configuration['remote_enrollment'] == 'yes'
+    test_metadata = get_configuration['metadata']
+    remote_enrollment_enabled = test_metadata['remote_enrollment'] == 'yes'
 
     if remote_enrollment_enabled:
         expected_log = "Accepting connections on port 1515. No password required."
@@ -88,14 +89,17 @@ def test_remote_enrollment(get_configuration, configure_environment, restart_aut
                                                                        prefix=monitoring.AUTHD_DETECTOR_PREFIX),
                                      error_message=f'Expected log not found: {expected_log}')
     with expectation:
-        ssl_socket = SocketController(("localhost", 1515), family='AF_INET', connection_protocol='SSL_TLSv1_2')
+        ssl_socket = SocketController(remote_enrollment_address, family='AF_INET', connection_protocol='SSL_TLSv1_2')
 
         ssl_socket.open()
+
+        if test_metadata['node_type'] == 'worker':
+            expected_answer = 'ERROR: Cannot comunicate with master'
 
         ssl_socket.send("OSSEC A:'user1'", size=False)
         response = ssl_socket.receive().decode()
 
-        assert "OSSEC K:'" in response
+        assert expected_answer in response
 
         ssl_socket.close()
 

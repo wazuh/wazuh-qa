@@ -1,14 +1,14 @@
-# Test basic configuration - Age
+# Test remote enrollment option for authd
 ## Overview
 
-Check if `wazuh-authd` actually disables 1515 ssl connections when `remote_enrollment` option is set to `no`,
+Check if `wazuh-authd` disables 1515 ssl connections when `remote_enrollment` option is set to `no`,
 and it accepts enrollments when the option is set to `yes`.
 
 It checks that the socket is or is not created according to the configuration and that the following [1] logs appear in `ossec.log`:
 - Port 1515 was set as disabled
 - Accepting connections on port 1515.
 
-It is executed for stand alone manager and also for cluster manager and worker[2]
+It is executed for stand alone manager and also for cluster manager and worker[2].
 
 ## Objective
 
@@ -28,10 +28,7 @@ It is executed for stand alone manager and also for cluster manager and worker[2
 
 ## Notes
 
-[2] Currently we've disabled the case where manager is a cluster node and remote enrollment is enabled because, as there is 
-no master node to connect with, the worker raises the following error: 'ERROR: Cannot communicate with master'. We could 
-add a simulated master node for the test but it would be too much work for what little testing it would provide so 
-we won't do it for the time being
+[2] For the worker case, as there is no master to report, the expected response from the worker is 'ERROR: Cannot comunicate with master'. THis confirms that the worker has attempted to communicate with the master to registrate the agent but it was not possible because the master is offline. The purpose of this test is not to check if the cluster works as expected so this would be enough to check that the option works right and remote enrollment is correctly enabled or disabled.
 
 ## Code documentation
 
