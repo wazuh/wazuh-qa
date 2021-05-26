@@ -13,6 +13,7 @@ from threading import Thread, Event
 from time import sleep
 
 import wazuh_testing.tools as tls
+from wazuh_testing.tools.utils import compare_versions
 
 logger = logging.getLogger('wazuh-statistics-monitor')
 logger.setLevel(logging.INFO)
@@ -42,23 +43,28 @@ class StatisticMonitor:
         target (str): target file to monitor.
     """
 
-    def __init__(self, target='agent', time_step=5, dst_dir=gettempdir()):
+    def __init__(self, target='agent', time_step=5, dst_dir=gettempdir(), wazuh_version=None):
         self.event = None
         self.thread = None
         self.time_step = time_step
         self.target = target
         self.dst_dir = dst_dir
         self.parse_json = False
+        self.wazuh_version = wazuh_version
 
         if self.target == 'agent':
-            self.statistics_file = tls.AGENT_STATISTICS_FILE
+            self.statistics_file = tls.LOGCOLLECTOR_STATISTICS_FILE_LEGACY if self.wazuh_version is not None and \
+                compare_versions('4.2.0', self.wazuh_version) == 1 else tls.AGENT_STATISTICS_FILE
         elif self.target == 'logcollector':
-            self.statistics_file = tls.LOGCOLLECTOR_STATISTICS_FILE
+            self.statistics_file = tls.LOGCOLLECTOR_STATISTICS_FILE_LEGACY if self.wazuh_version is not None and \
+                compare_versions('4.2.0', self.wazuh_version) == 1 else tls.LOGCOLLECTOR_STATISTICS_FILE
             self.parse_json = True
         elif self.target == 'remote':
-            self.statistics_file = tls.REMOTE_STATISTICS_FILE
+            self.statistics_file = tls.REMOTE_STATISTICS_FILE_LEGACY if self.wazuh_version is not None and \
+                compare_versions('4.2.0', self.wazuh_version) == 1 else tls.REMOTE_STATISTICS_FILE
         elif self.target == 'analysis':
-            self.statistics_file = tls.ANALYSIS_STATISTICS_FILE
+            self.statistics_file = tls.ANALYSIS_STATISTICS_FILE_LEGACY if self.wazuh_version is not None and \
+                compare_versions('4.2.0', self.wazuh_version) == 1 else tls.ANALYSIS_STATISTICS_FILE
         else:
             raise ValueError(f'The target {self.target} is not a valid one.')
 

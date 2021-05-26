@@ -113,13 +113,16 @@ def get_random_string(string_length, digits=True):
 
 
 def compare_versions(version_1, version_2):
-    """Version comparison function
+    """Function to compare two versions in x.y.z format.
 
     Args:
-        version_1 (str): Version 1 to compare in `x.y.z` format
-        version_2 (str): Version 2 to compare in `x.y.z` format
+        version_1 (str): Version 1 to compare in `x.y.z` format.
+        version_2 (str): Version 2 to compare in `x.y.z` format.
+
     Returns:
-        int: 1 if version1 is greater, -1 if version 2 is greater or 0 if versions are equals.
+        int: 1 if version1 is greater.
+            -1 if version 2 is greater.
+             0 if versions are equals.
     """
     if StrictVersion(version_1) > StrictVersion(version_2):
         return 1

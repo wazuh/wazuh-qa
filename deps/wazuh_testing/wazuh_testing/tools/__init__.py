@@ -48,6 +48,10 @@ else:
     LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-logcollector.state')
     REMOTE_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-remoted.state')
     ANALYSIS_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
+    AGENT_STATISTICS_FILE_LEGACY = os.path.join(WAZUH_PATH, 'var', 'run', 'ossec-agentd.state')
+    LOGCOLLECTOR_STATISTICS_FILE_LEGACY = os.path.join(WAZUH_PATH, 'var', 'run', 'ossec-logcollector.state')
+    REMOTE_STATISTICS_FILE_LEGACY = os.path.join(WAZUH_PATH, 'var', 'run', 'ossec-remoted.state')
+    ANALYSIS_STATISTICS_FILE_LEGACY = os.path.join(WAZUH_PATH, 'var', 'run', 'ossec-analysisd.state')
 
     try:
         import grp

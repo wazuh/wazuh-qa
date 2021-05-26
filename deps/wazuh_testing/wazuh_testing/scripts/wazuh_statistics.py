@@ -33,6 +33,8 @@ def get_script_arguments():
                         help='Enable debug level logging.')
     parser.add_argument('--store', dest='store_path', action='store', default=gettempdir(),
                         help=f"Path to store the CSVs with the data. Default {gettempdir()}.")
+    parser.add_argument('-v', '--version', dest='version', action='store', default=None,
+                        help=f"Wazuh version. Default None.")
 
     return parser.parse_args()
 
@@ -51,7 +53,8 @@ def main():
     logger.info(f'Started new session: {CURRENT_SESSION}')
 
     for target in options.target_list:
-        monitor = StatisticMonitor(target=target, time_step=options.sleep_time, dst_dir=options.store_path)
+        monitor = StatisticMonitor(target=target, time_step=options.sleep_time, dst_dir=options.store_path,
+                                   wazuh_version=options.version)
         monitor.start()
         MONITOR_LIST.append(monitor)
 
