@@ -13,7 +13,7 @@ from wazuh_testing.tools import get_service
 LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 
 # Marks
-pytestmark = pytest.mark.tier(level=0)
+pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]
 
 # Configuration
 no_restart_windows_after_configuration_set = True

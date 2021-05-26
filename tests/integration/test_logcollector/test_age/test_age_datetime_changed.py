@@ -70,14 +70,17 @@ def get_files_list():
     """Get file list to create from the module."""
     return file_structure
 
+
 @pytest.fixture(scope="module")
 def get_local_internal_options():
     """Get local internal options from the module."""
     return local_internal_options
 
+
 @pytest.mark.parametrize('new_datetime', new_host_datetime)
-def test_configuration_age_datetime(get_local_internal_options, configure_local_internal_options, new_datetime, get_files_list, get_configuration,
-                                    create_file_structure_function, configure_environment):
+def test_configuration_age_datetime(get_local_internal_options, configure_local_internal_options, new_datetime,
+                                    get_files_list, get_configuration, create_file_structure_function,
+                                    configure_environment):
     """Check if logcollector age option works correctly when date time of the system changes.
 
     Ensure that when date of the system change logcollector use properly age value, ignoring files that have not been
