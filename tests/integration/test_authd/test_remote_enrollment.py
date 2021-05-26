@@ -10,6 +10,7 @@ from wazuh_testing.tools import monitoring, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import SocketController, FileMonitor
 from wazuh_testing.tools.sockets import wait_for_tcp_port
+from wazuh_testing.tools.wazuh import DEFAULT_SSL_REMOTE_ENROLLMENT_PORT
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -44,7 +45,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 # Variables
 log_monitor_paths = []
 
-receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2')]
+receiver_sockets_params = [(("localhost", DEFAULT_SSL_REMOTE_ENROLLMENT_PORT), 'AF_INET', 'SSL_TLSv1_2')]
 
 monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]
 
@@ -65,7 +66,10 @@ def test_remote_enrollment(get_configuration, configure_environment, restart_aut
     to new connection, but requests to local socket will still be attended.
 
     Raises:
-
+        TimeoutError: if the expected logs do not appear or the port 1515 is not available when it should.
+        ConnectionRefusedError: if remote enrollment is enabled but authd refuse external connections.
+        assertRaises: if the expected OSSEC K message doesn't appear in authd response when remote connection
+                      are enabled.
     """
     expectation = does_not_raise()
 

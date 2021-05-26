@@ -67,8 +67,10 @@ def wait_for_tcp_port(port, host='localhost', timeout=10):
     while time.time() - start_time < timeout:
         try:
             sock.connect((host, port))
+            sock.close()
             return
         except ConnectionRefusedError:
             time.sleep(1)
+
 
     raise TimeoutError(f'Waited too long for the port {port} on host {host} to start accepting messages')
