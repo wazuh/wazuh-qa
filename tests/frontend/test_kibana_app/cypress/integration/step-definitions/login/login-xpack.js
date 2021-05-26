@@ -20,7 +20,8 @@ const clickSubmitButtonXPack = () => {
   clickElement(buttonSubmitSelector);
 };
 
-const loginXpack = () => {
+const loginXpack = loginMethod => {
+  cy.log(`Parameter loginMethod is: ${loginMethod}`)
   fillUsernameFieldXPack(XPACK_USERNAME);
   fillPasswordFieldXPack(XPACK_PASSWORD);
   clickSubmitButtonXPack();
