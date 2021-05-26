@@ -8,10 +8,12 @@ import pytest
 import wazuh_testing.api as api
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, get_service
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
+
+wazuh_component = get_service()
 
 LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 
@@ -96,7 +98,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_configuration_target(get_local_internal_options, configure_local_internal_options, get_configuration,
+def test_configuration_target(configure_local_internal_options, get_configuration,
                               configure_environment):
     """Check if Wazuh target field of logcollector works properly.
 
