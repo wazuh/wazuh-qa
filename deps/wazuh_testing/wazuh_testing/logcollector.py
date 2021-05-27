@@ -538,14 +538,14 @@ def callback_invalid_state_interval(interval):
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
-def wait_statistics_file():
+def wait_statistics_file(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT):
     """Wait until statistics file is available.
 
     Raises:
         FileNotFoundError: If the next statistics could not be obtained according to the interval
                            defined by "logcollector.state_interval".
     """
-    for _ in range(LOG_COLLECTOR_GLOBAL_TIMEOUT):
+    for _ in range(timeout):
         if path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
             break
         else:
