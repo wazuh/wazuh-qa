@@ -51,7 +51,7 @@ def test_max_files_per_second(inode_collision, get_configuration, configure_envi
     """ Check that FIM sleeps for one second when the option max_files_per_second is enabled
 
     Args:
-        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
+        inode_collision (boolean): Signals if the test should check the limit while running inode collisions.
         get_configuration (fixture): Gets the current configuration of the test.
         configure_environment (fixture): Configure the environment for the execution of the test.
         restart_syscheckd (fixture): Restarts syscheck.
@@ -91,21 +91,20 @@ def test_max_files_per_second(inode_collision, get_configuration, configure_envi
     for i in range(n_files_to_create):
         fim.delete_file(test_directories[0], f'test_{i}')
 
-    if inode_collision is False:
-        return  # Done testing this case
+    if inode_collision is True:
+        # Create the files again changing all inodes
+        fim.create_file(fim.REGULAR, test_directories[0], 'test', content='')
+        for i in range(n_files_to_create):
+            fim.create_file(fim.REGULAR, test_directories[0], f'test_{i}', content='')
 
-    # Create the files again changing all inodes
-    fim.create_file(fim.REGULAR, test_directories[0], 'test', content='')
-    for i in range(n_files_to_create):
-        fim.create_file(fim.REGULAR, test_directories[0], f'test_{i}', content='')
+        fim.check_time_travel(scheduled, monitor=wazuh_log_monitor,
+                              timeout=global_parameters.default_timeout + extra_timeout)
 
-    fim.check_time_travel(scheduled, monitor=wazuh_log_monitor,
-                          timeout=global_parameters.default_timeout + extra_timeout)
-    try:
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout + extra_timeout,
-                                callback=fim.callback_detect_max_files_per_second)
-    except TimeoutError as e:
-        if get_configuration['metadata']['max_files_per_sec'] == 0:
-            pass
-        else:
-            raise e
+        try:
+            wazuh_log_monitor.start(timeout=global_parameters.default_timeout + extra_timeout,
+                                    callback=fim.callback_detect_max_files_per_second)
+        except TimeoutError as e:
+            if get_configuration['metadata']['max_files_per_sec'] == 0:
+                pass
+            else:
+                raise e
