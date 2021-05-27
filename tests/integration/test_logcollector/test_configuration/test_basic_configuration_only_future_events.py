@@ -56,6 +56,8 @@ for log_format in log_format_list:
     tcases += [
         {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no',
             'MAX-SIZE': '9999999999999999999999999999999B', 'INVALID_VALUE': 'max-size'},
+        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '20B',
+         'INVALID_VALUE': ''},
         {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '5000B',
          'INVALID_VALUE': ''},
         {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '500KB',
@@ -129,7 +131,7 @@ def check_only_future_events_valid(cfg):
         if cfg['only-future-events'] == 'no':
             log_callback = logcollector.callback_monitoring_macos_logs(True)
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                    error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_MACOS)
+                                    error_message=error_message)
 
         log_callback = logcollector.callback_monitoring_macos_logs()
 

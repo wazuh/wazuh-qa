@@ -8,7 +8,7 @@ import pytest
 import wazuh_testing.api as api
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools import get_service
-from wazuh_testing.tools.services import get_process_cmd, check_if_process_is_running
+from wazuh_testing.tools.services import get_process_cmd, check_daemon_status
 from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 from wazuh_testing.logcollector import WINDOWS_CHANNEL_LIST
 import tempfile
@@ -80,4 +80,4 @@ def test_configuration_location(get_configuration, configure_environment, restar
         if sys.platform == 'win32':
             assert get_process_cmd('wazuh-agent.exe') != 'None'
         else:
-            assert check_if_process_is_running('wazuh-logcollector')
+            check_daemon_status('wazuh-logcollector')

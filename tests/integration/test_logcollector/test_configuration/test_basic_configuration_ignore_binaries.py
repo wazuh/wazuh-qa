@@ -10,7 +10,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 import wazuh_testing.generic_callbacks as gc
 from wazuh_testing.tools import get_service, LOG_FILE_PATH
 import wazuh_testing.logcollector as logcollector
-from wazuh_testing.tools.services import get_process_cmd, check_if_process_is_running, control_service
+from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import truncate_file
 import wazuh_testing.api as api
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX, FileMonitor
