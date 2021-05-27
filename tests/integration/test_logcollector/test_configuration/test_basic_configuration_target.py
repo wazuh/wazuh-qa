@@ -112,6 +112,7 @@ def test_configuration_target(get_configuration, configure_environment):
     truncate_file(LOG_FILE_PATH)
 
     if cfg['valid_value']:
+        control_service('start', daemon=LOGCOLLECTOR_DAEMON)
         check_configuration_target_valid(cfg)
     else:
         if sys.platform == 'win32':
