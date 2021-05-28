@@ -22,13 +22,13 @@ client_keys_path = os.path.join(WAZUH_PATH, "etc", "client.keys")
 # Subdirectories to be synchronized.
 directories_to_create = [os.path.join(WAZUH_PATH, "etc", "shared", "test_group"),
                          os.path.join(WAZUH_PATH, "var", "multigroups", "test_dir")]
-# Files that, after created in the master, should be present in all nodes.
+
+# Files that, after created in the master node, should be present in all nodes.
 files_to_sync = [os.path.join(WAZUH_PATH, "etc", "lists", "test_file"),
                  os.path.join(WAZUH_PATH, "etc", "rules", "test_file"),
-                 os.path.join(WAZUH_PATH, "etc", "decoders", "test_file")]
-# merged.mg files that must be created after creating each group folder.
-merged_mg_files = [os.path.join(directories_to_create[0], "merged.mg"),
-                   os.path.join(directories_to_create[1], "merged.mg")]
+                 os.path.join(WAZUH_PATH, "etc", "decoders", "test_file"),
+                 os.path.join(directories_to_create[1], 'merged.mg')]
+
 # Files inside directories where not 'all' files have to be synchronized, according to cluster.json.
 files_not_to_sync = [os.path.join(WAZUH_PATH, "etc", "test_file"),
                      os.path.join(WAZUH_PATH, "etc", "lists", 'ar.conf'),
@@ -38,8 +38,10 @@ files_not_to_sync = [os.path.join(WAZUH_PATH, "etc", "test_file"),
                      os.path.join(WAZUH_PATH, "etc", "lists", 'test.swp'),
                      os.path.join(directories_to_create[0], 'test_file'),
                      os.path.join(directories_to_create[1], 'test_file')]
-agent_conf_files_to_create = [os.path.join(directories_to_create[0], 'agent.conf'),
-                              os.path.join(directories_to_create[1], 'agent.conf')]
+
+# merged.mg and agent.conf files that must be created after creating a group folder.
+merged_mg_file = os.path.join(directories_to_create[0], "merged.mg")
+agent_conf_file = os.path.join(directories_to_create[0], 'agent.conf')
 
 
 @pytest.fixture(scope='function')
@@ -65,7 +67,7 @@ def test_missing_file(clean_files):
         host_manager.run_command(test_hosts[0], f'chown wazuh:wazuh {subdir}')
 
     # Create all specified files inside the master node.
-    for file in files_to_sync + files_not_to_sync + agent_conf_files_to_create:
+    for file in files_to_sync + files_not_to_sync + [agent_conf_file]:
         host_manager.run_command(test_hosts[0], f'touch {file}')
         host_manager.run_command(test_hosts[0], f'chown wazuh:wazuh {file}')
 
@@ -81,7 +83,7 @@ def test_missing_file(clean_files):
             assert perm == '660', f"{file} permissions were expected to be '660' in {host}, but they are {perm}."
         # Check that files which should not be synchronized are not sent to the workers. For example, only
         # merged.mg file inside /var/ossec/etc/shared/ directory should be synchronized, but nothing else.
-        for file in files_not_to_sync + agent_conf_files_to_create:
+        for file in files_not_to_sync + [agent_conf_file]:
             result = host_manager.run_command(host, f'ls {file}')
             assert result == '', f"File {file} was expected not to be copied in {host}, but it was."
 
@@ -100,11 +102,10 @@ def test_shared_files():
     for file in files_to_sync:
         host_manager.modify_file_content(host=test_hosts[0], path=file, content=file_test_content_master)
 
-    # Modify the content of agent.conf files to check if each merged.mg file is updated in master and synchronized in
+    # Modify the content of the agent.conf file to check if merged.mg file is updated in master and synchronized in
     # workers.
-    for file in agent_conf_files_to_create:
-        host_manager.modify_file_content(host=test_hosts[0], path=file,
-                                         content=f"{agent_conf_content}\n")
+    host_manager.modify_file_content(host=test_hosts[0], path=agent_conf_file,
+                                     content=f"{agent_conf_content}\n")
 
     time.sleep(time_to_sync)
 
@@ -115,13 +116,12 @@ def test_shared_files():
             assert result == file_test_content_master, f'File {file} inside {host} should contain ' \
                                                        f'{file_test_content_master}, but it has: {result}'
 
-    # Check whether merged.mg files are correctly updated in master and synchronized in workers or not.
+    # Check whether the merged.mg file is correctly updated in master and synchronized in workers or not.
     for host in test_hosts:
-        for file in merged_mg_files:
-            result = host_manager.run_command(host, f'cat {file}')
-            # The agent.conf content will be before the !0 test_file line in merged.mg.
-            assert agent_conf_content in result, f'File {file} inside {host} should contain ' \
-                                                 f'{agent_conf_content}, but it has: {result} '
+        result = host_manager.run_command(host, f'cat {merged_mg_file}')
+        # The agent.conf content will be before the !0 test_file line in merged.mg.
+        assert agent_conf_content in result, f'File {merged_mg_file} inside {host} should contain ' \
+                                             f'{agent_conf_content}, but it has: {result} '
 
     # Update the content of files in the worker node.
     for host in worker_hosts:
