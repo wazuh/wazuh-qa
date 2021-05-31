@@ -564,12 +564,18 @@ def delete_file_structure(get_files_list):
     """
 
     def remove_readonly(func, path, _):
-        "Clear the readonly bit and reattempt the removal"
+        """Give write permissions to specified path.
+
+        Args:
+            func (function): Called function.
+            path (str): File path.
+
+        """
         os.chmod(path, stat.S_IWRITE)
         func(path)
 
     for folder in get_files_list:
-        for i in range(0, 5):
+        for _ in range(5):
             try:
                 shutil.rmtree(folder['folder_path'], onerror=remove_readonly)
             except:
