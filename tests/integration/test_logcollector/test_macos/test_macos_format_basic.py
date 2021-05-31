@@ -73,6 +73,5 @@ def test_macos_format_basic(get_configuration, configure_environment, get_connec
                                                         'custom_log',
                                                         logcollector.TEMPLATE_OSLOG_MESSAGE, macos_message['subsystem'],
                                                         macos_message['category'])
-    sleep(20)
-
-    check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_macos_message)
+        
+    check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_macos_message, timeout=20)
