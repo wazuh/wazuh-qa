@@ -1,7 +1,6 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-import os
 import pytest
 from shutil import copyfile
 from wazuh_testing.tools import LOG_FILE_PATH
@@ -10,7 +9,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.authd_sim import AuthdSimulator
-from wazuh_testing.tools import _data_path
+from wazuh_testing.tools import CLIENT_CUSTOM_KEYS_PATH, CLIENT_CUSTOM_CERT_PATH
 
 DAEMON_NAME = "wazuh-logcollector"
 
@@ -31,13 +30,14 @@ def init_authd_remote_simulator(get_connection_configuration, request):
 
     Args:
         get_connection_configuration (fixture): Dictionary with authd and remoted parameters.
+        request (fixture): Provide information on the executing test function.
     """
     authd_remoted_simulator_configuration = get_connection_configuration
 
     # Write custom manager keys and certs in specified paths
 
-    copyfile(os.path.join(_data_path, 'sslmanager.key'), authd_remoted_simulator_configuration['server_keys'])
-    copyfile(os.path.join(_data_path, 'sslmanager.cert'), authd_remoted_simulator_configuration['server_cert'])
+    copyfile(CLIENT_CUSTOM_KEYS_PATH, authd_remoted_simulator_configuration['server_keys'])
+    copyfile(CLIENT_CUSTOM_CERT_PATH, authd_remoted_simulator_configuration['server_cert'])
 
     authd_simulator = AuthdSimulator(authd_remoted_simulator_configuration['ip_address'],
                                      enrollment_port=authd_remoted_simulator_configuration['authd_port'],
