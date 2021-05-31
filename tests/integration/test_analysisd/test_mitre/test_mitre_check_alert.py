@@ -25,8 +25,8 @@ configurations = []
 for i in range(1, 15):
     file_test = os.path.join(_data_path, f"test{i}.xml")
     configurations.append(file_test)
-    if i in range(5,9):
-        invalid_configurations.append(os.path.join(_data_path, f"test{i}.xml"))
+    if i in range(5, 9):
+        invalid_configurations.append(file_test)
 
 
 # fixtures

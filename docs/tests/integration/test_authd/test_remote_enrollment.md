@@ -32,5 +32,4 @@ It is executed for stand alone manager and also for cluster manager and worker[2
 
 ## Code documentation
 
-
-::: tests.integration.test_authd.test_remote_enrollment -->
+::: tests.integration.test_authd.test_remote_enrollment
