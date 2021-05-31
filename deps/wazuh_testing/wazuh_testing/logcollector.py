@@ -601,7 +601,7 @@ def macos_os_log_message(type, subsystem, category, process_name="custom_log"):
 
 
 def format_macos_message_pattern(process_name, message, subsystem=None, category=None):
-    """Compose expected macos format message that agent are going to send to the manager.
+    """Compose expected macos format message that agent is going to send to the manager.
 
     Args:
         process_name (str): Name of the process that has generated the log.
