@@ -64,9 +64,9 @@
     - log_format:
         value: LOG_FORMAT
     - only-future-events:
-        value: ONLY_FUTURE_EVENTS
+        value: ONLY-FUTURE-EVENTS
         attributes:
-          - max-size: MAX_SIZE
+          - max-size: MAX-SIZE
 
 - tags:
   - test_basic_configuration_frequency
@@ -135,20 +135,6 @@
          value: LOG_FORMAT
     - reconnect_time:
          value: RECONNECT_TIME
-
-- tags:
-  - test_basic_configuration_query
-  apply_to_modules:
-  - test_basic_configuration_query
-  sections:
-  - section: localfile
-    elements:
-    - location:
-        value: 'Security'
-    - log_format:
-         value: LOG_FORMAT
-    - reconnect_time:
-         value: QUERY
 
 - tags:
   - test_basic_configuration_label

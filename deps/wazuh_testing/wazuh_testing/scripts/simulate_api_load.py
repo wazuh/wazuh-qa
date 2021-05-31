@@ -1,9 +1,7 @@
 import argparse
-import yaml
-
-from os.path import join, dirname, abspath
 from time import sleep
 
+import yaml
 from wazuh_testing.tools.api_simulator import CustomLogger, APISimulator
 
 

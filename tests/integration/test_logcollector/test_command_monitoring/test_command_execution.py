@@ -22,8 +22,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_command_conf.yaml')
 
 local_internal_options = {
     'logcollector.remote_commands': 1,
-    'logcollector.debug': 2,
-    'monitord.rotate_log': 0
+    'logcollector.max_lines': 100
 }
 
 parameters = [
@@ -177,7 +176,6 @@ def test_command_execution_dbg(get_local_internal_options, configure_local_inter
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
                             callback=logcollector.callback_running_command(log_format=config['log_format'],
                                                                            command=config['command'],
-                                                                           prefix=LOG_COLLECTOR_DETECTOR_PREFIX,
                                                                            escape=True))
 
     # Command with known output to test "Reading command message: ..."
@@ -186,8 +184,7 @@ def test_command_execution_dbg(get_local_internal_options, configure_local_inter
 
     # "Read ... lines from command ..." only appears with log_format=command
     if config['log_format'] == 'command':
-        wazuh_log_monitor.start(timeout=60,
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                 error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
                                 callback=logcollector.callback_read_lines(command=config['command'],
-                                                                          prefix=LOG_COLLECTOR_DETECTOR_PREFIX,
                                                                           escape=True))
