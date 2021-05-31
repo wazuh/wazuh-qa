@@ -1,7 +1,7 @@
 - tags:
   - test_macos_format_ony_future_events
   apply_to_modules:
-  - test_macos_format_ony_future_events
+  - test_macos_format_only_future_events
   sections:
   - section: client
     elements:

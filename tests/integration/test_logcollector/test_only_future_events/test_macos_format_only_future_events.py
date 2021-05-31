@@ -17,9 +17,8 @@ import wazuh_testing.logcollector as logcollector
 pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=1)]
 
 # Configuration
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'configuration')
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_macos_format_only_future_events.yaml')
-
 parameters = [{'ONLY_FUTURE_EVENTS': 'yes'}, {'ONLY_FUTURE_EVENTS': 'no'}]
 metadata = [{'only-future-events': 'yes'}, {'only-future-events': 'no'}]
 
