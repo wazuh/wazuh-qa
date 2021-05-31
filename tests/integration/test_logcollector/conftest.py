@@ -59,8 +59,6 @@ def init_authd_remote_simulator(get_connection_configuration, request):
 
     truncate_file(authd_remoted_simulator_configuration['client_keys'])
 
-    sleep(1)
-
     control_service('restart')
 
     yield

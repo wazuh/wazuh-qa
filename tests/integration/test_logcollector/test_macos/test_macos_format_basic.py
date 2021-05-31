@@ -6,8 +6,7 @@ import os
 import pytest
 
 from time import sleep
-from wazuh_testing.logcollector import macos_logger_message, macos_os_log_message, \
-    DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION, format_macos_message_pattern, TEMPLATE_OSLOG_MESSAGE
+import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.remote import check_agent_received_message
 
@@ -45,7 +44,7 @@ def get_configuration(request):
 @pytest.fixture(scope="module")
 def get_connection_configuration():
     """Get configurations from the module."""
-    return DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
+    return logcollector.DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
 
 
 @pytest.mark.parametrize('macos_message', macos_log_messages)
@@ -64,14 +63,15 @@ def test_macos_format_basic(get_configuration, configure_environment, get_connec
     log_command = macos_message['command']
 
     if log_command == 'logger':
-        macos_logger_message(macos_message['message'])
-        expected_macos_message = format_macos_message_pattern(macos_message['command'], macos_message['message'])
+        logcollector.macos_logger_message(macos_message['message'])
+        expected_macos_message = logcollector.format_macos_message_pattern(macos_message['command'],
+                                                                           macos_message['message'])
 
     elif log_command == 'os_log':
-        macos_os_log_message(macos_message['type'], macos_message['subsystem'], macos_message['category'])
-        expected_macos_message = format_macos_message_pattern(
+        logcollector.macos_os_log_message(macos_message['type'], macos_message['subsystem'], macos_message['category'])
+        expected_macos_message = logcollector.format_macos_message_pattern(
                                                         'custom_log',
-                                                        TEMPLATE_OSLOG_MESSAGE, macos_message['subsystem'],
+                                                        logcollector.TEMPLATE_OSLOG_MESSAGE, macos_message['subsystem'],
                                                         macos_message['category'])
     sleep(20)
 
