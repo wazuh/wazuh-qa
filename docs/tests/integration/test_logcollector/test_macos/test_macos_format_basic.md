@@ -1,11 +1,11 @@
 # Test macOS format basic
 ## Overview 
 
-Check if `wazuh-logcollector` sends correctly unnified logging system events.
+Check if `wazuh-logcollector` gather correctly unnified logging system events.
 
 ## Objective
 
-- To confirm Wazuh macOS agent sends correctly unnified logging system events.
+- To confirm Wazuh macOS agent gather correctly unnified logging system events.
 
 ## General info
 

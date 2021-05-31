@@ -18,7 +18,7 @@ Confirm that logcollector works correctly for unnified logging system events in 
 
 ## List of tests
 
-- **[Test macos format basic](test_macos_format_basic.md)**: Check if `wazuh-logcollector` sends corrrectly generated 
+- **[Test macos format basic](test_macos_format_basic.md)**: Check if `wazuh-logcollector` gather corrrectly generated 
 unnified logging system events.
 
   
