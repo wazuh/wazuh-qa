@@ -564,12 +564,11 @@ def delete_file_structure(get_files_list):
     """
 
     def remove_readonly(func, path, _):
-        """Give write permissions to specified path.
+        """Give write permission to specified path.
 
         Args:
             func (function): Called function.
             path (str): File path.
-
         """
         os.chmod(path, stat.S_IWRITE)
         func(path)
