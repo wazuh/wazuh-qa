@@ -51,5 +51,5 @@ verifying that the dropped events match with the reported ones.
 
 #### Test macOS
 
-Wazuh macOS agent allow gather unnified logging system events. These tests ensure logcollector works correctly with this
+Wazuh macOS agent allows gather unnified logging system events. These tests ensure logcollector works correctly with this
 kind of log format.
