@@ -29,7 +29,7 @@ def get_local_internal_options(request):
     """Get configurations from the module."""
     backup_options_lines = conf.get_wazuh_local_internal_options()
     if sys.platform == 'win32':
-        conf.add_wazuh_local_internal_options({'windows.debug': '2'})
+        conf.add_wazuh_local_internal_options({'\n windows.debug': '2'})
     else:
         conf.add_wazuh_local_internal_options({'\n logcollector.debug': '2'})
     conf.add_wazuh_local_internal_options({'logcollector.state_interval': request.param})
