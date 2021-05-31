@@ -25,7 +25,7 @@ DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION = {
     'server_keys': os.path.join(WAZUH_PATH, 'etc', 'sslmanager.keys'),
     'server_cert': os.path.join(WAZUH_PATH, 'etc', 'sslmanager.cert'),
     'authd_port': 1515,
-    'remoted_port': 1515,
+    'remoted_port': 1514,
     'protocol': 'tcp',
     'remoted_mode': 'CONTROLLED_ACK',
 }
