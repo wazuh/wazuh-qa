@@ -51,7 +51,7 @@ def get_connection_configuration():
 def test_macos_format_basic(get_configuration, configure_environment, get_connection_configuration,
                             init_authd_remote_simulator, macos_message, restart_logcollector):
 
-    """Check if logcollector gather correctly macOS unnified logging system events.
+    """Check if logcollector gather correctly macOS unified logging system events.
 
     This test uses logger tool and a custom log to generate ULS events. The agent is connected to a authd simulator
     and sended events are gather using remoted simulator tool.
