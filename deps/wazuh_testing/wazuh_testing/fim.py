@@ -1321,7 +1321,8 @@ def callback_dbsync_no_data(line):
     return None
 
 
-def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None):
+def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None,
+                      timeout=global_parameters.default_timeout):
     """Change date and time of the system depending on a boolean condition.
 
     Optionally, a monitor may be used to check if a scheduled scan has been performed.
@@ -1333,6 +1334,7 @@ def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=1
         interval (timedelta, optional): time interval that will be added to system clock. Default: 13 hours.
         monitor (FileMonitor, optional): if passed, after changing system clock it will check for the end of the
             scheduled scan. The `monitor` will not consume any log line. Default `None`.
+        timeout (int, optional): If a monitor is provided, this parameter sets how log to wait for the end of scan.
 
     Raises
         TimeoutError: if `monitor` is not `None` and the scan has not ended in the
@@ -1349,10 +1351,10 @@ def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=1
         logger.info(f"Changing the system clock from {before} to {str(datetime.now())}")
 
         if monitor:
-            monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+            monitor.start(timeout=timeout, callback=callback_detect_end_scan,
                           update_position=False,
                           error_message=f'End of scheduled scan not detected after '
-                                        f'{global_parameters.default_timeout} seconds')
+                                        f'{timeout} seconds')
 
 
 def callback_configuration_warning(line):
