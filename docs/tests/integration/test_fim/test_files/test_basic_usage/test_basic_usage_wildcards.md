@@ -4,10 +4,10 @@ The test check for the correct expansion of wildcards in syscheck directories pa
 
 ## General info
 
-| Tier | Platforms | Time spent| Test file |
+| Tier | Platforms | Time spent | Test file |
 |:--:|:--:|:--:|:--:|
-| 0 | Linux | 85s |
-| 0 | Windows | 142s |
+| 0 | Linux | 85s | test_basic_usage_wildcards.py
+| 0 | Windows | 142s | test_basic_usage_wildcards.py
 
 ## Test logic
 

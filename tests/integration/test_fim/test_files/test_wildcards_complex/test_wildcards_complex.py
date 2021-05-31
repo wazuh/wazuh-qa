@@ -8,6 +8,7 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, generate_params
 from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.file import recursive_directory_creation
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -44,13 +45,9 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 
 def extra_configuration_before_yield():
+    """Function to create the test subdirectories that will be used for the test."""
     for dir in test_subdirectories:
-        split_path = os.path.split(dir)
-        parent_folder = os.path.join(test_folder, split_path[0])
-        if not os.path.exists(parent_folder):
-            os.mkdir(os.path.join(parent_folder))
-        if not os.path.exists(os.path.join(parent_folder, split_path[1])):
-            os.mkdir(os.path.join(parent_folder, split_path[1]))
+        recursive_directory_creation(os.path.join(test_folder, dir))
 
 
 # Fixtures

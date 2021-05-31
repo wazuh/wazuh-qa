@@ -21,9 +21,9 @@ test_folder = os.path.join(PREFIX, 'test_folder')
 test_directories = [test_folder]
 matched_dirs = ['simple1', 'stars123']
 test_subdirectories = matched_dirs + ['not_monitored_directory']
-expresions = [os.path.join(test_folder, 'simple?'),
-              os.path.join(test_folder, 'star*')]
-expresion_str = ','.join(expresions)
+expressions = [os.path.join(test_folder, 'simple?'),
+               os.path.join(test_folder, 'star*')]
+expresion_str = ','.join(expressions)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_wildcards.yml')
@@ -37,7 +37,6 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 def extra_configuration_before_yield():
     for sub_directory in test_subdirectories:
-
         if not os.path.exists(os.path.join(test_folder, sub_directory)):
             os.mkdir(os.path.join(test_folder, sub_directory))
 
@@ -52,13 +51,11 @@ def get_configuration(request):
 
 # tests
 
-@pytest.mark.parametrize('parent_folder', [test_folder])
 @pytest.mark.parametrize('subfolder_name', test_subdirectories)
 @pytest.mark.parametrize('file_name', ['regular_1'])
 @pytest.mark.parametrize('tags_to_apply', [{'ossec_conf_wildcards'}])
-def test_basic_usage_wildcards(parent_folder, subfolder_name, file_name, tags_to_apply,
-                               get_configuration, configure_environment, restart_syscheckd,
-                               wait_for_fim_start):
+def test_basic_usage_wildcards(subfolder_name, file_name, tags_to_apply,
+                               get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """Test the correct expansion of wildcards for monitored directories in syscheck
 
     The following wildcards expansions will be tried against the directory list:
@@ -72,7 +69,6 @@ def test_basic_usage_wildcards(parent_folder, subfolder_name, file_name, tags_to
     wildcards matching of the subfolder.
 
     Params:
-        parent_folder (str): Name of the root folder.
         subfolder_name (str): Name of the subfolder under root folder.
         file_name (str): Name of the file that will be created under subfolder.
         tags_to_apply (str): Value holding the configuration used in the test.
@@ -86,7 +82,7 @@ def test_basic_usage_wildcards(parent_folder, subfolder_name, file_name, tags_to
             pytest.skip("Windows can't create files with wildcards.")
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    folder = os.path.join(parent_folder, subfolder_name)
+    folder = os.path.join(test_folder, subfolder_name)
     regular_file_cud(folder, wazuh_log_monitor, file_list=[file_name],
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
                      min_timeout=global_parameters.default_timeout, triggers_event=subfolder_name in matched_dirs)

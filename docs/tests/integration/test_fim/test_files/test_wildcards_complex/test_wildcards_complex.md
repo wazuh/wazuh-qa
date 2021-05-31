@@ -4,10 +4,10 @@ The test check for the correct expansion of complex wildcards in syscheck direct
 
 ## General info
 
-| Tier | Platforms | Time spent| Test file |
+| Tier | Platforms | Time spent | Test file |
 |:--:|:--:|:--:|:--:|
-| 1 | Linux | 1503s |
-| 1 | Windows | 756s |
+| 1 | Linux | 1503s | test_wildcards_complex.py
+| 1 | Windows | 756s | test_wildcards_complex.py
 
 ## Test logic
 

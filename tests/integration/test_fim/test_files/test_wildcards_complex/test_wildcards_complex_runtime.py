@@ -9,6 +9,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing import fim
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.file import recursive_directory_creation
 from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
@@ -54,18 +55,13 @@ def wait_for_initial_scan():
 def create_test_folders():
     """Fixture that creates all the folders specified in the `test_subdirectories` list"""
     for dir in test_folders:
-        split_path = os.path.split(dir)
-        parent_folder = os.path.join(test_folder, split_path[0])
-        if not os.path.exists(parent_folder):
-            os.mkdir(os.path.join(parent_folder))
-        if not os.path.exists(os.path.join(parent_folder, split_path[1])):
-            os.mkdir(os.path.join(parent_folder, split_path[1]))
+        recursive_directory_creation(os.path.join(test_folder, dir))
 
 
 @pytest.fixture()
 def wait_for_wildcards_scan():
     """Fixture that waits until the end of the wildcards scan.
-    The wildcards scan is triggered at the beggining of the FIM scan)."""
+    The wildcards scan is triggered at the beginning of the FIM scan)."""
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout + frequency_scan,
                             callback=fim.callback_detect_end_scan,
                             error_message='End of FIM scan not detected').result()
@@ -87,7 +83,7 @@ def test_wildcards_complex_runtime(subfolder_name, file_name, tags_to_apply,
                                    wait_for_initial_scan, create_test_folders, wait_for_wildcards_scan):
     """Test the correct expansion of complex wildcards in runtime for monitored directories in syscheck.
         The test will monitor an empty folder and once the baseline scan is completed, it will create folders that may
-        match one of the monitored expresions and will check that the events are triggered (in case that a folder
+        match one of the monitored expressions and will check that the events are triggered (in case that a folder
         doesn't match the configured expresion, the test will check that no events are triggered in those folders.)
     Params:
         subfolder (str): Name of the subfolder under root folder.
