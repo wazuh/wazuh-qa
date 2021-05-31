@@ -77,7 +77,7 @@ def get_configuration(request):
 def test_audit_rules_removed_after_change_link(replaced_target, new_target, file_name, tags_to_apply,
                                                get_configuration, configure_environment,
                                                restart_syscheckd, wait_for_fim_start):
-    """ Test that checks if the audit rules are removed when the symlink target's is changed.
+    """Test that checks if the audit rules are removed when the symlink target's is changed.
 
     Args:
         replaced_target (str): Directory where the link is pointing.

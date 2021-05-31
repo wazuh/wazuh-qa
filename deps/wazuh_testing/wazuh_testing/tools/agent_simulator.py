@@ -20,12 +20,12 @@ import ssl
 import threading
 import zlib
 from datetime import date
-from sys import getsizeof
 from itertools import cycle
 from random import randint, sample, choice, getrandbits
 from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
 from string import ascii_letters, digits
 from struct import pack
+from sys import getsizeof
 from time import mktime, localtime, sleep, time
 
 import wazuh_testing.data.syscollector as syscollector
@@ -67,6 +67,7 @@ class Agent:
         fim_integrity_eps (int, optional): Set the maximum database synchronization message throughput.
         authd_password (str), optional: Password for registration if needed.
         registration_address (str, optional): Manager registration IP address.
+        retry_enrollment (bool, optional): retry then enrollment in case of error.
 
     Attributes:
         id (str): ID of the agent.
@@ -118,7 +119,7 @@ class Agent:
                  rootcheck_eps=100, logcollector_eps=100, authd_password=None, disable_all_modules=False,
                  rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, sca_frequency=60,
                  syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100,
-                 fixed_message_size=None, registration_address=None):
+                 fixed_message_size=None, registration_address=None, retry_enrollment=False):
         self.id = id
         self.name = name
         self.key = key
@@ -179,9 +180,10 @@ class Agent:
         self.upgrade_script_result = 0
         self.stop_receive = 0
         self.stage_disconnect = None
-        self.setup(disable_all_modules=disable_all_modules)
+        self.retry_enrollment = retry_enrollment
         self.rcv_msg_queue = Queue(rcv_msg_limit)
         self.fixed_message_size = fixed_message_size * 1024 if fixed_message_size is not None else None
+        self.setup(disable_all_modules=disable_all_modules)
 
     def update_checksum(self, new_checksum):
         self.keep_alive_raw_msg = self.keep_alive_raw_msg.replace(self.merged_checksum, new_checksum)
@@ -228,37 +230,55 @@ class Agent:
 
     def set_name(self):
         """Set a random agent name."""
-        random_string = ''.join(sample('0123456789abcdef' * 2, 8))
+        random_string = ''.join(sample(f"0123456789{ascii_letters}", 16))
         self.name = f"{agent_count}-{random_string}-{self.os}"
+
+    def _register_helper(self):
+        """Helper function to enroll an agent."""
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+        try:
+            ssl_socket = context.wrap_socket(sock, server_hostname=self.registration_address)
+            ssl_socket.connect((self.registration_address, 1515))
+
+            if self.authd_password is None:
+                event = f"OSSEC A:'{self.name}'\n".encode()
+            else:
+                event = f"OSSEC PASS: {self.authd_password} OSSEC A:'{self.name}'\n".encode()
+
+            ssl_socket.send(event)
+            recv = ssl_socket.recv(4096)
+            registration_info = recv.decode().split("'")[1].split(" ")
+
+            self.id = registration_info[0]
+            self.key = registration_info[3]
+        finally:
+            ssl_socket.close()
+            sock.close()
+
+        logging.debug(f"Registration - {self.name}({self.id}) in {self.registration_address}")
 
     def register(self):
         """Request to register the agent in the manager.
 
         In addition, it sets the agent id and agent key with the response data.
         """
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-        context.check_hostname = False
-        context.verify_mode = ssl.CERT_NONE
-
-        ssl_socket = context.wrap_socket(sock, server_hostname=self.registration_address)
-        ssl_socket.connect((self.registration_address, 1515))
-
-        if self.authd_password is None:
-            event = f"OSSEC A:'{self.name}'\n".encode()
+        if self.retry_enrollment:
+            retries = 20
+            while retries >= 0:
+                try:
+                    self._register_helper()
+                except Exception:
+                    retries -= 1
+                    sleep(6)
+                else:
+                    break
+            else:
+                raise ValueError(f"The agent {self.name} was not correctly enrolled.")
         else:
-            event = f"OSSEC PASS: {self.authd_password} OSSEC A:'{self.name}'\n".encode()
-
-        ssl_socket.send(event)
-        recv = ssl_socket.recv(4096)
-        registration_info = recv.decode().split("'")[1].split(" ")
-
-        self.id = registration_info[0]
-        self.key = registration_info[3]
-
-        ssl_socket.close()
-        sock.close()
-        logging.debug("Registration - {}({})".format(self.name, self.id))
+            self._register_helper()
 
     @staticmethod
     def wazuh_padding(compressed_event):
@@ -397,19 +417,20 @@ class Agent:
         """
         while self.stop_receive == 0:
             if is_tcp(sender.protocol):
-                rcv = sender.socket.recv(4)
-                if len(rcv) == 4:
-                    data_len = wazuh_unpack(rcv)
-                    try:
+                try:
+                    rcv = sender.socket.recv(4)
+                    if len(rcv) == 4:
+                        data_len = wazuh_unpack(rcv)
                         buffer_array = sender.socket.recv(data_len)
-                    except MemoryError:
-                        logging.critical(f"Memory error, trying to allocate {data_len}")
-                        return
-
-                    if data_len != len(buffer_array):
+                        if data_len != len(buffer_array):
+                            continue
+                    else:
                         continue
-                else:
-                    continue
+                except MemoryError:
+                    logging.critical(f"Memory error, trying to allocate {data_len}.")
+                    return
+                except Exception:
+                    return
             else:
                 buffer_array, client_address = sender.socket.recvfrom(65536)
             index = buffer_array.find(b'!')
@@ -422,17 +443,19 @@ class Agent:
             else:
                 msg_remove_header = bytes(buffer_array[1:])
                 msg_decrypted = Cipher(msg_remove_header, self.encryption_key).decrypt_blowfish()
-
-            padding = 0
-            while msg_decrypted:
-                if msg_decrypted[padding] == 33:
-                    padding += 1
-                else:
-                    break
-            msg_remove_padding = msg_decrypted[padding:]
-            msg_decompress = zlib.decompress(msg_remove_padding)
-            msg_decoded = msg_decompress.decode('ISO-8859-1')
-            self.process_message(sender, msg_decoded)
+            try:
+                padding = 0
+                while msg_decrypted:
+                    if msg_decrypted[padding] == 33:
+                        padding += 1
+                    else:
+                        break
+                msg_remove_padding = msg_decrypted[padding:]
+                msg_decompress = zlib.decompress(msg_remove_padding)
+                msg_decoded = msg_decompress.decode('ISO-8859-1')
+                self.process_message(sender, msg_decoded)
+            except zlib.error:
+                logging.error("Corrupted message from the manager. Continuing.")
 
     def stop_receiver(self):
         """Stop Agent listener."""
@@ -472,7 +495,7 @@ class Agent:
         req_code = message_list[1]
 
         if 'com' in message_list:
-            """ Examples:
+            """Examples:
             ['12d95abf04334f90f8dc3140031b3e7b342680000000130:5489:#!-req', '81d15486', 'com', 'close',
                 'wazuh_agent_v4.2.0_linux_x86_64.wpk']
             ['dff5324c331a37d56978f7f034f2634e599120000000130:5490:#!-req', '81d15487', 'com', 'sha1',
@@ -484,7 +507,7 @@ class Agent:
             command = message_list[com_index + 1]
 
         elif 'upgrade' in message_list:
-            """ Examples:
+            """Examples:
             ['5e085e566814750136f3926f758349cb232030000000130:5492:#!-req', '81d15489', 'upgrade',
                 '{"command":"clear_upgrade_result","parameters":{}}']
             """
@@ -492,12 +515,12 @@ class Agent:
             json_command = json.loads(message_list[com_index + 1])
             command = json_command['command']
         elif 'getconfig' in message_list:
-            """ Examples:
+            """Examples:
             ['ececac937b8e5dead15e9096e8bd5215214970000000002:3090:#!-req', 'c2b2c9e3', 'agent', 'getconfig', 'client']
             """
             command = 'getconfig'
         elif 'getstate' in message_list:
-            """ Examples:
+            """Examples:
             ['ececac937b8e5dead15e9096e8bd5215214970000000002:3090:#!-req', 'c2b2c9e3', 'logcollector', 'getstate']
             """
             command = 'getstate'
@@ -602,6 +625,8 @@ class Agent:
                 msg_as_list.insert(1, f'"{key}":{value}')
             msg = '\n'.join(msg_as_list)
 
+        logging.debug(f"Keep alive message = {msg}")
+
         self.keep_alive_event = self.create_event(msg)
         self.keep_alive_raw_msg = msg
 
@@ -688,7 +713,7 @@ class Agent:
         """Get agent connection status of global.db.
 
         Returns:
-            string: Agent connection status (connected, disconnected, never_connected)
+            str: Agent connection status (connected, disconnected, never_connected)
         """
         return self.get_agent_info('connection_status')
 
@@ -762,7 +787,7 @@ class GeneratorSyscollector:
             message_type (str): Syscollector event type.
 
         Returns:
-            string: the generated syscollector event message.
+            str: the generated syscollector event message.
         """
         message = syscollector.SYSCOLLECTOR_HEADER
         if message_type == 'network':
@@ -807,7 +832,7 @@ class GeneratorSyscollector:
          in `bath_size`.
 
          Returns:
-            string: generated event with the desired format for syscollector
+            str: generated event with the desired format for syscollector
         """
         if self.current_batch_events_size == 0:
             self.current_batch_events = (self.current_batch_events + 1) % len(self.list_events)
@@ -826,18 +851,7 @@ class GeneratorSyscollector:
 class SCA:
     """This class allows the generation of sca_label events.
 
-    Create sca events, both summary and check. Example messasge:
-
-          p:sca:{"type": "check", "scan_id": 386,
-         "id": 8247694953, "policy": "CIS Benchmark for debian8",
-         "policy_id": "cis_debian8_policy", "check": {"id": 92105,
-         "title": "Ensure root is the only UID 0 account", "description": "Any account with UID 0
-         has superuser privileges on the system", "rationale": "This access must be limited to only the
-         default root account", "remediation": "Remove any users other than root with UID 0", "compliance":
-         {"cis": "6.2.6", "cis_csc": "5.1", "pci_dss": "10.2.5", "hipaa": "164.312.b", "nist_800_53":
-         "AU.14,AC.7", "gpg_13": "7.8", "gdpr_IV": "35.7,32.2", "tsc": "CC6.1,CC6.8,CC7.2,CC7.3,CC7.4"},
-         "rules": "f:/etc/passwd -> !r:^# && !r:^\\\\s*\\\\t*root: && r:^\\\\w+:\\\\w+:0:\"]",
-         "condition": "none", "file": "/etc/passwd", "result": "failed"}}
+    Create sca events, both summary and check.
 
     Args:
         os (str): Agent operative system.
@@ -854,7 +868,7 @@ class SCA:
         """Alternatively creates summary and check SCA messages.
 
         Returns:
-            string: an sca_label message formatted with the required header codes.
+            str: an sca_label message formatted with the required header codes.
         """
         if self.count % 100 == 0:
             msg = self.create_sca_event('summary')
@@ -872,7 +886,10 @@ class SCA:
         """Create sca_label event of the desired type.
 
         Args:
-            event_type (str): Event type `[summary, check]`.
+            event_type (str): Event type summary or check.
+
+        Returns:
+            dict: SCA event.
         """
         event_data = dict()
         event_data['type'] = event_type
@@ -946,7 +963,7 @@ class Rootcheck:
     Args:
         agent_name (str): Name of the agent.
         agent_id (str): Id of the agent.
-        rootcheck_sample (str): File with the rootcheck events that are going to be used.
+        rootcheck_sample (str, optional): File with the rootcheck events that are going to be used.
     """
     def __init__(self, os, agent_name, agent_id, rootcheck_sample=None):
         self.os = os
@@ -966,6 +983,7 @@ class Rootcheck:
             self.rootcheck_path = os.path.join(_data_path, 'rootcheck.txt')
         else:
             self.rootcheck_path = os.path.join(_data_path, self.rootcheck_sample)
+
         with open(self.rootcheck_path) as fp:
             line = fp.readline()
             while line:
@@ -978,7 +996,7 @@ class Rootcheck:
         """Returns a rootcheck message, informing when rootcheck scan starts and ends.
 
         Returns:
-            string: a Rootcheck generated message
+            str: a Rootcheck generated message
         """
         message = next(self.message)
         if message == 'Starting rootcheck scan.':
@@ -992,22 +1010,16 @@ class Rootcheck:
 
 
 class Logcollector:
-    """This class allows the generation of logcollector events.
-
-    Creates logcollector events. Generated message:
-
-        x:syslog:Mar    24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550
-    """
+    """This class allows the generation of logcollector events."""
     def __init__(self):
         self.logcollector_tag = 'syslog'
         self.logcollector_mq = 'x'
 
     def generate_event(self):
-        """Generate logcollector event. Generated event:
-                x:syslog:Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550
+        """Generate logcollector event
 
         Returns:
-            string: a Logcollector generated message
+            str: a Logcollector generated message
         """
         log = 'Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550'
 
@@ -1044,7 +1056,7 @@ class GeneratorIntegrityFIM:
         """Generate integrity FIM message according to `event_type` attribute.
 
         Returns:
-            string: an IntegrityFIM formatted message
+            str: an IntegrityFIM formatted message
         """
         data = None
         if self.event_type in ["integrity_check_global", "integrity_check_left", "integrity_check_right"]:
@@ -1074,7 +1086,7 @@ class GeneratorIntegrityFIM:
         """Generate a random kind of integrity FIM message according to `event_type` attribute.
 
         Returns:
-            string: an IntegrityFIM formatted message
+            str: an IntegrityFIM formatted message
         """
         if event_type is not None:
             self.event_type = event_type
@@ -1104,7 +1116,7 @@ class GeneratorHostinfo:
         """"Generates an arbitrary hostinfo message
 
         Returns:
-            string: an hostinfo formatted message
+            str: an hostinfo formatted message
         """
         number_open_ports = randint(1, 10)
         host_ip = get_random_ip()
@@ -1157,7 +1169,7 @@ class GeneratorWinevt:
             winevt_type (str): Winevt type message `system, security, application, windows-defender, sysmon`.
 
         Returns:
-            string: an windows event generated message.
+            str: an windows event generated message.
         """
         self.current_event_key = next(self.next_event_key)
 
@@ -1211,7 +1223,7 @@ class GeneratorFIM:
         """Initialize file attribute.
 
         Returns:
-            string: the new randomized file for the instance
+            str: the new randomized file for the instance
         """
         self._file = self.file_root + ''.join(sample(ascii_letters + digits, self.default_file_length))
         return self._file
@@ -1220,13 +1232,13 @@ class GeneratorFIM:
         """Initialize file size with random value
 
         Returns:
-            string: the new randomized file size for the instance
+            str: the new randomized file size for the instance
         """
         self._size = randint(-1, self.max_size)
         return self._size
 
     def random_mode(self):
-        """ Initialize module attribute with `S_IFREG` or `S_IFLNK`
+        """Initialize module attribute with `S_IFREG` or `S_IFLNK`
 
         Returns:
             self._mode: the new randomized file mode for the instance
@@ -1244,30 +1256,30 @@ class GeneratorFIM:
         return self._mode
 
     def random_uid(self):
-        """ Initialize uid attribute with random value.
+        """Initialize uid attribute with random value.
 
         Returns:
-            string: the new randomized file uid for the instance
+            str: the new randomized file uid for the instance
         """
         self._uid = choice(list(self.users.keys()))
         self._uname = self.users[self._uid]
         return self._uid, self._uname
 
     def random_gid(self):
-        """ Initialize gid attribute with random value.
+        """Initialize gid attribute with random value.
 
         Returns:
-            string: the new randomized gid for the instance,
-            string: the new randomized gname for the instance.
+            str: the new randomized gid for the instance,
+            str: the new randomized gname for the instance.
         """
         self._gid = choice(list(self.users.keys()))
         self._gname = self.users[self._gid]
         return self._gid, self._gname
 
     def random_md5(self):
-        """ Initialize md5 attribute with random value.
+        """Initialize md5 attribute with random value.
         Returns:
-            string: the new randomized md5 for the instance.
+            str: the new randomized md5 for the instance.
         """
         if self._mode & S_IFREG == S_IFREG:
             self._md5 = ''.join(sample('0123456789abcdef' * 2, 32))
@@ -1275,9 +1287,9 @@ class GeneratorFIM:
         return self._md5
 
     def random_sha1(self):
-        """ Initialize sha1 attribute with random value.
+        """Initialize sha1 attribute with random value.
         Returns:
-            string: the new randomized sha1 for the instance.
+            str: the new randomized sha1 for the instance.
         """
         if self._mode & S_IFREG == S_IFREG:
             self._sha1 = ''.join(sample('0123456789abcdef' * 3, 40))
@@ -1285,9 +1297,9 @@ class GeneratorFIM:
         return self._sha1
 
     def random_sha256(self):
-        """ Initialize sha256 attribute with random value.
+        """Initialize sha256 attribute with random value.
         Returns:
-            string: the new randomized sha256 for the instance.
+            str: the new randomized sha256 for the instance.
         """
         if self._mode & S_IFREG == S_IFREG:
             self._sha256 = ''.join(sample('0123456789abcdef' * 4, 64))
@@ -1295,17 +1307,17 @@ class GeneratorFIM:
         return self._sha256
 
     def random_time(self):
-        """ Initialize time attribute with random value.
+        """Initialize time attribute with random value.
          Returns:
-            string: the new randomized mdate for the instance.
+            str: the new randomized mdate for the instance.
         """
         self._mdate += randint(1, self.max_timediff)
         return self._mdate
 
     def random_inode(self):
-        """ Initialize inode attribute with random value.
+        """Initialize inode attribute with random value.
         Returns:
-            string: the new randomized inode for the instance.
+            str: the new randomized inode for the instance.
         """
         self._inode = randint(1, self.max_inode)
         return self._inode
@@ -1353,7 +1365,7 @@ class GeneratorFIM:
         return changed_attributes
 
     def get_attributes(self):
-        """ Return GeneratorFIM attributes.
+        """Return GeneratorFIM attributes.
 
         Returns:
             dict: instance attributes.
@@ -1370,12 +1382,12 @@ class GeneratorFIM:
         return attributes
 
     def format_message(self, message):
-        """ Format FIM message.
+        """Format FIM message.
         Args:
             message (str): FIM message.
 
         Returns:
-            string: generated message with the required FIM header.
+            str: generated message with the required FIM header.
         """
         if self.agent_version >= "3.12":
             formated_message = f"{self.syscheck_mq}:({self.agent_id}) any->syscheck:{message}"
@@ -1391,10 +1403,10 @@ class GeneratorFIM:
         return formated_message
 
     def generate_message(self):
-        """ Generate FIM event based on `event_type` and `agent_version` attribute.
+        """Generate FIM event based on `event_type` and `agent_version` attribute.
 
         Returns:
-            string: generated message with the required FIM header.
+            str: generated message with the required FIM header.
         """
         if self.agent_version >= "3.12":
             if self.event_type == "added":
@@ -1435,13 +1447,13 @@ class GeneratorFIM:
         return formatted_message
 
     def get_message(self, event_mode=None, event_type=None):
-        """ Get FIM message. If no parameters are provided, it is randomly selected among the possible values
+        """Get FIM message. If no parameters are provided, it is randomly selected among the possible values
         Args:
             event_mode (str): Event mode `real-time, whodata, scheduled`.
             event_type (str): Event type `added, modified, deleted`.
 
         Returns:
-            string: generated message.
+            str: generated message.
         """
         if event_mode is not None:
             self.event_mode = event_mode
@@ -1496,6 +1508,8 @@ class Sender:
                 self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.socket.connect((self.manager_address, int(self.manager_port)))
                 self.socket.send(length + event)
+            except ConnectionResetError:
+                logging.warning(f"Connection reset by peer. Continuing...")
         if is_udp(self.protocol):
             self.socket.sendto(event, (self.manager_address, int(self.manager_port)))
 

@@ -3,10 +3,10 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-
-import pytest
 from grp import getgrnam
 from pwd import getpwnam
+
+import pytest
 from wazuh_testing.api import callback_detect_api_debug
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
