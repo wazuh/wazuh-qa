@@ -36,8 +36,8 @@ def init_authd_remote_simulator(get_connection_configuration, request):
 
     # Write custom manager keys and certs in specified paths
 
-    copyfile(os.path.join(_data_path, 'ssmanager.keys'), authd_remoted_simulator_configuration['server_keys'])
-    copyfile(os.path.join(_data_path, 'ssmanager.cert'), authd_remoted_simulator_configuration['server_cert'])
+    copyfile(os.path.join(_data_path, 'sslmanager.key'), authd_remoted_simulator_configuration['server_key'])
+    copyfile(os.path.join(_data_path, 'sslmanager.cert'), authd_remoted_simulator_configuration['server_cert'])
 
     authd_simulator = AuthdSimulator(authd_remoted_simulator_configuration['ip_address'],
                                      enrollment_port=authd_remoted_simulator_configuration['authd_port'],

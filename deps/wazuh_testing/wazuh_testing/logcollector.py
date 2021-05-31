@@ -21,7 +21,7 @@ GENERIC_CALLBACK_ERROR = 'The expected error output has not been produced'
 DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION = {
     'ip_address': 'localhost',
     'client_keys': os.path.join(WAZUH_PATH, 'etc', 'client.keys'),
-    'server_keys': os.path.join(WAZUH_PATH, 'etc', 'sslmanager.keys'),
+    'server_keys': os.path.join(WAZUH_PATH, 'etc', 'sslmanager.key'),
     'server_cert': os.path.join(WAZUH_PATH, 'etc', 'sslmanager.cert'),
     'authd_port': 1515,
     'remoted_port': 1514,
