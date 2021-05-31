@@ -31,7 +31,7 @@ def get_local_internal_options(request):
     if sys.platform == 'win32':
         conf.add_wazuh_local_internal_options({'windows.debug': '2'})
     else:
-        conf.add_wazuh_local_internal_options({'logcollector.debug': '2'})
+        conf.add_wazuh_local_internal_options({'\n logcollector.debug': '2'})
     conf.add_wazuh_local_internal_options({'logcollector.state_interval': request.param})
     if request.param not in range(0, 36001) and not isinstance(request.param, int):
         with pytest.raises(ValueError):
@@ -58,7 +58,8 @@ def test_options_state_interval(get_local_internal_options):
             else:
                 log_callback = logcollector.callback_invalid_state_interval(interval)
                 wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
-                                        error_message=f"Invalid definition for logcollector.state_interval: {interval}.")
+                                        error_message=f"The message: 'Invalid definition for "
+                                                  f"logcollector.state_interval: {interval}.' didn't appear")
         else:
             control_service('restart')
             logcollector.wait_statistics_file(timeout=interval + 5)
