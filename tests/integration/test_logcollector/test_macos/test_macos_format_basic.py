@@ -51,7 +51,14 @@ def get_connection_configuration():
 @pytest.mark.parametrize('macos_message', macos_log_messages)
 def test_macos_format_basic(get_configuration, configure_environment, get_connection_configuration,
                             init_authd_remote_simulator, macos_message, restart_logcollector):
-    """
+
+    """Check if logcollector gather correctly macOS unnified logging system events.
+
+    This test uses logger tool and a custom log to generate ULS events. The agent is connected to a authd simulator
+    and sended events are gather using remoted simulator tool.
+
+    Raises:
+        TimeoutError: If the expected callback is not generated.
     """
     expected_macos_message = ""
     log_command = macos_message['command']

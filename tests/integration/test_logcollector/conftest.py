@@ -27,6 +27,11 @@ def restart_logcollector(get_configuration, request):
 
 @pytest.fixture(scope='module')
 def init_authd_remote_simulator(get_connection_configuration, request):
+    """Initialize authd and remoted simulator
+
+    Args:
+        get_connection_configuration (fixture): Dictionary with authd and remoted parameters.
+    """
     authd_remoted_simulator_configuration = get_connection_configuration
 
     # Write custom manager keys and certs in specified paths
@@ -52,7 +57,6 @@ def init_authd_remote_simulator(get_connection_configuration, request):
     setattr(request.module, 'remoted_simulator', remoted_simulator)
     setattr(request.module, 'authd_simulator', authd_simulator)
 
-    # We should copy before truncate
     truncate_file(authd_remoted_simulator_configuration['client_keys'])
 
     sleep(1)

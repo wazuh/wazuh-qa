@@ -569,10 +569,28 @@ def wait_statistics_file():
 
 
 def macos_logger_message(message):
+    """Create a unified logging system log using logger tool.
+
+    Args:
+        message (str): Logger event message.
+    """
     os.system(f"logger {message}")
 
 
 def macos_os_log_message(type, subsystem, category, process_name="custom_log"):
+    """Create a unified logging system log using log generator script.
+
+    To create a custom event log with desired type, subsystem and category the `log_generator` script is required.
+    This, get these parameters and use os_log (https://developer.apple.com/documentation/os/os_log) to create it.
+    To run correctly `log_generator` is necessary to compile it. This is done in temporal folder, using `process_name`
+    parameter.
+
+    Args:
+        type (str): Log type (info, debug, default, error or fault).
+        subsystem (str): Subsystem of the event log.
+        category (str): Category of the event log.
+        process_name (str): Name of the process that is going to generate the log.
+    """
     compiled_log_generator_path = os.path.join(gettempdir(), process_name)
     if not os.path.exists(compiled_log_generator_path):
         os_log_swift_script = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -583,6 +601,17 @@ def macos_os_log_message(type, subsystem, category, process_name="custom_log"):
 
 
 def format_macos_message_pattern(process_name, message, subsystem=None, category=None):
+    """Compose expected macos format message that agent are going to send to the manager.
+
+    Args:
+        process_name (str): Name of the process that has generated the log.
+        message (str): Log message.
+        subsystem (str): Log event subsystem.
+        category (str): Log event category.
+
+    Returns:
+        string: Expected unified logging system event.
+    """
     if process_name == 'logger':
         macos_message = f"{process_name}\[\d+\]: {message}"
     else:

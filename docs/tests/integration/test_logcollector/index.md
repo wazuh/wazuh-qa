@@ -6,6 +6,7 @@ firewalls and other such devices. In the case of the Windows agent, `wazuh-agent
 logs and send them to the manager.
 
 ## Tiers
+
 ### Tier 0
 #### Test configuration
 
@@ -47,3 +48,8 @@ Wazuh allows forwarding the events that are written in a monitored log file to a
 through the `target` option in the `localfile` section of the configuration. These tests will check 
 if the statistics of the forwarded events, which are in the file `wazuh-logcollector.state` are correct, 
 verifying that the dropped events match with the reported ones.
+
+#### Test macOS
+
+Wazuh macOS agent allow gather unnified logging system events. These tests ensure logcollector works correctly with this
+kind of log format.
