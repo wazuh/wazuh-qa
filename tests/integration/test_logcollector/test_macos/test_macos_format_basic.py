@@ -5,13 +5,12 @@
 import os
 import pytest
 
-from time import sleep
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.remote import check_agent_received_message
 
 # Marks
-pytestmark = pytest.mark.tier(level=1)
+pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=1)]
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -73,5 +72,5 @@ def test_macos_format_basic(get_configuration, configure_environment, get_connec
                                                         'custom_log',
                                                         logcollector.TEMPLATE_OSLOG_MESSAGE, macos_message['subsystem'],
                                                         macos_message['category'])
-        
+
     check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_macos_message, timeout=20)
