@@ -47,3 +47,7 @@ Wazuh allows forwarding the events that are written in a monitored log file to a
 through the `target` option in the `localfile` section of the configuration. These tests will check 
 if the statistics of the forwarded events, which are in the file `wazuh-logcollector.state` are correct, 
 verifying that the dropped events match with the reported ones.
+
+#### Test options
+
+For each internal option of `logcollector` module, check if the options are set as expected and Wazuh and `logcollector` work correctly.
