@@ -1,15 +1,14 @@
 import os
 import shutil
-import sys
-from os import path
-from math import ceil
-from json import load
 import stat
-
-from time import sleep
+import sys
 from datetime import datetime, timedelta
+from json import load
+from math import ceil
+from tempfile import gettempdir
+from time import sleep
 
-from wazuh_testing.tools import LOGCOLLECTOR_STATISTICS_FILE, monitoring
+from wazuh_testing.tools import LOGCOLLECTOR_STATISTICS_FILE, WAZUH_PATH, monitoring
 
 GENERIC_CALLBACK_ERROR_COMMAND_MONITORING = 'The expected command monitoring log has not been produced'
 GENERIC_CALLBACK_ERROR_INVALID_LOCATION = 'The expected invalid location error log has not been produced'
@@ -22,6 +21,18 @@ LOG_COLLECTOR_GLOBAL_TIMEOUT = 20
 GENERIC_CALLBACK_ERROR_READING_FILE = "The expected invalid content error log has not been produced"
 GENERIC_CALLBACK_ERROR = 'The expected error output has not been produced'
 
+DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION = {
+    'ip_address': 'localhost',
+    'client_keys': os.path.join(WAZUH_PATH, 'etc', 'client.keys'),
+    'server_keys': os.path.join(WAZUH_PATH, 'etc', 'sslmanager.key'),
+    'server_cert': os.path.join(WAZUH_PATH, 'etc', 'sslmanager.cert'),
+    'authd_port': 1515,
+    'remoted_port': 1514,
+    'protocol': 'tcp',
+    'remoted_mode': 'CONTROLLED_ACK',
+}
+
+TEMPLATE_OSLOG_MESSAGE = 'Custom os_log event message'
 WINDOWS_CHANNEL_LIST = ['Microsoft-Windows-Sysmon/Operational',
                         'Microsoft-Windows-Windows Firewall With Advanced Security/Firewall',
                         'Application',
@@ -463,7 +474,7 @@ def get_data_sending_stats(log_path, socket_name):
     """
     wait_statistics_file()
 
-    if not path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
+    if not os.path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
         raise FileNotFoundError
 
     with open(LOGCOLLECTOR_STATISTICS_FILE, 'r') as json_file:
@@ -515,12 +526,12 @@ def get_next_stats(current_stats, log_path, socket_name, state_interval):
         FileNotFoundError: If the next statistics could not be obtained according to the interval
                            defined by "logcollector.state_interval".
     """
-    mtime_current = path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
+    mtime_current = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
     next_interval_date = current_stats['interval_end_date'] + timedelta(seconds=state_interval)
     next_2_intervals_date = current_stats['interval_end_date'] + timedelta(seconds=state_interval * 2)
     for _ in range(state_interval * 2):
         stats = get_data_sending_stats(log_path, socket_name)
-        mtime_next = path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
+        mtime_next = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
         # The time of the interval must be equal to or greater than the calculated time,
         # but less than the calculated time for two intervals.
         if next_interval_date <= stats['interval_end_date'] < next_2_intervals_date:
@@ -603,10 +614,62 @@ def wait_statistics_file():
                            defined by "logcollector.state_interval".
     """
     for _ in range(LOG_COLLECTOR_GLOBAL_TIMEOUT):
-        if path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
+        if os.path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
             break
         else:
             sleep(1)
 
-    if not path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
+    if not os.path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
         raise FileNotFoundError
+
+
+def generate_macos_logger_log(message):
+    """Create a unified logging system log using logger tool.
+
+    Args:
+        message (str): Logger event message.
+    """
+    os.system(f"logger {message}")
+
+
+def generate_macos_custom_log(type, subsystem, category, process_name="custom_log"):
+    """Create a unified logging system log using log generator script.
+
+    To create a custom event log with desired type, subsystem and category the `log_generator` script is required.
+    This, get these parameters and use os_log (https://developer.apple.com/documentation/os/os_log) to create it.
+    To correctly run `log_generator` is necessary to compile it. This is done in temporal folder, using `process_name`
+    parameter.
+
+    Args:
+        type (str): Log type (info, debug, default, error or fault).
+        subsystem (str): Subsystem of the event log.
+        category (str): Category of the event log.
+        process_name (str): Name of the process that is going to generate the log.
+    """
+    compiled_log_generator_path = os.path.join(gettempdir(), process_name)
+    if not os.path.exists(compiled_log_generator_path):
+        os_log_swift_script = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                           'tools', 'macos_log', 'log_generator.swift')
+        os.system(f"swiftc {os_log_swift_script} -o {compiled_log_generator_path}")
+
+    os.system(f'{compiled_log_generator_path} {type} {subsystem} {category} "{TEMPLATE_OSLOG_MESSAGE}"')
+
+
+def format_macos_message_pattern(process_name, message, subsystem=None, category=None):
+    """Compose expected macos format message that agent is going to send to the manager.
+
+    Args:
+        process_name (str): Name of the process that has generated the log.
+        message (str): Log message.
+        subsystem (str): Log event subsystem.
+        category (str): Log event category.
+
+    Returns:
+        string: Expected unified logging system event.
+    """
+    if process_name == 'logger':
+        macos_message = f"{process_name}\[\d+\]: {message}"
+    else:
+        macos_message = f"{process_name}\[\d+\]: \[{subsystem}:{category}\] {message}"
+
+    return macos_message
