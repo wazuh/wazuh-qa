@@ -9,8 +9,9 @@ from wazuh_testing import logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.remote import check_agent_received_message
 from wazuh_testing.tools.services import control_service
-
-import wazuh_testing.logcollector as logcollector
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -48,6 +49,13 @@ def test_macos_format_only_future_events(get_configuration, configure_environmen
         TimeoutError: If the expected callback is not generated.
     """
 
+    macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
+    truncate_file(LOG_FILE_PATH)
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+
+    wazuh_log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+
     only_future_events = get_configuration['metadata']['only-future-events']
 
     old_message = 'Old logger message'
@@ -60,6 +68,15 @@ def test_macos_format_only_future_events(get_configuration, configure_environmen
     ## Stop wazuh agent and ensure it gets old macos messages if only-future-events option is disabled
 
     control_service('restart')
+
+
+    macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
+
+    truncate_file(LOG_FILE_PATH)
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+
+    wazuh_log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
 
     if only_future_events:
         with pytest.raises(TimeoutError):

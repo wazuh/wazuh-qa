@@ -22,7 +22,6 @@ LOG_COLLECTOR_GLOBAL_TIMEOUT = 20
 GENERIC_CALLBACK_ERROR_READING_FILE = "The expected invalid content error log has not been produced"
 GENERIC_CALLBACK_ERROR = 'The expected error output has not been produced'
 
-<<<<<<< HEAD
 DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION = {
     'ip_address': 'localhost',
     'client_keys': os.path.join(WAZUH_PATH, 'etc', 'client.keys'),
@@ -35,7 +34,6 @@ DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION = {
 }
 
 TEMPLATE_OSLOG_MESSAGE = 'Custom os_log event message'
-=======
 WINDOWS_CHANNEL_LIST = ['Microsoft-Windows-Sysmon/Operational',
                         'Microsoft-Windows-Windows Firewall With Advanced Security/Firewall',
                         'Application',
@@ -46,7 +44,6 @@ WINDOWS_CHANNEL_LIST = ['Microsoft-Windows-Sysmon/Operational',
                         'File Replication Service',
                         'Service Microsoft-Windows-TerminalServices-RemoteConnectionManager'
                         ]
->>>>>>> master
 
 if sys.platform == 'win32':
     LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
