@@ -5,6 +5,7 @@
 import base64
 import hashlib
 import json
+import os
 import socket
 import struct
 import threading
@@ -12,7 +13,6 @@ import time
 import zlib
 from struct import pack
 
-import os
 from Crypto.Cipher import AES, Blowfish
 from Crypto.Util.Padding import pad
 from wazuh_testing.tools import WAZUH_PATH
@@ -52,7 +52,17 @@ class Cipher:
 
 
 class RemotedSimulator:
-    """Create an AF_INET server socket for simulating remoted connection."""
+    """Create an AF_INET server socket for simulating remoted connection.
+
+    Args:
+        server_address (str): Manager ip address.
+        remoted_port (str): Remoted connection port.
+        protocol (str): Remoted protocol.
+        mode (str): Remoted mode (REJECT, DUMMY_ACK, CONTROLLED_ACK, WRONG_KEY, INVALID_MSG)
+        client_keys (str): Client keys file path.
+        start_on_init (boolean): Indicate if remoted simulator should start after initialization.
+        rcv_msg_limit (int): max elements for the received message queue.
+    """
 
     def __init__(self, server_address='127.0.0.1', remoted_port=1514, protocol='udp', mode='REJECT',
                  client_keys=WAZUH_PATH + '/etc/client.keys', start_on_init=True, rcv_msg_limit=0):
@@ -152,7 +162,7 @@ class RemotedSimulator:
 
         Args:
             message (str): Raw message.
-            binary_data(str): Binary data.
+            binary_data (str): Binary data.
         """
         message = message.encode()
         if binary_data:
@@ -250,10 +260,11 @@ class RemotedSimulator:
         """Create a COM message.
 
         Args:
-            - client_address: client of the connection.
-            - connection: established connection (tcp only).
-            - payload: Optional binary data to add to the message.
-            - interruption_time: Time that will be added in between connections.
+            - client_address (str): Client of the connection.
+            - connection (pair): Pair with manager connection attributes.
+            - command (str): Pair connection and address.
+            - payload (bin): Optional binary data to add to the message.
+            - interruption_time (int): Time that will be added in between connections.
         """
         self.request_counter += 1
         if command == 'lock_restart -1' or self.wcom_message_version is None:
@@ -356,7 +367,13 @@ class RemotedSimulator:
                 return buffer_array
 
     def recv_all(self, connection, size: int):
-        """Recvall with known size of the message."""
+        """Receive all messages until the limit size is reached.
+
+        Args:
+            connection (pair): Pair with manager connection attributes.
+            size (int): Limit size of received messages.
+        """
+
         buffer = bytearray()
         while len(buffer) < size:
             try:
@@ -454,7 +471,17 @@ class RemotedSimulator:
 
     def upgrade_listener(self, filename, filepath, chunk_size, installer, sha1hash, simulate_interruption=False,
                          simulate_connection_error=False):
-        """Listener thread that will finish when encryption_keys are obtained."""
+        """Listener thread that will finish when encryption_keys are obtained.
+
+        Args:
+            filename (str): Filename.
+            filepath (str): File path
+            chunk_size (int): Size of the chunk.
+            installer (str): Name of the installer script.
+            sha1hash (str): SHA1 has of specified file.
+            simulate_interruption (boolean): Enable simulate connection interruption.
+            simulate_connection_error (boolean): Enable simulate connection error.
+        """
         self.upgrade_errors = False
         self.upgrade_success = False
 
@@ -501,7 +528,12 @@ class RemotedSimulator:
                 continue
 
     def send(self, dst, data):
-        """Send method to write on the socket."""
+        """Send method to write on the socket.
+
+        Args:
+            dst (socket): Address to write specified data.
+            data (socket): Data to be send.
+        """
         self.update_counters()
         if self.protocol == "tcp":
             try:
@@ -516,7 +548,12 @@ class RemotedSimulator:
                 pass
 
     def process_message(self, source, received):
-        """Process a received message and answer according to the simulator mode."""
+        """Process a received message and answer according to the simulator mode.
+
+        Args:
+            source (str): Source of the message.
+            received (str): Received message.
+        """
 
         # handle ping pong response
         if received == b'#ping':
@@ -609,6 +646,10 @@ class RemotedSimulator:
         """Get an specific key.
 
         Keys can be found in two dictionaries: by_id and by_ip. If no key is provided, the first item will be returned.
+
+        Args:
+            key (pair): Pair with by_id and by_ip key dictionaries.
+            dictionary (str): Dictionary to used (by_id or by_ip)
         """
         try:
             if key is None:

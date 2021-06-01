@@ -1,15 +1,14 @@
 import os
 import shutil
-import sys
-from math import ceil
-from json import load
 import stat
-
-from time import sleep
+import sys
 from datetime import datetime, timedelta
+from json import load
+from math import ceil
 from tempfile import gettempdir
-from wazuh_testing.tools import WAZUH_PATH
-from wazuh_testing.tools import LOGCOLLECTOR_STATISTICS_FILE, monitoring
+from time import sleep
+
+from wazuh_testing.tools import LOGCOLLECTOR_STATISTICS_FILE, WAZUH_PATH, monitoring
 
 GENERIC_CALLBACK_ERROR_COMMAND_MONITORING = 'The expected command monitoring log has not been produced'
 GENERIC_CALLBACK_ERROR_INVALID_LOCATION = 'The expected invalid location error log has not been produced'
@@ -25,7 +24,7 @@ GENERIC_CALLBACK_ERROR = 'The expected error output has not been produced'
 DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION = {
     'ip_address': 'localhost',
     'client_keys': os.path.join(WAZUH_PATH, 'etc', 'client.keys'),
-    'server_keys': os.path.join(WAZUH_PATH, 'etc', 'sslmanager.keys'),
+    'server_keys': os.path.join(WAZUH_PATH, 'etc', 'sslmanager.key'),
     'server_cert': os.path.join(WAZUH_PATH, 'etc', 'sslmanager.cert'),
     'authd_port': 1515,
     'remoted_port': 1514,
@@ -624,7 +623,7 @@ def wait_statistics_file():
         raise FileNotFoundError
 
 
-def macos_logger_message(message):
+def generate_macos_logger_log(message):
     """Create a unified logging system log using logger tool.
 
     Args:
@@ -633,12 +632,12 @@ def macos_logger_message(message):
     os.system(f"logger {message}")
 
 
-def macos_os_log_message(type, subsystem, category, process_name="custom_log"):
+def generate_macos_custom_log(type, subsystem, category, process_name="custom_log"):
     """Create a unified logging system log using log generator script.
 
     To create a custom event log with desired type, subsystem and category the `log_generator` script is required.
     This, get these parameters and use os_log (https://developer.apple.com/documentation/os/os_log) to create it.
-    To run correctly `log_generator` is necessary to compile it. This is done in temporal folder, using `process_name`
+    To correctly run `log_generator` is necessary to compile it. This is done in temporal folder, using `process_name`
     parameter.
 
     Args:
@@ -650,7 +649,7 @@ def macos_os_log_message(type, subsystem, category, process_name="custom_log"):
     compiled_log_generator_path = os.path.join(gettempdir(), process_name)
     if not os.path.exists(compiled_log_generator_path):
         os_log_swift_script = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                           'tools/macos_log/log_generator.swift')
+                                           'tools', 'macos_log', 'log_generator.swift')
         os.system(f"swiftc {os_log_swift_script} -o {compiled_log_generator_path}")
 
     os.system(f'{compiled_log_generator_path} {type} {subsystem} {category} "{TEMPLATE_OSLOG_MESSAGE}"')

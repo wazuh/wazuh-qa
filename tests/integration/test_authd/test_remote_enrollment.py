@@ -4,13 +4,13 @@
 
 import os
 import pytest
-from contextlib import nullcontext as does_not_raise
 
 from wazuh_testing.tools import monitoring, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import SocketController, FileMonitor
 from wazuh_testing.tools.sockets import wait_for_tcp_port
 from wazuh_testing.tools.wazuh import DEFAULT_SSL_REMOTE_ENROLLMENT_PORT
+from contextlib import contextmanager
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -59,6 +59,14 @@ def get_configuration(request):
     yield request.param
 
 
+@contextmanager
+def not_raises(exception):
+    try:
+        yield
+    except exception:
+        raise pytest.fail("DID RAISE {0}".format(exception))
+
+
 def test_remote_enrollment(get_configuration, configure_environment, restart_authd):
     """Check that Authd remote enrollment is enabled/disabled according to the configuration.
 
@@ -71,7 +79,7 @@ def test_remote_enrollment(get_configuration, configure_environment, restart_aut
         assertRaises: if the expected OSSEC K message doesn't appear in authd response when remote connection
                       are enabled.
     """
-    expectation = does_not_raise()
+    expectation = not_raises(ConnectionRefusedError)
     expected_answer = 'OSSEC K:'
 
     test_metadata = get_configuration['metadata']
