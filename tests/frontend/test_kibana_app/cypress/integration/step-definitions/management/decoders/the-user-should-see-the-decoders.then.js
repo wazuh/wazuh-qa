@@ -8,7 +8,7 @@ import {
 } from '../../../pageobjects/wazuh-menu/decoders.page';
 
 Then('The user should see the decoders', () => {
-  cy.wait(3000);
+  cy.wait(5000);
   getObject(titleSelector)
     .should('exist')
     .should('contain', 'Decoders');
