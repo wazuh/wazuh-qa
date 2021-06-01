@@ -63,12 +63,12 @@ def test_macos_format_basic(get_configuration, configure_environment, get_connec
     log_command = macos_message['command']
 
     if log_command == 'logger':
-        logcollector.macos_logger_message(macos_message['message'])
+        logcollector.generate_macos_logger_log(macos_message['message'])
         expected_macos_message = logcollector.format_macos_message_pattern(macos_message['command'],
                                                                            macos_message['message'])
 
     elif log_command == 'os_log':
-        logcollector.macos_os_log_message(macos_message['type'], macos_message['subsystem'], macos_message['category'])
+        logcollector.generate_macos_custom_log(macos_message['type'], macos_message['subsystem'], macos_message['category'])
         expected_macos_message = logcollector.format_macos_message_pattern(
                                                         'custom_log',
                                                         logcollector.TEMPLATE_OSLOG_MESSAGE, macos_message['subsystem'],

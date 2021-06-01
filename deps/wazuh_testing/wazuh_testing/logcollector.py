@@ -567,7 +567,7 @@ def wait_statistics_file():
         raise FileNotFoundError
 
 
-def macos_logger_message(message):
+def generate_macos_logger_log(message):
     """Create a unified logging system log using logger tool.
 
     Args:
@@ -576,7 +576,7 @@ def macos_logger_message(message):
     os.system(f"logger {message}")
 
 
-def macos_os_log_message(type, subsystem, category, process_name="custom_log"):
+def generate_macos_custom_log(type, subsystem, category, process_name="custom_log"):
     """Create a unified logging system log using log generator script.
 
     To create a custom event log with desired type, subsystem and category the `log_generator` script is required.
