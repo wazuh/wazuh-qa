@@ -162,7 +162,7 @@ class RemotedSimulator:
 
         Args:
             message (str): Raw message.
-            binary_data(str): Binary data.
+            binary_data (str): Binary data.
         """
         message = message.encode()
         if binary_data:
