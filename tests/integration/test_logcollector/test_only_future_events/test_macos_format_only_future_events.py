@@ -50,8 +50,6 @@ def test_macos_format_only_future_events(get_configuration, configure_environmen
 
     only_future_events = get_configuration['metadata']['only-future-events']
 
-    ## Send old macos format messages
-
     old_message = 'Old logger message'
     new_message = 'New logger message'
 
