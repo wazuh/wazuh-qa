@@ -63,7 +63,7 @@ def test_macos_format_only_future_events(get_configuration, configure_environmen
 
     logcollector.macos_logger_message(old_message)
     expected_old_macos_message = logcollector.format_macos_message_pattern('logger', old_message)
-    check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_old_macos_message, timeout=20)
+    check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_old_macos_message, timeout=40)
 
     ## Stop wazuh agent and ensure it gets old macos messages if only-future-events option is disabled
 
@@ -80,13 +80,13 @@ def test_macos_format_only_future_events(get_configuration, configure_environmen
 
     if only_future_events:
         with pytest.raises(TimeoutError):
-            check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_old_macos_message, timeout=20)
+            check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_old_macos_message, timeout=40)
 
     else:
-        check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_old_macos_message, timeout=20)
+        check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_old_macos_message, timeout=40)
 
     logcollector.macos_logger_message(new_message)
 
     expected_new_macos_message = logcollector.format_macos_message_pattern('logger', new_message)
 
-    check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_new_macos_message, timeout=5)
+    check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_new_macos_message, timeout=40)
