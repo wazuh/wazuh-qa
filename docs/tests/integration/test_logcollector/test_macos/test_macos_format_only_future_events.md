@@ -14,7 +14,7 @@ system format (ULS).
 
 |Tier | Number of tests | Time spent |
 |:--:|:--:|:--:|
-| 0 | 2 | 30s |
+| 0 | 2 | 2m55s |
 
 ## Expected behavior
 
