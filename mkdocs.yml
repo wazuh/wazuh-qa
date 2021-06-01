@@ -469,7 +469,8 @@ nav:
             - Test location custom sockets: tests/integration/test_logcollector/test_location_custom_sockets/test_location_custom_sockets.md
             - Test macos:
                 - Overview: tests/integration/test_logcollector/test_macos/index.md
-                - Test onyly future events macos format: tests/integration/test_logcollector/test_macos/test_macos_format_only_future_events.md
+                - Test macos format basic: tests/integration/test_logcollector/test_macos/test_macos_format_basic.md
+                - Test only future events macos format: tests/integration/test_logcollector/test_macos/test_macos_format_only_future_events.md
         - Logtest:
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md

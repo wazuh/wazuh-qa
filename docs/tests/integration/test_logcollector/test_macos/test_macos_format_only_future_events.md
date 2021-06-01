@@ -14,7 +14,7 @@ system format (ULS).
 
 |Tier | Number of tests | Time spent |
 |:--:|:--:|:--:|
-| 0 | 1 | 30s |
+| 0 | 2 | 30s |
 
 ## Expected behavior
 
@@ -26,4 +26,4 @@ system format (ULS).
 
 ## Code documentation
 
-::: tests.integration.test_logcollector.test_only_future_events.test_macos_format_only_future_events
+::: tests.integration.test_logcollector.test_macos.test_macos_format_only_future_events

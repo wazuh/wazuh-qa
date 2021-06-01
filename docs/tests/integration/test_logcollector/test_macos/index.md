@@ -13,7 +13,7 @@ Confirm that logcollector works correctly for unnified logging system events in 
 
 |Tier | Total | Time spent |
 | :--:| :--:  | :--:       |
-| 0   |    4 |    54s   |
+| 0   |    4 |    3m18s   |
 
 
 ## List of tests
