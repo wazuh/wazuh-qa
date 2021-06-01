@@ -1,12 +1,9 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-<<<<<<< HEAD
-=======
+
 import pytest
 from shutil import copyfile
-
->>>>>>> master
 import pytest
 import wazuh_testing.tools.configuration as conf
 from wazuh_testing.logcollector import LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS
