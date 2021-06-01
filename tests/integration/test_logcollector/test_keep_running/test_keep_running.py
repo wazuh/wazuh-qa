@@ -21,11 +21,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_keep_running_conf.yaml
 temp_dir = tempfile.gettempdir()
 log_test_path = os.path.join(temp_dir, 'wazuh-testing', 'test_log.log')
 
-local_internal_options = {
-    'logcollector.debug': 2,
-    'monitord.rotate_log': 0,
-    'logcollector.vcheck_files': 5
-}
+local_internal_options = {'logcollector.vcheck_files': 5}
 
 parameters = [
     {'LOG_FORMAT': 'syslog', 'LOCATION': log_test_path},

@@ -9,8 +9,6 @@ import wazuh_testing.api as api
 from wazuh_testing.tools import get_service
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
-
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -20,12 +18,6 @@ no_restart_windows_after_configuration_set = True
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 wazuh_component = get_service()
-
-
-if sys.platform == 'win32':
-    prefix = AGENT_DETECTOR_PREFIX
-else:
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 local_internal_options = {'logcollector.remote_commands': 1}
 
@@ -57,7 +49,7 @@ metadata = [
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
-configuration_ids = [f"{x['LOG_FORMAT'], x['COMMAND']}" for x in parameters]
+configuration_ids = [f"{x['log_format']}_{x['command']}" for x in metadata]
 
 
 # fixtures
@@ -74,7 +66,7 @@ def get_local_internal_options():
 
 
 def test_configuration_command(get_local_internal_options, configure_local_internal_options, get_configuration,
-                                     configure_environment, restart_logcollector):
+                               configure_environment, restart_logcollector):
     """Check if the Wazuh run correctly with the specified command monitoring configuration.
 
     Ensure command monitoring allow the specified attributes. Also, in the case of the manager instance, check if the API
@@ -86,7 +78,7 @@ def test_configuration_command(get_local_internal_options, configure_local_inter
     """
     cfg = get_configuration['metadata']
 
-    log_callback = logcollector.callback_monitoring_command(cfg['log_format'], cfg['command'], prefix=prefix)
+    log_callback = logcollector.callback_monitoring_command(cfg['log_format'], cfg['command'])
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 

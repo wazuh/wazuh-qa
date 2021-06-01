@@ -9,6 +9,7 @@ from base64 import b64encode
 
 import requests
 from urllib3 import disable_warnings, exceptions
+
 disable_warnings(exceptions.InsecureRequestWarning)
 
 # Variables
@@ -187,11 +188,5 @@ def wait_until_api_ready(protocol=API_PROTOCOL, host=API_HOST, port=API_PORT, us
         timeout (int): Timeout to get an API response.
         attempts (int): Maximum number of attempts to check API is ready.
     """
-    while attempts > 0:
-        try:
-            attempts -= 1
-            get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout)
-        except requests.exceptions.ConnectionError:
-            time.sleep(1)
-        else:
-            break
+
+    get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout, attempts, 1)

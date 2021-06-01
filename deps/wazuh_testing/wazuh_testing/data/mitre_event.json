@@ -73,7 +73,9 @@
           "type": "object",
           "title": "The Mitre Schema",
           "required": [
-            "id"
+            "id",
+            "tactic",
+            "technique"
           ],
           "properties": {
             "id": {

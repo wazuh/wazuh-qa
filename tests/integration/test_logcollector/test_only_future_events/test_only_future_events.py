@@ -5,7 +5,6 @@ import os
 import tempfile
 
 import pytest
-
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import monitoring, file
@@ -24,11 +23,7 @@ temp_dir = tempfile.gettempdir()
 log_test_path = os.path.join(temp_dir, 'wazuh-testing', 'test.log')
 current_line = 0
 
-local_internal_options = {
-    'logcollector.debug': 2,
-    'monitord.rotate_log': 0,
-    'logcollector.vcheck_files': 5
-}
+local_internal_options = {'logcollector.vcheck_files': 5}
 
 parameters = [
     {'LOG_FORMAT': 'syslog', 'LOCATION': log_test_path, 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '10MB'},

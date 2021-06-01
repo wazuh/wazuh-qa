@@ -2,7 +2,11 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 from os import path, unlink
-from socket import AF_UNIX, SHUT_RDWR, SOCK_STREAM, SOCK_DGRAM, socket
+from sys import platform
+if platform != 'win32':
+    from socket import AF_UNIX
+    
+from socket import SHUT_RDWR, SOCK_STREAM, SOCK_DGRAM, socket
 from tempfile import gettempdir
 
 import pytest
@@ -15,7 +19,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 
 # Marks
-pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=1)]
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
 # Configuration
 DAEMON_NAME = "wazuh-logcollector"
