@@ -28,7 +28,7 @@ def restart_wazuh_daemon(daemon):
     subprocess.check_call([f'{daemon_path}/{daemon}'])
 
 
-def restart_wazuh_with_new_conf(new_conf, daemon='wazuh-syscheckd'):
+def restart_wazuh_with_new_conf(new_conf, daemon='wazuh-modulesd'):
     """
     Restart Wazuh service applying a new ossec.conf
 

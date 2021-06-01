@@ -52,7 +52,7 @@ pip3 install pytest freezegun jq jsonschema pyyaml==5.4 psutil paramiko distro p
 
 ```shell script
 # Enable debug 2
-echo 'syscheck.debug=2' >> $wazuh_path/etc/local_internal_options.conf
+echo 'wazuh_modules.debug=2' >> $wazuh_path/etc/local_internal_options.conf
 
 # Avoid agent disconnections when travelling in time (only for agents)
 sed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time-reconnect>:g" /var/ossec/etc/ossec.conf
@@ -125,7 +125,7 @@ pip3 install pytest freezegun jq jsonschema pyyaml==5.4 psutil paramiko distro p
 ```shell script
 
 # Enable debug 2
-echo 'syscheck.debug=2' >> /Library/Ossec/etc/local_internal_options.conf
+echo 'wazuh_modules.debug=2' >> /Library/Ossec/etc/local_internal_options.conf
 
 # Avoid agent disconnections when travelling in time
 brew install gnu-sed

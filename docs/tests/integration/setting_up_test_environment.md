@@ -47,7 +47,6 @@ yum install python36 python3-pip python36-devel -y
 
 ```
 # Enable debug 2
-echo 'syscheck.debug=2' >> $wazuh_path/etc/local_internal_options.conf
 echo 'wazuh_modules.debug=2' >> $wazuh_path/etc/local_internal_options.conf
 echo 'wazuh_db.debug=2' >> $wazuh_path/etc/local_internal_options.conf
 
