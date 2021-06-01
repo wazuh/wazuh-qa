@@ -3,7 +3,9 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import socket
 import struct
+import time
 from os import path
+
 from wazuh_testing.tools import WAZUH_PATH, ACTIVE_RESPONSE_SOCKET_PATH
 from wazuh_testing.tools.utils import retry
 
@@ -50,3 +52,26 @@ def send_active_response_message(active_response_command):
     sock.connect(ACTIVE_RESPONSE_SOCKET_PATH)
     sock.send(f"{active_response_command}".encode())
     sock.close()
+
+
+def wait_for_tcp_port(port, host='localhost', timeout=10):
+    """Wait until a port starts accepting TCP connections.
+    Args:
+        port (int): Port number.
+        host (str): Host address on which the port should be listening. Default 'localhost'
+        timeout (float): In seconds. How long to wait before raising errors.
+    Raises:
+        TimeoutError: The port isn't accepting connection after time specified in `timeout`.
+    """
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        try:
+            sock.connect((host, port))
+            sock.close()
+            return
+        except ConnectionRefusedError:
+            time.sleep(1)
+
+
+    raise TimeoutError(f'Waited too long for the port {port} on host {host} to start accepting messages')

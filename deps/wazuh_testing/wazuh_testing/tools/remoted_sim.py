@@ -5,6 +5,7 @@
 import base64
 import hashlib
 import json
+import os
 import socket
 import struct
 import threading
@@ -12,7 +13,6 @@ import time
 import zlib
 from struct import pack
 
-import os
 from Crypto.Cipher import AES, Blowfish
 from Crypto.Util.Padding import pad
 from wazuh_testing.tools import WAZUH_PATH

@@ -1,17 +1,20 @@
 import os
 import shutil
+import stat
 import sys
-from math import ceil
-from json import load
-from time import sleep
 from datetime import datetime, timedelta
+from json import load
+from math import ceil
 from tempfile import gettempdir
+from time import sleep
+
 from wazuh_testing.tools import LOGCOLLECTOR_STATISTICS_FILE, WAZUH_PATH, monitoring
 
 GENERIC_CALLBACK_ERROR_COMMAND_MONITORING = 'The expected command monitoring log has not been produced'
 GENERIC_CALLBACK_ERROR_INVALID_LOCATION = 'The expected invalid location error log has not been produced'
 GENERIC_CALLBACK_ERROR_ANALYZING_FILE = 'The expected analyzing file log has not been produced'
 GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL = "The expected analyzing eventchannel log has not been produced"
+GENERIC_CALLBACK_ERROR_ANALYZING_MACOS = "The expected analyzing macos log has not been produced"
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET = "The expected target socket log has not been produced"
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND = "The expected target socket not found error has not been produced"
 LOG_COLLECTOR_GLOBAL_TIMEOUT = 20
@@ -30,10 +33,29 @@ DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION = {
 }
 
 TEMPLATE_OSLOG_MESSAGE = 'Custom os_log event message'
+WINDOWS_CHANNEL_LIST = ['Microsoft-Windows-Sysmon/Operational',
+                        'Microsoft-Windows-Windows Firewall With Advanced Security/Firewall',
+                        'Application',
+                        'Security',
+                        'System',
+                        'Microsoft-Windows-Sysmon/Operational',
+                        'Microsoft-Windows-Windows Defender/Operational',
+                        'File Replication Service',
+                        'Service Microsoft-Windows-TerminalServices-RemoteConnectionManager'
+                        ]
 
 if sys.platform == 'win32':
+    LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
+        'windows.debug': '2',
+        'agent.debug': '2'
+    }
     prefix = monitoring.AGENT_DETECTOR_PREFIX
 else:
+    LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
+        'logcollector.debug': '2',
+        'monitord.rotate_log': '0',
+        'agent.debug': '0',
+    }
     prefix = monitoring.LOG_COLLECTOR_DETECTOR_PREFIX
 
 
@@ -342,6 +364,18 @@ def callback_excluded_file(file):
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
+def callback_monitoring_macos_logs(old_logs=False):
+    """Create a callback to detect if logcollector is monitoring MacOS logs.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"Monitoring MacOS old logs with: /usr/bin/log show --style syslog --start" if old_logs else \
+        fr"Monitoring MacOS logs with: /usr/bin/log stream --style syslog"
+
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
 def add_log_data(log_path, log_line_message, size_kib=1024, line_start=1, print_line_num=False):
     """Increase the space occupied by a log file by adding lines to it.
     Args:
@@ -383,7 +417,7 @@ def callback_invalid_format_value(line, option, location):
     elif option == 'djb-multilog':
         msg = fr"DEBUG: Invalid DJB log: '{line}'"
 
-    return monitoring.make_callback(pattern=msg, prefix=prefix)
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
 def callback_reading_file(log_format, content_file, severity='DEBUG'):
@@ -516,7 +550,13 @@ def create_file_structure(get_files_list):
     for file in get_files_list:
         os.makedirs(file['folder_path'], exist_ok=True, mode=0o777)
         for name in file['filename']:
-            open(os.path.join(file['folder_path'], name), 'w').close()
+            for i in range(0, 5):
+                try:
+                    with open(os.path.join(file['folder_path'], name), mode='w'):
+                        pass
+                except:
+                    continue
+                break
 
             if 'age' in file:
                 fileinfo = os.stat(f"{file['folder_path']}{file['filename']}")
@@ -533,8 +573,24 @@ def delete_file_structure(get_files_list):
     Args:
         get_files_list(dict):  Files to delete.
     """
-    for file in get_files_list:
-        shutil.rmtree(file['folder_path'], ignore_errors=True)
+
+    def remove_readonly(func, path, _):
+        """Give write permission to specified path.
+
+        Args:
+            func (function): Called function.
+            path (str): File path.
+        """
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
+
+    for folder in get_files_list:
+        for _ in range(5):
+            try:
+                shutil.rmtree(folder['folder_path'], onerror=remove_readonly)
+            except:
+                continue
+            break
 
 
 def callback_invalid_state_interval(interval):
