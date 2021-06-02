@@ -41,7 +41,7 @@ if sys.platform == 'win32':
     prefix = monitoring.AGENT_DETECTOR_PREFIX
 else:
     LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
-        'logcollector.debug': '2',
+        'wazuh_modules.debug': '2',
         'monitord.rotate_log': '0',
         'agent.debug': '0',
     }

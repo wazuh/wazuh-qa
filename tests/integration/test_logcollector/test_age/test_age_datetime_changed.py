@@ -24,7 +24,7 @@ pytestmark = pytest.mark.tier(level=0)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 
-DAEMON_NAME = "wazuh-logcollector"
+DAEMON_NAME = "wazuh-modulesd"
 
 local_internal_options = {'logcollector.vcheck_files': 0}
 

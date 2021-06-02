@@ -22,7 +22,7 @@ from wazuh_testing.tools.services import control_service
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
 # Configuration
-DAEMON_NAME = "wazuh-logcollector"
+DAEMON_NAME = "wazuh-modulesd"
 test_data_path = path.join(path.dirname(path.realpath(__file__)), 'data')
 configurations_path = path.join(test_data_path, 'wazuh_location_custom_sockets_conf.yaml')
 temp_dir = gettempdir()
@@ -30,7 +30,7 @@ log_test_path = path.join(temp_dir, 'wazuh-testing', 'test.log')
 test_socket = None
 
 local_internal_options = {
-    'logcollector.debug': 2,
+    'wazuh_modules.debug': 2,
     'logcollector.state_interval': 5,
     'logcollector.queue_size': 2048,
     'monitord.rotate_log': 0
