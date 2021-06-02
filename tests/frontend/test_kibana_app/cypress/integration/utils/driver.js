@@ -1,23 +1,30 @@
-const navigate = (url) => {
+export const navigate = (url) => {
   cy.visit(url);
 };
 
-const getObject = (selector) => {
+export const getObject = (selector) => {
   return cy.get(selector);
 };
 
-const fillField = (selector, text) => {
+export const fillField = (selector, text) => {
   getObject(selector).clear().type(text);
   return this;
 };
 
-const clickElement = (selector) => {
+export const clickElement = (selector) => {
   getObject(selector).click();
   return this;
 };
 
-const elementIsVisible = (element) => {
-  return getObject(element).should('exist').should('be.visible');
-};
+export const validateElementTextIncludes = (selector, text) => {
+  getObject(selector).should('contain', text);
+}
 
-export { navigate, getObject, fillField, clickElement, elementIsVisible };
+export const validateURLIncludes = (include) => {
+  cy.url().should('include', include);
+}
+
+export const elementIsVisible = (element) => {
+  return getObject(element).should('exist').should('be.visible');
+}
+;
