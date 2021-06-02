@@ -11,7 +11,10 @@
                                         "reference":"03c06c4f118618400772367b1cf7e73ce0178e02",
                                         "type":"PACKAGE",
                                         "status":"VALID",
-                                        "check_pkg_existence":true}'
+                                        "check_pkg_existence":true,
+                                        "severity":null,
+                                        "cvss2_score":0,
+                                        "cvss3_score":0}'
     output: ['ok {"action":"INSERT","status":"PKG_NOT_FOUND"}']
     stage: "agent vuln_cves insert test_package when it does not exist in sys_programs"
   -
@@ -45,7 +48,7 @@
                                         "severity":"Medium",
                                         "cvss2_score":5.0,
                                         "cvss3_score":6.1}'
-    output: ['ok {"action":"UPDATE"}']
+    output: ['ok {"action":"UPDATE","status":"SUCCESS"}']
     stage: "agent vuln_cves update already inserted entry"
   -
     input: 'agent 000 sql INSERT INTO sys_programs (scan_id,scan_time,format,name,priority,section,size,vendor,install_time,version,architecture,multiarch,source,description,location,triaged,cpe,msu_name,checksum,item_id)
@@ -64,7 +67,10 @@
                                         "reference":"777fef8cc434b597769d102361af718d29ef72c1",
                                         "type":"OS",
                                         "status":"PENDING",
-                                        "check_pkg_existence":true}'
+                                        "check_pkg_existence":true,
+                                        "severity":null,
+                                        "cvss2_score":0,
+                                        "cvss3_score":0}'
     output: ['ok {"action":"INSERT","status":"SUCCESS"}']
     stage: "agent vuln_cves insert with spaces in json payload and the test package exist in sys_programs"
   -
@@ -188,7 +194,10 @@
                                         "reference":"777fef8cc434b597769d102361af718d29ef72c1",
                                         "type":"OS",
                                         "status":"PENDING",
-                                        "check_pkg_existence":true}'
+                                        "check_pkg_existence":true,
+                                        "severity":"Low",
+                                        "cvss2_score":3.2,
+                                        "cvss3_score":2.1}'
     output: ['ok {"action":"INSERT","status":"SUCCESS"}']
     stage: "agent vuln_cves insert with spaces in json payload and the test package exist in sys_programs again"
   -
