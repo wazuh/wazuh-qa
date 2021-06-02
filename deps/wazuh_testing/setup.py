@@ -21,7 +21,9 @@ setup(name='wazuh_testing',
                                       'data/keepalives.txt',
                                       'data/rootcheck.txt',
                                       'data/syscollector.py',
-                                      'data/winevt.py'
+                                      'data/winevt.py',
+                                      'data/sslmanager.key',
+                                      'data/sslmanager.cert'
                                       ]
                     },
       entry_points={
