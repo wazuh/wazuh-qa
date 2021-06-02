@@ -61,7 +61,7 @@ def test_macos_format_only_future_events(get_configuration, configure_environmen
     old_message = 'Old logger message'
     new_message = 'New logger message'
 
-    logcollector.macos_logger_message(old_message)
+    logcollector.generate_macos_logger_log(old_message)
     expected_old_macos_message = logcollector.format_macos_message_pattern('logger', old_message)
     check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_old_macos_message, timeout=40)
 
@@ -85,7 +85,7 @@ def test_macos_format_only_future_events(get_configuration, configure_environmen
     else:
         check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_old_macos_message, timeout=40)
 
-    logcollector.macos_logger_message(new_message)
+    logcollector.generate_macos_logger_log(new_message)
 
     expected_new_macos_message = logcollector.format_macos_message_pattern('logger', new_message)
 
