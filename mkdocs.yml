@@ -46,10 +46,10 @@ nav:
               - Test invalid values redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_invalid_values_redhat_feed.md
               - Test missing fileds redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_missing_fields_redhat_feed.md
             - Archlinux:
-                - Test extra fields archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_extra_fields_redhat_feed.md
-                - Test invalid syntax archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_invalid_syntax_redhat_feed.md
-                - Test invalid values archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_invalid_values_redhat_feed.md
-                - Test missing fileds archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_missing_fields_redhat_feed.md
+                - Test extra fields archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_extra_tags_archlinux_feed.md
+                - Test invalid syntax archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_invalid_syntax_archlinux_feed.md
+                - Test invalid values archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_invalid_values_archlinux_feed.md
+                - Test missing fileds archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_missing_tags_archlinux_feed.md
             - MSU:
               - Test extra fields feed: tests/integration/test_vulnerability_detector/test_feeds/msu/test_extra_fields_msu_feed.md
               - Test invalid syntax msu feed: tests/integration/test_vulnerability_detector/test_feeds/msu/test_invalid_syntax_msu_feed.md
