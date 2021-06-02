@@ -8,7 +8,9 @@ import pytest
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.remote import check_agent_received_message
-
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools.monitoring import FileMonitor
 # Marks
 pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=1)]
 
@@ -60,6 +62,10 @@ def test_macos_format_basic(get_configuration, configure_environment, get_connec
     """
     expected_macos_message = ""
     log_command = macos_message['command']
+
+    macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
+    wazuh_log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
 
     if log_command == 'logger':
         logcollector.generate_macos_logger_log(macos_message['message'])
