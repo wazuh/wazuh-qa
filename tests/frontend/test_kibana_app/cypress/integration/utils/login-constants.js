@@ -10,5 +10,6 @@ export const LOGIN_TYPE = {
 
 export const ODFE_PASSWORD = 'admin';
 export const ODFE_USERNAME = 'admin';
+export const OVERVIEW_URL = '/overview/';
 export const XPACK_PASSWORD = 'elastic';
 export const XPACK_USERNAME = 'elastic';

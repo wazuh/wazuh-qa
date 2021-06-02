@@ -24,7 +24,6 @@ const loginOdfe = () => {
   fillUsernameFieldODFE(ODFE_USERNAME);
   fillPasswordFieldODFE(ODFE_PASSWORD);
   clickSubmitButtonODFE();
-  cy.wait(12000);
 };
 
 export { loginOdfe };
