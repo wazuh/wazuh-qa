@@ -150,6 +150,7 @@ nav:
           - Test authd name ip pass:  tests/integration/test_authd/test_authd_name_ip_pass.md
           - Test authd local:  tests/integration/test_authd/test_authd_local.md
           - Test authd agents ctx:  tests/integration/test_authd/test_authd_agents_ctx.md
+          - Test authd remote enrollment enabled:  tests/integration/test_authd/test_remote_enrollment.md
         - Cluster:
           - tests/integration/test_cluster/index.md
           - Test key polling:
@@ -469,6 +470,7 @@ nav:
             - Test options:
                 - Overview: tests/integration/test_logcollector/test_options/index.md
                 - Test state interval: tests/integration/test_logcollector/test_options/test_options_state_interval.md
+            - Test macos: tests/integration/test_logcollector/test_macos/test_macos_format_basic.md
         - Logtest:
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md

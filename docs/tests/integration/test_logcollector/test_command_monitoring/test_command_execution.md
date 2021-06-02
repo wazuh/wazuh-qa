@@ -14,7 +14,7 @@ and check if the debug logs are displayed correctly when the test commands are e
 
 |Tier | Number of tests | Time spent |
 |:--:|:--:|:--:|
-| 0 | 44 | 2m49s |
+| 0 | 44 | 1m3s |
 
 ## Expected behavior
 

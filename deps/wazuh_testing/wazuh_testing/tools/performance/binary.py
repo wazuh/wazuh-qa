@@ -52,8 +52,11 @@ class Monitor:
         self.platform = platform
         self.dst_dir = dst_dir
         self.pid = None
+        self.proc = None
         self.event = None
         self.thread = None
+        self.previous_read = None
+        self.previous_write = None
         self.set_pid(self.process_name)
         self.csv_file = join(self.dst_dir, f'{self.process_name}.csv')
 
@@ -63,18 +66,22 @@ class Monitor:
         Raises:
             ValueError: if the process is not running.
         """
+        ppid = None
         for proc in psutil.process_iter():
             # These two binaries are executed using the Python interpreter instead of
             # directly execute them as daemons. That's why we need to search the .py file in
             # the cmdline instead of searching it in the name
             if process_name in ['wazuh-clusterd', 'wazuh-apid']:
                 if any(filter(lambda x: f"{process_name}.py" in x, proc.cmdline())):
-                    self.pid = proc.pid
+                    ppid = proc.pid
             elif process_name in proc.name():
-                self.pid = proc.pid
+                ppid = proc.pid
 
-        if self.pid is None:
+        if ppid is None:
             raise ValueError(f"The process {process_name} is not running.")
+
+        self.pid = ppid
+        self.proc = psutil.Process(self.pid)
 
     def get_process_info(self, proc):
         """Collect the data from the process.
@@ -113,6 +120,7 @@ class Monitor:
                 f'USS({self.value_unit})': 0.0, f'PSS({self.value_unit})': 0.0,
                 f'SWAP({self.value_unit})': 0.0, 'FD': 0.0, 'Read_Ops': 0.0, 'Write_Ops': 0.0,
                 f'Disk_Read({self.value_unit})': 0.0, f'Disk_Written({self.value_unit})': 0.0, 'Disk(%)': 0.0,
+                f'Disk_Read_Speed({self.value_unit}/s)': 0.0, f'Disk_Write_Speed({self.value_unit}/s)': 0.0,
                 }
 
         try:
@@ -136,9 +144,25 @@ class Monitor:
                     info[f'Disk_Read({self.value_unit})'] = unit_conversion(io_counters.read_bytes)
                     info[f'Disk_Written({self.value_unit})'] = unit_conversion(io_counters.write_bytes)
                     info['Disk(%)'] = disk_usage_process / disk_total * 100
+                    if self.previous_read is not None and self.previous_write is not None:
+                        read_speed = (info[f'Disk_Read({self.value_unit})'] - self.previous_read) / self.time_step
+                        write_speed = (info[f'Disk_Written({self.value_unit})'] - self.previous_write) / self.time_step
+                        info[f'Disk_Read_Speed({self.value_unit}/s)'] = read_speed
+                        info[f'Disk_Write_Speed({self.value_unit}/s)'] = write_speed
+                        self.previous_read = info[f'Disk_Read({self.value_unit})']
+                        self.previous_write = info[f'Disk_Written({self.value_unit})']
+                    else:
+                        self.previous_read = info[f'Disk_Read({self.value_unit})']
+                        self.previous_write = info[f'Disk_Written({self.value_unit})']
+        except psutil.NoSuchProcess:
+            logger.warning(f'Lost PID for {self.process_name}. Trying to obtain a new one')
+            try:
+                self.set_pid(self.process_name)
+            except ValueError:
+                logger.warning(f'Could not obtain a new PID for {self.process_name}. Trying again in {self.time_step}s')
         finally:
             info.update({key: round(value, 2) for key, value in info.items() if isinstance(value, (int, float))})
-            logger.debug(f'Recollected data for process {proc.pid}')
+            logger.debug(f'Recollected data for process {self.pid}')
             return info
 
     def _write_csv(self, data):
@@ -158,11 +182,10 @@ class Monitor:
 
     def _monitor_process(self):
         """Private function that runs the function to extract data."""
-        proc = psutil.Process(self.pid)
         while not self.event.is_set():
             data = dict()
             try:
-                data = self.get_process_info(proc)
+                data = self.get_process_info(self.proc)
             except Exception as e:
                 logger.error(f'Exception with {self.process_name} | {e}')
                 print(e.with_traceback())
@@ -225,7 +248,8 @@ class LogParser(ABC):
             pass
 
         for key, value in self.data.items():
-            with open(join(self.dst_dir, f"{key.replace(' ', '_')}.csv".lower()), 'w', newline='') as f:
+            file_name = key.replace(' ', '_').replace('/', '_').lower()
+            with open(join(self.dst_dir, f"{file_name}.csv"), 'w', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerow(self.columns)
                 writer.writerows(value)
@@ -260,6 +284,42 @@ class ClusterLogParser(LogParser):
                 except KeyError:
                     performance_information[match.group(3)] = list()
                     performance_information[match.group(3)].append(match.groups())
+
+        return performance_information
+
+    def write_csv(self):
+        self.data = self._log_parser()
+        super().write_csv()
+
+
+class APILogParser(LogParser):
+    """Logparser child class, this is exclusively in charge of parsing the API logs.
+
+    Args:
+        log_file (str): log file path.
+        dst_dir (str, optional): directory to store the CSVs. Defaults to temp directory.
+
+    Attributes:
+        log_file (str): log file path.
+        dst_dir (str): directory to store the CSVs. Defaults to temp directory.
+        data (dict): processed log file.
+    """
+    def __init__(self, log_file, dst_dir=gettempdir()):
+        # group1 Timestamp - group2 query - group3 time_spent(s)
+        regex = r'(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) .* \"(GET .+)\" with parameters .* done in (\d+\.\d+)s: .*'
+        columns = ['Timestamp', 'endpoint', 'time_spent(s)']
+        super().__init__(log_file, regex, columns, dst_dir)
+
+    def _log_parser(self):
+        """Function in charge of parsing the information of the cluster.log file."""
+        performance_information = dict()
+        with open(self.log_file) as log:
+            for match in self.regex.finditer(log.read()):
+                try:
+                    performance_information[match.group(2)].append(match.groups())
+                except KeyError:
+                    performance_information[match.group(2)] = list()
+                    performance_information[match.group(2)].append(match.groups())
 
         return performance_information
 

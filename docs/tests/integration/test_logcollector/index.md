@@ -6,6 +6,7 @@ firewalls and other such devices. In the case of the Windows agent, `wazuh-agent
 logs and send them to the manager.
 
 ## Tiers
+
 ### Tier 0
 #### Test configuration
 
@@ -51,3 +52,8 @@ verifying that the dropped events match with the reported ones.
 #### Test options
 
 For each internal option of `logcollector` module, check if the options are set as expected and Wazuh and `logcollector` work correctly.
+
+#### Test macOS
+
+Wazuh macOS agent allows gathering unified logging system events. These tests ensure logcollector works correctly 
+with this kind of log format.

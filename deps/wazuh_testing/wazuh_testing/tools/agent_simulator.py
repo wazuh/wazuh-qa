@@ -20,12 +20,12 @@ import ssl
 import threading
 import zlib
 from datetime import date
-from sys import getsizeof
 from itertools import cycle
 from random import randint, sample, choice, getrandbits
 from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
 from string import ascii_letters, digits
 from struct import pack
+from sys import getsizeof
 from time import mktime, localtime, sleep, time
 
 import wazuh_testing.data.syscollector as syscollector

@@ -1,7 +1,6 @@
 import json
 import logging
 from base64 import b64encode
-from os.path import join, dirname, abspath
 from threading import Thread, Event
 from time import sleep, time
 

@@ -14,6 +14,7 @@ import yaml
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS
 
+
 # customize _serialize_xml to avoid lexicographical order in XML attributes
 def _serialize_xml(write, elem, qnames, namespaces,
                    short_empty_elements, **kwargs):

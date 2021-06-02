@@ -5,10 +5,6 @@ configuration:
 
 test_cases:
 
-# SERVICE ENDPOINTS
-
-  # GET
-
   - endpoint: /cluster/local/info
     method: get
     parameters: {}
@@ -59,11 +55,6 @@ test_cases:
     parameters: {}
     body: {}
 
-  - endpoint: /manager/stats
-    method: get
-    parameters: {}
-    body: {}
-
   - endpoint: /manager/logs
     method: get
     parameters: {}
@@ -94,8 +85,6 @@ test_cases:
     parameters: {}
     body: {}
 
-  # PUT
-
   - endpoint: /active-response
     method: put
     parameters: {}
@@ -103,18 +92,6 @@ test_cases:
       command: custom
       custom: True
     restart: False
-
-  - endpoint: /cluster/restart
-    method: put
-    parameters: {}
-    body: {}
-    restart: True
-
-  - endpoint: /manager/restart
-    method: put
-    parameters: {}
-    body: {}
-    restart: True
 
   - endpoint: /rootcheck
     method: put
@@ -128,42 +105,16 @@ test_cases:
     body: {}
     restart: False
 
-  # DELETE
-
   - endpoint: /rootcheck
     method: delete
     parameters: {}
     body: {}
 
-# RESOURCE ENDPOINTS
-
-  # POST
-
-  - endpoint: /agents
-    method: post
-    parameters: {}
-    body:
-      name: "new_test_agent"
-      ip: "any"
-
-  - endpoint: /agents/insert
-    method: post
-    parameters: {}
-    body:
-      name: "new_test_agent_insert"
-      ip: "any"
-
-  - endpoint: /agents/insert/quick
-    method: post
-    parameters:
-      agent_name: "new_test_agent_insert_quick"
-    body: {}
-
   - endpoint: /groups
     method: post
-    parameters:
+    parameters: {}
+    body:
       group_id: "new_test_group"
-    body: {}
 
   - endpoint: /security/users
     method: post
@@ -171,7 +122,6 @@ test_cases:
     body:
       username: "new_test_user"
       password: "Password1!"
-      allow_run_as: True
 
   - endpoint: /security/roles
     method: post
@@ -200,8 +150,6 @@ test_cases:
         MATCH:
           name: "test"
 
-  # PUT
-
   - endpoint: /agents/group
     method: put
     parameters:
@@ -221,7 +169,25 @@ test_cases:
     body: {}
     restart: True
 
-  # GET
+  - endpoint: /agents
+    method: post
+    parameters: {}
+    body:
+      name: "new_test_agent"
+      ip: "any"
+
+  - endpoint: /agents/insert
+    method: post
+    parameters: {}
+    body:
+      name: "new_test_agent_insert"
+      ip: "any"
+
+  - endpoint: /agents/insert/quick
+    method: post
+    parameters:
+      agent_name: "new_test_agent_insert_quick"
+    body: {}
 
   - endpoint: /agents
     method: get
@@ -278,8 +244,6 @@ test_cases:
     parameters: {}
     body: {}
 
-  # DELETE
-
   - endpoint: /agents
     method: delete
     parameters:
@@ -317,3 +281,15 @@ test_cases:
     parameters:
       rule_ids: "all"
     body: {}
+
+  - endpoint: /manager/restart
+    method: put
+    parameters: {}
+    body: {}
+    restart: True
+
+  - endpoint: /cluster/restart
+    method: put
+    parameters: {}
+    body: {}
+    restart: True
