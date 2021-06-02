@@ -5,9 +5,8 @@
 import os
 import shutil
 import pytest
+import wazuh_testing.fim as fim
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud,  callback_delete_watch, \
-                              generate_params, change_internal_options, callback_realtime_added_directory
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -30,14 +29,14 @@ extra_dirs = [os.path.join(test_folder, 'test3'),
 # Add all paths to the monitoring
 dir_str = ','.join(created_dirs + extra_dirs)
 
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_max_fd.yaml')
 
 # Configurations
 
 conf_params = {'TEST_DIRECTORIES': dir_str}
-parameters, metadata = generate_params(extra_params=conf_params, modes=['realtime'])
+parameters, metadata = fim.generate_params(extra_params=conf_params, modes=['realtime'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
 
@@ -45,22 +44,18 @@ def extra_configuration_before_yield():
     for dir in created_dirs:
         if not os.path.exists(dir):
             os.mkdir(dir)
-    change_internal_options(param='syscheck.max_fd_win_rt', value=fd_rt_value)
+    fim.change_internal_options(param='syscheck.max_fd_win_rt', value=fd_rt_value)
 
 
 def extra_configuration_after_yield():
-    change_internal_options(param='syscheck.max_fd_win_rt', value=256)
+    fim.change_internal_options(param='syscheck.max_fd_win_rt', value=256)
 
-
-# Fixtures
 
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
-
-# Tests
 
 @pytest.mark.parametrize('tags_to_apply', [{'test_max_fd_rt'}])
 def test_max_fd_win_rt(tags_to_apply, get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
@@ -81,18 +76,20 @@ def test_max_fd_win_rt(tags_to_apply, get_configuration, configure_environment, 
 
     for dir in created_dirs:
         shutil.rmtree(dir)
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_delete_watch,
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_delete_watch,
                                 error_message='Did not receive expected "Deleted realtime watch ..." event')
 
         os.mkdir(dir)
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_realtime_added_directory,
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                callback=fim.callback_realtime_added_directory,
                                 error_message='Did not receive expected "Directory added for realtime ..." event')
 
-        regular_file_cud(dir, wazuh_log_monitor, min_timeout=global_parameters.default_timeout, time_travel=False)
+        fim.regular_file_cud(dir, wazuh_log_monitor, min_timeout=global_parameters.default_timeout, time_travel=False)
         shutil.rmtree(dir)
 
     for dir in extra_dirs:
         os.mkdir(dir)
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_realtime_added_directory,
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                callback=fim.callback_realtime_added_directory,
                                 error_message='Did not receive expected "Directory added for realtime ..." event')
-        regular_file_cud(dir, wazuh_log_monitor, min_timeout=global_parameters.default_timeout, time_travel=False)
+        fim.regular_file_cud(dir, wazuh_log_monitor, min_timeout=global_parameters.default_timeout, time_travel=False)
