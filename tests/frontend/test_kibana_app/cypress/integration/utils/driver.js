@@ -16,7 +16,7 @@ export const clickElement = (selector) => {
   return this;
 };
 
-export const validateElementTextIncludes = (selector, text) => {
+export const elementTextIncludes = (selector, text) => {
   getObject(selector).should('contain', text);
 }
 
@@ -26,5 +26,4 @@ export const validateURLIncludes = (include) => {
 
 export const elementIsVisible = (element) => {
   return getObject(element).should('exist').should('be.visible');
-}
-;
+};
