@@ -24,7 +24,6 @@ const loginXpack = () => {
   fillUsernameFieldXPack(XPACK_USERNAME);
   fillPasswordFieldXPack(XPACK_PASSWORD);
   clickSubmitButtonXPack();
-  cy.wait(20000);
 };
 
 export { loginXpack };
