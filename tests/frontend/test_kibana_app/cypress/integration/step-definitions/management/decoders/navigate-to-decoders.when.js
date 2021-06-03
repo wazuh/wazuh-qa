@@ -1,7 +1,7 @@
 import { When } from 'cypress-cucumber-preprocessor/steps';
 import { clickElement } from '../../../utils/driver';
 import {
-  decodersButton,
+  decodersLink,
   wazuhMenuButton,
   managementButton,
 } from '../../../pageobjects/wazuh-menu/wazuh-menu.page';
@@ -9,6 +9,6 @@ import {
 When('The user navigates to decoders', () => {
   clickElement(wazuhMenuButton);
   clickElement(managementButton);
-  clickElement(decodersButton);
+  clickElement(decodersLink);
   cy.wait(5000);
 });

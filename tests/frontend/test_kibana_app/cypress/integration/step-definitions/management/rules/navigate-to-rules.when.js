@@ -3,12 +3,12 @@ import { clickElement, getObject } from '../../../utils/driver';
 import {
   managementButton,
   wazuhMenuButton,
-  rulesButton,
+  rulesLink,
 } from '../../../pageobjects/wazuh-menu/wazuh-menu.page';
 
 When('The user navigates to rules', () => {
   clickElement(wazuhMenuButton);
   clickElement(managementButton);
-  clickElement(rulesButton);
+  clickElement(rulesLink);
   cy.wait(3000);
 });
