@@ -10,7 +10,8 @@ setup(name='wazuh_testing',
       author_email='hello@wazuh.com',
       license='GPLv2',
       packages=find_packages(),
-      package_data={'wazuh_testing': ['data/syscheck_event.json',
+      package_data={'wazuh_testing': ['data/agent.conf',
+                                      'data/syscheck_event.json',
                                       'data/syscheck_event_windows.json',
                                       'data/mitre_event.json',
                                       'data/analysis_alert.json',
@@ -18,7 +19,9 @@ setup(name='wazuh_testing',
                                       'data/state_integrity_analysis_schema.json',
                                       'data/gcp_event.json',
                                       'data/keepalives.txt',
-                                      'data/rootcheck.txt'
+                                      'data/rootcheck.txt',
+                                      'data/syscollector.py',
+                                      'data/winevt.py'
                                       ]
                     },
       entry_points={

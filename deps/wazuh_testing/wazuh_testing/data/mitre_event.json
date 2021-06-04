@@ -73,7 +73,9 @@
           "type": "object",
           "title": "The Mitre Schema",
           "required": [
-            "id"
+            "id",
+            "tactic",
+            "technique"
           ],
           "properties": {
             "id": {
@@ -330,7 +332,7 @@
       "title": "The Location Schema",
       "default": "",
       "examples": [
-        "ossec-monitord"
+        "wazuh-monitord"
       ],
       "pattern": "^(.*)$"
     }
