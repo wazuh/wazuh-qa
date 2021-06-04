@@ -1,29 +1,63 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-import json
+import logging
 import re
+import string
+from functools import wraps
+from random import randint, SystemRandom
+from time import sleep
+
+
+def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
+    """Decorator used to retry functions.
+
+    This function will execute `func` multiple times until the max number of attempts is reached or
+    the function is executed without errors.
+
+    Args:
+        exceptions (Exception or tuple): which exceptions to catch.
+        attempts (int): number of times to retry the execution of func before abort.
+        delay (int): number of seconds to wait between successive attempts.
+        delay_multiplier (int): factor to multiply the wait time on each attempt.
+
+    Example:
+        @retry(requests.exceptions.Timeout, attempts=10, delay=5, backoff=0)
+        def send_message(msg, dest):
+    """
+    def retry_function(func):
+        wraps(func)
+
+        def to_retry(*args, **kwargs):
+            attempt, wait_time, wait_multiplier, excepts = attempts, delay, delay_multiplier, exceptions
+            while attempt > 0:
+                try:
+                    return func(*args, **kwargs)
+                except excepts as exception:
+                    wait_time *= wait_multiplier
+                    attempt -= 1
+                    msg = f'Exception: "{exception}". {attempt}/{attempts} remaining attempts. ' \
+                          f'Waiting {wait_time} seconds.'
+                    logging.warning(msg)
+                    sleep(wait_time)
+            return func(*args, **kwargs)  # final attempt
+        return to_retry  # actual decorator
+
+    return retry_function
 
 
 def replace_regex(pattern, new_value, data, replace_group=False):
     """
     Function to replace a pattern string in a data text
 
-    Parameters
-    ----------
-    pattern: str
-        Regular expresion pattern
-    new_value: str
-        New replaced string
-    data: str
-        String to search and replace
-    replace_group: bool
-        Flag to replace a plain expression or to replace it in a group
+    Args:
+        pattern (str): Regular expresion pattern
+        new_value (str): New replaced string
+        data (str): String to search and replace
+        replace_group (bool): Flag to replace a plain expression or to replace it in a group
 
-    Returns
-    -------
-    str:
-        New replaced text
+    Returns:
+        str: New replaced text
     """
     compiled_pattern = re.compile(pattern, re.DOTALL)
     replace_value = rf"\g<1>{new_value}\g<3>" if replace_group else new_value
@@ -35,30 +69,69 @@ def insert_xml_tag(pattern, tag, value, data):
     """
     Function to insert a xml tag in a string data.
 
-    Parameters
-    ----------
-    pattern: str
-        regex pattern.
-        Important: the regex must be composed of 3 groups. The inserted data will be added between group 1 and group 2.
-        Example:
-            r'(.*</tag1>)(<my_custom_tag>)(<tag2>)
-                </tag1>
-                <my_custom_tag>custom_value</my_custom_tag>
-                <tag2>
-                ...
-    tag: str
-        new xml tag
-    value: str
-        value of new xml tag
-    data: str
-        XML string data
-
-    Returns
-    -------
-    str:
-        new XML string data
+    Args:
+        pattern (str): regex pattern. The regex must be composed of 3 groups. The inserted data will be added
+            between group 1 and group 2.
+            Example:
+                r'(.*\</tag1\>)(\<my_custom_tag\>)(\<tag2\>)
+                    \</tag1\>
+                    \<my_custom_tag\>custom_value\</my_custom_tag\>
+                    \<tag2\>
+                    ...
+        tag (str): new xml tag
+        value (str): value of new xml tag
+        data (str): XML string data
+    Returns:
+        str: new XML string data
     """
     xml_tag = f"\n  <{tag}>{value}</{tag}>"
     compiled_pattern = re.compile(pattern, re.DOTALL)
 
     return re.sub(compiled_pattern, rf"\g<1>{xml_tag}\n  \g<2>\g<3>", data)
+
+
+def replace_in_file(filename, to_replace, replacement):
+    """Replaces all occurrences of <to_replace> with <replacement> in <filename> file.
+    This helper performs a search and replacement similar to `sed -i` to a desired file.
+    """
+    with open(filename) as f:
+        replace_content = f.read().replace(to_replace, replacement)
+
+    with open(filename, "w") as f:
+        f.write(replace_content)
+
+
+def get_random_ip():
+    """Create a random ip address.
+
+    Return:
+        String: Random ip address.
+    """
+    return fr"{randint(0,255)}.{randint(0,255)}.{randint(0,255)}.{randint(0,255)}"
+
+
+def get_random_string(string_length, digits=True):
+    """Create a random string with specified length.
+
+    Args:
+        string_length (int): Random string length.
+        digits (boolean): Digits availability for string generation.
+
+    Returns:
+        String: Random string.
+    """
+    character_set = string.ascii_uppercase + string.digits if digits else string.ascii_uppercase
+
+    return ''.join(SystemRandom().choice(character_set) for _ in range(string_length))
+
+
+def lower_case_key_dictionary_array(array_dict):
+    """Given an array of dictionaries, create a copy of it with the keys of each dictionary in lower case.
+
+    Args:
+        array_dict (List): List of dictionaries.
+
+    Returns:
+        List: List of dictionaries with lowercase keys.
+    """
+    return [{str(key).lower(): value for key, value in element.items()} for element in array_dict]
