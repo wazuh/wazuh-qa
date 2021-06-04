@@ -24,14 +24,20 @@ else:
                 for item in ossec_init.readlines() if "DIRECTORY" in item][0])
     else:
         WAZUH_PATH = os.path.join("/", "var", "ossec")
+
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
     WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
+    AGENT_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'ossec-agentd.state')
+    LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'ossec-logcollector.state')
+    REMOTE_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'ossec-remoted.state')
+    ANALYSIS_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'ossec-analysisd.state')
+
     if sys.platform == 'darwin':
-        PREFIX = os.path.join('/', 'private', 'var', 'root') 
+        PREFIX = os.path.join('/', 'private', 'var', 'root')
         GEN_OSSEC = None
     else:
         PREFIX = os.sep
@@ -44,6 +50,7 @@ else:
         OSSEC_GID = grp.getgrnam("ossec").gr_gid
     except (ImportError, KeyError, ModuleNotFoundError):
         pass
+
 
 if sys.platform == 'darwin' or sys.platform == 'win32' or sys.platform == 'sunos5':
     WAZUH_SERVICE = 'wazuh.agent'
