@@ -1,5 +1,5 @@
 import { When } from 'cypress-cucumber-preprocessor/steps';
-import { clickElement } from '../../../utils/driver';
+import { clickElement, validateURLIncludes } from '../../../utils/driver';
 import {
   decodersLink,
   wazuhMenuButton,
@@ -10,5 +10,5 @@ When('The user navigates to decoders', () => {
   clickElement(wazuhMenuButton);
   clickElement(managementButton);
   clickElement(decodersLink);
-  cy.wait(5000);
+  validateURLIncludes('/manager/?tab=decoders');
 });
