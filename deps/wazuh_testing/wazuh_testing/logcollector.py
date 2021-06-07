@@ -91,7 +91,7 @@ def callback_command_alias_output(alias):
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"Reading command message: 'ossec: output: '{alias}':"
+    msg = fr"Reading command message: 'wazuh: output: '{alias}':"
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 
