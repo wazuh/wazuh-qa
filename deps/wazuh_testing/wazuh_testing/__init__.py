@@ -6,6 +6,24 @@ import logging
 import sys
 from collections import defaultdict
 
+UDP = 'UDP'
+TCP = 'TCP'
+TCP_UDP = 'TCP,UDP'
+
+
+def is_udp(protocol):
+    return protocol.upper() == UDP
+
+
+def is_tcp(protocol):
+    return protocol.upper() == TCP
+
+
+def is_tcp_udp(protocol):
+    _protocol = protocol.replace(' ','').upper().split(',')
+    _protocol.sort()
+    return ','.join(_protocol) == TCP_UDP
+
 
 class Parameters:
     """Class to allocate all global parameters for testing"""
