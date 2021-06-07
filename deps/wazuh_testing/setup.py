@@ -21,7 +21,10 @@ setup(name='wazuh_testing',
                                       'data/keepalives.txt',
                                       'data/rootcheck.txt',
                                       'data/syscollector.py',
-                                      'data/winevt.py'
+                                      'data/winevt.py',
+                                      'data/sslmanager.key',
+                                      'data/sslmanager.cert',
+                                      'tools/macos_log/log_generator.swift'
                                       ]
                     },
       entry_points={

@@ -84,7 +84,7 @@ def get_service():
     return 'wazuh-manager' if service == 'server' else 'wazuh-agent'
 
 
-_data_path = os.path.join(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'), 'data')
+_data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
 
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 SERVER_KEY_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.key')

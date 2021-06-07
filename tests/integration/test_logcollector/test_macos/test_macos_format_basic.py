@@ -5,13 +5,14 @@
 import os
 import pytest
 
-from time import sleep
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.remote import check_agent_received_message
-
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools.monitoring import FileMonitor
 # Marks
-pytestmark = pytest.mark.tier(level=1)
+pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=0)]
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -62,6 +63,10 @@ def test_macos_format_basic(get_configuration, configure_environment, get_connec
     expected_macos_message = ""
     log_command = macos_message['command']
 
+    macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
+    wazuh_log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+
     if log_command == 'logger':
         logcollector.generate_macos_logger_log(macos_message['message'])
         expected_macos_message = logcollector.format_macos_message_pattern(macos_message['command'],
@@ -73,5 +78,5 @@ def test_macos_format_basic(get_configuration, configure_environment, get_connec
                                                         'custom_log',
                                                         logcollector.TEMPLATE_OSLOG_MESSAGE, macos_message['subsystem'],
                                                         macos_message['category'])
-        
-    check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_macos_message, timeout=20)
+
+    check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_macos_message, timeout=40)

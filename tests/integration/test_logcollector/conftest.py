@@ -3,7 +3,6 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import pytest
 from shutil import copyfile
-
 import pytest
 import wazuh_testing.tools.configuration as conf
 from wazuh_testing.logcollector import LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS

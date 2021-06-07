@@ -45,6 +45,11 @@ nav:
               - Test invalid syntax redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_invalid_syntax_redhat_feed.md
               - Test invalid values redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_invalid_values_redhat_feed.md
               - Test missing fileds redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_missing_fields_redhat_feed.md
+            - Archlinux:
+                - Test extra fields archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_extra_tags_archlinux_feed.md
+                - Test invalid syntax archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_invalid_syntax_archlinux_feed.md
+                - Test invalid values archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_invalid_values_archlinux_feed.md
+                - Test missing fileds archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_missing_tags_archlinux_feed.md
             - MSU:
               - Test extra fields feed: tests/integration/test_vulnerability_detector/test_feeds/msu/test_extra_fields_msu_feed.md
               - Test invalid syntax msu feed: tests/integration/test_vulnerability_detector/test_feeds/msu/test_invalid_syntax_msu_feed.md
@@ -127,7 +132,7 @@ nav:
             - Test cors: tests/integration/test_api/test_config/test_cors/test_cors.md
             - Test DOS blocking system: tests/integration/test_api/test_config/test_DOS_blocking_system/test_DOS_blocking_system.md
             - Test drop privileges:  tests/integration/test_api/test_config/test_drop_privileges/test_drop_privileges.md
-            - Test experimental features:  tests/integration/test_api/test_config/test_experimental_features/test_experimental_features
+            - Test experimental features:  tests/integration/test_api/test_config/test_experimental_features/test_experimental_features.md
             - Test host port:  tests/integration/test_api/test_config/test_host_port/test_host_port.md
             - Test https:  tests/integration/test_api/test_config/test_https/test_https.md
             - Test jwt token exp timeout:  tests/integration/test_api/test_config/test_jwt_token_exp_timeout/test_jwt_token_exp_timeout.md
@@ -467,10 +472,13 @@ nav:
                 - Test log format: tests/integration/test_logcollector/test_log_format/test_log_format_values.md
             - Test only future events: tests/integration/test_logcollector/test_only_future_events/test_only_future_events.md
             - Test location custom sockets: tests/integration/test_logcollector/test_location_custom_sockets/test_location_custom_sockets.md
+            - Test macos:
+                - Overview: tests/integration/test_logcollector/test_macos/index.md
+                - Test macos format basic: tests/integration/test_logcollector/test_macos/test_macos_format_basic.md
+                - Test only future events macos format: tests/integration/test_logcollector/test_macos/test_macos_format_only_future_events.md
             - Test options:
                 - Overview: tests/integration/test_logcollector/test_options/index.md
                 - Test state interval: tests/integration/test_logcollector/test_options/test_options_state_interval.md
-            - Test macos: tests/integration/test_logcollector/test_macos/test_macos_format_basic.md
         - Logtest:
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md
