@@ -2,8 +2,8 @@
 
 ## Overview 
 
-Check if `only-future-events` option for `logcollector` works correctly for macOS unified logging 
-system format (ULS).
+Check if `only-future-events` option for `logcollector` works correctly for macOS Unified Logging 
+System format (ULS).
 
 ## Objective
 
