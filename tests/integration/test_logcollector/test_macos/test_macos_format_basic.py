@@ -12,7 +12,7 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 # Marks
-pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=1)]
+pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=0)]
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')

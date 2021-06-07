@@ -12,7 +12,7 @@ from wazuh_testing.tools.services import control_service
 
 # Marks
 
-pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=1)]
+pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=0)]
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')

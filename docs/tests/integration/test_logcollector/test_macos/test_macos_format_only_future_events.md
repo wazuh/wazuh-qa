@@ -1,14 +1,14 @@
-# Test only future events for macos format
+# Test only future events for macOS format
 
 ## Overview 
 
-Check if `only-future-events` option for `logcollector` works correctly for macos unified logging 
+Check if `only-future-events` option for `logcollector` works correctly for macOS unified logging 
 system format (ULS).
 
 ## Objective
 
-- To confirm that `logcollector` gather all events from ULS when `only-future-events` is disabled
-- To confirm that `logcollector` does not gather old events when `only-future-events` is enabled
+- To confirm that `logcollector` gathers all the events from ULS when `only-future-events` is disabled.
+- To confirm that `logcollector` does not gather old events when `only-future-events` is enabled.
 
 ## General info
 
