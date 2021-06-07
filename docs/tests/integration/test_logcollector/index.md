@@ -49,6 +49,10 @@ through the `target` option in the `localfile` section of the configuration. The
 if the statistics of the forwarded events, which are in the file `wazuh-logcollector.state` are correct, 
 verifying that the dropped events match with the reported ones.
 
+#### Test options
+
+For each internal option of `logcollector` module, check if the options are set as expected and Wazuh and `logcollector` work correctly.
+
 #### Test macOS
 
 Wazuh macOS agent allows gathering unified logging system events. These tests ensure logcollector works correctly 

@@ -459,7 +459,7 @@ def get_data_sending_stats(log_path, socket_name):
 
     For this purpose, it parses the "wazuh-logcollector.state" file and retrieves the data.
     See:
-    https://documentation.wazuh.com/current/user-manual/reference/statistics-files/wazuh-logcollector-state.html
+    https://documentation-dev.wazuh.com/current/user-manual/reference/statistics-files/wazuh-logcollector-state.html
 
     Args:
         log_path (str): Path of the log from which the statistics are to be obtained.
@@ -594,10 +594,10 @@ def delete_file_structure(get_files_list):
 
 
 def callback_invalid_state_interval(interval):
-    """Create a callback to detect if logcollector is excluding files.
+    """Create a callback to detect if logcollector detects an invalid value for logcollector.state_interval option.
 
     Args:
-        interval (str): Name with absolute path of the analyzed file.
+        interval (str): Value of logcollector.state_interval option.
 
     Returns:
         callable: callback to detect this event.
@@ -606,15 +606,15 @@ def callback_invalid_state_interval(interval):
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
-def wait_statistics_file():
+def wait_statistics_file(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT):
     """Wait until statistics file is available.
 
     Raises:
         FileNotFoundError: If the next statistics could not be obtained according to the interval
                            defined by "logcollector.state_interval".
     """
-    for _ in range(LOG_COLLECTOR_GLOBAL_TIMEOUT):
-        if os.path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
+    for _ in range(timeout):
+        if path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
             break
         else:
             sleep(1)
