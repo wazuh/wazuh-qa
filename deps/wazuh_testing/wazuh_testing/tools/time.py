@@ -262,7 +262,7 @@ def interval_to_time_modifier(interval):
     """Convert a string with format (1s, 1m, 1h, 1d) to SQLite date modifier.
 
     Args:
-        interval (str): Time interval string
+        interval (str): Time interval string.
 
     Returns:
           str: SQLite date modifier.
