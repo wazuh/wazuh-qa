@@ -33,7 +33,7 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.system import HostManager
 
 REMOTED_DETECTOR_PREFIX = r'.*wazuh-remoted.*'
-LOG_COLLECTOR_DETECTOR_PREFIX = r'.*wazuh-logcollector.*'
+LOG_COLLECTOR_DETECTOR_PREFIX = r'.*wazuh-modulesd:logcollector.*'
 AGENT_DETECTOR_PREFIX = r'.*wazuh-agent.*'
 AUTHD_DETECTOR_PREFIX = r'.*wazuh-authd.*'
 

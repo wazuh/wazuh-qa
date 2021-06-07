@@ -13,7 +13,7 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.services import control_service
 import subprocess as sb
 
-LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
+LOGCOLLECTOR_DAEMON = "wazuh-modulesd"
 
 # Configuration
 

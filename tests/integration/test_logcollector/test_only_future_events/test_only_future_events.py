@@ -16,7 +16,7 @@ from wazuh_testing.tools.services import control_service
 pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]
 
 # Configuration
-DAEMON_NAME = "wazuh-logcollector"
+DAEMON_NAME = "wazuh-modulesd"
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_only_future_events_conf.yaml')
 temp_dir = tempfile.gettempdir()

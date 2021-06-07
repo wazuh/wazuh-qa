@@ -17,7 +17,7 @@ from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_
 
 import subprocess as sb
 
-LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
+LOGCOLLECTOR_DAEMON = "wazuh-modulesd"
 
 
 # Marks

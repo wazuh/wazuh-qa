@@ -19,7 +19,7 @@ from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 
-LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
+LOGCOLLECTOR_DAEMON = "wazuh-modulesd"
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)

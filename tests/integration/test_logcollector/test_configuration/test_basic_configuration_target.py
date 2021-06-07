@@ -15,7 +15,7 @@ from wazuh_testing.tools.services import control_service
 
 wazuh_component = get_service()
 
-LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
+LOGCOLLECTOR_DAEMON = "wazuh-modulesd"
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]

@@ -14,7 +14,7 @@ from wazuh_testing.tools import get_service, LOG_FILE_PATH
 from tempfile import gettempdir
 from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 
-LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
+LOGCOLLECTOR_DAEMON = "wazuh-modulesd"
 prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 # Marks
