@@ -89,7 +89,7 @@ def override_wazuh_conf(configuration):
     # Stop Wazuh
     control_service('stop', daemon='wazuh-authd')
     time.sleep(1)
-    check_daemon_status(running=False, daemon='wazuh-authd')
+    check_daemon_status(running_condition=False, target_daemon='wazuh-authd')
     truncate_file(LOG_FILE_PATH)
 
     # Configuration for testing

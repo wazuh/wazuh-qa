@@ -517,7 +517,7 @@ def configure_sockets_environment(request):
 
     # Stop wazuh-service and ensure all daemons are stopped
     control_service('stop')
-    check_daemon_status(running=False)
+    check_daemon_status(running_condition=False)
 
     monitored_sockets = list()
     mitm_list = list()

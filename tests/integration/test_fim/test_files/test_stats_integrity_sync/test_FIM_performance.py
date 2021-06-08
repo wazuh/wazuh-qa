@@ -584,7 +584,7 @@ def test_performance(mode, file_size, eps, path_length, number_files, initial_cl
 
     # Stop Wazuh
     control_service(daemon=tested_daemon, action='stop')
-    check_daemon_status(daemon=tested_daemon, running=False)
+    check_daemon_status(target_daemon=tested_daemon, running_condition=False)
 
     # Create number_files
     path_name = create_long_path(path_length, "scan")
@@ -593,7 +593,7 @@ def test_performance(mode, file_size, eps, path_length, number_files, initial_cl
     # Start Wazuh
     truncate_file(LOG_FILE_PATH)
     control_service(daemon=tested_daemon, action='start')
-    check_daemon_status(daemon=tested_daemon, running=True)
+    check_daemon_status(target_daemon=tested_daemon, running_condition=True)
 
     # Start state collector
     state_process = Process(target=state_collector, args=(state_filename, fconfiguration, state_status,))
