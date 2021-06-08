@@ -187,4 +187,5 @@ def test_only_future_events(get_configuration, configure_environment, restart_lo
     if cfg['invalid_value'] == '':
         check_only_future_events_valid(cfg)
     else:
-        check_only_future_events_invalid(cfg)
+        pytest.xfail("Expected error. Issue https://github.com/wazuh/wazuh/issues/8927")
+#       check_only_future_events_invalid(cfg)
