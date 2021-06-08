@@ -3,9 +3,9 @@ import { loginOdfe } from '../step-definitions/login/login-odfe';
 import { loginBasic } from '../step-definitions/login/login-basic';
 
 export const LOGIN_TYPE = {
-  xpack: loginXpack,
-  odfe: loginOdfe,
-  basic: loginBasic,
+  xpack : () => loginXpack(),
+  odfe : () => loginOdfe(),
+  basic : () => loginBasic()
 };
 
 export const ODFE_PASSWORD = 'admin';
