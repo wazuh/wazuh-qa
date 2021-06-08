@@ -121,7 +121,7 @@ def dbg_reading_command(command, alias, log_format):
         msg = fr"^{output}'"
         prefix = ''
     else:
-        msg = fr"DEBUG: Reading command message: 'ossec: output: '{alias}': {output}'"
+        msg = fr"DEBUG: Reading command message: 'wazuh: output: '{alias}': {output}'"
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                             callback=monitoring.make_callback(pattern=msg, prefix=prefix),
