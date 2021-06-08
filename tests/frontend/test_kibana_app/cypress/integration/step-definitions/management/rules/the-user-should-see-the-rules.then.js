@@ -1,5 +1,5 @@
 import { Then } from 'cypress-cucumber-preprocessor/steps';
-import { getObject } from '../../../utils/driver';
+import { getElement } from '../../../utils/driver';
 import {
   dropdownPaginationSelector,
   listPagesSelector,
@@ -8,16 +8,16 @@ import {
 } from '../../../pageobjects/wazuh-menu/rules.page';
 
 Then('The user should see the rules', () => {
-  getObject(titleSelector)
+  getElement(titleSelector)
     .should('exist')
     .should('contain', 'Rules');
-  getObject(tableSelector)
+  getElement(tableSelector)
     .should('exist')
     .should('be.visible');
-  getObject(dropdownPaginationSelector)
+  getElement(dropdownPaginationSelector)
     .should('exist')
     .should('be.visible');
-  getObject(listPagesSelector)
+  getElement(listPagesSelector)
     .should('exist')
     .should('be.visible');
 });

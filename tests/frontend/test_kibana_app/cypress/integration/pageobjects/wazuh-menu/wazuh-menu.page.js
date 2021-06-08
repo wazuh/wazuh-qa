@@ -9,6 +9,7 @@ export const settingsButton = '.wz-menu-sections > :nth-child(7) > .euiButtonCon
 //endregion Menu
 //region SubMenu
 //region Modules
+export const modulesDirectory = 'div.wz-menu-right-side > div > div > div.euiFlexGroup.euiFlexGroup--gutterLarge.euiFlexGroup--directionRow.euiFlexGroup--responsive > div > button > span > span';
 export const securityEventsButton = ':nth-child(1) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(1) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
 export const integrityMonitoringButton = ':nth-child(1) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(2) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
 export const amazonAwsButton = ':nth-child(1) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(3) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';

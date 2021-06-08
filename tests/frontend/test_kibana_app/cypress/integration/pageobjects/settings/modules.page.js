@@ -1,0 +1,10 @@
+export const amazonAWSToggleButton = 'react-component > div:nth-child(1) > div > .euiFlexGroup .euiFlexGroup:nth-child(3) .euiSwitch__button';
+export const gCPToggleButton = 'react-component > div:nth-child(1) > div > .euiFlexGroup .euiFlexGroup:nth-child(4) .euiSwitch__button';
+export const openSCAPToggleButton = 'react-component > div:nth-child(2) > div > .euiFlexGroup .euiFlexGroup:nth-child(4) .euiSwitch__button';
+export const cisCatToggleButton = 'react-component > div:nth-child(2) > div > .euiFlexGroup .euiFlexGroup:nth-child(5) .euiSwitch__button';
+export const virusTotalToggleButton = 'react-component > div:nth-child(3) > div > .euiFlexGroup .euiFlexGroup:nth-child(3) .euiSwitch__button';
+export const osqueryToggleButton = 'react-component > div:nth-child(3) > div > .euiFlexGroup .euiFlexGroup:nth-child(4) .euiSwitch__button';
+export const dockerListenerToggleButton = 'react-component > div:nth-child(3) > div > .euiFlexGroup .euiFlexGroup:nth-child(5) .euiSwitch__button';
+export const gDPRToggleButton = 'react-component > div:nth-child(4) > div > .euiFlexGroup .euiFlexGroup:nth-child(3) .euiSwitch__button';
+export const hIPAAToggleButton = 'react-component > div:nth-child(4) > div > .euiFlexGroup .euiFlexGroup:nth-child(4) .euiSwitch__button';
+export const tSCToggleButton = 'react-component > div:nth-child(4) > div > .euiFlexGroup .euiFlexGroup:nth-child(5) .euiSwitch__button';
