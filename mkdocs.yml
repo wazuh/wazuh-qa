@@ -94,6 +94,9 @@ nav:
             - Test scan different cves:  tests/integration/test_vulnerability_detector/test_scan_results/test_scan_different_cves.md
             - Test scan nvd feed: tests/integration/test_vulnerability_detector/test_scan_results/test_scan_nvd_feed.md
             - Test scan providers and nvd feed: tests/integration/test_vulnerability_detector/test_scan_results/test_scan_providers_and_nvd_feed.md
+          - Tests SCAN types:
+            - tests/integration/test_vulnerability_detector/test_scan_types/index.md
+            - Test partial scan type: tests/integration/test_vulnerability_detector/test_scan_types/test_partial_scan_type.md
           - Tests Windows:
             - tests/integration/test_vulnerability_detector/test_windows/index.md
             - Test CPE indexing: tests/integration/test_vulnerability_detector/test_windows/test_cpe_indexing.md
