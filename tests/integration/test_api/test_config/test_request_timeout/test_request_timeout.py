@@ -8,8 +8,7 @@ from json import loads
 import pytest
 import requests
 
-from wazuh_testing.api import API_PROTOCOL, API_HOST, API_PORT, API_LOGIN_ENDPOINT, \
-    API_USER, API_PASS, get_login_headers
+import wazuh_testing.api as api
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 
 # Marks
@@ -38,10 +37,9 @@ def get_configuration(request):
 ])
 def test_request_timeout(tags_to_apply, get_configuration, configure_api_environment, restart_api,
                          wait_for_start, get_api_details):
-    """Check that the blocking time for IPs detected as brute-force attack works.
+    """Check that the maximum request time for an API request works.
 
-    Provoke a block, make a request before the blocking
-    time finishes and one after the blocking time.
+    Make a request to check the timeout error.
 
     Parameters
     ----------
@@ -49,8 +47,8 @@ def test_request_timeout(tags_to_apply, get_configuration, configure_api_environ
         Run test if match with a configuration identifier, skip otherwise.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    get_response = requests.get(f'{API_PROTOCOL}://{API_HOST}:{API_PORT}{API_LOGIN_ENDPOINT}',
-                                headers=get_login_headers(API_USER, API_PASS), verify=False)
+    get_response = requests.get(f'{api.API_PROTOCOL}://{api.API_HOST}:{api.API_PORT}{api.API_LOGIN_ENDPOINT}',
+                                headers=api.get_login_headers(api.API_USER, api.API_PASS), verify=False)
 
     assert get_response.status_code == 500, f'Expected status code was 500, ' \
                                             f'but {get_response.status_code} was returned. \n' \
