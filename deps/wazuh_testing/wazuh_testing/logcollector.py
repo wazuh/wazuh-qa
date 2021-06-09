@@ -614,7 +614,7 @@ def wait_statistics_file(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT):
                            defined by "logcollector.state_interval".
     """
     for _ in range(timeout):
-        if path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
+        if os.path.isfile(LOGCOLLECTOR_STATISTICS_FILE):
             break
         else:
             sleep(1)
