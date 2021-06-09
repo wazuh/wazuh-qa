@@ -78,22 +78,22 @@ def generate_analysisd_yaml(n_events, modify_events):
     # Restart syscheckd with the new configuration
     truncate_file(LOG_FILE_PATH)
     control_service('stop')
-    check_daemon_status(running=False)
+    check_daemon_status(running_condition=False)
 
     remove_logs()
 
     control_service('start', daemon='wazuh-db', debug_mode=True)
-    check_daemon_status(running=True, daemon='wazuh-db')
+    check_daemon_status(running_condition=True, daemon='wazuh-db')
 
     control_service('start', daemon='wazuh-analysisd', debug_mode=True)
-    check_daemon_status(running=True, daemon='wazuh-analysisd')
+    check_daemon_status(running_condition=True, daemon='wazuh-analysisd')
 
     mitm_analysisd = ManInTheMiddle(address=analysis_path, family='AF_UNIX', connection_protocol='UDP')
     analysis_queue = mitm_analysisd.queue
     mitm_analysisd.start()
 
     control_service('start', daemon='wazuh-remoted', debug_mode=True)
-    check_daemon_status(running=True, daemon='wazuh-remoted')
+    check_daemon_status(running_condition=True, daemon='wazuh-remoted')
 
     analysis_monitor = QueueMonitor(analysis_queue)
 
@@ -136,7 +136,7 @@ def generate_analysisd_yaml(n_events, modify_events):
 def kill_daemons():
     for daemon in ['wazuh-remoted', 'wazuh-analysisd', 'wazuh-db']:
         control_service('stop', daemon=daemon)
-        check_daemon_status(running=False, daemon=daemon)
+        check_daemon_status(running_condition=False, daemon=daemon)
 
 
 def get_script_arguments():

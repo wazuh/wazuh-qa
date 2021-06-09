@@ -70,9 +70,9 @@ def test_options_state_interval(get_local_internal_options):
                 last_modification_time = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
             elapsed = last_modification_time - previous_modification_time
             if sys.platform == 'win32':
-                assert interval - 30 < elapsed and elapsed < interval + 30
+                assert interval - 30 < elapsed < interval + 30
             else:
-                assert interval - 1 < elapsed and elapsed < interval + 1
+                assert interval - 1 < elapsed < interval + 1
 
     else:
         with pytest.raises(ValueError):
