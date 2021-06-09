@@ -64,7 +64,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
                                            metadata=metadata)
 configuration_ids = [f"{x['log_format']}_{x['location']}_{x['reconnect_time']}" for x in metadata]
 problematic_values = ['44sTesting', '9hTesting', '400mTesting', '3992']
-
+error_values = ['Testing44s', 'Testing']
 
 def check_configuration_reconnect_time_valid():
     """Check if Wazuh module correctly runs and analyzes the desired eventchannel.
@@ -123,6 +123,8 @@ def test_configuration_reconnect_time(get_configuration, configure_environment):
     else:
         if cfg['reconnect_time'] in problematic_values:
             pytest.xfail("Logcolector accepts invalid values. Issue: https://github.com/wazuh/wazuh/issues/8158")
+        elif cfg['reconnect_time'] in error_values:
+            pytest.xfail("Expected error. Issue: https://github.com/wazuh/wazuh/issues/8927")
         else:
             control_service('start', daemon=LOGCOLLECTOR_DAEMON)
             check_configuration_reconnect_time_invalid(cfg)
