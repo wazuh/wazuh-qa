@@ -350,13 +350,13 @@ def duplicate_name_agent_delete_test(server):
 def test_ossec_authd_agents_ctx_main(get_configuration, set_up_groups, configure_environment,
                                      configure_sockets_environment, connect_to_sockets_module):
     control_service('stop', daemon='wazuh-authd')
-    check_daemon_status(running_condition=False, daemon='wazuh-authd')
+    check_daemon_status(running_condition=False, target_daemon='wazuh-authd')
     time.sleep(1)
     clean_logs()
     clean_agents_ctx()
     time.sleep(1)
     control_service('start', daemon='wazuh-authd')
-    check_daemon_status(running_condition=True, daemon='wazuh-authd')
+    check_daemon_status(running_condition=True, target_daemon='wazuh-authd')
     wait_server_connection()
     time.sleep(1)
 
@@ -369,13 +369,13 @@ def test_ossec_authd_agents_ctx_main(get_configuration, set_up_groups, configure
 def test_ossec_authd_agents_ctx_local(get_configuration, set_up_groups, configure_environment,
                                       configure_sockets_environment, connect_to_sockets_module):
     control_service('stop', daemon='wazuh-authd')
-    check_daemon_status(running_condition=False, daemon='wazuh-authd')
+    check_daemon_status(running_condition=False, target_daemon='wazuh-authd')
     time.sleep(1)
     clean_logs()
     clean_agents_ctx()
     time.sleep(1)
     control_service('start', daemon='wazuh-authd')
-    check_daemon_status(running_condition=True, daemon='wazuh-authd')
+    check_daemon_status(running_condition=True, target_daemon='wazuh-authd')
     wait_server_connection()
     time.sleep(1)
 
