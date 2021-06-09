@@ -138,6 +138,8 @@ def query_wdb(command):
     data = []
 
     try:
+        #import pdb; pdb.set_trace()
+
         sock.send(wazuh_pack(len(command)) + command.encode())
 
         rcv = sock.recv(4)
