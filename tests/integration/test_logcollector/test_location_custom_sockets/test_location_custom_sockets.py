@@ -17,12 +17,12 @@ from wazuh_testing.tools import LOG_FILE_PATH, file
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.logcollector import LOGCOLLECTOR_DAEMON
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
 # Configuration
-DAEMON_NAME = "wazuh-modulesd"
 test_data_path = path.join(path.dirname(path.realpath(__file__)), 'data')
 configurations_path = path.join(test_data_path, 'wazuh_location_custom_sockets_conf.yaml')
 temp_dir = gettempdir()
@@ -82,11 +82,11 @@ def get_local_internal_options():
 @pytest.fixture(scope='function')
 def restart_logcollector(get_configuration, request):
     """Reset log file and start a new monitor."""
-    control_service('stop', daemon=DAEMON_NAME)
+    control_service('stop', daemon=LOGCOLLECTOR_DAEMON)
     file.truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
-    control_service('start', daemon=DAEMON_NAME)
+    control_service('start', daemon=LOGCOLLECTOR_DAEMON)
 
 
 @pytest.fixture(scope="function")

@@ -15,6 +15,7 @@ from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.time import TimeMachine, time_to_timedelta, time_to_seconds
 import tempfile
 from wazuh_testing.tools.utils import lower_case_key_dictionary_array
+from wazuh_testing.logcollector import LOGCOLLECTOR_DAEMON
 
 
 # Marks
@@ -24,7 +25,6 @@ pytestmark = pytest.mark.tier(level=0)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 
-DAEMON_NAME = "wazuh-modulesd"
 
 local_internal_options = {'logcollector.vcheck_files': 0}
 
@@ -92,10 +92,10 @@ def test_configuration_age_datetime(get_local_internal_options, configure_local_
     cfg = get_configuration['metadata']
     age_seconds = time_to_seconds(cfg['age'])
 
-    control_service('stop', daemon=DAEMON_NAME)
+    control_service('stop', daemon=LOGCOLLECTOR_DAEMON)
     truncate_file(LOG_FILE_PATH)
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-    control_service('start', daemon=DAEMON_NAME)
+    control_service('start', daemon=LOGCOLLECTOR_DAEMON)
 
     TimeMachine.travel_to_future(time_to_timedelta(new_datetime))
 
