@@ -102,7 +102,7 @@ def test_options_state_interval_no_file(get_local_internal_options_function, get
 
             log_callback = logcollector.callback_analyzing_file(log_path)
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                    error_message="ERROR GENERIC CHANGE")
+                                    error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
 
             # Ensure wazuh-logcollector.state is created
             logcollector.wait_statistics_file(timeout=interval + 5)
@@ -120,7 +120,7 @@ def test_options_state_interval_no_file(get_local_internal_options_function, get
 
             log_callback = logcollector.callback_removed_file(log_path)
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                    error_message="File not available, ignoring it:")
+                                    error_message="File no longer exists has not been generated")
 
             for n_attempts in range(open_attempts):
                 log_callback = logcollector.callback_unable_to_open(log_path, open_attempts - (n_attempts + 1))
@@ -129,7 +129,7 @@ def test_options_state_interval_no_file(get_local_internal_options_function, get
 
             log_callback = logcollector.callback_ignored_removed_file(log_path)
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                    error_message="File not available, ignoring it:")
+                                    error_message="File not available callback has not been generated")
 
             for _ in range(62):
                 with open(LOGCOLLECTOR_STATISTICS_FILE, 'r') as next_json_file:
