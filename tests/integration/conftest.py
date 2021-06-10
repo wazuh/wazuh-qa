@@ -517,7 +517,7 @@ def configure_sockets_environment(request):
 
     # Stop wazuh-service and ensure all daemons are stopped
     control_service('stop')
-    check_daemon_status(running=False)
+    check_daemon_status(running_condition=False)
 
     monitored_sockets = list()
     mitm_list = list()
@@ -533,9 +533,9 @@ def configure_sockets_environment(request):
         not daemon_first and mitm is not None and mitm.start()
         control_service('start', daemon=daemon, debug_mode=True)
         check_daemon_status(
-            running=True,
-            daemon=daemon,
-            extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else None
+            running_condition=True,
+            target_daemon=daemon,
+            extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else []
         )
         daemon_first and mitm is not None and mitm.start()
         if mitm is not None:
@@ -552,9 +552,9 @@ def configure_sockets_environment(request):
         mitm is not None and mitm.shutdown()
         control_service('stop', daemon=daemon)
         check_daemon_status(
-            running=False,
-            daemon=daemon,
-            extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else None
+            running_condition=False,
+            target_daemon=daemon,
+            extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else []
         )
 
     # Delete all db

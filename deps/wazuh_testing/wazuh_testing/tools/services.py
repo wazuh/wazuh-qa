@@ -172,8 +172,8 @@ def check_daemon_status(target_daemon=None, running_condition=True, timeout=10, 
 
     Args:
         target_daemon (str, optional):  Wazuh daemon to check. Default `None`. None means all.
-        running_condition (bool, optional): True if the daemon is expected to be running False if it is expected to be stopped.
-            Default `True`.
+        running_condition (bool, optional): True if the daemon is expected to be running False
+            if it is expected to be stopped. Default `True`.
         timeout (int, optional): Timeout value for the check. Default `10` seconds.
         extra_sockets (list, optional): Additional sockets to check. They may not be present in default configuration.
 
@@ -196,8 +196,11 @@ def check_daemon_status(target_daemon=None, running_condition=True, timeout=10, 
                 current_daemon = daemon_status_tokens[0]
                 daemon_status = ' '.join(daemon_status_tokens[1:])
                 daemon_running = daemon_status == 'is running...'
-                if current_daemon == target_daemon or target_daemon == None:
-                    socket_set = {path for path in WAZUH_SOCKETS[current_daemon]}
+                if current_daemon == target_daemon or target_daemon is None:
+                    if current_daemon in WAZUH_SOCKETS.keys():
+                        socket_set = {path for path in WAZUH_SOCKETS[current_daemon]}
+                    else:
+                        socket_set = set()
                     # We remove optional sockets and add extra sockets to the set to check
                     socket_set.difference_update(WAZUH_OPTIONAL_SOCKETS)
                     socket_set.update(extra_sockets)

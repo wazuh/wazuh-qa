@@ -169,7 +169,7 @@ echo 'monitord.rotate_log=0' >> /Library/Ossec/etc/local_internal_options.conf
 /Library/Ossec/bin/ossec-control restart
 ```
 
-- Download wazuh-qa repository, install the requirements and the package dependencies..
+- Download wazuh-qa repository, install the requirements and the package dependencies.
 
 ```
 # Download wazuh-qa repository

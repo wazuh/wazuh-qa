@@ -130,6 +130,7 @@ class APISimulator:
             self.logger.warning('API token expired')
             self.get_token()
             try:
+                headers = {'Authorization': f'Bearer {self.token}'}
                 response = getattr(requests, request['method'])(endpoint, headers=headers, params=request['parameters'],
                                                                 data=request['body'], verify=False)
                 if result:
