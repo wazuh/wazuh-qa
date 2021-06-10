@@ -19,7 +19,7 @@ from wazuh_testing.tools.services import control_service
 from time import sleep
 
 # Marks
-pytestmark = pytest.mark.tier(level=1)
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1), pytest.mark.server]
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'configuration')
