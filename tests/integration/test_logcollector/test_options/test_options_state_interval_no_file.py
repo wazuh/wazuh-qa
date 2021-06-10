@@ -40,9 +40,7 @@ parameters = [
 ]
 
 metadata = [
-    {'location': os.path.join(temp_dir, 'wazuh-testing', 'test.txt'),
-     'files': [os.path.join(temp_dir, 'wazuh-testing', 'test.txt')],
-     'log_format': 'syslog'}
+    {'location': os.path.join(temp_dir, 'wazuh-testing', 'test.txt'), 'log_format': 'syslog'}
 ]
 
 # Configuration data
@@ -50,8 +48,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 configuration_ids = [f"{x['LOCATION']}_{x['LOG_FORMAT']}" for x in parameters]
 local_options = [{'state_interval': '1', 'open_attempts': '1'},
                  {'state_interval': '4', 'open_attempts': '4'},
-                 {'state_interval': '5', 'open_attempts': '10'},
-                 ]
+                 {'state_interval': '5', 'open_attempts': '10'}]
 
 
 # Fixtures
@@ -71,16 +68,9 @@ def get_files_list():
 def get_local_internal_options_function(request):
     """Get configurations from the module."""
     backup_options_lines = conf.get_wazuh_local_internal_options()
-
-    if sys.platform == 'win32':
-        conf.add_wazuh_local_internal_options({'\n windows.debug': '2'})
-    else:
-        conf.add_wazuh_local_internal_options(
-            {'\n logcollector.debug': '2', 'logcollector.open_attempts': request.param['open_attempts'],
-             'logcollector.vcheck_files': '3'})
-
-    conf.add_wazuh_local_internal_options({'logcollector.state_interval': request.param['state_interval']})
-
+    conf.add_wazuh_local_internal_options({'logcollector.open_attempts': request.param['open_attempts'],
+                                           'logcollector.state_interval': request.param['state_interval'],
+                                           'logcollector.vcheck_files': '3'})
     yield request.param
 
     conf.set_wazuh_local_internal_options(backup_options_lines)
@@ -145,7 +135,6 @@ def test_options_state_interval_no_file(get_local_internal_options_function, get
                 with open(LOGCOLLECTOR_STATISTICS_FILE, 'r') as next_json_file:
                     data = load(next_json_file)
 
-                print("Check it is not in state")
                 global_files = data['global']['files']
                 interval_files = data['interval']['files']
                 if not list(filter(lambda global_file: global_file['location'] == log_path, global_files)) and \
