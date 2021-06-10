@@ -12,8 +12,6 @@ from wazuh_testing import logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools import LOGCOLLECTOR_STATISTICS_FILE
 from wazuh_testing.tools import LOG_FILE_PATH
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
@@ -103,6 +101,7 @@ def test_options_state_interval_no_file(get_local_internal_options_function, get
 
     interval = int(get_local_internal_options_function['state_interval'])
     open_attempts = int(get_local_internal_options_function['open_attempts'])
+    logcollector_state_file_updated = False
 
     for file in get_files_list:
         for name in file['filename']:
@@ -134,7 +133,7 @@ def test_options_state_interval_no_file(get_local_internal_options_function, get
                                     error_message="File not available, ignoring it:")
 
             for n_attempts in open_attempts:
-                log_callback = logcollector.callback_unable_to_open(log_path, open_attempts - n_attempts)
+                log_callback = logcollector.callback_unable_to_open(log_path, open_attempts - (n_attempts + 1))
                 wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                         error_message="Unable to open file callback has not been generated")
 
@@ -142,14 +141,17 @@ def test_options_state_interval_no_file(get_local_internal_options_function, get
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                     error_message="File not available, ignoring it:")
 
-            sleep(10)
+            for _ in range(60):
+                with open(LOGCOLLECTOR_STATISTICS_FILE, 'r') as next_json_file:
+                    data = load(next_json_file)
 
-            with open(LOGCOLLECTOR_STATISTICS_FILE, 'r') as next_json_file:
-                data = load(next_json_file)
-
-            print("Check it is not in state")
-            global_files = data['global']['files']
-            interval_files = data['interval']['files']
-
-            assert not list(filter(lambda global_file: global_file['location'] == log_path, global_files))
-            assert not list(filter(lambda interval_file: interval_file['location'] == log_path, interval_files))
+                print("Check it is not in state")
+                global_files = data['global']['files']
+                interval_files = data['interval']['files']
+                if not list(filter(lambda global_file: global_file['location'] == log_path, global_files)) and \
+                        not list(filter(lambda interval_file: interval_file['location'] == log_path, interval_files)):
+                    logcollector_state_file_updated = True
+                    break
+                else:
+                    sleep(1)
+            assert logcollector_state_file_updated
