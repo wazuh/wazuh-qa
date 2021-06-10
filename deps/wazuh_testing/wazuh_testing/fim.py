@@ -1321,6 +1321,11 @@ def callback_dbsync_no_data(line):
     return None
 
 
+def callback_detect_end_runtime_wildcards(line):
+    match = re.match(r".*Configuration wildcards update finalize\.", line)
+    return match is not None
+
+
 def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None,
                       timeout=global_parameters.default_timeout):
     """Change date and time of the system depending on a boolean condition.

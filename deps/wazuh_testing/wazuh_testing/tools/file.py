@@ -278,3 +278,18 @@ def set_file_owner_and_group(file_path, owner, group):
         gid = getgrnam(group).gr_gid
 
         os.chown(file_path, uid, gid)
+
+
+def recursive_directory_creation(path):
+    """Recursive function to create folders.
+       Args:
+        path (str): Path to create. If a folder doesn't exists, it will create it.
+    """
+    parent, _ = os.path.split(path)
+    if parent != '' and not os.path.exists(parent):
+        split = os.path.split(parent)
+        recursive_directory_creation(split[0])
+        os.mkdir(parent)
+
+    if not os.path.exists(path):
+        os.mkdir(path)

@@ -200,6 +200,8 @@ nav:
               - Test basic usage quick changes: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_quick_changes.md
               - Test basic usage rename: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_rename.md
               - Test basic usage starting agent: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_starting_agent.md
+              - Test basic usage wildcards: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_wildcards.md
+              - Test basic usage wildcards runtime: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_wildcards_runtime.md
             - Test benchmark:
               - tests/integration/test_fim/test_files/test_benchmark/index.md
               - Test benchmark:  tests/integration/test_fim/test_files/test_benchmark/test_benchmark.md
@@ -318,6 +320,10 @@ nav:
               - tests/integration/test_fim/test_files/test_windows_audit_interval/index.md
               - Manage acl: tests/integration/test_fim/test_files/test_windows_audit_interval/manage_acl.md
               - Test windows audit interval: tests/integration/test_fim/test_files/test_windows_audit_interval/test_windows_audit_interval.md
+            - Test wildcards complex:
+              - tests/integration/test_fim/test_files/test_wildcards_complex/index.md
+              - Test wildcards complex: tests/integration/test_fim/test_files/test_wildcards_complex/test_wildcards_complex.md
+              - Test wildcards complex runtime: tests/integration/test_fim/test_files/test_wildcards_complex/test_wildcards_complex_runtime.md
           - Test registry:
             - tests/integration/test_fim/test_registry/index.md
             - Test registry ambiguous confs:
