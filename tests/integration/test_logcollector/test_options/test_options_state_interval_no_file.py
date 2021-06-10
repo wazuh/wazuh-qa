@@ -76,10 +76,10 @@ def get_local_internal_options_function(request):
         conf.add_wazuh_local_internal_options({'\n windows.debug': '2'})
     else:
         conf.add_wazuh_local_internal_options(
-            {'\n logcollector.debug': '2', 'logcollector.open_attempts': request.param['state_interval'],
+            {'\n logcollector.debug': '2', 'logcollector.open_attempts': request.param['open_attempts'],
              'logcollector.vcheck_files': '3'})
 
-    conf.add_wazuh_local_internal_options({'logcollector.state_interval': request.param['open_attempts']})
+    conf.add_wazuh_local_internal_options({'logcollector.state_interval': request.param['state_interval']})
 
     yield request.param
 
@@ -132,7 +132,7 @@ def test_options_state_interval_no_file(get_local_internal_options_function, get
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                     error_message="File not available, ignoring it:")
 
-            for n_attempts in open_attempts:
+            for n_attempts in range(open_attempts):
                 log_callback = logcollector.callback_unable_to_open(log_path, open_attempts - (n_attempts + 1))
                 wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                         error_message="Unable to open file callback has not been generated")
@@ -141,7 +141,7 @@ def test_options_state_interval_no_file(get_local_internal_options_function, get
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                     error_message="File not available, ignoring it:")
 
-            for _ in range(60):
+            for _ in range(62):
                 with open(LOGCOLLECTOR_STATISTICS_FILE, 'r') as next_json_file:
                     data = load(next_json_file)
 
