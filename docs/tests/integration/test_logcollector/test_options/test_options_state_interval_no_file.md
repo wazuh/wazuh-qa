@@ -6,8 +6,8 @@ Check if `wazuh-logcollector` update `wazuh-logcollector.state` file properly wh
 ## Objective
 
 - To confirm the `wazuh-logcollector.state` file is updated when a monitored file is removed.
-- To confirm the `logcollector.open_attempts` options is correctly set, and it works correctly.
-- To confirm the `logcollector.state_interval` options is correctly set, and it works correctly.
+- To confirm the `logcollector.open_attempts` option is correctly set, and it works correctly.
+- To confirm the `logcollector.state_interval` option is correctly set, and it works correctly.
 
 ## General info
 
@@ -19,7 +19,7 @@ Check if `wazuh-logcollector` update `wazuh-logcollector.state` file properly wh
 
 - Pass if `wazuh-logcollector` update `wazuh-logcollector.state` file, removing deleted file.
 - Pass if `wazuh-logcollector` try to open the removed filed. The number of attempts should be equal 
-  to `logcollector.open_attempts` options is correctly set, and it works correctly.
+  to `logcollector.open_attempts` option is correctly set, and it works correctly.
 - Pass if `wazuh-logcollector` update `wazuh-logcollector.state` using `logcollector.state_interval` value 
 
 ## Code documentation

@@ -73,9 +73,9 @@ def callback_analyzing_file(file):
 def callback_removed_file(file):
     """Create a callback to detect if logcollector has detected that a monitored file has been deleted.
     Args:
-        file (str): Name with absolute path of the deleted file.
+        file (str): Absolute path of the deleted file.
     Returns:
-        callable: callback to detect this event.
+        callable: Callback to detect this event.
     """
 
     msg = fr"File '{file}' no longer exists."
@@ -85,9 +85,9 @@ def callback_removed_file(file):
 def callback_ignored_removed_file(file):
     """Create a callback to detect if logcollector is ignoring specified deleted file.
     Args:
-        file (str): Name with absolute path of the deleted file.
+        file (str): Absolute path of the deleted file.
     Returns:
-        callable: callback to detect this event.
+        callable: Callback to detect this event.
     """
     msg = fr"File not available, ignoring it: '{file}'."
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
@@ -99,7 +99,7 @@ def callback_monitoring_command(log_format, command):
         log_format (str): Log format of the command monitoring (full_command or command).
         command (str): Monitored command.
     Returns:
-        callable: callback to detect this event.
+        callable: Callback to detect this event.
     """
     log_format_message = 'full output' if log_format == 'full_command' else 'output'
     msg = fr"INFO: Monitoring {log_format_message} of command\(\d+\): {command}"
