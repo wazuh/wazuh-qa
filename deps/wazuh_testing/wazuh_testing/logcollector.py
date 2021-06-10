@@ -82,6 +82,17 @@ def callback_removed_file(file):
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
+def callback_ignored_removed_file(file):
+    """Create a callback to detect if logcollector is ignoring specified deleted file.
+    Args:
+        file (str): Name with absolute path of the deleted file.
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"File not available, ignoring it: '{file}'."
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
 def callback_monitoring_command(log_format, command):
     """Create a callback to detect if logcollector is monitoring a command.
     Args:
@@ -258,6 +269,18 @@ def callback_read_line_from_file(n_lines, filename):
         callable: callback to detect this event.
     """
     msg = fr"DEBUG: Read {n_lines} lines from {filename}"
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
+def callback_unable_to_open(file_path, n_attempt):
+    """Create a callback to detect if `wazuh-logcollector` fails to open the specified file.
+    Args:
+        file_path (str): Path of the file that `wazuh-logcollector` is trying to open.
+        n_attempt (str): Number of attempts remains to ignore the file.
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"Unable to open file '{file_path}'. Remaining attempts: {n_attempt}"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
