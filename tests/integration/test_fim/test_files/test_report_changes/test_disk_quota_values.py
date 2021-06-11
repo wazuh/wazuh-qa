@@ -78,7 +78,7 @@ def extra_configuration_after_yield():
 
 
 # Tests
-
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('tags_to_apply', [
     {'ossec_conf_diff'}
 ])

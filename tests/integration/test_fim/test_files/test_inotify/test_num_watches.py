@@ -82,7 +82,7 @@ def extra_configuration_after_yield():
 
 # Tests
 
-
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('realtime_enabled, decreases_num_watches, rename_folder', [
     (True, True, False),
     (True, True, True),

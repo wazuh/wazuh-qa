@@ -41,7 +41,7 @@ def get_configuration(request):
 
 
 # tests
-
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/1441')
 @pytest.mark.parametrize('tags_to_apply', [
     ({'config1'})
 ])
@@ -66,7 +66,7 @@ def test_audit_health_check(tags_to_apply, get_configuration,
     wazuh_log_monitor.start(timeout=20, callback=fim.callback_audit_health_check,
                             error_message='Health check failed')
 
-
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/1441')
 @pytest.mark.parametrize('tags_to_apply', [
     ({'config1'})
 ])
@@ -99,7 +99,7 @@ def test_added_rules(tags_to_apply, get_configuration,
     assert testdir2 in events, f'{testdir2} not detected in scan'
     assert testdir3 in events, f'{testdir3} not detected in scan'
 
-
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/1441')
 @pytest.mark.parametrize('tags_to_apply', [
     ({'config1'})
 ])
@@ -139,7 +139,7 @@ def test_readded_rules(tags_to_apply, get_configuration,
 
         assert dir_ in events, f'{dir_} not in {events}'
 
-
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/1441')
 @pytest.mark.parametrize('tags_to_apply', [
     ({'config1'})
 ])
@@ -182,7 +182,7 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
     assert testdir2 in events, f'{testdir2} not in {events}'
     assert testdir3 in events, f'{testdir3} not in {events}'
 
-
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/1441')
 @pytest.mark.parametrize('tags_to_apply', [
     ({'config1'})
 ])
@@ -223,7 +223,7 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
     p = subprocess.Popen(["service", "auditd", "start"])
     p.wait()
 
-
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/1441')
 @pytest.mark.parametrize('audit_key, path', [
     ("custom_audit_key", "/testdir1")
 ])
@@ -270,7 +270,7 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
     # Remove watch rule
     os.system("auditctl -W " + path + " -p wa -k " + audit_key)
 
-
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/1441')
 @pytest.mark.parametrize('tags_to_apply, should_restart', [
     ({'audit_key'}, True),
     ({'restart_audit_false'}, False)

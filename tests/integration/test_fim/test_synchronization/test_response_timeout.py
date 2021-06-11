@@ -51,7 +51,7 @@ def get_configuration(request):
 
 
 # Tests
-
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('num_files', [1, 100])
 def test_response_timeout(num_files, get_configuration, configure_environment, restart_syscheckd):
     """Verify that synchronization checks take place at the expected time given INTERVAL and RESPONSE_TIMEOUT

@@ -60,7 +60,7 @@ def extra_configuration_after_yield():
     shutil.rmtree(os.path.join(PREFIX, 'subdir'), ignore_errors=True)
     shutil.rmtree(testdir4, ignore_errors=True)
 
-
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('source_folder, target_folder, subdir, tags_to_apply, \
                 triggers_delete_event, triggers_add_event', [
     (testdir4, testdir2, 'subdir', {'ossec_conf'}, False, True),

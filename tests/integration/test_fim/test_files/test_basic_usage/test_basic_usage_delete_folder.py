@@ -45,7 +45,7 @@ def get_configuration(request):
 
 
 # tests
-
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('folder, file_list, filetype, tags_to_apply', [
     (testdir1, ['regular0', 'regular1', 'regular2'], REGULAR, {'ossec_conf'},),
     (testdir2, ['regular0', 'regular1', 'regular2'], REGULAR, {'ossec_conf'},)
