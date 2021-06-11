@@ -131,6 +131,7 @@ def test_options_state_interval_no_file(get_local_internal_options_function, get
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                     error_message="File not available callback has not been generated")
 
+            # Wait 62 seconds, the max time that logcollector may take to delete the file from the statistics file.
             for _ in range(62):
                 with open(LOGCOLLECTOR_STATISTICS_FILE, 'r') as next_json_file:
                     data = load(next_json_file)
