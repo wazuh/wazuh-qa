@@ -118,8 +118,8 @@ else:
 def test_check_all(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                    wait_for_fim_start):
     """
-    Test the functionality of `check_all` option when used in conjunction with more than one check on the same directory,
-    having "check_all" to "yes" and the other ones to "no".
+    Test the functionality of `check_all` option when used in conjunction with more than one check on the same
+    directory, having "check_all" to "yes" and the other ones to "no".
 
     Example:
         check_all="yes" check_sum="no" check_md5sum="no"

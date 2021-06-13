@@ -49,6 +49,7 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
+
 @pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('folder', test_directories)
 @pytest.mark.parametrize('filename, mode, content, triggers_event, tags_to_apply', [

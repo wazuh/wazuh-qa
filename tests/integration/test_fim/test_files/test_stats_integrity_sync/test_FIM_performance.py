@@ -542,6 +542,7 @@ def real_test(test_type, real_df, integrity_df, string_configuration, configurat
     if process:
         process.join()
 
+
 @pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('number_files', [
     '1', '1000', '100000'

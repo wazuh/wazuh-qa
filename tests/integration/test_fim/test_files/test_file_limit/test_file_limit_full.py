@@ -85,7 +85,8 @@ def test_file_limit_full(tags_to_apply, get_configuration, configure_environment
 
     wazuh_log_monitor.start(timeout=40, callback=callback_file_limit_full_database,
                             error_message='Did not receive expected '
-                                          '"DEBUG: ...: Couldn\'t insert \'...\' entry into DB. The DB is full, ..." event')
+                                          '"DEBUG: ...: Couldn\'t insert \'...\' '
+                                          'entry into DB. The DB is full, ..." event')
 
     entries, path_count = wazuh_log_monitor.start(timeout=40, callback=callback_entries_path_count,
                                                   error_message='Did not receive expected '

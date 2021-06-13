@@ -126,5 +126,5 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                             callback=callback_file_size_limit_reached,
-                            error_message='Did not receive expected '
-                                          '"File ... is too big for configured maximum size to perform diff operation" event.')
+                            error_message='Did not receive expected "File ... is too big for '
+                                          'configured maximum size to perform diff operation" event.')

@@ -136,6 +136,7 @@ def test_skip_proc(get_configuration, configure_environment, restart_syscheckd, 
             event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_integrity_state)
             raise AttributeError(f'Unexpected event {event}')
 
+
 @pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 def test_skip_sys(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check if syscheckd skips /sys when setting 'skip_sys="yes"'."""
@@ -168,6 +169,7 @@ def test_skip_sys(get_configuration, configure_environment, restart_syscheckd, w
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_integrity_state)
             raise AttributeError(f'Unexpected event {event}')
+
 
 @pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('directory, tags_to_apply', [

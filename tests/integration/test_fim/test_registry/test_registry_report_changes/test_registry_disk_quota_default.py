@@ -89,9 +89,8 @@ def test_disk_quota_default(key, subkey, arch, value_name, tags_to_apply,
 
     disk_quota_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                callback=callback_disk_quota_default,
-                                               error_message='Did not receive expected '
-                                                             '"Maximum disk quota size limit configured to \'... KB\'." event'
-                                               ).result()
+                                               error_message='Did not receive expected "Maximum disk quota size '
+                                                             'limit configured to \'... KB\'." event').result()
     if disk_quota_value:
         assert disk_quota_value == str(DEFAULT_SIZE), 'Wrong value for disk_quota'
     else:

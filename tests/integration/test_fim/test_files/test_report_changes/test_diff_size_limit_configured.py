@@ -65,8 +65,8 @@ def test_diff_size_limit_default(tags_to_apply, get_configuration, configure_env
 
     diff_size_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                               callback=callback_diff_size_limit_value,
-                                              error_message='Did not receive expected '
-                                                            '"Maximum file size limit configured to \'... KB\'..." event'
+                                              error_message='Did not receive expected "Maximum file size '
+                                                            'limit configured to \'... KB\'..." event'
                                               ).result()
 
     if diff_size_value:

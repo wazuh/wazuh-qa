@@ -69,8 +69,8 @@ def test_symlink_to_dir_between_scans(tags_to_apply, get_configuration, configur
                                       wait_for_fim_start):
     """Replace a link with a directory between scans.
 
-    This test monitors a link with `follow_symbolic_link` enabled. After the first scan, it is replaced with a directory,
-    the new directory should send alerts during a second scan.
+    This test monitors a link with `follow_symbolic_link` enabled. After the first scan, it is replaced with
+    a directory, the new directory should send alerts during a second scan.
 
     Args:
         tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.

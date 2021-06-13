@@ -21,8 +21,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.sunos5, pytest.mark.darwin, pytest.
 
 # configurations
 
-conf_params, conf_metadata = fim.generate_params(extra_params={'FOLLOW_MODE': 'yes'},
-                                             modes=['scheduled'])
+conf_params, conf_metadata = fim.generate_params(extra_params={'FOLLOW_MODE': 'yes'}, modes=['scheduled'])
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=conf_params,
                                            metadata=conf_metadata

@@ -80,8 +80,8 @@ def test_delete_folder(folder, file_list, filetype, tags_to_apply,
 
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
     events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                                     accum_results=len(file_list), error_message='Did not receive expected '
-                                                                                 '"Sending FIM event: ..." event').result()
+                                     accum_results=len(file_list),
+                                     error_message='Did not receive expected "Sending FIM event: ..." event').result()
     for ev in events:
         validate_event(ev, mode=mode)
 

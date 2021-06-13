@@ -100,8 +100,8 @@ def test_file_limit_full(tags_to_apply, get_configuration, configure_environment
     RegCloseKey(reg1_handle)
 
     wazuh_log_monitor.start(timeout=40, callback=callback_file_limit_full_database,
-                            error_message='Did not receive expected '
-                                          '"DEBUG: ...: Couldn\'t insert \'...\' entry into DB. The DB is full, ..." event')
+                            error_message='Did not receive expected "DEBUG: ...: Couldn\'t insert \'...\' '
+                                          'entry into DB. The DB is full, ..." event')
 
     entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                       callback=callback_registry_count_entries,
