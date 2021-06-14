@@ -33,6 +33,9 @@ DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION = {
 }
 
 TEMPLATE_OSLOG_MESSAGE = 'Custom os_log event message'
+TEMPLATE_ACTIVITY_MESSAGE = 'Custom activity event message'
+TEMPLATE_TRACE_MESSAGE = 'Custom trace event message'
+
 WINDOWS_CHANNEL_LIST = ['Microsoft-Windows-Sysmon/Operational',
                         'Microsoft-Windows-Windows Firewall With Advanced Security/Firewall',
                         'Application',
@@ -43,6 +46,21 @@ WINDOWS_CHANNEL_LIST = ['Microsoft-Windows-Sysmon/Operational',
                         'File Replication Service',
                         'Service Microsoft-Windows-TerminalServices-RemoteConnectionManager'
                         ]
+
+MAP_MACOS_TYPE_VALUE = {
+    'log': 1024,
+    'trace': 768,
+    'activity': 513
+}
+
+# Not the real map of macOS logs.
+MAP_MACOS_LEVEL_VALUE = {
+    'debug': 0,
+    'info': 1,
+    'default': 2,
+    'error': 3,
+    'fault': 4
+}
 
 if sys.platform == 'win32':
     LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
@@ -667,7 +685,7 @@ def generate_macos_logger_log(message):
     os.system(f"logger {message}")
 
 
-def generate_macos_custom_log(type, subsystem, category, process_name="custom_log"):
+def generate_macos_custom_log(type, level, subsystem, category, process_name="custom_log"):
     """Create a unified logging system log using log generator script.
 
     To create a custom event log with desired type, subsystem and category the `log_generator` script is required.
@@ -676,7 +694,8 @@ def generate_macos_custom_log(type, subsystem, category, process_name="custom_lo
     parameter.
 
     Args:
-        type (str): Log type (info, debug, default, error or fault).
+        level (str): Log type (trace, activity or log)
+        type (str): Log level (info, debug, default, error or fault).
         subsystem (str): Subsystem of the event log.
         category (str): Category of the event log.
         process_name (str): Name of the process that is going to generate the log.
@@ -684,13 +703,13 @@ def generate_macos_custom_log(type, subsystem, category, process_name="custom_lo
     compiled_log_generator_path = os.path.join(gettempdir(), process_name)
     if not os.path.exists(compiled_log_generator_path):
         os_log_swift_script = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                           'tools', 'macos_log', 'log_generator.swift')
-        os.system(f"swiftc {os_log_swift_script} -o {compiled_log_generator_path}")
+                                           'tools', 'macos_log', 'log_generator.m')
+        os.system(f"clang {os_log_swift_script} -o {compiled_log_generator_path}")
 
-    os.system(f'{compiled_log_generator_path} {type} {subsystem} {category} "{TEMPLATE_OSLOG_MESSAGE}"')
+    os.system(f'{compiled_log_generator_path} {type} {level} {subsystem} {category}')
 
 
-def format_macos_message_pattern(process_name, message, subsystem=None, category=None):
+def format_macos_message_pattern(process_name, message, type='log', subsystem=None, category=None):
     """Compose expected macos format message that agent is going to send to the manager.
 
     Args:
@@ -698,13 +717,17 @@ def format_macos_message_pattern(process_name, message, subsystem=None, category
         message (str): Log message.
         subsystem (str): Log event subsystem.
         category (str): Log event category.
+        type (str): Log event type (trace, activity or log)
 
     Returns:
         string: Expected unified logging system event.
     """
-    if process_name == 'logger':
+    if process_name == 'logger' or type == 'trace':
         macos_message = f"{process_name}\[\d+\]: {message}"
     else:
-        macos_message = f"{process_name}\[\d+\]: \[{subsystem}:{category}\] {message}"
+        if type == 'log':
+            macos_message = f"{process_name}\[\d+\]: \[{subsystem}:{category}\] {message}"
+        elif type == 'activity':
+            macos_message = f"{process_name}\[\d+\]: Created Activity ID.* Description: {message}"
 
     return macos_message
