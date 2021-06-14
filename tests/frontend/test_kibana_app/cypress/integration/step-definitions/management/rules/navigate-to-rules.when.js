@@ -1,5 +1,5 @@
 import { When } from 'cypress-cucumber-preprocessor/steps';
-import { clickElement, getElement, validateURLIncludes } from '../../../utils/driver';
+import { clickElement, getObject, validateURLIncludes } from '../../../utils/driver';
 import {
   managementButton,
   wazuhMenuButton,
