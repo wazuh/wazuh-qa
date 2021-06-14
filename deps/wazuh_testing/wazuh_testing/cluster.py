@@ -73,17 +73,17 @@ def cluster_msg_build(command: bytes = None, counter: int = None, payload: bytes
     """
     cmd_len = len(command)
     if cmd_len > CLUSTER_CMD_HEADER_SIZE - len(DIVIDE_FLAG):
-        raise Exception("Length of command '{}' exceeds limit ({}/{}).".format(cmd, cmd_len,
+        raise Exception("Length of command '{}' exceeds limit ({}/{}).".format(command, cmd_len,
                                                                                CLUSTER_CMD_HEADER_SIZE - len(
                                                                                    DIVIDE_FLAG)))
 
     # Add - to command until it reaches cmd length
     command = command + b' ' + b'-' * (CLUSTER_CMD_HEADER_SIZE - cmd_len - 1)
     encrypted_data = _my_fernet.encrypt(payload) if encrypt else payload
-    message_size = self.header_len + len(encrypted_data)
+    message_size = CLUSTER_DATA_HEADER_SIZE + len(encrypted_data)
 
     # Message size is <= request_chunk, send the message
-    if message_size <= self.request_chunk:
+    if message_size <= REQUEST_CHUNK:
         msg = bytearray(message_size)
         msg[:CLUSTER_DATA_HEADER_SIZE] = struct.pack(CLUSTER_HEADER_FORMAT, counter, len(encrypted_data), command)
         msg[CLUSTER_DATA_HEADER_SIZE:message_size] = encrypted_data
