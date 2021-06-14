@@ -26,7 +26,12 @@ pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
+
+default_log_format_configuration = 'wazuh_basic_configuration.yaml'
+multiple_logcollector_configuration = 'wazuh_duplicated_macos_configuration.yaml'
+no_location_defined_configuraition = 'wazuh_no_defined_location_macos_configuration.yaml'
+
+configurations_path = os.path.join(test_data_path, default_log_format_configuration)
 
 local_internal_options = {'logcollector.remote_commands': '1'}
 
@@ -71,13 +76,18 @@ windows_tcases = [
     {'LOCATION': '/tmp/test.txt', 'LOG_FORMAT': 'eventchannel', 'VALID_VALUE': True}
 ]
 
-macos_tcases = [{'LOCATION': 'macos', 'LOG_FORMAT': 'macos', 'COMMAND': 'example-command', 'VALID_VALUE': True}]
+macos_tcases = [{'LOCATION': 'macos', 'LOG_FORMAT': 'macos', 'COMMAND': 'example-command', 'VALID_VALUE': True},
+                {'LOCATION': '/tmp/log.txt', 'LOG_FORMAT': 'macos', 'VALID_VALUE': False},
+                {'LOCATION1': 'macos', 'LOG_FORMAT1': 'macos', 'LOCATION2': 'macos', 'LOG_FORMAT2': 'macos',
+                 'VALID_VALUE': False, 'CONFIGURATION': 'wazuh_duplicated_macos_configuration.yaml'},
+                {'LOG_FORMAT': 'macos', 'VALID_VALUE': True,
+                 'CONFIGURATION': 'wazuh_no_defined_location_macos_configuration.yaml'}
+                ]
 
 if sys.platform == 'win32':
     tcases += windows_tcases
 elif sys.platform == 'darwin':
     tcases += macos_tcases
-
 
 metadata = lower_case_key_dictionary_array(tcases)
 
@@ -86,13 +96,37 @@ for element in tcases:
 
 parameters = tcases
 
+parameters_default_configuration = [parameter for parameter in parameters if 'CONFIGURATION' not in parameter]
+metadata_default_configuration = [metadata_value for metadata_value in metadata if 'CONFIGURATION' not in metadata]
+
 configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=parameters,
-                                           metadata=metadata)
+                                           params=parameters_default_configuration,
+                                           metadata=metadata_default_configuration)
 
 configuration_ids = [f"{x['location']}_{x['log_format']}_{x['command']}" + f"" if 'command' in x
                      else f"{x['location']}_{x['log_format']}" for x in metadata]
 
+parameters_multiple_logcollector_configuration = [parameter for parameter in parameters if
+                                                  parameter['CONFIGURATION'] == multiple_logcollector_configuration]
+metadata_multiple_logcollector_configuration = [metadata_value for metadata_value in metadata if
+                                                metadata['CONFIGURATION'] == multiple_logcollector_configuration]
+
+configuration_ids += [f"{x['location1']}_{x['log_format1']}_{x['location1']}_{x['log_format2']}" for x in metadata]
+
+configurations += load_wazuh_configurations(multiple_logcollector_configuration, __name__,
+                                            params=parameters_multiple_logcollector_configuration,
+                                            metadata=metadata_multiple_logcollector_configuration)
+
+parameters_multiple_logcollector_configuration = [parameter for parameter in parameters if
+                                                  parameter['CONFIGURATION'] == no_location_defined_configuraition]
+metadata_multiple_logcollector_configuration = [metadata_value for metadata_value in metadata if
+                                                metadata['CONFIGURATION'] == no_location_defined_configuraition]
+
+configurations += load_wazuh_configurations(no_location_defined_configuraition, __name__,
+                                            params=parameters_multiple_logcollector_configuration,
+                                            metadata=metadata_multiple_logcollector_configuration)
+
+configuration_ids += [f"{x['log_format']}" for x in metadata]
 
 log_format_not_print_analyzing_info = ['command', 'full_command', 'eventlog', 'eventchannel', 'macos']
 

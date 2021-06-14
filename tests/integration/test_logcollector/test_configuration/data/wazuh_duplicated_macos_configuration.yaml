@@ -1,0 +1,15 @@
+- tags:
+  - test_basic_configuration_log_format
+  apply_to_modules:
+  - test_basic_configuration_log_format
+  sections:
+  - section: localfile
+    elements:
+    - location:
+        value: LOCATION1
+    - log_format:
+         value: LOG_FORMAT1
+    - location:
+        value: LOCATION2
+    - log_format:
+         value: LOG_FORMAT2
