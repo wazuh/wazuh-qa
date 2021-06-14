@@ -42,7 +42,6 @@ def get_configuration(request):
 
 
 # tests
-@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 def test_process_priority(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check if the wazuh-modulesd service priority is updated correctly using
        <process_priority> tag in ossec.conf.

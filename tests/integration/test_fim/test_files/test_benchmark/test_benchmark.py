@@ -50,6 +50,7 @@ def get_configuration(request):
 
 # tests
 
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/1449')
 @pytest.mark.benchmark
 @pytest.mark.parametrize('files, folder, tags_to_apply', [
     (file_list[0:10], testdir1, {'ossec_conf'}),

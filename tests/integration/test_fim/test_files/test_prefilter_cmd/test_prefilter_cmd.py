@@ -55,6 +55,7 @@ def check_prelink():
 # tests
 
 
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/1448')
 @pytest.mark.parametrize('tags_to_apply', [
     ({'prefilter_cmd'})
 ])

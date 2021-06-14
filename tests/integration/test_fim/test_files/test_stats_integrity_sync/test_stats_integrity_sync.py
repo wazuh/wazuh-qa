@@ -717,7 +717,7 @@ def clean_environment():
             os.unlink(os.path.join(state_path, file))
 
 
-@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/1449')
 @pytest.mark.parametrize('case, modify_file, modify_all, restore_all', [
     (Cases.case0.value, False, False, True),
     (Cases.case1.value, True, False, False),

@@ -47,7 +47,6 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('folder, filename, content, hidden_content, tags_to_apply', [
     (testdir1, 'testfile', "Sample content", False, {'valid_regex', 'valid_no_regex'}),
     (testdir1, 'btestfile', b"Sample content", False, {'valid_regex', 'valid_no_regex'}),

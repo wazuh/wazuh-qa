@@ -89,7 +89,6 @@ def extra_configuration_before_yield():
 
 
 # tests
-@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 def test_skip_proc(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check if syscheckd skips /proc when setting 'skip_proc="yes"'."""
     check_apply_test({'skip_proc'}, get_configuration['tags'])
@@ -137,7 +136,6 @@ def test_skip_proc(get_configuration, configure_environment, restart_syscheckd, 
             raise AttributeError(f'Unexpected event {event}')
 
 
-@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 def test_skip_sys(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check if syscheckd skips /sys when setting 'skip_sys="yes"'."""
     check_apply_test({'skip_sys'}, get_configuration['tags'])
@@ -171,7 +169,6 @@ def test_skip_sys(get_configuration, configure_environment, restart_syscheckd, w
             raise AttributeError(f'Unexpected event {event}')
 
 
-@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('directory, tags_to_apply', [
     (os.path.join('/', 'dev'), {'skip_dev'})
 ])
@@ -195,7 +192,6 @@ def test_skip_dev(modify_inode_mock, directory, tags_to_apply, get_configuration
     regular_file_cud(directory, wazuh_log_monitor, time_travel=True, min_timeout=3, triggers_event=trigger)
 
 
-@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('directory,  tags_to_apply', [
     (os.path.join('/', 'nfs-mount-point'), {'skip_nfs'})
 ])
