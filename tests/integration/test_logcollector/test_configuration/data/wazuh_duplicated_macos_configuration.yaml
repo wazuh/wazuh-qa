@@ -3,18 +3,20 @@
   apply_to_modules:
   - test_basic_configuration_log_format
   sections:
-  - section: localfile
+ - section: localfile
     attributes:
       - name: 'logcollector_configuration_block1'
     elements:
+    - log_format:
+        value: LOG_FORMAT1
     - location:
         value: LOCATION1
-    - log_format:
-         value: LOG_FORMAT1
   - section: localfile
     attributes:
       - name: 'logcollector_configuration_block2'
+    elements:
+    - log_format:
+        value: LOG_FORMAT2
     - location:
         value: LOCATION2
-    - log_format:
-         value: LOG_FORMAT2
+
