@@ -111,7 +111,7 @@ parameters_multiple_logcollector_configuration = [parameter for parameter in par
                                                   'CONFIGURATION' in parameter and parameter[
                                                       'CONFIGURATION'] == multiple_logcollector_configuration]
 metadata_multiple_logcollector_configuration = [metadata_value for metadata_value in metadata if
-                                                metadata['CONFIGURATION'] == multiple_logcollector_configuration]
+                                                metadata_value['configuration'] == multiple_logcollector_configuration]
 
 configuration_ids += [f"{x['location1']}_{x['log_format1']}_{x['location1']}_{x['log_format2']}" for x in metadata]
 
@@ -124,7 +124,7 @@ parameters_no_location_defined_configuration = [parameter for parameter in param
                                                     'CONFIGURATION'] == no_location_defined_configuration]
 
 metadata_no_location_defined_configuration = [metadata_value for metadata_value in metadata if
-                                              metadata['CONFIGURATION'] == no_location_defined_configuration]
+                                              metadata_value['configuration'] == no_location_defined_configuration]
 
 configurations += load_wazuh_configurations(no_location_defined_configuration, __name__,
                                             params=parameters_no_location_defined_configuration,
