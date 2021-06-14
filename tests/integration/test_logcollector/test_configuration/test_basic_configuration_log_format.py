@@ -116,7 +116,7 @@ metadata_multiple_logcollector_configuration = [metadata_value for metadata_valu
                                                 'configuration' in metadata_value and
                                                 metadata_value['configuration'] == multiple_logcollector_configuration]
 
-configuration_ids += [f"{x['location1']}_{x['log_format1']}_{x['location1']}_{x['log_format2']}" for x in metadata]
+configuration_ids += [f"{x['location1']}_{x['log_format1']}_{x['location1']}_{x['log_format2']}" for x in metadata_multiple_logcollector_configuration]
 
 configurations += load_wazuh_configurations(configurations_path_multiple_logcollector, __name__,
                                             params=parameters_multiple_logcollector_configuration,
@@ -134,7 +134,7 @@ configurations += load_wazuh_configurations(configurations_path_no_location, __n
                                             params=parameters_no_location_defined_configuration,
                                             metadata=metadata_no_location_defined_configuration)
 
-configuration_ids += [f"{x['log_format']}" for x in metadata]
+configuration_ids += [f"{x['log_format']}" for x in metadata_no_location_defined_configuration]
 
 log_format_not_print_analyzing_info = ['command', 'full_command', 'eventlog', 'eventchannel', 'macos']
 
