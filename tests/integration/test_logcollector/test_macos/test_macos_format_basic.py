@@ -8,9 +8,6 @@ import pytest
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.remote import check_agent_received_message
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools import LOG_FILE_PATH
-from wazuh_testing.tools.monitoring import FileMonitor
 # Marks
 pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=0)]
 
@@ -27,10 +24,10 @@ macos_log_messages = [
     },
     {
         'command': 'os_log',
-        'type': 'error',
+        'type': 'log',
+        'level': 'error',
         'subsystem': 'testing.wazuh-agent.macos',
-        'category': 'category',
-        'message': 1,
+        'category': 'category'
     }
 ]
 
