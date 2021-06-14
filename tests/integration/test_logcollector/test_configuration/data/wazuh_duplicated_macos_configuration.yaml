@@ -4,11 +4,16 @@
   - test_basic_configuration_log_format
   sections:
   - section: localfile
+    attributes:
+      - name: 'logcollector_configuration_block1'
     elements:
     - location:
         value: LOCATION1
     - log_format:
          value: LOG_FORMAT1
+  - section: localfile
+    attributes:
+      - name: 'logcollector_configuration_block2'
     - location:
         value: LOCATION2
     - log_format:

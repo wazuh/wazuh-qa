@@ -31,7 +31,9 @@ default_log_format_configuration = 'wazuh_basic_configuration.yaml'
 multiple_logcollector_configuration = 'wazuh_duplicated_macos_configuration.yaml'
 no_location_defined_configuration = 'wazuh_no_defined_location_macos_configuration.yaml'
 
-configurations_path = os.path.join(test_data_path, default_log_format_configuration)
+configurations_path_default = os.path.join(test_data_path, default_log_format_configuration)
+configurations_path_multiple_logcollector = os.path.join(test_data_path, multiple_logcollector_configuration)
+configurations_path_no_location = os.path.join(test_data_path, no_location_defined_configuration)
 
 local_internal_options = {'logcollector.remote_commands': '1'}
 
@@ -100,7 +102,7 @@ parameters_default_configuration = [parameter for parameter in parameters if 'CO
 metadata_default_configuration = [metadata_value for metadata_value in metadata if
                                   'configuration' not in metadata_value]
 
-configurations = load_wazuh_configurations(configurations_path, __name__,
+configurations = load_wazuh_configurations(default_log_format_configuration, __name__,
                                            params=parameters_default_configuration,
                                            metadata=metadata_default_configuration)
 
@@ -116,7 +118,7 @@ metadata_multiple_logcollector_configuration = [metadata_value for metadata_valu
 
 configuration_ids += [f"{x['location1']}_{x['log_format1']}_{x['location1']}_{x['log_format2']}" for x in metadata]
 
-configurations += load_wazuh_configurations(multiple_logcollector_configuration, __name__,
+configurations += load_wazuh_configurations(configurations_path_multiple_logcollector, __name__,
                                             params=parameters_multiple_logcollector_configuration,
                                             metadata=metadata_multiple_logcollector_configuration)
 
@@ -128,14 +130,13 @@ metadata_no_location_defined_configuration = [metadata_value for metadata_value 
                                               'configuration ' in metadata_value and
                                               metadata_value['configuration'] == no_location_defined_configuration]
 
-configurations += load_wazuh_configurations(no_location_defined_configuration, __name__,
+configurations += load_wazuh_configurations(configurations_path_no_location, __name__,
                                             params=parameters_no_location_defined_configuration,
                                             metadata=metadata_no_location_defined_configuration)
 
 configuration_ids += [f"{x['log_format']}" for x in metadata]
 
 log_format_not_print_analyzing_info = ['command', 'full_command', 'eventlog', 'eventchannel', 'macos']
-
 
 # fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
