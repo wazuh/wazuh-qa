@@ -102,7 +102,7 @@ parameters_default_configuration = [parameter for parameter in parameters if 'CO
 metadata_default_configuration = [metadata_value for metadata_value in metadata if
                                   'configuration' not in metadata_value]
 
-configurations = load_wazuh_configurations(default_log_format_configuration, __name__,
+configurations = load_wazuh_configurations(configurations_path_default, __name__,
                                            params=parameters_default_configuration,
                                            metadata=metadata_default_configuration)
 
