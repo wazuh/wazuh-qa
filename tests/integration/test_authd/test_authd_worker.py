@@ -8,7 +8,7 @@ import time
 
 import pytest
 import yaml
-from wazuh_testing.tools.key_polling_cluster import FERNET_KEY, CLUSTER_DATA_HEADER_SIZE, cluster_msg_build
+from wazuh_testing.cluster import FERNET_KEY, CLUSTER_DATA_HEADER_SIZE, cluster_msg_build
 from wazuh_testing.tools import WAZUH_PATH, CLUSTER_LOGS_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import ManInTheMiddle
@@ -44,8 +44,8 @@ class WorkerMID(ManInTheMiddle):
     def verify_message(self, data: bytes):
         if len(data) > CLUSTER_DATA_HEADER_SIZE:
             message = data[CLUSTER_DATA_HEADER_SIZE:]
-            response = cluster_msg_build(cmd=b'send_sync', counter=2, payload=bytes(self.cluster_output.encode()),
-                                         encrypt=False)
+            response = cluster_msg_build(command=b'send_sync', counter=2, payload=bytes(self.cluster_output.encode()),
+                                         encrypt=False)[0]
             print(f'Received message from wazuh-authd: {message}')
             print(f'Response to send: {self.cluster_output}')
             self.pause()
