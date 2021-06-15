@@ -19,11 +19,18 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-messages_files = os.listdir(test_data_path)
-module_tests = list()
-for file in messages_files:
+agent_message_files = os.listdir(os.path.join(test_data_path, 'agent'))
+global_message_files = os.listdir(os.path.join(test_data_path, 'global'))
+agent_module_tests = list()
+global_module_tests = list()
+
+for file in agent_message_files:
     with open(os.path.join(test_data_path, file)) as f:
-        module_tests.append((yaml.safe_load(f), file.split("_")[0]))
+        agent_module_tests.append((yaml.safe_load(f), file.split("_")[0]))
+
+for file in global_message_files:
+    with open(os.path.join(test_data_path, file)) as f:
+        global_module_tests.append((yaml.safe_load(f), file.split("_")[0]))
 
 # Variables
 
@@ -87,13 +94,17 @@ def pre_insert_agents():
         assert data[0] == 'ok', f'Unable to update agent {id}'
 
 
+@pytest.fixture(scope="function")
+def insert_agents_test()
+
+
 @pytest.mark.parametrize('test_case',
-                         [case['test_case'] for module_data in module_tests for case in module_data[0]],
+                         [case['test_case'] for module_data in agent_module_tests for case in module_data[0]],
                          ids=[f"{module_name}: {case['name']}"
-                              for module_data, module_name in module_tests
+                              for module_data, module_name in agent_module_tests
                               for case in module_data]
                          )
-def test_wazuh_db_messages(restart_wazuh, clean_registered_agents, configure_sockets_environment, connect_to_sockets_module, test_case):
+def test_wazuh_db_messages_agent(restart_wazuh, clean_registered_agents, configure_sockets_environment, connect_to_sockets_module, test_case: list):
     """Check that every input message in wazuh-db socket generates the adequate output to wazuh-db socket
 
     Parameters
@@ -125,7 +136,7 @@ def test_wazuh_db_create_agent(restart_wazuh, clean_registered_agents, configure
             "test_case": [{"input": "agent 999 syscheck integrity_check_left",
                            "output": "err Invalid FIM query syntax, near 'integrity_check_left'",
                            "stage": "Syscheck - Agent does not exits yet"}]}
-    test_wazuh_db_messages(clean_registered_agents, restart_wazuh, configure_sockets_environment, connect_to_sockets_module, test['test_case'])
+    test_wazuh_db_messages_agent(clean_registered_agents, restart_wazuh, configure_sockets_environment, connect_to_sockets_module, test['test_case'])
     assert os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'db', "999.db"))
 
 
