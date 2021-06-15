@@ -181,6 +181,10 @@ def check_log_format_valid(cfg):
             log_callback = logcollector.callback_invalid_location_value_macos(cfg['location'])
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                     error_message="The expected warning invalid macos value has not been produced")
+        if 'location' not in cfg:
+            log_callback = logcollector.callback_missing_location_macos()
+            wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                    error_message="The expected warning missing location value has not been produced")
 
         log_callback = logcollector.callback_monitoring_macos_logs()
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
@@ -208,14 +212,23 @@ def check_log_format_invalid(cfg):
     if cfg['valid_value']:
         pytest.skip('Valid values provided')
 
-    log_callback = gc.callback_invalid_value('log_format', cfg['log_format'], prefix)
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
+    if 'log_format1' in cfg and 'log_format2' in cfg:
+        log_callback = logcollector.callback_multiple_macos_block_configuration()
+        wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
+    else:
 
-    log_callback = gc.callback_error_in_configuration('ERROR', prefix,
-                                                      conf_path=f'{wazuh_configuration}')
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
+        log_callback = gc.callback_invalid_value('log_format', cfg['log_format'], prefix)
+        wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
+
+        log_callback = gc.callback_error_in_configuration('ERROR', prefix,
+                                                          conf_path=f'{wazuh_configuration}')
+        wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
+
+
+
 
     if sys.platform != 'win32':
         log_callback = gc.callback_error_in_configuration('CRITICAL', prefix,

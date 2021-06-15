@@ -402,12 +402,32 @@ def callback_excluded_file(file):
 
 
 def callback_invalid_location_value_macos(location):
-    """Create a callback to detect if logcollector warn about invalid location value for macos format
+    """Create a callback to detect if logcollector warn about invalid location value for macos format.
 
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"Invalid location value {location} when using 'macos' as 'log_format'. Default value will be used."
+    msg = fr"Invalid location value '{location}' when using 'macos' as 'log_format'. Default value will be used."
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
+def callback_missing_location_macos():
+    """Create a callback to detect if logcollector warn about missing location value.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"Missing 'location' element when using 'macos' as 'log_format'. Default value will be used."
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
+def callback_multiple_macos_block_configuration():
+    """Create a callback to detect multiple macos configuration block logcollector error.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"Can't add more than one 'macos' block"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
