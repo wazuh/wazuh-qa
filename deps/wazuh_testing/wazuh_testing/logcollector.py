@@ -353,6 +353,16 @@ def callback_trying_to_reconnect(location, reconnect_time):
     return monitoring.make_callback(pattern=log_format_message, prefix=monitoring.AGENT_DETECTOR_PREFIX)
 
 
+def callback_log_stream_exited_error():
+    """Create a callback to detect if `log stream` process exited.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    log_format_message = f"ERROR: \(\d+\): macOS 'log stream' process exited"
+    return monitoring.make_callback(pattern=log_format_message, prefix=monitoring.AGENT_DETECTOR_PREFIX)
+
+
 def callback_reconnect_eventchannel(location):
     """Create a callback to detect if specified channel has been reconnected successfully.
     Args:

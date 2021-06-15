@@ -150,6 +150,22 @@ def get_process(search_name):
     return None
 
 
+def search_process(search_pattern):
+    """Search process by its name.
+
+    Args:
+        search_pattern (str): Pattern of the process to be fetched.
+
+    Returns:
+        List: List of dictionaries with name and pid values of founded processes.
+    """
+    processes = []
+    for proc in psutil.process_iter(attrs=['pid', 'name', 'username']):
+        if search_pattern in proc.name():
+            processes += [{'pid': proc.pid(), 'name': proc.name()}]
+    return processes
+
+
 def get_process_cmd(search_cmd):
     """Search process by its command line.
 
