@@ -161,8 +161,9 @@ def search_process(search_pattern):
     """
     processes = []
     for proc in psutil.process_iter(attrs=['pid', 'name', 'username']):
-        if search_pattern in proc.name():
-            processes += [{'pid': proc.pid(), 'name': proc.name()}]
+        if search_pattern == proc.name():
+            pinfo = proc.as_dict({'pid': proc.pid, 'name': proc.name()})
+            processes += [pinfo]
     return processes
 
 

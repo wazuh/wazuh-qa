@@ -5,10 +5,12 @@
 import os
 import pytest
 import psutil
+import signal
+import time
 
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tool.service import search_process, control_service
+from wazuh_testing.tools.services import search_process, control_service
 from time import sleep
 
 
@@ -40,13 +42,14 @@ def test_macos_log_process_stop(get_configuration, configure_environment, restar
     wazuh_log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
 
-    log_processes = search_process(logcollector.MACOS_LOG_COMMAND_PATH)
+    log_processes = search_process('log')
 
-    assert log_processes['name'] == 'name'
+    assert len(log_processes) == 1
 
-    process = psutil.Process(log_processes['pid'])
-    process.kill
+    log_process_id = log_processes[0]['pid']
 
-    macos_logcollector_monitored = logcollector.callback_log_stream_exited_error
+    os.kill(int(log_process_id), signal.SIGTERM)
+
+    macos_logcollector_monitored = logcollector.callback_log_stream_exited_error()
     wazuh_log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
