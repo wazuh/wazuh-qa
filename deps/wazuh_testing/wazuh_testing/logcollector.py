@@ -32,6 +32,8 @@ DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION = {
     'remoted_mode': 'CONTROLLED_ACK',
 }
 
+MACOS_LOG_COMMAND_PATH = '/usr/bin/log'
+
 TEMPLATE_OSLOG_MESSAGE = 'Custom os_log event message'
 WINDOWS_CHANNEL_LIST = ['Microsoft-Windows-Sysmon/Operational',
                         'Microsoft-Windows-Windows Firewall With Advanced Security/Firewall',
@@ -405,8 +407,8 @@ def callback_monitoring_macos_logs(old_logs=False):
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"Monitoring MacOS old logs with: /usr/bin/log show --style syslog --start" if old_logs else \
-        fr"Monitoring MacOS logs with: /usr/bin/log stream --style syslog"
+    msg = fr"Monitoring macOS old logs with: {MACOS_LOG_COMMAND_PATH} show --style syslog --start" if old_logs else \
+        fr"Monitoring macOS logs with: {MACOS_LOG_COMMAND_PATH} stream --style syslog"
 
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
