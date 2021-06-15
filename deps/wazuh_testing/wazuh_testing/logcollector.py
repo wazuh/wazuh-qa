@@ -402,7 +402,7 @@ def callback_excluded_file(file):
 
 
 def callback_invalid_location_value_macos(location):
-    """Create a callback to detect if logcollector warn about invalid location value for macos format.
+    """Create a callback to detect if logcollector warns about invalid location value for macos format.
 
     Returns:
         callable: callback to detect this event.
@@ -412,12 +412,12 @@ def callback_invalid_location_value_macos(location):
 
 
 def callback_missing_location_macos():
-    """Create a callback to detect if logcollector warn about missing location value.
+    """Create a callback to detect if logcollector warns about missing location value.
 
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"Missing 'location' element when using 'macos' as 'log_format'. Default value will be used."
+    msg = "Missing 'location' element when using 'macos' as 'log_format'. Default value will be used."
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
@@ -427,7 +427,7 @@ def callback_multiple_macos_block_configuration():
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"Can't add more than one 'macos' block"
+    msg = "Can't add more than one 'macos' block"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
@@ -437,8 +437,8 @@ def callback_monitoring_macos_logs(old_logs=False):
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"Monitoring macOS old logs with: {MACOS_LOG_COMMAND_PATH} show --style syslog --start" if old_logs else \
-        fr"Monitoring macOS logs with: {MACOS_LOG_COMMAND_PATH} stream --style syslog"
+    msg = f"Monitoring macOS old logs with: {MACOS_LOG_COMMAND_PATH} show --style syslog --start" if old_logs else \
+        f"Monitoring macOS logs with: {MACOS_LOG_COMMAND_PATH} stream --style syslog"
 
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
