@@ -7,7 +7,7 @@ import pytest
 
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tool.service import search_process, control_service
+from wazuh_testing.tools.services import search_process, control_service
 from time import sleep
 
 
