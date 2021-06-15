@@ -31,7 +31,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_macos_log_process_stop(get_configuration, configure_environment, restart_logcollector):
+def test_macos_log_process_stop_suddenly(get_configuration, configure_environment, restart_logcollector):
     """Check if logcollector stops log process when Wazuh agent stops.
 
     Raises:

@@ -53,4 +53,4 @@ def test_macos_log_process_stop(get_configuration, configure_environment, restar
 
     assert len(log_processes) == 0
 
-    control_service('restart')
+    control_service('start')
