@@ -307,7 +307,7 @@ def get_connection_configuration():
     return logcollector.DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
 
 
-def test_macos_format_only_future_events(get_configuration, configure_environment, get_connection_configuration,
+def test_macos_format_query(get_configuration, configure_environment, get_connection_configuration,
                                          init_authd_remote_simulator, restart_logcollector):
     """Check if logcollector use correctly query option using macos log format.
 
@@ -355,7 +355,7 @@ def test_macos_format_only_future_events(get_configuration, configure_environmen
         macos_log['type'] = macos_log_type
         macos_log['level'] = macos_log_level
 
-        configuration_level = cfg['level'] if 'level' in cfg else ['default']
+        configuration_level = cfg['level'] if 'level' in cfg else 'default'
         configuration_type = cfg['type'] if 'type' in cfg else ['log']
 
         if 'type' in cfg:
