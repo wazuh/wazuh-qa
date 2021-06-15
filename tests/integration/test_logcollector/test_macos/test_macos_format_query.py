@@ -20,9 +20,6 @@ configurations_path_query_type = os.path.join(test_data_path, 'wazuh_macos_forma
 configurations_path_query_level = os.path.join(test_data_path, 'wazuh_macos_format_query_level.yaml')
 configurations_path_query_type_level = os.path.join(test_data_path, 'wazuh_macos_format_query_type_level.yaml')
 
-parameters = []
-metadata = []
-
 parameters_query_type_level = []
 metadata_query_type_level = []
 
@@ -142,7 +139,7 @@ query_list = [
     {
         'query_predicate': 'NOT messageType == "default"',
         'level': 'default',
-        'type': ['log'],
+        'type': ['log', 'trace'],
         'lambda_function': lambda clause: clause != "default",
         'clause': ['level'],
     },
@@ -159,7 +156,7 @@ query_list = [
     {
         'query_predicate': 'messageType == "fault"',
         'level': 'default',
-        'type': ['log'],
+        'type': ['log', 'trace'],
         'lambda_function': lambda clause: clause == "fault",
         'clause': ['level'],
         'real_type': 'fault'
@@ -168,7 +165,7 @@ query_list = [
     {
         'query_predicate': 'eventType == "logEvent"',
         'level': 'default',
-        'type': ['log'],
+        'type': ['log', 'activity'],
         'lambda_function': lambda clause: clause == "log",
         'clause': ['type']
     },
@@ -176,7 +173,7 @@ query_list = [
     {
         'query_predicate': 'eventType == "traceEvent"',
         'level': 'default',
-        'type': ['log'],
+        'type': ['log', 'trace'],
         'lambda_function': lambda clause: clause == "trace",
         'clause': ['type'],
         'real_type': 'trace'
@@ -194,7 +191,7 @@ query_list = [
     {
         'query_predicate': 'process == "customlog"',
         'level': 'info',
-        'type': ['log'],
+        'type': ['log', 'activity'],
         'lambda_function': lambda clause: clause == "customlog",
         'clause': ['program_name']
     },
@@ -202,7 +199,7 @@ query_list = [
     {
         'query_predicate': 'process == "customlog"',
         'level': 'debug',
-        'type': ['log'],
+        'type': ['log', 'trace'],
         'lambda_function': lambda clause: clause == "customlog",
         'clause': ['program_name']
     },
@@ -210,7 +207,7 @@ query_list = [
     {
         'query_predicate': 'process == "customlog"',
         'level': 'default',
-        'type': ['activity'],
+        'type': ['activity', 'log'],
         'lambda_function': lambda clause: clause == "customlog",
         'clause': ['program_name']
     },
