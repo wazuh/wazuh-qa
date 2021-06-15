@@ -14,7 +14,7 @@ query_list = ['']
 parameters = []
 
 level_list = ['default', 'info', 'debug']
-type_list = ['log', 'trace', 'activity']
+type_list = ['log', 'trace', 'activity', 'log,trace', 'activity,log', 'activity,trace']
 wazuh_configuration = 'wazuh_basic_configuration_query_macos.yaml'
 
 if sys.platform != 'win32' and sys.platform != 'darwin':
@@ -29,17 +29,9 @@ else:
                            f'{clause} == "testing"',
                            f'{clause} <> "testing"',
                            f'{clause} = "testing"',
-                           f'{clause} CONTAINS[c] "testing" AND  {clause} CONTAINS[c] "example"',
-                           f'{clause} CONTAINS[c] "testing" &&  {clause} CONTAINS[c] "example"',
-                           f'{clause} CONTAINS[c] "testing" OR  {clause} CONTAINS[c] "example"',
-                           f'{clause} CONTAINS[c] "testing" ||  {clause} CONTAINS[c] "example"',
-                           f'NOT {clause} BEGINSWITH[c] "testing"',
-                           f'! {clause} BEGINSWITH[c] "testing"',
-                           f'! {clause} ENDSWITH[c] "testing"',
-                           f'! {clause} LIKE[c] "testing"',
-                           f'! {clause} MATCHES[c] "testing"',
-                           f'! {clause} BEGINSWITH[c] "testing"',
-                           f'! {clause} IN "testing"',
+                           f'NOT {clause} CONTAINS[c] "testing" AND  {clause} LIKE "example"',
+                           f'{clause} ENDSWITH[c] "testing" &&  {clause} MATCHES[c] "example"',
+                           f'{clause} BEGINSWITH[c] "testing" OR  {clause} IN "example"'
                            ]
     else:
         wazuh_configuration = 'wazuh_basic_configuration_query_windows.yaml'

@@ -32,6 +32,8 @@ DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION = {
     'remoted_mode': 'CONTROLLED_ACK',
 }
 
+MACOS_LOG_COMMAND_PATH = '/usr/bin/log'
+
 TEMPLATE_OSLOG_MESSAGE = 'Custom os_log event message'
 WINDOWS_CHANNEL_LIST = ['Microsoft-Windows-Sysmon/Operational',
                         'Microsoft-Windows-Windows Firewall With Advanced Security/Firewall',
@@ -399,14 +401,44 @@ def callback_excluded_file(file):
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
+def callback_invalid_location_value_macos(location):
+    """Create a callback to detect if logcollector warns about invalid location value for macos format.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"Invalid location value '{location}' when using 'macos' as 'log_format'. Default value will be used."
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
+def callback_missing_location_macos():
+    """Create a callback to detect if logcollector warns about missing location value.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = "Missing 'location' element when using 'macos' as 'log_format'. Default value will be used."
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
+def callback_multiple_macos_block_configuration():
+    """Create a callback to detect multiple macos configuration block logcollector error.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = "Can't add more than one 'macos' block"
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
 def callback_monitoring_macos_logs(old_logs=False):
     """Create a callback to detect if logcollector is monitoring MacOS logs.
 
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"Monitoring MacOS old logs with: /usr/bin/log show --style syslog --start" if old_logs else \
-        fr"Monitoring MacOS logs with: /usr/bin/log stream --style syslog"
+    msg = f"Monitoring macOS old logs with: {MACOS_LOG_COMMAND_PATH} show --style syslog --start" if old_logs else \
+        f"Monitoring macOS logs with: {MACOS_LOG_COMMAND_PATH} stream --style syslog"
 
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
@@ -429,7 +461,6 @@ def add_log_data(log_path, log_line_message, size_kib=1024, line_start=1, print_
                 f.write(f"{log_line_message}{x}\n") if print_line_num else f.write(f"{log_line_message}\n")
         return line_start + lines - 1
     return 0
-
 
 def callback_invalid_format_value(line, option, location):
     """Create a callback to detect content values invalid in a log format file specific.
