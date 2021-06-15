@@ -78,7 +78,7 @@ windows_tcases = [
     {'LOCATION': '/tmp/test.txt', 'LOG_FORMAT': 'eventchannel', 'VALID_VALUE': True}
 ]
 
-macos_tcases = [{'LOCATION': 'macos', 'LOG_FORMAT': 'macos', 'COMMAND': 'example-command', 'VALID_VALUE': True},
+macos_tcases = [{'LOCATION': 'macos', 'LOG_FORMAT': 'macos', 'VALID_VALUE': True},
                 {'LOCATION': '/tmp/log.txt', 'LOG_FORMAT': 'macos', 'VALID_VALUE': False},
                 {'LOCATION1': 'macos', 'LOG_FORMAT1': 'macos', 'LOCATION2': 'macos', 'LOG_FORMAT2': 'macos',
                  'VALID_VALUE': False, 'CONFIGURATION': 'wazuh_duplicated_macos_configuration.yaml'},
@@ -127,7 +127,7 @@ parameters_no_location_defined_configuration = [parameter for parameter in param
                                                     'CONFIGURATION'] == no_location_defined_configuration]
 
 metadata_no_location_defined_configuration = [metadata_value for metadata_value in metadata if
-                                              'configuration ' in metadata_value and
+                                              'configuration' in metadata_value and
                                               metadata_value['configuration'] == no_location_defined_configuration]
 
 configurations += load_wazuh_configurations(configurations_path_no_location, __name__,
