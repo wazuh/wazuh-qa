@@ -79,7 +79,7 @@ windows_tcases = [
 ]
 
 macos_tcases = [{'LOCATION': 'macos', 'LOG_FORMAT': 'macos', 'VALID_VALUE': True},
-                {'LOCATION': '/tmp/log.txt', 'LOG_FORMAT': 'macos', 'VALID_VALUE': False},
+                {'LOCATION': '/tmp/log.txt', 'LOG_FORMAT': 'macos', 'VALID_VALUE': True},
                 {'LOCATION1': 'macos', 'LOG_FORMAT1': 'macos', 'LOCATION2': 'macos', 'LOG_FORMAT2': 'macos',
                  'VALID_VALUE': False, 'CONFIGURATION': 'wazuh_duplicated_macos_configuration.yaml'},
                 {'LOG_FORMAT': 'macos', 'VALID_VALUE': True,
