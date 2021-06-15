@@ -401,6 +401,16 @@ def callback_excluded_file(file):
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
+def callback_invalid_location_value_macos(location):
+    """Create a callback to detect if logcollector warn about invalid location value for macos format
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = fr"Invalid location value {location} when using 'macos' as 'log_format'. Default value will be used."
+    return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
 def callback_monitoring_macos_logs(old_logs=False):
     """Create a callback to detect if logcollector is monitoring MacOS logs.
 
@@ -431,7 +441,6 @@ def add_log_data(log_path, log_line_message, size_kib=1024, line_start=1, print_
                 f.write(f"{log_line_message}{x}\n") if print_line_num else f.write(f"{log_line_message}\n")
         return line_start + lines - 1
     return 0
-
 
 def callback_invalid_format_value(line, option, location):
     """Create a callback to detect content values invalid in a log format file specific.

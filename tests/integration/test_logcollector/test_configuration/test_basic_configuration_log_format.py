@@ -177,6 +177,11 @@ def check_log_format_valid(cfg):
                                 error_message="The expected multilog djb log has not been produced")
 
     elif cfg['log_format'] == 'macos':
+        if 'location' in cfg and cfg['location'] != 'macos':
+            log_callback = logcollector.callback_invalid_location_value_macos(cfg['location'])
+            wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                    error_message="The expected warning invalid macos value has not been produced")
+
         log_callback = logcollector.callback_monitoring_macos_logs()
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message="The expected macos log monitoring has not been produced")
