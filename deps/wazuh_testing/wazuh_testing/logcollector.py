@@ -53,7 +53,6 @@ MAP_MACOS_TYPE_VALUE = {
     'activity': 513
 }
 
-# Not the real map of macOS logs.
 MAP_MACOS_LEVEL_VALUE = {
     'debug': 0,
     'info': 1,
@@ -694,8 +693,8 @@ def generate_macos_custom_log(type, level, subsystem, category, process_name="cu
     parameter.
 
     Args:
-        level (str): Log type (trace, activity or log)
-        type (str): Log level (info, debug, default, error or fault).
+        type (str):  Log type (trace, activity or log).
+        level (str): Log level (info, debug, default, error or fault).
         subsystem (str): Subsystem of the event log.
         category (str): Category of the event log.
         process_name (str): Name of the process that is going to generate the log.

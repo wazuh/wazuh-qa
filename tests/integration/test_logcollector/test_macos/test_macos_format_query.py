@@ -7,7 +7,6 @@ import pytest
 from wazuh_testing import logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.remote import check_agent_received_message
-import inspect
 from time import sleep
 
 # Marks
@@ -37,46 +36,14 @@ parameters_query = []
 metadata_query = []
 
 
-def contains_lambda_function(string, false=False):
-    if false:
-        return lambda clause: not string in clause
-    else:
-        return lambda clause: string in clause
-
-
-def begin_with_lambda_function(string, false=False):
-    if false:
-        return lambda clause: not clause.startswith(string)
-    else:
-        return lambda clause: clause.startswith(string)
-
-
-def end_with_lambda_function(string, false=False):
-    if false:
-        return lambda clause: not clause.endswith(string)
-    else:
-        return lambda clause: clause.endswith(string)
-
-
-def equal_lambda_function(string, false=False):
-    if false:
-        return lambda clause: clause != string
-    else:
-        return lambda clause: clause == string
-
-
-def combine_lambda_function(lambda_function_1, lambda_function_2, lambda_function_1_string, lambda_function2_string,
-                            logical_operation):
-    if logical_operation == 'AND':
-        return lambda clause: lambda_function_1(lambda_function_1_string) and lambda_function_2(lambda_function2_string)
-    elif logical_operation == 'OR':
-        return lambda clause: lambda_function_1(lambda_function_1_string) or lambda_function_2(lambda_function2_string)
-
-
 macos_log_list = [
     {
         'program_name': 'logger',
         'message': "Logger testing message.",
+    },
+    {
+        'program_name': 'logger',
+        'message': "Custom oslog event message.",
     },
     {
         'program_name': 'logger',
@@ -137,30 +104,37 @@ macos_log_list = [
         'program_name': 'customlogdebug',
         'level': 'debug',
         'type': 'log',
-        'subsystem': 'testing.wazuhagent.macos',
+        'subsystem': 'testing.wazuhagent.example',
         'category': 'category'
-    }
+    },
+    {
+        'program_name': 'customlogdebug',
+        'level': 'default',
+        'type': 'log',
+        'subsystem': 'testing.wazuhagent.macos',
+        'category': 'examplecategory1'
+    },
 ]
 
 query_list = [
     {
         'query_predicate': 'eventMessage == "Logger testing message."',
         'level': 'default',
-        'type': 'log',
-        'lambda_function': equal_lambda_function("Logger testing message."),
+        'type': ['log'],
+        'lambda_function': lambda clause: clause == "Logger testing message.",
         'clause': ['message']
     },
     {
         'query_predicate': 'process = "logger"',
         'level': 'default',
-        'type': 'log',
-        'lambda_function': equal_lambda_function("logger"),
+        'type': ['log'],
+        'lambda_function': lambda clause: clause == "logger.",
         'clause': ['program_name']
     },
     {
         'query_predicate': 'eventMessage CONTAINS[c] "Logger testing" AND eventMessage CONTAINS[c] "testingnegative"',
         'level': 'default',
-        'type': 'log',
+        'type': ['log'],
         'lambda_function': lambda message: "Logger testing" in message and "testingnegative" in message,
         'clause': ['message']
     },
@@ -168,16 +142,16 @@ query_list = [
     {
         'query_predicate': 'NOT messageType == "default"',
         'level': 'default',
-        'type': 'log',
-        'lambda_function': equal_lambda_function("default", True),
+        'type': ['log'],
+        'lambda_function': lambda clause: clause != "default",
         'clause': ['level'],
     },
 
     {
         'query_predicate': 'messageType == "error"',
         'level': 'default',
-        'type': 'log',
-        'lambda_function': equal_lambda_function("error"),
+        'type': ['log'],
+        'lambda_function': lambda clause: clause == "error",
         'clause': ['level'],
         'real_type': 'error'
     },
@@ -185,8 +159,8 @@ query_list = [
     {
         'query_predicate': 'messageType == "fault"',
         'level': 'default',
-        'type': 'log',
-        'lambda_function': equal_lambda_function("fault"),
+        'type': ['log'],
+        'lambda_function': lambda clause: clause == "fault",
         'clause': ['level'],
         'real_type': 'fault'
     },
@@ -194,16 +168,16 @@ query_list = [
     {
         'query_predicate': 'eventType == "logEvent"',
         'level': 'default',
-        'type': 'log',
-        'lambda_function': equal_lambda_function("log"),
+        'type': ['log'],
+        'lambda_function': lambda clause: clause == "log",
         'clause': ['type']
     },
 
     {
         'query_predicate': 'eventType == "traceEvent"',
         'level': 'default',
-        'type': 'log',
-        'lambda_function': equal_lambda_function("trace"),
+        'type': ['log'],
+        'lambda_function': lambda clause: clause == "trace",
         'clause': ['type'],
         'real_type': 'trace'
     },
@@ -211,8 +185,8 @@ query_list = [
     {
         'query_predicate': 'eventType == "activityCreateEvent"',
         'level': 'default',
-        'type': 'log',
-        'lambda_function': equal_lambda_function("activity"),
+        'type': ['log'],
+        'lambda_function': lambda clause: clause == "activity",
         'clause': ['type'],
         'real_type': 'activity'
     },
@@ -220,63 +194,62 @@ query_list = [
     {
         'query_predicate': 'process == "customlog"',
         'level': 'info',
-        'type': 'log',
-        'lambda_function': equal_lambda_function("customlog"),
+        'type': ['log'],
+        'lambda_function': lambda clause: clause == "customlog",
         'clause': ['program_name']
     },
 
     {
         'query_predicate': 'process == "customlog"',
         'level': 'debug',
-        'type': 'log',
-        'lambda_function': equal_lambda_function("customlog"),
+        'type': ['log'],
+        'lambda_function': lambda clause: clause == "customlog",
         'clause': ['program_name']
     },
 
     {
         'query_predicate': 'process == "customlog"',
         'level': 'default',
-        'type': 'activity',
-        'lambda_function': equal_lambda_function("customlog"),
+        'type': ['activity'],
+        'lambda_function': lambda clause: clause == "customlog",
         'clause': ['program_name']
     },
 
     {
         'query_predicate': 'process == "customlog"',
         'level': 'default',
-        'type': 'trace',
-        'lambda_function': equal_lambda_function("customlog"),
+        'type': ['trace'],
+        'lambda_function': lambda clause: clause == "customlog",
         'clause': ['program_name']
     },
 
     {
         'query_predicate': 'category CONTAINS[c] "examplecategory1"',
         'level': 'default',
-        'type': 'log',
-        'lambda_function': contains_lambda_function("examplecategory1"),
+        'type': ['log'],
+        'lambda_function': lambda clause: "examplecategory1" in clause,
         'clause': ['category']
     },
-
     {
         'query_predicate': 'subsystem BEGINSWITH[c] "com"',
         'level': 'default',
-        'type': 'log',
-        'lambda_function': begin_with_lambda_function("com"),
+        'type': ['log'],
+        'lambda_function': lambda clause: not clause.startswith("com"),
         'clause': ['subsystem']
     },
 
     {
         'query_predicate': '! subsystem ENDSWITH[c] "com"',
         'level': 'default',
-        'type': 'log',
-        'lambda_function': end_with_lambda_function("com", True),
+        'type': ['log'],
+        'lambda_function': lambda clause: clause.endswith("com"),
         'clause': ['subsystem']
     },
 
     {
         'query_predicate': 'process == "logger" AND eventMessage CONTAINS[c] "Custom oslog event message"',
         'level': 'default',
-        'type': 'log',
+        'type': ['log'],
         'lambda_function': lambda process, eventMessage: process == 'logger'
                                                          and "Custom oslog event message" in eventMessage,
         'clause': ['program_name', 'message']
@@ -285,23 +258,24 @@ query_list = [
     {
         'query_predicate': 'process BEGINSWITH[c] "custom" OR subsystem ENDSWITH[c] "example"',
         'level': 'default',
-        'type': 'activity',
+        'type': ['activity'],
         'lambda_function': lambda process, subsystem: process.startswith("custom") or subsystem.endswith("example"),
         'clause': ['program_name', 'subsystem']
     },
 ]
 
 for query in query_list:
-    parameters_query_type_level += [{'QUERY': query['query_predicate'], 'TYPE': query['type'], 'LEVEL': query['level']}]
-    metadata_query_type_level += [{'query': query['query_predicate'], 'type': query['type'], 'level': query['level'],
+    type = ','.join(type for type in query['type'])
+    parameters_query_type_level += [{'QUERY': query['query_predicate'], 'TYPE': type, 'LEVEL': query['level']}]
+    metadata_query_type_level += [{'query': query['query_predicate'], 'type': type, 'level': query['level'],
                                    'lambda_function': query['lambda_function'], 'clause': query['clause']}]
 
     parameters_query_level += [{'QUERY': query['query_predicate'], 'LEVEL': query['level']}]
     metadata_query_level += [{'query': query['query_predicate'], 'level': query['level'],
                               'lambda_function': query['lambda_function'], 'clause': query['clause']}]
 
-    parameters_query_type += [{'QUERY': query['query_predicate'], 'TYPE': query['type']}]
-    metadata_query_type += [{'query': query['query_predicate'], 'type': query['type'],
+    parameters_query_type += [{'QUERY': query['query_predicate'], 'TYPE': type}]
+    metadata_query_type += [{'query': query['query_predicate'], 'type': type,
                              'lambda_function': query['lambda_function'], 'clause': query['clause']}]
 
     parameters_query += [{'QUERY': query['query_predicate']}]
@@ -317,9 +291,9 @@ configurations += load_wazuh_configurations(configurations_path_query_level, __n
 configurations += load_wazuh_configurations(configurations_path_query, __name__,
                                             params=parameters_query, metadata=metadata_query)
 
-configuration_ids = [f"{x['query']}_{x['level']}_{x['type']}" for x in metadata_query_type_level] + \
+configuration_ids = [f"{x['query']}_{x['level']}_{str(x['type'])}" for x in metadata_query_type_level] + \
                     [f"{x['query']}_{x['level']}" for x in metadata_query_level] + \
-                    [f"{x['query']}_{x['type']}" for x in metadata_query_type] + \
+                    [f"{x['query']}_{str(x['type'])}" for x in metadata_query_type] + \
                     [f"{x['query']}" for x in metadata_query]
 
 
@@ -384,11 +358,11 @@ def test_macos_format_only_future_events(get_configuration, configure_environmen
         macos_log['type'] = macos_log_type
         macos_log['level'] = macos_log_level
 
-        configuration_level = cfg['level'] if 'level' in cfg else 'default'
-        configuration_type = cfg['type'] if 'type' in cfg else 'log'
+        configuration_level = cfg['level'] if 'level' in cfg else ['default']
+        configuration_type = cfg['type'] if 'type' in cfg else ['log']
 
         if 'type' in cfg:
-            if macos_log_type != configuration_type:
+            if macos_log_type not in configuration_type:
                 same_type = False
 
         if logcollector.MAP_MACOS_LEVEL_VALUE[macos_log_level] < logcollector.MAP_MACOS_LEVEL_VALUE[
