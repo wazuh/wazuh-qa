@@ -231,7 +231,7 @@ query_list = [
         'query_predicate': 'subsystem BEGINSWITH[c] "com"',
         'level': 'default',
         'type': ['log'],
-        'lambda_function': lambda clause: not clause.startswith("com"),
+        'lambda_function': lambda clause: clause.startswith("com"),
         'clause': ['subsystem']
     },
 
@@ -239,7 +239,7 @@ query_list = [
         'query_predicate': '! subsystem ENDSWITH[c] "com"',
         'level': 'default',
         'type': ['log'],
-        'lambda_function': lambda clause: clause.endswith("com"),
+        'lambda_function': lambda clause: not clause.endswith("com"),
         'clause': ['subsystem']
     },
 
