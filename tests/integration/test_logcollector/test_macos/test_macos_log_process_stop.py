@@ -35,18 +35,22 @@ def test_macos_log_process_stop(get_configuration, configure_environment, restar
         TimeoutError: If the expected callback is not generated.
     """
 
+    sleep(2)
+
     macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
     wazuh_log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
 
-    log_processes = search_process(logcollector.MACOS_LOG_COMMAND_PATH)
+    log_processes = search_process('log')
 
-    assert log_processes['name'] == 'name'
+    assert len(log_processes) == 1
 
     control_service('stop')
 
     sleep(5)
 
-    log_processes = search_process('/usr/bin/log')
+    log_processes = search_process('log')
 
     assert len(log_processes) == 0
+
+    control_service('restart')
