@@ -263,4 +263,4 @@ def test_log_format(get_local_internal_options, configure_local_internal_options
 
         with pytest.raises(expected_exception):
             control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-            check_log_format_invalid(cfg)
+        check_log_format_invalid(cfg)
