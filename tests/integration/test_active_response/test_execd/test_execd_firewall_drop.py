@@ -108,7 +108,7 @@ def remove_ip_from_iptables(request, get_configuration):
         get_configuration (fixture): Get configurations from the module.
     """
     metadata = get_configuration['metadata']
-    param = '{"version":1,"origin":{"name":"","module":"wazuh-execd"},"command":"delete",' \
+    param = '{"version":1,"origin":{"name":"","module":"wazuh-modulesd"},"command":"delete",' \
             '"parameters":{"extra_args":[],"alert":{"data":{"srcip":"' + metadata['ip'] + \
             '","dstuser":"Test"}},"program":"/var/ossec/active-response/bin/firewall-drop"}}'
     firewall_drop_script_path = os.path.join(WAZUH_PATH, 'active-response/bin', 'firewall-drop')
