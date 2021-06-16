@@ -34,9 +34,7 @@ def mock_db(func):
     @functools.wraps(func)
     def magic(*args, **kwargs):
         control_service('stop', daemon='wazuh-modulesd')
-        """control_service('stop', daemon='wazuh-db')"""
         func(*args, **kwargs)
-        """control_service('start', daemon='wazuh-db')"""
         control_service('start', daemon='wazuh-modulesd')
 
     return magic
@@ -62,7 +60,6 @@ def mock_agent(
                      "{date_add}", "{last_keepalive}", "{group}", "{sync_status}", "{connection_status}")
                    '''
     try:
-        """run_query(create_agent_query, GLOBAL_DB_PATH)"""
         query_wdb(create_agent_query)
     except sqlite3.IntegrityError:
         logging.error("Failed to mock agent in database!")
