@@ -45,7 +45,7 @@ def get_configuration(request):
 
 
 # tests
-
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('folder, file_list, filetype, tags_to_apply', [
     (testdir1, ['regular0', 'regular1', 'regular2'], REGULAR, {'ossec_conf'},),
     (testdir2, ['regular0', 'regular1', 'regular2'], REGULAR, {'ossec_conf'},)
@@ -80,8 +80,8 @@ def test_delete_folder(folder, file_list, filetype, tags_to_apply,
 
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
     events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                                     accum_results=len(file_list), error_message='Did not receive expected '
-                                                                                 '"Sending FIM event: ..." event').result()
+                                     accum_results=len(file_list),
+                                     error_message='Did not receive expected "Sending FIM event: ..." event').result()
     for ev in events:
         validate_event(ev, mode=mode)
 

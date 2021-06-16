@@ -144,8 +144,8 @@ def generate_analysisd_yaml(n_events, modify_events):
     analysis_queue = mitm_analysisd.queue
     mitm_analysisd.start()
 
-    control_service('start', daemon='wazuh-syscheckd', debug_mode=True)
-    check_daemon_status(running=True, daemon='wazuh-syscheckd')
+    control_service('start', daemon='wazuh-modulesd', debug_mode=True)
+    check_daemon_status(running=True, daemon='wazuh-modulesd')
 
     # Wait for initial scan
     detect_initial_scan(file_monitor)
@@ -185,7 +185,7 @@ def generate_analysisd_yaml(n_events, modify_events):
 
 
 def kill_daemons():
-    for daemon in ['wazuh-analysisd', 'wazuh-db', 'wazuh-syscheckd']:
+    for daemon in ['wazuh-analysisd', 'wazuh-db', 'wazuh-modulesd']:
         control_service('stop', daemon=daemon)
         check_daemon_status(running=False, daemon=daemon)
 

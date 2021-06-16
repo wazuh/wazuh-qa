@@ -78,7 +78,7 @@ def extra_configuration_after_yield():
 
 
 # Tests
-
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('tags_to_apply', [
     {'ossec_conf_diff'}
 ])
@@ -96,5 +96,5 @@ def test_disk_quota_values(tags_to_apply, get_configuration, configure_environme
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 25, callback=callback_disk_quota_limit_reached,
-                            error_message='Did not receive expected '
-                                          '"The maximum configured size for the ... folder has been reached, ..." event.')
+                            error_message='Did not receive expected "The maximum configured '
+                                          'size for the ... folder has been reached, ..." event.')

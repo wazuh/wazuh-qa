@@ -89,7 +89,8 @@ def test_delete_registry(key, subkey, arch, value_list,
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
     events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                                      accum_results=len(value_list) + 1, error_message='Did not receive expected '
-                                                                                      '"Sending FIM event: ..." event').result()
+                                                                                      '"Sending FIM event: ..." '
+                                                                                      'event').result()
     for ev in events:
         validate_registry_value_event(ev, mode=mode)
 

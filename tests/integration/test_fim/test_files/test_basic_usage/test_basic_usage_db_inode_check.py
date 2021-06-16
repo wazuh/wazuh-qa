@@ -52,11 +52,11 @@ def restart_syscheck_function(get_configuration, request):
     """
     Reset wazuh.log and start a new monitor.
     """
-    control_service('stop', daemon='wazuh-syscheckd')
+    control_service('stop', daemon='wazuh-modulesd')
     truncate_file(fim.LOG_FILE_PATH)
     file_monitor = FileMonitor(fim.LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
-    control_service('start', daemon='wazuh-syscheckd')
+    control_service('start', daemon='wazuh-modulesd')
 
 
 @pytest.fixture(scope='function')

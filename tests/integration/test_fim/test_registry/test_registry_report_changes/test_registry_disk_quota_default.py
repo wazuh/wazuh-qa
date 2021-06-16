@@ -46,11 +46,11 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 @pytest.fixture(scope='function')
 def restart_syscheckd_each_time(request):
-    control_service('stop', daemon='wazuh-syscheckd')
+    control_service('stop', daemon='wazuh-modulesd')
     truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
-    control_service('start', daemon='wazuh-syscheckd')
+    control_service('start', daemon='wazuh-modulesd')
 
 
 @pytest.fixture(scope='module', params=configurations)
@@ -89,9 +89,8 @@ def test_disk_quota_default(key, subkey, arch, value_name, tags_to_apply,
 
     disk_quota_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                callback=callback_disk_quota_default,
-                                               error_message='Did not receive expected '
-                                                             '"Maximum disk quota size limit configured to \'... KB\'." event'
-                                               ).result()
+                                               error_message='Did not receive expected "Maximum disk quota size '
+                                                             'limit configured to \'... KB\'." event').result()
     if disk_quota_value:
         assert disk_quota_value == str(DEFAULT_SIZE), 'Wrong value for disk_quota'
     else:

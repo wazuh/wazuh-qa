@@ -70,8 +70,8 @@ def test_multiple_keys(tags_to_apply, get_configuration, configure_environment, 
 
     discarded = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_max_registry_monitored,
-                                        error_message='Did not receive expected '
-                                                      '"Maximum number of registries to be monitored..." event.').result()
+                                        error_message='Did not receive expected "Maximum number '
+                                                      'of registries to be monitored..." event.').result()
 
     assert discarded == expected_discarded, f'Discarded registry keys are not the expected ones.'
 

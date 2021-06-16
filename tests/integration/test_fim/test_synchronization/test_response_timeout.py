@@ -51,7 +51,6 @@ def get_configuration(request):
 
 
 # Tests
-
 @pytest.mark.parametrize('num_files', [1, 100])
 def test_response_timeout(num_files, get_configuration, configure_environment, restart_syscheckd):
     """Verify that synchronization checks take place at the expected time given INTERVAL and RESPONSE_TIMEOUT
@@ -78,7 +77,7 @@ def test_response_timeout(num_files, get_configuration, configure_environment, r
         truncate_agent_log()
         start_time = datetime.now()
         while datetime.now() < start_time + timedelta(seconds=time_out):
-            ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command (f"sudo cat {LOG_FILE_PATH}")
+            ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(f"sudo cat {LOG_FILE_PATH}")
             for line in ssh_stdout.read().decode('ascii').splitlines():
                 if callback_detect_end_scan(line):
                     return

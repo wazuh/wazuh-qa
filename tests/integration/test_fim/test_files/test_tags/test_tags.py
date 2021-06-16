@@ -51,6 +51,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('folder', test_directories)
 @pytest.mark.parametrize('name, content', [
     ('file1', 'Sample content'),

@@ -109,8 +109,8 @@ def test_file_size_default(tags_to_apply, filename, folder, get_configuration, c
     check_time_travel(scheduled)
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_file_size_limit_reached,
-                            error_message='Did not receive expected '
-                                          '"File ... is too big for configured maximum size to perform diff operation" event.')
+                            error_message='Did not receive expected "File ... is too '
+                                          'big for configured maximum size to perform diff operation" event.')
 
     if os.path.exists(diff_file_path):
         pytest.raises(FileExistsError(f"{diff_file_path} found. It should not exist after incresing the size."))

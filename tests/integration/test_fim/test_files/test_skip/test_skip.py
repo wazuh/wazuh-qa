@@ -89,7 +89,6 @@ def extra_configuration_before_yield():
 
 
 # tests
-
 def test_skip_proc(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check if syscheckd skips /proc when setting 'skip_proc="yes"'."""
     check_apply_test({'skip_proc'}, get_configuration['tags'])

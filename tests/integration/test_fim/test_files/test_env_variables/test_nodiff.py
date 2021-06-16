@@ -26,10 +26,12 @@ dir1, dir2, dir3, dir4 = test_directories
 
 # Check big environment variables ending with backslash
 if sys.platform == 'win32':
-    paths = [os.path.join(PREFIX, 'a' * 50 + '\\') for i in range(10)] + [os.path.join(dir2, "test.txt"), os.path.join(dir3, "test.txt")]
+    paths = [os.path.join(PREFIX, 'a' * 50 + '\\') for i in range(10)] + [os.path.join(dir2, "test.txt"),
+                                                                          os.path.join(dir3, "test.txt")]
     test_env = "%TEST_NODIFF_ENV%"
 else:
-    paths = [os.path.join(PREFIX, 'a' * 50 + '\\') for i in range(100)] + [os.path.join(dir2, "test.txt"), os.path.join(dir3, "test.txt")]
+    paths = [os.path.join(PREFIX, 'a' * 50 + '\\') for i in range(100)] + [os.path.join(dir2, "test.txt"),
+                                                                           os.path.join(dir3, "test.txt")]
     test_env = "$TEST_NODIFF_ENV"
 
 multiple_env_var = os.pathsep.join(paths)

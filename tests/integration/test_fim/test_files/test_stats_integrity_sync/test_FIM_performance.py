@@ -24,7 +24,7 @@ from wazuh_testing.tools.services import control_service, check_daemon_status
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=3), pytest.mark.server]
 
 root_dir = '/test'
-tested_daemon = 'wazuh-syscheckd'
+tested_daemon = 'wazuh-modulesd'
 state_collector_time = 1
 state_path = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-agentd.state')
 performance_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stats', 'performance')
@@ -32,7 +32,7 @@ fim_db_path = os.path.join(WAZUH_PATH, 'queue', 'fim', 'db')
 # local_internal_options configuration
 state_configuration = {
     "agentd.state_interval": state_collector_time,
-    "syscheck.debug": 2
+    "wazuh_modules.debug": 2
 }
 
 
@@ -542,6 +542,7 @@ def real_test(test_type, real_df, integrity_df, string_configuration, configurat
         process.join()
 
 
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/1449')
 @pytest.mark.parametrize('number_files', [
     '1', '1000', '100000'
 ])

@@ -59,7 +59,7 @@ def get_configuration(request):
 
 @pytest.fixture(scope='function')
 def restart_syscheckd_each_time(request):
-    control_service('stop', daemon='wazuh-syscheckd')
+    control_service('stop', daemon='wazuh-modulesd')
     truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
@@ -68,7 +68,7 @@ def restart_syscheckd_each_time(request):
         for directory in test_directories:
             os.mkdir(directory)
 
-    control_service('start', daemon='wazuh-syscheckd')
+    control_service('start', daemon='wazuh-modulesd')
     detect_initial_scan(file_monitor)
 
 
@@ -82,7 +82,7 @@ def extra_configuration_after_yield():
 
 # Tests
 
-
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('realtime_enabled, decreases_num_watches, rename_folder', [
     (True, True, False),
     (True, True, True),

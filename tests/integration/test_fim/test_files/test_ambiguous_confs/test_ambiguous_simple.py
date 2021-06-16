@@ -118,6 +118,7 @@ def _test_recursion_cud(ini, fin, path, recursion_subdir, scheduled,
 
 
 # tests
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('folders, tags_to_apply', [
     ([testdir, subdir], {'ambiguous_restrict'})
 ])
@@ -154,6 +155,7 @@ def test_ambiguous_restrict(folders, tags_to_apply, get_configuration, configure
                      min_timeout=global_parameters.default_timeout, triggers_event=True)
 
 
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('folders, tags_to_apply', [
     ([testdir, subdir], {'ambiguous_report_changes'})
 ])
@@ -216,6 +218,7 @@ def test_ambiguous_report(folders, tags_to_apply, get_configuration, configure_e
                      validators_after_update=[no_report_changes_validator])
 
 
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('folders, tags_to_apply', [
     ([testdir, subdir], {'ambiguous_tags'})
 ])
@@ -247,6 +250,7 @@ def test_ambiguous_tags(folders, tags_to_apply, get_configuration, configure_env
                      min_timeout=global_parameters.default_timeout, validators_after_cud=[tag_validator])
 
 
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('dirname, recursion_level, tags_to_apply', [
     (testdir_recursion, 1, {'ambiguous_recursion_over'}),
     (testdir_recursion, 4, {'ambiguous_recursion'})
@@ -290,6 +294,7 @@ def test_ambiguous_recursion(dirname, recursion_level, tags_to_apply, get_config
                         min_timeout=global_parameters.default_timeout, triggers_event=False)
 
 
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('dirnames, recursion_level, triggers_event, tags_to_apply', [
     ([testdir_recursion_tag, testdir_recursion_no_tag], 2, True, {'ambiguous_recursion_tag'}),
     ([testdir_recursion_tag, testdir_recursion_no_tag], 2, False, {'ambiguous_no_recursion_tag'})
@@ -330,6 +335,7 @@ def test_ambiguous_recursion_tag(dirnames, recursion_level, triggers_event, tags
                         triggers_event=triggers_event, validators_after_cud=[no_tag_validator])
 
 
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('tags_to_apply', [
     {'ambiguous_check'}
 ])

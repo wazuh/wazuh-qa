@@ -83,7 +83,8 @@ def test_symlink_dir_inside_monitored_dir(tags_to_apply, checkers, get_configura
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
     # Alerts from the pointed directory should have all checks except size
-    fim.regular_file_cud(testdir_target, wazuh_log_monitor, min_timeout=global_parameters.default_timeout, options=checkers,
-                     time_travel=scheduled)
+    fim.regular_file_cud(testdir_target, wazuh_log_monitor, min_timeout=global_parameters.default_timeout,
+                         options=checkers, time_travel=scheduled)
     # Alerts from the main directory should have all checks
-    fim.regular_file_cud(testdir, wazuh_log_monitor, min_timeout=global_parameters.default_timeout, time_travel=scheduled)
+    fim.regular_file_cud(testdir, wazuh_log_monitor, min_timeout=global_parameters.default_timeout,
+                         time_travel=scheduled)

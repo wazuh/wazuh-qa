@@ -181,6 +181,7 @@ def write_csv(data):
     df.to_csv(metrics_path, sep='\t', mode='a', index=False, header=(not os.path.exists(metrics_path)))
 
 
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/1449')
 @pytest.mark.benchmark
 @pytest.mark.parametrize('tags_to_apply', [
     {'ossec_conf'}
