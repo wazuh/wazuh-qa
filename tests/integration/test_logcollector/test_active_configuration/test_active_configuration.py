@@ -62,14 +62,19 @@ def test_get_configuration_sock(get_configuration, configure_environment, restar
     receiver_sockets[0].send(msg_get_config, True)
     msg_received = receiver_sockets[0].receive().decode('latin-1')
 
-    matched = re.match(r'.*{"file":"(\S+)","logformat":"(\S+)","ignore_binaries":"no","only-future-events":"yes",'
-                       r'"target":\["agent"\]}.*',msg_received)
+    if configuration['log_format'] == 'macos':
+        matched = re.match(r'.*{"logformat":"(\S+)","ignore_binaries":"no","only-future-events":"yes",'
+                           r'"target":\["agent"\]}.*',msg_received)
+    else:
+        matched = re.match(r'.*{"file":"(\S+)","logformat":"(\S+)","ignore_binaries":"no","only-future-events":"yes",'
+                           r'"target":\["agent"\]}.*',msg_received)
 
     assert matched is not None, f'Real message was: "{msg_received}"'
 
     assert matched.group(1) == configuration['location'], f"""Expected value in location option:
            '{configuration['location']}'. Value received: '{matched.group(1)}'"""
 
-    assert matched.group(2) == configuration['log_format'], f"""Expected value in location option:
-              '{configuration['log_format']}'. Value received: '{matched.group(2)}'"""
+    if configuration['log_format'] != 'macos':
+        assert matched.group(2) == configuration['log_format'], f"""Expected value in location option:
+                  '{configuration['log_format']}'. Value received: '{matched.group(2)}'"""
 
