@@ -17,6 +17,7 @@ level_list = ['default', 'info', 'debug']
 type_list = ['log', 'trace', 'activity', 'log,trace', 'activity,log', 'activity,trace']
 wazuh_configuration = 'wazuh_basic_configuration_query_macos.yaml'
 
+
 if sys.platform != 'win32' and sys.platform != 'darwin':
     pytestmark = [pytest.mark.skip, pytest.mark.tier(level=0)]
 else:
