@@ -83,8 +83,8 @@ def test_syslog_message(message, get_configuration, configure_environment, resta
 
     # Check if remoted correctly started with the new conf
     log_callback = remote.callback_detect_remoted_started(port=port, protocol=protocol, connection_type='syslog')
-    wazuh_log_monitor.start(timeout=5, callback=log_callback, update_position=False,
+    wazuh_log_monitor.start(timeout=50, callback=log_callback, update_position=False,
                             error_message="Wazuh remoted didn't start as expected.")
 
     # Check if wazuh-remoted receives syslog messages
-    remote.check_syslog_event(wazuh_archives_log_monitor, syslog_messages[message], port, protocol)
+    remote.check_syslog_event(wazuh_archives_log_monitor, syslog_messages[message], port, protocol, timeout=30)

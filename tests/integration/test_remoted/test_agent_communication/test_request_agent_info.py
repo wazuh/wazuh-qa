@@ -74,7 +74,14 @@ def test_request(get_configuration, configure_environment, remove_shared_files,
 
         msg_request = f'{agent.id} {command_request}'
 
-        response = send_request(msg_request)
+        retries = 3
+        response = ''
+        while retries > 0:
+            retries -= 1
+            try:
+                response = send_request(msg_request)
+            except (AttributeError, ValueError, ConnectionRefusedError):
+                pass
 
         assert expected_answer in response, "Remoted unexpected answer"
 

@@ -383,7 +383,7 @@ def detect_archives_log_event(archives_monitor, callback, error_message=None, up
                            error_message=error_message)
 
 
-def check_syslog_event(wazuh_archives_log_monitor, message, port, protocol, timeout=10):
+def check_syslog_event(wazuh_archives_log_monitor, message, port, protocol, timeout=20):
     """Check if a syslog event is properly received by the manager.
 
     Args:

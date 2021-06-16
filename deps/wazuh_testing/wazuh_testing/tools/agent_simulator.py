@@ -1706,7 +1706,7 @@ def create_agents(agents_number, manager_address, cypher='aes', fim_eps=100, aut
 
     return agents
 
-
+@retry(AttributeError, attempts=3, delay=15, delay_multiplier=1)
 def connect(agent,  manager_address='localhost', protocol=TCP, manager_port='1514'):
     """Connects an agent to the manager
 
