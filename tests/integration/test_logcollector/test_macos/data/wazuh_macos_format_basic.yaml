@@ -7,14 +7,6 @@
   - test_macos_log_process_stop
   - test_macos_log_process_stop_suddenly
   sections:
-  - section: client
-    elements:
-        - server:
-            elements:
-            - address:
-                value: '127.0.0.1'
-            - protocol:
-                value: 'tcp'
   - section: localfile
     elements:
       - location:
