@@ -7,9 +7,10 @@ import sys
 
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.office365 import callback_detect_enabled_err, callback_detect_only_future_events_err, callback_detect_interval_err, \
-    callback_detect_curl_max_size_err, callback_detect_tenant_id_err, callback_detect_client_id_err, callback_detect_client_secret_err, \
-    callback_detect_subscription_err, callback_detect_read_err
+from wazuh_testing.office365 import callback_detect_enabled_err, callback_detect_only_future_events_err, \
+    callback_detect_interval_err, callback_detect_curl_max_size_err, callback_detect_tenant_id_err, \
+    callback_detect_client_id_err, callback_detect_client_secret_err, callback_detect_subscription_err, \
+    callback_detect_read_err
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor

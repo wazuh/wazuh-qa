@@ -18,7 +18,8 @@ def callback_detect_only_future_events_err(line):
 
 
 def callback_detect_interval_err(line):
-    if 'wm_office365_read(): ERROR: Invalid content for tag \'interval\' at module \'office365\'. The maximum value allowed is 1 day.' in line:
+    if 'wm_office365_read(): ERROR: Invalid content for tag \'interval\' at module \'office365\'. '\
+       'The maximum value allowed is 1 day.' in line:
         return line
     return None
 

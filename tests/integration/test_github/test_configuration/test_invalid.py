@@ -7,9 +7,10 @@ import sys
 
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.github import callback_detect_enabled_err, callback_detect_only_future_events_err, callback_detect_interval_err, \
-    callback_detect_curl_max_size_err, callback_detect_time_delay_err, callback_detect_org_name_err, callback_detect_api_token_err, \
-    callback_detect_event_type_err, callback_detect_read_err
+from wazuh_testing.github import callback_detect_enabled_err, callback_detect_only_future_events_err, \
+    callback_detect_interval_err, callback_detect_curl_max_size_err, callback_detect_time_delay_err, \
+    callback_detect_org_name_err, callback_detect_api_token_err, callback_detect_event_type_err, \
+    callback_detect_read_err
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
