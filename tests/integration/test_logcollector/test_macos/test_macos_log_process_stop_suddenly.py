@@ -4,9 +4,8 @@
 
 import os
 import pytest
-import psutil
 import signal
-import time
+import platform
 
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations

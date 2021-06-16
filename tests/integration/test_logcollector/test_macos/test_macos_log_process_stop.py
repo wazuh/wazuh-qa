@@ -11,7 +11,6 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import search_process, control_service
 from time import sleep
 
-
 # Marks
 pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=0)]
 
