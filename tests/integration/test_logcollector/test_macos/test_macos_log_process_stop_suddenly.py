@@ -32,7 +32,7 @@ def get_configuration(request):
 
 
 def test_macos_log_process_stop_suddenly(get_configuration, configure_environment, restart_logcollector):
-    """Check if logcollector stops log process when Wazuh agent stops.
+    """Check if logcollector alerts when `log stream` process has stopped.
 
     Raises:
         TimeoutError: If the expected callback is not generated.
