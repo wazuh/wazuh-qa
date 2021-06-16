@@ -473,7 +473,7 @@ nav:
                 - Overview: tests/integration/test_logcollector/test_location/index.md
                 - Test location: tests/integration/test_logcollector/test_location/test_location.md
                 - Test exclude: tests/integration/test_logcollector/test_location/test_location_exclude.md
-            - Test log format: 
+            - Test log format:
                 - Overview: tests/integration/test_logcollector/test_log_format/index.md
                 - Test log format: tests/integration/test_logcollector/test_log_format/test_log_format_values.md
             - Test only future events: tests/integration/test_logcollector/test_only_future_events/test_only_future_events.md
@@ -482,6 +482,7 @@ nav:
                 - Overview: tests/integration/test_logcollector/test_macos/index.md
                 - Test macos format basic: tests/integration/test_logcollector/test_macos/test_macos_format_basic.md
                 - Test only future events macos format: tests/integration/test_logcollector/test_macos/test_macos_format_only_future_events.md
+                - Test query macos format: tests/integration/test_logcollector/test_macos/test_macos_format_query.md
             - Test options:
                 - Overview: tests/integration/test_logcollector/test_options/index.md
                 - Test state interval: tests/integration/test_logcollector/test_options/test_options_state_interval.md

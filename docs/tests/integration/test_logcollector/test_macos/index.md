@@ -21,5 +21,8 @@ Confirm that logcollector works correctly for unified logging system events in m
 - **[Test macOS format basic](test_macos_format_basic.md)**: Check if `wazuh-logcollector` gather corrrectly generated 
 unified logging system events.
 
+- **[Test macos format query](test_macos_format_query.md)**: Check if `query` option for `wazuh-logcollector`
+  works correctly for macos log format.
+
 - **[Test macOS format only future events](test_macos_format_only_future_events.md)**: Check if `only-future-events`
   works correctly for macOS log format.
