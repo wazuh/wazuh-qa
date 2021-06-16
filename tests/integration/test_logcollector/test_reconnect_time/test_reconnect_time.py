@@ -17,7 +17,7 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=0)]
 
 local_internal_options = {
     'logcollector.remote_commands': 1,
-    'logcollector.debug': 2,
+    'wazuh_modules.debug': 2,
     'monitord.rotate_log': 0
 }
 

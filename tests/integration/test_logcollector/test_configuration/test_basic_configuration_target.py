@@ -12,10 +12,10 @@ from wazuh_testing.tools import LOG_FILE_PATH, get_service
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.logcollector import LOGCOLLECTOR_DAEMON
 
 wazuh_component = get_service()
 
-LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]

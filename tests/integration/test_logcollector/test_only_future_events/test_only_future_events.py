@@ -11,12 +11,12 @@ from wazuh_testing.tools import monitoring, file
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.logcollector import LOGCOLLECTOR_DAEMON
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]
 
 # Configuration
-DAEMON_NAME = "wazuh-logcollector"
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_only_future_events_conf.yaml')
 temp_dir = tempfile.gettempdir()
@@ -107,14 +107,14 @@ def test_only_future_events(get_local_internal_options, configure_local_internal
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
                             callback=callback_message)
 
-    control_service('stop', daemon=DAEMON_NAME)
+    control_service('stop', daemon=LOGCOLLECTOR_DAEMON)
 
     # Add another KiB of data to log while logcollector is stopped
     first_line = current_line + 1
     current_line = logcollector.add_log_data(log_path=config['location'], log_line_message=config['log_line'],
                                              size_kib=1, line_start=first_line, print_line_num=True)
 
-    control_service('start', daemon=DAEMON_NAME)
+    control_service('start', daemon=LOGCOLLECTOR_DAEMON)
 
     if config['only_future_events'] == 'no':
         # Logcollector should detect the first line written while it was stopped

@@ -18,8 +18,8 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.utils import lower_case_key_dictionary_array
+from wazuh_testing.logcollector import LOGCOLLECTOR_DAEMON
 
-LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)

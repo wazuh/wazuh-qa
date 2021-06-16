@@ -10,7 +10,7 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 
-DAEMON_NAME = "wazuh-logcollector"
+DAEMON_NAME = "wazuh-modulesd"
 
 
 @pytest.fixture(scope='module')

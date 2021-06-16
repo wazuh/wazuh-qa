@@ -13,11 +13,9 @@ import wazuh_testing.generic_callbacks as gc
 from wazuh_testing.tools import get_service, LOG_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.services import control_service
-
+from wazuh_testing.logcollector import LOGCOLLECTOR_DAEMON
 import subprocess as sb
 
-
-LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)

@@ -14,7 +14,7 @@ from wazuh_testing.tools import get_service, LOG_FILE_PATH
 from tempfile import gettempdir
 from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 
-LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
+
 prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 # Marks
@@ -187,4 +187,5 @@ def test_only_future_events(get_configuration, configure_environment, restart_lo
     if cfg['invalid_value'] == '':
         check_only_future_events_valid(cfg)
     else:
-        check_only_future_events_invalid(cfg)
+        pytest.xfail("Expected error. Issue https://github.com/wazuh/wazuh/issues/8927")
+#       check_only_future_events_invalid(cfg)

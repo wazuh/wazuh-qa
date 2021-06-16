@@ -15,8 +15,8 @@ from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.services import control_service
 import subprocess as sb
+from wazuh_testing.logcollector import LOGCOLLECTOR_DAEMON
 
-LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)

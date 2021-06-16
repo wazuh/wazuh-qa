@@ -21,6 +21,7 @@ GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND = "The expected target socket not
 LOG_COLLECTOR_GLOBAL_TIMEOUT = 20
 GENERIC_CALLBACK_ERROR_READING_FILE = "The expected invalid content error log has not been produced"
 GENERIC_CALLBACK_ERROR = 'The expected error output has not been produced'
+LOGCOLLECTOR_DAEMON = "wazuh-modulesd"
 
 WINDOWS_CHANNEL_LIST = ['Microsoft-Windows-Sysmon/Operational',
                         'Microsoft-Windows-Windows Firewall With Advanced Security/Firewall',
@@ -41,7 +42,7 @@ if sys.platform == 'win32':
     prefix = monitoring.AGENT_DETECTOR_PREFIX
 else:
     LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
-        'logcollector.debug': '2',
+        'wazuh_modules.debug': '2',
         'monitord.rotate_log': '0',
         'agent.debug': '0',
     }
@@ -91,7 +92,7 @@ def callback_command_alias_output(alias):
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"Reading command message: 'ossec: output: '{alias}':"
+    msg = fr"Reading command message: 'wazuh: output: '{alias}':"
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 
