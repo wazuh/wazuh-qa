@@ -5,7 +5,7 @@ Feature: add sample data to modules
   in order to check modules
 
   Scenario: Add sample data
-    Given The kibana admin user is logged in using odfe authentication
+    Given The kibana admin user is logged in using basic authentication
     When The user navigates to Sample data settings
     And The user adds sample data for
       | security information            |
@@ -14,7 +14,7 @@ Feature: add sample data to modules
     Then The add data success toasts are displayed
 
     Scenario: Delete all sample data
-      Given The kibana admin user is logged in using odfe authentication
+      Given The kibana admin user is logged in using basic authentication
       When The user navigates to Sample data settings
       And The user removes sample data for
       | security information            |

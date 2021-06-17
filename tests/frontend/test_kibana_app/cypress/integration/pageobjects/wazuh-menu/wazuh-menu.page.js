@@ -11,6 +11,7 @@ export const settingsButton = '[data-test-subj=menuSettingsButton]';
 //region Modules
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 export const modulesDirectory = 'div.wz-menu-right-side > div > div > div.euiFlexGroup.euiFlexGroup--gutterLarge.euiFlexGroup--directionRow.euiFlexGroup--responsive > div > button > span > span';
 export const securityEventsButton = ':nth-child(1) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(1) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
 export const integrityMonitoringButton = ':nth-child(1) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(2) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
@@ -53,6 +54,9 @@ export const nistLink = '[data-cy=menu-modules-nist-link]';
 export const tscLink = '[data-cy=menu-modules-tsc-link]';
 >>>>>>> Update selectors
 =======
+=======
+export const modulesDirectoryLink = '.wz-menu-right-side  div.euiFlexGroup > div > button > span > span';
+>>>>>>> added example table, and modified scripts to run tests from CLI
 export const securityEventsLink = '[data-test-subj=menuModulesSecurityEventsLink]';
 export const integrityMonitoringLink = '[data-test-subj=menuModulesFimLink]';
 export const amazonAwsLink = '[data-test-subj=menuModulesAwsLink]';

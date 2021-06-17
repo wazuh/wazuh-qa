@@ -3,9 +3,13 @@ export const clickElement = (selector) => {
   return this;
 };
 
-export const elementIsVisible = (element) => {
-  return getElement(element).should('exist').should('be.visible');
+export const elementIsVisible = (selector) => {
+  return getElement(selector).should('exist').should('be.visible');
 };
+
+export const elementIsNotVisible = (selector) => {
+  return getElement(selector).should('not.exist');
+}
 
 export const elementTextIncludes = (selector, text) => {
   getElement(selector).should('contain', text);

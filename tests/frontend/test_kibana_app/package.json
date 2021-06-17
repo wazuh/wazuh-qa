@@ -7,7 +7,8 @@
     "start": "npx cypress open",
     "cy:install": "npx cypress install --force",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "cypress:run": "cypress run --headless --browser chrome",
+    "cypress:run-headless": "cypress run --headless --browser chrome",
+    "cypress:run": "cypress run --browser chrome",
     "merge": "mochawesome-merge cypress/report/mochawesome-report/*.json > cypress/report/output.json",
     "generate_mochawesome_report": "marge cypress/report/output.json --reportDir ./cypress/report --inline",
     "delete:reports": "rm -r cypress/report/* || true"
