@@ -254,6 +254,7 @@ nav:
               - tests/integration/test_fim/test_files/test_inotify/index.md
               - Test num watches: tests/integration/test_fim/test_files/test_inotify/test_num_watches.md
               - Test remove rename folder: tests/integration/test_fim/test_files/test_inotify/test_remove_rename_folder.md
+              - Test max fd win rt: tests/integration/test_fim/test_files/test_inotify/test_max_fd_rt.md
             - Test invalid:
               - tests/integration/test_fim/test_files/test_invalid/index.md
               - Test invalid: tests/integration/test_fim/test_files/test_invalid/test_invalid.md
