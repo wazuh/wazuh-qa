@@ -1,5 +1,5 @@
 import { Then } from 'cypress-cucumber-preprocessor/steps';
-import { getObject } from '../../../utils/driver';
+import { getElement } from '../../../utils/driver';
 import {
   titleSelector,
   tableSelector,
@@ -8,15 +8,15 @@ import {
 } from '../../../pageobjects/wazuh-menu/decoders.page';
 
 Then('The user should see the decoders', () => {
-  getObject(titleSelector)
+  getElement(titleSelector)
     .should('exist')
     .should('contain', 'Decoders');
-  getObject(tableSelector)
+  getElement(tableSelector)
     .should('exist');
-  getObject(dropdownPaginationSelector)
+  getElement(dropdownPaginationSelector)
     .should('exist')
     .should('be.visible');
-  getObject(listPages)
+  getElement(listPages)
     .should('exist')
     .should('be.visible');
 });

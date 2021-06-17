@@ -1,0 +1,10 @@
+export const amazonAWSToggleButton = ':nth-child(1) > .euiPanel > :nth-child(3) > :nth-child(1) > :nth-child(1) > :nth-child(3) > .euiFlexItem--flexGrowZero > .euiSwitch > button';
+export const gCPToggleButton = ':nth-child(1) > .euiPanel > :nth-child(3) > :nth-child(1) > :nth-child(1) > :nth-child(4) > .euiFlexItem--flexGrowZero > .euiSwitch > button';
+export const openSCAPToggleButton = ':nth-child(2) > .euiPanel > :nth-child(3) > :nth-child(1) > :nth-child(1) > :nth-child(4) > .euiFlexItem--flexGrowZero > .euiSwitch > button';
+export const cisCatToggleButton = ':nth-child(2) > .euiPanel > :nth-child(3) > :nth-child(1) > :nth-child(1) > :nth-child(5) > .euiFlexItem--flexGrowZero > .euiSwitch > button';
+export const virusTotalToggleButton = ':nth-child(3) > .euiPanel > :nth-child(3) > :nth-child(1) > :nth-child(1) > :nth-child(3) > .euiFlexItem--flexGrowZero > .euiSwitch > button';
+export const osqueryToggleButton = ':nth-child(3) > .euiPanel > :nth-child(3) > :nth-child(1) > :nth-child(1) > :nth-child(4) > .euiFlexItem--flexGrowZero > .euiSwitch > button';
+export const dockerListenerToggleButton = ':nth-child(3) > .euiPanel > :nth-child(3) > :nth-child(1) > :nth-child(1) > :nth-child(5) > .euiFlexItem--flexGrowZero > .euiSwitch > button';
+export const gDPRToggleButton = ':nth-child(4) > .euiPanel > :nth-child(3) > :nth-child(1) > :nth-child(1) > :nth-child(3) > .euiFlexItem--flexGrowZero > .euiSwitch > button';
+export const hIPAAToggleButton = ':nth-child(4) > .euiPanel > :nth-child(3) > :nth-child(1) > :nth-child(1) > :nth-child(4) > .euiFlexItem--flexGrowZero > .euiSwitch > button';
+export const tSCToggleButton = ':nth-child(4) > .euiPanel > :nth-child(3) > :nth-child(1) > :nth-child(1) > :nth-child(5) > .euiFlexItem--flexGrowZero > .euiSwitch > button';

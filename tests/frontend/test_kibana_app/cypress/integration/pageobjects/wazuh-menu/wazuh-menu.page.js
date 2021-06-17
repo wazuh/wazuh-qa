@@ -9,6 +9,7 @@ export const settingsButton = '[data-test-subj=menuSettingsButton]';
 //endregion Menu
 //region SubMenu
 //region Modules
+export const modulesDirectoryLink = '.wz-menu-right-side  div.euiFlexGroup > div > button > span > span';
 export const securityEventsLink = '[data-test-subj=menuModulesSecurityEventsLink]';
 export const integrityMonitoringLink = '[data-test-subj=menuModulesFimLink]';
 export const amazonAwsLink = '[data-test-subj=menuModulesAwsLink]';
