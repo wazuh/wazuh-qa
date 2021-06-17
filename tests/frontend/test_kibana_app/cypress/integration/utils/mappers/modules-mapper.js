@@ -9,7 +9,7 @@ import {
   osqueryToggleButton,
   tSCToggleButton,
   virusTotalToggleButton
-} from '../pageobjects/settings/modules.page';
+} from '../../pageobjects/settings/modules.page';
 import {
   amazonAWSCard,
   cisCatCard,
@@ -21,7 +21,7 @@ import {
   osqueryCard,
   tSCCard,
   virusTotalCard
-} from '../pageobjects/modules-directory.page';
+} from '../../pageobjects/modules-directory.page';
 
 export const MODULES_CARDS = {
   'Amazon AWS': amazonAWSCard,
