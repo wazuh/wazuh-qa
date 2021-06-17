@@ -24,7 +24,8 @@ def callback_detect_interval_err(line):
 
 
 def callback_detect_curl_max_size_err(line):
-    if 'wm_github_read(): ERROR: Invalid content for tag \'curl_max_size\' at module \'github\'.' in line:
+    if 'wm_github_read(): ERROR: Invalid content for tag \'curl_max_size\' at module \'github\'. '\
+       'The minimum value allowed is 1KB.' in line:
         return line
     return None
 
