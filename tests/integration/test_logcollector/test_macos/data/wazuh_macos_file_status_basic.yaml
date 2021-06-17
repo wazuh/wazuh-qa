@@ -1,0 +1,23 @@
+- tags:
+  - test_macos_file_status_basic
+  apply_to_modules:
+  - test_macos_file_status_basic
+  sections:
+  - section: client
+    elements:
+        - server:
+            elements:
+            - address:
+                value: '127.0.0.1'
+            - protocol:
+                value: 'tcp'
+  - section: localfile
+    elements:
+      - location:
+          value: 'macos'
+      - log_format:
+          value: 'macos'
+      - only-future-events:
+          value: ONLY_FUTURE_EVENTS
+      - query:
+          value: 'message CONTAINS "testing message"'
