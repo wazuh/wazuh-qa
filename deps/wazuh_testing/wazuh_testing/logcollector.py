@@ -752,6 +752,7 @@ def format_macos_message_pattern(process_name, message, type='log', subsystem=No
     Returns:
         string: Expected unified logging system event.
     """
+    macos_message = None
     if process_name == 'logger' or type == 'trace':
         macos_message = f"{process_name}\[\d+\]: {message}"
     else:
@@ -759,5 +760,7 @@ def format_macos_message_pattern(process_name, message, type='log', subsystem=No
             macos_message = f"{process_name}\[\d+\]: \[{subsystem}:{category}\] {message}"
         elif type == 'activity':
             macos_message = f"{process_name}\[\d+\]: Created Activity ID.* Description: {message}"
+
+    assert macos_message is not None
 
     return macos_message
