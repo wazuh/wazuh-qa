@@ -15,5 +15,5 @@ export const SETTINGS_MENU_LINKS = {
   Configuration: settingsConfigurationLink,
   Logs: settingsLogsLink,
   Miscellaneous: settingsMiscellaneousLink,
-  about: settingsAboutLink
+  About: settingsAboutLink
 };
