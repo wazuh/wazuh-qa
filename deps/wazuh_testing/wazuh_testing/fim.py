@@ -1326,9 +1326,35 @@ def callback_detect_end_runtime_wildcards(line):
     return match is not None
 
 
+def force_time_travel(interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None,
+                      timeout=global_parameters.default_timeout):
+    """Change date and time of the system and then waits for the FIM end scan event.
+
+    Args:
+        interval (timedelta, optional): time interval that will be added to system clock. Default: 13 hours.
+        monitor (FileMonitor, optional): if passed, after changing system clock it will check for the end of the
+            scheduled scan. The `monitor` will not consume any log line. Default `None`.
+        timeout (int, optional): If a monitor is provided, this parameter sets how log to wait for the end of scan.
+
+    Raises
+        TimeoutError: if `monitor` is not `None` and the scan has not ended in the
+            default timeout specified in `global_parameters`.
+    """
+
+    before = str(datetime.now())
+    TimeMachine.travel_to_future(interval)
+    logger.info(f"Changing the system clock from {before} to {str(datetime.now())}")
+
+    if monitor:
+        monitor.start(timeout=timeout, callback=callback_detect_end_scan,
+                      update_position=False,
+                      error_message=f'End of scheduled scan not detected after ' f'{timeout} seconds')
+
+
 def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None,
                       timeout=global_parameters.default_timeout):
-    """Change date and time of the system depending on a boolean condition.
+    """Checks if the conditions for changing the current time and date are met and call to the specific function
+       depending on those conditions.
 
     Optionally, a monitor may be used to check if a scheduled scan has been performed.
 
@@ -1340,26 +1366,15 @@ def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=1
         monitor (FileMonitor, optional): if passed, after changing system clock it will check for the end of the
             scheduled scan. The `monitor` will not consume any log line. Default `None`.
         timeout (int, optional): If a monitor is provided, this parameter sets how log to wait for the end of scan.
-
-    Raises
-        TimeoutError: if `monitor` is not `None` and the scan has not ended in the
-            default timeout specified in `global_parameters`.
     """
+
     if 'fim_mode' in global_parameters.current_configuration['metadata'].keys():
         mode = global_parameters.current_configuration['metadata']['fim_mode']
         if mode != 'scheduled' or mode not in global_parameters.fim_mode:
             return
 
     if time_travel:
-        before = str(datetime.now())
-        TimeMachine.travel_to_future(interval)
-        logger.info(f"Changing the system clock from {before} to {str(datetime.now())}")
-
-        if monitor:
-            monitor.start(timeout=timeout, callback=callback_detect_end_scan,
-                          update_position=False,
-                          error_message=f'End of scheduled scan not detected after '
-                                        f'{timeout} seconds')
+        force_time_travel(interval, monitor, timeout)
 
 
 def callback_configuration_warning(line):
@@ -1457,7 +1472,7 @@ class EventChecker:
         self.events = None
         self.callback = callback
 
-    def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0):
+    def fetch_and_check(self, event_type, event_mode=None, min_timeout=1, triggers_event=True, extra_timeout=0):
         """Call both 'fetch_events' and 'check_events'.
 
         Args:
@@ -1475,7 +1490,7 @@ class EventChecker:
         error_msg += " but were not detected." if len(self.file_list) > 1 else " but was not detected."
 
         self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
-        self.check_events(event_type)
+        self.check_events(event_type, mode=event_mode)
 
     def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0, error_message=''):
         """Try to fetch events on a given log monitor. Will return a list with the events detected.
@@ -2161,7 +2176,8 @@ class CustomValidator:
 
 def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=False, min_timeout=1, options=None,
                      triggers_event=True, encoding=None, callback=callback_detect_event, validators_after_create=None,
-                     validators_after_update=None, validators_after_delete=None, validators_after_cud=None):
+                     validators_after_update=None, validators_after_delete=None, validators_after_cud=None,
+                     validate_time_travel=True, event_mode=None):
     """Check if creation, update and delete events are detected by syscheck.
 
     This function provides multiple tools to validate events with custom validators.
@@ -2186,6 +2202,8 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         validators_after_cud (list, optional): List of functions that validates an event triggered when a new file
             is created, modified or deleted. Each function must accept a param to receive
             the event to be validated. Default `None`
+        validate_time_travel (boolean, optional): Boolean to determine if the time travel functionality must meet the
+            requisites before being executed or if it can be executed directly. Default 'True'.
     """
     # Transform file list
     if not isinstance(file_list, list) and not isinstance(file_list, dict):
@@ -2202,8 +2220,13 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
     for name, content in file_list.items():
         create_file(REGULAR, folder, name, content=content)
 
-    check_time_travel(time_travel, monitor=log_monitor)
-    event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event)
+    if validate_time_travel:
+        check_time_travel(time_travel, monitor=log_monitor)
+    else:
+        force_time_travel(monitor=log_monitor)
+
+    event_checker.fetch_and_check('added', event_mode=event_mode, min_timeout=min_timeout,
+                                  triggers_event=triggers_event)
     if triggers_event:
         logger.info("'added' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
@@ -2211,8 +2234,13 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
     for name, content in file_list.items():
         modify_file(folder, name, is_binary=isinstance(content, bytes))
 
-    check_time_travel(time_travel, monitor=log_monitor)
-    event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
+    if validate_time_travel:
+        check_time_travel(time_travel, monitor=log_monitor)
+    else:
+        force_time_travel(monitor=log_monitor)
+
+    event_checker.fetch_and_check('modified', event_mode=event_mode, min_timeout=min_timeout,
+                                  triggers_event=triggers_event, extra_timeout=2)
     if triggers_event:
         logger.info("'modified' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
@@ -2220,8 +2248,13 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
     for name in file_list:
         delete_file(folder, name)
 
-    check_time_travel(time_travel, monitor=log_monitor)
-    event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
+    if validate_time_travel:
+        check_time_travel(time_travel, monitor=log_monitor)
+    else:
+        force_time_travel(monitor=log_monitor)
+
+    event_checker.fetch_and_check('deleted', event_mode=event_mode, min_timeout=min_timeout,
+                                  triggers_event=triggers_event)
     if triggers_event:
         logger.info("'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
