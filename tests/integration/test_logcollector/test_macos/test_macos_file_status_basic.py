@@ -38,16 +38,19 @@ macos_log_messages = [
 
 file_status_update = 4
 
+
 def extra_configuration_before_yield():
     # Set default values
     os.remove(file_status_path) if os.path.exists(file_status_path) else None
     change_internal_options('logcollector.vcheck_files', str(file_status_update))
+
 
 # Fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
+
 
 @pytest.fixture(scope="module")
 def get_connection_configuration():
@@ -57,7 +60,7 @@ def get_connection_configuration():
 
 @pytest.mark.parametrize('macos_message', macos_log_messages)
 def test_macos_file_status_basic(get_configuration, configure_environment, get_connection_configuration,
-                            init_authd_remote_simulator, macos_message, restart_logcollector):
+                                 init_authd_remote_simulator, macos_message, restart_logcollector):
 
     """Checks if logcollector stores correctly "macos"-formatted localfile data.
 
@@ -96,7 +99,8 @@ def test_macos_file_status_basic(get_configuration, configure_environment, get_c
     # Check if json has a structure
     assert file_status_json["macos"], "Error finding 'macos' key"
     assert file_status_json["macos"]["timestamp"], "Error finding 'timestamp' key inside 'macos'"
-    assert re.match(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}-\d{4}$', file_status_json["macos"]["timestamp"]), "Error of timestamp format"
+    assert re.match(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}-\d{4}$', 
+                    file_status_json["macos"]["timestamp"]), "Error of timestamp format"
     assert file_status_json["macos"]["settings"], "Error finding 'settings' key inside 'macos'"
     conf_predicate = get_configuration['sections'][1]['elements'][2]['query']['value']
     conf_level = get_configuration['sections'][1]['elements'][2]['query']['attributes'][0]['level']
