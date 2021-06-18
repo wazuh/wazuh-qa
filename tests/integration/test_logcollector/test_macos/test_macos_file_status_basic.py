@@ -6,8 +6,9 @@ import os
 import pytest
 import json
 import re
-
+import time
 import wazuh_testing.logcollector as logcollector
+import macos_utils
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.remote import check_agent_received_message
 from wazuh_testing.tools import WAZUH_PATH
@@ -25,10 +26,7 @@ metadata = [{'only-future-events': 'yes'}, {'only-future-events': 'no'}]
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 configuration_ids = [f"{x['ONLY_FUTURE_EVENTS']}" for x in parameters]
 
-
 file_status_path = os.path.join(WAZUH_PATH, 'queue', 'logcollector', 'file_status.json')
-
-# configurations = load_wazuh_configurations(configurations_path, __name__)
 
 macos_log_messages = [
     {
@@ -37,14 +35,11 @@ macos_log_messages = [
     }
 ]
 
-
 # Fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
-
-
 
 @pytest.fixture(scope="module")
 def get_connection_configuration():
@@ -56,10 +51,10 @@ def get_connection_configuration():
 def test_macos_file_status_basic(get_configuration, configure_environment, get_connection_configuration,
                             init_authd_remote_simulator, macos_message, restart_logcollector):
 
-    """Check if logcollector gather correctly macOS unified logging system events.
+    """Checks if logcollector stores correctly "macos"-formatted localfile data.
 
-    This test uses logger tool and a custom log to generate ULS events. The agent is connected to a authd simulator
-    and sended events are gather using remoted simulator tool.
+    This test uses logger tool and a custom log to generate an ULS event. The agent is connected to the authd simulator
+    and sends an event to trigger the file_status.json update.
 
     Raises:
         TimeoutError: If the expected callback is not generated.
@@ -68,20 +63,20 @@ def test_macos_file_status_basic(get_configuration, configure_environment, get_c
     # Remove status file to check if agent behavior is as expected
     os.remove(file_status_path) if os.path.exists(file_status_path) else None
 
-    expected_macos_message = ""
     log_command = macos_message['command']
-
+  
     macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
     wazuh_log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
 
     logcollector.generate_macos_logger_log(macos_message['message'])
-    expected_macos_message = logcollector.format_macos_message_pattern(macos_message['command'], 
-                                                                       macos_message['message'])
+    expected_message = logcollector.format_macos_message_pattern(macos_message['command'], macos_message['message'])
 
-    check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_macos_message, timeout=40)
+    check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_message, timeout=40)
 
     file_status_json = ""
+
+    time.sleep(5)
 
     try:
         with open(file_status_path) as json_status:
@@ -94,4 +89,7 @@ def test_macos_file_status_basic(get_configuration, configure_environment, get_c
     assert file_status_json["macos"]["timestamp"], "Error finding 'timestamp' key inside 'macos'"
     assert re.match(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}-\d{4}$', file_status_json["macos"]["timestamp"]), "Error of timestamp format"
     assert file_status_json["macos"]["settings"], "Error finding 'settings' key inside 'macos'"
-
+    conf_predicate = get_configuration['sections'][1]['elements'][2]['query']['value']
+    conf_level = get_configuration['sections'][1]['elements'][2]['query']['attributes'][0]['level']
+    conf_type = get_configuration['sections'][1]['elements'][2]['query']['attributes'][1]['type']
+    assert file_status_json["macos"]["settings"] == macos_utils.compose_settings(conf_type, conf_level, conf_predicate)

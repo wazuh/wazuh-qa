@@ -17,7 +17,10 @@
           value: 'macos'
       - log_format:
           value: 'macos'
-      - only-future-events:
-          value: ONLY_FUTURE_EVENTS
       - query:
           value: 'message CONTAINS "testing message"'
+          attributes:
+            - level: 'default'
+            - type: 'log,trace'
+      - only-future-events:
+          value: ONLY_FUTURE_EVENTS
