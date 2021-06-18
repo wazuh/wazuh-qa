@@ -9,6 +9,7 @@ import re
 import time
 import wazuh_testing.logcollector as logcollector
 import macos_utils
+from wazuh_testing.fim import change_internal_options
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.remote import check_agent_received_message
 from wazuh_testing.tools import WAZUH_PATH
@@ -34,6 +35,13 @@ macos_log_messages = [
         'message': "Logger testing message - file status",
     }
 ]
+
+file_status_update = 4
+
+def extra_configuration_before_yield():
+    # Set default values
+    os.remove(file_status_path) if os.path.exists(file_status_path) else None
+    change_internal_options('logcollector.vcheck_files', str(file_status_update))
 
 # Fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
@@ -76,7 +84,8 @@ def test_macos_file_status_basic(get_configuration, configure_environment, get_c
 
     file_status_json = ""
 
-    time.sleep(5)
+    # Waiting for file_status.json to be updated with macOS data by logcollector
+    time.sleep(file_status_update + 1)
 
     try:
         with open(file_status_path) as json_status:
