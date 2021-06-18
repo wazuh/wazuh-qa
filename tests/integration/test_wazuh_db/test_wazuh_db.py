@@ -4,6 +4,7 @@
 
 import os
 import re
+import json
 import time
 
 import pytest
@@ -22,8 +23,8 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 agent_message_files = os.path.join(test_data_path, 'agent')
 global_message_files = os.path.join(test_data_path, 'global')
 
-agent_module_tests = list()
-global_module_tests = list()
+agent_module_tests = []
+global_module_tests = []
 
 for file in os.listdir(agent_message_files):
     with open(os.path.join(agent_message_files, file)) as f:
@@ -54,15 +55,15 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 
 def regex_match(regex, string):
-    regex = regex.replace("*", ".*")
-    regex = regex.replace("[", "")
-    regex = regex.replace("]", "")
-    regex = regex.replace("(", "")
-    regex = regex.replace(")", "")
-    string = string.replace("[", "")
-    string = string.replace("]", "")
-    string = string.replace("(", "")
-    string = string.replace(")", "")
+    regex = regex.replace('*', '.*')
+    regex = regex.replace('[', '')
+    regex = regex.replace(']', '')
+    regex = regex.replace('(', '')
+    regex = regex.replace(')', '')
+    string = string.replace('[', '')
+    string = string.replace(']', '')
+    string = string.replace('(', '')
+    string = string.replace(')', '')
     return re.match(regex, string)
 
 
@@ -80,8 +81,8 @@ def execute_wazuh_db_query(command: str):
     """Function to send a command to the wazuh-db socket.
     Args:
         command(str): Message to send to the socket.
-    Returns
-        A response from the socket
+    Returns:
+        str: A response from the socket
     """
     receiver_sockets[0].send(command, size=True)
     return receiver_sockets[0].receive(size=True).decode()
@@ -94,13 +95,22 @@ def insert_agent(agent_id: int):
     Raises:
         AssertionError: If the agent couldn't be inserted in the DB
     """
-    command = f'global insert-agent {{"id":{agent_id},"name":"TestName{agent_id}","date_add":1599223378}}'
-    data = execute_wazuh_db_query(command).split(" ", 1)
+    insert_data = json.dumps({'id': agent_id,
+                              'name': f'TestName{agent_id}',
+                              'date_add': 1599223378
+                              })
 
+    update_data = json.dumps({'id': agent_id,
+                              'sync_status': 'syncreq',
+                              'connection_status': 'active'
+                              })
+
+    command = f'global insert-agent {insert_data}'
+    data = execute_wazuh_db_query(command).split(' ', 1)
     assert data[0] == 'ok', f'Unable to add agent {agent_id} - {data[1]}'
 
-    command = f'global update-keepalive {{"id":{agent_id},"sync_status":"syncreq","connection_status":"active"}}'
-    data = execute_wazuh_db_query(command).split(" ", 1)
+    command = f'global update-keepalive {update_data}'
+    data = execute_wazuh_db_query(command).split(' ', 1)
 
     assert data[0] == 'ok', f'Unable to update agent {agent_id} - {data[1]}'
 
@@ -116,7 +126,7 @@ def remove_agent(agent_id: int):
 # Tests
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def pre_insert_agents():
     """Insert agents. Only used for the global queries"""
     AGENTS_CANT = 14000
@@ -130,7 +140,7 @@ def pre_insert_agents():
         remove_agent(id)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def insert_agents_test():
     """Insert agents. Only used for the agent queries"""
     agent_list = [1, 2]
@@ -157,7 +167,7 @@ def test_wazuh_db_messages_agent(restart_wazuh, clean_registered_agents, configu
         test_case(list): List of test_case stages (dicts with input, output and stage keys).
     """
     for index, stage in enumerate(test_case):
-        if 'ignore' in stage and stage['ignore'] == "yes":
+        if 'ignore' in stage and stage['ignore'] == 'yes':
             continue
 
         command = stage['input']
@@ -186,7 +196,7 @@ def test_wazuh_db_messages_global(configure_sockets_environment, connect_to_sock
         test_case(list): List of test_case stages (dicts with input, output and stage keys).
     """
     for index, stage in enumerate(test_case):
-        if 'ignore' in stage and stage['ignore'] == "yes":
+        if 'ignore' in stage and stage['ignore'] == 'yes':
             continue
 
         command = stage['input']
@@ -219,7 +229,7 @@ def test_wazuh_db_chunks(restart_wazuh, clean_registered_agents, configure_socke
 
     def send_chunk_command(command):
         response = execute_wazuh_db_query(command)
-        status = response.split(" ", 1)[0]
+        status = response.split(' ', 1)[0]
 
         assert status == 'due', 'Failed chunks check on < {} >. Expected: {}. Response: {}' \
             .format(command, 'due', status)
