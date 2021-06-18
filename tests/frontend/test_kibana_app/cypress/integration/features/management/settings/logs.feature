@@ -1,4 +1,5 @@
 Feature: Read Kibana logs
+
   As a kibana user
   I want to check the logs
   in order to see information about the system
