@@ -1,4 +1,5 @@
 Feature: Run health checks
+
   As a kibana user
   I want to run the health check
   in order to validate everything is connected
