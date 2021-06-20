@@ -18,6 +18,9 @@ Confirm that logcollector works correctly for unified logging system events in m
 
 ## List of tests
 
+- **[Test macOS file status basic](test_macos_file_status_basic.md)**: Checks if `wazuh-logcollector` correctly generates 
+the `file_status.json` file used by `only future events`.
+
 - **[Test macOS format basic](test_macos_format_basic.md)**: Check if `wazuh-logcollector` gather corrrectly generated 
 unified logging system events.
 

@@ -40,8 +40,10 @@ file_status_update = 4
 
 
 def extra_configuration_before_yield():
-    # Set default values
+    """Delete old OFE data and change file status update interval."""
+    # Remove old data from json_status
     os.remove(file_status_path) if os.path.exists(file_status_path) else None
+    # Set default values
     change_internal_options('logcollector.vcheck_files', str(file_status_update))
 
 
