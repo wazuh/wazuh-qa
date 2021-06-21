@@ -14,7 +14,7 @@ master_host = 'wazuh-master'
 worker_host = 'wazuh-worker2'
 agent_host = 'wazuh-agent3'
 managers_hosts = [master_host, worker_host]
-inventory_path = join(dirname(dirname(abspath(__file__))), 'provisioning', 'basic_cluster', 'inventory.yml')
+inventory_path = join(dirname(dirname(dirname(abspath(__file__)))), 'provisioning', 'basic_cluster', 'inventory.yml')
 host_manager = HostManager(inventory_path)
 time_to_sync = 60
 
