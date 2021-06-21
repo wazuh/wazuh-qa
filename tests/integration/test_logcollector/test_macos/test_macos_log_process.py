@@ -1,0 +1,117 @@
+# Copyright (C) 2015-2021, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+import os
+import pytest
+import platform
+import signal
+
+import wazuh_testing.logcollector as logcollector
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.services import search_process, control_service
+from wazuh_testing.tools.utils import retry
+from time import sleep
+
+macos_sierra = True if str(platform.mac_ver()[0]).startswith('10.12') else False
+
+# Marks
+
+pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=0)]
+
+# Configuration
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+configurations_path = os.path.join(test_data_path, 'wazuh_macos_format_basic.yaml')
+
+configurations = load_wazuh_configurations(configurations_path, __name__)
+
+
+# fixtures
+@pytest.fixture(scope="module", params=configurations, ids=['default_conf'])
+def get_configuration(request):
+    """Get configurations from the module."""
+    return request.param
+
+
+@retry(AssertionError, attempts=5, delay=2, delay_multiplier=1)
+def check_process_status(process_list, running=True, stage=''):
+    """Assert that some process are running or not.
+
+        This will check a list of process and asserts that all of them are running or not based on the arguments.
+
+        Args:
+            process_list (string list): the list of process to check
+            running (boolean): if the process are expected to be running or not
+            stage (string): in case of failure this string is append at the end of the error message and indicated
+                in which moment was the error produced (for example: after agent restart)
+
+        Raises:
+            AssertionError: if the condition is not meet
+    """
+    expected_process = 1 if running else 0
+    is_running_msg = 'is running' if running else 'is not running'
+    for process in process_list:
+        log_processes = search_process(process)
+        assert len(log_processes) == expected_process, f'Process {process} {is_running_msg} {stage}.'
+
+
+def test_macos_log_process_stop(get_configuration, configure_environment, restart_logcollector):
+    """Check if logcollector stops the log and script process when Wazuh agent or logcollector stop.
+
+    There are two process that would run on macOS system when logcollector is configured to get
+    macOS system logs. The log process and the script (only for Sierra) one. If logcollector process
+    finish or the agent is stopped, those process must stop.
+
+    Raises:
+        TimeoutError: If the expected callback is not generated.
+    """
+    process_to_stop = ['log', 'script'] if macos_sierra else ['log']
+
+    macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
+    wazuh_log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+
+    check_process_status(process_to_stop, running=True, stage='at start')
+
+    control_service('stop', daemon='wazuh-logcollector')
+    check_process_status(process_to_stop, running=False, stage='after stop logcollector')
+    control_service('start', daemon='wazuh-logcollector')
+
+    macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
+    wazuh_log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+
+    check_process_status(process_to_stop, running=True, stage='after start logcollector')
+
+    control_service('stop')
+    check_process_status(process_to_stop, running=False, stage='after stop agent')
+    control_service('start')
+
+
+def test_macos_log_process_stop_suddenly(get_configuration, configure_environment, restart_logcollector):
+    """Check if logcollector alerts when `log stream` process has stopped.
+
+    Raises:
+        TimeoutError: If the expected callback is not generated.
+    """
+
+    macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
+    wazuh_log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+
+    process_to_kill = ['log', 'script'] if macos_sierra else ['log']
+
+    check_process_status(process_to_kill, running=True, stage='at start')
+
+    for killed_process in process_to_kill:
+        log_processes = search_process(killed_process)
+        log_process_id = log_processes[0]['pid']
+        os.kill(int(log_process_id), signal.SIGTERM)
+
+        check_process_status(process_to_kill, running=False, stage='at start')
+
+        macos_logcollector_monitored = logcollector.callback_log_stream_exited_error()
+        wazuh_log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
+                                error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+
+        control_service('restart', daemon='wazuh-logcollector')
