@@ -18,7 +18,7 @@ Confirm that logcollector works correctly for unified logging system events in m
 
 ## List of tests
 
-- **[Test macOS format basic](test_macos_format_basic.md)**: Check if `wazuh-logcollector` gather corrrectly generated 
+- **[Test macOS format basic](test_macos_format_basic.md)**: Check if `wazuh-logcollector` correctly gather generated 
 unified logging system events.
 
 - **[Test macos format query](test_macos_format_query.md)**: Check if `query` option for `wazuh-logcollector`
@@ -27,8 +27,6 @@ unified logging system events.
 - **[Test macOS format only future events](test_macos_format_only_future_events.md)**: Check if `only-future-events`
   works correctly for macOS log format.
 
-- **[Test macOS log process stop](test_macos_log_process_stop.md)**: Check `log stream` process has been killed when
+- **[Test macOS log process](test_macos_log_process.md)**: Check `log stream` process has been killed when
 Wazuh agent stops.
   
-- **[Test macOS log process stop suddenly](test_macos_log_process_stop_suddenly.md)**: Check if `wazuh-logcollector`
-alerts when `log stream` process has stopped.
