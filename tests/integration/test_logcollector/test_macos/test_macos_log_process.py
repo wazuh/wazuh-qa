@@ -8,10 +8,13 @@ import platform
 import signal
 
 import wazuh_testing.logcollector as logcollector
+from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import search_process, control_service
 from wazuh_testing.tools.utils import retry
-from time import sleep
+
+wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 macos_sierra = True if str(platform.mac_ver()[0]).startswith('10.12') else False
 
@@ -27,7 +30,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__)
 
 
 # fixtures
-@pytest.fixture(scope="module", params=configurations, ids=['default_conf'])
+@pytest.fixture(scope="module", params=configurations, ids=[''])
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
@@ -49,11 +52,44 @@ def check_process_status(process_list, running=True, stage=''):
             AssertionError: if the condition is not meet
     """
     expected_process = 1 if running else 0
-    is_running_msg = 'is running' if running else 'is not running'
+    is_running_msg = 'is not running' if running else 'is running'
     for process in process_list:
         log_processes = search_process(process)
         assert len(log_processes) == expected_process, f'Process {process} {is_running_msg} {stage}.'
 
+def test_independent_log_process(get_configuration, configure_environment, restart_logcollector):
+   """Check that independent execution of log processes (external to Wazuh) are not altered because of the Wazuh agent.
+
+       Launches a log process and start Wazuh, check that the independent log process keep running along with the one
+       started by Wazuh. Stops Wazuh and check that the independent process is still running.
+
+        Raises:
+            TimeoutError: If the expected callback is not generated.
+    """
+   macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
+   wazuh_log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
+                           error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+
+   control_service('stop')
+   check_process_status(['log'], running=False, stage='after stop agent')
+
+   # Run a log stream in background
+   os.system('log stream&')
+
+   log_processes = search_process('log')
+   independent_log_pid = log_processes[0]['pid']
+
+   control_service('start')
+
+   assert any(x['pid'] == independent_log_pid for x in search_process('log')), 'The independent log process is dead ' \
+                                                                               'after starting Wazuh agent '
+   control_service('stop')
+
+   assert any(x['pid'] == independent_log_pid for x in search_process('log')), 'The independent log process is dead ' \
+                                                                               'after stopping Wazuh agent '
+   os.kill(int(independent_log_pid), signal.SIGTERM)
+
+   control_service('start')
 
 def test_macos_log_process_stop(get_configuration, configure_environment, restart_logcollector):
     """Check if logcollector stops the log and script process when Wazuh agent or logcollector stop.
@@ -88,8 +124,10 @@ def test_macos_log_process_stop(get_configuration, configure_environment, restar
     control_service('start')
 
 
-def test_macos_log_process_stop_suddenly(get_configuration, configure_environment, restart_logcollector):
+def test_macos_log_process_stop_suddenly_warning(get_configuration, configure_environment, restart_logcollector):
     """Check if logcollector alerts when `log stream` process has stopped.
+
+    In Sierra this tests also checks that, if log process ends, then script process also ends and the other way around.
 
     Raises:
         TimeoutError: If the expected callback is not generated.
