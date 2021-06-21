@@ -488,6 +488,7 @@ nav:
                 - Overview: tests/integration/test_logcollector/test_options/index.md
                 - Test state interval: tests/integration/test_logcollector/test_options/test_options_state_interval.md
                 - Test state interval no file: tests/integration/test_logcollector/test_options/test_options_state_interval_no_file.md
+            - Test statistics: tests/integration/test_logcollector/test_statistics/test_statistics.md
         - Logtest:
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md

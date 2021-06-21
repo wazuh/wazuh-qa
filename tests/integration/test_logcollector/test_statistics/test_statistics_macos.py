@@ -39,6 +39,7 @@ configuration_ids = [f"{x['LOCATION']}_{x['LOG_FORMAT']}" for x in parameters]
 
 local_internal_options = {'logcollector.state_interval': 1}
 
+
 # Fixtures
 @pytest.fixture(scope="module")
 def get_local_internal_options():
@@ -52,7 +53,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_options_state_interval_no_file(get_local_internal_options, get_configuration, 
+def test_options_state_interval_no_file(get_local_internal_options, get_configuration,
                                         configure_environment, restart_logcollector):
     """Check if the monitorized file does appear in logcollector.state.
 
