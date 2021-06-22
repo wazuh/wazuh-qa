@@ -149,7 +149,7 @@ def query_wdb(command):
 
             # Remove response header and cast str to list of dictionaries
             # From --> 'ok [ {data1}, {data2}...]' To--> [ {data1}, data2}...]
-            if data.split(' ')[0] == 'ok':
+            if len(data.split(' ')) > 1 and data.split(' ')[0] == 'ok':
                 data = json.loads(' '.join(data.split(' ')[1:]))
     finally:
         sock.close()
