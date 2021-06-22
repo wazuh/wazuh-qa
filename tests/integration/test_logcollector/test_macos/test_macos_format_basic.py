@@ -42,7 +42,8 @@ def get_connection_configuration():
     return logcollector.DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
 
 
-@pytest.mark.parametrize('macos_message', macos_log_messages, ids=[log_message['id'] for log_message in macos_log_messages])
+@pytest.mark.parametrize('macos_message', macos_log_messages,
+                         ids=[log_message['id'] for log_message in macos_log_messages])
 def test_macos_format_basic(get_configuration, configure_environment, get_connection_configuration,
                             init_authd_remote_simulator, macos_message, restart_logcollector):
 
@@ -70,8 +71,8 @@ def test_macos_format_basic(get_configuration, configure_environment, get_connec
         logcollector.generate_macos_custom_log(macos_message['type'], macos_message['level'],
                                                macos_message['subsystem'], macos_message['category'])
         expected_macos_message = logcollector.format_macos_message_pattern(
-                                                        'custom_log',
-                                                        logcollector.TEMPLATE_OSLOG_MESSAGE, 'log', macos_message['subsystem'],
-                                                        macos_message['category'])
+                                                'custom_log', logcollector.TEMPLATE_OSLOG_MESSAGE,
+                                                subsystem=macos_message['subsystem'],
+                                                category=macos_message['category'])
 
     check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_macos_message, timeout=40)
