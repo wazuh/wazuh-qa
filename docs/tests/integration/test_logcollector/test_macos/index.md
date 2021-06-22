@@ -13,7 +13,7 @@ Confirm that logcollector works correctly for unified logging system events in m
 
 |Tier | Total | Time spent |
 | :--:| :--:  | :--:       |
-| 0   |    4 |    3m50s   |
+| 0   |    4 |    4m30s   |
 
 
 ## List of tests

@@ -12,7 +12,7 @@ that can be used at the next startup of Wazuh-Logcollector
 
 |Tier | Total | Time spent |
 | :--:| :--:  | :--:       |
-| 0   |    2 |    65s  |
+| 0   |    2 |    105s  |
 
 
 ## Expected behavior

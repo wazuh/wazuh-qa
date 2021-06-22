@@ -4,15 +4,16 @@
 
 import os
 import pytest
-import json
 import re
-import time
-import wazuh_testing.logcollector as logcollector
-from wazuh_testing.fim import change_internal_options
+
+from wazuh_testing.logcollector import DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
-from wazuh_testing import global_parameters
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.fim import change_internal_options
+from wazuh_testing.tools.monitoring import wait_file
+from wazuh_testing.tools.file import read_json
+from wazuh_testing import global_parameters
 
 # Marks
 pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=0)]
@@ -36,17 +37,27 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 wazuh_log_monitor_timeout = 30
 
 # Time in seconds to update the file_status.json
-file_status_update = 4
+file_status_update_time = 4
 
-local_internal_options = {'logcollector.vcheck_files': str(file_status_update)}
+local_internal_options = {'logcollector.vcheck_files': str(file_status_update_time)}
+
+
 @pytest.fixture(scope="module")
 def get_local_internal_options():
     """Get configurations from the module."""
     return local_internal_options
 
+
+@pytest.fixture(scope="module")
+def get_local_internal_options():
+    """Get configurations from the module."""
+    return local_internal_options
+
+
 def extra_configuration_before_yield():
     """Delete file status file."""
     os.remove(file_status_path) if os.path.exists(file_status_path) else None
+
 
 def callback_log_bad_predicate(line):
     match = re.match(r'.*Execution error \'log:', line)
@@ -54,11 +65,13 @@ def callback_log_bad_predicate(line):
         return True
     return None
 
+
 def callback_log_exit_log(line):
     match = re.match(r'.*macOS \'log stream\' process exited, pid:', line)
     if match:
         return True
     return None
+
 
 # Fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
@@ -70,10 +83,10 @@ def get_configuration(request):
 @pytest.fixture(scope="module")
 def get_connection_configuration():
     """Get configurations from the module."""
-    return logcollector.DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
+    return DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
 
 
-def test_macos_file_status_predicate(get_local_internal_options, get_configuration, configure_environment, 
+def test_macos_file_status_predicate(get_local_internal_options, get_configuration, configure_environment,
                                      get_connection_configuration, init_authd_remote_simulator, restart_logcollector):
 
     """Checks that logcollector does not store "macos"-formatted localfile data since its predicate is erroneous.
@@ -82,7 +95,8 @@ def test_macos_file_status_predicate(get_local_internal_options, get_configurati
     which triggers the creation of file_status.json
 
     Raises:
-        TimeoutError: If the expected callbacks are not satisfied.
+        TimeoutError: If the callbacks, that checks the expected logs, are not satisfied in the expected time.
+        FileNotFoundError: If the file_status.json is not available in the expected time.
     """
 
     wazuh_log_monitor.start(timeout=wazuh_log_monitor_timeout,
@@ -95,16 +109,10 @@ def test_macos_file_status_predicate(get_local_internal_options, get_configurati
                             error_message="Expected log that matches the regex "
                                           "'.*macOS \'log stream\' process exited, pid:' could not be found")
 
-    file_status_json = ""
+    # Waiting for file_status.json to be created, with a timeout equal to the double of the update time
+    wait_file(file_status_path, file_status_update_time*2)
 
-    # Waiting for file_status.json tocat be updated with macOS data by logcollector
-    time.sleep(file_status_update + 1)
-
-    try:
-        with open(file_status_path) as json_status:
-            file_status_json = json.loads(json_status.read())
-    except EnvironmentError:
-        assert False, "Error opening '{}'".format(file_status_path)
+    file_status_json = read_json(file_status_path)
 
     # Check if json has a structure
     if "macos" in file_status_json:

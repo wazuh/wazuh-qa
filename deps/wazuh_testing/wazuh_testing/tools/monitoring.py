@@ -1016,3 +1016,20 @@ def wait_mtime(path, time_step=5, timeout=-1):
         if last_mtime - tic >= timeout:
             logger.error(f"{len(open(path, 'r').readlines())} lines within the file.")
             raise TimeoutError("Reached timeout.")
+
+
+
+def wait_file(path, timeout=30):
+    """Wait until a file, defined by its path, is available.
+
+    Raises:
+        FileNotFoundError: If the file is not available within the timeout defined interval of time.
+    """
+    for _ in range(timeout):
+        if os.path.isfile(path):
+            break
+        else:
+            time.sleep(1)
+
+    if not os.path.isfile(path):
+        raise FileNotFoundError
