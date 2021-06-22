@@ -17,7 +17,7 @@ and saves the corresponding information in the `wazuh-logcollector.state` file.
 
 ## Expected behavior
 
-- Pass if find macOS statistics on a Darwin system with the `<log_format>macos</log_format>` in the `localfile` block.
+- Pass if macOS statistics on a Darwin system are found with the `<log_format>macos</log_format>` in the `localfile` block.
 
 ## Code documentation
 
