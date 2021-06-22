@@ -211,7 +211,6 @@ nav:
               - Test check all: tests/integration/test_fim/test_files/test_checks/test_check_all.md
               - Test check other: tests/integration/test_fim/test_files/test_checks/test_check_others.md
               - Test checksums: tests/integration/test_fim/test_files/test_checks/test_checksums.md
-              - Test hard link: tests/integration/test_fim/test_files/test_checks/test_hard_link.md
             - Test env variables:
               - tests/integration/test_fim/test_files/test_env_variables/index.md
               - Test dir win32: tests/integration/test_fim/test_files/test_env_variables/test_dir_win32.md
