@@ -26,3 +26,6 @@ unified logging system events.
 
 - **[Test macOS format only future events](test_macos_format_only_future_events.md)**: Check if `only-future-events`
   works correctly for macOS log format.
+  
+- **[Test macOS multiline values](test_macos_multiline_values.md)**: Check if `wazuh-logcollector` gather corrrectly generated 
+unified logging system multi-line events.
