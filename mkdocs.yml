@@ -522,6 +522,7 @@ nav:
         - Test cluster:
           - tests/system/test_cluster/index.md
           - Test agent info sync: tests/system/test_cluster/test_agent_info_sync/test_agent_info_sync.md
+          - Test agent files deletion: tests/system/test_cluster/test_agent_files_deletion/test_agent_files_deletion.md
           - Test agent enrollment:  tests/system/test_cluster/test_agent_enrollment/test_agent_enrollment.md
           - Test agent key polling: tests/system/test_cluster/test_agent_key_polling/test_agent_key_polling.md
           - Test integrity sync: tests/system/test_cluster/test_integrity_sync/test_integrity_sync.md
