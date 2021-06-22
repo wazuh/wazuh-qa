@@ -42,7 +42,7 @@ def get_connection_configuration():
     return logcollector.DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
 
 
-@pytest.mark.parametrize('macos_message', macos_log_messages, ids=[x['id'] for x in macos_log_messages])
+@pytest.mark.parametrize('macos_message', macos_log_messages, ids=[log_message['id'] for log_message in macos_log_messages])
 def test_macos_format_basic(get_configuration, configure_environment, get_connection_configuration,
                             init_authd_remote_simulator, macos_message, restart_logcollector):
 
