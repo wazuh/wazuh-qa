@@ -761,6 +761,6 @@ def format_macos_message_pattern(process_name, message, type='log', subsystem=No
         elif type == 'activity':
             macos_message = f"{process_name}\[\d+\]: Created Activity ID.* Description: {message}"
 
-    assert macos_message is not None
+    assert macos_message is not None, 'Wrong type or process name selected for macos message pattern format.'
 
     return macos_message
