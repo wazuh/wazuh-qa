@@ -479,6 +479,7 @@ def add_log_data(log_path, log_line_message, size_kib=1024, line_start=1, print_
         return line_start + lines - 1
     return 0
 
+
 def callback_invalid_format_value(line, option, location):
     """Create a callback to detect content values invalid in a log format file specific.
 
