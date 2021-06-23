@@ -13,7 +13,7 @@ The objective is to check the agent's status is updated correctly after only sen
 
 |Tier | Number of tests | Time spent |
 |:--:|:--:|:--:|
-| 0 | 6 | 327s |
+| 0 | 6 | 78s |
 
 ## Expected behavior
 

@@ -380,7 +380,7 @@
     stage: "global testing sync_status after disconnecting-agents command"
   -
     input: 'global get-agents-by-connection-status 0 disconnected'
-    output: 'ok [{"id":1}]'
+    output: 'ok [{"id":1},{"id":2}]'
     stage: "global get-agents-by-connection-status disconnected after disconnecting agents success"
 -
   name: "Delete commands"

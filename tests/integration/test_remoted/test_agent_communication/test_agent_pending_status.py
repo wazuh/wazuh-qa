@@ -20,7 +20,7 @@ pytestmark = pytest.mark.tier(level=0)
 # Variables
 current_test_path = os.path.dirname(os.path.realpath(__file__))
 test_data_path = os.path.join(current_test_path, 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_multi_agent_status.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_agent_pending_status.yaml')
 
 # Set configuration
 parameters = [
@@ -102,7 +102,7 @@ def check_active_agents(num_agents=1, manager_address='127.0.0.1', agent_version
         if agent.get_connection_status() != 'pending':
             raise AttributeError(f"Agent is not pending yet")
 
-    sleep(5)
+    sleep(10)
 
     # Check agent active status for earch agent
     for agent in agents:
@@ -120,12 +120,5 @@ def test_protocols_communication(get_configuration, configure_environment, resta
     """Validate agent status after sending only the start-up"""
     manager_port = get_configuration['metadata']['port']
     protocol = get_configuration['metadata']['protocol']
-
-    # Reducing agent disconnection time.
-    change_conf_param('agents_disconnection_time','1s')
-    # Restarting Wazuh after the changes.
-    control_service('restart')
-    # Waiting 15 seconds for Wazuh to restart.
-    sleep(15)
 
     check_active_agents(num_agents=2, manager_port=manager_port, protocol=protocol)
