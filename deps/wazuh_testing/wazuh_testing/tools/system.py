@@ -229,3 +229,18 @@ class HostManager:
             stdout (str): The output of the command execution.
         """
         return self.get_host(host).ansible("command", cmd, check=check)["stdout"]
+
+    def run_shell(self, host: str, cmd: str, check: bool = False):
+        """Run a shell command on the specified host and return its stdout.
+
+        The difference with run_command is that here, shell symbols like &, |, etc. are interpreted.
+
+        Args:
+            host (str) : Hostname
+            cmd (str): Shell command to execute
+            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
+
+        Returns:
+            stdout (str): The output of the command execution.
+        """
+        return self.get_host(host).ansible("shell", cmd, check=check)["stdout"]
