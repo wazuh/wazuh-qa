@@ -4,8 +4,9 @@ Feature: Run health checks
   I want to run the health check
   in order to validate everything is connected
 
+  @miscellaneous
   Scenario: Run health check
     Given The kibana admin user is logged in using basic authentication
     When The user navigates to Miscellaneous settings
     And The user runs the health checks
-    Then The health checks are displayed without errors
+    Then The application navigates to the health checks page
