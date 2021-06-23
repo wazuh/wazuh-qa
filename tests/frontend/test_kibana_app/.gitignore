@@ -5,6 +5,7 @@
 node_modules/
 
 #env configurations
+cypress.env.json
 
 #reports
 report/
