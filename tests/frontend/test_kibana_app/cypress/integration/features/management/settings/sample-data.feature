@@ -4,6 +4,7 @@ Feature: add sample data to modules
   I want to add sample data indices
   in order to check modules
 
+  @sampleData
   Scenario: Add sample data
     Given The kibana admin user is logged in using basic authentication
     When The user navigates to Sample data settings
@@ -13,7 +14,8 @@ Feature: add sample data to modules
       | threat detection and response   |
     Then The add data success toasts are displayed
 
-    Scenario: Delete all sample data
+  @sampleData
+  Scenario: Delete all sample data
       Given The kibana admin user is logged in using basic authentication
       When The user navigates to Sample data settings
       And The user removes sample data for

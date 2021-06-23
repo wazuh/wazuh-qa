@@ -4,7 +4,7 @@ Feature: enable and disable modules
   I want to enable and disable different modules
   in order to see them in the modules directory
 
-  @Modules
+  @modules
   Scenario Outline: Enable modules, <Module Name>
     Given The kibana admin user is logged in using basic authentication
     When The user navigates to Modules settings
@@ -23,7 +23,7 @@ Feature: enable and disable modules
       | HIPAA                 |
       | TSC                   |
 
-    @Modules
+    @modules
     Scenario Outline: Disable modules, <Module Name>
       Given The kibana admin user is logged in using basic authentication
       When The user navigates to Modules settings
