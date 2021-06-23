@@ -1,7 +1,9 @@
 - tags:
   - test_multi_agent_status
+  - test_agent_pending_status
   apply_to_modules:
   - test_multi_agent_status
+  - test_agent_pending_status
   sections:
   - section: remote
     elements:
