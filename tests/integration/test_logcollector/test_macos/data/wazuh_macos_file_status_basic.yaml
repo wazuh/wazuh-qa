@@ -8,9 +8,9 @@
         - server:
             elements:
               - address:
-                  value: "127.0.0.1"
+                  value: '127.0.0.1'
               - protocol:
-                  value: "tcp"
+                  value: 'tcp'
     - section: localfile
       elements:
         - location:

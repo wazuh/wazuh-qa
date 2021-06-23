@@ -8,31 +8,31 @@
         - server:
             elements:
               - address:
-                  value: "127.0.0.1"
+                  value: '127.0.0.1'
               - protocol:
-                  value: "tcp"
+                  value: 'tcp'
     - section: localfile
       attributes:
-        - name: "localfile_macos_block"
+        - name: 'localfile_macos_block'
       elements:
         - location:
-            value: "macos"
+            value: 'macos'
         - log_format:
-            value: "macos"
+            value: 'macos'
         - query:
-            value: 'message =x= \"tresting merssage\"'
+            value: 'message =x= "tresting merssage"'
             attributes:
-              - level: "default"
-              - type: "log,trace"
+              - level: 'default'
+              - type: 'log,trace'
         - only-future-events:
             value: ONLY_FUTURE_EVENTS
     - section: localfile
       attributes:
-        - name: "localfile_dummy_block"
+        - name: 'localfile_dummy_block'
       elements:
         - location:
-            value: "/Library/Ossec/logs/active-responses.log"
+            value: '/Library/Ossec/logs/active-responses.log'
         - log_format:
-            value: "syslog"
+            value: 'syslog'
         - only-future-events:
-            value: "yes"
+            value: 'yes'

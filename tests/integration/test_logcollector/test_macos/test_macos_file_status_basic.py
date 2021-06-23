@@ -12,10 +12,8 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.remote import check_agent_received_message
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.fim import change_internal_options
 from wazuh_testing.tools.monitoring import wait_file
 from wazuh_testing.tools.file import read_json
-from wazuh_testing.tools import WAZUH_PATH
 from time import sleep
 
 # Marks
@@ -30,14 +28,14 @@ metadata = [{'only-future-events': 'yes'}, {'only-future-events': 'no'}]
 
 # Configuration data
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-configuration_ids = [f"{x['ONLY_FUTURE_EVENTS']}" for x in parameters]
+configuration_ids = [f'{x["ONLY_FUTURE_EVENTS"]}' for x in parameters]
 
 file_status_path = os.path.join(WAZUH_PATH, 'queue', 'logcollector', 'file_status.json')
 
 macos_log_messages = [
     {
         'command': 'logger',
-        'message': "Logger testing message - file status",
+        'message': 'Logger testing message - file status',
     }
 ]
 
@@ -49,29 +47,29 @@ file_status_update_time = 4
 local_internal_options = {'logcollector.vcheck_files': str(file_status_update_time)}
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope='module')
 def get_local_internal_options():
     """Get configurations from the module."""
     return local_internal_options
 
 
 # Fixtures
-@pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
+@pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope='module')
 def get_connection_configuration():
     """Get configurations from the module."""
     return logcollector.DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
 
 
 @pytest.mark.parametrize('macos_message', macos_log_messages)
-def test_macos_file_status_basic(get_local_internal_options, configure_local_internal_options, get_configuration, configure_environment,
-                                 get_connection_configuration, init_authd_remote_simulator, macos_message,
-                                 restart_logcollector):
+def test_macos_file_status_basic(get_local_internal_options, configure_local_internal_options, get_configuration,
+                                 configure_environment, get_connection_configuration, init_authd_remote_simulator,
+                                 macos_message, restart_logcollector):
 
     """Checks if logcollector stores correctly "macos"-formatted localfile data.
 
@@ -111,9 +109,9 @@ def test_macos_file_status_basic(get_local_internal_options, configure_local_int
     conf_type = get_configuration['sections'][1]['elements'][2]['query']['attributes'][1]['type']
 
     # Check if json has a structure
-    assert file_status_json["macos"], "Error finding 'macos' key"
-    assert file_status_json["macos"]["timestamp"], "Error finding 'timestamp' key inside 'macos'"
-    assert re.match(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}-\d{4}$', 
-                    file_status_json["macos"]["timestamp"]), "Error of timestamp format"
-    assert file_status_json["macos"]["settings"], "Error finding 'settings' key inside 'macos'"
-    assert file_status_json["macos"]["settings"] == macos_utils.compose_settings(conf_type, conf_level, conf_predicate)
+    assert file_status_json['macos'], 'Error finding "macos" key'
+    assert file_status_json['macos']['timestamp'], 'Error finding "timestamp" key inside "macos"'
+    assert re.match(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}-\d{4}$',
+                    file_status_json['macos']['timestamp']), 'Error of timestamp format'
+    assert file_status_json['macos']['settings'], 'Error finding "settings" key inside "macos"'
+    assert file_status_json['macos']['settings'] == macos_utils.compose_settings(conf_type, conf_level, conf_predicate)

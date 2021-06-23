@@ -13,7 +13,7 @@ Confirm that logcollector works correctly for unified logging system events in m
 
 |Tier | Total | Time spent |
 | :--:| :--:  | :--:       |
-| 0   |    4 |    4m30s   |
+| 0   |    4 |    5m20s   |
 
 
 ## List of tests
@@ -23,6 +23,9 @@ the `file_status.json` file used by `only future events`.
 
 - **[Test macOS file status predicate](test_macos_file_status_predicate.md)**: Checks that `wazuh-logcollector` does not
 store "macos"-formatted localfile data in `file_status.json`, since its predicate is erroneous.
+
+- **[Test macOS file status when no macos](test_macos_file_status_when_no_macos.md)**: Checks that `wazuh-logcollector` 
+does not store and removes, if exists, previous "macos"-formatted localfile data in the file_status.json
 
 - **[Test macOS format basic](test_macos_format_basic.md)**: Check if `wazuh-logcollector` gather corrrectly generated 
 unified logging system events.

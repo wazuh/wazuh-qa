@@ -1018,7 +1018,6 @@ def wait_mtime(path, time_step=5, timeout=-1):
             raise TimeoutError("Reached timeout.")
 
 
-
 def wait_file(path, timeout=30):
     """Wait until a file, defined by its path, is available.
 
