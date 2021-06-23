@@ -70,7 +70,37 @@ test_cases:
     parameters: {}
     body: {}
 
-  - endpoint: /mitre
+  - endpoint: /mitre/groups
+    method: get
+    parameters: {}
+    body: {}
+
+  - endpoint: /mitre/metadata
+    method: get
+    parameters: {}
+    body: {}
+
+  - endpoint: /mitre/mitigations
+    method: get
+    parameters: {}
+    body: {}
+
+  - endpoint: /mitre/references
+    method: get
+    parameters: {}
+    body: {}
+
+  - endpoint: /mitre/software
+    method: get
+    parameters: {}
+    body: {}
+
+  - endpoint: /mitre/tactics
+    method: get
+    parameters: {}
+    body: {}
+
+  - endpoint: /mitre/techniques
     method: get
     parameters: {}
     body: {}
@@ -104,11 +134,6 @@ test_cases:
     parameters: {}
     body: {}
     restart: False
-
-  - endpoint: /rootcheck
-    method: delete
-    parameters: {}
-    body: {}
 
   - endpoint: /groups
     method: post
