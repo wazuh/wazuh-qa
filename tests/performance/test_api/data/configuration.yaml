@@ -269,18 +269,18 @@ test_cases:
     parameters: {}
     body: {}
 
+  - endpoint: /groups
+    method: delete
+    parameters:
+      groups_list: "all"
+    body: {}
+
   - endpoint: /agents
     method: delete
     parameters:
       agents_list: "all"
       status: "all"
       older_than: "0s"
-    body: {}
-
-  - endpoint: /groups
-    method: delete
-    parameters:
-      groups_list: "all"
     body: {}
 
   - endpoint: /security/users
