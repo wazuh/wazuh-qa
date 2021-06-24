@@ -78,8 +78,9 @@ def get_connection_configuration():
     return DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
 
 
-def test_macos_file_status_predicate(get_local_internal_options, get_configuration, configure_environment,
-                                     get_connection_configuration, init_authd_remote_simulator, restart_logcollector):
+def test_macos_file_status_predicate(get_local_internal_options, configure_local_internal_options, get_configuration,
+                                     configure_environment, get_connection_configuration, init_authd_remote_simulator,
+                                     restart_logcollector):
 
     """Checks that logcollector does not store 'macos'-formatted localfile data since its predicate is erroneous.
 

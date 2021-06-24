@@ -3,10 +3,10 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import pytest
 import re
-# import macos_utils
+import pytest
 import wazuh_testing.logcollector as logcollector
+import wazuh_testing.tools.macos_log.macos_utils as macos_utils
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.remote import check_agent_received_message

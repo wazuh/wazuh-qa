@@ -3,12 +3,15 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 def compose_settings(__type="", __level="", __predicate="", __is_sierra=False):
+    """
+    This function replicates how the command 'log' will be called from the Wazuh agent given the query parameters
+    """
 
     settings_str = ""
 
     if (__is_sierra):
         settings_str = "/usr/bin/script -q /dev/null "
-    
+
     settings_str = settings_str + "/usr/bin/log stream --style syslog "
 
     if (__type):
