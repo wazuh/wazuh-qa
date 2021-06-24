@@ -11,8 +11,8 @@ from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.thread_executor import ThreadExecutor
-from wazuh_testing.fim import change_conf_param
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.file import truncate_file
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -116,7 +116,14 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
-def test_protocols_communication(get_configuration, configure_environment, restart_remoted):
+
+@pytest.fixture(scope="function")
+def restart_service():
+    truncate_file(LOG_FILE_PATH)
+    control_service('restart')
+
+
+def test_protocols_communication(get_configuration, configure_environment, restart_service):
     """Validate agent status after sending only the start-up"""
     manager_port = get_configuration['metadata']['port']
     protocol = get_configuration['metadata']['protocol']
