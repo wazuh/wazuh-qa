@@ -1,4 +1,4 @@
-# Test macOS file status when no macos
+# Test macOS - File status when no macos
 ## Overview 
 
 Checks that `wazuh-logcollector` does not store and removes, if exists, previous 

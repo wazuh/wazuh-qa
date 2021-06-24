@@ -1,4 +1,4 @@
-# Test macOS file status predicate
+# Test macOS - File status predicate
 ## Overview 
 
 Checks that `wazuh-logcollector` does not store "macos"-formatted localfile data in `file_status.json`, 

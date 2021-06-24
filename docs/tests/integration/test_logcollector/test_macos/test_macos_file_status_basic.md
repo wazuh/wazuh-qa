@@ -1,4 +1,4 @@
-# Test macOS file status basic
+# Test macOS - File status basic
 ## Overview 
 
 Checks if `wazuh-logcollector` correctly generates the `file_status.json` file used by `only future events`.
