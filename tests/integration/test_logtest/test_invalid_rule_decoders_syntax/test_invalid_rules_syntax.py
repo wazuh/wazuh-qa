@@ -33,17 +33,15 @@ receiver_sockets_params = [(logtest_path, 'AF_UNIX', 'TCP')]
 def configure_local_rules(get_configuration, request):
     """Configure a custom rule in local_rules.xml for testing"""
 
-    # save current configuration
-    shutil.copy('/var/ossec/etc/rules/local_rules.xml', '/var/ossec/etc/rules/local_rules.xml.cpy')
-
     # configuration for testing
     file_test = os.path.join(test_data_path, get_configuration['rules'])
-    shutil.copy(file_test, '/var/ossec/etc/rules/local_rules.xml')
+    target_file_test = os.path.join(WAZUH_PATH, 'etc', 'rules', get_configuration['rules'])
+    shutil.copy(file_test, target_file_test)
 
     yield
 
-    # restore previous configuration
-    shutil.copy('/var/ossec/etc/rules/local_rules.xml.cpy', '/var/ossec/etc/rules/local_rules.xml')
+    # remove configuration
+    os.remove(target_file_test)
 
 
 @pytest.fixture(scope='module', params=test_cases, ids=[test_case['name'] for test_case in test_cases])

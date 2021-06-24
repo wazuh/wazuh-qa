@@ -32,21 +32,19 @@ receiver_sockets_params = [(logtest_path, 'AF_UNIX', 'TCP')]
 @pytest.fixture(scope='function')
 def configure_local_decoders(get_configuration, request):
     """
-    Configure a custom decoder in local_decoder.xml for testing.
-    Restart Wazuh is needed for applying the configuration is optional.
+    Configure a custom decoder for testing.
     """
-
-    # save current configuration
-    shutil.copy('/var/ossec/etc/decoders/local_decoder.xml', '/var/ossec/etc/decoders/local_decoder.xml.cpy')
 
     # configuration for testing
     file_test = os.path.join(test_data_path, get_configuration['decoder'])
-    shutil.copy(file_test, '/var/ossec/etc/decoders/local_decoder.xml')
+    target_file_test = os.path.join(WAZUH_PATH, 'etc', 'decoders', get_configuration['decoder'])
+
+    shutil.copy(file_test, target_file_test)
 
     yield
 
     # restore previous configuration
-    shutil.copy('/var/ossec/etc/decoders/local_decoder.xml.cpy', '/var/ossec/etc/decoders/local_decoder.xml')
+    os.remove(target_file_test)
 
 
 @pytest.fixture(scope='module', params=test_cases, ids=[test_case['name'] for test_case in test_cases])
