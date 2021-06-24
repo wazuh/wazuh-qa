@@ -1,0 +1,9 @@
+---
+- tags:
+  - limitless_upload_size
+  configuration:
+    max_upload_size: 0
+- tags:
+  - low_upload_size
+  configuration:
+    max_upload_size: 5
