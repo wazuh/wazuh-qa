@@ -301,9 +301,19 @@ def main():
                             default=1000, help='EPS/agent ratio. Can only be used if the parameter -b was specified',
                             dest='balance_ratio')
 
+    arg_parser.add_argument('-w', '--waiting-connection-time', metavar='<waiting_connection_time>', type=int,
+                            help='Waiting time in seconds between agent registration and the sending of events.',
+                            required=False, default=0, dest='waiting_connection_time')
+
     args = arg_parser.parse_args()
 
     agents = create_agents(args)
+
+    logger.info(f"Waiting {args.waiting_connection_time} seconds before sending EPS and keep-alive events")
+
+    # Waiting time to prevent CPU overload when registering many agents (registration + event generation).
+    sleep(args.waiting_connection_time)
+
     injectors = create_injectors(agents, args.manager_address, args.agent_protocol)
 
     run(injectors, args.simulation_time)
