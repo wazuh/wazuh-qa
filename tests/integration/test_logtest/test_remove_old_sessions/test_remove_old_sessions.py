@@ -30,6 +30,13 @@ msg_create_session = """{"version":1, "command":"log_processing", "parameters":{
 "log_format": "syslog", "location": "master->/var/log/syslog"}}"""
 
 
+local_internal_options = {'analysisd.debug': str(1)}
+
+@pytest.fixture(scope='module')
+def get_local_internal_options():
+    """Get configurations from the module."""
+    return local_internal_options
+
 # Function to manage the comunication with Wazuh-logtest
 def create_connection():
     return SocketController(address=logtest_sock, family='AF_UNIX', connection_protocol='TCP')
@@ -48,7 +55,8 @@ def get_configuration(request):
 
 
 # Test
-def test_remove_old_session(get_configuration, configure_environment, restart_wazuh):
+def test_remove_old_session(get_local_internal_options, configure_local_internal_options,
+                            get_configuration, configure_environment, restart_wazuh):
     """
     Create more sessions than allowed and wait for the message which
     informs that Wazuh-logtest has removed the oldest session.

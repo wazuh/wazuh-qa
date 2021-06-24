@@ -34,6 +34,13 @@ msg_create_session = """{"version":1, "command":"log_processing", "parameters":{
 "log_format": "syslog", "location": "master->/var/log/syslog"}}"""
 
 
+local_internal_options = {'analysisd.debug': str(1)}
+
+@pytest.fixture(scope='module')
+def get_local_internal_options():
+    """Get configurations from the module."""
+    return local_internal_options
+
 # Fixture
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
@@ -42,7 +49,8 @@ def get_configuration(request):
 
 
 # Test
-def test_remove_old_session_for_inactivity(get_configuration, configure_environment,
+def test_remove_old_session_for_inactivity(get_local_internal_options, configure_local_internal_options,
+                                           get_configuration, configure_environment,
                                            restart_wazuh, connect_to_sockets_function):
     """
     Create more sessions than allowed and wait session_timeout seconds,
