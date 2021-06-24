@@ -14,4 +14,4 @@
   - section: global
     elements:
     - agents_disconnection_time:
-         value: '10s'
+         value: '5s'
