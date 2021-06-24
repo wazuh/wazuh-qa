@@ -65,7 +65,7 @@ nav:
               - Test invalid values canonical feed: tests/integration/test_vulnerability_detector/test_feeds/canonical/test_invalid_values_canonical_feed.md
               - Test invalid syntax canonical feed: tests/integration/test_vulnerability_detector/test_feeds/canonical/test_invalid_syntax_canonical_feed.md
               - Test extra tags canonical feed: tests/integration/test_vulnerability_detector/test_feeds/canonical/test_extra_tags_canonical_feed.md
-            - Test download feeds: tests/integration/test_vulnerability_detector/test_feeds/test_download_feed.md
+            - Test download feeds: tests/integration/test_vulnerability_detector/test_feeds/test_download_feeds.md
             - Test invalid type custom feeds: tests/integration/test_vulnerability_detector/test_feeds/test_invalid_type_custom_feeds.md
             - Test invalid type url feeds: tests/integration/test_vulnerability_detector/test_feeds/test_invalid_type_url_feeds.md
             - Test validate feed content: tests/integration/test_vulnerability_detector/test_feeds/test_validate_feed_content.md
