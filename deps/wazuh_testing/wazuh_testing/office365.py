@@ -2,8 +2,6 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import os
-
 
 def callback_detect_enabled_err(line):
     if 'wm_office365_read(): ERROR: Invalid content for tag \'enabled\' at module \'office365\'.' in line:

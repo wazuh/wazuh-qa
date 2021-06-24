@@ -9,8 +9,7 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.office365 import callback_detect_enabled_err, callback_detect_only_future_events_err, \
     callback_detect_interval_err, callback_detect_curl_max_size_err, callback_detect_tenant_id_err, \
-    callback_detect_client_id_err, callback_detect_client_secret_err, callback_detect_subscription_err, \
-    callback_detect_read_err
+    callback_detect_client_id_err, callback_detect_client_secret_err, callback_detect_subscription_err
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -28,6 +27,10 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 force_restart_after_restoring = True
 
 # configurations
+
+local_internal_options = {
+    'wazuh_modules.debug': 2
+}
 
 cases = [
     # Case 1: Invalid enabled (version 4.3)
@@ -165,6 +168,20 @@ metadata = [case['metadata'] for case in cases]
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
 
+# callbacks
+
+callbacks = {
+                'invalid_enabled': callback_detect_enabled_err,
+                'invalid_only_future_events': callback_detect_only_future_events_err,
+                'invalid_interval': callback_detect_interval_err,
+                'invalid_curl_max_size': callback_detect_curl_max_size_err,
+                'invalid_tenant_id': callback_detect_tenant_id_err,
+                'invalid_client_id': callback_detect_client_id_err,
+                'invalid_client_secret': callback_detect_client_secret_err,
+                'invalid_subscription': callback_detect_subscription_err
+            }
+
+
 # fixtures
 
 @pytest.fixture(scope='module', params=configurations)
@@ -173,14 +190,28 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.fixture(scope="module")
+def get_local_internal_options():
+    """Get internal configuration."""
+    return local_internal_options
+
+
 # tests
 
-def test_invalid(get_configuration, configure_environment, reset_ossec_log):
+def test_invalid(get_local_internal_options, configure_local_internal_options,
+                 get_configuration, configure_environment, reset_ossec_log):
     """
     Checks if an invalid configuration is detected
 
     Using invalid configurations with different attributes,
-    expect an error message and github unable to start.
+    expect an error message and office365 unable to start.
+
+    Args:
+        get_local_internal_options (fixture): Get internal configuration.
+        configure_local_internal_options (fixture): Set internal configuration for testing.
+        get_configuration (fixture): Get configurations from the module.
+        configure_environment (fixture): Configure a custom environment for testing.
+        reset_ossec_log (fixture): Reset ossec.log and start a new monitor
     """
     # Configuration error -> ValueError raised
     try:
@@ -191,57 +222,8 @@ def test_invalid(get_configuration, configure_environment, reset_ossec_log):
     metadata = get_configuration.get('metadata')
     tags_to_apply = metadata['tags']
 
-    if tags_to_apply == 'invalid_enabled':
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                callback=callback_detect_enabled_err,
-                                accum_results=1,
-                                error_message='Did not receive expected '
-                                              'Invalid element in the configuration').result()
-    elif tags_to_apply == 'invalid_only_future_events':
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                callback=callback_detect_only_future_events_err,
-                                accum_results=1,
-                                error_message='Did not receive expected '
-                                              'sched_scan_validate_parameters(): ERROR').result()
-    elif tags_to_apply == 'invalid_interval':
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                callback=callback_detect_interval_err,
-                                accum_results=1,
-                                error_message='Did not receive expected '
-                                              'sched_scan_validate_parameters(): ERROR').result()
-    elif tags_to_apply == 'invalid_curl_max_size':
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                callback=callback_detect_curl_max_size_err,
-                                accum_results=1,
-                                error_message='Did not receive expected '
-                                              'sched_scan_validate_parameters(): ERROR').result()
-    elif tags_to_apply == 'invalid_tenant_id':
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                callback=callback_detect_tenant_id_err,
-                                accum_results=1,
-                                error_message='Did not receive expected '
-                                              'sched_scan_validate_parameters(): ERROR').result()
-    elif tags_to_apply == 'invalid_client_id':
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                callback=callback_detect_client_id_err,
-                                accum_results=1,
-                                error_message='Did not receive expected '
-                                              'sched_scan_validate_parameters(): ERROR').result()
-    elif tags_to_apply == 'invalid_client_secret':
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                callback=callback_detect_client_secret_err,
-                                accum_results=1,
-                                error_message='Did not receive expected '
-                                              'sched_scan_validate_parameters(): ERROR').result()
-    elif tags_to_apply == 'invalid_subscription':
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                callback=callback_detect_subscription_err,
-                                accum_results=1,
-                                error_message='Did not receive expected '
-                                              'sched_scan_validate_parameters(): ERROR').result()
-    else:
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                callback=callback_detect_read_err,
-                                accum_results=1,
-                                error_message='Did not receive expected '
-                                              'wm_gcp_read(): ERROR:').result()
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                            callback=callbacks[tags_to_apply],
+                            accum_results=1,
+                            error_message='Did not receive expected '
+                                          'Invalid element in the configuration').result()
