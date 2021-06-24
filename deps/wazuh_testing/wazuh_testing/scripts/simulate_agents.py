@@ -99,7 +99,8 @@ def create_agents(args):
             agent = ag.Agent(manager_address=args.manager_address, os=args.os,
                              registration_address=args.manager_registration_address,
                              version=args.version, fixed_message_size=args.fixed_message_size, labels=custom_labels)
-            set_agent_modules_and_eps(agent, item[0].split(' '), item[1].split(' '))
+            set_agent_modules_and_eps(agent, item[0].split(' ') + ['keepalive', 'receive_messages'],
+                                      item[1].split(' ') + ['0', '0'])
             agents.append(agent)
     else:
         for _ in range(args.agents_number):
