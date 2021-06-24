@@ -4,7 +4,9 @@ import time
 import json
 import pytest
 import yaml
-from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.services import control_service, delete_dbs
 from wazuh_testing.tools.wazuh_manager import remove_all_agents
 
@@ -30,7 +32,7 @@ for file in os.listdir(global_message_files):
         global_module_tests.append((yaml.safe_load(f), file.split('_')[0]))
 
 # Variables
-
+log_monitor = FileMonitor(LOG_FILE_PATH)
 log_monitor_paths = []
 
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
@@ -69,6 +71,40 @@ def clean_registered_agents():
 
 
 @pytest.fixture(scope='module')
+def wait_range_checksum_avoided(line):
+    """Callback function to wait until the manager avoided the checksum calculus by using the last saved one."""
+    if 'range checksum avoided' in line:
+        return line
+    return None
+
+
+def wait_range_checksum_calculated(line):
+    """Callback function to wait until the manager calculates the new checksum."""
+    if 'range checksum: Time: ' in line:
+        return line
+    return None
+
+
+@pytest.fixture(scope="function")
+def prepare_range_checksum_data():
+    truncate_file(LOG_FILE_PATH)
+
+    command = """agent 003 syscheck save2 {\"path\":\"/home/test/file1\",\"timestamp\":1575421292,\"attributes\":{\"type\":\"file\",\"size\":0,\"perm\":\"rw-r--r--\",
+                 \"uid\":\"0\",\"gid\":\"0\",\"user_name\":\"root\",\"group_name\":\"root\",\"inode\":16879,\"mtime\":1575421292,
+                 \"hash_md5\":\"d41d8cd98f00b204e9800998ecf8427e\",\"hash_sha1\":\"da39a3ee5e6b4b0d3255bfef95601890afd80709\",
+                 \"hash_sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"checksum\":\"f65b9f66c5ef257a7566b98e862732640d502b6f\"}}"""
+    receiver_sockets[0].send(command, size=True)
+    response = receiver_sockets[0].receive(size=True).decode()
+
+    command = """agent 003 syscheck save2 {\"path\":\"/home/test/file2\",\"timestamp\":1575421292,\"attributes\":{\"type\":\"file\",\"size\":0,\"perm\":\"rw-r--r--\",
+                 \"uid\":\"0\",\"gid\":\"0\",\"user_name\":\"root\",\"group_name\":\"root\",\"inode\":16879,\"mtime\":1575421292,
+                 \"hash_md5\":\"d41d8cd98f00b204e9800998ecf8427e\",\"hash_sha1\":\"da39a3ee5e6b4b0d3255bfef95601890afd80709\",
+                 \"hash_sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"checksum\":\"f65b9f66c5ef257a7566b98e862732640d502b6f\"}}"""
+    receiver_sockets[0].send(command, size=True)
+    response = receiver_sockets[0].receive(size=True).decode()
+
+
+@pytest.fixture(scope="function")
 def pre_insert_agents():
     """Insert agents. Only used for the global queries"""
     AGENTS_CANT = 14000
@@ -229,3 +265,20 @@ def test_wazuh_db_chunks(restart_wazuh, configure_sockets_environment, clean_reg
     send_chunk_command('global get-agents-by-connection-status 0 active')
     # Check disconnect-agents chunk limit
     send_chunk_command('global disconnect-agents 0 {} syncreq'.format(str(int(time.time()) + 1)))
+
+
+def test_wazuh_db_range_checksum(configure_sockets_environment, connect_to_sockets_module, prepare_range_checksum_data):
+    """Check the checksum range during the synchroniation of the DBs"""
+
+    command = """agent 003 syscheck integrity_check_global {\"begin\":\"/home/test/file1\",\"end\":\"/home/test/file2\",
+                 \"checksum\":\"2a41be94762b4dc57d98e8262e85f0b90917d6be\",\"id\":1}"""
+
+    # Checksum Range calculus expected the first time
+    receiver_sockets[0].send(command, size=True)
+    response = receiver_sockets[0].receive(size=True).decode()
+    log_monitor.start(timeout=20, callback=wait_range_checksum_calculated)
+
+    # Checksum Range avoid expected the next times
+    receiver_sockets[0].send(command, size=True)
+    response = receiver_sockets[0].receive(size=True).decode()
+    log_monitor.start(timeout=20, callback=wait_range_checksum_avoided)

@@ -58,6 +58,8 @@ The **insert** and **clear** commands for `vuln_cves` table are tested:
 
 ### Checks chunks
 
+### Checks checksum range behavior
+
 ## Code documentation
 
 ::: tests.integration.test_wazuh_db.test_wazuh_db
