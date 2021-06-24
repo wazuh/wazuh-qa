@@ -46,12 +46,6 @@ def get_local_internal_options():
     return local_internal_options
 
 
-@pytest.fixture(scope='module')
-def get_local_internal_options():
-    """Get configurations from the module."""
-    return local_internal_options
-
-
 def extra_configuration_before_yield():
     """Delete file status file."""
     os.remove(file_status_path) if os.path.exists(file_status_path) else None

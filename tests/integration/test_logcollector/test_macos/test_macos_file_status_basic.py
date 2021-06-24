@@ -5,7 +5,7 @@
 import os
 import pytest
 import re
-import macos_utils
+# import macos_utils
 import wazuh_testing.logcollector as logcollector
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations

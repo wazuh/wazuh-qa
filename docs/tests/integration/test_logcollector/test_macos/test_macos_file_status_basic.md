@@ -1,5 +1,6 @@
 # Test macOS - File status basic
-## Overview 
+
+## Overview
 
 Checks if `wazuh-logcollector` correctly generates the `file_status.json` file used by `only future events`.
 
@@ -14,13 +15,11 @@ that can be used at the next startup of Wazuh-Logcollector
 | :--:| :--:  | :--:       |
 | 0   |    2 |    105s  |
 
-
 ## Expected behavior
 
 - Fail if `wazuh-logcollector` does not gather generated unified logging system event or does not send it to the manager
 - Fail if `wazuh-logcollector` does not create the status file `status_file.json`
 - Fail if `wazuh-logcollector` saves incorrectly formatted, or invalid data in the status file `status_file.json`.
-
 
 ## Code documentation
 
