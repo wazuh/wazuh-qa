@@ -3,10 +3,10 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import logging
 import re
-from functools import wraps
-from time import sleep
-from random import randint, SystemRandom, choice
 import string
+from functools import wraps
+from random import randint, SystemRandom
+from time import sleep
 
 
 def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
@@ -102,10 +102,36 @@ def replace_in_file(filename, to_replace, replacement):
 
 
 def get_random_ip():
+    """Create a random ip address.
+
+    Return:
+        String: Random ip address.
+    """
     return fr"{randint(0,255)}.{randint(0,255)}.{randint(0,255)}.{randint(0,255)}"
 
 
 def get_random_string(string_length, digits=True):
+    """Create a random string with specified length.
+
+    Args:
+        string_length (int): Random string length.
+        digits (boolean): Digits availability for string generation.
+
+    Returns:
+        String: Random string.
+    """
     character_set = string.ascii_uppercase + string.digits if digits else string.ascii_uppercase
 
     return ''.join(SystemRandom().choice(character_set) for _ in range(string_length))
+
+
+def lower_case_key_dictionary_array(array_dict):
+    """Given an array of dictionaries, create a copy of it with the keys of each dictionary in lower case.
+
+    Args:
+        array_dict (List): List of dictionaries.
+
+    Returns:
+        List: List of dictionaries with lowercase keys.
+    """
+    return [{str(key).lower(): value for key, value in element.items()} for element in array_dict]

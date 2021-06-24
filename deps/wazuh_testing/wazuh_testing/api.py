@@ -9,6 +9,7 @@ from base64 import b64encode
 
 import requests
 from urllib3 import disable_warnings, exceptions
+
 disable_warnings(exceptions.InsecureRequestWarning)
 
 # Variables
@@ -49,24 +50,25 @@ def get_login_headers(user, password):
             'Authorization': f'Basic {b64encode(basic_auth).decode()}'}
 
 
-def get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout):
+def get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout, login_attempts, sleep_time):
     """Get API login token"""
 
     login_url = f"{get_base_url(protocol, host, port)}{login_endpoint}"
 
-    for _ in range(10):
+    for _ in range(login_attempts):
         response = requests.get(login_url, headers=get_login_headers(user, password), verify=False, timeout=timeout)
 
         if response.status_code == 200:
             return json.loads(response.content.decode())['data']['token']
-        time.sleep(1)
+        time.sleep(sleep_time)
     else:
         raise RuntimeError(f"Error obtaining login token: {response.json()}")
 
 
 def get_api_details_dict(protocol=API_PROTOCOL, host=API_HOST, port=API_PORT, user=API_USER, password=API_PASS,
-                         login_endpoint=API_LOGIN_ENDPOINT, timeout=10):
-    login_token = get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout)
+                         login_endpoint=API_LOGIN_ENDPOINT, timeout=10, login_attempts=1, sleep_time=0):
+    login_token = get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout, login_attempts,
+                                      sleep_time)
     """Get API details"""
     return {
         'base_url': get_base_url(protocol, host, port),
@@ -186,11 +188,5 @@ def wait_until_api_ready(protocol=API_PROTOCOL, host=API_HOST, port=API_PORT, us
         timeout (int): Timeout to get an API response.
         attempts (int): Maximum number of attempts to check API is ready.
     """
-    while attempts > 0:
-        try:
-            attempts -= 1
-            get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout)
-        except requests.exceptions.ConnectionError:
-            time.sleep(1)
-        else:
-            break
+
+    get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout, attempts, 1)

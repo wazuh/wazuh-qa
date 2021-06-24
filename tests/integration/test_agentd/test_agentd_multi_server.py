@@ -42,6 +42,7 @@ metadata = [
         # 1. 3 Servers - (TCP/UDP) protocol all servers will refuse the connection to remoted but will accept enrollment
         # Starting with an empty clients.key.
         # We should verify that the agent tries to connect and enroll to each one of them.
+        'ID': 'refuse_remoted_accept_enrollment',
         'PROTOCOL': 'tcp',
         'CLEAN_KEYS': True,
         'SIMULATOR_NUMBER': 3,
@@ -66,6 +67,7 @@ metadata = [
         # 2. 3 Servers - (TCP/UDP) protocol.
         # First server only has enrollment available and third server only has remoted available.
         # Agent should enroll to the first server and connect to the third one.
+        'ID': 'only_enrollment_and_only_remoted',
         'PROTOCOL': 'tcp',
         'CLEAN_KEYS': True,
         'SIMULATOR_NUMBER': 3,
@@ -94,6 +96,7 @@ metadata = [
     {
         # 3. 3 Server - TCP protocol. Agent should enroll and connect to first server,
         # and then the first server will disconnect, agent should connect to the second server with the same key
+        'ID': 'server_down_fallback_tcp',
         'PROTOCOL': 'tcp',
         'CLEAN_KEYS': True,
         'SIMULATOR_NUMBER': 3,
@@ -112,7 +115,7 @@ metadata = [
                 f"Received message: '#!-agent ack '"
             ],
             [
-                f'Lost connection with manager. Setting lock.',
+                # f'Lost connection with manager. Setting lock.',
                 f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
                 f'Connected to the server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
@@ -121,9 +124,10 @@ metadata = [
         ]
     },
     {
-        # 4. 3 Server - UDP protocol. Agent should enroll and connect to first server, and then the first server will
-        # disconnect, agent should try to enroll to the first server again and then after failure, move to the second
-        # server and connect.
+        # 4. 3 Server - UDP protocol. Agent should enroll and connect to first server,
+        # and then the first server will disconnect, agent should try to enroll to the first server again and then
+        # after failure, move to the second server and connect.
+        'ID': 'server_down_fallback_udp',
         'PROTOCOL': 'udp',
         'CLEAN_KEYS': True,
         'SIMULATOR_NUMBER': 3,
@@ -140,7 +144,7 @@ metadata = [
                 f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f'Connected to the server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
                 f"Received message: '#!-agent ack '"
-            ],
+            ],  # Stage 2 - Enroll and connect to second server after failed attempts to connect with server 1
             [
                 f'Server unavailable. Setting lock.',
                 f'Requesting a key from server: {SERVER_HOSTS[0]}',
@@ -153,6 +157,7 @@ metadata = [
     {
         # 5. 3 Servers / (TCP/UDP) protocol only the last one is available.
         # Agent should enroll and connect to the last server.
+        'ID': 'only_one_server_available',
         'PROTOCOL': 'tcp',
         'CLEAN_KEYS': False,
         'SIMULATOR_NUMBER': 3,
@@ -180,6 +185,7 @@ metadata = [
     {
         # 6. 3 Servers / (TCP/UDP) protocol. Server 1 is available but it disconnects, 2 and 3 are not responding.
         # Agent on disconnection should try server 2 and 3 and go back to 1.
+        'ID': 'unique_available_server_disconnects',
         'PROTOCOL': 'tcp',
         'CLEAN_KEYS': False,
         'SIMULATOR_NUMBER': 3,
@@ -210,6 +216,8 @@ metadata = [
     },
 ]
 
+case_ids = [x['ID'] for x in metadata]
+
 # metadata = metadata[:] # 0,2 Run only one test
 
 params = [
@@ -238,7 +246,7 @@ remoted_servers = []
 
 
 # fixtures
-@pytest.fixture(scope="module", params=configurations)
+@pytest.fixture(scope="module", params=configurations, ids=case_ids)
 def get_configuration(request):
     """Get configurations from the module"""
     return request.param
@@ -327,7 +335,6 @@ def wait_until(x, log_str):
         x (str): String containing message.
         log_str (str): Log file string.
     """
-    print(x)
     return x if log_str in x else None
 
 

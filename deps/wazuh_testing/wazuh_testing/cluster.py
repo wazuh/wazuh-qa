@@ -15,6 +15,8 @@ CLUSTER_CMD_HEADER_SIZE = 12
 CLUSTER_HEADER_FORMAT = '!2I{}s'.format(CLUSTER_CMD_HEADER_SIZE)
 FERNET_KEY = ''.join(random.choices(string.ascii_lowercase + string.digits, k=32))
 _my_fernet = Fernet(base64.b64encode(FERNET_KEY.encode()))
+DIVIDE_FLAG = b'd'
+REQUEST_CHUNK = 5242880
 
 
 def callback_detect_master_serving(line):
@@ -57,11 +59,11 @@ def detect_initial_master_serving(file_monitor):
     file_monitor.start(timeout=5, callback=callback_detect_master_serving)
 
 
-def cluster_msg_build(cmd: bytes = None, counter: int = None, payload: bytes = None, encrypt=True) -> bytes:
+def cluster_msg_build(command: bytes = None, counter: int = None, payload: bytes = None, encrypt=True) -> bytes:
     """Build a message using cluster protocol.
 
     Args:
-        cmd (bytes): command to send
+        command (bytes): command to send
         counter (int): message id
         payload (bytes): data to send
         encrypt (bool): whether to use fernet encryption or not
@@ -69,21 +71,50 @@ def cluster_msg_build(cmd: bytes = None, counter: int = None, payload: bytes = N
     Returns:
         bytes: built message
     """
-    cmd_len = len(cmd)
-    if cmd_len > CLUSTER_CMD_HEADER_SIZE:
-        raise Exception("Length of command '{}' exceeds limit ({}/{}).".format(cmd, cmd_len,
-                                                                               CLUSTER_CMD_HEADER_SIZE))
-
-    encrypted_data = _my_fernet.encrypt(payload) if encrypt else payload
-    out_msg = bytearray(CLUSTER_DATA_HEADER_SIZE + len(encrypted_data))
+    cmd_len = len(command)
+    if cmd_len > CLUSTER_CMD_HEADER_SIZE - len(DIVIDE_FLAG):
+        raise Exception("Length of command '{}' exceeds limit ({}/{}).".format(command, cmd_len,
+                                                                               CLUSTER_CMD_HEADER_SIZE - len(
+                                                                                   DIVIDE_FLAG)))
 
     # Add - to command until it reaches cmd length
-    cmd = cmd + b' ' + b'-' * (CLUSTER_CMD_HEADER_SIZE - cmd_len - 1)
+    command = command + b' ' + b'-' * (CLUSTER_CMD_HEADER_SIZE - cmd_len - 1)
+    encrypted_data = _my_fernet.encrypt(payload) if encrypt else payload
+    message_size = CLUSTER_DATA_HEADER_SIZE + len(encrypted_data)
 
-    out_msg[:CLUSTER_DATA_HEADER_SIZE] = struct.pack(CLUSTER_HEADER_FORMAT, counter, len(encrypted_data), cmd)
-    out_msg[CLUSTER_DATA_HEADER_SIZE:CLUSTER_DATA_HEADER_SIZE + len(encrypted_data)] = encrypted_data
+    # Message size is <= request_chunk, send the message
+    if message_size <= REQUEST_CHUNK:
+        msg = bytearray(message_size)
+        msg[:CLUSTER_DATA_HEADER_SIZE] = struct.pack(CLUSTER_HEADER_FORMAT, counter, len(encrypted_data), command)
+        msg[CLUSTER_DATA_HEADER_SIZE:message_size] = encrypted_data
+        return [msg]
 
-    return bytes(out_msg[:CLUSTER_DATA_HEADER_SIZE + len(encrypted_data)])
+    # Message size > request_chunk, send the message divided
+    else:
+        # Command with the flag d (divided)
+        command = command[:-len(DIVIDE_FLAG)] + DIVIDE_FLAG
+        msg_list = []
+        partial_data_size = 0
+        data_size = len(encrypted_data)
+        while partial_data_size < data_size:
+            message_size = REQUEST_CHUNK \
+                if data_size - partial_data_size + CLUSTER_DATA_HEADER_SIZE >= REQUEST_CHUNK \
+                else data_size - partial_data_size + CLUSTER_DATA_HEADER_SIZE
+
+            # Last divided message, remove the flag
+            if message_size == data_size - partial_data_size + CLUSTER_DATA_HEADER_SIZE:
+                command = command[:-len(DIVIDE_FLAG)] + b'-' * len(DIVIDE_FLAG)
+
+            msg = bytearray(message_size)
+            msg[:CLUSTER_DATA_HEADER_SIZE] = struct.pack(CLUSTER_HEADER_FORMAT, counter,
+                                                         message_size - CLUSTER_DATA_HEADER_SIZE,
+                                                         command)
+            msg[CLUSTER_DATA_HEADER_SIZE:message_size] = encrypted_data[
+                                                         partial_data_size:partial_data_size + message_size - CLUSTER_DATA_HEADER_SIZE]
+            partial_data_size += message_size - CLUSTER_DATA_HEADER_SIZE
+            msg_list.append(msg)
+
+        return msg_list
 
 
 def _master_action(counter: int = None, cmd: bytes = None, payload: bytes = None, **kwargs):
@@ -112,7 +143,7 @@ def _master_action(counter: int = None, cmd: bytes = None, payload: bytes = None
 
     response_counter = counter
 
-    return {'cmd': response_cmd, 'counter': response_counter, 'payload': response_payload}
+    return {'command': response_cmd, 'counter': response_counter, 'payload': response_payload}
 
 
 def _get_info_from_header(data: bytes):
@@ -122,12 +153,14 @@ def _get_info_from_header(data: bytes):
         data (bytes): raw data to process
 
     Returns:
-        dict: counter, cmd, total extracted from header
+        dict: counter, cmd, total and flag_divided extracted from header
     """
     counter, total, cmd = struct.unpack(CLUSTER_HEADER_FORMAT, data[0:CLUSTER_DATA_HEADER_SIZE])
-    cmd = cmd.split(b' ')[0]
+    flag = cmd[-1:]
+    flag_divided = flag if flag == DIVIDE_FLAG else b''
+    cmd = cmd[:-1].split(b' ')[0]
 
-    return {'counter': counter, 'total': total, 'cmd': cmd}
+    return {'counter': counter, 'total': total, 'cmd': cmd, 'flag_divided': flag_divided}
 
 
 def _cluster_message_decompose(data: bytes):
@@ -159,7 +192,7 @@ def master_simulator(data: bytes):
     if header != b'':
         return cluster_msg_build(**_master_action(**_cluster_message_decompose(data)))
     else:
-        return b''
+        return [b'']
 
 
 def _process_clusterd_message(tup, command: bytes = None):

@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 
-cd /wazuh-qa/deps/wazuh_testing/
-python setup.py install
+BRANCH=$1
 
-mkdir -p /var/ossec/queue/vulnerabilities/dictionaries/  /var/ossec/etc/ /var/ossec/logs/archives /var/ossec/bin/
+cd /wazuh-qa
+git pull
+git checkout ${BRANCH}
+pip install -r requirements.txt
+cd deps/wazuh_testing
+python3 setup.py install
 
+mkdir -p /var/ossec/queue/vulnerabilities/dictionaries/  /var/ossec/etc/ /var/ossec/logs/archives /var/ossec/bin/ /tmp/wazuh-testing/
+
+touch /tmp/wazuh-testing/test.log
 echo "" > /var/ossec/queue/vulnerabilities/dictionaries/cpe_helper.json
 echo "" > /var/ossec/etc/local_internal_options.conf
 echo "" > /var/ossec/logs/archives/archives.log

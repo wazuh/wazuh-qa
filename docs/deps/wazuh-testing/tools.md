@@ -1,3 +1,4 @@
+
 ## __init__
 
 ::: deps.wazuh_testing.wazuh_testing.tools.__init__
@@ -44,7 +45,7 @@
 
 ## Utils
 
-::: deps.wazuh_testing.wazuh_testing.tools.utils 
+::: deps.wazuh_testing.wazuh_testing.tools.utils
 
 ## Configuration
 
