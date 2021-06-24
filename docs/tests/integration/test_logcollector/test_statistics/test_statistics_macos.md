@@ -1,4 +1,4 @@
-# Test statistics
+# Test statistics - macOS
 
 ## Overview 
 
@@ -21,4 +21,4 @@ and saves the corresponding information in the `wazuh-logcollector.state` file.
 
 ## Code documentation
 
-::: tests.integration.test_logcollector.test_statistics.test_statistics
+::: tests.integration.test_logcollector.test_statistics.test_statistics_macos
