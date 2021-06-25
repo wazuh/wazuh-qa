@@ -1,7 +1,6 @@
 - tags:
   - test_macos_format_basic
-  - test_macos_log_process_stop
-  - test_macos_log_process_stop_suddenly
+  - test_macos_log_process
   apply_to_modules:
   - test_macos_format_basic
   - test_macos_log_process_stop
