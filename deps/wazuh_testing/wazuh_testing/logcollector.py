@@ -359,7 +359,7 @@ def callback_log_stream_exited_error():
     Returns:
         callable: callback to detect this event.
     """
-    log_format_message = f"ERROR: \(\d+\): macOS 'log stream' process exited"
+    log_format_message = "ERROR: \(\d+\): macOS 'log stream' process exited"
     return monitoring.make_callback(pattern=log_format_message, prefix=prefix)
 
 
