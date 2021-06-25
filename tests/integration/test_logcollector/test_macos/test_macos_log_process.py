@@ -57,8 +57,9 @@ def check_process_status(process_list, running=True, stage=''):
         log_processes = search_process(process)
         assert len(log_processes) == expected_process, f'Process {process} {is_running_msg} {stage}.'
 
+
 def test_independent_log_process(get_configuration, configure_environment, restart_logcollector):
-   """Check that independent execution of log processes (external to Wazuh) are not altered because of the Wazuh agent.
+    """Check that independent execution of log processes (external to Wazuh) are not altered because of the Wazuh agent.
 
        Launches a log process and start Wazuh, check that the independent log process keep running along with the one
        started by Wazuh. Stops Wazuh and check that the independent process is still running.
@@ -66,30 +67,31 @@ def test_independent_log_process(get_configuration, configure_environment, resta
         Raises:
             TimeoutError: If the expected callback is not generated.
     """
-   macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
-   wazuh_log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
-                           error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+    macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
+    wazuh_log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
 
-   control_service('stop')
-   check_process_status(['log'], running=False, stage='after stop agent')
+    control_service('stop')
+    check_process_status(['log'], running=False, stage='after stop agent')
 
-   # Run a log stream in background
-   os.system('log stream&')
+    # Run a log stream in background
+    os.system('log stream&')
 
-   log_processes = search_process('log')
-   independent_log_pid = log_processes[0]['pid']
+    log_processes = search_process('log')
+    independent_log_pid = log_processes[0]['pid']
 
-   control_service('start')
+    control_service('start')
 
-   assert any(x['pid'] == independent_log_pid for x in search_process('log')), 'The independent log process is dead ' \
-                                                                               'after starting Wazuh agent '
-   control_service('stop')
+    assert any(x['pid'] == independent_log_pid for x in search_process('log')), 'The independent log process is dead ' \
+                                                                                'after starting Wazuh agent '
+    control_service('stop')
 
-   assert any(x['pid'] == independent_log_pid for x in search_process('log')), 'The independent log process is dead ' \
-                                                                               'after stopping Wazuh agent '
-   os.kill(int(independent_log_pid), signal.SIGTERM)
+    assert any(x['pid'] == independent_log_pid for x in search_process('log')), 'The independent log process is dead ' \
+                                                                                'after stopping Wazuh agent '
+    os.kill(int(independent_log_pid), signal.SIGTERM)
 
-   control_service('start')
+    control_service('start')
+
 
 def test_macos_log_process_stop(get_configuration, configure_environment, restart_logcollector):
     """Check if logcollector stops the log and script process when Wazuh agent or logcollector stop.
