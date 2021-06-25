@@ -442,6 +442,8 @@ nav:
                 - tests/integration/test_remoted/test_agent_communication/test_agents_switching_protocols.md
         - Logcollector:
             - tests/integration/test_logcollector/index.md
+            - Test active configuration:
+                - Test active configuration: tests/integration/test_logcollector/test_active_configuration/test_active_configuration.md
             - Test basic configuration:
                 - tests/integration/test_logcollector/test_configuration/index.md
                 - Test basic configuration age: tests/integration/test_logcollector/test_configuration/test_basic_configuration_age.md
