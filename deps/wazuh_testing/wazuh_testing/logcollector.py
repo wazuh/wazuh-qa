@@ -479,6 +479,7 @@ def add_log_data(log_path, log_line_message, size_kib=1024, line_start=1, print_
         return line_start + lines - 1
     return 0
 
+
 def callback_invalid_format_value(line, option, location):
     """Create a callback to detect content values invalid in a log format file specific.
 
@@ -752,6 +753,7 @@ def format_macos_message_pattern(process_name, message, type='log', subsystem=No
     Returns:
         string: Expected unified logging system event.
     """
+    macos_message = None
     if process_name == 'logger' or type == 'trace':
         macos_message = f"{process_name}\[\d+\]: {message}"
     else:
@@ -759,5 +761,7 @@ def format_macos_message_pattern(process_name, message, type='log', subsystem=No
             macos_message = f"{process_name}\[\d+\]: \[{subsystem}:{category}\] {message}"
         elif type == 'activity':
             macos_message = f"{process_name}\[\d+\]: Created Activity ID.* Description: {message}"
+
+    assert macos_message is not None, 'Wrong type or process name selected for macos message pattern format.'
 
     return macos_message
