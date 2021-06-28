@@ -12,8 +12,8 @@ The main test case, test_wazuh_db_messages, checks the Wazuh-db commands syntax,
 - **fim_messages.yaml**: tests for agents DB, FIM module commands
 - **global_messages.yaml**: tests for the Global DB, using `global` commands
 
-The test case test_wazuh_db_create_agent, checks the correct creation of a new agent DB when a query with a new agent ID is sent.
+The test case `test_wazuh_db_create_agent`, checks the correct creation of a new agent DB when a query with a new agent ID is sent.
 
-The test case test_wazuh_db_chunks, checks that commands by chunks work properly when agents amount exceed the response maximum size.
+The test case `test_wazuh_db_chunks`, checks that commands by chunks work properly when agents amount exceed the response maximum size.
 
-The test case test_wazuh_db_range_checksum, checks the checksum range correct behavior during the synchroniation of the DB.
+The test case `test_wazuh_db_range_checksum`, checks the checksum range correct behavior during the synchroniation of the DB.

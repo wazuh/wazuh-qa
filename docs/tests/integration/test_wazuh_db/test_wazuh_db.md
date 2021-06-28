@@ -54,11 +54,44 @@ The **insert** and **clear** commands for `vuln_cves` table are tested:
 
 ### Checks FIM
 
+The creation and update of the FIM DataBase are tested:
+
+- Basics success
+- Syntax errors
+- Save fails
+- Integrity_check_global
+- Integrity_check_left
+- Integrity clear
+- Invalid agent ID
+- Update existing file
+- Path length
+- Checksum field
+- Large inode
+
 ### Checks global_messages
+
+The different commands to the Global DataBase are tested:
+
+- Insert commands
+- Update commands
+- Labels commands
+- Select commands
+- sync-agent-info-get command
+- sync-agent-info-set command
+- Belongs commands
+- Reset connection status command
+- get-agents-by-connection-status command
+- disconnect-agents command
+- Delete commands
+- Manager keepalive command
 
 ### Checks chunks
 
+The special scenario where a command is returned by chunks is tested.
+
 ### Checks checksum range behavior
+
+The behavior of the checksum range calculus during an Integrity Check Global is tested.
 
 ## Code documentation
 

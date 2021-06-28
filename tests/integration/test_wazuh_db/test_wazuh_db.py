@@ -89,17 +89,23 @@ def wait_range_checksum_calculated(line):
 def prepare_range_checksum_data():
     truncate_file(LOG_FILE_PATH)
 
-    command = """agent 003 syscheck save2 {\"path\":\"/home/test/file1\",\"timestamp\":1575421292,\"attributes\":{\"type\":\"file\",\"size\":0,\"perm\":\"rw-r--r--\",
-                 \"uid\":\"0\",\"gid\":\"0\",\"user_name\":\"root\",\"group_name\":\"root\",\"inode\":16879,\"mtime\":1575421292,
-                 \"hash_md5\":\"d41d8cd98f00b204e9800998ecf8427e\",\"hash_sha1\":\"da39a3ee5e6b4b0d3255bfef95601890afd80709\",
-                 \"hash_sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"checksum\":\"f65b9f66c5ef257a7566b98e862732640d502b6f\"}}"""
+    command = """agent 003 syscheck save2 {\"path\":\"/home/test/file1\",\"timestamp\":1575421292,
+                 \"attributes\":{\"type\":\"file\",\"size\":0,\"perm\":\"rw-r--r--\",\"uid\":\"0\",\"gid\":\"0\",
+                 \"user_name\":\"root\",\"group_name\":\"root\",\"inode\":16879,\"mtime\":1575421292,
+                 \"hash_md5\":\"d41d8cd98f00b204e9800998ecf8427e\",
+                 \"hash_sha1\":\"da39a3ee5e6b4b0d3255bfef95601890afd80709\",
+                 \"hash_sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",
+                 \"checksum\":\"f65b9f66c5ef257a7566b98e862732640d502b6f\"}}"""
     receiver_sockets[0].send(command, size=True)
     response = receiver_sockets[0].receive(size=True).decode()
 
-    command = """agent 003 syscheck save2 {\"path\":\"/home/test/file2\",\"timestamp\":1575421292,\"attributes\":{\"type\":\"file\",\"size\":0,\"perm\":\"rw-r--r--\",
-                 \"uid\":\"0\",\"gid\":\"0\",\"user_name\":\"root\",\"group_name\":\"root\",\"inode\":16879,\"mtime\":1575421292,
-                 \"hash_md5\":\"d41d8cd98f00b204e9800998ecf8427e\",\"hash_sha1\":\"da39a3ee5e6b4b0d3255bfef95601890afd80709\",
-                 \"hash_sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"checksum\":\"f65b9f66c5ef257a7566b98e862732640d502b6f\"}}"""
+    command = """agent 003 syscheck save2 {\"path\":\"/home/test/file2\",\"timestamp\":1575421292,
+                 \"attributes\":{\"type\":\"file\",\"size\":0,\"perm\":\"rw-r--r--\",\"uid\":\"0\",\"gid\":\"0\",
+                 \"user_name\":\"root\",\"group_name\":\"root\",\"inode\":16879,\"mtime\":1575421292,
+                 \"hash_md5\":\"d41d8cd98f00b204e9800998ecf8427e\",
+                 \"hash_sha1\":\"da39a3ee5e6b4b0d3255bfef95601890afd80709\",
+                 \"hash_sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",
+                 \"checksum\":\"f65b9f66c5ef257a7566b98e862732640d502b6f\"}}"""
     receiver_sockets[0].send(command, size=True)
     response = receiver_sockets[0].receive(size=True).decode()
 
