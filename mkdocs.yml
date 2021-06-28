@@ -486,6 +486,7 @@ nav:
                 - Test query macos format: tests/integration/test_logcollector/test_macos/test_macos_format_query.md
                 - Test macos log process stop: tests/integration/test_logcollector/test_macos/test_macos_log_process_stop.md
                 - Test macos log process stop suddenly: tests/integration/test_logcollector/test_macos/test_macos_log_process_stop_suddenly.md
+                - Test macos log process: tests/integration/test_logcollector/test_macos/test_macos_log_process.md
             - Test options:
                 - Overview: tests/integration/test_logcollector/test_options/index.md
                 - Test state interval: tests/integration/test_logcollector/test_options/test_options_state_interval.md
