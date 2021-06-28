@@ -46,4 +46,4 @@ in the ossec.log file
 
 ## Code documentation
 
-::: tests.integration.test_logcollector.test_macos.test_macos_log_process_stop
+::: tests.integration.test_logcollector.test_macos.test_macos_log_process
