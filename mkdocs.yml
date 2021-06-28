@@ -503,6 +503,8 @@ nav:
           - Test invalid rule decoders syntax:
             - Test invalid decoder syntax: tests/integration/test_logtest/test_invalid_rule_decoders_syntax/test_invalid_decoder_syntax.md
             - Test invalid rules syntax: tests/integration/test_logtest/test_invalid_rule_decoders_syntax/test_invalid_rules_syntax.md
+          - Test ruleset refresh:
+            - Test decoder labels: tests/integration/test_logtest/test_ruleset_refresh/test_decoder_labels.md
         - RIDS:
           - tests/integration/test_rids/index.md
           - Test rids conf:  tests/integration/test_rids/test_rids.md
