@@ -42,10 +42,6 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 @pytest.fixture(scope='function', params=configurations)
 def check_realtime_mode_failure():
-    """Check if the "Folders monitored with real-time engine" event is fired, if not tries to check the initial scan
-       event
-
-    """
     try:
         wazuh_log_monitor.start(timeout=60, callback=callback_num_inotify_watches,
                                 error_message='Did not receive expected "Folders monitored with real-time engine..." \
@@ -65,7 +61,7 @@ def get_configuration(request):
 # tests
 def test_realtime_unsupported(folder, file, get_configuration, configure_environment, restart_syscheckd,
                               check_realtime_mode_failure):
-    """ Check if the current OS platform falls to scheduled mode when realtime isn't avaible.
+    """ Check if the current OS platform falls to the scheduled mode when realtime isn't avaible.
 
     Params:
         folder (str): Name of the folder under PREFIX.
@@ -73,8 +69,9 @@ def test_realtime_unsupported(folder, file, get_configuration, configure_environ
         get_configuration (fixture): Gets the current configuration of the test.
         configure_environment (fixture): Configure the environment for the execution of the test.
         restart_syscheckd (fixture): Restarts syscheck.
-        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
+        check_realtime_mode_failure (fixture): Try to catch the initial realtime monitorization event and if fails then
+        waits for the initial FIM scan event.
     """
 
     regular_file_cud(folder, wazuh_log_monitor, file_list=[file], time_travel=True, triggers_event=True,
-                     validate_time_travel=False, event_mode="scheduled")
+                     event_mode="scheduled")
