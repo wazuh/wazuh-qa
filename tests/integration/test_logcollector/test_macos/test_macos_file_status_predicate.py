@@ -8,8 +8,7 @@ import re
 
 from wazuh_testing.logcollector import DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH
 from wazuh_testing.tools.monitoring import wait_file
 from wazuh_testing.tools.file import read_json
 
@@ -26,10 +25,6 @@ metadata = [{'only-future-events': 'yes'}, {'only-future-events': 'no'}]
 # Configuration data
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 configuration_ids = [f'{x["ONLY_FUTURE_EVENTS"]}' for x in parameters]
-
-file_status_path = os.path.join(WAZUH_PATH, 'queue', 'logcollector', 'file_status.json')
-
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # Maximum waiting time in seconds to find the logs on ossec.log
 wazuh_log_monitor_timeout = 30
@@ -48,7 +43,7 @@ def get_local_internal_options():
 
 def extra_configuration_before_yield():
     """Delete file status file."""
-    os.remove(file_status_path) if os.path.exists(file_status_path) else None
+    os.remove(LOGCOLLECTOR_FILE_STATUS_PATH) if os.path.exists(LOGCOLLECTOR_FILE_STATUS_PATH) else None
 
 
 def callback_log_bad_predicate(line):
@@ -102,10 +97,10 @@ def test_macos_file_status_predicate(get_local_internal_options, configure_local
                             error_message='Expected log that matches the regex '
                                           '".*macOS \'log stream\' process exited, pid:" could not be found')
 
-    # Waiting for file_status.json to be created, with a timeout equal to the double of the update time
-    wait_file(file_status_path, file_status_update_time*2)
+    # Waiting for file_status.json to be created, with a timeout about the time needed to update the file
+    wait_file(LOGCOLLECTOR_FILE_STATUS_PATH, file_status_update_time+2)
 
-    file_status_json = read_json(file_status_path)
+    file_status_json = read_json(LOGCOLLECTOR_FILE_STATUS_PATH)
 
     # Check if json has a structure
     if 'macos' in file_status_json:

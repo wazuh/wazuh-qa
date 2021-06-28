@@ -3,14 +3,6 @@
   apply_to_modules:
     - test_macos_file_status_basic
   sections:
-    - section: client
-      elements:
-        - server:
-            elements:
-              - address:
-                  value: '127.0.0.1'
-              - protocol:
-                  value: 'tcp'
     - section: localfile
       elements:
         - location:

@@ -6,12 +6,10 @@ import os
 import re
 import pytest
 import wazuh_testing.logcollector as logcollector
-import wazuh_testing.tools.macos_log.macos_utils as macos_utils
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH
 from wazuh_testing.remote import check_agent_received_message
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.monitoring import wait_file
 from wazuh_testing.tools.file import read_json
 from time import sleep
@@ -29,17 +27,6 @@ metadata = [{'only-future-events': 'yes'}, {'only-future-events': 'no'}]
 # Configuration data
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 configuration_ids = [f'{x["ONLY_FUTURE_EVENTS"]}' for x in parameters]
-
-file_status_path = os.path.join(WAZUH_PATH, 'queue', 'logcollector', 'file_status.json')
-
-macos_log_messages = [
-    {
-        'command': 'logger',
-        'message': 'Logger testing message - file status',
-    }
-]
-
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # Time in seconds to update the file_status.json
 file_status_update_time = 4
@@ -66,10 +53,14 @@ def get_connection_configuration():
     return logcollector.DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
 
 
-@pytest.mark.parametrize('macos_message', macos_log_messages)
+def extra_configuration_before_yield():
+    """Delete file status file."""
+    os.remove(LOGCOLLECTOR_FILE_STATUS_PATH) if os.path.exists(LOGCOLLECTOR_FILE_STATUS_PATH) else None
+
+
 def test_macos_file_status_basic(get_local_internal_options, configure_local_internal_options, get_configuration,
                                  configure_environment, get_connection_configuration, init_authd_remote_simulator,
-                                 macos_message, restart_logcollector):
+                                 restart_logcollector):
 
     """Checks if logcollector stores correctly "macos"-formatted localfile data.
 
@@ -81,8 +72,10 @@ def test_macos_file_status_basic(get_local_internal_options, configure_local_int
         FileNotFoundError: If the file_status.json is not available in the expected time.
     """
 
-    # Remove old data from json_status
-    os.remove(file_status_path) if os.path.exists(file_status_path) else None
+    macos_message = {
+        'command': 'logger',
+        'message': 'Logger testing message - file status',
+    }
 
     macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
     wazuh_log_monitor.start(timeout=15, callback=macos_logcollector_monitored,
@@ -96,22 +89,30 @@ def test_macos_file_status_basic(get_local_internal_options, configure_local_int
 
     check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_message, timeout=15)
 
-    # Waiting for file_status.json to be created, with a timeout equal to its update time
-    wait_file(file_status_path, file_status_update_time)
+    # Waiting for file_status.json to be created, with a timeout about the time needed to update the file
+    wait_file(LOGCOLLECTOR_FILE_STATUS_PATH, file_status_update_time+1)
 
     # Waits 10 seconds to give time to logcollector to update the file_status.json file
     sleep(10)
 
-    file_status_json = read_json(file_status_path)
+    file_status_json = read_json(LOGCOLLECTOR_FILE_STATUS_PATH)
 
-    conf_predicate = get_configuration['sections'][1]['elements'][2]['query']['value']
-    conf_level = get_configuration['sections'][1]['elements'][2]['query']['attributes'][0]['level']
-    conf_type = get_configuration['sections'][1]['elements'][2]['query']['attributes'][1]['type']
+    conf_predicate = get_configuration['sections'][0]['elements'][2]['query']['value']
+    conf_level = get_configuration['sections'][0]['elements'][2]['query']['attributes'][0]['level']
+    conf_type = get_configuration['sections'][0]['elements'][2]['query']['attributes'][1]['type']
 
     # Check if json has a structure
     assert file_status_json['macos'], 'Error finding "macos" key'
+
     assert file_status_json['macos']['timestamp'], 'Error finding "timestamp" key inside "macos"'
+
     assert re.match(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}-\d{4}$',
-                    file_status_json['macos']['timestamp']), 'Error of timestamp format'
+                    file_status_json['macos']['timestamp']), \
+        'Error of timestamp format'
+
     assert file_status_json['macos']['settings'], 'Error finding "settings" key inside "macos"'
-    assert file_status_json['macos']['settings'] == macos_utils.compose_settings(conf_type, conf_level, conf_predicate)
+
+    assert file_status_json['macos']['settings'] \
+        == logcollector.compose_macos_log_command(conf_type,
+                                                  conf_level,
+                                                  conf_predicate)
