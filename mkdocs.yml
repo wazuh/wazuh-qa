@@ -44,12 +44,17 @@ nav:
               - Test extra fields redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_extra_fields_redhat_feed.md
               - Test invalid syntax redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_invalid_syntax_redhat_feed.md
               - Test invalid values redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_invalid_values_redhat_feed.md
-              - Test missing fileds redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_missing_fields_redhat_feed.md
+              - Test missing fields redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_missing_fields_redhat_feed.md
             - Archlinux:
-                - Test extra fields archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_extra_tags_archlinux_feed.md
-                - Test invalid syntax archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_invalid_syntax_archlinux_feed.md
-                - Test invalid values archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_invalid_values_archlinux_feed.md
-                - Test missing fileds archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_missing_tags_archlinux_feed.md
+              - Test extra fields archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_extra_tags_archlinux_feed.md
+              - Test invalid syntax archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_invalid_syntax_archlinux_feed.md
+              - Test invalid values archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_invalid_values_archlinux_feed.md
+              - Test missing fields archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_missing_tags_archlinux_feed.md
+            - SUSE:
+              - Test extra tags suse feed: tests/integration/test_vulnerability_detector/test_feeds/suse/test_extra_tags_suse_feed.md
+              - Test invalid syntax suse feed: tests/integration/test_vulnerability_detector/test_feeds/suse/test_invalid_syntax_suse_feed.md
+              - Test invalid values suse feed: tests/integration/test_vulnerability_detector/test_feeds/suse/test_invalid_values_suse_feed.md
+              - Test missing tags suse feed: tests/integration/test_vulnerability_detector/test_feeds/suse/test_missing_tags_suse_feed.md
             - MSU:
               - Test extra fields feed: tests/integration/test_vulnerability_detector/test_feeds/msu/test_extra_fields_msu_feed.md
               - Test invalid syntax msu feed: tests/integration/test_vulnerability_detector/test_feeds/msu/test_invalid_syntax_msu_feed.md
@@ -85,6 +90,7 @@ nav:
             - Test msu inventory with msu feed: tests/integration/test_vulnerability_detector/test_scan_results/test_msu_inventory_msu_feed.md
             - Test redhat inventory with redhat feed: tests/integration/test_vulnerability_detector/test_scan_results/test_redhat_inventory_redhat_feed.md
             - Test ubuntu inventory with canonical feed:  tests/integration/test_vulnerability_detector/test_scan_results/test_ubuntu_inventory_canonical_feed.md
+            - Test suse inventory with suse feed: tests/integration/test_vulnerability_detector/test_scan_results/test_suse_inventory_suse_feed.md
             - Test scan different cves:  tests/integration/test_vulnerability_detector/test_scan_results/test_scan_different_cves.md
             - Test scan nvd feed: tests/integration/test_vulnerability_detector/test_scan_results/test_scan_nvd_feed.md
             - Test scan providers and nvd feed: tests/integration/test_vulnerability_detector/test_scan_results/test_scan_providers_and_nvd_feed.md
