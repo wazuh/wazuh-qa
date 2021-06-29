@@ -13,32 +13,48 @@ that every option available work as expected.
 
 #### Test configuration
 
-- **[Test configuration file](test_configuration/test_configuration_file.md)**:
-Check if `wazuh-logtest` works as expected under different pre-defined
+- Check that `logtest` works as expected under different pre-defined
 configurations that either produce the logtest to correctly start; to be
 disabled or to log an error.
 
-- **[Test get configuration sock](test_configuration/test_get_configuration_sock.md)**:
-Check if `wazuh-analisysd` correctly retrieves the `rule_test` configuration.
+- Check that `analisysd` correctly retrieves the pre-defined configurations that
+are set.
+
+#### Test invalid rule decoders syntax
+
+- Check that `logtest` correctly detects and handles errors when processing a
+rules file.
+
+- Check that `logtest` correctly detects and handles errors when processing a
+decoders file.
 
 #### Test invalid socket input
 
-- **[Test invalid socket input](test_invalid_socket_input/test_invalid_socket_input.md)**:
-Check if `wazuh-logtest` correctly detects and handles errors when sending a
+- Check that `logtest` correctly detects and handles errors when sending a
 message through the socket to `analysisd`.
 
 #### Test invalid token
 
-- **[Test invalid token](test_invalid_token/test_invalid_session_token.md)**:
-Check if `wazuh-logtest` correctly detects and handles errors when using a token.
+- Check that `logtest` correctly detects and handles errors when using a token.
+
+#### Test remove old sessions
+
+- Check that `logtest` correctly detects and handles the situation where trying
+to use more sessions than allowed and then the oldest session is released.
+
+- Check that `logtest` correctly detects and handles the situation where trying
+to use more sessions than allowed and then old sessions are released due to
+inactivity.
 
 #### Test remove session
 
-- **[Test remove session](test_remove_session/test_remove_session.md)**:
-Check if `wazuh-logtest` correctly detects and removes the sessions under
+- Check that `logtest` correctly detects and removes the sessions under
 pre-defined scenarios.
 
 #### Test rules decoders load
 
-- **[Test load rules decoders](test_rules_decoders_load/test_load_rules_decoders.md)**:
-Check if `wazuh-logtest` produce the correct rule/decoder matching.
+- Check that modifying the decoders configuration allows new `logtest` sessions
+to test different sets of decoders withouth having to restart the manager.
+
+- Check that modifying the rules configuration allows new `logtest` sessions
+to test different sets of rules withouth having to restart the manager.
