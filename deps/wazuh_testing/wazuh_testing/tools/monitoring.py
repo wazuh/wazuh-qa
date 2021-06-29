@@ -33,7 +33,9 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.system import HostManager
 
 REMOTED_DETECTOR_PREFIX = r'.*wazuh-remoted.*'
-
+LOG_COLLECTOR_DETECTOR_PREFIX = r'.*wazuh-logcollector.*'
+AGENT_DETECTOR_PREFIX = r'.*wazuh-agent.*'
+AUTHD_DETECTOR_PREFIX = r'.*wazuh-authd.*'
 
 def wazuh_unpack(data, format_: str = "<I"):
     """Unpack data with a given header. Using Wazuh header by default.
@@ -499,7 +501,7 @@ class Queue(queue.Queue):
         return aux_queue.get(*args, **kwargs)
 
     def __repr__(self):
-        """ Returns the object representation in string format.
+        """Returns the object representation in string format.
 
         This method is called when repr() function is invoked on the object. If possible, the string returned should
             be a valid Python expression that can be used to reconstruct the object again. This is used to define how

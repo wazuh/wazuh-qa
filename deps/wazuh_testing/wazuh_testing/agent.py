@@ -3,14 +3,14 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import platform
 import re
 import socket
 import ssl
-import platform
 
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.fim import change_internal_options
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
+from wazuh_testing.tools.monitoring import FileMonitor
 
 DEFAULT_VALUES = {
     'enabled': 'yes',

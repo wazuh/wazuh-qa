@@ -42,12 +42,16 @@ def get_configuration(request):
 
 # Tests
 
-
-def test_max_files_per_second(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
+@pytest.mark.parametrize('inode_collision', [
+                         (False),
+                         pytest.param(True, marks=(pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5))
+                         ])
+def test_max_files_per_second(inode_collision, get_configuration, configure_environment, restart_syscheckd,
+                              wait_for_fim_start):
     """ Check that FIM sleeps for one second when the option max_files_per_second is enabled
 
     Args:
-        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
+        inode_collision (boolean): Signals if the test should check the limit while running inode collisions.
         get_configuration (fixture): Gets the current configuration of the test.
         configure_environment (fixture): Configure the environment for the execution of the test.
         restart_syscheckd (fixture): Restarts syscheck.
@@ -55,14 +59,20 @@ def test_max_files_per_second(get_configuration, configure_environment, restart_
     Raises:
         TimeoutError: If an expected event couldn't be captured.
     """
+    scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
+
+    if inode_collision is True and scheduled is False:
+        pytest.skip("realtime and whodata modes do not verify inode collisions")
+
     # Create the files in an empty folder to check realtime and whodata.
     for i in range(n_files_to_create):
         fim.create_file(fim.REGULAR, test_directories[0], f'test_{i}', content='')
 
     extra_timeout = n_files_to_create / max_files_per_second
 
-    scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
-    fim.check_time_travel(scheduled)
+    fim.check_time_travel(scheduled, monitor=wazuh_log_monitor,
+                          timeout=global_parameters.default_timeout + extra_timeout)
+
     try:
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout + extra_timeout,
                                 callback=fim.callback_detect_max_files_per_second)
@@ -71,3 +81,30 @@ def test_max_files_per_second(get_configuration, configure_environment, restart_
             pass
         else:
             raise e
+
+    if scheduled and get_configuration['metadata']['max_files_per_sec'] != 0:
+        # Walk to the end of the scan
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout + extra_timeout,
+                                callback=fim.callback_detect_end_scan)
+
+    # Remove all files
+    for i in range(n_files_to_create):
+        fim.delete_file(test_directories[0], f'test_{i}')
+
+    if inode_collision is True:
+        # Create the files again changing all inodes
+        fim.create_file(fim.REGULAR, test_directories[0], 'test', content='')
+        for i in range(n_files_to_create):
+            fim.create_file(fim.REGULAR, test_directories[0], f'test_{i}', content='')
+
+        fim.check_time_travel(scheduled, monitor=wazuh_log_monitor,
+                              timeout=global_parameters.default_timeout + extra_timeout)
+
+        try:
+            wazuh_log_monitor.start(timeout=global_parameters.default_timeout + extra_timeout,
+                                    callback=fim.callback_detect_max_files_per_second)
+        except TimeoutError as e:
+            if get_configuration['metadata']['max_files_per_sec'] == 0:
+                pass
+            else:
+                raise e

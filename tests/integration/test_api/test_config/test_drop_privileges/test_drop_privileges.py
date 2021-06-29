@@ -3,8 +3,8 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-
 import pwd
+
 import pytest
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 from wazuh_testing.tools.services import get_process_cmd

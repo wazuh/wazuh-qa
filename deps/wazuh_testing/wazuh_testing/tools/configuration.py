@@ -12,7 +12,7 @@ from typing import List, Any, Set
 import pytest
 import yaml
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import WAZUH_PATH, GEN_WAZUH, WAZUH_CONF, PREFIX
+from wazuh_testing.tools import WAZUH_PATH, GEN_WAZUH, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
@@ -543,3 +543,63 @@ def generate_syscheck_registry_config():
     for yn_values, tag_value in itertools.product(values_list, tags):
         yn_str = ' '.join([f'{name}="{value}"' for name, value in zip(check_names, yn_values)])
         yield ' '.join([yn_str, tag_value])
+
+
+def get_wazuh_local_internal_options() -> List[str]:
+    """Get current `internal_options.conf` file content.
+
+    Returns
+        List of str: A list containing all the lines of the `local_internal_options.conf` or  file.
+    """
+    with open(WAZUH_LOCAL_INTERNAL_OPTIONS) as f:
+        lines = f.readlines()
+    return lines
+
+
+def set_wazuh_local_internal_options(wazuh_local_internal_options: List[str]):
+    """Set up Wazuh `local_internal_options.conf` file content.
+
+    Returns
+        List of str: A list containing all the lines of the `local_internal_options.conf` file.
+    """
+    with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'w') as f:
+        f.writelines(wazuh_local_internal_options)
+
+
+def add_wazuh_local_internal_options(wazuh_local_internal_options_dict):
+    """Add new local internal options to the current configuration.
+
+    Args:
+        wazuh_local_internal_options_dict (List of str): A list containing local internal options to add.
+    """
+    local_internal_options_str = create_local_internal_options(wazuh_local_internal_options_dict)
+    with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'a') as f:
+        f.writelines(local_internal_options_str)
+
+
+def create_local_internal_options(dict_local_internal_options):
+    """Create local_internal_options using a dictionary.
+
+    Args:
+        dict_local_internal_options (dict) : Dictionary with the local internal options
+    """
+    wazuh_local_internal_options = ''
+    for key, value in dict_local_internal_options.items():
+        wazuh_local_internal_options += f"{str(key)}={str(value)}\n"
+    return wazuh_local_internal_options
+
+
+def local_internal_options_to_dict(local_internal_options):
+    """ Create a dictionary with current local internal options.
+
+    Args:
+        local_internal_options (List of str): A list containing local internal options.
+    """
+    dict_local_internal_options= {}
+    no_comments_options = [line.strip() for line in local_internal_options
+                           if not (line.startswith('#') or line == '\n')]
+    for line in no_comments_options:
+        key, value = line.split('=')
+        dict_local_internal_options[key.rstrip("\n")] = value
+
+    return dict_local_internal_options

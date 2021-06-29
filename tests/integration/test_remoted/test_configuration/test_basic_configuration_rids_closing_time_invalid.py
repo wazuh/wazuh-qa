@@ -5,7 +5,8 @@
 import os
 import pytest
 
-import wazuh_testing.remote as remote
+from wazuh_testing.generic_callbacks import callback_error_invalid_value_for
+from wazuh_testing.tools.monitoring import REMOTED_DETECTOR_PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 
 # Marks
@@ -44,6 +45,6 @@ def test_rids_closing_time_invalid(get_configuration, configure_environment, res
     Raises:
         AssertionError: if `wazuh-remoted` does not show in `wazuh.log` expected error messages.
     """
-    log_callback = remote.callback_error_invalid_value_for('rids_closing_time')
+    log_callback = callback_error_invalid_value_for('rids_closing_time', prefix=REMOTED_DETECTOR_PREFIX)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")

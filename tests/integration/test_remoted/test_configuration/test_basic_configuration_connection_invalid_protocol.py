@@ -6,6 +6,8 @@ import os
 import pytest
 
 import wazuh_testing.remote as remote
+from wazuh_testing.api import compare_config_api_response
+
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 
 # Marks
@@ -91,5 +93,8 @@ def test_invalid_protocol(get_configuration, configure_environment, restart_remo
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message="The expected error output has not been produced")
 
+    real_configuration = cfg.copy()
+    real_configuration['protocol'] = cfg['protocol'].split(',')
+
     # Check that API query return the selected configuration
-    remote.compare_config_api_response(cfg)
+    compare_config_api_response([real_configuration], 'remote')

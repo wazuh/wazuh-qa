@@ -6,6 +6,8 @@ import os
 import pytest
 
 import wazuh_testing.remote as remote
+from wazuh_testing.api import compare_config_api_response
+
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 
 # Marks
@@ -53,4 +55,4 @@ def test_ipv6_secure(get_configuration, configure_environment, restart_remoted):
                                 error_message="The expected error output has not been produced")
 
     # Check that API query return the selected configuration
-    remote.compare_config_api_response(cfg)
+    compare_config_api_response([cfg], 'remote')

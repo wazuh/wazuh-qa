@@ -17,7 +17,7 @@ pytestmark = pytest.mark.tier(level=1)
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_shared_configuration.yaml')
-agent_conf_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'shared.conf')
+agent_conf_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'agent.conf')
 
 parameters = [
     {'PROTOCOL': TCP},
@@ -51,8 +51,7 @@ def get_configuration(request):
 
 def test_push_shared_config(get_configuration, configure_environment, remove_shared_files,
                             restart_remoted, create_agent_group):
-    """ Checks that manager push shared configuration to agents when required.
-
+    """Checks that manager push shared configuration to agents when required.
     Checks if Wazuh Manager sends new shared files from group shared folder when the merged.mg checksum received from
     agent is different than the stored one, for example, when the group configuration changes.
     """

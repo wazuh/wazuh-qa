@@ -47,7 +47,7 @@ else:
 
 
 # Fixtures
-@pytest.fixture(scope="module", params=configurations)
+@pytest.fixture(scope="module", params=configurations, ids=[""])
 def get_configuration(request):
     """Get configurations from the module"""
     return request.param
@@ -277,7 +277,7 @@ def check_status(expected_value=None, get_state_callback=None):
 
 
 def wait_connect(update_position=False):
-    """ Watch the log file until `callback_connected_to_server` is triggered
+    """Watch the log file until `callback_connected_to_server` is triggered
 
     Args:
         update_position (bool, optional): update position after reading.
@@ -290,7 +290,7 @@ def wait_connect(update_position=False):
 
 
 def wait_ack(update_position=False):
-    """ Watch the log file until `callback_ack` is triggered
+    """Watch the log file until `callback_ack` is triggered
 
     Args:
         update_position (bool, optional): update position after reading.
@@ -303,7 +303,7 @@ def wait_ack(update_position=False):
 
 
 def wait_keepalive(update_position=False):
-    """ Watch the log file until `callback_keepalive` is triggered
+    """Watch the log file until `callback_keepalive` is triggered
 
     Args:
         update_position (bool, optional): update position after reading.
@@ -316,7 +316,7 @@ def wait_keepalive(update_position=False):
 
 
 def wait_state_update(update_position=True):
-    """ Watch the log file until `callback_state_file_updated` is triggered
+    """Watch the log file until `callback_state_file_updated` is triggered
 
     Args:
         update_position (bool, optional): update position after reading.

@@ -59,6 +59,9 @@ metadata = [
 ]
 params = [{} for x in range(0, len(metadata))]
 
+ids = [f"check_updates:{x['check_updates']}, check_delete:{x['check_delete']}, {x['agents_number']}_agents"
+       for x in metadata]
+
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                               'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_manager_conf.yaml')
@@ -66,7 +69,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=params, metadata=metadata)
 
 
-@pytest.fixture(scope="module", params=configurations)
+@pytest.fixture(scope="module", params=configurations, ids=ids)
 def get_configuration(request):
     """Get configurations from the module"""
     yield request.param
@@ -123,6 +126,9 @@ def test_rootcheck(get_configuration, configure_environment, restart_service,
 
     agents = create_agents(agents_number, SERVER_ADDRESS, CRYPTO)
 
+    for agent in agents:
+        agent.modules['rootcheck']['status'] = 'enabled'
+
     injectors = create_injectors(agents)
 
     # Let rootcheck events to be sent for 60 seconds
@@ -140,7 +146,7 @@ def test_rootcheck(get_configuration, configure_environment, restart_service,
         db_string = [row[3] for row in rows]
 
         logs_string = [':'.join(x.split(':')[2:]) for x in
-                       agent.rootcheck.rootcheck]
+                       agent.rootcheck.messages_list]
         for log in logs_string:
             assert log in db_string, f"Log: \"{log}\" not found in Database"
 
@@ -177,7 +183,7 @@ def test_rootcheck(get_configuration, configure_environment, restart_service,
             rows = retrieve_rootcheck_rows(agent.id)
 
             logs_string = [':'.join(x.split(':')[2:]) for x in
-                           agent.rootcheck.rootcheck]
+                           agent.rootcheck.messages_list]
             for row in rows:
                 assert row[1] < update_threshold, \
                     f'First time in log was updated after insertion'

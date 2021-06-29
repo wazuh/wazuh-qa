@@ -15,6 +15,7 @@ Our newest integration tests are located in `wazuh-qa/tests/integration/`. They 
 - **[_test_remoted_](test_remoted#test_remoted)**
 - **[_test_vulnerability_detector_](test_vulnerability_detector#tests-vulnerability-detector)**
 - **[_test_wazuh_db_](test_wazuh_db#test_wazuh_db)**
+- **[_test_logcollector_](test_logcollector#test_logcollector)**
 
 ## How to setup the test environment
 

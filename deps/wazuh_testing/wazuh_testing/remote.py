@@ -8,12 +8,12 @@ import subprocess as sb
 import time
 
 import pytest
-import wazuh_testing.api as api
-import wazuh_testing.tools.agent_simulator as ag
 import wazuh_testing.tools as tools
+import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing import UDP, TCP
+from wazuh_testing.tools import file
+from wazuh_testing.tools import monitoring
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import monitoring, file, REMOTE_AGENT_CONF, BASE_SHARED_CONF
 from wazuh_testing.tools.services import control_service
 
 
@@ -33,15 +33,15 @@ DEFAULT_TESTING_GROUP_NAME = 'testing_group'
 data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 
-def new_agent_group(group_name=DEFAULT_TESTING_GROUP_NAME, configuration_file=BASE_SHARED_CONF):
+def new_agent_group(group_name=DEFAULT_TESTING_GROUP_NAME, configuration_file='agent.conf'):
     """Create a new agent group for testing purpose, must be run only on Managers."""
 
-    sb.run([os.path.join(tools.WAZUH_PATH, 'bin', 'agent_groups'), '-q', '-a', '-g', group_name])
+    sb.run([f"{tools.WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-g", group_name])
 
     agent_conf_path = os.path.join(data_path, configuration_file)
 
-    with open(os.path.join(tools.WAZUH_PATH, 'etc', 'shared', group_name, configuration_file), 'w') as agent_conf_file:
-        with open(agent_conf_path) as configuration:
+    with open(f"{tools.WAZUH_PATH}/etc/shared/{group_name}/agent.conf", "w") as agent_conf_file:
+        with open(agent_conf_path, 'r') as configuration:
             agent_conf_file.write(configuration.read())
 
 
@@ -94,21 +94,8 @@ def callback_invalid_value(option, value):
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
-def callback_error_in_configuration(severity):
-    """Create a callback to detect configuration error in the configuration file.
-
-    Args:
-        severity (str): ERROR or CRITICAL.
-
-    Returns:
-        callable: callback to detect this event.
-    """
-    msg = fr"{severity}: \(\d+\): Configuration error at '{tools.WAZUH_CONF_RELATIVE}'."
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
-
-
 def callback_error_invalid_port(port):
-    """Create a callback to detect invalid port.
+    """Create a callback to detect invalid port.callback_detect_remoted_started
 
     Args:
         port (str): Wazuh manager port.
@@ -195,19 +182,6 @@ def callback_queue_size_too_big():
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
 
 
-def callback_error_invalid_value_for(option):
-    """Create a callback to detect invalid values in the manager.conf file.
-
-    Args:
-        option (str): Wazuh manager configuration option.
-
-    Returns:
-        callable: callback to detect this event.
-    """
-    msg = fr"WARNING: \(\d+\): Invalid value '.*' in '{option}' option. Default value will be used."
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
-
-
 def callback_error_invalid_ip(ip):
     """Create a callback to detect if error is created when invalid local ip value is provided.
 
@@ -230,18 +204,6 @@ def callback_info_no_allowed_ips():
     msg = r"INFO: \(\d+\): IP or network must be present in syslog access list \(allowed-ips\). "
     msg += "Syslog server disabled."
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
-
-
-def compare_config_api_response(configuration):
-    """Assert if configuration values provided are the same that configuration provided for API response.
-
-    Args:
-        configuration (dict): Dictionary with wazuh manager configuration.
-    """
-    # Check that API query return the selected configuration
-    for field in configuration.keys():
-        api_answer = api.get_manager_configuration(section="remote", field=field)
-        assert str(configuration[field]) in api_answer, "Wazuh API answer different from introduced configuration"
 
 
 def get_protocols(all_protocols):
@@ -653,9 +615,9 @@ def check_push_shared_config(agent, sender, injector=None):
         check_agent_received_message(agent.rcv_msg_queue, r'#!-up file \w+ merged.mg', timeout=10,
                                      error_message="initial up file message not received")
 
-        # Check shared.conf message
+        # Check agent.conf message
         check_agent_received_message(agent.rcv_msg_queue, '#default', timeout=10,
-                                     error_message=f"{REMOTE_AGENT_CONF} message not received")
+                                     error_message="agent.conf message not received")
         # Check close file (push end) message
         check_agent_received_message(agent.rcv_msg_queue, 'close', timeout=35,
                                      error_message="initial close message not received")
