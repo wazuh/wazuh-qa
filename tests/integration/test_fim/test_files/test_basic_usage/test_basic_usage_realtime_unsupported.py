@@ -15,8 +15,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
-
-pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]
+pytestmark = [pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]
 
 # variables
 
@@ -69,8 +68,8 @@ def test_realtime_unsupported(folder, file, get_configuration, configure_environ
         get_configuration (fixture): Gets the current configuration of the test.
         configure_environment (fixture): Configure the environment for the execution of the test.
         restart_syscheckd (fixture): Restarts syscheck.
-        check_realtime_mode_failure (fixture): Try to catch the initial realtime monitorization event and if fails then
-        waits for the initial FIM scan event.
+        check_realtime_mode_failure (fixture): Try to catch the initial realtime monitorization event and if fails \
+        then waits for the initial FIM scan event.
     """
 
     regular_file_cud(folder, wazuh_log_monitor, file_list=[file], time_travel=True, triggers_event=True,

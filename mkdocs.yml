@@ -202,6 +202,7 @@ nav:
               - Test basic usage starting agent: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_starting_agent.md
               - Test basic usage wildcards: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_wildcards.md
               - Test basic usage wildcards runtime: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_wildcards_runtime.md
+              - Test basic usage realtime unsupported: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_realtime_unsupported.md
             - Test benchmark:
               - tests/integration/test_fim/test_files/test_benchmark/index.md
               - Test benchmark:  tests/integration/test_fim/test_files/test_benchmark/test_benchmark.md

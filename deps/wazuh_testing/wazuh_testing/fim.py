@@ -1459,6 +1459,7 @@ class EventChecker:
 
         Args:
             event_type (str): Expected type of the raised event {'added', 'modified', 'deleted'}.
+            event_mode (str, optional): Specifies the scan mode to check in the events
             min_timeout (int, optional): seconds to wait until an event is raised when trying to fetch. Defaults `1`
             triggers_event (boolean, optional): True if the event should be raised. False otherwise. Defaults `True`
             extra_timeout (int, optional): Additional time to wait after the min_timeout
@@ -1534,6 +1535,7 @@ class EventChecker:
 
         Args:
             event_type (str): Expected type of the raised event {'added', 'modified', 'deleted'}.
+            mode (str, optional): Specifies the FIM scan mode to check in the events
         """
 
         def validate_checkers_per_event(events, options, mode):
@@ -2182,8 +2184,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         validators_after_cud (list, optional): List of functions that validates an event triggered when a new file
             is created, modified or deleted. Each function must accept a param to receive
             the event to be validated. Default `None`
-        validate_time_travel (boolean, optional): Boolean to determine if the time travel functionality must meet the
-            requisites before being executed or if it can be executed directly. Default 'True'.
+        event_mode (str, optional): Specifies the FIM scan mode to check in the events
     """
 
     # Transform file list
