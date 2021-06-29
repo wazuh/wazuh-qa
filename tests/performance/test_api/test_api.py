@@ -12,22 +12,22 @@ api_details = dict()
 
 xfailed_items = {
     '/active-response': {'message': 'Agent simulator not handling active-response messages: '
-                         'https://github.com/wazuh/wazuh-qa/issues/1266',
+                                    'https://github.com/wazuh/wazuh-qa/issues/1266',
                          'method': 'put'},
     '/agents/group': {'message': 'Slow agent-group files creation: https://github.com/wazuh/wazuh/issues/8625',
                       'method': 'put'},
     '/syscheck': {'message': 'The `queue/alerts/ar` socket does not accept agent lists: '
-                         'https://github.com/wazuh/wazuh/issues/9125',
-                         'method': 'put'},
+                             'https://github.com/wazuh/wazuh/issues/9125',
+                  'method': 'put'},
     '/rootcheck': {'message': 'The `queue/alerts/ar` socket does not accept agent lists: '
-                         'https://github.com/wazuh/wazuh/issues/9125',
-                         'method': 'put'},
+                              'https://github.com/wazuh/wazuh/issues/9125',
+                   'method': 'put'},
     '/agents': {'message': 'The `queue/sockets/auth` socket does not accept agent lists: '
-                         'https://github.com/wazuh/wazuh/issues/9127',
-                         'method': 'delete'},
+                           'https://github.com/wazuh/wazuh/issues/9127',
+                'method': 'delete'},
     '/groups': {'message': 'Timeout caused by agent-group file manipulation in the Framework: '
-                         'https://github.com/wazuh/wazuh/issues/9141',
-                         'method': 'delete'}
+                           'https://github.com/wazuh/wazuh/issues/9141',
+                'method': 'delete'}
 }
 
 
@@ -38,9 +38,9 @@ def test_api_endpoints(test_case, test_configuration, set_api_test_environment, 
     """Make an API request for each `test_case`. `test_configuration` fixture is only used to add metadata to the
     HTML report."""
     # Apply xfails
-    test_case['endpoint'] in xfailed_items.keys() and \
-    test_case['method'] == xfailed_items[test_case['endpoint']]['method'] and \
-    pytest.xfail(xfailed_items[test_case['endpoint']]['message'])
+    if test_case['endpoint'] in xfailed_items.keys() and \
+            test_case['method'] == xfailed_items[test_case['endpoint']]['method']:
+        pytest.xfail(xfailed_items[test_case['endpoint']]['message'])
 
     base_url = api_details['base_url']
     headers = api_details['auth_headers']
