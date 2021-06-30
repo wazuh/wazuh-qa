@@ -32,10 +32,12 @@ msg_create_session = """{"version":1, "command":"log_processing", "parameters":{
 
 local_internal_options = {'analysisd.debug': str(1)}
 
+
 @pytest.fixture(scope='module')
 def get_local_internal_options():
     """Get configurations from the module."""
     return local_internal_options
+
 
 # Function to manage the comunication with Wazuh-logtest
 def create_connection():

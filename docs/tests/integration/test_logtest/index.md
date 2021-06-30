@@ -42,3 +42,20 @@ pre-defined scenarios.
 
 - **[Test load rules decoders](test_rules_decoders_load/test_load_rules_decoders.md)**:
 Check if `wazuh-logtest` produce the correct rule/decoder matching.
+
+#### Test invalid rule decoders syntax
+
+- Check that `logtest` correctly detects and handles errors when processing a
+rules file.
+
+- Check that `logtest` correctly detects and handles errors when processing a
+decoders file.
+
+#### Test remove old sessions
+
+- Check that `logtest` correctly detects and handles the situation where trying
+to use more sessions than allowed and then the oldest session is released.
+
+- Check that `logtest` correctly detects and handles the situation where trying
+to use more sessions than allowed and then old sessions are released due to
+inactivity.
