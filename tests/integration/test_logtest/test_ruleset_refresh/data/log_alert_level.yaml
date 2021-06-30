@@ -1,6 +1,6 @@
 ---
 -
-  name: 'Check no alert for default level alert'
+  name: 'Check no alerts with default alert level'
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"event": "{\"it_logtest\" : \"rules\", \"test\": \"test_no_alert\"}","log_format": "syslog","location": "master->/var/log/syslog"}}'
   rule_id: '880002'
   rule_dir: 'etc/rules/'
@@ -18,7 +18,7 @@
         - rule_dir: 
             value: 'etc/rules'
 -
-  name: 'Check alert for default level alert'
+  name: 'Check alert with default alert level'
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"event": "{\"it_logtest\" : \"rules\", \"test\": \"test_alert\"}","log_format": "syslog","location": "master->/var/log/syslog"}}'
   rule_id: '880001'
   rule_dir: 'etc/rules/'
@@ -36,7 +36,7 @@
         - rule_dir: 
             value: 'etc/rules'
 -
-  name: 'Check no alert for alert level 8'
+  name: 'Check no alerts with alert level set as "8"'
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"event": "{\"it_logtest\" : \"rules\", \"test\": \"test_no_alert\"}","log_format": "syslog","location": "master->/var/log/syslog"}}'
   rule_id: '880002'
   rule_dir: 'etc/rules/'
@@ -60,7 +60,7 @@
         - email_alert_level:
             value: 12
 -
-  name: 'Check  alert for alert level 8'
+  name: 'Check no alerts with alert level set as "8"'
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"event": "{\"it_logtest\" : \"rules\", \"test\": \"test_alert\"}","log_format": "syslog","location": "master->/var/log/syslog"}}'
   rule_id: '880001'
   rule_dir: 'etc/rules/'
