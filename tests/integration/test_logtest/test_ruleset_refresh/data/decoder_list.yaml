@@ -23,7 +23,7 @@
         - decoder_dir: 
             value: 'etc/decoders_1'
 -
-  name: 'Check loading new files in a custom decoder dir (check decoder_include label)'
+  name: 'Check loading new decoders in a custom decoder file (check decoder_include label)'
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"event": "Oct 15 21:07:00 linux-agent decoder_IT_test_decoder_2[29205]: Test IT decoder","log_format": "syslog","location": "master->/var/log/syslog"}}'
   decoder_dir: 'etc/decoders_2/'
   decoder_file: 'custom_decoder_2.xml'  
