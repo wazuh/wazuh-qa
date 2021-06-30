@@ -4,14 +4,15 @@
 
 import os
 import shutil
+
 import pytest
-from wazuh_testing import global_parameters
 import wazuh_testing.fim as fim
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.file import truncate_file
 
 # Marks
 

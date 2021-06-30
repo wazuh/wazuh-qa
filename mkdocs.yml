@@ -45,6 +45,11 @@ nav:
               - Test invalid syntax redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_invalid_syntax_redhat_feed.md
               - Test invalid values redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_invalid_values_redhat_feed.md
               - Test missing fileds redhat feed: tests/integration/test_vulnerability_detector/test_feeds/redhat/test_missing_fields_redhat_feed.md
+            - Archlinux:
+                - Test extra fields archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_extra_tags_archlinux_feed.md
+                - Test invalid syntax archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_invalid_syntax_archlinux_feed.md
+                - Test invalid values archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_invalid_values_archlinux_feed.md
+                - Test missing fileds archlinux feed: tests/integration/test_vulnerability_detector/test_feeds/archlinux/test_missing_tags_archlinux_feed.md
             - MSU:
               - Test extra fields feed: tests/integration/test_vulnerability_detector/test_feeds/msu/test_extra_fields_msu_feed.md
               - Test invalid syntax msu feed: tests/integration/test_vulnerability_detector/test_feeds/msu/test_invalid_syntax_msu_feed.md
@@ -127,7 +132,7 @@ nav:
             - Test cors: tests/integration/test_api/test_config/test_cors/test_cors.md
             - Test DOS blocking system: tests/integration/test_api/test_config/test_DOS_blocking_system/test_DOS_blocking_system.md
             - Test drop privileges:  tests/integration/test_api/test_config/test_drop_privileges/test_drop_privileges.md
-            - Test experimental features:  tests/integration/test_api/test_config/test_experimental_features/test_experimental_features
+            - Test experimental features:  tests/integration/test_api/test_config/test_experimental_features/test_experimental_features.md
             - Test host port:  tests/integration/test_api/test_config/test_host_port/test_host_port.md
             - Test https:  tests/integration/test_api/test_config/test_https/test_https.md
             - Test jwt token exp timeout:  tests/integration/test_api/test_config/test_jwt_token_exp_timeout/test_jwt_token_exp_timeout.md
@@ -150,6 +155,7 @@ nav:
           - Test authd name ip pass:  tests/integration/test_authd/test_authd_name_ip_pass.md
           - Test authd local:  tests/integration/test_authd/test_authd_local.md
           - Test authd agents ctx:  tests/integration/test_authd/test_authd_agents_ctx.md
+          - Test authd remote enrollment enabled:  tests/integration/test_authd/test_remote_enrollment.md
         - Cluster:
           - tests/integration/test_cluster/index.md
           - Test key polling:
@@ -194,6 +200,8 @@ nav:
               - Test basic usage quick changes: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_quick_changes.md
               - Test basic usage rename: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_rename.md
               - Test basic usage starting agent: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_starting_agent.md
+              - Test basic usage wildcards: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_wildcards.md
+              - Test basic usage wildcards runtime: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_wildcards_runtime.md
             - Test benchmark:
               - tests/integration/test_fim/test_files/test_benchmark/index.md
               - Test benchmark:  tests/integration/test_fim/test_files/test_benchmark/test_benchmark.md
@@ -246,6 +254,7 @@ nav:
               - tests/integration/test_fim/test_files/test_inotify/index.md
               - Test num watches: tests/integration/test_fim/test_files/test_inotify/test_num_watches.md
               - Test remove rename folder: tests/integration/test_fim/test_files/test_inotify/test_remove_rename_folder.md
+              - Test max fd win rt: tests/integration/test_fim/test_files/test_inotify/test_max_fd_rt.md
             - Test invalid:
               - tests/integration/test_fim/test_files/test_invalid/index.md
               - Test invalid: tests/integration/test_fim/test_files/test_invalid/test_invalid.md
@@ -312,6 +321,10 @@ nav:
               - tests/integration/test_fim/test_files/test_windows_audit_interval/index.md
               - Manage acl: tests/integration/test_fim/test_files/test_windows_audit_interval/manage_acl.md
               - Test windows audit interval: tests/integration/test_fim/test_files/test_windows_audit_interval/test_windows_audit_interval.md
+            - Test wildcards complex:
+              - tests/integration/test_fim/test_files/test_wildcards_complex/index.md
+              - Test wildcards complex: tests/integration/test_fim/test_files/test_wildcards_complex/test_wildcards_complex.md
+              - Test wildcards complex runtime: tests/integration/test_fim/test_files/test_wildcards_complex/test_wildcards_complex_runtime.md
           - Test registry:
             - tests/integration/test_fim/test_registry/index.md
             - Test registry ambiguous confs:
@@ -378,6 +391,7 @@ nav:
             - Test sync interval: tests/integration/test_fim/test_synchronization/test_sync_interval.md
             - Test synchronize integrity scan: tests/integration/test_fim/test_synchronization/test_synchronize_integrity_scan.md
             - Test synchronize integrity win32: tests/integration/test_fim/test_synchronization/test_synchronize_integrity_win32.md
+            - Test registry responses win32: tests/integration/test_fim/test_synchronization/test_registry_responses_win32.md
         - gCloud:
           - tests/integration/test_gcloud/index.md
           - Test configuration:
@@ -445,6 +459,35 @@ nav:
                 - Test basic configuration query: tests/integration/test_logcollector/test_configuration/test_basic_configuration_query.md
                 - Test basic configuration reconnect time: tests/integration/test_logcollector/test_configuration/test_basic_configuration_reconnect_time.md
                 - Test basic configuration target: tests/integration/test_logcollector/test_configuration/test_basic_configuration_target.md
+            - Test age:
+                - tests/integration/test_logcollector/test_age/index.md
+                - Test age basic: tests/integration/test_logcollector/test_age/test_age_basic.md
+                - Test age changed datetime: tests/integration/test_logcollector/test_age/test_age_changed_datetime.md
+            - Test command monitoring:
+                - Overview: tests/integration/test_logcollector/test_command_monitoring/index.md
+                - Test command execution: tests/integration/test_logcollector/test_command_monitoring/test_command_execution.md
+                - Test command execution freq: tests/integration/test_logcollector/test_command_monitoring/test_command_execution_freq.md
+            - Test reconnect time: tests/integration/test_logcollector/test_reconnect_time.md
+            - Test keep running:
+                - Test keep running: tests/integration/test_logcollector/test_keep_running/test_keep_running.md
+            - Test location:
+                - Overview: tests/integration/test_logcollector/test_location/index.md
+                - Test location: tests/integration/test_logcollector/test_location/test_location.md
+                - Test exclude: tests/integration/test_logcollector/test_location/test_location_exclude.md
+            - Test log format:
+                - Overview: tests/integration/test_logcollector/test_log_format/index.md
+                - Test log format: tests/integration/test_logcollector/test_log_format/test_log_format_values.md
+            - Test only future events: tests/integration/test_logcollector/test_only_future_events/test_only_future_events.md
+            - Test location custom sockets: tests/integration/test_logcollector/test_location_custom_sockets/test_location_custom_sockets.md
+            - Test macos:
+                - Overview: tests/integration/test_logcollector/test_macos/index.md
+                - Test macos format basic: tests/integration/test_logcollector/test_macos/test_macos_format_basic.md
+                - Test only future events macos format: tests/integration/test_logcollector/test_macos/test_macos_format_only_future_events.md
+                - Test query macos format: tests/integration/test_logcollector/test_macos/test_macos_format_query.md
+            - Test options:
+                - Overview: tests/integration/test_logcollector/test_options/index.md
+                - Test state interval: tests/integration/test_logcollector/test_options/test_options_state_interval.md
+                - Test state interval no file: tests/integration/test_logcollector/test_options/test_options_state_interval_no_file.md
         - Logtest:
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md

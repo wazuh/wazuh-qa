@@ -6,6 +6,7 @@ import os
 import pytest
 
 import wazuh_testing.remote as rm
+from wazuh_testing import TCP_UDP
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 
 
@@ -92,7 +93,7 @@ def test_ping_pong_message(get_configuration, configure_environment, restart_rem
     test_multiple_pings = False
 
     if config['protocol'] in ['TCP,UDP', 'UDP,TCP', 'tcp,udp', 'udp,tcp']:
-        protocol, test_multiple_pings = rm.TCP_UDP, True
+        protocol, test_multiple_pings = TCP_UDP, True
     elif config['protocol'] in ['TCP,TCP', 'UDP,UDP', 'tcp,tcp', 'udp,udp']:
         protocol = config['protocol'].split(',')[0]
     else:

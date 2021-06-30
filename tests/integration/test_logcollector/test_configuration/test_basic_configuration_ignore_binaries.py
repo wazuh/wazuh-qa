@@ -10,7 +10,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 import wazuh_testing.generic_callbacks as gc
 from wazuh_testing.tools import get_service, LOG_FILE_PATH
 import wazuh_testing.logcollector as logcollector
-from wazuh_testing.tools.services import get_process_cmd, check_if_process_is_running, control_service
+from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import truncate_file
 import wazuh_testing.api as api
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX, FileMonitor
@@ -24,12 +24,12 @@ LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
-no_restart_windows_after_configuration_set = True
-force_restart_after_restoring = True
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
 if sys.platform == 'win32':
+    no_restart_windows_after_configuration_set = True
+    force_restart_after_restoring = True
     location = r'C:\testing\files*'
     wazuh_configuration = 'ossec.conf'
     prefix = AGENT_DETECTOR_PREFIX
@@ -67,7 +67,7 @@ metadata = [
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
-configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['IGNORE_BINARIES']}" for x in parameters]
+configuration_ids = [f"{x['location']}_{x['log_format']}_{x['ignore_binaries']}" for x in metadata]
 
 
 # fixtures
@@ -93,7 +93,7 @@ def check_ignore_binaries_valid(cfg):
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     if sys.platform == 'win32':
-        log_callback = logcollector.callback_invalid_location_pattern(cfg['location'], prefix=prefix)
+        log_callback = logcollector.callback_invalid_location_pattern(cfg['location'])
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message=logcollector.GENERIC_CALLBACK_ERROR_INVALID_LOCATION)
 
@@ -102,11 +102,6 @@ def check_ignore_binaries_valid(cfg):
         real_configuration.pop('valid_value')
         api.wait_until_api_ready()
         api.compare_config_api_response([real_configuration], 'localfile')
-    else:
-        if sys.platform == 'win32':
-            assert get_process_cmd('wazuh-agent.exe') != 'None'
-        else:
-            assert check_if_process_is_running('wazuh-logcollector')
 
 
 def check_ignore_binaries_invalid(cfg):

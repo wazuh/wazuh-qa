@@ -21,7 +21,10 @@ setup(name='wazuh_testing',
                                       'data/keepalives.txt',
                                       'data/rootcheck.txt',
                                       'data/syscollector.py',
-                                      'data/winevt.py'
+                                      'data/winevt.py',
+                                      'data/sslmanager.key',
+                                      'data/sslmanager.cert',
+                                      'tools/macos_log/log_generator.m'
                                       ]
                     },
       entry_points={
@@ -30,7 +33,8 @@ setup(name='wazuh_testing',
             'wazuh-metrics=wazuh_testing.scripts.wazuh_metrics:main',
             'wazuh-statistics=wazuh_testing.scripts.wazuh_statistics:main',
             'data-visualizer=wazuh_testing.scripts.data_visualizations:main',
-            'simulate-api-load=wazuh_testing.scripts.simulate_api_load:main'
+            'simulate-api-load=wazuh_testing.scripts.simulate_api_load:main',
+            'wazuh-log-metrics=wazuh_testing.scripts.wazuh_log_metrics:main'
         ],
       },
       include_package_data=True,

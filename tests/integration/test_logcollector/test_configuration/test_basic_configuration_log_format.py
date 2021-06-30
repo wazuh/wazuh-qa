@@ -3,20 +3,21 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import pytest
+import subprocess as sb
 import sys
 
-from wazuh_testing.tools.configuration import load_wazuh_configurations
-import wazuh_testing.logcollector as logcollector
-import wazuh_testing.generic_callbacks as gc
+import pytest
 import wazuh_testing.api as api
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
-from wazuh_testing.tools import get_service
-from wazuh_testing.tools.monitoring import FileMonitor
+import wazuh_testing.generic_callbacks as gc
+import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools import get_service
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
-import subprocess as sb
+from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 
 LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 
@@ -24,14 +25,21 @@ LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
-no_restart_windows_after_configuration_set = True
-force_restart_after_restoring = True
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
+
+default_log_format_configuration = 'wazuh_basic_configuration.yaml'
+multiple_logcollector_configuration = 'wazuh_duplicated_macos_configuration.yaml'
+no_location_defined_configuration = 'wazuh_no_defined_location_macos_configuration.yaml'
+
+configurations_path_default = os.path.join(test_data_path, default_log_format_configuration)
+configurations_path_multiple_logcollector = os.path.join(test_data_path, multiple_logcollector_configuration)
+configurations_path_no_location = os.path.join(test_data_path, no_location_defined_configuration)
 
 local_internal_options = {'logcollector.remote_commands': '1'}
 
 if sys.platform == 'win32':
+    no_restart_windows_after_configuration_set = True
+    force_restart_after_restoring = True
     location = r'C:\testing.txt'
     wazuh_configuration = 'ossec.conf'
     prefix = AGENT_DETECTOR_PREFIX
@@ -43,76 +51,92 @@ else:
 
 wazuh_component = get_service()
 
-parameters = [
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'COMMAND': 'example-command'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'json', 'COMMAND': 'example-command'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'snort-full', 'COMMAND': 'example-command'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'mysql_log', 'COMMAND': 'example-command'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'postgresql_log', 'COMMAND': 'example-command'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapg', 'COMMAND': 'example-command'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'iis', 'COMMAND': 'example-command'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'command', 'COMMAND': 'example-command'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'full_command', 'COMMAND': 'example-command'},
-    {'LOCATION': '/var/log/testing/current', 'LOG_FORMAT': 'djb-multilog', 'COMMAND': 'example-command'},
-    {'LOCATION': '/var/log/testing/current', 'LOG_FORMAT': 'djb-multilog', 'COMMAND': 'example-command'},
-    {'LOCATION': '/var/log/testing/current', 'LOG_FORMAT': 'djb-multilog', 'COMMAND': 'example-command'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'multi-line:3', 'COMMAND': 'example-command'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'squid', 'COMMAND': 'example-command'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit', 'COMMAND': 'example-command'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'invalid', 'COMMAND': 'example-command'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'testing', 'COMMAND': 'example-command'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'iisTesting', 'COMMAND': 'example-command'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapgFSKF', 'COMMAND': 'example-command'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'jsonLGK', 'COMMAND': 'example-command'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'commandFLKD', 'COMMAND': 'example-command'}
+tcases = [
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'json', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'snort-full', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'mysql_log', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'postgresql_log', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapg', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'iis', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'command', 'COMMAND': 'example-command', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'full_command', 'COMMAND': 'example-command', 'VALID_VALUE': True},
+    {'LOCATION': '/var/log/testing/current', 'LOG_FORMAT': 'djb-multilog', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'multi-line:3', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'squid', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'audit', 'VALID_VALUE': True},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'invalid', 'VALID_VALUE': False},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'testing', 'VALID_VALUE': False},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'iisTesting', 'VALID_VALUE': False},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'nmapgFSKF', 'VALID_VALUE': False},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'jsonLGK', 'COMMAND': 'example-command', 'VALID_VALUE': False},
+    {'LOCATION': f'{location}', 'LOG_FORMAT': 'commandFLKD', 'COMMAND': 'example-command', 'VALID_VALUE': False}
 ]
 
-metadata = [
-    {'location': f'{location}', 'log_format': 'syslog', 'command': 'example-command', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'json', 'command': 'example-command', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'snort-full', 'command': 'example-command', 'valid_value': True},
-
-    {'location': f'{location}', 'log_format': 'mysql_log', 'command': 'example-command', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'postgresql_log', 'command': 'example-command', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'nmapg', 'command': 'example-command', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'iis', 'command': 'example-command', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'command', 'command': 'example-command', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'full_command', 'command': 'example-command', 'valid_value': True},
-    {'location': '/var/log/testing/current', 'log_format': 'djb-multilog',
-     'command': 'example-command', 'valid_value': True},
-    {'location': '/var/log/testing/current', 'log_format': 'djb-multilog',
-     'command': 'example-command', 'valid_value': True},
-    {'location': '/var/log/testing/current', 'log_format': 'djb-multilog',
-     'command': 'example-command', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'multi-line:3',
-     'command': 'example-command', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'squid',
-     'command': 'example-command', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'audit',
-     'command': 'example-command', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'invalid',
-     'command': 'example-command', 'valid_value': False},
-    {'location': f'{location}', 'log_format': 'testing', 'command': 'example-command', 'valid_value': False},
-    {'location': f'{location}', 'log_format': 'iisTesting', 'command': 'example-command', 'valid_value': False},
-    {'location': f'{location}', 'log_format': 'nmapgFSKF', 'command': 'example-command', 'valid_value': False},
-    {'location': f'{location}', 'log_format': 'jsonLGK', 'command': 'example-command', 'valid_value': False},
-    {'location': f'{location}', 'log_format': 'commandFLKD', 'command': 'example-command', 'valid_value': False}
+windows_tcases = [
+    {'LOCATION': 'Security', 'LOG_FORMAT': 'eventlog', 'VALID_VALUE': True},
+    {'LOCATION': '/tmp/test.txt', 'LOG_FORMAT': 'eventchannel', 'VALID_VALUE': True}
 ]
+
+macos_tcases = [{'LOCATION': 'macos', 'LOG_FORMAT': 'macos', 'VALID_VALUE': True},
+                {'LOCATION': '/tmp/log.txt', 'LOG_FORMAT': 'macos', 'VALID_VALUE': True},
+                {'LOCATION1': 'macos', 'LOG_FORMAT1': 'macos', 'LOCATION2': 'macos', 'LOG_FORMAT2': 'macos',
+                 'VALID_VALUE': False, 'CONFIGURATION': 'wazuh_duplicated_macos_configuration.yaml'},
+                {'LOG_FORMAT': 'macos', 'VALID_VALUE': True,
+                 'CONFIGURATION': 'wazuh_no_defined_location_macos_configuration.yaml'}
+                ]
 
 if sys.platform == 'win32':
-    parameters.append({'LOCATION': 'Security', 'LOG_FORMAT': 'eventlog', 'COMMAND': 'example-command'})
-    parameters.append({'LOCATION': '/tmp/test.txt', 'LOG_FORMAT': 'eventchannel', 'COMMAND': 'example-command'})
-    metadata.append({'location': 'Security', 'log_format': 'eventlog', 'command': 'example-command', 'valid_value': True})
-    metadata.append({'location': '/tmp/test.txt', 'log_format': 'eventchannel', 'command': 'example-command', 'valid_value': True})
+    tcases += windows_tcases
+elif sys.platform == 'darwin':
+    tcases += macos_tcases
 
+metadata = lower_case_key_dictionary_array(tcases)
 
-configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=parameters,
-                                           metadata=metadata)
-configuration_ids = [f"{x['LOCATION'], x['LOG_FORMAT'], x['COMMAND']}" for x in parameters]
+for element in tcases:
+    element.pop('VALID_VALUE')
 
-log_format_not_print_analyzing_info = ['command', 'full_command', 'eventlog', 'eventchannel']
+parameters = tcases
 
+parameters_default_configuration = [parameter for parameter in parameters if 'CONFIGURATION' not in parameter]
+metadata_default_configuration = [metadata_value for metadata_value in metadata if
+                                  'configuration' not in metadata_value]
+
+configurations = load_wazuh_configurations(configurations_path_default, __name__,
+                                           params=parameters_default_configuration,
+                                           metadata=metadata_default_configuration)
+
+configuration_ids = [f"{x['location']}_{x['log_format']}_{x['command']}" + f"" if 'command' in x
+                     else f"{x['location']}_{x['log_format']}" for x in metadata_default_configuration]
+
+parameters_multiple_logcollector_configuration = [parameter for parameter in parameters if
+                                                  'CONFIGURATION' in parameter and parameter[
+                                                      'CONFIGURATION'] == multiple_logcollector_configuration]
+metadata_multiple_logcollector_configuration = [metadata_value for metadata_value in metadata if
+                                                'configuration' in metadata_value and
+                                                metadata_value['configuration'] == multiple_logcollector_configuration]
+
+configuration_ids += [f"{x['location1']}_{x['log_format1']}_{x['location1']}_{x['log_format2']}" for x in metadata_multiple_logcollector_configuration]
+
+configurations += load_wazuh_configurations(configurations_path_multiple_logcollector, __name__,
+                                            params=parameters_multiple_logcollector_configuration,
+                                            metadata=metadata_multiple_logcollector_configuration)
+
+parameters_no_location_defined_configuration = [parameter for parameter in parameters if
+                                                'CONFIGURATION' in parameter and parameter[
+                                                    'CONFIGURATION'] == no_location_defined_configuration]
+
+metadata_no_location_defined_configuration = [metadata_value for metadata_value in metadata if
+                                              'configuration' in metadata_value and
+                                              metadata_value['configuration'] == no_location_defined_configuration]
+
+configurations += load_wazuh_configurations(configurations_path_no_location, __name__,
+                                            params=parameters_no_location_defined_configuration,
+                                            metadata=metadata_no_location_defined_configuration)
+
+configuration_ids += [f"{x['log_format']}" for x in metadata_no_location_defined_configuration]
+
+log_format_not_print_analyzing_info = ['command', 'full_command', 'eventlog', 'eventchannel', 'macos']
 
 # fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
@@ -140,17 +164,31 @@ def check_log_format_valid(cfg):
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     if cfg['log_format'] not in log_format_not_print_analyzing_info:
-        log_callback = logcollector.callback_analyzing_file(cfg['location'], prefix=prefix)
+        log_callback = logcollector.callback_analyzing_file(cfg['location'])
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
     elif 'command' in cfg['log_format']:
-        log_callback = logcollector.callback_monitoring_command(cfg['log_format'], cfg['command'], prefix=prefix)
+        log_callback = logcollector.callback_monitoring_command(cfg['log_format'], cfg['command'])
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
     elif cfg['log_format'] == 'djb-multilog':
-        log_callback = logcollector.callback_monitoring_djb_multilog(cfg['location'], prefix=prefix)
+        log_callback = logcollector.callback_monitoring_djb_multilog(cfg['location'])
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message="The expected multilog djb log has not been produced")
+
+    elif cfg['log_format'] == 'macos':
+        if 'location' in cfg and cfg['location'] != 'macos':
+            log_callback = logcollector.callback_invalid_location_value_macos(cfg['location'])
+            wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                    error_message="The expected warning invalid macos value has not been produced")
+        if 'location' not in cfg:
+            log_callback = logcollector.callback_missing_location_macos()
+            wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                    error_message="The expected warning missing location value has not been produced")
+
+        log_callback = logcollector.callback_monitoring_macos_logs()
+        wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                error_message="The expected macos log monitoring has not been produced")
 
     if wazuh_component == 'wazuh-manager':
         real_configuration = cfg.copy()
@@ -174,14 +212,23 @@ def check_log_format_invalid(cfg):
     if cfg['valid_value']:
         pytest.skip('Valid values provided')
 
-    log_callback = gc.callback_invalid_value('log_format', cfg['log_format'], prefix)
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
+    if 'log_format1' in cfg and 'log_format2' in cfg:
+        log_callback = logcollector.callback_multiple_macos_block_configuration()
+        wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
+    else:
 
-    log_callback = gc.callback_error_in_configuration('ERROR', prefix,
-                                                      conf_path=f'{wazuh_configuration}')
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
+        log_callback = gc.callback_invalid_value('log_format', cfg['log_format'], prefix)
+        wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
+
+        log_callback = gc.callback_error_in_configuration('ERROR', prefix,
+                                                          conf_path=f'{wazuh_configuration}')
+        wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
+
+
+
 
     if sys.platform != 'win32':
         log_callback = gc.callback_error_in_configuration('CRITICAL', prefix,
@@ -190,7 +237,8 @@ def check_log_format_invalid(cfg):
                                 error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
 
-def test_log_format(get_configuration, configure_environment):
+def test_log_format(get_local_internal_options, configure_local_internal_options, get_configuration,
+                    configure_environment):
     """Check if Wazuh log format field of logcollector works properly.
 
     Ensure Wazuh component fails in case of invalid values and works properly in case of valid
@@ -215,4 +263,4 @@ def test_log_format(get_configuration, configure_environment):
 
         with pytest.raises(expected_exception):
             control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-            check_log_format_invalid(cfg)
+        check_log_format_invalid(cfg)

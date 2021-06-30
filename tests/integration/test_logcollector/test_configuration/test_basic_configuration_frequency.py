@@ -23,8 +23,7 @@ LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
-no_restart_windows_after_configuration_set = True
-force_restart_after_restoring = True
+
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
@@ -34,6 +33,8 @@ wazuh_component = get_service()
 
 
 if sys.platform == 'win32':
+    no_restart_windows_after_configuration_set = True
+    force_restart_after_restoring = True
     command = 'tasklist'
     wazuh_configuration = 'ossec.conf'
     prefix = AGENT_DETECTOR_PREFIX
@@ -87,7 +88,7 @@ problematic_values = ['3s', '3s5m', '3Testing']
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
-configuration_ids = [f"{x['LOG_FORMAT'], x['COMMAND'], x['FREQUENCY']}" for x in parameters]
+configuration_ids = [f"{x['log_format']}_{x['command']}_{x['frequency']}" for x in metadata]
 
 
 def check_configuration_frequency_valid(cfg):
@@ -106,7 +107,7 @@ def check_configuration_frequency_valid(cfg):
     """
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    log_callback = logcollector.callback_monitoring_command(cfg['log_format'], cfg['command'], prefix=prefix)
+    log_callback = logcollector.callback_monitoring_command(cfg['log_format'], cfg['command'])
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 

@@ -8,9 +8,8 @@ import socket
 import sqlite3
 
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_DB_SOCKET_PATH
-from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.monitoring import wazuh_pack, wazuh_unpack
-
+from wazuh_testing.tools.services import control_service
 
 GLOBAL_DB_PATH = f"{WAZUH_PATH}/queue/db/global.db"
 

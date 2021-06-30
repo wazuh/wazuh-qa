@@ -14,9 +14,11 @@ from datetime import datetime
 import pytest
 from numpydoc.docscrape import FunctionDoc
 from py.xml import html
-from wazuh_testing import global_parameters
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH
+
 import wazuh_testing.tools.configuration as conf
+from wazuh_testing import global_parameters
+from wazuh_testing.logcollector import create_file_structure, delete_file_structure
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
@@ -379,7 +381,7 @@ def close_sockets(receiver_sockets):
     """Close the sockets connection gracefully."""
     for socket in receiver_sockets:
         try:
-            # We flush the buffer before closing connection if connection is TCP
+            # We flush the buffer before closing the connection if the protocol is TCP:
             if socket.protocol == 1:
                 socket.sock.settimeout(5)
                 socket.receive()  # Flush buffer before closing connection
@@ -408,16 +410,21 @@ def connect_to_sockets_function(request):
 
 @pytest.fixture(scope='module')
 def configure_local_internal_options(get_local_internal_options):
+    """Configure Wazuh local internal options.
+
+    Args:
+        get_local_internal_options (Fixture): Fixture that returns a dictionary with the desired local internal options.
+    """
     backup_options_lines = conf.get_wazuh_local_internal_options()
     backup_options_dict = conf.local_internal_options_to_dict(backup_options_lines)
-    if not all(option in backup_options_dict.items() for option in get_local_internal_options.items()):
+
+    if backup_options_dict != get_local_internal_options:
         conf.add_wazuh_local_internal_options(get_local_internal_options)
 
         control_service('restart')
 
         yield
 
-        TimeMachine.time_rollback()
         conf.set_wazuh_local_internal_options(backup_options_lines)
 
         control_service('restart')
@@ -510,7 +517,7 @@ def configure_sockets_environment(request):
 
     # Stop wazuh-service and ensure all daemons are stopped
     control_service('stop')
-    check_daemon_status(running=False)
+    check_daemon_status(running_condition=False)
 
     monitored_sockets = list()
     mitm_list = list()
@@ -526,9 +533,9 @@ def configure_sockets_environment(request):
         not daemon_first and mitm is not None and mitm.start()
         control_service('start', daemon=daemon, debug_mode=True)
         check_daemon_status(
-            running=True,
-            daemon=daemon,
-            extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else None
+            running_condition=True,
+            target_daemon=daemon,
+            extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else []
         )
         daemon_first and mitm is not None and mitm.start()
         if mitm is not None:
@@ -545,9 +552,9 @@ def configure_sockets_environment(request):
         mitm is not None and mitm.shutdown()
         control_service('stop', daemon=daemon)
         check_daemon_status(
-            running=False,
-            daemon=daemon,
-            extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else None
+            running_condition=False,
+            target_daemon=daemon,
+            extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else []
         )
 
     # Delete all db
@@ -575,3 +582,23 @@ def put_env_variables(get_configuration, request):
         for env in environment_variables:
             if sys.platform != 'win32':
                 os.unsetenv(env[0])
+
+
+@pytest.fixture(scope="module")
+def create_file_structure_module(get_files_list):
+    """Module scope version of create_file_structure."""
+    create_file_structure(get_files_list)
+
+    yield
+
+    delete_file_structure(get_files_list)
+
+
+@pytest.fixture(scope="function")
+def create_file_structure_function(get_files_list):
+    """Function scope version of create_file_structure."""
+    create_file_structure(get_files_list)
+
+    yield
+
+    delete_file_structure(get_files_list)

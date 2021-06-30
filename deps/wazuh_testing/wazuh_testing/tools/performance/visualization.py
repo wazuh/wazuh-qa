@@ -108,7 +108,7 @@ class DataVisualizer:
     def _load_dataframes(self):
         """Load the dataframes from dataframes_paths."""
         for df_path in self.dataframes_paths:
-            if self.dataframe is None:
+            if self.dataframe is None and self.target != 'cluster':
                 self.dataframe = pd.read_csv(df_path, index_col="Timestamp", parse_dates=True)
             else:
                 new_csv = pd.read_csv(df_path, index_col="Timestamp", parse_dates=True)
@@ -127,6 +127,23 @@ class DataVisualizer:
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
 
     @staticmethod
+    def _get_statistics(df, calculate_mean=True, calculate_median=False):
+        """Function for calculating statistics.
+
+        Args:
+            df (pandas.DataFrame): dataframe on which the operations will be applied.
+            calculate_mean (bool, optional): specify whether or not the mean will be calculated.
+            calculate_median (bool, optional): specify whether or not the median will be calculated.
+        """
+        statistics = str()
+        if calculate_mean:
+            statistics += f"Mean: {round(pd.DataFrame.mean(df), 3)}\n"
+        if calculate_median:
+            statistics += f"Median: {round(pd.DataFrame.median(df), 3)}\n"
+
+        return statistics
+
+    @staticmethod
     def _basic_plot(ax, dataframe, label=None, color=None):
         """Basic function to visualize a dataframe.
 
@@ -138,7 +155,7 @@ class DataVisualizer:
         """
         ax.plot(dataframe, label=label, color=color)
 
-    def _save_custom_plot(self, ax, y_label, title, rotation=90):
+    def _save_custom_plot(self, ax, y_label, title, rotation=90, cluster_log=False, statistics=None):
         """Function to add info to the plot, the legend and save the SVG image.
 
         Args:
@@ -146,13 +163,23 @@ class DataVisualizer:
             y_label (str): label for the Y axis.
             title (str): title of the plot.
             rotation (int, optional): optional int to set the rotation of the X-axis labels.
+            cluster_log (bool, optional): optional flag used to plot specific graphics for the cluster.
+            statistics (str, optional): optional statistics measures.
         """
+        if statistics:
+            ax.text(0.9, 0.9, statistics, fontsize=14, transform=plt.gcf().transFigure)
+
         ax.legend(loc='center left', bbox_to_anchor=(1.0, 0.5))
         ax.set_ylabel(y_label)
         ax.set_title(title)
-        self._set_x_ticks_interval(ax)
-        plt.xticks(rotation=rotation)
-        svg_name = sub(pattern=r'\(.*\)', string=y_label, repl='')
+
+        if not cluster_log:
+            self._set_x_ticks_interval(ax)
+            plt.xticks(rotation=rotation)
+            svg_name = sub(pattern=r'\(.*\)', string=y_label, repl='')
+        else:
+            svg_name = sub(pattern=r'\(.*\)', string=title, repl='')
+
         if self.base_name is not None:
             svg_name = f"{self.base_name}_{svg_name}"
         plt.savefig(join(self.store_path, f"{svg_name}.svg"), dpi=1200, format='svg')
@@ -184,6 +211,29 @@ class DataVisualizer:
                     self._basic_plot(ax, self.dataframe[self.dataframe.target == target][element],
                                      label=target, color=color)
                 self._save_custom_plot(ax, element, title)
+
+        elif self.target == 'cluster':
+            for element in elements:
+                fig, ax = plt.subplots()
+                nodes = self.dataframe[self.dataframe.activity == element]['node_name'].unique()
+                current_df = self.dataframe[self.dataframe.activity == element]
+                current_df.reset_index(drop=True, inplace=True)
+                for node, color in zip(nodes, self._color_palette(len(nodes) + 1)):
+                    self._basic_plot(ax=ax, dataframe=current_df[current_df.node_name == node]['time_spent(s)'],
+                                     label=node, color=color)
+                self._save_custom_plot(ax, 'time_spent(s)', element.replace(' ', '_').lower(), cluster_log=True,
+                                       statistics=DataVisualizer._get_statistics(
+                                           current_df['time_spent(s)'], calculate_mean=True, calculate_median=True))
+
+        elif self.target == 'api':
+            for element in elements:
+                fig, ax = plt.subplots()
+                queries = self.dataframe.endpoint.unique()
+                colors = self._color_palette(len(queries))
+                for endpoint, color in zip(queries, colors):
+                    self._basic_plot(ax, self.dataframe[self.dataframe.endpoint == endpoint]['time_spent(s)'],
+                                     label=endpoint, color=color)
+                self._save_custom_plot(ax, element, 'API Response time')
 
         else:
             fig, ax = plt.subplots()
@@ -230,6 +280,14 @@ class DataVisualizer:
             title = LOGCOLLECTOR_CSV_HEADERS[element]['title']
             self._plot_data(elements=columns, title=title, generic_label=element)
 
+    def _plot_cluster_dataset(self):
+        """Function to plot the information from the cluster.log file."""
+        self._plot_data(elements=list(self.dataframe['activity'].unique()), generic_label='Managers')
+
+    def _plot_api_dataset(self):
+        """Function to plot the information from the api.log file."""
+        self._plot_data(elements=['endpoint'], generic_label='Queries')
+
     def plot(self):
         """Public function to plot the dataset."""
         if self.target == 'binary':
@@ -242,6 +300,10 @@ class DataVisualizer:
             self._plot_agentd_dataset()
         elif self.target == 'logcollector':
             self._plot_logcollector_dataset()
+        elif self.target == 'cluster':
+            self._plot_cluster_dataset()
+        elif self.target == 'api':
+            self._plot_api_dataset()
         else:
             raise AttributeError(f"Invalid target {self.target}")
 

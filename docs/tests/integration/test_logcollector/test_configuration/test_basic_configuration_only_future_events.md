@@ -2,13 +2,14 @@
 ## Overview 
 
 Check if `wazuh-agent` fails using invalid `only-future-events` values and allows valid `only-future-events` 
-values.
+values. It also tests the attribute `max-size` for the option which is supposed to accept a number and an unit suach 
+as 'KB' or 'GB' 
 
 ## Objective
 
-- To confirm `only-future-events` option allows valid values.
-- To confirm `wazuh-logcollector` and `wazuh-agent` fails when invalid `only-future-events` 
-  values are provided.
+- To confirm `only-future-events` option and the attribute `max-size`allow valid values.
+- To confirm `wazuh-logcollector` and `wazuh-agent` fails when invalid `only-future-events`  or invalid `max-size` 
+  values are provided
 - To confirm the API response is equal to set configuration.
 
 ## General info

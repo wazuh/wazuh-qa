@@ -1,7 +1,7 @@
 import os
 import platform
 
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH, get_version
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.file import truncate_file
 
 AR_FOLDER = 'active-response' if platform.system() == 'Windows' else 'logs'
