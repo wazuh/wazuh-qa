@@ -34,6 +34,22 @@ def parse_custom_labels(labels):
     return custom_labels
 
 
+def process_script_parameters(args):
+    """Process script parameters and edit them if necessary.
+
+    Args:
+        args (argparse.Namespace): Script args.
+    """
+    # Add keepalive and receive_message modules if they are not specified in script parameters
+    if 'keepalive' not in args.modules:
+        args.modules.append('keepalive')
+        args.modules_eps.append('0')
+
+    if 'receive_messages' not in args.modules:
+        args.modules.append('receive_messages')
+        args.modules_eps.append('0')
+
+
 def set_agent_modules_and_eps(agent, active_modules, modules_eps):
     """Set active modules and EPS to an agent.
 
@@ -87,7 +103,7 @@ def create_agents(args):
 
         for module, eps in zip(args.modules, args.modules_eps):
             modules_eps_data.append({
-                'remaining': eps,
+                'remaining': int(eps),
                 'module': module
             })
 
@@ -283,14 +299,14 @@ def main():
     arg_parser.add_argument('-v', '--version', metavar='<version>', dest='version',
                             type=str, required=False, default='4.2.0', help='Agent wazuh version')
 
-    arg_parser.add_argument('-m', '--modules', dest='modules', required=True, type=str, nargs='+', action='store',
-                            default=[], help='Active module separated by whitespace.')
+    arg_parser.add_argument('-m', '--modules', dest='modules', required=False, type=str, nargs='+', action='store',
+                            default=['keepalive', 'receive_messages'], help='Active module separated by whitespace.')
 
     arg_parser.add_argument('-l', '--labels', dest='labels', required=False, type=str, nargs='+',
                             action='store', default=None, help='Wazuh agent labels.')
 
-    arg_parser.add_argument('-s', '--modules-eps', dest='modules_eps', required=True, type=int, nargs='+',
-                            action='store', default=None, help='Active module EPS separated by whitespace.')
+    arg_parser.add_argument('-s', '--modules-eps', dest='modules_eps', required=False, type=str, nargs='+',
+                            action='store', default=['0', '0'], help='Active module EPS separated by whitespace.')
 
     arg_parser.add_argument('-f', '--fixed-message-size', metavar='<fixed_message_size>', type=int, required=False,
                             default=None, help='Size of all the agent modules messages (KB)', dest='fixed_message_size')
@@ -307,6 +323,8 @@ def main():
                             required=False, default=0, dest='waiting_connection_time')
 
     args = arg_parser.parse_args()
+
+    process_script_parameters(args)
 
     agents = create_agents(args)
 
