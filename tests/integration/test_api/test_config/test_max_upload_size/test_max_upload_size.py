@@ -31,12 +31,12 @@ def get_configuration(request):
 
 # Tests
 
-@pytest.mark.parametrize('tags_to_apply', [
-    {'limitless_upload_size'},
-    {'low_upload_size'}
+@pytest.mark.parametrize('tags_to_apply, expected_status_code', [
+    ({'limitless_upload_size'}, 200),
+    ({'low_upload_size'}, 413)
 ])
 def test_max_upload_size(tags_to_apply, get_configuration, configure_api_environment, restart_api, wait_for_start,
-                         get_api_details):
+                         get_api_details, expected_status_code):
     """Verify that a 413 status code is returned if the body is bigger than 'max_upload_size'.
 
     Calls to a PUT and a POST endpoint specifying a body. If the 'max_upload_size'
@@ -46,10 +46,10 @@ def test_max_upload_size(tags_to_apply, get_configuration, configure_api_environ
 
     Args:
         tags_to_apply (set): Run test if match with a configuration identifier, skip otherwise.
+        expected_status_code (int): Status code that should be returned when trying to run the endpoint.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
     api_details = get_api_details()
-    expected_status_code = 413 if 'low_upload_size' in tags_to_apply else 200
 
     # Try to create a new group.
     response = requests.post(api_details['base_url'] + '/groups', headers=api_details['auth_headers'],
