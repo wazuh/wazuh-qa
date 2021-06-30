@@ -20,7 +20,7 @@ new session of logtest is opened
 
 |Tier | Total | Time spent |
 | :--:| :--:  | :--:       |
-| 0   |    5 |    3s  |
+| 0   |    4 |    2s  |
 
 ## Expected behavior
 
