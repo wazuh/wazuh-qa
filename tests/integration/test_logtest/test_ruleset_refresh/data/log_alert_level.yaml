@@ -1,0 +1,85 @@
+---
+-
+  name: 'Check no alert for default level alert'
+  input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"event": "{\"it_logtest\" : \"rules\", \"test\": \"test_no_alert\"}","log_format": "syslog","location": "master->/var/log/syslog"}}'
+  rule_id: '880002'
+  rule_dir: 'etc/rules/'
+  rule_file: "custom_alert_rule_default.xml"
+  alert: False
+  sections:
+     - section: 'ruleset'
+       elements:
+        - decoder_dir: 
+            value: 'ruleset/decoders'
+        - rule_dir: 
+            value: 'ruleset/rules'
+        - rule_exclude: 
+            value: '0215-policy_rules.xml'
+        - rule_dir: 
+            value: 'etc/rules'
+-
+  name: 'Check alert for default level alert'
+  input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"event": "{\"it_logtest\" : \"rules\", \"test\": \"test_alert\"}","log_format": "syslog","location": "master->/var/log/syslog"}}'
+  rule_id: '880001'
+  rule_dir: 'etc/rules/'
+  rule_file: "custom_alert_rule_default.xml"
+  alert: True
+  sections:
+     - section: 'ruleset'
+       elements:
+        - decoder_dir: 
+            value: 'ruleset/decoders'
+        - rule_dir: 
+            value: 'ruleset/rules'
+        - rule_exclude: 
+            value: '0215-policy_rules.xml'
+        - rule_dir: 
+            value: 'etc/rules'
+-
+  name: 'Check no alert for alert level 8'
+  input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"event": "{\"it_logtest\" : \"rules\", \"test\": \"test_no_alert\"}","log_format": "syslog","location": "master->/var/log/syslog"}}'
+  rule_id: '880002'
+  rule_dir: 'etc/rules/'
+  rule_file: "custom_alert_rule_level_8.xml"
+  alert: False
+  sections:
+     - section: 'ruleset'
+       elements:
+        - decoder_dir: 
+            value: 'ruleset/decoders'
+        - rule_dir: 
+            value: 'ruleset/rules'
+        - rule_exclude: 
+            value: '0215-policy_rules.xml'
+        - rule_dir: 
+            value: 'etc/rules'
+     - section: 'alerts'
+       elements:
+        - log_alert_level:
+            value: 8
+        - email_alert_level:
+            value: 12
+-
+  name: 'Check  alert for alert level 8'
+  input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"event": "{\"it_logtest\" : \"rules\", \"test\": \"test_alert\"}","log_format": "syslog","location": "master->/var/log/syslog"}}'
+  rule_id: '880001'
+  rule_dir: 'etc/rules/'
+  rule_file: "custom_alert_rule_level_8.xml"
+  alert: True
+  sections:
+     - section: 'ruleset'
+       elements:
+        - decoder_dir: 
+            value: 'ruleset/decoders'
+        - rule_dir: 
+            value: 'ruleset/rules'
+        - rule_exclude: 
+            value: '0215-policy_rules.xml'
+        - rule_dir: 
+            value: 'etc/rules'
+     - section: 'alerts'
+       elements:
+        - log_alert_level:
+            value: 8
+        - email_alert_level:
+            value: 12
