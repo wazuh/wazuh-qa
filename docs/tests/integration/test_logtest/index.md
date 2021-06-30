@@ -42,3 +42,7 @@ pre-defined scenarios.
 
 - **[Test load rules decoders](test_rules_decoders_load/test_load_rules_decoders.md)**:
 Check if `wazuh-logtest` produce the correct rule/decoder matching.
+#### Test ruleset refresh
+
+- Check that `logtest` works as expected with the operation of 
+loading new cdb list files without the need to restart the manager.
