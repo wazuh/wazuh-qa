@@ -3,7 +3,7 @@
 -->
 <group name="ITs,">
 
-<rule id="100088" level="0">
+  <rule id="100088" level="0">
     <decoded_as>json</decoded_as>
     <field name="it_logtest">rules</field>
     <description>Parent rules IT</description>
@@ -14,4 +14,5 @@
     <field name="test">^rule_include$</field>
     <description>test rule_include</description>
   </rule>
-  </group>
+
+</group>
