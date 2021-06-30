@@ -35,8 +35,8 @@ def get_configuration(request):
     ({'limitless_upload_size'}, 200),
     ({'low_upload_size'}, 413)
 ])
-def test_max_upload_size(tags_to_apply, get_configuration, configure_api_environment, restart_api, wait_for_start,
-                         get_api_details, expected_status_code):
+def test_max_upload_size(tags_to_apply, expected_status_code, get_configuration, configure_api_environment, restart_api,
+                         wait_for_start, get_api_details):
     """Verify that a 413 status code is returned if the body is bigger than 'max_upload_size'.
 
     Calls to a PUT and a POST endpoint specifying a body. If the 'max_upload_size'
