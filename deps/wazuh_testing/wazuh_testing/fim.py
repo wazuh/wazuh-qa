@@ -1356,7 +1356,7 @@ def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=1
         if monitor:
             monitor.start(timeout=timeout, callback=callback_detect_end_scan,
                           update_position=False,
-                          error_message=f'End of scheduled scan not detected after ' f'{timeout} seconds')
+                          error_message=f'End of scheduled scan not detected after {timeout} seconds')
 
 
 def callback_configuration_warning(line):

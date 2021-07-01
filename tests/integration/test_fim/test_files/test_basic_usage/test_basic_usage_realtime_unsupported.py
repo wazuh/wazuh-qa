@@ -1,4 +1,3 @@
-# cat test_realtime_unsupported.py
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
@@ -6,6 +5,7 @@
 import os
 
 import pytest
+import re
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import generate_params, regular_file_cud, LOG_FILE_PATH, callback_num_inotify_watches, \
                               detect_initial_scan, CHECK_ALL, REQUIRED_ATTRIBUTES
@@ -36,17 +36,24 @@ conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
 parameters, metadata = generate_params(extra_params=conf_params, modes=['scheduled'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
+# helper functions
+
+
+def callback_ignore_realtime_flag(line):
+    match = re.match(r".*Ignoring flag for real time monitoring on directory: (.+)$", line)
+    if match:
+        return True
+
 # fixtures
 
 
 @pytest.fixture(scope='function', params=configurations)
 def check_realtime_mode_failure():
-    try:
-        wazuh_log_monitor.start(timeout=60, callback=callback_num_inotify_watches,
-                                error_message='Did not receive expected "Folders monitored with real-time engine..." \
-                                event', update_position=False)
-    except TimeoutError:
-        detect_initial_scan(wazuh_log_monitor)
+
+    wazuh_log_monitor.start(timeout=60, callback=callback_ignore_realtime_flag,
+                            error_message='Did not receive expected "Ignoring flag for real time monitoring on  \
+                            directory: ..." event', update_position=False)
+    detect_initial_scan(wazuh_log_monitor)
 
 
 @pytest.fixture(scope='module', params=configurations)

@@ -1,14 +1,13 @@
 # Test basic usage realtime unsupported
 
-The test check for the correct transition to FIM mode scheduled when realtime is not avaible in the current OS and is
-set in the ossec.conf as a monitorization mode.
+The test checks for FIM to properly change from realtime to scheduled mode when it is not supported.
 
 ## General info
 
 | Tier | Platforms | Time spent | Test file |
 |:--:|:--:|:--:|:--:|
-| 0 | Macos | 65 | test_basic_usage_realtime_unsupported.py
-| 0 | Solaris | 64 | test_basic_usage_realtime_unsupported.py
+| 0 | Macos | 4s | test_basic_usage_realtime_unsupported.py
+| 0 | Solaris | 5s | test_basic_usage_realtime_unsupported.py
 
 ## Test logic
 
