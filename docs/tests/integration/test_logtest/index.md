@@ -13,23 +13,28 @@ that every option available work as expected.
 
 #### Test configuration
 
-- Check that `logtest` works as expected under different pre-defined
+- **[Test configuration file](test_configuration/test_configuration_file.md)**:
+Check that `logtest` works as expected under different pre-defined
 configurations that either produce the logtest to correctly start; to be
 disabled or to log an error.
 
-- Check that `analisysd` correctly retrieves the pre-defined configurations that
+- **[Test get configuration sock](test_configuration/test_get_configuration_sock.md)**:
+Check that `analisysd` correctly retrieves the pre-defined configurations that
 are set.
 
 #### Test invalid socket input
 
-- Check that `logtest` correctly detects and handles errors when sending a
+- **[Test invalid socket input](test_invalid_socket_input/test_invalid_socket_input.md)**:
+Check that `logtest` correctly detects and handles errors when sending a
 message through the socket to `analysisd`.
 
 #### Test invalid token
 
-- Check that `logtest` correctly detects and handles errors when using a token.
+- **[Test invalid token](test_invalid_token/test_invalid_token.md)**:
+Check that `logtest` correctly detects and handles errors when using a token.
 
 #### Test remove session
 
-- Check that `logtest` correctly detects and removes the sessions under
+- **[Test remove session](test_remove_session/test_remove_session.md)**:
+Check that `logtest` correctly detects and removes the sessions under
 pre-defined scenarios.
