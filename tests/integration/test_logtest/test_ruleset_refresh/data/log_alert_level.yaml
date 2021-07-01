@@ -17,6 +17,13 @@
             value: '0215-policy_rules.xml'
         - rule_dir: 
             value: 'etc/rules'
+     - section: 'alerts'
+       elements:
+        - log_alert_level:
+            value: 3
+        - email_alert_level:
+            value: 12
+
 -
   name: 'Check alert with default alert level'
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"event": "{\"it_logtest\" : \"rules\", \"test\": \"test_alert\"}","log_format": "syslog","location": "master->/var/log/syslog"}}'
@@ -35,6 +42,13 @@
             value: '0215-policy_rules.xml'
         - rule_dir: 
             value: 'etc/rules'
+     - section: 'alerts'
+       elements:
+        - log_alert_level:
+            value: 3
+        - email_alert_level:
+            value: 12
+
 -
   name: 'Check no alerts with alert level set as "8"'
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"event": "{\"it_logtest\" : \"rules\", \"test\": \"test_no_alert\"}","log_format": "syslog","location": "master->/var/log/syslog"}}'
@@ -60,7 +74,7 @@
         - email_alert_level:
             value: 12
 -
-  name: 'Check no alerts with alert level set as "8"'
+  name: 'Check alerts with alert level set as "8"'
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"event": "{\"it_logtest\" : \"rules\", \"test\": \"test_alert\"}","log_format": "syslog","location": "master->/var/log/syslog"}}'
   rule_id: '880001'
   rule_dir: 'etc/rules/'
