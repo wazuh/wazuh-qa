@@ -97,7 +97,7 @@ def check_active_agents(num_agents=1, manager_address='127.0.0.1', agent_version
     for thread in send_event_threads:
         thread.join()
 
-    # Check agent active status for earch agent
+    # Check agent pending status for earch agent
     for agent in agents:
         if agent.get_connection_status() != 'pending':
             raise AttributeError(f"Agent is not pending yet")
