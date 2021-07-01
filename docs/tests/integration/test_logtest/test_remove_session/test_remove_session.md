@@ -2,24 +2,22 @@
 
 ## Overview
 
-Checks if...
+Check if `wazuh-logtest` correctly detects and removes the sessions under
+pre-defined scenarios.
 
 ## Objective
 
-- 
+- Confirm that `wazuh-logtest` correctly handles the sessions removals.
 
 ## General info
 
 |Tier | Total | Time spent |
 | :--:| :--:  | :--:       |
-| 0   |    N |    999s  |
-
+| 0   |    9 |    1s  |
 
 ## Expected behavior
 
-- 
-- 
-- 
+- Fail if the session removal attempt does not produce the expected result message.
 
 ## Code documentation
 
