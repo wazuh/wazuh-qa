@@ -24,7 +24,7 @@ To run the tests you need to have `python3 >= 3.6` installed along with a set of
 
 You can see all the information about it **[here](set_up_environment.md#setting-up-a-test-environment)**
 
-##  About test structure
+## About test structure
 
 See **[here](help.md#integration-tests-structure)** more information about the testing files structure or about `pytest`
 testing framework.
