@@ -23,27 +23,27 @@ will be generated with scheduled mode and not realtime as it is set in the confi
 platform sunos5 -- Python 3.7.6, pytest-6.2.3, py-1.10.0, pluggy-0.13.1 -- /opt/python3/bin/python3
 cachedir: .pytest_cache
 metadata: {'Python': '3.7.6', 'Platform': 'SunOS-5.11-i86pc-i386-32bit-ELF', 'Packages': {'pytest': '6.2.3', 'py': '1.10.0', 'pluggy': '0.13.1'}, 'Plugins': {'html': '3.1.1', 'metadata': '1.8.0', 'testinfra': '5.0.0'}}
-rootdir: /tmp/Test_integration_B7006_20210629092823/tests/integration, configfile: pytest.ini
+rootdir: /tmp/Test_integration_B7150_20210701111105/tests/integration, configfile: pytest.ini
 plugins: html-3.1.1, metadata-1.8.0, testinfra-5.0.0
 collecting ... collected 1 item
 
 test_fim/test_files/test_basic_usage/test_basic_usage_realtime_unsupported.py::test_realtime_unsupported[get_configuration0-check_realtime_mode_failure0-testfile.txt-/dir] PASSED [100%]
 
-- generated html file: file:///tmp/Test_integration_B7006_20210629092823/report.html -
-========================= 1 passed in 64.76s (0:01:04) =========================
+- generated html file: file:///tmp/Test_integration_B7150_20210701111105/report.html -
+============================== 1 passed in 5.87s ===============================
 
 ============================= test session starts ==============================
 platform darwin -- Python 3.7.3, pytest-6.2.3, py-1.10.0, pluggy-0.13.1 -- /Library/Developer/CommandLineTools/usr/bin/python3
 cachedir: .pytest_cache
 metadata: {'Python': '3.7.3', 'Platform': 'Darwin-19.0.0-x86_64-i386-64bit', 'Packages': {'pytest': '6.2.3', 'py': '1.10.0', 'pluggy': '0.13.1'}, 'Plugins': {'testinfra': '5.0.0', 'html': '3.1.1', 'metadata': '1.8.0'}}
-rootdir: /private/tmp/Test_integration_B7006_20210629092823/tests/integration, configfile: pytest.ini
+rootdir: /private/tmp/Test_integration_B7150_20210701111105/tests/integration, configfile: pytest.ini
 plugins: testinfra-5.0.0, html-3.1.1, metadata-1.8.0
 collecting ... collected 1 item
 
 test_fim/test_files/test_basic_usage/test_basic_usage_realtime_unsupported.py::test_realtime_unsupported[get_configuration0-check_realtime_mode_failure0-testfile.txt-/private/var/root/dir] PASSED [100%]
 
-- generated html file: file:///tmp/Test_integration_B7006_20210629092823/report.html -
-========================= 1 passed in 65.05s (0:01:05) =========================
+- generated html file: file:///tmp/Test_integration_B7150_20210701111105/report.html -
+============================== 1 passed in 4.76s ===============================
 ```
 
 ## Code documentation

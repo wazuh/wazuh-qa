@@ -15,17 +15,16 @@ from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
+
 pytestmark = [pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]
 
 # variables
 
 
 test_directories = [os.path.join(PREFIX, 'dir')]
-
 directory_str = str(test_directories[0])
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_check_realtime.yaml')
-testdir = test_directories
 test_file = "testfile.txt"
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
@@ -61,10 +60,11 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
-
-@pytest.mark.parametrize('folder', testdir)
-@pytest.mark.parametrize('file', [test_file])
 # tests
+
+
+@pytest.mark.parametrize('folder', test_directories)
+@pytest.mark.parametrize('file', [test_file])
 def test_realtime_unsupported(folder, file, get_configuration, configure_environment, restart_syscheckd,
                               check_realtime_mode_failure):
     """ Check if the current OS platform falls to the scheduled mode when realtime isn't avaible.
@@ -75,8 +75,8 @@ def test_realtime_unsupported(folder, file, get_configuration, configure_environ
         get_configuration (fixture): Gets the current configuration of the test.
         configure_environment (fixture): Configure the environment for the execution of the test.
         restart_syscheckd (fixture): Restarts syscheck.
-        check_realtime_mode_failure (fixture): Try to catch the initial realtime monitorization event and if fails \
-        then waits for the initial FIM scan event.
+        check_realtime_mode_failure (fixture): Try to catch the initial realtime warning about ignoring the realtime  \
+            flag event and then waits for the initial FIM scan event.
     """
 
     regular_file_cud(folder, wazuh_log_monitor, file_list=[file], time_travel=True, triggers_event=True,

@@ -1341,6 +1341,9 @@ def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=1
         monitor (FileMonitor, optional): if passed, after changing system clock it will check for the end of the
             scheduled scan. The `monitor` will not consume any log line. Default `None`.
         timeout (int, optional): If a monitor is provided, this parameter sets how log to wait for the end of scan.
+    Raises
+        TimeoutError: if `monitor` is not `None` and the scan has not ended in the
+            default timeout specified in `global_parameters`.
     """
 
     if 'fim_mode' in global_parameters.current_configuration['metadata'].keys():
