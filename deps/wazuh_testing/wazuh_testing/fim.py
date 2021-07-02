@@ -1036,15 +1036,15 @@ def callback_detect_integrity_event(line):
 
 
 def callback_detect_registry_integrity_state_event(line):
-    match = re.match(r'.*Sending integrity control message: {"component":"fim_registry","type":"state","data":(.+)}', line)
-    if match:
-        return json.loads(match.group(1))
+    event = callback_detect_integrity_event(line)
+    if event and event['component'] == 'fim_registry' and event['type'] == 'state':
+        return event['data']
     return None
 
 
 def callback_detect_registry_integrity_clear_event(line):
-    match = re.match(r'.*Sending integrity control message: {"component":"fim_registry","type":"integrity_clear".*', line)
-    if match:
+    event = callback_detect_integrity_event(line)
+    if event and event['component'] == 'fim_registry' and event['type'] == 'integrity_clear':
         return True
     return None
 
