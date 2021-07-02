@@ -104,6 +104,11 @@ def find_value_in_event_list(key_path, value_name, event_list):
     return None
 
 
+def extra_configuration_after_yield():
+    """Remove the registry key when the test ends"""
+    fim.delete_registry(fim.registry_parser[key], subkey, fim.KEY_WOW64_64KEY)
+
+
 @pytest.fixture(scope='function', params=configurations)
 def remove_key_and_restart(request):
     """Fixture that removes the test key and restart the agent. The aim of this
@@ -117,6 +122,10 @@ def remove_key_and_restart(request):
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
     control_service('start')
 
+    # wait until the sync is done.
+    wazuh_log_monitor.start(timeout=sync_interval + 15, callback=fim.callback_detect_registry_integrity_clear_event,
+                            error_message='Did not receive expected "integrity clear" event')
+
 
 # tests
 
@@ -124,7 +133,7 @@ def remove_key_and_restart(request):
 @pytest.mark.parametrize('key_name', [':subkey1', 'subkey2:', ':subkey3:'])
 @pytest.mark.parametrize('value_name', [':value1', 'value2:', ':value3:'])
 def test_registry_sync_after_restart(key_name, value_name, tags_to_apply, get_configuration, configure_environment,
-                                     remove_key_and_restart, wait_for_fim_start):
+                                     remove_key_and_restart):
     """
     Test to check that FIM synchronizes the registry DB when a modification is performed while the agent is down.
 
@@ -143,10 +152,6 @@ def test_registry_sync_after_restart(key_name, value_name, tags_to_apply, get_co
     check_apply_test(tags_to_apply, get_configuration['tags'])
     key_path = os.path.join(subkey, key_name)
     value_path = os.path.join(key, key_path, value_name)
-
-    # wait until the sync is done.
-    wazuh_log_monitor.start(timeout=sync_interval + 15, callback=fim.callback_detect_registry_integrity_clear_event,
-                            error_message='Did not receive expected "integrity clear" event')
 
     # stops syscheckd
     control_service('stop')
