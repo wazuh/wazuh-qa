@@ -17,14 +17,14 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # variables
 key = "HKEY_LOCAL_MACHINE"
-subkey = "SOFTWARE\\random_key"
+monitored_key = "SOFTWARE\\random_key"
 
 sync_interval = 20
 max_events = 20
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_registry_responses_win32.yaml')
-conf_params = {'WINDOWS_REGISTRY': os.path.join(key, subkey), 'SYNC_INTERVAL': sync_interval}
+conf_params = {'WINDOWS_REGISTRY': os.path.join(key, monitored_key), 'SYNC_INTERVAL': sync_interval}
 wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
 
 # configurations
@@ -106,7 +106,7 @@ def find_value_in_event_list(key_path, value_name, event_list):
 
 def extra_configuration_after_yield():
     """Remove the registry key when the test ends"""
-    fim.delete_registry(fim.registry_parser[key], subkey, fim.KEY_WOW64_64KEY)
+    fim.delete_registry(fim.registry_parser[key], monitored_key, fim.KEY_WOW64_64KEY)
 
 
 @pytest.fixture(scope='function', params=configurations)
@@ -115,7 +115,7 @@ def remove_key_and_restart(request):
        fixture is to avoid false positives if the manager still has the test  key
        in it's DB.
     """
-    fim.delete_registry(fim.registry_parser[key], subkey, fim.KEY_WOW64_64KEY)
+    fim.delete_registry(fim.registry_parser[key], monitored_key, fim.KEY_WOW64_64KEY)
     control_service('stop')
     truncate_file(fim.LOG_FILE_PATH)
     file_monitor = FileMonitor(fim.LOG_FILE_PATH)
@@ -123,7 +123,8 @@ def remove_key_and_restart(request):
     control_service('start')
 
     # wait until the sync is done.
-    wazuh_log_monitor.start(timeout=sync_interval + 15, callback=fim.callback_detect_registry_integrity_clear_event,
+    wazuh_log_monitor.start(timeout=sync_interval + global_parameters.default_timeout,
+                            callback=fim.callback_detect_registry_integrity_clear_event,
                             error_message='Did not receive expected "integrity clear" event')
 
 
@@ -150,12 +151,12 @@ def test_registry_sync_after_restart(key_name, value_name, tags_to_apply, get_co
         ValueError: If a path or value are not in the sync event.
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    key_path = os.path.join(subkey, key_name)
+    key_path = os.path.join(monitored_key, key_name)
     value_path = os.path.join(key, key_path, value_name)
 
     # stops syscheckd
     control_service('stop')
-    fim.create_registry(fim.registry_parser[key], subkey, fim.KEY_WOW64_64KEY)
+    fim.create_registry(fim.registry_parser[key], monitored_key, fim.KEY_WOW64_64KEY)
     key_handle = fim.create_registry(fim.registry_parser[key], key_path, fim.KEY_WOW64_64KEY)
 
     fim.modify_registry_value(key_handle, value_name, fim.REG_SZ, 'This is a test with syscheckd down.')
