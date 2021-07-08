@@ -301,7 +301,14 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
                 return proc.create_time()
         pytest.fail("Auditd is not running")
 
-    plugin_path = "/etc/audisp/plugins.d/af_wazuh.conf"
+    audit2_path = "/etc/audisp/plugins.d/af_wazuh.conf"
+    audit3_path = "/etc/audit/plugins.d/af_wazuh.conf"
+    if os.path.exists(audit2_path):
+        plugin_path = audit2_path
+    elif os.path.exists(audit3_path):
+        plugin_path = audit3_path
+    else:
+        raise Exception('Audit plugin not found')
 
     logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
