@@ -72,7 +72,7 @@ def get_configuration(request):
 @pytest.mark.parametrize('test_case',
                          [test_case['test_case'] for test_case in test_cases],
                          ids=[test_case['name'] for test_case in test_cases])
-def test_agentd_state_config(configure_environment, test_case: list):
+def test_agentd_state_config(test_case: list):
 
     control_service('stop', 'wazuh-agentd')
 
