@@ -51,18 +51,25 @@ callbacks = {
 }
 
 
-# Functions
-def extra_configuration_before_yield():
-    change_internal_options('agent.debug', '2')
-
-
-def extra_configuration_after_yield():
-    # Set default values
-    change_internal_options('agent.debug', '0')
+# Fixture
+@pytest.fixture(scope='module')
+def set_local_internal_options():
+    """Set local internal options"""
+    if sys.platform == 'win32':
+        change_internal_options('windows.debug', '2')
+    else:
+        change_internal_options('agent.debug', '2')
+        
+    yield
+    
+    if sys.platform == 'win32':
+        change_internal_options('windows.debug', '0')
+    else:
+        change_internal_options('agent.debug', '0')
+        
     set_state_interval(5, internal_options)
 
 
-# Fixture
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -72,7 +79,7 @@ def get_configuration(request):
 @pytest.mark.parametrize('test_case',
                          [test_case['test_case'] for test_case in test_cases],
                          ids=[test_case['name'] for test_case in test_cases])
-def test_agentd_state_config(test_case: list):
+def test_agentd_state_config(test_case: list, set_local_internal_options):
 
     control_service('stop', 'wazuh-agentd')
 
