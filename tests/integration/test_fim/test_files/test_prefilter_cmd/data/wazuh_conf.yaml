@@ -3,7 +3,7 @@
 - tags:
   - prefilter_cmd
   apply_to_modules:
-  - test_prefilter_cmd
+  - test_prefilter_cmd_conf
   sections:
   - section: syscheck
     elements:

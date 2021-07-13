@@ -59,7 +59,7 @@ def check_prelink():
 @pytest.mark.parametrize('tags_to_apply', [
     ({'prefilter_cmd'})
 ])
-def test_prefilter_cmd(tags_to_apply, get_configuration, configure_environment, check_prelink, restart_syscheckd):
+def test_prefilter_cmd_conf(tags_to_apply, get_configuration, configure_environment, check_prelink, restart_syscheckd):
     """
     Check if prelink is installed and syscheck works. If prelink is not installed, checks if an error log is received.
 
