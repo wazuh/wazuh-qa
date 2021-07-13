@@ -7,7 +7,8 @@ import subprocess
 
 import distro
 import pytest
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params
+from wazuh_testing import global_parameters
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, check_fim_start, callback_configuration_error
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -58,10 +59,9 @@ def check_prelink():
 @pytest.mark.parametrize('tags_to_apply', [
     ({'prefilter_cmd'})
 ])
-def test_prefilter_cmd(tags_to_apply, get_configuration, configure_environment, check_prelink, restart_syscheckd,
-                       wait_for_fim_start):
+def test_prefilter_cmd(tags_to_apply, get_configuration, configure_environment, check_prelink, restart_syscheckd):
     """
-    Check if prelink is installed and syscheck works
+    Check if prelink is installed and syscheck works. If prelink is not installed, checks if an error log is received.
 
     This test was implemented when prefilter_cmd could only be set with 'prelink'.
 
@@ -69,6 +69,9 @@ def test_prefilter_cmd(tags_to_apply, get_configuration, configure_environment, 
     """
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    if get_configuration['metadata']['prefilter_cmd'] == '/usr/sbin/prelink -y':
-        prelink = get_configuration['metadata']['prefilter_cmd'].split(' ')[0]
-        assert os.path.exists(prelink), f'Prelink is not installed'
+    if os.path.exists(prefilter.split(' ')[0]):
+        check_fim_start(wazuh_log_monitor)
+    else:
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_configuration_error,
+                                    error_message=f"The expected 'Configuration error at...' "
+                                                  f"message has not been produced")
