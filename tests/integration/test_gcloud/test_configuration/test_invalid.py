@@ -15,6 +15,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 
+
 # Marks
 
 pytestmark = pytest.mark.tier(level=1)
@@ -69,11 +70,9 @@ def test_invalid(get_configuration, configure_environment, reset_ossec_log):
     expect an error message and gcp-pubsub unable to start.
     """
     # Configuration error -> ValueError raised
-    try:
+    with pytest.raises(ValueError):
         control_service('restart')
-    except ValueError:
-        assert sys.platform != 'win32', 'Restarting ossec with invalid configuration should ' \
-                                        'not raise an exception in win32'
+
     tags_to_apply = get_configuration['tags'][0]
 
     if tags_to_apply == 'invalid_gcp_wmodule':
