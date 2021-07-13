@@ -2398,3 +2398,18 @@ def get_fim_mode_param(mode, key='FIM_MODE'):
         return {key: {'whodata': 'yes'}}, metadata
     else:
         return None, None
+
+
+def check_fim_start(file_monitor):
+    """Check if realtime starts, whodata starts or ends the initial FIM scan.
+
+    Args:
+        file_monitor (FileMonitor): file log monitor to detect events.
+    """
+    mode = global_parameters.current_configuration['metadata']['fim_mode']
+    if mode == 'realtime':
+        detect_realtime_start(file_monitor)
+    elif mode == 'whodata':
+        detect_whodata_start(file_monitor)
+    else:
+        detect_initial_scan(file_monitor)
