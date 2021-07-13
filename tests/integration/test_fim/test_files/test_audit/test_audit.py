@@ -303,6 +303,7 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
 
     audit2_path = "/etc/audisp/plugins.d/af_wazuh.conf"
     audit3_path = "/etc/audit/plugins.d/af_wazuh.conf"
+    
     if os.path.exists(audit2_path):
         plugin_path = audit2_path
     elif os.path.exists(audit3_path):
