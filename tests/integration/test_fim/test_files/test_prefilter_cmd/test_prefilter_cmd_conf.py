@@ -13,6 +13,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1), pytest.mark.agent, pytest.mark.server]
 
 #Variables
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -47,7 +48,7 @@ def get_configuration(request):
 
 
 @pytest.fixture(scope='session')
-def check_prelink():
+def install_prelink():
     # Call script to install prelink if it is not installed
     path = os.path.dirname(os.path.abspath(__file__))
     dist_list = ['centos', 'fedora', 'rhel']
@@ -67,5 +68,5 @@ def test_prefilter_cmd_conf(get_configuration, configure_environment, install_pr
         check_fim_start(wazuh_log_monitor)
     else:
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_configuration_error,
-                                    error_message=f"The expected 'Configuration error at...' "
+                                    error_message=f"The expected 'Configuration error at etc/ossec.conf' "
                                                   f"message has not been produced")
