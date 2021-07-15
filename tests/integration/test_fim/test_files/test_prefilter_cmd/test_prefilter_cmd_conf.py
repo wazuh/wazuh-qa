@@ -9,26 +9,29 @@ import distro
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, check_fim_start, callback_configuration_error
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
-
-# variables
-
+#Variables
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_prefilter_cmd_conf.yaml')
 test_directories = [os.path.join('/', 'testdir1')]
-force_restart_after_restoring = True
-
+directory_str = ','.join(test_directories)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-# configurations
-
+#Configurations
 prefilter = '/usr/sbin/prelink -y'
-conf_params, conf_metadata = generate_params(extra_params={'PREFILTER_CMD': prefilter})
+
+conf_params, conf_metadata = generate_params(extra_params={'TEST_DIRECTORIES': directory_str, 'PREFILTER_CMD': prefilter})
+
+configuration_ids = []
+
+for params in conf_params:
+    fim_modes =  params['FIM_MODE'].keys()
+    for fim_mode in fim_modes:
+        configuration_ids.append(f"prefilter_cmd_conf_{fim_mode}")
 
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=conf_params,
@@ -36,9 +39,8 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
                                            )
 
 
-# fixtures
-
-@pytest.fixture(scope='module', params=configurations)
+#Fixtures
+@pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
@@ -53,22 +55,14 @@ def check_prelink():
     subprocess.call([f'{path}/data/install_prelink.sh', dist])
 
 
-# tests
-
-
-@pytest.mark.parametrize('tags_to_apply', [
-    ({'prefilter_cmd'})
-])
-def test_prefilter_cmd_conf(tags_to_apply, get_configuration, configure_environment, check_prelink, restart_syscheckd):
-    """
-    Check if prelink is installed and syscheck works. If prelink is not installed, checks if an error log is received.
+#Tests
+def test_prefilter_cmd_conf(get_configuration, configure_environment, install_prelink, restart_syscheckd):
+    """Check if prelink is installed and syscheck works. If prelink is not installed, checks if an error log is received.
 
     This test was implemented when prefilter_cmd could only be set with 'prelink'.
 
     This test will have to updated if prefilter_cmd is updated as well.
     """
-    check_apply_test(tags_to_apply, get_configuration['tags'])
-
     if os.path.exists(prefilter.split(' ')[0]):
         check_fim_start(wazuh_log_monitor)
     else:
