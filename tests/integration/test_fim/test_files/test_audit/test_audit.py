@@ -11,7 +11,7 @@ import wazuh_testing.fim as fim
 
 from wazuh_testing import logger
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
-from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.file import truncate_file, remove_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service, check_daemon_status
 
@@ -303,17 +303,18 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
     audisp_path = '/etc/audisp/plugins.d/af_wazuh.conf'
     audit_path = '/etc/audit/plugins.d/af_wazuh.conf'
 
-    if os.path.exists(audisp_path):
-        plugin_path = audisp_path
-    elif os.path.exists(audit_path):
+    stdout = subprocess.check_output(['auditctl', '-v'])
+    auditctl_version_output = stdout.decode('utf8').strip().split()
+
+    if auditctl_version_output[2].startswith('3'):
         plugin_path = audit_path
+        remove_file(plugin_path)
     else:
-        raise Exception('Audit plugin not found')
+        plugin_path = audisp_path
+        remove_file(plugin_path)
 
     logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
-
-    os.remove(plugin_path)
 
     time_before_restart = get_audit_creation_time()
     control_service('restart')
