@@ -1,5 +1,4 @@
 ---
-# conf 1
 - tags:
   - prefilter_cmd
   apply_to_modules:
@@ -10,7 +9,7 @@
     - disabled:
         value: 'no'
     - directories:
-        value: "/testdir1"
+        value: TEST_DIRECTORIES
         attributes:
         - FIM_MODE
     - prefilter_cmd:
