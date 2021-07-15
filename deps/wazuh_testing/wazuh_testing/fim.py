@@ -2413,3 +2413,4 @@ def check_fim_start(file_monitor):
         detect_whodata_start(file_monitor)
     else:
         detect_initial_scan(file_monitor)
+        
