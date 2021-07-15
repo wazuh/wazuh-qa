@@ -293,7 +293,6 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
         ValueError: If the time before the and after the restart are equal when auditd has been restarted or if the time
                     before and after the restart are different when auditd hasn't been restarted
     """
-
     def get_audit_creation_time():
         for proc in psutil.process_iter(attrs=['name']):
             if proc.name() == "auditd":
@@ -301,8 +300,8 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
                 return proc.create_time()
         pytest.fail("Auditd is not running")
 
-    audisp_path = "/etc/audisp/plugins.d/af_wazuh.conf"
-    audit_path = "/etc/audit/plugins.d/af_wazuh.conf"
+    audisp_path = '/etc/audisp/plugins.d/af_wazuh.conf'
+    audit_path = '/etc/audit/plugins.d/af_wazuh.conf'
 
     if os.path.exists(audisp_path):
         plugin_path = audisp_path
