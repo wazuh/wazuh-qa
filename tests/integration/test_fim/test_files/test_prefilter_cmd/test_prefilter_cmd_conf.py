@@ -64,7 +64,7 @@ def test_prefilter_cmd_conf(get_configuration, configure_environment, install_pr
 
     This test will have to updated if prefilter_cmd is updated as well.
     """
-    if os.path.exists(prefilter.split(' ')[0]):
+    if os.path.exists(prefilter.split()[0]):
         check_fim_start(wazuh_log_monitor)
     else:
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_configuration_error,
