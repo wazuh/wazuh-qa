@@ -165,6 +165,14 @@ def pytest_addoption(parser):
         help="run tests using Google Cloud topic name"
     )
     parser.addoption(
+        "--gcp-configuration-file",
+        action="store",
+        metavar="gcp_configuration_file",
+        default=None,
+        type=str,
+        help="run tests using this configuration file."
+    )
+    parser.addoption(
         "--fim_mode",
         action="append",
         metavar="fim_mode",
@@ -197,6 +205,16 @@ def pytest_configure(config):
     fim_database_memory = config.getoption("--fim-database-memory")
     if fim_database_memory:
         global_parameters.fim_database_memory = True
+
+    # Load GCP defaults from configuration file
+    gcp_configuration_file = config.getoption("--gcp-configuration-file")
+    if gcp_configuration_file:
+        global_parameters.gcp_configuration_file = gcp_configuration_file
+    else:
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        default_configuration = os.path.join(dir_path, 'test_gcloud', 'data', 'configuration.yaml')
+        if os.path.exists(default_configuration):
+            global_parameters.gcp_configuration_file = default_configuration
 
     # Set gcp_project_id only if it is passed through command line args
     gcp_project_id = config.getoption("--gcp-project-id")
