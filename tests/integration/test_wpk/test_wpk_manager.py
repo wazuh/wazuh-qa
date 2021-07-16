@@ -359,7 +359,7 @@ cases = [
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
             'status': ['Legacy upgrade:' + \
-                       'check the result manually since the agent cannot report the result of the task'],
+                       ' check the result manually since the agent cannot report the result of the task'],
             'upgrade_notification': [False],
             'message_params': {'version': 'v3.13.1'},
             'expected_response': 'Success'
