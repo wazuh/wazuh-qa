@@ -21,6 +21,21 @@ def handle_credentials_file():
     remove_file(os.path.join(WAZUH_PATH, global_parameters.gcp_credentials_file))
 
 
+@pytest.fixture(scope='session', autouse=True)
+def validate_global_configuration():
+    if global_parameters.gcp_project_id is None:
+        raise ValueError('Google Cloud project id not found. Please use --gcp-project-id')
+
+    if global_parameters.gcp_subscription_name is None:
+        raise ValueError('Google Cloud subscription name not found. Please use --gcp-subscription-name')
+
+    if global_parameters.gcp_credentials_file is None:
+        raise ValueError('Credentials json file not found. Please enter a valid path using --gcp-credentials-file')
+
+    if global_parameters.gcp_topic_name is None:
+        raise ValueError('Gloogle Cloud topic name not found. Please enter a valid path using --gcp-topic-name')
+
+
 @pytest.fixture(scope='module')
 def wait_for_gcp_start(get_configuration, request):
     # Wait for module gpc-pubsub starts
