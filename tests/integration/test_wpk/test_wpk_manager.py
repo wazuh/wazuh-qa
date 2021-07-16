@@ -15,7 +15,7 @@ import requests
 import platform
 
 from configobj import ConfigObj
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, get_version
+from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, UPGRADE_PATH, get_version
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.agent_simulator import Sender, Injector
 from wazuh_testing.tools.services import control_service
