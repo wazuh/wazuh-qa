@@ -59,6 +59,12 @@ else:
         if sys_platform == 'Linux' else \
         'err Cannot execute installer'
 
+
+time_to_sleep_until_backup = 10
+time_to_sleep_until_stop = 1
+wait_upgrade_process_timeout = 240
+
+
 test_metadata = [
     # 1. Upgrade from initial_version to new version
     {
@@ -174,8 +180,6 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=params,
                                            metadata=test_metadata)
 
-# configurations = configurations[-1:]
-
 remoted_simulator = None
 
 
@@ -209,7 +213,7 @@ def start_agent(request, get_configuration):
 
     # Clean client.keys file
     truncate_file(CLIENT_KEYS_PATH)
-    time.sleep(1)
+    time.sleep(time_to_sleep_until_stop)
 
     control_service('stop')
     agent_auth_pat = 'bin' if sys_platform == 'Linux' else ''
@@ -286,7 +290,7 @@ def prepare_agent_version(get_configuration):
                 control_service('stop')
             except ValueError:
                 pass
-            time.sleep(10)
+            time.sleep(time_to_sleep_until_backup)
             backup_path = os.path.join(WAZUH_PATH, 'backup')
             subprocess.call(['robocopy', backup_path, WAZUH_PATH,
                              '/E', '/IS', '/NFL', '/NDL', '/NJH',
@@ -314,7 +318,7 @@ def prepare_agent_version(get_configuration):
             control_service('stop')
         except ValueError:
             pass
-        time.sleep(10)
+        time.sleep(time_to_sleep_until_backup)
         backup_path = os.path.join(WAZUH_PATH, 'backup')
         subprocess.call(['robocopy', backup_path, WAZUH_PATH,
                          '/E', '/IS', '/NFL', '/NDL', '/NJH', '/NP', '/NS', '/NC'])
@@ -339,7 +343,7 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
            'Initial version does not match Expected for agent'
 
     upgrade_process_result, upgrade_exec_message = \
-        remoted_simulator.wait_upgrade_process(timeout=240)
+        remoted_simulator.wait_upgrade_process(timeout=wait_upgrade_process_timeout)
     assert upgrade_process_result == expected['upgrade_ok'], \
            'Upgrade process result was not the expected'
     if upgrade_process_result:
@@ -348,7 +352,8 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
             exp_json = json.loads(upgrade_exec_message)
             upgrade_result_code = int(exp_json['message'])
         else:
-            upgrade_result_code = int(upgrade_exec_message.split(' ')[1])
+            exp_json = json.loads(upgrade_exec_message)
+            upgrade_result_code = int(exp_json['message'])
         assert upgrade_result_code == expected['result_code'], \
                f'Expected upgrade result code was {expected["result_code"]} ' \
                f'but obtained {upgrade_result_code} instead'
