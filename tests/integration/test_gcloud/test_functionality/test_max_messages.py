@@ -12,6 +12,7 @@ from wazuh_testing.gcloud import callback_received_messages_number, publish
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
+from google.cloud import pubsub_v1
 
 # Marks
 
@@ -22,17 +23,17 @@ pytestmark = pytest.mark.tier(level=0)
 if global_parameters.gcp_project_id is not None:
     project_id = global_parameters.gcp_project_id
 else:
-    raise ValueError(f"Google Cloud project id not found. Please use --gcp-project-id")
+    raise ValueError('Google Cloud project id not found. Please use --gcp-project-id')
 
 if global_parameters.gcp_subscription_name is not None:
     subscription_name = global_parameters.gcp_subscription_name
 else:
-    raise ValueError(f"Google Cloud subscription name not found. Please use --gcp-subscription-name")
+    raise ValueError('Google Cloud subscription name not found. Please use --gcp-subscription-name')
 
 if global_parameters.gcp_credentials_file is not None:
     credentials_file = global_parameters.gcp_credentials_file
 else:
-    raise ValueError(f"Credentials json file not found. Please enter a valid path using --gcp-credentials-file")
+    raise ValueError('Credentials json file not found. Please enter a valid path using --gcp-credentials-file')
 
 if global_parameters.gcp_topic_name is not None:
     topic_name = global_parameters.gcp_topic_name
