@@ -9,7 +9,7 @@ import psutil
 import pytest
 import wazuh_testing.fim as fim
 
-from wazuh_testing import logger
+from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.file import truncate_file, remove_file
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -322,7 +322,7 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
     time_before_restart = get_audit_creation_time()
     control_service('restart')
     try:
-        check_daemon_status(timeout=30)
+        check_daemon_status(timeout=global_parameters.default_timeout)
     except TimeoutError:
         pass
     time_after_restart = get_audit_creation_time()
