@@ -22,6 +22,7 @@ from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing import global_parameters
+from wazuh_testing.tools.sockets import WazuhSocket
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
@@ -36,6 +37,14 @@ CHUNK_SIZE = 16384
 TASK_TIMEOUT = '15m'
 global valid_sha1_list
 valid_sha1_list = {}
+
+
+upgrade_socket = WazuhSocket(UPGRADE_SOCKET)
+task_socket = WazuhSocket(TASK_SOCKET)
+time_until_registration_key_avaible = 40
+time_until_ask_upgrade_result = 30
+max_upgrade_result_status_retries = 30
+
 
 if global_parameters.wpk_version is None:
     raise ValueError("The WPK package version must be defined by parameter. See README.md")
@@ -925,10 +934,10 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
         remove_wpk_package()
 
     # Give time for registration key to be available and send a few heartbeats
-    time.sleep(40)
+    time.sleep(time_until_registration_key_avaible)
 
     # Send upgrade request
-    response = send_message(data, UPGRADE_SOCKET)
+    response = json.loads(upgrade_socket.send(json.dumps(data)))
 
     if metadata.get('checks') and (('use_http' in metadata.get('checks')) or ('version' in metadata.get('checks'))):
         # Checking version or http in logs
@@ -1004,20 +1013,22 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
                     "agents": [agent_id]
                 }
             }
-            time.sleep(30)
-            response = send_message(data, TASK_SOCKET)
+
+            time.sleep(time_until_ask_upgrade_result)
+
+            response = json.loads(task_socket.send(json.dumps(data)))
             retries = 0
             while (response['data'][0]['status'] != metadata.get('first_attempt')) \
                     and (retries < 10):
-                time.sleep(30)
-                response = send_message(data, TASK_SOCKET)
+                time.sleep(time_until_ask_upgrade_result)
+                response = json.loads(task_socket.send(json.dumps(data)))
                 retries += 1
             assert metadata.get('first_attempt') == response['data'][0]['status'], \
                 f'First upgrade status did not match expected! ' \
                 f'Expected {metadata.get("first_attempt")} obtained {response["data"][0]["status"]}'
 
         # send upgrade request again
-        response = send_message(repeat_message, UPGRADE_SOCKET)
+        response = json.loads(upgrade_socket.send(json.dumps(repeat_message)))
 
     if metadata.get('expected_response') == 'Success':
         # Chech that result is expected
@@ -1037,14 +1048,16 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
                     "agents": [agent_id]
                 }
             }
-            time.sleep(30)
-            response = send_message(data, TASK_SOCKET)
+            time.sleep(time_until_ask_upgrade_result)
+            response = json.loads(task_socket.send(json.dumps(data)))
             retries = 0
-            while response['data'][0]['status'] == 'Updating' and retries < 30 and \
+
+            while response['data'][0]['status'] == 'Updating' and retries < max_upgrade_result_status_retries and \
                     response['data'][0]['status'] != expected_status[index]:
-                time.sleep(30)
-                response = send_message(data, TASK_SOCKET)
+                time.sleep(time_until_ask_upgrade_result)
+                response = json.loads(task_socket.send(json.dumps(data)))
                 retries += 1
+
             assert expected_status[index] == response['data'][0]['status'], \
                 f'Upgrade status did not match expected! ' \
                 f'Expected {expected_status[index]} obtained {response["data"][0]["status"]} at index {index}'
