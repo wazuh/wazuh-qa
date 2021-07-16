@@ -10,7 +10,10 @@ import requests
 import subprocess
 import yaml
 import json
+import re
 
+from wazuh_testing import tools
+from wazuh_testing.tools.monitoring import make_callback, FileMonitor
 from configobj import ConfigObj
 from datetime import datetime
 from wazuh_testing.tools import WAZUH_PATH, get_version
@@ -19,6 +22,8 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.file import read_file_lines
+
 from wazuh_testing import global_parameters
 
 
@@ -27,7 +32,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0),
 
 sys_platform = platform.system()
 
-folder = 'etc' if sys_platform == 'Linux' else 'upgrade'
+folder = 'etc' if sys_platform == 'Linux' else '.'
 
 upgrade_result_folder = 'var/upgrade' if sys_platform == 'Linux' else 'upgrade'
 
@@ -183,6 +188,16 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
 remoted_simulator = None
 
 
+def callback_detect_upgrade_ack_event(event_log):
+    print("Callback")
+    msg = ".*Sending upgrade ACK event: '(.*)'"
+    match = re.match(msg, event_log)
+    if match:
+        print(match.group(1))
+        return match.group(1)
+    return None if not match else match.group(1)
+
+
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
     """Get configurations from the module"""
@@ -206,8 +221,10 @@ def start_agent(request, get_configuration):
                                          client_keys=CLIENT_KEYS_PATH)
 
     ver_split = _agent_version.replace("v", "").split(".")
+    ver_major = ver_split[0]
+    ver_minor = ver_split[1]
     if int(ver_split[0]) >= 4 and int(ver_split[1]) >= 1:
-        remoted_simulator.set_wcom_message_version('4.1')
+        remoted_simulator.set_wcom_message_version(f"{ver_major}.{ver_minor}")
     else:
         remoted_simulator.set_wcom_message_version(None)
 
@@ -337,6 +354,7 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
                    configure_environment, start_agent):
     metadata = get_configuration['metadata']
     expected = metadata['results']
+    wazuh_log_monitor = FileMonitor(tools.LOG_FILE_PATH)
 
     # Extract initial Wazuh Agent version
     assert get_version() == metadata["initial_version"], \
@@ -363,8 +381,28 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
             upgrade_exec_message = str(exp_json['message'])
         assert upgrade_exec_message == expected['error_message'], \
                f'Expected error message does not match'
+
     if upgrade_process_result and expected['receive_notification']:
-        result = remoted_simulator.wait_upgrade_notification(timeout=180)
+
+        lines = read_file_lines(tools.LOG_FILE_PATH) 
+        while lines != 0:
+            time.sleep(1) 
+            lines = read_file_lines(tools.LOG_FILE_PATH) 
+
+        wazuh_log_monitor = FileMonitor(tools.LOG_FILE_PATH)
+
+        if metadata['simulate_rollback']:
+            msg = r"SIGNAL [(15)-(Terminated)] Received. Exit Cleaning..."
+            callback = make_callback(pattern=msg, prefix=r'.*wazuh-agentd.*', escape=True)
+            wazuh_log_monitor.start(timeout=120,
+                                    error_message="Error agentd not stopped",
+                                    callback=callback)
+                                    
+            remoted_simulator.agent_restarted = True
+
+        result = json.loads(wazuh_log_monitor.start(timeout=120, error_message="ACK event not received", callback=callback_detect_upgrade_ack_event).result())['parameters']
+
+
         if result is not None:
             status = result['status']
             assert status == expected['status'], \

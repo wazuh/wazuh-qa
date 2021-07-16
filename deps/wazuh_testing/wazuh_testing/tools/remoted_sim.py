@@ -11,6 +11,7 @@ import threading
 import time
 import zlib
 from struct import pack
+from wazuh_testing import global_parameters, logger
 
 from Crypto.Cipher import AES, Blowfish
 from Crypto.Util.Padding import pad
@@ -77,6 +78,7 @@ class RemotedSimulator:
         self.active_response_message = None
         self.listener_thread = None
         self.last_client = None
+        self.change_default_listener = False
         if start_on_init:
             self.start()
 
@@ -464,7 +466,7 @@ class RemotedSimulator:
                 continue
 
     def upgrade_listener(self, filename, filepath, chunk_size, installer, sha1hash, simulate_interruption=False,
-                         simulate_connection_error=False):
+                         simulate_connection_error=False, upgrade_socket_closed_timeout=120):
         """
         Listener thread that will finish when encryption_keys are obtained
         """
@@ -506,7 +508,10 @@ class RemotedSimulator:
                 # Switch to common listener once the upgrade has ended
                 if simulate_connection_error:
                     # Sleep long enough to make the connection after upgrade fail and generate a rollback
-                    time.sleep(100)
+                    while not self.change_default_listener and upgrade_socket_closed_timeout > 0:
+                        time.sleep(1)
+                        upgrade_socket_closed_timeout -= 1
+
                     self.sock.close()
                     self._start_socket()
                 return self.listener()
@@ -561,6 +566,7 @@ class RemotedSimulator:
         keys = self.get_key()
         if keys is None:
             # No valid keys
+            logger.error("Not valid keys used.")
             return -1
         (id, name, ip, key) = keys
         self.create_encryption_key(id, name, key)
