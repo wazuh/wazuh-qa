@@ -79,7 +79,7 @@ def get_configuration(request):
 @pytest.mark.parametrize('test_case',
                          [test_case['test_case'] for test_case in test_cases],
                          ids=[test_case['name'] for test_case in test_cases])
-def test_agentd_state_config(test_case: list, set_local_internal_options):
+def test_agentd_state_config(test_case, set_local_internal_options):
 
     control_service('stop', 'wazuh-agentd')
 
@@ -95,11 +95,11 @@ def test_agentd_state_config(test_case: list, set_local_internal_options):
     if sys.platform == 'win32':
         if test_case['agentd_ends']:
             with pytest.raises(ValueError):
-                control_service('start', 'wazuh-agentd')
+                control_service('start')
             assert (test_case['agentd_ends']
                     is not check_if_process_is_running('wazuh-agentd'))
         else:
-            control_service('start', 'wazuh-agentd')
+            control_service('start')
     else:
         control_service('start', 'wazuh-agentd')
         assert (test_case['agentd_ends']
