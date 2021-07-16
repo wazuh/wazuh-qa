@@ -876,7 +876,19 @@ def get_sha_list(metadata):
     return sha_list
 
 
-def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
+@pytest.fixture(scope="function")
+def remove_current_wpk():
+    downloaded_wpk_path = '/var/ossec/var/upgrade/'
+    for filename in os.listdir(downloaded_wpk_path):
+        file_path = os.path.join(downloaded_wpk_path, filename)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception:
+            raise Exception(f'Failed to remove {filename} file')
+            
+
+def test_wpk_manager(remove_current_wpk, set_debug_mode, get_configuration, configure_environment,
                      restart_service, configure_agents):
     metadata = get_configuration.get('metadata')
     protocol = metadata['protocol']
