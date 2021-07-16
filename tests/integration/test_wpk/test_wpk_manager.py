@@ -28,7 +28,6 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 UPGRADE_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'upgrade')
 TASK_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'task')
-UPGRADE_PATH = os.path.join(WAZUH_PATH, 'var', 'upgrade')
 SERVER_ADDRESS = 'localhost'
 WPK_REPOSITORY_4x = 'packages-dev.wazuh.com/trash/wpk/'
 WPK_REPOSITORY_3x = 'packages.wazuh.com/wpk/'
@@ -737,7 +736,6 @@ cases = [
     }
 ]
 
-
 params = [case['params'] for case in cases]
 metadata = [case['metadata'] for case in cases]
 
@@ -774,16 +772,6 @@ def restart_service():
     control_service('restart')
 
     yield
-
-
-def send_message(data_object, socket_path):
-    upgrade_sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    upgrade_sock.connect(socket_path)
-    msg_bytes = json.dumps(data_object).encode()
-    upgrade_sock.send(struct.pack("<I", len(msg_bytes)) + msg_bytes)
-    size = struct.unpack("<I", upgrade_sock.recv(4, socket.MSG_WAITALL))[0]
-    response = upgrade_sock.recv(size, socket.MSG_WAITALL)
-    return json.loads(response.decode())
 
 
 def clean_logs():
@@ -981,7 +969,6 @@ def test_wpk_manager(remove_current_wpk, set_debug_mode, get_configuration, conf
             log_monitor.start(timeout=600, callback=wait_downloaded)
         except TimeoutError as err:
             raise AssertionError("Finish download wpk log took too much!")
-        # time.sleep(60)
 
     if metadata.get('checks') and ('chunk_size' in metadata.get('checks')):
         # Checking version in logs
