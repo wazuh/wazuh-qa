@@ -14,6 +14,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations, check_a
 from wazuh_testing.tools.file import truncate_file, remove_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service, check_daemon_status
+from wazuh_testing.tools.utils import retry
 
 # Marks
 
@@ -293,12 +294,15 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
         ValueError: If the time before the and after the restart are equal when auditd has been restarted or if the time
                     before and after the restart are different when auditd hasn't been restarted
     """
+    # We need to retry get_audit_creation_time in case syscheckd didn't have
+    # enough time to boot auditd    
+    @retry(Exception, attempts=2, delay=3, delay_multiplier=1)
     def get_audit_creation_time():
         for proc in psutil.process_iter(attrs=['name']):
             if proc.name() == "auditd":
                 logger.info(f"auditd detected. PID: {proc.pid}")
                 return proc.create_time()
-        pytest.fail("Auditd is not running")
+        raise Exception('Auditd is not running')
 
     audisp_path = '/etc/audisp/plugins.d/af_wazuh.conf'
     audit_path = '/etc/audit/plugins.d/af_wazuh.conf'
