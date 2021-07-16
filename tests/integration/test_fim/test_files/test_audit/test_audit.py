@@ -307,15 +307,14 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
     audisp_path = '/etc/audisp/plugins.d/af_wazuh.conf'
     audit_path = '/etc/audit/plugins.d/af_wazuh.conf'
 
-    stdout = subprocess.check_output(['auditctl', '-v'])
-    auditctl_version_output = stdout.decode('utf8').strip().split()
-
-    if auditctl_version_output[2].startswith('3'):
+    if os.path.exists(audisp_path):
+        plugin_path = audisp_path
+        remove_file(plugin_path)
+    elif os.path.exists(audit_path):
         plugin_path = audit_path
         remove_file(plugin_path)
     else:
-        plugin_path = audisp_path
-        remove_file(plugin_path)
+        raise Exception('The path could not be found because auditd was not running')
 
     logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
