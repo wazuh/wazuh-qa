@@ -1,0 +1,43 @@
+Project path: "../../tests/integration"
+
+Documentation path: ".."
+
+Include paths:
+  - wazuh_db:
+    path: "../../tests/integration/test_wazuh_db"
+    recursive: false
+  - vulnerability_detector:
+    path: "../../tests/integration/test_vulnerability_detector"
+
+Include regex:
+  - "^test_.*py$|readme.md$"
+
+Ignore paths:
+  - "../../tests/integration/test_wazuh_db/data"
+  - "*/data/*"
+
+Valid tags:
+  - DB
+  - Feeds
+  - VulDet
+  - Vulnerability Detector
+
+Required fields:
+  Module:
+    - Brief
+    - Metadata
+    - Metadata.Modules
+    - Metadata.Daemons
+    - Metadata.Operating System
+    - Metadata.Tiers
+  Tests:
+    - Test Logic
+    - Checks
+
+Ignored fields:
+  Case Sensitive: false
+  Module:
+    - Copyright
+  Tests:
+    - Params
+    - Args
