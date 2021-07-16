@@ -294,6 +294,9 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
         ValueError: If the time before the and after the restart are equal when auditd has been restarted or if the time
                     before and after the restart are different when auditd hasn't been restarted
     """
+    logger.info('Applying the test configuration')
+    check_apply_test(tags_to_apply, get_configuration['tags'])
+
     # We need to retry get_audit_creation_time in case syscheckd didn't have
     # enough time to boot auditd    
     @retry(Exception, attempts=2, delay=3, delay_multiplier=1)
@@ -315,9 +318,6 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
         remove_file(plugin_path)
     else:
         raise Exception('The path could not be found because auditd was not running')
-
-    logger.info('Applying the test configuration')
-    check_apply_test(tags_to_apply, get_configuration['tags'])
 
     time_before_restart = get_audit_creation_time()
     control_service('restart')
