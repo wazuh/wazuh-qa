@@ -105,7 +105,7 @@ def test_agentd_state_config(test_case, set_local_internal_options):
         assert (test_case['agentd_ends']
                     is not check_if_process_is_running('wazuh-agentd'))
     
-    # Check if test require checking state file existance
+    # Check if the test requires checking state file existence
     if 'state_file_exist' in test_case:
         if test_case['state_file_exist']:
             # Wait until state file was dumped
