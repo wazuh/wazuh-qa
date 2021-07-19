@@ -50,8 +50,9 @@ def get_configuration(request):
 
 @pytest.fixture(scope='function')
 def create_specific_size_file(get_configuration, request):
-    """Create a file with a specific size"""
+    """Create a file with a specific size requested from test configuration"""
     size = get_configuration['metadata']['disk_quota_limit']
+    # Translate given size from string to number in bytes
     translated_size = translate_size(configured_size=size)
     write_file(os.path.join(temp_dir, 'test'), random_string(translated_size*compression_ratio))
 
@@ -62,8 +63,7 @@ def create_specific_size_file(get_configuration, request):
 
 # Tests
 def test_disk_quota_values(get_configuration, configure_environment, create_specific_size_file, restart_syscheckd):
-    """
-    Check that the disk_quota option for report_changes is working correctly.
+    """Check that the disk_quota option for report_changes is working correctly.
 
     Monitor one of the system's folder and wait for the message alerting that the disk_quota limit has been reached.
 
