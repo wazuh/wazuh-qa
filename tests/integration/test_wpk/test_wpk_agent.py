@@ -388,7 +388,7 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
  
          if metadata['simulate_rollback']:
             msg = 'Exit Cleaning'
-            callback = monitoring.make_callback(pattern=msg, prefix=r'.*wazuh-agentd.*', escape=True)
+            callback = make_callback(pattern=msg, prefix=r'.*wazuh-agentd.*', escape=True)
             wazuh_log_monitor.start(timeout=200,
                                     error_message="Error agentd not stopped",
                                     callback=callback)
@@ -398,7 +398,7 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
                                     error_message="Error wazuh-agent does not stop",
                                     callback=callback_upgrade_module_up)
 
-                                    
+
                                     
             remoted_simulator.change_default_listener = True
 
