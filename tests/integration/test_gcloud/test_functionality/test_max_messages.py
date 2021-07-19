@@ -8,7 +8,7 @@ import sys
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import generate_params
-from wazuh_testing.gcloud import callback_received_messages_number, publish
+from wazuh_testing.gcloud import callback_detect_start_fetching_logs, callback_received_messages_number
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -21,6 +21,7 @@ pytestmark = pytest.mark.tier(level=0)
 # variables
 
 interval = '25s'
+pull_messages_timeout = global_parameters.default_timeout + 60
 pull_on_start = 'no'
 max_messages = 100
 logging = 'info'
@@ -55,10 +56,12 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-@pytest.mark.parametrize('nmessages', [
-    30, 100, 120
-])
-def test_max_messages(nmessages, get_configuration, configure_environment,
+@pytest.mark.parametrize('publish_messages', [
+    ['- DEBUG - GCP message' for _ in range(30)],
+    ['- DEBUG - GCP message' for _ in range(100)],
+    ['- DEBUG - GCP message' for _ in range(120)]
+], indirect=True)
+def test_max_messages(get_configuration, configure_environment, publish_messages,
                       restart_wazuh, wait_for_gcp_start):
     """
     Verify the module gcp-pubsub pull a number of messages less than or equal to max_messages.
@@ -68,30 +71,32 @@ def test_max_messages(nmessages, get_configuration, configure_environment,
     str_interval = get_configuration['sections'][0]['elements'][4]['interval']['value']
     time_interval = int(''.join(filter(str.isdigit, str_interval)))
 
-    # Publish messages to pull them later
-    publish(global_parameters.gcp_project_id, global_parameters.gcp_topic_name, global_parameters.gcp_credentials_file, nmessages, "- DEBUG - GCP message")
+    # Wait till the fetch starts
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout + time_interval,
+                            callback=callback_detect_start_fetching_logs,
+                            error_message='Did not receive expected '
+                                          '"Starting fetching of logs" event')
 
-    if nmessages <= max_messages:
-        number_pulled = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + time_interval + 5,
+    if publish_messages <= max_messages:
+        number_pulled = wazuh_log_monitor.start(timeout=pull_messages_timeout,
                                                 callback=callback_received_messages_number,
-                                                accum_results=1,
                                                 error_message='Did not receive expected '
                                                               '- INFO - Received and acknowledged x messages').result()
-        assert int(number_pulled) == nmessages
+        # GCP might log messages from sources other than ourselves
+        assert int(number_pulled) >= publish_messages
     else:
-        ntimes = int(nmessages / max_messages)
-        remainder = int(nmessages % max_messages)
+        ntimes = int(publish_messages / max_messages)
+        remainder = int(publish_messages % max_messages)
 
         for i in range(ntimes):
-            number_pulled = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + time_interval + 5,
+            number_pulled = wazuh_log_monitor.start(timeout=pull_messages_timeout,
                                                     callback=callback_received_messages_number,
-                                                    accum_results=1,
                                                     error_message='Did not receive expected '
                                                                   'Received and acknowledged x messages').result()
             assert int(number_pulled) == max_messages
-        number_pulled = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + time_interval + 5,
+        number_pulled = wazuh_log_monitor.start(timeout=pull_messages_timeout,
                                                 callback=callback_received_messages_number,
-                                                accum_results=1,
                                                 error_message='Did not receive expected '
                                                               '- INFO - Received and acknowledged x messages').result()
-        assert int(number_pulled) == remainder
+        # GCP might log messages from sources other than ourselves
+        assert int(number_pulled) >= remainder

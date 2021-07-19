@@ -8,7 +8,7 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.file import write_file, remove_file
-from wazuh_testing.gcloud import detect_gcp_start, publish
+from wazuh_testing.gcloud import detect_gcp_start, publish_sync
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -34,6 +34,14 @@ def validate_global_configuration():
 
     if global_parameters.gcp_topic_name is None:
         raise ValueError('Gloogle Cloud topic name not found. Please enter a valid path using --gcp-topic-name')
+
+
+@pytest.fixture(scope='function')
+def publish_messages(request):
+    publish_sync(global_parameters.gcp_project_id, global_parameters.gcp_topic_name,
+                 global_parameters.gcp_credentials_file, request.param)
+
+    return len(request.param)
 
 
 @pytest.fixture(scope='module')

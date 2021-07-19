@@ -8,7 +8,7 @@ import sys
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import generate_params
-from wazuh_testing.gcloud import callback_detect_all_gcp, publish
+from wazuh_testing.gcloud import callback_detect_all_gcp
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -55,7 +55,10 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_logging(get_configuration, configure_environment,
+@pytest.mark.parametrize('publish_messages', [
+    ['- DEBUG - GCP message' for _ in range(5)]
+], indirect=True)
+def test_logging(get_configuration, configure_environment, publish_messages,
                  restart_wazuh, wait_for_gcp_start):
     """
     When a logging option is used, it cannot be an event that has another logging option.
@@ -76,17 +79,12 @@ def test_logging(get_configuration, configure_environment,
     else:
         key_words = ['- INFO -', '- DEBUG -', '- WARNING -', '- ERROR -']
 
-    # Publish messages to pull them later
-    publish(global_parameters.gcp_project_id, global_parameters.gcp_topic_name, global_parameters.gcp_credentials_file, 5, "- DEBUG - GCP message")
-
-    found = 0
     for nevents in range(0, 12):
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + time_interval + 5,
                                         callback=callback_detect_all_gcp,
                                         accum_results=1,
                                         error_message='Did not receive expected '
                                                       'wazuh-modulesd:gcp-pubsub[]').result()
+
         for key in key_words:
-            if key in event:
-                found = 1
-    assert found == 0
+            assert key not in event
