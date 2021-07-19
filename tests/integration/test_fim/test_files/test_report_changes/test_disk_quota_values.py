@@ -44,7 +44,7 @@ metadata = [
 
 configuration_ids = [f"disk_quota_limit_{x['disk_quota_limit']}" for x in metadata]
 
-configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
 
 # Fixtures
