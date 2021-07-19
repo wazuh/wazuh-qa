@@ -19,7 +19,7 @@ from datetime import datetime
 from wazuh_testing.tools import WAZUH_PATH, get_version
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.file import truncate_file, read_file_lines
+from wazuh_testing.tools.file import truncate_file, count_file_lines
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.agent import callback_detect_upgrade_ack_event, callback_upgrade_module_up
@@ -373,10 +373,10 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
 
     if upgrade_process_result and expected['receive_notification']:
         if sys_platform not in ['win32', 'Windows']:
-            lines = read_file_lines(tools.LOG_FILE_PATH) 
+            lines = count_file_lines(tools.LOG_FILE_PATH) 
             while lines != 0:
                 time.sleep(1) 
-                lines = read_file_lines(tools.LOG_FILE_PATH) 
+                lines = count_file_lines(tools.LOG_FILE_PATH) 
 
             wazuh_log_monitor = FileMonitor(tools.LOG_FILE_PATH)
 
