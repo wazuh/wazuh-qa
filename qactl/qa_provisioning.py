@@ -15,7 +15,7 @@ class QAProvisioning():
                                ssh_private_key_file_path=host_info['local_private_key_file_path'],
                                ansible_python_interpreter=host_info['ansible_python_interpreter'])
 
-    def parse_ifraestructure_file(self, ansible_instances, hosts, groups, groups_vars, hosts_tasks):
+    def parse_ifraestructure_file(self, ansible_instances, hosts, hosts_tasks, groups):
 
         # Open the infraestructure file definition and parse into object
 
@@ -32,13 +32,6 @@ class QAProvisioning():
                 for host_key, host_value in root_value.items():
                     if "host" in host_key:
                         hosts.append(infra_obj[root_key][host_key]["host_info"]['host'])
-                        current_host_group = infra_obj[root_key][host_key]["host_info"]['group']
-
-                        if current_host_group not in groups:
-                            groups.update({current_host_group: {'hosts': {}}})
-
-                        groups[current_host_group]['hosts'].update({infra_obj[root_key][host_key]["host_info"]['host']:
-                                                                    ''})
 
                         ansible_instances.append(
                             self.__read_ansible_instance(infra_obj[root_key][host_key]["host_info"]))
@@ -47,26 +40,24 @@ class QAProvisioning():
 
                         hosts_tasks[hosts[-1]] = {'qa_framework': infra_obj[root_key][host_key]["qa_framework"]}
             elif root_key == "groups":
-                for group_key, group_value in root_value.items():
-                    groups_vars[group_key] = group_value["group_vars"]
+                groups.update({'children': infra_obj[root_key]})
 
     def __init__(self, infra_file_path):
         self.infra_file_path = infra_file_path
 
 
-qa_provisioning = QAProvisioning("path_to_infraestructure_definition.yaml")
+qa_provisioning = QAProvisioning("infra_def.yaml")
 ansible_instances = []
 hosts = []
 list_tasks = {}
-groups = defaultdict()
+groups = dict()
 groups_vars = {}
 hosts_tasks = {}
 
 qa_provisioning.parse_ifraestructure_file(ansible_instances=ansible_instances, hosts=hosts, groups=groups,
-                                          groups_vars=groups_vars, hosts_tasks=hosts_tasks)
+                                          hosts_tasks=hosts_tasks)
 
-ansible_inventory = AnsibleInventory(hosts=hosts, groups=groups, groups_vars=groups_vars,
-                                     ansible_instances=ansible_instances,
-                                     inventory_file_path="path_to_ansible_inventory.yaml")
+ansible_inventory = AnsibleInventory(hosts=hosts, groups=groups, ansible_instances=ansible_instances,
+                                     inventory_file_path="ansible_inventory.yaml")
 
 ansible_inventory.write_inventory_to_file()

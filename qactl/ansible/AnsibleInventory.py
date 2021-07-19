@@ -12,9 +12,6 @@ class AnsibleInventory():
 
         hosts = {}
 
-        inventory_groups = {key_group: {'hosts': value_group['hosts'], 'vars': self.groups_vars[key_group]}
-                            for key_group, value_group in self.groups.items()}
-
         for instance in self.ansible_instances:
             host_info = {
                         "ansible_host": instance.host,
@@ -33,7 +30,7 @@ class AnsibleInventory():
 
         ansible_inventory_dict["all"]['hosts'] = hosts
 
-        ansible_inventory_dict['all']['children'] = inventory_groups
+        ansible_inventory_dict['all']['children'] = self.groups['children']
 
         ansible_inventory_stream = yaml.dump(ansible_inventory_dict)
 
@@ -52,5 +49,4 @@ class AnsibleInventory():
         self.ansible_instances = ansible_instances
         self.hosts = hosts
         self.groups = groups
-        self.groups_vars = groups_vars
         self.ansible_instances = ansible_instances
