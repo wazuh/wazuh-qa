@@ -6,18 +6,18 @@ import os
 import tempfile
 
 import pytest
-from test_fim.test_files.test_report_changes.common import disable_file_max_size, restore_file_max_size
-from wazuh_testing import global_parameters
+from test_fim.test_files.test_report_changes.common import translate_size
 from wazuh_testing.fim import LOG_FILE_PATH, callback_disk_quota_limit_reached, generate_params
-from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.file import remove_file, random_string, write_file
 from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 pytestmark = [pytest.mark.tier(level=1)]
 
 # Variables
-
+extended_timeout = 30
+compression_ratio = 12
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 temp_dir = tempfile.gettempdir()
 
@@ -48,20 +48,16 @@ def get_configuration(request):
     return request.param
 
 
-# Functions
+@pytest.fixture(scope='function')
+def create_specific_size_file(get_configuration, request):
+    """Create a file with a specific size"""
+    size = get_configuration['metadata']['disk_quota_limit']
+    translated_size = translate_size(configured_size=size)
+    write_file(os.path.join(temp_dir, 'test'), random_string(translated_size*compression_ratio))
 
-def extra_configuration_before_yield():
-    """
-    Disable syscheck.file_max_size internal option
-    """
-    disable_file_max_size()
+    yield
 
-
-def extra_configuration_after_yield():
-    """
-    Restore syscheck.file_max_size internal option
-    """
-    restore_file_max_size()
+    remove_file(os.path.join(temp_dir, 'test'))
 
 
 # Tests
