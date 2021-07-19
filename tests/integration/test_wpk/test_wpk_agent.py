@@ -377,15 +377,17 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
             while lines != 0:
                 time.sleep(1) 
                 lines = count_file_lines(tools.LOG_FILE_PATH) 
+        else:
+            truncate_file(tools.LOG_FILE_PATH)
+        wazuh_log_monitor = FileMonitor(tools.LOG_FILE_PATH)
 
-            wazuh_log_monitor = FileMonitor(tools.LOG_FILE_PATH)
 
         if metadata['simulate_rollback']:
             wazuh_log_monitor.start(timeout=200,
                                     error_message="Error wazuh-agent does not stop",
                                     callback=callback_upgrade_module_up)
                                     
-            remoted_simulator.agent_restarted = True
+            remoted_simulator.change_default_listener = True
 
         result = json.loads(wazuh_log_monitor.start(timeout=300, error_message="ACK event not received", callback=callback_detect_upgrade_ack_event).result())['parameters']
         #result = remoted_simulator.wait_upgrade_notification(timeout=180)
