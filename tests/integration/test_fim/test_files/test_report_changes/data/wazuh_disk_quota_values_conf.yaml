@@ -1,0 +1,27 @@
+- tags:
+  - disk_quota_values
+  apply_to_modules:
+  - test_disk_quota_values
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - check_all: 'yes'
+        - FIM_MODE
+        - REPORT_CHANGES
+    - diff:
+        elements:
+        - file_size:
+            elements:
+            - enabled:
+                value: FILE_SIZE_ENABLED
+        - disk_quota:
+            elements:
+            - enabled:
+                value: DISK_QUOTA_ENABLED
+            - limit:
+                value: DISK_QUOTA_LIMIT

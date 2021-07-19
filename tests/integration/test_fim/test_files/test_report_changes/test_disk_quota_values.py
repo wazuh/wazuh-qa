@@ -22,8 +22,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 temp_dir = tempfile.gettempdir()
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-testdir1 = test_dirs[0]
+configurations_path = os.path.join(test_data_path, 'wazuh_disk_quota_values.yaml')
 
 
 # Configurations
@@ -32,18 +31,18 @@ disk_quota_values = ['1KB', '100KB', '1MB', '10MB']
 conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': 'yes'},
                                                            'TEST_DIRECTORIES': temp_dir,
                                                            'FILE_SIZE_ENABLED': 'no',
-                                                           'FILE_SIZE_LIMIT': '10MB',
                                                            'DISK_QUOTA_ENABLED': 'yes',
                                                            'MODULE_NAME': __name__},
                                              apply_to_all=({'DISK_QUOTA_LIMIT': disk_quota_elem}
                                                            for disk_quota_elem in disk_quota_values))
 
+configuration_ids = [f"disk_quota_limit_{x['disk_quota_limit']}" for x in conf_metadata]
+
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
 
 # Fixtures
-
-@pytest.fixture(scope='module', params=configurations)
+@pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
@@ -66,11 +65,7 @@ def extra_configuration_after_yield():
 
 
 # Tests
-
-@pytest.mark.parametrize('tags_to_apply', [
-    {'ossec_conf_diff'}
-])
-def test_disk_quota_values(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
+def test_disk_quota_values(get_configuration, configure_environment, create_specific_size_file, restart_syscheckd):
     """
     Check that the disk_quota option for report_changes is working correctly.
 
@@ -81,8 +76,6 @@ def test_disk_quota_values(tags_to_apply, get_configuration, configure_environme
     tags_to_apply : set
         Run test if matches with a configuration identifier, skip otherwise.
     """
-    check_apply_test(tags_to_apply, get_configuration['tags'])
-
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 25, callback=callback_disk_quota_limit_reached,
+    wazuh_log_monitor.start(timeout=extended_timeout, callback=callback_disk_quota_limit_reached,
                             error_message='Did not receive expected '
                                           '"The maximum configured size for the ... folder has been reached, ..." event.')
