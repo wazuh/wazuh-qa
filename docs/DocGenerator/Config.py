@@ -1,4 +1,3 @@
-from collections import namedtuple
 import yaml
 
 CONFIG_PATH = "config.yaml"
@@ -10,6 +9,7 @@ class Config():
         self.documentation_path = ".."
         self.include_paths = []
         self.include_regex = []
+        self.function_regex = []
         self.ignore_paths = []
         self.valid_tags = []
         self.required_fields = self.__fields()
@@ -21,6 +21,7 @@ class Config():
         self.__read_documentation_path()
         self.__read_include_paths()
         self.__read_include_regex()
+        self.__read_function_regex()
         self.__read_ignore_paths()
         self.__read_valid_tags()
         self.__read_required_fields()
@@ -50,6 +51,11 @@ class Config():
         if not 'Include regex' in self.__config_data:
             raise Exception("Include regex is empty")
         self.include_regex = self.__config_data['Include regex']
+
+    def __read_function_regex(self):
+        if not 'Function regex' in self.__config_data:
+            raise Exception("Function regex is empty")
+        self.function_regex = self.__config_data['Function regex']
 
     def __read_ignore_paths(self):
         if 'Ignore paths' in self.__config_data:

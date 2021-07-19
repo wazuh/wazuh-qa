@@ -12,6 +12,9 @@ Include paths:
 Include regex:
   - "^test_.*py$|readme.md$"
 
+Function regex:
+  - "^test_"
+
 Ignore paths:
   - "../../tests/integration/test_wazuh_db/data"
   - "*/data/*"
