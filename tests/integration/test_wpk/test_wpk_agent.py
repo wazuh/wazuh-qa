@@ -19,11 +19,10 @@ from datetime import datetime
 from wazuh_testing.tools import WAZUH_PATH, get_version
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.file import truncate_file, read_file_lines
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.file import read_file_lines
-
+from wazuh_testing.agent import callback_detect_upgrade_ack_event, callback_upgrade_module_up
 from wazuh_testing import global_parameters
 
 
@@ -186,16 +185,6 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
                                            metadata=test_metadata)
 
 remoted_simulator = None
-
-
-def callback_detect_upgrade_ack_event(event_log):
-    print("Callback")
-    msg = ".*Sending upgrade ACK event: '(.*)'"
-    match = re.match(msg, event_log)
-    if match:
-        print(match.group(1))
-        return match.group(1)
-    return None if not match else match.group(1)
 
 
 @pytest.fixture(scope="module", params=configurations)
@@ -383,24 +372,23 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
                f'Expected error message does not match'
 
     if upgrade_process_result and expected['receive_notification']:
-
-        lines = read_file_lines(tools.LOG_FILE_PATH) 
-        while lines != 0:
-            time.sleep(1) 
+        if sys_platform not in ['win32', 'Windows']:
             lines = read_file_lines(tools.LOG_FILE_PATH) 
+            while lines != 0:
+                time.sleep(1) 
+                lines = read_file_lines(tools.LOG_FILE_PATH) 
 
-        wazuh_log_monitor = FileMonitor(tools.LOG_FILE_PATH)
+            wazuh_log_monitor = FileMonitor(tools.LOG_FILE_PATH)
 
         if metadata['simulate_rollback']:
-            msg = r"SIGNAL [(15)-(Terminated)] Received. Exit Cleaning..."
-            callback = make_callback(pattern=msg, prefix=r'.*wazuh-agentd.*', escape=True)
-            wazuh_log_monitor.start(timeout=120,
-                                    error_message="Error agentd not stopped",
-                                    callback=callback)
+            wazuh_log_monitor.start(timeout=200,
+                                    error_message="Error wazuh-agent does not stop",
+                                    callback=callback_upgrade_module_up)
                                     
             remoted_simulator.agent_restarted = True
 
-        result = json.loads(wazuh_log_monitor.start(timeout=120, error_message="ACK event not received", callback=callback_detect_upgrade_ack_event).result())['parameters']
+        result = json.loads(wazuh_log_monitor.start(timeout=300, error_message="ACK event not received", callback=callback_detect_upgrade_ack_event).result())['parameters']
+        #result = remoted_simulator.wait_upgrade_notification(timeout=180)
 
 
         if result is not None:

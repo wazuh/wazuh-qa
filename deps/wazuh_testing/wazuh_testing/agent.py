@@ -10,7 +10,7 @@ import ssl
 
 from wazuh_testing.fim import change_internal_options
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
-from wazuh_testing.tools.monitoring import FileMonitor
+import wazuh_testing.tools.monitoring as monitoring
 
 DEFAULT_VALUES = {
     'enabled': 'yes',
@@ -111,7 +111,7 @@ def check_client_keys_file():
             return line
         return None
 
-    log_monitor = FileMonitor(LOG_FILE_PATH)
+    log_monitor = monitoring.FileMonitor(LOG_FILE_PATH)
     try:
         log_monitor.start(timeout=6, callback=wait_key_changes)
     except:
@@ -265,3 +265,32 @@ def set_state_interval(interval, internal_file_path):
 
         with open(internal_file_path, 'w') as opts:
             opts.write(new_content)
+
+
+def callback_detect_upgrade_ack_event(event_log):
+    """Detect sending upgrade ACK event returning upgrade process result.
+    
+    Args:
+        event_log (str): Event line logs.
+    
+    Returns:
+        String: Upgrade result.
+    """
+    msg = ".*Sending upgrade ACK event: '(.*)'"
+    match = re.match(msg, event_log)
+    if match:
+        return match.group(1)
+    return None if not match else match.group(1)
+
+
+def callback_upgrade_module_up(event_log):
+    """Detect module agent upgrade started event.
+
+    Args:
+        event_log (str): Event line logs.
+    
+    Returns:
+        callable: callback to detect this event.
+    """
+    msg = '.*Module Agent Upgrade started.*'
+    return monitoring.make_callback(pattern=msg)
