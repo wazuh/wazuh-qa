@@ -11,8 +11,8 @@
         value: TEST_DIRECTORIES
         attributes:
         - check_all: 'yes'
-        - FIM_MODE
-        - REPORT_CHANGES
+        - realtime: 'yes'
+        - report_changes: 'yes'
     - diff:
         elements:
         - file_size:

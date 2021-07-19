@@ -28,15 +28,21 @@ configurations_path = os.path.join(test_data_path, 'wazuh_disk_quota_values_conf
 # Configurations
 disk_quota_values = ['1KB', '100KB', '1MB', '10MB']
 
-conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': 'yes'},
-                                                           'TEST_DIRECTORIES': temp_dir,
-                                                           'FILE_SIZE_ENABLED': 'no',
-                                                           'DISK_QUOTA_ENABLED': 'yes',
-                                                           'MODULE_NAME': __name__},
-                                             apply_to_all=({'DISK_QUOTA_LIMIT': disk_quota_elem}
-                                                           for disk_quota_elem in disk_quota_values))
+parameters = [
+    {'TEST_DIRECTORIES': temp_dir,
+     'FILE_SIZE_ENABLED': 'no',
+     'DISK_QUOTA_ENABLED': 'yes',
+     'DISK_QUOTA_LIMIT': disk_quota_elem} for disk_quota_elem in disk_quota_values
+]
 
-configuration_ids = [f"disk_quota_limit_{x['disk_quota_limit']}" for x in conf_metadata]
+metadata = [
+    {'test_directories': temp_dir,
+     'file_size_enabled': 'no',
+     'disk_quota_enabled': 'yes',
+     'disk_quota_limit': disk_quota_elem} for disk_quota_elem in disk_quota_values
+]
+
+configuration_ids = [f"disk_quota_limit_{x['disk_quota_limit']}" for x in metadata]
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
