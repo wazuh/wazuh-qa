@@ -35,6 +35,8 @@ with open(test_data_file) as f:
     test_cases = yaml.safe_load(f)
 
 # Variables
+wait_daemon_control = 1
+
 if sys.platform == 'win32':
     state_file_path = os.path.join(WAZUH_PATH, 'wazuh-agent.state')
     internal_options = os.path.join(WAZUH_PATH, 'internal_options.conf')
@@ -102,6 +104,9 @@ def test_agentd_state_config(test_case, set_local_internal_options):
             control_service('start')
     else:
         control_service('start', 'wazuh-agentd')
+        # Sleep enough time to Wazuh load agent.state_interval configuration and
+        # boot wazuh-agentd
+        time.sleep(wait_daemon_control) 
         assert (test_case['agentd_ends']
                     is not check_if_process_is_running('wazuh-agentd'))
     
