@@ -26,6 +26,7 @@ from wazuh_testing.agent import callback_detect_upgrade_ack_event, callback_upgr
 from wazuh_testing import global_parameters
 
 
+
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0),
               pytest.mark.agent]
 
@@ -383,9 +384,21 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
 
 
         if metadata['simulate_rollback']:
+
+ 
+         if metadata['simulate_rollback']:
+            msg = 'Exit Cleaning'
+            callback = monitoring.make_callback(pattern=msg, prefix=r'.*wazuh-agentd.*', escape=True)
+            wazuh_log_monitor.start(timeout=200,
+                                    error_message="Error agentd not stopped",
+                                    callback=callback)
+
+            wazuh_log_monitor = FileMonitor(tools.LOG_FILE_PATH)
             wazuh_log_monitor.start(timeout=200,
                                     error_message="Error wazuh-agent does not stop",
                                     callback=callback_upgrade_module_up)
+
+                                    
                                     
             remoted_simulator.change_default_listener = True
 
