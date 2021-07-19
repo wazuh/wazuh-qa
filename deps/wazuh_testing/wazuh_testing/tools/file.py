@@ -274,3 +274,20 @@ def set_file_owner_and_group(file_path, owner, group):
         gid = getgrnam(group).gr_gid
 
         os.chown(file_path, uid, gid)
+
+
+def count_file_lines(filepath):
+    """Count number of lines of a specified file.
+
+    Args:
+        filepath (str): Absolute path of the file.
+    
+    Returns:
+        Integer: Number of lines of the file.
+    """
+    file = open(filepath, "r")
+    nonempty_lines = [line.strip("\n") for line in file if line != "\n"]
+    line_count = len(nonempty_lines)
+    file.close()
+    return line_count
+
