@@ -22,7 +22,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 temp_dir = tempfile.gettempdir()
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_disk_quota_values.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_disk_quota_values_conf.yaml')
 
 
 # Configurations
