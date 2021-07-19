@@ -1,5 +1,5 @@
-from AnsibleInventory import AnsibleInventory
-from AnsibleInstance import AnsibleInstance
+from ansible.AnsibleInventory import AnsibleInventory
+from ansible.AnsibleInstance import AnsibleInstance
 from collections import defaultdict
 import yaml
 import sys
@@ -54,7 +54,7 @@ class QAProvisioning():
         self.infra_file_path = infra_file_path
 
 
-qa_provisioning = QAProvisioning("")
+qa_provisioning = QAProvisioning("path_to_infraestructure_definition.yaml")
 ansible_instances = []
 hosts = []
 list_tasks = {}
@@ -67,6 +67,6 @@ qa_provisioning.parse_ifraestructure_file(ansible_instances=ansible_instances, h
 
 ansible_inventory = AnsibleInventory(hosts=hosts, groups=groups, groups_vars=groups_vars,
                                      ansible_instances=ansible_instances,
-                                     inventory_file_path="./ansible_inventory.yaml")
+                                     inventory_file_path="path_to_ansible_inventory.yaml")
 
 ansible_inventory.write_inventory_to_file()
