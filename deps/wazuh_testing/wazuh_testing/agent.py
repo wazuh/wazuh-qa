@@ -294,3 +294,8 @@ def callback_upgrade_module_up(event_log):
     """
     msg = '.*Module Agent Upgrade started.*'
     return monitoring.make_callback(pattern=msg)
+
+
+def callback_agent_stop(event_log):
+    msg = 'Exit Cleaning'
+    return monitoring.make_callback(pattern=msg, prefix=r'.*wazuh-agentd.*')

@@ -22,7 +22,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file, count_file_lines
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.agent import callback_detect_upgrade_ack_event, callback_upgrade_module_up
+from wazuh_testing.agent import callback_detect_upgrade_ack_event, callback_upgrade_module_up, callback_agent_stop
 from wazuh_testing import global_parameters
 
 
@@ -186,6 +186,11 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
                                            metadata=test_metadata)
 
 remoted_simulator = None
+
+def callback_agent_req(id_req):
+    msg = '#! req {id_req}'
+    return make_callback(pattern=msg, prefix=r'.*wazuh-agentd.*')
+
 
 
 @pytest.fixture(scope="module", params=configurations)
@@ -386,24 +391,22 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
         if metadata['simulate_rollback']:
 
  
-         if metadata['simulate_rollback']:
-            msg = 'Exit Cleaning'
-            callback = make_callback(pattern=msg, prefix=r'.*wazuh-agentd.*', escape=True)
             wazuh_log_monitor.start(timeout=200,
                                     error_message="Error agentd not stopped",
-                                    callback=callback)
-
-            wazuh_log_monitor = FileMonitor(tools.LOG_FILE_PATH)
+                                    callback=callback_agent_stop)
+ 
             wazuh_log_monitor.start(timeout=200,
-                                    error_message="Error wazuh-agent does not stop",
-                                    callback=callback_upgrade_module_up)
+                                    error_message="Agent did not receives req 384 message",
+                                    callback=callback_agent_req)
 
+            wazuh_log_monitor.start(timeout=200,
+                                    error_message="Upgrade module did not start",
+                                    callback=callback_upgrade_module_up)
 
                                     
             remoted_simulator.change_default_listener = True
 
         result = json.loads(wazuh_log_monitor.start(timeout=300, error_message="ACK event not received", callback=callback_detect_upgrade_ack_event).result())['parameters']
-        #result = remoted_simulator.wait_upgrade_notification(timeout=180)
 
 
         if result is not None:
