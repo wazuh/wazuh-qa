@@ -71,6 +71,55 @@ wait_upgrade_process_timeout = 240
 
 
 test_metadata = [
+       # 1. Upgrade from initial_version to new version
+    {
+        'protocol': PROTOCOL,
+        'initial_version': _agent_version,
+        'agent_version': version_to_upgrade,
+        'use_http': False,
+        'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
+        'chunk_size': 16384,
+        'simulate_interruption': False,
+        'simulate_rollback': False,
+        'results': {
+            'upgrade_ok': True,
+            'result_code': 0,
+            'receive_notification': True,
+            'status': 'Done',
+        }
+    },
+    # 2. False upgrade script parameter
+    {
+        'protocol': PROTOCOL,
+        'initial_version': _agent_version,
+        'agent_version': version_to_upgrade,
+        'use_http': False,
+        'upgrade_script': 'fake_upgrade.sh',
+        'chunk_size': 16384,
+        'simulate_interruption': False,
+        'simulate_rollback': False,
+        'results': {
+            'upgrade_ok': False,
+            'error_message': error_msg,
+            'receive_notification': False,
+        }
+    },
+    # 3. Simulate an interruption
+    {
+        'protocol': PROTOCOL,
+        'initial_version': _agent_version,
+        'agent_version': version_to_upgrade,
+        'use_http': False,
+        'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
+        'chunk_size': 16384,
+        'simulate_interruption': True,
+        'simulate_rollback': False,
+        'results': {
+            'upgrade_ok': False,
+            'error_message': 'Request confirmation never arrived',
+            'receive_notification': False,
+        }
+    }
 ]
 
 if _agent_version == 'v3.13.2':
