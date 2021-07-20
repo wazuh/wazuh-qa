@@ -71,55 +71,6 @@ wait_upgrade_process_timeout = 240
 
 
 test_metadata = [
-    # 1. Upgrade from initial_version to new version
-    {
-        'protocol': PROTOCOL,
-        'initial_version': _agent_version,
-        'agent_version': version_to_upgrade,
-        'use_http': False,
-        'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
-        'chunk_size': 16384,
-        'simulate_interruption': False,
-        'simulate_rollback': False,
-        'results': {
-            'upgrade_ok': True,
-            'result_code': 0,
-            'receive_notification': True,
-            'status': 'Done',
-        }
-    },
-    # 2. False upgrade script parameter
-    {
-        'protocol': PROTOCOL,
-        'initial_version': _agent_version,
-        'agent_version': version_to_upgrade,
-        'use_http': False,
-        'upgrade_script': 'fake_upgrade.sh',
-        'chunk_size': 16384,
-        'simulate_interruption': False,
-        'simulate_rollback': False,
-        'results': {
-            'upgrade_ok': False,
-            'error_message': error_msg,
-            'receive_notification': False,
-        }
-    },
-    # 3. Simulate an interruption
-    {
-        'protocol': PROTOCOL,
-        'initial_version': _agent_version,
-        'agent_version': version_to_upgrade,
-        'use_http': False,
-        'upgrade_script': DEFAULT_UPGRADE_SCRIPT,
-        'chunk_size': 16384,
-        'simulate_interruption': True,
-        'simulate_rollback': False,
-        'results': {
-            'upgrade_ok': False,
-            'error_message': 'Request confirmation never arrived',
-            'receive_notification': False,
-        }
-    }
 ]
 
 if _agent_version == 'v3.13.2':
@@ -390,18 +341,15 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
 
         if metadata['simulate_rollback']:
 
+            if sys_platform not in ['win32', 'Windows']:
+                wazuh_log_monitor.start(timeout=200,
+                                        error_message="Error agentd not stopped",
+                                        callback=callback_agent_stop())
  
-            wazuh_log_monitor.start(timeout=200,
-                                    error_message="Error agentd not stopped",
-                                    callback=callback_agent_stop)
- 
-            wazuh_log_monitor.start(timeout=200,
-                                    error_message="Agent did not receives req 384 message",
-                                    callback=callback_agent_req)
 
             wazuh_log_monitor.start(timeout=200,
                                     error_message="Upgrade module did not start",
-                                    callback=callback_upgrade_module_up)
+                                    callback=callback_upgrade_module_up())
 
                                     
             remoted_simulator.change_default_listener = True

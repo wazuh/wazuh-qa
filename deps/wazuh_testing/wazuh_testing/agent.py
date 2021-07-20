@@ -283,7 +283,7 @@ def callback_detect_upgrade_ack_event(event_log):
     return None if not match else match.group(1)
 
 
-def callback_upgrade_module_up(event_log):
+def callback_upgrade_module_up():
     """Detect module agent upgrade started event.
 
     Args:
@@ -292,10 +292,10 @@ def callback_upgrade_module_up(event_log):
     Returns:
         callable: callback to detect this event.
     """
-    msg = '.*Module Agent Upgrade started.*'
-    return monitoring.make_callback(pattern=msg)
+    msg = 'Module Agent Upgrade started'
+    return monitoring.make_callback(pattern=msg, prefix=r'.*wazuh-modulesd.*')
 
 
-def callback_agent_stop(event_log):
+def callback_agent_stop():
     msg = 'Exit Cleaning'
     return monitoring.make_callback(pattern=msg, prefix=r'.*wazuh-agentd.*')
