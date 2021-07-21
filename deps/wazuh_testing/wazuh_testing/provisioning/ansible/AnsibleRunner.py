@@ -40,12 +40,15 @@ class AnsibleRunner:
         return ansible_output
 
     @staticmethod
-    def run_ephemeral_tasks(ansible_inventory_path, playbook_parameters):
+    def run_ephemeral_tasks(ansible_inventory_path, playbook_parameters, raise_on_error=True):
         ansible_playbook = AnsiblePlaybook(**playbook_parameters)
 
         try:
             runner = ansible_runner.run(playbook=ansible_playbook.playbook_file_path, inventory=ansible_inventory_path)
             ansible_output = AnsibleOutput(runner)
+
+            if ansible_output.rc != 0 and raise_on_error:
+                raise Exception(f'Failed: {ansible_output}')
 
             return ansible_output
 
