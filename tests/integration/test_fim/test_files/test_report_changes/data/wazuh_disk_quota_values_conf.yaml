@@ -12,6 +12,7 @@
     - directories:
         value: TEST_DIRECTORIES
         attributes:
+        - follow_symbolic_link: 'yes'
         - check_all: 'yes'
         - realtime: 'yes'
         - report_changes: 'yes'
