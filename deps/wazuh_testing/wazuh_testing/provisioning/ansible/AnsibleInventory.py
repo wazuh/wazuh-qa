@@ -1,52 +1,72 @@
-import sys
+import os
 import yaml
-from collections import defaultdict
-from yaml.error import YAMLError
+import copy
+import json
 
 
 class AnsibleInventory():
+    """Represent an inventory of ansible. It allows us to build inventories from a set of instances and groups.
 
-    def __generate_inventory(self):
+    Args:
+        ansible_instances (list(AnsibleInstances)): Ansible instances that will be defined in the ansible inventory.
+        inventory_file_path (str): Path were save the ansible inventory.
+        ansible_groups (list(AnsibleGroups)): List of ansible groups to save in the ansible inventory.
 
+    Attributes:
+        ansible_instances (list(AnsibleInstances)): Ansible instances that will be defined in the ansible inventory.
+        inventory_file_path (str): Path were save the ansible inventory.
+        ansible_groups (list(AnsibleGroups)): List of ansible groups to save in the ansible inventory.
+
+    """
+    def __init__(self, ansible_instances, inventory_file_path, ansible_groups=None):
+        self.ansible_instances = ansible_instances
+        self.inventory_file_path = inventory_file_path
+        self.ansible_groups = ansible_groups
+        self.data = {}
+        self.__setup_data__()
+
+    def __setup_data__(self):
+        """Build the ansible inventory data and save it in the data class attribute."""
         ansible_inventory_dict = {'all': {'hosts': {}, 'children': {}}}
-
         hosts = {}
 
         for instance in self.ansible_instances:
             host_info = {
-                        "ansible_host": instance.host,
-                        "ansible_connection": instance.connection_method,
-                        "ansible_port": instance.connection_port,
-                        "ansible_user": instance.connection_user,
-                        "ansible_password": instance.connection_user_password,
-                        "ansible_python_interpreter": instance.ansible_python_interpreter
+                        'ansible_host': instance.host,
+                        'ansible_user': instance.connection_user,
+                        'ansible_password': instance.connection_user_password,
+                        'ansible_connection': instance.connection_method,
+                        'ansible_port': instance.connection_port,
+                        'ansible_python_interpreter': instance.ansible_python_interpreter,
+                        'ansible_ssh_private_key_file': instance.ssh_private_key_file_path,
+                        'vars': instance.host_vars
                         }
-            if instance.host_vars:
-                host_info.update({'vars': instance.host_vars})
-            if instance.connection_method == "ssh":
-                host_info.update({'ansible_ssh_private_key_file': instance.ssh_private_key_file_path})
 
-            hosts.update({instance.host: host_info})
+            # Remove ansible vars with None value
+            host_info = {key: value for key, value in host_info.items() if value is not None}
 
-        ansible_inventory_dict["all"]['hosts'] = hosts
+            hosts[instance.host] = copy.deepcopy(host_info)
 
-        ansible_inventory_dict['all']['children'] = self.groups['children']
+        ansible_inventory_dict['all']['hosts'] = hosts
 
-        ansible_inventory_stream = yaml.dump(ansible_inventory_dict)
+        if self.ansible_groups:
+            for group in self.ansible_groups:
+                ansible_inventory_dict['all']['children'].update(group.data)
 
-        return ansible_inventory_stream
+        self.data = ansible_inventory_dict
+
+    def __str__(self):
+        """Define how the class object is to be displayed."""
+        return yaml.dump(self.data, allow_unicode=True, sort_keys=False)
+
+    def __repr__(self):
+        """Representation of the object of the class in string format"""
+        return json.dumps(self.data)
 
     def write_inventory_to_file(self):
-        with open(self.inventory_file_path, "w") as inventory:
-            ansible_inventory_stream = self.__generate_inventory()
-            inventory.writelines(ansible_inventory_stream)
+        """Write the ansible inventory data in a file"""
+        if not os.path.exists(os.path.dirname(self.inventory_file_path)):
+            os.makedirs(os.path.dirname(self.inventory_file_path))
 
-    def print_data(self):
-        pass
-
-    def __init__(self, ansible_instances, inventory_file_path, hosts={}, groups={}, groups_vars={}):
-        self.inventory_file_path = inventory_file_path
-        self.ansible_instances = ansible_instances
-        self.hosts = hosts
-        self.groups = groups
-        self.ansible_instances = ansible_instances
+        with open(self.inventory_file_path, 'w') as inventory:
+            inventory.write(self.__str__())
