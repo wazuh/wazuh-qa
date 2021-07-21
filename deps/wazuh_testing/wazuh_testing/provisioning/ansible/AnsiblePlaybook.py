@@ -5,7 +5,7 @@ import yaml
 class AnsiblePlaybook():
 
     def __init__(self, name, tasks_list=None, playbook_file_path=None, hosts='all', gather_facts=False,
-                 ignore_errors=False, become=False, playbook_vars=None):
+                 ignore_errors=False, become=False, playbook_vars=None, generate_file=True):
         self.name = name
         self.hosts = hosts
         self.gather_facts = gather_facts
@@ -14,6 +14,8 @@ class AnsiblePlaybook():
         self.become = become
         self.playbook_vars = playbook_vars
         self.playbook_file_path = playbook_file_path
+        if generate_file:
+            self.write_playbook_to_file()
 
     def __str__(self):
         playbook = {'hosts': self.hosts, 'gather_facts': self.gather_facts, 'become': self.become,

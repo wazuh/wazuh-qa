@@ -11,6 +11,7 @@ class AnsibleInventory():
         ansible_instances (list(AnsibleInstances)): Ansible instances that will be defined in the ansible inventory.
         inventory_file_path (str): Path were save the ansible inventory.
         ansible_groups (list(AnsibleGroups)): List of ansible groups to save in the ansible inventory.
+        generate_file (boolean): True to generate the file with the inventory automatically, False otherwise.
 
     Attributes:
         ansible_instances (list(AnsibleInstances)): Ansible instances that will be defined in the ansible inventory.
@@ -18,12 +19,14 @@ class AnsibleInventory():
         ansible_groups (list(AnsibleGroups)): List of ansible groups to save in the ansible inventory.
 
     """
-    def __init__(self, ansible_instances, inventory_file_path, ansible_groups=None):
+    def __init__(self, ansible_instances, inventory_file_path, ansible_groups=None, generate_file=True):
         self.ansible_instances = ansible_instances
         self.inventory_file_path = inventory_file_path
         self.ansible_groups = ansible_groups
         self.data = {}
         self.__setup_data__()
+        if generate_file:
+            self.write_inventory_to_file()
 
     def __setup_data__(self):
         """Build the ansible inventory data and save it in the data class attribute."""
@@ -70,3 +73,7 @@ class AnsibleInventory():
 
         with open(self.inventory_file_path, 'w') as inventory:
             inventory.write(self.__str__())
+
+    def delete_playbook_file(self):
+        if os.path.exists(self.inventory_file_path):
+            os.remove(self.inventory_file_path)
