@@ -21,10 +21,10 @@
         - file_size:
             elements:
             - enabled:
-                value: FILE_SIZE_ENABLED
+                value: 'no'
         - disk_quota:
             elements:
             - enabled:
-                value: DISK_QUOTA_ENABLED
+                value: 'yes'
             - limit:
                 value: DISK_QUOTA_LIMIT

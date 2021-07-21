@@ -30,15 +30,11 @@ disk_quota_values = ['1KB', '100KB', '1MB', '10MB']
 
 parameters = [
     {'TEST_DIRECTORIES': temp_dir,
-     'FILE_SIZE_ENABLED': 'no',
-     'DISK_QUOTA_ENABLED': 'yes',
      'DISK_QUOTA_LIMIT': disk_quota_elem} for disk_quota_elem in disk_quota_values
 ]
 
 metadata = [
     {'test_directories': temp_dir,
-     'file_size_enabled': 'no',
-     'disk_quota_enabled': 'yes',
      'disk_quota_limit': disk_quota_elem} for disk_quota_elem in disk_quota_values
 ]
 
