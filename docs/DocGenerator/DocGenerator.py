@@ -57,28 +57,26 @@ class DocGenerator:
         doc_path = os.path.splitext(base_path + relative_path)[0]
         return doc_path
 
+    def dump_output(self, content, doc_path):
+        if not os.path.exists(os.path.dirname(doc_path)):
+            os.makedirs(os.path.dirname(doc_path))
+        with open(doc_path + ".json", "w+") as outfile:
+            outfile.write(json.dumps(content, indent=4))
+        with open(doc_path + ".yaml", "w+") as outfile:
+            outfile.write(yaml.dump(content))
+
     def create_group(self, path, group_id):
         self.__id_counter = self.__id_counter + 1
         group = self.parser.parse_group(path, self.__id_counter, group_id)
         doc_path = self.get_group_doc_path(path)
-        if not os.path.exists(os.path.dirname(doc_path)):
-            os.makedirs(os.path.dirname(doc_path))
-        with open(doc_path + ".json", "w+") as outfile:
-            outfile.write(json.dumps(group, indent=4))
-        with open(doc_path + ".yaml", "w+") as outfile:
-            outfile.write(yaml.dump(group))
+        self.dump_output(group, doc_path)
         return self.__id_counter
 
     def create_test(self, path, group_id):
         self.__id_counter = self.__id_counter + 1
         test = self.parser.parse_test(path, self.__id_counter, group_id)
         doc_path = self.get_test_doc_path(path)
-        if not os.path.exists( os.path.dirname(doc_path) ):
-            os.makedirs(os.path.dirname(doc_path))
-        with open(doc_path + ".json", "w+") as outfile:
-            outfile.write(json.dumps(test, indent=4))
-        with open(doc_path + ".yaml", "w+") as outfile:
-            outfile.write(yaml.dump(test))
+        self.dump_output(test, doc_path)
         return self.__id_counter
 
     def parse_folder(self, path, group_id):
