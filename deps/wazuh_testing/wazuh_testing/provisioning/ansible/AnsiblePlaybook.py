@@ -7,7 +7,28 @@ from wazuh_testing.tools.time import get_current_timestamp
 
 
 class AnsiblePlaybook():
+    """Class to create playbook file with a custom tasks list
 
+    Args:
+        name (str): Playbook name.
+        tasks_list (list(AnsibleTask)): List of ansible tasks that will be launched.
+        playbook_file_path (str): Path where the playbook will be stored.
+        hosts (str): Group of hosts to which send the tasks.
+        gather_facts (bool): Allow or denied the gather_facts fetch
+        become (bool): Allo or denied privilege escalation.
+        playbook_vars (dict): Variables for playbook
+        generate_file (bool): If True, write playbook in file.
+
+    Attributes:
+        name (str): Playbook name.
+        tasks_list (list(AnsibleTask)): List of ansible tasks that will be launched.
+        playbook_file_path (str): Path where the playbook will be stored.
+        hosts (str): Group of hosts to which send the tasks.
+        gather_facts (bool): Allow or denied the gather_facts fetch
+        become (bool): Allo or denied privilege escalation.
+        playbook_vars (dict): Variables for playbook
+        generate_file (bool): If True, write playbook in file.
+    """
     def __init__(self, name='generic_playbook', tasks_list=None, playbook_file_path=None, hosts='all',
                  gather_facts=False, ignore_errors=False, become=False, playbook_vars=None, generate_file=True):
         self.name = name
@@ -23,6 +44,7 @@ class AnsiblePlaybook():
             self.write_playbook_to_file()
 
     def __str__(self):
+        """Define how the class object is to be displayed."""
         playbook = {'hosts': self.hosts, 'gather_facts': self.gather_facts, 'become': self.become,
                     'ignore_errors': self.ignore_errors}
 
@@ -39,6 +61,7 @@ class AnsiblePlaybook():
         return playbook_string
 
     def write_playbook_to_file(self):
+        """Write the ansible playbook data in a file"""
         if not os.path.exists(os.path.dirname(self.playbook_file_path)):
             os.makedirs(os.path.dirname(self.playbook_file_path))
 
