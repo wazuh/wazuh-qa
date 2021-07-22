@@ -1,6 +1,6 @@
 Project path: "../../tests/integration"
 
-Documentation path: ".."
+Documentation path: "../output"
 
 Include paths:
   - wazuh_db:
@@ -10,11 +10,17 @@ Include paths:
     path: "../../tests/integration/test_vulnerability_detector"
 
 Include regex:
-  - "^test_.*py$|readme.md$"
+  - "^test_.*py$"
+
+Group files:
+  - "README.md"
+
+Function regex:
+  - "^test_"
 
 Ignore paths:
   - "../../tests/integration/test_wazuh_db/data"
-  - "*/data/*"
+  - "/data/*"
 
 Valid tags:
   - DB
@@ -40,4 +46,5 @@ Ignored fields:
     - Copyright
   Tests:
     - Params
+    - Parameters
     - Args

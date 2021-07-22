@@ -10,6 +10,8 @@ class Config():
         self.documentation_path = ".."
         self.include_paths = []
         self.include_regex = []
+        self.group_files = ""
+        self.function_regex = []
         self.ignore_paths = []
         self.valid_tags = []
         self.required_fields = self.__fields()
@@ -21,6 +23,8 @@ class Config():
         self.__read_documentation_path()
         self.__read_include_paths()
         self.__read_include_regex()
+        self.__read_group_files()
+        self.__read_function_regex()
         self.__read_ignore_paths()
         self.__read_valid_tags()
         self.__read_required_fields()
@@ -50,6 +54,16 @@ class Config():
         if not 'Include regex' in self.__config_data:
             raise Exception("Include regex is empty")
         self.include_regex = self.__config_data['Include regex']
+
+    def __read_group_files(self):
+        if not 'Group files' in self.__config_data:
+            raise Exception("Group files is empty")
+        self.group_files = self.__config_data['Group files']
+
+    def __read_function_regex(self):
+        if not 'Function regex' in self.__config_data:
+            raise Exception("Function regex is empty")
+        self.function_regex = self.__config_data['Function regex']
 
     def __read_ignore_paths(self):
         if 'Ignore paths' in self.__config_data:
@@ -93,35 +107,3 @@ class Config():
             self.module = []
             self.tests = []
             self.case_sensitive = False
-
-
-conf = Config()
-
-print(conf.project_path)
-
-print(conf.documentation_path)
-
-for element in conf.include_paths:
-    print(element.path)
-    print(element.recursive)
-
-for element in conf.include_regex:
-    print(element)
-
-for element in conf.ignore_paths:
-    print(element)
-
-for element in conf.valid_tags:
-    print(element)
-
-print(conf.required_fields.case_sensitive)
-for element in conf.required_fields.module:
-    print(element)
-for element in conf.required_fields.tests:
-    print(element)
-
-print(conf.ignored_fields.case_sensitive)
-for element in conf.ignored_fields.module:
-    print(element)
-for element in conf.ignored_fields.tests:
-    print(element)
