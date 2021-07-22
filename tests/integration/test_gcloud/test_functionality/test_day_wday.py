@@ -79,9 +79,9 @@ def test_day_wday(tags_to_apply, get_configuration, configure_environment,
     or month and time.
     """
     def get_next_scan(next_scan_time: str):
-        next_scan_time = next_scan_time_log.split(" ")
-        date = next_scan_time[0].split("/")
-        hour = next_scan_time[1].split(":")
+        next_scan_time = next_scan_time_log.split()
+        date = next_scan_time[0].split('/')
+        hour = next_scan_time[1].split(':')
 
         date_before = datetime.datetime.now()
 
