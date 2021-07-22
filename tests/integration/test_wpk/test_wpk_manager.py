@@ -931,7 +931,7 @@ def test_wpk_manager(remove_current_wpk, set_debug_mode, get_configuration, conf
     time.sleep(time_until_registration_key_avaible)
 
     # Send upgrade request
-    response = json.loads(upgrade_socket.send(json.dumps(data)))
+    response = upgrade_socket.send(data)
 
     if metadata.get('checks') and (('use_http' in metadata.get('checks')) or ('version' in metadata.get('checks'))):
         # Checking version or http in logs
@@ -1009,19 +1009,19 @@ def test_wpk_manager(remove_current_wpk, set_debug_mode, get_configuration, conf
 
             time.sleep(time_until_ask_upgrade_result)
 
-            response = json.loads(task_socket.send(json.dumps(data)))
+            response = task_socket.send(data)
             retries = 0
             while (response['data'][0]['status'] != metadata.get('first_attempt')) \
                     and (retries < 10):
                 time.sleep(time_until_ask_upgrade_result)
-                response = json.loads(task_socket.send(json.dumps(data)))
+                response = task_socket.send(data)
                 retries += 1
             assert metadata.get('first_attempt') == response['data'][0]['status'], \
                 f'First upgrade status did not match expected! ' \
                 f'Expected {metadata.get("first_attempt")} obtained {response["data"][0]["status"]}'
 
         # send upgrade request again
-        response = json.loads(upgrade_socket.send(json.dumps(repeat_message)))
+        response = upgrade_socket.send(repeat_message)
 
     if metadata.get('expected_response') == 'Success':
         # Chech that result is expected
@@ -1042,13 +1042,13 @@ def test_wpk_manager(remove_current_wpk, set_debug_mode, get_configuration, conf
                 }
             }
             time.sleep(time_until_ask_upgrade_result)
-            response = json.loads(task_socket.send(json.dumps(data)))
+            response = task_socket.send((data))
             retries = 0
 
             while response['data'][0]['status'] == 'Updating' and retries < max_upgrade_result_status_retries and \
                     response['data'][0]['status'] != expected_status[index]:
                 time.sleep(time_until_ask_upgrade_result)
-                response = json.loads(task_socket.send(json.dumps(data)))
+                response = task_socket.send(data)
                 retries += 1
 
             assert expected_status[index] == response['data'][0]['status'], \

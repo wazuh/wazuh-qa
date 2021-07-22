@@ -63,7 +63,8 @@ class WazuhSocket:
             response = recv_response(wazuh_socket, response_size)
             wazuh_socket.close()
 
-            return response
+
+            return json.loads(response)
 
         except Exception:
             raise ConnectionError
