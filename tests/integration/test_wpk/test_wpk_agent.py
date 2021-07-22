@@ -10,7 +10,6 @@ import requests
 import subprocess
 import yaml
 import json
-import re
 
 from wazuh_testing import tools
 from wazuh_testing.tools.monitoring import make_callback, FileMonitor
@@ -22,9 +21,8 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file, count_file_lines
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.agent import callback_detect_upgrade_ack_event, callback_upgrade_module_up, callback_agent_stop
+from wazuh_testing.agent import callback_detect_upgrade_ack_event, callback_upgrade_module_up, callback_exit_cleaning
 from wazuh_testing import global_parameters
-
 
 
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0),
@@ -71,7 +69,7 @@ wait_upgrade_process_timeout = 240
 
 
 test_metadata = [
-       # 1. Upgrade from initial_version to new version
+    # 1. Upgrade from initial_version to new version
     {
         'protocol': PROTOCOL,
         'initial_version': _agent_version,
@@ -190,7 +188,6 @@ remoted_simulator = None
 def callback_agent_req(id_req):
     msg = '#! req {id_req}'
     return make_callback(pattern=msg, prefix=r'.*wazuh-agentd.*')
-
 
 
 @pytest.fixture(scope="module", params=configurations)
@@ -349,7 +346,6 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
                    configure_environment, start_agent):
     metadata = get_configuration['metadata']
     expected = metadata['results']
-    wazuh_log_monitor = FileMonitor(tools.LOG_FILE_PATH)
 
     # Extract initial Wazuh Agent version
     assert get_version() == metadata["initial_version"], \
@@ -387,13 +383,12 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
             truncate_file(tools.LOG_FILE_PATH)
         wazuh_log_monitor = FileMonitor(tools.LOG_FILE_PATH)
 
-
         if metadata['simulate_rollback']:
 
             if sys_platform not in ['win32', 'Windows']:
                 wazuh_log_monitor.start(timeout=200,
                                         error_message="Error agentd not stopped",
-                                        callback=callback_agent_stop())
+                                        callback=callback_exit_cleaning())
  
 
             wazuh_log_monitor.start(timeout=200,
@@ -403,9 +398,9 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
                                     
             remoted_simulator.change_default_listener = True
 
-        result = json.loads(wazuh_log_monitor.start(timeout=300, error_message="ACK event not received", callback=callback_detect_upgrade_ack_event).result())['parameters']
-
-
+        event = json.loads(wazuh_log_monitor.start(timeout=300, error_message="ACK event not received", callback=callback_detect_upgrade_ack_event).result())
+        result = event['parameters']
+        
         if result is not None:
             status = result['status']
             assert status == expected['status'], \

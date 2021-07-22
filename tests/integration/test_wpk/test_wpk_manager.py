@@ -5,16 +5,10 @@
 import json
 import os
 import pytest
-import socket
-import subprocess
-import struct
-import threading
 import time
 import hashlib
 import requests
-import platform
 
-from configobj import ConfigObj
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, UPGRADE_PATH, get_version
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.agent_simulator import Sender, Injector

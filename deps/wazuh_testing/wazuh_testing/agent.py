@@ -278,8 +278,6 @@ def callback_detect_upgrade_ack_event(event_log):
     """
     msg = ".*Sending upgrade ACK event: '(.*)'"
     match = re.match(msg, event_log)
-    if match:
-        return match.group(1)
     return None if not match else match.group(1)
 
 
@@ -292,10 +290,17 @@ def callback_upgrade_module_up():
     Returns:
         callable: callback to detect this event.
     """
-    msg = 'Module Agent Upgrade started'
-    return monitoring.make_callback(pattern=msg, prefix=r'.*wazuh-modulesd.*')
+    return monitoring.make_callback(pattern='Module Agent Upgrade started', 
+    prefix=r'.*wazuh-modulesd.*')
 
 
-def callback_agent_stop():
-    msg = 'Exit Cleaning'
-    return monitoring.make_callback(pattern=msg, prefix=r'.*wazuh-agentd.*')
+def callback_exit_cleaning():
+    """Detect exit cleaning message.
+
+    Args:
+        callable: callback to detect this event.
+    
+    Returns:
+        callable: callback to detect this event.
+    """
+    return monitoring.make_callback(pattern='Exit Cleaning', prefix=r'.*wazuh-agentd.*')

@@ -30,26 +30,26 @@ class WazuhSocket:
         Returns:
             str: received data
         """
+        @retry(socket.error)
+        def connection(_socket, request):
+            _socket.connect(request)
+
+        @retry(socket.error)
+        def send_msg(_socket, msg):
+            _socket.send(msg)
+
+        @retry(ValueError)
+        def recv_response(_socket, size):
+            size = struct.unpack("<I", _socket.recv(size, socket.MSG_WAITALL))[0]
+            recv_msg = _socket.recv(size, socket.MSG_WAITALL)
+            if recv_msg == '':
+                raise ValueError
+            return recv_msg
+
         try:
             wazuh_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             encoded_msg = msg.encode('utf-8')
             request_msg = struct.pack("<I", len(encoded_msg)) + encoded_msg
-
-            @retry(socket.error)
-            def connection(_socket, request):
-                _socket.connect(request)
-
-            @retry(socket.error)
-            def send_msg(_socket, msg):
-                _socket.send(msg)
-
-            @retry(ValueError)
-            def recv_response(_socket, size):
-                size = struct.unpack("<I", _socket.recv(size, socket.MSG_WAITALL))[0]
-                recv_msg = _socket.recv(size, socket.MSG_WAITALL)
-                if recv_msg == '':
-                    raise ValueError
-                return recv_msg
 
             connection(wazuh_socket, self.file)
             send_msg(wazuh_socket, request_msg)
