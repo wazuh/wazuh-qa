@@ -1,6 +1,9 @@
+from deployment.LocalPackage import LocalPackage
 from ansible.AnsibleInventory import AnsibleInventory
 from ansible.AnsibleInstance import AnsibleInstance
+from deployment.WazuhSources import WazuhSources
 from collections import defaultdict
+from subprocess import call
 import yaml
 import sys
 
@@ -57,7 +60,19 @@ hosts_tasks = {}
 qa_provisioning.parse_ifraestructure_file(ansible_instances=ansible_instances, hosts=hosts, groups=groups,
                                           hosts_tasks=hosts_tasks)
 
-ansible_inventory = AnsibleInventory(hosts=hosts, groups=groups, ansible_instances=ansible_instances,
-                                     inventory_file_path="ansible_inventory.yaml")
+ansible_inventory = AnsibleInventory(ansible_instances=ansible_instances,
+                                     inventory_file_path="/tmp/ansible_inventory.yaml")
 
-ansible_inventory.write_inventory_to_file()
+wa_sources = WazuhSources("managers", "/tmp/prueba_ansible_sources/", "1596-development", "https://www.github.com/wazuh/wazuh-qa")
+
+wa_sources.download_sources(inventory_path="ansible_inventory.yaml", playbook_path="/tmp/ansible_playbook_sources.yaml")
+
+call(["ansible-playbook", "-i", "/tmp/ansible_inventory.yaml", "/tmp/ansible_playbook_sources.yaml"])
+
+
+wa_local_package = LocalPackage("managers", "/tmp/prueba_ansible_packages/",
+                                "/home/jamh/Downloads/google-chrome-stable_current_amd64.deb")
+wa_local_package.download_sources(playbook_path="/tmp/ansible_playbook_packages.yaml",
+                                  inventory_path="/tmp/ansible_inventory.yaml", )
+
+call(["ansible-playbook", "-i", "/tmp/ansible_inventory.yaml", "/tmp/ansible_playbook_packages.yaml"])
