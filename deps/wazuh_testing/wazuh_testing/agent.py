@@ -10,7 +10,7 @@ import ssl
 
 from wazuh_testing.fim import change_internal_options
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
-import wazuh_testing.tools.monitoring as monitoring
+from wazuh_testing.tools import monitoring
 
 DEFAULT_VALUES = {
     'enabled': 'yes',
