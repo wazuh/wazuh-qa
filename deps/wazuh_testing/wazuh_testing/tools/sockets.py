@@ -49,7 +49,7 @@ class WazuhSocket:
 
         try:
             msg_json = msg.loads()
-        except ValueError:
+        except AttributeError:
             msg_json = json.dumps(msg)
 
 
