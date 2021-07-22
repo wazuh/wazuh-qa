@@ -4,6 +4,7 @@
 import socket
 import struct
 import time
+import json
 from os import path
 from wazuh_testing.tools import WAZUH_PATH, ACTIVE_RESPONSE_SOCKET_PATH
 from wazuh_testing.tools.utils import retry
@@ -47,8 +48,14 @@ class WazuhSocket:
             return recv_msg
 
         try:
+            msg_json = msg.loads()
+        except ValueError:
+            msg_json = json.dumps(msg)
+
+
+        try:
             wazuh_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-            encoded_msg = msg.encode('utf-8')
+            encoded_msg = msg_json.encode('utf-8')
             request_msg = struct.pack("<I", len(encoded_msg)) + encoded_msg
 
             connection(wazuh_socket, self.file)
@@ -60,7 +67,6 @@ class WazuhSocket:
 
         except Exception:
             raise ConnectionError
-
 
 
 def send_request(msg_request, response_size=100, wazuh_socket=request_socket):

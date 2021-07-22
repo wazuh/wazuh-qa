@@ -66,6 +66,10 @@ else:
 time_to_sleep_until_backup = 10
 time_to_sleep_until_stop = 1
 wait_upgrade_process_timeout = 240
+timeout_ack_response = 300
+timeout_agent_exit = 100
+timeout_upgrade_module_start= 100
+
 
 
 test_metadata = [
@@ -386,21 +390,21 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
         if metadata['simulate_rollback']:
 
             if sys_platform not in ['win32', 'Windows']:
-                wazuh_log_monitor.start(timeout=200,
+                wazuh_log_monitor.start(timeout=timeout_agent_exit,
                                         error_message="Error agentd not stopped",
                                         callback=callback_exit_cleaning())
  
 
-            wazuh_log_monitor.start(timeout=200,
+            wazuh_log_monitor.start(timeout=timeout_upgrade_module_start,
                                     error_message="Upgrade module did not start",
                                     callback=callback_upgrade_module_up())
 
                                     
             remoted_simulator.change_default_listener = True
 
-        event = json.loads(wazuh_log_monitor.start(timeout=300, error_message="ACK event not received", callback=callback_detect_upgrade_ack_event).result())
+        event = json.loads(wazuh_log_monitor.start(timeout=timeout_ack_response, error_message="ACK event not received", callback=callback_detect_upgrade_ack_event).result())
         result = event['parameters']
-        
+
         if result is not None:
             status = result['status']
             assert status == expected['status'], \
