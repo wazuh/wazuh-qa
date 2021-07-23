@@ -9,6 +9,8 @@ import time
 import pytest
 import yaml
 from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.wazuh_manager import remove_all_agents
 
 # Marks
 
@@ -56,7 +58,11 @@ def regex_match(regex, string):
     return re.match(regex, string)
 
 
-# Tests
+@pytest.fixture(scope="module")
+def clean_registered_agents():
+    control_service('restart')
+    remove_all_agents()
+
 
 @pytest.fixture(scope="function")
 def pre_insert_agents():
@@ -82,7 +88,7 @@ def pre_insert_agents():
                               for module_data, module_name in module_tests
                               for case in module_data]
                          )
-def test_wazuh_db_messages(configure_sockets_environment, connect_to_sockets_module, test_case: list):
+def test_wazuh_db_messages(clean_registered_agents, configure_sockets_environment, connect_to_sockets_module, test_case):
     """Check that every input message in wazuh-db socket generates the adequate output to wazuh-db socket
 
     Parameters
@@ -106,7 +112,7 @@ def test_wazuh_db_messages(configure_sockets_environment, connect_to_sockets_mod
             .format(index + 1, stage['stage'], expected, response)
 
 
-def test_wazuh_db_create_agent(configure_sockets_environment, connect_to_sockets_module):
+def test_wazuh_db_create_agent(clean_registered_agents, configure_sockets_environment, connect_to_sockets_module):
     """Check that Wazuh DB creates the agent database when a query with a new agent ID is sent"""
     test = {"name": "Create agent",
             "description": "Wazuh DB creates automatically the agent's database the first time a query with a new agent"
@@ -114,11 +120,11 @@ def test_wazuh_db_create_agent(configure_sockets_environment, connect_to_sockets
             "test_case": [{"input": "agent 999 syscheck integrity_check_left",
                            "output": "err Invalid FIM query syntax, near 'integrity_check_left'",
                            "stage": "Syscheck - Agent does not exits yet"}]}
-    test_wazuh_db_messages(configure_sockets_environment, connect_to_sockets_module, test['test_case'])
+    test_wazuh_db_messages(clean_registered_agents, configure_sockets_environment, connect_to_sockets_module, test['test_case'])
     assert os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'db', "999.db"))
 
 
-def test_wazuh_db_chunks(configure_sockets_environment, connect_to_sockets_module, pre_insert_agents):
+def test_wazuh_db_chunks(clean_agent_registered, configure_sockets_environment, connect_to_sockets_module, pre_insert_agents):
     """Check that commands by chunks work properly when agents amount exceed the response maximum size"""
 
     def send_chunk_command(command):
