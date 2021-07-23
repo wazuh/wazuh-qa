@@ -376,7 +376,7 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
 
     if upgrade_process_result and expected['receive_notification']:
         if sys_platform not in ['win32', 'Windows']:
-            int max_retries_truncate_file = 100
+            max_retries_truncate_file = 100
             lines = count_file_lines(tools.LOG_FILE_PATH)
             truncate_file_lines = lines
             while truncate_file_lines >= lines and max_retries_truncate_file > 0:
