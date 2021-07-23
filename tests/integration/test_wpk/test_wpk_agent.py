@@ -13,7 +13,6 @@ import json
 
 from wazuh_testing import tools
 from wazuh_testing.tools.monitoring import make_callback, FileMonitor
-from configobj import ConfigObj
 from datetime import datetime
 from wazuh_testing.tools import WAZUH_PATH, get_version
 from wazuh_testing.tools.authd_sim import AuthdSimulator
@@ -171,10 +170,10 @@ params = [
 
 
 def load_tests(path):
-    """ Loads a yaml file from a path
-    Return
-    ----------
-    yaml structure
+    """ Loads a yaml file from a path.
+    
+    Args:
+        String: Full path of yaml file.
     """
     with open(path) as f:
         return yaml.safe_load(f)
@@ -394,15 +393,14 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
                                         error_message="Error agentd not stopped",
                                         callback=callback_exit_cleaning())
  
-
             wazuh_log_monitor.start(timeout=timeout_upgrade_module_start,
                                     error_message="Upgrade module did not start",
                                     callback=callback_upgrade_module_up())
-
-                                    
+                        
             remoted_simulator.change_default_listener = True
 
-        event = json.loads(wazuh_log_monitor.start(timeout=timeout_ack_response, error_message="ACK event not received", callback=callback_detect_upgrade_ack_event).result())
+        event = json.loads(wazuh_log_monitor.start(timeout=timeout_ack_response, error_message='ACK event not received', 
+                                                   callback=callback_detect_upgrade_ack_event).result())
         result = event['parameters']
 
         if result is not None:

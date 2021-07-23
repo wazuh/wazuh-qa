@@ -269,10 +269,10 @@ def set_state_interval(interval, internal_file_path):
 
 def callback_detect_upgrade_ack_event(event_log):
     """Detect sending upgrade ACK event returning upgrade process result.
-    
+
     Args:
         event_log (str): Event line logs.
-    
+
     Returns:
         String: Upgrade result.
     """
@@ -286,12 +286,11 @@ def callback_upgrade_module_up():
 
     Args:
         event_log (str): Event line logs.
-    
+
     Returns:
         callable: callback to detect this event.
     """
-    return monitoring.make_callback(pattern='Module Agent Upgrade started', 
-    prefix=r'.*wazuh-modulesd.*')
+    return monitoring.make_callback(pattern='Module Agent Upgrade started', prefix=monitoring.MODULESD_DETECTOR_PREFIX)
 
 
 def callback_exit_cleaning():
@@ -299,8 +298,8 @@ def callback_exit_cleaning():
 
     Args:
         callable: callback to detect this event.
-    
+
     Returns:
         callable: callback to detect this event.
     """
-    return monitoring.make_callback(pattern='Exit Cleaning', prefix=r'.*wazuh-agentd.*')
+    return monitoring.make_callback(pattern='Exit Cleaning', prefix=monitoring.AGENT_DETECTOR_PREFIX)

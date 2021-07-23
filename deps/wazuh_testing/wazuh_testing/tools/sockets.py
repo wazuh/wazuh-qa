@@ -47,11 +47,7 @@ class WazuhSocket:
                 raise ValueError
             return recv_msg
 
-        try:
-            msg_json = msg.loads()
-        except AttributeError:
-            msg_json = json.dumps(msg)
-
+        msg_json = json.dumps(msg)
 
         try:
             wazuh_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -62,7 +58,6 @@ class WazuhSocket:
             send_msg(wazuh_socket, request_msg)
             response = recv_response(wazuh_socket, response_size)
             wazuh_socket.close()
-
 
             return json.loads(response)
 
