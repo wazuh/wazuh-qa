@@ -31,4 +31,7 @@ class AnsibleRunner:
                                     inventory=self.ansible_inventory_path)
         ansible_output = AnsibleOutput(runner)
 
+        if ansible_output.rc != 0:
+            raise Exception(f"The playbook execution has failed. RC = {ansible_output.rc}")
+
         return ansible_output
