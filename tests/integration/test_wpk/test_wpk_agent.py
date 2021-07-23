@@ -66,7 +66,7 @@ time_to_sleep_until_backup = 10
 time_to_sleep_until_stop = 1
 wait_upgrade_process_timeout = 240
 timeout_ack_response = 300
-timeout_agent_exit = 100
+timeout_agent_exit = 250
 timeout_upgrade_module_start = 200
 
 test_metadata = [
@@ -371,17 +371,23 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
         if _agent_version == version_to_upgrade and not metadata['simulate_interruption']:
             exp_json = json.loads(upgrade_exec_message)
             upgrade_exec_message = str(exp_json['message'])
-        assert upgrade_exec_message == expected['error_message'], \
-               f'Expected error message does not match'
+        assert upgrade_exec_message == expected['error_message'], f'Expected error message does not match'
+
 
     if upgrade_process_result and expected['receive_notification']:
         if sys_platform not in ['win32', 'Windows']:
-            lines = count_file_lines(tools.LOG_FILE_PATH) 
-            while lines != 0:
-                time.sleep(1) 
-                lines = count_file_lines(tools.LOG_FILE_PATH) 
+            int max_retries_truncate_file = 100
+            lines = count_file_lines(tools.LOG_FILE_PATH)
+            truncate_file_lines = lines
+            while truncate_file_lines >= lines and max_retries_truncate_file > 0:
+                --max_retries_truncate_file
+                truncate_file_lines = count_file_lines(tools.LOG_FILE_PATH)
+                time.sleep(1)
         else:
             truncate_file(tools.LOG_FILE_PATH)
+
+
+
         wazuh_log_monitor = FileMonitor(tools.LOG_FILE_PATH)
 
         if metadata['simulate_rollback']:
