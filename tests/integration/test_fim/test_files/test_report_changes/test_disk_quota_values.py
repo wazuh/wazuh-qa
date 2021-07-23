@@ -53,14 +53,15 @@ def get_configuration(request):
 @pytest.fixture(scope='function')
 def create_specific_size_file(get_configuration, request):
     """Create a file with a specific size requested from test configuration"""
-    size = get_configuration['metadata']['disk_quota_limit']
+    test_file = os.path.join(temp_dir, 'test')
+
     # Translate given size from string to number in bytes
-    translated_size = translate_size(configured_size=size)
-    write_file(os.path.join(temp_dir, 'test'), random_string(translated_size*compression_ratio))
+    translated_size = translate_size(configured_size=get_configuration['metadata']['disk_quota_limit'])
+    write_file(test_file, random_string(translated_size*compression_ratio))
 
     yield
 
-    remove_file(os.path.join(temp_dir, 'test'))
+    remove_file(test_file)
 
 
 # Tests
