@@ -67,9 +67,7 @@ time_to_sleep_until_stop = 1
 wait_upgrade_process_timeout = 240
 timeout_ack_response = 300
 timeout_agent_exit = 100
-timeout_upgrade_module_start= 100
-
-
+timeout_upgrade_module_start = 200
 
 test_metadata = [
     # 1. Upgrade from initial_version to new version
@@ -408,12 +406,9 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
             assert status == expected['status'], \
                    'Notification status did not match expected'
         else:
-            assert not expected['receive_notification'], \
-                   'Notification was expected but was not received'
+            assert not expected['receive_notification'], 'Notification was expected but was not received'
 
     if expected['upgrade_ok'] and not metadata['simulate_rollback']:
-        assert get_version() == metadata['agent_version'], \
-                'End version does not match expected!'
+        assert get_version() == metadata['agent_version'], 'End version does not match expected!'
     else:
-        assert get_version() == metadata['initial_version'], \
-                'End version does not match expected!'
+        assert get_version() == metadata['initial_version'], 'End version does not match expected!'
