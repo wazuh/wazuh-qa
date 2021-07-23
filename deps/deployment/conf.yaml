@@ -1,0 +1,42 @@
+host1:
+    provider:
+        vagrant:
+            enabled: True
+            vagrantfile_path: '/tmp'
+            vagrant_box: 'bento/ubuntu-20.04'
+            vm_memory: 1024
+            vm_cpu: 1
+            vm_name: 'ubuntu'
+            vm_system: 'Linux'
+            os: Ubuntu
+            label: 'Label'
+            vm_ip: '10.2.0.3'
+            quiet_out: False
+host2:
+    provider:
+        vagrant:
+            enabled: True
+            vagrantfile_path: '/tmp'
+            vagrant_box: 'jacqinthebox/windowsserver2016'
+            vm_memory: 1024
+            vm_cpu: 1
+            vm_name: 'Windows2016'
+            vm_system: 'Windows'
+            os: Windows
+            label: 'Label'
+            vm_ip: '10.2.0.4'
+            quiet_out: False
+host3:
+    provider:
+        vagrant:
+            enabled: False
+            vagrantfile_path: '/tmp'
+            vagrant_box: 'https://s3.amazonaws.com/ci.wazuh.com/vms/vagrant/solaris/11/i386/solaris11.3.box'
+            vm_memory: 1024
+            vm_cpu: 1
+            vm_name: 'solaris11'
+            vm_system: 'Solaris'
+            os: solaris11
+            label: 'Label'
+            vm_ip: '10.2.0.5'
+            quiet_out: False
