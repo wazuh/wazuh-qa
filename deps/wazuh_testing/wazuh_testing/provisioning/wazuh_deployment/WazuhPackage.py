@@ -1,12 +1,15 @@
 from abc import ABC, abstractmethod
-import WazuhInstallation
+
+from wazuh_testing.provisioning.wazuh_deployment.WazuhInstallation import WazuhInstallation
 
 
 class WazuhPackage(WazuhInstallation, ABC):
 
-    @abstractmethod
-    def download_sources():
-        pass
+    def __init__(self, version, system, wazuh_target, installation_files_path):
+        self.version = version
+        self.system = system
+        super().__init__(wazuh_target=wazuh_target, installation_files_path=installation_files_path)
 
-    def __init__(self, params):
-        super().__init__(params=params)
+    @abstractmethod
+    def download_installation_files(self, inventory_file_path, ansible_tasks, hosts='all'):
+        super().download_installation_files(inventory_file_path, ansible_tasks, hosts)
