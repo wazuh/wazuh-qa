@@ -4,6 +4,7 @@ import re
 import json
 import yaml
 from Config import Config
+from TestCaseParser import TestCaseParser
 from docstring_parser import parse
 from comment_parser import comment_parser
 import warnings
@@ -11,6 +12,7 @@ import warnings
 class CodeParser:
     def __init__(self):
         self.conf = Config()
+        self.test_case_parser = TestCaseParser()
         self.function_regexes = []
         for regex in self.conf.function_regex:
             self.function_regexes.append(re.compile(regex))
@@ -58,18 +60,23 @@ class CodeParser:
             module_doc['Id'] = id
             module_doc['Group Id'] = group_id
 
+            test_cases = self.test_case_parser.collect(code_file)
+
             functions_doc = []
             for function in functions:
                 if self.is_documentable_function(function):
                     function_doc = self.parse_comment(function)
                     if function_doc:
+                        if test_cases[function.name]:
+                            function_doc["Test Cases"] = test_cases[function.name]
                         functions_doc.append(function_doc)
+
             if not functions_doc:
                 warnings.warn("Module doesn´t contain any test function")
 
             module_doc['Tests'] = functions_doc
 
-            self.remove_ignored_fields(module_doc)
+            #self.remove_ignored_fields(module_doc)
 
         return module_doc
 
