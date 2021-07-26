@@ -4,7 +4,6 @@ import re
 import json
 import ast
 
-
 class Sanity():
     def __init__(self,):
         self.conf = Config()
@@ -32,7 +31,6 @@ class Sanity():
                         self.add_report(f"Mandatory field '{key}' is missing in file {self.scan_file}")
             elif not field in available_fields:
                 self.add_report(f"Mandatory field '{field}' is missing in file {self.scan_file}")
-
 
     def validate_module_fields(self, fields):
         self.validate_fields(self.conf.module_fields.mandatory, fields)
@@ -71,8 +69,6 @@ class Sanity():
                         for regex in function_regexes:
                             if regex.match(function.name):
                                 self.project_tests = self.project_tests + 1
-
-
 
     def add_report(self, message):
         self.error_reports.append(message)

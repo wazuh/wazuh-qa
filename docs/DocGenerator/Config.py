@@ -19,7 +19,7 @@ class Config():
 
         try:
             with open(CONFIG_PATH) as fd:
-                self.__config_data = yaml.load(fd)
+                self.__config_data = yaml.safe_load(fd)
         except:
             raise Exception("Cannot load config file")
 
