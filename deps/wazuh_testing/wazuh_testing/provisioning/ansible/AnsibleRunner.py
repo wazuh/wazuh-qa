@@ -1,5 +1,7 @@
 import ansible_runner
 
+from tempfile import gettempdir
+
 from wazuh_testing.provisioning.ansible.AnsibleOutput import AnsibleOutput
 from wazuh_testing.provisioning.ansible.AnsiblePlaybook import AnsiblePlaybook
 
@@ -17,7 +19,7 @@ class AnsibleRunner:
         ansible_playbook_path (string): Path where is located the playbook file.
         private_data_dir (string): Path where the artifacts files (result files) will be stored.
     """
-    def __init__(self, ansible_inventory_path, ansible_playbook_path, private_data_dir='/tmp'):
+    def __init__(self, ansible_inventory_path, ansible_playbook_path, private_data_dir=gettempdir()):
         self.ansible_inventory_path = ansible_inventory_path
         self.ansible_playbook_path = ansible_playbook_path
         self.private_data_dir = private_data_dir
