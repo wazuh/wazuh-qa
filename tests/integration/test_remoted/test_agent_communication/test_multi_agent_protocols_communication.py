@@ -100,8 +100,8 @@ def validate_agent_manager_protocol_communication(num_agents=2, manager_port=151
     socket_monitor_thread = ThreadExecutor(rd.check_queue_socket_event, {'raw_events': search_patterns})
     socket_monitor_thread.start()
 
-    # Wait 3 seconds until socket monitor is fully initialized
-    sleep(3)
+    # Wait 10 seconds until socket monitor is fully initialized
+    sleep(10)
 
     # Start sender event threads
     for thread in send_event_threads:
