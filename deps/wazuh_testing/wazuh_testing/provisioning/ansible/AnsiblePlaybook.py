@@ -1,6 +1,8 @@
 import os
 import yaml
 
+from tempfile import gettempdir
+
 from wazuh_testing.tools.time import get_current_timestamp
 
 
@@ -15,7 +17,8 @@ class AnsiblePlaybook():
         self.ignore_errors = ignore_errors
         self.become = become
         self.playbook_vars = playbook_vars
-        self.playbook_file_path = playbook_file_path if playbook_file_path else f"/tmp/{get_current_timestamp()}.yaml"
+        self.playbook_file_path = playbook_file_path if playbook_file_path else \
+            f"{gettempdir()}/{get_current_timestamp()}.yaml"
         if generate_file:
             self.write_playbook_to_file()
 
