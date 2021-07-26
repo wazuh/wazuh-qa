@@ -28,23 +28,23 @@ Valid tags:
   - VulDet
   - Vulnerability Detector
 
-Required fields:
+Output fields:
   Module:
-    - Brief
-    - Metadata
-    - Metadata.Modules
-    - Metadata.Daemons
-    - Metadata.Operating System
-    - Metadata.Tiers
-  Tests:
-    - Test Logic
-    - Checks
-
-Ignored fields:
-  Case Sensitive: false
-  Module:
-    - Copyright
-  Tests:
-    - Params
-    - Parameters
-    - Args
+    Mandatory:
+      - Brief
+      - Metadata:
+        - Modules
+        - Daemons
+        - Operating System
+        - Tiers
+        - Demo:
+          - One
+          - Two
+    Optional:
+      - Tags
+  Test:
+    Mandatory:
+      - Test Logic
+      - Checks
+    Optional:
+      - Expected result
