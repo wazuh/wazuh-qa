@@ -14,10 +14,14 @@ class Config():
         self.function_regex = []
         self.ignore_paths = []
         self.valid_tags = []
-        self.required_fields = self.__fields()
-        self.ignored_fields = self.__fields()
-        with open(CONFIG_PATH) as fd:
-            self.__config_data = yaml.load(fd)
+        self.module_fields = self.__fields()
+        self.test_fields = self.__fields()
+
+        try:
+            with open(CONFIG_PATH) as fd:
+                self.__config_data = yaml.load(fd)
+        except:
+            raise Exception("Cannot load config file")
 
         self.__read_project_path()
         self.__read_documentation_path()
@@ -27,8 +31,7 @@ class Config():
         self.__read_function_regex()
         self.__read_ignore_paths()
         self.__read_valid_tags()
-        self.__read_required_fields()
-        self.__read_ignored_fields()
+        self.__read_output_fields()
 
     def __read_project_path(self):
         if 'Project path' in self.__config_data:
@@ -73,29 +76,33 @@ class Config():
         if 'Valid tags' in self.__config_data:
             self.valid_tags = self.__config_data['Valid tags']
 
-    def __read_required_fields(self):
-        if 'Required fields' in self.__config_data:
-            required_fields = self.__config_data['Required fields']
-            if 'Module' in required_fields:
-                for required_module_field in required_fields['Module']:
-                    self.required_fields.module.append(required_module_field)
-            if 'Tests' in required_fields:
-                for required_tests_field in required_fields['Tests']:
-                    self.required_fields.tests.append(required_tests_field)
-            if 'Case Sensitive' in required_fields:
-                self.required_fields.case_sensitive = required_fields['Case Sensitive']
+    def __read_module_fields(self):
+        if not 'Module' in self.__config_data['Output fields']:
+            raise Exception("Output module fields is missing")
+        module_fields = self.__config_data['Output fields']['Module']
+        if not 'Mandatory' in module_fields and not 'Optional' in module_fields:
+            raise Exception("Output module fields are empty")
+        if 'Mandatory' in module_fields:
+            self.module_fields.mandatory = module_fields['Mandatory']
+        if 'Optional' in module_fields:
+            self.module_fields.optional = module_fields['Optional']
 
-    def __read_ignored_fields(self):
-        if 'Ignored fields' in self.__config_data:
-            ignored_fields = self.__config_data['Ignored fields']
-            if 'Module' in ignored_fields:
-                for required_module_field in ignored_fields['Module']:
-                    self.ignored_fields.module.append(required_module_field)
-            if 'Tests' in ignored_fields:
-                for required_tests_field in ignored_fields['Tests']:
-                    self.ignored_fields.tests.append(required_tests_field)
-            if 'Case Sensitive' in ignored_fields:
-                self.ignored_fields.case_sensitive = ignored_fields['Case Sensitive']
+    def __read_test_fields(self):
+        if not 'Test' in self.__config_data['Output fields']:
+            raise Exception("Output test fields is missing")
+        test_fields = self.__config_data['Output fields']['Test']
+        if not 'Mandatory' in test_fields and not 'Optional' in test_fields:
+            raise Exception("Output test fields are empty")
+        if 'Mandatory' in test_fields:
+            self.test_fields.mandatory = test_fields['Mandatory']
+        if 'Optional' in test_fields:
+            self.test_fields.optional = test_fields['Optional']
+
+    def __read_output_fields(self):
+        if not 'Output fields' in self.__config_data:
+            raise Exception("Output fields is missing")
+        self.__read_module_fields()
+        self.__read_test_fields()
 
     class __paths:
         def __init__(self):
@@ -104,6 +111,5 @@ class Config():
 
     class __fields:
         def __init__(self):
-            self.module = []
-            self.tests = []
-            self.case_sensitive = False
+            self.mandatory = []
+            self.optional = []

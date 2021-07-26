@@ -25,7 +25,7 @@ class CodeParser:
         for field in self.conf.ignored_fields.module:
             if field in doc:
                 del doc[field]
-        for test in doc['tests']:
+        for test in doc['Tests']:
             for field in self.conf.ignored_fields.tests:
                 if field in test:
                     del test[field]
@@ -35,7 +35,7 @@ class CodeParser:
         try:
             doc = yaml.load(docstring)
             if hasattr(function, 'name'):
-                doc['name'] = function.name
+                doc['Name'] = function.name
 
         except Exception as inst:
             warnings.warn("Error parsing comment of...")
@@ -54,9 +54,9 @@ class CodeParser:
 
         module_doc = self.parse_comment(module)
         if module_doc:
-            module_doc['name'] = os.path.basename(code_file)
-            module_doc['id'] = id
-            module_doc['group id'] = group_id
+            module_doc['Name'] = os.path.basename(code_file)
+            module_doc['Id'] = id
+            module_doc['Group Id'] = group_id
 
             functions_doc = []
             for function in functions:
@@ -67,7 +67,7 @@ class CodeParser:
             if not functions_doc:
                 warnings.warn("Module doesn´t contain any test function")
 
-            module_doc['tests'] = functions_doc
+            module_doc['Tests'] = functions_doc
 
             self.remove_ignored_fields(module_doc)
 
@@ -77,9 +77,9 @@ class CodeParser:
         with open(group_file) as fd:
             file_content = fd.read()
         group_doc = {}
-        group_doc['name'] = os.path.basename(os.path.dirname(group_file))
-        group_doc['id'] = id
-        group_doc['group id'] = group_id
-        group_doc['description'] = file_content
+        group_doc['Name'] = os.path.basename(os.path.dirname(group_file))
+        group_doc['Id'] = id
+        group_doc['Group id'] = group_id
+        group_doc['Description'] = file_content
 
         return group_doc
