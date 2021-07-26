@@ -1,6 +1,7 @@
 import ansible_runner
 
 from wazuh_testing.provisioning.ansible.AnsibleOutput import AnsibleOutput
+from wazuh_testing.provisioning.ansible.AnsiblePlaybook import AnsiblePlaybook
 
 
 class AnsibleRunner:
@@ -35,3 +36,16 @@ class AnsibleRunner:
             raise Exception(f"The playbook execution has failed. RC = {ansible_output.rc}")
 
         return ansible_output
+
+    @staticmethod
+    def run_ephemeral_tasks(ansible_inventory_path, playbook_parameters):
+        ansible_playbook = AnsiblePlaybook(**playbook_parameters)
+
+        try:
+            runner = ansible_runner.run(playbook=ansible_playbook.playbook_file_path, inventory=ansible_inventory_path)
+            ansible_output = AnsibleOutput(runner)
+
+            return ansible_output
+
+        finally:
+            ansible_playbook.delete_playbook_file()
