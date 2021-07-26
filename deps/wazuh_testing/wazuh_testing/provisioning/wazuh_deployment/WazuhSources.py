@@ -1,21 +1,18 @@
-from ansible.AnsibleTask import AnsibleTask
-from deployment.WazuhInstallation import WazuhInstallation
-import ansible.AnsiblePlaybook
+from wazuh_testing.provisioning.wazuh_deployment.WazuhInstallation import WazuhInstallation
+from wazuh_testing.provisioning.ansible.AnsibleTask import AnsibleTask
 
 
 class WazuhSources(WazuhInstallation):
 
-    def download_sources(self, inventory_path, playbook_path, hosts='all'):
-        name = 'ansibleconcept',
-
-        task_git = {'git': {'repo': self.download_target,
-                    'dest': self.target_path, 'version': self.wazuh_branch}}
-
-        ansible_tasks = [AnsibleTask(task_git)]
-        ansible_playbook = ansible.AnsiblePlaybook.AnsiblePlaybook(name=name, tasks_list=ansible_tasks,
-                                                                   playbook_file_path=playbook_path, hosts=hosts)
-
-    def __init__(self, target, target_path, wazuh_branch, download_target):
+    def __init__(self, wazuh_target, installation_files_path, wazuh_branch='master',
+                 wazuh_repository_url='https://github.com/wazuh/wazuh.git'):
         self.wazuh_branch = wazuh_branch
-        self.download_target = download_target
-        super().__init__(target, target_path)
+        self.wazuh_repository_url = wazuh_repository_url
+        super().__init__(wazuh_target=wazuh_target, installation_files_path=f"{installation_files_path}/wazuh")
+
+    def download_installation_files(self, inventory_file_path, hosts='all'):
+        download_wazuh_sources_task = AnsibleTask({'name': 'Clone wazuh repository',
+                                                   'git': {'repo': self.wazuh_repository_url,
+                                                           'dest': self.installation_files_path,
+                                                           'version': self.wazuh_branch}})
+        super().download_installation_files(inventory_file_path, [download_wazuh_sources_task], hosts)
