@@ -1,11 +1,13 @@
 import os
 import yaml
 
+from wazuh_testing.tools.time import get_current_timestamp
+
 
 class AnsiblePlaybook():
 
-    def __init__(self, name, tasks_list=None, playbook_file_path=None, hosts='all', gather_facts=False,
-                 ignore_errors=False, become=False, playbook_vars=None, generate_file=True):
+    def __init__(self, name='generic_playbook', tasks_list=None, playbook_file_path=None, hosts='all',
+                 gather_facts=False, ignore_errors=False, become=False, playbook_vars=None, generate_file=True):
         self.name = name
         self.hosts = hosts
         self.gather_facts = gather_facts
@@ -13,7 +15,7 @@ class AnsiblePlaybook():
         self.ignore_errors = ignore_errors
         self.become = become
         self.playbook_vars = playbook_vars
-        self.playbook_file_path = playbook_file_path
+        self.playbook_file_path = playbook_file_path if playbook_file_path else f"/tmp/{get_current_timestamp()}.yaml"
         if generate_file:
             self.write_playbook_to_file()
 
