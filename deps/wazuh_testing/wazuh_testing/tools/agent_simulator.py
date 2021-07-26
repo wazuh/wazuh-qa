@@ -540,7 +540,7 @@ class Agent:
                         sender.send_event(self.create_event(f'#!-req {req_code} {{"error":0, '
                                                             f'"message":"{self.sha_key}", "data":[]}}'))
             else:
-                raise ValueError(f'WPK SHA key should be configured in agent')
+                raise ValueError('WPK SHA key should be configured in agent')
 
         elif command == 'upgrade':
             if self.upgrade_exec_result:

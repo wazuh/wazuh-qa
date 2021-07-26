@@ -286,6 +286,4 @@ def count_file_lines(filepath):
         Integer: Number of lines of the file.
     """
     with open(filepath, "r") as file:
-        line_count = sum(1 for line in file if line.strip())
-        return line_count
-
+        return sum(1 for line in file if line.strip())

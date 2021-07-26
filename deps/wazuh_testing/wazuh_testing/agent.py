@@ -276,8 +276,7 @@ def callback_detect_upgrade_ack_event(event_log):
     Returns:
         String: Upgrade result.
     """
-    msg = ".*Sending upgrade ACK event: '(.*)'"
-    match = re.match(msg, event_log)
+    match = re.match(".*Sending upgrade ACK event: '(.*)'", event_log)
     return None if not match else match.group(1)
 
 
