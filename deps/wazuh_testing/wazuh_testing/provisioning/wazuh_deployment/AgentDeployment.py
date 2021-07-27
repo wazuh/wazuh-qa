@@ -22,14 +22,20 @@ class AgentDeployment(WazuhDeployment):
         tasks_list = []
 
         tasks_list.append(AnsibleTask({'name': 'Configuring server ip to autoenrollment agent',
-                                       'lineinfile': {'path': f'{self.install_dir}' +
-                                                              ('\\' if self.system == 'windows' else '/etc/') +
-                                                              'ossec.conf',
+                                       'lineinfile': {'path': f'{self.install_dir}/etc/ossec.conf',
                                                       'regexp': '<address>(.*)</address>',
                                                       'line': f'<address>{self.ip_server}</address>',
-                                                      'backrefs': 'yes'}}))
+                                                      'backrefs': 'yes'},
+                                       'when': 'ansible_system != "Windows"'}))
 
-        playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'become': True}
+        tasks_list.append(AnsibleTask({'name': 'Configuring server ip to autoenrollment agent',
+                                       'lineinfile': {'path': f'{self.install_dir}\\ossec.conf',
+                                                      'regexp': '<address>(.*)</address>',
+                                                      'line': f'<address>{self.ip_server}</address>',
+                                                      'backrefs': 'yes'},
+                                       'when': 'ansible_system == "Windows"'}))\
+
+        playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
 
         self.stop_service()
         AnsibleRunner.run_ephemeral_tasks(self.inventory, playbook_parameters)
