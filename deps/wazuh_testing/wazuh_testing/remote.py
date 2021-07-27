@@ -403,6 +403,7 @@ def check_syslog_event(wazuh_archives_log_monitor, message, port, protocol, time
     for msg in parsed_msg.split("\n"):
         detect_archives_log_event(archives_monitor=wazuh_archives_log_monitor,
                                   callback=callback_detect_syslog_event(msg),
+                                  update_position=False,
                                   timeout=timeout,
                                   error_message="Syslog message wasn't received or took too much time.")
 
